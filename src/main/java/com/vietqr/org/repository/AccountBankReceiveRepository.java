@@ -1,5 +1,7 @@
 package com.vietqr.org.repository;
 
+import java.util.List;
+
 import javax.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,9 +20,10 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Query(value = "DELETE FROM account_bank_receive WHERE id = :id", nativeQuery = true)
 	void deleteAccountBank(@Param(value = "id")String id);
 
-	@Query(value = "SELECT id FROM account_bank_receive WHERE bank_account = :bankAccount AND bank_type_id = :bankTypeId", nativeQuery =true)
-	String checkExistedBankAccount(@Param(value ="bankAccount") String bankAccount, @Param(value = "bankTypeId")String bankTypeId);
+	@Query(value = "SELECT type FROM account_bank_receive WHERE bank_account = :bankAccount AND bank_type_id = :bankTypeId", nativeQuery =true)
+	List<Integer> checkExistedBankAccount(@Param(value ="bankAccount") String bankAccount, @Param(value = "bankTypeId")String bankTypeId);
 
 	@Query(value = "SELECT * FROM account_bank_receive WHERE id = :bankId", nativeQuery = true)
 	AccountBankReceiveEntity getAccountBankById(@Param(value = "bankId") String bankId);
+		
 }

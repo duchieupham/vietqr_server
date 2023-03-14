@@ -2,7 +2,7 @@ package com.vietqr.org.dto;
 
 import java.io.Serializable;
 
-public class VietQRCreateDTO implements Serializable{
+public class VietQRCreateDTO implements Serializable {
 
 	/**
 	 *
@@ -12,16 +12,20 @@ public class VietQRCreateDTO implements Serializable{
 	private String bankId;
 	private String amount;
 	private String content;
+	private String branchId;
+	private String businessId;
 
 	public VietQRCreateDTO() {
 		super();
 	}
 
-	public VietQRCreateDTO(String bankId, String amount, String content) {
+	public VietQRCreateDTO(String bankId, String amount, String content, String branchId, String businessId) {
 		super();
 		this.bankId = bankId;
 		this.amount = amount;
 		this.content = content;
+		this.branchId = branchId;
+		this.businessId = businessId;
 	}
 
 	public String getBankId() {
@@ -46,6 +50,22 @@ public class VietQRCreateDTO implements Serializable{
 
 	public void setContent(String content) {
 		this.content = content;
+	}
+
+	public String getBranchId() {
+		return branchId;
+	}
+
+	public void setBranchId(String branchId) {
+		this.branchId = branchId;
+	}
+
+	public String getBusinessId() {
+		return businessId;
+	}
+
+	public void setBusinessId(String businessId) {
+		this.businessId = businessId;
 	}
 
 }

@@ -25,7 +25,7 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
 	}
 
 	@Override
-	public String checkExistedBank(String bankAccount, String bankTypeId) {
+	public List<Integer> checkExistedBank(String bankAccount, String bankTypeId) {
 		return accountBankRepo.checkExistedBankAccount(bankAccount, bankTypeId);
 	}
 

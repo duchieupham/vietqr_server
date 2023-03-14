@@ -21,7 +21,7 @@ public interface ImageRepository extends JpaRepository<ImageEntity, Long>{
 
 	@Transactional
 	@Modifying
-	@Query(value = "UPDATE image SET image = :image WHERE id = :id", nativeQuery = true)
-	void updateImage(@Param(value = "image") byte[] image, @Param(value = "id") String id);
+	@Query(value = "UPDATE image SET image = :image, name = :name WHERE id = :id", nativeQuery = true)
+	void updateImage(@Param(value = "image") byte[] image, @Param(value = "name") String name, @Param(value = "id") String id);
 
 }

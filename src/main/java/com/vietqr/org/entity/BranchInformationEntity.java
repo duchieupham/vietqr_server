@@ -22,16 +22,16 @@ public class BranchInformationEntity implements Serializable{
 
 	@Column(name = "businessId")
 	private String businessId;
-	
+
 	@Column(name = "code")
 	private String code;
-	
+
 	@Column(name = "name")
 	private String name;
-	
+
 	@Column(name = "address")
 	private String address;
-	
+
 	@Column(name = "isActive")
 	private boolean isActive;
 
@@ -97,5 +97,5 @@ public class BranchInformationEntity implements Serializable{
 	public void setActive(boolean isActive) {
 		this.isActive = isActive;
 	}
-	
+
 }

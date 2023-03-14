@@ -8,7 +8,7 @@ public class LogoutDTO implements Serializable{
 	 *
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	private String fcmToken;
 
 	public LogoutDTO() {
@@ -27,7 +27,7 @@ public class LogoutDTO implements Serializable{
 	public void setFcmToken(String fcmToken) {
 		this.fcmToken = fcmToken;
 	}
-	
-	
+
+
 
 }

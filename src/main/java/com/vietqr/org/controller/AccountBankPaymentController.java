@@ -22,7 +22,6 @@ import com.vietqr.org.dto.AccountBankResponseDTO;
 import com.vietqr.org.dto.BankAccountRemoveDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.entity.AccountBankPaymentEntity;
-import com.vietqr.org.entity.BankTypeEntity;
 import com.vietqr.org.service.AccountBankPaymentService;
 import com.vietqr.org.service.BankTypeService;
 
@@ -37,13 +36,13 @@ public class AccountBankPaymentController {
 	BankTypeService bankTypeService;
 
 	@PostMapping("account-bank-payment")
-	public ResponseEntity<ResponseMessageDTO> insertAccountBank(@Valid @RequestBody AccountBankPaymentDTO
-			dto){
+	public ResponseEntity<ResponseMessageDTO> insertAccountBank(@Valid @RequestBody AccountBankPaymentDTO dto) {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
-			String checkBankAccountExisted = accountBankService.checkExistedBank(dto.getBankAccount(), dto.getBankTypeId());
-			if(checkBankAccountExisted == null || checkBankAccountExisted.isEmpty()) {
+			String checkBankAccountExisted = accountBankService.checkExistedBank(dto.getBankAccount(),
+					dto.getBankTypeId());
+			if (checkBankAccountExisted == null || checkBankAccountExisted.isEmpty()) {
 				UUID uuid = UUID.randomUUID();
 				AccountBankPaymentEntity entity = new AccountBankPaymentEntity();
 				entity.setId(uuid.toString());
@@ -53,11 +52,11 @@ public class AccountBankPaymentController {
 				entity.setBankTypeId(dto.getBankTypeId());
 				entity.setDateOpen(dto.getDateOpen());
 				entity.setPhoneOTP(dto.getPhoneOtp());
-				int check =	accountBankService.insertAccountBank(entity);
-				if(check == 1) {
+				int check = accountBankService.insertAccountBank(entity);
+				if (check == 1) {
 					result = new ResponseMessageDTO("SUCESS", "");
 					httpStatus = HttpStatus.OK;
-				}else {
+				} else {
 					result = new ResponseMessageDTO("FAILED", "E13");
 					httpStatus = HttpStatus.BAD_REQUEST;
 				}
@@ -66,7 +65,7 @@ public class AccountBankPaymentController {
 				httpStatus = HttpStatus.BAD_REQUEST;
 			}
 
-		}catch(Exception e) {
+		} catch (Exception e) {
 			System.out.println("Error at insertAccountBank - BankAccountPayment: " + e.toString());
 			result = new ResponseMessageDTO("FAILED", "Unexpected Error.");
 			httpStatus = HttpStatus.BAD_REQUEST;
@@ -74,46 +73,46 @@ public class AccountBankPaymentController {
 		return new ResponseEntity<>(result, httpStatus);
 	}
 
-
 	@GetMapping("account-bank-payment/{userId}")
-	public ResponseEntity<List<AccountBankResponseDTO>> getAccountBanks(@PathVariable("userId") String userId){
+	public ResponseEntity<List<AccountBankResponseDTO>> getAccountBanks(@PathVariable("userId") String userId) {
 		List<AccountBankResponseDTO> result = new ArrayList<>();
 		HttpStatus httpStatus = null;
 		try {
-			List<AccountBankPaymentEntity> bankAccounts = accountBankService.getAccountBanksByUserId(userId);
-			if(!bankAccounts.isEmpty()) {
-				for (AccountBankPaymentEntity accountBankEntity: bankAccounts) {
-					BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(accountBankEntity.getBankTypeId());
-					AccountBankResponseDTO dto = new AccountBankResponseDTO();
-					dto.setId(accountBankEntity.getId());
-					dto.setUserId(accountBankEntity.getUserId());
-					dto.setBankAccount(accountBankEntity.getBankAccount());
-					dto.setUserBankName(accountBankEntity.getBankAccountName().toUpperCase());
-					dto.setBankCode(bankTypeEntity.getBankCode());
-					dto.setBankName(bankTypeEntity.getBankName());
-					dto.setBankStatus(bankTypeEntity.getStatus());
-					dto.setImgId(bankTypeEntity.getImgId());
-					result.add(dto);
-				}
-			}
+			// List<AccountBankPaymentEntity> bankAccounts =
+			// accountBankService.getAccountBanksByUserId(userId);
+			// if(!bankAccounts.isEmpty()) {
+			// for (AccountBankPaymentEntity accountBankEntity: bankAccounts) {
+			// BankTypeEntity bankTypeEntity =
+			// bankTypeService.getBankTypeById(accountBankEntity.getBankTypeId());
+			// AccountBankResponseDTO dto = new AccountBankResponseDTO();
+			// dto.setId(accountBankEntity.getId());
+			// dto.setUserId(accountBankEntity.getUserId());
+			// dto.setBankAccount(accountBankEntity.getBankAccount());
+			// dto.setUserBankName(accountBankEntity.getBankAccountName().toUpperCase());
+			// dto.setBankCode(bankTypeEntity.getBankCode());
+			// dto.setBankName(bankTypeEntity.getBankName());
+			// dto.setBankStatus(bankTypeEntity.getStatus());
+			// dto.setImgId(bankTypeEntity.getImgId());
+			// result.add(dto);
+			// }
+			// }
 			httpStatus = HttpStatus.OK;
-		}catch(Exception e) {
+		} catch (Exception e) {
 			System.out.println("Error at getAccountBanks: " + e.toString());
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(result, httpStatus);
 	}
 
-
 	@DeleteMapping("account-bank-payment")
-	public ResponseEntity<ResponseMessageDTO> deleteAccountBank(@Valid @RequestBody BankAccountRemoveDTO dto){
+	public ResponseEntity<ResponseMessageDTO> deleteAccountBank(@Valid @RequestBody BankAccountRemoveDTO dto) {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
 			accountBankService.deleteAccountBank(dto.getBankId());
 			result = new ResponseMessageDTO("SUCCESS", "");
 			httpStatus = HttpStatus.OK;
-		}catch(Exception e) {
+		} catch (Exception e) {
 			System.out.println("Error at deleteAccountBank: " + e.toString());
 			result = new ResponseMessageDTO("FAILED", "Unexpected Error.");
 			httpStatus = HttpStatus.BAD_REQUEST;
@@ -121,23 +120,23 @@ public class AccountBankPaymentController {
 		return new ResponseEntity<>(result, httpStatus);
 	}
 
-//	@PostMapping("account-bank-payment/request-mb")
-//	public ResponseEntity<Object> requestPaymentMb(@Valid @RequestParam String bankPaymentId, @Valid @RequestParam Long amount){
-//		Object result = null;
-//		HttpStatus httpStatus = null;
-//		try {
-//			//insert into db
-//			TransactionCreateEntity
-//			//request payment
-//			//response
-//		}catch(Exception e) {
-//			System.out.println("Error at requestPaymentMb: " + e.toString());
-//			result = new ResponseMessageDTO("FAILED", "Unexpected Error.");
-//			httpStatus = HttpStatus.BAD_REQUEST;
-//		}
-//		return new ResponseEntity<Object>(result, httpStatus);
-//
-//	}
-
+	// @PostMapping("account-bank-payment/request-mb")
+	// public ResponseEntity<Object> requestPaymentMb(@Valid @RequestParam String
+	// bankPaymentId, @Valid @RequestParam Long amount){
+	// Object result = null;
+	// HttpStatus httpStatus = null;
+	// try {
+	// //insert into db
+	// TransactionCreateEntity
+	// //request payment
+	// //response
+	// }catch(Exception e) {
+	// System.out.println("Error at requestPaymentMb: " + e.toString());
+	// result = new ResponseMessageDTO("FAILED", "Unexpected Error.");
+	// httpStatus = HttpStatus.BAD_REQUEST;
+	// }
+	// return new ResponseEntity<Object>(result, httpStatus);
+	//
+	// }
 
 }

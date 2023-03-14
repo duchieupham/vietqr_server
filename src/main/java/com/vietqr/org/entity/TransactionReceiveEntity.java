@@ -18,7 +18,7 @@ public class TransactionReceiveEntity implements Serializable {
 
 	@Id
 	@Column(name = "id")
-	private String id ;
+	private String id;
 
 	@Column(name = "bankAccount")
 	private String bankAccount;
@@ -30,20 +30,20 @@ public class TransactionReceiveEntity implements Serializable {
 	private String content;
 
 	@Column(name = "amount")
-	private String amount;
+	private long amount;
 
 	@Column(name = "time")
 	private long time;
 
-	@Column(name = "transactionBankId")
-	private String transactionBankId;
+	// ref id from transaction_bank/(transaction_sms:removed)
+	@Column(name = "refId")
+	private String refId;
 
-	@Column(name = "transactionSmsId")
-	private String transactionSmsId;
+	// transaction type: From Bank/(SMS:removed)
+	@Column(name = "type")
+	private int type;
 
-	@Column(name = "transType")
-	private String transType;
-
+	// transaction status: PAID/UNPAID
 	@Column(name = "status")
 	private int status;
 
@@ -51,18 +51,16 @@ public class TransactionReceiveEntity implements Serializable {
 		super();
 	}
 
-	public TransactionReceiveEntity(String id, String bankAccount, String bankId, String content, String amount, long time,
-			String transactionBankId, String transactionSmsId, String transType, int status) {
-		super();
+	public TransactionReceiveEntity(String id, String bankAccount, String bankId, String content, long amount,
+			long time, String refId, int type, int status) {
 		this.id = id;
 		this.bankAccount = bankAccount;
 		this.bankId = bankId;
 		this.content = content;
 		this.amount = amount;
 		this.time = time;
-		this.transactionBankId = transactionBankId;
-		this.transactionSmsId = transactionSmsId;
-		this.transType = transType;
+		this.refId = refId;
+		this.type = type;
 		this.status = status;
 	}
 
@@ -98,11 +96,11 @@ public class TransactionReceiveEntity implements Serializable {
 		this.content = content;
 	}
 
-	public String getAmount() {
+	public long getAmount() {
 		return amount;
 	}
 
-	public void setAmount(String amount) {
+	public void setAmount(long amount) {
 		this.amount = amount;
 	}
 
@@ -114,28 +112,20 @@ public class TransactionReceiveEntity implements Serializable {
 		this.time = time;
 	}
 
-	public String getTransactionBankId() {
-		return transactionBankId;
+	public String getRefId() {
+		return refId;
 	}
 
-	public void setTransactionBankId(String transactionBankId) {
-		this.transactionBankId = transactionBankId;
+	public void setRefId(String refId) {
+		this.refId = refId;
 	}
 
-	public String getTransactionSmsId() {
-		return transactionSmsId;
+	public int getType() {
+		return type;
 	}
 
-	public void setTransactionSmsId(String transactionSmsId) {
-		this.transactionSmsId = transactionSmsId;
-	}
-
-	public String getTransType() {
-		return transType;
-	}
-
-	public void setTransType(String transType) {
-		this.transType = transType;
+	public void setType(int type) {
+		this.type = type;
 	}
 
 	public int getStatus() {

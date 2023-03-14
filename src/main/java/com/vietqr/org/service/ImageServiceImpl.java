@@ -23,8 +23,8 @@ public class ImageServiceImpl implements ImageService{
 	}
 
 	@Override
-	public void updateImage(byte[] image, String id) {
-		 imageRepo.updateImage(image, id);
+	public void updateImage(byte[] image, String name, String id) {
+		 imageRepo.updateImage(image, name, id);
 	}
 
 }

@@ -1,1 +1,0 @@
-# vietqr_server

@@ -28,25 +28,34 @@ public class BusinessInformationEntity implements Serializable{
 
 	@Column(name = "imgId")
 	private String imgId;
-	
+
+	@Column(name = "coverImgId")
+	private String coverImgId;
+
 	@Column(name = "address")
 	private String address;
-	
+
 	@Column(name = "taxCode")
 	private String taxCode;
+
+	@Column(name = "isActive")
+	private boolean isActive;
+
 
 	public BusinessInformationEntity() {
 		super();
 	}
 
-	public BusinessInformationEntity(String id, String code, String name, String imgId, String address, String taxCode) {
+	public BusinessInformationEntity(String id, String code, String name, String imgId, String coverImgId, String address, String taxCode, boolean isActive) {
 		super();
 		this.id = id;
 		this.code = code;
 		this.name = name;
 		this.imgId = imgId;
+		this.coverImgId = coverImgId;
 		this.address = address;
 		this.taxCode = taxCode;
+		this.isActive = isActive;
 	}
 
 	public String getId() {
@@ -81,6 +90,14 @@ public class BusinessInformationEntity implements Serializable{
 		this.imgId = imgId;
 	}
 
+	public String getCoverImgId() {
+		return coverImgId;
+	}
+
+	public void setCoverImgId(String coverImgId) {
+		this.coverImgId = coverImgId;
+	}
+
 	public String getAddress() {
 		return address;
 	}
@@ -95,6 +112,14 @@ public class BusinessInformationEntity implements Serializable{
 
 	public void setTaxCode(String taxCode) {
 		this.taxCode = taxCode;
+	}
+
+	public boolean isActive() {
+		return isActive;
+	}
+
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
 	}
 
 }

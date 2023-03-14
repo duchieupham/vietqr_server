@@ -28,7 +28,7 @@ public class AccountBankReceiveEntity implements Serializable{
 
 	@Column(name = "bankAccountName")
 	private String bankAccountName;
-	
+
 	@Column(name = "type")
 	private int type;
 
