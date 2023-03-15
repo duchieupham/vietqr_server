@@ -24,52 +24,58 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.vietqr.org.security.JWTAuthorizationFilter;
 
 @SpringBootApplication
-//@EnableScheduling
+// @EnableScheduling
 public class VietqrApplication extends SpringBootServletInitializer implements WebMvcConfigurer {
 
-		public static void main(String[] args) throws IOException, ClassNotFoundException {
-			SpringApplication.run(VietqrApplication.class, args);
+	public static void main(String[] args) throws IOException, ClassNotFoundException {
+		SpringApplication.run(VietqrApplication.class, args);
+	}
+
+	@EnableWebSecurity
+	@Configuration
+	@Order(1)
+	class WebSecurityBasicConfig extends WebSecurityConfigurerAdapter {
+		@Autowired
+		public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+			// UAT user mb bank
+			// auth.inMemoryAuthentication()
+			// .withUser("3")
+			// .password(passwordEncoder().encode("MBK3cG76F"))
+			// .authorities("ROLE_USER")
+			// .and()
+			// Product user mb bank
+			auth.inMemoryAuthentication()
+					.withUser("b-mb-user3")
+					.password(passwordEncoder().encode("Yi1tYi11c2VyMw=="))
+					.authorities("ROLE_USER")
+					.and()
+					.withUser("admin")
+					.password(passwordEncoder().encode("Aa_123456789"))
+					.authorities("ROLE_ADMIN");
 		}
 
-		@EnableWebSecurity
-		@Configuration
-		@Order(1)
-		class WebSecurityBasicConfig extends WebSecurityConfigurerAdapter {
-		    	@Autowired
-		    	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-		    		auth.inMemoryAuthentication()
-		    		.withUser("3")
-		            .password(passwordEncoder().encode("MBK3cG76F"))
-		            .authorities("ROLE_USER")
-		            .and()
-		        	.withUser("admin")
-		            .password(passwordEncoder().encode("Aa_123456789"))
-		            .authorities("ROLE_ADMIN");
-		    	}
-
-		    	@Override
-		        protected void configure(HttpSecurity http) throws Exception {
-		            http.csrf().disable().
-		            requestMatcher(new AntPathRequestMatcher("/api/token_generate")).authorizeRequests()
-		                    .anyRequest().authenticated()
-		                    .and()
-		                    .httpBasic();
-		        }
-
-		        @Bean
-		        PasswordEncoder passwordEncoder() {
-		            return new BCryptPasswordEncoder();
-		        }
+		@Override
+		protected void configure(HttpSecurity http) throws Exception {
+			http.csrf().disable().requestMatcher(new AntPathRequestMatcher("/api/token_generate")).authorizeRequests()
+					.anyRequest().authenticated()
+					.and()
+					.httpBasic();
 		}
 
-		@EnableWebSecurity
-		@Configuration
-		@Order(2)
-		class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+		@Bean
+		PasswordEncoder passwordEncoder() {
+			return new BCryptPasswordEncoder();
+		}
+	}
 
-			@Override
-			protected void configure(HttpSecurity http) throws Exception {
-				http.csrf().disable()
+	@EnableWebSecurity
+	@Configuration
+	@Order(2)
+	class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
+		@Override
+		protected void configure(HttpSecurity http) throws Exception {
+			http.csrf().disable()
 					.addFilterAfter(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
 					.authorizeRequests()
 					.antMatchers(HttpMethod.POST, "/api/token_generate").permitAll()
@@ -77,7 +83,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 					.antMatchers(HttpMethod.POST, "/api/accounts").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts/register").permitAll()
 					.anyRequest().authenticated();
-			}
 		}
+	}
 
 }
