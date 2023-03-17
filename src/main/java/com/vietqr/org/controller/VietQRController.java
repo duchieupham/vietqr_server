@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.UUID;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 import javax.validation.Valid;
 
@@ -154,6 +156,7 @@ public class VietQRController {
 		} finally {
 			// 2. Insert transaction_receive if branch_id and business_id != null
 			// 3. Insert transaction_receive_branch if branch_id and business_id != null
+			NumberFormat nf = NumberFormat.getInstance(Locale.US);
 			AccountBankReceiveEntity accountBankEntity = accountBankService.getAccountBankById(dto.getBankId());
 			if (accountBankEntity != null) {
 				if (dto != null && dto.getBusinessId() != null && dto.getBranchId() != null) {
@@ -165,7 +168,7 @@ public class VietQRController {
 						transactionEntity.setId(transcationUUID.toString());
 						transactionEntity.setBankAccount(accountBankEntity.getBankAccount());
 						transactionEntity.setBankId(dto.getBankId());
-						transactionEntity.setContent(dto.getContent());
+						transactionEntity.setContent(transcationUUID.toString() + "  " + dto.getContent());
 						transactionEntity.setAmount(Long.parseLong(dto.getAmount()));
 						transactionEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
 						transactionEntity.setRefId("");
@@ -191,7 +194,8 @@ public class VietQRController {
 								BranchInformationEntity branchEntity = branchInformationService
 										.getBranchById(dto.getBranchId());
 								String message = NotificationUtil.getNotiDescNewTransPrefix() + branchEntity.getName()
-										+ NotificationUtil.getNotiDescNewTransSuffix1() + dto.getAmount()
+										+ NotificationUtil.getNotiDescNewTransSuffix1()
+										+ nf.format(Double.parseDouble(dto.getAmount()))
 										+ NotificationUtil
 												.getNotiDescNewTransSuffix2();
 								// String title = NotificationUtil.getNotiTitleNewTransaction();

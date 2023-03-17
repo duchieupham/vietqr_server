@@ -20,13 +20,18 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
-    public void updateTransactionReceiveStatus(boolean status, String id) {
-        repo.updateTransactionReceiveStatus(status, id);
+    public void updateTransactionReceiveStatus(int status, String refId, String id) {
+        repo.updateTransactionReceiveStatus(status, refId, id);
     }
 
     @Override
     public List<TransactionRelatedDTO> getRelatedTransactionReceives(String businessId) {
         return repo.getRelatedTransactionReceives(businessId);
+    }
+
+    @Override
+    public TransactionReceiveEntity getTransactionById(String id) {
+        return repo.getTransactionById(id);
     }
 
 }

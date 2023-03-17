@@ -1,7 +1,5 @@
 package com.vietqr.org.util;
 
-import java.io.UnsupportedEncodingException;
-
 import com.vietqr.org.dto.VietQRGenerateDTO;
 
 public class VietQRUtil {
