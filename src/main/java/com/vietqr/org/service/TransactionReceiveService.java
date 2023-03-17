@@ -10,7 +10,9 @@ public interface TransactionReceiveService {
 
     public int insertTransactionReceive(TransactionReceiveEntity entity);
 
-    public void updateTransactionReceiveStatus(boolean status, String id);
+    public void updateTransactionReceiveStatus(int status, String refId, String id);
 
     public List<TransactionRelatedDTO> getRelatedTransactionReceives(String businessId);
+
+    public TransactionReceiveEntity getTransactionById(String id);
 }

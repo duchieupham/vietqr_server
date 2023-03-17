@@ -7,4 +7,6 @@ import com.vietqr.org.entity.TransactionReceiveBranchEntity;
 @Service
 public interface TransactionReceiveBranchService {
     public int insertTransactionReceiveBranch(TransactionReceiveBranchEntity entity);
+
+    public TransactionReceiveBranchEntity getTransactionBranchByTransactionId(String transactionId);
 }

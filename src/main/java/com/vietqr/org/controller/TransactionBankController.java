@@ -1,9 +1,14 @@
 package com.vietqr.org.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.time.ZoneOffset;
+import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.util.Locale;
 
 import javax.validation.Valid;
 
@@ -21,28 +26,74 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import org.apache.log4j.Logger;
+
 import com.vietqr.org.dto.AccountLoginDTO;
 import com.vietqr.org.dto.RefTransactionDTO;
 import com.vietqr.org.dto.TransactionBankDTO;
 import com.vietqr.org.dto.TransactionResponseDTO;
 import com.vietqr.org.service.TransactionBankService;
+import com.vietqr.org.service.TransactionReceiveService;
+import com.vietqr.org.service.TransactionReceiveBranchService;
+import com.vietqr.org.service.BranchMemberService;
+import com.vietqr.org.service.BranchInformationService;
+import com.vietqr.org.service.NotificationService;
+import com.vietqr.org.service.FcmTokenService;
+import com.vietqr.org.service.FirebaseMessagingService;
+import com.vietqr.org.service.AccountBankReceiveService;
+
+import com.vietqr.org.entity.TransactionReceiveEntity;
+import com.vietqr.org.entity.TransactionReceiveBranchEntity;
+import com.vietqr.org.entity.NotificationEntity;
+import com.vietqr.org.entity.BranchInformationEntity;
+import com.vietqr.org.entity.FcmTokenEntity;
+import com.vietqr.org.entity.AccountBankReceiveEntity;
+
+import com.vietqr.org.dto.FcmRequestDTO;
+
+import com.vietqr.org.util.NotificationUtil;
 
 @RestController
 @RequestMapping("/bank/api")
 public class TransactionBankController {
+	private static final Logger logger = Logger.getLogger(TransactionBankController.class);
+
+	@Autowired
+	AccountBankReceiveService accountBankService;
 
 	@Autowired
 	TransactionBankService transactionBankService;
 
-	// @Autowired
-	// private FirebaseMessagingService firebaseMessagingService;
+	@Autowired
+	TransactionReceiveService transactionReceiveService;
+
+	@Autowired
+	TransactionReceiveBranchService transactionReceiveBranchService;
+
+	@Autowired
+	BranchMemberService branchMemberService;
+
+	@Autowired
+	BranchInformationService branchInformationService;
+
+	@Autowired
+	NotificationService notificationService;
+
+	@Autowired
+	FcmTokenService fcmTokenService;
+
+	private FirebaseMessagingService firebaseMessagingService;
+
+	public TransactionBankController(FirebaseMessagingService firebaseMessagingService) {
+		this.firebaseMessagingService = firebaseMessagingService;
+	}
 
 	@PostMapping("transaction-sync")
 	public ResponseEntity<TransactionResponseDTO> insertTranscationBank(@RequestBody TransactionBankDTO dto) {
 		TransactionResponseDTO result = null;
 		HttpStatus httpStatus = null;
+		UUID uuid = UUID.randomUUID();
 		try {
-			UUID uuid = UUID.randomUUID();
 			List<Object> list = transactionBankService.checkTransactionIdInserted(dto.getTransactionid());
 			if (list.isEmpty()) {
 				result = validateTransactionBank(dto, uuid.toString());
@@ -59,12 +110,103 @@ public class TransactionBankController {
 				httpStatus = HttpStatus.BAD_REQUEST;
 				result = new TransactionResponseDTO(true, "006", "Duplicated transactionid");
 			}
+			return new ResponseEntity<>(result, httpStatus);
 		} catch (Exception e) {
 			System.out.println("Error at insertTranscationBank: " + e.toString());
 			result = new TransactionResponseDTO(true, "005", "Unexpected error");
 			httpStatus = HttpStatus.BAD_REQUEST;
+			return new ResponseEntity<>(result, httpStatus);
+		} finally {
+			// find transaction by id
+			NumberFormat nf = NumberFormat.getInstance(Locale.US);
+			LocalDateTime currentDateTime = LocalDateTime.now();
+			String transcationId = dto.getContent().split("  ")[0];
+			if (transcationId != null && !transcationId.isBlank()) {
+				TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
+						.getTransactionById(transcationId);
+				if (transactionReceiveEntity != null) {
+					AccountBankReceiveEntity accountBankEntity = accountBankService
+							.getAccountBankById(transactionReceiveEntity.getBankId()); // update status
+					// transaction
+					transactionReceiveService.updateTransactionReceiveStatus(1, uuid.toString(), transcationId);
+					// find transaction-branch-receive to push notification
+					TransactionReceiveBranchEntity transactionBranchEntity = transactionReceiveBranchService
+							.getTransactionBranchByTransactionId(transcationId);
+					if (transactionBranchEntity != null) {
+						// push notification
+						// find userIds into business_member and branch_member
+						List<String> userIds = branchMemberService
+								.getUserIdsByBusinessIdAndBranchId(transactionBranchEntity.getBusinessId(),
+										transactionBranchEntity.getBranchId());
+						// insert AND push notification to users belong to
+						// admin business/ member of branch
+						if (userIds != null && !userIds.isEmpty()) {
+							for (String userId : userIds) {
+								// insert notification
+								UUID notificationUUID = UUID.randomUUID();
+								NotificationEntity notiEntity = new NotificationEntity();
+								BranchInformationEntity branchEntity = branchInformationService
+										.getBranchById(transactionBranchEntity.getBranchId());
+								String prefix = "";
+								if (dto.getTransType().toUpperCase().equals("D")) {
+									prefix = "-";
+								} else {
+									prefix = "+";
+								}
+								String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
+										+ accountBankEntity.getBankAccount()
+										+ NotificationUtil.getNotiDescUpdateTransSuffix2()
+										+ prefix + nf.format(dto.getAmount())
+										+ NotificationUtil.getNotiDescUpdateTransSuffix3()
+										+ branchEntity.getName();
+								// String title = NotificationUtil.getNotiTitleNewTransaction();
+								notiEntity.setId(notificationUUID.toString());
+								notiEntity.setRead(false);
+								notiEntity.setMessage(message);
+								notiEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
+								notiEntity.setType(NotificationUtil.getNotiTypeNewTransaction());
+								notiEntity.setUserId(userId);
+								notiEntity.setData(transactionReceiveEntity.getId());
+								notificationService.insertNotification(notiEntity);
+								// push notification
+								List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+								fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
+								if (fcmTokens != null && !fcmTokens.isEmpty()) {
+									for (FcmTokenEntity fcmToken : fcmTokens) {
+										try {
+											FcmRequestDTO fcmDTO = new FcmRequestDTO();
+											fcmDTO.setTitle(NotificationUtil.getNotiTitleUpdateTransaction());
+											fcmDTO.setMessage(message);
+											fcmDTO.setToken(fcmToken.getToken());
+											firebaseMessagingService.sendPushNotificationToToken(fcmDTO);
+											logger.info("Send notification to device " + fcmToken.getToken());
+										} catch (Exception e) {
+											System.out.println("Error at send noti" + e.toString());
+											logger.error(
+													"Error when Send Notification using FCM " + e.toString());
+											if (e.toString()
+													.contains(
+															"The registration token is not a valid FCM registration token")) {
+												fcmTokenService.deleteFcmToken(fcmToken.getToken());
+											}
+
+										}
+									}
+								}
+							}
+						} else {
+							// không tồn tài userId nào
+						}
+					} else {
+						// Không có transaction-branch tương ứng nào
+					}
+				} else {
+					// Không có giao dịch nào trùng id, trạng thái: chưa thanh toán,
+				}
+
+			}
+
 		}
-		return new ResponseEntity<>(result, httpStatus);
 	}
 
 	@PostMapping("callback-login")
@@ -72,7 +214,6 @@ public class TransactionBankController {
 		String result = "";
 		HttpStatus httpStatus = null;
 		try {
-			System.out.println("======CALL API CALLBACK LOGIN");
 			Map<String, Object> data = new HashMap<>();
 			data.put("phoneNo", dto.getPhoneNo());
 			data.put("password", dto.getPassword());

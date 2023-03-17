@@ -20,8 +20,9 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE FROM transaction_receive SET status = :status WHERE id = :id", nativeQuery = true)
-    void updateTransactionReceiveStatus(@Param(value = "status") boolean status, @Param(value = "id") String id);
+    @Query(value = "UPDATE transaction_receive SET status = :status, ref_id = :refId WHERE id = :id", nativeQuery = true)
+    void updateTransactionReceiveStatus(@Param(value = "status") int status, @Param(value = "refId") String refId,
+            @Param(value = "id") String id);
 
     @Query(value = "SELECT b.id as transactionId, b.amount, b.bank_account as bankAccount, b.content, b.time, b.status "
             + "FROM transaction_receive_branch a "
@@ -31,4 +32,9 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "ORDER BY b.time DESC LIMIT 5", nativeQuery = true)
     List<TransactionRelatedDTO> getRelatedTransactionReceives(@Param(value = "businessId") String businessId);
 
+    @Query(value = "SELECT * "
+            + "FROM transaction_receive "
+            + "WHERE id = :id "
+            + "AND status = 0", nativeQuery = true)
+    TransactionReceiveEntity getTransactionById(@Param(value = "id") String id);
 }

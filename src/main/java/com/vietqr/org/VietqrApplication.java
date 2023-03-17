@@ -27,7 +27,8 @@ import com.vietqr.org.security.JWTAuthorizationFilter;
 // @EnableScheduling
 public class VietqrApplication extends SpringBootServletInitializer implements WebMvcConfigurer {
 
-	public static void main(String[] args) throws IOException, ClassNotFoundException {
+	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
+
 		SpringApplication.run(VietqrApplication.class, args);
 	}
 
@@ -37,16 +38,14 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 	class WebSecurityBasicConfig extends WebSecurityConfigurerAdapter {
 		@Autowired
 		public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-			// UAT user mb bank
-			// auth.inMemoryAuthentication()
-			// .withUser("3")
-			// .password(passwordEncoder().encode("MBK3cG76F"))
-			// .authorities("ROLE_USER")
-			// .and()
-			// Product user mb bank
+
 			auth.inMemoryAuthentication()
-					.withUser("b-mb-user3")
-					.password(passwordEncoder().encode("Yi1tYi11c2VyMw=="))
+					.withUser("3")
+					.password(passwordEncoder().encode("MBK3cG76F"))
+					.authorities("ROLE_USER")
+					.and()
+					.withUser("iot-bl-user04")
+					.password(passwordEncoder().encode("aW90LWJsLXVzZXIwNA=="))
 					.authorities("ROLE_USER")
 					.and()
 					.withUser("admin")
