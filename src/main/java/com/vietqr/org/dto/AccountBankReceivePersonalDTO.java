@@ -16,6 +16,10 @@ public interface AccountBankReceivePersonalDTO {
 
     Integer getBankType();
 
+    String getNationalId();
+
+    String getPhoneAuthenticated();
+
     // for business bank
     String getBranchId();
 

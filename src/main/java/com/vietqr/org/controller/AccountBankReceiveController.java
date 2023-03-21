@@ -65,6 +65,8 @@ public class AccountBankReceiveController {
 			entity.setBankAccount(dto.getBankAccount());
 			entity.setBankAccountName(dto.getUserBankName());
 			entity.setType(dto.getType());
+			entity.setNationalId(dto.getNationalId());
+			entity.setPhoneAuthenticated(dto.getPhoneAuthenticated());
 			accountBankService.insertAccountBank(entity);
 			if (dto.getType() == 0) {
 				// insert bank receive personal
@@ -112,6 +114,8 @@ public class AccountBankReceiveController {
 					dto.setBankName(personalBank.getBankName());
 					dto.setImgId(personalBank.getImgId());
 					dto.setType(personalBank.getBankType());
+					dto.setNationalId(personalBank.getNationalId());
+					dto.setPhoneAuthenticated(personalBank.getPhoneAuthenticated());
 					dto.setBranchId("");
 					dto.setBusinessId("");
 					dto.setBranchName("");
@@ -157,6 +161,8 @@ public class AccountBankReceiveController {
 					dto.setBankName(bank.getBankName());
 					dto.setImgId(bank.getImgId());
 					dto.setType(bank.getBankType());
+					dto.setNationalId(bank.getNationalId());
+					dto.setPhoneAuthenticated(bank.getPhoneAuthenticated());
 					dto.setBranchId(bank.getBranchId());
 					dto.setBusinessId(bank.getBusinessId());
 					dto.setBranchName(bank.getBranchName());

@@ -46,6 +46,7 @@ import com.vietqr.org.service.FcmTokenService;
 import com.vietqr.org.service.FirebaseMessagingService;
 import com.vietqr.org.util.VietQRUtil;
 import com.vietqr.org.util.NotificationUtil;
+import com.vietqr.org.util.RandomCodeUtil;
 
 @RestController
 @RequestMapping("/api")
@@ -116,10 +117,11 @@ public class VietQRController {
 	public ResponseEntity<VietQRDTO> generateQR(@Valid @RequestBody VietQRCreateDTO dto) {
 		VietQRDTO result = null;
 		HttpStatus httpStatus = null;
+		UUID transcationUUID = UUID.randomUUID();
+		String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
 		try {
 			AccountBankReceiveEntity accountBankEntity = accountBankService.getAccountBankById(dto.getBankId());
 			if (accountBankEntity != null) {
-
 				// 1.Generate VietQR
 				// get bank information
 				// get bank type information
@@ -130,7 +132,7 @@ public class VietQRController {
 				VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
 				vietQRGenerateDTO.setCaiValue(caiValue);
 				vietQRGenerateDTO.setAmount(dto.getAmount());
-				vietQRGenerateDTO.setContent(dto.getContent());
+				vietQRGenerateDTO.setContent(traceId + "." + dto.getContent());
 				vietQRGenerateDTO.setBankAccount(accountBankEntity.getBankAccount());
 				String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
 				// generate VietQRDTO
@@ -140,7 +142,7 @@ public class VietQRController {
 				vietQRDTO.setBankAccount(accountBankEntity.getBankAccount());
 				vietQRDTO.setUserBankName(accountBankEntity.getBankAccountName().toUpperCase());
 				vietQRDTO.setAmount(dto.getAmount());
-				vietQRDTO.setContent(dto.getContent());
+				vietQRDTO.setContent(traceId + "." + dto.getContent());
 				vietQRDTO.setQrCode(qr);
 				vietQRDTO.setImgId(bankTypeEntity.getImgId());
 				result = vietQRDTO;
@@ -161,19 +163,19 @@ public class VietQRController {
 			if (accountBankEntity != null) {
 				if (dto != null && dto.getBusinessId() != null && dto.getBranchId() != null) {
 					if (!dto.getBranchId().isEmpty() && !dto.getBusinessId().isEmpty()) {
-						UUID transcationUUID = UUID.randomUUID();
 						UUID transactionBranchUUID = UUID.randomUUID();
 						LocalDateTime currentDateTime = LocalDateTime.now();
 						TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
 						transactionEntity.setId(transcationUUID.toString());
 						transactionEntity.setBankAccount(accountBankEntity.getBankAccount());
 						transactionEntity.setBankId(dto.getBankId());
-						transactionEntity.setContent(transcationUUID.toString() + "  " + dto.getContent());
+						transactionEntity.setContent(traceId + "." + dto.getContent());
 						transactionEntity.setAmount(Long.parseLong(dto.getAmount()));
 						transactionEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
 						transactionEntity.setRefId("");
 						transactionEntity.setType(0);
 						transactionEntity.setStatus(0);
+						transactionEntity.setTraceId(traceId);
 						transactionReceiveService.insertTransactionReceive(transactionEntity);
 						TransactionReceiveBranchEntity transactionBranchEntity = new TransactionReceiveBranchEntity();
 						transactionBranchEntity.setId(transactionBranchUUID.toString());

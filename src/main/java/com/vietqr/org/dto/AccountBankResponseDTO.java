@@ -16,6 +16,8 @@ public class AccountBankResponseDTO implements Serializable {
 	private String bankName;
 	private String imgId;
 	private int type;
+	private String nationalId;
+	private String phoneAuthenticated;
 	// for business bank
 	private String branchId;
 	private String businessId;
@@ -29,7 +31,8 @@ public class AccountBankResponseDTO implements Serializable {
 	}
 
 	public AccountBankResponseDTO(String id, String bankAccount, String userBankName, String bankCode, String bankName,
-			String imgId, int type, String branchId, String businessId, String branchName, String businessName,
+			String imgId, String nationalId, String phoneAuthenticated, int type, String branchId, String businessId,
+			String branchName, String businessName,
 			String branchCode,
 			String businessCode) {
 		this.id = id;
@@ -39,6 +42,8 @@ public class AccountBankResponseDTO implements Serializable {
 		this.bankName = bankName;
 		this.imgId = imgId;
 		this.type = type;
+		this.nationalId = nationalId;
+		this.phoneAuthenticated = phoneAuthenticated;
 		this.branchId = branchId;
 		this.businessId = businessId;
 		this.branchName = branchName;
@@ -93,6 +98,22 @@ public class AccountBankResponseDTO implements Serializable {
 
 	public void setType(int type) {
 		this.type = type;
+	}
+
+	public String getNationalId() {
+		return nationalId;
+	}
+
+	public void setNationalId(String nationalId) {
+		this.nationalId = nationalId;
+	}
+
+	public String getPhoneAuthenticated() {
+		return phoneAuthenticated;
+	}
+
+	public void setPhoneAuthenticated(String phoneAuthenticated) {
+		this.phoneAuthenticated = phoneAuthenticated;
 	}
 
 	public String getImgId() {

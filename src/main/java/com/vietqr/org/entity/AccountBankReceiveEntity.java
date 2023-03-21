@@ -9,7 +9,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "AccountBankReceive")
-public class AccountBankReceiveEntity implements Serializable{
+public class AccountBankReceiveEntity implements Serializable {
 
 	/**
 	 *
@@ -29,20 +29,28 @@ public class AccountBankReceiveEntity implements Serializable{
 	@Column(name = "bankAccountName")
 	private String bankAccountName;
 
+	@Column(name = "nationalId")
+	private String nationalId;
+
+	@Column(name = "phoneAuthenticated")
+	private String phoneAuthenticated;
+
 	@Column(name = "type")
 	private int type;
-
 
 	public AccountBankReceiveEntity() {
 		super();
 	}
 
-	public AccountBankReceiveEntity(String id, String bankTypeId, String bankAccount, String bankAccountName, int type) {
+	public AccountBankReceiveEntity(String id, String bankTypeId, String bankAccount, String bankAccountName,
+			String nationalId, String phoneAuthenticated, int type) {
 		super();
 		this.id = id;
 		this.bankTypeId = bankTypeId;
 		this.bankAccount = bankAccount;
 		this.bankAccountName = bankAccountName;
+		this.nationalId = nationalId;
+		this.phoneAuthenticated = phoneAuthenticated;
 		this.type = type;
 	}
 
@@ -76,6 +84,22 @@ public class AccountBankReceiveEntity implements Serializable{
 
 	public void setBankAccount(String bankAccount) {
 		this.bankAccount = bankAccount;
+	}
+
+	public String getNationalId() {
+		return nationalId;
+	}
+
+	public void setNationalId(String nationalId) {
+		this.nationalId = nationalId;
+	}
+
+	public String getPhoneAuthenticated() {
+		return phoneAuthenticated;
+	}
+
+	public void setPhoneAuthenticated(String phoneAuthenticated) {
+		this.phoneAuthenticated = phoneAuthenticated;
 	}
 
 	public int getType() {

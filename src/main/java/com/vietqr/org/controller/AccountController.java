@@ -92,7 +92,7 @@ public class AccountController {
 					List<FcmTokenEntity> fcmTokens = new ArrayList<>();
 					fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
 					if (fcmTokens != null && !fcmTokens.isEmpty()) {
-						System.out.println("FCM token != null" + fcmTokens.size());
+						logger.info("FCM list size: " + fcmTokens.size());
 						// insert new Notification
 						String messageNotification = NotificationUtil.getNotiDescLoginWarningPrefix()
 								+ dto.getPlatform() + " " + dto.getDevice();
@@ -115,7 +115,6 @@ public class AccountController {
 								firebaseMessagingService.sendPushNotificationToToken(fcmDTO);
 								logger.info("Send notification to device " + fcmToken.getToken());
 							} catch (Exception e) {
-								System.out.println("Error at send noti" + e.toString());
 								logger.error("Error when Send Notification using FCM " + e.toString());
 								if (e.toString()
 										.contains("The registration token is not a valid FCM registration token")) {
@@ -138,13 +137,15 @@ public class AccountController {
 					result = getJWTToken(accountInformationEntity);
 					httpStatus = HttpStatus.OK;
 				} else {
+					logger.error("Cannot find user to login");
 					httpStatus = HttpStatus.BAD_REQUEST;
 				}
 			} else {
+				logger.error("Phone number is empty");
 				httpStatus = HttpStatus.BAD_REQUEST;
 			}
 		} catch (Exception e) {
-			System.out.println("Error at login: " + e.toString());
+			logger.error("Error at login: " + e.toString());
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(result, httpStatus);
