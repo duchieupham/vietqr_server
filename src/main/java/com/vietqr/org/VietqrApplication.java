@@ -28,7 +28,6 @@ import com.vietqr.org.security.JWTAuthorizationFilter;
 public class VietqrApplication extends SpringBootServletInitializer implements WebMvcConfigurer {
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
-
 		SpringApplication.run(VietqrApplication.class, args);
 	}
 
@@ -38,7 +37,6 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 	class WebSecurityBasicConfig extends WebSecurityConfigurerAdapter {
 		@Autowired
 		public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-
 			auth.inMemoryAuthentication()
 					.withUser("b-mb-user3")
 					.password(passwordEncoder().encode("Yi1tYi11c2VyMw=="))

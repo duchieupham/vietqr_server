@@ -39,4 +39,9 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
         return repo.getTransactionByTraceId(id);
     }
 
+    @Override
+    public List<TransactionReceiveEntity> getTransactionByBankId(String bankId) {
+        return repo.getRelatedTransactionByBankId(bankId);
+    }
+
 }

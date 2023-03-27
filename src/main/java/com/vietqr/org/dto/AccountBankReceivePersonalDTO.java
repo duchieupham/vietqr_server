@@ -32,4 +32,6 @@ public interface AccountBankReceivePersonalDTO {
     String getBranchCode();
 
     String getBusinessCode();
+
+    boolean getAuthenticated();
 }

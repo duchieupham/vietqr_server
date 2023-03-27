@@ -38,12 +38,18 @@ public class AccountBankReceiveEntity implements Serializable {
 	@Column(name = "type")
 	private int type;
 
+	@Column(name = "userId")
+	private String userId;
+
+	@Column(name = "isAuthenticated")
+	private boolean isAuthenticated;
+
 	public AccountBankReceiveEntity() {
 		super();
 	}
 
 	public AccountBankReceiveEntity(String id, String bankTypeId, String bankAccount, String bankAccountName,
-			String nationalId, String phoneAuthenticated, int type) {
+			String nationalId, String phoneAuthenticated, int type, String userId, boolean isAuthenticated) {
 		super();
 		this.id = id;
 		this.bankTypeId = bankTypeId;
@@ -52,6 +58,8 @@ public class AccountBankReceiveEntity implements Serializable {
 		this.nationalId = nationalId;
 		this.phoneAuthenticated = phoneAuthenticated;
 		this.type = type;
+		this.userId = userId;
+		this.isAuthenticated = isAuthenticated;
 	}
 
 	public String getId() {
@@ -108,6 +116,22 @@ public class AccountBankReceiveEntity implements Serializable {
 
 	public void setType(int type) {
 		this.type = type;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public boolean isAuthenticated() {
+		return isAuthenticated;
+	}
+
+	public void setAuthenticated(boolean isAuthenticated) {
+		this.isAuthenticated = isAuthenticated;
 	}
 
 }

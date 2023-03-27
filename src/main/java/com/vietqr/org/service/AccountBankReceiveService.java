@@ -1,7 +1,5 @@
 package com.vietqr.org.service;
 
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.entity.AccountBankReceiveEntity;
@@ -13,7 +11,11 @@ public interface AccountBankReceiveService {
 
 	public void deleteAccountBank(String id);
 
-	public List<Integer> checkExistedBank(String bankAccount, String bankTypeId);
+	public String checkExistedBank(String bankAccount, String bankTypeId);
 
 	public AccountBankReceiveEntity getAccountBankById(String bankId);
+
+	public void updateRegisterAuthenticationBank(String nationalId, String phoneAuthenticated, String bankId);
+
+	public AccountBankReceiveEntity getAccountBankByBankAccount(String bankAccount);
 }

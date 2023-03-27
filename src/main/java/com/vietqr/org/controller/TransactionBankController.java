@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.time.ZoneOffset;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
@@ -58,9 +60,7 @@ import com.vietqr.org.entity.BusinessInformationEntity;
 import com.vietqr.org.entity.FcmTokenEntity;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.entity.BankTypeEntity;
-import com.vietqr.org.dto.FcmRequestDTO;
 import com.vietqr.org.dto.TokenProductBankDTO;
-import com.vietqr.org.dto.ConfirmRequestBankDTO;
 import com.vietqr.org.dto.ConfirmRequestFailedBankDTO;
 import com.vietqr.org.dto.RequestBankDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
@@ -149,9 +149,26 @@ public class TransactionBankController {
 			String[] newPaths = dto.getContent().split("\\s+");
 			logger.info("content: " + dto.getContent() + "-" + newPaths.length + "-" + newPaths.toString());
 			if (newPaths != null && newPaths.length > 0) {
-				for (String path : newPaths) {
-					if (path.contains("VQR") && path.length() == 13) {
-						traceId = path;
+				int indexSaved = 0;
+				for (int i = 0; i < newPaths.length; i++) {
+					if (newPaths[i].contains("VQR")) {
+						traceId = newPaths[i];
+						indexSaved = i;
+					}
+					if (i == indexSaved + 1) {
+						if (traceId.length() < 13) {
+							traceId = traceId + newPaths[i];
+						}
+					}
+				}
+				if (!traceId.isEmpty()) {
+					String pattern = "VQR.{10}";
+					Pattern r = Pattern.compile(pattern);
+					Matcher m = r.matcher(traceId);
+					if (m.find()) {
+						traceId = m.group(0);
+					} else {
+						traceId = "";
 					}
 				}
 				logger.info("traceId: " + traceId);
@@ -212,28 +229,6 @@ public class TransactionBankController {
 									notiEntity.setUserId(userId);
 									notiEntity.setData(transactionReceiveEntity.getId());
 									notificationService.insertNotification(notiEntity);
-									// push notification
-									// List<FcmTokenEntity> fcmTokens = new ArrayList<>();
-									// fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
-									// if (fcmTokens != null && !fcmTokens.isEmpty()) {
-									// for (FcmTokenEntity fcmToken : fcmTokens) {
-									// try {
-									// FcmRequestDTO fcmDTO = new FcmRequestDTO();
-									// fcmDTO.setTitle(NotificationUtil.getNotiTitleUpdateTransaction());
-									// fcmDTO.setMessage(message);
-									// fcmDTO.setToken(fcmToken.getToken());
-									// firebaseMessagingService.sendPushNotificationToToken(fcmDTO);
-									// logger.info("Send notification to device " + fcmToken.getToken());
-									// } catch (Exception e) {
-									// System.out.println("Error at send noti" + e.toString());
-									// logger.error(
-									// "Error when Send Notification using FCM " + e.toString());
-									// if (e.toString()
-									// .contains(
-									// "The registration token is not a valid FCM registration token")) {
-									// fcmTokenService.deleteFcmToken(fcmToken.getToken());
-									// }
-									// }
 									List<FcmTokenEntity> fcmTokens = new ArrayList<>();
 									fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
 									Map<String, String> data = new HashMap<>();
@@ -270,10 +265,76 @@ public class TransactionBankController {
 					logger.info("transaction-sync - cannot find transaction receive");
 				}
 			} else {
-				logger.info("transaction-sync - traceId is empty");
+				logger.info("transaction-sync - traceId is empty. Receive transaction outside system");
+				AccountBankReceiveEntity accountBankEntity = accountBankService
+						.getAccountBankByBankAccount(dto.getBankaccount());
+				if (accountBankEntity != null) {
+					BankTypeEntity bankTypeEntity = bankTypeService
+							.getBankTypeById(accountBankEntity.getBankTypeId());
+					UUID transcationUUID = UUID.randomUUID();
+					long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+					TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
+					transactionEntity.setId(transcationUUID.toString());
+					transactionEntity.setBankAccount(accountBankEntity.getBankAccount());
+					transactionEntity.setBankId(accountBankEntity.getId());
+					transactionEntity.setContent(traceId + "." + dto.getContent());
+					transactionEntity.setAmount(Long.parseLong(dto.getAmount() + ""));
+					transactionEntity.setTime(time);
+					transactionEntity.setRefId(uuid.toString());
+					transactionEntity.setType(2);
+					transactionEntity.setStatus(1);
+					transactionEntity.setTraceId("");
+					transactionReceiveService.insertTransactionReceive(transactionEntity);
+					//
+					// insert notification
+					UUID notificationUUID = UUID.randomUUID();
+					NotificationEntity notiEntity = new NotificationEntity();
+					String prefix = "";
+					if (dto.getTransType().toUpperCase().equals("D")) {
+						prefix = "-";
+					} else {
+						prefix = "+";
+					}
+					String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
+							+ accountBankEntity.getBankAccount()
+							+ NotificationUtil.getNotiDescUpdateTransSuffix2()
+							+ prefix + nf.format(dto.getAmount())
+							+ NotificationUtil.getNotiDescUpdateTransSuffix4()
+							+ dto.getContent();
+					// String title = NotificationUtil.getNotiTitleNewTransaction();
+					notiEntity.setId(notificationUUID.toString());
+					notiEntity.setRead(false);
+					notiEntity.setMessage(message);
+					notiEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
+					notiEntity.setType(NotificationUtil.getNotiTypeNewTransaction());
+					notiEntity.setUserId(accountBankEntity.getUserId());
+					notiEntity.setData(transcationUUID.toString());
+					notificationService.insertNotification(notiEntity);
+					List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+					fcmTokens = fcmTokenService.getFcmTokensByUserId(accountBankEntity.getUserId());
+					Map<String, String> data = new HashMap<>();
+					data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+					data.put("notificationId", notificationUUID.toString());
+					data.put("transactionReceiveId", transcationUUID.toString());
+					data.put("bankAccount", accountBankEntity.getBankAccount());
+					data.put("bankName", bankTypeEntity.getBankName());
+					data.put("bankCode", bankTypeEntity.getBankCode());
+					data.put("bankId", accountBankEntity.getId());
+					data.put("branchName", "");
+					data.put("businessName", "");
+					data.put("content", dto.getContent());
+					data.put("amount", "" + dto.getAmount());
+					data.put("time", "" + time);
+					data.put("refId", "" + dto.getTransactionid());
+					data.put("status", "1");
+					data.put("traceId", "");
+					firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
+							NotificationUtil
+									.getNotiTitleUpdateTransaction(),
+							message);
+				}
 			}
 		}
-
 	}
 
 	// get token bank product

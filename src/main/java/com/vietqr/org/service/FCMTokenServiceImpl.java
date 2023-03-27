@@ -29,4 +29,9 @@ public class FCMTokenServiceImpl implements FcmTokenService {
 		repo.deleteFcmToken(token);
 	}
 
+	@Override
+	public void updateToken(String newToken, String userId, String oldToken) {
+		repo.updateToken(newToken, userId, oldToken);
+	}
+
 }

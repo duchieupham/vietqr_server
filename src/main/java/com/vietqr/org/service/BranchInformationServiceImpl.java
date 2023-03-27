@@ -49,4 +49,9 @@ public class BranchInformationServiceImpl implements BranchInformationService {
     public BranchInformationEntity getBranchById(String id) {
         return repo.getBranchById(id);
     }
+
+    @Override
+    public List<String> getBranchIdsByBankId(String bankId) {
+        return repo.getBranchIdsByBankId(bankId);
+    }
 }

@@ -23,4 +23,6 @@ public interface BranchInformationService {
     List<BranchChoiceDTO> getBranchsByBusinessId(String businessId);
 
     BranchInformationEntity getBranchById(String id);
+
+    List<String> getBranchIdsByBankId(String bankId);
 }

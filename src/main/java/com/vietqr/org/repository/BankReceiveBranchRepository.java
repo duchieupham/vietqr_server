@@ -17,7 +17,7 @@ public interface BankReceiveBranchRepository extends JpaRepository<BankReceiveBr
 
     @Query(value = "SELECT a.bank_id as bankId, b.bank_account as bankAccount, b.bank_account_name as userBankName, c.bank_name as bankName, "
             + "c.bank_code as bankCode, c.img_id as imgId, b.type as bankType, a.branch_id as branchId, d.business_id as businessId, d.name as branchName, "
-            + "e.name as businessName, d.code as branchCode, e.code as businessCode "
+            + "e.name as businessName, d.code as branchCode, e.code as businessCode, b.is_authenticated as authenticated "
             + "FROM bank_receive_branch a "
             + "INNER JOIN account_bank_receive b "
             + "ON a.bank_id = b.id "

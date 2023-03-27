@@ -14,18 +14,21 @@ public class VietQRCreateDTO implements Serializable {
 	private String content;
 	private String branchId;
 	private String businessId;
+	private String userId;
 
 	public VietQRCreateDTO() {
 		super();
 	}
 
-	public VietQRCreateDTO(String bankId, String amount, String content, String branchId, String businessId) {
+	public VietQRCreateDTO(String bankId, String amount, String content, String branchId, String businessId,
+			String userId) {
 		super();
 		this.bankId = bankId;
 		this.amount = amount;
 		this.content = content;
 		this.branchId = branchId;
 		this.businessId = businessId;
+		this.userId = userId;
 	}
 
 	public String getBankId() {
@@ -66,6 +69,14 @@ public class VietQRCreateDTO implements Serializable {
 
 	public void setBusinessId(String businessId) {
 		this.businessId = businessId;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 
 }

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.vietqr.org.dto.BankDetailInputDTO;
 import com.vietqr.org.dto.CaiBankDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.VietQRCreateDTO;
@@ -113,6 +114,46 @@ public class VietQRController {
 		return new ResponseEntity<>(result, httpStatus);
 	}
 
+	@PostMapping("account-bank/qr/generate")
+	public ResponseEntity<VietQRDTO> generateQRBank(@Valid @RequestBody BankDetailInputDTO dto) {
+		VietQRDTO result = null;
+		HttpStatus httpStatus = null;
+		try {
+			AccountBankReceiveEntity accountBankEntity = accountBankService.getAccountBankById(dto.getBankId());
+			if (accountBankEntity != null) {
+				// 1.Generate VietQR
+				// get bank information
+				// get bank type information
+				BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(accountBankEntity.getBankTypeId());
+				// get cai value
+				String caiValue = caiBankService.getCaiValue(bankTypeEntity.getId());
+				// generate VietQRGenerateDTO
+				VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+				vietQRGenerateDTO.setCaiValue(caiValue);
+				vietQRGenerateDTO.setBankAccount(accountBankEntity.getBankAccount());
+				String qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
+				// generate VietQRDTO
+				VietQRDTO vietQRDTO = new VietQRDTO();
+				vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
+				vietQRDTO.setBankName(bankTypeEntity.getBankName());
+				vietQRDTO.setBankAccount(accountBankEntity.getBankAccount());
+				vietQRDTO.setUserBankName(accountBankEntity.getBankAccountName().toUpperCase());
+				vietQRDTO.setQrCode(qr);
+				vietQRDTO.setImgId(bankTypeEntity.getImgId());
+				vietQRDTO.setAmount("");
+				vietQRDTO.setContent("");
+				httpStatus = HttpStatus.OK;
+				result = vietQRDTO;
+			} else {
+				httpStatus = HttpStatus.BAD_REQUEST;
+			}
+		} catch (Exception e) {
+			logger.error(e.toString());
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
 	@PostMapping("qr/generate")
 	public ResponseEntity<VietQRDTO> generateQR(@Valid @RequestBody VietQRCreateDTO dto) {
 		VietQRDTO result = null;
@@ -161,78 +202,120 @@ public class VietQRController {
 			NumberFormat nf = NumberFormat.getInstance(Locale.US);
 			AccountBankReceiveEntity accountBankEntity = accountBankService.getAccountBankById(dto.getBankId());
 			if (accountBankEntity != null) {
-				if (dto != null && dto.getBusinessId() != null && dto.getBranchId() != null) {
-					if (!dto.getBranchId().isEmpty() && !dto.getBusinessId().isEmpty()) {
-						UUID transactionBranchUUID = UUID.randomUUID();
-						LocalDateTime currentDateTime = LocalDateTime.now();
-						TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
-						transactionEntity.setId(transcationUUID.toString());
-						transactionEntity.setBankAccount(accountBankEntity.getBankAccount());
-						transactionEntity.setBankId(dto.getBankId());
-						transactionEntity.setContent(traceId + "." + dto.getContent());
-						transactionEntity.setAmount(Long.parseLong(dto.getAmount()));
-						transactionEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
-						transactionEntity.setRefId("");
-						transactionEntity.setType(0);
-						transactionEntity.setStatus(0);
-						transactionEntity.setTraceId(traceId);
-						transactionReceiveService.insertTransactionReceive(transactionEntity);
-						TransactionReceiveBranchEntity transactionBranchEntity = new TransactionReceiveBranchEntity();
-						transactionBranchEntity.setId(transactionBranchUUID.toString());
-						transactionBranchEntity.setTransactionReceiveId(transcationUUID.toString());
-						transactionBranchEntity.setBranchId(dto.getBranchId());
-						transactionBranchEntity.setBusinessId(dto.getBusinessId());
-						transactionReceiveBranchService.insertTransactionReceiveBranch(transactionBranchEntity);
-						// find userIds into business_member and branch_member
-						List<String> userIds = branchMemberService
-								.getUserIdsByBusinessIdAndBranchId(dto.getBusinessId(), dto.getBranchId());
-						// insert AND push notification to users belong to
-						// admin business/ member of branch
-						if (userIds != null && !userIds.isEmpty()) {
-							for (String userId : userIds) {
-								// insert notification
-								UUID notificationUUID = UUID.randomUUID();
-								NotificationEntity notiEntity = new NotificationEntity();
-								BranchInformationEntity branchEntity = branchInformationService
-										.getBranchById(dto.getBranchId());
-								String message = NotificationUtil.getNotiDescNewTransPrefix() + branchEntity.getName()
-										+ NotificationUtil.getNotiDescNewTransSuffix1()
-										+ nf.format(Double.parseDouble(dto.getAmount()))
-										+ NotificationUtil
-												.getNotiDescNewTransSuffix2();
-								// String title = NotificationUtil.getNotiTitleNewTransaction();
-								notiEntity.setId(notificationUUID.toString());
-								notiEntity.setRead(false);
-								notiEntity.setMessage(message);
-								notiEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
-								notiEntity.setType(NotificationUtil.getNotiTypeNewTransaction());
-								notiEntity.setUserId(userId);
-								notiEntity.setData(transcationUUID.toString());
-								notificationService.insertNotification(notiEntity);
-								// push notification
-								List<FcmTokenEntity> fcmTokens = new ArrayList<>();
-								fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
-								if (fcmTokens != null && !fcmTokens.isEmpty()) {
-									for (FcmTokenEntity fcmToken : fcmTokens) {
-										try {
-											FcmRequestDTO fcmDTO = new FcmRequestDTO();
-											fcmDTO.setTitle(NotificationUtil.getNotiTitleNewTransaction());
-											fcmDTO.setMessage(message);
-											fcmDTO.setToken(fcmToken.getToken());
-											firebaseMessagingService.sendPushNotificationToToken(fcmDTO);
-											logger.info("Send notification to device " + fcmToken.getToken());
-										} catch (Exception e) {
-											System.out.println("Error at send noti" + e.toString());
-											logger.error("Error when Send Notification using FCM " + e.toString());
-											if (e.toString()
-													.contains(
-															"The registration token is not a valid FCM registration token")) {
-												fcmTokenService.deleteFcmToken(fcmToken.getToken());
-											}
-
+				UUID transactionBranchUUID = UUID.randomUUID();
+				LocalDateTime currentDateTime = LocalDateTime.now();
+				TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
+				transactionEntity.setId(transcationUUID.toString());
+				transactionEntity.setBankAccount(accountBankEntity.getBankAccount());
+				transactionEntity.setBankId(dto.getBankId());
+				transactionEntity.setContent(traceId + "." + dto.getContent());
+				transactionEntity.setAmount(Long.parseLong(dto.getAmount()));
+				transactionEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
+				transactionEntity.setRefId("");
+				transactionEntity.setType(0);
+				transactionEntity.setStatus(0);
+				transactionEntity.setTraceId(traceId);
+				transactionReceiveService.insertTransactionReceive(transactionEntity);
+				// insert transaction branch if existing branchId and businessId. Else just do
+				// not map.
+				if (!dto.getBranchId().isEmpty() && !dto.getBusinessId().isEmpty()) {
+					TransactionReceiveBranchEntity transactionBranchEntity = new TransactionReceiveBranchEntity();
+					transactionBranchEntity.setId(transactionBranchUUID.toString());
+					transactionBranchEntity.setTransactionReceiveId(transcationUUID.toString());
+					transactionBranchEntity.setBranchId(dto.getBranchId());
+					transactionBranchEntity.setBusinessId(dto.getBusinessId());
+					transactionReceiveBranchService.insertTransactionReceiveBranch(transactionBranchEntity);
+					// find userIds into business_member and branch_member
+					List<String> userIds = branchMemberService
+							.getUserIdsByBusinessIdAndBranchId(dto.getBusinessId(), dto.getBranchId());
+					// insert AND push notification to users belong to
+					// admin business/ member of branch
+					if (userIds != null && !userIds.isEmpty()) {
+						for (String userId : userIds) {
+							// insert notification
+							UUID notificationUUID = UUID.randomUUID();
+							NotificationEntity notiEntity = new NotificationEntity();
+							BranchInformationEntity branchEntity = branchInformationService
+									.getBranchById(dto.getBranchId());
+							String message = NotificationUtil.getNotiDescNewTransPrefix() + branchEntity.getName()
+									+ NotificationUtil.getNotiDescNewTransSuffix1()
+									+ nf.format(Double.parseDouble(dto.getAmount()))
+									+ NotificationUtil
+											.getNotiDescNewTransSuffix2();
+							// String title = NotificationUtil.getNotiTitleNewTransaction();
+							notiEntity.setId(notificationUUID.toString());
+							notiEntity.setRead(false);
+							notiEntity.setMessage(message);
+							notiEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
+							notiEntity.setType(NotificationUtil.getNotiTypeNewTransaction());
+							notiEntity.setUserId(userId);
+							notiEntity.setData(transcationUUID.toString());
+							notificationService.insertNotification(notiEntity);
+							// push notification
+							List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+							fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
+							if (fcmTokens != null && !fcmTokens.isEmpty()) {
+								for (FcmTokenEntity fcmToken : fcmTokens) {
+									try {
+										FcmRequestDTO fcmDTO = new FcmRequestDTO();
+										fcmDTO.setTitle(NotificationUtil.getNotiTitleNewTransaction());
+										fcmDTO.setMessage(message);
+										fcmDTO.setToken(fcmToken.getToken());
+										firebaseMessagingService.sendPushNotificationToToken(fcmDTO);
+										logger.info("Send notification to device " + fcmToken.getToken());
+									} catch (Exception e) {
+										System.out.println("Error at send noti" + e.toString());
+										logger.error("Error when Send Notification using FCM " + e.toString());
+										if (e.toString()
+												.contains(
+														"The registration token is not a valid FCM registration token")) {
+											fcmTokenService.deleteFcmToken(fcmToken.getToken());
 										}
+
 									}
 								}
+							}
+						}
+					}
+				} else {
+					// insert notification
+					UUID notificationUUID = UUID.randomUUID();
+					NotificationEntity notiEntity = new NotificationEntity();
+					String message = NotificationUtil.getNotiDescNewTransPrefix2()
+							+ NotificationUtil.getNotiDescNewTransSuffix1()
+							+ nf.format(Double.parseDouble(dto.getAmount()))
+							+ NotificationUtil
+									.getNotiDescNewTransSuffix2();
+					// String title = NotificationUtil.getNotiTitleNewTransaction();
+					notiEntity.setId(notificationUUID.toString());
+					notiEntity.setRead(false);
+					notiEntity.setMessage(message);
+					notiEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
+					notiEntity.setType(NotificationUtil.getNotiTypeNewTransaction());
+					notiEntity.setUserId(dto.getUserId());
+					notiEntity.setData(transcationUUID.toString());
+					notificationService.insertNotification(notiEntity);
+					// push notification
+					List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+					fcmTokens = fcmTokenService.getFcmTokensByUserId(dto.getUserId());
+					if (fcmTokens != null && !fcmTokens.isEmpty()) {
+						for (FcmTokenEntity fcmToken : fcmTokens) {
+							try {
+								FcmRequestDTO fcmDTO = new FcmRequestDTO();
+								fcmDTO.setTitle(NotificationUtil.getNotiTitleNewTransaction());
+								fcmDTO.setMessage(message);
+								fcmDTO.setToken(fcmToken.getToken());
+								firebaseMessagingService.sendPushNotificationToToken(fcmDTO);
+								logger.info("Send notification to device " + fcmToken.getToken());
+							} catch (Exception e) {
+								System.out.println("Error at send noti" + e.toString());
+								logger.error("Error when Send Notification using FCM " + e.toString());
+								if (e.toString()
+										.contains(
+												"The registration token is not a valid FCM registration token")) {
+									fcmTokenService.deleteFcmToken(fcmToken.getToken());
+								}
+
 							}
 						}
 					}
