@@ -46,6 +46,10 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 					.password(passwordEncoder().encode("aW90LWJsLXVzZXIwNA=="))
 					.authorities("ROLE_USER")
 					.and()
+					.withUser("customer-bl-user05")
+					.password(passwordEncoder().encode("Y3VzdG9tZXItYmwtdXNlcjA1"))
+					.authorities("ROLE_USER")
+					.and()
 					.withUser("admin")
 					.password(passwordEncoder().encode("Aa_123456789"))
 					.authorities("ROLE_ADMIN");
