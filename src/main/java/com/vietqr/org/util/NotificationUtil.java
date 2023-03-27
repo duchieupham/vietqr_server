@@ -7,6 +7,7 @@ public class NotificationUtil {
 	private static final String NOTI_TYPE_TRANSACTION = "N01";
 	private static final String NOTI_TYPE_NEW_MEMBER = "N03";
 	private static final String NOTI_TYPE_NEW_TRANSACTION = "N04";
+	private static final String NOTI_TYPE_UPDATE_TRANSACTION = "N05";
 
 	// Title
 	private static final String NOTI_TITLE_TRANSACTION = "Thông báo biến động số dư";
@@ -20,11 +21,13 @@ public class NotificationUtil {
 	private static final String NOTI_DESC_NEW_MEMBER_PREFIX = "Bạn vừa được thêm vào tài khoản ";
 	private static final String NOTI_DESC_NEW_MEMBER_SUFFIX = " để quản lý đối soát thanh toán";
 	private static final String NOTI_DESC_NEW_TRANS_PREFIX = "Giao dịch mới từ chi nhánh ";
+	private static final String NOTI_DESC_NEW_TRANS_PREFIX2 = "Giao dịch mới";
 	private static final String NOTI_DESC_NEW_TRANS_SUFFIX_1 = " được tạo. Số tiền ";
 	private static final String NOTI_DESC_NEW_TRANS_SUFFIX_2 = " VND";
 	private static final String NOTI_DESC_UPDATE_TRANS_SUFFIX_1 = "TK ";
 	private static final String NOTI_DESC_UPDATE_TRANS_SUFFIX_2 = "|GD: ";
-	private static final String NOTI_DESC_UPDATE_TRANS_SUFFIX_3 = "|Chi nhánh: ";
+	private static final String NOTI_DESC_UPDATE_TRANS_SUFFIX_3 = "|CN: ";
+	private static final String NOTI_DESC_UPDATE_TRANS_SUFFIX_4 = "|ND: ";
 
 	public static String getNotiTitleTransaction() {
 		return NOTI_TITLE_TRANSACTION;
@@ -96,6 +99,18 @@ public class NotificationUtil {
 
 	public static String getNotiDescUpdateTransSuffix3() {
 		return NOTI_DESC_UPDATE_TRANS_SUFFIX_3;
+	}
+
+	public static String getNotiDescUpdateTransSuffix4() {
+		return NOTI_DESC_UPDATE_TRANS_SUFFIX_4;
+	}
+
+	public static String getNotiTypeUpdateTransaction() {
+		return NOTI_TYPE_UPDATE_TRANSACTION;
+	}
+
+	public static String getNotiDescNewTransPrefix2() {
+		return NOTI_DESC_NEW_TRANS_PREFIX2;
 	}
 
 }

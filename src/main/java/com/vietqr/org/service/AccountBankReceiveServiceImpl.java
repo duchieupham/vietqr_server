@@ -16,7 +16,7 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
 
 	@Override
 	public int insertAccountBank(AccountBankReceiveEntity entity) {
-		return accountBankRepo.save(entity) == null ? 0: 1;
+		return accountBankRepo.save(entity) == null ? 0 : 1;
 	}
 
 	@Override
@@ -25,13 +25,28 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
 	}
 
 	@Override
-	public List<Integer> checkExistedBank(String bankAccount, String bankTypeId) {
+	public String checkExistedBank(String bankAccount, String bankTypeId) {
 		return accountBankRepo.checkExistedBankAccount(bankAccount, bankTypeId);
 	}
 
 	@Override
 	public AccountBankReceiveEntity getAccountBankById(String bankId) {
 		return accountBankRepo.getAccountBankById(bankId);
+	}
+
+	@Override
+	public void updateRegisterAuthenticationBank(String nationalId, String phoneAuthenticated, String bankId) {
+		accountBankRepo.updateRegisterAuthenticationBank(nationalId, phoneAuthenticated, bankId);
+	}
+
+	@Override
+	public AccountBankReceiveEntity getAccountBankByBankAccount(String bankAccount) {
+		return accountBankRepo.getAccountBankByBankAccount(bankAccount);
+	}
+
+	@Override
+	public AccountBankReceiveEntity getAccountBankByBankAccountAndBankTypeId(String bankAccount, String bankTypeId) {
+		return accountBankRepo.getAccountBankByBankAccountAndBankTypeId(bankAccount, bankTypeId);
 	}
 
 }

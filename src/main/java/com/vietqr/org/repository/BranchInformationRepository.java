@@ -46,4 +46,9 @@ public interface BranchInformationRepository extends JpaRepository<BranchInforma
                         + "FROM branch_information a "
                         + "WHERE business_id = :businessId AND a.is_active = true", nativeQuery = true)
         List<BranchChoiceDTO> getBranchsByBusinessId(@Param(value = "businessId") String businessId);
+
+        @Query(value = "SELECT branch_id "
+                        + "FROM bank_receive_branch "
+                        + "WHERE bank_id = :bankId", nativeQuery = true)
+        List<String> getBranchIdsByBankId(@Param(value = "bankId") String bankId);
 }

@@ -38,8 +38,8 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		@Autowired
 		public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 			auth.inMemoryAuthentication()
-					.withUser("3")
-					.password(passwordEncoder().encode("MBK3cG76F"))
+					.withUser("b-mb-user3")
+					.password(passwordEncoder().encode("Yi1tYi11c2VyMw=="))
 					.authorities("ROLE_USER")
 					.and()
 					.withUser("iot-bl-user04")
@@ -80,7 +80,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 					.addFilterAfter(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
 					.authorizeRequests()
 					.antMatchers(HttpMethod.POST, "/api/token_generate").permitAll()
-					.antMatchers(HttpMethod.POST, "/api/token_generate_without_auth").permitAll()
+					.antMatchers(HttpMethod.POST, "/bank/api/get_token_bank").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts/register").permitAll()
 					.anyRequest().authenticated();

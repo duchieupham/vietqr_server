@@ -11,4 +11,5 @@ public interface CaiBankService {
 
 	public String getCaiValue(String bankTypeId);
 
+	public CaiBankEntity getCaiBankByCaiValue(String caiValue);
 }

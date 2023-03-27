@@ -9,7 +9,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "AccountBankReceive")
-public class AccountBankReceiveEntity implements Serializable{
+public class AccountBankReceiveEntity implements Serializable {
 
 	/**
 	 *
@@ -29,21 +29,37 @@ public class AccountBankReceiveEntity implements Serializable{
 	@Column(name = "bankAccountName")
 	private String bankAccountName;
 
+	@Column(name = "nationalId")
+	private String nationalId;
+
+	@Column(name = "phoneAuthenticated")
+	private String phoneAuthenticated;
+
 	@Column(name = "type")
 	private int type;
 
+	@Column(name = "userId")
+	private String userId;
+
+	@Column(name = "isAuthenticated")
+	private boolean isAuthenticated;
 
 	public AccountBankReceiveEntity() {
 		super();
 	}
 
-	public AccountBankReceiveEntity(String id, String bankTypeId, String bankAccount, String bankAccountName, int type) {
+	public AccountBankReceiveEntity(String id, String bankTypeId, String bankAccount, String bankAccountName,
+			String nationalId, String phoneAuthenticated, int type, String userId, boolean isAuthenticated) {
 		super();
 		this.id = id;
 		this.bankTypeId = bankTypeId;
 		this.bankAccount = bankAccount;
 		this.bankAccountName = bankAccountName;
+		this.nationalId = nationalId;
+		this.phoneAuthenticated = phoneAuthenticated;
 		this.type = type;
+		this.userId = userId;
+		this.isAuthenticated = isAuthenticated;
 	}
 
 	public String getId() {
@@ -78,12 +94,44 @@ public class AccountBankReceiveEntity implements Serializable{
 		this.bankAccount = bankAccount;
 	}
 
+	public String getNationalId() {
+		return nationalId;
+	}
+
+	public void setNationalId(String nationalId) {
+		this.nationalId = nationalId;
+	}
+
+	public String getPhoneAuthenticated() {
+		return phoneAuthenticated;
+	}
+
+	public void setPhoneAuthenticated(String phoneAuthenticated) {
+		this.phoneAuthenticated = phoneAuthenticated;
+	}
+
 	public int getType() {
 		return type;
 	}
 
 	public void setType(int type) {
 		this.type = type;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public boolean isAuthenticated() {
+		return isAuthenticated;
+	}
+
+	public void setAuthenticated(boolean isAuthenticated) {
+		this.isAuthenticated = isAuthenticated;
 	}
 
 }

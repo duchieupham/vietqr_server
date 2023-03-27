@@ -16,22 +16,31 @@ public class AccountBankResponseDTO implements Serializable {
 	private String bankName;
 	private String imgId;
 	private int type;
-	// for business bank
+	// private String nationalId;
+	// private String phoneAuthenticated;
+	// // for business bank
 	private String branchId;
 	private String businessId;
 	private String branchName;
 	private String businessName;
-	private String branchCode;
-	private String businessCode;
+	// private String branchCode;
+	// private String businessCode;
+	private boolean isAuthenticated;
 
 	public AccountBankResponseDTO() {
 		super();
 	}
 
 	public AccountBankResponseDTO(String id, String bankAccount, String userBankName, String bankCode, String bankName,
-			String imgId, int type, String branchId, String businessId, String branchName, String businessName,
-			String branchCode,
-			String businessCode) {
+			String imgId,
+			// String nationalId, String phoneAuthenticated,
+			int type,
+			String branchId, String businessId,
+			String branchName, String businessName,
+			boolean isAuthenticated
+	// String branchCode,
+	// String businessCode
+	) {
 		this.id = id;
 		this.bankAccount = bankAccount;
 		this.userBankName = userBankName;
@@ -39,12 +48,15 @@ public class AccountBankResponseDTO implements Serializable {
 		this.bankName = bankName;
 		this.imgId = imgId;
 		this.type = type;
+		// this.nationalId = nationalId;
+		// this.phoneAuthenticated = phoneAuthenticated;
 		this.branchId = branchId;
 		this.businessId = businessId;
 		this.branchName = branchName;
 		this.businessName = businessName;
-		this.branchCode = branchCode;
-		this.businessCode = businessCode;
+		this.isAuthenticated = isAuthenticated;
+		// this.branchCode = branchCode;
+		// this.businessCode = businessCode;
 	}
 
 	public String getId() {
@@ -95,6 +107,22 @@ public class AccountBankResponseDTO implements Serializable {
 		this.type = type;
 	}
 
+	// public String getNationalId() {
+	// return nationalId;
+	// }
+
+	// public void setNationalId(String nationalId) {
+	// this.nationalId = nationalId;
+	// }
+
+	// public String getPhoneAuthenticated() {
+	// return phoneAuthenticated;
+	// }
+
+	// public void setPhoneAuthenticated(String phoneAuthenticated) {
+	// this.phoneAuthenticated = phoneAuthenticated;
+	// }
+
 	public String getImgId() {
 		return imgId;
 	}
@@ -135,20 +163,28 @@ public class AccountBankResponseDTO implements Serializable {
 		this.businessName = businessName;
 	}
 
-	public String getBranchCode() {
-		return branchCode;
+	public boolean isAuthenticated() {
+		return isAuthenticated;
 	}
 
-	public void setBranchCode(String branchCode) {
-		this.branchCode = branchCode;
+	public void setAuthenticated(boolean isAuthenticated) {
+		this.isAuthenticated = isAuthenticated;
 	}
 
-	public String getBusinessCode() {
-		return businessCode;
-	}
+	// public String getBranchCode() {
+	// return branchCode;
+	// }
 
-	public void setBusinessCode(String businessCode) {
-		this.businessCode = businessCode;
-	}
+	// public void setBranchCode(String branchCode) {
+	// this.branchCode = branchCode;
+	// }
+
+	// public String getBusinessCode() {
+	// return businessCode;
+	// }
+
+	// public void setBusinessCode(String businessCode) {
+	// this.businessCode = businessCode;
+	// }
 
 }

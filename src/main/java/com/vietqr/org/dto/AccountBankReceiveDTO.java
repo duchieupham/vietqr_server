@@ -14,6 +14,8 @@ public class AccountBankReceiveDTO implements Serializable {
 	private String userBankName;
 	private String userId;
 	private int type;
+	private String nationalId;
+	private String phoneAuthenticated;
 	// for business
 	private String branchId;
 
@@ -21,13 +23,16 @@ public class AccountBankReceiveDTO implements Serializable {
 		super();
 	}
 
-	public AccountBankReceiveDTO(String bankTypeId, String bankAccount, String userBankName, String userId, int type,
+	public AccountBankReceiveDTO(String bankTypeId, String bankAccount, String userBankName, String userId,
+			String nationalId, String phoneAuthenticated, int type,
 			String branchId) {
 		super();
 		this.bankTypeId = bankTypeId;
 		this.bankAccount = bankAccount;
 		this.userBankName = userBankName;
 		this.userId = userId;
+		this.nationalId = nationalId;
+		this.phoneAuthenticated = phoneAuthenticated;
 		this.type = type;
 		this.branchId = branchId;
 	}
@@ -46,6 +51,22 @@ public class AccountBankReceiveDTO implements Serializable {
 
 	public void setUserBankName(String userBankName) {
 		this.userBankName = userBankName;
+	}
+
+	public String getNationalId() {
+		return nationalId;
+	}
+
+	public void setNationalId(String nationalId) {
+		this.nationalId = nationalId;
+	}
+
+	public String getPhoneAuthenticated() {
+		return phoneAuthenticated;
+	}
+
+	public void setPhoneAuthenticated(String phoneAuthenticated) {
+		this.phoneAuthenticated = phoneAuthenticated;
 	}
 
 	public int getType() {
