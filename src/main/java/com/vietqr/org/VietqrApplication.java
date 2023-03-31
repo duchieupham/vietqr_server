@@ -38,8 +38,8 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		@Autowired
 		public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 			auth.inMemoryAuthentication()
-					.withUser("b-mb-user3")
-					.password(passwordEncoder().encode("Yi1tYi11c2VyMw=="))
+					.withUser("3")
+					.password(passwordEncoder().encode("MBK3cG76F"))
 					.authorities("ROLE_USER")
 					.and()
 					.withUser("iot-bl-user04")
