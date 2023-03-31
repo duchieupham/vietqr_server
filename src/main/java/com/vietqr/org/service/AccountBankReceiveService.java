@@ -1,7 +1,10 @@
 package com.vietqr.org.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
+import com.vietqr.org.dto.BusinessBankDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 
 @Service
@@ -20,4 +23,6 @@ public interface AccountBankReceiveService {
 	public AccountBankReceiveEntity getAccountBankByBankAccount(String bankAccount);
 
 	public AccountBankReceiveEntity getAccountBankByBankAccountAndBankTypeId(String bankAccount, String bankTypeId);
+
+	public List<BusinessBankDTO> getBankByBranchId(String branchId);
 }

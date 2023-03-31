@@ -160,17 +160,19 @@ public class AccountBankReceiveDetailDTO implements Serializable {
         private String businessId;
         private String businessName;
         private String imgId;
+        private String coverImgId;
         private List<BranchBankDetailDTO> branchDetails;
 
         public BusinessBankDetailDTO() {
             super();
         }
 
-        public BusinessBankDetailDTO(String businessId, String businessName, String imgId,
+        public BusinessBankDetailDTO(String businessId, String businessName, String imgId, String coverImgId,
                 List<BranchBankDetailDTO> branchDetails) {
             this.businessId = businessId;
             this.businessName = businessName;
             this.imgId = imgId;
+            this.coverImgId = coverImgId;
             this.branchDetails = branchDetails;
         }
 
@@ -198,6 +200,14 @@ public class AccountBankReceiveDetailDTO implements Serializable {
             this.imgId = imgId;
         }
 
+        public String getCoverImgId() {
+            return coverImgId;
+        }
+
+        public void setCoverImgId(String coverImgId) {
+            this.coverImgId = coverImgId;
+        }
+
         public List<BranchBankDetailDTO> getBranchDetails() {
             return branchDetails;
         }
@@ -216,14 +226,18 @@ public class AccountBankReceiveDetailDTO implements Serializable {
 
         private String branchId;
         private String branchName;
+        private String code;
+        private String address;
 
         public BranchBankDetailDTO() {
             super();
         }
 
-        public BranchBankDetailDTO(String branchId, String branchName) {
+        public BranchBankDetailDTO(String branchId, String branchName, String code, String address) {
             this.branchId = branchId;
             this.branchName = branchName;
+            this.code = code;
+            this.address = address;
         }
 
         public String getBranchId() {
@@ -240,6 +254,22 @@ public class AccountBankReceiveDetailDTO implements Serializable {
 
         public void setBranchName(String branchName) {
             this.branchName = branchName;
+        }
+
+        public String getCode() {
+            return code;
+        }
+
+        public void setCode(String code) {
+            this.code = code;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+
+        public void setAddress(String address) {
+            this.address = address;
         }
 
     }

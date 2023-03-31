@@ -118,7 +118,11 @@ public class TransactionBankController {
 		TransactionResponseDTO result = null;
 		HttpStatus httpStatus = null;
 		UUID uuid = UUID.randomUUID();
+		NumberFormat nf = NumberFormat.getInstance(Locale.US);
+		LocalDateTime currentDateTime = LocalDateTime.now();
+		long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
 		try {
+			logger.info("Start transaction sync at: " + time);
 			List<Object> list = transactionBankService.checkTransactionIdInserted(dto.getTransactionid());
 			if (list.isEmpty()) {
 				result = validateTransactionBank(dto, uuid.toString());
@@ -135,6 +139,9 @@ public class TransactionBankController {
 				httpStatus = HttpStatus.BAD_REQUEST;
 				result = new TransactionResponseDTO(true, "006", "Duplicated transactionid");
 			}
+			LocalDateTime currentDateTime2 = LocalDateTime.now();
+			long time2 = currentDateTime2.toEpochSecond(ZoneOffset.UTC);
+			logger.info("Response transcation sync at: " + time2);
 			return new ResponseEntity<>(result, httpStatus);
 		} catch (Exception e) {
 			logger.error("Error at transaction-sync: " + e.toString());
@@ -143,8 +150,6 @@ public class TransactionBankController {
 			return new ResponseEntity<>(result, httpStatus);
 		} finally {
 			// find transaction by id
-			NumberFormat nf = NumberFormat.getInstance(Locale.US);
-			LocalDateTime currentDateTime = LocalDateTime.now();
 			String traceId = "";
 			String[] newPaths = dto.getContent().split("\\s+");
 			logger.info("content: " + dto.getContent() + "-" + newPaths.length + "-" + newPaths.toString());
@@ -247,6 +252,9 @@ public class TransactionBankController {
 									data.put("refId", "" + dto.getTransactionid());
 									data.put("status", "1");
 									data.put("traceId", "" + transactionReceiveEntity.getTraceId());
+									LocalDateTime currentDateTime3 = LocalDateTime.now();
+									long time3 = currentDateTime3.toEpochSecond(ZoneOffset.UTC);
+									logger.info("Push notification at: " + time3);
 									firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
 											NotificationUtil
 													.getNotiTitleUpdateTransaction(),
@@ -263,16 +271,86 @@ public class TransactionBankController {
 					}
 				} else {
 					logger.info("transaction-sync - cannot find transaction receive");
+					// process here
+					AccountBankReceiveEntity accountBankEntity = accountBankService
+							.getAccountBankByBankAccount(dto.getBankaccount());
+					if (accountBankEntity != null) {
+						BankTypeEntity bankTypeEntity = bankTypeService
+								.getBankTypeById(accountBankEntity.getBankTypeId());
+						UUID transcationUUID = UUID.randomUUID();
+						TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
+						transactionEntity.setId(transcationUUID.toString());
+						transactionEntity.setBankAccount(accountBankEntity.getBankAccount());
+						transactionEntity.setBankId(accountBankEntity.getId());
+						transactionEntity.setContent(traceId + "." + dto.getContent());
+						transactionEntity.setAmount(Long.parseLong(dto.getAmount() + ""));
+						transactionEntity.setTime(time);
+						transactionEntity.setRefId(uuid.toString());
+						transactionEntity.setType(2);
+						transactionEntity.setStatus(1);
+						transactionEntity.setTraceId("");
+						transactionReceiveService.insertTransactionReceive(transactionEntity);
+						//
+						// insert notification
+						UUID notificationUUID = UUID.randomUUID();
+						NotificationEntity notiEntity = new NotificationEntity();
+						String prefix = "";
+						if (dto.getTransType().toUpperCase().equals("D")) {
+							prefix = "-";
+						} else {
+							prefix = "+";
+						}
+						String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
+								+ accountBankEntity.getBankAccount()
+								+ NotificationUtil.getNotiDescUpdateTransSuffix2()
+								+ prefix + nf.format(dto.getAmount())
+								+ NotificationUtil.getNotiDescUpdateTransSuffix4()
+								+ dto.getContent();
+						// String title = NotificationUtil.getNotiTitleNewTransaction();
+						notiEntity.setId(notificationUUID.toString());
+						notiEntity.setRead(false);
+						notiEntity.setMessage(message);
+						notiEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
+						notiEntity.setType(NotificationUtil.getNotiTypeNewTransaction());
+						notiEntity.setUserId(accountBankEntity.getUserId());
+						notiEntity.setData(transcationUUID.toString());
+						notificationService.insertNotification(notiEntity);
+						List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+						fcmTokens = fcmTokenService.getFcmTokensByUserId(accountBankEntity.getUserId());
+						Map<String, String> data = new HashMap<>();
+						data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+						data.put("notificationId", notificationUUID.toString());
+						data.put("transactionReceiveId", transcationUUID.toString());
+						data.put("bankAccount", accountBankEntity.getBankAccount());
+						data.put("bankName", bankTypeEntity.getBankName());
+						data.put("bankCode", bankTypeEntity.getBankCode());
+						data.put("bankId", accountBankEntity.getId());
+						data.put("branchName", "");
+						data.put("businessName", "");
+						data.put("content", dto.getContent());
+						data.put("amount", "" + dto.getAmount());
+						data.put("time", "" + time);
+						data.put("refId", "" + dto.getTransactionid());
+						data.put("status", "1");
+						data.put("traceId", "");
+						LocalDateTime currentDateTime3 = LocalDateTime.now();
+						long time3 = currentDateTime3.toEpochSecond(ZoneOffset.UTC);
+						logger.info("Push notification at: " + time3);
+						firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
+								NotificationUtil
+										.getNotiTitleUpdateTransaction(),
+								message);
+					}
 				}
 			} else {
 				logger.info("transaction-sync - traceId is empty. Receive transaction outside system");
+				// process here
 				AccountBankReceiveEntity accountBankEntity = accountBankService
 						.getAccountBankByBankAccount(dto.getBankaccount());
 				if (accountBankEntity != null) {
 					BankTypeEntity bankTypeEntity = bankTypeService
 							.getBankTypeById(accountBankEntity.getBankTypeId());
 					UUID transcationUUID = UUID.randomUUID();
-					long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
 					TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
 					transactionEntity.setId(transcationUUID.toString());
 					transactionEntity.setBankAccount(accountBankEntity.getBankAccount());
@@ -328,13 +406,24 @@ public class TransactionBankController {
 					data.put("refId", "" + dto.getTransactionid());
 					data.put("status", "1");
 					data.put("traceId", "");
+					LocalDateTime currentDateTime3 = LocalDateTime.now();
+					long time3 = currentDateTime3.toEpochSecond(ZoneOffset.UTC);
+					logger.info("Push notification at: " + time3);
 					firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
 							NotificationUtil
 									.getNotiTitleUpdateTransaction(),
 							message);
 				}
+
 			}
 		}
+	}
+
+	// getTransactionsByBranchId
+
+	private void insertNewTransaction() {
+		//
+
 	}
 
 	// get token bank product
@@ -403,7 +492,7 @@ public class TransactionBankController {
 			data.put("phoneNumber", dto.getPhoneNumber());
 			data.put("authenType", "SMS");
 			data.put("applicationType", dto.getApplicationType());
-			data.put("transType", "C");
+			data.put("transType", "DC");
 			UriComponents uriComponents = UriComponentsBuilder
 					.fromHttpUrl(EnvironmentUtil.getBankUrl()
 							+ "private/ms/push-mesages-partner/v1.0/bdsd/subscribe/request")
@@ -644,6 +733,20 @@ public class TransactionBankController {
 			}
 		} catch (Exception e) {
 			result = new TransactionResponseDTO(true, "005", "Unexpected error");
+		}
+		return result;
+	}
+
+	// check duplicate referenceNumber fromMB
+	boolean checkDuplicateReferenceNumber(String refNumber) {
+		boolean result = false;
+		try {
+			String check = transactionBankService.checkExistedReferenceNumber(refNumber);
+			if (check == null || check.isEmpty()) {
+				result = true;
+			}
+		} catch (Exception e) {
+			logger.error(e.toString());
 		}
 		return result;
 	}

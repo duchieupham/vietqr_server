@@ -54,4 +54,8 @@ public interface BusinessMemberRepository extends JpaRepository<BusinessMemberEn
 			+ "WHERE a.user_id = :userId "
 			+ "AND b.is_active=true", nativeQuery = true)
 	List<BusinessItemDTO> getBusinessItemByUserId(@Param(value = "userId") String userId);
+
+	@Query(value = "SELECT role FROM business_member WHERE user_id = :userId AND business_id = :businessId", nativeQuery = true)
+	Object getRoleFromBusiness(@Param(value = "userId") String userId, @Param(value = "businessId") String businessId);
+
 }

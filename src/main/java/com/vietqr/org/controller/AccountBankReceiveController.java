@@ -86,6 +86,7 @@ public class AccountBankReceiveController {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
+			// check existed if bank account is authenticated
 			String check = accountBankService.checkExistedBank(bankAccount, bankTypeId);
 			if (check == null || check.isEmpty()) {
 				result = new ResponseMessageDTO("SUCCESS", "");
@@ -235,7 +236,6 @@ public class AccountBankReceiveController {
 				result.setNationalId(accountBankEntity.getNationalId());
 				result.setQrCode(qr);
 				result.setPhoneAuthenticated(accountBankEntity.getPhoneAuthenticated());
-
 				List<String> branchIds = new ArrayList<>();
 				branchIds = branchInformationService.getBranchIdsByBankId(bankId);
 				// get list branch linked
@@ -264,6 +264,7 @@ public class AccountBankReceiveController {
 						businessBankDTO.setBusinessId(business.getId());
 						businessBankDTO.setBusinessName(business.getName());
 						businessBankDTO.setImgId(business.getImgId());
+						businessBankDTO.setCoverImgId(business.getCoverImgId());
 						List<BranchBankDetailDTO> branchBanks = new ArrayList<>();
 						if (branchEntities != null && !branchEntities.isEmpty()) {
 							for (BranchInformationEntity branch : branchEntities) {
@@ -271,7 +272,8 @@ public class AccountBankReceiveController {
 									BranchBankDetailDTO branchBank = new BranchBankDetailDTO();
 									branchBank.setBranchId(branch.getId());
 									branchBank.setBranchName(branch.getName());
-
+									branchBank.setCode(branch.getCode());
+									branchBank.setAddress(branch.getAddress());
 									branchBanks.add(branchBank);
 								}
 							}

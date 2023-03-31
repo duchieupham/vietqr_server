@@ -42,4 +42,5 @@ public class BusinessInformationServiceImpl implements BusinessInformationServic
 	public BusinessCounterDTO getBusinessCounter(String businessId) {
 		return repo.getBusinessCounter(businessId);
 	}
+
 }

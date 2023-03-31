@@ -24,4 +24,6 @@ public interface BusinessMemberService {
 	public List<BusinessChoiceDTO> getBusinessChoiceByUserId(String userId);
 
 	public List<BusinessItemDTO> getBusinessItemByUserId(String userId);
+
+	public int getRoleFromBusiness(String userId, String businessId);
 }

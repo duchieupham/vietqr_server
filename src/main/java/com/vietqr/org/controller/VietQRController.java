@@ -220,6 +220,7 @@ public class VietQRController {
 		HttpStatus httpStatus = null;
 		UUID transcationUUID = UUID.randomUUID();
 		String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
+		System.out.println("BRANCH ID: " + dto.getBranchId());
 		try {
 			AccountBankReceiveEntity accountBankEntity = accountBankService.getAccountBankById(dto.getBankId());
 			if (accountBankEntity != null) {
@@ -283,7 +284,10 @@ public class VietQRController {
 					transactionBranchEntity.setId(transactionBranchUUID.toString());
 					transactionBranchEntity.setTransactionReceiveId(transcationUUID.toString());
 					transactionBranchEntity.setBranchId(dto.getBranchId());
+
 					transactionBranchEntity.setBusinessId(dto.getBusinessId());
+					System.out.println("branchId: " + dto.getBranchId());
+					System.out.println("branchId after set: " + transactionBranchEntity.getBranchId());
 					transactionReceiveBranchService.insertTransactionReceiveBranch(transactionBranchEntity);
 					// find userIds into business_member and branch_member
 					List<String> userIds = branchMemberService

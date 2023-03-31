@@ -1,5 +1,7 @@
 package com.vietqr.org.service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -98,7 +100,9 @@ public class FirebaseMessagingService {
 					fcmDTO.setMessage(message);
 					fcmDTO.setToken(fcmToken.getToken());
 					sendPushNotificationWithData(data, fcmDTO);
-					logger.info("Send notification to device " + fcmToken.getToken());
+					LocalDateTime currentDateTime = LocalDateTime.now();
+					long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+					logger.info("Send notification to device " + fcmToken.getToken() + " at: " + time);
 				} catch (Exception e) {
 					System.out.println("Error at sendUsersNotificationWithData" + e.toString());
 					logger.error(

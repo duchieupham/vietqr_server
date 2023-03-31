@@ -12,13 +12,13 @@ public class BusinessItemResponseDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String businessId;
-    private String code;
+    // private String code;
     private int role;
     private String imgId;
     private String coverImgId;
     private String name;
-    private String address;
-    private String taxCode;
+    // private String address;
+    // private String taxCode;
     private List<TransactionRelatedDTO> transactions;
     private int totalMember;
     private int totalBranch;
@@ -27,17 +27,21 @@ public class BusinessItemResponseDTO implements Serializable {
         super();
     }
 
-    public BusinessItemResponseDTO(String businessId, String code, int role, String imgId, String coverImgId,
-            String name, String address, String taxCode, List<TransactionRelatedDTO> transactions, int totalMember,
+    public BusinessItemResponseDTO(String businessId,
+            // String code,
+            int role, String imgId, String coverImgId,
+            String name,
+            // String address, String taxCode,
+            List<TransactionRelatedDTO> transactions, int totalMember,
             int totalBranch) {
         this.businessId = businessId;
-        this.code = code;
+        // this.code = code;
         this.role = role;
         this.imgId = imgId;
         this.coverImgId = coverImgId;
         this.name = name;
-        this.address = address;
-        this.taxCode = taxCode;
+        // this.address = address;
+        // this.taxCode = taxCode;
         this.transactions = transactions;
         this.totalMember = totalMember;
         this.totalBranch = totalBranch;
@@ -51,13 +55,13 @@ public class BusinessItemResponseDTO implements Serializable {
         this.businessId = businessId;
     }
 
-    public String getCode() {
-        return code;
-    }
+    // public String getCode() {
+    // return code;
+    // }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
+    // public void setCode(String code) {
+    // this.code = code;
+    // }
 
     public int getRole() {
         return role;
@@ -91,21 +95,21 @@ public class BusinessItemResponseDTO implements Serializable {
         this.name = name;
     }
 
-    public String getAddress() {
-        return address;
-    }
+    // public String getAddress() {
+    // return address;
+    // }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
+    // public void setAddress(String address) {
+    // this.address = address;
+    // }
 
-    public String getTaxCode() {
-        return taxCode;
-    }
+    // public String getTaxCode() {
+    // return taxCode;
+    // }
 
-    public void setTaxCode(String taxCode) {
-        this.taxCode = taxCode;
-    }
+    // public void setTaxCode(String taxCode) {
+    // this.taxCode = taxCode;
+    // }
 
     public List<TransactionRelatedDTO> getTransactions() {
         return transactions;

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import com.vietqr.org.entity.BranchInformationEntity;
 import com.vietqr.org.dto.BranchChoiceDTO;
+import com.vietqr.org.dto.BranchFilterResponseDTO;
 
 @Repository
 public interface BranchInformationRepository extends JpaRepository<BranchInformationEntity, Long> {
@@ -51,4 +52,20 @@ public interface BranchInformationRepository extends JpaRepository<BranchInforma
                         + "FROM bank_receive_branch "
                         + "WHERE bank_id = :bankId", nativeQuery = true)
         List<String> getBranchIdsByBankId(@Param(value = "bankId") String bankId);
+
+        @Query(value = "SELECT id as branchId, name as branchName "
+                        + "FROM branch_information "
+                        + "WHERE business_id = :businessId", nativeQuery = true)
+        List<BranchFilterResponseDTO> getBranchFilters(@Param(value = "businessId") String businessId);
+
+        @Query(value = "SELECT id FROM branch_information WHERE business_id = :businessId", nativeQuery = true)
+        List<String> getBranchIdsByBusinessId(@Param(value = "businessId") String businessId);
+
+        @Query(value = "SELECT a.branch_id as branchId, b.name as branchName "
+                        + "FROM branch_member a "
+                        + "INNER JOIN branch_information b ON a.branch_id = b.id "
+                        + "WHERE a.user_id = :userId AND a.role = :role "
+                        + "AND b.business_id = :businessId", nativeQuery = true)
+        List<BranchFilterResponseDTO> getBranchFilterByUserIdAndRole(@Param(value = "userId") String userId,
+                        @Param(value = "role") int role, @Param(value = "businessId") String businessId);
 }

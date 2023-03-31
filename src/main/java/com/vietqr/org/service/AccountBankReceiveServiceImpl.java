@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.vietqr.org.dto.BusinessBankDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.repository.AccountBankReceiveRepository;
 
@@ -47,6 +48,11 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
 	@Override
 	public AccountBankReceiveEntity getAccountBankByBankAccountAndBankTypeId(String bankAccount, String bankTypeId) {
 		return accountBankRepo.getAccountBankByBankAccountAndBankTypeId(bankAccount, bankTypeId);
+	}
+
+	@Override
+	public List<BusinessBankDTO> getBankByBranchId(String branchId) {
+		return accountBankRepo.getBankByBranchId(branchId);
 	}
 
 }

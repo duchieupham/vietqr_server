@@ -49,4 +49,5 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "WHERE bank_id = :bankId "
                         + "ORDER BY time DESC LIMIT 5", nativeQuery = true)
         List<TransactionReceiveEntity> getRelatedTransactionByBankId(@Param(value = "bankId") String bankId);
+
 }
