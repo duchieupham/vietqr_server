@@ -13,5 +13,7 @@ public interface BankReceiveBranchService {
 
     public void deleteBankReceiveBranch(String id);
 
+    public void deleteBankReceiveBranchByBankId(String bankId);
+
     public List<AccountBankReceivePersonalDTO> getBankReceiveBranchs(String branchId);
 }

@@ -36,4 +36,8 @@ public interface BankReceiveBranchRepository extends JpaRepository<BankReceiveBr
     @Query(value = "DELETE FROM bank_receive_branch WHERE id = :id", nativeQuery = true)
     void deleteBankReceiveBranch(@Param(value = "id") String id);
 
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM bank_receive_branch WHERE bank_id = :bankId", nativeQuery = true)
+    void deleteBankReceiveBranchByBankId(@Param(value = "bankId") String id);
 }

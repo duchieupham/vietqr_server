@@ -25,4 +25,9 @@ public class AccountBankReceivePersonalServiceImpl implements AccountBankReceive
         return repo.getPersonalBankReceive(userId);
     }
 
+    @Override
+    public void deleteBankReceivePersonalByBankId(String bankId) {
+        repo.deleteBankReceivePersonalByBankId(bankId);
+    }
+
 }

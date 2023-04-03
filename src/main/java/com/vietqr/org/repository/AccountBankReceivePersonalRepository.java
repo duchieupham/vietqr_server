@@ -2,7 +2,10 @@ package com.vietqr.org.repository;
 
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -21,5 +24,10 @@ public interface AccountBankReceivePersonalRepository extends JpaRepository<Bank
             + "ON b.bank_type_id = c.id "
             + "WHERE a.user_id = :userId", nativeQuery = true)
     List<AccountBankReceivePersonalDTO> getPersonalBankReceive(@Param(value = "userId") String userId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM bank_receive_personal WHERE bank_id = :bankId", nativeQuery = true)
+    void deleteBankReceivePersonalByBankId(@Param(value = "bankId") String id);
 
 }

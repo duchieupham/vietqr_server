@@ -25,7 +25,7 @@ public interface TransactionReceiveBranchRepository extends JpaRepository<Transa
         TransactionReceiveBranchEntity getTransactionBranchByTransactionId(
                         @Param(value = "transactionId") String transactionId);
 
-        @Query(value = "SELECT a.id as transactionId, a.amount, a.bank_account as bankAccount, a.content, a.time, a.status, a.type "
+        @Query(value = "SELECT a.id as transactionId, a.amount, a.bank_account as bankAccount, a.content, a.time, a.status, a.type, a.trans_type as transType "
                         + "FROM transaction_receive a "
                         + "INNER JOIN transaction_receive_branch b "
                         + "ON a.id = b.transaction_receive_id "
@@ -34,7 +34,7 @@ public interface TransactionReceiveBranchRepository extends JpaRepository<Transa
         List<TransactionRelatedDTO> getTransactionsByBranchId(@Param(value = "branchId") String branchId,
                         @Param(value = "offset") int offset);
 
-        @Query(value = "SELECT a.id as transactionId, a.amount, a.bank_account as bankAccount, a.content, a.time, a.status, a.type "
+        @Query(value = "SELECT a.id as transactionId, a.amount, a.bank_account as bankAccount, a.content, a.time, a.status, a.type, a.trans_type as transType "
                         + "FROM transaction_receive a "
                         + "INNER JOIN transaction_receive_branch b "
                         + "ON a.id = b.transaction_receive_id "

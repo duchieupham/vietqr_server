@@ -14,18 +14,20 @@ public class VietQRCreateCustomerDTO implements Serializable {
     private String content;
     private String branchCode;
     private String bankCode;
+    private String userBankName;
 
     public VietQRCreateCustomerDTO() {
         super();
     }
 
     public VietQRCreateCustomerDTO(String bankAccount, Long amount, String content, String branchCode,
-            String bankCode) {
+            String bankCode, String userBankName) {
         this.bankAccount = bankAccount;
         this.amount = amount;
         this.content = content;
         this.branchCode = branchCode;
         this.bankCode = bankCode;
+        this.userBankName = userBankName;
     }
 
     public String getBankAccount() {
@@ -66,6 +68,14 @@ public class VietQRCreateCustomerDTO implements Serializable {
 
     public void setBankCode(String bankCode) {
         this.bankCode = bankCode;
+    }
+
+    public String getUserBankName() {
+        return userBankName;
+    }
+
+    public void setUserBankName(String userBankName) {
+        this.userBankName = userBankName;
     }
 
 }

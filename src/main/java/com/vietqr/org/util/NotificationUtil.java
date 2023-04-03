@@ -14,7 +14,7 @@ public class NotificationUtil {
 	private static final String NOTI_TITLE_LOGIN_WARNING = "Đăng nhập vào thiết bị mới";
 	private static final String NOTI_TITLE_NEW_MEMBER = "Thành viên mới";
 	private static final String NOTI_TITLE_NEW_TRANSACTION = "Giao dịch mới";
-	private static final String NOTI_TITLE_UPDATE_TRANSACTION = "Giao dịch thành công";
+	private static final String NOTI_TITLE_UPDATE_TRANSACTION = "Biến động số dư";
 
 	// Description
 	private static final String NOTI_DESC_LOGIN_WARNING_PREFIX = "Chúng tôi nhận thấy có lượt đăng nhập từ thiết bị ";

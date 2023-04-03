@@ -1,12 +1,14 @@
 package com.vietqr.org.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.text.NumberFormat;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.validation.Valid;
 
@@ -194,8 +196,31 @@ public class VietQRController {
 						result = vietQRDTO;
 						httpStatus = HttpStatus.OK;
 					} else {
-						result = new ResponseMessageDTO("FAILED", "E25");
-						httpStatus = HttpStatus.BAD_REQUEST;
+						// get cai value
+						BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(bankTypeId);
+						String caiValue = caiBankService.getCaiValue(bankTypeId);
+						// generate VietQRGenerateDTO
+						VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+						vietQRGenerateDTO.setCaiValue(caiValue);
+						vietQRGenerateDTO.setAmount(dto.getAmount() + "");
+						vietQRGenerateDTO.setContent(traceId + "." + dto.getContent());
+						vietQRGenerateDTO.setBankAccount(dto.getBankAccount());
+						String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+						//
+						// generate VietQRDTO
+						VietQRDTO vietQRDTO = new VietQRDTO();
+						vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
+						vietQRDTO.setBankName(bankTypeEntity.getBankName());
+						vietQRDTO.setBankAccount(dto.getBankAccount());
+						vietQRDTO.setUserBankName(dto.getUserBankName().toUpperCase());
+						vietQRDTO.setAmount(dto.getAmount() + "");
+						vietQRDTO.setContent(traceId + "." + dto.getContent());
+						vietQRDTO.setQrCode(qr);
+						vietQRDTO.setImgId(bankTypeEntity.getImgId());
+						result = vietQRDTO;
+						httpStatus = HttpStatus.OK;
+						// result = new ResponseMessageDTO("FAILED", "E25");
+						// httpStatus = HttpStatus.BAD_REQUEST;
 					}
 				} else {
 					result = new ResponseMessageDTO("FAILED", "E24");
@@ -209,6 +234,8 @@ public class VietQRController {
 			//
 		} catch (Exception e) {
 			logger.error(e.toString());
+			System.out.println(e.toString());
+			result = new ResponseMessageDTO("FAILED", "Unexpected Error");
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(result, httpStatus);
@@ -276,6 +303,7 @@ public class VietQRController {
 				transactionEntity.setType(0);
 				transactionEntity.setStatus(0);
 				transactionEntity.setTraceId(traceId);
+				transactionEntity.setTransType("C");
 				transactionReceiveService.insertTransactionReceive(transactionEntity);
 				// insert transaction branch if existing branchId and businessId. Else just do
 				// not map.
@@ -284,7 +312,6 @@ public class VietQRController {
 					transactionBranchEntity.setId(transactionBranchUUID.toString());
 					transactionBranchEntity.setTransactionReceiveId(transcationUUID.toString());
 					transactionBranchEntity.setBranchId(dto.getBranchId());
-
 					transactionBranchEntity.setBusinessId(dto.getBusinessId());
 					System.out.println("branchId: " + dto.getBranchId());
 					System.out.println("branchId after set: " + transactionBranchEntity.getBranchId());
@@ -306,6 +333,46 @@ public class VietQRController {
 									+ nf.format(Double.parseDouble(dto.getAmount()))
 									+ NotificationUtil
 											.getNotiDescNewTransSuffix2();
+
+							// push notification
+							List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+							fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
+							Map<String, String> data = new HashMap<>();
+							data.put("notificationType", NotificationUtil.getNotiTypeNewTransaction());
+							data.put("notificationId", notificationUUID.toString());
+							data.put("bankCode", result.getBankCode());
+							data.put("bankName", result.getBankName());
+							data.put("bankAccount", result.getBankAccount());
+							data.put("userBankName", result.getUserBankName());
+							data.put("amount", result.getAmount());
+							data.put("content", result.getContent());
+							data.put("qrCode", result.getQrCode());
+							data.put("imgId", result.getImgId());
+							firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
+									NotificationUtil
+											.getNotiTitleNewTransaction(),
+									message);
+
+							// if (fcmTokens != null && !fcmTokens.isEmpty(
+							// or (F
+							// ry {
+							// FcmRequestDTO fcmDTO = new FcmRequestDTO();
+							// fcmDTO.setTitle(Notificatio
+							// fcmDTO.setMessage(message);
+							// fcmDTO.setToken(fcmToken.getToken());
+							// firebaseMessagingService.sendPushNotificationToToken(fcmDTO);
+							// logger.info("Send noti
+							// catch (Exception e) {
+							// System.out.println("Error at send noti" + e.toString());
+							// logger.error("Er
+							// (e.toStri
+							// ontains(
+							// "The registration token is not a valid FCM regist
+							//
+
+							//
+							// }
+							//
 							// String title = NotificationUtil.getNotiTitleNewTransaction();
 							notiEntity.setId(notificationUUID.toString());
 							notiEntity.setRead(false);
@@ -315,31 +382,8 @@ public class VietQRController {
 							notiEntity.setUserId(userId);
 							notiEntity.setData(transcationUUID.toString());
 							notificationService.insertNotification(notiEntity);
-							// push notification
-							List<FcmTokenEntity> fcmTokens = new ArrayList<>();
-							fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
-							if (fcmTokens != null && !fcmTokens.isEmpty()) {
-								for (FcmTokenEntity fcmToken : fcmTokens) {
-									try {
-										FcmRequestDTO fcmDTO = new FcmRequestDTO();
-										fcmDTO.setTitle(NotificationUtil.getNotiTitleNewTransaction());
-										fcmDTO.setMessage(message);
-										fcmDTO.setToken(fcmToken.getToken());
-										firebaseMessagingService.sendPushNotificationToToken(fcmDTO);
-										logger.info("Send notification to device " + fcmToken.getToken());
-									} catch (Exception e) {
-										System.out.println("Error at send noti" + e.toString());
-										logger.error("Error when Send Notification using FCM " + e.toString());
-										if (e.toString()
-												.contains(
-														"The registration token is not a valid FCM registration token")) {
-											fcmTokenService.deleteFcmToken(fcmToken.getToken());
-										}
-
-									}
-								}
-							}
 						}
+
 					}
 				} else {
 					// insert notification
@@ -350,7 +394,47 @@ public class VietQRController {
 							+ nf.format(Double.parseDouble(dto.getAmount()))
 							+ NotificationUtil
 									.getNotiDescNewTransSuffix2();
-					// String title = NotificationUtil.getNotiTitleNewTransaction();
+
+					// push notification
+					List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+					fcmTokens = fcmTokenService.getFcmTokensByUserId(dto.getUserId());
+					Map<String, String> data = new HashMap<>();
+					data.put("notificationType", NotificationUtil.getNotiTypeNewTransaction());
+					data.put("notificationId", notificationUUID.toString());
+					data.put("bankCode", result.getBankCode());
+					data.put("bankName", result.getBankName());
+					data.put("bankAccount", result.getBankAccount());
+					data.put("userBankName", result.getUserBankName());
+					data.put("amount", result.getAmount());
+					data.put("content", result.getContent());
+					data.put("qrCode", result.getQrCode());
+					data.put("imgId", result.getImgId());
+					firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
+							NotificationUtil
+									.getNotiTitleNewTransaction(),
+							message);
+					// if (fcmTokens != null && !fcmTokens.isEmpty()) {
+					// for (FcmTokenEntity fcmToken : fcmTokens) {
+					// try {
+					// FcmRequestDTO fcmDTO = new FcmRequestDTO();
+					// fcmDTO.setTitle(NotificationUtil.getNotiTitleNewTransaction());
+					// fcmDTO.setMessage(message);
+					// fcmDTO.setToken(fcmToken.getToken());
+					// firebaseMessagingService.sendPushNotificationToToken(fcmDTO);
+					// logger.info("Send notification to device " + fcmToken.getToken());
+					// } catch (Exception e) {
+					// System.out.println("Error at send noti" + e.toString());
+					// logger.error("Error when Send Notification using FCM " + e.toString());
+					// if (e.toString()
+					// .contains(
+					// "The registration token is not a valid FCM registration token")) {
+					// fcmTokenService.deleteFcmToken(fcmToken.getToken());
+					// }
+
+					// }
+					// }
+					// }
+
 					notiEntity.setId(notificationUUID.toString());
 					notiEntity.setRead(false);
 					notiEntity.setMessage(message);
@@ -359,34 +443,9 @@ public class VietQRController {
 					notiEntity.setUserId(dto.getUserId());
 					notiEntity.setData(transcationUUID.toString());
 					notificationService.insertNotification(notiEntity);
-					// push notification
-					List<FcmTokenEntity> fcmTokens = new ArrayList<>();
-					fcmTokens = fcmTokenService.getFcmTokensByUserId(dto.getUserId());
-					if (fcmTokens != null && !fcmTokens.isEmpty()) {
-						for (FcmTokenEntity fcmToken : fcmTokens) {
-							try {
-								FcmRequestDTO fcmDTO = new FcmRequestDTO();
-								fcmDTO.setTitle(NotificationUtil.getNotiTitleNewTransaction());
-								fcmDTO.setMessage(message);
-								fcmDTO.setToken(fcmToken.getToken());
-								firebaseMessagingService.sendPushNotificationToToken(fcmDTO);
-								logger.info("Send notification to device " + fcmToken.getToken());
-							} catch (Exception e) {
-								System.out.println("Error at send noti" + e.toString());
-								logger.error("Error when Send Notification using FCM " + e.toString());
-								if (e.toString()
-										.contains(
-												"The registration token is not a valid FCM registration token")) {
-									fcmTokenService.deleteFcmToken(fcmToken.getToken());
-								}
-
-							}
-						}
-					}
 				}
 			}
 		}
-
 	}
 
 	@PostMapping("qr/generate-list")

@@ -16,6 +16,8 @@ public class AccountBankReceiveDetailDTO implements Serializable {
     private String bankCode;
     private String bankName;
     private String imgId;
+    // userId who create bank account
+    private String userId;
     private int type;
     private boolean isAuthenticated;
     private String nationalId;
@@ -29,7 +31,7 @@ public class AccountBankReceiveDetailDTO implements Serializable {
     }
 
     public AccountBankReceiveDetailDTO(String id, String bankAccount, String userBankName, String bankCode,
-            String bankName, String imgId, int type, boolean isAuthenticated, String nationalId,
+            String bankName, String imgId, String userId, int type, boolean isAuthenticated, String nationalId,
             String phoneAuthenticated, String qrCode, List<BusinessBankDetailDTO> businessDetails,
             List<TransactionBankListDTO> transactions) {
         this.id = id;
@@ -39,6 +41,7 @@ public class AccountBankReceiveDetailDTO implements Serializable {
         this.bankName = bankName;
         this.imgId = imgId;
         this.type = type;
+        this.userId = userId;
         this.isAuthenticated = isAuthenticated;
         this.nationalId = nationalId;
         this.qrCode = qrCode;
@@ -101,6 +104,14 @@ public class AccountBankReceiveDetailDTO implements Serializable {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public boolean isAuthenticated() {
@@ -288,13 +299,14 @@ public class AccountBankReceiveDetailDTO implements Serializable {
         private int status;
         private long time;
         private int type;
+        private String transType;
 
         public TransactionBankListDTO() {
             super();
         }
 
         public TransactionBankListDTO(String transactionId, String bankAccount, String bankId, String amount,
-                String content, int status, long time, int type) {
+                String content, int status, long time, int type, String transType) {
             this.transactionId = transactionId;
             this.bankAccount = bankAccount;
             this.bankId = bankId;
@@ -303,6 +315,7 @@ public class AccountBankReceiveDetailDTO implements Serializable {
             this.status = status;
             this.time = time;
             this.type = type;
+            this.transType = transType;
         }
 
         public String getTransactionId() {
@@ -367,6 +380,14 @@ public class AccountBankReceiveDetailDTO implements Serializable {
 
         public void setType(int type) {
             this.type = type;
+        }
+
+        public String getTransType() {
+            return transType;
+        }
+
+        public void setTransType(String transType) {
+            this.transType = transType;
         }
 
     }

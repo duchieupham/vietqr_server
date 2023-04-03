@@ -29,4 +29,9 @@ public class BankReceiveBranchServiceImpl implements BankReceiveBranchService {
     public List<AccountBankReceivePersonalDTO> getBankReceiveBranchs(String branchId) {
         return repo.getBankReceiveBranchs(branchId);
     }
+
+    @Override
+    public void deleteBankReceiveBranchByBankId(String bankId) {
+        repo.deleteBankReceiveBranchByBankId(bankId);
+    }
 }
