@@ -28,11 +28,16 @@ public interface BankReceiveBranchRepository extends JpaRepository<BankReceiveBr
             + "INNER JOIN business_information e "
             + "ON d.business_id = e.id "
             + "WHERE a.branch_id = :branchId", nativeQuery = true)
-    List<AccountBankReceivePersonalDTO> getBankReceiveBranchs(@Param(value = "branchId") String businessId);
+    List<AccountBankReceivePersonalDTO> getBankReceiveBranchs(@Param(value = "branchId") String branchId);
 
     // delete
     @Transactional
     @Modifying
     @Query(value = "DELETE FROM bank_receive_branch WHERE id = :id", nativeQuery = true)
     void deleteBankReceiveBranch(@Param(value = "id") String id);
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM bank_receive_branch WHERE bank_id = :bankId", nativeQuery = true)
+    void deleteBankReceiveBranchByBankId(@Param(value = "bankId") String id);
 }

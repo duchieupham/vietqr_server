@@ -14,4 +14,5 @@ public interface AccountBankReceivePersonalService {
 
     public List<AccountBankReceivePersonalDTO> getBankReceivePersonals(String userId);
 
+    public void deleteBankReceivePersonalByBankId(String bankId);
 }

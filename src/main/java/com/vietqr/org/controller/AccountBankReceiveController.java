@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.google.api.Http;
 import com.vietqr.org.dto.AccountBankReceiveDTO;
 import com.vietqr.org.dto.AccountBankReceiveDetailDTO;
 import com.vietqr.org.dto.AccountBankResponseDTO;
@@ -86,6 +88,7 @@ public class AccountBankReceiveController {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
+			// check existed if bank account is authenticated
 			String check = accountBankService.checkExistedBank(bankAccount, bankTypeId);
 			if (check == null || check.isEmpty()) {
 				result = new ResponseMessageDTO("SUCCESS", "");
@@ -231,11 +234,11 @@ public class AccountBankReceiveController {
 				result.setBankName(bankTypeEntity.getBankName());
 				result.setImgId(bankTypeEntity.getImgId());
 				result.setType(accountBankEntity.getType());
+				result.setUserId(accountBankEntity.getUserId());
 				result.setAuthenticated(accountBankEntity.isAuthenticated());
 				result.setNationalId(accountBankEntity.getNationalId());
 				result.setQrCode(qr);
 				result.setPhoneAuthenticated(accountBankEntity.getPhoneAuthenticated());
-
 				List<String> branchIds = new ArrayList<>();
 				branchIds = branchInformationService.getBranchIdsByBankId(bankId);
 				// get list branch linked
@@ -264,6 +267,7 @@ public class AccountBankReceiveController {
 						businessBankDTO.setBusinessId(business.getId());
 						businessBankDTO.setBusinessName(business.getName());
 						businessBankDTO.setImgId(business.getImgId());
+						businessBankDTO.setCoverImgId(business.getCoverImgId());
 						List<BranchBankDetailDTO> branchBanks = new ArrayList<>();
 						if (branchEntities != null && !branchEntities.isEmpty()) {
 							for (BranchInformationEntity branch : branchEntities) {
@@ -271,7 +275,8 @@ public class AccountBankReceiveController {
 									BranchBankDetailDTO branchBank = new BranchBankDetailDTO();
 									branchBank.setBranchId(branch.getId());
 									branchBank.setBranchName(branch.getName());
-
+									branchBank.setCode(branch.getCode());
+									branchBank.setAddress(branch.getAddress());
 									branchBanks.add(branchBank);
 								}
 							}
@@ -296,6 +301,7 @@ public class AccountBankReceiveController {
 						transaction.setStatus(transactionEntity.getStatus());
 						transaction.setTime(transactionEntity.getTime());
 						transaction.setType(transactionEntity.getType());
+						transaction.setTransType(transactionEntity.getTransType());
 						transactions.add(transaction);
 					}
 				}
@@ -403,15 +409,24 @@ public class AccountBankReceiveController {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
-			// if(dto.getRole() == 1) {
-			// accountBankService.deleteAccountBank(dto.getBankId());
-			// bankMemberService.deleteAllMemberByBankId(dto.getBankId());
-			// }else {
-			// bankMemberService.removeMemberFromBank(dto.getBankId(), dto.getUserId());
-			// }
-
-			result = new ResponseMessageDTO("SUCCESS", "");
-			httpStatus = HttpStatus.OK;
+			if (dto.isAuthenticated() == true) {
+				result = new ResponseMessageDTO("CHECK", "C04");
+				httpStatus = HttpStatus.OK;
+			} else {
+				// 1.check type = 0 => personal; type = 1 => business
+				// 2.a remove bank_receive_branch by bank_id
+				// 2.b remvoe bank_receive_personal by bank_id
+				// 3. remove bank_receive
+				//
+				if (dto.getType() == 0) {
+					bankReceivePersonalService.deleteBankReceivePersonalByBankId(dto.getBankId());
+				} else if (dto.getType() == 1) {
+					bankReceiveBranchService.deleteBankReceiveBranchByBankId(dto.getBankId());
+				}
+				accountBankService.deleteAccountBank(dto.getBankId());
+				result = new ResponseMessageDTO("SUCCESS", "");
+				httpStatus = HttpStatus.OK;
+			}
 		} catch (Exception e) {
 			System.out.println("Error at deleteAccountBank: " + e.toString());
 			result = new ResponseMessageDTO("FAILED", "Unexpected Error.");
@@ -420,21 +435,4 @@ public class AccountBankReceiveController {
 		return new ResponseEntity<>(result, httpStatus);
 	}
 
-	// @DeleteMapping("account-bank/remove")
-	// public ResponseEntity<ResponseMessageDTO> removeMemberFromBank(@Valid
-	// @RequestParam String bankId,
-	// @Valid @RequestParam String userId) {
-	// ResponseMessageDTO result = null;
-	// HttpStatus httpStatus = null;
-	// try {
-	// // bankMemberService.removeMemberFromBank(bankId, userId);
-	// result = new ResponseMessageDTO("SUCCESS", "");
-	// httpStatus = HttpStatus.OK;
-	// } catch (Exception e) {
-	// System.out.println("Error at deleteAccountBank: " + e.toString());
-	// result = new ResponseMessageDTO("FAILED", "Unexpected Error.");
-	// httpStatus = HttpStatus.BAD_REQUEST;
-	// }
-	// return new ResponseEntity<>(result, httpStatus);
-	// }
 }

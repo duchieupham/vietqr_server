@@ -14,4 +14,6 @@ public interface TransactionRelatedDTO {
     Integer getStatus();
 
     Integer getType();
+
+    String getTransType();
 }

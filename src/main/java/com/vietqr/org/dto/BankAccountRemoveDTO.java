@@ -2,7 +2,7 @@ package com.vietqr.org.dto;
 
 import java.io.Serializable;
 
-public class BankAccountRemoveDTO implements Serializable{
+public class BankAccountRemoveDTO implements Serializable {
 
 	/**
 	 *
@@ -10,18 +10,18 @@ public class BankAccountRemoveDTO implements Serializable{
 	private static final long serialVersionUID = 1L;
 
 	private String bankId;
-	private int role;
-	private String userId;
+	private int type;
+	private boolean authenticated;
 
 	public BankAccountRemoveDTO() {
 		super();
 	}
 
-	public BankAccountRemoveDTO(String bankId, int role, String userId) {
+	public BankAccountRemoveDTO(String bankId, int type, boolean authenticated) {
 		super();
 		this.bankId = bankId;
-		this.role = role;
-		this.userId = userId;
+		this.type = type;
+		this.authenticated = authenticated;
 	}
 
 	public String getBankId() {
@@ -32,20 +32,20 @@ public class BankAccountRemoveDTO implements Serializable{
 		this.bankId = bankId;
 	}
 
-	public int getRole() {
-		return role;
+	public boolean isAuthenticated() {
+		return authenticated;
 	}
 
-	public void setRole(int role) {
-		this.role = role;
+	public void setAuthenticated(boolean authenticated) {
+		this.authenticated = authenticated;
 	}
 
-	public String getUserId() {
-		return userId;
+	public int getType() {
+		return type;
 	}
 
-	public void setUserId(String userId) {
-		this.userId = userId;
+	public void setType(int type) {
+		this.type = type;
 	}
 
 }

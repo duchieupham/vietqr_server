@@ -28,7 +28,6 @@ public class VietQRCreateCustomerDTO implements Serializable {
         this.branchCode = branchCode;
         this.bankCode = bankCode;
         this.userBankName = userBankName;
-
     }
 
     public String getBankAccount() {

@@ -2,30 +2,40 @@ package com.vietqr.org.dto;
 
 import java.io.Serializable;
 
-public class MemberDeleteDTO implements Serializable{
+public class MemberDeleteDTO implements Serializable {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 1L;
-	
-	private String id;
+
+	private String userId;
+	private String businessId;
 
 	public MemberDeleteDTO() {
 		super();
 	}
 
-	public MemberDeleteDTO(String id) {
+	public MemberDeleteDTO(String userId, String businessId) {
 		super();
-		this.id = id;
+		this.userId = userId;
+		this.businessId = businessId;
 	}
 
-	public String getId() {
-		return id;
+	public String getUserId() {
+		return userId;
 	}
 
-	public void setId(String id) {
-		this.id = id;
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public String getBusinessId() {
+		return businessId;
+	}
+
+	public void setBusinessId(String businessId) {
+		this.businessId = businessId;
 	}
 
 }

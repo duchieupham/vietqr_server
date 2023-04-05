@@ -50,4 +50,19 @@ public interface BranchMemberRepository extends JpaRepository<BranchMemberEntity
                         + "WHERE branch_id = :branchId", nativeQuery = true)
         List<String> getUserIdsByBusinessIdAndBranchId(@Param(value = "businessId") String businessId,
                         @Param(value = "branchId") String branchId);
+
+        @Query(value = "SELECT COUNT(*) FROM branch_member  WHERE branch_id = :branchId", nativeQuery = true)
+        int getTotalMemberInBranch(@Param(value = "branchId") String branchId);
+
+        @Query(value = "SELECT a.id, c.id as userId, a.role, c.phone_no as phoneNo, b.first_name as firstName, b.middle_name as middleName, b.last_name as lastName, b.address, b.gender, b.birth_date as birthDate, b.email, b.img_id as imgId "
+                        + "FROM branch_member a "
+                        + "INNER JOIN account_information b "
+                        + "ON a.user_id = b.user_id "
+                        + "INNER JOIN account_login c "
+                        + "ON a.user_id = c.id "
+                        + "WHERE a.branch_id = :branchId AND a.role = 3", nativeQuery = true)
+        MemberDTO getManagerByBranchId(@Param(value = "branchId") String branchId);
+
+        @Query(value = "SELECT role FROM branch_member WHERE user_id = :userId AND branch_id = :branchId", nativeQuery = true)
+        int getRoleFromBranch(@Param(value = "userId") String userId, @Param(value = "branchId") String branchId);
 }

@@ -38,4 +38,6 @@ public interface BusinessInformationRepository extends JpaRepository<BusinessInf
 			+ "(SELECT COUNT(*) FROM branch_information WHERE business_id = :businessId) as totalBranch; ", nativeQuery = true)
 	BusinessCounterDTO getBusinessCounter(@Param(value = "businessId") String businessId);
 
+	// @Query(value = "", nativeQuery = true)
+
 }

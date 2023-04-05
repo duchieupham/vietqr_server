@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import javax.validation.Valid;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,18 +24,25 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.vietqr.org.dto.BusinessListItemDTO;
 import com.vietqr.org.dto.BusinessMemberInsertDTO;
+import com.vietqr.org.dto.BranchFilterInsertDTO;
+import com.vietqr.org.dto.BranchFilterResponseDTO;
+import com.vietqr.org.dto.BusinessBankDTO;
+import com.vietqr.org.dto.BusinessBranchDTO;
 import com.vietqr.org.dto.BusinessBranchInsertDTO;
 import com.vietqr.org.dto.BusinessInformationInsertDTO;
 import com.vietqr.org.dto.BusinessStatusDTO;
+import com.vietqr.org.dto.MemberDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.BusinessItemResponseDTO;
 import com.vietqr.org.dto.TransactionRelatedDTO;
 import com.vietqr.org.dto.BusinessItemDTO;
 import com.vietqr.org.dto.BusinessCounterDTO;
+import com.vietqr.org.dto.BusinessInformationDetailDTO;
 import com.vietqr.org.entity.BranchInformationEntity;
 import com.vietqr.org.entity.BusinessInformationEntity;
 import com.vietqr.org.entity.BusinessMemberEntity;
 import com.vietqr.org.entity.ImageEntity;
+import com.vietqr.org.service.AccountBankReceiveService;
 import com.vietqr.org.service.BranchInformationService;
 import com.vietqr.org.service.BusinessInformationService;
 import com.vietqr.org.service.BusinessMemberService;
@@ -46,6 +54,7 @@ import com.vietqr.org.util.RandomCodeUtil;
 @RestController
 @RequestMapping("/api")
 public class BusinessInformationController {
+	private static final Logger logger = Logger.getLogger(BusinessInformationController.class);
 
 	@Autowired
 	BusinessInformationService businessInfoService;
@@ -61,6 +70,9 @@ public class BusinessInformationController {
 
 	@Autowired
 	ImageService imageService;
+
+	@Autowired
+	AccountBankReceiveService accountBankReceiveService;
 
 	@Autowired
 	TransactionReceiveService transactionReceiveService;
@@ -163,6 +175,116 @@ public class BusinessInformationController {
 		return new ResponseEntity<>(result, httpStatus);
 	}
 
+	// get business detail
+	@GetMapping("business-information/detail/{businessId}/{userId}")
+	public ResponseEntity<BusinessInformationDetailDTO> getBusinessDetail(
+			@PathVariable("businessId") String businessId, @PathVariable("userId") String userId) {
+		BusinessInformationDetailDTO result = null;
+		HttpStatus httpStatus = null;
+		try {
+			BusinessInformationEntity bEntity = businessInfoService.getBusinessById(businessId);
+			if (bEntity != null) {
+				result = new BusinessInformationDetailDTO();
+				result.setId(bEntity.getId());
+				result.setName(bEntity.getName());
+				result.setAddress(bEntity.getAddress());
+				result.setCode(bEntity.getCode());
+				result.setImgId(bEntity.getImgId());
+				result.setCoverImgId(bEntity.getCoverImgId());
+				result.setTaxCode(bEntity.getTaxCode());
+				result.setActive(bEntity.isActive());
+				int role = 0;
+				int businessRole = businessMemberService.getRoleFromBusiness(userId,
+						businessId);
+				if (businessRole != 0) {
+					role = businessRole;
+				} else {
+					List<String> branchIds = branchInformationService.getBranchIdsByBusinessId(businessId);
+					if (branchIds != null && !branchIds.isEmpty()) {
+						for (String branchId : branchIds) {
+							int branchRole = branchMemberService.getRoleFromBranch(userId, branchId);
+							System.out.println("branchId: " + branchId + "- role: " + branchRole);
+							if (branchRole != 0) {
+								role = branchRole;
+								break;
+							}
+
+						}
+					}
+				}
+				result.setUserRole(role);
+				// get list manager
+				List<MemberDTO> managers = new ArrayList<>();
+				managers = businessMemberService.getBusinessMembersByBusinessId(businessId);
+				if (managers != null && !managers.isEmpty()) {
+					result.setManagers(managers);
+				}
+				// get list branch
+				List<BusinessBranchDTO> branchs = new ArrayList<>();
+				List<BranchInformationEntity> branchEntities = branchInformationService
+						.getListBranchByBusinessId(businessId);
+				if (branchEntities != null && !branchEntities.isEmpty()) {
+					for (BranchInformationEntity branchEntity : branchEntities) {
+						BusinessBranchDTO businessBranchDTO = new BusinessBranchDTO();
+						businessBranchDTO.setId(branchEntity.getId());
+						businessBranchDTO.setCode(branchEntity.getCode());
+						businessBranchDTO.setName(branchEntity.getName());
+						businessBranchDTO.setAddress(branchEntity.getAddress());
+						// set total member
+						int totalMemberBranch = branchMemberService.getTotalMemberInBranch(branchEntity.getId());
+						businessBranchDTO.setTotalMember(totalMemberBranch);
+						// set manager
+						MemberDTO manager = branchMemberService.getManagerByBranchId(branchEntity.getId());
+						businessBranchDTO.setManager(manager);
+						// set bankAccount linked
+						List<BusinessBankDTO> bank = accountBankReceiveService.getBankByBranchId(branchEntity.getId());
+						businessBranchDTO.setBanks(bank);
+						branchs.add(businessBranchDTO);
+					}
+				}
+				result.setBranchs(branchs);
+				// get list transaction
+				List<TransactionRelatedDTO> transactions = new ArrayList<>();
+				transactions = transactionReceiveService.getRelatedTransactionReceives(businessId);
+				result.setTransactions(transactions);
+				httpStatus = HttpStatus.OK;
+			} else {
+				httpStatus = HttpStatus.BAD_REQUEST;
+			}
+		} catch (Exception e) {
+			logger.error(e.toString());
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	// get list branch filter search by businessId, check is manager or not
+	@PostMapping("business-information/branch/filter")
+	public ResponseEntity<List<BranchFilterResponseDTO>> getBranchFilterList(
+			@Valid @RequestBody BranchFilterInsertDTO dto) {
+		List<BranchFilterResponseDTO> result = new ArrayList<>();
+		HttpStatus httpStatus = null;
+		try {
+			if (dto.getRole() == 5 || dto.getRole() == 1) {
+				// role = 5 && role = 1
+				result = branchInformationService.getBranchFilters(dto.getBusinessId());
+				httpStatus = HttpStatus.OK;
+			} else {
+				// find BranchFilterResponseDTO
+				result = branchInformationService.getBranchFilterByUserIdAndRole(dto.getUserId(), dto.getRole(),
+						dto.getBusinessId());
+				httpStatus = HttpStatus.OK;
+			}
+
+		} catch (Exception e) {
+			logger.error(e.toString());
+			System.out.println("Error: " + e.toString());
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+
+	}
+
 	// get business list dashboard
 	@GetMapping("business-informations/{userId}")
 	public ResponseEntity<List<BusinessItemResponseDTO>> getBusinessItems(@PathVariable("userId") String userId) {
@@ -177,13 +299,13 @@ public class BusinessInformationController {
 					BusinessItemResponseDTO dto = new BusinessItemResponseDTO();
 					BusinessCounterDTO counterDTO = businessInfoService.getBusinessCounter(item.getBusinessId());
 					dto.setBusinessId(item.getBusinessId());
-					dto.setCode(item.getCode());
+					// dto.setCode(item.getCode());
 					dto.setRole(item.getRole());
 					dto.setImgId(item.getImgId());
 					dto.setCoverImgId(item.getCoverImgId());
 					dto.setName(item.getName());
-					dto.setAddress(item.getAddress());
-					dto.setTaxCode(item.getTaxCode());
+					// dto.setAddress(item.getAddress());
+					// dto.setTaxCode(item.getTaxCode());
 					transactions = transactionReceiveService.getRelatedTransactionReceives(item.getBusinessId());
 					dto.setTransactions(transactions);
 					dto.setTotalMember(counterDTO.getTotalAdmin() + counterDTO.getTotalMember());
@@ -197,13 +319,13 @@ public class BusinessInformationController {
 					BusinessItemResponseDTO dto = new BusinessItemResponseDTO();
 					BusinessCounterDTO counterDTO = businessInfoService.getBusinessCounter(item.getBusinessId());
 					dto.setBusinessId(item.getBusinessId());
-					dto.setCode(item.getCode());
+					// dto.setCode(item.getCode());
 					dto.setRole(item.getRole());
 					dto.setImgId(item.getImgId());
 					dto.setCoverImgId(item.getCoverImgId());
 					dto.setName(item.getName());
-					dto.setAddress(item.getAddress());
-					dto.setTaxCode(item.getTaxCode());
+					// dto.setAddress(item.getAddress());
+					// dto.setTaxCode(item.getTaxCode());
 					transactions = transactionReceiveService.getRelatedTransactionReceives(item.getBusinessId());
 					dto.setTransactions(transactions);
 					dto.setTotalMember(counterDTO.getTotalAdmin() + counterDTO.getTotalMember());

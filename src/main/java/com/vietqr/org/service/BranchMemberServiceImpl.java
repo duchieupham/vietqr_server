@@ -45,4 +45,24 @@ public class BranchMemberServiceImpl implements BranchMemberService {
     public List<String> getUserIdsByBusinessIdAndBranchId(String businessId, String branchId) {
         return repo.getUserIdsByBusinessIdAndBranchId(businessId, branchId);
     }
+
+    @Override
+    public int getTotalMemberInBranch(String branchId) {
+        return repo.getTotalMemberInBranch(branchId);
+    }
+
+    @Override
+    public MemberDTO getManagerByBranchId(String branchId) {
+        return repo.getManagerByBranchId(branchId);
+    }
+
+    @Override
+    public int getRoleFromBranch(String userId, String branchId) {
+        int result = 0;
+        try {
+            result = Integer.parseInt(repo.getRoleFromBranch(userId, branchId) + "");
+        } catch (Exception e) {
+        }
+        return result;
+    }
 }

@@ -17,7 +17,7 @@ public interface MemberDTO {
 
 	String getAddress();
 
-	boolean getGender();
+	Integer getGender();
 
 	String getBirthDate();
 

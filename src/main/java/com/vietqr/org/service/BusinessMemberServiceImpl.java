@@ -47,4 +47,19 @@ public class BusinessMemberServiceImpl implements BusinessMemberService {
 	public List<BusinessItemDTO> getBusinessItemByUserId(String userId) {
 		return repo.getBusinessItemByUserId(userId);
 	}
+
+	@Override
+	public int getRoleFromBusiness(String userId, String businessId) {
+		int result = 0;
+		try {
+			result = Integer.parseInt(repo.getRoleFromBusiness(userId, businessId) + "");
+		} catch (Exception e) {
+		}
+		return result;
+	}
+
+	@Override
+	public void deleteBusinessMemberByUserIdAndBankId(String userId, String bankId) {
+		repo.deleteBusinessMemberByUserIdAndBankId(userId, bankId);
+	}
 }

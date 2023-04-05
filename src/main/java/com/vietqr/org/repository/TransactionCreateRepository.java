@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.vietqr.org.entity.TransactionCreateEntity;
 
 @Repository
-public interface TransactionCreateRepository extends JpaRepository<TransactionCreateEntity, Long>{
+public interface TransactionCreateRepository extends JpaRepository<TransactionCreateEntity, Long> {
 
 }

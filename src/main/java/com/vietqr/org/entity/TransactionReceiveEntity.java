@@ -50,12 +50,15 @@ public class TransactionReceiveEntity implements Serializable {
 	@Column(name = "traceId")
 	private String traceId;
 
+	@Column(name = "transType")
+	private String transType;
+
 	public TransactionReceiveEntity() {
 		super();
 	}
 
 	public TransactionReceiveEntity(String id, String bankAccount, String bankId, String content, long amount,
-			long time, String refId, int type, int status, String traceId) {
+			long time, String refId, int type, int status, String traceId, String transType) {
 		this.id = id;
 		this.bankAccount = bankAccount;
 		this.bankId = bankId;
@@ -66,6 +69,7 @@ public class TransactionReceiveEntity implements Serializable {
 		this.type = type;
 		this.status = status;
 		this.traceId = traceId;
+		this.transType = transType;
 	}
 
 	public String getId() {
@@ -146,6 +150,14 @@ public class TransactionReceiveEntity implements Serializable {
 
 	public void setTraceId(String traceId) {
 		this.traceId = traceId;
+	}
+
+	public String getTransType() {
+		return transType;
+	}
+
+	public void setTransType(String transType) {
+		this.transType = transType;
 	}
 
 }

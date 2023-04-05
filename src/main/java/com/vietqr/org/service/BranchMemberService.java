@@ -21,4 +21,10 @@ public interface BranchMemberService {
     public List<BusinessItemDTO> getBusinessItemByUserId(String userId);
 
     public List<String> getUserIdsByBusinessIdAndBranchId(String businessId, String branchId);
+
+    public int getTotalMemberInBranch(String branchId);
+
+    public MemberDTO getManagerByBranchId(String branchId);
+
+    public int getRoleFromBranch(String userId, String branchId);
 }
