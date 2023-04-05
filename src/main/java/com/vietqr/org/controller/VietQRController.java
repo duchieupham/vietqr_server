@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -47,6 +48,10 @@ import com.vietqr.org.service.NotificationService;
 import com.vietqr.org.service.FcmTokenService;
 import com.vietqr.org.service.FirebaseMessagingService;
 import com.vietqr.org.util.VietQRUtil;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+
 import com.vietqr.org.util.NotificationUtil;
 import com.vietqr.org.util.RandomCodeUtil;
 
@@ -156,10 +161,11 @@ public class VietQRController {
 	}
 
 	@PostMapping("qr/generate-customer")
-	public ResponseEntity<Object> generateQRCustomer(@Valid @RequestBody VietQRCreateCustomerDTO dto) {
+	public ResponseEntity<Object> generateQRCustomer(@Valid @RequestBody VietQRCreateCustomerDTO dto,
+			@RequestHeader("Authorization") String token) {
 		Object result = null;
 		HttpStatus httpStatus = null;
-		UUID transcationUUID = UUID.randomUUID();
+		// UUID transcationUUID = UUID.randomUUID();
 		String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
 		try {
 			if (dto.getContent().length() <= 50) {
@@ -191,11 +197,36 @@ public class VietQRController {
 						vietQRDTO.setContent(traceId + "." + dto.getContent());
 						vietQRDTO.setQrCode(qr);
 						vietQRDTO.setImgId(bankTypeEntity.getImgId());
+						vietQRDTO.setExisting(1);
 						result = vietQRDTO;
 						httpStatus = HttpStatus.OK;
 					} else {
-						result = new ResponseMessageDTO("FAILED", "E25");
-						httpStatus = HttpStatus.BAD_REQUEST;
+						// get cai value
+						BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(bankTypeId);
+						String caiValue = caiBankService.getCaiValue(bankTypeId);
+						// generate VietQRGenerateDTO
+						VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+						vietQRGenerateDTO.setCaiValue(caiValue);
+						vietQRGenerateDTO.setAmount(dto.getAmount() + "");
+						vietQRGenerateDTO.setContent(traceId + "." + dto.getContent());
+						vietQRGenerateDTO.setBankAccount(dto.getBankAccount());
+						String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+						//
+						// generate VietQRDTO
+						VietQRDTO vietQRDTO = new VietQRDTO();
+						vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
+						vietQRDTO.setBankName(bankTypeEntity.getBankName());
+						vietQRDTO.setBankAccount(dto.getBankAccount());
+						vietQRDTO.setUserBankName(dto.getUserBankName().toUpperCase());
+						vietQRDTO.setAmount(dto.getAmount() + "");
+						vietQRDTO.setContent(traceId + "." + dto.getContent());
+						vietQRDTO.setQrCode(qr);
+						vietQRDTO.setImgId(bankTypeEntity.getImgId());
+						vietQRDTO.setExisting(0);
+						result = vietQRDTO;
+						httpStatus = HttpStatus.OK;
+						// result = new ResponseMessageDTO("FAILED", "E25");
+						// httpStatus = HttpStatus.BAD_REQUEST;
 					}
 				} else {
 					result = new ResponseMessageDTO("FAILED", "E24");
@@ -205,13 +236,27 @@ public class VietQRController {
 				result = new ResponseMessageDTO("FAILED", "E26");
 				httpStatus = HttpStatus.BAD_REQUEST;
 			}
-
+			return new ResponseEntity<>(result, httpStatus);
 			//
 		} catch (Exception e) {
 			logger.error(e.toString());
+			System.out.println(e.toString());
+			result = new ResponseMessageDTO("FAILED", "Unexpected Error");
 			httpStatus = HttpStatus.BAD_REQUEST;
+			return new ResponseEntity<>(result, httpStatus);
+		} finally {
+			System.out.println(token);
+			String secretKey = "mySecretKey";
+			String jwtToken = token.substring(7); // remove "Bearer " from the beginning
+			Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(jwtToken).getBody();
+			String user = (String) claims.get("user");
+			if (user != null) {
+				System.out.println(user);
+			} else {
+				System.out.println("undetected user");
+			}
 		}
-		return new ResponseEntity<>(result, httpStatus);
+
 	}
 
 	@PostMapping("qr/generate")

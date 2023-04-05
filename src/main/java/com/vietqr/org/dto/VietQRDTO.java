@@ -2,7 +2,7 @@ package com.vietqr.org.dto;
 
 import java.io.Serializable;
 
-public class VietQRDTO  implements Serializable{
+public class VietQRDTO implements Serializable {
 
 	/**
 	 *
@@ -17,13 +17,14 @@ public class VietQRDTO  implements Serializable{
 	private String content;
 	private String qrCode;
 	private String imgId;
+	private int existing;
 
 	public VietQRDTO() {
 		super();
 	}
 
 	public VietQRDTO(String bankCode, String bankName, String bankAccount, String userBankName, String amount,
-			String content, String qrCode, String imgId) {
+			String content, String qrCode, String imgId, int existing) {
 		super();
 		this.bankCode = bankCode;
 		this.bankName = bankName;
@@ -33,6 +34,7 @@ public class VietQRDTO  implements Serializable{
 		this.content = content;
 		this.qrCode = qrCode;
 		this.imgId = imgId;
+		this.existing = existing;
 	}
 
 	public String getBankCode() {
@@ -99,5 +101,12 @@ public class VietQRDTO  implements Serializable{
 		this.imgId = imgId;
 	}
 
+	public int getExisting() {
+		return existing;
+	}
+
+	public void setExisting(int existing) {
+		this.existing = existing;
+	}
 
 }
