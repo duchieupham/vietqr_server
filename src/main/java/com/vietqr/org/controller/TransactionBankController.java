@@ -13,7 +13,6 @@ import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.Base64;
-import java.util.function.Function;
 
 import javax.validation.Valid;
 import org.springframework.web.client.HttpClientErrorException;
@@ -886,11 +885,11 @@ public class TransactionBankController {
 				}
 				UriComponents uriComponents = UriComponentsBuilder
 						.fromHttpUrl("http://" + entity.getIpAddress() + ":" + entity.getPort() + "/" + suffixUrl
-								+ "/api/transaction-sync")
+								+ "/bank/api/transaction-sync")
 						.buildAndExpand(/* add url parameter here */);
 				WebClient webClient = WebClient.builder()
 						.baseUrl("http://" + entity.getIpAddress() + ":" + entity.getPort() + "/" + suffixUrl
-								+ "/api/transaction-sync")
+								+ "/bank/api/transaction-sync")
 						.build();
 				logger.info("uriComponents: " + uriComponents.toString());
 				Mono<TransactionResponseDTO> responseMono = webClient.post()

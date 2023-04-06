@@ -2,7 +2,7 @@ package com.vietqr.org.dto;
 
 import java.io.Serializable;
 
-public class TransactionResponseDTO implements Serializable{
+public class TransactionResponseDTO implements Serializable {
 	/**
 	 *
 	 */
@@ -31,27 +31,35 @@ public class TransactionResponseDTO implements Serializable{
 		this.toastMessage = toastMessage;
 		this.object = object;
 	}
+
 	public boolean isError() {
 		return error;
 	}
+
 	public void setError(boolean error) {
 		this.error = error;
 	}
+
 	public String getErrorReason() {
 		return errorReason;
 	}
+
 	public void setErrorReason(String errorReason) {
 		this.errorReason = errorReason;
 	}
+
 	public String getToastMessage() {
 		return toastMessage;
 	}
+
 	public void setToastMessage(String toastMessage) {
 		this.toastMessage = toastMessage;
 	}
+
 	public RefTransactionDTO getObject() {
 		return object;
 	}
+
 	public void setObject(RefTransactionDTO object) {
 		this.object = object;
 	}
