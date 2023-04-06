@@ -87,6 +87,12 @@ public class FirebaseMessagingService {
 		} catch (InterruptedException | ExecutionException e) {
 			System.out.println("Error at sendPushNotificationWithData" + e.toString());
 			logger.error(e.getMessage());
+			if (e.toString()
+					.contains(
+							"The registration token is not a valid FCM registration token")
+					|| e.toString().contains("Requested entity was not found")) {
+				fcmTokenService.deleteFcmToken(request.getToken());
+			}
 		}
 	}
 

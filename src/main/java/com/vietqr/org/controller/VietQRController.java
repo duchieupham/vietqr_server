@@ -247,7 +247,6 @@ public class VietQRController {
 			httpStatus = HttpStatus.BAD_REQUEST;
 			return new ResponseEntity<>(result, httpStatus);
 		} finally {
-			NumberFormat nf = NumberFormat.getInstance(Locale.US);
 			LocalDateTime currentDateTime = LocalDateTime.now();
 			long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
 			String secretKey = "mySecretKey";
@@ -270,7 +269,6 @@ public class VietQRController {
 		HttpStatus httpStatus = null;
 		UUID transcationUUID = UUID.randomUUID();
 		String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
-		System.out.println("BRANCH ID: " + dto.getBranchId());
 		try {
 			AccountBankReceiveEntity accountBankEntity = accountBankService.getAccountBankById(dto.getBankId());
 			if (accountBankEntity != null) {
@@ -375,28 +373,6 @@ public class VietQRController {
 									NotificationUtil
 											.getNotiTitleNewTransaction(),
 									message);
-
-							// if (fcmTokens != null && !fcmTokens.isEmpty(
-							// or (F
-							// ry {
-							// FcmRequestDTO fcmDTO = new FcmRequestDTO();
-							// fcmDTO.setTitle(Notificatio
-							// fcmDTO.setMessage(message);
-							// fcmDTO.setToken(fcmToken.getToken());
-							// firebaseMessagingService.sendPushNotificationToToken(fcmDTO);
-							// logger.info("Send noti
-							// catch (Exception e) {
-							// System.out.println("Error at send noti" + e.toString());
-							// logger.error("Er
-							// (e.toStri
-							// ontains(
-							// "The registration token is not a valid FCM regist
-							//
-
-							//
-							// }
-							//
-							// String title = NotificationUtil.getNotiTitleNewTransaction();
 							notiEntity.setId(notificationUUID.toString());
 							notiEntity.setRead(false);
 							notiEntity.setMessage(message);
@@ -436,28 +412,6 @@ public class VietQRController {
 							NotificationUtil
 									.getNotiTitleNewTransaction(),
 							message);
-					// if (fcmTokens != null && !fcmTokens.isEmpty()) {
-					// for (FcmTokenEntity fcmToken : fcmTokens) {
-					// try {
-					// FcmRequestDTO fcmDTO = new FcmRequestDTO();
-					// fcmDTO.setTitle(NotificationUtil.getNotiTitleNewTransaction());
-					// fcmDTO.setMessage(message);
-					// fcmDTO.setToken(fcmToken.getToken());
-					// firebaseMessagingService.sendPushNotificationToToken(fcmDTO);
-					// logger.info("Send notification to device " + fcmToken.getToken());
-					// } catch (Exception e) {
-					// System.out.println("Error at send noti" + e.toString());
-					// logger.error("Error when Send Notification using FCM " + e.toString());
-					// if (e.toString()
-					// .contains(
-					// "The registration token is not a valid FCM registration token")) {
-					// fcmTokenService.deleteFcmToken(fcmToken.getToken());
-					// }
-
-					// }
-					// }
-					// }
-
 					notiEntity.setId(notificationUUID.toString());
 					notiEntity.setRead(false);
 					notiEntity.setMessage(message);
