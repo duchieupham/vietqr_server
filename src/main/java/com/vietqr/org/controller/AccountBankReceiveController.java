@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.api.Http;
 import com.vietqr.org.dto.AccountBankReceiveDTO;
 import com.vietqr.org.dto.AccountBankReceiveDetailDTO;
 import com.vietqr.org.dto.AccountBankResponseDTO;
