@@ -34,10 +34,12 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Transactional
 	@Modifying
 	@Query(value = "UPDATE account_bank_receive "
-			+ "SET national_id = :nationalId, phone_authenticated = :phoneAuthenticated, is_authenticated = true "
+			+ "SET national_id = :nationalId, phone_authenticated = :phoneAuthenticated, bank_account_name = :bankAccountName, bank_account = :bankAccount, is_authenticated = true "
 			+ "WHERE id = :bankId", nativeQuery = true)
 	void updateRegisterAuthenticationBank(@Param(value = "nationalId") String nationalId,
-			@Param(value = "phoneAuthenticated") String phoneAuthenticated, @Param(value = "bankId") String bankId);
+			@Param(value = "phoneAuthenticated") String phoneAuthenticated,
+			@Param(value = "bankAccountName") String bankAccountName, @Param(value = "bankAccount") String bankAccount,
+			@Param(value = "bankId") String bankId);
 
 	@Query(value = "SELECT * FROM account_bank_receive WHERE bank_account = :bankAccount AND bank_type_id = :bankTypeId ", nativeQuery = true)
 	AccountBankReceiveEntity getAccountBankByBankAccountAndBankTypeId(@Param(value = "bankAccount") String bankAccount,

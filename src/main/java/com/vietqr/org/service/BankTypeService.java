@@ -2,6 +2,7 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+// import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.entity.BankTypeEntity;
@@ -13,6 +14,7 @@ public interface BankTypeService {
 
 	public List<BankTypeEntity> getBankTypes();
 
+	// @Async
 	public BankTypeEntity getBankTypeById(String id);
 
 	public String getBankTypeIdByBankCode(String bankCode);

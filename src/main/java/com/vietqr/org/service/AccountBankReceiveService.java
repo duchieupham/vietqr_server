@@ -18,7 +18,8 @@ public interface AccountBankReceiveService {
 
 	public AccountBankReceiveEntity getAccountBankById(String bankId);
 
-	public void updateRegisterAuthenticationBank(String nationalId, String phoneAuthenticated, String bankId);
+	public void updateRegisterAuthenticationBank(String nationalId, String phoneAuthenticated, String bankAccountName,
+			String bankAccount, String bankId);
 
 	public AccountBankReceiveEntity getAccountBankByBankAccount(String bankAccount);
 

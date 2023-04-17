@@ -44,4 +44,9 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
         return repo.getRelatedTransactionByBankId(bankId);
     }
 
+    @Override
+    public List<TransactionRelatedDTO> getTransactions(int offset, String bankId) {
+        return repo.getTransactions(offset, bankId);
+    }
+
 }

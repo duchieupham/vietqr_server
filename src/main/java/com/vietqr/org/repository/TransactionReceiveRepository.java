@@ -32,6 +32,13 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ORDER BY b.time DESC LIMIT 5", nativeQuery = true)
         List<TransactionRelatedDTO> getRelatedTransactionReceives(@Param(value = "businessId") String businessId);
 
+        @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time,a.status,a.type,a.trans_type as transType "
+                        + "FROM transaction_receive a "
+                        + "WHERE a.bank_id=:bankId "
+                        + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransactions(@Param(value = "offset") int offset,
+                        @Param(value = "bankId") String bankId);
+
         @Query(value = "SELECT * "
                         + "FROM transaction_receive "
                         + "WHERE id = :id "

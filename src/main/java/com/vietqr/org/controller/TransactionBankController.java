@@ -218,12 +218,14 @@ public class TransactionBankController {
 			// find transaction-branch-receive to push notification
 			BankTypeEntity bankTypeEntity = bankTypeService
 					.getBankTypeById(accountBankEntity.getBankTypeId());
+			// update transaction receive
+			transactionReceiveService.updateTransactionReceiveStatus(1,
+					dto.getTransactionid(),
+					transactionReceiveEntity.getId());
+			//
 			TransactionReceiveBranchEntity transactionBranchEntity = transactionReceiveBranchService
 					.getTransactionBranchByTransactionId(transactionReceiveEntity.getId());
 			if (transactionBranchEntity != null) {
-				transactionReceiveService.updateTransactionReceiveStatus(1,
-						dto.getTransactionid(),
-						transactionBranchEntity.getTransactionReceiveId());
 				// push notification
 				// find userIds into business_member and branch_member
 				List<String> userIds = branchMemberService
@@ -292,6 +294,53 @@ public class TransactionBankController {
 				}
 			} else {
 				logger.info("transaction-sync - transaction-branch is empty.");
+				// insert notification
+				UUID notificationUUID = UUID.randomUUID();
+				NotificationEntity notiEntity = new NotificationEntity();
+				String prefix = "";
+				if (dto.getTransType().toUpperCase().equals("D")) {
+					prefix = "-";
+				} else {
+					prefix = "+";
+				}
+				String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
+						+ accountBankEntity.getBankAccount()
+						+ NotificationUtil.getNotiDescUpdateTransSuffix2()
+						+ prefix + nf.format(dto.getAmount())
+						+ NotificationUtil.getNotiDescUpdateTransSuffix4()
+						+ dto.getContent();
+				// String title = NotificationUtil.getNotiTitleNewTransaction();
+				notiEntity.setId(notificationUUID.toString());
+				notiEntity.setRead(false);
+				notiEntity.setMessage(message);
+				notiEntity.setTime(time);
+				notiEntity.setType(NotificationUtil.getNotiTypeNewTransaction());
+				notiEntity.setUserId(accountBankEntity.getUserId());
+				notiEntity.setData(transactionReceiveEntity.getId());
+				notificationService.insertNotification(notiEntity);
+				List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+				fcmTokens = fcmTokenService.getFcmTokensByUserId(accountBankEntity.getUserId());
+				Map<String, String> data = new HashMap<>();
+				data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+				data.put("notificationId", notificationUUID.toString());
+				data.put("transactionReceiveId", transactionReceiveEntity.getId());
+				data.put("bankAccount", accountBankEntity.getBankAccount());
+				data.put("bankName", bankTypeEntity.getBankName());
+				data.put("bankCode", bankTypeEntity.getBankCode());
+				data.put("bankId", accountBankEntity.getId());
+				data.put("branchName", "");
+				data.put("businessName", "");
+				data.put("content", dto.getContent());
+				data.put("amount", "" + dto.getAmount());
+				data.put("time", "" + time);
+				data.put("refId", "" + dto.getTransactionid());
+				data.put("status", "1");
+				data.put("traceId", "");
+				data.put("transType", dto.getTransType());
+				firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
+						NotificationUtil
+								.getNotiTitleUpdateTransaction(),
+						message);
 			}
 		} else {
 			logger.info("transaction-sync - cannot find account bank");

@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vietqr.org.dto.TransactionBranchInputDTO;
+import com.vietqr.org.dto.TransactionInputDTO;
 import com.vietqr.org.dto.TransactionRelatedDTO;
 import com.vietqr.org.service.TransactionReceiveBranchService;
+import com.vietqr.org.service.TransactionReceiveService;
 
 @RestController
 @RequestMapping("/api")
@@ -25,6 +27,9 @@ public class TransactionController {
 
     @Autowired
     TransactionReceiveBranchService transactionReceiveBranchService;
+
+    @Autowired
+    TransactionReceiveService transactionReceiveService;
 
     @PostMapping("transaction-branch")
     private ResponseEntity<List<TransactionRelatedDTO>> getTransactionsByBranchId(
@@ -40,6 +45,21 @@ public class TransactionController {
                 // get transaction by branchId
                 result = transactionReceiveBranchService.getTransactionsByBranchId(dto.getBranchId(), dto.getOffset());
             }
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error(e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("transaction/list")
+    private ResponseEntity<List<TransactionRelatedDTO>> getTransactionsByBankId(
+            @Valid @RequestBody TransactionInputDTO dto) {
+        List<TransactionRelatedDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            result = transactionReceiveService.getTransactions(dto.getOffset(), dto.getBankId());
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error(e.toString());

@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 //import org.springframework.scheduling.annotation.EnableScheduling;
@@ -22,8 +23,10 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.vietqr.org.security.JWTAuthorizationFilter;
+import com.vietqr.org.util.CorsConfig;
 
 @SpringBootApplication
+@Import(CorsConfig.class)
 // @EnableScheduling
 public class VietqrApplication extends SpringBootServletInitializer implements WebMvcConfigurer {
 
