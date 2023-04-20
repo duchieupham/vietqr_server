@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,6 +30,7 @@ import com.vietqr.org.service.CaiBankService;
 import com.vietqr.org.service.ImageService;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api")
 public class BankTypeController {
 	private static final Logger logger = Logger.getLogger(BankTypeController.class);

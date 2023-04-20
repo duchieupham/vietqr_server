@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,6 +52,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api")
 public class AccountController {
 	private static final Logger logger = Logger.getLogger(AccountController.class);
@@ -108,12 +110,14 @@ public class AccountController {
 						// push notification to devices
 						for (FcmTokenEntity fcmToken : fcmTokens) {
 							try {
-								FcmRequestDTO fcmDTO = new FcmRequestDTO();
-								fcmDTO.setTitle(NotificationUtil.getNotiTitleLoginWarning());
-								fcmDTO.setMessage(messageNotification);
-								fcmDTO.setToken(fcmToken.getToken());
-								firebaseMessagingService.sendPushNotificationToToken(fcmDTO);
-								logger.info("Send notification to device " + fcmToken.getToken());
+								if (!fcmToken.getToken().trim().isEmpty()) {
+									FcmRequestDTO fcmDTO = new FcmRequestDTO();
+									fcmDTO.setTitle(NotificationUtil.getNotiTitleLoginWarning());
+									fcmDTO.setMessage(messageNotification);
+									fcmDTO.setToken(fcmToken.getToken());
+									firebaseMessagingService.sendPushNotificationToToken(fcmDTO);
+									logger.info("Send notification to device " + fcmToken.getToken());
+								}
 							} catch (Exception e) {
 								logger.error("Error when Send Notification using FCM " + e.toString());
 								if (e.toString()
@@ -125,6 +129,7 @@ public class AccountController {
 						}
 					}
 					// insert new FCM token
+
 					FcmTokenEntity fcmTokenEntity = new FcmTokenEntity();
 					UUID uuid = UUID.randomUUID();
 					fcmTokenEntity.setId(uuid.toString());
@@ -133,6 +138,7 @@ public class AccountController {
 					fcmTokenEntity.setPlatform(dto.getPlatform());
 					fcmTokenEntity.setDevice(dto.getDevice());
 					fcmTokenService.insertFcmToken(fcmTokenEntity);
+
 					// response login success
 					result = getJWTToken(accountInformationEntity);
 					httpStatus = HttpStatus.OK;

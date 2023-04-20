@@ -26,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -72,6 +73,7 @@ import com.vietqr.org.dto.TokenDTO;
 
 import com.vietqr.org.util.NotificationUtil;
 import com.vietqr.org.util.RandomCodeUtil;
+import com.vietqr.org.util.SocketHandler;
 
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -79,6 +81,7 @@ import reactor.core.scheduler.Schedulers;
 import com.vietqr.org.util.EnvironmentUtil;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/bank/api")
 public class TransactionBankController {
 	private static final Logger logger = Logger.getLogger(TransactionBankController.class);
@@ -115,6 +118,9 @@ public class TransactionBankController {
 
 	@Autowired
 	CustomerSyncService customerSyncService;
+
+	@Autowired
+	private SocketHandler socketHandler;
 
 	private FirebaseMessagingService firebaseMessagingService;
 
@@ -288,6 +294,11 @@ public class TransactionBankController {
 								NotificationUtil
 										.getNotiTitleUpdateTransaction(),
 								message);
+						try {
+							socketHandler.sendMessageToUser(userId, data);
+						} catch (Exception e) {
+							logger.error("Error at socketHandler: " + e.toString());
+						}
 					}
 				} else {
 					logger.info("transaction-sync - userIds empty.");
@@ -420,6 +431,11 @@ public class TransactionBankController {
 					NotificationUtil
 							.getNotiTitleUpdateTransaction(),
 					message);
+			try {
+				socketHandler.sendMessageToUser(accountBankEntity.getUserId(), data);
+			} catch (Exception e) {
+				logger.error("Error at socketHandler: " + e.toString());
+			}
 		}
 
 	}

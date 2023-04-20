@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -51,6 +52,7 @@ import com.vietqr.org.util.VietQRUtil;
 import com.vietqr.org.service.BranchInformationService;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api")
 public class AccountBankReceiveController {
 	private static final Logger logger = Logger.getLogger(AccountBankReceiveController.class);
@@ -144,6 +146,7 @@ public class AccountBankReceiveController {
 	}
 
 	// register authentication
+
 	@PostMapping("account-bank/register-authentication")
 	public ResponseEntity<ResponseMessageDTO> registerAuthentication(
 			@Valid @RequestBody RegisterAuthenticationDTO dto) {
@@ -168,6 +171,7 @@ public class AccountBankReceiveController {
 	//
 
 	// register bank account with authenticated
+
 	@PostMapping("account-bank")
 	public ResponseEntity<ResponseMessageDTO> insertAccountBank(@Valid @RequestBody AccountBankReceiveDTO dto) {
 		ResponseMessageDTO result = null;

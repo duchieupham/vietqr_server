@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,12 +21,14 @@ import com.vietqr.org.entity.BusinessMemberEntity;
 import com.vietqr.org.service.BusinessMemberService;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api")
 public class BusinessMemberController {
 
 	@Autowired
 	BusinessMemberService businessMemberService;
 
+	//
 	// @GetMapping("business-member/{id}")
 	// public ResponseEntity<List<MemberDTO>>
 	// getBusinessMembersByBankId(@PathVariable("id") String id) {

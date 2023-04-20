@@ -9,6 +9,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +23,7 @@ import com.vietqr.org.entity.BankTextFormEntity;
 import com.vietqr.org.service.BankTextFormService;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api")
 public class BankTextFormController {
 
@@ -29,7 +31,8 @@ public class BankTextFormController {
 	BankTextFormService bankTextFormService;
 
 	@PostMapping(value = "bank-text-form", produces = "application/json;charset=UTF-8")
-	public ResponseEntity<ResponseMessageDTO> insertBankTextForm(@Valid @RequestParam String text, @Valid @RequestParam String bankId){
+	public ResponseEntity<ResponseMessageDTO> insertBankTextForm(@Valid @RequestParam String text,
+			@Valid @RequestParam String bankId) {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
@@ -39,14 +42,14 @@ public class BankTextFormController {
 			entity.setText(text);
 			entity.setBankId(bankId);
 			int check = bankTextFormService.insertBankTextForm(entity);
-			if(check == 1) {
+			if (check == 1) {
 				result = new ResponseMessageDTO("SUCESS", "");
 				httpStatus = HttpStatus.OK;
-			}else {
-				result = new ResponseMessageDTO("FAILED","E10");
+			} else {
+				result = new ResponseMessageDTO("FAILED", "E10");
 				httpStatus = HttpStatus.BAD_REQUEST;
 			}
-		}catch(Exception e) {
+		} catch (Exception e) {
 			System.out.println("Error at insertBankTextForm: " + e.toString());
 			result = new ResponseMessageDTO("FAILED", "Unexpected Error");
 			httpStatus = HttpStatus.BAD_REQUEST;
@@ -55,7 +58,7 @@ public class BankTextFormController {
 	}
 
 	@GetMapping("bank-text-form/{bankId}")
-	public ResponseEntity<List<BankTextFormEntity>> getBankTextForms(@PathVariable("bankId") String bankId){
+	public ResponseEntity<List<BankTextFormEntity>> getBankTextForms(@PathVariable("bankId") String bankId) {
 		List<BankTextFormEntity> result = new ArrayList<>();
 		HttpStatus httpStatus = null;
 		try {
@@ -69,14 +72,14 @@ public class BankTextFormController {
 	}
 
 	@DeleteMapping("bank-text-form")
-	public ResponseEntity<ResponseMessageDTO> deleteBankTextForm(@Valid @RequestParam String id){
+	public ResponseEntity<ResponseMessageDTO> deleteBankTextForm(@Valid @RequestParam String id) {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
 			bankTextFormService.removeBankTextForm(id);
 			result = new ResponseMessageDTO("SUCCESS", "");
 			httpStatus = HttpStatus.OK;
-		}catch(Exception e) {
+		} catch (Exception e) {
 			System.out.println("Error at deleteBankTextForm: " + e.toString());
 			result = new ResponseMessageDTO("FAILED", "Unexpected Error");
 			httpStatus = HttpStatus.BAD_REQUEST;

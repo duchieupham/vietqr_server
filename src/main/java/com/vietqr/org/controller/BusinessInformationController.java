@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -52,6 +53,7 @@ import com.vietqr.org.service.TransactionReceiveService;
 import com.vietqr.org.util.RandomCodeUtil;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api")
 public class BusinessInformationController {
 	private static final Logger logger = Logger.getLogger(BusinessInformationController.class);
@@ -78,6 +80,7 @@ public class BusinessInformationController {
 	TransactionReceiveService transactionReceiveService;
 
 	// insert business information
+
 	@PostMapping("business-information")
 	public ResponseEntity<ResponseMessageDTO> insertBusinessInformation(
 			@ModelAttribute BusinessInformationInsertDTO dto) {
@@ -176,6 +179,7 @@ public class BusinessInformationController {
 	}
 
 	// get business detail
+
 	@GetMapping("business-information/detail/{businessId}/{userId}")
 	public ResponseEntity<BusinessInformationDetailDTO> getBusinessDetail(
 			@PathVariable("businessId") String businessId, @PathVariable("userId") String userId) {
@@ -259,6 +263,7 @@ public class BusinessInformationController {
 	}
 
 	// get list branch filter search by businessId, check is manager or not
+
 	@PostMapping("business-information/branch/filter")
 	public ResponseEntity<List<BranchFilterResponseDTO>> getBranchFilterList(
 			@Valid @RequestBody BranchFilterInsertDTO dto) {
@@ -286,6 +291,7 @@ public class BusinessInformationController {
 	}
 
 	// get business list dashboard
+
 	@GetMapping("business-informations/{userId}")
 	public ResponseEntity<List<BusinessItemResponseDTO>> getBusinessItems(@PathVariable("userId") String userId) {
 		List<BusinessItemResponseDTO> result = new ArrayList<>();
@@ -342,6 +348,7 @@ public class BusinessInformationController {
 	}
 
 	// get business list by userId
+
 	@GetMapping("business-information/list/{userId}")
 	public ResponseEntity<List<BusinessListItemDTO>> getBusinessListItem(@PathVariable("userId") String userId) {
 		List<BusinessListItemDTO> result = new ArrayList<>();
@@ -357,6 +364,7 @@ public class BusinessInformationController {
 	}
 
 	// get business information
+
 	@GetMapping("business-information/{id}")
 	public ResponseEntity<BusinessInformationEntity> getBusinessInformation(@PathVariable("id") String id) {
 		BusinessInformationEntity result = null;
@@ -372,6 +380,7 @@ public class BusinessInformationController {
 	}
 
 	// update cover image
+
 	@PutMapping("business-information/cover")
 	public ResponseEntity<ResponseMessageDTO> updateBusinessCover(@RequestParam String id,
 			@RequestParam String coverImgId, @RequestParam MultipartFile coverImage) {
@@ -400,6 +409,7 @@ public class BusinessInformationController {
 	}
 
 	// update image
+
 	@PutMapping("business-information/image")
 	public ResponseEntity<ResponseMessageDTO> updateBusinessImage(@RequestParam String id, @RequestParam String imgId,
 			@RequestParam MultipartFile image) {
@@ -428,6 +438,7 @@ public class BusinessInformationController {
 	}
 
 	// update business status
+
 	@PutMapping("business-information/status")
 	public ResponseEntity<ResponseMessageDTO> updateBusinessStatus(@Valid @RequestBody BusinessStatusDTO dto) {
 		ResponseMessageDTO result = null;

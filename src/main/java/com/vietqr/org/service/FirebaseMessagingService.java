@@ -101,14 +101,17 @@ public class FirebaseMessagingService {
 		if (fcmTokens != null && !fcmTokens.isEmpty()) {
 			for (FcmTokenEntity fcmToken : fcmTokens) {
 				try {
-					FcmRequestDTO fcmDTO = new FcmRequestDTO();
-					fcmDTO.setTitle(title);
-					fcmDTO.setMessage(message);
-					fcmDTO.setToken(fcmToken.getToken());
-					sendPushNotificationWithData(data, fcmDTO);
-					LocalDateTime currentDateTime = LocalDateTime.now();
-					long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
-					logger.info("Send notification to device " + fcmToken.getToken() + " at: " + time);
+					if (!fcmToken.getToken().trim().isEmpty()) {
+						FcmRequestDTO fcmDTO = new FcmRequestDTO();
+						fcmDTO.setTitle(title);
+						fcmDTO.setMessage(message);
+						fcmDTO.setToken(fcmToken.getToken());
+						sendPushNotificationWithData(data, fcmDTO);
+						LocalDateTime currentDateTime = LocalDateTime.now();
+						long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+						logger.info("Send notification to device " + fcmToken.getToken() + " at: " + time);
+
+					}
 				} catch (Exception e) {
 					System.out.println("Error at sendUsersNotificationWithData" + e.toString());
 					logger.error(
