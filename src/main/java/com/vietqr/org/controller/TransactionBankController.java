@@ -52,6 +52,7 @@ import com.vietqr.org.service.BusinessInformationService;
 import com.vietqr.org.service.CustomerSyncService;
 import com.vietqr.org.service.BranchInformationService;
 import com.vietqr.org.service.NotificationService;
+import com.vietqr.org.service.TextToSpeechService;
 import com.vietqr.org.service.FcmTokenService;
 import com.vietqr.org.service.FirebaseMessagingService;
 import com.vietqr.org.service.AccountBankReceiveService;
@@ -121,6 +122,9 @@ public class TransactionBankController {
 
 	@Autowired
 	private SocketHandler socketHandler;
+
+	@Autowired
+	private TextToSpeechService textToSpeechService;
 
 	private FirebaseMessagingService firebaseMessagingService;
 
@@ -240,6 +244,7 @@ public class TransactionBankController {
 				// insert AND push notification to users belong to
 				// admin business/ member of branch
 				if (userIds != null && !userIds.isEmpty()) {
+					String requestId = "";
 					for (String userId : userIds) {
 						// insert notification
 						UUID notificationUUID = UUID.randomUUID();
@@ -294,12 +299,19 @@ public class TransactionBankController {
 								NotificationUtil
 										.getNotiTitleUpdateTransaction(),
 								message);
-						try {
-							socketHandler.sendMessageToUser(userId, data);
-						} catch (Exception e) {
-							logger.error("Error at socketHandler: " + e.toString());
+						if (requestId.trim().isEmpty()) {
+							requestId = textToSpeechService.requestTTS(accountBankEntity.getUserId(),
+									data, dto.getAmount() + "");
+						} else {
+							data.put("audioLink", textToSpeechService.find(requestId));
+							try {
+								socketHandler.sendMessageToUser(userId, data);
+							} catch (Exception e) {
+								logger.error("TTS-Transaction: Error: " + e.toString());
+							}
 						}
 					}
+					textToSpeechService.delete(requestId);
 				} else {
 					logger.info("transaction-sync - userIds empty.");
 				}
@@ -352,6 +364,10 @@ public class TransactionBankController {
 						NotificationUtil
 								.getNotiTitleUpdateTransaction(),
 						message);
+				String requestId = "";
+				requestId = textToSpeechService.requestTTS(accountBankEntity.getUserId(),
+						data, dto.getAmount() + "");
+				textToSpeechService.delete(requestId);
 			}
 		} else {
 			logger.info("transaction-sync - cannot find account bank");
@@ -431,11 +447,10 @@ public class TransactionBankController {
 					NotificationUtil
 							.getNotiTitleUpdateTransaction(),
 					message);
-			try {
-				socketHandler.sendMessageToUser(accountBankEntity.getUserId(), data);
-			} catch (Exception e) {
-				logger.error("Error at socketHandler: " + e.toString());
-			}
+			String requestId = "";
+			requestId = textToSpeechService.requestTTS(accountBankEntity.getUserId(),
+					data, dto.getAmount() + "");
+			textToSpeechService.delete(requestId);
 		}
 
 	}

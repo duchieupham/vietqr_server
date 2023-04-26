@@ -10,6 +10,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 // import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
@@ -31,9 +32,11 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.vietqr.org.security.JWTAuthorizationFilter;
+import com.vietqr.org.util.WebSocketConfig;
 
 @SpringBootApplication
 @ComponentScan(basePackages = { "com.vietqr.org" })
+@Import(WebSocketConfig.class)
 @EnableWebMvc
 public class VietqrApplication extends SpringBootServletInitializer implements WebMvcConfigurer {
 
@@ -118,6 +121,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 					.antMatchers(HttpMethod.POST, "/api/accounts").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts/register").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts/logout").permitAll()
+					.antMatchers(HttpMethod.POST, "/api/transaction/voice/**").permitAll()
 					.anyRequest().authenticated();
 		}
 

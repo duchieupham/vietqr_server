@@ -21,12 +21,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.BankDetailInputDTO;
 import com.vietqr.org.dto.CaiBankDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
@@ -51,6 +54,7 @@ import com.vietqr.org.service.BranchMemberService;
 import com.vietqr.org.service.TransactionReceiveBranchService;
 import com.vietqr.org.service.BranchInformationService;
 import com.vietqr.org.service.NotificationService;
+import com.vietqr.org.service.TextToSpeechService;
 import com.vietqr.org.service.FcmTokenService;
 import com.vietqr.org.service.FirebaseMessagingService;
 import com.vietqr.org.util.VietQRUtil;
@@ -98,10 +102,61 @@ public class VietQRController {
 	@Autowired
 	private SocketHandler socketHandler;
 
+	@Autowired
+	private TextToSpeechService textToSpeechService;
+
 	private FirebaseMessagingService firebaseMessagingService;
 
 	public VietQRController(FirebaseMessagingService firebaseMessagingService) {
 		this.firebaseMessagingService = firebaseMessagingService;
+	}
+
+	@PostMapping("/transaction/voice/{userId}")
+	public ResponseEntity<Void> handleWebhookEvent(@PathVariable String userId, @RequestBody Object payload) {
+		String requestId = "";
+		String audioLink = "";
+		try {
+			logger.info("TTS-WH: payload: " + payload.toString());
+			// Create an ObjectMapper instance
+			ObjectMapper objectMapper = new ObjectMapper();
+			JsonNode rootNode = objectMapper.valueToTree(payload);
+
+			// Extract the values of request_id and audio_link
+			if (rootNode.get("request_id") != null) {
+				requestId = rootNode.get("request_id").asText();
+				logger.info("TTS-WH: request_id: " + requestId);
+			} else {
+				logger.info("TTS-WH: empty request_id");
+			}
+			if (rootNode.get("audio_link") != null) {
+				audioLink = rootNode.get("audio_link").asText();
+				logger.info("TTS-WH: audio_link: " + audioLink);
+			} else {
+				logger.info("TTS-WH: empty audio_link");
+			}
+			if (!requestId.trim().isEmpty() && !audioLink.trim().isEmpty()) {
+				logger.info("TTS-WH: update tts");
+				textToSpeechService.update(requestId, audioLink);
+			}
+			return ResponseEntity.ok().build();
+		} catch (Exception e) {
+			logger.info("TTS-WH: Error: " + e.toString());
+			return ResponseEntity.ok().build();
+		} finally {
+			if (!requestId.trim().isEmpty() && !audioLink.trim().isEmpty()) {
+				Map<String, String> notiData = textToSpeechService.findData(requestId);
+				notiData.put("audioLink", audioLink);
+				try {
+					socketHandler.sendMessageToUser(userId, notiData);
+				} catch (Exception e) {
+					logger.error("TTS-WS: Error: " + e.toString());
+				}
+				// finally {
+				// textToSpeechService.delete(requestId);
+				// }
+
+			}
+		}
 	}
 
 	@GetMapping("qr/websocket/test")

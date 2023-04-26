@@ -22,9 +22,21 @@ public class SocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        logger.info("WS: add session: " + session.toString());
-        sessions.add(session);
-        logger.info("WS: sessions size: " + sessions.size());
+        try {
+            logger.info("WS: add session: " + session.toString());
+            String userId = (String) session.getAttributes().get("userId");
+            if (userId == null || userId.trim().isEmpty()) {
+                logger.error("WS: userId is missing");
+                session.close();
+            } else {
+                // save userId for this session
+                session.getAttributes().put("userId", userId);
+                sessions.add(session);
+            }
+            logger.info("WS: userSessions size: " + sessions.size());
+        } catch (Exception e) {
+            logger.error("WS: error add session: " + e.toString());
+        }
     }
 
     @Override
@@ -41,20 +53,18 @@ public class SocketHandler extends TextWebSocketHandler {
 
     public void sendMessageToUser(String userId, Map<String, String> message) throws IOException {
         logger.info("WS: sendMessageToUser");
-        logger.info("WS: sessions: " + sessions.size());
+        logger.info("WS: userSessions: " + sessions.size());
 
         for (WebSocketSession session : sessions) {
             logger.info("WS: session ID: " + session.getId());
             logger.info("WS: session Attributes: " + session.getAttributes());
-            logger.info("WS: session userId: " + session.getAttributes().get("userId"));
-            // if (session.getAttributes().get("userId").equals(userId)) {
-            // ObjectMapper mapper = new ObjectMapper();
-            // String jsonMessage = mapper.writeValueAsString(message);
-            // session.sendMessage(new TextMessage(jsonMessage));
-            // }
-            ObjectMapper mapper = new ObjectMapper();
-            String jsonMessage = mapper.writeValueAsString(message);
-            session.sendMessage(new TextMessage(jsonMessage));
+            Object sessionUserId = session.getAttributes().get("userId");
+            if (sessionUserId != null && sessionUserId.equals(userId)) {
+                ObjectMapper mapper = new ObjectMapper();
+                String jsonMessage = mapper.writeValueAsString(message);
+                session.sendMessage(new TextMessage(jsonMessage));
+            }
         }
     }
+
 }
