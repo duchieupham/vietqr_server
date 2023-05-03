@@ -57,4 +57,9 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
 		return accountBankRepo.getBankByBranchId(branchId);
 	}
 
+	@Override
+	public void unRegisterAuthenticationBank(String bankAccount) {
+		accountBankRepo.unRegisterAuthenticationBank(bankAccount);
+	}
+
 }

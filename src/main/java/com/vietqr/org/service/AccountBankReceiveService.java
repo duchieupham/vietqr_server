@@ -26,4 +26,6 @@ public interface AccountBankReceiveService {
 	public AccountBankReceiveEntity getAccountBankByBankAccountAndBankTypeId(String bankAccount, String bankTypeId);
 
 	public List<BusinessBankDTO> getBankByBranchId(String branchId);
+
+	public void unRegisterAuthenticationBank(String bankAccount);
 }

@@ -44,6 +44,8 @@ import com.vietqr.org.dto.CofirmOTPBankDTO;
 import com.vietqr.org.dto.RefTransactionDTO;
 import com.vietqr.org.dto.TransactionBankDTO;
 import com.vietqr.org.dto.TransactionResponseDTO;
+import com.vietqr.org.dto.UnregisterBankConfirmDTO;
+import com.vietqr.org.dto.UnregisterRequestDTO;
 import com.vietqr.org.service.TransactionBankService;
 import com.vietqr.org.service.TransactionReceiveService;
 import com.vietqr.org.service.TransactionReceiveBranchService;
@@ -632,6 +634,156 @@ public class TransactionBankController {
 						.block();
 				LocalDateTime currentDateTime = LocalDateTime.now();
 				logger.error("Response confirmOTP error: " + confirmRequestBankDTO.getSoaErrorCode() + "-"
+						+ confirmRequestBankDTO.getSoaErrorDesc() + " at "
+						+ currentDateTime.toEpochSecond(ZoneOffset.UTC));
+				String status = "FAILED";
+				String message = getMessageBankCode(confirmRequestBankDTO.getSoaErrorCode());
+				result = new ResponseMessageDTO(status, message);
+				httpStatus = HttpStatus.BAD_REQUEST;
+			}
+		} catch (HttpClientErrorException ex) {
+			logger.error("HttpClientErrorException: " + ex.getMessage());
+			logger.error("Response body: " + ex.getResponseBodyAsString());
+			result = new ResponseMessageDTO("FAILED", "E05");
+			httpStatus = HttpStatus.BAD_REQUEST;
+		} catch (HttpServerErrorException ex) {
+			logger.error("HttpServerErrorException: " + ex.getMessage());
+			logger.error("Response body: " + ex.getResponseBodyAsString());
+			result = new ResponseMessageDTO("FAILED", "E05");
+			httpStatus = HttpStatus.BAD_REQUEST;
+
+		} catch (Exception e) {
+			logger.error("Error at confirmOTP: " + e.toString());
+			result = new ResponseMessageDTO("FAILED", "E05");
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	@PostMapping("unregister_request")
+	public ResponseEntity<ResponseMessageDTO> unegisterRequest(@Valid @RequestBody UnregisterRequestDTO dto) {
+		ResponseMessageDTO result = null;
+		HttpStatus httpStatus = null;
+		try {
+			UUID clientMessageId = UUID.randomUUID();
+			Map<String, Object> data = new HashMap<>();
+			data.put("accountNumber", dto.getAccountNumber());
+			data.put("authenType", "SMS");
+			data.put("applicationType", dto.getApplicationType());
+			data.put("transType", "DC");
+			UriComponents uriComponents = UriComponentsBuilder
+					.fromHttpUrl(EnvironmentUtil.getBankUrl()
+							+ "private/ms/push-mesages-partner/v1.0/bdsd/unsubscribe/request")
+					.buildAndExpand(/* add url parameter here */);
+			WebClient webClient = WebClient.builder()
+					.baseUrl(
+							EnvironmentUtil.getBankUrl()
+									+ "private/ms/push-mesages-partner/v1.0/bdsd/unsubscribe/request")
+					.build();
+			Mono<ClientResponse> responseMono = webClient.post()
+					.uri(uriComponents.toUri())
+					.contentType(MediaType.APPLICATION_JSON)
+					.header("clientMessageId", clientMessageId.toString())
+					.header("transactionId", RandomCodeUtil.generateRandomUUID())
+					.header("Authorization", "Bearer " + getBankToken().getAccess_token())
+					.body(BodyInserters.fromValue(data))
+					.exchange();
+			ClientResponse response = responseMono.block();
+			if (response.statusCode().is2xxSuccessful()) {
+				String json = response.bodyToMono(String.class).block();
+				logger.info("Response unegisterRequest: " + json);
+				ObjectMapper objectMapper = new ObjectMapper();
+				JsonNode rootNode = objectMapper.readTree(json);
+				String requestId = rootNode.get("data").get("requestId").asText();
+				result = new ResponseMessageDTO("SUCCESS",
+						requestId);
+				httpStatus = HttpStatus.OK;
+			} else {
+
+				ConfirmRequestFailedBankDTO confirmRequestBankDTO = response.bodyToMono(
+						ConfirmRequestFailedBankDTO.class)
+						.block();
+				LocalDateTime currentDateTime = LocalDateTime.now();
+				logger.error("Response unegisterRequest error: " + confirmRequestBankDTO.getSoaErrorCode() + "-"
+						+ confirmRequestBankDTO.getSoaErrorDesc() + " at "
+						+ currentDateTime.toEpochSecond(ZoneOffset.UTC));
+				String status = "FAILED";
+				String message = getMessageBankCode(confirmRequestBankDTO.getSoaErrorCode());
+				result = new ResponseMessageDTO(status, message);
+				httpStatus = HttpStatus.BAD_REQUEST;
+			}
+		} catch (HttpClientErrorException ex) {
+			logger.error("HttpClientErrorException: " + ex.getMessage());
+			logger.error("Response body: " + ex.getResponseBodyAsString());
+			result = new ResponseMessageDTO("FAILED", "E05");
+			httpStatus = HttpStatus.BAD_REQUEST;
+		} catch (HttpServerErrorException ex) {
+			logger.error("HttpServerErrorException: " + ex.getMessage());
+			logger.error("Response body: " + ex.getResponseBodyAsString());
+			result = new ResponseMessageDTO("FAILED", "E05");
+			httpStatus = HttpStatus.BAD_REQUEST;
+
+		} catch (Exception e) {
+			logger.error("Error at requestOTP: " + e.toString());
+			result = new ResponseMessageDTO("FAILED", "E05");
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	@PostMapping("unregister_confirm")
+	public ResponseEntity<ResponseMessageDTO> unegisterConfirm(@Valid @RequestBody UnregisterBankConfirmDTO dto) {
+		ResponseMessageDTO result = null;
+		HttpStatus httpStatus = null;
+		try {
+			UUID clientMessageId = UUID.randomUUID();
+			Map<String, Object> data = new HashMap<>();
+			data.put("requestId", dto.getRequestId());
+			data.put("otpValue", dto.getOtpValue());
+			// data.put("authenType", "SMS");
+			data.put("applicationType", dto.getApplicationType());
+			UriComponents uriComponents = UriComponentsBuilder
+					.fromHttpUrl(EnvironmentUtil.getBankUrl()
+							+ "private/ms/push-mesages-partner/v1.0/bdsd/unsubscribe/confirm")
+					.buildAndExpand(/* add url parameter here */);
+			WebClient webClient = WebClient.builder()
+					.baseUrl(
+							EnvironmentUtil.getBankUrl()
+									+ "private/ms/push-mesages-partner/v1.0/bdsd/unsubscribe/confirm")
+					.build();
+			Mono<ClientResponse> responseMono = webClient.post()
+					.uri(uriComponents.toUri())
+					.contentType(MediaType.APPLICATION_JSON)
+					.header("clientMessageId", clientMessageId.toString())
+					.header("transactionId", RandomCodeUtil.generateRandomUUID())
+					.header("Authorization", "Bearer " + getBankToken().getAccess_token())
+					.body(BodyInserters.fromValue(data))
+					.exchange();
+			ClientResponse response = responseMono.block();
+			if (response.statusCode().is2xxSuccessful()) {
+				String json = response.bodyToMono(String.class).block();
+				logger.info("Response unegisterConfirm: " + json);
+				ObjectMapper objectMapper = new ObjectMapper();
+				JsonNode rootNode = objectMapper.readTree(json);
+				String status = rootNode.get("data").get("status").asText();
+				if (status.equals("Success")) {
+					// do update status bank_account from authen => unauthen
+					accountBankService.unRegisterAuthenticationBank(dto.getBankAccount());
+					//
+					result = new ResponseMessageDTO("SUCCESS",
+							"");
+					httpStatus = HttpStatus.OK;
+				} else {
+					result = new ResponseMessageDTO("FAILED",
+							"E05");
+					httpStatus = HttpStatus.BAD_REQUEST;
+				}
+			} else {
+				ConfirmRequestFailedBankDTO confirmRequestBankDTO = response.bodyToMono(
+						ConfirmRequestFailedBankDTO.class)
+						.block();
+				LocalDateTime currentDateTime = LocalDateTime.now();
+				logger.error("Response unegisterConfirm error: " + confirmRequestBankDTO.getSoaErrorCode() + "-"
 						+ confirmRequestBankDTO.getSoaErrorDesc() + " at "
 						+ currentDateTime.toEpochSecond(ZoneOffset.UTC));
 				String status = "FAILED";
