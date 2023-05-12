@@ -34,4 +34,9 @@ public class BankReceiveBranchServiceImpl implements BankReceiveBranchService {
     public void deleteBankReceiveBranchByBankId(String bankId) {
         repo.deleteBankReceiveBranchByBankId(bankId);
     }
+
+    @Override
+    public BankReceiveBranchEntity getBankReceiveBranchByBankId(String bankId) {
+        return repo.getBankReceiveBranchByBankId(bankId);
+    }
 }

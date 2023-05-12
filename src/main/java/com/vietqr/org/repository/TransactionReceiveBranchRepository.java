@@ -42,4 +42,5 @@ public interface TransactionReceiveBranchRepository extends JpaRepository<Transa
                         + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
         List<TransactionRelatedDTO> getTransactionsByBusinessId(@Param(value = "businessId") String businessId,
                         @Param(value = "offset") int offset);
+
 }

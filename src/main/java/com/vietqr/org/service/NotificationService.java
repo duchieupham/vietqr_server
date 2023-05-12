@@ -11,7 +11,11 @@ public interface NotificationService {
 
 	public int insertNotification(NotificationEntity entity);
 
-	public List<NotificationEntity> getNotificationsByUserId(String userId);
+	public List<NotificationEntity> getNotificationsByUserId(String userId, int offset);
 
-	public void updateNotificationStatus(String id);
+	public void updateNotificationStatus(String userId);
+
+	public int getNotificationCountByUserId(String userId);
+
+	public void deleteNotificationsByUserId(String userId);
 }

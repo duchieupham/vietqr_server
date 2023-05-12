@@ -24,4 +24,9 @@ public class CustomerSyncServiceImpl implements CustomerSyncService {
         return repo.getCustomerSyncEntities();
     }
 
+    @Override
+    public CustomerSyncEntity getCustomerSyncById(String id) {
+        return repo.getCustomerSyncById(id);
+    }
+
 }

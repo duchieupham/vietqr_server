@@ -3,11 +3,12 @@ package com.vietqr.org.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.vietqr.org.dto.AccountCheckDTO;
 import com.vietqr.org.entity.AccountLoginEntity;
 import com.vietqr.org.repository.AccountLoginRepository;
 
 @Service
-public class AccountLoginServiceImpl implements AccountLoginService{
+public class AccountLoginServiceImpl implements AccountLoginService {
 
 	@Autowired
 	AccountLoginRepository accountLoginRepository;
@@ -24,28 +25,22 @@ public class AccountLoginServiceImpl implements AccountLoginService{
 
 	@Override
 	public void updatePassword(String password, String userId) {
-		 accountLoginRepository.updatePassword(password, userId);
+		accountLoginRepository.updatePassword(password, userId);
 	}
 
 	@Override
 	public int insertAccountLogin(AccountLoginEntity entity) {
-		return accountLoginRepository.save(entity) == null ? 0:1;
+		return accountLoginRepository.save(entity) == null ? 0 : 1;
 	}
 
 	@Override
-	public String checkExistedPhoneNo(String phoneNo) {
+	public AccountCheckDTO checkExistedPhoneNo(String phoneNo) {
 		return accountLoginRepository.checkExistedPhoneNo(phoneNo);
 	}
 
 	@Override
-	public String checkExistedAccount(String userId) {
-		return accountLoginRepository.checkExistedAccount(userId);
+	public void updateStatus(int status, String userId) {
+		accountLoginRepository.updateStatus(status, userId);
 	}
-
-	@Override
-	public String checkExistedAccountByPhoneNo(String phoneNo) {
-		return accountLoginRepository.checkExistedAccountByPhoneNo(phoneNo);
-	}
-
 
 }

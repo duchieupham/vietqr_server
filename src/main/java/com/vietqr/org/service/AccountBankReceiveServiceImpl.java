@@ -42,10 +42,11 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
 				bankId);
 	}
 
-	@Override
-	public AccountBankReceiveEntity getAccountBankByBankAccount(String bankAccount) {
-		return accountBankRepo.getAccountBankByBankAccount(bankAccount);
-	}
+	// @Override
+	// public AccountBankReceiveEntity getAccountBankByBankAccount(String
+	// bankAccount) {
+	// return accountBankRepo.getAccountBankByBankAccount(bankAccount);
+	// }
 
 	@Override
 	public AccountBankReceiveEntity getAccountBankByBankAccountAndBankTypeId(String bankAccount, String bankTypeId) {
@@ -60,6 +61,11 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
 	@Override
 	public void unRegisterAuthenticationBank(String bankAccount) {
 		accountBankRepo.unRegisterAuthenticationBank(bankAccount);
+	}
+
+	@Override
+	public void updateStatusAccountBankByUserId(int status, String userId) {
+		accountBankRepo.updateStatusAccountBankByUserId(status, userId);
 	}
 
 }

@@ -11,15 +11,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-// import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
-//import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -28,7 +27,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-// import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.vietqr.org.security.JWTAuthorizationFilter;
@@ -44,16 +42,6 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		SpringApplication.run(VietqrApplication.class, args);
 	}
 
-	// @Override
-	// public void addCorsMappings(CorsRegistry registry) {
-	// registry.addMapping("/**")
-	// .allowedOrigins("*")
-	// .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-	// .allowedHeaders("*")
-	// .allowCredentials(true)
-	// .maxAge(3600);
-	// }
-
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
@@ -65,29 +53,22 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		return source;
 	}
 
+	@Bean
+	PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
 	@EnableWebSecurity
 	@Configuration
 	@Order(1)
 	class WebSecurityBasicConfig extends WebSecurityConfigurerAdapter {
 
 		@Autowired
+		UserDetailsService userDetailsService;
+
+		@Autowired
 		public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-			auth.inMemoryAuthentication()
-					.withUser("b-mb-user3")
-					.password(passwordEncoder().encode("Yi1tYi11c2VyMw=="))
-					.authorities("ROLE_USER")
-					.and()
-					.withUser("iot-bl-user04")
-					.password(passwordEncoder().encode("aW90LWJsLXVzZXIwNA=="))
-					.authorities("ROLE_USER")
-					.and()
-					.withUser("customer-bl-user05")
-					.password(passwordEncoder().encode("Y3VzdG9tZXItYmwtdXNlcjA1"))
-					.authorities("ROLE_USER")
-					.and()
-					.withUser("admin")
-					.password(passwordEncoder().encode("Aa_123456789"))
-					.authorities("ROLE_ADMIN");
+			auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
 		}
 
 		@Override
@@ -99,10 +80,6 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 					.httpBasic();
 		}
 
-		@Bean
-		PasswordEncoder passwordEncoder() {
-			return new BCryptPasswordEncoder();
-		}
 	}
 
 	@EnableWebSecurity

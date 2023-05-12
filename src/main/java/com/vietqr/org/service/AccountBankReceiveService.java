@@ -21,11 +21,14 @@ public interface AccountBankReceiveService {
 	public void updateRegisterAuthenticationBank(String nationalId, String phoneAuthenticated, String bankAccountName,
 			String bankAccount, String bankId);
 
-	public AccountBankReceiveEntity getAccountBankByBankAccount(String bankAccount);
+	// public AccountBankReceiveEntity getAccountBankByBankAccount(String
+	// bankAccount);
 
 	public AccountBankReceiveEntity getAccountBankByBankAccountAndBankTypeId(String bankAccount, String bankTypeId);
 
 	public List<BusinessBankDTO> getBankByBranchId(String branchId);
 
 	public void unRegisterAuthenticationBank(String bankAccount);
+
+	public void updateStatusAccountBankByUserId(int status, String userId);
 }

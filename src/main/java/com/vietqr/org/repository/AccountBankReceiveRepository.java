@@ -28,8 +28,10 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Query(value = "SELECT * FROM account_bank_receive WHERE id = :bankId", nativeQuery = true)
 	AccountBankReceiveEntity getAccountBankById(@Param(value = "bankId") String bankId);
 
-	@Query(value = "SELECT * FROM account_bank_receive WHERE bank_account = :bankAccount", nativeQuery = true)
-	AccountBankReceiveEntity getAccountBankByBankAccount(@Param(value = "bankAccount") String bankAccount);
+	// @Query(value = "SELECT * FROM account_bank_receive WHERE bank_account =
+	// :bankAccount AND is_authenticated = true", nativeQuery = true)
+	// AccountBankReceiveEntity getAccountBankByBankAccount(@Param(value =
+	// "bankAccount") String bankAccount);
 
 	@Transactional
 	@Modifying
@@ -48,7 +50,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "WHERE bank_account = :bankAccount AND is_authenticated = true", nativeQuery = true)
 	void unRegisterAuthenticationBank(@Param(value = "bankAccount") String bankAccount);
 
-	@Query(value = "SELECT * FROM account_bank_receive WHERE bank_account = :bankAccount AND bank_type_id = :bankTypeId ", nativeQuery = true)
+	@Query(value = "SELECT * FROM account_bank_receive WHERE bank_account = :bankAccount AND bank_type_id = :bankTypeId AND is_authenticated = true AND status = 1", nativeQuery = true)
 	AccountBankReceiveEntity getAccountBankByBankAccountAndBankTypeId(@Param(value = "bankAccount") String bankAccount,
 			@Param(value = "bankTypeId") String bankTypeId);
 
@@ -70,4 +72,11 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "ON b.bank_type_id = c.id "
 			+ "WHERE a.branch_id = :branchId", nativeQuery = true)
 	List<BusinessBankDTO> getBankByBranchId(@Param(value = "branchId") String branchId);
+
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_bank_receive "
+			+ "SET status = :status "
+			+ "WHERE user_id = :userId", nativeQuery = true)
+	void updateStatusAccountBankByUserId(@Param(value = "status") int status, @Param(value = "userId") String userId);
 }

@@ -58,6 +58,7 @@ import com.vietqr.org.service.TextToSpeechService;
 import com.vietqr.org.service.FcmTokenService;
 import com.vietqr.org.service.FirebaseMessagingService;
 import com.vietqr.org.service.AccountBankReceiveService;
+import com.vietqr.org.service.AccountCustomerBankService;
 import com.vietqr.org.service.BankTypeService;
 import com.vietqr.org.entity.TransactionReceiveEntity;
 import com.vietqr.org.entity.TransactionReceiveBranchEntity;
@@ -67,8 +68,10 @@ import com.vietqr.org.entity.BusinessInformationEntity;
 import com.vietqr.org.entity.CustomerSyncEntity;
 import com.vietqr.org.entity.FcmTokenEntity;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
+import com.vietqr.org.entity.AccountCustomerBankEntity;
 import com.vietqr.org.entity.BankTypeEntity;
 import com.vietqr.org.dto.TokenProductBankDTO;
+import com.vietqr.org.dto.TransactionBankCustomerDTO;
 import com.vietqr.org.dto.ConfirmRequestFailedBankDTO;
 import com.vietqr.org.dto.RequestBankDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
@@ -120,7 +123,7 @@ public class TransactionBankController {
 	BankTypeService bankTypeService;
 
 	@Autowired
-	CustomerSyncService customerSyncService;
+	private CustomerSyncService customerSyncService;
 
 	@Autowired
 	private SocketHandler socketHandler;
@@ -128,12 +131,16 @@ public class TransactionBankController {
 	@Autowired
 	private TextToSpeechService textToSpeechService;
 
+	@Autowired
+	private AccountCustomerBankService accountCustomerBankService;
+
 	private FirebaseMessagingService firebaseMessagingService;
 
 	public TransactionBankController(FirebaseMessagingService firebaseMessagingService) {
 		this.firebaseMessagingService = firebaseMessagingService;
 	}
 
+	// Receive BDSD from MB Bank, so bankCode = 'MB'
 	@PostMapping("transaction-sync")
 	public ResponseEntity<TransactionResponseDTO> insertTranscationBank(@RequestBody TransactionBankDTO dto) {
 		TransactionResponseDTO result = null;
@@ -170,238 +177,168 @@ public class TransactionBankController {
 			httpStatus = HttpStatus.BAD_REQUEST;
 			return new ResponseEntity<>(result, httpStatus);
 		} finally {
+			// AccountBankReceiveEntity accountBankEntity = accountBankService
+			// .getAccountBankById(transactionReceiveEntity.getBankId());
 			if (checkDuplicate) {
-				// find transaction by id
-				String traceId = "";
-				String[] newPaths = dto.getContent().split("\\s+");
-				logger.info("content: " + dto.getContent() + "-" + newPaths.length + "-" + newPaths.toString());
-				if (newPaths != null && newPaths.length > 0) {
-					int indexSaved = 0;
-					for (int i = 0; i < newPaths.length; i++) {
-						if (newPaths[i].contains("VQR")) {
-							traceId = newPaths[i];
-							indexSaved = i;
-						}
-						if (i == indexSaved + 1) {
-							if (traceId.length() < 13) {
-								traceId = traceId + newPaths[i];
+				String bankCode = "MB";
+				String bankTypeId = bankTypeService.getBankTypeIdByBankCode(bankCode);
+				AccountBankReceiveEntity accountBankEntity = accountBankService
+						.getAccountBankByBankAccountAndBankTypeId(dto.getBankaccount(), bankTypeId);
+				if (accountBankEntity != null) {
+					// find transaction by id
+					String traceId = "";
+					String[] newPaths = dto.getContent().split("\\s+");
+					logger.info("content: " + dto.getContent() + "-" + newPaths.length + "-" + newPaths.toString());
+					if (newPaths != null && newPaths.length > 0) {
+						int indexSaved = 0;
+						for (int i = 0; i < newPaths.length; i++) {
+							if (newPaths[i].contains("VQR")) {
+								traceId = newPaths[i];
+								indexSaved = i;
+							}
+							if (i == indexSaved + 1) {
+								if (traceId.length() < 13) {
+									traceId = traceId + newPaths[i];
+								}
 							}
 						}
-					}
-					if (!traceId.isEmpty()) {
-						String pattern = "VQR.{10}";
-						Pattern r = Pattern.compile(pattern);
-						Matcher m = r.matcher(traceId);
-						if (m.find()) {
-							traceId = m.group(0);
-						} else {
-							traceId = "";
+						if (!traceId.isEmpty()) {
+							String pattern = "VQR.{10}";
+							Pattern r = Pattern.compile(pattern);
+							Matcher m = r.matcher(traceId);
+							if (m.find()) {
+								traceId = m.group(0);
+							} else {
+								traceId = "";
+							}
 						}
+						logger.info("traceId: " + traceId);
 					}
-					logger.info("traceId: " + traceId);
-				}
-				if (traceId != null && !traceId.isEmpty()) {
-					logger.info("transaction-sync - trace ID detect: " + traceId);
-					TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
-							.getTransactionByTraceId(traceId);
-					if (transactionReceiveEntity != null) {
-						updateTransaction(dto, transactionReceiveEntity, time, nf);
+					String orderId = "";
+					String sign = "";
+					if (traceId != null && !traceId.isEmpty()) {
+						logger.info("transaction-sync - trace ID detect: " + traceId);
+						TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
+								.getTransactionByTraceIdAndAmount(traceId, dto.getAmount() + "");
+						if (transactionReceiveEntity != null) {
+							orderId = transactionReceiveEntity.getOrderId();
+							sign = transactionReceiveEntity.getSign();
+							updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time, nf);
+						} else {
+							logger.info(
+									"transaction-sync - cannot find transaction receive. Receive new transaction outside system");
+							// process here
+							insertNewTransaction(dto, accountBankEntity, time, traceId, uuid, nf, "", "");
+						}
 					} else {
-						logger.info(
-								"transaction-sync - cannot find transaction receive. Receive new transaction outside system");
-						// process here
-						insertNewTransaction(dto, time, traceId, uuid, nf);
+						logger.info("transaction-sync - traceId is empty. Receive new transaction outside system");
+						insertNewTransaction(dto, accountBankEntity, time, traceId, uuid, nf, "", "");
 					}
+					getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
 				} else {
-					logger.info("transaction-sync - traceId is empty. Receive new transaction outside system");
-					insertNewTransaction(dto, time, traceId, uuid, nf);
+					logger.info("transaction-sync - cannot find account bank or account bank is deactive");
 				}
-				getCustomerSyncEntities(dto, time);
 			}
 		}
 	}
 
 	@Async
 	private void updateTransaction(TransactionBankDTO dto, TransactionReceiveEntity transactionReceiveEntity,
-			long time, NumberFormat nf) {
-		AccountBankReceiveEntity accountBankEntity = accountBankService
-				.getAccountBankById(transactionReceiveEntity.getBankId()); // update status
-		if (accountBankEntity != null) {
-			// find transaction-branch-receive to push notification
-			BankTypeEntity bankTypeEntity = bankTypeService
-					.getBankTypeById(accountBankEntity.getBankTypeId());
-			// update transaction receive
-			transactionReceiveService.updateTransactionReceiveStatus(1,
-					dto.getTransactionid(),
-					transactionReceiveEntity.getId());
-			//
-			TransactionReceiveBranchEntity transactionBranchEntity = transactionReceiveBranchService
-					.getTransactionBranchByTransactionId(transactionReceiveEntity.getId());
-			if (transactionBranchEntity != null) {
-				// push notification
-				// find userIds into business_member and branch_member
-				List<String> userIds = branchMemberService
-						.getUserIdsByBusinessIdAndBranchId(transactionBranchEntity.getBusinessId(),
-								transactionBranchEntity.getBranchId());
-				// insert AND push notification to users belong to
-				// admin business/ member of branch
-				if (userIds != null && !userIds.isEmpty()) {
-					String requestId = "";
-					for (String userId : userIds) {
-						// insert notification
-						UUID notificationUUID = UUID.randomUUID();
-						NotificationEntity notiEntity = new NotificationEntity();
-						BranchInformationEntity branchEntity = branchInformationService
-								.getBranchById(transactionBranchEntity.getBranchId());
-						BusinessInformationEntity businessEntity = businessInformationService
-								.getBusinessById(branchEntity.getBusinessId());
-						String prefix = "";
-						if (dto.getTransType().toUpperCase().equals("D")) {
-							prefix = "-";
-						} else {
-							prefix = "+";
-						}
-						String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
-								+ accountBankEntity.getBankAccount()
-								+ NotificationUtil.getNotiDescUpdateTransSuffix2()
-								+ prefix + nf.format(dto.getAmount())
-								+ NotificationUtil.getNotiDescUpdateTransSuffix3()
-								+ branchEntity.getName()
-								+ NotificationUtil.getNotiDescUpdateTransSuffix4()
-								+ dto.getContent();
-						// String title = NotificationUtil.getNotiTitleNewTransaction();
-						notiEntity.setId(notificationUUID.toString());
-						notiEntity.setRead(false);
-						notiEntity.setMessage(message);
-						notiEntity.setTime(time);
-						notiEntity.setType(NotificationUtil.getNotiTypeNewTransaction());
-						notiEntity.setUserId(userId);
-						notiEntity.setData(transactionReceiveEntity.getId());
-						notificationService.insertNotification(notiEntity);
-						List<FcmTokenEntity> fcmTokens = new ArrayList<>();
-						fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
-						Map<String, String> data = new HashMap<>();
-						data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
-						data.put("notificationId", notificationUUID.toString());
-						data.put("transactionReceiveId", transactionReceiveEntity.getId());
-						data.put("bankAccount", transactionReceiveEntity.getBankAccount());
-						data.put("bankName", bankTypeEntity.getBankName());
-						data.put("bankCode", bankTypeEntity.getBankCode());
-						data.put("bankId", transactionReceiveEntity.getBankId());
-						data.put("branchName", branchEntity.getName());
-						data.put("businessName", businessEntity.getName());
-						data.put("content", transactionReceiveEntity.getContent());
-						data.put("amount", "" + transactionReceiveEntity.getAmount());
-						data.put("time", "" + transactionReceiveEntity.getTime());
-						data.put("refId", "" + dto.getTransactionid());
-						data.put("status", "1");
-						data.put("traceId", "" + transactionReceiveEntity.getTraceId());
-						data.put("transType", dto.getTransType());
-						firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
-								NotificationUtil
-										.getNotiTitleUpdateTransaction(),
-								message);
-						if (requestId.trim().isEmpty()) {
-							requestId = textToSpeechService.requestTTS(accountBankEntity.getUserId(),
-									data, dto.getAmount() + "");
-						} else {
-							data.put("audioLink", textToSpeechService.find(requestId));
-							try {
-								socketHandler.sendMessageToUser(userId, data);
-							} catch (Exception e) {
-								logger.error("TTS-Transaction: Error: " + e.toString());
-							}
+			AccountBankReceiveEntity accountBankEntity, long time, NumberFormat nf) {
+
+		// find transaction-branch-receive to push notification
+		BankTypeEntity bankTypeEntity = bankTypeService
+				.getBankTypeById(accountBankEntity.getBankTypeId());
+		// update transaction receive
+		transactionReceiveService.updateTransactionReceiveStatus(1,
+				dto.getTransactionid(),
+				dto.getReferencenumber(),
+				transactionReceiveEntity.getId());
+		//
+		TransactionReceiveBranchEntity transactionBranchEntity = transactionReceiveBranchService
+				.getTransactionBranchByTransactionId(transactionReceiveEntity.getId());
+		if (transactionBranchEntity != null) {
+			// push notification
+			// find userIds into business_member and branch_member
+			List<String> userIds = branchMemberService
+					.getUserIdsByBusinessIdAndBranchId(transactionBranchEntity.getBusinessId(),
+							transactionBranchEntity.getBranchId());
+			// insert AND push notification to users belong to
+			// admin business/ member of branch
+			if (userIds != null && !userIds.isEmpty()) {
+				String requestId = "";
+				for (String userId : userIds) {
+					// insert notification
+					UUID notificationUUID = UUID.randomUUID();
+					NotificationEntity notiEntity = new NotificationEntity();
+					BranchInformationEntity branchEntity = branchInformationService
+							.getBranchById(transactionBranchEntity.getBranchId());
+					BusinessInformationEntity businessEntity = businessInformationService
+							.getBusinessById(branchEntity.getBusinessId());
+					String prefix = "";
+					if (dto.getTransType().toUpperCase().equals("D")) {
+						prefix = "-";
+					} else {
+						prefix = "+";
+					}
+					String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
+							+ accountBankEntity.getBankAccount()
+							+ NotificationUtil.getNotiDescUpdateTransSuffix2()
+							+ prefix + nf.format(dto.getAmount())
+							+ NotificationUtil.getNotiDescUpdateTransSuffix3()
+							+ branchEntity.getName()
+							+ NotificationUtil.getNotiDescUpdateTransSuffix4()
+							+ dto.getContent();
+					// String title = NotificationUtil.getNotiTitleNewTransaction();
+					notiEntity.setId(notificationUUID.toString());
+					notiEntity.setRead(false);
+					notiEntity.setMessage(message);
+					notiEntity.setTime(time);
+					notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
+					notiEntity.setUserId(userId);
+					notiEntity.setData(transactionReceiveEntity.getId());
+					notificationService.insertNotification(notiEntity);
+					List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+					fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
+					Map<String, String> data = new HashMap<>();
+					data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+					data.put("notificationId", notificationUUID.toString());
+					data.put("transactionReceiveId", transactionReceiveEntity.getId());
+					data.put("bankAccount", transactionReceiveEntity.getBankAccount());
+					data.put("bankName", bankTypeEntity.getBankName());
+					data.put("bankCode", bankTypeEntity.getBankCode());
+					data.put("bankId", transactionReceiveEntity.getBankId());
+					data.put("branchName", branchEntity.getName());
+					data.put("businessName", businessEntity.getName());
+					data.put("content", transactionReceiveEntity.getContent());
+					data.put("amount", "" + transactionReceiveEntity.getAmount());
+					data.put("time", "" + transactionReceiveEntity.getTime());
+					data.put("refId", "" + dto.getTransactionid());
+					data.put("status", "1");
+					data.put("traceId", "" + transactionReceiveEntity.getTraceId());
+					data.put("transType", dto.getTransType());
+					firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
+							NotificationUtil
+									.getNotiTitleUpdateTransaction(),
+							message);
+					if (requestId.trim().isEmpty()) {
+						requestId = textToSpeechService.requestTTS(accountBankEntity.getUserId(),
+								data, dto.getAmount() + "");
+					} else {
+						data.put("audioLink", textToSpeechService.find(requestId));
+						try {
+							socketHandler.sendMessageToUser(userId, data);
+						} catch (Exception e) {
+							logger.error("TTS-Transaction: Error: " + e.toString());
 						}
 					}
-					textToSpeechService.delete(requestId);
-				} else {
-					logger.info("transaction-sync - userIds empty.");
 				}
-			} else {
-				logger.info("transaction-sync - transaction-branch is empty.");
-				// insert notification
-				UUID notificationUUID = UUID.randomUUID();
-				NotificationEntity notiEntity = new NotificationEntity();
-				String prefix = "";
-				if (dto.getTransType().toUpperCase().equals("D")) {
-					prefix = "-";
-				} else {
-					prefix = "+";
-				}
-				String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
-						+ accountBankEntity.getBankAccount()
-						+ NotificationUtil.getNotiDescUpdateTransSuffix2()
-						+ prefix + nf.format(dto.getAmount())
-						+ NotificationUtil.getNotiDescUpdateTransSuffix4()
-						+ dto.getContent();
-				// String title = NotificationUtil.getNotiTitleNewTransaction();
-				notiEntity.setId(notificationUUID.toString());
-				notiEntity.setRead(false);
-				notiEntity.setMessage(message);
-				notiEntity.setTime(time);
-				notiEntity.setType(NotificationUtil.getNotiTypeNewTransaction());
-				notiEntity.setUserId(accountBankEntity.getUserId());
-				notiEntity.setData(transactionReceiveEntity.getId());
-				notificationService.insertNotification(notiEntity);
-				List<FcmTokenEntity> fcmTokens = new ArrayList<>();
-				fcmTokens = fcmTokenService.getFcmTokensByUserId(accountBankEntity.getUserId());
-				Map<String, String> data = new HashMap<>();
-				data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
-				data.put("notificationId", notificationUUID.toString());
-				data.put("transactionReceiveId", transactionReceiveEntity.getId());
-				data.put("bankAccount", accountBankEntity.getBankAccount());
-				data.put("bankName", bankTypeEntity.getBankName());
-				data.put("bankCode", bankTypeEntity.getBankCode());
-				data.put("bankId", accountBankEntity.getId());
-				data.put("branchName", "");
-				data.put("businessName", "");
-				data.put("content", dto.getContent());
-				data.put("amount", "" + dto.getAmount());
-				data.put("time", "" + time);
-				data.put("refId", "" + dto.getTransactionid());
-				data.put("status", "1");
-				data.put("traceId", "");
-				data.put("transType", dto.getTransType());
-				firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
-						NotificationUtil
-								.getNotiTitleUpdateTransaction(),
-						message);
-				String requestId = "";
-				requestId = textToSpeechService.requestTTS(accountBankEntity.getUserId(),
-						data, dto.getAmount() + "");
 				textToSpeechService.delete(requestId);
+			} else {
+				logger.info("transaction-sync - userIds empty.");
 			}
 		} else {
-			logger.info("transaction-sync - cannot find account bank");
-		}
-	}
-
-	@Async
-	private void insertNewTransaction(TransactionBankDTO dto, long time, String traceId, UUID uuid, NumberFormat nf) {
-		AccountBankReceiveEntity accountBankEntity = accountBankService
-				.getAccountBankByBankAccount(dto.getBankaccount());
-		if (accountBankEntity != null) {
-			BankTypeEntity bankTypeEntity = bankTypeService
-					.getBankTypeById(accountBankEntity.getBankTypeId());
-			UUID transcationUUID = UUID.randomUUID();
-			TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
-			transactionEntity.setId(transcationUUID.toString());
-			transactionEntity.setBankAccount(accountBankEntity.getBankAccount());
-			transactionEntity.setBankId(accountBankEntity.getId());
-			if (traceId == null || traceId.isEmpty()) {
-				transactionEntity.setContent(dto.getContent().trim());
-			} else {
-				transactionEntity.setContent(traceId + "." + dto.getContent());
-			}
-			transactionEntity.setAmount(Long.parseLong(dto.getAmount() + ""));
-			transactionEntity.setTime(time);
-			transactionEntity.setRefId(uuid.toString());
-			transactionEntity.setType(2);
-			transactionEntity.setStatus(1);
-			transactionEntity.setTraceId("");
-			transactionEntity.setTransType(dto.getTransType());
-			transactionReceiveService.insertTransactionReceive(transactionEntity);
-			//
+			logger.info("transaction-sync - transaction-branch is empty.");
 			// insert notification
 			UUID notificationUUID = UUID.randomUUID();
 			NotificationEntity notiEntity = new NotificationEntity();
@@ -422,16 +359,16 @@ public class TransactionBankController {
 			notiEntity.setRead(false);
 			notiEntity.setMessage(message);
 			notiEntity.setTime(time);
-			notiEntity.setType(NotificationUtil.getNotiTypeNewTransaction());
+			notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
 			notiEntity.setUserId(accountBankEntity.getUserId());
-			notiEntity.setData(transcationUUID.toString());
+			notiEntity.setData(transactionReceiveEntity.getId());
 			notificationService.insertNotification(notiEntity);
 			List<FcmTokenEntity> fcmTokens = new ArrayList<>();
 			fcmTokens = fcmTokenService.getFcmTokensByUserId(accountBankEntity.getUserId());
 			Map<String, String> data = new HashMap<>();
 			data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
 			data.put("notificationId", notificationUUID.toString());
-			data.put("transactionReceiveId", transcationUUID.toString());
+			data.put("transactionReceiveId", transactionReceiveEntity.getId());
 			data.put("bankAccount", accountBankEntity.getBankAccount());
 			data.put("bankName", bankTypeEntity.getBankName());
 			data.put("bankCode", bankTypeEntity.getBankCode());
@@ -454,6 +391,88 @@ public class TransactionBankController {
 					data, dto.getAmount() + "");
 			textToSpeechService.delete(requestId);
 		}
+
+	}
+
+	@Async
+	private void insertNewTransaction(TransactionBankDTO dto, AccountBankReceiveEntity accountBankEntity, long time,
+			String traceId, UUID uuid, NumberFormat nf, String orderId, String sign) {
+
+		BankTypeEntity bankTypeEntity = bankTypeService
+				.getBankTypeById(accountBankEntity.getBankTypeId());
+		UUID transcationUUID = UUID.randomUUID();
+		TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
+		transactionEntity.setId(transcationUUID.toString());
+		transactionEntity.setBankAccount(accountBankEntity.getBankAccount());
+		transactionEntity.setBankId(accountBankEntity.getId());
+		if (traceId == null || traceId.isEmpty()) {
+			transactionEntity.setContent(dto.getContent().trim());
+		} else {
+			transactionEntity.setContent(traceId + "." + dto.getContent());
+		}
+		transactionEntity.setAmount(Long.parseLong(dto.getAmount() + ""));
+		transactionEntity.setTime(time);
+		transactionEntity.setRefId(uuid.toString());
+		transactionEntity.setType(2);
+		transactionEntity.setStatus(1);
+		transactionEntity.setTraceId("");
+		transactionEntity.setTransType(dto.getTransType());
+		transactionEntity.setReferenceNumber(dto.getReferencenumber());
+		transactionEntity.setOrderId(orderId);
+		transactionEntity.setSign(sign);
+		transactionReceiveService.insertTransactionReceive(transactionEntity);
+		//
+		// insert notification
+		UUID notificationUUID = UUID.randomUUID();
+		NotificationEntity notiEntity = new NotificationEntity();
+		String prefix = "";
+		if (dto.getTransType().toUpperCase().equals("D")) {
+			prefix = "-";
+		} else {
+			prefix = "+";
+		}
+		String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
+				+ accountBankEntity.getBankAccount()
+				+ NotificationUtil.getNotiDescUpdateTransSuffix2()
+				+ prefix + nf.format(dto.getAmount())
+				+ NotificationUtil.getNotiDescUpdateTransSuffix4()
+				+ dto.getContent();
+		// String title = NotificationUtil.getNotiTitleNewTransaction();
+		notiEntity.setId(notificationUUID.toString());
+		notiEntity.setRead(false);
+		notiEntity.setMessage(message);
+		notiEntity.setTime(time);
+		notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
+		notiEntity.setUserId(accountBankEntity.getUserId());
+		notiEntity.setData(transcationUUID.toString());
+		notificationService.insertNotification(notiEntity);
+		List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+		fcmTokens = fcmTokenService.getFcmTokensByUserId(accountBankEntity.getUserId());
+		Map<String, String> data = new HashMap<>();
+		data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+		data.put("notificationId", notificationUUID.toString());
+		data.put("transactionReceiveId", transcationUUID.toString());
+		data.put("bankAccount", accountBankEntity.getBankAccount());
+		data.put("bankName", bankTypeEntity.getBankName());
+		data.put("bankCode", bankTypeEntity.getBankCode());
+		data.put("bankId", accountBankEntity.getId());
+		data.put("branchName", "");
+		data.put("businessName", "");
+		data.put("content", dto.getContent());
+		data.put("amount", "" + dto.getAmount());
+		data.put("time", "" + time);
+		data.put("refId", "" + dto.getTransactionid());
+		data.put("status", "1");
+		data.put("traceId", "");
+		data.put("transType", dto.getTransType());
+		firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
+				NotificationUtil
+						.getNotiTitleUpdateTransaction(),
+				message);
+		String requestId = "";
+		requestId = textToSpeechService.requestTTS(accountBankEntity.getUserId(),
+				data, dto.getAmount() + "");
+		textToSpeechService.delete(requestId);
 
 	}
 
@@ -932,117 +951,6 @@ public class TransactionBankController {
 		return result;
 	}
 
-	// @Async
-	// private CompletableFuture<TokenDTO> getCustomerSyncToken(CustomerSyncEntity
-	// entity) {
-	// return CompletableFuture.supplyAsync(() -> {
-	// String key = entity.getUsername() + ":" + entity.getPassword();
-	// String encodedKey = Base64.getEncoder().encodeToString(key.getBytes());
-	// String suffixUrl = entity.getSuffixUrl() != null &&
-	// !entity.getSuffixUrl().isEmpty()
-	// ? entity.getSuffixUrl()
-	// : "";
-	// UriComponents uriComponents = UriComponentsBuilder
-	// .fromHttpUrl("http://" + entity.getIpAddress() + ":" + entity.getPort() + "/"
-	// + suffixUrl
-	// + "/api/token_generate")
-	// .buildAndExpand();
-	// WebClient webClient = WebClient.builder()
-	// .baseUrl("http://" + entity.getIpAddress() + ":" + entity.getPort() + "/" +
-	// suffixUrl
-	// + "/api/token_generate")
-	// .build();
-	// TokenDTO response = webClient.method(HttpMethod.POST)
-	// .uri(uriComponents.toUri())
-	// .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-	// .header("Authorization", "Basic " + encodedKey)
-	// .retrieve()
-	// .onStatus(HttpStatus::isError, clientResponse -> {
-	// logger.info("getCustomerSyncToken - clientHttpResponse <> status code 200: "
-	// + clientResponse.bodyToMono(String.class).block());
-	// System.out.println("getCustomerSyncToken - clientHttpResponse <> status code
-	// 200: "
-	// + clientResponse.bodyToMono(String.class).block());
-	// return Mono.error(new RuntimeException("Failed to retrieve access token"));
-	// })
-	// .bodyToMono(TokenDTO.class)
-	// .block();
-	// logger.info("get access token response: " + response.getAccess_token());
-	// System.out.println("get access token response: " +
-	// response.getAccess_token());
-	// return response;
-	// });
-	// }
-
-	// @Async
-	// private CompletableFuture<TransactionResponseDTO>
-	// pushNewTransactionToCustomerSync(CustomerSyncEntity entity,
-	// TransactionBankDTO dto, long time) {
-	// return getCustomerSyncToken(entity)
-	// .thenCompose(tokenDTO -> {
-	// Map<String, Object> data = new HashMap<>();
-	// data.put("transactionid", dto.getTransactionid());
-	// data.put("transactiontime", dto.getTransactiontime());
-	// data.put("referencenumber", dto.getReferencenumber());
-	// data.put("amount", dto.getAmount());
-	// data.put("content", dto.getContent());
-	// data.put("bankaccount", dto.getBankaccount());
-	// data.put("transType", dto.getTransType());
-
-	// String suffixUrl = entity.getSuffixUrl() != null &&
-	// !entity.getSuffixUrl().isEmpty()
-	// ? entity.getSuffixUrl()
-	// : "";
-	// UriComponents uriComponents = UriComponentsBuilder
-	// .fromHttpUrl("https://" + entity.getIpAddress() + ":" + entity.getPort() +
-	// "/"
-	// + suffixUrl + "/api/transaction-sync")
-	// .buildAndExpand(/* add url parameter here */);
-
-	// WebClient webClient = WebClient.builder()
-	// .baseUrl("https://" + entity.getIpAddress() + ":" + entity.getPort() + "/" +
-	// suffixUrl
-	// + "/api/transaction-sync")
-	// .build();
-
-	// return webClient.post()
-	// .uri(uriComponents.toUri())
-	// .contentType(MediaType.APPLICATION_JSON)
-	// .header("Authorization", "Bearer " + tokenDTO.getAccess_token())
-	// .body(BodyInserters.fromValue(data))
-	// .retrieve()
-	// .bodyToMono(TransactionResponseDTO.class)
-	// .toFuture();
-	// });
-	// }
-
-	// @Async
-	// private CompletableFuture<Void> getCustomerSyncEntities(TransactionBankDTO
-	// dto, long time) {
-	// try {
-	// List<CustomerSyncEntity> list = new ArrayList<>();
-	// list = customerSyncService.getCustomerSyncEntities();
-	// if (list != null && !list.isEmpty()) {
-	// logger.info("getCustomerSyncEntities size: " + list.size());
-	// System.out.println("getCustomerSyncEntities size:" + list.size());
-	// List<CompletableFuture<TransactionResponseDTO>> futures = new ArrayList<>();
-	// for (CustomerSyncEntity entity : list) {
-	// futures.add(pushNewTransactionToCustomerSync(entity, dto, time));
-	// }
-	// return CompletableFuture.allOf(futures.toArray(new
-	// CompletableFuture[futures.size()]));
-	// } else {
-	// logger.info("getCustomerSyncEntities empty.");
-	// System.out.println("getCustomerSyncEntities empty.");
-	// return CompletableFuture.completedFuture(null);
-	// }
-	// } catch (Exception e) {
-	// logger.error("Error at getCustomerSyncEntities: " + e.toString());
-	// System.out.println("Error at getCustomerSyncEntities: " + e.toString());
-	// return CompletableFuture.completedFuture(null);
-	// }
-	// }
-
 	private TokenDTO getCustomerSyncToken(CustomerSyncEntity entity) {
 		TokenDTO result = null;
 		try {
@@ -1098,8 +1006,11 @@ public class TransactionBankController {
 		return result;
 	}
 
-	private void pushNewTransactionToCustomerSync(CustomerSyncEntity entity, TransactionBankDTO dto, long time) {
+	private void pushNewTransactionToCustomerSync(CustomerSyncEntity entity,
+			TransactionBankCustomerDTO dto, long time) {
 		try {
+			System.out.println("orderId" + dto.getOrderId());
+			System.out.println("sign" + dto.getSign());
 
 			TokenDTO tokenDTO = getCustomerSyncToken(entity);
 			if (tokenDTO != null) {
@@ -1111,6 +1022,8 @@ public class TransactionBankController {
 				data.put("content", dto.getContent());
 				data.put("bankaccount", dto.getBankaccount());
 				data.put("transType", dto.getTransType());
+				data.put("orderId", dto.getOrderId());
+				data.put("sign", dto.getSign());
 				String suffixUrl = "";
 				if (entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty()) {
 					suffixUrl = entity.getSuffixUrl();
@@ -1158,21 +1071,41 @@ public class TransactionBankController {
 		}
 	}
 
-	private void getCustomerSyncEntities(TransactionBankDTO dto, long time) {
+	private void getCustomerSyncEntities(TransactionBankDTO dto, AccountBankReceiveEntity accountBankEntity,
+			long time, String orderId, String sign) {
 		try {
-			List<CustomerSyncEntity> list = new ArrayList<>();
-			list = customerSyncService.getCustomerSyncEntities();
-			if (list != null && !list.isEmpty()) {
-				for (CustomerSyncEntity entity : list) {
-					pushNewTransactionToCustomerSync(entity, dto, time);
+			TransactionBankCustomerDTO transactionBankCustomerDTO = new TransactionBankCustomerDTO();
+			transactionBankCustomerDTO.setTransactionid(dto.getTransactionid());
+			transactionBankCustomerDTO.setTransactiontime(dto.getTransactiontime());
+			transactionBankCustomerDTO.setReferencenumber(dto.getReferencenumber());
+			transactionBankCustomerDTO.setAmount(dto.getAmount());
+			transactionBankCustomerDTO.setContent(dto.getContent());
+			transactionBankCustomerDTO.setBankaccount(dto.getBankaccount());
+			transactionBankCustomerDTO.setTransType(dto.getTransType());
+			transactionBankCustomerDTO.setReciprocalAccount(dto.getReciprocalAccount());
+			transactionBankCustomerDTO.setReciprocalBankCode(dto.getReciprocalBankCode());
+			transactionBankCustomerDTO.setVa(dto.getVa());
+			transactionBankCustomerDTO.setValueDate(dto.getValueDate());
+			transactionBankCustomerDTO.setSign(sign);
+			transactionBankCustomerDTO.setOrderId(orderId);
+			// 1. Check bankAccountEntity with sync = true (add sync boolean field)
+			// 2. Find account_customer_bank by bank_id/bank_account AND auth = true.
+			// 3. Find customer_sync and push data to customer.
+			if (accountBankEntity.isSync() == true) {
+				List<AccountCustomerBankEntity> accountCustomerBankEntities = new ArrayList<>();
+				accountCustomerBankEntities = accountCustomerBankService
+						.getAccountCustomerBankByBankId(accountBankEntity.getId());
+				if (!accountCustomerBankEntities.isEmpty()) {
+					for (AccountCustomerBankEntity accountCustomerBankEntity : accountCustomerBankEntities) {
+						CustomerSyncEntity customerSyncEntity = customerSyncService
+								.getCustomerSyncById(accountCustomerBankEntity.getCustomerSyncId());
+						pushNewTransactionToCustomerSync(customerSyncEntity, transactionBankCustomerDTO, time);
+					}
 				}
-			} else {
-				logger.info("getCustomerSyncEntities empty.");
-				System.out.println("getCustomerSyncEntities empty.");
 			}
 		} catch (Exception e) {
-			logger.error("Error at getCustomerSyncEntities: " + e.toString());
-			System.out.println("Error at getCustomerSyncEntities: " + e.toString());
+			logger.error("CustomerSync: Error: " + e.toString());
+			System.out.println("CustomerSync: Error: " + e.toString());
 		}
 	}
 

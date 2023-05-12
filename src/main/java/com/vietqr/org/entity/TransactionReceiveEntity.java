@@ -53,12 +53,23 @@ public class TransactionReceiveEntity implements Serializable {
 	@Column(name = "transType")
 	private String transType;
 
+	@Column(name = "referenceNumber")
+	private String referenceNumber;
+
+	// for customers
+	@Column(name = "orderId")
+	private String orderId;
+
+	@Column(name = "sign")
+	private String sign;
+
 	public TransactionReceiveEntity() {
 		super();
 	}
 
 	public TransactionReceiveEntity(String id, String bankAccount, String bankId, String content, long amount,
-			long time, String refId, int type, int status, String traceId, String transType) {
+			long time, String refId, int type, int status, String traceId, String transType, String referenceNumber,
+			String sign, String orderId) {
 		this.id = id;
 		this.bankAccount = bankAccount;
 		this.bankId = bankId;
@@ -70,6 +81,9 @@ public class TransactionReceiveEntity implements Serializable {
 		this.status = status;
 		this.traceId = traceId;
 		this.transType = transType;
+		this.referenceNumber = referenceNumber;
+		this.sign = sign;
+		this.orderId = orderId;
 	}
 
 	public String getId() {
@@ -158,6 +172,30 @@ public class TransactionReceiveEntity implements Serializable {
 
 	public void setTransType(String transType) {
 		this.transType = transType;
+	}
+
+	public String getReferenceNumber() {
+		return referenceNumber;
+	}
+
+	public void setReferenceNumber(String referenceNumber) {
+		this.referenceNumber = referenceNumber;
+	}
+
+	public String getOrderId() {
+		return orderId;
+	}
+
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
+	}
+
+	public String getSign() {
+		return sign;
+	}
+
+	public void setSign(String sign) {
+		this.sign = sign;
 	}
 
 }

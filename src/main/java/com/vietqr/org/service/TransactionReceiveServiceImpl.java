@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.vietqr.org.repository.TransactionReceiveRepository;
 import java.util.List;
 import com.vietqr.org.entity.TransactionReceiveEntity;
+import com.vietqr.org.dto.TransactionDetailDTO;
 import com.vietqr.org.dto.TransactionRelatedDTO;
 
 @Service
@@ -20,8 +21,8 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
-    public void updateTransactionReceiveStatus(int status, String refId, String id) {
-        repo.updateTransactionReceiveStatus(status, refId, id);
+    public void updateTransactionReceiveStatus(int status, String refId, String referenceNumber, String id) {
+        repo.updateTransactionReceiveStatus(status, refId, referenceNumber, id);
     }
 
     @Override
@@ -30,13 +31,14 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
-    public TransactionReceiveEntity getTransactionById(String id) {
+    public TransactionDetailDTO getTransactionById(String id) {
         return repo.getTransactionById(id);
     }
 
     @Override
-    public TransactionReceiveEntity getTransactionByTraceId(String id) {
-        return repo.getTransactionByTraceId(id);
+    public TransactionReceiveEntity getTransactionByTraceIdAndAmount(String id, String amount) {
+        Long amountParsed = Long.parseLong(amount);
+        return repo.getTransactionByTraceId(id, amountParsed);
     }
 
     @Override
@@ -47,6 +49,11 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     @Override
     public List<TransactionRelatedDTO> getTransactions(int offset, String bankId) {
         return repo.getTransactions(offset, bankId);
+    }
+
+    @Override
+    public TransactionReceiveEntity getTransactionReceiveById(String id) {
+        return repo.getTransactionReceiveById(id);
     }
 
 }

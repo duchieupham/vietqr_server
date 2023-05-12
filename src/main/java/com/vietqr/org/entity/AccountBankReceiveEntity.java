@@ -44,12 +44,19 @@ public class AccountBankReceiveEntity implements Serializable {
 	@Column(name = "isAuthenticated")
 	private boolean isAuthenticated;
 
+	@Column(name = "isSync")
+	private boolean isSync;
+
+	@Column(name = "status")
+	private boolean status;
+
 	public AccountBankReceiveEntity() {
 		super();
 	}
 
 	public AccountBankReceiveEntity(String id, String bankTypeId, String bankAccount, String bankAccountName,
-			String nationalId, String phoneAuthenticated, int type, String userId, boolean isAuthenticated) {
+			String nationalId, String phoneAuthenticated, int type, String userId, boolean isAuthenticated,
+			boolean isSync, boolean status, String orderId, String sign) {
 		super();
 		this.id = id;
 		this.bankTypeId = bankTypeId;
@@ -60,6 +67,8 @@ public class AccountBankReceiveEntity implements Serializable {
 		this.type = type;
 		this.userId = userId;
 		this.isAuthenticated = isAuthenticated;
+		this.isSync = isSync;
+		this.status = status;
 	}
 
 	public String getId() {
@@ -132,6 +141,22 @@ public class AccountBankReceiveEntity implements Serializable {
 
 	public void setAuthenticated(boolean isAuthenticated) {
 		this.isAuthenticated = isAuthenticated;
+	}
+
+	public boolean isSync() {
+		return isSync;
+	}
+
+	public void setSync(boolean isSync) {
+		this.isSync = isSync;
+	}
+
+	public boolean isStatus() {
+		return status;
+	}
+
+	public void setStatus(boolean status) {
+		this.status = status;
 	}
 
 }

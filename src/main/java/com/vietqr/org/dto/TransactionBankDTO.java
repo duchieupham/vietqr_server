@@ -2,7 +2,7 @@ package com.vietqr.org.dto;
 
 import java.io.Serializable;
 
-public class TransactionBankDTO implements Serializable{
+public class TransactionBankDTO implements Serializable {
 	/**
 	 *
 	 */

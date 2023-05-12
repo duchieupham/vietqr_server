@@ -34,7 +34,6 @@ import com.vietqr.org.dto.AccountBankReceiveDetailDTO.BusinessBankDetailDTO;
 import com.vietqr.org.dto.AccountBankReceiveDetailDTO.TransactionBankListDTO;
 import com.vietqr.org.dto.AccountBankReceivePersonalDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
-import com.vietqr.org.entity.BankReceiveBranchEntity;
 import com.vietqr.org.entity.BankReceivePersonalEntity;
 import com.vietqr.org.entity.BankTypeEntity;
 import com.vietqr.org.entity.BranchInformationEntity;
@@ -127,6 +126,8 @@ public class AccountBankReceiveController {
 			entity.setNationalId("");
 			entity.setPhoneAuthenticated("");
 			entity.setAuthenticated(false);
+			entity.setSync(false);
+			entity.setStatus(true);
 			accountBankService.insertAccountBank(entity);
 			// insert bank-receive-personal
 			UUID uuidPersonal = UUID.randomUUID();
@@ -173,7 +174,7 @@ public class AccountBankReceiveController {
 	// register bank account with authenticated
 
 	@PostMapping("account-bank")
-	public ResponseEntity<ResponseMessageDTO> insertAccountBank(@Valid @RequestBody AccountBankReceiveDTO dto) {
+	public ResponseEntity<ResponseMessageDTO> insertPersonalAccountBank(@Valid @RequestBody AccountBankReceiveDTO dto) {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
@@ -189,24 +190,28 @@ public class AccountBankReceiveController {
 			entity.setNationalId(dto.getNationalId());
 			entity.setPhoneAuthenticated(dto.getPhoneAuthenticated());
 			entity.setAuthenticated(true);
+			entity.setSync(false);
+			entity.setStatus(true);
 			accountBankService.insertAccountBank(entity);
-			if (dto.getType() == 0) {
-				// insert bank receive personal
-				UUID uuidPersonal = UUID.randomUUID();
-				BankReceivePersonalEntity personalEntity = new BankReceivePersonalEntity();
-				personalEntity.setId(uuidPersonal.toString());
-				personalEntity.setBankId(uuid.toString());
-				personalEntity.setUserId(dto.getUserId());
-				bankReceivePersonalService.insertAccountBankReceivePersonal(personalEntity);
-			} else if (dto.getType() == 1) {
-				// insert bank_receive_branch
-				UUID uuidBankReceiveBranch = UUID.randomUUID();
-				BankReceiveBranchEntity bankReceiveBranchEntity = new BankReceiveBranchEntity();
-				bankReceiveBranchEntity.setId(uuidBankReceiveBranch.toString());
-				bankReceiveBranchEntity.setBranchId(dto.getBranchId());
-				bankReceiveBranchEntity.setBankId(uuid.toString());
-				bankReceiveBranchService.insertBankReceiveBranch(bankReceiveBranchEntity);
-			}
+			// if (dto.getType() == 0) {
+			// insert bank receive personal
+			UUID uuidPersonal = UUID.randomUUID();
+			BankReceivePersonalEntity personalEntity = new BankReceivePersonalEntity();
+			personalEntity.setId(uuidPersonal.toString());
+			personalEntity.setBankId(uuid.toString());
+			personalEntity.setUserId(dto.getUserId());
+			bankReceivePersonalService.insertAccountBankReceivePersonal(personalEntity);
+			// } else if (dto.getType() == 1) {
+			// // insert bank_receive_branch
+			// UUID uuidBankReceiveBranch = UUID.randomUUID();
+			// BankReceiveBranchEntity bankReceiveBranchEntity = new
+			// BankReceiveBranchEntity();
+			// bankReceiveBranchEntity.setId(uuidBankReceiveBranch.toString());
+			// bankReceiveBranchEntity.setBranchId(dto.getBranchId());
+			// bankReceiveBranchEntity.setBankId(uuid.toString());
+			// bankReceiveBranchEntity.setBusinessId(dto.getBusinessId());
+			// bankReceiveBranchService.insertBankReceiveBranch(bankReceiveBranchEntity);
+			// }
 			result = new ResponseMessageDTO("SUCCESS", uuid.toString() + "*" + qr);
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {

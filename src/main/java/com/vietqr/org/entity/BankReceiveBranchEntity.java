@@ -26,15 +26,19 @@ public class BankReceiveBranchEntity implements Serializable {
 	@Column(name = "branchId")
 	private String branchId;
 
+	@Column(name = "businessId")
+	private String businessId;
+
 	public BankReceiveBranchEntity() {
 		super();
 	}
 
-	public BankReceiveBranchEntity(String id, String bankId, String branchId) {
+	public BankReceiveBranchEntity(String id, String bankId, String branchId, String businessId) {
 		super();
 		this.id = id;
 		this.bankId = bankId;
 		this.branchId = branchId;
+		this.businessId = businessId;
 	}
 
 	public String getId() {
@@ -59,6 +63,14 @@ public class BankReceiveBranchEntity implements Serializable {
 
 	public void setBranchId(String branchId) {
 		this.branchId = branchId;
+	}
+
+	public String getBusinessId() {
+		return businessId;
+	}
+
+	public void setBusinessId(String businessId) {
+		this.businessId = businessId;
 	}
 
 }
