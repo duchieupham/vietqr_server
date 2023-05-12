@@ -20,13 +20,23 @@ public class NotificationServiceImpl implements NotificationService {
 	}
 
 	@Override
-	public List<NotificationEntity> getNotificationsByUserId(String userId) {
-		return repo.getNotificationsByUserId(userId);
+	public List<NotificationEntity> getNotificationsByUserId(String userId, int offset) {
+		return repo.getNotificationsByUserId(userId, offset);
 	}
 
 	@Override
-	public void updateNotificationStatus(String id) {
-		repo.updateNotificationStatus(id);
+	public void updateNotificationStatus(String userId) {
+		repo.updateNotificationStatus(userId);
+	}
+
+	@Override
+	public int getNotificationCountByUserId(String userId) {
+		return repo.getNotificationCountByUserId(userId);
+	}
+
+	@Override
+	public void deleteNotificationsByUserId(String userId) {
+		repo.deleteNotificationsByUserId(userId);
 	}
 
 }

@@ -34,4 +34,9 @@ public class FCMTokenServiceImpl implements FcmTokenService {
 		repo.updateToken(newToken, userId, oldToken);
 	}
 
+	@Override
+	public void deleteTokensByUserId(String userId) {
+		repo.deleteTokensByUserId(userId);
+	}
+
 }

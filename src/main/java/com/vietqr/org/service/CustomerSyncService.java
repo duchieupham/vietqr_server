@@ -13,4 +13,6 @@ public interface CustomerSyncService {
 
     public List<CustomerSyncEntity> getCustomerSyncEntities();
 
+    public CustomerSyncEntity getCustomerSyncById(String id);
+
 }

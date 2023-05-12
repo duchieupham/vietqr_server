@@ -8,6 +8,7 @@ public class NotificationUtil {
 	private static final String NOTI_TYPE_NEW_MEMBER = "N03";
 	private static final String NOTI_TYPE_NEW_TRANSACTION = "N04";
 	private static final String NOTI_TYPE_UPDATE_TRANSACTION = "N05";
+	private static final String NOTI_TYPE_VOICE_TRANSACTION = "N06";
 
 	// Title
 	private static final String NOTI_TITLE_TRANSACTION = "Thông báo biến động số dư";
@@ -111,6 +112,10 @@ public class NotificationUtil {
 
 	public static String getNotiDescNewTransPrefix2() {
 		return NOTI_DESC_NEW_TRANS_PREFIX2;
+	}
+
+	public static String getNotiTypeVoiceTransaction() {
+		return NOTI_TYPE_VOICE_TRANSACTION;
 	}
 
 }

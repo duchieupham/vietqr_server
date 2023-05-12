@@ -14,7 +14,7 @@ import com.vietqr.org.entity.AccountInformationEntity;
 @Repository
 public interface AccountInformationRepository extends JpaRepository<AccountInformationEntity, Long> {
 
-	@Query(value = "SELECT * FROM account_information WHERE user_id = :userId", nativeQuery = true)
+	@Query(value = "SELECT * FROM account_information WHERE user_id = :userId AND status = 1", nativeQuery = true)
 	AccountInformationEntity getAccountInformation(@Param(value = "userId") String userId);
 
 	@Transactional
@@ -40,6 +40,11 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
 			+ "FROM account_login a "
 			+ "INNER JOIN account_information b "
 			+ "ON a.id= b.user_id "
-			+ "WHERE a.phone_no= :phoneNo", nativeQuery = true)
+			+ "WHERE a.phone_no= :phoneNo AND status = 1", nativeQuery = true)
 	AccountSearchDTO getAccountSearch(@Param(value = "phoneNo") String phoneNo);
+
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_information SET status = :status WHERE user_id = :userId", nativeQuery = true)
+	void updateStatus(@Param(value = "status") int status, @Param(value = "userId") String userId);
 }

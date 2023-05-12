@@ -9,7 +9,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "AccountInformation")
-public class AccountInformationEntity implements Serializable{
+public class AccountInformationEntity implements Serializable {
 
 	/**
 	 *
@@ -47,12 +47,15 @@ public class AccountInformationEntity implements Serializable{
 	@Column(name = "imgId")
 	private String imgId;
 
+	@Column(name = "status")
+	private boolean status;
+
 	public AccountInformationEntity() {
 		super();
 	}
 
 	public AccountInformationEntity(String id, String userId, String firstName, String middleName, String lastName,
-			String birthDate, String address, int gender, String email, String imgId) {
+			String birthDate, String address, int gender, String email, String imgId, boolean status) {
 		super();
 		this.id = id;
 		this.userId = userId;
@@ -64,6 +67,7 @@ public class AccountInformationEntity implements Serializable{
 		this.gender = gender;
 		this.email = email;
 		this.imgId = imgId;
+		this.status = status;
 	}
 
 	public String getId() {
@@ -144,6 +148,14 @@ public class AccountInformationEntity implements Serializable{
 
 	public void setImgId(String imgId) {
 		this.imgId = imgId;
+	}
+
+	public boolean isStatus() {
+		return status;
+	}
+
+	public void setStatus(boolean status) {
+		this.status = status;
 	}
 
 }

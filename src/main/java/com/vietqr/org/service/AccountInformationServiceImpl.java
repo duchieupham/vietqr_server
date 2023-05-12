@@ -45,4 +45,9 @@ public class AccountInformationServiceImpl implements AccountInformationService 
 		return accountInformationRepo.getAccountSearch(phoneNo);
 	}
 
+	@Override
+	public void udpateStatus(int status, String userId) {
+		accountInformationRepo.updateStatus(status, userId);
+	}
+
 }

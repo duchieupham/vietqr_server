@@ -15,6 +15,9 @@ import com.vietqr.org.dto.AccountBankReceivePersonalDTO;
 @Repository
 public interface BankReceiveBranchRepository extends JpaRepository<BankReceiveBranchEntity, Long> {
 
+    @Query(value = "SELECT * FROM bank_receive_branch WHERE bank_id = :bankId", nativeQuery = true)
+    BankReceiveBranchEntity getBankReceiveBranchByBankId(@Param(value = "bankId") String bankId);
+
     @Query(value = "SELECT a.bank_id as bankId, b.bank_account as bankAccount, b.bank_account_name as userBankName, c.bank_name as bankName, "
             + "c.bank_code as bankCode, c.img_id as imgId, b.type as bankType, a.branch_id as branchId, d.business_id as businessId, d.name as branchName, "
             + "e.name as businessName, d.code as branchCode, e.code as businessCode, b.is_authenticated as authenticated "

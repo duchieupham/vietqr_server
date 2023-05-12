@@ -2,6 +2,7 @@ package com.vietqr.org.service;
 
 import org.springframework.stereotype.Service;
 
+import com.vietqr.org.dto.AccountCheckDTO;
 import com.vietqr.org.entity.AccountLoginEntity;
 
 @Service
@@ -15,9 +16,8 @@ public interface AccountLoginService {
 
 	public int insertAccountLogin(AccountLoginEntity entity);
 
-	public String checkExistedPhoneNo(String phoneNo);
+	public AccountCheckDTO checkExistedPhoneNo(String phoneNo);
 
-	public String checkExistedAccount(String userId);
+	public void updateStatus(int status, String userId);
 
-	public String checkExistedAccountByPhoneNo(String phoneNo);
 }

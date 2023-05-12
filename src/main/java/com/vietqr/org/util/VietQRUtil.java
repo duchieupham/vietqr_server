@@ -1,8 +1,12 @@
 package com.vietqr.org.util;
 
+// import org.springframework.scheduling.annotation.Async;
+
 import com.vietqr.org.dto.VietQRGenerateDTO;
 
 public class VietQRUtil {
+
+	// @Async
 	public static String generateStaticQR(VietQRGenerateDTO dto) {
 		String result = "";
 		// Payload Format Indicator
@@ -40,6 +44,7 @@ public class VietQRUtil {
 		return result;
 	}
 
+	// @Async
 	public static String generateTransactionQR(VietQRGenerateDTO dto) {
 		String result = "";
 		if (dto.getAmount().isEmpty() && dto.getContent().isEmpty()) {

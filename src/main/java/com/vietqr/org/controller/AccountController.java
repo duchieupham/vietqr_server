@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.vietqr.org.dto.AccountCheckDTO;
 import com.vietqr.org.dto.AccountInformationDTO;
 import com.vietqr.org.dto.AccountLoginDTO;
 import com.vietqr.org.dto.FcmRequestDTO;
@@ -39,6 +41,7 @@ import com.vietqr.org.entity.AccountLoginEntity;
 import com.vietqr.org.entity.FcmTokenEntity;
 import com.vietqr.org.entity.ImageEntity;
 import com.vietqr.org.entity.NotificationEntity;
+import com.vietqr.org.service.AccountBankReceiveService;
 import com.vietqr.org.service.AccountInformationService;
 import com.vietqr.org.service.AccountLoginService;
 import com.vietqr.org.service.FcmTokenService;
@@ -51,6 +54,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api")
 public class AccountController {
 	private static final Logger logger = Logger.getLogger(AccountController.class);
@@ -69,6 +73,9 @@ public class AccountController {
 
 	@Autowired
 	NotificationService notificationService;
+
+	@Autowired
+	AccountBankReceiveService accountBankReceiveService;
 
 	private FirebaseMessagingService firebaseMessagingService;
 
@@ -108,12 +115,14 @@ public class AccountController {
 						// push notification to devices
 						for (FcmTokenEntity fcmToken : fcmTokens) {
 							try {
-								FcmRequestDTO fcmDTO = new FcmRequestDTO();
-								fcmDTO.setTitle(NotificationUtil.getNotiTitleLoginWarning());
-								fcmDTO.setMessage(messageNotification);
-								fcmDTO.setToken(fcmToken.getToken());
-								firebaseMessagingService.sendPushNotificationToToken(fcmDTO);
-								logger.info("Send notification to device " + fcmToken.getToken());
+								if (!fcmToken.getToken().trim().isEmpty()) {
+									FcmRequestDTO fcmDTO = new FcmRequestDTO();
+									fcmDTO.setTitle(NotificationUtil.getNotiTitleLoginWarning());
+									fcmDTO.setMessage(messageNotification);
+									fcmDTO.setToken(fcmToken.getToken());
+									firebaseMessagingService.sendPushNotificationToToken(fcmDTO);
+									logger.info("Send notification to device " + fcmToken.getToken());
+								}
 							} catch (Exception e) {
 								logger.error("Error when Send Notification using FCM " + e.toString());
 								if (e.toString()
@@ -125,6 +134,7 @@ public class AccountController {
 						}
 					}
 					// insert new FCM token
+
 					FcmTokenEntity fcmTokenEntity = new FcmTokenEntity();
 					UUID uuid = UUID.randomUUID();
 					fcmTokenEntity.setId(uuid.toString());
@@ -133,6 +143,7 @@ public class AccountController {
 					fcmTokenEntity.setPlatform(dto.getPlatform());
 					fcmTokenEntity.setDevice(dto.getDevice());
 					fcmTokenService.insertFcmToken(fcmTokenEntity);
+
 					// response login success
 					result = getJWTToken(accountInformationEntity);
 					httpStatus = HttpStatus.OK;
@@ -194,8 +205,8 @@ public class AccountController {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
-			String checkExistedPhoneNo = accountLoginService.checkExistedPhoneNo(dto.getPhoneNo());
-			if (checkExistedPhoneNo == null || checkExistedPhoneNo.isEmpty()) {
+			AccountCheckDTO accountCheckDTO = accountLoginService.checkExistedPhoneNo(dto.getPhoneNo());
+			if (accountCheckDTO == null) {
 				UUID uuid = UUID.randomUUID();
 				UUID accountInformationUUID = UUID.randomUUID();
 				// insert account_login
@@ -203,7 +214,9 @@ public class AccountController {
 				accountLoginEntity.setId(uuid.toString());
 				accountLoginEntity.setPhoneNo(dto.getPhoneNo());
 				accountLoginEntity.setPassword(dto.getPassword());
+				accountLoginEntity.setStatus(true);
 				accountLoginService.insertAccountLogin(accountLoginEntity);
+
 				// insert account_information
 				AccountInformationEntity accountInformationEntity = new AccountInformationEntity();
 				accountInformationEntity.setId(accountInformationUUID.toString());
@@ -216,6 +229,7 @@ public class AccountController {
 				accountInformationEntity.setLastName("");
 				accountInformationEntity.setGender(0);
 				accountInformationEntity.setImgId("");
+				accountInformationEntity.setStatus(true);
 				int check = accountInformationService.insertAccountInformation(accountInformationEntity);
 				if (check == 1) {
 					result = new ResponseMessageDTO("SUCCESS", "");
@@ -224,9 +238,17 @@ public class AccountController {
 					result = new ResponseMessageDTO("FAILED", "E03");
 					httpStatus = HttpStatus.BAD_REQUEST;
 				}
-			} else {
+			} else if (accountCheckDTO != null && accountCheckDTO.getStatus() == true) {
 				result = new ResponseMessageDTO("FAILED", "E02");
 				httpStatus = HttpStatus.BAD_REQUEST;
+			} else if (accountCheckDTO != null && accountCheckDTO.getStatus() == false) {
+				// update status account_login and account information = 1
+				accountLoginService.updateStatus(1, accountCheckDTO.getId());
+				accountLoginService.updatePassword(dto.getPassword(), accountCheckDTO.getId());
+				accountInformationService.udpateStatus(1, accountCheckDTO.getId());
+				accountBankReceiveService.updateStatusAccountBankByUserId(1, accountCheckDTO.getId());
+				result = new ResponseMessageDTO("SUCCESS", "");
+				httpStatus = HttpStatus.OK;
 			}
 		} catch (Exception e) {
 			System.out.println("Error at registerAccount: " + e.toString());
@@ -280,7 +302,7 @@ public class AccountController {
 		return new ResponseEntity<>(result, httpStatus);
 	}
 
-	@PutMapping("user/image")
+	@PostMapping("user/image")
 	public ResponseEntity<ResponseMessageDTO> updateImage(@Valid @RequestParam String imgId,
 			@Valid @RequestParam MultipartFile image, @Valid @RequestParam String userId) {
 		ResponseMessageDTO result = null;
@@ -304,6 +326,33 @@ public class AccountController {
 			System.out.println("Error at updateImage: " + e.toString());
 			result = new ResponseMessageDTO("FAILED", "Cannot update information");
 			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	@PostMapping("user/deactive/{userId}")
+	public ResponseEntity<ResponseMessageDTO> deactiveUser(@PathVariable(value = "userId") String userId) {
+		ResponseMessageDTO result = null;
+		HttpStatus httpStatus = null;
+		try {
+			// delete all FCM token
+			fcmTokenService.deleteTokensByUserId(userId);
+			// delete all notification
+			notificationService.deleteNotificationsByUserId(userId);
+			// delete all transaction (not yet)
+			// update user information
+			accountInformationService.updateAccountInformation("Undefined", "", "", "01/01/1970", "", 0, "",
+					userId);
+			// update account_login and account_information => deactive (status = 2)
+			accountLoginService.updateStatus(0, userId);
+			accountInformationService.udpateStatus(0, userId);
+			accountBankReceiveService.updateStatusAccountBankByUserId(0, userId);
+			result = new ResponseMessageDTO("SUCCESS", "");
+			httpStatus = HttpStatus.OK;
+		} catch (Exception e) {
+			result = new ResponseMessageDTO("FAILED", "E05");
+			httpStatus = HttpStatus.BAD_REQUEST;
+			logger.error("DISABLE USER: " + e.toString());
 		}
 		return new ResponseEntity<>(result, httpStatus);
 	}

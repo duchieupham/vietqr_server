@@ -20,4 +20,6 @@ public interface AccountInformationService {
 	public int insertAccountInformation(AccountInformationEntity entity);
 
 	public AccountSearchDTO getAccountSearch(String phoneNo);
+
+	public void udpateStatus(int status, String userId);
 }

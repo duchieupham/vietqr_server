@@ -16,4 +16,6 @@ public interface FcmTokenService {
 	public void deleteFcmToken(String token);
 
 	public void updateToken(String newToken, String userId, String oldToken);
+
+	public void deleteTokensByUserId(String userId);
 }

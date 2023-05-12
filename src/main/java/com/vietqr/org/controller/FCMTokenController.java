@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.service.FcmTokenService;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/api")
 public class FCMTokenController {
     private static final Logger logger = Logger.getLogger(FCMTokenController.class);
