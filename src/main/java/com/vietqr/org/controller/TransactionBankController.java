@@ -152,6 +152,7 @@ public class TransactionBankController {
 		NumberFormat nf = NumberFormat.getInstance(Locale.US);
 		LocalDateTime currentDateTime = LocalDateTime.now();
 		long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+		logger.info("receive transaction sync from MB: " + dto.toString() + " at: " + time);
 		boolean checkDuplicate = checkDuplicateReferenceNumber(dto.getReferencenumber());
 		try {
 			List<Object> list = transactionBankService.checkTransactionIdInserted(dto.getTransactionid());
@@ -226,18 +227,19 @@ public class TransactionBankController {
 						if (transactionReceiveEntity != null) {
 							orderId = transactionReceiveEntity.getOrderId();
 							sign = transactionReceiveEntity.getSign();
+							getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
 							updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time, nf);
 						} else {
 							logger.info(
 									"transaction-sync - cannot find transaction receive. Receive new transaction outside system");
 							// process here
+							getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
 							insertNewTransaction(dto, accountBankEntity, time, traceId, uuid, nf, "", "");
 						}
 					} else {
 						logger.info("transaction-sync - traceId is empty. Receive new transaction outside system");
 						insertNewTransaction(dto, accountBankEntity, time, traceId, uuid, nf, "", "");
 					}
-					getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
 				} else {
 					logger.info("transaction-sync - cannot find account bank or account bank is deactive");
 				}
@@ -1180,13 +1182,17 @@ public class TransactionBankController {
 						.retrieve()
 						.bodyToMono(TransactionResponseDTO.class);
 				responseMono.subscribe(transactionResponseDTO -> {
+					LocalDateTime currentDateTime = LocalDateTime.now();
+					long responseTime = currentDateTime.toEpochSecond(ZoneOffset.UTC);
 					if (transactionResponseDTO != null && transactionResponseDTO.getObject() != null) {
 						if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
 							logger.info("pushNewTransactionToCustomerSync SUCCESS: " + entity.getIpAddress() + " - "
-									+ transactionResponseDTO.getObject().getReftransactionid());
+									+ transactionResponseDTO.getObject().getReftransactionid() + " at: "
+									+ responseTime);
 						} else {
 							logger.info("pushNewTransactionToCustomerSync SUCCESS: " + entity.getInformation() + " - "
-									+ transactionResponseDTO.getObject().getReftransactionid());
+									+ transactionResponseDTO.getObject().getReftransactionid() + " at: "
+									+ responseTime);
 						}
 						// System.out.println("pushNewTransactionToCustomerSync SUCCESS: " +
 						// entity.getIpAddress() + " - "
@@ -1194,65 +1200,64 @@ public class TransactionBankController {
 					} else {
 						if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
 							logger.error("Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - "
-									+ (transactionResponseDTO != null ? transactionResponseDTO.getErrorReason() : ""));
+									+ (transactionResponseDTO != null ? transactionResponseDTO.getErrorReason() : "")
+									+ " at: " + responseTime);
 						} else {
 							logger.error("Error at pushNewTransactionToCustomerSync: " + entity.getInformation() + " - "
-									+ (transactionResponseDTO != null ? transactionResponseDTO.getErrorReason() : ""));
+									+ (transactionResponseDTO != null ? transactionResponseDTO.getErrorReason() : "")
+									+ " at: " + responseTime);
 						}
-						// System.out.println("Error at pushNewTransactionToCustomerSync: " +
-						// entity.getIpAddress() + " - "
-						// + (transactionResponseDTO != null ? transactionResponseDTO.getErrorReason() :
-						// ""));
 					}
 				}, error -> {
+					LocalDateTime currentDateTime = LocalDateTime.now();
+					long responseTime = currentDateTime.toEpochSecond(ZoneOffset.UTC);
 					if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
 						logger.error("Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - "
-								+ error.toString());
+								+ error.toString() + " at: " + responseTime);
 					} else {
 						logger.error("Error at pushNewTransactionToCustomerSync: " + entity.getInformation() + " - "
-								+ error.toString());
+								+ error.toString() + " at: " + responseTime);
 					}
-					// System.out.println("Error at pushNewTransactionToCustomerSync: " +
-					// entity.getIpAddress() + " - "
-					// + error.toString());
+
 				});
 			}
 
 		} catch (Exception e) {
+			LocalDateTime currentDateTime = LocalDateTime.now();
+			long responseTime = currentDateTime.toEpochSecond(ZoneOffset.UTC);
 			if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
 				logger.error(
-						"Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - " + e.toString());
+						"Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - " + e.toString()
+								+ " at: " + responseTime);
 			} else {
 				logger.error(
-						"Error at pushNewTransactionToCustomerSync: " + entity.getInformation() + " - " + e.toString());
+						"Error at pushNewTransactionToCustomerSync: " + entity.getInformation() + " - " + e.toString()
+								+ " at: " + responseTime);
 			}
-			// System.out.println(
-			// "Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - "
-			// + e.toString());
 		}
 	}
 
 	private void getCustomerSyncEntities(TransactionBankDTO dto, AccountBankReceiveEntity accountBankEntity,
 			long time, String orderId, String sign) {
 		try {
-			TransactionBankCustomerDTO transactionBankCustomerDTO = new TransactionBankCustomerDTO();
-			transactionBankCustomerDTO.setTransactionid(dto.getTransactionid());
-			transactionBankCustomerDTO.setTransactiontime(dto.getTransactiontime());
-			transactionBankCustomerDTO.setReferencenumber(dto.getReferencenumber());
-			transactionBankCustomerDTO.setAmount(dto.getAmount());
-			transactionBankCustomerDTO.setContent(dto.getContent());
-			transactionBankCustomerDTO.setBankaccount(dto.getBankaccount());
-			transactionBankCustomerDTO.setTransType(dto.getTransType());
-			transactionBankCustomerDTO.setReciprocalAccount(dto.getReciprocalAccount());
-			transactionBankCustomerDTO.setReciprocalBankCode(dto.getReciprocalBankCode());
-			transactionBankCustomerDTO.setVa(dto.getVa());
-			transactionBankCustomerDTO.setValueDate(dto.getValueDate());
-			transactionBankCustomerDTO.setSign(sign);
-			transactionBankCustomerDTO.setOrderId(orderId);
 			// 1. Check bankAccountEntity with sync = true (add sync boolean field)
 			// 2. Find account_customer_bank by bank_id/bank_account AND auth = true.
 			// 3. Find customer_sync and push data to customer.
 			if (accountBankEntity.isSync() == true) {
+				TransactionBankCustomerDTO transactionBankCustomerDTO = new TransactionBankCustomerDTO();
+				transactionBankCustomerDTO.setTransactionid(dto.getTransactionid());
+				transactionBankCustomerDTO.setTransactiontime(dto.getTransactiontime());
+				transactionBankCustomerDTO.setReferencenumber(dto.getReferencenumber());
+				transactionBankCustomerDTO.setAmount(dto.getAmount());
+				transactionBankCustomerDTO.setContent(dto.getContent());
+				transactionBankCustomerDTO.setBankaccount(dto.getBankaccount());
+				transactionBankCustomerDTO.setTransType(dto.getTransType());
+				transactionBankCustomerDTO.setReciprocalAccount(dto.getReciprocalAccount());
+				transactionBankCustomerDTO.setReciprocalBankCode(dto.getReciprocalBankCode());
+				transactionBankCustomerDTO.setVa(dto.getVa());
+				transactionBankCustomerDTO.setValueDate(dto.getValueDate());
+				transactionBankCustomerDTO.setSign(sign);
+				transactionBankCustomerDTO.setOrderId(orderId);
 				List<AccountCustomerBankEntity> accountCustomerBankEntities = new ArrayList<>();
 				accountCustomerBankEntities = accountCustomerBankService
 						.getAccountCustomerBankByBankId(accountBankEntity.getId());

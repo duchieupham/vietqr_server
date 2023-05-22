@@ -129,4 +129,13 @@ public class TransactionBankDTO implements Serializable {
 		this.valueDate = valueDate;
 	}
 
+	@Override
+	public String toString() {
+		return "TransactionBankDTO [transactionid=" + transactionid + ", transactiontime=" + transactiontime
+				+ ", referencenumber=" + referencenumber + ", amount=" + amount + ", content=" + content
+				+ ", bankaccount=" + bankaccount + ", transType=" + transType + ", reciprocalAccount="
+				+ reciprocalAccount + ", reciprocalBankCode=" + reciprocalBankCode + ", va=" + va + ", valueDate="
+				+ valueDate + "]";
+	}
+
 }
