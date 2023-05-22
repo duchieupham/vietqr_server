@@ -1072,11 +1072,11 @@ public class TransactionBankController {
 			} else {
 				uriComponents = UriComponentsBuilder
 						.fromHttpUrl(
-								"https://" + entity.getInformation() + "/" + suffixUrl
+								entity.getInformation() + "/" + suffixUrl
 										+ "/api/token_generate")
 						.buildAndExpand();
 				webClient = WebClient.builder()
-						.baseUrl("https://" + entity.getInformation() + "/" + suffixUrl
+						.baseUrl(entity.getInformation() + "/" + suffixUrl
 								+ "/api/token_generate")
 						.build();
 			}
@@ -1164,11 +1164,11 @@ public class TransactionBankController {
 							.build();
 				} else {
 					uriComponents = UriComponentsBuilder
-							.fromHttpUrl("https://" + entity.getInformation() + "/" + suffixUrl
+							.fromHttpUrl(entity.getInformation() + "/" + suffixUrl
 									+ "/bank/api/transaction-sync")
 							.buildAndExpand(/* add url parameter here */);
 					webClient = WebClient.builder()
-							.baseUrl("https://" + entity.getInformation() + "/" + suffixUrl
+							.baseUrl(entity.getInformation() + "/" + suffixUrl
 									+ "/bank/api/transaction-sync")
 							.build();
 				}
