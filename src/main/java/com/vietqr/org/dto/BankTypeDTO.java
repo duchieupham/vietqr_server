@@ -2,7 +2,7 @@ package com.vietqr.org.dto;
 
 import java.io.Serializable;
 
-public class BankTypeDTO implements Serializable{
+public class BankTypeDTO implements Serializable {
 
 	/**
 	 *
@@ -14,18 +14,20 @@ public class BankTypeDTO implements Serializable{
 	private String bankName;
 	private String imageId;
 	private int status;
+	private String caiValue;
 
 	public BankTypeDTO() {
 		super();
 	}
 
-	public BankTypeDTO(String id, String bankCode, String bankName, String imageId, int status) {
+	public BankTypeDTO(String id, String bankCode, String bankName, String imageId, int status, String caiValue) {
 		super();
 		this.id = id;
 		this.bankCode = bankCode;
 		this.bankName = bankName;
 		this.imageId = imageId;
 		this.status = status;
+		this.caiValue = caiValue;
 	}
 
 	public String getId() {
@@ -66,6 +68,14 @@ public class BankTypeDTO implements Serializable{
 
 	public void setStatus(int status) {
 		this.status = status;
+	}
+
+	public String getCaiValue() {
+		return caiValue;
+	}
+
+	public void setCaiValue(String caiValue) {
+		this.caiValue = caiValue;
 	}
 
 }

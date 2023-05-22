@@ -33,4 +33,6 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
 	@Query(value = "UPDATE account_login SET status = :status WHERE id = :id", nativeQuery = true)
 	void updateStatus(@Param(value = "status") int status, @Param(value = "id") String id);
 
+	@Query(value = "SELECT id FROM account_login WHERE email = :email AND password = :password AND status = 1", nativeQuery = true)
+	String loginByEmail(@Param(value = "email") String email, @Param(value = "password") String password);
 }

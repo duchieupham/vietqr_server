@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.vietqr.org.repository.BranchMemberRepository;
 import com.vietqr.org.entity.BranchMemberEntity;
 import com.vietqr.org.dto.MemberDTO;
+import com.vietqr.org.dto.AccountMemberBranchDTO;
 import com.vietqr.org.dto.BusinessItemDTO;
 
 @Service
@@ -65,4 +66,21 @@ public class BranchMemberServiceImpl implements BranchMemberService {
         }
         return result;
     }
+
+    @Override
+    public String checkUserExistedFromBusiness(String businessId, String userId) {
+        return repo.checkUserExistedFromBusiness(businessId, userId);
+    }
+
+    @Override
+    public void removeMemberFromBusiness(String userId, String businessId) {
+        repo.removeBranchMemberFromBusiness(userId, businessId);
+        repo.removeBusinessMemberFromBusiness(userId, businessId);
+    }
+
+    @Override
+    public List<AccountMemberBranchDTO> getMembersFromBranch(String branchId) {
+        return repo.getMembersFromBranch(branchId);
+    }
+
 }

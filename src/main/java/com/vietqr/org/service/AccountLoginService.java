@@ -20,4 +20,6 @@ public interface AccountLoginService {
 
 	public void updateStatus(int status, String userId);
 
+	public String loginByEmail(String email, String password);
+
 }

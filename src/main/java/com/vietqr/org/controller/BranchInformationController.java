@@ -3,6 +3,7 @@ package com.vietqr.org.controller;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import com.vietqr.org.service.BranchInformationService;
 import com.vietqr.org.service.BusinessMemberService;
 import com.vietqr.org.dto.BusinessBranchChoiceDTO;
 import com.vietqr.org.dto.BusinessChoiceDTO;
+import com.vietqr.org.entity.BranchInformationEntity;
 import com.vietqr.org.dto.BranchChoiceDTO;
 import com.vietqr.org.dto.BranchChoiceReponseDTO;
 
@@ -23,6 +25,7 @@ import com.vietqr.org.dto.BranchChoiceReponseDTO;
 @CrossOrigin
 @RequestMapping("/api")
 public class BranchInformationController {
+    private static final Logger logger = Logger.getLogger(BranchInformationController.class);
 
     @Autowired
     BusinessMemberService businessMemberService;
@@ -63,6 +66,26 @@ public class BranchInformationController {
         } catch (Exception e) {
             httpStatus = HttpStatus.BAD_REQUEST;
         }
-        return new ResponseEntity<List<BusinessBranchChoiceDTO>>(result, httpStatus);
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // get branch detail
+    @GetMapping("branch/information/{id}")
+    public ResponseEntity<BranchInformationEntity> getBranchInformation(@PathVariable("id") String id) {
+        BranchInformationEntity result = null;
+        HttpStatus httpStatus = null;
+        try {
+            BranchInformationEntity entity = branchInformationService.getBranchById(id);
+            if (entity != null) {
+                result = entity;
+                httpStatus = HttpStatus.OK;
+            } else {
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("BRANCH INFORMATION: getBranchInformation ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
     }
 }

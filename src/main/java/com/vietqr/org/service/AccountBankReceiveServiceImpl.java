@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.vietqr.org.dto.AccountBankConnectBranchDTO;
 import com.vietqr.org.dto.BusinessBankDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.repository.AccountBankReceiveRepository;
@@ -66,6 +67,16 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
 	@Override
 	public void updateStatusAccountBankByUserId(int status, String userId) {
 		accountBankRepo.updateStatusAccountBankByUserId(status, userId);
+	}
+
+	@Override
+	public List<AccountBankConnectBranchDTO> getAccountBankConnect(String userId) {
+		return accountBankRepo.getAccountBankConnect(userId);
+	}
+
+	@Override
+	public void updateBankType(String id, int type) {
+		accountBankRepo.updateBankType(id, type);
 	}
 
 }

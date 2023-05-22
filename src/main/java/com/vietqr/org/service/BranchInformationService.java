@@ -11,21 +11,21 @@ import com.vietqr.org.dto.BranchFilterResponseDTO;
 @Service
 public interface BranchInformationService {
 
-    int insertBranchInformation(BranchInformationEntity entity);
+    public int insertBranchInformation(BranchInformationEntity entity);
 
-    List<BranchInformationEntity> getListBranchByBusinessId(String businessId);
+    public List<BranchInformationEntity> getListBranchByBusinessId(String businessId);
 
-    void deleteBranch(String id);
+    public void deleteBranch(String id);
 
-    void updateActiveBranch(boolean isActive, String id);
+    public void updateActiveBranch(boolean isActive, String id);
 
-    List<String> getBranchIdsByUserIdBusiness(String userId);
+    public List<String> getBranchIdsByUserIdBusiness(String userId);
 
-    List<BranchChoiceDTO> getBranchsByBusinessId(String businessId);
+    public List<BranchChoiceDTO> getBranchsByBusinessId(String businessId);
 
-    BranchInformationEntity getBranchById(String id);
+    public BranchInformationEntity getBranchById(String id);
 
-    List<String> getBranchIdsByBankId(String bankId);
+    public List<String> getBranchIdsByBankId(String bankId);
 
     public List<BranchFilterResponseDTO> getBranchFilters(String businessId);
 

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.vietqr.org.repository.BankReceiveBranchRepository;
 import com.vietqr.org.entity.BankReceiveBranchEntity;
+import com.vietqr.org.dto.AccountBankBranchDTO;
 import com.vietqr.org.dto.AccountBankReceivePersonalDTO;
 
 @Service
@@ -38,5 +39,15 @@ public class BankReceiveBranchServiceImpl implements BankReceiveBranchService {
     @Override
     public BankReceiveBranchEntity getBankReceiveBranchByBankId(String bankId) {
         return repo.getBankReceiveBranchByBankId(bankId);
+    }
+
+    @Override
+    public List<AccountBankBranchDTO> getBanksByBranchId(String branchId) {
+        return repo.getBanksByBranchId(branchId);
+    }
+
+    @Override
+    public void deleteBankReceiveBranchByBankIdAndBranchId(String bankId, String branchId) {
+        repo.deleteBankReceiveBranchByBankIdAndBranchId(bankId, branchId);
     }
 }

@@ -39,8 +39,8 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
 	@Query(value = "SELECT a.id, a.phone_no as phoneNo, b.first_name as firstName, b.middle_name as middleName, b.last_name as lastName, b.img_id as imgId "
 			+ "FROM account_login a "
 			+ "INNER JOIN account_information b "
-			+ "ON a.id= b.user_id "
-			+ "WHERE a.phone_no= :phoneNo AND status = 1", nativeQuery = true)
+			+ "ON a.id = b.user_id "
+			+ "WHERE a.phone_no= :phoneNo AND a.status = 1", nativeQuery = true)
 	AccountSearchDTO getAccountSearch(@Param(value = "phoneNo") String phoneNo);
 
 	@Transactional

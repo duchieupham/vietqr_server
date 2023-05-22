@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.vietqr.org.dto.AccountBankConnectBranchDTO;
 import com.vietqr.org.dto.BusinessBankDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 
@@ -31,4 +32,8 @@ public interface AccountBankReceiveService {
 	public void unRegisterAuthenticationBank(String bankAccount);
 
 	public void updateStatusAccountBankByUserId(int status, String userId);
+
+	public List<AccountBankConnectBranchDTO> getAccountBankConnect(String userId);
+
+	public void updateBankType(String id, int type);
 }

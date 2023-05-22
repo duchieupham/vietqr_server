@@ -43,4 +43,9 @@ public class AccountLoginServiceImpl implements AccountLoginService {
 		accountLoginRepository.updateStatus(status, userId);
 	}
 
+	@Override
+	public String loginByEmail(String email, String password) {
+		return accountLoginRepository.loginByEmail(email, password);
+	}
+
 }

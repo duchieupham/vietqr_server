@@ -23,6 +23,9 @@ public class BranchMemberEntity implements Serializable {
 	@Column(name = "branchId")
 	private String branchId;
 
+	@Column(name = "businessId")
+	private String businessId;
+
 	@Column(name = "userId")
 	private String userId;
 
@@ -33,11 +36,12 @@ public class BranchMemberEntity implements Serializable {
 		super();
 	}
 
-	public BranchMemberEntity(String id, String branchId, String userId, int role) {
+	public BranchMemberEntity(String id, String branchId, String businessId, String userId, int role) {
 		this.id = id;
 		this.branchId = branchId;
 		this.userId = userId;
 		this.role = role;
+		this.businessId = businessId;
 	}
 
 	public String getId() {
@@ -50,6 +54,14 @@ public class BranchMemberEntity implements Serializable {
 
 	public String getBranchId() {
 		return branchId;
+	}
+
+	public String getBusinessId() {
+		return businessId;
+	}
+
+	public void setBusinessId(String businessId) {
+		this.businessId = businessId;
 	}
 
 	public void setBranchId(String branchId) {

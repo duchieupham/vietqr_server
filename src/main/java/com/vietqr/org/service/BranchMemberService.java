@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.dto.MemberDTO;
+import com.vietqr.org.dto.AccountMemberBranchDTO;
 import com.vietqr.org.dto.BusinessItemDTO;
 import com.vietqr.org.entity.BranchMemberEntity;;
 
@@ -27,4 +28,10 @@ public interface BranchMemberService {
     public MemberDTO getManagerByBranchId(String branchId);
 
     public int getRoleFromBranch(String userId, String branchId);
+
+    public String checkUserExistedFromBusiness(String businessId, String userId);
+
+    public void removeMemberFromBusiness(String userId, String businessId);
+
+    public List<AccountMemberBranchDTO> getMembersFromBranch(String branchId);
 }

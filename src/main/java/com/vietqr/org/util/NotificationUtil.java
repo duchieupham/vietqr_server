@@ -9,6 +9,8 @@ public class NotificationUtil {
 	private static final String NOTI_TYPE_NEW_TRANSACTION = "N04";
 	private static final String NOTI_TYPE_UPDATE_TRANSACTION = "N05";
 	private static final String NOTI_TYPE_VOICE_TRANSACTION = "N06";
+	private static final String NOTI_TYPE_ADD_MEMBER = "N07";
+	private static final String NOTI_TYPE_REMOVE_MEMBER = "N08";
 
 	// Title
 	private static final String NOTI_TITLE_TRANSACTION = "Thông báo biến động số dư";
@@ -16,6 +18,8 @@ public class NotificationUtil {
 	private static final String NOTI_TITLE_NEW_MEMBER = "Thành viên mới";
 	private static final String NOTI_TITLE_NEW_TRANSACTION = "Giao dịch mới";
 	private static final String NOTI_TITLE_UPDATE_TRANSACTION = "Biến động số dư";
+	private static final String NOTI_TITLE_ADD_MEMBER = "Thông báo từ doanh nghiệp";
+	private static final String NOTI_TITLE_REMOVE_MEMBER = "Thông báo từ doanh nghiệp";
 
 	// Description
 	private static final String NOTI_DESC_LOGIN_WARNING_PREFIX = "Chúng tôi nhận thấy có lượt đăng nhập từ thiết bị ";
@@ -29,6 +33,8 @@ public class NotificationUtil {
 	private static final String NOTI_DESC_UPDATE_TRANS_SUFFIX_2 = "|GD: ";
 	private static final String NOTI_DESC_UPDATE_TRANS_SUFFIX_3 = "|CN: ";
 	private static final String NOTI_DESC_UPDATE_TRANS_SUFFIX_4 = "|ND: ";
+	private static final String NOTI_DESC_ADD_MEMBER = "Bạn vừa được thêm vào là thành viên của Doanh nghiệp ";
+	private static final String NOTI_DESC_REMOVE_MEMBER = "Bạn vừa được quản lý xoá khỏi Doanh nghiệp ";
 
 	public static String getNotiTitleTransaction() {
 		return NOTI_TITLE_TRANSACTION;
@@ -116,6 +122,30 @@ public class NotificationUtil {
 
 	public static String getNotiTypeVoiceTransaction() {
 		return NOTI_TYPE_VOICE_TRANSACTION;
+	}
+
+	public static String getNotiTypeAddMember() {
+		return NOTI_TYPE_ADD_MEMBER;
+	}
+
+	public static String getNotiTypeRemoveMember() {
+		return NOTI_TYPE_REMOVE_MEMBER;
+	}
+
+	public static String getNotiTitleAddMember() {
+		return NOTI_TITLE_ADD_MEMBER;
+	}
+
+	public static String getNotiTitleRemoveMember() {
+		return NOTI_TITLE_REMOVE_MEMBER;
+	}
+
+	public static String getNotiDescAddMember() {
+		return NOTI_DESC_ADD_MEMBER;
+	}
+
+	public static String getNotiDescRemoveMember() {
+		return NOTI_DESC_REMOVE_MEMBER;
 	}
 
 }

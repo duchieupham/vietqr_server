@@ -29,16 +29,20 @@ public class AccountLoginEntity implements Serializable {
 	@Column(name = "status")
 	private boolean status;
 
+	@Column(name = "email")
+	private String email;
+
 	public AccountLoginEntity() {
 		super();
 	}
 
-	public AccountLoginEntity(String id, String phoneNo, String password, boolean status) {
+	public AccountLoginEntity(String id, String phoneNo, String password, boolean status, String email) {
 		super();
 		this.id = id;
 		this.phoneNo = phoneNo;
 		this.password = password;
 		this.status = status;
+		this.email = email;
 	}
 
 	public String getId() {
@@ -71,6 +75,14 @@ public class AccountLoginEntity implements Serializable {
 
 	public void setStatus(boolean status) {
 		this.status = status;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 }

@@ -58,8 +58,9 @@ public class BusinessMemberServiceImpl implements BusinessMemberService {
 		return result;
 	}
 
-	@Override
-	public void deleteBusinessMemberByUserIdAndBankId(String userId, String bankId) {
-		repo.deleteBusinessMemberByUserIdAndBankId(userId, bankId);
-	}
+	// @Override
+	// public void deleteBusinessMemberByUserIdAndBankId(String userId, String
+	// bankId) {
+	// repo.deleteBusinessMemberByUserIdAndBankId(userId, bankId);
+	// }
 }
