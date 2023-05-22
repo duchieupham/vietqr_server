@@ -2,7 +2,7 @@ package com.vietqr.org.dto;
 
 import java.io.Serializable;
 
-public class AccountLoginDTO implements Serializable{
+public class AccountLoginDTO implements Serializable {
 
 	/**
 	 *
@@ -10,6 +10,7 @@ public class AccountLoginDTO implements Serializable{
 	private static final long serialVersionUID = 1L;
 
 	private String phoneNo;
+	private String email;
 	private String password;
 	private String fcmToken;
 	private String platform;
@@ -22,6 +23,17 @@ public class AccountLoginDTO implements Serializable{
 	public AccountLoginDTO(String phoneNo, String password, String fcmToken, String platform, String device) {
 		super();
 		this.phoneNo = phoneNo;
+		this.password = password;
+		this.fcmToken = fcmToken;
+		this.platform = platform;
+		this.device = device;
+	}
+
+	public AccountLoginDTO(String phoneNo, String email, String password, String fcmToken, String platform,
+			String device) {
+		super();
+		this.phoneNo = phoneNo;
+		this.email = email;
 		this.password = password;
 		this.fcmToken = fcmToken;
 		this.platform = platform;
@@ -66,6 +78,14 @@ public class AccountLoginDTO implements Serializable{
 
 	public void setDevice(String device) {
 		this.device = device;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 }

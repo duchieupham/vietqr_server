@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import org.hibernate.annotations.Parameter;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Repository;
 
 import com.vietqr.org.entity.BranchMemberEntity;
 import com.vietqr.org.dto.MemberDTO;
+import com.vietqr.org.dto.AccountMemberBranchDTO;
+import com.vietqr.org.dto.AccountSearchDTO;
 import com.vietqr.org.dto.BusinessItemDTO;
 
 @Repository
@@ -41,6 +44,8 @@ public interface BranchMemberRepository extends JpaRepository<BranchMemberEntity
                         + "WHERE a.user_id = :userId AND b.is_active = true AND c.is_active = true", nativeQuery = true)
         List<BusinessItemDTO> getBusinessItemByUserId(@Param(value = "userId") String userId);
 
+        // need branchId because userA belongs to branch 1 create transaction, then only
+        // branch 1 receive notification (branch 2 does not receive notification)
         @Query(value = "SELECT user_id as userId "
                         + "FROM business_member "
                         + "WHERE business_id = :businessId "
@@ -65,4 +70,39 @@ public interface BranchMemberRepository extends JpaRepository<BranchMemberEntity
 
         @Query(value = "SELECT role FROM branch_member WHERE user_id = :userId AND branch_id = :branchId", nativeQuery = true)
         int getRoleFromBranch(@Param(value = "userId") String userId, @Param(value = "branchId") String branchId);
+
+        // check member existed in business member or other branchMember
+        @Query(value = "SELECT user_id as userId "
+                        + "FROM business_member "
+                        + "WHERE business_id = :businessId "
+                        + "AND user_id = :userId "
+                        + "UNION "
+                        + "SELECT user_id as userId "
+                        + "FROM branch_member "
+                        + "WHERE business_id = :businessId "
+                        + "AND user_id = :userId", nativeQuery = true)
+        String checkUserExistedFromBusiness(@Param(value = "businessId") String businessId,
+                        @Param(value = "userId") String userId);
+
+        @Transactional
+        @Modifying
+        @Query(value = "DELETE FROM branch_member WHERE user_id = :userId AND business_id = :businessId", nativeQuery = true)
+        void removeBranchMemberFromBusiness(@Param(value = "userId") String userId,
+                        @Param(value = "businessId") String businessId);
+
+        @Transactional
+        @Modifying
+        @Query(value = "DELETE FROM business_member WHERE user_id = :userId AND business_id = :businessId", nativeQuery = true)
+        void removeBusinessMemberFromBusiness(@Param(value = "userId") String userId,
+                        @Param(value = "businessId") String businessId);
+
+        @Query(value = "SELECT a.id, a.phone_no as phoneNo, b.first_name as firstName, b.middle_name as middleName, b.last_name as lastName, b.img_id as imgId, c.role "
+                        + "FROM account_login a "
+                        + "INNER JOIN account_information b "
+                        + "ON a.id = b.user_id "
+                        + "INNER JOIN branch_member c "
+                        + "ON c.user_id = a.id "
+                        + "WHERE a.status = 1 AND c.branch_id = :branchId", nativeQuery = true)
+        List<AccountMemberBranchDTO> getMembersFromBranch(@Param(value = "branchId") String branchId);
+
 }

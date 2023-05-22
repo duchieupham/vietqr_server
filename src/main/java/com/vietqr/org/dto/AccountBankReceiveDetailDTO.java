@@ -18,6 +18,7 @@ public class AccountBankReceiveDetailDTO implements Serializable {
     private String imgId;
     private String bankTypeId;
     private int bankTypeStatus;
+    private String caiValue;
     // userId who create bank account
     private String userId;
     private int type;
@@ -33,7 +34,8 @@ public class AccountBankReceiveDetailDTO implements Serializable {
     }
 
     public AccountBankReceiveDetailDTO(String id, String bankAccount, String userBankName, String bankCode,
-            String bankName, String imgId, String bankTypeId, int bankTypeStatus, String userId, int type,
+            String bankName, String imgId, String bankTypeId, int bankTypeStatus, String caiValue, String userId,
+            int type,
             boolean isAuthenticated, String nationalId,
             String phoneAuthenticated, String qrCode, List<BusinessBankDetailDTO> businessDetails,
             List<TransactionBankListDTO> transactions) {
@@ -46,6 +48,7 @@ public class AccountBankReceiveDetailDTO implements Serializable {
         this.type = type;
         this.bankTypeId = bankTypeId;
         this.bankTypeStatus = bankTypeStatus;
+        this.caiValue = caiValue;
         this.userId = userId;
         this.isAuthenticated = isAuthenticated;
         this.nationalId = nationalId;
@@ -53,6 +56,14 @@ public class AccountBankReceiveDetailDTO implements Serializable {
         this.phoneAuthenticated = phoneAuthenticated;
         this.businessDetails = businessDetails;
         this.transactions = transactions;
+    }
+
+    public String getCaiValue() {
+        return caiValue;
+    }
+
+    public void setCaiValue(String caiValue) {
+        this.caiValue = caiValue;
     }
 
     public String getId() {

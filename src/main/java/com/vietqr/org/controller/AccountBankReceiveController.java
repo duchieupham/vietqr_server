@@ -147,7 +147,7 @@ public class AccountBankReceiveController {
 	}
 
 	// register authentication
-
+	// for case user created bank before and then register authentication
 	@PostMapping("account-bank/register-authentication")
 	public ResponseEntity<ResponseMessageDTO> registerAuthentication(
 			@Valid @RequestBody RegisterAuthenticationDTO dto) {
@@ -356,6 +356,7 @@ public class AccountBankReceiveController {
 				result.setAuthenticated(accountBankEntity.isAuthenticated());
 				result.setNationalId(accountBankEntity.getNationalId());
 				result.setQrCode(qr);
+				result.setCaiValue(caiValue);
 				result.setPhoneAuthenticated(accountBankEntity.getPhoneAuthenticated());
 				List<String> branchIds = new ArrayList<>();
 				branchIds = branchInformationService.getBranchIdsByBankId(bankId);

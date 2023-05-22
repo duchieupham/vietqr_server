@@ -27,5 +27,6 @@ public interface BusinessMemberService {
 
 	public int getRoleFromBusiness(String userId, String businessId);
 
-	public void deleteBusinessMemberByUserIdAndBankId(String userId, String bankId);
+	// public void deleteBusinessMemberByUserIdAndBankId(String userId, String
+	// bankId);
 }

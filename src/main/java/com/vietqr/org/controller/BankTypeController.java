@@ -84,6 +84,8 @@ public class BankTypeController {
 					dto.setBankName(entity.getBankName());
 					dto.setImageId(entity.getImgId());
 					dto.setStatus(entity.getStatus());
+					String caiValue = caiBankService.getCaiValue(dto.getId());
+					dto.setCaiValue(caiValue);
 					result.add(dto);
 				}
 			}
@@ -110,6 +112,7 @@ public class BankTypeController {
 					dto.setBankName(bankTypeEntity.getBankName());
 					dto.setImageId(bankTypeEntity.getImgId());
 					dto.setStatus(bankTypeEntity.getStatus());
+					dto.setCaiValue(caiValue);
 					result = dto;
 					httpStatus = HttpStatus.OK;
 				} else {

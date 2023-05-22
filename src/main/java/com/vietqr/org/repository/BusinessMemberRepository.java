@@ -31,11 +31,13 @@ public interface BusinessMemberRepository extends JpaRepository<BusinessMemberEn
 	@Query(value = "DELETE FROM business_member WHERE id = :id", nativeQuery = true)
 	void deleteMemberFromBusinessInformation(@Param(value = "id") String id);
 
-	@Transactional
-	@Modifying
-	@Query(value = "DELETE FROM business_member WHERE user_id = :userId AND bank_id = :bankId", nativeQuery = true)
-	void deleteBusinessMemberByUserIdAndBankId(@Param(value = "userId") String userId,
-			@Param(value = "bankId") String bankId);
+	// @Transactional
+	// @Modifying
+	// @Query(value = "DELETE FROM business_member WHERE user_id = :userId AND
+	// bank_id = :bankId", nativeQuery = true)
+	// void deleteBusinessMemberByUserIdAndBankId(@Param(value = "userId") String
+	// userId,
+	// @Param(value = "bankId") String bankId);
 
 	@Query(value = "SELECT a.business_id, b.name, b.img_id "
 			+ "FROM business_member a "

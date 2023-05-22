@@ -27,6 +27,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,6 +41,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import org.apache.log4j.Logger;
 
+import com.vietqr.org.dto.AccountBankNameDTO;
 import com.vietqr.org.dto.AccountLoginDTO;
 import com.vietqr.org.dto.CofirmOTPBankDTO;
 import com.vietqr.org.dto.RefTransactionDTO;
@@ -246,7 +249,6 @@ public class TransactionBankController {
 	private void updateTransaction(TransactionBankDTO dto, TransactionReceiveEntity transactionReceiveEntity,
 			AccountBankReceiveEntity accountBankEntity, long time, NumberFormat nf) {
 
-		// find transaction-branch-receive to push notification
 		BankTypeEntity bankTypeEntity = bankTypeService
 				.getBankTypeById(accountBankEntity.getBankTypeId());
 		// update transaction receive
@@ -254,7 +256,8 @@ public class TransactionBankController {
 				dto.getTransactionid(),
 				dto.getReferencenumber(),
 				transactionReceiveEntity.getId());
-		//
+
+		// find transaction-branch-receive to push notification
 		TransactionReceiveBranchEntity transactionBranchEntity = transactionReceiveBranchService
 				.getTransactionBranchByTransactionId(transactionReceiveEntity.getId());
 		if (transactionBranchEntity != null) {
@@ -394,6 +397,8 @@ public class TransactionBankController {
 
 	}
 
+	// insert new transaction mean it's not created from business. So DO NOT need to
+	// push to users
 	@Async
 	private void insertNewTransaction(TransactionBankDTO dto, AccountBankReceiveEntity accountBankEntity, long time,
 			String traceId, UUID uuid, NumberFormat nf, String orderId, String sign) {
@@ -473,7 +478,6 @@ public class TransactionBankController {
 		requestId = textToSpeechService.requestTTS(accountBankEntity.getUserId(),
 				data, dto.getAmount() + "");
 		textToSpeechService.delete(requestId);
-
 	}
 
 	// get token bank product
@@ -527,6 +531,94 @@ public class TransactionBankController {
 			logger.error(e.toString());
 		}
 		return new ResponseEntity<TokenProductBankDTO>(result, httpStatus);
+	}
+
+	@GetMapping("account/info/{bankCode}/{accountNumber}/{accountType}/{transferType}")
+	private ResponseEntity<AccountBankNameDTO> getBankNameInformation(
+			@PathVariable(value = "bankCode") String bankCode,
+			@PathVariable(value = "accountNumber") String accountNumber,
+			@PathVariable(value = "accountType") String accountType,
+			@PathVariable(value = "transferType") String transferType) {
+
+		AccountBankNameDTO result = null;
+		HttpStatus httpStatus = null;
+
+		try {
+			// Get bank token
+			TokenProductBankDTO token = getBankToken();
+			if (token != null) {
+				// Build URL with PathVariable
+				UriComponents uriComponents = UriComponentsBuilder
+						.fromHttpUrl(
+								"https://api-private.mbbank.com.vn/private/ms/bank-info/v1.0/account/info")
+						.buildAndExpand(accountNumber);
+
+				// Create WebClient with authorization header
+				WebClient webClient = WebClient.builder()
+						.baseUrl(uriComponents.toUriString())
+						.defaultHeader("Authorization", "Bearer " + token.getAccess_token())
+						.defaultHeader("clientMessageId", UUID.randomUUID().toString())
+						.build();
+				Mono<ClientResponse> responseMono = null;
+				if (transferType.trim().equals("INHOUSE")) {
+					// Send GET request to API
+					responseMono = webClient.get()
+							.uri(uriBuilder -> uriBuilder
+									.queryParam("accountNumber", accountNumber)
+									.queryParam("accountType", accountType)
+									.queryParam("transferType", transferType)
+									.build())
+							.exchange();
+				} else {
+					// Send GET request to API
+					responseMono = webClient.get()
+							.uri(uriBuilder -> uriBuilder
+									.queryParam("accountNumber", accountNumber)
+									.queryParam("accountType", accountType)
+									.queryParam("transferType", transferType)
+									.queryParam("bankCode", bankCode)
+									.build())
+							.exchange();
+				}
+
+				ClientResponse response = responseMono.block();
+				if (response.statusCode().is2xxSuccessful()) {
+					String json = response.bodyToMono(String.class).block();
+					logger.info("getBankNameInformation: response: " + json);
+					if (json != null && !json.isEmpty()) { // Check if response is not empty
+						// Parse response to extract bank name
+						ObjectMapper objectMapper = new ObjectMapper();
+						JsonNode rootNode = objectMapper.readTree(json);
+						String accountName = "";
+						String customerName = "";
+						String customerShortName = "";
+						if (rootNode.get("data").get("accountName") != null) {
+							accountName = rootNode.get("data").get("accountName").asText();
+						}
+						if (rootNode.get("data").get("customerName") != null) {
+							customerName = rootNode.get("data").get("customerName").asText();
+						}
+						if (rootNode.get("data").get("customerShortName") != null) {
+							customerShortName = rootNode.get("data").get("customerShortName").asText();
+						}
+						result = new AccountBankNameDTO(accountName, customerName, customerShortName);
+						httpStatus = HttpStatus.OK;
+					} else {
+						httpStatus = HttpStatus.BAD_REQUEST;
+					}
+				} else {
+					String json = response.bodyToMono(String.class).block();
+					logger.error("Error at getBankNameInformation: status code: " + response.statusCode());
+					logger.error("Error at getBankNameInformation: response: " + json);
+					httpStatus = HttpStatus.BAD_REQUEST;
+				}
+			}
+		} catch (Exception e) {
+			logger.error("Error at getBankNameInformation: " + e.toString());
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+
+		return new ResponseEntity<>(result, httpStatus);
 	}
 
 	@PostMapping("request_otp_bank")
@@ -958,19 +1050,35 @@ public class TransactionBankController {
 			String encodedKey = Base64.getEncoder().encodeToString(key.getBytes());
 			logger.info("key: " + encodedKey + " - username: " + entity.getUsername() + " - password: "
 					+ entity.getPassword());
-			System.out.println("key: " + encodedKey + " - username: " + entity.getUsername() + " - password: "
-					+ entity.getPassword());
+			// System.out.println("key: " + encodedKey + " - username: " +
+			// entity.getUsername() + " - password: "
+			// + entity.getPassword());
 			String suffixUrl = entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty() ? entity.getSuffixUrl()
 					: "";
-			UriComponents uriComponents = UriComponentsBuilder
-					.fromHttpUrl("http://" + entity.getIpAddress() + ":" + entity.getPort() + "/" + suffixUrl
-							+ "/api/token_generate")
-					.buildAndExpand();
-			WebClient webClient = WebClient.builder()
-					.baseUrl("http://" + entity.getIpAddress() + ":" + entity.getPort() + "/" + suffixUrl
-							+ "/api/token_generate")
-					.build();
-			System.out.println("uriComponents: " + uriComponents.toString());
+			UriComponents uriComponents = null;
+			WebClient webClient = null;
+			if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
+				uriComponents = UriComponentsBuilder
+						.fromHttpUrl(
+								"http://" + entity.getIpAddress() + ":" + entity.getPort() + "/" + suffixUrl
+										+ "/api/token_generate")
+						.buildAndExpand();
+				webClient = WebClient.builder()
+						.baseUrl("http://" + entity.getIpAddress() + ":" + entity.getPort() + "/" + suffixUrl
+								+ "/api/token_generate")
+						.build();
+			} else {
+				uriComponents = UriComponentsBuilder
+						.fromHttpUrl(
+								"https://" + entity.getInformation() + "/" + suffixUrl
+										+ "/api/token_generate")
+						.buildAndExpand();
+				webClient = WebClient.builder()
+						.baseUrl("https://" + entity.getInformation() + "/" + suffixUrl
+								+ "/api/token_generate")
+						.build();
+			}
+			// System.out.println("uriComponents: " + uriComponents.toString());
 			Mono<TokenDTO> responseMono = webClient.method(HttpMethod.POST)
 					.uri(uriComponents.toUri())
 					.contentType(MediaType.APPLICATION_JSON)
@@ -992,16 +1100,30 @@ public class TransactionBankController {
 			Optional<TokenDTO> resultOptional = responseMono.subscribeOn(Schedulers.boundedElastic()).blockOptional();
 			if (resultOptional.isPresent()) {
 				result = resultOptional.get();
-				logger.info("Token got: " + result.getAccess_token() + " - from: " + entity.getIpAddress());
-				System.out.println("Token got: " + result.getAccess_token() + " - from: " + entity.getIpAddress());
+				if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
+					logger.info("Token got: " + result.getAccess_token() + " - from: " + entity.getIpAddress());
+				} else {
+					logger.info("Token got: " + result.getAccess_token() + " - from: " + entity.getInformation());
+				}
+
+				// System.out.println("Token got: " + result.getAccess_token() + " - from: " +
+				// entity.getIpAddress());
 			} else {
-				logger.info("Token could not be retrieved from: " + entity.getIpAddress());
-				System.out.println("Token could not be retrieved from: " + entity.getIpAddress());
+				if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
+					logger.info("Token could not be retrieved from: " + entity.getIpAddress());
+				} else {
+					logger.info("Token could not be retrieved from: " + entity.getInformation());
+				}
 			}
 			///
 		} catch (Exception e) {
-			logger.error("Error at getCustomerSyncToken: " + entity.getIpAddress() + " - " + e.toString());
-			System.out.println("Error at getCustomerSyncToken: " + entity.getIpAddress() + " - " + e.toString());
+			if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
+				logger.error("Error at getCustomerSyncToken: " + entity.getIpAddress() + " - " + e.toString());
+				// System.out.println("Error at getCustomerSyncToken: " + entity.getIpAddress()
+				// + " - " + e.toString());
+			} else {
+				logger.error("Error at getCustomerSyncToken: " + entity.getInformation() + " - " + e.toString());
+			}
 		}
 		return result;
 	}
@@ -1009,9 +1131,8 @@ public class TransactionBankController {
 	private void pushNewTransactionToCustomerSync(CustomerSyncEntity entity,
 			TransactionBankCustomerDTO dto, long time) {
 		try {
-			System.out.println("orderId" + dto.getOrderId());
-			System.out.println("sign" + dto.getSign());
-
+			logger.info("pushNewTransactionToCustomerSync: orderId: " + dto.getOrderId());
+			logger.info("pushNewTransactionToCustomerSync: sign: " + dto.getSign());
 			TokenDTO tokenDTO = getCustomerSyncToken(entity);
 			if (tokenDTO != null) {
 				Map<String, Object> data = new HashMap<>();
@@ -1028,14 +1149,28 @@ public class TransactionBankController {
 				if (entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty()) {
 					suffixUrl = entity.getSuffixUrl();
 				}
-				UriComponents uriComponents = UriComponentsBuilder
-						.fromHttpUrl("http://" + entity.getIpAddress() + ":" + entity.getPort() + "/" + suffixUrl
-								+ "/bank/api/transaction-sync")
-						.buildAndExpand(/* add url parameter here */);
-				WebClient webClient = WebClient.builder()
-						.baseUrl("http://" + entity.getIpAddress() + ":" + entity.getPort() + "/" + suffixUrl
-								+ "/bank/api/transaction-sync")
-						.build();
+				UriComponents uriComponents = null;
+				WebClient webClient = null;
+				if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
+					uriComponents = UriComponentsBuilder
+							.fromHttpUrl("http://" + entity.getIpAddress() + ":" + entity.getPort() + "/" + suffixUrl
+									+ "/bank/api/transaction-sync")
+							.buildAndExpand(/* add url parameter here */);
+					webClient = WebClient.builder()
+							.baseUrl("http://" + entity.getIpAddress() + ":" + entity.getPort() + "/" + suffixUrl
+									+ "/bank/api/transaction-sync")
+							.build();
+				} else {
+					uriComponents = UriComponentsBuilder
+							.fromHttpUrl("https://" + entity.getInformation() + "/" + suffixUrl
+									+ "/bank/api/transaction-sync")
+							.buildAndExpand(/* add url parameter here */);
+					webClient = WebClient.builder()
+							.baseUrl("https://" + entity.getInformation() + "/" + suffixUrl
+									+ "/bank/api/transaction-sync")
+							.build();
+				}
+				//
 				logger.info("uriComponents: " + uriComponents.toString());
 				Mono<TransactionResponseDTO> responseMono = webClient.post()
 						.uri(uriComponents.toUri())
@@ -1046,28 +1181,54 @@ public class TransactionBankController {
 						.bodyToMono(TransactionResponseDTO.class);
 				responseMono.subscribe(transactionResponseDTO -> {
 					if (transactionResponseDTO != null && transactionResponseDTO.getObject() != null) {
-						logger.info("pushNewTransactionToCustomerSync SUCCESS: " + entity.getIpAddress() + " - "
-								+ transactionResponseDTO.getObject().getReftransactionid());
-						System.out.println("pushNewTransactionToCustomerSync SUCCESS: " + entity.getIpAddress() + " - "
-								+ transactionResponseDTO.getObject().getReftransactionid());
+						if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
+							logger.info("pushNewTransactionToCustomerSync SUCCESS: " + entity.getIpAddress() + " - "
+									+ transactionResponseDTO.getObject().getReftransactionid());
+						} else {
+							logger.info("pushNewTransactionToCustomerSync SUCCESS: " + entity.getInformation() + " - "
+									+ transactionResponseDTO.getObject().getReftransactionid());
+						}
+						// System.out.println("pushNewTransactionToCustomerSync SUCCESS: " +
+						// entity.getIpAddress() + " - "
+						// + transactionResponseDTO.getObject().getReftransactionid());
 					} else {
-						logger.error("Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - "
-								+ (transactionResponseDTO != null ? transactionResponseDTO.getErrorReason() : ""));
-						System.out.println("Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - "
-								+ (transactionResponseDTO != null ? transactionResponseDTO.getErrorReason() : ""));
+						if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
+							logger.error("Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - "
+									+ (transactionResponseDTO != null ? transactionResponseDTO.getErrorReason() : ""));
+						} else {
+							logger.error("Error at pushNewTransactionToCustomerSync: " + entity.getInformation() + " - "
+									+ (transactionResponseDTO != null ? transactionResponseDTO.getErrorReason() : ""));
+						}
+						// System.out.println("Error at pushNewTransactionToCustomerSync: " +
+						// entity.getIpAddress() + " - "
+						// + (transactionResponseDTO != null ? transactionResponseDTO.getErrorReason() :
+						// ""));
 					}
 				}, error -> {
-					logger.error("Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - "
-							+ error.toString());
-					System.out.println("Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - "
-							+ error.toString());
+					if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
+						logger.error("Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - "
+								+ error.toString());
+					} else {
+						logger.error("Error at pushNewTransactionToCustomerSync: " + entity.getInformation() + " - "
+								+ error.toString());
+					}
+					// System.out.println("Error at pushNewTransactionToCustomerSync: " +
+					// entity.getIpAddress() + " - "
+					// + error.toString());
 				});
 			}
 
 		} catch (Exception e) {
-			logger.error("Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - " + e.toString());
-			System.out.println(
-					"Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - " + e.toString());
+			if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
+				logger.error(
+						"Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - " + e.toString());
+			} else {
+				logger.error(
+						"Error at pushNewTransactionToCustomerSync: " + entity.getInformation() + " - " + e.toString());
+			}
+			// System.out.println(
+			// "Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - "
+			// + e.toString());
 		}
 	}
 

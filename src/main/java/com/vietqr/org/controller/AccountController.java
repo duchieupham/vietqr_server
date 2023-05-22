@@ -151,9 +151,73 @@ public class AccountController {
 					logger.error("Cannot find user to login");
 					httpStatus = HttpStatus.BAD_REQUEST;
 				}
+			} else if (dto.getEmail() != null && !dto.getEmail().isEmpty()) {
+				String userId = accountLoginService.loginByEmail(dto.getEmail(), dto.getPassword());
+				if (userId != null && !userId.isEmpty()) {
+					// get user information
+					AccountInformationEntity accountInformationEntity = accountInformationService
+							.getAccountInformation(userId);
+					// push notification to other devices if user logged in before
+					LocalDateTime currentDateTime = LocalDateTime.now();
+					List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+					fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
+					if (fcmTokens != null && !fcmTokens.isEmpty()) {
+						logger.info("FCM list size: " + fcmTokens.size());
+						// insert new Notification
+						String messageNotification = NotificationUtil.getNotiDescLoginWarningPrefix()
+								+ dto.getPlatform() + " " + dto.getDevice();
+						UUID notificationUuid = UUID.randomUUID();
+						NotificationEntity notificationEntity = new NotificationEntity();
+						notificationEntity.setId(notificationUuid.toString());
+						notificationEntity.setRead(false);
+						notificationEntity.setMessage(messageNotification);
+						notificationEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
+						notificationEntity.setType(NotificationUtil.getNotiTypeLogin());
+						notificationEntity.setUserId(userId);
+						notificationService.insertNotification(notificationEntity);
+						// push notification to devices
+						for (FcmTokenEntity fcmToken : fcmTokens) {
+							try {
+								if (!fcmToken.getToken().trim().isEmpty()) {
+									FcmRequestDTO fcmDTO = new FcmRequestDTO();
+									fcmDTO.setTitle(NotificationUtil.getNotiTitleLoginWarning());
+									fcmDTO.setMessage(messageNotification);
+									fcmDTO.setToken(fcmToken.getToken());
+									firebaseMessagingService.sendPushNotificationToToken(fcmDTO);
+									logger.info("Send notification to device " + fcmToken.getToken());
+								}
+							} catch (Exception e) {
+								logger.error("Error when Send Notification using FCM " + e.toString());
+								if (e.toString()
+										.contains("The registration token is not a valid FCM registration token")) {
+									fcmTokenService.deleteFcmToken(fcmToken.getToken());
+								}
+
+							}
+						}
+					}
+					// insert new FCM token
+
+					FcmTokenEntity fcmTokenEntity = new FcmTokenEntity();
+					UUID uuid = UUID.randomUUID();
+					fcmTokenEntity.setId(uuid.toString());
+					fcmTokenEntity.setToken(dto.getFcmToken());
+					fcmTokenEntity.setUserId(userId);
+					fcmTokenEntity.setPlatform(dto.getPlatform());
+					fcmTokenEntity.setDevice(dto.getDevice());
+					fcmTokenService.insertFcmToken(fcmTokenEntity);
+
+					// response login success
+					result = getJWTToken(accountInformationEntity);
+					httpStatus = HttpStatus.OK;
+				} else {
+					logger.error("Cannot find user to login");
+					httpStatus = HttpStatus.BAD_REQUEST;
+				}
 			} else {
-				logger.error("Phone number is empty");
+				logger.error("LOGIN: Phone number AND email is empty");
 				httpStatus = HttpStatus.BAD_REQUEST;
+
 			}
 		} catch (Exception e) {
 			logger.error("Error at login: " + e.toString());
@@ -195,6 +259,7 @@ public class AccountController {
 
 		} catch (Exception e) {
 			System.out.println("Error at searchAccount: " + e.toString());
+			result = new ResponseMessageDTO("FAILED", "E05");
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<Object>(result, httpStatus);

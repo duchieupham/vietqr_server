@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.vietqr.org.dto.AccountBankConnectBranchDTO;
 import com.vietqr.org.dto.BusinessBankDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 
@@ -79,4 +80,18 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "SET status = :status "
 			+ "WHERE user_id = :userId", nativeQuery = true)
 	void updateStatusAccountBankByUserId(@Param(value = "status") int status, @Param(value = "userId") String userId);
+
+	@Query(value = "SELECT a.id as bankId, a.bank_account as bankAccount, a.bank_account_name as bankAccountName, a.user_id as userId, a.is_authenticated as authenticated, b.bank_code as bankCode, b.bank_name as bankName, b.img_id as imgId "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN bank_type b "
+			+ "ON a.bank_type_id = b.id "
+			+ "WHERE a.type = 0 AND user_id = :userId AND a.status = 1", nativeQuery = true)
+	List<AccountBankConnectBranchDTO> getAccountBankConnect(@Param(value = "userId") String userId);
+
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_bank_receive "
+			+ "SET type = :type "
+			+ "WHERE id = :id", nativeQuery = true)
+	void updateBankType(@Param(value = "id") String id, @Param(value = "type") int type);
 }
