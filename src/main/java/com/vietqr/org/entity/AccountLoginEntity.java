@@ -32,17 +32,21 @@ public class AccountLoginEntity implements Serializable {
 	@Column(name = "email")
 	private String email;
 
+	@Column(name = "time")
+	private long time;
+
 	public AccountLoginEntity() {
 		super();
 	}
 
-	public AccountLoginEntity(String id, String phoneNo, String password, boolean status, String email) {
+	public AccountLoginEntity(String id, String phoneNo, String password, boolean status, String email, Long time) {
 		super();
 		this.id = id;
 		this.phoneNo = phoneNo;
 		this.password = password;
 		this.status = status;
 		this.email = email;
+		this.time = time;
 	}
 
 	public String getId() {
@@ -83,6 +87,14 @@ public class AccountLoginEntity implements Serializable {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public long getTime() {
+		return time;
+	}
+
+	public void setTime(long time) {
+		this.time = time;
 	}
 
 }

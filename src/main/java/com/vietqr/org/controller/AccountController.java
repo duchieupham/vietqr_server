@@ -280,6 +280,9 @@ public class AccountController {
 				accountLoginEntity.setPhoneNo(dto.getPhoneNo());
 				accountLoginEntity.setPassword(dto.getPassword());
 				accountLoginEntity.setStatus(true);
+				LocalDateTime currentDateTime = LocalDateTime.now();
+				long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+				accountLoginEntity.setTime(time);
 				accountLoginService.insertAccountLogin(accountLoginEntity);
 
 				// insert account_information
