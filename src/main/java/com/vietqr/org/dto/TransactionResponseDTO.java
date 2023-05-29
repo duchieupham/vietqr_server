@@ -63,4 +63,11 @@ public class TransactionResponseDTO implements Serializable {
 	public void setObject(RefTransactionDTO object) {
 		this.object = object;
 	}
+
+	@Override
+	public String toString() {
+		return "TransactionResponseDTO [error=" + error + ", errorReason=" + errorReason + ", toastMessage="
+				+ toastMessage + ", object=" + object.toString() + "]";
+	}
+
 }

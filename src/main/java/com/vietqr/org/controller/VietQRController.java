@@ -156,10 +156,6 @@ public class VietQRController {
 				} catch (Exception e) {
 					logger.error("TTS-WS: Error: " + e.toString());
 				}
-				// finally {
-				// textToSpeechService.delete(requestId);
-				// }
-
 			}
 		}
 	}
@@ -349,7 +345,7 @@ public class VietQRController {
 				vietQRCreateDTO.setUserId(accountBankEntity.getUserId());
 				UUID transactionUUID = UUID.randomUUID();
 				insertNewTransaction(transactionUUID, traceId, vietQRCreateDTO, vietQRDTO, dto.getOrderId(),
-						dto.getSign());
+						dto.getSign(), true);
 			}
 			//
 			LocalDateTime currentDateTime = LocalDateTime.now();
@@ -370,7 +366,11 @@ public class VietQRController {
 
 	@Async
 	private void insertNewTransaction(UUID transcationUUID, String traceId, VietQRCreateDTO dto, VietQRDTO result,
-			String orderId, String sign) {
+			String orderId, String sign, boolean isFromBusinessSync) {
+		LocalDateTime startTime = LocalDateTime.now();
+		long startTimeLong = startTime.toEpochSecond(ZoneOffset.UTC);
+		logger.info("QR generate - start insertNewTransaction at: " + startTimeLong);
+		logger.info("QR generate - insertNewTransaction data: " + result.toString());
 		try {
 			NumberFormat nf = NumberFormat.getInstance(Locale.US);
 			// 2. Insert transaction_receive if branch_id and business_id != null
@@ -396,6 +396,9 @@ public class VietQRController {
 				transactionEntity.setSign(sign);
 				//
 				transactionReceiveService.insertTransactionReceive(transactionEntity);
+				LocalDateTime afterInsertTransactionTime = LocalDateTime.now();
+				long afterInsertTransactionTimeLong = afterInsertTransactionTime.toEpochSecond(ZoneOffset.UTC);
+				logger.info("QR generate - after insertTransactionReceive at: " + afterInsertTransactionTimeLong);
 
 				// insert transaction branch if existing branchId and businessId. Else just do
 				// not map.
@@ -454,8 +457,13 @@ public class VietQRController {
 							notiEntity.setUserId(userId);
 							notiEntity.setData(transcationUUID.toString());
 							notificationService.insertNotification(notiEntity);
-						}
+							LocalDateTime afterInsertNotificationTransaction = LocalDateTime.now();
+							long afterInsertNotificationTransactionLong = afterInsertNotificationTransaction
+									.toEpochSecond(ZoneOffset.UTC);
+							logger.info("QR generate - after InsertNotificationTransaction at: "
+									+ afterInsertNotificationTransactionLong);
 
+						}
 					}
 				} else {
 					// insert notification
@@ -467,25 +475,28 @@ public class VietQRController {
 							+ NotificationUtil
 									.getNotiDescNewTransSuffix2();
 
-					// push notification
-					List<FcmTokenEntity> fcmTokens = new ArrayList<>();
-					fcmTokens = fcmTokenService.getFcmTokensByUserId(dto.getUserId());
-					Map<String, String> data = new HashMap<>();
-					data.put("notificationType", NotificationUtil.getNotiTypeNewTransaction());
-					data.put("notificationId", notificationUUID.toString());
-					data.put("bankCode", result.getBankCode());
-					data.put("bankName", result.getBankName());
-					data.put("bankAccount", result.getBankAccount());
-					data.put("userBankName", result.getUserBankName());
-					data.put("amount", result.getAmount());
-					data.put("content", result.getContent());
-					data.put("qrCode", result.getQrCode());
-					data.put("imgId", result.getImgId());
-					firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
-							NotificationUtil
-									.getNotiTitleNewTransaction(),
-							message);
-					socketHandler.sendMessageToUser(dto.getUserId(), data);
+					if (isFromBusinessSync == false) {
+						// push notification
+						List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+						fcmTokens = fcmTokenService.getFcmTokensByUserId(dto.getUserId());
+						Map<String, String> data = new HashMap<>();
+						data.put("notificationType", NotificationUtil.getNotiTypeNewTransaction());
+						data.put("notificationId", notificationUUID.toString());
+						data.put("bankCode", result.getBankCode());
+						data.put("bankName", result.getBankName());
+						data.put("bankAccount", result.getBankAccount());
+						data.put("userBankName", result.getUserBankName());
+						data.put("amount", result.getAmount());
+						data.put("content", result.getContent());
+						data.put("qrCode", result.getQrCode());
+						data.put("imgId", result.getImgId());
+						firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
+								NotificationUtil
+										.getNotiTitleNewTransaction(),
+								message);
+						socketHandler.sendMessageToUser(dto.getUserId(), data);
+					}
+
 					notiEntity.setId(notificationUUID.toString());
 					notiEntity.setRead(false);
 					notiEntity.setMessage(message);
@@ -494,10 +505,20 @@ public class VietQRController {
 					notiEntity.setUserId(dto.getUserId());
 					notiEntity.setData(transcationUUID.toString());
 					notificationService.insertNotification(notiEntity);
+					LocalDateTime afterInsertNotificationTransaction = LocalDateTime.now();
+					long afterInsertNotificationTransactionLong = afterInsertNotificationTransaction
+							.toEpochSecond(ZoneOffset.UTC);
+					logger.info("QR generate - after InsertNotificationTransaction at: "
+							+ afterInsertNotificationTransactionLong);
 				}
 			}
+
 		} catch (Exception e) {
 			logger.error("Error at insertNewTransaction: " + e.toString());
+		} finally {
+			LocalDateTime endTime = LocalDateTime.now();
+			long endTimeLong = endTime.toEpochSecond(ZoneOffset.UTC);
+			logger.info("QR generate - end insertNewTransaction at: " + endTimeLong);
 		}
 
 	}
@@ -680,7 +701,7 @@ public class VietQRController {
 			httpStatus = HttpStatus.BAD_REQUEST;
 			return new ResponseEntity<>(result, httpStatus);
 		} finally {
-			insertNewTransaction(transcationUUID, traceId, dto, result, "", "");
+			insertNewTransaction(transcationUUID, traceId, dto, result, "", "", false);
 		}
 	}
 

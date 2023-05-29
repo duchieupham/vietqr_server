@@ -109,4 +109,11 @@ public class VietQRDTO implements Serializable {
 		this.existing = existing;
 	}
 
+	@Override
+	public String toString() {
+		return "VietQRDTO [bankCode=" + bankCode + ", bankName=" + bankName + ", bankAccount=" + bankAccount
+				+ ", userBankName=" + userBankName + ", amount=" + amount + ", content=" + content + ", qrCode="
+				+ qrCode + ", imgId=" + imgId + ", existing=" + existing + "]";
+	}
+
 }

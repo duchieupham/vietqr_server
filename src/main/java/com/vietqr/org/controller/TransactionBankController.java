@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.time.ZoneOffset;
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.util.Locale;
@@ -154,10 +155,10 @@ public class TransactionBankController {
 		long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
 		logger.info("receive transaction sync from MB: " + dto.toString() + " at: " + time);
 		boolean checkDuplicate = checkDuplicateReferenceNumber(dto.getReferencenumber());
+		result = validateTransactionBank(dto, uuid.toString());
 		try {
 			List<Object> list = transactionBankService.checkTransactionIdInserted(dto.getTransactionid());
 			if (list.isEmpty()) {
-				result = validateTransactionBank(dto, uuid.toString());
 				if (!result.isError()) {
 					if (checkDuplicate) {
 						transactionBankService.insertTransactionBank(dto.getTransactionid(), dto.getTransactiontime(),
@@ -165,14 +166,18 @@ public class TransactionBankController {
 								dto.getTransType(), dto.getReciprocalAccount(), dto.getReciprocalBankCode(),
 								dto.getVa(),
 								dto.getValueDate(), uuid.toString());
+					} else {
+						logger.error("Transaction-sync: Duplicate Reference number");
 					}
 					httpStatus = HttpStatus.OK;
 				} else {
+					logger.error("Transaction-sync:  Error receive data: " + result.toString());
 					httpStatus = HttpStatus.BAD_REQUEST;
 				}
 			} else {
 				httpStatus = HttpStatus.BAD_REQUEST;
 				result = new TransactionResponseDTO(true, "006", "Duplicated transactionid");
+				logger.error("Error receive transaction-sync: " + result.toString());
 			}
 			return new ResponseEntity<>(result, httpStatus);
 		} catch (Exception e) {
@@ -183,68 +188,76 @@ public class TransactionBankController {
 		} finally {
 			// AccountBankReceiveEntity accountBankEntity = accountBankService
 			// .getAccountBankById(transactionReceiveEntity.getBankId());
-			if (checkDuplicate) {
-				String bankCode = "MB";
-				String bankTypeId = bankTypeService.getBankTypeIdByBankCode(bankCode);
-				AccountBankReceiveEntity accountBankEntity = accountBankService
-						.getAccountBankByBankAccountAndBankTypeId(dto.getBankaccount(), bankTypeId);
-				if (accountBankEntity != null) {
-					// find transaction by id
-					String traceId = "";
-					String[] newPaths = dto.getContent().split("\\s+");
-					logger.info("content: " + dto.getContent() + "-" + newPaths.length + "-" + newPaths.toString());
-					if (newPaths != null && newPaths.length > 0) {
-						int indexSaved = 0;
-						for (int i = 0; i < newPaths.length; i++) {
-							if (newPaths[i].contains("VQR")) {
-								traceId = newPaths[i];
-								indexSaved = i;
-							}
-							if (i == indexSaved + 1) {
-								if (traceId.length() < 13) {
-									traceId = traceId + newPaths[i];
+			if (!result.isError()) {
+				if (checkDuplicate) {
+					String bankCode = "MB";
+					String bankTypeId = bankTypeService.getBankTypeIdByBankCode(bankCode);
+					AccountBankReceiveEntity accountBankEntity = accountBankService
+							.getAccountBankByBankAccountAndBankTypeId(dto.getBankaccount(), bankTypeId);
+					if (accountBankEntity != null) {
+						// find transaction by id
+						String traceId = "";
+						String[] newPaths = dto.getContent().split("\\s+");
+						logger.info("content: " + dto.getContent() + "-" + newPaths.length + "-" + newPaths.toString());
+						if (newPaths != null && newPaths.length > 0) {
+							int indexSaved = 0;
+							for (int i = 0; i < newPaths.length; i++) {
+								if (newPaths[i].contains("VQR")) {
+									traceId = newPaths[i];
+									indexSaved = i;
+								}
+								if (i == indexSaved + 1) {
+									if (traceId.length() < 13) {
+										traceId = traceId + newPaths[i];
+									}
 								}
 							}
-						}
-						if (!traceId.isEmpty()) {
-							String pattern = "VQR.{10}";
-							Pattern r = Pattern.compile(pattern);
-							Matcher m = r.matcher(traceId);
-							if (m.find()) {
-								traceId = m.group(0);
-							} else {
-								traceId = "";
+							if (!traceId.isEmpty()) {
+								String pattern = "VQR.{10}";
+								Pattern r = Pattern.compile(pattern);
+								Matcher m = r.matcher(traceId);
+								if (m.find()) {
+									traceId = m.group(0);
+								} else {
+									traceId = "";
+								}
 							}
+							logger.info("traceId: " + traceId);
 						}
-						logger.info("traceId: " + traceId);
-					}
-					String orderId = "";
-					String sign = "";
-					if (traceId != null && !traceId.isEmpty()) {
-						logger.info("transaction-sync - trace ID detect: " + traceId);
-						TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
-								.getTransactionByTraceIdAndAmount(traceId, dto.getAmount() + "");
-						if (transactionReceiveEntity != null) {
-							orderId = transactionReceiveEntity.getOrderId();
-							sign = transactionReceiveEntity.getSign();
-							getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
-							updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time, nf);
+						String orderId = "";
+						String sign = "";
+						if (traceId != null && !traceId.isEmpty()) {
+							logger.info("transaction-sync - trace ID detect: " + traceId);
+							TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
+									.getTransactionByTraceIdAndAmount(traceId, dto.getAmount() + "");
+							if (transactionReceiveEntity != null) {
+								orderId = transactionReceiveEntity.getOrderId();
+								sign = transactionReceiveEntity.getSign();
+								getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
+								updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time, nf);
+							} else {
+								logger.info(
+										"transaction-sync - cannot find transaction receive. Receive new transaction outside system");
+								// process here
+								getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
+								insertNewTransaction(dto, accountBankEntity, time, traceId, uuid, nf, "", "");
+							}
 						} else {
-							logger.info(
-									"transaction-sync - cannot find transaction receive. Receive new transaction outside system");
-							// process here
+							logger.info("transaction-sync - traceId is empty. Receive new transaction outside system");
 							getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
 							insertNewTransaction(dto, accountBankEntity, time, traceId, uuid, nf, "", "");
 						}
 					} else {
-						logger.info("transaction-sync - traceId is empty. Receive new transaction outside system");
-						insertNewTransaction(dto, accountBankEntity, time, traceId, uuid, nf, "", "");
+						logger.info("transaction-sync - cannot find account bank or account bank is deactive");
 					}
 				} else {
-					logger.info("transaction-sync - cannot find account bank or account bank is deactive");
+					logger.error("Transaction-sync: Duplicate Reference number");
 				}
+			} else {
+				logger.error("Transaction-sync:  Error receive data: " + result.toString());
 			}
 		}
+
 	}
 
 	@Async
@@ -391,10 +404,15 @@ public class TransactionBankController {
 					NotificationUtil
 							.getNotiTitleUpdateTransaction(),
 					message);
-			String requestId = "";
-			requestId = textToSpeechService.requestTTS(accountBankEntity.getUserId(),
-					data, dto.getAmount() + "");
-			textToSpeechService.delete(requestId);
+			try {
+				socketHandler.sendMessageToUser(accountBankEntity.getUserId(), data);
+			} catch (IOException e) {
+				logger.error("WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
+			}
+			// String requestId = "";
+			// requestId = textToSpeechService.requestTTS(accountBankEntity.getUserId(),
+			// data, dto.getAmount() + "");
+			// textToSpeechService.delete(requestId);
 		}
 
 	}
@@ -476,10 +494,15 @@ public class TransactionBankController {
 				NotificationUtil
 						.getNotiTitleUpdateTransaction(),
 				message);
-		String requestId = "";
-		requestId = textToSpeechService.requestTTS(accountBankEntity.getUserId(),
-				data, dto.getAmount() + "");
-		textToSpeechService.delete(requestId);
+		try {
+			socketHandler.sendMessageToUser(accountBankEntity.getUserId(), data);
+		} catch (IOException e) {
+			logger.error("WS: socketHandler.sendMessageToUser - insertNewTransaction ERROR: " + e.toString());
+		}
+		// String requestId = "";
+		// requestId = textToSpeechService.requestTTS(accountBankEntity.getUserId(),
+		// data, dto.getAmount() + "");
+		// textToSpeechService.delete(requestId);
 	}
 
 	// get token bank product

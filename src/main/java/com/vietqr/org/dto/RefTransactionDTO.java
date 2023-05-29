@@ -2,7 +2,7 @@ package com.vietqr.org.dto;
 
 import java.io.Serializable;
 
-public class RefTransactionDTO implements Serializable{
+public class RefTransactionDTO implements Serializable {
 	/**
 	 *
 	 */
@@ -26,4 +26,10 @@ public class RefTransactionDTO implements Serializable{
 	public void setReftransactionid(String reftransactionid) {
 		this.reftransactionid = reftransactionid;
 	}
+
+	@Override
+	public String toString() {
+		return "RefTransactionDTO [reftransactionid=" + reftransactionid + "]";
+	}
+
 }
