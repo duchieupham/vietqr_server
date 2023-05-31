@@ -512,11 +512,11 @@ public class TransactionBankController {
 			String key = EnvironmentUtil.getUserBankAccess() + ":" + EnvironmentUtil.getPasswordBankAccess();
 			String encodedKey = Base64.getEncoder().encodeToString(key.getBytes());
 			UriComponents uriComponents = UriComponentsBuilder
-					.fromHttpUrl(EnvironmentUtil.getBankUrl() + "private/oauth2/v1/token")
+					.fromHttpUrl(EnvironmentUtil.getBankUrl() + "oauth2/v1/token")
 					.buildAndExpand(/* add url parameter here */);
 			WebClient webClient = WebClient.builder()
 					.baseUrl(EnvironmentUtil.getBankUrl()
-							+ "private/oauth2/v1/token")
+							+ "oauth2/v1/token")
 					.build();
 			// Call POST API
 			TokenProductBankDTO response = webClient.method(HttpMethod.POST)
@@ -575,7 +575,7 @@ public class TransactionBankController {
 				// Build URL with PathVariable
 				UriComponents uriComponents = UriComponentsBuilder
 						.fromHttpUrl(
-								"https://api-private.mbbank.com.vn/private/ms/bank-info/v1.0/account/info")
+								EnvironmentUtil.getBankUrl() + "ms/bank-info/v1.0/account/info")
 						.buildAndExpand(accountNumber);
 
 				// Create WebClient with authorization header
@@ -662,12 +662,12 @@ public class TransactionBankController {
 			data.put("transType", "DC");
 			UriComponents uriComponents = UriComponentsBuilder
 					.fromHttpUrl(EnvironmentUtil.getBankUrl()
-							+ "private/ms/push-mesages-partner/v1.0/bdsd/subscribe/request")
+							+ "ms/push-mesages-partner/v1.0/bdsd/subscribe/request")
 					.buildAndExpand(/* add url parameter here */);
 			WebClient webClient = WebClient.builder()
 					.baseUrl(
 							EnvironmentUtil.getBankUrl()
-									+ "private/ms/push-mesages-partner/v1.0/bdsd/subscribe/request")
+									+ "ms/push-mesages-partner/v1.0/bdsd/subscribe/request")
 					.build();
 			Mono<ClientResponse> responseMono = webClient.post()
 					.uri(uriComponents.toUri())
@@ -733,12 +733,12 @@ public class TransactionBankController {
 			data.put("applicationType", dto.getApplicationType());
 			UriComponents uriComponents = UriComponentsBuilder
 					.fromHttpUrl(EnvironmentUtil.getBankUrl()
-							+ "private/ms/push-mesages-partner/v1.0/bdsd/subscribe/confirm")
+							+ "ms/push-mesages-partner/v1.0/bdsd/subscribe/confirm")
 					.buildAndExpand(/* add url parameter here */);
 			WebClient webClient = WebClient.builder()
 					.baseUrl(
 							EnvironmentUtil.getBankUrl()
-									+ "private/ms/push-mesages-partner/v1.0/bdsd/subscribe/confirm")
+									+ "ms/push-mesages-partner/v1.0/bdsd/subscribe/confirm")
 					.build();
 			Mono<ClientResponse> responseMono = webClient.post()
 					.uri(uriComponents.toUri())
@@ -809,12 +809,12 @@ public class TransactionBankController {
 			data.put("transType", "DC");
 			UriComponents uriComponents = UriComponentsBuilder
 					.fromHttpUrl(EnvironmentUtil.getBankUrl()
-							+ "private/ms/push-mesages-partner/v1.0/bdsd/unsubscribe/request")
+							+ "ms/push-mesages-partner/v1.0/bdsd/unsubscribe/request")
 					.buildAndExpand(/* add url parameter here */);
 			WebClient webClient = WebClient.builder()
 					.baseUrl(
 							EnvironmentUtil.getBankUrl()
-									+ "private/ms/push-mesages-partner/v1.0/bdsd/unsubscribe/request")
+									+ "ms/push-mesages-partner/v1.0/bdsd/unsubscribe/request")
 					.build();
 			Mono<ClientResponse> responseMono = webClient.post()
 					.uri(uriComponents.toUri())
@@ -880,12 +880,12 @@ public class TransactionBankController {
 			data.put("applicationType", dto.getApplicationType());
 			UriComponents uriComponents = UriComponentsBuilder
 					.fromHttpUrl(EnvironmentUtil.getBankUrl()
-							+ "private/ms/push-mesages-partner/v1.0/bdsd/unsubscribe/confirm")
+							+ "ms/push-mesages-partner/v1.0/bdsd/unsubscribe/confirm")
 					.buildAndExpand(/* add url parameter here */);
 			WebClient webClient = WebClient.builder()
 					.baseUrl(
 							EnvironmentUtil.getBankUrl()
-									+ "private/ms/push-mesages-partner/v1.0/bdsd/unsubscribe/confirm")
+									+ "ms/push-mesages-partner/v1.0/bdsd/unsubscribe/confirm")
 					.build();
 			Mono<ClientResponse> responseMono = webClient.post()
 					.uri(uriComponents.toUri())

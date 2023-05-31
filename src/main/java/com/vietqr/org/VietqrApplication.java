@@ -40,6 +40,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
+
 	}
 
 	@Bean
@@ -98,6 +99,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 					.antMatchers(HttpMethod.POST, "/api/accounts").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts/register").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts/logout").permitAll()
+					.antMatchers(HttpMethod.POST, "/api/transaction-mms").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/transaction/voice/**").permitAll()
 					.anyRequest().authenticated();
 		}
