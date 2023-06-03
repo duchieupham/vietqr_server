@@ -36,6 +36,7 @@ import com.vietqr.org.dto.VietQRCreateCustomerDTO;
 import com.vietqr.org.dto.VietQRCreateDTO;
 import com.vietqr.org.dto.VietQRCreateFromTransactionDTO;
 import com.vietqr.org.dto.VietQRCreateListDTO;
+import com.vietqr.org.dto.VietQRCreateUnauthenticatedDTO;
 import com.vietqr.org.dto.VietQRDTO;
 import com.vietqr.org.dto.VietQRGenerateDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
@@ -241,6 +242,41 @@ public class VietQRController {
 			}
 		} catch (Exception e) {
 			logger.error(e.toString());
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	@PostMapping("qr/generate/unauthenticated")
+	public ResponseEntity<Object> generateQRUnauthenticated(@Valid @RequestBody VietQRCreateUnauthenticatedDTO dto) {
+		Object result = null;
+		HttpStatus httpStatus = null;
+		VietQRDTO vietQRDTO = new VietQRDTO();
+		try {
+			String bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
+			if (bankTypeId != null) {
+				String caiValue = caiBankService.getCaiValue(bankTypeId);
+				BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(bankTypeId);
+				VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+				vietQRGenerateDTO.setCaiValue(caiValue);
+				vietQRGenerateDTO.setBankAccount(dto.getBankAccount());
+				vietQRGenerateDTO.setAmount("");
+				vietQRGenerateDTO.setContent("");
+				String qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
+				vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
+				vietQRDTO.setBankName(bankTypeEntity.getBankName());
+				vietQRDTO.setBankAccount(dto.getBankAccount());
+				vietQRDTO.setUserBankName(dto.getUserBankName().toUpperCase());
+				vietQRDTO.setAmount("");
+				vietQRDTO.setContent("");
+				vietQRDTO.setQrCode(qr);
+				vietQRDTO.setImgId(bankTypeEntity.getImgId());
+				vietQRDTO.setExisting(0);
+				result = vietQRDTO;
+				httpStatus = HttpStatus.OK;
+			}
+		} catch (Exception e) {
+			result = new ResponseMessageDTO("FAILED", "Unexpected Error");
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(result, httpStatus);

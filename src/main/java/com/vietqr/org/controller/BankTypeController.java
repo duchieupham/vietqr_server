@@ -97,6 +97,32 @@ public class BankTypeController {
 		return new ResponseEntity<>(result, httpStatus);
 	}
 
+	@GetMapping("bank-type/unauthenticated")
+	public ResponseEntity<List<BankTypeDTO>> getBankTypesUnauthenticated() {
+		List<BankTypeDTO> result = new ArrayList<>();
+		HttpStatus httpStatus = null;
+		try {
+			List<BankTypeEntity> entities = bankTypeService.getBankTypes();
+			if (!entities.isEmpty()) {
+				for (BankTypeEntity entity : entities) {
+					BankTypeDTO dto = new BankTypeDTO();
+					dto.setId("");
+					dto.setBankCode(entity.getBankCode());
+					dto.setBankName(entity.getBankName());
+					dto.setImageId(entity.getImgId());
+					dto.setStatus(0);
+					dto.setCaiValue("");
+					result.add(dto);
+				}
+			}
+			httpStatus = HttpStatus.OK;
+		} catch (Exception e) {
+			System.out.println("Error at getBankTypes: " + e.toString());
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
 	@GetMapping("bank-type/cai/{caiValue}")
 	public ResponseEntity<BankTypeDTO> getBankTypeByCaiValue(@PathVariable("caiValue") String caiValue) {
 		BankTypeDTO result = null;
