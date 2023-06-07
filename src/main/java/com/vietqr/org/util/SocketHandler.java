@@ -18,22 +18,29 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class SocketHandler extends TextWebSocketHandler {
     private static final Logger logger = Logger.getLogger(SocketHandler.class);
 
-    private List<WebSocketSession> sessions = new ArrayList<>();
+    private List<WebSocketSession> notificationSessions = new ArrayList<>();
+    private List<WebSocketSession> loginSessions = new ArrayList<>();
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         try {
             logger.info("WS: add session: " + session.toString());
             String userId = (String) session.getAttributes().get("userId");
-            if (userId == null || userId.trim().isEmpty()) {
-                logger.error("WS: userId is missing");
-                session.close();
-            } else {
+            String loginId = (String) session.getAttributes().get("loginId");
+
+            if (userId != null && !userId.trim().isEmpty()) {
                 // save userId for this session
                 session.getAttributes().put("userId", userId);
-                sessions.add(session);
+                notificationSessions.add(session);
+                logger.info("WS: userSessions size: " + notificationSessions.size());
+            } else if (loginId != null && !loginId.trim().isEmpty()) {
+                // save loginId for this session
+                session.getAttributes().put("loginId", loginId);
+                loginSessions.add(session);
+            } else {
+                logger.error("WS: userId is missing");
+                session.close();
             }
-            logger.info("WS: userSessions size: " + sessions.size());
         } catch (Exception e) {
             logger.error("WS: error add session: " + e.toString());
         }
@@ -46,16 +53,30 @@ public class SocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        sessions.remove(session);
+        notificationSessions.remove(session);
         logger.info("WS: remove session: " + session.toString());
-        logger.info("WS: sessions size: " + sessions.size());
+        logger.info("WS: notificationSessions size: " + notificationSessions.size());
+    }
+
+    public void sendMessageLoginToWeb(String loginId, Map<String, String> message) throws IOException {
+        logger.info("WS: sendMessageLoginToWeb");
+        logger.info("WS: loginSessions: " + loginSessions.size());
+        for (WebSocketSession session : loginSessions) {
+            logger.info("WS: login session ID: " + session.getId());
+            logger.info("WS: login session Attributes: " + session.getAttributes());
+            Object sessionLoginId = session.getAttributes().get("loginId");
+            if (sessionLoginId != null && sessionLoginId.equals(loginId)) {
+                ObjectMapper mapper = new ObjectMapper();
+                String jsonMessage = mapper.writeValueAsString(message);
+                session.sendMessage(new TextMessage(jsonMessage));
+            }
+        }
     }
 
     public void sendMessageToUser(String userId, Map<String, String> message) throws IOException {
         logger.info("WS: sendMessageToUser");
-        logger.info("WS: userSessions: " + sessions.size());
-
-        for (WebSocketSession session : sessions) {
+        logger.info("WS: notificationSessions: " + notificationSessions.size());
+        for (WebSocketSession session : notificationSessions) {
             logger.info("WS: session ID: " + session.getId());
             logger.info("WS: session Attributes: " + session.getAttributes());
             Object sessionUserId = session.getAttributes().get("userId");

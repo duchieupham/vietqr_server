@@ -12,6 +12,7 @@ public class BankTypeDTO implements Serializable {
 	private String id;
 	private String bankCode;
 	private String bankName;
+	private String bankShortName;
 	private String imageId;
 	private int status;
 	private String caiValue;
@@ -20,11 +21,13 @@ public class BankTypeDTO implements Serializable {
 		super();
 	}
 
-	public BankTypeDTO(String id, String bankCode, String bankName, String imageId, int status, String caiValue) {
+	public BankTypeDTO(String id, String bankCode, String bankName, String bankShortName, String imageId, int status,
+			String caiValue) {
 		super();
 		this.id = id;
 		this.bankCode = bankCode;
 		this.bankName = bankName;
+		this.bankShortName = bankShortName;
 		this.imageId = imageId;
 		this.status = status;
 		this.caiValue = caiValue;
@@ -52,6 +55,14 @@ public class BankTypeDTO implements Serializable {
 
 	public void setBankName(String bankName) {
 		this.bankName = bankName;
+	}
+
+	public String getBankShortName() {
+		return bankShortName;
+	}
+
+	public void setBankShortName(String bankShortName) {
+		this.bankShortName = bankShortName;
 	}
 
 	public String getImageId() {

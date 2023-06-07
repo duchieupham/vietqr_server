@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,7 +25,9 @@ import com.vietqr.org.dto.AccountBankReceiveDTO;
 import com.vietqr.org.dto.AccountBankReceiveDetailDTO;
 import com.vietqr.org.dto.AccountBankReceiveDetailWT;
 import com.vietqr.org.dto.AccountBankResponseDTO;
+import com.vietqr.org.dto.AccountBankSyncWpDTO;
 import com.vietqr.org.dto.AccountBankUnauthenticatedDTO;
+import com.vietqr.org.dto.AccountBankWpDTO;
 import com.vietqr.org.dto.BankAccountRemoveDTO;
 import com.vietqr.org.dto.RegisterAuthenticationDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
@@ -48,6 +51,10 @@ import com.vietqr.org.service.BusinessInformationService;
 import com.vietqr.org.service.CaiBankService;
 import com.vietqr.org.service.TransactionReceiveService;
 import com.vietqr.org.util.VietQRUtil;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+
 import com.vietqr.org.service.BranchInformationService;
 
 @RestController
@@ -127,6 +134,7 @@ public class AccountBankReceiveController {
 			entity.setPhoneAuthenticated("");
 			entity.setAuthenticated(false);
 			entity.setSync(false);
+			entity.setWpSync(false);
 			entity.setStatus(true);
 			accountBankService.insertAccountBank(entity);
 			// insert bank-receive-personal
@@ -144,6 +152,62 @@ public class AccountBankReceiveController {
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	@GetMapping("account-bank/wp")
+	public ResponseEntity<List<AccountBankWpDTO>> getAccountBankReceiveWps(
+			@RequestHeader("Authorization") String token) {
+		List<AccountBankWpDTO> result = new ArrayList<>();
+		HttpStatus httpStatus = null;
+		try {
+			String userId = getUserIdFromToken(token);
+			result = accountBankService.getAccountBankReceiveWps(userId);
+			httpStatus = HttpStatus.OK;
+		} catch (Exception e) {
+			logger.error("getAccountBankReceiveWps: ERROR: " + e.toString());
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	@PostMapping("account-bank/wp/sync")
+	public ResponseEntity<ResponseMessageDTO> updateSyncWp(@RequestBody AccountBankSyncWpDTO dto) {
+		ResponseMessageDTO result = null;
+		HttpStatus httpStatus = null;
+		try {
+			if (dto != null) {
+				if (dto.getBankId() != null && !dto.getBankId().trim().isEmpty()) {
+					accountBankService.updateSyncWp(dto.isSyncWp(), dto.getBankId());
+					result = new ResponseMessageDTO("SUCCESS", "");
+					httpStatus = HttpStatus.OK;
+				} else {
+					logger.error("updateSyncWp: ERROR: BankId is Invalid");
+					result = new ResponseMessageDTO("FAILED", "E31");
+					httpStatus = HttpStatus.BAD_REQUEST;
+				}
+			} else {
+				logger.error("updateSyncWp: ERROR: NULL Request Body");
+				result = new ResponseMessageDTO("FAILED", "E30");
+				httpStatus = HttpStatus.BAD_REQUEST;
+			}
+		} catch (Exception e) {
+			logger.error("updateSyncWp: ERROR: " + e.toString());
+			result = new ResponseMessageDTO("FAILED", "E05");
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	private String getUserIdFromToken(String token) {
+		String result = "";
+		if (token != null && !token.trim().isEmpty()) {
+			String secretKey = "mySecretKey";
+			String jwtToken = token.substring(7); // remove "Bearer " from the beginning
+			Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(jwtToken).getBody();
+			String userId = (String) claims.get("userId");
+			result = userId;
+		}
+		return result;
 	}
 
 	// register authentication
@@ -191,6 +255,7 @@ public class AccountBankReceiveController {
 			entity.setPhoneAuthenticated(dto.getPhoneAuthenticated());
 			entity.setAuthenticated(true);
 			entity.setSync(false);
+			entity.setWpSync(false);
 			entity.setStatus(true);
 			accountBankService.insertAccountBank(entity);
 			// if (dto.getType() == 0) {

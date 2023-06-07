@@ -15,6 +15,7 @@ public class AccountLoginDTO implements Serializable {
 	private String fcmToken;
 	private String platform;
 	private String device;
+	private String hosting;
 
 	public AccountLoginDTO() {
 		super();
@@ -29,8 +30,19 @@ public class AccountLoginDTO implements Serializable {
 		this.device = device;
 	}
 
+	public AccountLoginDTO(String phoneNo, String password, String fcmToken, String platform, String device,
+			String hosting) {
+		super();
+		this.phoneNo = phoneNo;
+		this.password = password;
+		this.fcmToken = fcmToken;
+		this.platform = platform;
+		this.device = device;
+		this.hosting = hosting;
+	}
+
 	public AccountLoginDTO(String phoneNo, String email, String password, String fcmToken, String platform,
-			String device) {
+			String device, String hosting) {
 		super();
 		this.phoneNo = phoneNo;
 		this.email = email;
@@ -38,6 +50,7 @@ public class AccountLoginDTO implements Serializable {
 		this.fcmToken = fcmToken;
 		this.platform = platform;
 		this.device = device;
+		this.hosting = hosting;
 	}
 
 	public String getPhoneNo() {
@@ -86,6 +99,14 @@ public class AccountLoginDTO implements Serializable {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public String getHosting() {
+		return hosting;
+	}
+
+	public void setHosting(String hosting) {
+		this.hosting = hosting;
 	}
 
 }

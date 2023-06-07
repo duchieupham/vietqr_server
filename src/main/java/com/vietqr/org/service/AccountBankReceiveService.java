@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.dto.AccountBankConnectBranchDTO;
+import com.vietqr.org.dto.AccountBankWpDTO;
 import com.vietqr.org.dto.BusinessBankDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 
@@ -36,4 +37,8 @@ public interface AccountBankReceiveService {
 	public List<AccountBankConnectBranchDTO> getAccountBankConnect(String userId);
 
 	public void updateBankType(String id, int type);
+
+	public List<AccountBankWpDTO> getAccountBankReceiveWps(String userId);
+
+	public void updateSyncWp(boolean syncWp, String bankId);
 }

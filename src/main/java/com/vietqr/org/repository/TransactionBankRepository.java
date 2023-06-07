@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.vietqr.org.dto.TransactionCheckDTO;
 import com.vietqr.org.entity.TransactionBankEntity;
 
 @Repository
@@ -32,4 +33,13 @@ public interface TransactionBankRepository extends JpaRepository<TransactionBank
 
 	@Query(value = "SELECT referencenumber FROM transaction_bank WHERE referencenumber = :referenceNumber", nativeQuery = true)
 	String checkExistedReferenceNumber(@Param(value = "referenceNumber") String referenceNumber);
+
+	@Query(value = "SELECT transactionid as transactionId, referencenumber as referenceNumber, bankaccount as bankAccount, amount, trans_type as transType, content, "
+			+ "DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(transactiontime/1000), '+00:00', '+07:00'), '%Y-%m-%d %H:%i:%s') AS timeReceived "
+			+ "FROM transaction_bank "
+			+ "WHERE CONVERT_TZ(FROM_UNIXTIME(transactiontime/1000), '+00:00', '+07:00') "
+			+ "BETWEEN :fromDate AND :toDate AND bankaccount = :bankAccount "
+			+ "ORDER BY transactiontime DESC", nativeQuery = true)
+	List<TransactionCheckDTO> getTransactionsCheck(@Param(value = "fromDate") String fromDate,
+			@Param(value = "toDate") String toDate, @Param(value = "bankAccount") String bankAccount);
 }

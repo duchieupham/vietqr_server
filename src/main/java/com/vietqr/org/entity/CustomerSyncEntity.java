@@ -38,6 +38,10 @@ public class CustomerSyncEntity implements Serializable {
     @Column(name = "information")
     private String information;
 
+    // userId for check user login by Wordpress
+    @Column(name = "userId")
+    private String userId;
+
     @Column(name = "active")
     private boolean active;
 
@@ -119,6 +123,14 @@ public class CustomerSyncEntity implements Serializable {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
 }

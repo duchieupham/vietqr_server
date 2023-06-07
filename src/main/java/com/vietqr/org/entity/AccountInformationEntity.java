@@ -47,6 +47,12 @@ public class AccountInformationEntity implements Serializable {
 	@Column(name = "imgId")
 	private String imgId;
 
+	@Column(name = "registerPlatform")
+	private String registerPlatform;
+
+	@Column(name = "userIp")
+	private String userIp;
+
 	@Column(name = "status")
 	private boolean status;
 
@@ -55,7 +61,8 @@ public class AccountInformationEntity implements Serializable {
 	}
 
 	public AccountInformationEntity(String id, String userId, String firstName, String middleName, String lastName,
-			String birthDate, String address, int gender, String email, String imgId, boolean status) {
+			String birthDate, String address, int gender, String email, String imgId, String registerPlatform,
+			String userIp, boolean status) {
 		super();
 		this.id = id;
 		this.userId = userId;
@@ -67,6 +74,8 @@ public class AccountInformationEntity implements Serializable {
 		this.gender = gender;
 		this.email = email;
 		this.imgId = imgId;
+		this.registerPlatform = registerPlatform;
+		this.userIp = userIp;
 		this.status = status;
 	}
 
@@ -148,6 +157,22 @@ public class AccountInformationEntity implements Serializable {
 
 	public void setImgId(String imgId) {
 		this.imgId = imgId;
+	}
+
+	public String getRegisterPlatform() {
+		return registerPlatform;
+	}
+
+	public void setRegisterPlatform(String registerPlatform) {
+		this.registerPlatform = registerPlatform;
+	}
+
+	public String getUserIp() {
+		return userIp;
+	}
+
+	public void setUserIp(String userIp) {
+		this.userIp = userIp;
 	}
 
 	public boolean isStatus() {

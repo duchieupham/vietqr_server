@@ -46,14 +46,16 @@ public class BankTypeController {
 
 	@PostMapping(value = "bank-type", produces = "application/json;charset=UTF-8")
 	public ResponseEntity<ResponseMessageDTO> insertBankType(@Valid @RequestParam String bankCode,
-			@Valid @RequestParam String bankName, @Valid @RequestParam MultipartFile imgUrl) {
+			@Valid @RequestParam String bankName, @Valid @RequestParam String bankShortName,
+			@Valid @RequestParam MultipartFile imgUrl) {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
 			UUID uuid = UUID.randomUUID();
 			UUID uuidImage = UUID.randomUUID();
 			String fileName = StringUtils.cleanPath(imgUrl.getOriginalFilename());
-			BankTypeEntity entity = new BankTypeEntity(uuid.toString(), bankCode, bankName, uuidImage.toString(), 0);
+			BankTypeEntity entity = new BankTypeEntity(uuid.toString(), bankCode, bankName, bankShortName,
+					uuidImage.toString(), 0);
 			bankTypeService.insertBankType(entity);
 			// insert image
 			ImageEntity imageEntity = new ImageEntity(uuidImage.toString(), fileName, imgUrl.getBytes());
@@ -82,6 +84,7 @@ public class BankTypeController {
 					dto.setId(entity.getId());
 					dto.setBankCode(entity.getBankCode());
 					dto.setBankName(entity.getBankName());
+					dto.setBankShortName(entity.getBankShortName());
 					dto.setImageId(entity.getImgId());
 					dto.setStatus(entity.getStatus());
 					String caiValue = caiBankService.getCaiValue(dto.getId());
@@ -109,6 +112,7 @@ public class BankTypeController {
 					dto.setId("");
 					dto.setBankCode(entity.getBankCode());
 					dto.setBankName(entity.getBankName());
+					dto.setBankShortName(entity.getBankShortName());
 					dto.setImageId(entity.getImgId());
 					dto.setStatus(0);
 					dto.setCaiValue("");

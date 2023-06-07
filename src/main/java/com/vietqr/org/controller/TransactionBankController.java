@@ -339,17 +339,22 @@ public class TransactionBankController {
 							NotificationUtil
 									.getNotiTitleUpdateTransaction(),
 							message);
-					if (requestId.trim().isEmpty()) {
-						requestId = textToSpeechService.requestTTS(accountBankEntity.getUserId(),
-								data, dto.getAmount() + "");
-					} else {
-						data.put("audioLink", textToSpeechService.find(requestId));
-						try {
-							socketHandler.sendMessageToUser(userId, data);
-						} catch (Exception e) {
-							logger.error("TTS-Transaction: Error: " + e.toString());
-						}
+					try {
+						socketHandler.sendMessageToUser(accountBankEntity.getUserId(), data);
+					} catch (IOException e) {
+						logger.error("WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
 					}
+					// if (requestId.trim().isEmpty()) {
+					// requestId = textToSpeechService.requestTTS(accountBankEntity.getUserId(),
+					// data, dto.getAmount() + "");
+					// } else {
+					// data.put("audioLink", textToSpeechService.find(requestId));
+					// try {
+					// socketHandler.sendMessageToUser(userId, data);
+					// } catch (Exception e) {
+					// logger.error("TTS-Transaction: Error: " + e.toString());
+					// }
+					// }
 				}
 				textToSpeechService.delete(requestId);
 			} else {
@@ -1266,7 +1271,7 @@ public class TransactionBankController {
 			// 1. Check bankAccountEntity with sync = true (add sync boolean field)
 			// 2. Find account_customer_bank by bank_id/bank_account AND auth = true.
 			// 3. Find customer_sync and push data to customer.
-			if (accountBankEntity.isSync() == true) {
+			if (accountBankEntity.isSync() == true || accountBankEntity.isWpSync() == true) {
 				TransactionBankCustomerDTO transactionBankCustomerDTO = new TransactionBankCustomerDTO();
 				transactionBankCustomerDTO.setTransactionid(dto.getTransactionid());
 				transactionBankCustomerDTO.setTransactiontime(dto.getTransactiontime());
