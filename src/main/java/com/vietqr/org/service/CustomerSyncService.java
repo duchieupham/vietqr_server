@@ -15,4 +15,7 @@ public interface CustomerSyncService {
 
     public CustomerSyncEntity getCustomerSyncById(String id);
 
+    public String checkExistedCustomerSync(String userId);
+
+    public void updateCustomerSyncInformation(String information, String userId);
 }

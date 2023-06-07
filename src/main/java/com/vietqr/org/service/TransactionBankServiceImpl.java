@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.vietqr.org.dto.TransactionCheckDTO;
 import com.vietqr.org.repository.TransactionBankRepository;
 
 @Service
@@ -30,6 +31,13 @@ public class TransactionBankServiceImpl implements TransactionBankService {
 	@Override
 	public String checkExistedReferenceNumber(String referenceNumber) {
 		return transactionBankRepo.checkExistedReferenceNumber(referenceNumber);
+	}
+
+	@Override
+	public List<TransactionCheckDTO> getTransactionsCheck(String fromDate, String toDate, String bankAccount) {
+		String fromDateString = fromDate + " " + "00:00:00";
+		String toDateString = toDate + " " + "23:59:59";
+		return transactionBankRepo.getTransactionsCheck(fromDateString, toDateString, bankAccount);
 	}
 
 }

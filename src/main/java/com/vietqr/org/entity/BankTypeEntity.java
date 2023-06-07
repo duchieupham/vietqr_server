@@ -9,7 +9,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "BankType")
-public class BankTypeEntity implements Serializable{
+public class BankTypeEntity implements Serializable {
 
 	/**
 	 *
@@ -26,6 +26,9 @@ public class BankTypeEntity implements Serializable{
 	@Column(name = "bankName", columnDefinition = "TEXT")
 	private String bankName;
 
+	@Column(name = "bankShortName", columnDefinition = "TEXT")
+	private String bankShortName;
+
 	@Column(name = "imgId")
 	private String imgId;
 
@@ -36,11 +39,12 @@ public class BankTypeEntity implements Serializable{
 		super();
 	}
 
-	public BankTypeEntity(String id, String bankCode, String bankName, String imgId, int status) {
+	public BankTypeEntity(String id, String bankCode, String bankName, String bankShortName, String imgId, int status) {
 		super();
 		this.id = id;
 		this.bankCode = bankCode;
 		this.bankName = bankName;
+		this.bankShortName = bankShortName;
 		this.imgId = imgId;
 		this.status = status;
 	}
@@ -63,6 +67,14 @@ public class BankTypeEntity implements Serializable{
 
 	public String getBankName() {
 		return bankName;
+	}
+
+	public String getBankShortName() {
+		return bankShortName;
+	}
+
+	public void setBankShortName(String bankShortName) {
+		this.bankShortName = bankShortName;
 	}
 
 	public void setBankName(String bankName) {

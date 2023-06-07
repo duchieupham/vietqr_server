@@ -48,4 +48,24 @@ public class AccountLoginServiceImpl implements AccountLoginService {
 		return accountLoginRepository.loginByEmail(email, password);
 	}
 
+	@Override
+	public String getPhoneNoById(String userId) {
+		return accountLoginRepository.getPhoneNoById(userId);
+	}
+
+	@Override
+	public void updateCardNumber(String cardNumber, String userId) {
+		accountLoginRepository.updateCardNumber(cardNumber, userId);
+	}
+
+	@Override
+	public String checkExistedCardNumber(String cardNumber) {
+		return accountLoginRepository.checkExistedCardNumber(cardNumber);
+	}
+
+	@Override
+	public String loginByCardNumber(String cardNumber) {
+		return accountLoginRepository.loginByCardNumber(cardNumber);
+	}
+
 }

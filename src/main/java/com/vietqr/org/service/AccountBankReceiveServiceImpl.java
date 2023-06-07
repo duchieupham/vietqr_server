@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.dto.AccountBankConnectBranchDTO;
+import com.vietqr.org.dto.AccountBankWpDTO;
 import com.vietqr.org.dto.BusinessBankDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.repository.AccountBankReceiveRepository;
@@ -77,6 +78,16 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
 	@Override
 	public void updateBankType(String id, int type) {
 		accountBankRepo.updateBankType(id, type);
+	}
+
+	@Override
+	public List<AccountBankWpDTO> getAccountBankReceiveWps(String userId) {
+		return accountBankRepo.getAccountBankReceiveWps(userId);
+	}
+
+	@Override
+	public void updateSyncWp(boolean syncWp, String bankId) {
+		accountBankRepo.updateSyncWp(syncWp, bankId);
 	}
 
 }

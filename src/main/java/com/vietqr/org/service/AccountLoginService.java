@@ -22,4 +22,11 @@ public interface AccountLoginService {
 
 	public String loginByEmail(String email, String password);
 
+	public String getPhoneNoById(String userId);
+
+	public void updateCardNumber(String cardNumber, String userId);
+
+	public String checkExistedCardNumber(String cardNumber);
+
+	public String loginByCardNumber(String cardNumber);
 }

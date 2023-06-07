@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.vietqr.org.dto.AccountBankConnectBranchDTO;
+import com.vietqr.org.dto.AccountBankWpDTO;
 import com.vietqr.org.dto.BusinessBankDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 
@@ -94,4 +95,21 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "SET type = :type "
 			+ "WHERE id = :id", nativeQuery = true)
 	void updateBankType(@Param(value = "id") String id, @Param(value = "type") int type);
+
+	// get account bank receive authenticated = 1 by user_id
+	@Query(value = "SELECT a.id, a.bank_account as bankAccount, a.bank_account_name as userBankName, "
+			+ "a.is_wp_sync as syncAccount, b.bank_code as bankCode, b.bank_name as bankName, b.img_id as imgId "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN bank_type b "
+			+ "ON a.bank_type_id = b.id "
+			+ "WHERE a.is_authenticated = 1 AND a.status = 1 "
+			+ "AND a.user_id = :userId", nativeQuery = true)
+	List<AccountBankWpDTO> getAccountBankReceiveWps(@Param(value = "userId") String userId);
+
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_bank_receive "
+			+ "SET is_wp_sync = :syncWp "
+			+ "WHERE id = :bankId", nativeQuery = true)
+	void updateSyncWp(@Param(value = "syncWp") boolean syncWp, @Param(value = "bankId") String bankId);
 }

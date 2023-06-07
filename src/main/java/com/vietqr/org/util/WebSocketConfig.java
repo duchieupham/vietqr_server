@@ -35,9 +35,15 @@ public class WebSocketConfig implements WebSocketConfigurer {
                             ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
                             logger.info("WS: request: " + request.getURI().toString());
                             String userId = servletRequest.getServletRequest().getParameter("userId");
-                            logger.info("WS: beforeHandshake - userId: " + userId);
                             if (userId != null && !userId.isEmpty()) {
+                                logger.info("WS: beforeHandshake - userId: " + userId);
                                 attributes.put("userId", userId);
+                                return true;
+                            }
+                            String loginId = servletRequest.getServletRequest().getParameter("loginId");
+                            if (loginId != null && !loginId.isEmpty()) {
+                                logger.info("WS: beforeHandshake - loginId: " + loginId);
+                                attributes.put("loginId", loginId);
                                 return true;
                             }
                         }
