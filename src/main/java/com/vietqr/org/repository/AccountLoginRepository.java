@@ -49,4 +49,8 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
 
 	@Query(value = "SELECT id FROM account_login WHERE card_number = :cardNumber", nativeQuery = true)
 	String loginByCardNumber(@Param(value = "cardNumber") String cardNumber);
+
+	@Query(value = "SELECT card_number FROM account_login WHERE id = :userId", nativeQuery = true)
+	String getCardNumberByUserId(@Param(value = "userId") String userId);
+
 }

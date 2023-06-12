@@ -39,4 +39,9 @@ public class CustomerSyncServiceImpl implements CustomerSyncService {
         repo.updateCustomerSyncInformation(information, userId);
     }
 
+    @Override
+    public String checkExistedCustomerSyncByInformation(String information) {
+        return repo.checkExistedCustomerSyncByInformation(information);
+    }
+
 }

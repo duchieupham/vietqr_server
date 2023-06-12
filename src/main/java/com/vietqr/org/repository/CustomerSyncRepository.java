@@ -30,4 +30,6 @@ public interface CustomerSyncRepository extends JpaRepository<CustomerSyncEntity
     void updateCustomerSyncInformation(@Param(value = "information") String information,
             @Param(value = "userId") String userId);
 
+    @Query(value = "SELECT id FROM customer_sync WHERE information = :information", nativeQuery = true)
+    String checkExistedCustomerSyncByInformation(@Param(value = "information") String information);
 }

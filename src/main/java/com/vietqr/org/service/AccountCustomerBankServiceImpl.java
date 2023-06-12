@@ -19,4 +19,14 @@ public class AccountCustomerBankServiceImpl implements AccountCustomerBankServic
         return repo.getAccountCustomerBankByBankId(bankId);
     }
 
+    @Override
+    public int insert(AccountCustomerBankEntity entity) {
+        return repo.save(entity) == null ? 0 : 1;
+    }
+
+    @Override
+    public String checkExistedAccountCustomerBank(String bankId, String customerSyncId) {
+        return repo.checkExistedAccountCustomerBank(bankId, customerSyncId);
+    }
+
 }

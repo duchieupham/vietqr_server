@@ -86,8 +86,13 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
 	}
 
 	@Override
-	public void updateSyncWp(boolean syncWp, String bankId) {
-		accountBankRepo.updateSyncWp(syncWp, bankId);
+	public void updateSyncWp(String userId, String bankId) {
+		accountBankRepo.updateSyncWp(userId, bankId);
+	}
+
+	@Override
+	public String getBankAccountById(String bankId) {
+		return accountBankRepo.getBankAccountById(bankId);
 	}
 
 }

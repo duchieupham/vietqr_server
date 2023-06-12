@@ -37,6 +37,7 @@ import com.vietqr.org.dto.AccountBankReceiveDetailDTO.BusinessBankDetailDTO;
 import com.vietqr.org.dto.AccountBankReceiveDetailDTO.TransactionBankListDTO;
 import com.vietqr.org.dto.AccountBankReceivePersonalDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
+import com.vietqr.org.entity.AccountCustomerBankEntity;
 import com.vietqr.org.entity.BankReceivePersonalEntity;
 import com.vietqr.org.entity.BankTypeEntity;
 import com.vietqr.org.entity.BranchInformationEntity;
@@ -44,11 +45,13 @@ import com.vietqr.org.entity.BusinessInformationEntity;
 import com.vietqr.org.entity.TransactionReceiveEntity;
 import com.vietqr.org.service.AccountBankReceivePersonalService;
 import com.vietqr.org.service.AccountBankReceiveService;
+import com.vietqr.org.service.AccountCustomerBankService;
 import com.vietqr.org.service.BankReceiveBranchService;
 import com.vietqr.org.service.BankTypeService;
 import com.vietqr.org.service.BranchMemberService;
 import com.vietqr.org.service.BusinessInformationService;
 import com.vietqr.org.service.CaiBankService;
+import com.vietqr.org.service.CustomerSyncService;
 import com.vietqr.org.service.TransactionReceiveService;
 import com.vietqr.org.util.VietQRUtil;
 
@@ -89,6 +92,12 @@ public class AccountBankReceiveController {
 
 	@Autowired
 	TransactionReceiveService transactionReceiveService;
+
+	@Autowired
+	CustomerSyncService customerSyncService;
+
+	@Autowired
+	AccountCustomerBankService accountCustomerBankService;
 
 	@GetMapping("account-bank/check/{bankAccount}/{bankTypeId}")
 	public ResponseEntity<ResponseMessageDTO> checkExistedBankAccount(
@@ -171,13 +180,48 @@ public class AccountBankReceiveController {
 	}
 
 	@PostMapping("account-bank/wp/sync")
-	public ResponseEntity<ResponseMessageDTO> updateSyncWp(@RequestBody AccountBankSyncWpDTO dto) {
+	public ResponseEntity<ResponseMessageDTO> updateSyncWp(@RequestBody AccountBankSyncWpDTO dto,
+			@RequestHeader("Authorization") String token) {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
 			if (dto != null) {
 				if (dto.getBankId() != null && !dto.getBankId().trim().isEmpty()) {
-					accountBankService.updateSyncWp(dto.isSyncWp(), dto.getBankId());
+					String userId = getUserIdFromToken(token);
+					// 1. find customer_sync_id by hosting (information)
+					// - if not found => do nothing
+					// - if found => step 2
+					String hosting = getHostingFromToken(token);
+					if (hosting != null && !hosting.trim().isEmpty()) {
+						String customerSyncId = customerSyncService.checkExistedCustomerSyncByInformation(hosting);
+						if (customerSyncId != null && !customerSyncId.isEmpty()) {
+							// 2. Check account_customer_bank is existed by cusomer_sync_id and bank_id
+							// - if not existed => insert account_customer_bank
+							// - if existed => do nothing
+							String checkExistedAccountCustomerBank = accountCustomerBankService
+									.checkExistedAccountCustomerBank(dto.getBankId(), customerSyncId);
+							if (checkExistedAccountCustomerBank == null
+									|| checkExistedAccountCustomerBank.trim().isEmpty()) {
+								UUID uuid = UUID.randomUUID();
+								AccountCustomerBankEntity entity = new AccountCustomerBankEntity();
+								entity.setId(uuid.toString());
+								entity.setAccountCustomerId("");
+								entity.setBankId(dto.getBankId());
+								String bankAccount = accountBankService.getBankAccountById(dto.getBankId());
+								entity.setBankAccount(bankAccount);
+								entity.setCustomerSyncId(customerSyncId);
+								accountCustomerBankService.insert(entity);
+							} else {
+								logger.info("updateSyncWp: EXISTED account_customer_bank - id: "
+										+ checkExistedAccountCustomerBank);
+							}
+						} else {
+							logger.info("updateSyncWp: NOT FOUND customer_sync_id - user_id: " + userId);
+						}
+					} else {
+						logger.info("updateSyncWp: NOT FOUND HOSTING - user_id: " + userId);
+					}
+					accountBankService.updateSyncWp(userId, dto.getBankId());
 					result = new ResponseMessageDTO("SUCCESS", "");
 					httpStatus = HttpStatus.OK;
 				} else {
@@ -206,6 +250,20 @@ public class AccountBankReceiveController {
 			Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(jwtToken).getBody();
 			String userId = (String) claims.get("userId");
 			result = userId;
+		}
+		return result;
+	}
+
+	private String getHostingFromToken(String token) {
+		String result = "";
+		if (token != null && !token.trim().isEmpty()) {
+			String secretKey = "mySecretKey";
+			String jwtToken = token.substring(7); // remove "Bearer " from the beginning
+			Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(jwtToken).getBody();
+			String hosting = (String) claims.get("hosting");
+			if (hosting != null && !hosting.trim().isEmpty()) {
+				result = hosting;
+			}
 		}
 		return result;
 	}
