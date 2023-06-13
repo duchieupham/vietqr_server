@@ -1424,6 +1424,8 @@ public class TransactionBankController {
 				transactionBankCustomerDTO.setValueDate(dto.getValueDate());
 				transactionBankCustomerDTO.setSign(sign);
 				transactionBankCustomerDTO.setOrderId(orderId);
+				logger.info("getCustomerSyncEntities: Order ID: " + orderId);
+				logger.info("getCustomerSyncEntities: Signature: " + sign);
 				List<AccountCustomerBankEntity> accountCustomerBankEntities = new ArrayList<>();
 				accountCustomerBankEntities = accountCustomerBankService
 						.getAccountCustomerBankByBankId(accountBankEntity.getId());
