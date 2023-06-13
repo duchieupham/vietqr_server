@@ -68,4 +68,9 @@ public class AccountLoginServiceImpl implements AccountLoginService {
 		return accountLoginRepository.loginByCardNumber(cardNumber);
 	}
 
+	@Override
+	public String getCardNumberByUserId(String userId) {
+		return accountLoginRepository.getCardNumberByUserId(userId);
+	}
+
 }

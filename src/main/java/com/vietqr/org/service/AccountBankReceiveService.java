@@ -40,5 +40,7 @@ public interface AccountBankReceiveService {
 
 	public List<AccountBankWpDTO> getAccountBankReceiveWps(String userId);
 
-	public void updateSyncWp(boolean syncWp, String bankId);
+	public void updateSyncWp(String userId, String bankId);
+
+	public String getBankAccountById(String bankId);
 }

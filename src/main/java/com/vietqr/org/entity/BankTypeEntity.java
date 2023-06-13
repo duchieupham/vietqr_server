@@ -32,6 +32,9 @@ public class BankTypeEntity implements Serializable {
 	@Column(name = "imgId")
 	private String imgId;
 
+	@Column(name = "swiftCode")
+	private String swiftCode;
+
 	@Column(name = "status")
 	private int status;
 
@@ -39,13 +42,15 @@ public class BankTypeEntity implements Serializable {
 		super();
 	}
 
-	public BankTypeEntity(String id, String bankCode, String bankName, String bankShortName, String imgId, int status) {
+	public BankTypeEntity(String id, String bankCode, String bankName, String bankShortName, String imgId,
+			String swiftCode, int status) {
 		super();
 		this.id = id;
 		this.bankCode = bankCode;
 		this.bankName = bankName;
 		this.bankShortName = bankShortName;
 		this.imgId = imgId;
+		this.swiftCode = swiftCode;
 		this.status = status;
 	}
 
@@ -87,6 +92,14 @@ public class BankTypeEntity implements Serializable {
 
 	public void setImgId(String imgId) {
 		this.imgId = imgId;
+	}
+
+	public String getSwiftCode() {
+		return swiftCode;
+	}
+
+	public void setSwiftCode(String swiftCode) {
+		this.swiftCode = swiftCode;
 	}
 
 	public int getStatus() {

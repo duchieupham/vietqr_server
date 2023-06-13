@@ -29,4 +29,6 @@ public interface AccountLoginService {
 	public String checkExistedCardNumber(String cardNumber);
 
 	public String loginByCardNumber(String cardNumber);
+
+	public String getCardNumberByUserId(String userId);
 }

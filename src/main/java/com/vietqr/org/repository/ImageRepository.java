@@ -11,17 +11,24 @@ import org.springframework.stereotype.Repository;
 import com.vietqr.org.entity.ImageEntity;
 
 @Repository
-public interface ImageRepository extends JpaRepository<ImageEntity, Long>{
+public interface ImageRepository extends JpaRepository<ImageEntity, Long> {
 
-	@Query(value ="SELECT image FROM image WHERE id = :id", nativeQuery  = true)
-	byte[] getImageById(@Param(value = "id")String id);
+	@Query(value = "SELECT image FROM image WHERE id = :id", nativeQuery = true)
+	byte[] getImageById(@Param(value = "id") String id);
 
 	@Query(value = "DELETE FROM image WHERE id = :id", nativeQuery = true)
-	int deleteImage(@Param(value = "id")String id);
+	int deleteImage(@Param(value = "id") String id);
+
+	@Query(value = "SELECT name FROM image WHERE id = :id", nativeQuery = true)
+	String getImageNameById(@Param(value = "id") String id);
+
+	@Query(value = "SELECT image FROM image WHERE name = :name", nativeQuery = true)
+	byte[] getImageByName(@Param(value = "name") String name);
 
 	@Transactional
 	@Modifying
 	@Query(value = "UPDATE image SET image = :image, name = :name WHERE id = :id", nativeQuery = true)
-	void updateImage(@Param(value = "image") byte[] image, @Param(value = "name") String name, @Param(value = "id") String id);
+	void updateImage(@Param(value = "image") byte[] image, @Param(value = "name") String name,
+			@Param(value = "id") String id);
 
 }

@@ -17,7 +17,7 @@ public interface TransactionReceiveService {
 
     public TransactionDetailDTO getTransactionById(String id);
 
-    public TransactionReceiveEntity getTransactionByTraceIdAndAmount(String id, String amount);
+    public TransactionReceiveEntity getTransactionByTraceIdAndAmount(String id, String amount, String transType);
 
     public List<TransactionReceiveEntity> getTransactionByBankId(String bankId);
 

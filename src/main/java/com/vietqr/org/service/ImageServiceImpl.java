@@ -7,14 +7,14 @@ import com.vietqr.org.entity.ImageEntity;
 import com.vietqr.org.repository.ImageRepository;
 
 @Service
-public class ImageServiceImpl implements ImageService{
+public class ImageServiceImpl implements ImageService {
 
 	@Autowired
 	ImageRepository imageRepo;
 
 	@Override
 	public int insertImage(ImageEntity entity) {
-		return imageRepo.save(entity) == null ? 0: 1;
+		return imageRepo.save(entity) == null ? 0 : 1;
 	}
 
 	@Override
@@ -24,7 +24,17 @@ public class ImageServiceImpl implements ImageService{
 
 	@Override
 	public void updateImage(byte[] image, String name, String id) {
-		 imageRepo.updateImage(image, name, id);
+		imageRepo.updateImage(image, name, id);
+	}
+
+	@Override
+	public String getImageNameById(String id) {
+		return imageRepo.getImageNameById(id);
+	}
+
+	@Override
+	public byte[] getImageByName(String name) {
+		return imageRepo.getImageByName(name);
 	}
 
 }

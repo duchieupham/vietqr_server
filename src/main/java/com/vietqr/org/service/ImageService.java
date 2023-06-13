@@ -11,4 +11,8 @@ public interface ImageService {
 	public byte[] getImageById(String id);
 
 	public void updateImage(byte[] image, String name, String id);
+
+	public String getImageNameById(String id);
+
+	public byte[] getImageByName(String name);
 }

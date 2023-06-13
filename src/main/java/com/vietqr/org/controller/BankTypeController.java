@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.vietqr.org.dto.BankTypeCustomerDTO;
 import com.vietqr.org.dto.BankTypeDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.entity.BankTypeEntity;
@@ -47,6 +48,7 @@ public class BankTypeController {
 	@PostMapping(value = "bank-type", produces = "application/json;charset=UTF-8")
 	public ResponseEntity<ResponseMessageDTO> insertBankType(@Valid @RequestParam String bankCode,
 			@Valid @RequestParam String bankName, @Valid @RequestParam String bankShortName,
+			@Valid @RequestParam String swiftCode,
 			@Valid @RequestParam MultipartFile imgUrl) {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
@@ -55,7 +57,7 @@ public class BankTypeController {
 			UUID uuidImage = UUID.randomUUID();
 			String fileName = StringUtils.cleanPath(imgUrl.getOriginalFilename());
 			BankTypeEntity entity = new BankTypeEntity(uuid.toString(), bankCode, bankName, bankShortName,
-					uuidImage.toString(), 0);
+					uuidImage.toString(), swiftCode, 0);
 			bankTypeService.insertBankType(entity);
 			// insert image
 			ImageEntity imageEntity = new ImageEntity(uuidImage.toString(), fileName, imgUrl.getBytes());
@@ -67,6 +69,35 @@ public class BankTypeController {
 		} catch (Exception e) {
 			System.out.println("Error at insertBankType: " + e.toString());
 			result = new ResponseMessageDTO("FAILED", "Unexpected Error");
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	@GetMapping("bank-types")
+	public ResponseEntity<List<BankTypeCustomerDTO>> getBankTypesForCustomer() {
+		List<BankTypeCustomerDTO> result = new ArrayList<>();
+		HttpStatus httpStatus = null;
+		try {
+			List<BankTypeEntity> entities = bankTypeService.getBankTypes();
+			if (!entities.isEmpty()) {
+				for (BankTypeEntity entity : entities) {
+					BankTypeCustomerDTO dto = new BankTypeCustomerDTO();
+					dto.setBankCode(entity.getBankCode());
+					dto.setBankName(entity.getBankName());
+					dto.setShortName(entity.getBankShortName());
+					String imageName = imageService.getImageNameById(entity.getImgId());
+					String imageUrl = "https://api.vietqr.org/vqr/images/" + imageName;
+					dto.setImgUrl(imageUrl);
+					String caiValue = caiBankService.getCaiValue(entity.getId());
+					dto.setBin(caiValue);
+					dto.setSwiftCode(entity.getSwiftCode());
+					result.add(dto);
+				}
+			}
+			httpStatus = HttpStatus.OK;
+		} catch (Exception e) {
+			System.out.println("Error at getBankTypes: " + e.toString());
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(result, httpStatus);

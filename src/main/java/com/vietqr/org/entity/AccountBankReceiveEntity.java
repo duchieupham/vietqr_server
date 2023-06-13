@@ -171,4 +171,12 @@ public class AccountBankReceiveEntity implements Serializable {
 		this.isWpSync = isWpSync;
 	}
 
+	@Override
+	public String toString() {
+		return "AccountBankReceiveEntity [id=" + id + ", bankTypeId=" + bankTypeId + ", bankAccount=" + bankAccount
+				+ ", bankAccountName=" + bankAccountName + ", nationalId=" + nationalId + ", phoneAuthenticated="
+				+ phoneAuthenticated + ", type=" + type + ", userId=" + userId + ", isAuthenticated=" + isAuthenticated
+				+ ", isSync=" + isSync + ", isWpSync=" + isWpSync + ", status=" + status + "]";
+	}
+
 }

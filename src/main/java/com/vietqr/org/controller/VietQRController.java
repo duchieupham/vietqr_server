@@ -283,22 +283,36 @@ public class VietQRController {
 	}
 
 	@PostMapping("qr/generate-customer")
-	public ResponseEntity<Object> generateQRCustomer(@Valid @RequestBody VietQRCreateCustomerDTO dto,
+	public ResponseEntity<Object> generateQRCustomer(@RequestBody VietQRCreateCustomerDTO dto,
 			@RequestHeader("Authorization") String token) {
 		Object result = null;
 		HttpStatus httpStatus = null;
 		// UUID transcationUUID = UUID.randomUUID();
 		String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
-		String bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
+		String bankTypeId = "";
+		if (dto.getTransType() == null || dto.getTransType().trim().toUpperCase().equals("C")) {
+			bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
+		} else {
+			bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getCustomerBankCode());
+		}
 		VietQRDTO vietQRDTO = new VietQRDTO();
 		try {
 			if (dto.getContent().length() <= 50) {
+				// check if generate qr with transtype = D or C
+				// if D => generate with customer information
+				// if C => do normal
 				// find bankTypeId by bankcode
-
 				if (bankTypeId != null && !bankTypeId.isEmpty()) {
 					// find bank by bankAccount and banktypeId
-					AccountBankReceiveEntity accountBankEntity = accountBankService
-							.getAccountBankByBankAccountAndBankTypeId(dto.getBankAccount(), bankTypeId);
+
+					AccountBankReceiveEntity accountBankEntity = null;
+					if (dto.getTransType() == null || dto.getTransType().trim().toUpperCase().equals("C")) {
+						accountBankEntity = accountBankService
+								.getAccountBankByBankAccountAndBankTypeId(dto.getBankAccount(), bankTypeId);
+					} else {
+						accountBankEntity = accountBankService
+								.getAccountBankByBankAccountAndBankTypeId(dto.getCustomerBankAccount(), bankTypeId);
+					}
 					if (accountBankEntity != null) {
 						// get cai value
 						BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(bankTypeId);
@@ -324,6 +338,15 @@ public class VietQRController {
 						result = vietQRDTO;
 						httpStatus = HttpStatus.OK;
 					} else {
+						String bankAccount = "";
+						String userBankName = "";
+						if (dto.getTransType() == null || dto.getTransType().trim().toUpperCase().equals("C")) {
+							bankAccount = dto.getBankAccount();
+							userBankName = dto.getUserBankName().trim().toUpperCase();
+						} else {
+							bankAccount = dto.getCustomerBankAccount();
+							userBankName = dto.getCustomerName().trim().toUpperCase();
+						}
 						// get cai value
 						BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(bankTypeId);
 						String caiValue = caiBankService.getCaiValue(bankTypeId);
@@ -332,15 +355,14 @@ public class VietQRController {
 						vietQRGenerateDTO.setCaiValue(caiValue);
 						vietQRGenerateDTO.setAmount(dto.getAmount() + "");
 						vietQRGenerateDTO.setContent(traceId + "." + dto.getContent());
-						vietQRGenerateDTO.setBankAccount(dto.getBankAccount());
+						vietQRGenerateDTO.setBankAccount(bankAccount);
 						String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
 						//
 						// generate VietQRDTO
-
 						vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
 						vietQRDTO.setBankName(bankTypeEntity.getBankName());
-						vietQRDTO.setBankAccount(dto.getBankAccount());
-						vietQRDTO.setUserBankName(dto.getUserBankName().toUpperCase());
+						vietQRDTO.setBankAccount(bankAccount);
+						vietQRDTO.setUserBankName(userBankName);
 						vietQRDTO.setAmount(dto.getAmount() + "");
 						vietQRDTO.setContent(traceId + "." + dto.getContent());
 						vietQRDTO.setQrCode(qr);
@@ -369,8 +391,12 @@ public class VietQRController {
 			return new ResponseEntity<>(result, httpStatus);
 		} finally {
 			// insert new transaction with orderId and sign
+			if (dto.getTransType() != null && dto.getTransType().trim().toUpperCase().equals("D")) {
+				bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
+			}
 			AccountBankReceiveEntity accountBankEntity = accountBankService
 					.getAccountBankByBankAccountAndBankTypeId(dto.getBankAccount(), bankTypeId);
+			System.out.println("FINALLY accountBankEntity FOUND: " + accountBankEntity.toString());
 			if (accountBankEntity != null) {
 				VietQRCreateDTO vietQRCreateDTO = new VietQRCreateDTO();
 				vietQRCreateDTO.setBankId(accountBankEntity.getId());
@@ -379,6 +405,14 @@ public class VietQRController {
 				vietQRCreateDTO.setBusinessId("");
 				vietQRCreateDTO.setBranchId("");
 				vietQRCreateDTO.setUserId(accountBankEntity.getUserId());
+				if (dto.getTransType() != null && dto.getTransType().trim().toUpperCase().equals("D")) {
+					vietQRCreateDTO.setTransType("D");
+					vietQRCreateDTO.setCustomerBankAccount(dto.getCustomerBankAccount());
+					vietQRCreateDTO.setCustomerBankCode(dto.getCustomerBankCode());
+					vietQRCreateDTO.setCustomerName(dto.getCustomerName());
+				} else {
+					vietQRCreateDTO.setTransType("C");
+				}
 				UUID transactionUUID = UUID.randomUUID();
 				insertNewTransaction(transactionUUID, traceId, vietQRCreateDTO, vietQRDTO, dto.getOrderId(),
 						dto.getSign(), true);
@@ -400,6 +434,7 @@ public class VietQRController {
 		}
 	}
 
+	// isFromBusinessSync: From customer with extra flow - customer-sync.
 	@Async
 	private void insertNewTransaction(UUID transcationUUID, String traceId, VietQRCreateDTO dto, VietQRDTO result,
 			String orderId, String sign, boolean isFromBusinessSync) {
@@ -426,11 +461,20 @@ public class VietQRController {
 				transactionEntity.setType(0);
 				transactionEntity.setStatus(0);
 				transactionEntity.setTraceId(traceId);
-				transactionEntity.setTransType("C");
+				if (dto.getTransType() != null) {
+					transactionEntity.setTransType(dto.getTransType());
+				} else {
+					transactionEntity.setTransType("C");
+				}
 				transactionEntity.setReferenceNumber("");
 				transactionEntity.setOrderId(orderId);
 				transactionEntity.setSign(sign);
 				//
+				if (dto.getTransType() != null && dto.getTransType().trim().toUpperCase().equals("D")) {
+					transactionEntity.setCustomerBankAccount(dto.getCustomerBankAccount());
+					transactionEntity.setCustomerBankCode(dto.getCustomerBankCode());
+					transactionEntity.setCustomerName(dto.getCustomerName());
+				}
 				transactionReceiveService.insertTransactionReceive(transactionEntity);
 				LocalDateTime afterInsertTransactionTime = LocalDateTime.now();
 				long afterInsertTransactionTimeLong = afterInsertTransactionTime.toEpochSecond(ZoneOffset.UTC);

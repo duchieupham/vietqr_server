@@ -56,9 +56,10 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "WHERE tr.trace_id = :id "
                         + "AND tr.amount = :amount "
                         + "AND tr.status = 0 "
+                        + "AND tr.trans_type = :transType "
                         + "AND bt.status = 1", nativeQuery = true)
         TransactionReceiveEntity getTransactionByTraceId(@Param(value = "id") String id,
-                        @Param(value = "amount") Long amount);
+                        @Param(value = "amount") Long amount, @Param(value = "transType") String transType);
 
         @Query(value = "SELECT * "
                         + "FROM transaction_receive "

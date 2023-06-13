@@ -63,6 +63,15 @@ public class TransactionReceiveEntity implements Serializable {
 	@Column(name = "sign")
 	private String sign;
 
+	@Column(name = "customerBankAccount")
+	private String customerBankAccount;
+
+	@Column(name = "customerBankCode")
+	private String customerBankCode;
+
+	@Column(name = "customerName")
+	private String customerName;
+
 	public TransactionReceiveEntity() {
 		super();
 	}
@@ -84,6 +93,28 @@ public class TransactionReceiveEntity implements Serializable {
 		this.referenceNumber = referenceNumber;
 		this.sign = sign;
 		this.orderId = orderId;
+	}
+
+	public TransactionReceiveEntity(String id, String bankAccount, String bankId, String content, long amount,
+			long time, String refId, int type, int status, String traceId, String transType, String referenceNumber,
+			String orderId, String sign, String customerBankAccount, String customerBankCode, String customerName) {
+		this.id = id;
+		this.bankAccount = bankAccount;
+		this.bankId = bankId;
+		this.content = content;
+		this.amount = amount;
+		this.time = time;
+		this.refId = refId;
+		this.type = type;
+		this.status = status;
+		this.traceId = traceId;
+		this.transType = transType;
+		this.referenceNumber = referenceNumber;
+		this.orderId = orderId;
+		this.sign = sign;
+		this.customerBankAccount = customerBankAccount;
+		this.customerBankCode = customerBankCode;
+		this.customerName = customerName;
 	}
 
 	public String getId() {
@@ -196,6 +227,30 @@ public class TransactionReceiveEntity implements Serializable {
 
 	public void setSign(String sign) {
 		this.sign = sign;
+	}
+
+	public String getCustomerBankAccount() {
+		return customerBankAccount;
+	}
+
+	public void setCustomerBankAccount(String customerBankAccount) {
+		this.customerBankAccount = customerBankAccount;
+	}
+
+	public String getCustomerBankCode() {
+		return customerBankCode;
+	}
+
+	public void setCustomerBankCode(String customerBankCode) {
+		this.customerBankCode = customerBankCode;
+	}
+
+	public String getCustomerName() {
+		return customerName;
+	}
+
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
 	}
 
 }

@@ -18,4 +18,6 @@ public interface CustomerSyncService {
     public String checkExistedCustomerSync(String userId);
 
     public void updateCustomerSyncInformation(String information, String userId);
+
+    public String checkExistedCustomerSyncByInformation(String information);
 }

@@ -9,12 +9,15 @@ public class VietQRCreateCustomerDTO implements Serializable {
      */
     private static final long serialVersionUID = 1L;
 
-    private String bankAccount;
     private Long amount;
     private String content;
-    private String branchCode;
+    private String bankAccount;
     private String bankCode;
     private String userBankName;
+    private String transType;
+    private String customerBankAccount;
+    private String customerBankCode;
+    private String customerName;
     private String orderId;
     private String sign;
 
@@ -22,14 +25,30 @@ public class VietQRCreateCustomerDTO implements Serializable {
         super();
     }
 
-    public VietQRCreateCustomerDTO(String bankAccount, Long amount, String content, String branchCode,
-            String bankCode, String userBankName, int existing, String orderId, String sign) {
-        this.bankAccount = bankAccount;
+    public VietQRCreateCustomerDTO(Long amount, String content, String bankAccount, String bankCode,
+            String userBankName, String orderId, String sign) {
         this.amount = amount;
         this.content = content;
-        this.branchCode = branchCode;
+        this.bankAccount = bankAccount;
         this.bankCode = bankCode;
         this.userBankName = userBankName;
+        this.orderId = orderId;
+        this.sign = sign;
+    }
+
+    public VietQRCreateCustomerDTO(String bankAccount, Long amount, String content,
+            String bankCode, String userBankName, int existing, String transType,
+            String customerBankAccount, String customerBankCode, String customerName,
+            String orderId, String sign) {
+        this.amount = amount;
+        this.content = content;
+        this.bankAccount = bankAccount;
+        this.bankCode = bankCode;
+        this.userBankName = userBankName;
+        this.transType = transType;
+        this.customerBankAccount = customerBankAccount;
+        this.customerBankCode = customerBankCode;
+        this.customerName = customerName;
         this.orderId = orderId;
         this.sign = sign;
     }
@@ -56,14 +75,6 @@ public class VietQRCreateCustomerDTO implements Serializable {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public String getBranchCode() {
-        return branchCode;
-    }
-
-    public void setBranchCode(String branchCode) {
-        this.branchCode = branchCode;
     }
 
     public String getBankCode() {
@@ -96,6 +107,46 @@ public class VietQRCreateCustomerDTO implements Serializable {
 
     public void setSign(String sign) {
         this.sign = sign;
+    }
+
+    public String getTransType() {
+        return transType;
+    }
+
+    public void setTransType(String transType) {
+        this.transType = transType;
+    }
+
+    public String getCustomerBankAccount() {
+        return customerBankAccount;
+    }
+
+    public void setCustomerBankAccount(String customerBankAccount) {
+        this.customerBankAccount = customerBankAccount;
+    }
+
+    public String getCustomerBankCode() {
+        return customerBankCode;
+    }
+
+    public void setCustomerBankCode(String customerBankCode) {
+        this.customerBankCode = customerBankCode;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    @Override
+    public String toString() {
+        return "VietQRCreateCustomerDTO [amount=" + amount + ", content=" + content + ", bankAccount=" + bankAccount
+                + ", bankCode=" + bankCode + ", userBankName=" + userBankName + ", transType=" + transType
+                + ", customerBankAccount=" + customerBankAccount + ", customerBankCode=" + customerBankCode
+                + ", customerName=" + customerName + ", orderId=" + orderId + ", sign=" + sign + "]";
     }
 
 }

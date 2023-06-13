@@ -174,6 +174,7 @@ public class AccountController {
 					// check customer_sync existed by userId
 					// do insert or update
 					String check = customerSyncService.checkExistedCustomerSync(userId);
+					String information = "";
 					if (check == null || check.trim().isEmpty()) {
 						UUID cusUuid = UUID.randomUUID();
 						CustomerSyncEntity customerSyncEntity = new CustomerSyncEntity();
@@ -183,7 +184,6 @@ public class AccountController {
 						customerSyncEntity.setIpAddress("");
 						customerSyncEntity.setPort("");
 						customerSyncEntity.setSuffixUrl("");
-						String information = "";
 						if (dto.getHosting().toUpperCase().contains("HTTP://") || dto.getHosting().toUpperCase()
 								.contains("HTTPS://")) {
 							information = dto.getHosting();
@@ -195,7 +195,6 @@ public class AccountController {
 						customerSyncEntity.setActive(true);
 						customerSyncService.insertCustomerSync(customerSyncEntity);
 					} else {
-						String information = "";
 						if (dto.getHosting().toUpperCase().contains("HTTP://") || dto.getHosting().toUpperCase()
 								.contains("HTTPS://")) {
 							information = dto.getHosting();
@@ -205,7 +204,7 @@ public class AccountController {
 						customerSyncService.updateCustomerSyncInformation(information, userId);
 					}
 					//
-					result = getJWTInfinitiveToken(accountInformationEntity, phoneNo);
+					result = getJWTInfinitiveToken(accountInformationEntity, phoneNo, information);
 				} else {
 					result = getJWTToken(accountInformationEntity, phoneNo);
 				}
@@ -385,11 +384,45 @@ public class AccountController {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
-			accountLoginService.updateCardNumber(dto.getCardNumber(), dto.getUserId());
-			result = new ResponseMessageDTO("SUCCESS", "");
-			httpStatus = HttpStatus.OK;
+			if (dto.getCardNumber().trim().isEmpty()) {
+				accountLoginService.updateCardNumber(dto.getCardNumber(), dto.getUserId());
+				result = new ResponseMessageDTO("SUCCESS", "");
+				httpStatus = HttpStatus.OK;
+			} else {
+				// check card number existed
+				String checkExisted = accountLoginService.checkExistedCardNumber(dto.getCardNumber());
+				if (checkExisted != null && !checkExisted.trim().isEmpty()) {
+					result = new ResponseMessageDTO("CHECK", "C05");
+					httpStatus = HttpStatus.BAD_REQUEST;
+				} else {
+					accountLoginService.updateCardNumber(dto.getCardNumber(), dto.getUserId());
+					result = new ResponseMessageDTO("SUCCESS", "");
+					httpStatus = HttpStatus.OK;
+				}
+			}
 		} catch (Exception e) {
 			logger.error("updateCardNumberLogin: ERROR: " + e.toString());
+			result = new ResponseMessageDTO("FAILED", "E05");
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	@GetMapping("accounts/cardNumber/{userId}")
+	public ResponseEntity<ResponseMessageDTO> getCardNumberByUserId(@PathVariable(value = "userId") String userId) {
+		ResponseMessageDTO result = null;
+		HttpStatus httpStatus = null;
+		try {
+			String check = accountLoginService.getCardNumberByUserId(userId);
+			if (check != null && !check.trim().isEmpty()) {
+				result = new ResponseMessageDTO("SUCCESS", check);
+				httpStatus = HttpStatus.OK;
+			} else {
+				result = new ResponseMessageDTO("SUCCESS", "");
+				httpStatus = HttpStatus.OK;
+			}
+		} catch (Exception e) {
+			logger.error("getCardNumberByUserId: ERROR: " + e.toString());
 			result = new ResponseMessageDTO("FAILED", "E05");
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
@@ -619,11 +652,12 @@ public class AccountController {
 		return result;
 	}
 
-	private String getJWTInfinitiveToken(AccountInformationEntity entity, String phoneNo) {
+	private String getJWTInfinitiveToken(AccountInformationEntity entity, String phoneNo, String hosting) {
 		String secretKey = "mySecretKey";
 		List<GrantedAuthority> grantedAuthorities = AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER");
 		String token = Jwts.builder()
 				.claim("userId", entity.getUserId())
+				.claim("hosting", hosting)
 				.claim("phoneNo", phoneNo)
 				.claim("firstName", entity.getFirstName())
 				.claim("middleName", entity.getMiddleName())

@@ -36,9 +36,9 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
-    public TransactionReceiveEntity getTransactionByTraceIdAndAmount(String id, String amount) {
+    public TransactionReceiveEntity getTransactionByTraceIdAndAmount(String id, String amount, String transType) {
         Long amountParsed = Long.parseLong(amount);
-        return repo.getTransactionByTraceId(id, amountParsed);
+        return repo.getTransactionByTraceId(id, amountParsed, transType);
     }
 
     @Override

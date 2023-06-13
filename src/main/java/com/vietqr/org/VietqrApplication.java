@@ -102,7 +102,10 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 					.antMatchers(HttpMethod.POST, "/api/accounts/logout").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/transaction-mms").permitAll()
 					.antMatchers(HttpMethod.GET, "/api/bank-type/unauthenticated").permitAll()
+					.antMatchers(HttpMethod.GET, "/api/bank-types").permitAll()
+					.antMatchers(HttpMethod.GET, "/images/**").permitAll()
 					.antMatchers(HttpMethod.GET, "/api/images/**").permitAll()
+					.antMatchers(HttpMethod.GET, "/bank/api/account/**").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/qr/generate/unauthenticated").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/transaction/voice/**").permitAll()
 					.anyRequest().authenticated();
