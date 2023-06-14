@@ -30,6 +30,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.vietqr.org.security.JWTAuthorizationFilter;
+import com.vietqr.org.util.SftpFileReader;
 import com.vietqr.org.util.WebSocketConfig;
 
 @SpringBootApplication
@@ -40,7 +41,8 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
-
+		SftpFileReader reader = new SftpFileReader();
+		reader.readRemoteFile();
 	}
 
 	@Bean
