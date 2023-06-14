@@ -396,8 +396,8 @@ public class VietQRController {
 			}
 			AccountBankReceiveEntity accountBankEntity = accountBankService
 					.getAccountBankByBankAccountAndBankTypeId(dto.getBankAccount(), bankTypeId);
-			System.out.println("FINALLY accountBankEntity FOUND: " + accountBankEntity.toString());
 			if (accountBankEntity != null) {
+				System.out.println("FINALLY accountBankEntity FOUND: " + accountBankEntity.toString());
 				VietQRCreateDTO vietQRCreateDTO = new VietQRCreateDTO();
 				vietQRCreateDTO.setBankId(accountBankEntity.getId());
 				vietQRCreateDTO.setAmount(dto.getAmount() + "");
