@@ -3,7 +3,6 @@ package com.vietqr.org.util;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.List;
 
 import com.jcraft.jsch.*;
 
@@ -14,7 +13,7 @@ public class SftpFileReader {
         int port = 22;
         String username = "root";
         String password = "4G01T1r3!Ab1";
-        String remoteFilePath = "/usr/data/transactions/in/RV_20211021_TC.txt";
+        String remoteFilePath = "/usr/data/transactions/in/RV_20230614_TC.txt";
 
         JSch jsch = new JSch();
 
