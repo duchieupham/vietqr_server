@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.vietqr.org.entity.BranchInformationEntity;
 import com.vietqr.org.dto.BranchChoiceDTO;
+import com.vietqr.org.dto.BranchConnectedCheckDTO;
 import com.vietqr.org.dto.BranchFilterResponseDTO;
 
 @Service
@@ -33,4 +34,5 @@ public interface BranchInformationService {
 
     public List<BranchFilterResponseDTO> getBranchFilterByUserIdAndRole(String userId, int role, String businessId);
 
+    public List<BranchConnectedCheckDTO> getBranchContects(String businessId);
 }

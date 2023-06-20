@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.vietqr.org.dto.BusinessListItemDTO;
 import com.vietqr.org.dto.BusinessMemberInsertDTO;
+import com.vietqr.org.dto.BranchConnectedCheckDTO;
 import com.vietqr.org.dto.BranchFilterInsertDTO;
 import com.vietqr.org.dto.BranchFilterResponseDTO;
 import com.vietqr.org.dto.BusinessBankDTO;
@@ -291,16 +292,16 @@ public class BusinessInformationController {
 	}
 
 	// get business list dashboard
-
 	@GetMapping("business-informations/{userId}")
 	public ResponseEntity<List<BusinessItemResponseDTO>> getBusinessItems(@PathVariable("userId") String userId) {
 		List<BusinessItemResponseDTO> result = new ArrayList<>();
 		HttpStatus httpStatus = null;
 		try {
 			List<BusinessItemDTO> businessItems = businessMemberService.getBusinessItemByUserId(userId);
-			List<BusinessItemDTO> branchItems = branchMemberService.getBusinessItemByUserId(userId);
+			List<BusinessItemDTO> businessFromMemberItems = branchMemberService.getBusinessItemByUserId(userId);
 			if (businessItems != null && !businessItems.isEmpty()) {
 				for (BusinessItemDTO item : businessItems) {
+					List<BranchConnectedCheckDTO> branchs = new ArrayList<>();
 					List<TransactionRelatedDTO> transactions = new ArrayList<>();
 					BusinessItemResponseDTO dto = new BusinessItemResponseDTO();
 					BusinessCounterDTO counterDTO = businessInfoService.getBusinessCounter(item.getBusinessId());
@@ -312,15 +313,19 @@ public class BusinessInformationController {
 					dto.setName(item.getName());
 					// dto.setAddress(item.getAddress());
 					// dto.setTaxCode(item.getTaxCode());
-					transactions = transactionReceiveService.getRelatedTransactionReceives(item.getBusinessId());
+					// transactions =
+					// transactionReceiveService.getRelatedTransactionReceives(item.getBusinessId());
+					branchs = branchInformationService.getBranchContects(item.getBusinessId());
+					dto.setBranchs(branchs);
 					dto.setTransactions(transactions);
 					dto.setTotalMember(counterDTO.getTotalAdmin() + counterDTO.getTotalMember());
 					dto.setTotalBranch(counterDTO.getTotalBranch());
 					result.add(dto);
 				}
 			}
-			if (branchItems != null && !branchItems.isEmpty()) {
-				for (BusinessItemDTO item : branchItems) {
+			if (businessFromMemberItems != null && !businessFromMemberItems.isEmpty()) {
+				for (BusinessItemDTO item : businessFromMemberItems) {
+					List<BranchConnectedCheckDTO> branchs = new ArrayList<>();
 					List<TransactionRelatedDTO> transactions = new ArrayList<>();
 					BusinessItemResponseDTO dto = new BusinessItemResponseDTO();
 					BusinessCounterDTO counterDTO = businessInfoService.getBusinessCounter(item.getBusinessId());
@@ -332,7 +337,10 @@ public class BusinessInformationController {
 					dto.setName(item.getName());
 					// dto.setAddress(item.getAddress());
 					// dto.setTaxCode(item.getTaxCode());
-					transactions = transactionReceiveService.getRelatedTransactionReceives(item.getBusinessId());
+					// transactions =
+					// transactionReceiveService.getRelatedTransactionReceives(item.getBusinessId());
+					branchs = branchInformationService.getBranchContects(item.getBusinessId());
+					dto.setBranchs(branchs);
 					dto.setTransactions(transactions);
 					dto.setTotalMember(counterDTO.getTotalAdmin() + counterDTO.getTotalMember());
 					dto.setTotalBranch(counterDTO.getTotalBranch());

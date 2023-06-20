@@ -11,7 +11,7 @@ public class TransactionBankCustomerDTO implements Serializable {
     private String transactionid;
     private long transactiontime;
     private String referencenumber;
-    private int amount;
+    private long amount;
     private String content;
     private String bankaccount;
     private String transType;
@@ -26,7 +26,7 @@ public class TransactionBankCustomerDTO implements Serializable {
         super();
     }
 
-    public TransactionBankCustomerDTO(String transactionid, int transactiontime, String referencenumber, int amount,
+    public TransactionBankCustomerDTO(String transactionid, int transactiontime, String referencenumber, long amount,
             String content, String bankaccount, String transType, String reciprocalAccount, String reciprocalBankCode,
             String va, int valueDate, String sign, String orderId) {
         super();
@@ -69,11 +69,11 @@ public class TransactionBankCustomerDTO implements Serializable {
         this.referencenumber = referencenumber;
     }
 
-    public int getAmount() {
+    public long getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(long amount) {
         this.amount = amount;
     }
 

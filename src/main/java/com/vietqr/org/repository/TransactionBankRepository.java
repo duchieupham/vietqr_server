@@ -31,7 +31,13 @@ public interface TransactionBankRepository extends JpaRepository<TransactionBank
 	@Query(value = "SELECT transactionid FROM transaction_bank WHERE transactionid = :transactionid", nativeQuery = true)
 	List<Object> checkTransactionIdInserted(@Param(value = "transactionid") String transactionid);
 
-	@Query(value = "SELECT referencenumber FROM transaction_bank WHERE referencenumber = :referenceNumber", nativeQuery = true)
+	@Query(value = "SELECT "
+			+ "CASE "
+			+ "WHEN EXISTS(SELECT 1 FROM transaction_bank WHERE referencenumber = :referenceNumber) OR "
+			+ "EXISTS(SELECT 1 FROM transactionmms WHERE ft_code = :referenceNumber) "
+			+ "THEN :referenceNumber "
+			+ "ELSE '' "
+			+ "END AS referencenumber", nativeQuery = true)
 	String checkExistedReferenceNumber(@Param(value = "referenceNumber") String referenceNumber);
 
 	@Query(value = "SELECT transactionid as transactionId, referencenumber as referenceNumber, bankaccount as bankAccount, amount, trans_type as transType, content, "

@@ -30,6 +30,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.vietqr.org.security.JWTAuthorizationFilter;
+// import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.WebSocketConfig;
 
 @SpringBootApplication
@@ -40,7 +41,18 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
-
+		// String checksum = "d66257cd69d8b32c622f37caa2d1f25c";
+		// String traceTransfer = "Q00009hhsg";
+		// String billNumber = "";
+		// String payDate = "20230618140454";
+		// String debitAmount = "13000";
+		// String encrypt = BankEncryptUtil.generateMD5Checksum(traceTransfer,
+		// billNumber, payDate, debitAmount);
+		// boolean check = BankEncryptUtil.isMatchChecksum(encrypt, checksum);
+		// System.out.println("check: " + check);
+		// String bankAccount = "0541103612005";
+		// String data = BankEncryptUtil.encrypt(bankAccount);
+		// System.out.println("data: " + data);
 	}
 
 	@Bean

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.vietqr.org.entity.BranchInformationEntity;
 import com.vietqr.org.repository.BranchInformationRepository;
 import com.vietqr.org.dto.BranchChoiceDTO;
+import com.vietqr.org.dto.BranchConnectedCheckDTO;
 import com.vietqr.org.dto.BranchFilterResponseDTO;
 
 @Service
@@ -69,6 +70,11 @@ public class BranchInformationServiceImpl implements BranchInformationService {
     @Override
     public List<BranchFilterResponseDTO> getBranchFilterByUserIdAndRole(String userId, int role, String businessId) {
         return repo.getBranchFilterByUserIdAndRole(userId, role, businessId);
+    }
+
+    @Override
+    public List<BranchConnectedCheckDTO> getBranchContects(String businessId) {
+        return repo.getBranchContects(businessId);
     }
 
 }

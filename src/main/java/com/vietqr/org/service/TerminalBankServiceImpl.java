@@ -22,4 +22,9 @@ public class TerminalBankServiceImpl implements TerminalBankService {
         return repository.getTerminalBankByTerminalId(terminalId);
     }
 
+    @Override
+    public TerminalBankEntity getTerminalBankByBankAccount(String bankAccount) {
+        return repository.getTerminalBankByBankAccount(bankAccount);
+    }
+
 }

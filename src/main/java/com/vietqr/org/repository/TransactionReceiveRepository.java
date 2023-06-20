@@ -25,6 +25,18 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
         void updateTransactionReceiveStatus(@Param(value = "status") int status, @Param(value = "refId") String refId,
                         @Param(value = "referenceNumber") String referenceNumber, @Param(value = "id") String id);
 
+        @Query(value = "SELECT * FROM transaction_receive WHERE order_id = :orderId AND status = 0 AND amount = :amount", nativeQuery = true)
+        TransactionReceiveEntity getTransactionByOrderId(@Param(value = "orderId") String orderId,
+                        @Param(value = "amount") String amount);
+
+        // @Transactional
+        // @Modifying
+        // @Query(value = "UPDATE transaction_receive "
+        // + "SET status = :status, ref_id = :refId, "
+        // + "reference_number = :referenceNumber "
+        // + "WHERE id = ", nativeQuery = true)
+        // void updateTransactionReceiveFromMMS();
+
         @Query(value = "SELECT b.id as transactionId, b.amount, b.bank_account as bankAccount, b.content, b.time, b.status, b.type, b.trans_type as transType "
                         + "FROM transaction_receive_branch a "
                         + "INNER JOIN transaction_receive b "

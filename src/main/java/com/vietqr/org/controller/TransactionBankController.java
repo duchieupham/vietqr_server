@@ -1412,7 +1412,7 @@ public class TransactionBankController {
 			if (accountBankEntity.isSync() == true || accountBankEntity.isWpSync() == true) {
 				TransactionBankCustomerDTO transactionBankCustomerDTO = new TransactionBankCustomerDTO();
 				transactionBankCustomerDTO.setTransactionid(dto.getTransactionid());
-				transactionBankCustomerDTO.setTransactiontime(dto.getTransactiontime());
+				transactionBankCustomerDTO.setTransactiontime(time);
 				transactionBankCustomerDTO.setReferencenumber(dto.getReferencenumber());
 				transactionBankCustomerDTO.setAmount(dto.getAmount());
 				transactionBankCustomerDTO.setContent(dto.getContent());
