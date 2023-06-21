@@ -30,7 +30,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.vietqr.org.security.JWTAuthorizationFilter;
-import com.vietqr.org.util.SftpFileReader;
+// import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.WebSocketConfig;
 
 @SpringBootApplication
@@ -41,8 +41,19 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
-		SftpFileReader reader = new SftpFileReader();
-		reader.readRemoteFile();
+		// String checksum = "d66257cd69d8b32c622f37caa2d1f25c";
+		// String traceTransfer = "qr123456";
+		// String billNumber = "31566173";
+		// String payDate = "202320061142";
+		// String debitAmount = "10000";
+		// String encrypt = BankEncryptUtil.generateMD5Checksum(traceTransfer,
+		// billNumber, payDate, debitAmount);
+		// // boolean check = BankEncryptUtil.isMatchChecksum(encrypt, checksum);
+		// System.out.println("check: " + encrypt);
+		// String bankAccount = "55555888829999";
+		// String data = BankEncryptUtil.encrypt(bankAccount);
+		// System.out.println("data: " + data);
+
 	}
 
 	@Bean

@@ -10,4 +10,6 @@ public interface TerminalBankService {
     public int insertTerminalBank(TerminalBankEntity entity);
 
     public TerminalBankEntity getTerminalBankByTerminalId(String terminalId);
+
+    public TerminalBankEntity getTerminalBankByBankAccount(String bankAccount);
 }

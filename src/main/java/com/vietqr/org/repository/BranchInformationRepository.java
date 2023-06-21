@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import com.vietqr.org.entity.BranchInformationEntity;
 import com.vietqr.org.dto.BranchChoiceDTO;
+import com.vietqr.org.dto.BranchConnectedCheckDTO;
 import com.vietqr.org.dto.BranchFilterResponseDTO;
 
 @Repository
@@ -68,4 +69,12 @@ public interface BranchInformationRepository extends JpaRepository<BranchInforma
                         + "AND b.business_id = :businessId", nativeQuery = true)
         List<BranchFilterResponseDTO> getBranchFilterByUserIdAndRole(@Param(value = "userId") String userId,
                         @Param(value = "role") int role, @Param(value = "businessId") String businessId);
+
+        @Query(value = "SELECT branch_information.id as branchId, IF(bank_receive_branch.branch_id IS NOT NULL, true, false) AS connected "
+                        + "FROM branch_information "
+                        + "LEFT JOIN "
+                        + "bank_receive_branch ON branch_information.id= "
+                        + "bank_receive_branch.branch_id WHERE branch_information.business_id= :businessId", nativeQuery = true)
+        List<BranchConnectedCheckDTO> getBranchContects(@Param(value = "businessId") String businessId);
+
 }

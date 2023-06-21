@@ -820,7 +820,6 @@ public class TransactionBankController {
 						requestId);
 				httpStatus = HttpStatus.OK;
 			} else {
-
 				ConfirmRequestFailedBankDTO confirmRequestBankDTO = response.bodyToMono(
 						ConfirmRequestFailedBankDTO.class)
 						.block();
@@ -829,20 +828,20 @@ public class TransactionBankController {
 						+ confirmRequestBankDTO.getSoaErrorDesc() + " at "
 						+ currentDateTime.toEpochSecond(ZoneOffset.UTC));
 				String status = "FAILED";
-				String message = getMessageBankCode(confirmRequestBankDTO.getSoaErrorCode());
+				String message = getMessageBankCode(confirmRequestBankDTO.getSoaErrorCode().trim());
 				result = new ResponseMessageDTO(status, message);
 				httpStatus = HttpStatus.BAD_REQUEST;
 			}
-		} catch (HttpClientErrorException ex) {
-			logger.error("HttpClientErrorException: " + ex.getMessage());
-			logger.error("Response body: " + ex.getResponseBodyAsString());
-			result = new ResponseMessageDTO("FAILED", "E05");
-			httpStatus = HttpStatus.BAD_REQUEST;
-		} catch (HttpServerErrorException ex) {
-			logger.error("HttpServerErrorException: " + ex.getMessage());
-			logger.error("Response body: " + ex.getResponseBodyAsString());
-			result = new ResponseMessageDTO("FAILED", "E05");
-			httpStatus = HttpStatus.BAD_REQUEST;
+			// } catch (HttpClientErrorException ex) {
+			// logger.error("HttpClientErrorException: " + ex.getMessage());
+			// logger.error("Response body: " + ex.getResponseBodyAsString());
+			// result = new ResponseMessageDTO("FAILED", "E05");
+			// httpStatus = HttpStatus.BAD_REQUEST;
+			// } catch (HttpServerErrorException ex) {
+			// logger.error("HttpServerErrorException: " + ex.getMessage());
+			// logger.error("Response body: " + ex.getResponseBodyAsString());
+			// result = new ResponseMessageDTO("FAILED", "E05");
+			// httpStatus = HttpStatus.BAD_REQUEST;
 
 		} catch (Exception e) {
 			logger.error("Error at requestOTP: " + e.toString());
@@ -905,20 +904,20 @@ public class TransactionBankController {
 						+ confirmRequestBankDTO.getSoaErrorDesc() + " at "
 						+ currentDateTime.toEpochSecond(ZoneOffset.UTC));
 				String status = "FAILED";
-				String message = getMessageBankCode(confirmRequestBankDTO.getSoaErrorCode());
+				String message = getMessageBankCode(confirmRequestBankDTO.getSoaErrorCode().trim());
 				result = new ResponseMessageDTO(status, message);
 				httpStatus = HttpStatus.BAD_REQUEST;
 			}
-		} catch (HttpClientErrorException ex) {
-			logger.error("HttpClientErrorException: " + ex.getMessage());
-			logger.error("Response body: " + ex.getResponseBodyAsString());
-			result = new ResponseMessageDTO("FAILED", "E05");
-			httpStatus = HttpStatus.BAD_REQUEST;
-		} catch (HttpServerErrorException ex) {
-			logger.error("HttpServerErrorException: " + ex.getMessage());
-			logger.error("Response body: " + ex.getResponseBodyAsString());
-			result = new ResponseMessageDTO("FAILED", "E05");
-			httpStatus = HttpStatus.BAD_REQUEST;
+			// } catch (HttpClientErrorException ex) {
+			// logger.error("HttpClientErrorException: " + ex.getMessage());
+			// logger.error("Response body: " + ex.getResponseBodyAsString());
+			// result = new ResponseMessageDTO("FAILED", "E05");
+			// httpStatus = HttpStatus.BAD_REQUEST;
+			// } catch (HttpServerErrorException ex) {
+			// logger.error("HttpServerErrorException: " + ex.getMessage());
+			// logger.error("Response body: " + ex.getResponseBodyAsString());
+			// result = new ResponseMessageDTO("FAILED", "E05");
+			// httpStatus = HttpStatus.BAD_REQUEST;
 
 		} catch (Exception e) {
 			logger.error("Error at confirmOTP: " + e.toString());
@@ -976,20 +975,20 @@ public class TransactionBankController {
 						+ confirmRequestBankDTO.getSoaErrorDesc() + " at "
 						+ currentDateTime.toEpochSecond(ZoneOffset.UTC));
 				String status = "FAILED";
-				String message = getMessageBankCode(confirmRequestBankDTO.getSoaErrorCode());
+				String message = getMessageBankCode(confirmRequestBankDTO.getSoaErrorCode().trim());
 				result = new ResponseMessageDTO(status, message);
 				httpStatus = HttpStatus.BAD_REQUEST;
 			}
-		} catch (HttpClientErrorException ex) {
-			logger.error("HttpClientErrorException: " + ex.getMessage());
-			logger.error("Response body: " + ex.getResponseBodyAsString());
-			result = new ResponseMessageDTO("FAILED", "E05");
-			httpStatus = HttpStatus.BAD_REQUEST;
-		} catch (HttpServerErrorException ex) {
-			logger.error("HttpServerErrorException: " + ex.getMessage());
-			logger.error("Response body: " + ex.getResponseBodyAsString());
-			result = new ResponseMessageDTO("FAILED", "E05");
-			httpStatus = HttpStatus.BAD_REQUEST;
+			// } catch (HttpClientErrorException ex) {
+			// logger.error("HttpClientErrorException: " + ex.getMessage());
+			// logger.error("Response body: " + ex.getResponseBodyAsString());
+			// result = new ResponseMessageDTO("FAILED", "E05");
+			// httpStatus = HttpStatus.BAD_REQUEST;
+			// } catch (HttpServerErrorException ex) {
+			// logger.error("HttpServerErrorException: " + ex.getMessage());
+			// logger.error("Response body: " + ex.getResponseBodyAsString());
+			// result = new ResponseMessageDTO("FAILED", "E05");
+			// httpStatus = HttpStatus.BAD_REQUEST;
 
 		} catch (Exception e) {
 			logger.error("Error at requestOTP: " + e.toString());
@@ -1055,20 +1054,20 @@ public class TransactionBankController {
 						+ confirmRequestBankDTO.getSoaErrorDesc() + " at "
 						+ currentDateTime.toEpochSecond(ZoneOffset.UTC));
 				String status = "FAILED";
-				String message = getMessageBankCode(confirmRequestBankDTO.getSoaErrorCode());
+				String message = getMessageBankCode(confirmRequestBankDTO.getSoaErrorCode().trim());
 				result = new ResponseMessageDTO(status, message);
 				httpStatus = HttpStatus.BAD_REQUEST;
 			}
-		} catch (HttpClientErrorException ex) {
-			logger.error("HttpClientErrorException: " + ex.getMessage());
-			logger.error("Response body: " + ex.getResponseBodyAsString());
-			result = new ResponseMessageDTO("FAILED", "E05");
-			httpStatus = HttpStatus.BAD_REQUEST;
-		} catch (HttpServerErrorException ex) {
-			logger.error("HttpServerErrorException: " + ex.getMessage());
-			logger.error("Response body: " + ex.getResponseBodyAsString());
-			result = new ResponseMessageDTO("FAILED", "E05");
-			httpStatus = HttpStatus.BAD_REQUEST;
+			// } catch (HttpClientErrorException ex) {
+			// logger.error("HttpClientErrorException: " + ex.getMessage());
+			// logger.error("Response body: " + ex.getResponseBodyAsString());
+			// result = new ResponseMessageDTO("FAILED", "E05");
+			// httpStatus = HttpStatus.BAD_REQUEST;
+			// } catch (HttpServerErrorException ex) {
+			// logger.error("HttpServerErrorException: " + ex.getMessage());
+			// logger.error("Response body: " + ex.getResponseBodyAsString());
+			// result = new ResponseMessageDTO("FAILED", "E05");
+			// httpStatus = HttpStatus.BAD_REQUEST;
 
 		} catch (Exception e) {
 			logger.error("Error at confirmOTP: " + e.toString());
@@ -1412,7 +1411,7 @@ public class TransactionBankController {
 			if (accountBankEntity.isSync() == true || accountBankEntity.isWpSync() == true) {
 				TransactionBankCustomerDTO transactionBankCustomerDTO = new TransactionBankCustomerDTO();
 				transactionBankCustomerDTO.setTransactionid(dto.getTransactionid());
-				transactionBankCustomerDTO.setTransactiontime(dto.getTransactiontime());
+				transactionBankCustomerDTO.setTransactiontime(time);
 				transactionBankCustomerDTO.setReferencenumber(dto.getReferencenumber());
 				transactionBankCustomerDTO.setAmount(dto.getAmount());
 				transactionBankCustomerDTO.setContent(dto.getContent());

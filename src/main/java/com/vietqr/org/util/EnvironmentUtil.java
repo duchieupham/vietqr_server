@@ -14,8 +14,22 @@ public class EnvironmentUtil {
     private static final String USER_BANK_ACCESS_PROD = "LP6GX1nahlNKYXPLZZ8xOvmmarO2JAMJ";
     private static final String PASSWORD_BANK_ACCESS_PROD = "LB9xgPoukVu6hOrA";
 
-    private static final String USER_BANK_MMS_ACCESS_PROD = "";
-    private static final String PASSWORD_BANK_MMS_ACCESS_PROD = "";
+    private static final String USER_BANK_MMS_ACCESS_PROD = "LP6GX1nahlNKYXPLZZ8xOvmmarO2JAMJ";
+    private static final String PASSWORD_BANK_MMS_ACCESS_PROD = "LB9xgPoukVu6hOrA";
+
+    private static final String SECRET_KEY_API_UAT = "32KqWUGhGum1lEAi6WsHlUha7Kk0Ck9JeMBMmnIfdkoajRrOHVgAWBcX7rIRH1LD";
+    private static final String SECRET_KEY_API_PROD = "vuSMiHQ3tH2auAVHzXQiMgQQCzcdlpvq3Bb0wQRF4dBxdjojMj0LQnGUPE24bGqr";
+
+    private static final String USERNAME_API_UAT = "MB_BLC";
+    private static final String USERNAME_API_PROD = "MB_BLC";
+
+    public static String getSecretKeyAPI() {
+        return (IS_PRODUCTION == false) ? SECRET_KEY_API_UAT : SECRET_KEY_API_PROD;
+    }
+
+    public static String getUsernameAPI() {
+        return (IS_PRODUCTION == false) ? USERNAME_API_UAT : USERNAME_API_PROD;
+    }
 
     public static String getBankUrl() {
         return (IS_PRODUCTION == false) ? BANK_URL_UAT : BANK_URL_PRODUCT;

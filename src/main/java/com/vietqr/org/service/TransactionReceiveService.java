@@ -25,4 +25,5 @@ public interface TransactionReceiveService {
 
     public TransactionReceiveEntity getTransactionReceiveById(String id);
 
+    public TransactionReceiveEntity getTransactionByOrderId(String orderId, String amount);
 }

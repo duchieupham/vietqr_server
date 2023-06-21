@@ -56,4 +56,9 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
         return repo.getTransactionReceiveById(id);
     }
 
+    @Override
+    public TransactionReceiveEntity getTransactionByOrderId(String orderId, String amount) {
+        return repo.getTransactionByOrderId(orderId, amount);
+    }
+
 }
