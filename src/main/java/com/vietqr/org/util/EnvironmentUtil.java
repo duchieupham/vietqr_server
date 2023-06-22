@@ -1,7 +1,7 @@
 package com.vietqr.org.util;
 
 public class EnvironmentUtil {
-    private static boolean IS_PRODUCTION = false;
+    private static boolean IS_PRODUCTION = true;
     private static final String BANK_URL_UAT = "https://api-sandbox.mbbank.com.vn/";
     private static final String BANK_URL_PRODUCT = "https://api-private.mbbank.com.vn/private/";
 

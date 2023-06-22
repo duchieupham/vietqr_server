@@ -16,8 +16,6 @@ import java.util.Locale;
 import java.util.Base64;
 
 import javax.validation.Valid;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

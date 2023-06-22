@@ -260,15 +260,30 @@ public class VietQRController {
 				VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
 				vietQRGenerateDTO.setCaiValue(caiValue);
 				vietQRGenerateDTO.setBankAccount(dto.getBankAccount());
-				vietQRGenerateDTO.setAmount("");
-				vietQRGenerateDTO.setContent("");
-				String qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
+				String amount = "";
+				String content = "";
+				if (dto.getAmount() != null && !dto.getAmount().trim().isEmpty()) {
+					amount = dto.getAmount();
+				} else if (dto.getAmount() != null && dto.getAmount().trim().isEmpty()) {
+					amount = "0";
+				}
+				if (dto.getContent() != null && !dto.getContent().trim().isEmpty()) {
+					content = dto.getContent();
+				}
+				vietQRGenerateDTO.setAmount(amount);
+				vietQRGenerateDTO.setContent(content);
+				String qr = "";
+				if (amount.trim().isEmpty() && content.trim().isEmpty()) {
+					qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
+				} else {
+					qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+				}
 				vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
 				vietQRDTO.setBankName(bankTypeEntity.getBankName());
 				vietQRDTO.setBankAccount(dto.getBankAccount());
 				vietQRDTO.setUserBankName(dto.getUserBankName().toUpperCase());
-				vietQRDTO.setAmount("");
-				vietQRDTO.setContent("");
+				vietQRDTO.setAmount(amount);
+				vietQRDTO.setContent(content);
 				vietQRDTO.setQrCode(qr);
 				vietQRDTO.setImgId(bankTypeEntity.getImgId());
 				vietQRDTO.setExisting(0);
@@ -276,7 +291,7 @@ public class VietQRController {
 				httpStatus = HttpStatus.OK;
 			}
 		} catch (Exception e) {
-			result = new ResponseMessageDTO("FAILED", "Unexpected Error");
+			result = new ResponseMessageDTO("FAILED", "E05");
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(result, httpStatus);
