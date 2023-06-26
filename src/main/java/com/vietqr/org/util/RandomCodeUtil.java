@@ -1,5 +1,6 @@
 package com.vietqr.org.util;
 
+import java.security.SecureRandom;
 import java.util.Random;
 import java.util.UUID;
 
@@ -34,5 +35,16 @@ public class RandomCodeUtil {
 		UUID uuid = UUID.randomUUID();
 		String randomUUIDString = uuid.toString().replaceAll("-", "").substring(0, 10);
 		return randomUUIDString;
+	}
+
+	private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
+	public static String generateRandomId(int length) {
+		char[] randomChars = new char[length];
+		for (int i = 0; i < randomChars.length; i++) {
+			randomChars[i] = CHARACTERS.charAt(SECURE_RANDOM.nextInt(CHARACTERS.length()));
+		}
+		return new String(randomChars);
 	}
 }

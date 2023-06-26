@@ -30,6 +30,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.vietqr.org.security.JWTAuthorizationFilter;
+// import com.vietqr.org.util.RandomCodeUtil;
 // import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.WebSocketConfig;
 
@@ -53,7 +54,16 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// String bankAccount = "55555888829999";
 		// String data = BankEncryptUtil.encrypt(bankAccount);
 		// System.out.println("data: " + data);
-
+		// String c1 = RandomCodeUtil.generateRandomId(12);
+		// String c2 = RandomCodeUtil.generateRandomId(12);
+		// String c3 = RandomCodeUtil.generateRandomId(12);
+		// String c4 = RandomCodeUtil.generateRandomId(12);
+		// String c5 = RandomCodeUtil.generateRandomId(12);
+		// System.out.println("c1: " + c1);
+		// System.out.println("c2: " + c2);
+		// System.out.println("c3: " + c3);
+		// System.out.println("c4: " + c4);
+		// System.out.println("c5: " + c5);
 	}
 
 	@Bean

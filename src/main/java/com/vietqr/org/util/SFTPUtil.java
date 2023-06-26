@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 
 import com.jcraft.jsch.*;
 
-public class SftpFileReader {
+public class SFTPUtil {
 
     public void readRemoteFile() {
         String host = "112.78.1.220";

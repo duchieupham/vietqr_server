@@ -44,6 +44,7 @@ import com.vietqr.org.dto.AccountSearchDTO;
 import com.vietqr.org.entity.AccountInformationEntity;
 import com.vietqr.org.entity.AccountLoginEntity;
 import com.vietqr.org.entity.AccountSettingEntity;
+import com.vietqr.org.entity.AccountWalletEntity;
 import com.vietqr.org.entity.CustomerSyncEntity;
 import com.vietqr.org.entity.FcmTokenEntity;
 import com.vietqr.org.entity.ImageEntity;
@@ -52,12 +53,14 @@ import com.vietqr.org.service.AccountBankReceiveService;
 import com.vietqr.org.service.AccountInformationService;
 import com.vietqr.org.service.AccountLoginService;
 import com.vietqr.org.service.AccountSettingService;
+import com.vietqr.org.service.AccountWalletService;
 import com.vietqr.org.service.CustomerSyncService;
 import com.vietqr.org.service.FcmTokenService;
 import com.vietqr.org.service.FirebaseMessagingService;
 import com.vietqr.org.service.ImageService;
 import com.vietqr.org.service.NotificationService;
 import com.vietqr.org.util.NotificationUtil;
+import com.vietqr.org.util.RandomCodeUtil;
 import com.vietqr.org.util.SocketHandler;
 
 import io.jsonwebtoken.Jwts;
@@ -95,6 +98,9 @@ public class AccountController {
 
 	@Autowired
 	CustomerSyncService customerSyncService;
+
+	@Autowired
+	AccountWalletService accountWalletService;
 
 	private FirebaseMessagingService firebaseMessagingService;
 
@@ -270,6 +276,7 @@ public class AccountController {
 				UUID uuid = UUID.randomUUID();
 				UUID accountInformationUUID = UUID.randomUUID();
 				UUID accountSettingUUID = UUID.randomUUID();
+				UUID accountWalletUUID = UUID.randomUUID();
 				// insert account_login
 				AccountLoginEntity accountLoginEntity = new AccountLoginEntity();
 				accountLoginEntity.setId(uuid.toString());
@@ -309,6 +316,35 @@ public class AccountController {
 				accountSettingEntity.setVoiceWeb(false);
 				accountSettingEntity.setUserId(uuid.toString());
 				accountSettingService.insertAccountSetting(accountSettingEntity);
+				///
+				// insert account wallet
+				AccountWalletEntity accountWalletEntity = new AccountWalletEntity();
+				accountWalletEntity.setId(accountWalletUUID.toString());
+				accountWalletEntity.setUserId(uuid.toString());
+				accountWalletEntity.setAmount("100000");
+				accountWalletEntity.setEnableService(true);
+				accountWalletEntity.setActive(true);
+				accountWalletEntity.setPoint(0);
+				// set wallet ID
+				String walletId = "";
+				do {
+					walletId = RandomCodeUtil.generateRandomId(12); // Tạo mã ngẫu nhiên
+				} while (accountWalletService.checkExistedWalletId(walletId) != null);
+				accountWalletEntity.setWalletId(walletId);
+				// set sharing code
+				String sharingCode = "";
+				do {
+					sharingCode = RandomCodeUtil.generateRandomId(12); // Tạo mã ngẫu nhiên
+				} while (accountWalletService.checkExistedSharingCode(sharingCode) != null);
+				accountWalletEntity.setSharingCode(sharingCode);
+				accountWalletService.insertAccountWallet(accountWalletEntity);
+				///
+				// update point if sharing_code != null
+				if (dto.getSharingCode() != null && !dto.getSharingCode().isEmpty()) {
+					accountWalletService.updatePointBySharingCode(10, dto.getSharingCode());
+					// insert account_sharing_code
+					///
+				}
 				// insert customer_sync
 				if (dto.getHosting() != null && !dto.getHosting().trim().isEmpty()) {
 					UUID cusUuid = UUID.randomUUID();

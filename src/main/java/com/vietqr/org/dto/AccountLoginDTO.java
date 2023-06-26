@@ -16,9 +16,22 @@ public class AccountLoginDTO implements Serializable {
 	private String platform;
 	private String device;
 	private String hosting;
+	private String sharingCode;
 
 	public AccountLoginDTO() {
 		super();
+	}
+
+	public AccountLoginDTO(String phoneNo, String email, String password, String fcmToken, String platform,
+			String device, String hosting, String sharingCode) {
+		this.phoneNo = phoneNo;
+		this.email = email;
+		this.password = password;
+		this.fcmToken = fcmToken;
+		this.platform = platform;
+		this.device = device;
+		this.hosting = hosting;
+		this.sharingCode = sharingCode;
 	}
 
 	public AccountLoginDTO(String phoneNo, String password, String fcmToken, String platform, String device) {
@@ -107,6 +120,14 @@ public class AccountLoginDTO implements Serializable {
 
 	public void setHosting(String hosting) {
 		this.hosting = hosting;
+	}
+
+	public String getSharingCode() {
+		return sharingCode;
+	}
+
+	public void setSharingCode(String sharingCode) {
+		this.sharingCode = sharingCode;
 	}
 
 }

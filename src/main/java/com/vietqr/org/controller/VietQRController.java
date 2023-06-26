@@ -463,7 +463,7 @@ public class VietQRController {
 			// 3. Insert transaction_receive_branch if branch_id and business_id != null
 			AccountBankReceiveEntity accountBankEntity = accountBankService.getAccountBankById(dto.getBankId());
 			if (accountBankEntity != null) {
-				UUID transactionBranchUUID = UUID.randomUUID();
+				// UUID transactionBranchUUID = UUID.randomUUID();
 				LocalDateTime currentDateTime = LocalDateTime.now();
 				TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
 				transactionEntity.setId(transcationUUID.toString());
@@ -497,116 +497,120 @@ public class VietQRController {
 
 				// insert transaction branch if existing branchId and businessId. Else just do
 				// not map.
-				if (!dto.getBranchId().isEmpty() && !dto.getBusinessId().isEmpty()) {
-					TransactionReceiveBranchEntity transactionBranchEntity = new TransactionReceiveBranchEntity();
-					transactionBranchEntity.setId(transactionBranchUUID.toString());
-					transactionBranchEntity.setTransactionReceiveId(transcationUUID.toString());
-					transactionBranchEntity.setBranchId(dto.getBranchId());
-					transactionBranchEntity.setBusinessId(dto.getBusinessId());
-					System.out.println("branchId: " + dto.getBranchId());
-					System.out.println("branchId after set: " + transactionBranchEntity.getBranchId());
-					transactionReceiveBranchService.insertTransactionReceiveBranch(transactionBranchEntity);
-					// find userIds into business_member and branch_member
-					List<String> userIds = branchMemberService
-							.getUserIdsByBusinessIdAndBranchId(dto.getBusinessId(), dto.getBranchId());
-					// insert AND push notification to users belong to
-					// admin business/ member of branch
-					if (userIds != null && !userIds.isEmpty()) {
-						for (String userId : userIds) {
-							// insert notification
-							UUID notificationUUID = UUID.randomUUID();
-							NotificationEntity notiEntity = new NotificationEntity();
-							BranchInformationEntity branchEntity = branchInformationService
-									.getBranchById(dto.getBranchId());
-							String message = NotificationUtil.getNotiDescNewTransPrefix()
-									+ branchEntity.getName()
-									+ NotificationUtil.getNotiDescNewTransSuffix1()
-									+ nf.format(Double.parseDouble(dto.getAmount()))
-									+ NotificationUtil
-											.getNotiDescNewTransSuffix2();
+				// if (!dto.getBranchId().isEmpty() && !dto.getBusinessId().isEmpty()) {
+				// TransactionReceiveBranchEntity transactionBranchEntity = new
+				// TransactionReceiveBranchEntity();
+				// transactionBranchEntity.setId(transactionBranchUUID.toString());
+				// transactionBranchEntity.setTransactionReceiveId(transcationUUID.toString());
+				// transactionBranchEntity.setBranchId(dto.getBranchId());
+				// transactionBranchEntity.setBusinessId(dto.getBusinessId());
+				// System.out.println("branchId: " + dto.getBranchId());
+				// System.out.println("branchId after set: " +
+				// transactionBranchEntity.getBranchId());
+				// transactionReceiveBranchService.insertTransactionReceiveBranch(transactionBranchEntity);
+				// // find userIds into business_member and branch_member
+				// List<String> userIds = branchMemberService
+				// .getUserIdsByBusinessIdAndBranchId(dto.getBusinessId(), dto.getBranchId());
+				// // insert AND push notification to users belong to
+				// // admin business/ member of branch
+				// if (userIds != null && !userIds.isEmpty()) {
+				// for (String userId : userIds) {
+				// // insert notification
+				// UUID notificationUUID = UUID.randomUUID();
+				// NotificationEntity notiEntity = new NotificationEntity();
+				// BranchInformationEntity branchEntity = branchInformationService
+				// .getBranchById(dto.getBranchId());
+				// String message = NotificationUtil.getNotiDescNewTransPrefix()
+				// + branchEntity.getName()
+				// + NotificationUtil.getNotiDescNewTransSuffix1()
+				// + nf.format(Double.parseDouble(dto.getAmount()))
+				// + NotificationUtil
+				// .getNotiDescNewTransSuffix2();
 
-							// push notification
-							List<FcmTokenEntity> fcmTokens = new ArrayList<>();
-							fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
-							Map<String, String> data = new HashMap<>();
-							data.put("notificationType", NotificationUtil.getNotiTypeNewTransaction());
-							data.put("notificationId", notificationUUID.toString());
-							data.put("bankCode", result.getBankCode());
-							data.put("bankName", result.getBankName());
-							data.put("bankAccount", result.getBankAccount());
-							data.put("userBankName", result.getUserBankName());
-							data.put("amount", result.getAmount());
-							data.put("content", result.getContent());
-							data.put("qrCode", result.getQrCode());
-							data.put("imgId", result.getImgId());
-							firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
-									NotificationUtil
-											.getNotiTitleNewTransaction(),
-									message);
-							socketHandler.sendMessageToUser(userId, data);
-							notiEntity.setId(notificationUUID.toString());
-							notiEntity.setRead(false);
-							notiEntity.setMessage(message);
-							notiEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
-							notiEntity.setType(NotificationUtil.getNotiTypeNewTransaction());
-							notiEntity.setUserId(userId);
-							notiEntity.setData(transcationUUID.toString());
-							notificationService.insertNotification(notiEntity);
-							LocalDateTime afterInsertNotificationTransaction = LocalDateTime.now();
-							long afterInsertNotificationTransactionLong = afterInsertNotificationTransaction
-									.toEpochSecond(ZoneOffset.UTC);
-							logger.info("QR generate - after InsertNotificationTransaction at: "
-									+ afterInsertNotificationTransactionLong);
+				// // push notification
+				// List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+				// fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
+				// Map<String, String> data = new HashMap<>();
+				// data.put("notificationType", NotificationUtil.getNotiTypeNewTransaction());
+				// data.put("notificationId", notificationUUID.toString());
+				// data.put("bankCode", result.getBankCode());
+				// data.put("bankName", result.getBankName());
+				// data.put("bankAccount", result.getBankAccount());
+				// data.put("userBankName", result.getUserBankName());
+				// data.put("amount", result.getAmount());
+				// data.put("content", result.getContent());
+				// data.put("qrCode", result.getQrCode());
+				// data.put("imgId", result.getImgId());
+				// firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
+				// NotificationUtil
+				// .getNotiTitleNewTransaction(),
+				// message);
+				// socketHandler.sendMessageToUser(userId, data);
+				// notiEntity.setId(notificationUUID.toString());
+				// notiEntity.setRead(false);
+				// notiEntity.setMessage(message);
+				// notiEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
+				// notiEntity.setType(NotificationUtil.getNotiTypeNewTransaction());
+				// notiEntity.setUserId(userId);
+				// notiEntity.setData(transcationUUID.toString());
+				// notificationService.insertNotification(notiEntity);
+				// LocalDateTime afterInsertNotificationTransaction = LocalDateTime.now();
+				// long afterInsertNotificationTransactionLong =
+				// afterInsertNotificationTransaction
+				// .toEpochSecond(ZoneOffset.UTC);
+				// logger.info("QR generate - after InsertNotificationTransaction at: "
+				// + afterInsertNotificationTransactionLong);
 
-						}
-					}
-				} else {
-					// insert notification
-					UUID notificationUUID = UUID.randomUUID();
-					NotificationEntity notiEntity = new NotificationEntity();
-					String message = NotificationUtil.getNotiDescNewTransPrefix2()
-							+ NotificationUtil.getNotiDescNewTransSuffix1()
-							+ nf.format(Double.parseDouble(dto.getAmount()))
-							+ NotificationUtil
-									.getNotiDescNewTransSuffix2();
+				// }
+				// }
+				// } else {
 
-					if (isFromBusinessSync == false) {
-						// push notification
-						List<FcmTokenEntity> fcmTokens = new ArrayList<>();
-						fcmTokens = fcmTokenService.getFcmTokensByUserId(dto.getUserId());
-						Map<String, String> data = new HashMap<>();
-						data.put("notificationType", NotificationUtil.getNotiTypeNewTransaction());
-						data.put("notificationId", notificationUUID.toString());
-						data.put("bankCode", result.getBankCode());
-						data.put("bankName", result.getBankName());
-						data.put("bankAccount", result.getBankAccount());
-						data.put("userBankName", result.getUserBankName());
-						data.put("amount", result.getAmount());
-						data.put("content", result.getContent());
-						data.put("qrCode", result.getQrCode());
-						data.put("imgId", result.getImgId());
-						firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
-								NotificationUtil
-										.getNotiTitleNewTransaction(),
-								message);
-						socketHandler.sendMessageToUser(dto.getUserId(), data);
-					}
+				// insert notification
+				UUID notificationUUID = UUID.randomUUID();
+				NotificationEntity notiEntity = new NotificationEntity();
+				String message = NotificationUtil.getNotiDescNewTransPrefix2()
+						+ NotificationUtil.getNotiDescNewTransSuffix1()
+						+ nf.format(Double.parseDouble(dto.getAmount()))
+						+ NotificationUtil
+								.getNotiDescNewTransSuffix2();
 
-					notiEntity.setId(notificationUUID.toString());
-					notiEntity.setRead(false);
-					notiEntity.setMessage(message);
-					notiEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
-					notiEntity.setType(NotificationUtil.getNotiTypeNewTransaction());
-					notiEntity.setUserId(dto.getUserId());
-					notiEntity.setData(transcationUUID.toString());
-					notificationService.insertNotification(notiEntity);
-					LocalDateTime afterInsertNotificationTransaction = LocalDateTime.now();
-					long afterInsertNotificationTransactionLong = afterInsertNotificationTransaction
-							.toEpochSecond(ZoneOffset.UTC);
-					logger.info("QR generate - after InsertNotificationTransaction at: "
-							+ afterInsertNotificationTransactionLong);
+				if (isFromBusinessSync == false) {
+					// push notification
+					List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+					fcmTokens = fcmTokenService.getFcmTokensByUserId(dto.getUserId());
+					Map<String, String> data = new HashMap<>();
+					data.put("notificationType", NotificationUtil.getNotiTypeNewTransaction());
+					data.put("notificationId", notificationUUID.toString());
+					data.put("bankCode", result.getBankCode());
+					data.put("bankName", result.getBankName());
+					data.put("bankAccount", result.getBankAccount());
+					data.put("userBankName", result.getUserBankName());
+					data.put("amount", result.getAmount());
+					data.put("content", result.getContent());
+					data.put("qrCode", result.getQrCode());
+					data.put("imgId", result.getImgId());
+					firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
+							NotificationUtil
+									.getNotiTitleNewTransaction(),
+							message);
+					socketHandler.sendMessageToUser(dto.getUserId(), data);
 				}
+
+				notiEntity.setId(notificationUUID.toString());
+				notiEntity.setRead(false);
+				notiEntity.setMessage(message);
+				notiEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
+				notiEntity.setType(NotificationUtil.getNotiTypeNewTransaction());
+				notiEntity.setUserId(dto.getUserId());
+				notiEntity.setData(transcationUUID.toString());
+				notificationService.insertNotification(notiEntity);
+				LocalDateTime afterInsertNotificationTransaction = LocalDateTime.now();
+				long afterInsertNotificationTransactionLong = afterInsertNotificationTransaction
+						.toEpochSecond(ZoneOffset.UTC);
+				logger.info("QR generate - after InsertNotificationTransaction at: "
+						+ afterInsertNotificationTransactionLong);
 			}
+			// }
 
 		} catch (Exception e) {
 			logger.error("Error at insertNewTransaction: " + e.toString());
@@ -627,7 +631,7 @@ public class VietQRController {
 			// 3. Insert transaction_receive_branch if branch_id and business_id != null
 			AccountBankReceiveEntity accountBankEntity = accountBankService.getAccountBankById(dto.getBankId());
 			if (accountBankEntity != null) {
-				UUID transactionBranchUUID = UUID.randomUUID();
+				// UUID transactionBranchUUID = UUID.randomUUID();
 				LocalDateTime currentDateTime = LocalDateTime.now();
 				TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
 				transactionEntity.setId(transcationUUID.toString());
@@ -648,104 +652,105 @@ public class VietQRController {
 				// insert transaction branch if existing branchId and businessId. Else just do
 				// not map.
 				// find businessId and branchId
-				BankReceiveBranchEntity bankReceiveBranch = bankReceiveBranchService
-						.getBankReceiveBranchByBankId(dto.getBankId());
-				if (bankReceiveBranch != null) {
-					TransactionReceiveBranchEntity transactionBranchEntity = new TransactionReceiveBranchEntity();
-					transactionBranchEntity.setId(transactionBranchUUID.toString());
-					transactionBranchEntity.setTransactionReceiveId(transcationUUID.toString());
-					transactionBranchEntity.setBranchId(bankReceiveBranch.getBranchId());
-					transactionBranchEntity.setBusinessId(bankReceiveBranch.getBusinessId());
-					transactionReceiveBranchService.insertTransactionReceiveBranch(transactionBranchEntity);
-					// find userIds into business_member and branch_member
-					List<String> userIds = branchMemberService
-							.getUserIdsByBusinessIdAndBranchId(bankReceiveBranch.getBusinessId(),
-									bankReceiveBranch.getBranchId());
-					// insert AND push notification to users belong to
-					// admin business/ member of branch
-					if (userIds != null && !userIds.isEmpty()) {
-						for (String userId : userIds) {
-							// insert notification
-							UUID notificationUUID = UUID.randomUUID();
-							NotificationEntity notiEntity = new NotificationEntity();
-							BranchInformationEntity branchEntity = branchInformationService
-									.getBranchById(bankReceiveBranch.getBranchId());
-							String message = NotificationUtil.getNotiDescNewTransPrefix()
-									+ branchEntity.getName()
-									+ NotificationUtil.getNotiDescNewTransSuffix1()
-									+ nf.format(Double.parseDouble(dto.getAmount()))
-									+ NotificationUtil
-											.getNotiDescNewTransSuffix2();
+				// BankReceiveBranchEntity bankReceiveBranch = bankReceiveBranchService
+				// .getBankReceiveBranchByBankId(dto.getBankId());
+				// if (bankReceiveBranch != null) {
+				// TransactionReceiveBranchEntity transactionBranchEntity = new
+				// TransactionReceiveBranchEntity();
+				// transactionBranchEntity.setId(transactionBranchUUID.toString());
+				// transactionBranchEntity.setTransactionReceiveId(transcationUUID.toString());
+				// transactionBranchEntity.setBranchId(bankReceiveBranch.getBranchId());
+				// transactionBranchEntity.setBusinessId(bankReceiveBranch.getBusinessId());
+				// transactionReceiveBranchService.insertTransactionReceiveBranch(transactionBranchEntity);
+				// // find userIds into business_member and branch_member
+				// List<String> userIds = branchMemberService
+				// .getUserIdsByBusinessIdAndBranchId(bankReceiveBranch.getBusinessId(),
+				// bankReceiveBranch.getBranchId());
+				// // insert AND push notification to users belong to
+				// // admin business/ member of branch
+				// if (userIds != null && !userIds.isEmpty()) {
+				// for (String userId : userIds) {
+				// // insert notification
+				// UUID notificationUUID = UUID.randomUUID();
+				// NotificationEntity notiEntity = new NotificationEntity();
+				// BranchInformationEntity branchEntity = branchInformationService
+				// .getBranchById(bankReceiveBranch.getBranchId());
+				// String message = NotificationUtil.getNotiDescNewTransPrefix()
+				// + branchEntity.getName()
+				// + NotificationUtil.getNotiDescNewTransSuffix1()
+				// + nf.format(Double.parseDouble(dto.getAmount()))
+				// + NotificationUtil
+				// .getNotiDescNewTransSuffix2();
 
-							// push notification
-							List<FcmTokenEntity> fcmTokens = new ArrayList<>();
-							fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
-							Map<String, String> data = new HashMap<>();
-							data.put("notificationType", NotificationUtil.getNotiTypeNewTransaction());
-							data.put("notificationId", notificationUUID.toString());
-							data.put("bankCode", result.getBankCode());
-							data.put("bankName", result.getBankName());
-							data.put("bankAccount", result.getBankAccount());
-							data.put("userBankName", result.getUserBankName());
-							data.put("amount", result.getAmount());
-							data.put("content", result.getContent());
-							data.put("qrCode", result.getQrCode());
-							data.put("imgId", result.getImgId());
-							firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
-									NotificationUtil
-											.getNotiTitleNewTransaction(),
-									message);
-							socketHandler.sendMessageToUser(userId, data);
-							notiEntity.setId(notificationUUID.toString());
-							notiEntity.setRead(false);
-							notiEntity.setMessage(message);
-							notiEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
-							notiEntity.setType(NotificationUtil.getNotiTypeNewTransaction());
-							notiEntity.setUserId(userId);
-							notiEntity.setData(transcationUUID.toString());
-							notificationService.insertNotification(notiEntity);
-						}
+				// // push notification
+				// List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+				// fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
+				// Map<String, String> data = new HashMap<>();
+				// data.put("notificationType", NotificationUtil.getNotiTypeNewTransaction());
+				// data.put("notificationId", notificationUUID.toString());
+				// data.put("bankCode", result.getBankCode());
+				// data.put("bankName", result.getBankName());
+				// data.put("bankAccount", result.getBankAccount());
+				// data.put("userBankName", result.getUserBankName());
+				// data.put("amount", result.getAmount());
+				// data.put("content", result.getContent());
+				// data.put("qrCode", result.getQrCode());
+				// data.put("imgId", result.getImgId());
+				// firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
+				// NotificationUtil
+				// .getNotiTitleNewTransaction(),
+				// message);
+				// socketHandler.sendMessageToUser(userId, data);
+				// notiEntity.setId(notificationUUID.toString());
+				// notiEntity.setRead(false);
+				// notiEntity.setMessage(message);
+				// notiEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
+				// notiEntity.setType(NotificationUtil.getNotiTypeNewTransaction());
+				// notiEntity.setUserId(userId);
+				// notiEntity.setData(transcationUUID.toString());
+				// notificationService.insertNotification(notiEntity);
+				// }
 
-					}
-				} else {
-					// insert notification
-					UUID notificationUUID = UUID.randomUUID();
-					NotificationEntity notiEntity = new NotificationEntity();
-					String message = NotificationUtil.getNotiDescNewTransPrefix2()
-							+ NotificationUtil.getNotiDescNewTransSuffix1()
-							+ nf.format(Double.parseDouble(dto.getAmount()))
-							+ NotificationUtil
-									.getNotiDescNewTransSuffix2();
+				// }
+				// } else {
+				// insert notification
+				UUID notificationUUID = UUID.randomUUID();
+				NotificationEntity notiEntity = new NotificationEntity();
+				String message = NotificationUtil.getNotiDescNewTransPrefix2()
+						+ NotificationUtil.getNotiDescNewTransSuffix1()
+						+ nf.format(Double.parseDouble(dto.getAmount()))
+						+ NotificationUtil
+								.getNotiDescNewTransSuffix2();
 
-					// push notification
-					List<FcmTokenEntity> fcmTokens = new ArrayList<>();
-					fcmTokens = fcmTokenService.getFcmTokensByUserId(dto.getUserId());
-					Map<String, String> data = new HashMap<>();
-					data.put("notificationType", NotificationUtil.getNotiTypeNewTransaction());
-					data.put("notificationId", notificationUUID.toString());
-					data.put("bankCode", result.getBankCode());
-					data.put("bankName", result.getBankName());
-					data.put("bankAccount", result.getBankAccount());
-					data.put("userBankName", result.getUserBankName());
-					data.put("amount", result.getAmount());
-					data.put("content", result.getContent());
-					data.put("qrCode", result.getQrCode());
-					data.put("imgId", result.getImgId());
-					firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
-							NotificationUtil
-									.getNotiTitleNewTransaction(),
-							message);
-					socketHandler.sendMessageToUser(dto.getUserId(), data);
-					notiEntity.setId(notificationUUID.toString());
-					notiEntity.setRead(false);
-					notiEntity.setMessage(message);
-					notiEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
-					notiEntity.setType(NotificationUtil.getNotiTypeNewTransaction());
-					notiEntity.setUserId(dto.getUserId());
-					notiEntity.setData(transcationUUID.toString());
-					notificationService.insertNotification(notiEntity);
-				}
+				// push notification
+				List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+				fcmTokens = fcmTokenService.getFcmTokensByUserId(dto.getUserId());
+				Map<String, String> data = new HashMap<>();
+				data.put("notificationType", NotificationUtil.getNotiTypeNewTransaction());
+				data.put("notificationId", notificationUUID.toString());
+				data.put("bankCode", result.getBankCode());
+				data.put("bankName", result.getBankName());
+				data.put("bankAccount", result.getBankAccount());
+				data.put("userBankName", result.getUserBankName());
+				data.put("amount", result.getAmount());
+				data.put("content", result.getContent());
+				data.put("qrCode", result.getQrCode());
+				data.put("imgId", result.getImgId());
+				firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
+						NotificationUtil
+								.getNotiTitleNewTransaction(),
+						message);
+				socketHandler.sendMessageToUser(dto.getUserId(), data);
+				notiEntity.setId(notificationUUID.toString());
+				notiEntity.setRead(false);
+				notiEntity.setMessage(message);
+				notiEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
+				notiEntity.setType(NotificationUtil.getNotiTypeNewTransaction());
+				notiEntity.setUserId(dto.getUserId());
+				notiEntity.setData(transcationUUID.toString());
+				notificationService.insertNotification(notiEntity);
 			}
+			// }
 		} catch (Exception e) {
 			logger.error("Error at reInsertNewTransaction: " + e.toString());
 		}
@@ -758,7 +763,6 @@ public class VietQRController {
 		HttpStatus httpStatus = null;
 		UUID transcationUUID = UUID.randomUUID();
 		String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
-
 		try {
 			AccountBankReceiveEntity accountBankEntity = accountBankService.getAccountBankById(dto.getBankId());
 			if (accountBankEntity != null) {

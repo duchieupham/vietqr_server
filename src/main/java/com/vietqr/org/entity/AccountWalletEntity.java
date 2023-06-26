@@ -36,18 +36,26 @@ public class AccountWalletEntity implements Serializable {
     @Column(name = "isActive")
     private boolean isActive;
 
+    @Column(name = "point")
+    private long point;
+
+    @Column(name = "sharingCode")
+    private String sharingCode;
+
     public AccountWalletEntity() {
         super();
     }
 
     public AccountWalletEntity(String id, String userId, String walletId, String amount, boolean enableService,
-            boolean isActive) {
+            boolean isActive, long point, String sharingCode) {
         this.id = id;
         this.userId = userId;
         this.walletId = walletId;
         this.amount = amount;
         this.enableService = enableService;
         this.isActive = isActive;
+        this.point = point;
+        this.sharingCode = sharingCode;
     }
 
     public String getId() {
@@ -96,6 +104,22 @@ public class AccountWalletEntity implements Serializable {
 
     public void setActive(boolean isActive) {
         this.isActive = isActive;
+    }
+
+    public long getPoint() {
+        return point;
+    }
+
+    public void setPoint(long point) {
+        this.point = point;
+    }
+
+    public String getSharingCode() {
+        return sharingCode;
+    }
+
+    public void setSharingCode(String sharingCode) {
+        this.sharingCode = sharingCode;
     }
 
 }
