@@ -1,5 +1,7 @@
 package com.vietqr.org.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.dto.AccountCheckDTO;
@@ -31,4 +33,6 @@ public interface AccountLoginService {
 	public String loginByCardNumber(String cardNumber);
 
 	public String getCardNumberByUserId(String userId);
+
+	public List<String> getAllUserIds();
 }

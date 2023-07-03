@@ -1,5 +1,7 @@
 package com.vietqr.org.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -71,6 +73,11 @@ public class AccountLoginServiceImpl implements AccountLoginService {
 	@Override
 	public String getCardNumberByUserId(String userId) {
 		return accountLoginRepository.getCardNumberByUserId(userId);
+	}
+
+	@Override
+	public List<String> getAllUserIds() {
+		return accountLoginRepository.getAllUserIds();
 	}
 
 }

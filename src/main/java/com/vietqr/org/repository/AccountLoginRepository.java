@@ -1,5 +1,7 @@
 package com.vietqr.org.repository;
 
+import java.util.List;
+
 import javax.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -53,4 +55,6 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
 	@Query(value = "SELECT card_number FROM account_login WHERE id = :userId", nativeQuery = true)
 	String getCardNumberByUserId(@Param(value = "userId") String userId);
 
+	@Query(value = "SELECT id FROM account_login", nativeQuery = true)
+	List<String> getAllUserIds();
 }

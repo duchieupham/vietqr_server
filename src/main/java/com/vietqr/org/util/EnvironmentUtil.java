@@ -1,7 +1,7 @@
 package com.vietqr.org.util;
 
 public class EnvironmentUtil {
-    private static boolean IS_PRODUCTION = false;
+    private static boolean IS_PRODUCTION = true;
 
     // MB Bank
     private static final String BANK_URL_UAT = "https://api-sandbox.mbbank.com.vn/";
@@ -35,10 +35,62 @@ public class EnvironmentUtil {
     private static final String SFTP_HOSTING_UAT = "112.78.1.220";
     private static final String SFTP_HOSTING_PROD = "112.78.1.209";
 
-    private static final int PORT = 22;
+    private static final int SFTP_PORT = 22;
 
-    private static final String INPUT_FOLDER = "/usr/data/transactions/in/";
-    private static final String OUTPUT_FOLDER = "/usr/data/transactions/out/";
+    private static final String SFTP_INPUT_FOLDER = "/usr/data/transactions/in/";
+    private static final String SFTP_OUTPUT_FOLDER = "/usr/data/transactions/out/";
+
+    private static final String VNPT_EPAY_WEB_SERVICE_URL_UAT = "http://itopup-test.megapay.net.vn:8086/CDV_Partner_Services/services/Interfaces?wsdl";
+    private static final String VNPT_EPAY_WEB_SERVICE_URL_PROD = "";
+
+    private static final String VNPT_EPAY_KEY_PRIVATE_RSA_UAT = "";
+    private static final String VNPT_EPAY_KEY_PRIVATE_RSA_PROD = "";
+
+    private static final String VNPT_EPAY_KEY_3DES_UAT = "123456abc";
+    private static final String VNPT_EPAY_KEY_3DES_PROD = "123456abc";
+
+    private static final String VNPT_EPAY_PARTNER_NAME_UAT = "partnerTest";
+    private static final String VNPT_EPAY_PARTNER_NAME_PROD = "";
+
+    public static String getVnptEpayPartnerName() {
+        return (IS_PRODUCTION == false) ? VNPT_EPAY_PARTNER_NAME_UAT : VNPT_EPAY_PARTNER_NAME_PROD;
+    }
+
+    public static String getVnptEpayKey3DES() {
+        return (IS_PRODUCTION == false) ? VNPT_EPAY_KEY_3DES_UAT : VNPT_EPAY_KEY_3DES_PROD;
+    }
+
+    public static String getVnptEpayWebServiceUrl() {
+        return (IS_PRODUCTION == false) ? VNPT_EPAY_WEB_SERVICE_URL_UAT : VNPT_EPAY_WEB_SERVICE_URL_PROD;
+    }
+
+    public static String getVnptEpayKeyPrivateRSA() {
+        return (IS_PRODUCTION == false) ? VNPT_EPAY_KEY_PRIVATE_RSA_UAT : VNPT_EPAY_KEY_PRIVATE_RSA_PROD;
+    }
+
+    public static String getSftpUsername() {
+        return (IS_PRODUCTION == false) ? SFTP_USER_UAT : SFTP_USER_PROD;
+    }
+
+    public static String getSftpPassword() {
+        return (IS_PRODUCTION == false) ? SFTP_PASSWORD_UAT : SFTP_PASSWORD_PROD;
+    }
+
+    public static String getSftpHosting() {
+        return (IS_PRODUCTION == false) ? SFTP_HOSTING_UAT : SFTP_HOSTING_PROD;
+    }
+
+    public static int getSftpPort() {
+        return SFTP_PORT;
+    }
+
+    public static String getSftpInputFolder() {
+        return SFTP_INPUT_FOLDER;
+    }
+
+    public static String getSftpOutputFolder() {
+        return SFTP_OUTPUT_FOLDER;
+    }
 
     public static String getSecretKeyAPI() {
         return (IS_PRODUCTION == false) ? SECRET_KEY_API_UAT : SECRET_KEY_API_PROD;

@@ -35,4 +35,9 @@ public class AccountWalletServiceImpl implements AccountWalletService {
     public String checkExistedSharingCode(String sharingCode) {
         return repo.checkExistedSharingCode(sharingCode);
     }
+
+    @Override
+    public void deleteAllAccountWallet() {
+        repo.deleteAllAccountWallet();
+    }
 }

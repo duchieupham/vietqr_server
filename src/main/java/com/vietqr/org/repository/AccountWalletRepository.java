@@ -27,4 +27,9 @@ public interface AccountWalletRepository extends JpaRepository<AccountWalletEnti
     @Query(value = "UPDATE account_wallet SET point = point + :amount WHERE sharing_code = :sharingCode", nativeQuery = true)
     void updatePointBySharingCode(@Param(value = "amount") long amount,
             @Param(value = "sharingCode") String sharingCode);
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM account_wallet", nativeQuery = true)
+    void deleteAllAccountWallet();
 }
