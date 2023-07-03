@@ -24,13 +24,15 @@ public class TransactionBankServiceImpl implements TransactionBankService {
 	}
 
 	@Override
-	public List<Object> checkTransactionIdInserted(String transactionid) {
-		return transactionBankRepo.checkTransactionIdInserted(transactionid);
+	public List<Object> checkTransactionIdInserted(String transactionid, String transType) {
+		return transactionBankRepo.checkTransactionIdInserted(transactionid, transType);
 	}
 
 	@Override
-	public String checkExistedReferenceNumber(String referenceNumber) {
-		return transactionBankRepo.checkExistedReferenceNumber(referenceNumber);
+	public String checkExistedReferenceNumber(String referenceNumber, String transType) {
+		return (transType != null && transType.trim().toUpperCase().equals("D"))
+				? transactionBankRepo.checkExistedReferenceNumberTypeD(referenceNumber)
+				: transactionBankRepo.checkExistedReferenceNumber(referenceNumber);
 	}
 
 	@Override

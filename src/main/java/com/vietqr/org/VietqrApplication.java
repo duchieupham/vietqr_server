@@ -42,28 +42,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
-		// String checksum = "d66257cd69d8b32c622f37caa2d1f25c";
-		// String traceTransfer = "qr123456";
-		// String billNumber = "31566173";
-		// String payDate = "202320061142";
-		// String debitAmount = "10000";
-		// String encrypt = BankEncryptUtil.generateMD5Checksum(traceTransfer,
-		// billNumber, payDate, debitAmount);
-		// // boolean check = BankEncryptUtil.isMatchChecksum(encrypt, checksum);
-		// System.out.println("check: " + encrypt);
-		// String bankAccount = "55555888829999";
-		// String data = BankEncryptUtil.encrypt(bankAccount);
-		// System.out.println("data: " + data);
-		// String c1 = RandomCodeUtil.generateRandomId(12);
-		// String c2 = RandomCodeUtil.generateRandomId(12);
-		// String c3 = RandomCodeUtil.generateRandomId(12);
-		// String c4 = RandomCodeUtil.generateRandomId(12);
-		// String c5 = RandomCodeUtil.generateRandomId(12);
-		// System.out.println("c1: " + c1);
-		// System.out.println("c2: " + c2);
-		// System.out.println("c3: " + c3);
-		// System.out.println("c4: " + c4);
-		// System.out.println("c5: " + c5);
+
 	}
 
 	@Bean

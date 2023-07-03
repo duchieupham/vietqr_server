@@ -99,10 +99,12 @@ public class AccountBankReceiveController {
 	@Autowired
 	AccountCustomerBankService accountCustomerBankService;
 
-	@GetMapping("account-bank/check/{bankAccount}/{bankTypeId}")
+	@GetMapping("account-bank/check/{bankAccount}/{bankTypeId}/{userId}")
 	public ResponseEntity<ResponseMessageDTO> checkExistedBankAccount(
 			@PathVariable(value = "bankAccount") String bankAccount,
-			@PathVariable(value = "bankTypeId") String bankTypeId) {
+			@PathVariable(value = "bankTypeId") String bankTypeId
+	// @PathVariable(value = "userId") String userId
+	) {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {

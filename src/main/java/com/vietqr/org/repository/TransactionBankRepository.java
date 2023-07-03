@@ -28,17 +28,21 @@ public interface TransactionBankRepository extends JpaRepository<TransactionBank
 			@Param(value = "reciprocalBankCode") String reciprocalBankCode, @Param(value = "va") String va,
 			@Param(value = "valueDate") long valueDate, @Param(value = "id") String id);
 
-	@Query(value = "SELECT transactionid FROM transaction_bank WHERE transactionid = :transactionid", nativeQuery = true)
-	List<Object> checkTransactionIdInserted(@Param(value = "transactionid") String transactionid);
+	@Query(value = "SELECT transactionid FROM transaction_bank WHERE transactionid = :transactionid AND trans_type = :transType", nativeQuery = true)
+	List<Object> checkTransactionIdInserted(@Param(value = "transactionid") String transactionid,
+			@Param(value = "transType") String transType);
 
 	@Query(value = "SELECT "
 			+ "CASE "
-			+ "WHEN EXISTS(SELECT 1 FROM transaction_bank WHERE referencenumber = :referenceNumber) OR "
+			+ "WHEN EXISTS(SELECT 1 FROM transaction_bank WHERE referencenumber = :referenceNumber AND trans_type = 'C' ) OR "
 			+ "EXISTS(SELECT 1 FROM transactionmms WHERE ft_code = :referenceNumber) "
 			+ "THEN :referenceNumber "
 			+ "ELSE '' "
 			+ "END AS referencenumber", nativeQuery = true)
 	String checkExistedReferenceNumber(@Param(value = "referenceNumber") String referenceNumber);
+
+	@Query(value = "SELECT referencenumber FROM transaction_bank WHERE referencenumber = :referenceNumber AND trans_type = 'D'", nativeQuery = true)
+	String checkExistedReferenceNumberTypeD(@Param(value = "referenceNumber") String referenceNumber);
 
 	@Query(value = "SELECT transactionid as transactionId, referencenumber as referenceNumber, bankaccount as bankAccount, amount, trans_type as transType, content, "
 			+ "DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(transactiontime/1000), '+00:00', '+07:00'), '%Y-%m-%d %H:%i:%s') AS timeReceived "

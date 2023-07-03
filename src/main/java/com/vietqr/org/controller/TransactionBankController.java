@@ -153,11 +153,12 @@ public class TransactionBankController {
 		LocalDateTime currentDateTime = LocalDateTime.now();
 		long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
 		logger.info("receive transaction sync from MB: " + dto.toString() + " at: " + time);
-		boolean checkDuplicate = checkDuplicateReferenceNumber(dto.getReferencenumber());
+		boolean checkDuplicate = checkDuplicateReferenceNumber(dto.getReferencenumber(), dto.getTransType());
 		result = validateTransactionBank(dto, uuid.toString());
 		try {
-			List<Object> list = transactionBankService.checkTransactionIdInserted(dto.getTransactionid());
-			if (list.isEmpty()) {
+			List<Object> list = transactionBankService.checkTransactionIdInserted(dto.getTransactionid(),
+					dto.getTransType());
+			if (list != null && list.isEmpty()) {
 				if (!result.isError()) {
 					if (checkDuplicate) {
 						transactionBankService.insertTransactionBank(dto.getTransactionid(), dto.getTransactiontime(),
@@ -176,7 +177,7 @@ public class TransactionBankController {
 			} else {
 				httpStatus = HttpStatus.BAD_REQUEST;
 				result = new TransactionResponseDTO(true, "006", "Duplicated transactionid");
-				logger.error("Error receive transaction-sync: " + result.toString());
+				logger.error("Error receive transaction-sync: " + "Duplicated transactionid");
 			}
 			return new ResponseEntity<>(result, httpStatus);
 		} catch (Exception e) {
@@ -231,45 +232,49 @@ public class TransactionBankController {
 							// if dto trans_type = D => do 2 things: find type D and C and do insert D
 							// beside.
 							// if dto tran_type = C => just do 1 thing find.
-							if (dto.getTransType().trim().toUpperCase().equals("D")) {
+							// if (dto.getTransType().trim().toUpperCase().equals("D")) {
 
-								// find type D existed or not
-								TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
-										.getTransactionByTraceIdAndAmount(traceId, dto.getAmount() + "", "D");
-								if (transactionReceiveEntity != null) {
-									// if existed -> do update
-									orderId = transactionReceiveEntity.getOrderId();
-									sign = transactionReceiveEntity.getSign();
-									getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
-									updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time, nf);
-								} else {
-									// if not existed -> do insert
-									getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
-									insertNewTransaction(dto, accountBankEntity, time, traceId, uuid, nf, "",
-											"");
-									// find another C in system
-									TransactionReceiveEntity transactionReceiveEntityC = transactionReceiveService
-											.getTransactionByTraceIdAndAmount(traceId, dto.getAmount() + "", "C");
-									if (transactionReceiveEntityC != null) {
-										updateTransaction(dto, transactionReceiveEntityC, accountBankEntity, time, nf);
-									}
-								}
+							// // find type D existed or not
+							// TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
+							// .getTransactionByTraceIdAndAmount(traceId, dto.getAmount() + "", "D");
+							// if (transactionReceiveEntity != null) {
+							// // if existed -> do update
+							// orderId = transactionReceiveEntity.getOrderId();
+							// sign = transactionReceiveEntity.getSign();
+							// getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
+							// updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time,
+							// nf);
+							// } else {
+							// // if not existed -> do insert
+							// getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
+							// insertNewTransaction(dto, accountBankEntity, time, traceId, uuid, nf, "",
+							// "");
+							// // find another C in system
+							// TransactionReceiveEntity transactionReceiveEntityC =
+							// transactionReceiveService
+							// .getTransactionByTraceIdAndAmount(traceId, dto.getAmount() + "", "C");
+							// if (transactionReceiveEntityC != null) {
+							// updateTransaction(dto, transactionReceiveEntityC, accountBankEntity, time,
+							// nf);
+							// }
+							// }
+							// } else {
+							TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
+									.getTransactionByTraceIdAndAmount(traceId, dto.getAmount() + "",
+											dto.getTransType().trim().toUpperCase());
+							if (transactionReceiveEntity != null) {
+								orderId = transactionReceiveEntity.getOrderId();
+								sign = transactionReceiveEntity.getSign();
+								getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
+								updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time, nf);
 							} else {
-								TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
-										.getTransactionByTraceIdAndAmount(traceId, dto.getAmount() + "", "C");
-								if (transactionReceiveEntity != null) {
-									orderId = transactionReceiveEntity.getOrderId();
-									sign = transactionReceiveEntity.getSign();
-									getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
-									updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time, nf);
-								} else {
-									logger.info(
-											"transaction-sync - cannot find transaction receive. Receive new transaction outside system");
-									// process here
-									getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
-									insertNewTransaction(dto, accountBankEntity, time, traceId, uuid, nf, "", "");
-								}
+								logger.info(
+										"transaction-sync - cannot find transaction receive. Receive new transaction outside system");
+								// process here
+								getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
+								insertNewTransaction(dto, accountBankEntity, time, traceId, uuid, nf, "", "");
 							}
+							// }
 						} else {
 							logger.info("transaction-sync - traceId is empty. Receive new transaction outside system");
 							getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
@@ -282,7 +287,8 @@ public class TransactionBankController {
 					logger.error("Transaction-sync: Duplicate Reference number");
 				}
 			} else {
-				logger.error("Transaction-sync:  Error receive data: " + result.toString());
+				// logger.error("Transaction-sync: Error receive data: " + result.toString());
+				logger.error("Transaction-sync:  Error receive data: ");
 			}
 		}
 
@@ -1184,10 +1190,12 @@ public class TransactionBankController {
 	}
 
 	// check duplicate referenceNumber fromMB
-	private boolean checkDuplicateReferenceNumber(String refNumber) {
+	private boolean checkDuplicateReferenceNumber(String refNumber, String transType) {
 		boolean result = false;
 		try {
-			String check = transactionBankService.checkExistedReferenceNumber(refNumber);
+			// if transType = C => check all transaction_bank and transaction_mms
+			// if transType = D => check only transaction bank
+			String check = transactionBankService.checkExistedReferenceNumber(refNumber, transType);
 			if (check == null || check.isEmpty()) {
 				result = true;
 			}

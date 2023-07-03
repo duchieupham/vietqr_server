@@ -12,9 +12,9 @@ public interface TransactionBankService {
 			String content, String bankaccount, String transType, String reciprocalAccount, String reciprocalBankCode,
 			String va, long valueDate, String reftransactionid);
 
-	public List<Object> checkTransactionIdInserted(String transactionid);
+	public List<Object> checkTransactionIdInserted(String transactionid, String transType);
 
-	public String checkExistedReferenceNumber(String referenceNumber);
+	public String checkExistedReferenceNumber(String referenceNumber, String transType);
 
 	public List<TransactionCheckDTO> getTransactionsCheck(String fromDate, String toDate, String bankAccount);
 }
