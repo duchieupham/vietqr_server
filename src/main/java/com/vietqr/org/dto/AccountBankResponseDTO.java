@@ -26,6 +26,8 @@ public class AccountBankResponseDTO implements Serializable {
 	// private String branchCode;
 	// private String businessCode;
 	private boolean isAuthenticated;
+	// userId of who add bankAccount;
+	private String userId;
 
 	public AccountBankResponseDTO() {
 		super();
@@ -37,7 +39,8 @@ public class AccountBankResponseDTO implements Serializable {
 			int type,
 			String branchId, String businessId,
 			String branchName, String businessName,
-			boolean isAuthenticated
+			boolean isAuthenticated,
+			String userId
 	// String branchCode,
 	// String businessCode
 	) {
@@ -57,6 +60,7 @@ public class AccountBankResponseDTO implements Serializable {
 		this.isAuthenticated = isAuthenticated;
 		// this.branchCode = branchCode;
 		// this.businessCode = businessCode;
+		this.userId = userId;
 	}
 
 	public String getId() {
@@ -169,6 +173,14 @@ public class AccountBankResponseDTO implements Serializable {
 
 	public void setAuthenticated(boolean isAuthenticated) {
 		this.isAuthenticated = isAuthenticated;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 
 	// public String getBranchCode() {

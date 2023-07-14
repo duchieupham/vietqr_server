@@ -577,7 +577,7 @@ public class VietQRController {
 				if (isFromBusinessSync == false) {
 					// push notification
 					List<FcmTokenEntity> fcmTokens = new ArrayList<>();
-					fcmTokens = fcmTokenService.getFcmTokensByUserId(dto.getUserId());
+					fcmTokens = fcmTokenService.getFcmTokensKiotByUserId(dto.getUserId());
 					Map<String, String> data = new HashMap<>();
 					data.put("notificationType", NotificationUtil.getNotiTypeNewTransaction());
 					data.put("notificationId", notificationUUID.toString());

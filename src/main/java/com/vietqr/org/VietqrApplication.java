@@ -30,6 +30,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.vietqr.org.security.JWTAuthorizationFilter;
+// import com.vietqr.org.util.BankEncryptUtil;
+// import com.vietqr.org.util.SFTPUtil;
 // import com.vietqr.org.util.RandomCodeUtil;
 // import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.WebSocketConfig;
@@ -42,7 +44,14 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
-
+		// SFTPUtil sftpUtil = new SFTPUtil();
+		// sftpUtil.checkTransactions();
+		// BankEncryptUtil bankEncryptUtil = new BankEncryptUtil();
+		// String checkSum =
+		// bankEncryptUtil.generateMD5RefundCustomerChecksum("0001297129444",
+		// "FT23140924876602",
+		// "SABAccessKey");
+		// System.out.println("Check sum: " + checkSum);
 	}
 
 	@Bean
@@ -100,6 +109,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 					.antMatchers(HttpMethod.POST, "/bank/api/get_token_bank").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts/login").permitAll()
+					.antMatchers(HttpMethod.GET, "/api/accounts/search/**").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts/register").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts/logout").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/transaction-mms").permitAll()

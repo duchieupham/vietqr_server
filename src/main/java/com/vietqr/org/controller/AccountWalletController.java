@@ -45,12 +45,15 @@ public class AccountWalletController {
         AccountWalletDTO result = null;
         HttpStatus httpStatus = null;
         try {
+            System.out.println("userId: " + userId);
+
             AccountWalletEntity entity = accountWalletService.getAccountWalletByUserId(userId);
             result = new AccountWalletDTO(entity.getAmount(), entity.getPoint() + "", entity.getSharingCode(),
                     entity.getWalletId(), entity.isEnableService());
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            logger.error("getAccountBankReceiveWps: ERROR: " + e.toString());
+            System.out.println(e.toString());
+            logger.error("getAccountWalletByUserId: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);

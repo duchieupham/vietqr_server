@@ -61,4 +61,24 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
         return repo.getTransactionByOrderId(orderId, amount);
     }
 
+    @Override
+    public TransactionReceiveEntity findTransactionReceiveByFtCode(String ftCode) {
+        return repo.findTransactionReceiveByFtCode(ftCode);
+    }
+
+    @Override
+    public TransactionReceiveEntity getTransactionReceiveByRefNumberAndOrderId(String referenceNumber, String orderId) {
+        return repo.getTransactionReceiveByRefNumberAndOrderId(referenceNumber, orderId);
+    }
+
+    @Override
+    public TransactionReceiveEntity getTransactionReceiveByRefNumber(String referenceNumber) {
+        return repo.getTransactionReceiveByRefNumber(referenceNumber);
+    }
+
+    @Override
+    public TransactionReceiveEntity getTransactionReceiveByOrderId(String orderId) {
+        return repo.getTransactionReceiveByOrderId(orderId);
+    }
+
 }

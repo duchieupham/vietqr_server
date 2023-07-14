@@ -79,4 +79,20 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ORDER BY time DESC LIMIT 5", nativeQuery = true)
         List<TransactionReceiveEntity> getRelatedTransactionByBankId(@Param(value = "bankId") String bankId);
 
+        @Query(value = "SELECT * FROM transaction_receive WHERE reference_number = :referenceNumber AND trans_type = 'C'", nativeQuery = true)
+        TransactionReceiveEntity findTransactionReceiveByFtCode(
+                        @Param(value = "referenceNumber") String referenceNumber);
+
+        @Query(value = "SELECT * FROM transaction_receive WHERE reference_number = :referenceNumber AND order_id = :orderId", nativeQuery = true)
+        TransactionReceiveEntity getTransactionReceiveByRefNumberAndOrderId(
+                        @Param(value = "referenceNumber") String referenceNumber,
+                        @Param(value = "orderId") String orderId);
+
+        @Query(value = "SELECT * FROM transaction_receive WHERE reference_number = :referenceNumber", nativeQuery = true)
+        TransactionReceiveEntity getTransactionReceiveByRefNumber(
+                        @Param(value = "referenceNumber") String referenceNumber);
+
+        @Query(value = "SELECT * FROM transaction_receive WHERE order_id = :orderId", nativeQuery = true)
+        TransactionReceiveEntity getTransactionReceiveByOrderId(
+                        @Param(value = "orderId") String orderId);
 }

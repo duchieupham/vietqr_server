@@ -99,7 +99,8 @@ public class AccountBankReceiveController {
 	@Autowired
 	AccountCustomerBankService accountCustomerBankService;
 
-	@GetMapping("account-bank/check/{bankAccount}/{bankTypeId}/{userId}")
+	// @GetMapping("account-bank/check/{bankAccount}/{bankTypeId}/{userId}")
+	@GetMapping("account-bank/check/{bankAccount}/{bankTypeId}")
 	public ResponseEntity<ResponseMessageDTO> checkExistedBankAccount(
 			@PathVariable(value = "bankAccount") String bankAccount,
 			@PathVariable(value = "bankTypeId") String bankTypeId
@@ -147,6 +148,7 @@ public class AccountBankReceiveController {
 			entity.setSync(false);
 			entity.setWpSync(false);
 			entity.setStatus(true);
+			entity.setMmsActive(false);
 			accountBankService.insertAccountBank(entity);
 			// insert bank-receive-personal
 			UUID uuidPersonal = UUID.randomUUID();
@@ -317,6 +319,7 @@ public class AccountBankReceiveController {
 			entity.setSync(false);
 			entity.setWpSync(false);
 			entity.setStatus(true);
+			entity.setMmsActive(false);
 			accountBankService.insertAccountBank(entity);
 			// if (dto.getType() == 0) {
 			// insert bank receive personal
@@ -565,11 +568,13 @@ public class AccountBankReceiveController {
 	public ResponseEntity<List<AccountBankResponseDTO>> getAccountBanks(@PathVariable("userId") String userId) {
 		List<AccountBankResponseDTO> result = new ArrayList<>();
 		HttpStatus httpStatus = null;
+		System.out.println("userId: " + userId);
 		try {
 			// get list personal bank
 			//
 			List<AccountBankReceivePersonalDTO> personalBanks = bankReceivePersonalService
 					.getBankReceivePersonals(userId);
+			System.out.println("personalBanks size: " + personalBanks.size());
 			if (personalBanks != null && !personalBanks.isEmpty()) {
 				for (AccountBankReceivePersonalDTO personalBank : personalBanks) {
 					AccountBankResponseDTO dto = new AccountBankResponseDTO();
@@ -588,6 +593,7 @@ public class AccountBankReceiveController {
 					// dto.setBranchCode("");
 					dto.setBusinessName("");
 					dto.setAuthenticated(personalBank.getAuthenticated());
+					dto.setUserId(personalBank.getUserId());
 					// dto.setBusinessCode("");
 					result.add(dto);
 				}
@@ -635,6 +641,7 @@ public class AccountBankReceiveController {
 					dto.setBranchName(bank.getBranchName());
 					dto.setBusinessName(bank.getBusinessName());
 					dto.setAuthenticated(bank.getAuthenticated());
+					dto.setUserId(bank.getUserId());
 					// dto.setBranchCode(bank.getBranchCode());
 					// dto.setBusinessCode(bank.getBusinessCode());
 					result.add(dto);
@@ -642,7 +649,7 @@ public class AccountBankReceiveController {
 			}
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
-			System.out.println("Error at getAccountBanks: " + e.toString());
+			System.out.println("Error at getAccountBantks: " + e.toString());
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(result, httpStatus);

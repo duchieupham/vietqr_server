@@ -40,10 +40,13 @@ import com.vietqr.org.dto.FcmRequestDTO;
 import com.vietqr.org.dto.LogoutDTO;
 import com.vietqr.org.dto.PasswordUpdateDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
+import com.vietqr.org.dto.TokenPluginDTO;
+import com.vietqr.org.dto.TokenPluginRequestDTO;
 import com.vietqr.org.dto.AccountSearchDTO;
 import com.vietqr.org.entity.AccountInformationEntity;
 import com.vietqr.org.entity.AccountLoginEntity;
 import com.vietqr.org.entity.AccountSettingEntity;
+import com.vietqr.org.entity.AccountShareEntity;
 import com.vietqr.org.entity.AccountWalletEntity;
 import com.vietqr.org.entity.CustomerSyncEntity;
 import com.vietqr.org.entity.FcmTokenEntity;
@@ -53,6 +56,7 @@ import com.vietqr.org.service.AccountBankReceiveService;
 import com.vietqr.org.service.AccountInformationService;
 import com.vietqr.org.service.AccountLoginService;
 import com.vietqr.org.service.AccountSettingService;
+import com.vietqr.org.service.AccountShareService;
 import com.vietqr.org.service.AccountWalletService;
 import com.vietqr.org.service.CustomerSyncService;
 import com.vietqr.org.service.FcmTokenService;
@@ -102,6 +106,9 @@ public class AccountController {
 	@Autowired
 	AccountWalletService accountWalletService;
 
+	@Autowired
+	AccountShareService accountShareService;
+
 	private FirebaseMessagingService firebaseMessagingService;
 
 	public AccountController(FirebaseMessagingService firebaseMessagingService) {
@@ -127,43 +134,49 @@ public class AccountController {
 						.getAccountInformation(userId);
 				// push notification to other devices if user logged in before
 				LocalDateTime currentDateTime = LocalDateTime.now();
-				List<FcmTokenEntity> fcmTokens = new ArrayList<>();
-				fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
-				if (fcmTokens != null && !fcmTokens.isEmpty()) {
-					logger.info("FCM list size: " + fcmTokens.size());
-					// insert new Notification
-					String messageNotification = NotificationUtil.getNotiDescLoginWarningPrefix()
-							+ dto.getPlatform() + " " + dto.getDevice();
-					UUID notificationUuid = UUID.randomUUID();
-					NotificationEntity notificationEntity = new NotificationEntity();
-					notificationEntity.setId(notificationUuid.toString());
-					notificationEntity.setRead(false);
-					notificationEntity.setMessage(messageNotification);
-					notificationEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
-					notificationEntity.setType(NotificationUtil.getNotiTypeLogin());
-					notificationEntity.setUserId(userId);
-					notificationService.insertNotification(notificationEntity);
-					// push notification to devices
-					for (FcmTokenEntity fcmToken : fcmTokens) {
-						try {
-							if (!fcmToken.getToken().trim().isEmpty()) {
-								FcmRequestDTO fcmDTO = new FcmRequestDTO();
-								fcmDTO.setTitle(NotificationUtil.getNotiTitleLoginWarning());
-								fcmDTO.setMessage(messageNotification);
-								fcmDTO.setToken(fcmToken.getToken());
-								firebaseMessagingService.sendPushNotificationToToken(fcmDTO);
-								logger.info("Send notification to device " + fcmToken.getToken());
-							}
-						} catch (Exception e) {
-							logger.error("Error when Send Notification using FCM " + e.toString());
-							if (e.toString()
-									.contains("The registration token is not a valid FCM registration token")) {
-								fcmTokenService.deleteFcmToken(fcmToken.getToken());
-							}
+				//
+				String messageNotification = NotificationUtil.getNotiDescLoginWarningPrefix()
+						+ dto.getPlatform() + " " + dto.getDevice();
+				UUID notificationUuid = UUID.randomUUID();
+				NotificationEntity notificationEntity = new NotificationEntity();
+				notificationEntity.setId(notificationUuid.toString());
+				notificationEntity.setRead(false);
+				notificationEntity.setMessage(messageNotification);
+				notificationEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
+				notificationEntity.setType(NotificationUtil.getNotiTypeLogin());
+				notificationEntity.setUserId(userId);
+				notificationService.insertNotification(notificationEntity);
+				//
+				// List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+				// fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
+				// if (fcmTokens != null && !fcmTokens.isEmpty()) {
+				// logger.info("FCM list size: " + fcmTokens.size());
+				// // insert new Notification
+				// String messageNotification = NotificationUtil.getNotiDescLoginWarningPrefix()
+				// + dto.getPlatform() + " " + dto.getDevice();
 
-						}
-					}
-				}
+				// // push notification to devices
+				// for (FcmTokenEntity fcmToken : fcmTokens) {
+				// try {
+				// if (!fcmToken.getToken().trim().isEmpty()) {
+				// FcmRequestDTO fcmDTO = new FcmRequestDTO();
+				// fcmDTO.setTitle(NotificationUtil.getNotiTitleLoginWarning());
+				// fcmDTO.setMessage(messageNotification);
+				// fcmDTO.setToken(fcmToken.getToken());
+				// firebaseMessagingService.sendPushNotificationToToken(fcmDTO);
+				// logger.info("Send notification to device " + fcmToken.getToken());
+				// }
+				// } catch (Exception e) {
+				// logger.error("Error when Send Notification using FCM " + e.toString());
+				// if (e.toString()
+				// .contains("The registration token is not a valid FCM registration token")) {
+				// fcmTokenService.deleteFcmToken(fcmToken.getToken());
+				// }
+
+				// }
+				// }
+				// }
+
 				// insert new FCM token
 				FcmTokenEntity fcmTokenEntity = new FcmTokenEntity();
 				UUID uuid = UUID.randomUUID();
@@ -341,8 +354,17 @@ public class AccountController {
 				///
 				// update point if sharing_code != null
 				if (dto.getSharingCode() != null && !dto.getSharingCode().isEmpty()) {
-					accountWalletService.updatePointBySharingCode(10, dto.getSharingCode());
-					// insert account_sharing_code
+					// find sharingCode is Existed or not
+					String checkExisted = accountWalletService.checkExistedSharingCode(dto.getSharingCode());
+					if (checkExisted != null) {
+						// if existed, do update
+						accountWalletService.updatePointBySharingCode(10, dto.getSharingCode());
+						// insert account_share_entity
+						UUID accountShareId = UUID.randomUUID();
+						accountShareService.insertAccountShare(new AccountShareEntity(accountShareId.toString(),
+								dto.getSharingCode(), uuid.toString()));
+					}
+					// if not existed, do nothing
 					///
 				}
 				// insert customer_sync
@@ -655,6 +677,39 @@ public class AccountController {
 			result = new ResponseMessageDTO("FAILED", "E05");
 			httpStatus = HttpStatus.BAD_REQUEST;
 			logger.error("DISABLE USER: " + e.toString());
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	@PostMapping("accounts/token-plugin")
+	public ResponseEntity<Object> getTokenPlugin(@RequestBody TokenPluginRequestDTO dto) {
+		Object result = null;
+		HttpStatus httpStatus = null;
+		try {
+			if (dto != null && dto.getUserId() != null && !dto.getUserId().trim().isEmpty()) {
+				AccountInformationEntity accountInformationEntity = accountInformationService
+						.getAccountInformation(dto.getUserId());
+				if (accountInformationEntity != null) {
+					TokenPluginDTO tokenPluginDTO = new TokenPluginDTO();
+					String accessToken = getJWTInfinitiveToken(accountInformationEntity, dto.getPhoneNo(),
+							dto.getHosting());
+					tokenPluginDTO.setAccessToken(accessToken);
+					result = tokenPluginDTO;
+					httpStatus = HttpStatus.OK;
+				} else {
+					logger.error("getTokenPlugin: EMPTY request body");
+					result = new ResponseMessageDTO("FAILED", "E38");
+					httpStatus = HttpStatus.BAD_REQUEST;
+				}
+			} else {
+				logger.error("getTokenPlugin: EMPTY request body");
+				result = new ResponseMessageDTO("FAILED", "E37");
+				httpStatus = HttpStatus.BAD_REQUEST;
+			}
+		} catch (Exception e) {
+			logger.error("getTokenPlugin: ERROR: " + e.toString());
+			result = new ResponseMessageDTO("FAILED", "E05");
+			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(result, httpStatus);
 	}

@@ -22,11 +22,19 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vietqr.org.dto.RefundRequestDTO;
+import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.TokenDTO;
+import com.vietqr.org.dto.TokenProductBankDTO;
+import com.vietqr.org.dto.TransMMSCheckInDTO;
+import com.vietqr.org.dto.TransMMSCheckOutDTO;
 import com.vietqr.org.dto.TransactionBankCustomerDTO;
 import com.vietqr.org.dto.TransactionMMSResponseDTO;
 import com.vietqr.org.dto.TransactionResponseDTO;
@@ -41,6 +49,8 @@ import com.vietqr.org.service.TerminalBankService;
 import com.vietqr.org.service.TransactionMMSService;
 import com.vietqr.org.service.TransactionReceiveService;
 import com.vietqr.org.util.BankEncryptUtil;
+import com.vietqr.org.util.EnvironmentUtil;
+import com.vietqr.org.util.RandomCodeUtil;
 
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -93,7 +103,7 @@ public class TransactionMMSController {
                     httpStatus = HttpStatus.OK;
                     LocalDateTime insertLocalTime = LocalDateTime.now();
                     long insertTime = insertLocalTime.toEpochSecond(ZoneOffset.UTC);
-                    logger.error(
+                    logger.info(
                             "transaction-mms-sync: INSERT SUCCESS at: " + insertTime);
                     ///
                     // find transaction_receive to update
@@ -428,4 +438,287 @@ public class TransactionMMSController {
         return result;
     }
 
+    // check order API
+    @PostMapping("transaction-mms/check-order")
+    public ResponseEntity<Object> checkTranscationMMS(@RequestBody TransMMSCheckInDTO dto) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            TransMMSCheckOutDTO tranMMSCheckOutDTO = null;
+            if (dto != null && dto.getOrderId() != null && dto.getReferenceNumber() != null) {
+                // 3 trường hợp
+                // 1. Đủ ftCode và orderId
+                // 2. Có ftCode không có orderId
+                // 3. Có orderId mà không ftCode
+                if (!dto.getReferenceNumber().isEmpty() && !dto.getOrderId().isEmpty()) {
+
+                    TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
+                            .getTransactionReceiveByRefNumberAndOrderId(dto.getReferenceNumber(), dto.getOrderId());
+                    if (transactionReceiveEntity != null) {
+                        // trùng ft code và order id trong gd
+                        tranMMSCheckOutDTO = new TransMMSCheckOutDTO();
+                        tranMMSCheckOutDTO.setReferenceNumber(transactionReceiveEntity.getReferenceNumber());
+                        tranMMSCheckOutDTO.setOrderId(transactionReceiveEntity.getOrderId());
+                        tranMMSCheckOutDTO.setAmount(transactionReceiveEntity.getAmount() + "");
+                        tranMMSCheckOutDTO.setTime(transactionReceiveEntity.getTime());
+                        tranMMSCheckOutDTO.setTransType(transactionReceiveEntity.getTransType());
+                        tranMMSCheckOutDTO.setStatus(transactionReceiveEntity.getStatus());
+                        result = tranMMSCheckOutDTO;
+                        httpStatus = HttpStatus.OK;
+                    } else {
+                        // không trùng ft code và order id trong gd
+                        // Mặc định lấy theo ftCode
+                        transactionReceiveEntity = transactionReceiveService
+                                .getTransactionReceiveByRefNumber(dto.getReferenceNumber());
+                        if (transactionReceiveEntity != null) {
+                            // trùng ft code và order id trong gd
+                            tranMMSCheckOutDTO = new TransMMSCheckOutDTO();
+                            tranMMSCheckOutDTO.setReferenceNumber(transactionReceiveEntity.getReferenceNumber());
+                            tranMMSCheckOutDTO.setOrderId(transactionReceiveEntity.getOrderId());
+                            tranMMSCheckOutDTO.setAmount(transactionReceiveEntity.getAmount() + "");
+                            tranMMSCheckOutDTO.setTime(transactionReceiveEntity.getTime());
+                            tranMMSCheckOutDTO.setTransType(transactionReceiveEntity.getTransType());
+                            tranMMSCheckOutDTO.setStatus(transactionReceiveEntity.getStatus());
+                            result = tranMMSCheckOutDTO;
+                            httpStatus = HttpStatus.OK;
+                        } else {
+                            transactionReceiveEntity = transactionReceiveService
+                                    .getTransactionReceiveByOrderId(dto.getOrderId());
+                            if (transactionReceiveEntity != null) {
+                                tranMMSCheckOutDTO = new TransMMSCheckOutDTO();
+                                tranMMSCheckOutDTO.setReferenceNumber(transactionReceiveEntity.getReferenceNumber());
+                                tranMMSCheckOutDTO.setOrderId(transactionReceiveEntity.getOrderId());
+                                tranMMSCheckOutDTO.setAmount(transactionReceiveEntity.getAmount() + "");
+                                tranMMSCheckOutDTO.setTime(transactionReceiveEntity.getTime());
+                                tranMMSCheckOutDTO.setTransType(transactionReceiveEntity.getTransType());
+                                tranMMSCheckOutDTO.setStatus(transactionReceiveEntity.getStatus());
+                                result = tranMMSCheckOutDTO;
+                                httpStatus = HttpStatus.OK;
+                            }
+                        }
+                    }
+                    // đi xuống 2 phần dưới
+                } else if (!dto.getReferenceNumber().isEmpty() && dto.getOrderId().isEmpty()) {
+                    // thấy
+                    TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
+                            .getTransactionReceiveByRefNumber(dto.getReferenceNumber());
+                    if (transactionReceiveEntity != null) {
+                        // trùng ft code và order id trong gd
+                        tranMMSCheckOutDTO = new TransMMSCheckOutDTO();
+                        tranMMSCheckOutDTO.setReferenceNumber(transactionReceiveEntity.getReferenceNumber());
+                        tranMMSCheckOutDTO.setOrderId(transactionReceiveEntity.getOrderId());
+                        tranMMSCheckOutDTO.setAmount(transactionReceiveEntity.getAmount() + "");
+                        tranMMSCheckOutDTO.setTime(transactionReceiveEntity.getTime());
+                        tranMMSCheckOutDTO.setTransType(transactionReceiveEntity.getTransType());
+                        tranMMSCheckOutDTO.setStatus(transactionReceiveEntity.getStatus());
+                        result = tranMMSCheckOutDTO;
+                        httpStatus = HttpStatus.OK;
+                    }
+                    // không thấy
+
+                } else if (!dto.getOrderId().isEmpty() && dto.getReferenceNumber().isEmpty()) {
+                    // thấy
+                    TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
+                            .getTransactionReceiveByOrderId(dto.getOrderId());
+                    if (transactionReceiveEntity != null) {
+                        tranMMSCheckOutDTO = new TransMMSCheckOutDTO();
+                        tranMMSCheckOutDTO.setReferenceNumber(transactionReceiveEntity.getReferenceNumber());
+                        tranMMSCheckOutDTO.setOrderId(transactionReceiveEntity.getOrderId());
+                        tranMMSCheckOutDTO.setAmount(transactionReceiveEntity.getAmount() + "");
+                        tranMMSCheckOutDTO.setTime(transactionReceiveEntity.getTime());
+                        tranMMSCheckOutDTO.setTransType(transactionReceiveEntity.getTransType());
+                        tranMMSCheckOutDTO.setStatus(transactionReceiveEntity.getStatus());
+                        result = tranMMSCheckOutDTO;
+                        httpStatus = HttpStatus.OK;
+                    }
+                    // không thấy
+                }
+                if (tranMMSCheckOutDTO == null) {
+                    logger.error("checkTranscationMMS: CANNOT FOUND RECORD");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    result = new ResponseMessageDTO("FAILED", "E40");
+                }
+            } else {
+                logger.error("checkTranscationMMS: INVALID REQUEST BODY");
+                httpStatus = HttpStatus.BAD_REQUEST;
+                result = new ResponseMessageDTO("FAILED", "E39");
+            }
+        } catch (Exception e) {
+            logger.error("checkTranscationMMS: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+            result = new ResponseMessageDTO("FAILED", "E05");
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // refund API
+    @PostMapping("transaction-mms/refund")
+    public ResponseEntity<ResponseMessageDTO> refund(@RequestBody RefundRequestDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            String accessKey = "SABAccessKey";
+            String checkSum = BankEncryptUtil.generateMD5RefundCustomerChecksum(dto.getBankAccount(),
+                    dto.getReferenceNumber(), accessKey);
+            if (BankEncryptUtil.isMatchChecksum(dto.getCheckSum(), checkSum)) {
+                // find terminal ID by bankAccount
+                TerminalBankEntity terminalBankEntity = terminalBankService
+                        .getTerminalBankByBankAccount(dto.getBankAccount());
+                if (terminalBankEntity != null) {
+                    String refundResult = refundFromMB(terminalBankEntity.getTerminalId(), dto.getReferenceNumber(),
+                            dto.getAmount(), dto.getContent());
+                    if (refundResult != null) {
+                        if (refundResult.trim().equals("4863")) {
+                            logger.error("refund: ERROR: " + dto.getBankAccount() + " FT CODE IS NOT EXISTED");
+                            httpStatus = HttpStatus.BAD_REQUEST;
+                            result = new ResponseMessageDTO("FAILED", "E44");
+                        } else if (refundResult.trim().equals("4857")) {
+                            logger.error("refund: ERROR: " + dto.getBankAccount() + " INVALID AMOUNT");
+                            httpStatus = HttpStatus.BAD_REQUEST;
+                            result = new ResponseMessageDTO("FAILED", "E45");
+                        } else if (refundResult.trim().contains("FT")) {
+                            httpStatus = HttpStatus.OK;
+                            result = new ResponseMessageDTO("SUCCESS", refundResult);
+                        } else {
+                            logger.error("refund: ERROR: UNEXPECTED ERROR");
+                            httpStatus = HttpStatus.BAD_REQUEST;
+                            result = new ResponseMessageDTO("FAILED", "E05");
+                        }
+                    } else {
+                        logger.error("refund: ERROR: " + dto.getBankAccount() + " REFUND FAILED");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        result = new ResponseMessageDTO("FAILED", "E43");
+                    }
+                } else {
+                    logger.error("refund: ERROR: " + dto.getBankAccount() + " INVALID TERMINAL");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    result = new ResponseMessageDTO("FAILED", "E42");
+                }
+            } else {
+                logger.error("refund: ERROR: " + dto.getReferenceNumber() + " INVALID CHECKSUM");
+                httpStatus = HttpStatus.BAD_REQUEST;
+                result = new ResponseMessageDTO("FAILED", "E41");
+            }
+        } catch (Exception e) {
+            logger.error("refund: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+            result = new ResponseMessageDTO("FAILED", "E05");
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    private String refundFromMB(String terminalId, String ftCode, String amount, String content) {
+        String result = null;
+        try {
+            TokenProductBankDTO token = getBankToken();
+            if (token != null) {
+                // {
+                // "terminalID": "BLC2",
+                // "traceTransfer":"FT23149029920410",
+                // "amount":"30000",
+                // "content":"Hoan tien test"
+                // }
+                UUID clientMessageId = UUID.randomUUID();
+                UUID transactionId = UUID.randomUUID();
+                Map<String, Object> data = new HashMap<>();
+                data.put("terminalID", terminalId);
+                data.put("traceTransfer", ftCode);
+                data.put("amount", amount);
+                data.put("content", content);
+                UriComponents uriComponents = UriComponentsBuilder
+                        .fromHttpUrl(EnvironmentUtil.getBankUrl()
+                                + "ms/offus/public/payment-service/payment/v1.0/refundVietQR")
+                        .buildAndExpand(/* add url parameter here */);
+                WebClient webClient = WebClient.builder()
+                        .baseUrl(
+                                EnvironmentUtil.getBankUrl()
+                                        + "ms/offus/public/payment-service/payment/v1.0/refundVietQR")
+                        .build();
+                Mono<ClientResponse> responseMono = webClient.post()
+                        .uri(uriComponents.toUri())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("clientMessageId", clientMessageId.toString())
+                        .header("userName", EnvironmentUtil.getUsernameAPI())
+                        .header("secretKey", EnvironmentUtil.getSecretKeyAPI())
+                        .header("transactionID", transactionId.toString())
+                        .header("Authorization", "Bearer " + getBankToken().getAccess_token())
+                        .body(BodyInserters.fromValue(data))
+                        .exchange();
+                ClientResponse response = responseMono.block();
+
+                String json = response.bodyToMono(String.class).block();
+                System.out.println("refundFromMB: RESPONSE: " + json);
+                logger.info("refundFromMB: RESPONSE: " + json);
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode rootNode = objectMapper.readTree(json);
+                if (rootNode.get("errorCode") != null) {
+                    // 000
+                    if ((rootNode.get("errorCode").asText()).trim().equals("000")) {
+                        if (rootNode.get("data").get("ft") != null) {
+                            result = rootNode.get("data").get("ft").asText();
+                            logger.info("refundFromMB: RESPONSE FT: " + result);
+                        } else {
+                            logger.error("refundFromMB: RESPONSE: FT NULL");
+                        }
+                    }
+                    // "4863" FT code not existed
+                    else if ((rootNode.get("errorCode").asText()).trim().equals("4863")) {
+                        result = "4863";
+                    }
+                    // "4857" Invalid amount
+                    else if ((rootNode.get("errorCode").asText()).trim().equals("4857")) {
+                        result = "4857";
+                    }
+                } else {
+                    logger.error("refundFromMB: RESPONSE: ERROR CODE NULL");
+                }
+
+            } else {
+                logger.error("ERROR at refundFromMB: " + ftCode + " - " + " TOKEN BANK IS INVALID");
+            }
+        } catch (Exception e) {
+            logger.error("ERROR at refundFromMB: " + ftCode + " - " + e.toString());
+        }
+        System.out.println("RESULT REFUND: " + result);
+        return result;
+    }
+
+    // get token bank product
+    private TokenProductBankDTO getBankToken() {
+        TokenProductBankDTO result = null;
+        try {
+            String key = EnvironmentUtil.getUserBankAccess() + ":" + EnvironmentUtil.getPasswordBankAccess();
+            String encodedKey = Base64.getEncoder().encodeToString(key.getBytes());
+            UriComponents uriComponents = UriComponentsBuilder
+                    .fromHttpUrl(EnvironmentUtil.getBankUrl() + "oauth2/v1/token")
+                    .buildAndExpand(/* add url parameter here */);
+            WebClient webClient = WebClient.builder()
+                    .baseUrl(EnvironmentUtil.getBankUrl()
+                            + "oauth2/v1/token")
+                    .build();
+            // Call POST API
+            TokenProductBankDTO response = webClient.method(HttpMethod.POST)
+                    .uri(uriComponents.toUri())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .header("Authorization", "Basic " + encodedKey)
+                    .body(BodyInserters.fromFormData("grant_type", "client_credentials"))
+                    .exchange()
+                    .flatMap(clientResponse -> {
+                        if (clientResponse.statusCode().is2xxSuccessful()) {
+                            return clientResponse.bodyToMono(TokenProductBankDTO.class);
+                        } else {
+                            clientResponse.body((clientHttpResponse, context) -> {
+                                logger.info(clientHttpResponse.getBody().collectList().block().toString());
+                                return clientHttpResponse.getBody();
+                            });
+                            return null;
+                        }
+                    })
+                    .block();
+            result = response;
+        } catch (Exception e) {
+            logger.error(e.toString());
+        }
+        return result;
+    }
 }

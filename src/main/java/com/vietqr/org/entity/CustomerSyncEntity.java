@@ -45,12 +45,15 @@ public class CustomerSyncEntity implements Serializable {
     @Column(name = "active")
     private boolean active;
 
+    @Column(name = "token")
+    private String token;
+
     public CustomerSyncEntity() {
         super();
     }
 
     public CustomerSyncEntity(String id, String username, String password, String ipAddress, String port,
-            String suffixUrl, String information, boolean active) {
+            String suffixUrl, String information, boolean active, String token) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -59,6 +62,7 @@ public class CustomerSyncEntity implements Serializable {
         this.suffixUrl = suffixUrl;
         this.information = information;
         this.active = active;
+        this.token = token;
     }
 
     public String getId() {
@@ -131,6 +135,14 @@ public class CustomerSyncEntity implements Serializable {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
 }

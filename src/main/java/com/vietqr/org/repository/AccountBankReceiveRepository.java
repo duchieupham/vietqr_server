@@ -119,4 +119,11 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 
 	@Query(value = "SELECT bank_account FROM account_bank_receive WHERE id = :bankId", nativeQuery = true)
 	String getBankAccountById(@Param(value = "bankId") String bankId);
+
+	// @Query(value = "SELECT * FROM account_bank_receive "
+	// + "WHERE bank_account = :bankAccount "
+	// + "AND is_authenticated = true "
+	// + "AND status = true", nativeQuery = true)
+	// AccountBankReceiveEntity getBankAccountAuthenticatedByAccount(@Param(value =
+	// "bankAccount") String bankAccount);
 }

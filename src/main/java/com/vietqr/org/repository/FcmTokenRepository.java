@@ -18,6 +18,9 @@ public interface FcmTokenRepository extends JpaRepository<FcmTokenEntity, Long> 
 	@Query(value = "SELECT * FROM fcm_token WHERE user_id = :userId", nativeQuery = true)
 	List<FcmTokenEntity> getFcmTokensByUserId(@Param(value = "userId") String userId);
 
+	@Query(value = "SELECT * FROM fcm_token WHERE user_id = :userId AND platform IN ('ANDROID_KIOT', 'IOS_KIOT')", nativeQuery = true)
+	List<FcmTokenEntity> getFcmTokensKiotByUserId(@Param(value = "userId") String userId);
+
 	@Transactional
 	@Modifying
 	@Query(value = "DELETE FROM fcm_token WHERE token = :token", nativeQuery = true)

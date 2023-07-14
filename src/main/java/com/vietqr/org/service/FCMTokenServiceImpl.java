@@ -39,4 +39,9 @@ public class FCMTokenServiceImpl implements FcmTokenService {
 		repo.deleteTokensByUserId(userId);
 	}
 
+	@Override
+	public List<FcmTokenEntity> getFcmTokensKiotByUserId(String userId) {
+		return repo.getFcmTokensKiotByUserId(userId);
+	}
+
 }

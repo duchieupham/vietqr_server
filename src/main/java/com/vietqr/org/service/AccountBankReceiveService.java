@@ -43,4 +43,7 @@ public interface AccountBankReceiveService {
 	public void updateSyncWp(String userId, String bankId);
 
 	public String getBankAccountById(String bankId);
+
+	// public AccountBankReceiveEntity getBankAccountAuthenticatedByAccount(String
+	// bankAccount);
 }

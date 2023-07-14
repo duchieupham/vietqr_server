@@ -53,13 +53,16 @@ public class AccountBankReceiveEntity implements Serializable {
 	@Column(name = "status")
 	private boolean status;
 
+	@Column(name = "mmsActive")
+	private boolean mmsActive;
+
 	public AccountBankReceiveEntity() {
 		super();
 	}
 
 	public AccountBankReceiveEntity(String id, String bankTypeId, String bankAccount, String bankAccountName,
 			String nationalId, String phoneAuthenticated, int type, String userId, boolean isAuthenticated,
-			boolean isSync, boolean isWpSync, boolean status, String orderId, String sign) {
+			boolean isSync, boolean isWpSync, boolean status, String orderId, String sign, boolean mmsActive) {
 		super();
 		this.id = id;
 		this.bankTypeId = bankTypeId;
@@ -73,6 +76,7 @@ public class AccountBankReceiveEntity implements Serializable {
 		this.isSync = isSync;
 		this.isWpSync = isWpSync;
 		this.status = status;
+		this.mmsActive = mmsActive;
 	}
 
 	public String getId() {
@@ -171,12 +175,21 @@ public class AccountBankReceiveEntity implements Serializable {
 		this.isWpSync = isWpSync;
 	}
 
+	public boolean isMmsActive() {
+		return mmsActive;
+	}
+
+	public void setMmsActive(boolean mmsActive) {
+		this.mmsActive = mmsActive;
+	}
+
 	@Override
 	public String toString() {
 		return "AccountBankReceiveEntity [id=" + id + ", bankTypeId=" + bankTypeId + ", bankAccount=" + bankAccount
 				+ ", bankAccountName=" + bankAccountName + ", nationalId=" + nationalId + ", phoneAuthenticated="
 				+ phoneAuthenticated + ", type=" + type + ", userId=" + userId + ", isAuthenticated=" + isAuthenticated
-				+ ", isSync=" + isSync + ", isWpSync=" + isWpSync + ", status=" + status + "]";
+				+ ", isSync=" + isSync + ", isWpSync=" + isWpSync + ", status=" + status + ", mmsActive=" + mmsActive
+				+ "]";
 	}
 
 }

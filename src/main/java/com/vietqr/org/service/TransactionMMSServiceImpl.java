@@ -1,5 +1,7 @@
 package com.vietqr.org.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,16 @@ public class TransactionMMSServiceImpl implements TransactionMMSService {
     @Override
     public String checkExistedFtCode(String ftCode) {
         return repository.checkExistedFtCode(ftCode);
+    }
+
+    @Override
+    public TransactionMMSEntity getTransactionMMSByFtCode(String ftCode, String payDate) {
+        return repository.getTransactionMMSByFtCode(ftCode, payDate);
+    }
+
+    @Override
+    public List<TransactionMMSEntity> getTransactionMMSByDate(String date) {
+        return repository.getTransactionMMSByDate(date);
     }
 
 }
