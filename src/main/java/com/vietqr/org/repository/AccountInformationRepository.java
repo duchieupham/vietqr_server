@@ -20,12 +20,16 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
 	@Transactional
 	@Modifying
 	@Query(value = "UPDATE account_information SET first_name = :firstName, middle_name = :middleName, last_name = :lastName, "
-			+ "birth_date = :birthDate, address = :address, gender = :gender, email = :email "
+			+ "birth_date = :birthDate, address = :address, gender = :gender, email = :email, "
+			+ "national_id = :nationalId, old_national_id = :oldNationalId, national_date = :nationalDate "
 			+ "WHERE user_id = :userId", nativeQuery = true)
 	void updateAccountInformaiton(@Param(value = "firstName") String firstName,
 			@Param(value = "middleName") String middleName, @Param(value = "lastName") String lastName,
 			@Param(value = "birthDate") String birthDate, @Param(value = "address") String address,
 			@Param(value = "gender") int gender, @Param(value = "email") String email,
+			@Param(value = "nationalId") String nationalId,
+			@Param(value = "oldNationalId") String oldNationalId,
+			@Param(value = "nationalDate") String nationalDate,
 			@Param(value = "userId") String userId);
 
 	@Transactional

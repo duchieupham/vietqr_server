@@ -315,6 +315,9 @@ public class AccountController {
 				accountInformationEntity.setImgId("");
 				accountInformationEntity.setRegisterPlatform(dto.getPlatform());
 				accountInformationEntity.setUserIp(dto.getDevice());
+				accountInformationEntity.setNationalId("");
+				accountInformationEntity.setOldNationalId("");
+				accountInformationEntity.setNationalDate("");
 				accountInformationEntity.setStatus(true);
 				int check = accountInformationService.insertAccountInformation(accountInformationEntity);
 
@@ -615,6 +618,7 @@ public class AccountController {
 		try {
 			accountInformationService.updateAccountInformation(dto.getFirstName(), dto.getMiddleName(),
 					dto.getLastName(), dto.getBirthDate(), dto.getAddress(), dto.getGender(), dto.getEmail(),
+					dto.getNationalId(), dto.getOldNationalId(), dto.getNationalDate(),
 					dto.getUserId());
 			result = new ResponseMessageDTO("SUCCESS", "");
 			httpStatus = HttpStatus.OK;
@@ -665,7 +669,7 @@ public class AccountController {
 			notificationService.deleteNotificationsByUserId(userId);
 			// delete all transaction (not yet)
 			// update user information
-			accountInformationService.updateAccountInformation("Undefined", "", "", "01/01/1970", "", 0, "",
+			accountInformationService.updateAccountInformation("Undefined", "", "", "01/01/1970", "", 0, "", "", "", "",
 					userId);
 			// update account_login and account_information => deactive (status = 2)
 			accountLoginService.updateStatus(0, userId);

@@ -20,9 +20,10 @@ public class AccountInformationServiceImpl implements AccountInformationService 
 
 	@Override
 	public void updateAccountInformation(String firstName, String middleName, String lastName, String birthDate,
-			String address, int gender, String email, String userId) {
+			String address, int gender, String email, String nationalId, String oldNationalId, String nationalDate,
+			String userId) {
 		accountInformationRepo.updateAccountInformaiton(firstName, middleName, lastName, birthDate, address, gender,
-				email, userId);
+				email, nationalId, oldNationalId, nationalDate, userId);
 	}
 
 	@Override

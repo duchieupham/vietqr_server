@@ -11,7 +11,8 @@ public interface AccountInformationService {
 	public AccountInformationEntity getAccountInformation(String userId);
 
 	public void updateAccountInformation(String firstName, String middleName, String lastName, String birthDate,
-			String address, int gender, String email, String userId);
+			String address, int gender, String email, String nationalId, String oldNationalId, String nationalDate,
+			String userId);
 
 	public void updateImageId(String imgId, String userId);
 

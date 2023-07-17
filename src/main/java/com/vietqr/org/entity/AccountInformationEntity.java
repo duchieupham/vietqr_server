@@ -53,6 +53,15 @@ public class AccountInformationEntity implements Serializable {
 	@Column(name = "userIp")
 	private String userIp;
 
+	@Column(name = "nationalId")
+	private String nationalId;
+
+	@Column(name = "oldNationalId")
+	private String oldNationalId;
+
+	@Column(name = "nationalDate")
+	private String nationalDate;
+
 	@Column(name = "status")
 	private boolean status;
 
@@ -62,7 +71,7 @@ public class AccountInformationEntity implements Serializable {
 
 	public AccountInformationEntity(String id, String userId, String firstName, String middleName, String lastName,
 			String birthDate, String address, int gender, String email, String imgId, String registerPlatform,
-			String userIp, boolean status) {
+			String userIp, String nationalId, String nationalDate, String oldNationalId, boolean status) {
 		super();
 		this.id = id;
 		this.userId = userId;
@@ -76,6 +85,9 @@ public class AccountInformationEntity implements Serializable {
 		this.imgId = imgId;
 		this.registerPlatform = registerPlatform;
 		this.userIp = userIp;
+		this.nationalId = nationalId;
+		this.nationalDate = nationalDate;
+		this.oldNationalId = oldNationalId;
 		this.status = status;
 	}
 
@@ -173,6 +185,30 @@ public class AccountInformationEntity implements Serializable {
 
 	public void setUserIp(String userIp) {
 		this.userIp = userIp;
+	}
+
+	public String getNationalId() {
+		return nationalId;
+	}
+
+	public void setNationalId(String nationalId) {
+		this.nationalId = nationalId;
+	}
+
+	public String getOldNationalId() {
+		return oldNationalId;
+	}
+
+	public void setOldNationalId(String oldNationalId) {
+		this.oldNationalId = oldNationalId;
+	}
+
+	public String getNationalDate() {
+		return nationalDate;
+	}
+
+	public void setNationalDate(String nationalDate) {
+		this.nationalDate = nationalDate;
 	}
 
 	public boolean isStatus() {

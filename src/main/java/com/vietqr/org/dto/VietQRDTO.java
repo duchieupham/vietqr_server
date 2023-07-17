@@ -18,13 +18,15 @@ public class VietQRDTO implements Serializable {
 	private String qrCode;
 	private String imgId;
 	private int existing;
+	// transactionId to upload bill image
+	private String transactionId;
 
 	public VietQRDTO() {
 		super();
 	}
 
 	public VietQRDTO(String bankCode, String bankName, String bankAccount, String userBankName, String amount,
-			String content, String qrCode, String imgId, int existing) {
+			String content, String qrCode, String imgId, int existing, String transactionId) {
 		super();
 		this.bankCode = bankCode;
 		this.bankName = bankName;
@@ -35,6 +37,7 @@ public class VietQRDTO implements Serializable {
 		this.qrCode = qrCode;
 		this.imgId = imgId;
 		this.existing = existing;
+		this.transactionId = transactionId;
 	}
 
 	public String getBankCode() {
@@ -107,6 +110,14 @@ public class VietQRDTO implements Serializable {
 
 	public void setExisting(int existing) {
 		this.existing = existing;
+	}
+
+	public String getTransactionId() {
+		return transactionId;
+	}
+
+	public void setTransactionId(String transactionId) {
+		this.transactionId = transactionId;
 	}
 
 	@Override
