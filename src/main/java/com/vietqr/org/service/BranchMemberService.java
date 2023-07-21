@@ -34,4 +34,6 @@ public interface BranchMemberService {
     public void removeMemberFromBusiness(String userId, String businessId);
 
     public List<AccountMemberBranchDTO> getMembersFromBranch(String branchId);
+
+    public void deleteAllMemberFromBusiness(String businessId);
 }

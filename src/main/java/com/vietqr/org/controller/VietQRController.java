@@ -40,16 +40,12 @@ import com.vietqr.org.dto.VietQRCreateUnauthenticatedDTO;
 import com.vietqr.org.dto.VietQRDTO;
 import com.vietqr.org.dto.VietQRGenerateDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
-import com.vietqr.org.entity.BankReceiveBranchEntity;
 import com.vietqr.org.entity.BankTypeEntity;
-import com.vietqr.org.entity.BranchInformationEntity;
 import com.vietqr.org.entity.CaiBankEntity;
 import com.vietqr.org.entity.NotificationEntity;
 import com.vietqr.org.entity.TransactionReceiveEntity;
-import com.vietqr.org.entity.TransactionReceiveBranchEntity;
 import com.vietqr.org.entity.FcmTokenEntity;
 import com.vietqr.org.service.AccountBankReceiveService;
-import com.vietqr.org.service.BankReceiveBranchService;
 import com.vietqr.org.service.BankTypeService;
 import com.vietqr.org.service.CaiBankService;
 import com.vietqr.org.service.TransactionReceiveService;
@@ -107,9 +103,6 @@ public class VietQRController {
 
 	@Autowired
 	private TextToSpeechService textToSpeechService;
-
-	@Autowired
-	private BankReceiveBranchService bankReceiveBranchService;
 
 	private FirebaseMessagingService firebaseMessagingService;
 
@@ -235,6 +228,7 @@ public class VietQRController {
 				vietQRDTO.setImgId(bankTypeEntity.getImgId());
 				vietQRDTO.setAmount("");
 				vietQRDTO.setContent("");
+				vietQRDTO.setTransactionId("");
 				httpStatus = HttpStatus.OK;
 				result = vietQRDTO;
 			} else {
@@ -287,6 +281,7 @@ public class VietQRController {
 				vietQRDTO.setQrCode(qr);
 				vietQRDTO.setImgId(bankTypeEntity.getImgId());
 				vietQRDTO.setExisting(0);
+				vietQRDTO.setTransactionId("");
 				result = vietQRDTO;
 				httpStatus = HttpStatus.OK;
 			}
@@ -349,6 +344,7 @@ public class VietQRController {
 						vietQRDTO.setQrCode(qr);
 						vietQRDTO.setImgId(bankTypeEntity.getImgId());
 						vietQRDTO.setExisting(1);
+						vietQRDTO.setTransactionId("");
 						//
 						result = vietQRDTO;
 						httpStatus = HttpStatus.OK;
@@ -789,6 +785,8 @@ public class VietQRController {
 				vietQRDTO.setContent(traceId + "." + dto.getContent());
 				vietQRDTO.setQrCode(qr);
 				vietQRDTO.setImgId(bankTypeEntity.getImgId());
+				// return transactionId to upload bill image
+				vietQRDTO.setTransactionId(transcationUUID.toString());
 				result = vietQRDTO;
 				httpStatus = HttpStatus.OK;
 			} else {
@@ -836,6 +834,7 @@ public class VietQRController {
 						vietQRDTO.setContent(dto.getContent());
 						vietQRDTO.setQrCode(qr);
 						vietQRDTO.setImgId(bankTypeEntity.getImgId());
+						vietQRDTO.setTransactionId("");
 						result.add(vietQRDTO);
 					}
 				}

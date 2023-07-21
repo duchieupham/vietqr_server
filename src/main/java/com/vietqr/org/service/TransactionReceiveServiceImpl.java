@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.vietqr.org.repository.TransactionReceiveRepository;
 import java.util.List;
 import com.vietqr.org.entity.TransactionReceiveEntity;
+import com.vietqr.org.dto.TransactionCheckStatusDTO;
 import com.vietqr.org.dto.TransactionDetailDTO;
 import com.vietqr.org.dto.TransactionRelatedDTO;
 
@@ -79,6 +80,11 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     @Override
     public TransactionReceiveEntity getTransactionReceiveByOrderId(String orderId) {
         return repo.getTransactionReceiveByOrderId(orderId);
+    }
+
+    @Override
+    public TransactionCheckStatusDTO getTransactionCheckStatus(String transactionId) {
+        return repo.getTransactionCheckStatus(transactionId);
     }
 
 }

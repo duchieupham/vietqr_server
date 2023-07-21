@@ -40,4 +40,9 @@ public class AccountWalletServiceImpl implements AccountWalletService {
     public void deleteAllAccountWallet() {
         repo.deleteAllAccountWallet();
     }
+
+    @Override
+    public String getUserIdByWalletId(String walletId) {
+        return repo.getUserIdByWalletId(walletId);
+    }
 }

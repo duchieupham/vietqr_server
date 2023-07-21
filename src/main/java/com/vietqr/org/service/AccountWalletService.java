@@ -18,4 +18,6 @@ public interface AccountWalletService {
     public String checkExistedSharingCode(String sharingCode);
 
     public void deleteAllAccountWallet();
+
+    public String getUserIdByWalletId(String walletId);
 }

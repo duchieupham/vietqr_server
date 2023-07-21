@@ -83,4 +83,9 @@ public class BranchMemberServiceImpl implements BranchMemberService {
         return repo.getMembersFromBranch(branchId);
     }
 
+    @Override
+    public void deleteAllMemberFromBusiness(String businessId) {
+        repo.deleteAllMemberFromBusiness(businessId);
+    }
+
 }

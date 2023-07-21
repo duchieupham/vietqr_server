@@ -40,4 +40,8 @@ public interface BusinessInformationRepository extends JpaRepository<BusinessInf
 
 	// @Query(value = "", nativeQuery = true)
 
+	@Transactional
+	@Modifying
+	@Query(value = "DELETE FROM business_information WHERE id = :id", nativeQuery = true)
+	void deleteBusinessInformation(@Param(value = "id") String id);
 }

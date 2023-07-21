@@ -44,6 +44,8 @@ public interface AccountBankReceiveService {
 
 	public String getBankAccountById(String bankId);
 
+	public String checkExistedBankAccountSameUser(String bankAccount, String bankTypeId, String userId);
+
 	// public AccountBankReceiveEntity getBankAccountAuthenticatedByAccount(String
 	// bankAccount);
 }

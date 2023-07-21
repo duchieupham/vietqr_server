@@ -11,6 +11,7 @@ public class NotificationUtil {
 	private static final String NOTI_TYPE_VOICE_TRANSACTION = "N06";
 	private static final String NOTI_TYPE_ADD_MEMBER = "N07";
 	private static final String NOTI_TYPE_REMOVE_MEMBER = "N08";
+	private static final String NOTI_ADD_VIETQR_ID = "N09";
 
 	// Title
 	private static final String NOTI_TITLE_TRANSACTION = "Thông báo biến động số dư";
@@ -20,6 +21,7 @@ public class NotificationUtil {
 	private static final String NOTI_TITLE_UPDATE_TRANSACTION = "Biến động số dư";
 	private static final String NOTI_TITLE_ADD_MEMBER = "Thông báo từ doanh nghiệp";
 	private static final String NOTI_TITLE_REMOVE_MEMBER = "Thông báo từ doanh nghiệp";
+	private static final String NOTI_TITLE_ADD_VIETQR_ID = "Thêm bạn bè";
 
 	// Description
 	private static final String NOTI_DESC_LOGIN_WARNING_PREFIX = "Chúng tôi nhận thấy có lượt đăng nhập từ thiết bị ";
@@ -35,6 +37,19 @@ public class NotificationUtil {
 	private static final String NOTI_DESC_UPDATE_TRANS_SUFFIX_4 = "|ND: ";
 	private static final String NOTI_DESC_ADD_MEMBER = "Bạn vừa được thêm vào là thành viên của Doanh nghiệp ";
 	private static final String NOTI_DESC_REMOVE_MEMBER = "Bạn vừa được quản lý xoá khỏi Doanh nghiệp ";
+	private static final String NOTI_DESC_ADD_VIETQR_ID = " vừa thêm bạn vào danh bạ của họ. Hãy trở thành bạn bè với nhau trên VietQR VN";
+
+	public static String getNotiAddVietqrId() {
+		return NOTI_ADD_VIETQR_ID;
+	}
+
+	public static String getNotiTitleAddVietqrId() {
+		return NOTI_TITLE_ADD_VIETQR_ID;
+	}
+
+	public static String getNotiDescAddVietqrId() {
+		return NOTI_DESC_ADD_VIETQR_ID;
+	}
 
 	public static String getNotiTitleTransaction() {
 		return NOTI_TITLE_TRANSACTION;

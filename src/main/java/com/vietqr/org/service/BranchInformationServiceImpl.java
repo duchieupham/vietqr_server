@@ -77,4 +77,9 @@ public class BranchInformationServiceImpl implements BranchInformationService {
         return repo.getBranchContects(businessId);
     }
 
+    @Override
+    public void deleteAllBranchByBusinessId(String businessId) {
+        repo.deleteAllBranchByBusinessId(businessId);
+    }
+
 }

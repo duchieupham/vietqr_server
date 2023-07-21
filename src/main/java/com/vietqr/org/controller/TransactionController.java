@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.validation.Valid;
 
@@ -12,23 +13,32 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.vietqr.org.dto.ResponseMessageDTO;
+import com.vietqr.org.dto.TransImgIdDTO;
 import com.vietqr.org.dto.TransactionBranchInputDTO;
 import com.vietqr.org.dto.TransactionCheckDTO;
+import com.vietqr.org.dto.TransactionCheckStatusDTO;
 import com.vietqr.org.dto.TransactionDateDTO;
 import com.vietqr.org.dto.TransactionDetailDTO;
 import com.vietqr.org.dto.TransactionInputDTO;
 import com.vietqr.org.dto.TransactionRelatedDTO;
+import com.vietqr.org.entity.ImageEntity;
+import com.vietqr.org.entity.TransactionReceiveImageEntity;
+import com.vietqr.org.service.ImageService;
 import com.vietqr.org.service.TransactionBankService;
 import com.vietqr.org.service.TransactionReceiveBranchService;
+import com.vietqr.org.service.TransactionReceiveImageService;
 import com.vietqr.org.service.TransactionReceiveService;
 
 @RestController
@@ -48,6 +58,12 @@ public class TransactionController {
 
     @Autowired
     TransactionBankService transactionBankService;
+
+    @Autowired
+    ImageService imageService;
+
+    @Autowired
+    TransactionReceiveImageService transactionReceiveImageService;
 
     @PostMapping("transaction-branch")
     public ResponseEntity<List<TransactionRelatedDTO>> getTransactionsByBranchId(
@@ -98,6 +114,61 @@ public class TransactionController {
         } catch (Exception e) {
             logger.error(e.toString());
             System.out.println(e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("transaction/image")
+    public ResponseEntity<ResponseMessageDTO> uploadImageTransaction(@Valid @RequestParam String transactionId,
+            @Valid @RequestParam MultipartFile image) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            UUID uuid = UUID.randomUUID();
+            UUID uuid2 = UUID.randomUUID();
+            String fileName = StringUtils.cleanPath(image.getOriginalFilename());
+            ImageEntity imageEntity = new ImageEntity(uuid.toString(), fileName, image.getBytes());
+            imageService.insertImage(imageEntity);
+            TransactionReceiveImageEntity transactionReceiveImageEntity = new TransactionReceiveImageEntity();
+            transactionReceiveImageEntity.setId(uuid2.toString());
+            transactionReceiveImageEntity.setImgId(uuid.toString());
+            transactionReceiveImageEntity.setTransactionReceiveId(transactionId);
+            int check = transactionReceiveImageService.insertTransactionReceiveImage(transactionReceiveImageEntity);
+            if (check == 1) {
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            } else {
+                result = new ResponseMessageDTO("FAILED", "E05");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+            logger.error("uploadImageTransaction: ERROR: " + e.toString());
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // get transaction image
+
+    @GetMapping("transaction/image/{transactionId}")
+    public ResponseEntity<List<TransImgIdDTO>> getTransactionImages(
+            @PathVariable(value = "transactionId") String transactionId) {
+        List<TransImgIdDTO> result = null;
+        HttpStatus httpStatus = null;
+        try {
+            result = new ArrayList<>();
+            List<String> imgIds = transactionReceiveImageService.getImgIdsByTransReceiveId(transactionId);
+            if (imgIds != null && !imgIds.isEmpty()) {
+                for (String imgId : imgIds) {
+                    TransImgIdDTO dto = new TransImgIdDTO(imgId);
+                    result.add(dto);
+                }
+            }
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            System.out.println("getTransactionImages: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -159,5 +230,31 @@ public class TransactionController {
         } catch (DateTimeParseException e) {
             return null;
         }
+    }
+
+    // check transaction
+    // TransactionCheckStatusDTO
+    @GetMapping("transaction/check/{transactionId}")
+    public ResponseEntity<TransactionCheckStatusDTO> checkTransactionStatus(@PathVariable String transactionId) {
+        TransactionCheckStatusDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (transactionId != null) {
+                result = transactionReceiveService.getTransactionCheckStatus(transactionId);
+                if (result != null) {
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    logger.error("checkTransactionStatus: RECORD NULL");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                logger.error("checkTransactionStatus: TRANSACTION ID NULL");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("checkTransactionStatus: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
     }
 }

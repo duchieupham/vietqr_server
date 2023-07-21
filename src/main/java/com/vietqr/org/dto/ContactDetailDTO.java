@@ -1,68 +1,40 @@
-package com.vietqr.org.entity;
+package com.vietqr.org.dto;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
-@Entity
-@Table(name = "Contact")
-public class ContactEntity implements Serializable {
+public class ContactDetailDTO implements Serializable {
 
     /**
      *
      */
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @Column(name = "id")
     private String id;
-
-    @Column(name = "userId")
-    private String userId;
-
-    @Column(name = "nickname")
     private String nickname;
-
-    @Column(name = "value")
     private String value;
-
-    @Column(name = "additionalData")
     private String additionalData;
-
-    @Column(name = "type")
     private int type;
-
-    @Column(name = "status")
     private int status;
-
-    @Column(name = "time")
-    private long time;
-
-    // if type == 2 - bank => add swiftCode and bankAccount
-    @Column(name = "bankTypeId")
-    private String bankTypeId;
-
-    @Column(name = "bankAccount")
+    private String bankShortName;
+    private String bankName;
+    private String imgId;
     private String bankAccount;
 
-    public ContactEntity() {
+    public ContactDetailDTO() {
         super();
     }
 
-    public ContactEntity(String id, String userId, String nickname, String value, String additionalData, int type,
-            int status, long time, String bankTypeId, String bankAccount) {
+    public ContactDetailDTO(String id, String nickname, String value, String additionalData, int type, int status,
+            String bankShortName, String bankName, String imgId, String bankAccount) {
         this.id = id;
-        this.userId = userId;
         this.nickname = nickname;
         this.value = value;
         this.additionalData = additionalData;
         this.type = type;
         this.status = status;
-        this.time = time;
-        this.bankTypeId = bankTypeId;
+        this.bankShortName = bankShortName;
+        this.bankName = bankName;
+        this.imgId = imgId;
         this.bankAccount = bankAccount;
     }
 
@@ -72,14 +44,6 @@ public class ContactEntity implements Serializable {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
     }
 
     public String getNickname() {
@@ -122,20 +86,28 @@ public class ContactEntity implements Serializable {
         this.status = status;
     }
 
-    public long getTime() {
-        return time;
+    public String getBankShortName() {
+        return bankShortName;
     }
 
-    public void setTime(long time) {
-        this.time = time;
+    public void setBankShortName(String bankShortName) {
+        this.bankShortName = bankShortName;
     }
 
-    public String getBankTypeId() {
-        return bankTypeId;
+    public String getBankName() {
+        return bankName;
     }
 
-    public void setBankTypeId(String bankTypeId) {
-        this.bankTypeId = bankTypeId;
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
+    }
+
+    public String getImgId() {
+        return imgId;
+    }
+
+    public void setImgId(String imgId) {
+        this.imgId = imgId;
     }
 
     public String getBankAccount() {

@@ -50,7 +50,6 @@ import com.vietqr.org.service.TransactionMMSService;
 import com.vietqr.org.service.TransactionReceiveService;
 import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.EnvironmentUtil;
-import com.vietqr.org.util.RandomCodeUtil;
 
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;

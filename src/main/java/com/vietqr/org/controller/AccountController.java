@@ -315,6 +315,9 @@ public class AccountController {
 				accountInformationEntity.setImgId("");
 				accountInformationEntity.setRegisterPlatform(dto.getPlatform());
 				accountInformationEntity.setUserIp(dto.getDevice());
+				accountInformationEntity.setNationalId("");
+				accountInformationEntity.setOldNationalId("");
+				accountInformationEntity.setNationalDate("");
 				accountInformationEntity.setStatus(true);
 				int check = accountInformationService.insertAccountInformation(accountInformationEntity);
 
@@ -608,16 +611,60 @@ public class AccountController {
 		return new ResponseEntity<>(result, httpStatus);
 	}
 
+	@GetMapping("user/information/{userId}")
+	public ResponseEntity<AccountInformationDTO> getUserInformation(@PathVariable(value = "userId") String userId) {
+		AccountInformationDTO result = null;
+		HttpStatus httpStatus = null;
+		try {
+			if (userId != null && !userId.isEmpty()) {
+				AccountInformationEntity accountInformationEntity = accountInformationService
+						.getAccountInformation(userId);
+				if (accountInformationEntity != null) {
+					result = new AccountInformationDTO();
+					result.setFirstName(accountInformationEntity.getFirstName());
+					result.setMiddleName(accountInformationEntity.getMiddleName());
+					result.setLastName(accountInformationEntity.getLastName());
+					result.setBirthDate(accountInformationEntity.getBirthDate());
+					result.setAddress(accountInformationEntity.getAddress());
+					result.setGender(accountInformationEntity.getGender());
+					result.setEmail(accountInformationEntity.getEmail());
+					result.setUserId(accountInformationEntity.getUserId());
+					result.setNationalId(accountInformationEntity.getNationalId());
+					result.setOldNationalId(accountInformationEntity.getOldNationalId());
+					result.setNationalDate(accountInformationEntity.getNationalDate());
+					result.setImgId(accountInformationEntity.getImgId());
+					httpStatus = HttpStatus.OK;
+				} else {
+					logger.error("getUserInformation: EMPTY RECORD ");
+					httpStatus = HttpStatus.BAD_REQUEST;
+				}
+			} else {
+				logger.error("getUserInformation: EMPTY USER ID ");
+				httpStatus = HttpStatus.BAD_REQUEST;
+			}
+		} catch (Exception e) {
+			logger.error("getUserInformation: ERROR: " + e.toString());
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
 	@PutMapping("user/information")
-	public ResponseEntity<ResponseMessageDTO> updateInformation(@Valid @RequestBody AccountInformationDTO dto) {
+	public ResponseEntity<ResponseMessageDTO> updateInformation(@RequestBody AccountInformationDTO dto) {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
-			accountInformationService.updateAccountInformation(dto.getFirstName(), dto.getMiddleName(),
-					dto.getLastName(), dto.getBirthDate(), dto.getAddress(), dto.getGender(), dto.getEmail(),
-					dto.getUserId());
-			result = new ResponseMessageDTO("SUCCESS", "");
-			httpStatus = HttpStatus.OK;
+			if (dto != null) {
+				accountInformationService.updateAccountInformation(dto.getFirstName(), dto.getMiddleName(),
+						dto.getLastName(), dto.getBirthDate(), dto.getAddress(), dto.getGender(), dto.getEmail(),
+						dto.getNationalId(), dto.getOldNationalId(), dto.getNationalDate(),
+						dto.getUserId());
+				result = new ResponseMessageDTO("SUCCESS", "");
+				httpStatus = HttpStatus.OK;
+			} else {
+				result = new ResponseMessageDTO("FAILED", "E05");
+				httpStatus = HttpStatus.BAD_REQUEST;
+			}
 		} catch (Exception e) {
 			System.out.println("Error at updateInformation: " + e.toString());
 			result = new ResponseMessageDTO("FAILED", "Cannot update information");
@@ -665,7 +712,7 @@ public class AccountController {
 			notificationService.deleteNotificationsByUserId(userId);
 			// delete all transaction (not yet)
 			// update user information
-			accountInformationService.updateAccountInformation("Undefined", "", "", "01/01/1970", "", 0, "",
+			accountInformationService.updateAccountInformation("Undefined", "", "", "01/01/1970", "", 0, "", "", "", "",
 					userId);
 			// update account_login and account_information => deactive (status = 2)
 			accountLoginService.updateStatus(0, userId);

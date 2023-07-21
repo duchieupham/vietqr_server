@@ -118,7 +118,7 @@ public class AccountWalletController {
                     do {
                         walletId = RandomCodeUtil.generateRandomId(12); // Tạo mã ngẫu nhiên
                     } while (accountWalletService.checkExistedWalletId(walletId) != null);
-                    accountWalletEntity.setWalletId(walletId);
+                    accountWalletEntity.setWalletId("VQRID" + walletId);
                     // set sharing code
                     String sharingCode = "";
                     do {

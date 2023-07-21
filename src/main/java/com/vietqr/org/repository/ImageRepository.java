@@ -16,8 +16,10 @@ public interface ImageRepository extends JpaRepository<ImageEntity, Long> {
 	@Query(value = "SELECT image FROM image WHERE id = :id", nativeQuery = true)
 	byte[] getImageById(@Param(value = "id") String id);
 
+	@Transactional
+	@Modifying
 	@Query(value = "DELETE FROM image WHERE id = :id", nativeQuery = true)
-	int deleteImage(@Param(value = "id") String id);
+	void deleteImage(@Param(value = "id") String id);
 
 	@Query(value = "SELECT name FROM image WHERE id = :id", nativeQuery = true)
 	String getImageNameById(@Param(value = "id") String id);

@@ -20,4 +20,5 @@ public interface BusinessInformationService {
 
 	public BusinessCounterDTO getBusinessCounter(String businessId);
 
+	public void deleteBusinessInformation(String id);
 }

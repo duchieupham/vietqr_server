@@ -2,7 +2,7 @@ package com.vietqr.org.dto;
 
 import java.io.Serializable;
 
-public class AccountInformationDTO implements Serializable{
+public class AccountInformationDTO implements Serializable {
 
 	/**
 	 *
@@ -17,6 +17,10 @@ public class AccountInformationDTO implements Serializable{
 	private int gender;
 	private String email;
 	private String userId;
+	private String nationalId;
+	private String oldNationalId;
+	private String nationalDate;
+	private String imgId;
 
 	public AccountInformationDTO() {
 		super();
@@ -33,6 +37,47 @@ public class AccountInformationDTO implements Serializable{
 		this.gender = gender;
 		this.email = email;
 		this.userId = userId;
+	}
+
+	public AccountInformationDTO(String firstName, String middleName, String lastName, String birthDate, String address,
+			int gender, String email, String nationalId, String oldNationalId, String nationalDate, String userId) {
+		super();
+		this.firstName = firstName;
+		this.middleName = middleName;
+		this.lastName = lastName;
+		this.birthDate = birthDate;
+		this.address = address;
+		this.gender = gender;
+		this.email = email;
+		this.nationalId = nationalId;
+		this.oldNationalId = oldNationalId;
+		this.nationalDate = nationalDate;
+		this.userId = userId;
+	}
+
+	public AccountInformationDTO(String firstName, String middleName, String lastName, String birthDate, String address,
+			int gender, String email, String userId, String nationalId, String oldNationalId, String nationalDate,
+			String imgId) {
+		this.firstName = firstName;
+		this.middleName = middleName;
+		this.lastName = lastName;
+		this.birthDate = birthDate;
+		this.address = address;
+		this.gender = gender;
+		this.email = email;
+		this.userId = userId;
+		this.nationalId = nationalId;
+		this.oldNationalId = oldNationalId;
+		this.nationalDate = nationalDate;
+		this.imgId = imgId;
+	}
+
+	public String getImgId() {
+		return imgId;
+	}
+
+	public void setImgId(String imgId) {
+		this.imgId = imgId;
 	}
 
 	public String getFirstName() {
@@ -97,6 +142,30 @@ public class AccountInformationDTO implements Serializable{
 
 	public void setUserId(String userId) {
 		this.userId = userId;
+	}
+
+	public String getNationalId() {
+		return nationalId;
+	}
+
+	public void setNationalId(String nationalId) {
+		this.nationalId = nationalId;
+	}
+
+	public String getOldNationalId() {
+		return oldNationalId;
+	}
+
+	public void setOldNationalId(String oldNationalId) {
+		this.oldNationalId = oldNationalId;
+	}
+
+	public String getNationalDate() {
+		return nationalDate;
+	}
+
+	public void setNationalDate(String nationalDate) {
+		this.nationalDate = nationalDate;
 	}
 
 }

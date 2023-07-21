@@ -27,6 +27,12 @@ public interface BranchInformationRepository extends JpaRepository<BranchInforma
         @Query(value = "DELETE from branch_information WHERE id = :id", nativeQuery = true)
         void deleteBranch(@Param(value = "id") String id);
 
+        // delete all branch into business
+        @Transactional
+        @Modifying
+        @Query(value = "DELETE from branch_information WHERE business_id = :businessId", nativeQuery = true)
+        void deleteAllBranchByBusinessId(@Param(value = "businessId") String businessId);
+
         // get list branch by business_id
         @Query(value = "SELECT * FROM branch_information WHERE business_id = :businessId AND is_active = true", nativeQuery = true)
         List<BranchInformationEntity> getListBranchByBusinessId(@Param(value = "businessId") String businessId);

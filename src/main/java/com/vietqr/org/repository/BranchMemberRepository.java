@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
-import org.hibernate.annotations.Parameter;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Repository;
 import com.vietqr.org.entity.BranchMemberEntity;
 import com.vietqr.org.dto.MemberDTO;
 import com.vietqr.org.dto.AccountMemberBranchDTO;
-import com.vietqr.org.dto.AccountSearchDTO;
 import com.vietqr.org.dto.BusinessItemDTO;
 
 @Repository
@@ -95,6 +93,11 @@ public interface BranchMemberRepository extends JpaRepository<BranchMemberEntity
         @Query(value = "DELETE FROM business_member WHERE user_id = :userId AND business_id = :businessId", nativeQuery = true)
         void removeBusinessMemberFromBusiness(@Param(value = "userId") String userId,
                         @Param(value = "businessId") String businessId);
+
+        @Transactional
+        @Modifying
+        @Query(value = "DELETE FROM branch_member WHERE business_id = :businessId ", nativeQuery = true)
+        void deleteAllMemberFromBusiness(@Param(value = "businessId") String businessId);
 
         @Query(value = "SELECT a.id, a.phone_no as phoneNo, b.first_name as firstName, b.middle_name as middleName, b.last_name as lastName, b.img_id as imgId, c.role "
                         + "FROM account_login a "

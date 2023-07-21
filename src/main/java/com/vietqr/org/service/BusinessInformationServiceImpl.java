@@ -43,4 +43,9 @@ public class BusinessInformationServiceImpl implements BusinessInformationServic
 		return repo.getBusinessCounter(businessId);
 	}
 
+	@Override
+	public void deleteBusinessInformation(String id) {
+		repo.deleteBusinessInformation(id);
+	}
+
 }

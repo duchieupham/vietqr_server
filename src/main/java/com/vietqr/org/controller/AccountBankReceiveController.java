@@ -132,33 +132,40 @@ public class AccountBankReceiveController {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
-			// insert bankAccount receive
-			UUID uuid = UUID.randomUUID();
-			String qr = getStaticQR(dto.getBankAccount(), dto.getBankTypeId());
-			AccountBankReceiveEntity entity = new AccountBankReceiveEntity();
-			entity.setId(uuid.toString());
-			entity.setBankTypeId(dto.getBankTypeId());
-			entity.setBankAccount(dto.getBankAccount());
-			entity.setBankAccountName(dto.getUserBankName());
-			entity.setType(0);
-			entity.setUserId(dto.getUserId());
-			entity.setNationalId("");
-			entity.setPhoneAuthenticated("");
-			entity.setAuthenticated(false);
-			entity.setSync(false);
-			entity.setWpSync(false);
-			entity.setStatus(true);
-			entity.setMmsActive(false);
-			accountBankService.insertAccountBank(entity);
-			// insert bank-receive-personal
-			UUID uuidPersonal = UUID.randomUUID();
-			BankReceivePersonalEntity personalEntity = new BankReceivePersonalEntity();
-			personalEntity.setId(uuidPersonal.toString());
-			personalEntity.setBankId(uuid.toString());
-			personalEntity.setUserId(dto.getUserId());
-			bankReceivePersonalService.insertAccountBankReceivePersonal(personalEntity);
-			result = new ResponseMessageDTO("SUCCESS", uuid.toString() + "*" + qr);
-			httpStatus = HttpStatus.OK;
+			String checkExistedBankAccountSameUser = accountBankService
+					.checkExistedBankAccountSameUser(dto.getBankAccount(), dto.getBankTypeId(), dto.getUserId());
+			if (checkExistedBankAccountSameUser == null) {
+				// insert bankAccount receive
+				UUID uuid = UUID.randomUUID();
+				String qr = getStaticQR(dto.getBankAccount(), dto.getBankTypeId());
+				AccountBankReceiveEntity entity = new AccountBankReceiveEntity();
+				entity.setId(uuid.toString());
+				entity.setBankTypeId(dto.getBankTypeId());
+				entity.setBankAccount(dto.getBankAccount());
+				entity.setBankAccountName(dto.getUserBankName());
+				entity.setType(0);
+				entity.setUserId(dto.getUserId());
+				entity.setNationalId("");
+				entity.setPhoneAuthenticated("");
+				entity.setAuthenticated(false);
+				entity.setSync(false);
+				entity.setWpSync(false);
+				entity.setStatus(true);
+				entity.setMmsActive(false);
+				accountBankService.insertAccountBank(entity);
+				// insert bank-receive-personal
+				UUID uuidPersonal = UUID.randomUUID();
+				BankReceivePersonalEntity personalEntity = new BankReceivePersonalEntity();
+				personalEntity.setId(uuidPersonal.toString());
+				personalEntity.setBankId(uuid.toString());
+				personalEntity.setUserId(dto.getUserId());
+				bankReceivePersonalService.insertAccountBankReceivePersonal(personalEntity);
+				result = new ResponseMessageDTO("SUCCESS", uuid.toString() + "*" + qr);
+				httpStatus = HttpStatus.OK;
+			} else {
+				result = new ResponseMessageDTO("CHECK", "C03");
+				httpStatus = HttpStatus.BAD_REQUEST;
+			}
 		} catch (Exception e) {
 			logger.error(e.toString());
 			result = new ResponseMessageDTO("FAILED", "E05");

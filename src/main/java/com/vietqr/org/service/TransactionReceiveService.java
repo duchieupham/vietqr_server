@@ -3,6 +3,7 @@ package com.vietqr.org.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import com.vietqr.org.entity.TransactionReceiveEntity;
+import com.vietqr.org.dto.TransactionCheckStatusDTO;
 import com.vietqr.org.dto.TransactionDetailDTO;
 import com.vietqr.org.dto.TransactionRelatedDTO;
 
@@ -34,5 +35,7 @@ public interface TransactionReceiveService {
     public TransactionReceiveEntity getTransactionReceiveByRefNumber(String referenceNumber);
 
     public TransactionReceiveEntity getTransactionReceiveByOrderId(String orderId);
+
+    public TransactionCheckStatusDTO getTransactionCheckStatus(String transactionId);
 
 }

@@ -5,7 +5,8 @@ import org.springframework.stereotype.Service;
 
 import com.vietqr.org.entity.AccountInformationEntity;
 import com.vietqr.org.repository.AccountInformationRepository;
-import com.vietqr.org.dto.AccountSearchDTO;;
+import com.vietqr.org.dto.AccountSearchDTO;
+import com.vietqr.org.dto.UserInfoWalletDTO;;
 
 @Service
 public class AccountInformationServiceImpl implements AccountInformationService {
@@ -20,9 +21,10 @@ public class AccountInformationServiceImpl implements AccountInformationService 
 
 	@Override
 	public void updateAccountInformation(String firstName, String middleName, String lastName, String birthDate,
-			String address, int gender, String email, String userId) {
+			String address, int gender, String email, String nationalId, String oldNationalId, String nationalDate,
+			String userId) {
 		accountInformationRepo.updateAccountInformaiton(firstName, middleName, lastName, birthDate, address, gender,
-				email, userId);
+				email, nationalId, oldNationalId, nationalDate, userId);
 	}
 
 	@Override
@@ -50,4 +52,8 @@ public class AccountInformationServiceImpl implements AccountInformationService 
 		accountInformationRepo.updateStatus(status, userId);
 	}
 
+	@Override
+	public UserInfoWalletDTO getUserInforWallet(String userId) {
+		return accountInformationRepo.getUserInforWallet(userId);
+	}
 }

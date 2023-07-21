@@ -22,6 +22,9 @@ public interface AccountWalletRepository extends JpaRepository<AccountWalletEnti
     @Query(value = "SELECT sharing_code FROM account_wallet WHERE sharing_code = :sharingCode", nativeQuery = true)
     String checkExistedSharingCode(@Param(value = "sharingCode") String sharingCode);
 
+    @Query(value = "SELECT user_id FROM account_wallet WHERE wallet_id = :walletId", nativeQuery = true)
+    String getUserIdByWalletId(@Param(value = "walletId") String walletId);
+
     @Transactional
     @Modifying
     @Query(value = "UPDATE account_wallet SET point = point + :amount WHERE sharing_code = :sharingCode", nativeQuery = true)

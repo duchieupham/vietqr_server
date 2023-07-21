@@ -37,4 +37,9 @@ public class ImageServiceImpl implements ImageService {
 		return imageRepo.getImageByName(name);
 	}
 
+	@Override
+	public void deleteImage(String id) {
+		imageRepo.deleteImage(id);
+	}
+
 }

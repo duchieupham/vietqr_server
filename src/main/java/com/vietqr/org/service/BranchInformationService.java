@@ -35,4 +35,6 @@ public interface BranchInformationService {
     public List<BranchFilterResponseDTO> getBranchFilterByUserIdAndRole(String userId, int role, String businessId);
 
     public List<BranchConnectedCheckDTO> getBranchContects(String businessId);
+
+    public void deleteAllBranchByBusinessId(String businessId);
 }

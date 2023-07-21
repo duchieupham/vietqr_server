@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -313,8 +314,7 @@ public class BusinessInformationController {
 					dto.setName(item.getName());
 					// dto.setAddress(item.getAddress());
 					// dto.setTaxCode(item.getTaxCode());
-					// transactions =
-					// transactionReceiveService.getRelatedTransactionReceives(item.getBusinessId());
+					transactions = transactionReceiveService.getRelatedTransactionReceives(item.getBusinessId());
 					branchs = branchInformationService.getBranchContects(item.getBusinessId());
 					dto.setBranchs(branchs);
 					dto.setTransactions(transactions);
@@ -337,8 +337,7 @@ public class BusinessInformationController {
 					dto.setName(item.getName());
 					// dto.setAddress(item.getAddress());
 					// dto.setTaxCode(item.getTaxCode());
-					// transactions =
-					// transactionReceiveService.getRelatedTransactionReceives(item.getBusinessId());
+					transactions = transactionReceiveService.getRelatedTransactionReceives(item.getBusinessId());
 					branchs = branchInformationService.getBranchContects(item.getBusinessId());
 					dto.setBranchs(branchs);
 					dto.setTransactions(transactions);
@@ -462,4 +461,50 @@ public class BusinessInformationController {
 		return new ResponseEntity<ResponseMessageDTO>(result, httpStatus);
 	}
 
+	// Delete business information
+	// 1. get business information to delete image and cover
+	// 2. delete business member
+	// 3. delete branch member
+	// 4. delete branch bank
+	// 4. delete branchs
+	// 5. delete business
+	@DeleteMapping("business/remove/{businessId}")
+	public ResponseEntity<ResponseMessageDTO> deleteBusiness(@PathVariable(value = "businessId") String businessId) {
+		ResponseMessageDTO result = null;
+		HttpStatus httpStatus = null;
+		try {
+			if (businessId != null && !businessId.trim().isEmpty()) {
+				BusinessInformationEntity entity = businessInfoService.getBusinessById(businessId);
+				if (entity != null) {
+					// 1.
+					imageService.deleteImage(entity.getImgId());
+					imageService.deleteImage(entity.getCoverImgId());
+					// 2.
+					businessMemberService.deleteAllMemberFromBusiness(businessId);
+					// 3.
+					branchMemberService.deleteAllMemberFromBusiness(businessId);
+					// 4.
+					branchInformationService.deleteAllBranchByBusinessId(businessId);
+					// 5.
+					businessInfoService.deleteBusinessInformation(businessId);
+					//
+					result = new ResponseMessageDTO("SUCCESS", "");
+					httpStatus = HttpStatus.OK;
+				} else {
+					logger.error("deleteBusiness: RECORD NOT FOUND");
+					result = new ResponseMessageDTO("FAILED", "E05");
+					httpStatus = HttpStatus.BAD_REQUEST;
+				}
+			} else {
+				logger.error("deleteBusiness: INVALID BUSINESS ID");
+				result = new ResponseMessageDTO("FAILED", "E05");
+				httpStatus = HttpStatus.BAD_REQUEST;
+			}
+		} catch (Exception e) {
+			logger.error("deleteBusiness: ERROR: " + e.toString());
+			result = new ResponseMessageDTO("FAILED", "E05");
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
 }

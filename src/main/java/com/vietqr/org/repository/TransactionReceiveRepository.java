@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import com.vietqr.org.entity.TransactionReceiveEntity;
+import com.vietqr.org.dto.TransactionCheckStatusDTO;
 import com.vietqr.org.dto.TransactionDetailDTO;
 import com.vietqr.org.dto.TransactionRelatedDTO;
 
@@ -95,4 +96,13 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
         @Query(value = "SELECT * FROM transaction_receive WHERE order_id = :orderId", nativeQuery = true)
         TransactionReceiveEntity getTransactionReceiveByOrderId(
                         @Param(value = "orderId") String orderId);
+
+        @Query(value = "SELECT a.amount, a.bank_account as bankAccount, c.bank_name as bankName, a.time, a.content, a.reference_number as referenceNumber, a.trans_type as transType, a.status "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "WHERE a.id = :transactionId ", nativeQuery = true)
+        TransactionCheckStatusDTO getTransactionCheckStatus(@Param(value = "transactionId") String transactionId);
 }
