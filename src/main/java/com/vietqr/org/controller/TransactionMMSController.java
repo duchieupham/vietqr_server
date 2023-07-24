@@ -444,32 +444,20 @@ public class TransactionMMSController {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            TransMMSCheckOutDTO tranMMSCheckOutDTO = null;
-            if (dto != null && dto.getOrderId() != null && dto.getReferenceNumber() != null) {
-                // 3 trường hợp
-                // 1. Đủ ftCode và orderId
-                // 2. Có ftCode không có orderId
-                // 3. Có orderId mà không ftCode
-                if (!dto.getReferenceNumber().isEmpty() && !dto.getOrderId().isEmpty()) {
+            String accessKey = "SABAccessKey";
+            String checkSum = BankEncryptUtil.generateMD5CheckOrderChecksum(dto.getBankAccount(),
+                    accessKey);
+            if (BankEncryptUtil.isMatchChecksum(dto.getCheckSum(), checkSum)) {
+                TransMMSCheckOutDTO tranMMSCheckOutDTO = null;
+                if (dto != null && dto.getOrderId() != null && dto.getReferenceNumber() != null) {
+                    // 3 trường hợp
+                    // 1. Đủ ftCode và orderId
+                    // 2. Có ftCode không có orderId
+                    // 3. Có orderId mà không ftCode
+                    if (!dto.getReferenceNumber().isEmpty() && !dto.getOrderId().isEmpty()) {
 
-                    TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
-                            .getTransactionReceiveByRefNumberAndOrderId(dto.getReferenceNumber(), dto.getOrderId());
-                    if (transactionReceiveEntity != null) {
-                        // trùng ft code và order id trong gd
-                        tranMMSCheckOutDTO = new TransMMSCheckOutDTO();
-                        tranMMSCheckOutDTO.setReferenceNumber(transactionReceiveEntity.getReferenceNumber());
-                        tranMMSCheckOutDTO.setOrderId(transactionReceiveEntity.getOrderId());
-                        tranMMSCheckOutDTO.setAmount(transactionReceiveEntity.getAmount() + "");
-                        tranMMSCheckOutDTO.setTime(transactionReceiveEntity.getTime());
-                        tranMMSCheckOutDTO.setTransType(transactionReceiveEntity.getTransType());
-                        tranMMSCheckOutDTO.setStatus(transactionReceiveEntity.getStatus());
-                        result = tranMMSCheckOutDTO;
-                        httpStatus = HttpStatus.OK;
-                    } else {
-                        // không trùng ft code và order id trong gd
-                        // Mặc định lấy theo ftCode
-                        transactionReceiveEntity = transactionReceiveService
-                                .getTransactionReceiveByRefNumber(dto.getReferenceNumber());
+                        TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
+                                .getTransactionReceiveByRefNumberAndOrderId(dto.getReferenceNumber(), dto.getOrderId());
                         if (transactionReceiveEntity != null) {
                             // trùng ft code và order id trong gd
                             tranMMSCheckOutDTO = new TransMMSCheckOutDTO();
@@ -482,9 +470,12 @@ public class TransactionMMSController {
                             result = tranMMSCheckOutDTO;
                             httpStatus = HttpStatus.OK;
                         } else {
+                            // không trùng ft code và order id trong gd
+                            // Mặc định lấy theo ftCode
                             transactionReceiveEntity = transactionReceiveService
-                                    .getTransactionReceiveByOrderId(dto.getOrderId());
+                                    .getTransactionReceiveByRefNumber(dto.getReferenceNumber());
                             if (transactionReceiveEntity != null) {
+                                // trùng ft code và order id trong gd
                                 tranMMSCheckOutDTO = new TransMMSCheckOutDTO();
                                 tranMMSCheckOutDTO.setReferenceNumber(transactionReceiveEntity.getReferenceNumber());
                                 tranMMSCheckOutDTO.setOrderId(transactionReceiveEntity.getOrderId());
@@ -494,49 +485,68 @@ public class TransactionMMSController {
                                 tranMMSCheckOutDTO.setStatus(transactionReceiveEntity.getStatus());
                                 result = tranMMSCheckOutDTO;
                                 httpStatus = HttpStatus.OK;
+                            } else {
+                                transactionReceiveEntity = transactionReceiveService
+                                        .getTransactionReceiveByOrderId(dto.getOrderId());
+                                if (transactionReceiveEntity != null) {
+                                    tranMMSCheckOutDTO = new TransMMSCheckOutDTO();
+                                    tranMMSCheckOutDTO
+                                            .setReferenceNumber(transactionReceiveEntity.getReferenceNumber());
+                                    tranMMSCheckOutDTO.setOrderId(transactionReceiveEntity.getOrderId());
+                                    tranMMSCheckOutDTO.setAmount(transactionReceiveEntity.getAmount() + "");
+                                    tranMMSCheckOutDTO.setTime(transactionReceiveEntity.getTime());
+                                    tranMMSCheckOutDTO.setTransType(transactionReceiveEntity.getTransType());
+                                    tranMMSCheckOutDTO.setStatus(transactionReceiveEntity.getStatus());
+                                    result = tranMMSCheckOutDTO;
+                                    httpStatus = HttpStatus.OK;
+                                }
                             }
                         }
-                    }
-                    // đi xuống 2 phần dưới
-                } else if (!dto.getReferenceNumber().isEmpty() && dto.getOrderId().isEmpty()) {
-                    // thấy
-                    TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
-                            .getTransactionReceiveByRefNumber(dto.getReferenceNumber());
-                    if (transactionReceiveEntity != null) {
-                        // trùng ft code và order id trong gd
-                        tranMMSCheckOutDTO = new TransMMSCheckOutDTO();
-                        tranMMSCheckOutDTO.setReferenceNumber(transactionReceiveEntity.getReferenceNumber());
-                        tranMMSCheckOutDTO.setOrderId(transactionReceiveEntity.getOrderId());
-                        tranMMSCheckOutDTO.setAmount(transactionReceiveEntity.getAmount() + "");
-                        tranMMSCheckOutDTO.setTime(transactionReceiveEntity.getTime());
-                        tranMMSCheckOutDTO.setTransType(transactionReceiveEntity.getTransType());
-                        tranMMSCheckOutDTO.setStatus(transactionReceiveEntity.getStatus());
-                        result = tranMMSCheckOutDTO;
-                        httpStatus = HttpStatus.OK;
-                    }
-                    // không thấy
+                        // đi xuống 2 phần dưới
+                    } else if (!dto.getReferenceNumber().isEmpty() && dto.getOrderId().isEmpty()) {
+                        // thấy
+                        TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
+                                .getTransactionReceiveByRefNumber(dto.getReferenceNumber());
+                        if (transactionReceiveEntity != null) {
+                            // trùng ft code và order id trong gd
+                            tranMMSCheckOutDTO = new TransMMSCheckOutDTO();
+                            tranMMSCheckOutDTO.setReferenceNumber(transactionReceiveEntity.getReferenceNumber());
+                            tranMMSCheckOutDTO.setOrderId(transactionReceiveEntity.getOrderId());
+                            tranMMSCheckOutDTO.setAmount(transactionReceiveEntity.getAmount() + "");
+                            tranMMSCheckOutDTO.setTime(transactionReceiveEntity.getTime());
+                            tranMMSCheckOutDTO.setTransType(transactionReceiveEntity.getTransType());
+                            tranMMSCheckOutDTO.setStatus(transactionReceiveEntity.getStatus());
+                            result = tranMMSCheckOutDTO;
+                            httpStatus = HttpStatus.OK;
+                        }
+                        // không thấy
 
-                } else if (!dto.getOrderId().isEmpty() && dto.getReferenceNumber().isEmpty()) {
-                    // thấy
-                    TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
-                            .getTransactionReceiveByOrderId(dto.getOrderId());
-                    if (transactionReceiveEntity != null) {
-                        tranMMSCheckOutDTO = new TransMMSCheckOutDTO();
-                        tranMMSCheckOutDTO.setReferenceNumber(transactionReceiveEntity.getReferenceNumber());
-                        tranMMSCheckOutDTO.setOrderId(transactionReceiveEntity.getOrderId());
-                        tranMMSCheckOutDTO.setAmount(transactionReceiveEntity.getAmount() + "");
-                        tranMMSCheckOutDTO.setTime(transactionReceiveEntity.getTime());
-                        tranMMSCheckOutDTO.setTransType(transactionReceiveEntity.getTransType());
-                        tranMMSCheckOutDTO.setStatus(transactionReceiveEntity.getStatus());
-                        result = tranMMSCheckOutDTO;
-                        httpStatus = HttpStatus.OK;
+                    } else if (!dto.getOrderId().isEmpty() && dto.getReferenceNumber().isEmpty()) {
+                        // thấy
+                        TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
+                                .getTransactionReceiveByOrderId(dto.getOrderId());
+                        if (transactionReceiveEntity != null) {
+                            tranMMSCheckOutDTO = new TransMMSCheckOutDTO();
+                            tranMMSCheckOutDTO.setReferenceNumber(transactionReceiveEntity.getReferenceNumber());
+                            tranMMSCheckOutDTO.setOrderId(transactionReceiveEntity.getOrderId());
+                            tranMMSCheckOutDTO.setAmount(transactionReceiveEntity.getAmount() + "");
+                            tranMMSCheckOutDTO.setTime(transactionReceiveEntity.getTime());
+                            tranMMSCheckOutDTO.setTransType(transactionReceiveEntity.getTransType());
+                            tranMMSCheckOutDTO.setStatus(transactionReceiveEntity.getStatus());
+                            result = tranMMSCheckOutDTO;
+                            httpStatus = HttpStatus.OK;
+                        }
+                        // không thấy
                     }
-                    // không thấy
-                }
-                if (tranMMSCheckOutDTO == null) {
-                    logger.error("checkTranscationMMS: CANNOT FOUND RECORD");
+                    if (tranMMSCheckOutDTO == null) {
+                        logger.error("checkTranscationMMS: CANNOT FOUND RECORD");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        result = new ResponseMessageDTO("FAILED", "E40");
+                    }
+                } else {
+                    logger.error("checkTranscationMMS: INVALID REQUEST BODY");
                     httpStatus = HttpStatus.BAD_REQUEST;
-                    result = new ResponseMessageDTO("FAILED", "E40");
+                    result = new ResponseMessageDTO("FAILED", "E39");
                 }
             } else {
                 logger.error("checkTranscationMMS: INVALID REQUEST BODY");
