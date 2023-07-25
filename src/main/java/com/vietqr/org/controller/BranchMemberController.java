@@ -80,7 +80,7 @@ public class BranchMemberController {
                 accountSearchMemberDTO.setFirstName(dto.getFirstName());
                 accountSearchMemberDTO.setMiddleName(dto.getMiddleName());
                 accountSearchMemberDTO.setLastName(dto.getLastName());
-                accountSearchMemberDTO.setId(dto.getId());
+                accountSearchMemberDTO.setImgId(dto.getImgId());
                 // 2. check user existed from business
                 String checkExisted = branchMemberService.checkUserExistedFromBusiness(businessId, dto.getId());
                 if (checkExisted != null && !checkExisted.isEmpty()) {

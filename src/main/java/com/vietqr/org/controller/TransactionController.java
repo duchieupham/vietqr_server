@@ -26,6 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.TransImgIdDTO;
+import com.vietqr.org.dto.TransReceiveRpaDTO;
+import com.vietqr.org.dto.TransSyncRpaDTO;
 import com.vietqr.org.dto.TransactionBranchInputDTO;
 import com.vietqr.org.dto.TransactionCheckDTO;
 import com.vietqr.org.dto.TransactionCheckStatusDTO;
@@ -33,8 +35,12 @@ import com.vietqr.org.dto.TransactionDateDTO;
 import com.vietqr.org.dto.TransactionDetailDTO;
 import com.vietqr.org.dto.TransactionInputDTO;
 import com.vietqr.org.dto.TransactionRelatedDTO;
+import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.entity.ImageEntity;
+import com.vietqr.org.entity.TransactionReceiveEntity;
 import com.vietqr.org.entity.TransactionReceiveImageEntity;
+import com.vietqr.org.service.AccountBankReceiveService;
+import com.vietqr.org.service.BankTypeService;
 import com.vietqr.org.service.ImageService;
 import com.vietqr.org.service.TransactionBankService;
 import com.vietqr.org.service.TransactionReceiveBranchService;
@@ -64,6 +70,12 @@ public class TransactionController {
 
     @Autowired
     TransactionReceiveImageService transactionReceiveImageService;
+
+    @Autowired
+    BankTypeService bankTypeService;
+
+    @Autowired
+    AccountBankReceiveService accountBankReceiveService;
 
     @PostMapping("transaction-branch")
     public ResponseEntity<List<TransactionRelatedDTO>> getTransactionsByBranchId(
@@ -253,6 +265,84 @@ public class TransactionController {
             }
         } catch (Exception e) {
             logger.error("checkTransactionStatus: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // synchronize transaction from RPA
+    @PostMapping("transaction/rpa-sync")
+    public ResponseEntity<ResponseMessageDTO> syncTransactionRpa(@RequestBody TransReceiveRpaDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            List<TransactionReceiveEntity> transactions = new ArrayList<>();
+            if (dto != null) {
+                String bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
+                if (bankTypeId != null) {
+                    AccountBankReceiveEntity accountBankEntity = accountBankReceiveService
+                            .getAccountBankByBankAccountAndBankTypeId(dto.getBankAccount(), bankTypeId);
+                    if (accountBankEntity != null) {
+                        if (dto.getTransactions() != null && !dto.getTransactions().isEmpty()) {
+                            for (TransSyncRpaDTO transSyncRpaDTO : dto.getTransactions()) {
+                                TransactionReceiveEntity entity = new TransactionReceiveEntity();
+                                UUID uuid = UUID.randomUUID();
+                                entity.setId(uuid.toString());
+                                entity.setAmount(transSyncRpaDTO.getAmount());
+                                entity.setBankAccount(dto.getBankAccount());
+                                entity.setBankId(accountBankEntity.getId());
+                                entity.setContent(transSyncRpaDTO.getContent());
+                                entity.setRefId(transSyncRpaDTO.getId());
+                                entity.setStatus(1);
+                                entity.setTime(transSyncRpaDTO.getTime());
+                                entity.setType(4);
+                                entity.setTraceId("");
+                                entity.setTransType(transSyncRpaDTO.getTransType());
+                                entity.setReferenceNumber(transSyncRpaDTO.getReferenceNumber());
+                                entity.setOrderId("");
+                                entity.setSign("");
+                                entity.setCustomerBankAccount("");
+                                entity.setCustomerBankCode("");
+                                entity.setCustomerName("");
+                                transactions.add(entity);
+                            }
+                            System.out.println("transactions size: " + transactions.size());
+                            if (transactions != null && !transactions.isEmpty()) {
+                                int check = transactionReceiveService.insertAllTransactionReceive(transactions);
+                                System.out.println("check " + check);
+                                if (check == 1) {
+                                    result = new ResponseMessageDTO("SUCCESS", "");
+                                    httpStatus = HttpStatus.OK;
+                                } else {
+                                    logger.error("syncTransactionRpa: INSERT TRANSACTIONS FAILED");
+                                    result = new ResponseMessageDTO("FAILED", "E05");
+                                    httpStatus = HttpStatus.BAD_REQUEST;
+                                }
+                            }
+                        } else {
+                            logger.error("syncTransactionRpa: TRANSACTION LIST IS INVALID");
+                            result = new ResponseMessageDTO("FAILED", "E53");
+                            httpStatus = HttpStatus.BAD_REQUEST;
+                        }
+                    } else {
+                        logger.error("syncTransactionRpa: BANK ACCOUNT IS NOT EXISTED");
+                        result = new ResponseMessageDTO("FAILED", "E52");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    }
+                } else {
+                    logger.error("syncTransactionRpa: NOT FOUND BANK TYPE ID");
+                    result = new ResponseMessageDTO("FAILED", "E51");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+
+            } else {
+                logger.error("syncTransactionRpa: RPA SYSTEM ERROR");
+                result = new ResponseMessageDTO("FAILED", "E54");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("syncTransactionRpa: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);

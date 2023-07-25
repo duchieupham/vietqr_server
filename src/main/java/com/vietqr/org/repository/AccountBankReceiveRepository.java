@@ -130,4 +130,5 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	// + "AND status = true", nativeQuery = true)
 	// AccountBankReceiveEntity getBankAccountAuthenticatedByAccount(@Param(value =
 	// "bankAccount") String bankAccount);
+
 }

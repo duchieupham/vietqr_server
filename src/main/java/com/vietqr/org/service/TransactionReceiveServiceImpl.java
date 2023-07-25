@@ -87,4 +87,9 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
         return repo.getTransactionCheckStatus(transactionId);
     }
 
+    @Override
+    public int insertAllTransactionReceive(List<TransactionReceiveEntity> entities) {
+        return repo.saveAll(entities) == null ? 0 : 1;
+    }
+
 }

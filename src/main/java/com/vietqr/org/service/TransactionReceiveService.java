@@ -12,6 +12,8 @@ public interface TransactionReceiveService {
 
     public int insertTransactionReceive(TransactionReceiveEntity entity);
 
+    public int insertAllTransactionReceive(List<TransactionReceiveEntity> entities);
+
     public void updateTransactionReceiveStatus(int status, String refId, String referenceNumber, String id);
 
     public List<TransactionRelatedDTO> getRelatedTransactionReceives(String businessId);
