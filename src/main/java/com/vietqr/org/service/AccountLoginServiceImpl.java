@@ -80,4 +80,9 @@ public class AccountLoginServiceImpl implements AccountLoginService {
 		return accountLoginRepository.getAllUserIds();
 	}
 
+	@Override
+	public String getUserIdByPhoneNo(String phoneNo) {
+		return accountLoginRepository.getIdFromPhoneNo(phoneNo);
+	}
+
 }
