@@ -204,8 +204,12 @@ public class ContactController {
             if (dto != null) {
                 if (dto.getStatus() == 0) {
                     contactService.updateContactStatus(dto.getStatus(), dto.getId());
+                    result = new ResponseMessageDTO("SUCCESS", "");
+                    httpStatus = HttpStatus.OK;
                 } else if (dto.getStatus() == 2) {
                     contactService.deleteContactById(dto.getId());
+                    result = new ResponseMessageDTO("SUCCESS", "");
+                    httpStatus = HttpStatus.OK;
                 } else {
                     logger.error("updateContactStatus: INVALID REQUEST BODY");
                     result = new ResponseMessageDTO("FAILED", "E49");

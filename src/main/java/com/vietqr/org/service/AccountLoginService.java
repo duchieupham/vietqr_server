@@ -35,4 +35,6 @@ public interface AccountLoginService {
 	public String getCardNumberByUserId(String userId);
 
 	public List<String> getAllUserIds();
+
+	public String getUserIdByPhoneNo(String phoneNo);
 }

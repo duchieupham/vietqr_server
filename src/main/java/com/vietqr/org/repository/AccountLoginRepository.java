@@ -57,4 +57,7 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
 
 	@Query(value = "SELECT id FROM account_login", nativeQuery = true)
 	List<String> getAllUserIds();
+
+	@Query(value = "SELECT id FROM account_login WHERE phone_no = :phoneNo AND status = 1", nativeQuery = true)
+	String getIdFromPhoneNo(@Param(value = "phoneNo") String phoneNo);
 }

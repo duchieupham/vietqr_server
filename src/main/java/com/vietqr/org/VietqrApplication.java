@@ -46,10 +46,8 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		SpringApplication.run(VietqrApplication.class, args);
 		// SFTPUtil sftpUtil = new SFTPUtil();
 		// sftpUtil.checkTransactions();
-		// BankEncryptUtil bankEncryptUtil = new BankEncryptUtil();
 		// String checkSum =
-		// bankEncryptUtil.generateMD5RefundCustomerChecksum("0001297129444",
-		// "FT23140838608076",
+		// BankEncryptUtil.generateMD5CheckOrderChecksum("55555888829999",
 		// "SABAccessKey");
 		// System.out.println("Check sum: " + checkSum);
 	}

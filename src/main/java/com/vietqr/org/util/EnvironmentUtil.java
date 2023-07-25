@@ -52,6 +52,19 @@ public class EnvironmentUtil {
     private static final String VNPT_EPAY_PARTNER_NAME_UAT = "partnerTest";
     private static final String VNPT_EPAY_PARTNER_NAME_PROD = "";
 
+    // for recharge into VietQR VN
+    private static final String BANK_ACCOUNT_RECHARGE = "1123355589";
+    private static final String BANK_TYPE_ID_RECHARGE_UAT = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
+    private static final String BANK_TYPE_ID_RECHARGE_PROD = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
+
+    public static String getBankAccountRecharge() {
+        return BANK_ACCOUNT_RECHARGE;
+    }
+
+    public static String getBankTypeIdRecharge() {
+        return (IS_PRODUCTION == false) ? BANK_TYPE_ID_RECHARGE_UAT : BANK_TYPE_ID_RECHARGE_PROD;
+    }
+
     public static String getVnptEpayPartnerName() {
         return (IS_PRODUCTION == false) ? VNPT_EPAY_PARTNER_NAME_UAT : VNPT_EPAY_PARTNER_NAME_PROD;
     }

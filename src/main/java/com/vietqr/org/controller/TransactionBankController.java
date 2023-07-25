@@ -24,6 +24,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -88,6 +89,11 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import com.vietqr.org.util.EnvironmentUtil;
+
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import reactor.netty.http.client.HttpClient;
 
 @RestController
 @CrossOrigin
@@ -1304,8 +1310,8 @@ public class TransactionBankController {
 		return result;
 	}
 
-	private void pushNewTransactionToCustomerSync(CustomerSyncEntity entity,
-			TransactionBankCustomerDTO dto, long time) {
+	private void pushNewTransactionToCustomerSync(CustomerSyncEntity entity, TransactionBankCustomerDTO dto,
+			long time) {
 		try {
 			logger.info("pushNewTransactionToCustomerSync: orderId: " + dto.getOrderId());
 			logger.info("pushNewTransactionToCustomerSync: sign: " + dto.getSign());
@@ -1331,33 +1337,30 @@ public class TransactionBankController {
 			if (entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty()) {
 				suffixUrl = entity.getSuffixUrl();
 			}
-			UriComponents uriComponents = null;
-			WebClient webClient = null;
+			WebClient.Builder webClientBuilder = WebClient.builder()
+					.baseUrl(entity.getInformation() + "/" + suffixUrl + "/bank/api/transaction-sync");
+
 			if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
-				uriComponents = UriComponentsBuilder
-						.fromHttpUrl("http://" + entity.getIpAddress() + ":" + entity.getPort() + "/" + suffixUrl
-								+ "/bank/api/transaction-sync")
-						.buildAndExpand(/* add url parameter here */);
-				webClient = WebClient.builder()
-						.baseUrl("http://" + entity.getIpAddress() + ":" + entity.getPort() + "/" + suffixUrl
-								+ "/bank/api/transaction-sync")
-						.build();
-			} else {
-				uriComponents = UriComponentsBuilder
-						.fromHttpUrl(entity.getInformation() + "/" + suffixUrl
-								+ "/bank/api/transaction-sync")
-						.buildAndExpand(/* add url parameter here */);
-				webClient = WebClient.builder()
-						.baseUrl(entity.getInformation() + "/" + suffixUrl
-								+ "/bank/api/transaction-sync")
-						.build();
+				webClientBuilder.baseUrl("http://" + entity.getIpAddress() + ":" + entity.getPort() + "/" + suffixUrl
+						+ "/bank/api/transaction-sync");
 			}
-			//
-			logger.info("uriComponents: " + uriComponents.toString());
+
+			// Create SSL context to ignore SSL handshake exception
+			SslContext sslContext = SslContextBuilder.forClient()
+					.trustManager(InsecureTrustManagerFactory.INSTANCE)
+					.build();
+			HttpClient httpClient = HttpClient.create().secure(sslContextSpec -> sslContextSpec.sslContext(sslContext));
+
+			WebClient webClient = webClientBuilder.clientConnector(new ReactorClientHttpConnector(httpClient))
+					.build();
+
+			logger.info("uriComponents: " + webClient.get().uri(builder -> builder.path("/").build()).toString());
+			System.out
+					.println("uriComponents: " + webClient.get().uri(builder -> builder.path("/").build()).toString());
 			Mono<TransactionResponseDTO> responseMono = null;
 			if (tokenDTO != null) {
 				responseMono = webClient.post()
-						.uri(uriComponents.toUri())
+						.uri("/bank/api/transaction-sync")
 						.contentType(MediaType.APPLICATION_JSON)
 						.header("Authorization", "Bearer " + tokenDTO.getAccess_token())
 						.body(BodyInserters.fromValue(data))
@@ -1365,7 +1368,7 @@ public class TransactionBankController {
 						.bodyToMono(TransactionResponseDTO.class);
 			} else {
 				responseMono = webClient.post()
-						.uri(uriComponents.toUri())
+						.uri("/bank/api/transaction-sync")
 						.contentType(MediaType.APPLICATION_JSON)
 						.body(BodyInserters.fromValue(data))
 						.retrieve()
@@ -1379,23 +1382,38 @@ public class TransactionBankController {
 						logger.info("pushNewTransactionToCustomerSync SUCCESS: " + entity.getIpAddress() + " - "
 								+ transactionResponseDTO.getObject().getReftransactionid() + " at: "
 								+ responseTime);
+						System.out
+								.println("pushNewTransactionToCustomerSync SUCCESS: " + entity.getIpAddress() + " - "
+										+ transactionResponseDTO.getObject().getReftransactionid() + " at: "
+										+ responseTime);
 					} else {
 						logger.info("pushNewTransactionToCustomerSync SUCCESS: " + entity.getInformation() + " - "
 								+ transactionResponseDTO.getObject().getReftransactionid() + " at: "
 								+ responseTime);
+						System.out
+								.println("pushNewTransactionToCustomerSync SUCCESS: " + entity.getInformation() + " - "
+										+ transactionResponseDTO.getObject().getReftransactionid() + " at: "
+										+ responseTime);
 					}
-					// System.out.println("pushNewTransactionToCustomerSync SUCCESS: " +
-					// entity.getIpAddress() + " - "
-					// + transactionResponseDTO.getObject().getReftransactionid());
 				} else {
 					if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
 						logger.error("Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - "
 								+ (transactionResponseDTO != null ? transactionResponseDTO.getErrorReason() : "")
 								+ " at: " + responseTime);
+						System.out
+								.println("Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - "
+										+ (transactionResponseDTO != null ? transactionResponseDTO.getErrorReason()
+												: "")
+										+ " at: " + responseTime);
 					} else {
 						logger.error("Error at pushNewTransactionToCustomerSync: " + entity.getInformation() + " - "
 								+ (transactionResponseDTO != null ? transactionResponseDTO.getErrorReason() : "")
 								+ " at: " + responseTime);
+						System.out
+								.println("Error at pushNewTransactionToCustomerSync: " + entity.getInformation() + " - "
+										+ (transactionResponseDTO != null ? transactionResponseDTO.getErrorReason()
+												: "")
+										+ " at: " + responseTime);
 					}
 				}
 			}, error -> {
@@ -1404,9 +1422,16 @@ public class TransactionBankController {
 				if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
 					logger.error("Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - "
 							+ error.toString() + " at: " + responseTime);
+					System.out
+							.println("Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - "
+									+ error.toString() + " at: " + responseTime);
+
 				} else {
 					logger.error("Error at pushNewTransactionToCustomerSync: " + entity.getInformation() + " - "
 							+ error.toString() + " at: " + responseTime);
+					System.out
+							.println("Error at pushNewTransactionToCustomerSync: " + entity.getInformation() + " - "
+									+ error.toString() + " at: " + responseTime);
 				}
 
 			});
@@ -1424,6 +1449,143 @@ public class TransactionBankController {
 			}
 		}
 	}
+
+	// private void pushNewTransactionToCustomerSync(CustomerSyncEntity entity,
+	// TransactionBankCustomerDTO dto, long time) {
+	// try {
+	// logger.info("pushNewTransactionToCustomerSync: orderId: " +
+	// dto.getOrderId());
+	// logger.info("pushNewTransactionToCustomerSync: sign: " + dto.getSign());
+	// TokenDTO tokenDTO = null;
+	// if (entity.getUsername() != null && !entity.getUsername().trim().isEmpty() &&
+	// entity.getPassword() != null
+	// && !entity.getPassword().trim().isEmpty()) {
+	// tokenDTO = getCustomerSyncToken(entity);
+	// } else if (entity.getToken() != null && !entity.getToken().trim().isEmpty())
+	// {
+	// logger.info("Get token from record: " + entity.getId());
+	// tokenDTO = new TokenDTO(entity.getToken(), "Bearer", 0);
+	// }
+	// Map<String, Object> data = new HashMap<>();
+	// data.put("transactionid", dto.getTransactionid());
+	// data.put("transactiontime", dto.getTransactiontime());
+	// data.put("referencenumber", dto.getReferencenumber());
+	// data.put("amount", dto.getAmount());
+	// data.put("content", dto.getContent());
+	// data.put("bankaccount", dto.getBankaccount());
+	// data.put("transType", dto.getTransType());
+	// data.put("orderId", dto.getOrderId());
+	// data.put("sign", dto.getSign());
+	// String suffixUrl = "";
+	// if (entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty()) {
+	// suffixUrl = entity.getSuffixUrl();
+	// }
+	// UriComponents uriComponents = null;
+	// WebClient webClient = null;
+	// if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
+	// uriComponents = UriComponentsBuilder
+	// .fromHttpUrl("http://" + entity.getIpAddress() + ":" + entity.getPort() + "/"
+	// + suffixUrl
+	// + "/bank/api/transaction-sync")
+	// .buildAndExpand(/* add url parameter here */);
+	// webClient = WebClient.builder()
+	// .baseUrl("http://" + entity.getIpAddress() + ":" + entity.getPort() + "/" +
+	// suffixUrl
+	// + "/bank/api/transaction-sync")
+	// .build();
+	// } else {
+	// uriComponents = UriComponentsBuilder
+	// .fromHttpUrl(entity.getInformation() + "/" + suffixUrl
+	// + "/bank/api/transaction-sync")
+	// .buildAndExpand(/* add url parameter here */);
+	// webClient = WebClient.builder()
+	// .baseUrl(entity.getInformation() + "/" + suffixUrl
+	// + "/bank/api/transaction-sync")
+	// .build();
+	// }
+	// //
+	// logger.info("uriComponents: " + uriComponents.toString());
+	// Mono<TransactionResponseDTO> responseMono = null;
+	// if (tokenDTO != null) {
+	// responseMono = webClient.post()
+	// .uri(uriComponents.toUri())
+	// .contentType(MediaType.APPLICATION_JSON)
+	// .header("Authorization", "Bearer " + tokenDTO.getAccess_token())
+	// .body(BodyInserters.fromValue(data))
+	// .retrieve()
+	// .bodyToMono(TransactionResponseDTO.class);
+	// } else {
+	// responseMono = webClient.post()
+	// .uri(uriComponents.toUri())
+	// .contentType(MediaType.APPLICATION_JSON)
+	// .body(BodyInserters.fromValue(data))
+	// .retrieve()
+	// .bodyToMono(TransactionResponseDTO.class);
+	// }
+	// responseMono.subscribe(transactionResponseDTO -> {
+	// LocalDateTime currentDateTime = LocalDateTime.now();
+	// long responseTime = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+	// if (transactionResponseDTO != null && transactionResponseDTO.getObject() !=
+	// null) {
+	// if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
+	// logger.info("pushNewTransactionToCustomerSync SUCCESS: " +
+	// entity.getIpAddress() + " - "
+	// + transactionResponseDTO.getObject().getReftransactionid() + " at: "
+	// + responseTime);
+	// } else {
+	// logger.info("pushNewTransactionToCustomerSync SUCCESS: " +
+	// entity.getInformation() + " - "
+	// + transactionResponseDTO.getObject().getReftransactionid() + " at: "
+	// + responseTime);
+	// }
+	// // System.out.println("pushNewTransactionToCustomerSync SUCCESS: " +
+	// // entity.getIpAddress() + " - "
+	// // + transactionResponseDTO.getObject().getReftransactionid());
+	// } else {
+	// if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
+	// logger.error("Error at pushNewTransactionToCustomerSync: " +
+	// entity.getIpAddress() + " - "
+	// + (transactionResponseDTO != null ? transactionResponseDTO.getErrorReason() :
+	// "")
+	// + " at: " + responseTime);
+	// } else {
+	// logger.error("Error at pushNewTransactionToCustomerSync: " +
+	// entity.getInformation() + " - "
+	// + (transactionResponseDTO != null ? transactionResponseDTO.getErrorReason() :
+	// "")
+	// + " at: " + responseTime);
+	// }
+	// }
+	// }, error -> {
+	// LocalDateTime currentDateTime = LocalDateTime.now();
+	// long responseTime = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+	// if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
+	// logger.error("Error at pushNewTransactionToCustomerSync: " +
+	// entity.getIpAddress() + " - "
+	// + error.toString() + " at: " + responseTime);
+	// } else {
+	// logger.error("Error at pushNewTransactionToCustomerSync: " +
+	// entity.getInformation() + " - "
+	// + error.toString() + " at: " + responseTime);
+	// }
+
+	// });
+	// } catch (Exception e) {
+	// LocalDateTime currentDateTime = LocalDateTime.now();
+	// long responseTime = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+	// if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
+	// logger.error(
+	// "Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - "
+	// + e.toString()
+	// + " at: " + responseTime);
+	// } else {
+	// logger.error(
+	// "Error at pushNewTransactionToCustomerSync: " + entity.getInformation() + " -
+	// " + e.toString()
+	// + " at: " + responseTime);
+	// }
+	// }
+	// }
 
 	private void getCustomerSyncEntities(TransactionBankDTO dto, AccountBankReceiveEntity accountBankEntity,
 			long time, String orderId, String sign) {
