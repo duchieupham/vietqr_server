@@ -35,4 +35,9 @@ public interface AccountWalletRepository extends JpaRepository<AccountWalletEnti
     @Modifying
     @Query(value = "DELETE FROM account_wallet", nativeQuery = true)
     void deleteAllAccountWallet();
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE account_wallet SET amount = :amount WHERE id = :id", nativeQuery = true)
+    void updateAmount(@Param(value = "amount") String amount, @Param(value = "id") String id);
 }

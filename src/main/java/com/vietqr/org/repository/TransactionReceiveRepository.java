@@ -10,6 +10,9 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import com.vietqr.org.entity.TransactionReceiveEntity;
+import com.vietqr.org.dto.TransStatisticByDateDTO;
+import com.vietqr.org.dto.TransStatisticByMonthDTO;
+import com.vietqr.org.dto.TransStatisticDTO;
 import com.vietqr.org.dto.TransactionCheckStatusDTO;
 import com.vietqr.org.dto.TransactionDetailDTO;
 import com.vietqr.org.dto.TransactionRelatedDTO;
@@ -42,13 +45,13 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "FROM transaction_receive_branch a "
                         + "INNER JOIN transaction_receive b "
                         + "ON a.transaction_receive_id = b.id "
-                        + "WHERE a.business_id = :businessId "
+                        + "WHERE a.business_id = :businessId AND b.status != 2 "
                         + "ORDER BY b.time DESC LIMIT 5", nativeQuery = true)
         List<TransactionRelatedDTO> getRelatedTransactionReceives(@Param(value = "businessId") String businessId);
 
         @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time,a.status,a.type,a.trans_type as transType "
                         + "FROM transaction_receive a "
-                        + "WHERE a.bank_id=:bankId "
+                        + "WHERE a.bank_id=:bankId AND a.status != 2 "
                         + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
         List<TransactionRelatedDTO> getTransactions(@Param(value = "offset") int offset,
                         @Param(value = "bankId") String bankId);
@@ -76,7 +79,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
 
         @Query(value = "SELECT * "
                         + "FROM transaction_receive "
-                        + "WHERE bank_id = :bankId "
+                        + "WHERE bank_id = :bankId AND status != 2 "
                         + "ORDER BY time DESC LIMIT 5", nativeQuery = true)
         List<TransactionReceiveEntity> getRelatedTransactionByBankId(@Param(value = "bankId") String bankId);
 
@@ -105,4 +108,36 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON b.bank_type_id = c.id "
                         + "WHERE a.id = :transactionId ", nativeQuery = true)
         TransactionCheckStatusDTO getTransactionCheckStatus(@Param(value = "transactionId") String transactionId);
+
+        @Query(value = "SELECT COUNT(*) AS totalTrans, "
+                        + "SUM(CASE WHEN trans_type = 'C' THEN amount ELSE 0 END) AS totalCashIn, "
+                        + "SUM(CASE WHEN trans_type = 'D' THEN amount ELSE 0 END) AS totalCashOut, "
+                        + "SUM(CASE WHEN trans_type = 'C' THEN 1 ELSE 0 END) AS totalTransC, "
+                        + "SUM(CASE WHEN trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
+                        + "FROM transaction_receive "
+                        + "WHERE bank_id = :bankId AND status = 1", nativeQuery = true)
+        TransStatisticDTO getTransactionOverview(@Param(value = "bankId") String bankId);
+
+        @Query(value = "SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(time), '+00:00', '+07:00'), '%Y-%m-%d') AS date, "
+                        + "COUNT(*) AS totalTrans, "
+                        + "SUM(CASE WHEN trans_type = 'C' THEN amount ELSE 0 END) AS totalCashIn, "
+                        + "SUM(CASE WHEN trans_type = 'D' THEN amount ELSE 0 END) AS totalCashOut, "
+                        + "SUM(CASE WHEN trans_type = 'C' THEN 1 ELSE 0 END) AS totalTransC, "
+                        + "SUM(CASE WHEN trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
+                        + "FROM transaction_receive "
+                        + "WHERE bank_id = :bankId AND status = 1 "
+                        + "GROUP BY date ORDER BY date DESC ", nativeQuery = true)
+        List<TransStatisticByDateDTO> getTransStatisticByDate(@Param(value = "bankId") String bankId);
+
+        @Query(value = "SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(time), '+00:00', '+07:00'), '%Y-%m') AS month, "
+                        + "COUNT(*) AS totalTrans, "
+                        + "SUM(CASE WHEN trans_type = 'C' THEN amount ELSE 0 END) AS totalCashIn, "
+                        + "SUM(CASE WHEN trans_type = 'D' THEN amount ELSE 0 END) AS totalCashOut, "
+                        + "SUM(CASE WHEN trans_type = 'C' THEN 1 ELSE 0 END) AS totalTransC, "
+                        + "SUM(CASE WHEN trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
+                        + "FROM transaction_receive "
+                        + "WHERE bank_id = :bankId AND status = 1 "
+                        + "GROUP BY month ORDER BY month DESC ", nativeQuery = true)
+        List<TransStatisticByMonthDTO> getTransStatisticByMonth(@Param(value = "bankId") String bankId);
+
 }

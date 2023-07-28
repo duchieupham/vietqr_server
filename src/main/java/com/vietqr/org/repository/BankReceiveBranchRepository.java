@@ -45,6 +45,17 @@ public interface BankReceiveBranchRepository extends JpaRepository<BankReceiveBr
                         + "WHERE a.branch_id = :branchId", nativeQuery = true)
         List<AccountBankBranchDTO> getBanksByBranchId(@Param(value = "branchId") String branchId);
 
+        @Query(value = "SELECT a.bank_id as bankId, b.bank_account as bankAccount, b.bank_account_name as userBankName, c.bank_name as bankName, "
+                        + "c.bank_code as bankCode, c.img_id as imgId, b.type as bankType, "
+                        + "b.is_authenticated as authenticated "
+                        + "FROM bank_receive_branch a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id= c.id "
+                        + "WHERE a.business_id = :businessId", nativeQuery = true)
+        List<AccountBankBranchDTO> getBanksByBusinessId(@Param(value = "businessId") String businessId);
+
         // delete
         @Transactional
         @Modifying
@@ -61,4 +72,12 @@ public interface BankReceiveBranchRepository extends JpaRepository<BankReceiveBr
         @Query(value = "DELETE FROM bank_receive_branch WHERE bank_id = :bankId AND branch_id = :branchId", nativeQuery = true)
         void deleteBankReceiveBranchByBankIdAndBranchId(@Param(value = "bankId") String bankId,
                         @Param(value = "branchId") String branchId);
+
+        @Transactional
+        @Modifying
+        @Query(value = "DELETE FROM bank_receive_branch WHERE business_id = :businessId", nativeQuery = true)
+        void deleteBankReceiveBranchByBusinessId(@Param(value = "businessId") String businessId);
+
+        @Query(value = "SELECT bank_id FROM bank_receive_branch WHERE business_id = :businessId", nativeQuery = true)
+        List<String> getBankIdsByBusinessId(@Param(value = "businessId") String businessId);
 }

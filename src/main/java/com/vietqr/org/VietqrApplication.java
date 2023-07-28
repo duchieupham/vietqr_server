@@ -31,9 +31,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.vietqr.org.security.JWTAuthorizationFilter;
 // import com.vietqr.org.util.BankEncryptUtil;
-// import com.vietqr.org.util.SFTPUtil;
-// import com.vietqr.org.util.RandomCodeUtil;
-// import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.WebSocketConfig;
 
 @SpringBootApplication
@@ -47,7 +44,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// SFTPUtil sftpUtil = new SFTPUtil();
 		// sftpUtil.checkTransactions();
 		// String checkSum =
-		// BankEncryptUtil.generateMD5CheckOrderChecksum("55555888829999",
+		// BankEncryptUtil.generateMD5CheckOrderChecksum("0001297129444",
 		// "SABAccessKey");
 		// System.out.println("Check sum: " + checkSum);
 	}

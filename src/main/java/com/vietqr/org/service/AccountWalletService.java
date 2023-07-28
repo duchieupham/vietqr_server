@@ -20,4 +20,6 @@ public interface AccountWalletService {
     public void deleteAllAccountWallet();
 
     public String getUserIdByWalletId(String walletId);
+
+    public void updateAmount(String amount, String id);
 }

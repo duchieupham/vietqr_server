@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 import com.vietqr.org.repository.TransactionReceiveRepository;
 import java.util.List;
 import com.vietqr.org.entity.TransactionReceiveEntity;
+import com.vietqr.org.dto.TransStatisticByDateDTO;
+import com.vietqr.org.dto.TransStatisticByMonthDTO;
+import com.vietqr.org.dto.TransStatisticDTO;
 import com.vietqr.org.dto.TransactionCheckStatusDTO;
 import com.vietqr.org.dto.TransactionDetailDTO;
 import com.vietqr.org.dto.TransactionRelatedDTO;
@@ -90,6 +93,21 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     @Override
     public int insertAllTransactionReceive(List<TransactionReceiveEntity> entities) {
         return repo.saveAll(entities) == null ? 0 : 1;
+    }
+
+    @Override
+    public TransStatisticDTO getTransactionOverview(String bankId) {
+        return repo.getTransactionOverview(bankId);
+    }
+
+    @Override
+    public List<TransStatisticByDateDTO> getTransStatisticByDate(String bankId) {
+        return repo.getTransStatisticByDate(bankId);
+    }
+
+    @Override
+    public List<TransStatisticByMonthDTO> getTransStatisticByMonth(String bankId) {
+        return repo.getTransStatisticByMonth(bankId);
     }
 
 }

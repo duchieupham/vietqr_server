@@ -21,6 +21,7 @@ public class BusinessItemResponseDTO implements Serializable {
     // private String taxCode;
     private List<BranchConnectedCheckDTO> branchs;
     private List<TransactionRelatedDTO> transactions;
+    private List<AccountBankBranchDTO> bankAccounts;
     private int totalMember;
     private int totalBranch;
 
@@ -34,7 +35,9 @@ public class BusinessItemResponseDTO implements Serializable {
             String name,
             // String address, String taxCode,
             List<BranchConnectedCheckDTO> branchs,
-            List<TransactionRelatedDTO> transactions, int totalMember,
+            List<TransactionRelatedDTO> transactions,
+            List<AccountBankBranchDTO> bankAccounts,
+            int totalMember,
             int totalBranch) {
         this.businessId = businessId;
         // this.code = code;
@@ -46,6 +49,7 @@ public class BusinessItemResponseDTO implements Serializable {
         // this.taxCode = taxCode;
         this.branchs = branchs;
         this.transactions = transactions;
+        this.bankAccounts = bankAccounts;
         this.totalMember = totalMember;
         this.totalBranch = totalBranch;
     }
@@ -128,6 +132,14 @@ public class BusinessItemResponseDTO implements Serializable {
 
     public void setTransactions(List<TransactionRelatedDTO> transactions) {
         this.transactions = transactions;
+    }
+
+    public List<AccountBankBranchDTO> getBankAccounts() {
+        return bankAccounts;
+    }
+
+    public void setBankAccounts(List<AccountBankBranchDTO> bankAccounts) {
+        this.bankAccounts = bankAccounts;
     }
 
     public int getTotalMember() {

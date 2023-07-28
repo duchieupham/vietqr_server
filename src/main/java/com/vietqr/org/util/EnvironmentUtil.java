@@ -1,7 +1,7 @@
 package com.vietqr.org.util;
 
 public class EnvironmentUtil {
-    private static boolean IS_PRODUCTION = false;
+    private static boolean IS_PRODUCTION = true;
 
     // MB Bank
     private static final String BANK_URL_UAT = "https://api-sandbox.mbbank.com.vn/";
@@ -53,12 +53,48 @@ public class EnvironmentUtil {
     private static final String VNPT_EPAY_PARTNER_NAME_PROD = "";
 
     // for recharge into VietQR VN
-    private static final String BANK_ACCOUNT_RECHARGE = "1123355589";
+    private static final String BUSINESS_ID_RECHARGE_UAT = "";
+    private static final String BUSINESS_ID_RECHARGE_PROD = "b75f30cc-15b8-462d-8194-03651cb69ef3";
+    //
+    private static final String BRANCH_ID_RECHARGE_UAT = "";
+    private static final String BRANCH_ID_RECHARGE_PROD = "51f334ab-3b07-4bd9-a617-1c986c76344b";
+    //
+    private static final String CAI_VALUE_RECHARGE = "970422";
+    //
+    private static final String BANK_LOGO_ID_RECHARGE_UAT = "58b7190b-a294-4b14-968f-cd365593893e";
+    private static final String BANK_LOGO_ID_RECHARGE_PROD = "58b7190b-a294-4b14-968f-cd365593893e";
+    //
+    private static final String BANK_ID_RECHARGE_UAT = "85310662-d161-4891-b0aa-481ddb97a66b";
+    private static final String BANK_ID_RECHARGE_PROD = "BNS01";
+    //
+    private static final String BANK_ACCOUNT_RECHARGE_UAT = "1123355589";
+    private static final String BANK_ACCOUNT_RECHARGE_PROD = "1123355589";
+    //
     private static final String BANK_TYPE_ID_RECHARGE_UAT = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
     private static final String BANK_TYPE_ID_RECHARGE_PROD = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
 
+    public static String getBranchIdRecharge() {
+        return (IS_PRODUCTION == false) ? BRANCH_ID_RECHARGE_UAT : BRANCH_ID_RECHARGE_PROD;
+    }
+
+    public static String getBusinessIdRecharge() {
+        return (IS_PRODUCTION == false) ? BUSINESS_ID_RECHARGE_UAT : BUSINESS_ID_RECHARGE_PROD;
+    }
+
+    public static String getCAIRecharge() {
+        return CAI_VALUE_RECHARGE;
+    }
+
+    public static String getBankLogoIdRecharge() {
+        return (IS_PRODUCTION == false) ? BANK_LOGO_ID_RECHARGE_UAT : BANK_LOGO_ID_RECHARGE_PROD;
+    }
+
+    public static String getBankIdRecharge() {
+        return (IS_PRODUCTION == false) ? BANK_ID_RECHARGE_UAT : BANK_ID_RECHARGE_PROD;
+    }
+
     public static String getBankAccountRecharge() {
-        return BANK_ACCOUNT_RECHARGE;
+        return (IS_PRODUCTION == false) ? BANK_ACCOUNT_RECHARGE_UAT : BANK_ACCOUNT_RECHARGE_PROD;
     }
 
     public static String getBankTypeIdRecharge() {

@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.vietqr.org.dto.BusinessListItemDTO;
 import com.vietqr.org.dto.BusinessMemberInsertDTO;
+import com.vietqr.org.dto.AccountBankBranchDTO;
 import com.vietqr.org.dto.BranchConnectedCheckDTO;
 import com.vietqr.org.dto.BranchFilterInsertDTO;
 import com.vietqr.org.dto.BranchFilterResponseDTO;
@@ -41,11 +42,14 @@ import com.vietqr.org.dto.TransactionRelatedDTO;
 import com.vietqr.org.dto.BusinessItemDTO;
 import com.vietqr.org.dto.BusinessCounterDTO;
 import com.vietqr.org.dto.BusinessInformationDetailDTO;
+import com.vietqr.org.entity.BankReceivePersonalEntity;
 import com.vietqr.org.entity.BranchInformationEntity;
 import com.vietqr.org.entity.BusinessInformationEntity;
 import com.vietqr.org.entity.BusinessMemberEntity;
 import com.vietqr.org.entity.ImageEntity;
+import com.vietqr.org.service.AccountBankReceivePersonalService;
 import com.vietqr.org.service.AccountBankReceiveService;
+import com.vietqr.org.service.BankReceiveBranchService;
 import com.vietqr.org.service.BranchInformationService;
 import com.vietqr.org.service.BusinessInformationService;
 import com.vietqr.org.service.BusinessMemberService;
@@ -80,6 +84,12 @@ public class BusinessInformationController {
 
 	@Autowired
 	TransactionReceiveService transactionReceiveService;
+
+	@Autowired
+	AccountBankReceivePersonalService accountBankReceivePersonalService;
+
+	@Autowired
+	BankReceiveBranchService bankReceiveBranchService;
 
 	// insert business information
 
@@ -304,6 +314,7 @@ public class BusinessInformationController {
 				for (BusinessItemDTO item : businessItems) {
 					List<BranchConnectedCheckDTO> branchs = new ArrayList<>();
 					List<TransactionRelatedDTO> transactions = new ArrayList<>();
+					List<AccountBankBranchDTO> bankAccounts = new ArrayList<>();
 					BusinessItemResponseDTO dto = new BusinessItemResponseDTO();
 					BusinessCounterDTO counterDTO = businessInfoService.getBusinessCounter(item.getBusinessId());
 					dto.setBusinessId(item.getBusinessId());
@@ -316,10 +327,12 @@ public class BusinessInformationController {
 					// dto.setTaxCode(item.getTaxCode());
 					transactions = transactionReceiveService.getRelatedTransactionReceives(item.getBusinessId());
 					branchs = branchInformationService.getBranchContects(item.getBusinessId());
+					bankAccounts = bankReceiveBranchService.getBanksByBusinessId(item.getBusinessId());
 					dto.setBranchs(branchs);
 					dto.setTransactions(transactions);
 					dto.setTotalMember(counterDTO.getTotalAdmin() + counterDTO.getTotalMember());
 					dto.setTotalBranch(counterDTO.getTotalBranch());
+					dto.setBankAccounts(bankAccounts);
 					result.add(dto);
 				}
 			}
@@ -327,6 +340,7 @@ public class BusinessInformationController {
 				for (BusinessItemDTO item : businessFromMemberItems) {
 					List<BranchConnectedCheckDTO> branchs = new ArrayList<>();
 					List<TransactionRelatedDTO> transactions = new ArrayList<>();
+					List<AccountBankBranchDTO> bankAccounts = new ArrayList<>();
 					BusinessItemResponseDTO dto = new BusinessItemResponseDTO();
 					BusinessCounterDTO counterDTO = businessInfoService.getBusinessCounter(item.getBusinessId());
 					dto.setBusinessId(item.getBusinessId());
@@ -339,10 +353,12 @@ public class BusinessInformationController {
 					// dto.setTaxCode(item.getTaxCode());
 					transactions = transactionReceiveService.getRelatedTransactionReceives(item.getBusinessId());
 					branchs = branchInformationService.getBranchContects(item.getBusinessId());
+					bankAccounts = bankReceiveBranchService.getBanksByBusinessId(item.getBusinessId());
 					dto.setBranchs(branchs);
 					dto.setTransactions(transactions);
 					dto.setTotalMember(counterDTO.getTotalAdmin() + counterDTO.getTotalMember());
 					dto.setTotalBranch(counterDTO.getTotalBranch());
+					dto.setBankAccounts(bankAccounts);
 					result.add(dto);
 				}
 			}
@@ -467,7 +483,11 @@ public class BusinessInformationController {
 	// 3. delete branch member
 	// 4. delete branch bank
 	// 4. delete branchs
-	// 5. delete business
+	// 5. update bank type
+	// 6. insert bank_account_personal
+	// 7. delete bank_account_branch
+	// 8. delete business
+	//
 	@DeleteMapping("business/remove/{businessId}")
 	public ResponseEntity<ResponseMessageDTO> deleteBusiness(@PathVariable(value = "businessId") String businessId) {
 		ResponseMessageDTO result = null;
@@ -485,7 +505,28 @@ public class BusinessInformationController {
 					branchMemberService.deleteAllMemberFromBusiness(businessId);
 					// 4.
 					branchInformationService.deleteAllBranchByBusinessId(businessId);
-					// 5.
+					// before 5&6. get all bankId by businessId
+					List<String> bankIds = bankReceiveBranchService.getBankIdsByBusinessId(businessId);
+					if (bankIds != null && !bankIds.isEmpty()) {
+						for (String bankId : bankIds) {
+							String userId = accountBankReceiveService.getUserIdByBankId(bankId);
+							if (userId != null && !userId.trim().isEmpty()) {
+								// 5.
+								accountBankReceiveService.updateBankType(bankId, 0);
+								// 6.
+								UUID uuid = UUID.randomUUID();
+								BankReceivePersonalEntity bankPersonalEntity = new BankReceivePersonalEntity();
+								bankPersonalEntity.setId(uuid.toString());
+								bankPersonalEntity.setBankId(bankId);
+								bankPersonalEntity.setUserId(userId);
+								accountBankReceivePersonalService.insertAccountBankReceivePersonal(bankPersonalEntity);
+
+							}
+						}
+					}
+					// 7.
+					bankReceiveBranchService.deleteBankReceiveBranchByBusinessId(businessId);
+					// 8.
 					businessInfoService.deleteBusinessInformation(businessId);
 					//
 					result = new ResponseMessageDTO("SUCCESS", "");

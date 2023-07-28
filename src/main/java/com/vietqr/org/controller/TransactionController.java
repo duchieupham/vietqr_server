@@ -27,6 +27,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.TransImgIdDTO;
 import com.vietqr.org.dto.TransReceiveRpaDTO;
+import com.vietqr.org.dto.TransStatisticByDateDTO;
+import com.vietqr.org.dto.TransStatisticByMonthDTO;
+import com.vietqr.org.dto.TransStatisticDTO;
 import com.vietqr.org.dto.TransSyncRpaDTO;
 import com.vietqr.org.dto.TransactionBranchInputDTO;
 import com.vietqr.org.dto.TransactionCheckDTO;
@@ -343,6 +346,55 @@ public class TransactionController {
         } catch (Exception e) {
             logger.error("syncTransactionRpa: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("transaction/overview/{bankId}")
+    public ResponseEntity<TransStatisticDTO> getTransactionOverview(@PathVariable("bankId") String bankId) {
+        TransStatisticDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            result = transactionReceiveService.getTransactionOverview(bankId);
+            if (result != null) {
+                httpStatus = HttpStatus.OK;
+            } else {
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            System.out.println("Error at getBankOverview: " + e.toString());
+            logger.error("Error at getBankOverview: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("transaction/statistic")
+    public ResponseEntity<Object> getTransactionStatistic(
+            @RequestParam(value = "bankId") String bankId,
+            @RequestParam(value = "type") int type) {
+        Object result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            // type = 1 => sort by date
+            // type = 2 => sort by month
+            if (type == 1) {
+                List<TransStatisticByDateDTO> transactions = transactionReceiveService.getTransStatisticByDate(bankId);
+                result = transactions;
+                httpStatus = HttpStatus.OK;
+            } else if (type == 2) {
+                List<TransStatisticByMonthDTO> transactions = transactionReceiveService
+                        .getTransStatisticByMonth(bankId);
+                result = transactions;
+                httpStatus = HttpStatus.OK;
+            } else {
+                logger.error("Error at getTransactionStatistic: INVALID TYPE");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            System.out.println("Error at getTransactionStatistic: " + e.toString());
+            logger.error("Error at getTransactionStatistic: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);

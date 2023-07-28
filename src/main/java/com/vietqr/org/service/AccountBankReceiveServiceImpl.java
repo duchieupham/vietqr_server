@@ -100,4 +100,9 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
 		return accountBankRepo.checkExistedBankAccountSameUser(bankAccount, bankTypeId, userId);
 	}
 
+	@Override
+	public String getUserIdByBankId(String bankId) {
+		return accountBankRepo.getUserIdByBankId(bankId);
+	}
+
 }

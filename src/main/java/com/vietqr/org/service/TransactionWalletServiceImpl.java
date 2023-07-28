@@ -36,8 +36,13 @@ public class TransactionWalletServiceImpl implements TransactionWalletService {
     }
 
     @Override
-    public void updateTransactionWalletStatus(int status, String billNumber, String amount) {
-        repo.updateTransactionWalletStatus(status, billNumber, amount);
+    public void updateTransactionWalletStatus(int status, long timePaid, String id) {
+        repo.updateTransactionWalletStatus(status, timePaid, id);
+    }
+
+    @Override
+    public TransactionWalletEntity getTransactionWalletByBillNumber(String billNumber) {
+        return repo.getTransactionWalletByBillNumber(billNumber);
     }
 
 }

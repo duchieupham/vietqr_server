@@ -52,6 +52,7 @@ import com.vietqr.org.dto.UnregisterBankConfirmDTO;
 import com.vietqr.org.dto.UnregisterRequestDTO;
 import com.vietqr.org.service.TransactionBankService;
 import com.vietqr.org.service.TransactionReceiveService;
+import com.vietqr.org.service.TransactionWalletService;
 import com.vietqr.org.service.TransactionReceiveBranchService;
 import com.vietqr.org.service.BranchMemberService;
 import com.vietqr.org.service.BusinessInformationService;
@@ -63,8 +64,10 @@ import com.vietqr.org.service.FcmTokenService;
 import com.vietqr.org.service.FirebaseMessagingService;
 import com.vietqr.org.service.AccountBankReceiveService;
 import com.vietqr.org.service.AccountCustomerBankService;
+import com.vietqr.org.service.AccountWalletService;
 import com.vietqr.org.service.BankTypeService;
 import com.vietqr.org.entity.TransactionReceiveEntity;
+import com.vietqr.org.entity.TransactionWalletEntity;
 import com.vietqr.org.entity.TransactionReceiveBranchEntity;
 import com.vietqr.org.entity.NotificationEntity;
 import com.vietqr.org.entity.BranchInformationEntity;
@@ -73,6 +76,7 @@ import com.vietqr.org.entity.CustomerSyncEntity;
 import com.vietqr.org.entity.FcmTokenEntity;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.entity.AccountCustomerBankEntity;
+import com.vietqr.org.entity.AccountWalletEntity;
 import com.vietqr.org.entity.BankTypeEntity;
 import com.vietqr.org.dto.TokenProductBankDTO;
 import com.vietqr.org.dto.TransactionBankCustomerDTO;
@@ -127,6 +131,12 @@ public class TransactionBankController {
 
 	@Autowired
 	FcmTokenService fcmTokenService;
+
+	@Autowired
+	TransactionWalletService transactionWalletService;
+
+	@Autowired
+	AccountWalletService accountWalletService;
 
 	@Autowired
 	BankTypeService bankTypeService;
@@ -286,6 +296,68 @@ public class TransactionBankController {
 									sign = transactionReceiveEntity.getSign();
 									getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
 									updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time, nf);
+									// check if recharge => do update status and push data to customer
+									if (transactionReceiveEntity.getType() == 5) {
+										// find transactionWallet by billNumber and status = 0
+										TransactionWalletEntity transactionWalletEntity = transactionWalletService
+												.getTransactionWalletByBillNumber(orderId);
+										if (transactionWalletEntity != null) {
+											// update transaction wallet
+											transactionWalletService.updateTransactionWalletStatus(1, time,
+													transactionWalletEntity.getId());
+
+											// get userId on transaction wallet
+											String userIdRecharge = transactionWalletEntity.getUserId();
+											if (userIdRecharge != null) {
+												// update amount account wallet
+												AccountWalletEntity accountWalletEntity = accountWalletService
+														.getAccountWalletByUserId(userIdRecharge);
+												if (accountWalletEntity != null) {
+													Long currentAmount = Long
+															.parseLong(accountWalletEntity.getAmount());
+													Long updatedAmount = currentAmount + dto.getAmount();
+													accountWalletService.updateAmount(updatedAmount + "",
+															accountWalletEntity.getId());
+												}
+												// push notification
+												UUID notificationUUID = UUID.randomUUID();
+												String notiType = NotificationUtil.getNotiRecharge();
+												String title = NotificationUtil.getNotiTitleRecharge();
+												String message = NotificationUtil.getNotiDescRecharge1()
+														+ dto.getAmount() + NotificationUtil.getNotiDescRecharge2();
+												NotificationEntity notiEntity = new NotificationEntity();
+												notiEntity.setId(notificationUUID.toString());
+												notiEntity.setRead(false);
+												notiEntity.setMessage(message);
+												notiEntity.setTime(time);
+												notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
+												notiEntity.setUserId(userIdRecharge);
+												notiEntity.setData(transactionWalletEntity.getId());
+												notificationService.insertNotification(notiEntity);
+												List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+												fcmTokens = fcmTokenService.getFcmTokensByUserId(userIdRecharge);
+												Map<String, String> data = new HashMap<>();
+												data.put("notificationType",
+														notiType);
+												data.put("notificationId", notificationUUID.toString());
+												data.put("amount", dto.getAmount() + "");
+												data.put("billNumber", orderId);
+												data.put("transWalletId", transactionWalletEntity.getId());
+												data.put("time", time + "");
+												firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
+														title, message);
+												try {
+													socketHandler.sendMessageToUser(userIdRecharge,
+															data);
+												} catch (IOException e) {
+													logger.error(
+															"WS: socketHandler.sendMessageToUser - RECHARGE ERROR: "
+																	+ e.toString());
+												}
+											}
+
+										}
+									}
 								} else {
 									logger.info(
 											"transaction-sync - cannot find transaction receive. Receive new transaction outside system");
@@ -1310,13 +1382,16 @@ public class TransactionBankController {
 		return result;
 	}
 
-	private void pushNewTransactionToCustomerSync(CustomerSyncEntity entity, TransactionBankCustomerDTO dto,
+	private void pushNewTransactionToCustomerSync(CustomerSyncEntity entity,
+			TransactionBankCustomerDTO dto,
 			long time) {
 		try {
-			logger.info("pushNewTransactionToCustomerSync: orderId: " + dto.getOrderId());
+			logger.info("pushNewTransactionToCustomerSync: orderId: " +
+					dto.getOrderId());
 			logger.info("pushNewTransactionToCustomerSync: sign: " + dto.getSign());
 			TokenDTO tokenDTO = null;
-			if (entity.getUsername() != null && !entity.getUsername().trim().isEmpty() && entity.getPassword() != null
+			if (entity.getUsername() != null && !entity.getUsername().trim().isEmpty() &&
+					entity.getPassword() != null
 					&& !entity.getPassword().trim().isEmpty()) {
 				tokenDTO = getCustomerSyncToken(entity);
 			} else if (entity.getToken() != null && !entity.getToken().trim().isEmpty()) {
@@ -1338,10 +1413,12 @@ public class TransactionBankController {
 				suffixUrl = entity.getSuffixUrl();
 			}
 			WebClient.Builder webClientBuilder = WebClient.builder()
-					.baseUrl(entity.getInformation() + "/" + suffixUrl + "/bank/api/transaction-sync");
+					.baseUrl(entity.getInformation() + "/" + suffixUrl +
+							"/bank/api/transaction-sync");
 
 			if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
-				webClientBuilder.baseUrl("http://" + entity.getIpAddress() + ":" + entity.getPort() + "/" + suffixUrl
+				webClientBuilder.baseUrl("http://" + entity.getIpAddress() + ":" +
+						entity.getPort() + "/" + suffixUrl
 						+ "/bank/api/transaction-sync");
 			}
 
@@ -1355,12 +1432,10 @@ public class TransactionBankController {
 					.build();
 
 			logger.info("uriComponents: " + webClient.get().uri(builder -> builder.path("/").build()).toString());
-			System.out
-					.println("uriComponents: " + webClient.get().uri(builder -> builder.path("/").build()).toString());
 			Mono<TransactionResponseDTO> responseMono = null;
 			if (tokenDTO != null) {
 				responseMono = webClient.post()
-						.uri("/bank/api/transaction-sync")
+						// .uri("/bank/api/transaction-sync")
 						.contentType(MediaType.APPLICATION_JSON)
 						.header("Authorization", "Bearer " + tokenDTO.getAccess_token())
 						.body(BodyInserters.fromValue(data))
@@ -1368,7 +1443,7 @@ public class TransactionBankController {
 						.bodyToMono(TransactionResponseDTO.class);
 			} else {
 				responseMono = webClient.post()
-						.uri("/bank/api/transaction-sync")
+						// .uri("/bank/api/transaction-sync")
 						.contentType(MediaType.APPLICATION_JSON)
 						.body(BodyInserters.fromValue(data))
 						.retrieve()
@@ -1379,38 +1454,46 @@ public class TransactionBankController {
 				long responseTime = currentDateTime.toEpochSecond(ZoneOffset.UTC);
 				if (transactionResponseDTO != null && transactionResponseDTO.getObject() != null) {
 					if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
-						logger.info("pushNewTransactionToCustomerSync SUCCESS: " + entity.getIpAddress() + " - "
+						logger.info("pushNewTransactionToCustomerSync SUCCESS: " +
+								entity.getIpAddress() + " - "
 								+ transactionResponseDTO.getObject().getReftransactionid() + " at: "
 								+ responseTime);
 						System.out
-								.println("pushNewTransactionToCustomerSync SUCCESS: " + entity.getIpAddress() + " - "
+								.println("pushNewTransactionToCustomerSync SUCCESS: " + entity.getIpAddress()
+										+ " - "
 										+ transactionResponseDTO.getObject().getReftransactionid() + " at: "
 										+ responseTime);
 					} else {
-						logger.info("pushNewTransactionToCustomerSync SUCCESS: " + entity.getInformation() + " - "
+						logger.info("pushNewTransactionToCustomerSync SUCCESS: " +
+								entity.getInformation() + " - "
 								+ transactionResponseDTO.getObject().getReftransactionid() + " at: "
 								+ responseTime);
 						System.out
-								.println("pushNewTransactionToCustomerSync SUCCESS: " + entity.getInformation() + " - "
+								.println("pushNewTransactionToCustomerSync SUCCESS: " +
+										entity.getInformation() + " - "
 										+ transactionResponseDTO.getObject().getReftransactionid() + " at: "
 										+ responseTime);
 					}
 				} else {
 					if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
-						logger.error("Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - "
+						logger.error("Error at pushNewTransactionToCustomerSync: " +
+								entity.getIpAddress() + " - "
 								+ (transactionResponseDTO != null ? transactionResponseDTO.getErrorReason() : "")
 								+ " at: " + responseTime);
 						System.out
-								.println("Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - "
+								.println("Error at pushNewTransactionToCustomerSync: " +
+										entity.getIpAddress() + " - "
 										+ (transactionResponseDTO != null ? transactionResponseDTO.getErrorReason()
 												: "")
 										+ " at: " + responseTime);
 					} else {
-						logger.error("Error at pushNewTransactionToCustomerSync: " + entity.getInformation() + " - "
+						logger.error("Error at pushNewTransactionToCustomerSync: " +
+								entity.getInformation() + " - "
 								+ (transactionResponseDTO != null ? transactionResponseDTO.getErrorReason() : "")
 								+ " at: " + responseTime);
 						System.out
-								.println("Error at pushNewTransactionToCustomerSync: " + entity.getInformation() + " - "
+								.println("Error at pushNewTransactionToCustomerSync: " +
+										entity.getInformation() + " - "
 										+ (transactionResponseDTO != null ? transactionResponseDTO.getErrorReason()
 												: "")
 										+ " at: " + responseTime);
@@ -1420,17 +1503,21 @@ public class TransactionBankController {
 				LocalDateTime currentDateTime = LocalDateTime.now();
 				long responseTime = currentDateTime.toEpochSecond(ZoneOffset.UTC);
 				if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
-					logger.error("Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - "
+					logger.error("ERROR at pushNewTransactionToCustomerSync: " +
+							entity.getIpAddress() + " - "
 							+ error.toString() + " at: " + responseTime);
 					System.out
-							.println("Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - "
+							.println("ERROR at pushNewTransactionToCustomerSync: " +
+									entity.getIpAddress() + " - "
 									+ error.toString() + " at: " + responseTime);
 
 				} else {
-					logger.error("Error at pushNewTransactionToCustomerSync: " + entity.getInformation() + " - "
+					logger.error("ERROR at pushNewTransactionToCustomerSync: " +
+							entity.getInformation() + " - "
 							+ error.toString() + " at: " + responseTime);
 					System.out
-							.println("Error at pushNewTransactionToCustomerSync: " + entity.getInformation() + " - "
+							.println("ERROR at pushNewTransactionToCustomerSync: " +
+									entity.getInformation() + " - "
 									+ error.toString() + " at: " + responseTime);
 				}
 
@@ -1440,11 +1527,15 @@ public class TransactionBankController {
 			long responseTime = currentDateTime.toEpochSecond(ZoneOffset.UTC);
 			if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
 				logger.error(
-						"Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - " + e.toString()
+						"Error Unexpected at pushNewTransactionToCustomerSync: " +
+								entity.getIpAddress() + " - "
+								+ e.toString()
 								+ " at: " + responseTime);
 			} else {
 				logger.error(
-						"Error at pushNewTransactionToCustomerSync: " + entity.getInformation() + " - " + e.toString()
+						"Error Unexpected at pushNewTransactionToCustomerSync: " +
+								entity.getInformation() + " - "
+								+ e.toString()
 								+ " at: " + responseTime);
 			}
 		}
@@ -1453,6 +1544,8 @@ public class TransactionBankController {
 	// private void pushNewTransactionToCustomerSync(CustomerSyncEntity entity,
 	// TransactionBankCustomerDTO dto, long time) {
 	// try {
+	// SSLUtil.disableCertificateValidation();
+
 	// logger.info("pushNewTransactionToCustomerSync: orderId: " +
 	// dto.getOrderId());
 	// logger.info("pushNewTransactionToCustomerSync: sign: " + dto.getSign());

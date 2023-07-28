@@ -45,4 +45,9 @@ public class AccountWalletServiceImpl implements AccountWalletService {
     public String getUserIdByWalletId(String walletId) {
         return repo.getUserIdByWalletId(walletId);
     }
+
+    @Override
+    public void updateAmount(String amount, String id) {
+        repo.updateAmount(amount, id);
+    }
 }

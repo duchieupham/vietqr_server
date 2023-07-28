@@ -337,10 +337,10 @@ public class AccountController {
 				AccountWalletEntity accountWalletEntity = new AccountWalletEntity();
 				accountWalletEntity.setId(accountWalletUUID.toString());
 				accountWalletEntity.setUserId(uuid.toString());
-				accountWalletEntity.setAmount("100000");
+				accountWalletEntity.setAmount("0");
 				accountWalletEntity.setEnableService(true);
 				accountWalletEntity.setActive(true);
-				accountWalletEntity.setPoint(0);
+				accountWalletEntity.setPoint(100);
 				// set wallet ID
 				String walletId = "";
 				do {
