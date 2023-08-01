@@ -62,6 +62,9 @@ public class AccountInformationEntity implements Serializable {
 	@Column(name = "nationalDate")
 	private String nationalDate;
 
+	@Column(name = "carrierTypeId")
+	private String carrierTypeId;
+
 	@Column(name = "status")
 	private boolean status;
 
@@ -71,7 +74,8 @@ public class AccountInformationEntity implements Serializable {
 
 	public AccountInformationEntity(String id, String userId, String firstName, String middleName, String lastName,
 			String birthDate, String address, int gender, String email, String imgId, String registerPlatform,
-			String userIp, String nationalId, String nationalDate, String oldNationalId, boolean status) {
+			String userIp, String nationalId, String nationalDate, String oldNationalId, String carrierTypeId,
+			boolean status) {
 		super();
 		this.id = id;
 		this.userId = userId;
@@ -88,6 +92,7 @@ public class AccountInformationEntity implements Serializable {
 		this.nationalId = nationalId;
 		this.nationalDate = nationalDate;
 		this.oldNationalId = oldNationalId;
+		this.carrierTypeId = carrierTypeId;
 		this.status = status;
 	}
 
@@ -209,6 +214,14 @@ public class AccountInformationEntity implements Serializable {
 
 	public void setNationalDate(String nationalDate) {
 		this.nationalDate = nationalDate;
+	}
+
+	public String getCarrierTypeId() {
+		return carrierTypeId;
+	}
+
+	public void setCarrierTypeId(String carrierTypeId) {
+		this.carrierTypeId = carrierTypeId;
 	}
 
 	public boolean isStatus() {

@@ -62,6 +62,7 @@ import com.vietqr.org.service.CustomerSyncService;
 import com.vietqr.org.service.FcmTokenService;
 import com.vietqr.org.service.FirebaseMessagingService;
 import com.vietqr.org.service.ImageService;
+import com.vietqr.org.service.MobileCarrierService;
 import com.vietqr.org.service.NotificationService;
 import com.vietqr.org.util.NotificationUtil;
 import com.vietqr.org.util.RandomCodeUtil;
@@ -108,6 +109,9 @@ public class AccountController {
 
 	@Autowired
 	AccountShareService accountShareService;
+
+	@Autowired
+	MobileCarrierService mobileCarrierService;
 
 	private FirebaseMessagingService firebaseMessagingService;
 
@@ -318,6 +322,18 @@ public class AccountController {
 				accountInformationEntity.setNationalId("");
 				accountInformationEntity.setOldNationalId("");
 				accountInformationEntity.setNationalDate("");
+				// set carrier type id
+				if (dto.getPhoneNo() != null && !dto.getPhoneNo().trim().isEmpty()) {
+					String prefix = dto.getPhoneNo().substring(0, 3);
+					String carrierTypeId = mobileCarrierService.getTypeIdByPrefix(prefix);
+					if (carrierTypeId != null) {
+						accountInformationEntity.setCarrierTypeId(carrierTypeId);
+					} else {
+						accountInformationEntity.setCarrierTypeId("");
+					}
+				} else {
+					accountInformationEntity.setCarrierTypeId("");
+				}
 				accountInformationEntity.setStatus(true);
 				int check = accountInformationService.insertAccountInformation(accountInformationEntity);
 

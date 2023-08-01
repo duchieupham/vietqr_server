@@ -30,7 +30,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.vietqr.org.security.JWTAuthorizationFilter;
-import com.vietqr.org.util.VNPTEpayUtil;
+// import com.vietqr.org.util.VNPTEpayUtil;
 // import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.WebSocketConfig;
 
@@ -42,12 +42,12 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
-		String partnerName = "partnerTest";
-		String requestId = VNPTEpayUtil.createRequestID(partnerName);
-		System.out.println("Request ID VNPT EPAY: " + requestId);
-		System.out.println("TOPUP");
-		VNPTEpayUtil.queryBalance("partnerTest");
-		VNPTEpayUtil.topup(requestId, "partnerTest", "VTT", "0931865469", 10000);
+		// String partnerName = "partnerTest";
+		// String requestId = VNPTEpayUtil.createRequestID(partnerName);
+		// System.out.println("Request ID VNPT EPAY: " + requestId);
+		// System.out.println("TOPUP");
+		// VNPTEpayUtil.queryBalance("partnerTest");
+		// VNPTEpayUtil.topup(requestId, "partnerTest", "VTT", "0931865469", 10000);
 	}
 
 	@Bean

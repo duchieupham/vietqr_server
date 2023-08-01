@@ -23,17 +23,17 @@ public class MobileCarrierEntity implements Serializable {
     @Column(name = "prefix")
     private String prefix;
 
-    @Column(name = "type")
-    private String type;
+    @Column(name = "typeId")
+    private String typeId;
 
     public MobileCarrierEntity() {
         super();
     }
 
-    public MobileCarrierEntity(String id, String prefix, String type) {
+    public MobileCarrierEntity(String id, String prefix, String typeId) {
         this.id = id;
         this.prefix = prefix;
-        this.type = type;
+        this.typeId = typeId;
     }
 
     public String getId() {
@@ -52,12 +52,12 @@ public class MobileCarrierEntity implements Serializable {
         this.prefix = prefix;
     }
 
-    public String getType() {
-        return type;
+    public String getTypeId() {
+        return typeId;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setType(String typeId) {
+        this.typeId = typeId;
     }
 
 }

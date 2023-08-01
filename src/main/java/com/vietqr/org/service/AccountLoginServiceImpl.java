@@ -85,4 +85,9 @@ public class AccountLoginServiceImpl implements AccountLoginService {
 		return accountLoginRepository.getIdFromPhoneNo(phoneNo);
 	}
 
+	@Override
+	public List<AccountLoginEntity> getAllAccountLogin() {
+		return accountLoginRepository.getAllAccountLogin();
+	}
+
 }

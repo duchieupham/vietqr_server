@@ -37,4 +37,6 @@ public interface AccountLoginService {
 	public List<String> getAllUserIds();
 
 	public String getUserIdByPhoneNo(String phoneNo);
+
+	public List<AccountLoginEntity> getAllAccountLogin();
 }
