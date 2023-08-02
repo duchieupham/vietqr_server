@@ -14,11 +14,13 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.vietqr.org.dto.CarrierTypeUpdateDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.entity.AccountLoginEntity;
 import com.vietqr.org.entity.CarrierTypeEntity;
@@ -28,6 +30,7 @@ import com.vietqr.org.service.AccountLoginService;
 import com.vietqr.org.service.CarrierTypeService;
 import com.vietqr.org.service.ImageService;
 import com.vietqr.org.service.MobileCarrierService;
+import com.vietqr.org.service.AccountInformationService;
 
 @RestController
 @CrossOrigin
@@ -43,6 +46,9 @@ public class MobileCarrierController {
 
     @Autowired
     AccountLoginService accountLoginService;
+
+    @Autowired
+    AccountInformationService accountInformationService;
 
     @Autowired
     ImageService imageService;
@@ -195,6 +201,7 @@ public class MobileCarrierController {
     // 2. check 3 số điện thoại lấy carrier type id
     // 2.1. Nếu lấy được, set giá trị
     // 2.2. Nếu không lấy được, set giá trị = ""
+    @PostMapping("mobile-carrier/type/update-all")
     public ResponseEntity<ResponseMessageDTO> updateCarrierTypeForUsers() {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
@@ -204,25 +211,41 @@ public class MobileCarrierController {
             if (accounts != null && !accounts.isEmpty()) {
                 int index = 0;
                 for (AccountLoginEntity account : accounts) {
-                    index++;
-                    String phoneNo = account.getPhoneNo();
-                    if (phoneNo != null && !phoneNo.trim().isEmpty()) {
-                        // 2
-                        String prefix = phoneNo.substring(0, 3);
-                        String carrierTypeId = mobileCarrierService.getTypeIdByPrefix(prefix);
-                        if (carrierTypeId != null) {
-                            // 2.1.
-
+                    if (account != null && account.getId() != null && !account.getId().trim().isEmpty()) {
+                        index++;
+                        String phoneNo = account.getPhoneNo();
+                        if (phoneNo != null && !phoneNo.trim().isEmpty()) {
+                            // 2
+                            String prefix = phoneNo.substring(0, 3);
+                            String carrierTypeId = mobileCarrierService.getTypeIdByPrefix(prefix);
+                            if (carrierTypeId != null) {
+                                // 2.1.
+                                System.out.println("index: " + index + " - phone: " + phoneNo + " - prefix: " + prefix
+                                        + " - carrier: " + carrierTypeId);
+                                accountInformationService.updateCarrierTypeIdByUserId(carrierTypeId, account.getId());
+                            } else {
+                                // 2.2.
+                                System.out.println("index: " + index + " - phone: " + phoneNo + " - prefix: " + prefix
+                                        + " - carrier: " + carrierTypeId);
+                                accountInformationService.updateCarrierTypeIdByUserId("", account.getId());
+                            }
                         } else {
                             // 2.2.
+                            System.out.println("index: " + index + " - phone: " + phoneNo
+                                    + " - carrier: " + "");
+                            accountInformationService.updateCarrierTypeIdByUserId("", account.getId());
                         }
                     } else {
-                        // 2.2.
+                        logger.error("updateCarrierTypeForUsers: account null or userId null");
+                        System.out.println("updateCarrierTypeForUsers: account null or userId null");
                     }
                 }
             }
+            httpStatus = HttpStatus.OK;
+            result = new ResponseMessageDTO("SUCCESS", "");
         } catch (Exception e) {
             logger.error("ERROR at updateCarrierTypeForUsers: " + e.toString());
+            System.out.println("ERROR at updateCarrierTypeForUsers: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
             result = new ResponseMessageDTO("FAILED", "E05");
         }
@@ -230,4 +253,20 @@ public class MobileCarrierController {
     }
 
     // update carrier type nếu user chọn nhà mạng khác
+    @PostMapping("mobile-carrier/type/update")
+    public ResponseEntity<ResponseMessageDTO> updateCarrierTypeIdByUserId(@RequestBody CarrierTypeUpdateDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            accountInformationService.updateCarrierTypeIdByUserId(dto.getCarrierTypeId(), dto.getUserId());
+            httpStatus = HttpStatus.OK;
+            result = new ResponseMessageDTO("SUCCESS", "");
+        } catch (Exception e) {
+            System.out.println("Error at registerAccount: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
 }

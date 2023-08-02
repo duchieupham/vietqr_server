@@ -21,6 +21,7 @@ public class AccountInformationDTO implements Serializable {
 	private String oldNationalId;
 	private String nationalDate;
 	private String imgId;
+	private String carrierTypeId;
 
 	public AccountInformationDTO() {
 		super();
@@ -70,6 +71,24 @@ public class AccountInformationDTO implements Serializable {
 		this.oldNationalId = oldNationalId;
 		this.nationalDate = nationalDate;
 		this.imgId = imgId;
+	}
+
+	public AccountInformationDTO(String firstName, String middleName, String lastName, String birthDate, String address,
+			int gender, String email, String userId, String nationalId, String oldNationalId, String nationalDate,
+			String imgId, String carrierTypeId) {
+		this.firstName = firstName;
+		this.middleName = middleName;
+		this.lastName = lastName;
+		this.birthDate = birthDate;
+		this.address = address;
+		this.gender = gender;
+		this.email = email;
+		this.userId = userId;
+		this.nationalId = nationalId;
+		this.oldNationalId = oldNationalId;
+		this.nationalDate = nationalDate;
+		this.imgId = imgId;
+		this.carrierTypeId = carrierTypeId;
 	}
 
 	public String getImgId() {
@@ -166,6 +185,14 @@ public class AccountInformationDTO implements Serializable {
 
 	public void setNationalDate(String nationalDate) {
 		this.nationalDate = nationalDate;
+	}
+
+	public String getCarrierTypeId() {
+		return carrierTypeId;
+	}
+
+	public void setCarrierTypeId(String carrierTypeId) {
+		this.carrierTypeId = carrierTypeId;
 	}
 
 }

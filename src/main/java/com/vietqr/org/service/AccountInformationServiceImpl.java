@@ -56,4 +56,9 @@ public class AccountInformationServiceImpl implements AccountInformationService 
 	public UserInfoWalletDTO getUserInforWallet(String userId) {
 		return accountInformationRepo.getUserInforWallet(userId);
 	}
+
+	@Override
+	public void updateCarrierTypeIdByUserId(String carrierTypeId, String userId) {
+		accountInformationRepo.updateCarrierTypeIdByUserId(carrierTypeId, userId);
+	}
 }

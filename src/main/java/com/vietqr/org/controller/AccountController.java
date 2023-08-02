@@ -649,6 +649,7 @@ public class AccountController {
 					result.setOldNationalId(accountInformationEntity.getOldNationalId());
 					result.setNationalDate(accountInformationEntity.getNationalDate());
 					result.setImgId(accountInformationEntity.getImgId());
+					result.setCarrierTypeId(accountInformationEntity.getCarrierTypeId());
 					httpStatus = HttpStatus.OK;
 				} else {
 					logger.error("getUserInformation: EMPTY RECORD ");
@@ -794,6 +795,7 @@ public class AccountController {
 				.claim("address", entity.getAddress())
 				.claim("email", entity.getEmail())
 				.claim("imgId", entity.getImgId())
+				.claim("carrierTypeId", entity.getCarrierTypeId())
 				.claim("authorities",
 						grantedAuthorities.stream()
 								.map(GrantedAuthority::getAuthority)

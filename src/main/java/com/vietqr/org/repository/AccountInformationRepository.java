@@ -38,6 +38,12 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
 	@Query(value = "UPDATE account_information SET img_id = :imgId WHERE user_id = :userId", nativeQuery = true)
 	void updateImage(@Param(value = "imgId") String imgId, @Param(value = "userId") String userId);
 
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_information SET carrier_type_id = :carrierTypeId WHERE user_id = :userId", nativeQuery = true)
+	void updateCarrierTypeIdByUserId(@Param(value = "carrierTypeId") String carrierTypeId,
+			@Param(value = "userId") String userId);
+
 	@Query(value = "SELECT phone_no FROM account_login WHERE id = :userId", nativeQuery = true)
 	String getPhoneNoByUserId(@Param(value = "userId") String userId);
 

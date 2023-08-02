@@ -26,4 +26,6 @@ public interface AccountInformationService {
 	public void udpateStatus(int status, String userId);
 
 	public UserInfoWalletDTO getUserInforWallet(String userId);
+
+	public void updateCarrierTypeIdByUserId(String carrierTypeId, String userId);
 }

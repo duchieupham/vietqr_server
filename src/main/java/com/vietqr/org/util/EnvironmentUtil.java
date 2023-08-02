@@ -1,7 +1,7 @@
 package com.vietqr.org.util;
 
 public class EnvironmentUtil {
-    private static boolean IS_PRODUCTION = false;
+    private static boolean IS_PRODUCTION = true;
 
     // MB Bank
     private static final String BANK_URL_UAT = "https://api-sandbox.mbbank.com.vn/";
@@ -41,7 +41,7 @@ public class EnvironmentUtil {
     private static final String SFTP_OUTPUT_FOLDER = "/usr/data/transactions/out/";
 
     private static final String VNPT_EPAY_WEB_SERVICE_URL_UAT = "http://itopup-test.megapay.net.vn:8082/CDV_Partner_Services/services/Interfaces?wsdl";
-    private static final String VNPT_EPAY_WEB_SERVICE_URL_PROD = "";
+    private static final String VNPT_EPAY_WEB_SERVICE_URL_PROD = "http://itopup-test.megapay.net.vn:8082/CDV_Partner_Services/services/Interfaces?wsdl";
 
     private static final String VNPT_EPAY_KEY_PRIVATE_RSA_UAT = "";
     private static final String VNPT_EPAY_KEY_PRIVATE_RSA_PROD = "";
@@ -50,7 +50,7 @@ public class EnvironmentUtil {
     private static final String VNPT_EPAY_KEY_3DES_PROD = "123456abc";
 
     private static final String VNPT_EPAY_PARTNER_NAME_UAT = "partnerTest";
-    private static final String VNPT_EPAY_PARTNER_NAME_PROD = "";
+    private static final String VNPT_EPAY_PARTNER_NAME_PROD = "partnerTest";
 
     // for recharge into VietQR VN
     private static final String BUSINESS_ID_RECHARGE_UAT = "";
