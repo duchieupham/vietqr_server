@@ -2,7 +2,6 @@ package com.vietqr.org;
 
 import java.io.IOException;
 import java.util.Arrays;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -30,6 +29,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.vietqr.org.security.JWTAuthorizationFilter;
+import com.vietqr.org.util.VNPTEpayUtil;
 // import com.vietqr.org.util.VNPTEpayUtil;
 // import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.WebSocketConfig;
@@ -48,6 +48,9 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// System.out.println("TOPUP");
 		// VNPTEpayUtil.queryBalance("partnerTest");
 		// VNPTEpayUtil.topup(requestId, "partnerTest", "VTT", "0931865469", 10000);
+		// String sign = VNPTEpayUtil.sign("partnerTest",
+		// "MIICXAIBAAKBgQC38UMua2xwkIhemWa/hAtpOcV1mjBDUmNt55RGmJOH2xh2zgoAGrcenWOKAqZggawPHT1GA6fP+577toM5mZcfgYf+S6ALx4OER901rS+d5IsZoOEw1f5f/7IfStES9o+QH0DVUUzGVrWexti6QizvnrCoUs5/N1a1uKGtCwtNiwIDAQABAoGBAKg4JWdraLWdCInzIotdWA44fkPp6d93lmTpl6nkWW+ySDJGhdDIndWKvIB3oe66SD9eTy4bo7nKdP/gTyw7MX9atn7Rt41pNeHVx6UNkuoo6lmevvB3hsSYK0/XtccQu8QkG8nTO4v0ffn6NOp8EMVYWhIUVWdZpcc7Bg9E54UhAkEA3cyO1vthUAlRO/f34sRkctr0beYSd38nZ+HiPxIxtZd++bZLjoNxQFE7XXZaOBfTdrDpB+1cLBXi1jO77dCGewJBANROU8FhNFufe7uGVpSSHrPGjwuw8UMkgKZnkgKnVmVnY+dLwBmmcZKTdur5zWkD4LmVk/83Np578pHeCmv3sDECQAewb8NEM7tylz5c+lsCM/lHXfHxZ/J8lgEj85P8LXz+I4jEqRnntKVmK4ix8a7AJLSYrXt43xkoKRUD9h/oesECQAvIMQO5VkODbUVx5hompceKTGP0tN7qBq21b7fv+25zN2sdnBKQVxswTdgqdsjOK0mBUI5ITSKsdEC+Fsv5GfECQG68h8sCzSQxSsYhjn0lmSzetuJ5wdnGluOu25NEtelrwYmoAaHamifLXl/dCs/7Am5m0OnFKVwo8MbXabP03dk=");
+		// System.out.println("sign: " + sign);
 	}
 
 	@Bean

@@ -44,12 +44,18 @@ public class TransactionWalletEntity implements Serializable {
     @Column(name = "timePaid")
     private long timePaid;
 
+    @Column(name = "otp")
+    private String otp;
+
+    @Column(name = "paymentType")
+    private int paymentType;
+
     public TransactionWalletEntity() {
         super();
     }
 
     public TransactionWalletEntity(String id, String userId, String amount, String content, int status,
-            String transType, String billNumber, long timeCreated, long timePaid) {
+            String transType, String billNumber, long timeCreated, long timePaid, String otp, int paymentType) {
         this.id = id;
         this.userId = userId;
         this.amount = amount;
@@ -59,6 +65,8 @@ public class TransactionWalletEntity implements Serializable {
         this.billNumber = billNumber;
         this.timeCreated = timeCreated;
         this.timePaid = timePaid;
+        this.otp = otp;
+        this.paymentType = paymentType;
     }
 
     public String getId() {
@@ -131,6 +139,22 @@ public class TransactionWalletEntity implements Serializable {
 
     public void setTimePaid(long timePaid) {
         this.timePaid = timePaid;
+    }
+
+    public String getOtp() {
+        return otp;
+    }
+
+    public void setOtp(String otp) {
+        this.otp = otp;
+    }
+
+    public int getPaymentType() {
+        return paymentType;
+    }
+
+    public void setPaymentType(int paymentType) {
+        this.paymentType = paymentType;
     }
 
 }

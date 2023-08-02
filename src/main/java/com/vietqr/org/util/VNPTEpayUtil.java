@@ -17,24 +17,29 @@ import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Random;
+
+import org.apache.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.vietqr.org.service.vnpt.services.InterfacesSoapBindingStub;
 import com.vietqr.org.service.vnpt.services.QueryBalanceResult;
 import com.vietqr.org.service.vnpt.services.TopupResult;
 
-// import sun.misc.BASE64Decoder;
-// import sun.misc.BASE64Encoder;
-
 public class VNPTEpayUtil {
+    private static final Logger logger = Logger.getLogger(VNPTEpayUtil.class);
+
     public static String private_key;
     public static String public_key;
     private static InterfacesSoapBindingStub service = null;
 
     // Read key
     public static void initializeKeys() {
-        private_key = Readfile("keyRSA/private_key.pem");
-        public_key = Readfile("keyRSA/public_key.pem");
+        // private_key = Readfile("keyRSAProd/private_key.pem");
+        // public_key = Readfile("keyRSAProd/public_key.pem");
+        logger.info("URL FILE PATH: " + "/opt/keyRSAProd/private_key.pem");
+        private_key = Readfile("/opt/keyRSAProd/private_key.pem");
+        logger.info("URL FILE PATH: " + "/opt/keyRSAProd/public_key.pem");
+        public_key = Readfile("/opt/keyRSAProd/public_key.pem");
     }
 
     private static String Readfile(String path) {
@@ -54,13 +59,16 @@ public class VNPTEpayUtil {
             fstream.close();
         } catch (Exception e) {
             e.printStackTrace();
+            logger.error("ERROR: Readfile: " + e.toString());
         }
+        logger.info("FILE: " + xau);
         return xau;
     }
 
     public static InterfacesSoapBindingStub getService() throws Exception {
         if (service == null) {
             URL oUrl = new URL(EnvironmentUtil.getVnptEpayWebServiceUrl());
+            logger.info("oURL: " + oUrl);
             service = new InterfacesSoapBindingStub(oUrl, null);
             service.setTimeout(300000);
         }
@@ -87,7 +95,8 @@ public class VNPTEpayUtil {
         return requestID;
     }
 
-    public static void queryBalance(String partnerName) {
+    public static QueryBalanceResult queryBalance(String partnerName) {
+        QueryBalanceResult result = null;
         try {
             String keyPrivateRsa = EnvironmentUtil.getVnptEpayKeyPrivateRSA();
             if (keyPrivateRsa == null || keyPrivateRsa.equals("")) {
@@ -96,7 +105,15 @@ public class VNPTEpayUtil {
             }
             String dataSign = partnerName;
             String sign = sign(dataSign, keyPrivateRsa);
-            QueryBalanceResult result = getService().queryBalance(partnerName, sign);
+            logger.info("sign: " + sign);
+            result = getService().queryBalance(partnerName, sign);
+            logger.info("err code: " + result.getErrorCode());
+            logger.info("msg " + result.getMessage());
+            logger.info("So du tien mat: " + result.getBalance_money());
+            logger.info("So du thuong: " + result.getBalance_bonus());
+            logger.info("So du tam giu: " + result.getBalance_debit());
+            logger.info("So du kha dung: " + result.getBalance_avaiable());
+            //
             System.out.println(result.getErrorCode());
             System.out.println(result.getMessage());
             System.out.println("So du tien mat: " + result.getBalance_money());
@@ -105,8 +122,10 @@ public class VNPTEpayUtil {
             System.out.println("So du kha dung: " + result.getBalance_avaiable());
         } catch (Exception e) {
             System.out.println("ERROR AT queryBalance: " + e.toString());
+            logger.error("ERROR AT queryBalance: " + e.toString());
             e.printStackTrace();
         }
+        return result;
     }
 
     public static String sign(String data, String key_private) {
@@ -161,37 +180,4 @@ public class VNPTEpayUtil {
         }
         return false;
     }
-
-    // public static String sign(String data, String key_private) throws Exception {
-    // System.out.println("KEY PRIVATE: " + key_private);
-    // // Get the BouncyCastleProvider
-    // Provider bouncyCastleProvider = new BouncyCastleProvider();
-
-    // // Add the BouncyCastleProvider to the list of providers
-    // Security.addProvider(bouncyCastleProvider);
-
-    // // Get the private key
-    // PrivateKey privateKey = KeyFactory.getInstance("RSA")
-    // .generatePrivate(new
-    // PKCS8EncodedKeySpec(Base64.getDecoder().decode(key_private)));
-
-    // // Create a Signature object
-    // Signature rsa = Signature.getInstance("SHA1withRSA");
-
-    // // Initialize the Signature object
-    // rsa.initSign(privateKey);
-
-    // // Update the Signature object with the data
-    // rsa.update(data.getBytes());
-
-    // // Sign the data
-    // byte[] signature = rsa.sign();
-
-    // // Encode the signature in base64
-    // String encodedSignature = Base64.getEncoder().encodeToString(signature);
-
-    // // Return the encoded signature
-    // return encodedSignature;
-    // }
-
 }

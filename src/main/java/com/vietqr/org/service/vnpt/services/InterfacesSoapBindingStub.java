@@ -7,7 +7,11 @@
 
 package com.vietqr.org.service.vnpt.services;
 
+import org.apache.log4j.Logger;
+
 public class InterfacesSoapBindingStub extends org.apache.axis.client.Stub implements Interfaces {
+	private static final Logger logger = Logger.getLogger(InterfacesSoapBindingStub.class);
+
 	private java.util.Vector cachedSerClasses = new java.util.Vector();
 	private java.util.Vector cachedSerQNames = new java.util.Vector();
 	private java.util.Vector cachedSerFactories = new java.util.Vector();
@@ -486,7 +490,7 @@ public class InterfacesSoapBindingStub extends org.apache.axis.client.Stub imple
 		_call.setSOAPActionURI("");
 		_call.setSOAPVersion(org.apache.axis.soap.SOAPConstants.SOAP11_CONSTANTS);
 		_call.setOperationName(new javax.xml.namespace.QName("http://services.epay", "queryBalance"));
-
+		logger.info("_call: " + _call.toString());
 		setRequestHeaders(_call);
 		setAttachments(_call);
 		try {
@@ -498,8 +502,10 @@ public class InterfacesSoapBindingStub extends org.apache.axis.client.Stub imple
 				extractAttachments(_call);
 				try {
 					System.out.println("_resp: " + _resp.toString());
+					logger.info("_resp: " + _resp.toString());
 					return (QueryBalanceResult) _resp;
 				} catch (java.lang.Exception _exception) {
+					logger.error("_exception: " + _exception.toString());
 					return (QueryBalanceResult) org.apache.axis.utils.JavaUtils.convert(_resp,
 							QueryBalanceResult.class);
 				}

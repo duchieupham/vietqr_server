@@ -25,6 +25,7 @@ import com.vietqr.org.service.TransactionWalletService;
 import com.vietqr.org.util.EnvironmentUtil;
 import com.vietqr.org.util.RandomCodeUtil;
 import com.vietqr.org.util.VietQRUtil;
+import com.vietqr.org.dto.RequestPaymentDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.TransWalletInsertDTO;
 import com.vietqr.org.dto.VietQRDTO;
@@ -59,6 +60,21 @@ public class TransactionWalletController {
 
     @Autowired
     TransactionReceiveBranchService transactionReceiveBranchService;
+
+    @PostMapping("transaction-wallet/request-payment")
+    public ResponseEntity<ResponseMessageDTO> requestPayment(@RequestBody RequestPaymentDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+
+        } catch (Exception e) {
+            logger.error("requestPayment: Error " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 
     @PostMapping("transaction-wallet")
     public ResponseEntity<Object> insertTransactionWallet(@RequestBody TransWalletInsertDTO dto) {
