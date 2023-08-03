@@ -131,7 +131,7 @@ public class VNPTEpayController {
                                                     String notiType = NotificationUtil.getNotiMobileTopup();
                                                     String title = NotificationUtil.getNotiTitleMobileTopup();
                                                     String message = NotificationUtil.getNotiDescMobileTopup1()
-                                                            + "+" + nf.format(amount + "")
+                                                            + "+" + nf.format(amount)
                                                             + NotificationUtil.getNotiDescMobileTopup2()
                                                             + dto.getPhoneNo()
                                                             + NotificationUtil.getNotiDescMobileTopup3();
@@ -164,6 +164,8 @@ public class VNPTEpayController {
                                                                 "WS: socketHandler.sendMessageToUser - RECHARGE ERROR: "
                                                                         + e.toString());
                                                     }
+                                                    result = new ResponseMessageDTO("SUCCESS", "");
+                                                    httpStatus = HttpStatus.OK;
                                                 } else {
                                                     logger.error("rechargeMobile: CANNOT FIND USER INFORMATION");
                                                     result = new ResponseMessageDTO("FAILED", "E59");
@@ -236,7 +238,7 @@ public class VNPTEpayController {
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
-            System.out.println("Error at registerAccount: " + e.toString());
+            System.out.println("Error at rechargeMobile: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
