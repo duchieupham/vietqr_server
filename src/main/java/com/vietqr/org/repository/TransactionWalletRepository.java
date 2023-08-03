@@ -30,4 +30,19 @@ public interface TransactionWalletRepository extends JpaRepository<TransactionWa
     @Query(value = "UPDATE transaction_wallet SET status = :status, time_paid = :timePaid WHERE id = :id", nativeQuery = true)
     void updateTransactionWalletStatus(@Param(value = "status") int status,
             @Param(value = "timePaid") long timePaid, @Param(value = "id") String id);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE transaction_wallet SET status = :status, time_paid = :timePaid, amount = :amount WHERE user_id = :userId AND otp = :otp AND payment_type = :paymentType AND status = 0", nativeQuery = true)
+    void updateTransactionWallet(@Param(value = "status") int status,
+            @Param(value = "timePaid") long timePaid,
+            @Param(value = "amount") String amount,
+            @Param(value = "userId") String userId,
+            @Param(value = "otp") String otp,
+            @Param(value = "paymentType") int paymentType);
+
+    @Query(value = "SELECT id FROM transaction_wallet WHERE otp = :otp AND user_id = :userId AND payment_type = :paymentType AND status = 0", nativeQuery = true)
+    String checkExistedTransactionnWallet(@Param(value = "otp") String otp,
+            @Param(value = "userId") String userId,
+            @Param(value = "paymentType") int paymentType);
 }

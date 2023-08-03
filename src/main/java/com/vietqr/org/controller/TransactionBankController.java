@@ -324,7 +324,8 @@ public class TransactionBankController {
 												String notiType = NotificationUtil.getNotiRecharge();
 												String title = NotificationUtil.getNotiTitleRecharge();
 												String message = NotificationUtil.getNotiDescRecharge1()
-														+ dto.getAmount() + NotificationUtil.getNotiDescRecharge2();
+														+ "+" + nf.format(dto.getAmount())
+														+ NotificationUtil.getNotiDescRecharge2();
 												NotificationEntity notiEntity = new NotificationEntity();
 												notiEntity.setId(notificationUUID.toString());
 												notiEntity.setRead(false);

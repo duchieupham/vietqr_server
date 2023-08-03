@@ -144,8 +144,8 @@ public class VNPTEpayUtil {
         return null;
     }
 
-    public static void topup(String requestId, String partnerName, String provider, String target, int amount) {
-        System.out.println("requestId: " + requestId);
+    public static int topup(String requestId, String partnerName, String provider, String target, int amount) {
+        int result = 99;
         try {
             String keyPrivateRsa = EnvironmentUtil.getVnptEpayKeyPrivateRSA();
             if (keyPrivateRsa == null || keyPrivateRsa.equals("")) {
@@ -153,15 +153,24 @@ public class VNPTEpayUtil {
                 keyPrivateRsa = private_key;
             }
             String dataSign = requestId + partnerName + provider + target + amount;
-            System.out.println("Data sign: " + dataSign);
+            System.out.println("topup: data sign: " + dataSign);
+            logger.info("topup: data sign: " + dataSign);
+            //
             String sign = sign(dataSign, keyPrivateRsa);
-            System.out.println("sign after process: " + sign);
-            TopupResult result = getService().topup(requestId, partnerName, provider, target, amount, sign);
-            System.out.println("ERROR CODE: " + result.getErrorCode());
-            System.out.println("MESSAGE: " + result.getMessage());
+            System.out.println("topup: sign after process: " + sign);
+            logger.info("topup: sign after process: " + sign);
+            //
+            TopupResult topupResult = getService().topup(requestId, partnerName, provider, target, amount, sign);
+            System.out.println("topup: ERROR CODE: " + topupResult.getErrorCode());
+            System.out.println("topup: MESSAGE: " + topupResult.getMessage());
+            logger.info("topup: ERROR CODE: " + topupResult.getErrorCode());
+            logger.info("topup: MESSAGE: " + topupResult.getMessage());
+            //
+            result = topupResult.getErrorCode();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return result;
     }
 
     public static boolean verify(String data, String sign, String key_public) {

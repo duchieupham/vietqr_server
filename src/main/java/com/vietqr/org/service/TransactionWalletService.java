@@ -18,4 +18,9 @@ public interface TransactionWalletService {
     public List<TransactionWalletEntity> getTransactionWallets();
 
     public void updateTransactionWalletStatus(int status, long timePaid, String id);
+
+    public void updateTransactionWallet(int status, long timePaid, String amount, String userId, String otp,
+            int paymentType);
+
+    public String checkExistedTransactionnWallet(String otp, String userId, int paymentType);
 }

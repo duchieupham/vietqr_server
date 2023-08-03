@@ -10,9 +10,9 @@ public class RequestPaymentDTO implements Serializable {
 
     private String userId;
     private String password;
-    // 1: recharge VQR
-    // 2: recharge mobile
-    // 3: exchange point
+    // 0: recharge VQR
+    // 1: recharge mobile
+    // 2: exchange point
     private int paymentType;
 
     public RequestPaymentDTO() {

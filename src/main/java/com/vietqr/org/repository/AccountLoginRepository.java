@@ -22,6 +22,10 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
 	@Query(value = "SELECT password FROM account_login WHERE id = :userId AND password = :password", nativeQuery = true)
 	String checkOldPassword(@Param(value = "userId") String userId, @Param(value = "password") String password);
 
+	@Query(value = "SELECT id FROM account_login WHERE id = :userId AND password = :password", nativeQuery = true)
+	String checkExistedUserByIdAndPassword(@Param(value = "userId") String userId,
+			@Param(value = "password") String password);
+
 	@Transactional
 	@Modifying
 	@Query(value = "UPDATE account_login SET password = :password WHERE id = :userId", nativeQuery = true)

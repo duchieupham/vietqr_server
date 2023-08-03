@@ -47,4 +47,17 @@ public class RandomCodeUtil {
 		}
 		return new String(randomChars);
 	}
+
+	private static final String DIGITS = "0123456789";
+
+	public static String generateOTP(int length) {
+		Random random = new Random();
+		StringBuilder code = new StringBuilder(length);
+
+		for (int i = 0; i < length; i++) {
+			int index = random.nextInt(DIGITS.length());
+			code.append(DIGITS.charAt(index));
+		}
+		return code.toString();
+	}
 }

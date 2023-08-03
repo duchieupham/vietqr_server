@@ -90,4 +90,9 @@ public class AccountLoginServiceImpl implements AccountLoginService {
 		return accountLoginRepository.getAllAccountLogin();
 	}
 
+	@Override
+	public String checkExistedUserByIdAndPassword(String userId, String password) {
+		return accountLoginRepository.checkExistedUserByIdAndPassword(userId, password);
+	}
+
 }

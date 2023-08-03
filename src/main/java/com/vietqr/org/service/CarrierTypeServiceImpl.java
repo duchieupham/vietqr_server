@@ -24,4 +24,9 @@ public class CarrierTypeServiceImpl implements CarrierTypeService {
         return repo.getCarrierTypes();
     }
 
+    @Override
+    public CarrierTypeEntity getCarrierTypeById(String id) {
+        return repo.getCarrierTypeById(id);
+    }
+
 }

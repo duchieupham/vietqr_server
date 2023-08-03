@@ -13,6 +13,7 @@ public class NotificationUtil {
 	private static final String NOTI_TYPE_REMOVE_MEMBER = "N08";
 	private static final String NOTI_ADD_VIETQR_ID = "N09";
 	private static final String NOTI_RECHARGE = "N10";
+	private static final String NOTI_MOBILE_TOPUP = "N11";
 
 	// Title
 	private static final String NOTI_TITLE_TRANSACTION = "Thông báo biến động số dư";
@@ -24,6 +25,7 @@ public class NotificationUtil {
 	private static final String NOTI_TITLE_REMOVE_MEMBER = "Thông báo từ doanh nghiệp";
 	private static final String NOTI_TITLE_ADD_VIETQR_ID = "Thêm bạn bè";
 	private static final String NOTI_TITLE_RECHARGE = "Thanh toán thành công";
+	private static final String NOTI_TITLE_MOBILE_TOPUP = "Nạp điện thoại thành công";
 
 	// Description
 	private static final String NOTI_DESC_LOGIN_WARNING_PREFIX = "Chúng tôi nhận thấy có lượt đăng nhập từ thiết bị ";
@@ -41,7 +43,30 @@ public class NotificationUtil {
 	private static final String NOTI_DESC_REMOVE_MEMBER = "Bạn vừa được quản lý xoá khỏi Doanh nghiệp ";
 	private static final String NOTI_DESC_ADD_VIETQR_ID = " vừa thêm bạn vào danh bạ của họ. Hãy trở thành bạn bè với nhau trên VietQR VN";
 	private static final String NOTI_DESC_RECHARGE_1 = "Quý khách đã nạp thành công số tiền ";
-	private static final String NOTI_DESC_RECHARGE_2 = ". Cảm ơn quý khách đã sử dụng dịch vụ của VietQR VN";
+	private static final String NOTI_DESC_RECHARGE_2 = " VQR. Cảm ơn quý khách đã sử dụng dịch vụ của VietQR VN";
+	private static final String NOTI_DESC_MOBILE_TOPUP_1 = "Quý khách đã nạp thành công số tiền ";
+	private static final String NOTI_DESC_MOBILE_TOPUP_2 = " VND cho số điện thoại ";
+	private static final String NOTI_DESC_MOBILE_TOPUP_3 = ". Cảm ơn quý khách đã sử dụng dịch vụ của VietQR VN";
+
+	public static String getNotiMobileTopup() {
+		return NOTI_MOBILE_TOPUP;
+	}
+
+	public static String getNotiTitleMobileTopup() {
+		return NOTI_TITLE_MOBILE_TOPUP;
+	}
+
+	public static String getNotiDescMobileTopup1() {
+		return NOTI_DESC_MOBILE_TOPUP_1;
+	}
+
+	public static String getNotiDescMobileTopup2() {
+		return NOTI_DESC_MOBILE_TOPUP_2;
+	}
+
+	public static String getNotiDescMobileTopup3() {
+		return NOTI_DESC_MOBILE_TOPUP_3;
+	}
 
 	public static String getNotiRecharge() {
 		return NOTI_RECHARGE;

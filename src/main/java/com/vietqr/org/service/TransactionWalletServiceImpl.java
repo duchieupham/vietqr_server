@@ -45,4 +45,15 @@ public class TransactionWalletServiceImpl implements TransactionWalletService {
         return repo.getTransactionWalletByBillNumber(billNumber);
     }
 
+    @Override
+    public void updateTransactionWallet(int status, long timePaid, String amount, String userId, String otp,
+            int paymentType) {
+        repo.updateTransactionWallet(status, timePaid, amount, userId, otp, paymentType);
+    }
+
+    @Override
+    public String checkExistedTransactionnWallet(String otp, String userId, int paymentType) {
+        return repo.checkExistedTransactionnWallet(otp, userId, paymentType);
+    }
+
 }

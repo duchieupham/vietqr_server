@@ -66,12 +66,67 @@ public class TransactionWalletController {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-
+            if (dto != null) {
+                String checkExisted = accountLoginService.checkExistedUserByIdAndPassword(dto.getUserId(),
+                        dto.getPassword());
+                if (checkExisted != null && !checkExisted.trim().isEmpty()) {
+                    // 1. check payment type
+                    // 2.1 if = 0. now ignore
+                    // 2.2 if = 1. do
+                    // 2.2.1 do insert transaction wallet => type = 0 & otp & payment type = 1
+                    // 2.2.2 response otp
+                    // 2.3 if = 2. now ignore
+                    // 2.4 if != 1|2|3. response error
+                    if (dto.getPaymentType() == 0) {
+                        logger.error("requestPayment: WRONG PAYMENT TYPE");
+                        result = new ResponseMessageDTO("FAILED", "E56");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    } else if (dto.getPaymentType() == 1) {
+                        // insert transaction_wallet
+                        UUID transWalletUUID = UUID.randomUUID();
+                        String billNumber = "VPM" + RandomCodeUtil.generateRandomId(10);
+                        String otp = RandomCodeUtil.generateOTP(6);
+                        LocalDateTime currentDateTime = LocalDateTime.now();
+                        long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+                        TransactionWalletEntity transactionWalletEntity = new TransactionWalletEntity();
+                        transactionWalletEntity.setId(transWalletUUID.toString());
+                        transactionWalletEntity.setAmount("0");
+                        transactionWalletEntity.setBillNumber(billNumber);
+                        transactionWalletEntity.setContent("");
+                        transactionWalletEntity.setStatus(0);
+                        transactionWalletEntity.setTimeCreated(time);
+                        transactionWalletEntity.setTimePaid(0);
+                        transactionWalletEntity.setTransType("D");
+                        transactionWalletEntity.setUserId(dto.getUserId());
+                        transactionWalletEntity.setOtp(otp);
+                        transactionWalletEntity.setPaymentType(1);
+                        transactionWalletService.insertTransactionWallet(transactionWalletEntity);
+                        //
+                        result = new ResponseMessageDTO("SUCCESS", otp);
+                        httpStatus = HttpStatus.OK;
+                    } else if (dto.getPaymentType() == 2) {
+                        logger.error("requestPayment: WRONG PAYMENT TYPE");
+                        result = new ResponseMessageDTO("FAILED", "E56");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    } else {
+                        logger.error("requestPayment: WRONG PAYMENT TYPE");
+                        result = new ResponseMessageDTO("FAILED", "E56");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    }
+                } else {
+                    logger.error("requestPayment: USER NOT FOUND");
+                    result = new ResponseMessageDTO("FAILED", "E55");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                logger.error("requestPayment: INVALID REQUEST BODY");
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
         } catch (Exception e) {
             logger.error("requestPayment: Error " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
-
         }
         return new ResponseEntity<>(result, httpStatus);
     }
@@ -162,6 +217,8 @@ public class TransactionWalletController {
                     transactionWalletEntity.setTimePaid(0);
                     transactionWalletEntity.setTransType("C");
                     transactionWalletEntity.setUserId(userId);
+                    transactionWalletEntity.setOtp("");
+                    transactionWalletEntity.setPaymentType(0);
                     transactionWalletService.insertTransactionWallet(transactionWalletEntity);
                     // final
                     result = vietQRDTO;

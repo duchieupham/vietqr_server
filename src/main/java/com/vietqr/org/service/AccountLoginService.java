@@ -39,4 +39,6 @@ public interface AccountLoginService {
 	public String getUserIdByPhoneNo(String phoneNo);
 
 	public List<AccountLoginEntity> getAllAccountLogin();
+
+	public String checkExistedUserByIdAndPassword(String userId, String password);
 }

@@ -13,4 +13,5 @@ public interface CarrierTypeService {
 
     public List<CarrierTypeEntity> getCarrierTypes();
 
+    public CarrierTypeEntity getCarrierTypeById(String id);
 }
