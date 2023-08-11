@@ -9,8 +9,10 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.io.IOException;
 import java.text.NumberFormat;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.Base64;
@@ -59,9 +61,11 @@ import com.vietqr.org.service.BusinessInformationService;
 import com.vietqr.org.service.CustomerSyncService;
 import com.vietqr.org.service.BranchInformationService;
 import com.vietqr.org.service.NotificationService;
+import com.vietqr.org.service.TelegramAccountBankService;
 import com.vietqr.org.service.TextToSpeechService;
 import com.vietqr.org.service.FcmTokenService;
 import com.vietqr.org.service.FirebaseMessagingService;
+import com.vietqr.org.service.LarkAccountBankService;
 import com.vietqr.org.service.AccountBankReceiveService;
 import com.vietqr.org.service.AccountCustomerBankService;
 import com.vietqr.org.service.AccountWalletService;
@@ -88,11 +92,13 @@ import com.vietqr.org.dto.TokenDTO;
 import com.vietqr.org.util.NotificationUtil;
 import com.vietqr.org.util.RandomCodeUtil;
 import com.vietqr.org.util.SocketHandler;
+import com.vietqr.org.util.TelegramUtil;
 
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import com.vietqr.org.util.EnvironmentUtil;
+import com.vietqr.org.util.LarkUtil;
 
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
@@ -149,6 +155,12 @@ public class TransactionBankController {
 
 	@Autowired
 	private TextToSpeechService textToSpeechService;
+
+	@Autowired
+	TelegramAccountBankService telegramAccountBankService;
+
+	@Autowired
+	LarkAccountBankService larkAccountBankService;
 
 	@Autowired
 	private AccountCustomerBankService accountCustomerBankService;
@@ -257,37 +269,6 @@ public class TransactionBankController {
 							String sign = "";
 							if (traceId != null && !traceId.isEmpty()) {
 								logger.info("transaction-sync - trace ID detect: " + traceId);
-								// change here.
-								// if dto trans_type = D => do 2 things: find type D and C and do insert D
-								// beside.
-								// if dto tran_type = C => just do 1 thing find.
-								// if (dto.getTransType().trim().toUpperCase().equals("D")) {
-
-								// // find type D existed or not
-								// TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
-								// .getTransactionByTraceIdAndAmount(traceId, dto.getAmount() + "", "D");
-								// if (transactionReceiveEntity != null) {
-								// // if existed -> do update
-								// orderId = transactionReceiveEntity.getOrderId();
-								// sign = transactionReceiveEntity.getSign();
-								// getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
-								// updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time,
-								// nf);
-								// } else {
-								// // if not existed -> do insert
-								// getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
-								// insertNewTransaction(dto, accountBankEntity, time, traceId, uuid, nf, "",
-								// "");
-								// // find another C in system
-								// TransactionReceiveEntity transactionReceiveEntityC =
-								// transactionReceiveService
-								// .getTransactionByTraceIdAndAmount(traceId, dto.getAmount() + "", "C");
-								// if (transactionReceiveEntityC != null) {
-								// updateTransaction(dto, transactionReceiveEntityC, accountBankEntity, time,
-								// nf);
-								// }
-								// }
-								// } else {
 								TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
 										.getTransactionByTraceIdAndAmount(traceId, dto.getAmount() + "",
 												dto.getTransType().trim().toUpperCase());
@@ -297,6 +278,7 @@ public class TransactionBankController {
 									getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
 									updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time, nf);
 									// check if recharge => do update status and push data to customer
+									////////// USER RECHAGE VQR
 									if (transactionReceiveEntity.getType() == 5) {
 										// find transactionWallet by billNumber and status = 0
 										TransactionWalletEntity transactionWalletEntity = transactionWalletService
@@ -410,8 +392,14 @@ public class TransactionBankController {
 							transactionBranchEntity.getBranchId());
 			// insert AND push notification to users belong to
 			// admin business/ member of branch
+			String prefix = "";
+			if (dto.getTransType().toUpperCase().equals("D")) {
+				prefix = "-";
+			} else {
+				prefix = "+";
+			}
 			if (userIds != null && !userIds.isEmpty()) {
-				String requestId = "";
+				// String requestId = "";
 				for (String userId : userIds) {
 					// insert notification
 					UUID notificationUUID = UUID.randomUUID();
@@ -420,12 +408,7 @@ public class TransactionBankController {
 							.getBranchById(transactionBranchEntity.getBranchId());
 					BusinessInformationEntity businessEntity = businessInformationService
 							.getBusinessById(branchEntity.getBusinessId());
-					String prefix = "";
-					if (dto.getTransType().toUpperCase().equals("D")) {
-						prefix = "-";
-					} else {
-						prefix = "+";
-					}
+
 					String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
 							+ accountBankEntity.getBankAccount()
 							+ NotificationUtil.getNotiDescUpdateTransSuffix2()
@@ -482,8 +465,40 @@ public class TransactionBankController {
 					// logger.error("TTS-Transaction: Error: " + e.toString());
 					// }
 					// }
+
 				}
-				textToSpeechService.delete(requestId);
+				/////// DO INSERT TELEGRAM
+				List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
+				if (chatIds != null && !chatIds.isEmpty()) {
+					TelegramUtil telegramUtil = new TelegramUtil();
+					String telegramMsg = "Thanh toán thành công 🎉."
+							+ "\nTài khoản: " + bankTypeEntity.getBankShortName() + " - "
+							+ accountBankEntity.getBankAccount()
+							+ "\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
+							+ "\nMã giao dịch: " + dto.getReferencenumber()
+							+ "\nThời gian: " + convertLongToDate(time)
+							+ "\nNội dung: " + dto.getContent();
+					for (String chatId : chatIds) {
+						telegramUtil.sendMsg(chatId, telegramMsg);
+					}
+				}
+
+				/////// DO INSERT LARK
+				List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+				if (webhooks != null && !webhooks.isEmpty()) {
+					LarkUtil larkUtil = new LarkUtil();
+					String larkMsg = "Thanh toán thành công 🎉."
+							+ "\\nTài khoản: " + bankTypeEntity.getBankShortName() + " - "
+							+ accountBankEntity.getBankAccount()
+							+ "\\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
+							+ "\\nMã giao dịch: " + dto.getReferencenumber()
+							+ "\\nThời gian: " + convertLongToDate(time)
+							+ "\\nNội dung: " + dto.getContent();
+					for (String webhook : webhooks) {
+						larkUtil.sendMessageToLark(larkMsg, webhook);
+					}
+				}
+				// textToSpeechService.delete(requestId);
 			} else {
 				logger.info("transaction-sync - userIds empty.");
 			}
@@ -540,6 +555,37 @@ public class TransactionBankController {
 				socketHandler.sendMessageToUser(accountBankEntity.getUserId(), data);
 			} catch (IOException e) {
 				logger.error("WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
+			}
+			/////// DO INSERT TELEGRAM
+			List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
+			if (chatIds != null && !chatIds.isEmpty()) {
+				TelegramUtil telegramUtil = new TelegramUtil();
+				String telegramMsg = "Thanh toán thành công 🎉."
+						+ "\nTài khoản: " + bankTypeEntity.getBankShortName() + " - "
+						+ accountBankEntity.getBankAccount()
+						+ "\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
+						+ "\nMã giao dịch: " + dto.getReferencenumber()
+						+ "\nThời gian: " + convertLongToDate(time)
+						+ "\nNội dung: " + dto.getContent();
+				for (String chatId : chatIds) {
+					telegramUtil.sendMsg(chatId, telegramMsg);
+				}
+			}
+
+			/////// DO INSERT LARK
+			List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+			if (webhooks != null && !webhooks.isEmpty()) {
+				LarkUtil larkUtil = new LarkUtil();
+				String larkMsg = "Thanh toán thành công 🎉."
+						+ "\\nTài khoản: " + bankTypeEntity.getBankShortName() + " - "
+						+ accountBankEntity.getBankAccount()
+						+ "\\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
+						+ "\\nMã giao dịch: " + dto.getReferencenumber()
+						+ "\\nThời gian: " + convertLongToDate(time)
+						+ "\\nNội dung: " + dto.getContent();
+				for (String webhook : webhooks) {
+					larkUtil.sendMessageToLark(larkMsg, webhook);
+				}
 			}
 			// String requestId = "";
 			// requestId = textToSpeechService.requestTTS(accountBankEntity.getUserId(),
@@ -631,10 +677,64 @@ public class TransactionBankController {
 		} catch (IOException e) {
 			logger.error("WS: socketHandler.sendMessageToUser - insertNewTransaction ERROR: " + e.toString());
 		}
+		/////// DO INSERT TELEGRAM
+		List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
+		if (chatIds != null && !chatIds.isEmpty()) {
+			TelegramUtil telegramUtil = new TelegramUtil();
+			String telegramMsg = "Thanh toán thành công 🎉."
+					+ "\nTài khoản: " + bankTypeEntity.getBankShortName() + " - " + accountBankEntity.getBankAccount()
+					+ "\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
+					+ "\nMã giao dịch: " + dto.getReferencenumber()
+					+ "\nThời gian: " + convertLongToDate(time)
+					+ "\nNội dung: " + dto.getContent();
+			for (String chatId : chatIds) {
+				telegramUtil.sendMsg(chatId, telegramMsg);
+			}
+		}
+
+		/////// DO INSERT LARK
+		List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+		if (webhooks != null && !webhooks.isEmpty()) {
+			LarkUtil larkUtil = new LarkUtil();
+			String larkMsg = "Thanh toán thành công 🎉."
+					+ "\\nTài khoản: " + bankTypeEntity.getBankShortName() + " - " + accountBankEntity.getBankAccount()
+					+ "\\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
+					+ "\\nMã giao dịch: " + dto.getReferencenumber()
+					+ "\\nThời gian: " + convertLongToDate(time)
+					+ "\\nNội dung: " + dto.getContent();
+			for (String webhook : webhooks) {
+				larkUtil.sendMessageToLark(larkMsg, webhook);
+			}
+		}
 		// String requestId = "";
 		// requestId = textToSpeechService.requestTTS(accountBankEntity.getUserId(),
 		// data, dto.getAmount() + "");
 		// textToSpeechService.delete(requestId);
+	}
+
+	public String convertLongToDate(long timestamp) {
+		String result = "";
+		try {
+			// Tạo một đối tượng Instant từ timestamp
+			Instant instant = Instant.ofEpochSecond(timestamp);
+
+			// Tạo một đối tượng LocalDateTime từ Instant và ZoneOffset.UTC
+			LocalDateTime dateTime = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+
+			// Chuyển đổi múi giờ từ UTC sang UTC+7
+			ZoneOffset offset = ZoneOffset.ofHours(7);
+			dateTime = dateTime.plusHours(offset.getTotalSeconds() / 3600);
+
+			// Định dạng ngày tháng năm
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+
+			// Chuyển đổi thành chuỗi ngày tháng năm
+			result = dateTime.format(formatter);
+
+		} catch (Exception e) {
+			logger.error("convertLongToDate: ERROR: " + e.toString());
+		}
+		return result;
 	}
 
 	// get token bank product

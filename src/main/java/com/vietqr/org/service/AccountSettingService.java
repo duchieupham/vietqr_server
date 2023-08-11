@@ -12,4 +12,10 @@ public interface AccountSettingService {
     public AccountSettingEntity getAccountSettingEntity(String userId);
 
     public void updateGuideWebByUserId(int guideWeb, String userId);
+
+    public void updateVoiceMobile(int value, String userId);
+
+    public void updateVoiceMobileKiot(int value, String userId);
+
+    public void updateVoiceWeb(int value, String userId);
 }

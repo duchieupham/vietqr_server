@@ -27,4 +27,19 @@ public class AccountSettingServiceImpl implements AccountSettingService {
         return repo.save(entity) == null ? 0 : 1;
     }
 
+    @Override
+    public void updateVoiceMobile(int value, String userId) {
+        repo.updateVoiceMobile(value, userId);
+    }
+
+    @Override
+    public void updateVoiceMobileKiot(int value, String userId) {
+        repo.updateVoiceMobileKiot(value, userId);
+    }
+
+    @Override
+    public void updateVoiceWeb(int value, String userId) {
+        repo.updateVoiceWeb(value, userId);
+    }
+
 }

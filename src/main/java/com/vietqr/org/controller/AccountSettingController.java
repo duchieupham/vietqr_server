@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vietqr.org.dto.AccountSettingUpdateDTO;
+import com.vietqr.org.dto.AccountSettingVoiceDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.entity.AccountSettingEntity;
 import com.vietqr.org.service.AccountSettingService;
@@ -58,8 +59,48 @@ public class AccountSettingController {
         } catch (Exception e) {
             logger.error("updateGuideWebUser: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<ResponseMessageDTO>(result, httpStatus);
+    }
+
+    @PostMapping("accounts/setting/voice")
+    public ResponseEntity<ResponseMessageDTO> updateVoice(@RequestBody AccountSettingVoiceDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            // check type:
+            // 0: mobile
+            // 1: kiot
+            // 2: web
+            if (dto != null) {
+                if (dto.getType() == 0) {
+                    accountSettingService.updateVoiceMobile(dto.getValue(), dto.getUserId());
+                    result = new ResponseMessageDTO("SUCCESS", "");
+                    httpStatus = HttpStatus.OK;
+                } else if (dto.getType() == 1) {
+                    accountSettingService.updateVoiceMobileKiot(dto.getValue(), dto.getUserId());
+                    result = new ResponseMessageDTO("SUCCESS", "");
+                    httpStatus = HttpStatus.OK;
+                } else if (dto.getType() == 2) {
+                    accountSettingService.updateVoiceWeb(dto.getValue(), dto.getUserId());
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    logger.error("updateVoiceMobile: INVALID REQUEST TYPE");
+                    result = new ResponseMessageDTO("FAILED", "E56");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                logger.error("updateVoiceMobile: INVALID REQUEST BODY");
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("updateVoiceMobile: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
     }
 
 }

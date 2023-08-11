@@ -22,6 +22,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -29,9 +30,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.vietqr.org.security.JWTAuthorizationFilter;
-import com.vietqr.org.util.VNPTEpayUtil;
-// import com.vietqr.org.util.VNPTEpayUtil;
-// import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.WebSocketConfig;
 
 @SpringBootApplication
@@ -40,17 +38,22 @@ import com.vietqr.org.util.WebSocketConfig;
 @EnableWebMvc
 public class VietqrApplication extends SpringBootServletInitializer implements WebMvcConfigurer {
 
+	@Bean
+	public RestTemplate restTemplate() {
+		return new RestTemplate();
+	}
+
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
-		// String partnerName = "partnerTest";
-		// String requestId = VNPTEpayUtil.createRequestID(partnerName);
-		// System.out.println("Request ID VNPT EPAY: " + requestId);
-		// System.out.println("TOPUP");
-		// VNPTEpayUtil.queryBalance("partnerTest");
-		// VNPTEpayUtil.topup(requestId, "partnerTest", "VTT", "0931865469", 10000);
-		// String sign = VNPTEpayUtil.sign("partnerTest",
-		// "MIICXAIBAAKBgQC38UMua2xwkIhemWa/hAtpOcV1mjBDUmNt55RGmJOH2xh2zgoAGrcenWOKAqZggawPHT1GA6fP+577toM5mZcfgYf+S6ALx4OER901rS+d5IsZoOEw1f5f/7IfStES9o+QH0DVUUzGVrWexti6QizvnrCoUs5/N1a1uKGtCwtNiwIDAQABAoGBAKg4JWdraLWdCInzIotdWA44fkPp6d93lmTpl6nkWW+ySDJGhdDIndWKvIB3oe66SD9eTy4bo7nKdP/gTyw7MX9atn7Rt41pNeHVx6UNkuoo6lmevvB3hsSYK0/XtccQu8QkG8nTO4v0ffn6NOp8EMVYWhIUVWdZpcc7Bg9E54UhAkEA3cyO1vthUAlRO/f34sRkctr0beYSd38nZ+HiPxIxtZd++bZLjoNxQFE7XXZaOBfTdrDpB+1cLBXi1jO77dCGewJBANROU8FhNFufe7uGVpSSHrPGjwuw8UMkgKZnkgKnVmVnY+dLwBmmcZKTdur5zWkD4LmVk/83Np578pHeCmv3sDECQAewb8NEM7tylz5c+lsCM/lHXfHxZ/J8lgEj85P8LXz+I4jEqRnntKVmK4ix8a7AJLSYrXt43xkoKRUD9h/oesECQAvIMQO5VkODbUVx5hompceKTGP0tN7qBq21b7fv+25zN2sdnBKQVxswTdgqdsjOK0mBUI5ITSKsdEC+Fsv5GfECQG68h8sCzSQxSsYhjn0lmSzetuJ5wdnGluOu25NEtelrwYmoAaHamifLXl/dCs/7Am5m0OnFKVwo8MbXabP03dk=");
-		// System.out.println("sign: " + sign);
+
+		// LarkUtil larkUtil = new LarkUtil();
+		// larkUtil.sendMessageToLark("Thanh toán thành công 🎉."
+		// + "\nTài khoản: 11******89"
+		// + "\nGiao dịch: +50,000 VND"
+		// + "\nMã giao dịch: FT23220783825900"
+		// + "\nThời gian: 08/08/2023 15:30"
+		// + "\nNội dung: VQR88c7832ac4 THANH TOAN NAP TIEN DIEN THOAI");
+
 	}
 
 	@Bean

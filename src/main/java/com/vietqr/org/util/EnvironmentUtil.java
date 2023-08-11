@@ -1,7 +1,15 @@
 package com.vietqr.org.util;
 
 public class EnvironmentUtil {
-    private static boolean IS_PRODUCTION = false;
+    private static boolean IS_PRODUCTION = true;
+
+    // DINO SOFT - VOICE
+    private static final String VOICE_REQUEST_URL = "http://103.141.140.202:8009/tts/v1/speak";
+    private static final String APP_ID_VOICE = "4a5vyvn37z4C5MNGYGsKw3dNo3Vdw4PG";
+    private static final String VOICE_TYPE = "mp3";
+    private static final String VOICE_CODE = "1";
+    private static final String SPEED_RATE = "1.1";
+    private static final int BIT_RATE = 24;
 
     // MB Bank
     private static final String BANK_URL_UAT = "https://api-sandbox.mbbank.com.vn/";
@@ -82,6 +90,43 @@ public class EnvironmentUtil {
     //
     private static final String BANK_TYPE_ID_RECHARGE_UAT = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
     private static final String BANK_TYPE_ID_RECHARGE_PROD = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
+
+    // Social Network config
+    // Telegram
+    private static final String TELEGRAM_BOT_USERNAME = "vietqr_bot";
+    private static final String TELEGRAM_BOT_TOKEN = "6603683411:AAGTCde6C-7kt4gR5gTvcDA_jmYIqs0SJJM";
+
+    public static String getVoiceRequestUrl() {
+        return VOICE_REQUEST_URL;
+    }
+
+    public static String getAppIdVoice() {
+        return APP_ID_VOICE;
+    }
+
+    public static String getVoiceType() {
+        return VOICE_TYPE;
+    }
+
+    public static String getVoiceCode() {
+        return VOICE_CODE;
+    }
+
+    public static String getSpeedRate() {
+        return SPEED_RATE;
+    }
+
+    public static int getBitRate() {
+        return BIT_RATE;
+    }
+
+    public static String getTelegramBotUsername() {
+        return TELEGRAM_BOT_USERNAME;
+    }
+
+    public static String getTelegramBotToken() {
+        return TELEGRAM_BOT_TOKEN;
+    }
 
     public static String getBranchIdRecharge() {
         return (IS_PRODUCTION == false) ? BRANCH_ID_RECHARGE_UAT : BRANCH_ID_RECHARGE_PROD;

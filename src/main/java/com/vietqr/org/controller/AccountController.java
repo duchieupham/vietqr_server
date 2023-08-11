@@ -343,9 +343,9 @@ public class AccountController {
 				accountSettingEntity.setGuideMobile(false);
 				accountSettingEntity.setGuideWeb(false);
 				accountSettingEntity.setStatus(true);
-				accountSettingEntity.setVoiceMobile(false);
-				accountSettingEntity.setVoiceMobileKiot(false);
-				accountSettingEntity.setVoiceWeb(false);
+				accountSettingEntity.setVoiceMobile(true);
+				accountSettingEntity.setVoiceMobileKiot(true);
+				accountSettingEntity.setVoiceWeb(true);
 				accountSettingEntity.setUserId(uuid.toString());
 				accountSettingService.insertAccountSetting(accountSettingEntity);
 				///
