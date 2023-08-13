@@ -110,6 +110,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 					.antMatchers(HttpMethod.POST, "/api/token_generate").permitAll()
 					.antMatchers(HttpMethod.POST, "/bank/api/get_token_bank").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts").permitAll()
+					.antMatchers(HttpMethod.POST, "/api/accounts-admin").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts/login").permitAll()
 					.antMatchers(HttpMethod.GET, "/api/accounts/search/**").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts/register").permitAll()

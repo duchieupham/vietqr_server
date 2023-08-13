@@ -52,6 +52,7 @@ import com.vietqr.org.entity.CustomerSyncEntity;
 import com.vietqr.org.entity.FcmTokenEntity;
 import com.vietqr.org.entity.ImageEntity;
 import com.vietqr.org.entity.NotificationEntity;
+import com.vietqr.org.entity.SystemSettingEntity;
 import com.vietqr.org.service.AccountBankReceiveService;
 import com.vietqr.org.service.AccountInformationService;
 import com.vietqr.org.service.AccountLoginService;
@@ -64,6 +65,8 @@ import com.vietqr.org.service.FirebaseMessagingService;
 import com.vietqr.org.service.ImageService;
 import com.vietqr.org.service.MobileCarrierService;
 import com.vietqr.org.service.NotificationService;
+import com.vietqr.org.service.SystemSettingService;
+import com.vietqr.org.util.LarkUtil;
 import com.vietqr.org.util.NotificationUtil;
 import com.vietqr.org.util.RandomCodeUtil;
 import com.vietqr.org.util.SocketHandler;
@@ -112,6 +115,9 @@ public class AccountController {
 
 	@Autowired
 	MobileCarrierService mobileCarrierService;
+
+	@Autowired
+	SystemSettingService systemSettingService;
 
 	private FirebaseMessagingService firebaseMessagingService;
 
@@ -409,6 +415,18 @@ public class AccountController {
 					customerSyncService.insertCustomerSync(customerSyncEntity);
 				}
 				if (check == 1) {
+					LarkUtil larkUtil = new LarkUtil();
+					String msgSharingCode = "";
+					if (dto.getSharingCode() != null && !dto.getSharingCode().trim().isEmpty()) {
+						msgSharingCode = "\\nĐã nhập mã giới thiệu: " + dto.getSharingCode();
+					}
+					String larkMsg = "Người dùng đăng ký mới 🙋‍♂️"
+							+ "\\nSố điện thoại: " + dto.getPhoneNo()
+							+ "\\nĐăng ký từ nền tảng: " + dto.getPlatform()
+							+ "\\nĐịa chỉ IP: " + dto.getDevice()
+							+ msgSharingCode;
+					SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
+					larkUtil.sendMessageToLark(larkMsg, systemSettingEntity.getWebhookUrl());
 					result = new ResponseMessageDTO("SUCCESS", "");
 					httpStatus = HttpStatus.OK;
 				} else {
