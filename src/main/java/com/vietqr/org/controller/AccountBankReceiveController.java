@@ -38,21 +38,27 @@ import com.vietqr.org.dto.AccountBankReceiveDetailDTO.TransactionBankListDTO;
 import com.vietqr.org.dto.AccountBankReceivePersonalDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.entity.AccountCustomerBankEntity;
+import com.vietqr.org.entity.AccountInformationEntity;
 import com.vietqr.org.entity.BankReceivePersonalEntity;
 import com.vietqr.org.entity.BankTypeEntity;
 import com.vietqr.org.entity.BranchInformationEntity;
 import com.vietqr.org.entity.BusinessInformationEntity;
+import com.vietqr.org.entity.SystemSettingEntity;
 import com.vietqr.org.entity.TransactionReceiveEntity;
 import com.vietqr.org.service.AccountBankReceivePersonalService;
 import com.vietqr.org.service.AccountBankReceiveService;
 import com.vietqr.org.service.AccountCustomerBankService;
+import com.vietqr.org.service.AccountInformationService;
+import com.vietqr.org.service.AccountLoginService;
 import com.vietqr.org.service.BankReceiveBranchService;
 import com.vietqr.org.service.BankTypeService;
 import com.vietqr.org.service.BranchMemberService;
 import com.vietqr.org.service.BusinessInformationService;
 import com.vietqr.org.service.CaiBankService;
 import com.vietqr.org.service.CustomerSyncService;
+import com.vietqr.org.service.SystemSettingService;
 import com.vietqr.org.service.TransactionReceiveService;
+import com.vietqr.org.util.LarkUtil;
 import com.vietqr.org.util.VietQRUtil;
 
 import io.jsonwebtoken.Claims;
@@ -98,6 +104,15 @@ public class AccountBankReceiveController {
 
 	@Autowired
 	AccountCustomerBankService accountCustomerBankService;
+
+	@Autowired
+	AccountLoginService accountLoginService;
+
+	@Autowired
+	AccountInformationService accountInformationService;
+
+	@Autowired
+	SystemSettingService systemSettingService;
 
 	// @GetMapping("account-bank/check/{bankAccount}/{bankTypeId}/{userId}")
 	@GetMapping("account-bank/check/{bankAccount}/{bankTypeId}")
@@ -160,6 +175,36 @@ public class AccountBankReceiveController {
 				personalEntity.setBankId(uuid.toString());
 				personalEntity.setUserId(dto.getUserId());
 				bankReceivePersonalService.insertAccountBankReceivePersonal(personalEntity);
+				//
+				LarkUtil larkUtil = new LarkUtil();
+				String phoneNo = accountInformationService.getPhoneNoByUserId(dto.getUserId());
+				AccountInformationEntity accountInformationEntity = accountInformationService
+						.getAccountInformation(dto.getUserId());
+				String fullname = accountInformationEntity.getLastName() + " "
+						+ accountInformationEntity.getMiddleName() + " " + accountInformationEntity.getFirstName();
+				String email = "";
+				if (accountInformationEntity.getEmail() != null
+						&& !accountInformationEntity.getEmail().trim().isEmpty()) {
+					email = "\\nEmail " + accountInformationEntity.getEmail();
+				}
+				String address = "";
+				if (accountInformationEntity.getAddress() != null
+						&& !accountInformationEntity.getAddress().trim().isEmpty()) {
+					address = "\\nĐịa chỉ: " + accountInformationEntity.getAddress();
+				}
+
+				BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(dto.getBankTypeId());
+				String larkMsg = "💳 Người dùng thêm TK ngân hàng"
+						+ "\\nSố TK: " + dto.getBankAccount()
+						+ "\\nNgân hàng: " + bankTypeEntity.getBankShortName()
+						+ "\\nTên người thụ hưởng: " + dto.getUserBankName()
+						+ "\\nTrạng thái: Chưa liên kết"
+						+ "\\nSĐT đăng nhập: " + phoneNo
+						+ "\\nTên đăng nhập: " + fullname.trim()
+						+ email
+						+ address;
+				SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
+				larkUtil.sendMessageToLark(larkMsg, systemSettingEntity.getWebhookUrl());
 				result = new ResponseMessageDTO("SUCCESS", uuid.toString() + "*" + qr);
 				httpStatus = HttpStatus.OK;
 			} else {
@@ -291,6 +336,37 @@ public class AccountBankReceiveController {
 			accountBankService.updateRegisterAuthenticationBank(dto.getNationalId(), dto.getPhoneAuthenticated(),
 					dto.getBankAccountName(), dto.getBankAccount(),
 					dto.getBankId());
+			//
+			LarkUtil larkUtil = new LarkUtil();
+			AccountBankReceiveEntity accountBankReceiveEntity = accountBankService.getAccountBankById(dto.getBankId());
+			String phoneNo = accountInformationService.getPhoneNoByUserId(accountBankReceiveEntity.getUserId());
+			AccountInformationEntity accountInformationEntity = accountInformationService
+					.getAccountInformation(accountBankReceiveEntity.getUserId());
+			String fullname = accountInformationEntity.getLastName() + " "
+					+ accountInformationEntity.getMiddleName() + " " + accountInformationEntity.getFirstName();
+			String email = "";
+			if (accountInformationEntity.getEmail() != null
+					&& !accountInformationEntity.getEmail().trim().isEmpty()) {
+				email = "\\nEmail " + accountInformationEntity.getEmail();
+			}
+			String address = "";
+			if (accountInformationEntity.getAddress() != null
+					&& !accountInformationEntity.getAddress().trim().isEmpty()) {
+				address = "\\nĐịa chỉ: " + accountInformationEntity.getAddress();
+			}
+
+			String larkMsg = "💳 Người dùng cập nhật liên kết TK ngân hàng"
+					+ "\\nSố TK: " + dto.getBankAccount()
+					+ "\\nNgân hàng: " + "MBBank"
+					+ "\\nTên người thụ hưởng: " + accountBankReceiveEntity.getBankAccountName()
+					+ "\\nSĐT Xác thực: " + dto.getPhoneAuthenticated()
+					+ "\\nTrạng thái: Đã liên kết"
+					+ "\\nSĐT đăng nhập: " + phoneNo
+					+ "\\nTên đăng nhập: " + fullname.trim()
+					+ email
+					+ address;
+			SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
+			larkUtil.sendMessageToLark(larkMsg, systemSettingEntity.getWebhookUrl());
 			result = new ResponseMessageDTO("SUCCESS", "");
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
@@ -336,17 +412,37 @@ public class AccountBankReceiveController {
 			personalEntity.setBankId(uuid.toString());
 			personalEntity.setUserId(dto.getUserId());
 			bankReceivePersonalService.insertAccountBankReceivePersonal(personalEntity);
-			// } else if (dto.getType() == 1) {
-			// // insert bank_receive_branch
-			// UUID uuidBankReceiveBranch = UUID.randomUUID();
-			// BankReceiveBranchEntity bankReceiveBranchEntity = new
-			// BankReceiveBranchEntity();
-			// bankReceiveBranchEntity.setId(uuidBankReceiveBranch.toString());
-			// bankReceiveBranchEntity.setBranchId(dto.getBranchId());
-			// bankReceiveBranchEntity.setBankId(uuid.toString());
-			// bankReceiveBranchEntity.setBusinessId(dto.getBusinessId());
-			// bankReceiveBranchService.insertBankReceiveBranch(bankReceiveBranchEntity);
-			// }
+			//
+			LarkUtil larkUtil = new LarkUtil();
+			// AccountBankReceiveEntity accountBankReceiveEntity =
+			// accountBankService.getAccountBankById(dto.getBankId());
+			String phoneNo = accountInformationService.getPhoneNoByUserId(dto.getUserId());
+			AccountInformationEntity accountInformationEntity = accountInformationService
+					.getAccountInformation(dto.getUserId());
+			String fullname = accountInformationEntity.getLastName() + " "
+					+ accountInformationEntity.getMiddleName() + " " + accountInformationEntity.getFirstName();
+			String email = "";
+			if (accountInformationEntity.getEmail() != null
+					&& !accountInformationEntity.getEmail().trim().isEmpty()) {
+				email = "\\nEmail " + accountInformationEntity.getEmail();
+			}
+			String address = "";
+			if (accountInformationEntity.getAddress() != null
+					&& !accountInformationEntity.getAddress().trim().isEmpty()) {
+				address = "\\nĐịa chỉ: " + accountInformationEntity.getAddress();
+			}
+			String larkMsg = "💳 Người dùng liên kết TK ngân hàng"
+					+ "\\nSố TK: " + dto.getBankAccount()
+					+ "\\nNgân hàng: " + "MBBank"
+					+ "\\nTên người thụ hưởng: " + dto.getUserBankName()
+					+ "\\nSĐT Xác thực: " + dto.getPhoneAuthenticated()
+					+ "\\nTrạng thái: Đã liên kết"
+					+ "\\nSĐT đăng nhập: " + phoneNo
+					+ "\\nTên đăng nhập: " + fullname.trim()
+					+ email
+					+ address;
+			SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
+			larkUtil.sendMessageToLark(larkMsg, systemSettingEntity.getWebhookUrl());
 			result = new ResponseMessageDTO("SUCCESS", uuid.toString() + "*" + qr);
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {

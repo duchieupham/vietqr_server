@@ -50,6 +50,14 @@ public class TransactionWalletEntity implements Serializable {
     @Column(name = "paymentType")
     private int paymentType;
 
+    // 0: VQR
+    // 1: VietQR
+    @Column(name = "paymentMethod")
+    private int paymentMethod;
+
+    @Column(name = "referenceNumber")
+    private String referenceNumber;
+
     public TransactionWalletEntity() {
         super();
     }
@@ -67,6 +75,24 @@ public class TransactionWalletEntity implements Serializable {
         this.timePaid = timePaid;
         this.otp = otp;
         this.paymentType = paymentType;
+    }
+
+    public TransactionWalletEntity(String id, String userId, String amount, String content, int status,
+            String transType, String billNumber, long timeCreated, long timePaid, String otp, int paymentType,
+            int paymentMethod, String referenceNumber) {
+        this.id = id;
+        this.userId = userId;
+        this.amount = amount;
+        this.content = content;
+        this.status = status;
+        this.transType = transType;
+        this.billNumber = billNumber;
+        this.timeCreated = timeCreated;
+        this.timePaid = timePaid;
+        this.otp = otp;
+        this.paymentType = paymentType;
+        this.paymentMethod = paymentMethod;
+        this.referenceNumber = referenceNumber;
     }
 
     public String getId() {
@@ -155,6 +181,22 @@ public class TransactionWalletEntity implements Serializable {
 
     public void setPaymentType(int paymentType) {
         this.paymentType = paymentType;
+    }
+
+    public int getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(int paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getReferenceNumber() {
+        return referenceNumber;
+    }
+
+    public void setReferenceNumber(String referenceNumber) {
+        this.referenceNumber = referenceNumber;
     }
 
 }

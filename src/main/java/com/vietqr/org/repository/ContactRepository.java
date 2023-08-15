@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.vietqr.org.dto.ContactRechargeDTO;
 import com.vietqr.org.entity.ContactEntity;
 
 @Repository
@@ -47,4 +48,16 @@ public interface ContactRepository extends JpaRepository<ContactEntity, Long> {
                         @Param(value = "type") int type,
                         @Param(value = "additionalData") String additionalData,
                         @Param(value = "id") String id);
+
+        @Query(value = "SELECT c.user_id as userId, a.nickname, c.img_id as imgId, d.phone_no as phoneNo, c.carrier_type_id as carrierTypeId "
+                        + "FROM contact a "
+                        + "INNER JOIN account_wallet b "
+                        + "ON a.value = b.wallet_id "
+                        + "INNER JOIN account_information c "
+                        + "ON b.user_id = c.user_id "
+                        + "INNER JOIN account_login d "
+                        + "ON c.user_id = d.id "
+                        + "WHERE a.type = 1 AND a.user_id = :userId "
+                        + "ORDER BY a.nickname ASC ", nativeQuery = true)
+        List<ContactRechargeDTO> getContactRecharge(@Param(value = "userId") String userId);
 }

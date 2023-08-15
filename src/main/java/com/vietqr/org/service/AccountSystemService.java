@@ -9,4 +9,6 @@ public interface AccountSystemService {
     public int insertNewAdmin(AccountSystemEntity entity);
 
     public AccountSystemEntity loginAdmin(String username, String password);
+
+    public String checkExistedAdmin(String id);
 }

@@ -14,4 +14,6 @@ public interface AccountSystemRepository extends JpaRepository<AccountSystemEnti
     AccountSystemEntity loginAdmin(@Param(value = "username") String username,
             @Param(value = "password") String password);
 
+    @Query(value = "SELECT id FROM account_system WHERE id = :id", nativeQuery = true)
+    String checkExistedAdmin(@Param(value = "id") String id);
 }

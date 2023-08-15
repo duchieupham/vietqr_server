@@ -420,7 +420,7 @@ public class AccountController {
 					if (dto.getSharingCode() != null && !dto.getSharingCode().trim().isEmpty()) {
 						msgSharingCode = "\\nĐã nhập mã giới thiệu: " + dto.getSharingCode();
 					}
-					String larkMsg = "Người dùng đăng ký mới 🙋‍♂️"
+					String larkMsg = "🙋‍♂️ Người dùng đăng ký mới"
 							+ "\\nSố điện thoại: " + dto.getPhoneNo()
 							+ "\\nĐăng ký từ nền tảng: " + dto.getPlatform()
 							+ "\\nĐịa chỉ IP: " + dto.getDevice()
@@ -694,6 +694,21 @@ public class AccountController {
 						dto.getLastName(), dto.getBirthDate(), dto.getAddress(), dto.getGender(), dto.getEmail(),
 						dto.getNationalId(), dto.getOldNationalId(), dto.getNationalDate(),
 						dto.getUserId());
+				//
+				LarkUtil larkUtil = new LarkUtil();
+				String phoneNo = accountLoginService.getPhoneNoById(dto.getUserId());
+				String fullname = dto.getLastName() + " " + dto.getMiddleName() + " " + dto.getFirstName();
+				String gender = (dto.getGender() == 0) ? "Nam" : "Nữ";
+				String larkMsg = "🙋‍♂️ Người dùng cập nhật thông tin"
+						+ "\\nSố điện thoại: " + phoneNo
+						+ "\\nHọ tên: " + fullname.trim()
+						+ "\\nĐịa chỉ: " + dto.getAddress()
+						+ "\\nEmail: " + dto.getEmail()
+						+ "\\nNgày sinh: " + dto.getBirthDate()
+						+ "\\nGiới tính: " + gender;
+				SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
+				larkUtil.sendMessageToLark(larkMsg, systemSettingEntity.getWebhookUrl());
+				//
 				result = new ResponseMessageDTO("SUCCESS", "");
 				httpStatus = HttpStatus.OK;
 			} else {

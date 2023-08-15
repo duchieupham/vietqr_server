@@ -56,7 +56,7 @@ public class VoiceController {
                             httpStatus = HttpStatus.OK;
                         } else {
                             logger.info("getTransactionVoice: USER DISABLE VOICE");
-                            result = new ResponseMessageDTO("FAILED", "E59");
+                            result = new ResponseMessageDTO("FAILED", "E69");
                             httpStatus = HttpStatus.BAD_REQUEST;
                         }
                     } else if (dto.getType() == 1) {
@@ -67,7 +67,7 @@ public class VoiceController {
                             httpStatus = HttpStatus.OK;
                         } else {
                             logger.info("getTransactionVoice: USER DISABLE VOICE");
-                            result = new ResponseMessageDTO("FAILED", "E59");
+                            result = new ResponseMessageDTO("FAILED", "E69");
                             httpStatus = HttpStatus.BAD_REQUEST;
                         }
                     } else if (dto.getType() == 2) {
@@ -78,17 +78,17 @@ public class VoiceController {
                             httpStatus = HttpStatus.OK;
                         } else {
                             logger.info("getTransactionVoice: USER DISABLE VOICE");
-                            result = new ResponseMessageDTO("FAILED", "E59");
+                            result = new ResponseMessageDTO("FAILED", "E69");
                             httpStatus = HttpStatus.BAD_REQUEST;
                         }
                     } else {
                         logger.error("getTransactionVoice: WRONG TYPE");
-                        result = new ResponseMessageDTO("FAILED", "E58");
+                        result = new ResponseMessageDTO("FAILED", "E68");
                         httpStatus = HttpStatus.BAD_REQUEST;
                     }
                 } else {
                     logger.error("getTransactionVoice: NOT FOUND USER SETTING");
-                    result = new ResponseMessageDTO("FAILED", "E57");
+                    result = new ResponseMessageDTO("FAILED", "E67");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {

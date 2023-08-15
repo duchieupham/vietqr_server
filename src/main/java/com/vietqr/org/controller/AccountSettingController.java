@@ -87,7 +87,7 @@ public class AccountSettingController {
                     httpStatus = HttpStatus.OK;
                 } else {
                     logger.error("updateVoiceMobile: INVALID REQUEST TYPE");
-                    result = new ResponseMessageDTO("FAILED", "E56");
+                    result = new ResponseMessageDTO("FAILED", "E72");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {

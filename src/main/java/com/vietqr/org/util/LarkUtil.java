@@ -13,20 +13,23 @@ public class LarkUtil {
 
     public boolean sendMessageToLark(String message, String larkWebhookUrl) {
         boolean check = false;
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        // String requestBody = "{\"content\":\"" + message + "\"}";
-        String requestBody = "{\"msg_type\":\"text\",\"content\":{\"text\":\"" + message + "\"}}";
+        if (larkWebhookUrl != null && !larkWebhookUrl.trim().isEmpty()) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            // String requestBody = "{\"content\":\"" + message + "\"}";
+            String requestBody = "{\"msg_type\":\"text\",\"content\":{\"text\":\"" + message + "\"}}";
 
-        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+            HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 
-        ResponseEntity<String> responseEntity = restTemplate.exchange(larkWebhookUrl, HttpMethod.POST, requestEntity,
-                String.class);
-        if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            System.out.println("Tin nhắn đã được gửi đến Lark");
-            check = true;
-        } else {
-            System.out.println("Lỗi khi gửi tin nhắn đến Lark: " + responseEntity.getStatusCode());
+            ResponseEntity<String> responseEntity = restTemplate.exchange(larkWebhookUrl, HttpMethod.POST,
+                    requestEntity,
+                    String.class);
+            if (responseEntity.getStatusCode().is2xxSuccessful()) {
+                System.out.println("Tin nhắn đã được gửi đến Lark");
+                check = true;
+            } else {
+                System.out.println("Lỗi khi gửi tin nhắn đến Lark: " + responseEntity.getStatusCode());
+            }
         }
         return check;
     }

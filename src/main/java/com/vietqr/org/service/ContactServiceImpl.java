@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.vietqr.org.dto.ContactRechargeDTO;
 import com.vietqr.org.entity.ContactEntity;
 import com.vietqr.org.repository.ContactRepository;
 
@@ -52,6 +53,11 @@ public class ContactServiceImpl implements ContactService {
     @Override
     public void updateContact(String nickname, int type, String additionalData, String id) {
         repo.udpateContact(nickname, type, additionalData, id);
+    }
+
+    @Override
+    public List<ContactRechargeDTO> getContactRecharge(String userId) {
+        return repo.getContactRecharge(userId);
     }
 
 }

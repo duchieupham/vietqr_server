@@ -2,6 +2,8 @@ package com.vietqr.org.service;
 
 import org.springframework.stereotype.Service;
 import java.util.List;
+
+import com.vietqr.org.dto.ContactRechargeDTO;
 import com.vietqr.org.entity.ContactEntity;
 
 @Service
@@ -22,4 +24,6 @@ public interface ContactService {
     public ContactEntity getContactById(String id);
 
     public void updateContact(String nickname, int type, String additionalData, String id);
+
+    public List<ContactRechargeDTO> getContactRecharge(String userId);
 }

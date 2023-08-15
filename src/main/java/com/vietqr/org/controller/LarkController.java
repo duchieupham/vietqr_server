@@ -58,7 +58,7 @@ public class LarkController {
                 result = new ResponseMessageDTO("SUCCESS", "");
                 httpStatus = HttpStatus.OK;
             } else {
-                result = new ResponseMessageDTO("FAILED", "E66");
+                result = new ResponseMessageDTO("FAILED", "E71");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {

@@ -99,7 +99,9 @@ public class TransactionWalletController {
                         transactionWalletEntity.setTransType("D");
                         transactionWalletEntity.setUserId(dto.getUserId());
                         transactionWalletEntity.setOtp(otp);
-                        transactionWalletEntity.setPaymentType(1);
+                        transactionWalletEntity.setPaymentType(dto.getPaymentType());
+                        transactionWalletEntity.setPaymentMethod(0);
+                        transactionWalletEntity.setReferenceNumber("");
                         transactionWalletService.insertTransactionWallet(transactionWalletEntity);
                         //
                         result = new ResponseMessageDTO("SUCCESS", otp);
@@ -219,16 +221,17 @@ public class TransactionWalletController {
                     transactionWalletEntity.setUserId(userId);
                     transactionWalletEntity.setOtp("");
                     transactionWalletEntity.setPaymentType(0);
+                    transactionWalletEntity.setPaymentMethod(1);
+                    transactionWalletEntity.setReferenceNumber("");
                     transactionWalletService.insertTransactionWallet(transactionWalletEntity);
                     // final
                     result = vietQRDTO;
                     httpStatus = HttpStatus.OK;
                 } else {
                     logger.error("insertTransactionWallet: USER NOT EXISTED");
-                    result = new ResponseMessageDTO("FAILED", "E50");
+                    result = new ResponseMessageDTO("FAILED", "E59");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
-
             } else {
                 logger.error("insertTransactionWallet: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");

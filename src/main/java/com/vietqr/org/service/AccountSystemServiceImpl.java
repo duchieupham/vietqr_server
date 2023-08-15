@@ -22,4 +22,9 @@ public class AccountSystemServiceImpl implements AccountSystemService {
         return repo.loginAdmin(username, password);
     }
 
+    @Override
+    public String checkExistedAdmin(String id) {
+        return repo.checkExistedAdmin(id);
+    }
+
 }

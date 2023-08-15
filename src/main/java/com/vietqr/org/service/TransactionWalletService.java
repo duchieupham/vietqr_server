@@ -22,5 +22,8 @@ public interface TransactionWalletService {
     public void updateTransactionWallet(int status, long timePaid, String amount, String userId, String otp,
             int paymentType);
 
+    public void updateTransactionWalletConfirm(long timeCreated, String amount, String userId, String otp,
+            int paymentType);
+
     public String checkExistedTransactionnWallet(String otp, String userId, int paymentType);
 }

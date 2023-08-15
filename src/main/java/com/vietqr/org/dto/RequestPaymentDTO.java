@@ -14,6 +14,9 @@ public class RequestPaymentDTO implements Serializable {
     // 1: recharge mobile
     // 2: exchange point
     private int paymentType;
+    // // 0: VQR
+    // // 1: VietQR
+    // private Integer paymentMethod;
 
     public RequestPaymentDTO() {
         super();
@@ -24,6 +27,14 @@ public class RequestPaymentDTO implements Serializable {
         this.password = password;
         this.paymentType = paymentType;
     }
+
+    // public RequestPaymentDTO(String userId, String password, int paymentType,
+    // Integer paymentMethod) {
+    // this.userId = userId;
+    // this.password = password;
+    // this.paymentType = paymentType;
+    // this.paymentMethod = paymentMethod;
+    // }
 
     public String getUserId() {
         return userId;
@@ -48,5 +59,13 @@ public class RequestPaymentDTO implements Serializable {
     public void setPaymentType(int paymentType) {
         this.paymentType = paymentType;
     }
+
+    // public Integer getPaymentMethod() {
+    // return paymentMethod;
+    // }
+
+    // public void setPaymentMethod(Integer paymentMethod) {
+    // this.paymentMethod = paymentMethod;
+    // }
 
 }

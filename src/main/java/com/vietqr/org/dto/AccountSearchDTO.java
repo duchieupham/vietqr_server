@@ -12,4 +12,6 @@ public interface AccountSearchDTO {
     String getLastName();
 
     String getImgId();
+
+    String getCarrierTypeId();
 }

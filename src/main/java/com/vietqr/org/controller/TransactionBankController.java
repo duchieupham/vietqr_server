@@ -68,6 +68,7 @@ import com.vietqr.org.service.FirebaseMessagingService;
 import com.vietqr.org.service.LarkAccountBankService;
 import com.vietqr.org.service.AccountBankReceiveService;
 import com.vietqr.org.service.AccountCustomerBankService;
+import com.vietqr.org.service.AccountLoginService;
 import com.vietqr.org.service.AccountWalletService;
 import com.vietqr.org.service.BankTypeService;
 import com.vietqr.org.entity.TransactionReceiveEntity;
@@ -93,6 +94,7 @@ import com.vietqr.org.util.NotificationUtil;
 import com.vietqr.org.util.RandomCodeUtil;
 import com.vietqr.org.util.SocketHandler;
 import com.vietqr.org.util.TelegramUtil;
+import com.vietqr.org.util.VNPTEpayUtil;
 
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -158,6 +160,9 @@ public class TransactionBankController {
 
 	@Autowired
 	TelegramAccountBankService telegramAccountBankService;
+
+	@Autowired
+	AccountLoginService accountLoginService;
 
 	@Autowired
 	LarkAccountBankService larkAccountBankService;
@@ -278,68 +283,12 @@ public class TransactionBankController {
 									getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
 									updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time, nf);
 									// check if recharge => do update status and push data to customer
-									////////// USER RECHAGE VQR
+									////////// USER RECHAGE VQR || USER RECHARGE MOBILE
 									if (transactionReceiveEntity.getType() == 5) {
 										// find transactionWallet by billNumber and status = 0
 										TransactionWalletEntity transactionWalletEntity = transactionWalletService
 												.getTransactionWalletByBillNumber(orderId);
-										if (transactionWalletEntity != null) {
-											// update transaction wallet
-											transactionWalletService.updateTransactionWalletStatus(1, time,
-													transactionWalletEntity.getId());
-
-											// get userId on transaction wallet
-											String userIdRecharge = transactionWalletEntity.getUserId();
-											if (userIdRecharge != null) {
-												// update amount account wallet
-												AccountWalletEntity accountWalletEntity = accountWalletService
-														.getAccountWalletByUserId(userIdRecharge);
-												if (accountWalletEntity != null) {
-													Long currentAmount = Long
-															.parseLong(accountWalletEntity.getAmount());
-													Long updatedAmount = currentAmount + dto.getAmount();
-													accountWalletService.updateAmount(updatedAmount + "",
-															accountWalletEntity.getId());
-												}
-												// push notification
-												UUID notificationUUID = UUID.randomUUID();
-												String notiType = NotificationUtil.getNotiRecharge();
-												String title = NotificationUtil.getNotiTitleRecharge();
-												String message = NotificationUtil.getNotiDescRecharge1()
-														+ "+" + nf.format(dto.getAmount())
-														+ NotificationUtil.getNotiDescRecharge2();
-												NotificationEntity notiEntity = new NotificationEntity();
-												notiEntity.setId(notificationUUID.toString());
-												notiEntity.setRead(false);
-												notiEntity.setMessage(message);
-												notiEntity.setTime(time);
-												notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
-												notiEntity.setUserId(userIdRecharge);
-												notiEntity.setData(transactionWalletEntity.getId());
-												notificationService.insertNotification(notiEntity);
-												List<FcmTokenEntity> fcmTokens = new ArrayList<>();
-												fcmTokens = fcmTokenService.getFcmTokensByUserId(userIdRecharge);
-												Map<String, String> data = new HashMap<>();
-												data.put("notificationType",
-														notiType);
-												data.put("notificationId", notificationUUID.toString());
-												data.put("amount", dto.getAmount() + "");
-												data.put("billNumber", orderId);
-												data.put("transWalletId", transactionWalletEntity.getId());
-												data.put("time", time + "");
-												firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
-														title, message);
-												try {
-													socketHandler.sendMessageToUser(userIdRecharge,
-															data);
-												} catch (IOException e) {
-													logger.error(
-															"WS: socketHandler.sendMessageToUser - RECHARGE ERROR: "
-																	+ e.toString());
-												}
-											}
-
-										}
+										processTransactionWallet(nf, time, dto, orderId, transactionWalletEntity);
 									}
 								} else {
 									logger.info(
@@ -366,6 +315,250 @@ public class TransactionBankController {
 					logger.error("Transaction-sync:  Error receive data: ");
 				}
 			}
+		}
+	}
+
+	@Async
+	private void processTransactionWallet(NumberFormat nf, long time, TransactionBankDTO dto, String orderId,
+			TransactionWalletEntity entity) {
+		if (entity != null) {
+			// update transaction wallet
+			transactionWalletService.updateTransactionWalletStatus(1, time,
+					entity.getId());
+			// get userId on transaction wallet
+			String userIdRecharge = entity.getUserId();
+			if (userIdRecharge != null) {
+				// check referenceNumber
+				// referenceNumber != null && not empty => check ref.tran.
+				// referenceNumber = null || empty => do insert VQR.
+				if (entity.getReferenceNumber() != null
+						&& !entity.getReferenceNumber().trim()
+								.isEmpty()) {
+					String[] parts = entity.getReferenceNumber()
+							.split("\\*");
+					if (parts.length == 5) {
+						Integer paymentType = Integer.parseInt(parts[0]);
+						String carrierCode = parts[1];
+						String phoneNo = parts[2];
+						String userId = parts[3];
+						String otp = parts[4];
+						if (paymentType != null && userId != null && otp != null) {
+							// check valid transaction by otp & userId
+							// & paymentType & status = 0
+							String check = transactionWalletService
+									.checkExistedTransactionnWallet(otp,
+											userId, 1);
+							if (check != null && !check.trim().isEmpty()) {
+								// find tranMobile by Id
+								TransactionWalletEntity tranMobileEntity = transactionWalletService
+										.getTransactionWalletById(check);
+								if (tranMobileEntity != null) {
+									// call api topup
+									String requestId = VNPTEpayUtil
+											.createRequestID(EnvironmentUtil
+													.getVnptEpayPartnerName());
+									int topupResponseCode = VNPTEpayUtil.topup(
+											requestId,
+											EnvironmentUtil.getVnptEpayPartnerName(),
+											carrierCode,
+											phoneNo,
+											Integer.parseInt(
+													tranMobileEntity.getAmount() + ""));
+									// initial notification data
+									LocalDateTime localTimeM = LocalDateTime
+											.now();
+									long timeM = localTimeM
+											.toEpochSecond(ZoneOffset.UTC);
+									String msgErrorCode = "";
+									UUID notificationUUID = UUID.randomUUID();
+									String notiType = NotificationUtil
+											.getNotiMobileTopup();
+									String title = (topupResponseCode == 0) ? NotificationUtil
+											.getNotiTitleMobileTopup()
+											: NotificationUtil.getNotiTitleMobileTopupFailed();
+									String message = "";
+									if (topupResponseCode == 0) {
+										message = NotificationUtil
+												.getNotiDescMobileTopup1()
+												+ "+"
+												+ nf.format(Long.parseLong(
+														tranMobileEntity.getAmount()))
+												+ NotificationUtil
+														.getNotiDescMobileTopup2()
+												+ phoneNo
+												+ NotificationUtil
+														.getNotiDescMobileTopup3();
+									} else {
+										message = NotificationUtil.getNotiTitleMobileTopupFailed();
+									}
+									String status = (topupResponseCode == 0) ? "SUCCESS" : "FAILED";
+									// process response
+									if (topupResponseCode == 0) {
+										// update transaction wallet mobile recharge by
+										// paymentType
+										// & userId & otp & status = 0
+										transactionWalletService
+												.updateTransactionWallet(1, timeM,
+														tranMobileEntity.getAmount()
+																+ "",
+														userId, otp,
+														1);
+									} else if (topupResponseCode == 23 || topupResponseCode == 99) {
+										msgErrorCode = "E62";
+										transactionWalletService
+												.updateTransactionWallet(3, timeM,
+														tranMobileEntity.getAmount()
+																+ "",
+														userId, otp,
+														1);
+										System.out.println(
+												"transaction-sync: : TRANSACTION FAILED: " + topupResponseCode);
+										logger.error(
+												"transaction-sync: : TRANSACTION FAILED: " + topupResponseCode);
+									} else if (topupResponseCode == 35) {
+										msgErrorCode = "E64";
+										transactionWalletService
+												.updateTransactionWallet(3, timeM,
+														tranMobileEntity.getAmount()
+																+ "",
+														userId, otp,
+														1);
+										System.out.println(
+												"transaction-sync:  VNPT EPAY BUSY TRAFFIC: "
+														+ topupResponseCode);
+										logger.error("transaction-sync:  VNPT EPAY BUSY TRAFFIC: "
+												+ topupResponseCode);
+									} else if (topupResponseCode == 109) {
+										msgErrorCode = "E63";
+										transactionWalletService
+												.updateTransactionWallet(3, timeM,
+														tranMobileEntity.getAmount()
+																+ "",
+														userId, otp,
+														1);
+										System.out.println(
+												"transaction-sync: VNPT EPAY MAINTAN: " + topupResponseCode);
+										logger.error("transaction-sync: VNPT EPAY MAINTAN: " + topupResponseCode);
+									} else {
+										msgErrorCode = "E62";
+										transactionWalletService
+												.updateTransactionWallet(3, timeM,
+														tranMobileEntity.getAmount()
+																+ "",
+														userId, otp,
+														1);
+										System.out.println(
+												"transaction-sync: TRANSACTION FAILED: " + topupResponseCode);
+										logger.error("transaction-sync: TRANSACTION FAILED: " + topupResponseCode);
+									}
+									// push notification
+
+									NotificationEntity notiEntity = new NotificationEntity();
+									notiEntity.setId(notificationUUID.toString());
+									notiEntity.setRead(false);
+									notiEntity.setMessage(message);
+									notiEntity.setTime(time);
+									notiEntity.setType(
+											notiType);
+									notiEntity.setUserId(userId);
+									notiEntity.setData(check);
+									Map<String, String> data = new HashMap<>();
+									data.put("notificationType",
+											notiType);
+									data.put("notificationId",
+											notificationUUID.toString());
+									data.put("amount",
+											tranMobileEntity.getAmount() + "");
+									data.put("transWalletId", check);
+									data.put("time", time + "");
+									data.put("phoneNo", phoneNo);
+									data.put("paymentType", "1");
+									data.put("status", status);
+									data.put("message", msgErrorCode);
+									pushNotification(title, message, notiEntity, data, userId);
+									//
+								} else {
+									System.out.println(
+											"transaction-sync: TRAN MOBILE NULL");
+									logger.error("transaction-sync: TRAN MOBILE NULL");
+								}
+
+							} else {
+								System.out.println("transaction-sync: INVALID OTP");
+								logger.error("transaction-sync: INVALID OTP");
+							}
+
+						} else {
+							System.out.println(
+									"transaction-sync: REFERENCE NUMBER INVALID: "
+											+ entity
+													.getReferenceNumber());
+							logger.error("transaction-sync: REFERENCE NUMBER INVALID: "
+									+ entity.getReferenceNumber());
+						}
+					}
+				} else {
+					// update amount account wallet
+					AccountWalletEntity accountWalletEntity = accountWalletService
+							.getAccountWalletByUserId(userIdRecharge);
+					if (accountWalletEntity != null) {
+						Long currentAmount = Long
+								.parseLong(accountWalletEntity.getAmount());
+						Long updatedAmount = currentAmount + dto.getAmount();
+						accountWalletService.updateAmount(updatedAmount + "",
+								accountWalletEntity.getId());
+					}
+					// push notification
+					UUID notificationUUID = UUID.randomUUID();
+					String notiType = NotificationUtil.getNotiRecharge();
+					String title = NotificationUtil.getNotiTitleRecharge();
+					String message = NotificationUtil.getNotiDescRecharge1()
+							+ "+" + nf.format(dto.getAmount())
+							+ NotificationUtil.getNotiDescRecharge2();
+					NotificationEntity notiEntity = new NotificationEntity();
+					notiEntity.setId(notificationUUID.toString());
+					notiEntity.setRead(false);
+					notiEntity.setMessage(message);
+					notiEntity.setTime(time);
+					notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
+					notiEntity.setUserId(userIdRecharge);
+					notiEntity.setData(entity.getId());
+					Map<String, String> data = new HashMap<>();
+					data.put("notificationType",
+							notiType);
+					data.put("notificationId", notificationUUID.toString());
+					data.put("amount", dto.getAmount() + "");
+					data.put("billNumber", orderId);
+					data.put("transWalletId", entity.getId());
+					data.put("time", time + "");
+					String phoneNo = accountLoginService.getPhoneNoById(userIdRecharge);
+					data.put("phoneNo", phoneNo);
+					data.put("paymentType", "0");
+					pushNotification(title, message, notiEntity, data, userIdRecharge);
+				}
+
+			}
+
+		}
+	}
+
+	private void pushNotification(String title, String message, NotificationEntity notiEntity, Map<String, String> data,
+			String userId) {
+		if (notiEntity != null) {
+			notificationService.insertNotification(notiEntity);
+		}
+		List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+		fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
+		firebaseMessagingService.sendUsersNotificationWithData(data,
+				fcmTokens,
+				title, message);
+		try {
+			socketHandler.sendMessageToUser(userId,
+					data);
+		} catch (IOException e) {
+			logger.error(
+					"transaction-sync: WS: socketHandler.sendMessageToUser - RECHARGE ERROR: "
+							+ e.toString());
 		}
 	}
 
@@ -592,7 +785,6 @@ public class TransactionBankController {
 			// data, dto.getAmount() + "");
 			// textToSpeechService.delete(requestId);
 		}
-
 	}
 
 	// insert new transaction mean it's not created from business. So DO NOT need to

@@ -25,22 +25,30 @@ import org.springframework.web.bind.annotation.RestController;
 import com.vietqr.org.dto.EpayBalanceDTO;
 import com.vietqr.org.dto.MobileRechargeDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
+import com.vietqr.org.dto.VietQRGenerateDTO;
 import com.vietqr.org.entity.AccountWalletEntity;
 import com.vietqr.org.entity.CarrierTypeEntity;
 import com.vietqr.org.entity.FcmTokenEntity;
 import com.vietqr.org.entity.NotificationEntity;
+import com.vietqr.org.entity.TransactionReceiveBranchEntity;
+import com.vietqr.org.entity.TransactionReceiveEntity;
+import com.vietqr.org.entity.TransactionWalletEntity;
 import com.vietqr.org.service.AccountWalletService;
 import com.vietqr.org.service.CarrierTypeService;
 import com.vietqr.org.service.FcmTokenService;
 import com.vietqr.org.service.FirebaseMessagingService;
 import com.vietqr.org.service.NotificationService;
+import com.vietqr.org.service.TransactionReceiveBranchService;
+import com.vietqr.org.service.TransactionReceiveService;
 import com.vietqr.org.service.TransactionWalletService;
 import com.vietqr.org.service.vnpt.services.QueryBalanceResult;
 import com.vietqr.org.util.EnvironmentUtil;
 import com.vietqr.org.util.FormatUtil;
 import com.vietqr.org.util.NotificationUtil;
+import com.vietqr.org.util.RandomCodeUtil;
 import com.vietqr.org.util.SocketHandler;
 import com.vietqr.org.util.VNPTEpayUtil;
+import com.vietqr.org.util.VietQRUtil;
 
 @RestController
 @CrossOrigin
@@ -67,6 +75,12 @@ public class VNPTEpayController {
     FirebaseMessagingService firebaseMessagingService;
 
     @Autowired
+    TransactionReceiveService transactionReceiveService;
+
+    @Autowired
+    TransactionReceiveBranchService transactionReceiveBranchService;
+
+    @Autowired
     private SocketHandler socketHandler;
 
     // api nap tien dien thoai
@@ -78,145 +92,261 @@ public class VNPTEpayController {
     public ResponseEntity<ResponseMessageDTO> rechargeMobile(@RequestBody MobileRechargeDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
+        int paymentVQRType = 0;
+        int paymentMobileRechargeType = 1;
         try {
-            // check phone no
-            // get carrier Type Id
-            // check amount wallet
-            // call api topup
-            // check response => response and notify
             if (dto != null) {
+                // check phone no
+                // get carrier Type Id
+                // check amount wallet
+                // call api topup
+                // check response => response and notify
                 if (FormatUtil.isNumber(dto.getPhoneNo())) {
-                    if (dto.getCarrierTypeId() != null && !dto.getCarrierTypeId().trim().isEmpty()) {
+                    if (dto.getCarrierTypeId() != null &&
+                            !dto.getCarrierTypeId().trim().isEmpty()) {
                         CarrierTypeEntity carrier = carrierTypeService.getCarrierTypeById(dto.getCarrierTypeId());
                         if (carrier != null) {
-                            AccountWalletEntity wallet = accountWalletService.getAccountWalletByUserId(dto.getUserId());
-                            if (wallet != null) {
-                                long amount = getAmountByType(dto.getRechargeType());
-                                if (amount != 0) {
-                                    long balance = Long.parseLong(wallet.getAmount());
-                                    if (balance >= amount) {
-                                        // find transaction by otp and userId
-                                        String check = transactionWalletService
-                                                .checkExistedTransactionnWallet(dto.getOtp(), dto.getUserId(), 1);
-                                        if (check != null && !check.trim().isEmpty()) {
-                                            // call api topup
-                                            String requestId = VNPTEpayUtil
-                                                    .createRequestID(EnvironmentUtil.getVnptEpayPartnerName());
-                                            int topupResponseCode = VNPTEpayUtil.topup(requestId,
-                                                    EnvironmentUtil.getVnptEpayPartnerName(), carrier.getCode(),
-                                                    dto.getPhoneNo(), Integer.parseInt(amount + ""));
-                                            // process response
-                                            if (topupResponseCode == 0) {
-                                                // success
-                                                /// update transaction wallet status success
-                                                LocalDateTime currentDateTime = LocalDateTime.now();
-                                                long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
-                                                transactionWalletService.updateTransactionWallet(1, time, amount + "",
-                                                        dto.getUserId(), dto.getOtp(), 1);
-                                                //
-                                                ///
-                                                // update wallet
-                                                // update amount account wallet
-                                                AccountWalletEntity accountWalletEntity = accountWalletService
-                                                        .getAccountWalletByUserId(dto.getUserId());
-                                                if (accountWalletEntity != null) {
-                                                    Long currentAmount = Long
-                                                            .parseLong(accountWalletEntity.getAmount());
-                                                    Long updatedAmount = currentAmount - amount;
-                                                    accountWalletService.updateAmount(updatedAmount + "",
-                                                            accountWalletEntity.getId());
-                                                    // push notification
-                                                    NumberFormat nf = NumberFormat.getInstance(Locale.US);
-                                                    UUID notificationUUID = UUID.randomUUID();
-                                                    String notiType = NotificationUtil.getNotiMobileTopup();
-                                                    String title = NotificationUtil.getNotiTitleMobileTopup();
-                                                    String message = NotificationUtil.getNotiDescMobileTopup1()
-                                                            + "+" + nf.format(amount)
-                                                            + NotificationUtil.getNotiDescMobileTopup2()
-                                                            + dto.getPhoneNo()
-                                                            + NotificationUtil.getNotiDescMobileTopup3();
-                                                    NotificationEntity notiEntity = new NotificationEntity();
-                                                    notiEntity.setId(notificationUUID.toString());
-                                                    notiEntity.setRead(false);
-                                                    notiEntity.setMessage(message);
-                                                    notiEntity.setTime(time);
-                                                    notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
-                                                    notiEntity.setUserId(dto.getUserId());
-                                                    notiEntity.setData(check);
-                                                    notificationService.insertNotification(notiEntity);
-                                                    List<FcmTokenEntity> fcmTokens = new ArrayList<>();
-                                                    fcmTokens = fcmTokenService.getFcmTokensByUserId(dto.getUserId());
-                                                    Map<String, String> data = new HashMap<>();
-                                                    data.put("notificationType",
-                                                            notiType);
-                                                    data.put("notificationId", notificationUUID.toString());
-                                                    data.put("amount", amount + "");
-                                                    data.put("transWalletId", check);
-                                                    data.put("time", time + "");
-                                                    firebaseMessagingService.sendUsersNotificationWithData(data,
-                                                            fcmTokens,
-                                                            title, message);
-                                                    try {
-                                                        socketHandler.sendMessageToUser(dto.getUserId(),
-                                                                data);
-                                                    } catch (IOException e) {
-                                                        logger.error(
-                                                                "WS: socketHandler.sendMessageToUser - RECHARGE ERROR: "
-                                                                        + e.toString());
+                            // check payment method
+                            if (dto.getPaymentMethod() == null || dto.getPaymentMethod() == 0) {
+                                AccountWalletEntity wallet = accountWalletService
+                                        .getAccountWalletByUserId(dto.getUserId());
+                                if (wallet != null) {
+                                    long amount = getAmountByType(dto.getRechargeType());
+                                    if (amount != 0) {
+                                        long balance = Long.parseLong(wallet.getAmount());
+                                        if (balance >= amount) {
+                                            // find transaction by otp and userId
+                                            String check = transactionWalletService
+                                                    .checkExistedTransactionnWallet(dto.getOtp(), dto.getUserId(), 1);
+                                            if (check != null && !check.trim().isEmpty()) {
+                                                // call api topup
+                                                String requestId = VNPTEpayUtil
+                                                        .createRequestID(EnvironmentUtil.getVnptEpayPartnerName());
+                                                int topupResponseCode = VNPTEpayUtil.topup(requestId,
+                                                        EnvironmentUtil.getVnptEpayPartnerName(), carrier.getCode(),
+                                                        dto.getPhoneNo(), Integer.parseInt(amount + ""));
+                                                // process response
+                                                if (topupResponseCode == 0) {
+                                                    // success
+                                                    /// update transaction wallet status success
+                                                    LocalDateTime currentDateTime = LocalDateTime.now();
+                                                    long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+                                                    transactionWalletService.updateTransactionWallet(1, time,
+                                                            amount + "",
+                                                            dto.getUserId(), dto.getOtp(), 1);
+                                                    //
+                                                    ///
+                                                    // update wallet
+                                                    // update amount account wallet
+                                                    AccountWalletEntity accountWalletEntity = accountWalletService
+                                                            .getAccountWalletByUserId(dto.getUserId());
+                                                    if (accountWalletEntity != null) {
+                                                        Long currentAmount = Long
+                                                                .parseLong(accountWalletEntity.getAmount());
+                                                        Long updatedAmount = currentAmount - amount;
+                                                        accountWalletService.updateAmount(updatedAmount + "",
+                                                                accountWalletEntity.getId());
+                                                        // push notification
+                                                        NumberFormat nf = NumberFormat.getInstance(Locale.US);
+                                                        UUID notificationUUID = UUID.randomUUID();
+                                                        String notiType = NotificationUtil.getNotiMobileTopup();
+                                                        String title = NotificationUtil.getNotiTitleMobileTopup();
+                                                        String message = NotificationUtil.getNotiDescMobileTopup1()
+                                                                + "+" + nf.format(amount)
+                                                                + NotificationUtil.getNotiDescMobileTopup2()
+                                                                + dto.getPhoneNo()
+                                                                + NotificationUtil.getNotiDescMobileTopup3();
+                                                        NotificationEntity notiEntity = new NotificationEntity();
+                                                        notiEntity.setId(notificationUUID.toString());
+                                                        notiEntity.setRead(false);
+                                                        notiEntity.setMessage(message);
+                                                        notiEntity.setTime(time);
+                                                        notiEntity.setType(
+                                                                notiType);
+                                                        notiEntity.setUserId(dto.getUserId());
+                                                        notiEntity.setData(check);
+                                                        notificationService.insertNotification(notiEntity);
+                                                        List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+                                                        fcmTokens = fcmTokenService
+                                                                .getFcmTokensByUserId(dto.getUserId());
+                                                        Map<String, String> data = new HashMap<>();
+                                                        data.put("notificationType",
+                                                                notiType);
+                                                        data.put("notificationId", notificationUUID.toString());
+                                                        data.put("amount", amount + "");
+                                                        data.put("transWalletId", check);
+                                                        data.put("time", time + "");
+                                                        data.put("phoneNo", dto.getPhoneNo());
+                                                        data.put("paymentType", paymentMobileRechargeType + "");
+                                                        data.put("status", "SUCCESS");
+                                                        data.put("message", "");
+                                                        firebaseMessagingService.sendUsersNotificationWithData(data,
+                                                                fcmTokens,
+                                                                title, message);
+                                                        try {
+                                                            socketHandler.sendMessageToUser(dto.getUserId(),
+                                                                    data);
+                                                        } catch (IOException e) {
+                                                            logger.error(
+                                                                    "WS: socketHandler.sendMessageToUser - RECHARGE ERROR: "
+                                                                            + e.toString());
+                                                        }
+                                                        result = new ResponseMessageDTO("SUCCESS", "");
+                                                        httpStatus = HttpStatus.OK;
+                                                    } else {
+                                                        logger.error("rechargeMobile: CANNOT FIND USER INFORMATION");
+                                                        result = new ResponseMessageDTO("FAILED", "E59");
+                                                        httpStatus = HttpStatus.BAD_REQUEST;
                                                     }
-                                                    result = new ResponseMessageDTO("SUCCESS", "");
-                                                    httpStatus = HttpStatus.OK;
+
+                                                } else if (topupResponseCode == 23 || topupResponseCode == 99) {
+                                                    // processing
+                                                    // update transaction wallet status vnpt epay pending
+                                                    logger.error(
+                                                            "rechargeMobile: TRANSACTION FAILED: " + topupResponseCode);
+                                                    result = new ResponseMessageDTO("FAILED", "E62");
+                                                    httpStatus = HttpStatus.BAD_REQUEST;
+                                                } else if (topupResponseCode == 35) {
+                                                    // traffic busy
+                                                    logger.error(
+                                                            "rechargeMobile: VNPT EPAY BUSY TRAFFIC: "
+                                                                    + topupResponseCode);
+                                                    result = new ResponseMessageDTO("FAILED", "E64");
+                                                    httpStatus = HttpStatus.BAD_REQUEST;
+                                                } else if (topupResponseCode == 109) {
+                                                    // maintain VNPT Epay
+                                                    logger.error(
+                                                            "rechargeMobile: VNPT EPAY MAINTAN: " + topupResponseCode);
+                                                    result = new ResponseMessageDTO("FAILED", "E63");
+                                                    httpStatus = HttpStatus.BAD_REQUEST;
                                                 } else {
-                                                    logger.error("rechargeMobile: CANNOT FIND USER INFORMATION");
-                                                    result = new ResponseMessageDTO("FAILED", "E59");
+                                                    // failed
+                                                    logger.error(
+                                                            "rechargeMobile: TRANSACTION FAILED: " + topupResponseCode);
+                                                    result = new ResponseMessageDTO("FAILED", "E62");
                                                     httpStatus = HttpStatus.BAD_REQUEST;
                                                 }
-
-                                            } else if (topupResponseCode == 23 || topupResponseCode == 99) {
-                                                // processing
-                                                // update transaction wallet status vnpt epay pending
-                                                logger.error(
-                                                        "rechargeMobile: TRANSACTION FAILED: " + topupResponseCode);
-                                                result = new ResponseMessageDTO("FAILED", "E62");
-                                                httpStatus = HttpStatus.BAD_REQUEST;
-                                            } else if (topupResponseCode == 35) {
-                                                // traffic busy
-                                                logger.error(
-                                                        "rechargeMobile: VNPT EPAY BUSY TRAFFIC: " + topupResponseCode);
-                                                result = new ResponseMessageDTO("FAILED", "E64");
-                                                httpStatus = HttpStatus.BAD_REQUEST;
-                                            } else if (topupResponseCode == 109) {
-                                                // maintain VNPT Epay
-                                                logger.error("rechargeMobile: VNPT EPAY MAINTAN: " + topupResponseCode);
-                                                result = new ResponseMessageDTO("FAILED", "E63");
-                                                httpStatus = HttpStatus.BAD_REQUEST;
                                             } else {
-                                                // failed
-                                                logger.error(
-                                                        "rechargeMobile: TRANSACTION FAILED: " + topupResponseCode);
-                                                result = new ResponseMessageDTO("FAILED", "E62");
+                                                logger.error("rechargeMobile: INVALID OTP");
+                                                result = new ResponseMessageDTO("FAILED", "E65");
                                                 httpStatus = HttpStatus.BAD_REQUEST;
                                             }
                                         } else {
-                                            logger.error("rechargeMobile: INVALID OTP");
-                                            result = new ResponseMessageDTO("FAILED", "E65");
+                                            logger.error("rechargeMobile: INVALID ACCOUNT BALANCE");
+                                            result = new ResponseMessageDTO("FAILED", "E61");
                                             httpStatus = HttpStatus.BAD_REQUEST;
                                         }
                                     } else {
-                                        logger.error("rechargeMobile: INVALID ACCOUNT BALANCE");
-                                        result = new ResponseMessageDTO("FAILED", "E61");
+                                        logger.error("rechargeMobile: INVALID RECHARGE TYPE");
+                                        result = new ResponseMessageDTO("FAILED", "E60");
                                         httpStatus = HttpStatus.BAD_REQUEST;
                                     }
                                 } else {
-                                    logger.error("rechargeMobile: INVALID RECHARGE TYPE");
-                                    result = new ResponseMessageDTO("FAILED", "E60");
+                                    logger.error("rechargeMobile: CANNOT FIND USER INFORMATION");
+                                    result = new ResponseMessageDTO("FAILED", "E59");
+                                    httpStatus = HttpStatus.BAD_REQUEST;
+                                }
+                            } else if (dto.getPaymentMethod() == 1) {
+                                // initial data
+                                String check = transactionWalletService
+                                        .checkExistedTransactionnWallet(dto.getOtp(), dto.getUserId(), 1);
+                                if (check != null && !check.trim().isEmpty()) {
+                                    UUID transReceiveUUID = UUID.randomUUID();
+                                    UUID transcationReceiveBranchUUID = UUID.randomUUID();
+                                    UUID transWalletVQRUUID = UUID.randomUUID();
+                                    LocalDateTime currentDateTime = LocalDateTime.now();
+                                    long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+                                    long amount = getAmountByType(dto.getRechargeType());
+                                    //
+                                    String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
+                                    String billNumberVQR = "VRC" + RandomCodeUtil.generateRandomId(10);
+                                    String content = traceId + " " + billNumberVQR;
+                                    // get bank recharge information
+                                    String bankAccount = EnvironmentUtil.getBankAccountRecharge();
+                                    String bankId = EnvironmentUtil.getBankIdRecharge();
+                                    String bankLogo = EnvironmentUtil.getBankLogoIdRecharge();
+                                    String cai = EnvironmentUtil.getCAIRecharge();
+                                    String businessId = EnvironmentUtil.getBusinessIdRecharge();
+                                    String branchId = EnvironmentUtil.getBranchIdRecharge();
+                                    // generate VQR
+                                    VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+                                    vietQRGenerateDTO.setCaiValue(cai);
+                                    vietQRGenerateDTO.setBankAccount(bankAccount);
+                                    vietQRGenerateDTO.setAmount(amount + "");
+                                    vietQRGenerateDTO.setContent(content);
+                                    String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+                                    // insert transaction_receive
+                                    // insert transaction_receive
+                                    TransactionReceiveEntity transactionReceiveEntity = new TransactionReceiveEntity();
+                                    transactionReceiveEntity.setId(transReceiveUUID.toString());
+                                    transactionReceiveEntity.setAmount(amount);
+                                    transactionReceiveEntity.setBankAccount(bankAccount);
+                                    transactionReceiveEntity.setBankId(bankId);
+                                    transactionReceiveEntity.setContent(content);
+                                    transactionReceiveEntity.setRefId("");
+                                    transactionReceiveEntity.setStatus(0);
+                                    transactionReceiveEntity.setTime(time);
+                                    transactionReceiveEntity.setType(5);
+                                    transactionReceiveEntity.setTraceId(traceId);
+                                    transactionReceiveEntity.setTransType("C");
+                                    transactionReceiveEntity.setReferenceNumber("");
+                                    transactionReceiveEntity.setOrderId(billNumberVQR);
+                                    transactionReceiveEntity.setSign("");
+                                    transactionReceiveEntity.setCustomerBankAccount("");
+                                    transactionReceiveEntity.setCustomerBankCode("");
+                                    transactionReceiveEntity.setCustomerName("");
+                                    transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
+                                    // insert transaction branch
+                                    if (businessId != null && branchId != null && !businessId.trim().isEmpty()
+                                            && !branchId.trim().isEmpty()) {
+                                        TransactionReceiveBranchEntity transactionReceiveBranchEntity = new TransactionReceiveBranchEntity();
+                                        transactionReceiveBranchEntity.setId(transcationReceiveBranchUUID.toString());
+                                        transactionReceiveBranchEntity.setBusinessId(businessId);
+                                        transactionReceiveBranchEntity.setBranchId(branchId);
+                                        transactionReceiveBranchEntity
+                                                .setTransactionReceiveId(transReceiveUUID.toString());
+                                        transactionReceiveBranchService
+                                                .insertTransactionReceiveBranch(transactionReceiveBranchEntity);
+                                    }
+                                    // insert transaction_wallet VQR
+                                    TransactionWalletEntity transactionWalletEntity = new TransactionWalletEntity();
+                                    transactionWalletEntity.setId(transWalletVQRUUID.toString());
+                                    transactionWalletEntity.setAmount(amount + "");
+                                    transactionWalletEntity.setBillNumber(billNumberVQR);
+                                    transactionWalletEntity.setContent(content);
+                                    transactionWalletEntity.setStatus(0);
+                                    transactionWalletEntity.setTimeCreated(time);
+                                    transactionWalletEntity.setTimePaid(0);
+                                    transactionWalletEntity.setTransType("C");
+                                    transactionWalletEntity.setUserId(dto.getUserId());
+                                    transactionWalletEntity.setOtp("");
+                                    transactionWalletEntity.setPaymentType(paymentVQRType);
+                                    transactionWalletEntity.setPaymentMethod(1);
+                                    transactionWalletEntity
+                                            .setReferenceNumber(paymentMobileRechargeType + "*" + carrier.getCode()
+                                                    + "*" + dto.getPhoneNo() + "*" + dto.getUserId() + "*"
+                                                    + dto.getOtp());
+                                    transactionWalletService.insertTransactionWallet(transactionWalletEntity);
+                                    // update transaction_wallet mobile recharge
+                                    LocalDateTime currentDateTimeMobile = LocalDateTime.now();
+                                    long timeMobile = currentDateTimeMobile.toEpochSecond(ZoneOffset.UTC);
+                                    transactionWalletService.updateTransactionWalletConfirm(timeMobile, amount + "",
+                                            dto.getUserId(), dto.getOtp(), 1);
+                                    // response billNumber*imgId*QR
+                                    result = new ResponseMessageDTO("SUCCESS",
+                                            billNumberVQR + "*" + bankLogo + "*" + qr);
+                                    httpStatus = HttpStatus.OK;
+                                } else {
+                                    logger.error("rechargeMobile: INVALID OTP");
+                                    result = new ResponseMessageDTO("FAILED", "E65");
                                     httpStatus = HttpStatus.BAD_REQUEST;
                                 }
                             } else {
-                                logger.error("rechargeMobile: CANNOT FIND USER INFORMATION");
-                                result = new ResponseMessageDTO("FAILED", "E59");
+                                logger.error("rechargeMobile: INVALID PAYMENT METHOD");
+                                result = new ResponseMessageDTO("FAILED", "E70");
                                 httpStatus = HttpStatus.BAD_REQUEST;
                             }
+
                         } else {
                             logger.error("rechargeMobile: INVALID CARRIER TYPE ID");
                             result = new ResponseMessageDTO("FAILED", "E58");

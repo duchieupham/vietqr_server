@@ -19,10 +19,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.vietqr.org.dto.ContactDetailDTO;
 import com.vietqr.org.dto.ContactInsertDTO;
 import com.vietqr.org.dto.ContactListDTO;
+import com.vietqr.org.dto.ContactRechargeDTO;
 import com.vietqr.org.dto.ContactScanResultDTO;
 import com.vietqr.org.dto.ContactStatusUpdateDTO;
 import com.vietqr.org.dto.ContactUpdateDTO;
@@ -227,6 +229,23 @@ public class ContactController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
+    // get list contact for recharge
+    @GetMapping("contact/recharge")
+    private ResponseEntity<List<ContactRechargeDTO>> getContactForRecharge(
+            @RequestParam(value = "userId") String userId) {
+        List<ContactRechargeDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            result = contactService.getContactRecharge(userId);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("Error at getContactForRecharge: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+    //
 
     // get list contact approved
     @GetMapping("contact/list-approved/{userId}")

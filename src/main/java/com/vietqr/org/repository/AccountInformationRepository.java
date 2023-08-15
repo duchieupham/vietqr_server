@@ -47,7 +47,7 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
 	@Query(value = "SELECT phone_no FROM account_login WHERE id = :userId", nativeQuery = true)
 	String getPhoneNoByUserId(@Param(value = "userId") String userId);
 
-	@Query(value = "SELECT a.id, a.phone_no as phoneNo, b.first_name as firstName, b.middle_name as middleName, b.last_name as lastName, b.img_id as imgId "
+	@Query(value = "SELECT a.id, a.phone_no as phoneNo, b.first_name as firstName, b.middle_name as middleName, b.last_name as lastName, b.img_id as imgId, b.carrier_type_id as carrierTypeId "
 			+ "FROM account_login a "
 			+ "INNER JOIN account_information b "
 			+ "ON a.id = b.user_id "

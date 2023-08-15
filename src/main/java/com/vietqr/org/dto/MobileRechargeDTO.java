@@ -19,6 +19,9 @@ public class MobileRechargeDTO implements Serializable {
     private int rechargeType;
     private String carrierTypeId;
     private String otp;
+    // 0: VQR Unit
+    // 1: VietQR Scan
+    private Integer paymentMethod;
 
     public MobileRechargeDTO() {
         super();
@@ -30,6 +33,16 @@ public class MobileRechargeDTO implements Serializable {
         this.rechargeType = rechargeType;
         this.carrierTypeId = carrierTypeId;
         this.otp = otp;
+    }
+
+    public MobileRechargeDTO(String phoneNo, String userId, int rechargeType, String carrierTypeId, String otp,
+            Integer paymentMethod) {
+        this.phoneNo = phoneNo;
+        this.userId = userId;
+        this.rechargeType = rechargeType;
+        this.carrierTypeId = carrierTypeId;
+        this.otp = otp;
+        this.paymentMethod = paymentMethod;
     }
 
     public String getPhoneNo() {
@@ -70,6 +83,14 @@ public class MobileRechargeDTO implements Serializable {
 
     public void setOtp(String otp) {
         this.otp = otp;
+    }
+
+    public Integer getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(Integer paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 
 }
