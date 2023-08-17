@@ -196,7 +196,7 @@ public class AccountBankReceiveController {
 				BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(dto.getBankTypeId());
 				String larkMsg = "💳 Thêm TK mới: " + bankTypeEntity.getBankShortName()
 						+ "\\nSố TK: " + dto.getBankAccount()
-						+ "\\nTên người thụ hưởng: " + dto.getUserBankName()
+						+ "\\nChủ Tài khoản: " + dto.getUserBankName()
 						+ "\\nTrạng thái: Chưa liên kết"
 						+ "\\nSĐT đăng nhập: " + phoneNo
 						+ "\\nTên đăng nhập: " + fullname.trim()
@@ -356,7 +356,7 @@ public class AccountBankReceiveController {
 
 			String larkMsg = "💳 Liên kết TK: " + "MBBank"
 					+ "\\nSố TK: " + dto.getBankAccount()
-					+ "\\nTên người thụ hưởng: " + accountBankReceiveEntity.getBankAccountName()
+					+ "\\nChủ Tài khoản: " + accountBankReceiveEntity.getBankAccountName()
 					+ "\\nSĐT Xác thực: " + dto.getPhoneAuthenticated()
 					+ "\\nTrạng thái: Đã liên kết"
 					+ "\\nSĐT đăng nhập: " + phoneNo
@@ -431,7 +431,7 @@ public class AccountBankReceiveController {
 			}
 			String larkMsg = "💳 Liên kết TK: " + "MBBank"
 					+ "\\nSố TK: " + dto.getBankAccount()
-					+ "\\nTên người thụ hưởng: " + dto.getUserBankName()
+					+ "\\nChủ Tài khoản: " + dto.getUserBankName()
 					+ "\\nSĐT Xác thực: " + dto.getPhoneAuthenticated()
 					+ "\\nTrạng thái: Đã liên kết"
 					+ "\\nSĐT đăng nhập: " + phoneNo
