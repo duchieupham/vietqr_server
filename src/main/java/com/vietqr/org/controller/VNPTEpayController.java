@@ -119,6 +119,8 @@ public class VNPTEpayController {
                                             String check = transactionWalletService
                                                     .checkExistedTransactionnWallet(dto.getOtp(), dto.getUserId(), 1);
                                             if (check != null && !check.trim().isEmpty()) {
+                                                TransactionWalletEntity tranMobileEntity = transactionWalletService
+                                                        .getTransactionWalletById(check);
                                                 // call api topup
                                                 String requestId = VNPTEpayUtil
                                                         .createRequestID(EnvironmentUtil.getVnptEpayPartnerName());
@@ -177,6 +179,8 @@ public class VNPTEpayController {
                                                         data.put("transWalletId", check);
                                                         data.put("time", time + "");
                                                         data.put("phoneNo", dto.getPhoneNo());
+                                                        data.put("billNumber", tranMobileEntity.getBillNumber());
+                                                        data.put("paymentMethod", "0");
                                                         data.put("paymentType", paymentMobileRechargeType + "");
                                                         data.put("status", "SUCCESS");
                                                         data.put("message", "");

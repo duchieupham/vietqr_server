@@ -1,5 +1,7 @@
 package com.vietqr.org.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.entity.AccountInformationEntity;
@@ -24,6 +26,8 @@ public interface AccountInformationService {
 	public AccountSearchDTO getAccountSearch(String phoneNo);
 
 	public void udpateStatus(int status, String userId);
+
+	public List<AccountSearchDTO> getAccountsSearch(String phoneNo);
 
 	public UserInfoWalletDTO getUserInforWallet(String userId);
 

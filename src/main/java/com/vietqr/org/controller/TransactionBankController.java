@@ -472,6 +472,8 @@ public class TransactionBankController {
 									data.put("transWalletId", check);
 									data.put("time", time + "");
 									data.put("phoneNo", phoneNo);
+									data.put("billNumber", tranMobileEntity.getBillNumber());
+									data.put("paymentMethod", "1");
 									data.put("paymentType", "1");
 									data.put("status", status);
 									data.put("message", msgErrorCode);
@@ -533,6 +535,7 @@ public class TransactionBankController {
 					data.put("time", time + "");
 					String phoneNo = accountLoginService.getPhoneNoById(userIdRecharge);
 					data.put("phoneNo", phoneNo);
+					data.put("paymentMethod", "1");
 					data.put("paymentType", "0");
 					pushNotification(title, message, notiEntity, data, userIdRecharge);
 				}

@@ -1,5 +1,7 @@
 package com.vietqr.org.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -60,5 +62,10 @@ public class AccountInformationServiceImpl implements AccountInformationService 
 	@Override
 	public void updateCarrierTypeIdByUserId(String carrierTypeId, String userId) {
 		accountInformationRepo.updateCarrierTypeIdByUserId(carrierTypeId, userId);
+	}
+
+	@Override
+	public List<AccountSearchDTO> getAccountsSearch(String phoneNo) {
+		return accountInformationRepo.getAccountsSearch(phoneNo);
 	}
 }

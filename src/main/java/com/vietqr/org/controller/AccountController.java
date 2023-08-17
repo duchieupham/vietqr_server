@@ -289,6 +289,20 @@ public class AccountController {
 		return new ResponseEntity<Object>(result, httpStatus);
 	}
 
+	@GetMapping("accounts/list/search/{phoneNo}")
+	public ResponseEntity<List<AccountSearchDTO>> searchAccounts(@Valid @PathVariable("phoneNo") String phoneNo) {
+		List<AccountSearchDTO> result = null;
+		HttpStatus httpStatus = null;
+		try {
+			result = accountInformationService.getAccountsSearch(phoneNo);
+			httpStatus = HttpStatus.OK;
+		} catch (Exception e) {
+			System.out.println("Error at searchAccounts: " + e.toString());
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
 	@PostMapping("accounts/register")
 	public ResponseEntity<ResponseMessageDTO> registerAccount(@RequestBody AccountLoginDTO dto) {
 		ResponseMessageDTO result = null;
@@ -420,10 +434,10 @@ public class AccountController {
 					if (dto.getSharingCode() != null && !dto.getSharingCode().trim().isEmpty()) {
 						msgSharingCode = "\\nĐã nhập mã giới thiệu: " + dto.getSharingCode();
 					}
-					String larkMsg = "🙋‍♂️ Người dùng đăng ký mới"
+					String larkMsg = "🙋‍♂️ Người dùng mới"
 							+ "\\nSố điện thoại: " + dto.getPhoneNo()
-							+ "\\nĐăng ký từ nền tảng: " + dto.getPlatform()
-							+ "\\nĐịa chỉ IP: " + dto.getDevice()
+							+ "\\nNền tảng: " + dto.getPlatform()
+							+ "\\nIP: " + dto.getDevice()
 							+ msgSharingCode;
 					SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
 					larkUtil.sendMessageToLark(larkMsg, systemSettingEntity.getWebhookUrl());
@@ -699,7 +713,7 @@ public class AccountController {
 				String phoneNo = accountLoginService.getPhoneNoById(dto.getUserId());
 				String fullname = dto.getLastName() + " " + dto.getMiddleName() + " " + dto.getFirstName();
 				String gender = (dto.getGender() == 0) ? "Nam" : "Nữ";
-				String larkMsg = "🙋‍♂️ Người dùng cập nhật thông tin"
+				String larkMsg = "🧰 Người dùng cập nhật thông tin"
 						+ "\\nSố điện thoại: " + phoneNo
 						+ "\\nHọ tên: " + fullname.trim()
 						+ "\\nĐịa chỉ: " + dto.getAddress()

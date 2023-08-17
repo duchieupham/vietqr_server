@@ -194,9 +194,8 @@ public class AccountBankReceiveController {
 				}
 
 				BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(dto.getBankTypeId());
-				String larkMsg = "💳 Người dùng thêm TK ngân hàng"
+				String larkMsg = "💳 Thêm TK mới: " + bankTypeEntity.getBankShortName()
 						+ "\\nSố TK: " + dto.getBankAccount()
-						+ "\\nNgân hàng: " + bankTypeEntity.getBankShortName()
 						+ "\\nTên người thụ hưởng: " + dto.getUserBankName()
 						+ "\\nTrạng thái: Chưa liên kết"
 						+ "\\nSĐT đăng nhập: " + phoneNo
@@ -355,9 +354,8 @@ public class AccountBankReceiveController {
 				address = "\\nĐịa chỉ: " + accountInformationEntity.getAddress();
 			}
 
-			String larkMsg = "💳 Người dùng cập nhật liên kết TK ngân hàng"
+			String larkMsg = "💳 Liên kết TK: " + "MBBank"
 					+ "\\nSố TK: " + dto.getBankAccount()
-					+ "\\nNgân hàng: " + "MBBank"
 					+ "\\nTên người thụ hưởng: " + accountBankReceiveEntity.getBankAccountName()
 					+ "\\nSĐT Xác thực: " + dto.getPhoneAuthenticated()
 					+ "\\nTrạng thái: Đã liên kết"
@@ -431,9 +429,8 @@ public class AccountBankReceiveController {
 					&& !accountInformationEntity.getAddress().trim().isEmpty()) {
 				address = "\\nĐịa chỉ: " + accountInformationEntity.getAddress();
 			}
-			String larkMsg = "💳 Người dùng liên kết TK ngân hàng"
+			String larkMsg = "💳 Liên kết TK: " + "MBBank"
 					+ "\\nSố TK: " + dto.getBankAccount()
-					+ "\\nNgân hàng: " + "MBBank"
 					+ "\\nTên người thụ hưởng: " + dto.getUserBankName()
 					+ "\\nSĐT Xác thực: " + dto.getPhoneAuthenticated()
 					+ "\\nTrạng thái: Đã liên kết"
