@@ -43,6 +43,9 @@ public class AccountSystemController {
                     String token = getJWTToken(entity);
                     result = token;
                     httpStatus = HttpStatus.OK;
+                } else {
+                    result = "";
+                    httpStatus = HttpStatus.BAD_REQUEST;
                 }
             }
         } catch (Exception e) {
@@ -54,7 +57,7 @@ public class AccountSystemController {
 
     private String getJWTToken(AccountSystemEntity entity) {
         String result = "";
-        String secretKey = "VietQRAdminSecretKey";
+        String secretKey = "mySecretKey";
         List<GrantedAuthority> grantedAuthorities = AuthorityUtils
                 .commaSeparatedStringToAuthorityList("ROLE_USER");
         result = Jwts

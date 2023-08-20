@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.vietqr.org.dto.CustomerSyncInformationDTO;
+import com.vietqr.org.dto.CustomerSyncListDTO;
 import com.vietqr.org.entity.CustomerSyncEntity;
 
 @Service
@@ -20,4 +22,8 @@ public interface CustomerSyncService {
     public void updateCustomerSyncInformation(String information, String userId);
 
     public String checkExistedCustomerSyncByInformation(String information);
+
+    public List<CustomerSyncListDTO> getCustomerSyncList();
+
+    public CustomerSyncInformationDTO getCustomerSyncInformationById(String id);
 }

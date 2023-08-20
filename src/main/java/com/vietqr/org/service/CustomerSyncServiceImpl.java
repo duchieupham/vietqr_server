@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.vietqr.org.dto.CustomerSyncInformationDTO;
+import com.vietqr.org.dto.CustomerSyncListDTO;
 import com.vietqr.org.entity.CustomerSyncEntity;
 import com.vietqr.org.repository.CustomerSyncRepository;
 
@@ -42,6 +44,16 @@ public class CustomerSyncServiceImpl implements CustomerSyncService {
     @Override
     public String checkExistedCustomerSyncByInformation(String information) {
         return repo.checkExistedCustomerSyncByInformation(information);
+    }
+
+    @Override
+    public List<CustomerSyncListDTO> getCustomerSyncList() {
+        return repo.getCustomerSyncList();
+    }
+
+    @Override
+    public CustomerSyncInformationDTO getCustomerSyncInformationById(String id) {
+        return repo.getCustomerSyncInformationById(id);
     }
 
 }
