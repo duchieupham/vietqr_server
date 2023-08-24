@@ -1,5 +1,7 @@
 package com.vietqr.org.controller;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -43,6 +45,7 @@ import com.vietqr.org.entity.BankReceivePersonalEntity;
 import com.vietqr.org.entity.BankTypeEntity;
 import com.vietqr.org.entity.BranchInformationEntity;
 import com.vietqr.org.entity.BusinessInformationEntity;
+import com.vietqr.org.entity.ContactEntity;
 import com.vietqr.org.entity.SystemSettingEntity;
 import com.vietqr.org.entity.TransactionReceiveEntity;
 import com.vietqr.org.service.AccountBankReceivePersonalService;
@@ -55,6 +58,7 @@ import com.vietqr.org.service.BankTypeService;
 import com.vietqr.org.service.BranchMemberService;
 import com.vietqr.org.service.BusinessInformationService;
 import com.vietqr.org.service.CaiBankService;
+import com.vietqr.org.service.ContactService;
 import com.vietqr.org.service.CustomerSyncService;
 import com.vietqr.org.service.SystemSettingService;
 import com.vietqr.org.service.TransactionReceiveService;
@@ -113,6 +117,9 @@ public class AccountBankReceiveController {
 
 	@Autowired
 	SystemSettingService systemSettingService;
+
+	@Autowired
+	ContactService contactService;
 
 	// @GetMapping("account-bank/check/{bankAccount}/{bankTypeId}/{userId}")
 	@GetMapping("account-bank/check/{bankAccount}/{bankTypeId}")
@@ -175,6 +182,27 @@ public class AccountBankReceiveController {
 				personalEntity.setBankId(uuid.toString());
 				personalEntity.setUserId(dto.getUserId());
 				bankReceivePersonalService.insertAccountBankReceivePersonal(personalEntity);
+				// insert contact
+				String checkExistedContact = contactService.checkExistedRecord(dto.getUserId(), qr, 2);
+				if (checkExistedContact == null) {
+					UUID uuidContact = UUID.randomUUID();
+					LocalDateTime currentDateTime = LocalDateTime.now();
+					long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+					ContactEntity contactEntity = new ContactEntity();
+					contactEntity.setId(uuidContact.toString());
+					contactEntity.setUserId(dto.getUserId());
+					contactEntity.setNickname(dto.getUserBankName());
+					contactEntity.setValue(qr);
+					contactEntity.setAdditionalData("");
+					contactEntity.setType(2);
+					contactEntity.setStatus(0);
+					contactEntity.setTime(time);
+					contactEntity.setBankTypeId(dto.getBankTypeId());
+					contactEntity.setBankAccount(dto.getBankAccount());
+					contactEntity.setImgId("");
+					contactEntity.setColorType(0);
+					contactService.insertContact(contactEntity);
+				}
 				//
 				LarkUtil larkUtil = new LarkUtil();
 				String phoneNo = accountInformationService.getPhoneNoByUserId(dto.getUserId());
@@ -410,6 +438,27 @@ public class AccountBankReceiveController {
 			personalEntity.setBankId(uuid.toString());
 			personalEntity.setUserId(dto.getUserId());
 			bankReceivePersonalService.insertAccountBankReceivePersonal(personalEntity);
+			// insert contact
+			String checkExistedContact = contactService.checkExistedRecord(dto.getUserId(), qr, 2);
+			if (checkExistedContact == null) {
+				UUID uuidContact = UUID.randomUUID();
+				LocalDateTime currentDateTime = LocalDateTime.now();
+				long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+				ContactEntity contactEntity = new ContactEntity();
+				contactEntity.setId(uuidContact.toString());
+				contactEntity.setUserId(dto.getUserId());
+				contactEntity.setNickname(dto.getUserBankName());
+				contactEntity.setValue(qr);
+				contactEntity.setAdditionalData("");
+				contactEntity.setType(2);
+				contactEntity.setStatus(0);
+				contactEntity.setTime(time);
+				contactEntity.setBankTypeId(dto.getBankTypeId());
+				contactEntity.setBankAccount(dto.getBankAccount());
+				contactEntity.setImgId("");
+				contactEntity.setColorType(0);
+				contactService.insertContact(contactEntity);
+			}
 			//
 			LarkUtil larkUtil = new LarkUtil();
 			// AccountBankReceiveEntity accountBankReceiveEntity =
@@ -658,6 +707,7 @@ public class AccountBankReceiveController {
 				httpStatus = HttpStatus.BAD_REQUEST;
 			}
 		} catch (Exception e) {
+			System.out.println(e.toString());
 			logger.error(e.toString());
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}

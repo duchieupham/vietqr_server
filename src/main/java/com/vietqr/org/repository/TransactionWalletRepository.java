@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.vietqr.org.dto.TransWalletListDTO;
 import com.vietqr.org.entity.TransactionWalletEntity;
 
 @Repository
@@ -24,6 +26,27 @@ public interface TransactionWalletRepository extends JpaRepository<TransactionWa
 
         @Query(value = "SELECT * FROM transaction_wallet WHERE ORDER BY time_created DESC", nativeQuery = true)
         List<TransactionWalletEntity> getTransactionWallets();
+
+        @Query(value = "SELECT id, amount, bill_number as billNumber, status, trans_type as transType, payment_type as paymentType, payment_method as paymentMethod, "
+                        + "time_created AS timeCreated, "
+                        + "time_paid AS timePaid "
+                        + "FROM transaction_wallet "
+                        + "WHERE user_id = :userId "
+                        + "ORDER BY time_created DESC "
+                        + "LIMIT :offset, 20", nativeQuery = true)
+        List<TransWalletListDTO> getTransactionWalletList(@Param(value = "userId") String userId,
+                        @Param(value = "offset") int offset);
+
+        @Query(value = "SELECT id, amount, bill_number as billNumber, status, trans_type as transType, payment_type as paymentType, payment_method as paymentMethod, "
+                        + "time_created AS timeCreated, "
+                        + "time_paid AS timePaid "
+                        + "FROM transaction_wallet "
+                        + "WHERE user_id = :userId AND status = :status "
+                        + "ORDER BY time_created DESC "
+                        + "LIMIT :offset, 20", nativeQuery = true)
+        List<TransWalletListDTO> getTransactionWalletListByStatus(@Param(value = "userId") String userId,
+                        @Param(value = "status") int status,
+                        @Param(value = "offset") int offset);
 
         @Transactional
         @Modifying

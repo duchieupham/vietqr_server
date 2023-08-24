@@ -30,6 +30,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.vietqr.org.security.JWTAuthorizationFilter;
+import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.WebSocketConfig;
 
 @SpringBootApplication
@@ -53,6 +54,9 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// + "\nMã giao dịch: FT23220783825900"
 		// + "\nThời gian: 08/08/2023 15:30"
 		// + "\nNội dung: VQR88c7832ac4 THANH TOAN NAP TIEN DIEN THOAI");
+
+		String bankAccountEncrypted = BankEncryptUtil.encrypt("686839999");
+		System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
 
 	}
 

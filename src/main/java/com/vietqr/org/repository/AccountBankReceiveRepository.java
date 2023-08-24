@@ -106,7 +106,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "FROM account_bank_receive a "
 			+ "INNER JOIN bank_type b "
 			+ "ON a.bank_type_id = b.id "
-			+ "WHERE a.is_authenticated = 1 AND a.status = 1 "
+			+ "WHERE a.status = 1 "
 			+ "AND a.user_id = :userId", nativeQuery = true)
 	List<AccountBankWpDTO> getAccountBankReceiveWps(@Param(value = "userId") String userId);
 

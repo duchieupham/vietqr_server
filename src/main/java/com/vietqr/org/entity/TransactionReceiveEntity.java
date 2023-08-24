@@ -35,6 +35,9 @@ public class TransactionReceiveEntity implements Serializable {
 	@Column(name = "time")
 	private long time;
 
+	@Column(name = "timePaid")
+	private long timePaid;
+
 	// ref id from transaction_bank/(transaction_sms:removed)
 	@Column(name = "refId")
 	private String refId;
@@ -104,6 +107,30 @@ public class TransactionReceiveEntity implements Serializable {
 		this.content = content;
 		this.amount = amount;
 		this.time = time;
+		this.refId = refId;
+		this.type = type;
+		this.status = status;
+		this.traceId = traceId;
+		this.transType = transType;
+		this.referenceNumber = referenceNumber;
+		this.orderId = orderId;
+		this.sign = sign;
+		this.customerBankAccount = customerBankAccount;
+		this.customerBankCode = customerBankCode;
+		this.customerName = customerName;
+	}
+
+	public TransactionReceiveEntity(String id, String bankAccount, String bankId, String content, long amount,
+			long time, long timePaid, String refId, int type, int status, String traceId, String transType,
+			String referenceNumber, String orderId, String sign, String customerBankAccount, String customerBankCode,
+			String customerName) {
+		this.id = id;
+		this.bankAccount = bankAccount;
+		this.bankId = bankId;
+		this.content = content;
+		this.amount = amount;
+		this.time = time;
+		this.timePaid = timePaid;
 		this.refId = refId;
 		this.type = type;
 		this.status = status;
@@ -251,6 +278,14 @@ public class TransactionReceiveEntity implements Serializable {
 
 	public void setCustomerName(String customerName) {
 		this.customerName = customerName;
+	}
+
+	public long getTimePaid() {
+		return timePaid;
+	}
+
+	public void setTimePaid(long timePaid) {
+		this.timePaid = timePaid;
 	}
 
 }

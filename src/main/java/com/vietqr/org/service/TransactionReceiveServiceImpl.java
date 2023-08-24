@@ -25,8 +25,9 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
-    public void updateTransactionReceiveStatus(int status, String refId, String referenceNumber, String id) {
-        repo.updateTransactionReceiveStatus(status, refId, referenceNumber, id);
+    public void updateTransactionReceiveStatus(int status, String refId, String referenceNumber, long timePaid,
+            String id) {
+        repo.updateTransactionReceiveStatus(status, refId, referenceNumber, timePaid, id);
     }
 
     @Override
@@ -108,6 +109,11 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     @Override
     public List<TransStatisticByMonthDTO> getTransStatisticByMonth(String bankId) {
         return repo.getTransStatisticByMonth(bankId);
+    }
+
+    @Override
+    public List<TransactionRelatedDTO> getTransactionsByStatus(int status, int offset, String bankId) {
+        return repo.getTransactionsByStatus(status, offset, bankId);
     }
 
 }

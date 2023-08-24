@@ -19,13 +19,14 @@ public class ContactDetailDTO implements Serializable {
     private String bankName;
     private String imgId;
     private String bankAccount;
+    private int colorType;
 
     public ContactDetailDTO() {
         super();
     }
 
     public ContactDetailDTO(String id, String nickname, String value, String additionalData, int type, int status,
-            String bankShortName, String bankName, String imgId, String bankAccount) {
+            String bankShortName, String bankName, String imgId, String bankAccount, int colorType) {
         this.id = id;
         this.nickname = nickname;
         this.value = value;
@@ -36,6 +37,7 @@ public class ContactDetailDTO implements Serializable {
         this.bankName = bankName;
         this.imgId = imgId;
         this.bankAccount = bankAccount;
+        this.colorType = colorType;
     }
 
     public String getId() {
@@ -116,6 +118,14 @@ public class ContactDetailDTO implements Serializable {
 
     public void setBankAccount(String bankAccount) {
         this.bankAccount = bankAccount;
+    }
+
+    public int getColorType() {
+        return colorType;
+    }
+
+    public void setColorType(int colorType) {
+        this.colorType = colorType;
     }
 
 }

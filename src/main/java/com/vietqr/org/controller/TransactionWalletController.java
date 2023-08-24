@@ -4,13 +4,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.springframework.web.bind.annotation.CrossOrigin;
-
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,6 +30,8 @@ import com.vietqr.org.util.VietQRUtil;
 import com.vietqr.org.dto.RequestPaymentDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.TransWalletInsertDTO;
+import com.vietqr.org.dto.TransWalletListDTO;
+import com.vietqr.org.dto.TransactionRelatedDTO;
 import com.vietqr.org.dto.VietQRDTO;
 import com.vietqr.org.dto.VietQRGenerateDTO;
 import com.vietqr.org.entity.TransactionReceiveBranchEntity;
@@ -249,6 +253,27 @@ public class TransactionWalletController {
     // update giao dich thanh cong => transaction sync xu ly
 
     // get list all
+
+    @GetMapping("transaction-wallet")
+    public ResponseEntity<List<TransWalletListDTO>> getTransactionWalletsFilter(
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "status") int status,
+            @RequestParam(value = "offset") int offset) {
+        List<TransWalletListDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            if (status == 9) {
+                result = transactionWalletService.getTransactionWalletList(userId, offset);
+            } else {
+                result = transactionWalletService.getTransactionWalletListByStatus(userId, status, offset);
+            }
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getTransactionWalletsFilter: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 
     // get list by userId
 

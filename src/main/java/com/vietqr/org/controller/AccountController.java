@@ -232,12 +232,12 @@ public class AccountController {
 						}
 						customerSyncService.updateCustomerSyncInformation(information, userId);
 					}
-					//
 					result = getJWTInfinitiveToken(accountInformationEntity, phoneNo, information);
 				} else {
 					result = getJWTToken(accountInformationEntity, phoneNo);
 				}
-
+				// update login access
+				updateAccessLogin(userId);
 				httpStatus = HttpStatus.OK;
 			} else {
 				logger.error("LOGIN: Cannot find user Id");
@@ -248,6 +248,22 @@ public class AccountController {
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	void updateAccessLogin(String userId) {
+		try {
+			Long currentCount = accountSettingService.getAccessCountByUserId(userId);
+			long accessCount = 0;
+			if (currentCount != null) {
+				accessCount = currentCount + 1;
+			}
+			LocalDateTime currentDateTime = LocalDateTime.now();
+			long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+			accountSettingService.updateAccessLogin(time, accessCount, userId);
+		} catch (Exception e) {
+			System.out.println("updateAccessLogin: ERROR: " + e.toString());
+			logger.error("updateAccessLogin: ERROR: " + e.toString());
+		}
 	}
 
 	@PostMapping("accounts/logout")
@@ -367,6 +383,8 @@ public class AccountController {
 				accountSettingEntity.setVoiceMobileKiot(true);
 				accountSettingEntity.setVoiceWeb(true);
 				accountSettingEntity.setUserId(uuid.toString());
+				accountSettingEntity.setLastLogin(time);
+				accountSettingEntity.setAccessCount(1);
 				accountSettingService.insertAccountSetting(accountSettingEntity);
 				///
 				// insert account wallet
@@ -376,7 +394,7 @@ public class AccountController {
 				accountWalletEntity.setAmount("0");
 				accountWalletEntity.setEnableService(true);
 				accountWalletEntity.setActive(true);
-				accountWalletEntity.setPoint(100);
+				accountWalletEntity.setPoint(50);
 				// set wallet ID
 				String walletId = "";
 				do {
@@ -565,6 +583,7 @@ public class AccountController {
 			// check userId
 			if (userId != null && !userId.trim().isEmpty()) {
 				accountInformationEntity = accountInformationService.getAccountInformation(userId);
+				updateAccessLogin(userId);
 			} else {
 				logger.error("LOGIN: INVALID userId");
 			}

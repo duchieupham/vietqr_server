@@ -41,12 +41,18 @@ public class AccountSettingEntity implements Serializable {
     @Column(name = "status")
     private boolean status;
 
+    @Column(name = "lastLogin")
+    private long lastLogin;
+
+    @Column(name = "accessCount")
+    private long accessCount;
+
     public AccountSettingEntity() {
         super();
     }
 
     public AccountSettingEntity(String id, String userId, boolean guideWeb, boolean guideMobile, boolean voiceWeb,
-            boolean voiceMobile, boolean voiceMobileKiot, boolean status) {
+            boolean voiceMobile, boolean voiceMobileKiot, boolean status, long lastLogin, long accessCount) {
         this.id = id;
         this.userId = userId;
         this.guideWeb = guideWeb;
@@ -55,6 +61,8 @@ public class AccountSettingEntity implements Serializable {
         this.voiceMobile = voiceMobile;
         this.voiceMobileKiot = voiceMobileKiot;
         this.status = status;
+        this.lastLogin = lastLogin;
+        this.accessCount = accessCount;
     }
 
     public String getId() {
@@ -119,6 +127,22 @@ public class AccountSettingEntity implements Serializable {
 
     public void setStatus(boolean status) {
         this.status = status;
+    }
+
+    public long getLastLogin() {
+        return lastLogin;
+    }
+
+    public void setLastLogin(long lastLogin) {
+        this.lastLogin = lastLogin;
+    }
+
+    public long getAccessCount() {
+        return accessCount;
+    }
+
+    public void setAccessCount(long accessCount) {
+        this.accessCount = accessCount;
     }
 
 }

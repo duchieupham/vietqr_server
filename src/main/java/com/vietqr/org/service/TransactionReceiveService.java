@@ -17,7 +17,8 @@ public interface TransactionReceiveService {
 
     public int insertAllTransactionReceive(List<TransactionReceiveEntity> entities);
 
-    public void updateTransactionReceiveStatus(int status, String refId, String referenceNumber, String id);
+    public void updateTransactionReceiveStatus(int status, String refId, String referenceNumber, long timePaid,
+            String id);
 
     public List<TransactionRelatedDTO> getRelatedTransactionReceives(String businessId);
 
@@ -28,6 +29,8 @@ public interface TransactionReceiveService {
     public List<TransactionReceiveEntity> getTransactionByBankId(String bankId);
 
     public List<TransactionRelatedDTO> getTransactions(int offset, String bankId);
+
+    public List<TransactionRelatedDTO> getTransactionsByStatus(int status, int offset, String bankId);
 
     public TransactionReceiveEntity getTransactionReceiveById(String id);
 

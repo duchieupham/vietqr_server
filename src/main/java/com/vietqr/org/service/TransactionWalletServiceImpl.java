@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.vietqr.org.dto.TransWalletListDTO;
 import com.vietqr.org.entity.TransactionWalletEntity;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +61,16 @@ public class TransactionWalletServiceImpl implements TransactionWalletService {
     public void updateTransactionWalletConfirm(long timeCreated, String amount, String userId, String otp,
             int paymentType) {
         repo.updateTransactionWalletConfirm(timeCreated, amount, userId, otp, paymentType);
+    }
+
+    @Override
+    public List<TransWalletListDTO> getTransactionWalletList(String userId, int offset) {
+        return repo.getTransactionWalletList(userId, offset);
+    }
+
+    @Override
+    public List<TransWalletListDTO> getTransactionWalletListByStatus(String userId, int status, int offset) {
+        return repo.getTransactionWalletListByStatus(userId, status, offset);
     }
 
 }

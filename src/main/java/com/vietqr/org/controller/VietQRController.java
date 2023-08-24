@@ -473,6 +473,7 @@ public class VietQRController {
 				transactionEntity.setType(0);
 				transactionEntity.setStatus(0);
 				transactionEntity.setTraceId(traceId);
+				transactionEntity.setTimePaid(0);
 				if (dto.getTransType() != null) {
 					transactionEntity.setTransType(dto.getTransType());
 				} else {
@@ -644,6 +645,7 @@ public class VietQRController {
 				transactionEntity.setReferenceNumber("");
 				transactionEntity.setOrderId("");
 				transactionEntity.setSign("");
+				transactionEntity.setTimePaid(0);
 				transactionReceiveService.insertTransactionReceive(transactionEntity);
 				// insert transaction branch if existing branchId and businessId. Else just do
 				// not map.
@@ -720,7 +722,7 @@ public class VietQRController {
 
 				// push notification
 				List<FcmTokenEntity> fcmTokens = new ArrayList<>();
-				fcmTokens = fcmTokenService.getFcmTokensByUserId(dto.getUserId());
+				fcmTokens = fcmTokenService.getFcmTokensKiotByUserId(dto.getUserId());
 				Map<String, String> data = new HashMap<>();
 				data.put("notificationType", NotificationUtil.getNotiTypeNewTransaction());
 				data.put("notificationId", notificationUUID.toString());

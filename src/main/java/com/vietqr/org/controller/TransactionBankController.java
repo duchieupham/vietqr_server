@@ -575,6 +575,7 @@ public class TransactionBankController {
 		transactionReceiveService.updateTransactionReceiveStatus(1,
 				dto.getTransactionid(),
 				dto.getReferencenumber(),
+				time,
 				transactionReceiveEntity.getId());
 
 		// find transaction-branch-receive to push notification
@@ -818,6 +819,7 @@ public class TransactionBankController {
 		transactionEntity.setReferenceNumber(dto.getReferencenumber());
 		transactionEntity.setOrderId(orderId);
 		transactionEntity.setSign(sign);
+		transactionEntity.setTimePaid(time);
 		transactionReceiveService.insertTransactionReceive(transactionEntity);
 		//
 		// insert notification

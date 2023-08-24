@@ -60,4 +60,29 @@ public class ContactServiceImpl implements ContactService {
         return repo.getContactRecharge(userId);
     }
 
+    @Override
+    public String getImgIdByWalletId(String walletId) {
+        return repo.getImgIdByWalletId(walletId);
+    }
+
+    @Override
+    public List<ContactEntity> getContactApprovedByUserIdWithPagging(String userId, int offset) {
+        return repo.getContactApprovedByUserIdWithPagging(userId, offset);
+    }
+
+    @Override
+    public List<ContactEntity> getContactApprovedByUserIdAndStatusWithPagging(String userId, int type, int offset) {
+        return repo.getContactApprovedByUserIdAndStatusWithPagging(userId, type, offset);
+    }
+
+    @Override
+    public void updateContactMultipart(String nickname, String additionalData, int colorType, String id) {
+        repo.udpateContactMultipart(nickname, additionalData, colorType, id);
+    }
+
+    @Override
+    public void updateImgIdById(String imgId, String id) {
+        repo.updateImgIdById(imgId, id);
+    }
+
 }

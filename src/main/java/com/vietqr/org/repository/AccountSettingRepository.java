@@ -37,4 +37,13 @@ public interface AccountSettingRepository extends JpaRepository<AccountSettingEn
     @Query(value = "UPDATE account_setting SET voice_web = :value WHERE user_id = :userId", nativeQuery = true)
     void updateVoiceWeb(@Param(value = "value") int value, @Param(value = "userId") String userId);
 
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE account_setting SET last_login = :lastLogin, access_count = :accessCount WHERE user_id = :userId", nativeQuery = true)
+    void updateAccessLogin(@Param(value = "lastLogin") long lastLogin,
+            @Param(value = "accessCount") long accessCount,
+            @Param(value = "userId") String userId);
+
+    @Query(value = "SELECT access_count FROM account_setting WHERE user_id = :userId", nativeQuery = true)
+    Long getAccessCountByUserId(@Param(value = "userId") String userId);
 }

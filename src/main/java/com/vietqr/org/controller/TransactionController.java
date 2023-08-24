@@ -117,6 +117,27 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("transactions")
+    public ResponseEntity<List<TransactionRelatedDTO>> getTransactionsFilter(
+            @RequestParam(value = "bankId") String bankId,
+            @RequestParam(value = "status") int status,
+            @RequestParam(value = "offset") int offset) {
+        List<TransactionRelatedDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            if (status == 9) {
+                result = transactionReceiveService.getTransactions(offset, bankId);
+            } else {
+                result = transactionReceiveService.getTransactionsByStatus(status, offset, bankId);
+            }
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getTransactionsFilter: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @GetMapping("transaction/{id}")
     public ResponseEntity<TransactionDetailDTO> getTransactionById(@PathVariable(value = "id") String id) {
         TransactionDetailDTO result = null;

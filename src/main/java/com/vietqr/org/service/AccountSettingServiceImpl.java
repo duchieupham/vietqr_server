@@ -42,4 +42,14 @@ public class AccountSettingServiceImpl implements AccountSettingService {
         repo.updateVoiceWeb(value, userId);
     }
 
+    @Override
+    public void updateAccessLogin(long lastLogin, long accessCount, String userId) {
+        repo.updateAccessLogin(lastLogin, accessCount, userId);
+    }
+
+    @Override
+    public Long getAccessCountByUserId(String userId) {
+        return repo.getAccessCountByUserId(userId);
+    }
+
 }

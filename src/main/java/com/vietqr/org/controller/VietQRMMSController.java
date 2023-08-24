@@ -165,6 +165,7 @@ public class VietQRMMSController {
             transactionEntity.setReferenceNumber("");
             transactionEntity.setOrderId(dto.getOrderId());
             transactionEntity.setSign(dto.getSign());
+            transactionEntity.setTimePaid(time);
             transactionReceiveService.insertTransactionReceive(transactionEntity);
             LocalDateTime endTime = LocalDateTime.now();
             long endTimeLong = endTime.toEpochSecond(ZoneOffset.UTC);

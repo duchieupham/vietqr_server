@@ -18,6 +18,24 @@ public interface ContactRepository extends JpaRepository<ContactEntity, Long> {
         @Query(value = "SELECT * FROM contact WHERE user_id = :userId AND status = 0 ORDER BY nickname ASC ", nativeQuery = true)
         List<ContactEntity> getContactApprovedByUserId(@Param(value = "userId") String userId);
 
+        // contact approved all with pagging
+        @Query(value = "SELECT * FROM contact "
+                        + "WHERE user_id = :userId AND status = 0 "
+                        + "ORDER BY nickname ASC "
+                        + "LIMIT :offset, 20", nativeQuery = true)
+        List<ContactEntity> getContactApprovedByUserIdWithPagging(@Param(value = "userId") String userId,
+                        @Param(value = "offset") int offset);
+
+        // contact approved by status with pagging
+        @Query(value = "SELECT * FROM contact "
+                        + "WHERE user_id = :userId AND status = 0 "
+                        + "AND TYPE = :type "
+                        + "ORDER BY nickname ASC "
+                        + "LIMIT :offset, 20", nativeQuery = true)
+        List<ContactEntity> getContactApprovedByUserIdAndStatusWithPagging(@Param(value = "userId") String userId,
+                        @Param(value = "type") int type,
+                        @Param(value = "offset") int offset);
+
         @Query(value = "SELECT * FROM contact WHERE user_id = :userId AND status = 1 ORDER BY nickname ASC ", nativeQuery = true)
         List<ContactEntity> getContactPendingByUserId(@Param(value = "userId") String userId);
 
@@ -49,6 +67,21 @@ public interface ContactRepository extends JpaRepository<ContactEntity, Long> {
                         @Param(value = "additionalData") String additionalData,
                         @Param(value = "id") String id);
 
+        @Transactional
+        @Modifying
+        @Query(value = "UPDATE contact SET nickname = :nickname, additional_data = :additionalData, color_type = :colorType "
+                        + "WHERE id = :id ", nativeQuery = true)
+        void udpateContactMultipart(@Param(value = "nickname") String nickname,
+                        @Param(value = "additionalData") String additionalData,
+                        @Param(value = "colorType") int colorType,
+                        @Param(value = "id") String id);
+
+        @Transactional
+        @Modifying
+        @Query(value = "UPDATE contact SET img_id = :imgId WHERE id = :id", nativeQuery = true)
+        void updateImgIdById(@Param(value = "imgId") String imgId,
+                        @Param(value = "id") String id);
+
         @Query(value = "SELECT c.user_id as userId, a.nickname, c.img_id as imgId, d.phone_no as phoneNo, c.carrier_type_id as carrierTypeId "
                         + "FROM contact a "
                         + "INNER JOIN account_wallet b "
@@ -60,4 +93,11 @@ public interface ContactRepository extends JpaRepository<ContactEntity, Long> {
                         + "WHERE a.type = 1 AND a.user_id = :userId "
                         + "ORDER BY a.nickname ASC ", nativeQuery = true)
         List<ContactRechargeDTO> getContactRecharge(@Param(value = "userId") String userId);
+
+        @Query(value = "SELECT b.img_id "
+                        + "FROM account_wallet a "
+                        + "INNER JOIN account_information b "
+                        + "ON a.user_id = b.user_id "
+                        + "WHERE a.wallet_id = :walletId", nativeQuery = true)
+        String getImgIdByWalletId(@Param(value = "walletId") String walletId);
 }

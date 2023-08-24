@@ -48,6 +48,12 @@ public class ContactEntity implements Serializable {
     @Column(name = "bankAccount")
     private String bankAccount;
 
+    @Column(name = "imgId")
+    private String imgId;
+
+    @Column(name = "colorType")
+    private int colorType;
+
     public ContactEntity() {
         super();
     }
@@ -64,6 +70,38 @@ public class ContactEntity implements Serializable {
         this.time = time;
         this.bankTypeId = bankTypeId;
         this.bankAccount = bankAccount;
+    }
+
+    public ContactEntity(String id, String userId, String nickname, String value, String additionalData, int type,
+            int status, long time, String bankTypeId, String bankAccount, String imgId, int colorType) {
+        this.id = id;
+        this.userId = userId;
+        this.nickname = nickname;
+        this.value = value;
+        this.additionalData = additionalData;
+        this.type = type;
+        this.status = status;
+        this.time = time;
+        this.bankTypeId = bankTypeId;
+        this.bankAccount = bankAccount;
+        this.imgId = imgId;
+        this.colorType = colorType;
+    }
+
+    public String getImgId() {
+        return imgId;
+    }
+
+    public void setImgId(String imgId) {
+        this.imgId = imgId;
+    }
+
+    public int getColorType() {
+        return colorType;
+    }
+
+    public void setColorType(int colorType) {
+        this.colorType = colorType;
     }
 
     public String getId() {

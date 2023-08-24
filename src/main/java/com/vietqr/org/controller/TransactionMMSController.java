@@ -125,7 +125,7 @@ public class TransactionMMSController {
                             }
                             // update
                             transactionReceiveService.updateTransactionReceiveStatus(1, uuid.toString(),
-                                    entity.getFtCode(),
+                                    entity.getFtCode(), time,
                                     transactionReceiveEntity.getId());
                         } else {
                             logger.info("transaction-mms-sync: NOT FOUND transactionReceiveEntity");

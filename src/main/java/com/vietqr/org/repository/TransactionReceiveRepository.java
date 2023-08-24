@@ -25,9 +25,12 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
 
         @Transactional
         @Modifying
-        @Query(value = "UPDATE transaction_receive SET status = :status, ref_id = :refId, reference_number = :referenceNumber WHERE id = :id", nativeQuery = true)
-        void updateTransactionReceiveStatus(@Param(value = "status") int status, @Param(value = "refId") String refId,
-                        @Param(value = "referenceNumber") String referenceNumber, @Param(value = "id") String id);
+        @Query(value = "UPDATE transaction_receive SET status = :status, ref_id = :refId, reference_number = :referenceNumber, time_paid = :timePaid WHERE id = :id", nativeQuery = true)
+        void updateTransactionReceiveStatus(@Param(value = "status") int status,
+                        @Param(value = "refId") String refId,
+                        @Param(value = "referenceNumber") String referenceNumber,
+                        @Param(value = "timePaid") long timePaid,
+                        @Param(value = "id") String id);
 
         @Query(value = "SELECT * FROM transaction_receive WHERE order_id = :orderId AND status = 0 AND amount = :amount", nativeQuery = true)
         TransactionReceiveEntity getTransactionByOrderId(@Param(value = "orderId") String orderId,
@@ -54,6 +57,14 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "WHERE a.bank_id=:bankId AND a.status != 2 "
                         + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
         List<TransactionRelatedDTO> getTransactions(@Param(value = "offset") int offset,
+                        @Param(value = "bankId") String bankId);
+
+        @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time,a.status,a.type,a.trans_type as transType "
+                        + "FROM transaction_receive a "
+                        + "WHERE a.bank_id=:bankId AND a.status = :status "
+                        + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransactionsByStatus(@Param(value = "status") int status,
+                        @Param(value = "offset") int offset,
                         @Param(value = "bankId") String bankId);
 
         @Query(value = "SELECT a.id, a.amount, a.bank_id as bankId, b.bank_account as bankAccount, a.content, a.ref_id as refId, a.status, a.time, a.type, a.trace_id as traceId, a.trans_type as transType, b.bank_account_name as bankAccountName, c.bank_code as bankCode, c.bank_name as bankName, c.img_id as imgId, a.reference_number as referenceNumber "

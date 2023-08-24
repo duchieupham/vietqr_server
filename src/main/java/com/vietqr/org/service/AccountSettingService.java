@@ -18,4 +18,8 @@ public interface AccountSettingService {
     public void updateVoiceMobileKiot(int value, String userId);
 
     public void updateVoiceWeb(int value, String userId);
+
+    public void updateAccessLogin(long lastLogin, long accessCount, String userId);
+
+    public Long getAccessCountByUserId(String userId);
 }

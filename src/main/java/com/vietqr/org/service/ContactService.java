@@ -25,5 +25,15 @@ public interface ContactService {
 
     public void updateContact(String nickname, int type, String additionalData, String id);
 
+    public void updateContactMultipart(String nickname, String additionalData, int colorType, String id);
+
     public List<ContactRechargeDTO> getContactRecharge(String userId);
+
+    public String getImgIdByWalletId(String walletId);
+
+    public List<ContactEntity> getContactApprovedByUserIdWithPagging(String userId, int offset);
+
+    public List<ContactEntity> getContactApprovedByUserIdAndStatusWithPagging(String userId, int type, int offset);
+
+    public void updateImgIdById(String imgId, String id);
 }

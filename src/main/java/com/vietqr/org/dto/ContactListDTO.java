@@ -15,18 +15,21 @@ public class ContactListDTO implements Serializable {
     private int type;
     private String imgId;
     private String description;
+    private Integer colorType;
 
     public ContactListDTO() {
         super();
     }
 
-    public ContactListDTO(String id, String nickname, int status, int type, String imgId, String description) {
+    public ContactListDTO(String id, String nickname, int status, int type, String imgId, String description,
+            int colorType) {
         this.id = id;
         this.nickname = nickname;
         this.status = status;
         this.type = type;
         this.imgId = imgId;
         this.description = description;
+        this.colorType = colorType;
     }
 
     public String getId() {
@@ -75,6 +78,14 @@ public class ContactListDTO implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Integer getColorType() {
+        return colorType;
+    }
+
+    public void setColorType(Integer colorType) {
+        this.colorType = colorType;
     }
 
 }
