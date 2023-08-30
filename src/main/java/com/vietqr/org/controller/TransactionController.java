@@ -1,9 +1,11 @@
 package com.vietqr.org.controller;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,12 +42,14 @@ import com.vietqr.org.dto.TransactionInputDTO;
 import com.vietqr.org.dto.TransactionRelatedDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.entity.ImageEntity;
+import com.vietqr.org.entity.TransactionRPAEntity;
 import com.vietqr.org.entity.TransactionReceiveEntity;
 import com.vietqr.org.entity.TransactionReceiveImageEntity;
 import com.vietqr.org.service.AccountBankReceiveService;
 import com.vietqr.org.service.BankTypeService;
 import com.vietqr.org.service.ImageService;
 import com.vietqr.org.service.TransactionBankService;
+import com.vietqr.org.service.TransactionRPAService;
 import com.vietqr.org.service.TransactionReceiveBranchService;
 import com.vietqr.org.service.TransactionReceiveImageService;
 import com.vietqr.org.service.TransactionReceiveService;
@@ -79,6 +83,9 @@ public class TransactionController {
 
     @Autowired
     AccountBankReceiveService accountBankReceiveService;
+
+    @Autowired
+    TransactionRPAService transactionRPAService;
 
     @PostMapping("transaction-branch")
     public ResponseEntity<List<TransactionRelatedDTO>> getTransactionsByBranchId(
@@ -300,7 +307,7 @@ public class TransactionController {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            List<TransactionReceiveEntity> transactions = new ArrayList<>();
+            List<TransactionRPAEntity> transactions = new ArrayList<>();
             if (dto != null) {
                 String bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
                 if (bankTypeId != null) {
@@ -309,7 +316,7 @@ public class TransactionController {
                     if (accountBankEntity != null) {
                         if (dto.getTransactions() != null && !dto.getTransactions().isEmpty()) {
                             for (TransSyncRpaDTO transSyncRpaDTO : dto.getTransactions()) {
-                                TransactionReceiveEntity entity = new TransactionReceiveEntity();
+                                TransactionRPAEntity entity = new TransactionRPAEntity();
                                 UUID uuid = UUID.randomUUID();
                                 entity.setId(uuid.toString());
                                 entity.setAmount(transSyncRpaDTO.getAmount());
@@ -318,21 +325,15 @@ public class TransactionController {
                                 entity.setContent(transSyncRpaDTO.getContent());
                                 entity.setRefId(transSyncRpaDTO.getId());
                                 entity.setStatus(1);
-                                entity.setTime(transSyncRpaDTO.getTime());
-                                entity.setType(4);
-                                entity.setTraceId("");
+                                entity.setTime(convertTimeStringToInteger(transSyncRpaDTO.getTime()));
+                                entity.setTimePaid(convertTimeStringToInteger(transSyncRpaDTO.getTime()));
                                 entity.setTransType(transSyncRpaDTO.getTransType());
                                 entity.setReferenceNumber(transSyncRpaDTO.getReferenceNumber());
-                                entity.setOrderId("");
-                                entity.setSign("");
-                                entity.setCustomerBankAccount("");
-                                entity.setCustomerBankCode("");
-                                entity.setCustomerName("");
                                 transactions.add(entity);
                             }
                             System.out.println("transactions size: " + transactions.size());
                             if (transactions != null && !transactions.isEmpty()) {
-                                int check = transactionReceiveService.insertAllTransactionReceive(transactions);
+                                int check = transactionRPAService.insertAllTransactionRPA(transactions);
                                 System.out.println("check " + check);
                                 if (check == 1) {
                                     result = new ResponseMessageDTO("SUCCESS", "");
@@ -419,5 +420,19 @@ public class TransactionController {
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
+    }
+
+    public static long convertTimeStringToInteger(String timeString) {
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss dd-MM-yyyy");
+        long result = 0;
+        try {
+            Date date = format.parse(timeString);
+            long timestamp = date.getTime() / 1000; // Chia cho 1000 để chuyển đổi sang giây
+            result = (long) timestamp;
+        } catch (Exception e) {
+            System.out.println("convertTimeStringToInteger: ERORR: " + e.toString());
+            logger.error("convertTimeStringToInteger: ERORR: " + e.toString());
+        }
+        return result;
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.vietqr.org.dto.FCMTokenUpdateDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.service.FcmTokenService;
+import com.vietqr.org.service.FcmTokenSmsService;
 
 @RestController
 @CrossOrigin
@@ -24,6 +25,9 @@ public class FCMTokenController {
 
     @Autowired
     FcmTokenService fcmTokenService;
+
+    @Autowired
+    FcmTokenSmsService fcmTokenSmsService;
 
     @PostMapping("fcm-token/update")
     public ResponseEntity<ResponseMessageDTO> updateToken(@Valid @RequestBody FCMTokenUpdateDTO dto) {
@@ -40,4 +44,21 @@ public class FCMTokenController {
         }
         return new ResponseEntity<ResponseMessageDTO>(result, httpStatus);
     }
+
+    @PostMapping("fcm-token-sms/update")
+    public ResponseEntity<ResponseMessageDTO> updateTokenSms(@Valid @RequestBody FCMTokenUpdateDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            fcmTokenSmsService.updateTokenSms(dto.getNewToken(), dto.getUserId(), dto.getOldToken());
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error(e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<ResponseMessageDTO>(result, httpStatus);
+    }
+
 }

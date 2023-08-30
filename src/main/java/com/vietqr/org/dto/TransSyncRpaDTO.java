@@ -9,7 +9,7 @@ public class TransSyncRpaDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String id;
-    private long time;
+    private String time;
     private long amount;
     private String content;
     private String referenceNumber;
@@ -19,7 +19,7 @@ public class TransSyncRpaDTO implements Serializable {
         super();
     }
 
-    public TransSyncRpaDTO(String id, long time, long amount, String content, String referenceNumber,
+    public TransSyncRpaDTO(String id, String time, long amount, String content, String referenceNumber,
             String transType) {
         this.id = id;
         this.time = time;
@@ -37,11 +37,11 @@ public class TransSyncRpaDTO implements Serializable {
         this.id = id;
     }
 
-    public long getTime() {
+    public String getTime() {
         return time;
     }
 
-    public void setTime(long time) {
+    public void setTime(String time) {
         this.time = time;
     }
 

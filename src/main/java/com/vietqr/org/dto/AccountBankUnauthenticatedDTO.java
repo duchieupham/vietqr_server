@@ -79,4 +79,11 @@ public class AccountBankUnauthenticatedDTO implements Serializable {
         this.phoneAuthenticated = phoneAuthenticated;
     }
 
+    @Override
+    public String toString() {
+        return "AccountBankUnauthenticatedDTO [bankTypeId=" + bankTypeId + ", bankAccount=" + bankAccount
+                + ", userBankName=" + userBankName + ", userId=" + userId + ", nationalId=" + nationalId
+                + ", phoneAuthenticated=" + phoneAuthenticated + "]";
+    }
+
 }

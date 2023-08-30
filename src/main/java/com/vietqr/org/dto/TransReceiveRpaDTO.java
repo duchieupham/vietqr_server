@@ -10,14 +10,14 @@ public class TransReceiveRpaDTO implements Serializable {
     private static final long serialVersionUID = 1L;
     private String bankAccount;
     private String bankCode;
-    private long time;
+    private String time;
     private List<TransSyncRpaDTO> transactions;
 
     public TransReceiveRpaDTO() {
         super();
     }
 
-    public TransReceiveRpaDTO(String bankAccount, String bankCode, long time, List<TransSyncRpaDTO> transactions) {
+    public TransReceiveRpaDTO(String bankAccount, String bankCode, String time, List<TransSyncRpaDTO> transactions) {
         this.bankAccount = bankAccount;
         this.bankCode = bankCode;
         this.time = time;
@@ -40,11 +40,11 @@ public class TransReceiveRpaDTO implements Serializable {
         this.bankCode = bankCode;
     }
 
-    public long getTime() {
+    public String getTime() {
         return time;
     }
 
-    public void setTime(long time) {
+    public void setTime(String time) {
         this.time = time;
     }
 

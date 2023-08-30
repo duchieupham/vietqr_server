@@ -11,12 +11,20 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.vietqr.org.dto.AccountBankConnectBranchDTO;
+import com.vietqr.org.dto.AccountBankReceiveRPAItemDTO;
 import com.vietqr.org.dto.AccountBankWpDTO;
 import com.vietqr.org.dto.BusinessBankDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 
 @Repository
 public interface AccountBankReceiveRepository extends JpaRepository<AccountBankReceiveEntity, Long> {
+
+	@Query(value = "SELECT a.id, b.bank_code as bankCode, b.bank_name as bankName, a.bank_account_name as userBankName, a.bank_account as bankAccount, a.username, a.password "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN bank_type b "
+			+ "ON a.bank_type_id = b.id "
+			+ "WHERE a.user_id = :userId AND is_rpa_sync = 1 ", nativeQuery = true)
+	List<AccountBankReceiveRPAItemDTO> getBankAccountsRPA(@Param(value = "userId") String userId);
 
 	@Transactional
 	@Modifying

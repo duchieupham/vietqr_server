@@ -1,7 +1,12 @@
 package com.vietqr.org;
 
 import java.io.IOException;
+// import java.util.ArrayList;
 import java.util.Arrays;
+// import java.util.List;
+// import java.util.regex.Matcher;
+// import java.util.regex.Pattern;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -30,7 +35,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.vietqr.org.security.JWTAuthorizationFilter;
-import com.vietqr.org.util.BankEncryptUtil;
+// import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.WebSocketConfig;
 
 @SpringBootApplication
@@ -47,18 +52,91 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
 
-		// LarkUtil larkUtil = new LarkUtil();
-		// larkUtil.sendMessageToLark("Thanh toán thành công 🎉."
-		// + "\nTài khoản: 11******89"
-		// + "\nGiao dịch: +50,000 VND"
-		// + "\nMã giao dịch: FT23220783825900"
-		// + "\nThời gian: 08/08/2023 15:30"
-		// + "\nNội dung: VQR88c7832ac4 THANH TOAN NAP TIEN DIEN THOAI");
+		// String bankAccountEncrypted = BankEncryptUtil.encrypt("686839999");
+		// System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
 
-		String bankAccountEncrypted = BankEncryptUtil.encrypt("686839999");
-		System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
-
+		// List<String> data = new ArrayList<>();
+		// data.add("");
+		// data.add("VQR303f2894 ce");
+		// data.add("VQR303f2894.ce");
+		// data.add("VQR303f2894 c eVRC");
+		// data.add("VQR303f2894 ceVRC");
+		// data.add("VQR303f2894ceVQC");
+		// data.add("VQR303f2894ce");
+		// data.add("VQR 303f2894ce");
+		// data.add("V QR303f2894ce");
+		// data.add("VQ R 303f 2894 ce");
+		// data.add(
+		// "MBVCB.4125261053.047334.VQR303f2894 ce VRCbC2btHFanN.CT tu 9000006789 P HAM
+		// DUC TUAN toi 1123355589 PHAM DU C HIEU tai MB- Ma GD ACSP/ cw047334
+		// 1123355589");
+		// data.add(
+		// "MBVCB.4125261053.047334.V.QR303f2894 ce VRCbC2btHFanN.CT tu 9000006789 P HAM
+		// DUC TUAN toi 1123355589 PHAM DU C HIEU tai MB- Ma GD ACSP/ cw047334
+		// 1123355589");
+		// data.add(
+		// "MBVCB.4125261053.0473 34.VQR303f2894 ce VRCbC2btHFanN.CT tu 9000006789 P HAM
+		// DUC TUAN toi 1123355589 PHAM DU C HIEU tai MB- Ma GD ACSP/ cw047334
+		// 1123355589");
+		// data.add(
+		// "MBVCB.4125261053.047334.VQR303f2894 ceVV VRCbC2btHFanN.CT tu 9000006789 P
+		// HAM DUC TUAN toi 1123355589 PHAM DU C HIEU tai MB- Ma GD ACSP/ cw047334
+		// 1123355589");
+		// data.add(
+		// "MBVCB.4125261053.047334.VQR303f2894ceVRCbC2btHFanN.CT tu 9000006789 P HAM
+		// DUC TUAN toi 1123355589 PHAM DU C HIEU tai MB- Ma GD ACSP/ cw047334
+		// 1123355589");
+		// int count = 0;
+		// for (String item : data) {
+		// String traceId = extractCode(item);
+		// System.out.println("No: " + count + " - input: " + item + " - output: " +
+		// traceId);
+		// count++;
+		// }
 	}
+
+	// public static String extractCode(String inputString) {
+	// String result = "";
+	// try {
+	// inputString = inputString.replaceAll("\\.", " ");
+	// String[] newPaths = inputString.split("\\s+");
+
+	// String traceId = "";
+	// int indexSaved = -1;
+
+	// for (int i = 0; i < newPaths.length; i++) {
+	// if (newPaths[i].contains("VQR")) {
+	// if (newPaths[i].length() >= 13) {
+	// traceId = newPaths[i].substring(0, 13);
+	// break;
+	// }
+	// traceId = newPaths[i];
+	// indexSaved = i;
+	// } else if (indexSaved != -1 && i == indexSaved + 1) {
+	// if (traceId.length() < 13) {
+	// traceId += newPaths[i].substring(0, Math.min(13 - traceId.length(),
+	// newPaths[i].length()));
+	// }
+	// }
+	// }
+
+	// if (!traceId.isEmpty()) {
+	// String pattern = "VQR.{10}";
+	// Pattern r = Pattern.compile(pattern);
+	// Matcher m = r.matcher(traceId);
+	// if (m.find()) {
+	// traceId = m.group(0);
+	// } else {
+	// traceId = "";
+	// }
+	// }
+
+	// result = traceId;
+	// } catch (Exception e) {
+	// System.out.println("get traceId: ERROR: " + e.toString());
+	// }
+	// return result;
+	// }
 
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
@@ -114,11 +192,15 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 					.antMatchers(HttpMethod.POST, "/api/token_generate").permitAll()
 					.antMatchers(HttpMethod.POST, "/bank/api/get_token_bank").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts").permitAll()
+					.antMatchers(HttpMethod.POST, "/api/accounts-sms").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts-admin").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts/login").permitAll()
 					.antMatchers(HttpMethod.GET, "/api/accounts/search/**").permitAll()
+					.antMatchers(HttpMethod.GET, "/api/accounts-sms/search/**").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts/register").permitAll()
+					.antMatchers(HttpMethod.POST, "/api/accounts-sms/register").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts/logout").permitAll()
+					.antMatchers(HttpMethod.POST, "/api/accounts-sms/logout").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/transaction-mms").permitAll()
 					.antMatchers(HttpMethod.GET, "/api/bank-type/unauthenticated").permitAll()
 					.antMatchers(HttpMethod.GET, "/api/bank-types").permitAll()

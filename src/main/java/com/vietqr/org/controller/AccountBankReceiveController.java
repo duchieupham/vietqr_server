@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vietqr.org.dto.AccountBankReceiveDTO;
@@ -38,6 +39,8 @@ import com.vietqr.org.dto.AccountBankReceiveDetailDTO.BranchBankDetailDTO;
 import com.vietqr.org.dto.AccountBankReceiveDetailDTO.BusinessBankDetailDTO;
 import com.vietqr.org.dto.AccountBankReceiveDetailDTO.TransactionBankListDTO;
 import com.vietqr.org.dto.AccountBankReceivePersonalDTO;
+import com.vietqr.org.dto.AccountBankReceiveRPAItemDTO;
+import com.vietqr.org.dto.AccountBankReceiveRpaDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.entity.AccountCustomerBankEntity;
 import com.vietqr.org.entity.AccountInformationEntity;
@@ -148,97 +151,135 @@ public class AccountBankReceiveController {
 		return new ResponseEntity<>(result, httpStatus);
 	}
 
+	@GetMapping("account-bank/check/{bankAccount}/{bankTypeId}/{userId}/{type}")
+	public ResponseEntity<ResponseMessageDTO> checkExistedBankAccountWUserId(
+			@PathVariable(value = "bankAccount") String bankAccount,
+			@PathVariable(value = "bankTypeId") String bankTypeId,
+			@PathVariable(value = "userId") String userId,
+			@PathVariable(value = "type") String type) {
+		ResponseMessageDTO result = null;
+		HttpStatus httpStatus = null;
+		try {
+			// check existed same user
+			String checkExistedSameUser = accountBankService
+					.checkExistedBankAccountSameUser(bankAccount, bankTypeId, userId);
+			if (checkExistedSameUser == null) {
+				if (type.equals("ADD")) {
+					result = new ResponseMessageDTO("SUCCESS", "");
+					httpStatus = HttpStatus.OK;
+				} else {
+					// check existed if bank account is authenticated
+					String check = accountBankService.checkExistedBank(bankAccount, bankTypeId);
+					if (check == null || check.isEmpty()) {
+						result = new ResponseMessageDTO("SUCCESS", "");
+						httpStatus = HttpStatus.OK;
+					} else {
+						result = new ResponseMessageDTO("CHECK", "C03");
+						httpStatus = HttpStatus.BAD_REQUEST;
+					}
+				}
+			} else {
+				result = new ResponseMessageDTO("CHECK", "C06");
+				httpStatus = HttpStatus.BAD_REQUEST;
+			}
+
+		} catch (Exception e) {
+			logger.error(e.toString());
+			result = new ResponseMessageDTO("FAILED", "E05");
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
 	@PostMapping("account-bank/unauthenticated")
 	public ResponseEntity<ResponseMessageDTO> insertAccountBankWithouthAuthenticate(
 			@Valid @RequestBody AccountBankUnauthenticatedDTO dto) {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
+		System.out.println(dto.toString());
 		try {
-			String checkExistedBankAccountSameUser = accountBankService
-					.checkExistedBankAccountSameUser(dto.getBankAccount(), dto.getBankTypeId(), dto.getUserId());
-			if (checkExistedBankAccountSameUser == null) {
-				// insert bankAccount receive
-				UUID uuid = UUID.randomUUID();
-				String qr = getStaticQR(dto.getBankAccount(), dto.getBankTypeId());
-				AccountBankReceiveEntity entity = new AccountBankReceiveEntity();
-				entity.setId(uuid.toString());
-				entity.setBankTypeId(dto.getBankTypeId());
-				entity.setBankAccount(dto.getBankAccount());
-				entity.setBankAccountName(dto.getUserBankName());
-				entity.setType(0);
-				entity.setUserId(dto.getUserId());
-				entity.setNationalId("");
-				entity.setPhoneAuthenticated("");
-				entity.setAuthenticated(false);
-				entity.setSync(false);
-				entity.setWpSync(false);
-				entity.setStatus(true);
-				entity.setMmsActive(false);
-				accountBankService.insertAccountBank(entity);
-				// insert bank-receive-personal
-				UUID uuidPersonal = UUID.randomUUID();
-				BankReceivePersonalEntity personalEntity = new BankReceivePersonalEntity();
-				personalEntity.setId(uuidPersonal.toString());
-				personalEntity.setBankId(uuid.toString());
-				personalEntity.setUserId(dto.getUserId());
-				bankReceivePersonalService.insertAccountBankReceivePersonal(personalEntity);
-				// insert contact
-				String checkExistedContact = contactService.checkExistedRecord(dto.getUserId(), qr, 2);
-				if (checkExistedContact == null) {
-					UUID uuidContact = UUID.randomUUID();
-					LocalDateTime currentDateTime = LocalDateTime.now();
-					long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
-					ContactEntity contactEntity = new ContactEntity();
-					contactEntity.setId(uuidContact.toString());
-					contactEntity.setUserId(dto.getUserId());
-					contactEntity.setNickname(dto.getUserBankName());
-					contactEntity.setValue(qr);
-					contactEntity.setAdditionalData("");
-					contactEntity.setType(2);
-					contactEntity.setStatus(0);
-					contactEntity.setTime(time);
-					contactEntity.setBankTypeId(dto.getBankTypeId());
-					contactEntity.setBankAccount(dto.getBankAccount());
-					contactEntity.setImgId("");
-					contactEntity.setColorType(0);
-					contactService.insertContact(contactEntity);
-				}
-				//
-				LarkUtil larkUtil = new LarkUtil();
-				String phoneNo = accountInformationService.getPhoneNoByUserId(dto.getUserId());
-				AccountInformationEntity accountInformationEntity = accountInformationService
-						.getAccountInformation(dto.getUserId());
-				String fullname = accountInformationEntity.getLastName() + " "
-						+ accountInformationEntity.getMiddleName() + " " + accountInformationEntity.getFirstName();
-				String email = "";
-				if (accountInformationEntity.getEmail() != null
-						&& !accountInformationEntity.getEmail().trim().isEmpty()) {
-					email = "\\nEmail " + accountInformationEntity.getEmail();
-				}
-				String address = "";
-				if (accountInformationEntity.getAddress() != null
-						&& !accountInformationEntity.getAddress().trim().isEmpty()) {
-					address = "\\nĐịa chỉ: " + accountInformationEntity.getAddress();
-				}
-
-				BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(dto.getBankTypeId());
-				String larkMsg = "💳 Thêm TK mới: " + bankTypeEntity.getBankShortName()
-						+ "\\nSố TK: " + dto.getBankAccount()
-						+ "\\nChủ Tài khoản: " + dto.getUserBankName()
-						+ "\\nTrạng thái: Chưa liên kết"
-						+ "\\nSĐT đăng nhập: " + phoneNo
-						+ "\\nTên đăng nhập: " + fullname.trim()
-						+ email
-						+ address;
-				SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
-				larkUtil.sendMessageToLark(larkMsg, systemSettingEntity.getWebhookUrl());
-				result = new ResponseMessageDTO("SUCCESS", uuid.toString() + "*" + qr);
-				httpStatus = HttpStatus.OK;
-			} else {
-				result = new ResponseMessageDTO("CHECK", "C03");
-				httpStatus = HttpStatus.BAD_REQUEST;
+			// insert bankAccount receive
+			UUID uuid = UUID.randomUUID();
+			String qr = getStaticQR(dto.getBankAccount(), dto.getBankTypeId());
+			AccountBankReceiveEntity entity = new AccountBankReceiveEntity();
+			entity.setId(uuid.toString());
+			entity.setBankTypeId(dto.getBankTypeId());
+			entity.setBankAccount(dto.getBankAccount());
+			entity.setBankAccountName(dto.getUserBankName());
+			entity.setType(0);
+			entity.setUserId(dto.getUserId());
+			entity.setNationalId("");
+			entity.setPhoneAuthenticated("");
+			entity.setAuthenticated(false);
+			entity.setSync(false);
+			entity.setWpSync(false);
+			entity.setStatus(true);
+			entity.setMmsActive(false);
+			entity.setRpaSync(false);
+			entity.setUsername("");
+			entity.setPassword("");
+			accountBankService.insertAccountBank(entity);
+			// insert bank-receive-personal
+			UUID uuidPersonal = UUID.randomUUID();
+			BankReceivePersonalEntity personalEntity = new BankReceivePersonalEntity();
+			personalEntity.setId(uuidPersonal.toString());
+			personalEntity.setBankId(uuid.toString());
+			personalEntity.setUserId(dto.getUserId());
+			bankReceivePersonalService.insertAccountBankReceivePersonal(personalEntity);
+			// insert contact
+			String checkExistedContact = contactService.checkExistedRecord(dto.getUserId(), qr, 2);
+			if (checkExistedContact == null) {
+				UUID uuidContact = UUID.randomUUID();
+				LocalDateTime currentDateTime = LocalDateTime.now();
+				long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+				ContactEntity contactEntity = new ContactEntity();
+				contactEntity.setId(uuidContact.toString());
+				contactEntity.setUserId(dto.getUserId());
+				contactEntity.setNickname(dto.getUserBankName());
+				contactEntity.setValue(qr);
+				contactEntity.setAdditionalData("");
+				contactEntity.setType(2);
+				contactEntity.setStatus(0);
+				contactEntity.setTime(time);
+				contactEntity.setBankTypeId(dto.getBankTypeId());
+				contactEntity.setBankAccount(dto.getBankAccount());
+				contactEntity.setImgId("");
+				contactEntity.setColorType(0);
+				contactService.insertContact(contactEntity);
 			}
+			//
+			LarkUtil larkUtil = new LarkUtil();
+			String phoneNo = accountInformationService.getPhoneNoByUserId(dto.getUserId());
+			AccountInformationEntity accountInformationEntity = accountInformationService
+					.getAccountInformation(dto.getUserId());
+			String fullname = accountInformationEntity.getLastName() + " "
+					+ accountInformationEntity.getMiddleName() + " " + accountInformationEntity.getFirstName();
+			String email = "";
+			if (accountInformationEntity.getEmail() != null
+					&& !accountInformationEntity.getEmail().trim().isEmpty()) {
+				email = "\\nEmail " + accountInformationEntity.getEmail();
+			}
+			String address = "";
+			if (accountInformationEntity.getAddress() != null
+					&& !accountInformationEntity.getAddress().trim().isEmpty()) {
+				address = "\\nĐịa chỉ: " + accountInformationEntity.getAddress();
+			}
+
+			BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(dto.getBankTypeId());
+			String larkMsg = "💳 Thêm TK mới: " + bankTypeEntity.getBankShortName()
+					+ "\\nSố TK: " + dto.getBankAccount()
+					+ "\\nChủ Tài khoản: " + dto.getUserBankName()
+					+ "\\nTrạng thái: Chưa liên kết"
+					+ "\\nSĐT đăng nhập: " + phoneNo
+					+ "\\nTên đăng nhập: " + fullname.trim()
+					+ email
+					+ address;
+			SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
+			larkUtil.sendMessageToLark(larkMsg, systemSettingEntity.getWebhookUrl());
+			result = new ResponseMessageDTO("SUCCESS", uuid.toString() + "*" + qr);
+			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
+			System.out.println(e.toString());
 			logger.error(e.toString());
 			result = new ResponseMessageDTO("FAILED", "E05");
 			httpStatus = HttpStatus.BAD_REQUEST;
@@ -429,6 +470,9 @@ public class AccountBankReceiveController {
 			entity.setWpSync(false);
 			entity.setStatus(true);
 			entity.setMmsActive(false);
+			entity.setRpaSync(false);
+			entity.setUsername("");
+			entity.setPassword("");
 			accountBankService.insertAccountBank(entity);
 			// if (dto.getType() == 0) {
 			// insert bank receive personal
@@ -836,4 +880,74 @@ public class AccountBankReceiveController {
 		return new ResponseEntity<>(result, httpStatus);
 	}
 
+	// insert account bank receive with RPA sync
+	@PostMapping("account-bank/rpa")
+	public ResponseEntity<ResponseMessageDTO> insertAccountBankReceiveRPA(@RequestBody AccountBankReceiveRpaDTO dto) {
+		ResponseMessageDTO result = null;
+		HttpStatus httpStatus = null;
+		try {
+			String bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
+			if (bankTypeId != null && !bankTypeId.trim().isEmpty()) {
+				String check = accountBankService.checkExistedBank(dto.getBankAccount(), bankTypeId);
+				if (check == null || check.isEmpty()) {
+					UUID uuid = UUID.randomUUID();
+					AccountBankReceiveEntity entity = new AccountBankReceiveEntity();
+					entity.setId(uuid.toString());
+					entity.setBankTypeId(bankTypeId);
+					entity.setBankAccount(dto.getBankAccount());
+					entity.setBankAccountName(dto.getUserBankName());
+					entity.setType(0);
+					entity.setUserId(dto.getUserId());
+					entity.setNationalId("");
+					entity.setPhoneAuthenticated("");
+					entity.setAuthenticated(true);
+					entity.setSync(false);
+					entity.setWpSync(false);
+					entity.setStatus(true);
+					entity.setMmsActive(false);
+					entity.setRpaSync(true);
+					entity.setUsername(dto.getUsername());
+					entity.setPassword(dto.getPassword());
+					accountBankService.insertAccountBank(entity);
+					// insert account_bank_personal
+					UUID uuidPersonal = UUID.randomUUID();
+					BankReceivePersonalEntity personalEntity = new BankReceivePersonalEntity();
+					personalEntity.setId(uuidPersonal.toString());
+					personalEntity.setBankId(uuid.toString());
+					personalEntity.setUserId(dto.getUserId());
+					bankReceivePersonalService.insertAccountBankReceivePersonal(personalEntity);
+					result = new ResponseMessageDTO("SUCCESS", "");
+					httpStatus = HttpStatus.OK;
+				} else {
+					logger.error("insertAccountBankReceiveRPA: EXISTED BANK ACCOUNT");
+					result = new ResponseMessageDTO("FAILED", "E73");
+					httpStatus = HttpStatus.BAD_REQUEST;
+				}
+			} else {
+				logger.error("insertAccountBankReceiveRPA: NOT FOUND BANK TYPE ID");
+				result = new ResponseMessageDTO("FAILED", "E51");
+				httpStatus = HttpStatus.BAD_REQUEST;
+			}
+		} catch (Exception e) {
+			System.out.println("Error at insertAccountBankReceiveRPA: " + e.toString());
+			result = new ResponseMessageDTO("FAILED", "E05");
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	@GetMapping("account-bank/rpa/list")
+	public ResponseEntity<List<AccountBankReceiveRPAItemDTO>> getBankAccountRPAs(
+			@RequestParam(value = "userId") String userId) {
+		List<AccountBankReceiveRPAItemDTO> result = new ArrayList<>();
+		HttpStatus httpStatus = null;
+		try {
+			result = accountBankService.getBankAccountsRPA(userId);
+			httpStatus = HttpStatus.OK;
+		} catch (Exception e) {
+			System.out.println("Error at getBankAccountRPAs: " + e.toString());
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
 }

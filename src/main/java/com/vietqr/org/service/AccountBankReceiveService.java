@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.dto.AccountBankConnectBranchDTO;
+import com.vietqr.org.dto.AccountBankReceiveRPAItemDTO;
 import com.vietqr.org.dto.AccountBankWpDTO;
 import com.vietqr.org.dto.BusinessBankDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
@@ -47,6 +48,8 @@ public interface AccountBankReceiveService {
 	public String checkExistedBankAccountSameUser(String bankAccount, String bankTypeId, String userId);
 
 	public String getUserIdByBankId(String bankId);
+
+	public List<AccountBankReceiveRPAItemDTO> getBankAccountsRPA(String userId);
 
 	// public AccountBankReceiveEntity getBankAccountAuthenticatedByAccount(String
 	// bankAccount);

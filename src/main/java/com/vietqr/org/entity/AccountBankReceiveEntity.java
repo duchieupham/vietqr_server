@@ -56,6 +56,15 @@ public class AccountBankReceiveEntity implements Serializable {
 	@Column(name = "mmsActive")
 	private boolean mmsActive;
 
+	@Column(name = "isRpaSync")
+	private boolean isRpaSync;
+
+	@Column(name = "username")
+	private String username;
+
+	@Column(name = "password")
+	private String password;
+
 	public AccountBankReceiveEntity() {
 		super();
 	}
@@ -77,6 +86,30 @@ public class AccountBankReceiveEntity implements Serializable {
 		this.isWpSync = isWpSync;
 		this.status = status;
 		this.mmsActive = mmsActive;
+	}
+
+	public boolean isRpaSync() {
+		return isRpaSync;
+	}
+
+	public void setRpaSync(boolean isRpaSync) {
+		this.isRpaSync = isRpaSync;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 	public String getId() {

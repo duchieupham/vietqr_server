@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.TokenDTO;
 import com.vietqr.org.service.AccountSettingService;
+import com.vietqr.org.service.AccountSmsService;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -39,6 +40,9 @@ public class BearerTokenController {
 
 	@Autowired
 	AccountSettingService accountSettingService;
+
+	@Autowired
+	AccountSmsService accountSmsService;
 
 	@PostMapping("token_generate")
 	public ResponseEntity<TokenDTO> getToken(HttpServletRequest request) {
@@ -86,6 +90,38 @@ public class BearerTokenController {
 		return new ResponseEntity<>(result, httpStatus);
 	}
 
+	@GetMapping("token-sms")
+	public ResponseEntity<ResponseMessageDTO> checkValidTokenSms(
+			@RequestHeader("Authorization") String token) {
+		ResponseMessageDTO result = null;
+		HttpStatus httpStatus = null;
+		try {
+			String smsId = getSmsIdFromToken(token);
+			System.out.println("smsId: " + smsId);
+			if (smsId != null && !smsId.trim().isEmpty()) {
+				updateAccessSmsLogin(smsId);
+			}
+			result = new ResponseMessageDTO("SUCCESS", "");
+			httpStatus = HttpStatus.OK;
+		} catch (Exception e) {
+			result = new ResponseMessageDTO("FAILED", "E05");
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	private String getSmsIdFromToken(String token) {
+		String result = "";
+		if (token != null && !token.trim().isEmpty()) {
+			String secretKey = "mySecretKey";
+			String jwtToken = token.substring(7); // remove "Bearer " from the beginning
+			Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(jwtToken).getBody();
+			String userId = (String) claims.get("smsId");
+			result = userId;
+		}
+		return result;
+	}
+
 	private String getUserIdFromToken(String token) {
 		String result = "";
 		if (token != null && !token.trim().isEmpty()) {
@@ -111,6 +147,22 @@ public class BearerTokenController {
 		} catch (Exception e) {
 			System.out.println("updateAccessLogin: ERROR: " + e.toString());
 			logger.error("updateAccessLogin: ERROR: " + e.toString());
+		}
+	}
+
+	void updateAccessSmsLogin(String id) {
+		try {
+			Long currentCount = accountSmsService.getAccessCountById(id);
+			long accessCount = 0;
+			if (currentCount != null) {
+				accessCount = currentCount + 1;
+			}
+			LocalDateTime currentDateTime = LocalDateTime.now();
+			long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+			accountSmsService.updateAccessLoginSms(time, accessCount, id);
+		} catch (Exception e) {
+			System.out.println("updateAccessSmsLogin: ERROR: " + e.toString());
+			logger.error("updateAccessSmsLogin: ERROR: " + e.toString());
 		}
 	}
 
