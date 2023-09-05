@@ -26,4 +26,6 @@ public interface CustomerSyncService {
     public List<CustomerSyncListDTO> getCustomerSyncList();
 
     public CustomerSyncInformationDTO getCustomerSyncInformationById(String id);
+
+    // public List<String> checkExistedCustomerSyncByUsername(String username);
 }

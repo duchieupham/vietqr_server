@@ -29,4 +29,14 @@ public class AccountCustomerBankServiceImpl implements AccountCustomerBankServic
         return repo.checkExistedAccountCustomerBank(bankId, customerSyncId);
     }
 
+    @Override
+    public List<String> checkExistedAccountCustomerBankByBankAccount(String bankAccount, String customerSyncId) {
+        return repo.checkExistedAccountCustomerBankByBankAccount(bankAccount, customerSyncId);
+    }
+
+    @Override
+    public List<String> checkExistedCustomerSyncByUsername(String username) {
+        return repo.checkExistedCustomerSyncByUsername(username);
+    }
+
 }

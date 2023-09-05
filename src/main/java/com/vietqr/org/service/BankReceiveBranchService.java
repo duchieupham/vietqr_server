@@ -31,4 +31,6 @@ public interface BankReceiveBranchService {
     List<AccountBankBranchDTO> getBanksByBusinessId(String businessId);
 
     public List<String> getBankIdsByBusinessId(String businessId);
+
+    public List<String> getBankIdsByBranchId(String branchId);
 }

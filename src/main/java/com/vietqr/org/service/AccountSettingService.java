@@ -22,4 +22,8 @@ public interface AccountSettingService {
     public void updateAccessLogin(long lastLogin, long accessCount, String userId);
 
     public Long getAccessCountByUserId(String userId);
+
+    public void updateEdgeImgId(String imgId, String userId);
+
+    public void updateFooterImgId(String imgId, String userId);
 }

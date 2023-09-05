@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -46,7 +47,9 @@ import com.vietqr.org.entity.NotificationEntity;
 import com.vietqr.org.entity.TransactionReceiveBranchEntity;
 import com.vietqr.org.entity.TransactionReceiveEntity;
 import com.vietqr.org.entity.FcmTokenEntity;
+import com.vietqr.org.service.AccountBankReceivePersonalService;
 import com.vietqr.org.service.AccountBankReceiveService;
+import com.vietqr.org.service.BankReceiveBranchService;
 import com.vietqr.org.service.BankTypeService;
 import com.vietqr.org.service.CaiBankService;
 import com.vietqr.org.service.TransactionReceiveService;
@@ -101,6 +104,12 @@ public class VietQRController {
 
 	@Autowired
 	private SocketHandler socketHandler;
+
+	@Autowired
+	AccountBankReceivePersonalService accountBankReceivePersonalService;
+
+	@Autowired
+	BankReceiveBranchService bankReceiveBranchService;
 
 	@Autowired
 	private TextToSpeechService textToSpeechService;
@@ -802,6 +811,80 @@ public class VietQRController {
 		} finally {
 			insertNewTransaction(transcationUUID, traceId, dto, result, "", "", false);
 		}
+	}
+
+	@PostMapping("qr/list")
+	public ResponseEntity<List<VietQRDTO>> generateStaticQRList(
+			@RequestParam(value = "userId") String userId) {
+		List<VietQRDTO> result = new ArrayList<>();
+		HttpStatus httpStatus = null;
+		try {
+			List<String> bankIds = new ArrayList<>();
+			// 1. getPersonalBankIdsByUserId
+			List<String> personalBankIds = accountBankReceivePersonalService.getPersonalBankIdsByUserId(userId);
+			if (personalBankIds != null && !personalBankIds.isEmpty()) {
+				// add list bank
+				for (String personalBankId : personalBankIds) {
+					bankIds.add(personalBankId);
+				}
+			}
+			// 2. getBankIdsByBusinessId
+			List<String> branchIds = new ArrayList<>();
+			List<String> branchIdsByUserIdBusiness = branchInformationService.getBranchIdsByUserIdBusiness(userId);
+			List<String> branchIdsByUserIdBranch = branchMemberService.getBranchIdsByUserId(userId);
+			if (branchIdsByUserIdBusiness != null && !branchIdsByUserIdBusiness.isEmpty()) {
+				branchIds.addAll(branchIdsByUserIdBusiness);
+			}
+			if (branchIdsByUserIdBranch != null && !branchIdsByUserIdBranch.isEmpty()) {
+				branchIds.addAll(branchIdsByUserIdBranch);
+			}
+			if (branchIds != null && !branchIds.isEmpty()) {
+				for (String branchId : branchIds) {
+					List<String> businessBankIds = bankReceiveBranchService.getBankIdsByBranchId(branchId);
+					if (businessBankIds != null && !businessBankIds.isEmpty()) {
+						for (String businessBankId : businessBankIds) {
+							bankIds.add(businessBankId);
+						}
+					}
+				}
+			}
+			if (bankIds != null && !bankIds.isEmpty()) {
+				for (String bankId : bankIds) {
+					AccountBankReceiveEntity accountBankEntity = accountBankService.getAccountBankById(bankId);
+					if (accountBankEntity != null) {
+						// get bank type information
+						BankTypeEntity bankTypeEntity = bankTypeService
+								.getBankTypeById(accountBankEntity.getBankTypeId());
+						// get cai value
+						String caiValue = caiBankService.getCaiValue(bankTypeEntity.getId());
+						// generate VietQRGenerateDTO
+						VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+						vietQRGenerateDTO.setCaiValue(caiValue);
+						vietQRGenerateDTO.setAmount("");
+						vietQRGenerateDTO.setContent("");
+						vietQRGenerateDTO.setBankAccount(accountBankEntity.getBankAccount()); // generate QR
+						String qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
+						// generate VietQRDTO
+						VietQRDTO vietQRDTO = new VietQRDTO();
+						vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
+						vietQRDTO.setBankName(bankTypeEntity.getBankName());
+						vietQRDTO.setBankAccount(accountBankEntity.getBankAccount());
+						vietQRDTO.setUserBankName(accountBankEntity.getBankAccountName().toUpperCase());
+						vietQRDTO.setAmount("");
+						vietQRDTO.setContent("");
+						vietQRDTO.setQrCode(qr);
+						vietQRDTO.setImgId(bankTypeEntity.getImgId());
+						vietQRDTO.setTransactionId("");
+						result.add(vietQRDTO);
+					}
+				}
+			}
+			httpStatus = HttpStatus.OK;
+		} catch (Exception e) {
+			logger.error("generateStaticQRList: ERROR: " + e.toString());
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
 	}
 
 	@PostMapping("qr/generate-list")

@@ -65,4 +65,9 @@ public class BankReceiveBranchServiceImpl implements BankReceiveBranchService {
     public List<AccountBankBranchDTO> getBanksByBusinessId(String businessId) {
         return repo.getBanksByBusinessId(businessId);
     }
+
+    @Override
+    public List<String> getBankIdsByBranchId(String branchId) {
+        return repo.getBankIdsByBranchId(branchId);
+    }
 }

@@ -30,4 +30,7 @@ public interface AccountBankReceivePersonalRepository extends JpaRepository<Bank
     @Query(value = "DELETE FROM bank_receive_personal WHERE bank_id = :bankId", nativeQuery = true)
     void deleteBankReceivePersonalByBankId(@Param(value = "bankId") String id);
 
+    @Query(value = "SELECT bank_id FROM bank_receive_personal WHERE user_id = :userId", nativeQuery = true)
+    List<String> getPersonalBankIdsByUserId(@Param(value = "userId") String userId);
+
 }

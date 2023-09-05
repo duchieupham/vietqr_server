@@ -52,4 +52,14 @@ public class AccountSettingServiceImpl implements AccountSettingService {
         return repo.getAccessCountByUserId(userId);
     }
 
+    @Override
+    public void updateEdgeImgId(String imgId, String userId) {
+        repo.updateEdgeImgId(imgId, userId);
+    }
+
+    @Override
+    public void updateFooterImgId(String imgId, String userId) {
+        repo.updateFooterImgId(imgId, userId);
+    }
+    
 }

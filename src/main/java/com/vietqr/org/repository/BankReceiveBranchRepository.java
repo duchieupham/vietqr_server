@@ -80,4 +80,7 @@ public interface BankReceiveBranchRepository extends JpaRepository<BankReceiveBr
 
         @Query(value = "SELECT bank_id FROM bank_receive_branch WHERE business_id = :businessId", nativeQuery = true)
         List<String> getBankIdsByBusinessId(@Param(value = "businessId") String businessId);
+
+        @Query(value = "SELECT bank_id FROM bank_receive_branch WHERE branch_id = :branchId", nativeQuery = true)
+        List<String> getBankIdsByBranchId(@Param(value = "branchId") String branchId);
 }

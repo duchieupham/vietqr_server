@@ -46,4 +46,14 @@ public interface AccountSettingRepository extends JpaRepository<AccountSettingEn
 
     @Query(value = "SELECT access_count FROM account_setting WHERE user_id = :userId", nativeQuery = true)
     Long getAccessCountByUserId(@Param(value = "userId") String userId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE account_setting SET edge_img_id = :imgId WHERE user_id = :userId", nativeQuery = true)
+    void updateEdgeImgId(@Param(value = "imgId") String imgId, @Param(value = "userId") String userId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE account_setting SET footer_img_id = :imgId WHERE user_id = :userId", nativeQuery = true)
+    void updateFooterImgId(@Param(value = "imgId") String imgId, @Param(value = "userId") String userId);
 }

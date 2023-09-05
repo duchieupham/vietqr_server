@@ -56,7 +56,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
 
 		// List<String> data = new ArrayList<>();
-		// data.add("");
+		// data.add("Thanh toan QR-VQR869d78447a VRCfc8QjM2sCA NG CHUYEN:CUSTOMER");
 		// data.add("VQR303f2894 ce");
 		// data.add("VQR303f2894.ce");
 		// data.add("VQR303f2894 c eVRC");
@@ -99,6 +99,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 	// String result = "";
 	// try {
 	// inputString = inputString.replaceAll("\\.", " ");
+	// inputString = inputString.replaceAll("\\-", " ");
 	// String[] newPaths = inputString.split("\\s+");
 
 	// String traceId = "";

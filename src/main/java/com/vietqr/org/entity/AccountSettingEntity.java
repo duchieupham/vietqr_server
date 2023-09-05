@@ -47,12 +47,19 @@ public class AccountSettingEntity implements Serializable {
     @Column(name = "accessCount")
     private long accessCount;
 
+    @Column(name = "edgeImgId")
+    private String edgeImgId;
+
+    @Column(name = "footerImgId")
+    private String footerImgId;
+
     public AccountSettingEntity() {
         super();
     }
 
     public AccountSettingEntity(String id, String userId, boolean guideWeb, boolean guideMobile, boolean voiceWeb,
-            boolean voiceMobile, boolean voiceMobileKiot, boolean status, long lastLogin, long accessCount) {
+            boolean voiceMobile, boolean voiceMobileKiot, boolean status, long lastLogin, long accessCount,
+            String edgeImgId, String footerImgId) {
         this.id = id;
         this.userId = userId;
         this.guideWeb = guideWeb;
@@ -63,6 +70,8 @@ public class AccountSettingEntity implements Serializable {
         this.status = status;
         this.lastLogin = lastLogin;
         this.accessCount = accessCount;
+        this.edgeImgId = edgeImgId;
+        this.footerImgId = footerImgId;
     }
 
     public String getId() {
@@ -143,6 +152,22 @@ public class AccountSettingEntity implements Serializable {
 
     public void setAccessCount(long accessCount) {
         this.accessCount = accessCount;
+    }
+
+    public String getEdgeImgId() {
+        return edgeImgId;
+    }
+
+    public void setEdgeImgId(String edgeImgId) {
+        this.edgeImgId = edgeImgId;
+    }
+
+    public String getFooterImgId() {
+        return footerImgId;
+    }
+
+    public void setFooterImgId(String footerImgId) {
+        this.footerImgId = footerImgId;
     }
 
 }

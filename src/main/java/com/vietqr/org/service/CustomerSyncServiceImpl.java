@@ -56,4 +56,9 @@ public class CustomerSyncServiceImpl implements CustomerSyncService {
         return repo.getCustomerSyncInformationById(id);
     }
 
+    // @Override
+    // public List<String> checkExistedCustomerSyncByUsername(String username) {
+    // return repo.checkExistedCustomerSyncByUsername(username);
+    // }
+
 }

@@ -14,4 +14,8 @@ public interface AccountCustomerBankService {
     public List<AccountCustomerBankEntity> getAccountCustomerBankByBankId(String bankId);
 
     public String checkExistedAccountCustomerBank(String bankId, String customerSyncId);
+
+    public List<String> checkExistedCustomerSyncByUsername(String username);
+
+    public List<String> checkExistedAccountCustomerBankByBankAccount(String bankAccount, String customerSyncId);
 }
