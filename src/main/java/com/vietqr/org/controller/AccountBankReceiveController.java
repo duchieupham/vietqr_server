@@ -135,7 +135,7 @@ public class AccountBankReceiveController {
 		HttpStatus httpStatus = null;
 		try {
 			// check existed if bank account is authenticated
-			String check = accountBankService.checkExistedBank(bankAccount, bankTypeId);
+			List<String> check = accountBankService.checkExistedBank(bankAccount, bankTypeId);
 			if (check == null || check.isEmpty()) {
 				result = new ResponseMessageDTO("SUCCESS", "");
 				httpStatus = HttpStatus.OK;
@@ -151,25 +151,26 @@ public class AccountBankReceiveController {
 		return new ResponseEntity<>(result, httpStatus);
 	}
 
-	@GetMapping("account-bank/check/{bankAccount}/{bankTypeId}/{userId}/{type}")
+	@GetMapping("account-bank/check-existed")
 	public ResponseEntity<ResponseMessageDTO> checkExistedBankAccountWUserId(
-			@PathVariable(value = "bankAccount") String bankAccount,
-			@PathVariable(value = "bankTypeId") String bankTypeId,
-			@PathVariable(value = "userId") String userId,
-			@PathVariable(value = "type") String type) {
+			@RequestParam(value = "bankAccount") String bankAccount,
+			@RequestParam(value = "bankTypeId") String bankTypeId,
+			@RequestParam(value = "userId") String userId,
+			@RequestParam(value = "type") String type) {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
 			// check existed same user
-			String checkExistedSameUser = accountBankService
+			List<String> checkExistedSameUser = accountBankService
 					.checkExistedBankAccountSameUser(bankAccount, bankTypeId, userId);
-			if (checkExistedSameUser == null) {
+			System.out.println("type" + type);
+			if (checkExistedSameUser == null || checkExistedSameUser.isEmpty()) {
 				if (type.equals("ADD")) {
 					result = new ResponseMessageDTO("SUCCESS", "");
 					httpStatus = HttpStatus.OK;
 				} else {
 					// check existed if bank account is authenticated
-					String check = accountBankService.checkExistedBank(bankAccount, bankTypeId);
+					List<String> check = accountBankService.checkExistedBank(bankAccount, bankTypeId);
 					if (check == null || check.isEmpty()) {
 						result = new ResponseMessageDTO("SUCCESS", "");
 						httpStatus = HttpStatus.OK;
@@ -184,6 +185,7 @@ public class AccountBankReceiveController {
 			}
 
 		} catch (Exception e) {
+			System.out.println(e.toString());
 			logger.error(e.toString());
 			result = new ResponseMessageDTO("FAILED", "E05");
 			httpStatus = HttpStatus.BAD_REQUEST;
@@ -888,7 +890,7 @@ public class AccountBankReceiveController {
 		try {
 			String bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
 			if (bankTypeId != null && !bankTypeId.trim().isEmpty()) {
-				String check = accountBankService.checkExistedBank(dto.getBankAccount(), bankTypeId);
+				List<String> check = accountBankService.checkExistedBank(dto.getBankAccount(), bankTypeId);
 				if (check == null || check.isEmpty()) {
 					UUID uuid = UUID.randomUUID();
 					AccountBankReceiveEntity entity = new AccountBankReceiveEntity();

@@ -17,7 +17,7 @@ public interface AccountBankReceiveService {
 
 	public void deleteAccountBank(String id);
 
-	public String checkExistedBank(String bankAccount, String bankTypeId);
+	public List<String> checkExistedBank(String bankAccount, String bankTypeId);
 
 	public AccountBankReceiveEntity getAccountBankById(String bankId);
 
@@ -45,7 +45,7 @@ public interface AccountBankReceiveService {
 
 	public String getBankAccountById(String bankId);
 
-	public String checkExistedBankAccountSameUser(String bankAccount, String bankTypeId, String userId);
+	public List<String> checkExistedBankAccountSameUser(String bankAccount, String bankTypeId, String userId);
 
 	public String getUserIdByBankId(String bankId);
 

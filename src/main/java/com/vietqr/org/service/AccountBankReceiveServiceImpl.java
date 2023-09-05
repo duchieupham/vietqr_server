@@ -29,7 +29,7 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
 	}
 
 	@Override
-	public String checkExistedBank(String bankAccount, String bankTypeId) {
+	public List<String> checkExistedBank(String bankAccount, String bankTypeId) {
 		return accountBankRepo.checkExistedBankAccount(bankAccount, bankTypeId);
 	}
 
@@ -97,7 +97,7 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
 	}
 
 	@Override
-	public String checkExistedBankAccountSameUser(String bankAccount, String bankTypeId, String userId) {
+	public List<String> checkExistedBankAccountSameUser(String bankAccount, String bankTypeId, String userId) {
 		return accountBankRepo.checkExistedBankAccountSameUser(bankAccount, bankTypeId, userId);
 	}
 
