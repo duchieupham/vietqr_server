@@ -44,7 +44,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
         // + "WHERE id = ", nativeQuery = true)
         // void updateTransactionReceiveFromMMS();
 
-        @Query(value = "SELECT b.id as transactionId, b.amount, b.bank_account as bankAccount, b.content, b.time, b.status, b.type, b.trans_type as transType "
+        @Query(value = "SELECT b.id as transactionId, b.amount, b.bank_account as bankAccount, b.content, b.time, b.time_paid as timePaid, b.status, b.type, b.trans_type as transType "
                         + "FROM transaction_receive_branch a "
                         + "INNER JOIN transaction_receive b "
                         + "ON a.transaction_receive_id = b.id "
@@ -52,14 +52,14 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ORDER BY b.time DESC LIMIT 5", nativeQuery = true)
         List<TransactionRelatedDTO> getRelatedTransactionReceives(@Param(value = "businessId") String businessId);
 
-        @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time,a.status,a.type,a.trans_type as transType "
+        @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, a.time_paid as timePaid,a.status,a.type,a.trans_type as transType "
                         + "FROM transaction_receive a "
                         + "WHERE a.bank_id=:bankId AND a.status != 2 "
                         + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
         List<TransactionRelatedDTO> getTransactions(@Param(value = "offset") int offset,
                         @Param(value = "bankId") String bankId);
 
-        @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time,a.status,a.type,a.trans_type as transType "
+        @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, a.time_paid as timePaid,a.status,a.type,a.trans_type as transType "
                         + "FROM transaction_receive a "
                         + "WHERE a.bank_id=:bankId AND a.status = :status "
                         + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
@@ -67,7 +67,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         @Param(value = "offset") int offset,
                         @Param(value = "bankId") String bankId);
 
-        @Query(value = "SELECT a.id, a.amount, a.bank_id as bankId, b.bank_account as bankAccount, a.content, a.ref_id as refId, a.status, a.time, a.type, a.trace_id as traceId, a.trans_type as transType, b.bank_account_name as bankAccountName, c.bank_code as bankCode, c.bank_name as bankName, c.img_id as imgId, a.reference_number as referenceNumber "
+        @Query(value = "SELECT a.id, a.amount, a.bank_id as bankId, b.bank_account as bankAccount, a.content, a.ref_id as refId, a.status, a.time, a.time_paid as timePaid, a.type, a.trace_id as traceId, a.trans_type as transType, b.bank_account_name as bankAccountName, c.bank_code as bankCode, c.bank_name as bankName, c.img_id as imgId, a.reference_number as referenceNumber "
                         + "FROM transaction_receive a "
                         + "INNER JOIN account_bank_receive b "
                         + "ON a.bank_id = b.id "

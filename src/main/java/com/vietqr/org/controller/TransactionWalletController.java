@@ -31,7 +31,6 @@ import com.vietqr.org.dto.RequestPaymentDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.TransWalletInsertDTO;
 import com.vietqr.org.dto.TransWalletListDTO;
-import com.vietqr.org.dto.TransactionRelatedDTO;
 import com.vietqr.org.dto.VietQRDTO;
 import com.vietqr.org.dto.VietQRGenerateDTO;
 import com.vietqr.org.entity.TransactionReceiveBranchEntity;

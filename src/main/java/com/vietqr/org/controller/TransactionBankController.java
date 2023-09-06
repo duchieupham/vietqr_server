@@ -1977,6 +1977,9 @@ public class TransactionBankController {
 			logger.info("pushNewTransactionToCustomerSync: orderId: " +
 					dto.getOrderId());
 			logger.info("pushNewTransactionToCustomerSync: sign: " + dto.getSign());
+			System.out.println("pushNewTransactionToCustomerSync: orderId: " +
+					dto.getOrderId());
+			System.out.println("pushNewTransactionToCustomerSync: sign: " + dto.getSign());
 			TokenDTO tokenDTO = null;
 			if (entity.getUsername() != null && !entity.getUsername().trim().isEmpty() &&
 					entity.getPassword() != null
@@ -2020,6 +2023,8 @@ public class TransactionBankController {
 					.build();
 
 			logger.info("uriComponents: " + webClient.get().uri(builder -> builder.path("/").build()).toString());
+			System.out
+					.println("uriComponents: " + webClient.get().uri(builder -> builder.path("/").build()).toString());
 			// Mono<TransactionResponseDTO> responseMono = null;
 			Mono<ClientResponse> responseMono = null;
 			if (tokenDTO != null) {
@@ -2354,11 +2359,16 @@ public class TransactionBankController {
 				List<AccountCustomerBankEntity> accountCustomerBankEntities = new ArrayList<>();
 				accountCustomerBankEntities = accountCustomerBankService
 						.getAccountCustomerBankByBankId(accountBankEntity.getId());
-				if (!accountCustomerBankEntities.isEmpty()) {
+				if (accountCustomerBankEntities != null && !accountCustomerBankEntities.isEmpty()) {
 					for (AccountCustomerBankEntity accountCustomerBankEntity : accountCustomerBankEntities) {
 						CustomerSyncEntity customerSyncEntity = customerSyncService
 								.getCustomerSyncById(accountCustomerBankEntity.getCustomerSyncId());
-						result = pushNewTransactionToCustomerSync(customerSyncEntity, transactionBankCustomerDTO, time);
+						if (customerSyncEntity != null) {
+							System.out.println("customerSyncEntity: " + customerSyncEntity.getId() + " - "
+									+ customerSyncEntity.getInformation());
+							result = pushNewTransactionToCustomerSync(customerSyncEntity, transactionBankCustomerDTO,
+									time);
+						}
 					}
 				}
 			}

@@ -11,6 +11,8 @@ public interface TransactionRelatedDTO {
 
     Integer getTime();
 
+    Integer getTimePaid();
+
     Integer getStatus();
 
     Integer getType();

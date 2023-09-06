@@ -385,6 +385,8 @@ public class AccountController {
 				accountSettingEntity.setUserId(uuid.toString());
 				accountSettingEntity.setLastLogin(time);
 				accountSettingEntity.setAccessCount(1);
+				accountSettingEntity.setEdgeImgId("");
+				accountSettingEntity.setFooterImgId("");
 				accountSettingService.insertAccountSetting(accountSettingEntity);
 				///
 				// insert account wallet

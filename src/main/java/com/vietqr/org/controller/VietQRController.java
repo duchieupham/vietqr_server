@@ -813,7 +813,7 @@ public class VietQRController {
 		}
 	}
 
-	@PostMapping("qr/list")
+	@GetMapping("qr/list")
 	public ResponseEntity<List<VietQRDTO>> generateStaticQRList(
 			@RequestParam(value = "userId") String userId) {
 		List<VietQRDTO> result = new ArrayList<>();
@@ -848,9 +848,13 @@ public class VietQRController {
 					}
 				}
 			}
+			// System.out.println("bankIds list: " + bankIds.size() + " - " +
+			// bankIds.toString());
 			if (bankIds != null && !bankIds.isEmpty()) {
 				for (String bankId : bankIds) {
 					AccountBankReceiveEntity accountBankEntity = accountBankService.getAccountBankById(bankId);
+					// System.out.println("bankId: " + bankId + " - bank account: " +
+					// accountBankEntity.getBankAccount());
 					if (accountBankEntity != null) {
 						// get bank type information
 						BankTypeEntity bankTypeEntity = bankTypeService

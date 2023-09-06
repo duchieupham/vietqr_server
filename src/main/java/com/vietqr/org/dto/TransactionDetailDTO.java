@@ -17,6 +17,8 @@ public interface TransactionDetailDTO {
 
     Integer getTime();
 
+    Integer getTimePaid();
+
     Integer getType();
 
     String getTraceId();

@@ -69,7 +69,7 @@ public class AccountSettingController {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            if (imgId.isEmpty()) {
+            if (imgId.trim().isEmpty()) {
                 UUID uuidImage = UUID.randomUUID();
                 String fileName = StringUtils.cleanPath(image.getOriginalFilename());
                 ImageEntity imageEntity = new ImageEntity(uuidImage.toString(), fileName, image.getBytes());
