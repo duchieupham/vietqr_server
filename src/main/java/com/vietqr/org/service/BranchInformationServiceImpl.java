@@ -82,4 +82,9 @@ public class BranchInformationServiceImpl implements BranchInformationService {
         repo.deleteAllBranchByBusinessId(businessId);
     }
 
+    @Override
+    public List<BranchChoiceDTO> getValidBranchsByBusinessId(String businessId) {
+        return repo.getValidBranchsByBusinessId(businessId);
+    }
+
 }
