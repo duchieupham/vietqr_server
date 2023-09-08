@@ -10,9 +10,9 @@ import org.springframework.stereotype.Repository;
 import com.vietqr.org.entity.BankTypeEntity;
 
 @Repository
-public interface BankTypeRepository extends JpaRepository<BankTypeEntity, Long>{
+public interface BankTypeRepository extends JpaRepository<BankTypeEntity, Long> {
 
-	@Query(value ="SELECT * FROM bank_type", nativeQuery = true)
+	@Query(value = "SELECT * FROM bank_type", nativeQuery = true)
 	List<BankTypeEntity> getBankTypes();
 
 	@Query(value = "SELECT * FROM bank_type WHERE id = :id", nativeQuery = true)
@@ -21,4 +21,6 @@ public interface BankTypeRepository extends JpaRepository<BankTypeEntity, Long>{
 	@Query(value = "SELECT id FROM bank_type WHERE bank_code = :bankCode", nativeQuery = true)
 	String getBankTypeIdByBankCode(@Param(value = "bankCode") String bankCode);
 
+	@Query(value = "SELECT rpa_contain_id FROM bank_type WHERE bank_code = :bankCode", nativeQuery = true)
+	Boolean getRpaContainIdByBankCode(@Param(value = "bankCode") String bankCode);
 }

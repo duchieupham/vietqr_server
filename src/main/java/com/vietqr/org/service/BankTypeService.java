@@ -19,4 +19,5 @@ public interface BankTypeService {
 
 	public String getBankTypeIdByBankCode(String bankCode);
 
+	public Boolean getRpaContainIdByBankCode(String bankCode);
 }

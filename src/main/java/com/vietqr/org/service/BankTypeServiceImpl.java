@@ -16,7 +16,7 @@ public class BankTypeServiceImpl implements BankTypeService {
 
 	@Override
 	public int insertBankType(BankTypeEntity entity) {
-		return bankTypeRepository.save(entity) ==  null ? 0: 1;
+		return bankTypeRepository.save(entity) == null ? 0 : 1;
 	}
 
 	@Override
@@ -32,6 +32,11 @@ public class BankTypeServiceImpl implements BankTypeService {
 	@Override
 	public String getBankTypeIdByBankCode(String bankCode) {
 		return bankTypeRepository.getBankTypeIdByBankCode(bankCode);
+	}
+
+	@Override
+	public Boolean getRpaContainIdByBankCode(String bankCode) {
+		return bankTypeRepository.getRpaContainIdByBankCode(bankCode);
 	}
 
 }

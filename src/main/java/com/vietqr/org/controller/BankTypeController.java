@@ -57,7 +57,7 @@ public class BankTypeController {
 			UUID uuidImage = UUID.randomUUID();
 			String fileName = StringUtils.cleanPath(imgUrl.getOriginalFilename());
 			BankTypeEntity entity = new BankTypeEntity(uuid.toString(), bankCode, bankName, bankShortName,
-					uuidImage.toString(), swiftCode, 0);
+					uuidImage.toString(), swiftCode, 0, false);
 			bankTypeService.insertBankType(entity);
 			// insert image
 			ImageEntity imageEntity = new ImageEntity(uuidImage.toString(), fileName, imgUrl.getBytes());

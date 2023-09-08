@@ -35,4 +35,9 @@ public class TelegramAccountBankServiceImpl implements TelegramAccountBankServic
         return repo.getChatIdsByBankId(bankId);
     }
 
+    @Override
+    public void removeTelAccBankByTelIdAndBankId(String telId, String bankId) {
+        repo.removeTelAccBankByTelIdAndBankId(telId, bankId);
+    }
+
 }

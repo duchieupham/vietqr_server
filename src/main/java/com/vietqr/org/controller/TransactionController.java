@@ -43,7 +43,6 @@ import com.vietqr.org.dto.TransactionRelatedDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.entity.ImageEntity;
 import com.vietqr.org.entity.TransactionRPAEntity;
-import com.vietqr.org.entity.TransactionReceiveEntity;
 import com.vietqr.org.entity.TransactionReceiveImageEntity;
 import com.vietqr.org.service.AccountBankReceiveService;
 import com.vietqr.org.service.BankTypeService;
@@ -314,22 +313,48 @@ public class TransactionController {
                     AccountBankReceiveEntity accountBankEntity = accountBankReceiveService
                             .getAccountBankByBankAccountAndBankTypeId(dto.getBankAccount(), bankTypeId);
                     if (accountBankEntity != null) {
+                        //
+                        Boolean rpaContainId = bankTypeService.getRpaContainIdByBankCode(dto.getBankCode());
                         if (dto.getTransactions() != null && !dto.getTransactions().isEmpty()) {
                             for (TransSyncRpaDTO transSyncRpaDTO : dto.getTransactions()) {
-                                TransactionRPAEntity entity = new TransactionRPAEntity();
-                                UUID uuid = UUID.randomUUID();
-                                entity.setId(uuid.toString());
-                                entity.setAmount(transSyncRpaDTO.getAmount());
-                                entity.setBankAccount(dto.getBankAccount());
-                                entity.setBankId(accountBankEntity.getId());
-                                entity.setContent(transSyncRpaDTO.getContent());
-                                entity.setRefId(transSyncRpaDTO.getId());
-                                entity.setStatus(1);
-                                entity.setTime(convertTimeStringToInteger(transSyncRpaDTO.getTime()));
-                                entity.setTimePaid(convertTimeStringToInteger(transSyncRpaDTO.getTime()));
-                                entity.setTransType(transSyncRpaDTO.getTransType());
-                                entity.setReferenceNumber(transSyncRpaDTO.getReferenceNumber());
-                                transactions.add(entity);
+                                // check duplication transaction by transaction id ->getReferenceNumber
+                                List<String> checkDuplicatedReferenceNumber = transactionRPAService
+                                        .checkExistedTransaction(transSyncRpaDTO.getReferenceNumber());
+                                if (rpaContainId != null && rpaContainId == true) {
+                                    if (checkDuplicatedReferenceNumber == null
+                                            || checkDuplicatedReferenceNumber.isEmpty()) {
+                                        TransactionRPAEntity entity = new TransactionRPAEntity();
+                                        UUID uuid = UUID.randomUUID();
+                                        entity.setId(uuid.toString());
+                                        entity.setAmount(transSyncRpaDTO.getAmount());
+                                        entity.setBankAccount(dto.getBankAccount());
+                                        entity.setBankId(accountBankEntity.getId());
+                                        entity.setContent(transSyncRpaDTO.getContent());
+                                        entity.setRefId(transSyncRpaDTO.getId());
+                                        entity.setStatus(1);
+                                        entity.setTime(convertTimeStringToInteger(transSyncRpaDTO.getTime()));
+                                        entity.setTimePaid(convertTimeStringToInteger(transSyncRpaDTO.getTime()));
+                                        entity.setTransType(transSyncRpaDTO.getTransType());
+                                        entity.setReferenceNumber(transSyncRpaDTO.getReferenceNumber());
+                                        transactions.add(entity);
+                                    }
+                                } else {
+                                    TransactionRPAEntity entity = new TransactionRPAEntity();
+                                    UUID uuid = UUID.randomUUID();
+                                    entity.setId(uuid.toString());
+                                    entity.setAmount(transSyncRpaDTO.getAmount());
+                                    entity.setBankAccount(dto.getBankAccount());
+                                    entity.setBankId(accountBankEntity.getId());
+                                    entity.setContent(transSyncRpaDTO.getContent());
+                                    entity.setRefId(transSyncRpaDTO.getId());
+                                    entity.setStatus(1);
+                                    entity.setTime(convertTimeStringToInteger(transSyncRpaDTO.getTime()));
+                                    entity.setTimePaid(convertTimeStringToInteger(transSyncRpaDTO.getTime()));
+                                    entity.setTransType(transSyncRpaDTO.getTransType());
+                                    entity.setReferenceNumber(transSyncRpaDTO.getReferenceNumber());
+                                    transactions.add(entity);
+                                }
+
                             }
                             System.out.println("transactions size: " + transactions.size());
                             if (transactions != null && !transactions.isEmpty()) {

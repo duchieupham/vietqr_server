@@ -16,6 +16,8 @@ public interface LarkAccountBankService {
 
     public void removeLarkAccBankByLarkId(String larkId);
 
+    public void removeLarkAccBankByLarkIdAndBankId(String larkId, String bankId);
+
     // for case send msg
     public List<String> getWebhooksByBankId(String bankId);
 }

@@ -35,4 +35,9 @@ public class LarkAccountBankServiceImpl implements LarkAccountBankService {
         return repo.getWebhooksByBankId(bankId);
     }
 
+    @Override
+    public void removeLarkAccBankByLarkIdAndBankId(String larkId, String bankId) {
+        repo.removeLarkAccBankByLarkIdAndBankId(larkId, bankId);
+    }
+
 }

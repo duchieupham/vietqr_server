@@ -29,4 +29,9 @@ public class LarkServiceImpl implements LarkService {
         repo.removeLarkById(id);
     }
 
+    @Override
+    public LarkEntity getLarkById(String id) {
+        return repo.getLarkById(id);
+    }
+
 }

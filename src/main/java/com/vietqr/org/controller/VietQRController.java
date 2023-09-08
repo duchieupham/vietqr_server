@@ -859,27 +859,33 @@ public class VietQRController {
 						// get bank type information
 						BankTypeEntity bankTypeEntity = bankTypeService
 								.getBankTypeById(accountBankEntity.getBankTypeId());
-						// get cai value
-						String caiValue = caiBankService.getCaiValue(bankTypeEntity.getId());
-						// generate VietQRGenerateDTO
-						VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
-						vietQRGenerateDTO.setCaiValue(caiValue);
-						vietQRGenerateDTO.setAmount("");
-						vietQRGenerateDTO.setContent("");
-						vietQRGenerateDTO.setBankAccount(accountBankEntity.getBankAccount()); // generate QR
-						String qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
-						// generate VietQRDTO
-						VietQRDTO vietQRDTO = new VietQRDTO();
-						vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
-						vietQRDTO.setBankName(bankTypeEntity.getBankName());
-						vietQRDTO.setBankAccount(accountBankEntity.getBankAccount());
-						vietQRDTO.setUserBankName(accountBankEntity.getBankAccountName().toUpperCase());
-						vietQRDTO.setAmount("");
-						vietQRDTO.setContent("");
-						vietQRDTO.setQrCode(qr);
-						vietQRDTO.setImgId(bankTypeEntity.getImgId());
-						vietQRDTO.setTransactionId("");
-						result.add(vietQRDTO);
+						if (bankTypeEntity != null) {
+							// get cai value
+							String caiValue = caiBankService.getCaiValue(bankTypeEntity.getId());
+							if (caiValue != null && !caiValue.trim().isEmpty()) {
+								// generate VietQRGenerateDTO
+								VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+								vietQRGenerateDTO.setCaiValue(caiValue);
+								vietQRGenerateDTO.setAmount("");
+								vietQRGenerateDTO.setContent("");
+								vietQRGenerateDTO.setBankAccount(accountBankEntity.getBankAccount()); // generate QR
+								String qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
+								// generate VietQRDTO
+								VietQRDTO vietQRDTO = new VietQRDTO();
+								vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
+								vietQRDTO.setBankName(bankTypeEntity.getBankName());
+								vietQRDTO.setBankAccount(accountBankEntity.getBankAccount());
+								vietQRDTO.setUserBankName(accountBankEntity.getBankAccountName().toUpperCase());
+								vietQRDTO.setAmount("");
+								vietQRDTO.setContent("");
+								vietQRDTO.setQrCode(qr);
+								vietQRDTO.setImgId(bankTypeEntity.getImgId());
+								vietQRDTO.setTransactionId("");
+								result.add(vietQRDTO);
+							}
+
+						}
+
 					}
 				}
 			}

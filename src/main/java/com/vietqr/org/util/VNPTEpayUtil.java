@@ -59,7 +59,7 @@ public class VNPTEpayUtil {
             fstream.close();
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error("ERROR: Readfile: " + e.toString());
+            logger.error("VNPTEpayUtil - ERROR: Readfile: " + e.toString());
         }
         logger.info("FILE: " + xau);
         return xau;

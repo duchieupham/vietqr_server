@@ -256,6 +256,9 @@ public class AccountBankReceiveController {
 					.getAccountInformation(dto.getUserId());
 			String fullname = accountInformationEntity.getLastName() + " "
 					+ accountInformationEntity.getMiddleName() + " " + accountInformationEntity.getFirstName();
+			if (fullname.trim().equals("Undefined")) {
+				fullname = dto.getUserBankName();
+			}
 			String email = "";
 			if (accountInformationEntity.getEmail() != null
 					&& !accountInformationEntity.getEmail().trim().isEmpty()) {
@@ -414,6 +417,9 @@ public class AccountBankReceiveController {
 					.getAccountInformation(accountBankReceiveEntity.getUserId());
 			String fullname = accountInformationEntity.getLastName() + " "
 					+ accountInformationEntity.getMiddleName() + " " + accountInformationEntity.getFirstName();
+			if (fullname.trim().equals("Undefined")) {
+				fullname = accountBankReceiveEntity.getBankAccountName();
+			}
 			String email = "";
 			if (accountInformationEntity.getEmail() != null
 					&& !accountInformationEntity.getEmail().trim().isEmpty()) {
@@ -514,6 +520,9 @@ public class AccountBankReceiveController {
 					.getAccountInformation(dto.getUserId());
 			String fullname = accountInformationEntity.getLastName() + " "
 					+ accountInformationEntity.getMiddleName() + " " + accountInformationEntity.getFirstName();
+			if (fullname.trim().equals("Undefined")) {
+				fullname = dto.getUserBankName();
+			}
 			String email = "";
 			if (accountInformationEntity.getEmail() != null
 					&& !accountInformationEntity.getEmail().trim().isEmpty()) {

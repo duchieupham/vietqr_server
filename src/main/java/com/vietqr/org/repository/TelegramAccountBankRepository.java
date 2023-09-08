@@ -30,6 +30,11 @@ public interface TelegramAccountBankRepository extends JpaRepository<TelegramAcc
     @Query(value = "DELETE FROM telegram_account_bank WHERE telegram_id = :telId", nativeQuery = true)
     void removeTelAccBankByTelId(@Param(value = "telId") String telId);
 
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM telegram_account_bank WHERE telegram_id = :telId AND bank_id = :bankId ", nativeQuery = true)
+    void removeTelAccBankByTelIdAndBankId(@Param(value = "telId") String telId, @Param(value = "bankId") String bankId);
+
     @Query(value = "SELECT chat_id FROM telegram_account_bank WHERE bank_id = :bankId", nativeQuery = true)
     List<String> getChatIdsByBankId(@Param(value = "bankId") String bankId);
 

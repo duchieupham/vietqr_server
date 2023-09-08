@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vietqr.org.dto.ResponseMessageDTO;
+import com.vietqr.org.dto.SocialNetworkBankDTO;
 import com.vietqr.org.dto.LarkBankDTO;
 import com.vietqr.org.dto.LarkDetailDTO;
 import com.vietqr.org.dto.LarkInsertDTO;
@@ -64,6 +65,79 @@ public class LarkController {
         } catch (Exception e) {
             logger.error("Error at sendFirstMessage: " + e.toString());
             System.out.println("Error at sendFirstMessage: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // add bank to lark
+    @PostMapping("service/lark/bank")
+    public ResponseEntity<ResponseMessageDTO> insertBankIntoLark(@RequestBody SocialNetworkBankDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null) {
+                LarkEntity larkEntity = larkService.getLarkById(dto.getId());
+                if (larkEntity != null) {
+                    UUID uuid = UUID.randomUUID();
+                    LarkAccountBankEntity telAccBankEntity = new LarkAccountBankEntity();
+                    telAccBankEntity.setId(uuid.toString());
+                    telAccBankEntity.setBankId(dto.getBankId());
+                    telAccBankEntity.setLarkId(dto.getId());
+                    telAccBankEntity.setUserId(dto.getUserId());
+                    telAccBankEntity.setWebhook(larkEntity.getWebhook());
+                    larkAccountBankService.insert(telAccBankEntity);
+                    result = new ResponseMessageDTO("SUCCESS", "");
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    logger.error("NOT FOUND LARK INFORMATION");
+                    System.out.println("NOT FOUND LARK INFORMATION");
+                    result = new ResponseMessageDTO("FAILED", "E05");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                logger.error("INVALID REQUEST BODY");
+                System.out.println("INVALID REQUEST BODY");
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("Error at insertBankIntoLark: " + e.toString());
+            System.out.println("Error at insertBankIntoLark: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // remove bank from lark
+    @DeleteMapping("service/lark/bank")
+    public ResponseEntity<ResponseMessageDTO> removeBankFromLark(@RequestBody SocialNetworkBankDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null) {
+                LarkEntity larkEntity = larkService.getLarkById(dto.getId());
+                if (larkEntity != null) {
+                    larkAccountBankService.removeLarkAccBankByLarkIdAndBankId(dto.getId(), dto.getBankId());
+                    result = new ResponseMessageDTO("SUCCESS", "");
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    logger.error("NOT FOUND LARK INFORMATION");
+                    System.out.println("NOT FOUND LARK INFORMATION");
+                    result = new ResponseMessageDTO("FAILED", "E05");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                logger.error("INVALID REQUEST BODY");
+                System.out.println("INVALID REQUEST BODY");
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("Error at removeBankFromLark: " + e.toString());
+            System.out.println("Error at removeBankFromLark: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }

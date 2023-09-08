@@ -38,12 +38,15 @@ public class BankTypeEntity implements Serializable {
 	@Column(name = "status")
 	private int status;
 
+	@Column(name = "rpaContainId")
+	private boolean rpaContainId;
+
 	public BankTypeEntity() {
 		super();
 	}
 
 	public BankTypeEntity(String id, String bankCode, String bankName, String bankShortName, String imgId,
-			String swiftCode, int status) {
+			String swiftCode, int status, boolean rpaContainId) {
 		super();
 		this.id = id;
 		this.bankCode = bankCode;
@@ -52,6 +55,7 @@ public class BankTypeEntity implements Serializable {
 		this.imgId = imgId;
 		this.swiftCode = swiftCode;
 		this.status = status;
+		this.rpaContainId = rpaContainId;
 	}
 
 	public String getId() {
@@ -108,6 +112,14 @@ public class BankTypeEntity implements Serializable {
 
 	public void setStatus(int status) {
 		this.status = status;
+	}
+
+	public boolean isRpaContainId() {
+		return rpaContainId;
+	}
+
+	public void setRpaContainId(boolean rpaContainId) {
+		this.rpaContainId = rpaContainId;
 	}
 
 }

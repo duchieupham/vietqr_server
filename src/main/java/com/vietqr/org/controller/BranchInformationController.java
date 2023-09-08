@@ -98,7 +98,7 @@ public class BranchInformationController {
                         }
                     }
                     dto.setBranchs(branchChoicesResponse);
-                    if (dto.getBranchs() != null && dto.getBranchs().isEmpty()) {
+                    if (dto.getBranchs() != null && !dto.getBranchs().isEmpty()) {
                         result.add(dto);
                     }
                 }

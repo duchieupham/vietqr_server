@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vietqr.org.dto.ResponseMessageDTO;
+import com.vietqr.org.dto.SocialNetworkBankDTO;
 import com.vietqr.org.dto.TelBankDTO;
 import com.vietqr.org.dto.TelegramDetailDTO;
 import com.vietqr.org.dto.TelegramInsertDTO;
@@ -64,6 +65,79 @@ public class TelegramController {
         } catch (Exception e) {
             logger.error("Error at sendFirstMessage: " + e.toString());
             System.out.println("Error at sendFirstMessage: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // add bank to telegram
+    @PostMapping("service/telegram/bank")
+    public ResponseEntity<ResponseMessageDTO> insertBankIntoTelegram(@RequestBody SocialNetworkBankDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null) {
+                TelegramEntity telegramEntity = telegramService.getTelegramById(dto.getId());
+                if (telegramEntity != null) {
+                    UUID uuid = UUID.randomUUID();
+                    TelegramAccountBankEntity telAccBankEntity = new TelegramAccountBankEntity();
+                    telAccBankEntity.setId(uuid.toString());
+                    telAccBankEntity.setBankId(dto.getBankId());
+                    telAccBankEntity.setTelegramId(dto.getId());
+                    telAccBankEntity.setUserId(dto.getUserId());
+                    telAccBankEntity.setChatId(telegramEntity.getChatId());
+                    telegramAccountBankService.insert(telAccBankEntity);
+                    result = new ResponseMessageDTO("SUCCESS", "");
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    logger.error("NOT FOUND LARK INFORMATION");
+                    System.out.println("NOT FOUND LARK INFORMATION");
+                    result = new ResponseMessageDTO("FAILED", "E05");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                logger.error("INVALID REQUEST BODY");
+                System.out.println("INVALID REQUEST BODY");
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("Error at insertBankIntoLark: " + e.toString());
+            System.out.println("Error at insertBankIntoLark: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // remove bank from telegram
+    @DeleteMapping("service/telegram/bank")
+    public ResponseEntity<ResponseMessageDTO> removeBankFromTelegram(@RequestBody SocialNetworkBankDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null) {
+                TelegramEntity telegramEntity = telegramService.getTelegramById(dto.getId());
+                if (telegramEntity != null) {
+                    telegramAccountBankService.removeTelAccBankByTelIdAndBankId(dto.getId(), dto.getBankId());
+                    result = new ResponseMessageDTO("SUCCESS", "");
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    logger.error("NOT FOUND LARK INFORMATION");
+                    System.out.println("NOT FOUND LARK INFORMATION");
+                    result = new ResponseMessageDTO("FAILED", "E05");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                logger.error("INVALID REQUEST BODY");
+                System.out.println("INVALID REQUEST BODY");
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("Error at removeBankFromLark: " + e.toString());
+            System.out.println("Error at removeBankFromLark: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }

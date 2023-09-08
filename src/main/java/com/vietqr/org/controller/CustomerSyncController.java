@@ -41,7 +41,7 @@ public class CustomerSyncController {
     }
 
     @GetMapping("customer-sync/information")
-    public ResponseEntity<CustomerSyncInformationDTO> getCustomerSyncList(@RequestParam(value = "id") String id) {
+    public ResponseEntity<CustomerSyncInformationDTO> getCustomerSyncInfo(@RequestParam(value = "id") String id) {
         CustomerSyncInformationDTO result = null;
         HttpStatus httpStatus = null;
         try {

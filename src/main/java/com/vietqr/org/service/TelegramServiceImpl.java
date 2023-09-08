@@ -29,4 +29,9 @@ public class TelegramServiceImpl implements TelegramService {
         repo.removeTelegramById(id);
     }
 
+    @Override
+    public TelegramEntity getTelegramById(String id) {
+        return repo.getTelegramById(id);
+    }
+
 }

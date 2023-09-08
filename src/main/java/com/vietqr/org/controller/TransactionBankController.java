@@ -954,13 +954,19 @@ public class TransactionBankController {
 				List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
 				if (chatIds != null && !chatIds.isEmpty()) {
 					TelegramUtil telegramUtil = new TelegramUtil();
-					String telegramMsg = "Thanh toán thành công 🎉."
-							+ "\nTài khoản: " + bankTypeEntity.getBankShortName() + " - "
+					// String telegramMsg2 = "Thanh toán thành công 🎉."
+					// + "\nTài khoản: " + bankTypeEntity.getBankShortName() + " - "
+					// + accountBankEntity.getBankAccount()
+					// + "\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
+					// + "\nMã giao dịch: " + dto.getReferencenumber()
+					// + "\nThời gian: " + convertLongToDate(time)
+					// + "\nNội dung: " + dto.getContent();
+					String telegramMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
+							+ "| TK: " + bankTypeEntity.getBankShortName() + " - "
 							+ accountBankEntity.getBankAccount()
-							+ "\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
-							+ "\nMã giao dịch: " + dto.getReferencenumber()
-							+ "\nThời gian: " + convertLongToDate(time)
-							+ "\nNội dung: " + dto.getContent();
+							+ "| Ma GD: " + dto.getReferencenumber()
+							+ "| ND: " + dto.getContent()
+							+ "| " + convertLongToDate(time);
 					for (String chatId : chatIds) {
 						telegramUtil.sendMsg(chatId, telegramMsg);
 					}
@@ -970,13 +976,19 @@ public class TransactionBankController {
 				List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
 				if (webhooks != null && !webhooks.isEmpty()) {
 					LarkUtil larkUtil = new LarkUtil();
-					String larkMsg = "Thanh toán thành công 🎉."
-							+ "\\nTài khoản: " + bankTypeEntity.getBankShortName() + " - "
+					// String larkMsg2 = "Thanh toán thành công 🎉."
+					// + "\\nTài khoản: " + bankTypeEntity.getBankShortName() + " - "
+					// + accountBankEntity.getBankAccount()
+					// + "\\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
+					// + "\\nMã giao dịch: " + dto.getReferencenumber()
+					// + "\\nThời gian: " + convertLongToDate(time)
+					// + "\\nNội dung: " + dto.getContent();
+					String larkMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
+							+ "| TK: " + bankTypeEntity.getBankShortName() + " - "
 							+ accountBankEntity.getBankAccount()
-							+ "\\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
-							+ "\\nMã giao dịch: " + dto.getReferencenumber()
-							+ "\\nThời gian: " + convertLongToDate(time)
-							+ "\\nNội dung: " + dto.getContent();
+							+ "| Ma GD: " + dto.getReferencenumber()
+							+ "| ND: " + dto.getContent()
+							+ "| " + convertLongToDate(time);
 					for (String webhook : webhooks) {
 						larkUtil.sendMessageToLark(larkMsg, webhook);
 					}
@@ -1043,13 +1055,19 @@ public class TransactionBankController {
 			List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
 			if (chatIds != null && !chatIds.isEmpty()) {
 				TelegramUtil telegramUtil = new TelegramUtil();
-				String telegramMsg = "Thanh toán thành công 🎉."
-						+ "\nTài khoản: " + bankTypeEntity.getBankShortName() + " - "
+				// String telegramMsg2 = "Thanh toán thành công 🎉."
+				// + "\nTài khoản: " + bankTypeEntity.getBankShortName() + " - "
+				// + accountBankEntity.getBankAccount()
+				// + "\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
+				// + "\nMã giao dịch: " + dto.getReferencenumber()
+				// + "\nThời gian: " + convertLongToDate(time)
+				// + "\nNội dung: " + dto.getContent();
+				String telegramMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
+						+ "| TK: " + bankTypeEntity.getBankShortName() + " - "
 						+ accountBankEntity.getBankAccount()
-						+ "\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
-						+ "\nMã giao dịch: " + dto.getReferencenumber()
-						+ "\nThời gian: " + convertLongToDate(time)
-						+ "\nNội dung: " + dto.getContent();
+						+ "| Ma GD: " + dto.getReferencenumber()
+						+ "| ND: " + dto.getContent()
+						+ "| " + convertLongToDate(time);
 				for (String chatId : chatIds) {
 					telegramUtil.sendMsg(chatId, telegramMsg);
 				}
@@ -1059,13 +1077,19 @@ public class TransactionBankController {
 			List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
 			if (webhooks != null && !webhooks.isEmpty()) {
 				LarkUtil larkUtil = new LarkUtil();
-				String larkMsg = "Thanh toán thành công 🎉."
-						+ "\\nTài khoản: " + bankTypeEntity.getBankShortName() + " - "
+				// String larkMsg2 = "Thanh toán thành công 🎉."
+				// + "\\nTài khoản: " + bankTypeEntity.getBankShortName() + " - "
+				// + accountBankEntity.getBankAccount()
+				// + "\\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
+				// + "\\nMã giao dịch: " + dto.getReferencenumber()
+				// + "\\nThời gian: " + convertLongToDate(time)
+				// + "\\nNội dung: " + dto.getContent();
+				String larkMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
+						+ "| TK: " + bankTypeEntity.getBankShortName() + " - "
 						+ accountBankEntity.getBankAccount()
-						+ "\\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
-						+ "\\nMã giao dịch: " + dto.getReferencenumber()
-						+ "\\nThời gian: " + convertLongToDate(time)
-						+ "\\nNội dung: " + dto.getContent();
+						+ "| Ma GD: " + dto.getReferencenumber()
+						+ "| ND: " + dto.getContent()
+						+ "| " + convertLongToDate(time);
 				for (String webhook : webhooks) {
 					larkUtil.sendMessageToLark(larkMsg, webhook);
 				}
@@ -1164,12 +1188,19 @@ public class TransactionBankController {
 		List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
 		if (chatIds != null && !chatIds.isEmpty()) {
 			TelegramUtil telegramUtil = new TelegramUtil();
-			String telegramMsg = "Thanh toán thành công 🎉."
-					+ "\nTài khoản: " + bankTypeEntity.getBankShortName() + " - " + accountBankEntity.getBankAccount()
-					+ "\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
-					+ "\nMã giao dịch: " + dto.getReferencenumber()
-					+ "\nThời gian: " + convertLongToDate(time)
-					+ "\nNội dung: " + dto.getContent();
+			// String telegramMsg2 = "Thanh toán thành công 🎉."
+			// + "\nTài khoản: " + bankTypeEntity.getBankShortName() + " - " +
+			// accountBankEntity.getBankAccount()
+			// + "\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
+			// + "\nMã giao dịch: " + dto.getReferencenumber()
+			// + "\nThời gian: " + convertLongToDate(time)
+			// + "\nNội dung: " + dto.getContent();
+			String telegramMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
+					+ "| TK: " + bankTypeEntity.getBankShortName() + " - "
+					+ accountBankEntity.getBankAccount()
+					+ "| Ma GD: " + dto.getReferencenumber()
+					+ "| ND: " + dto.getContent()
+					+ "| " + convertLongToDate(time);
 			for (String chatId : chatIds) {
 				telegramUtil.sendMsg(chatId, telegramMsg);
 			}
@@ -1179,12 +1210,19 @@ public class TransactionBankController {
 		List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
 		if (webhooks != null && !webhooks.isEmpty()) {
 			LarkUtil larkUtil = new LarkUtil();
-			String larkMsg = "Thanh toán thành công 🎉."
-					+ "\\nTài khoản: " + bankTypeEntity.getBankShortName() + " - " + accountBankEntity.getBankAccount()
-					+ "\\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
-					+ "\\nMã giao dịch: " + dto.getReferencenumber()
-					+ "\\nThời gian: " + convertLongToDate(time)
-					+ "\\nNội dung: " + dto.getContent();
+			// String larkMsg2 = "Thanh toán thành công 🎉."
+			// + "\\nTài khoản: " + bankTypeEntity.getBankShortName() + " - " +
+			// accountBankEntity.getBankAccount()
+			// + "\\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
+			// + "\\nMã giao dịch: " + dto.getReferencenumber()
+			// + "\\nThời gian: " + convertLongToDate(time)
+			// + "\\nNội dung: " + dto.getContent();
+			String larkMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
+					+ "| TK: " + bankTypeEntity.getBankShortName() + " - "
+					+ accountBankEntity.getBankAccount()
+					+ "| Ma GD: " + dto.getReferencenumber()
+					+ "| ND: " + dto.getContent()
+					+ "| " + convertLongToDate(time);
 			for (String webhook : webhooks) {
 				larkUtil.sendMessageToLark(larkMsg, webhook);
 			}

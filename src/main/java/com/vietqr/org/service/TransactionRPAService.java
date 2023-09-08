@@ -11,4 +11,6 @@ public interface TransactionRPAService {
 
     public int insertAllTransactionRPA(List<TransactionRPAEntity> entities);
 
+    List<String> checkExistedTransaction(String referenceNumber);
+
 }

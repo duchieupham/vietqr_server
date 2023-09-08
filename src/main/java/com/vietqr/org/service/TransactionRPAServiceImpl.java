@@ -19,4 +19,9 @@ public class TransactionRPAServiceImpl implements TransactionRPAService {
         return repo.saveAll(entities) == null ? 0 : 1;
     }
 
+    @Override
+    public List<String> checkExistedTransaction(String referenceNumber) {
+        return repo.checkExistedTransaction(referenceNumber);
+    }
+
 }

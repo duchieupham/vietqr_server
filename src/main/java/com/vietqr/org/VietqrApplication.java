@@ -1,11 +1,6 @@
 package com.vietqr.org;
 
 import java.io.IOException;
-// import java.util.ArrayList;
-import java.util.Arrays;
-// import java.util.List;
-// import java.util.regex.Matcher;
-// import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -35,6 +30,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.vietqr.org.security.JWTAuthorizationFilter;
+import com.vietqr.org.util.BankRSAUtil;
 // import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.WebSocketConfig;
 
@@ -52,6 +48,14 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
 
+		String customerName = "John Doe";
+		String personalId = "123456789";
+		String phoneNumber = "555-1234";
+		String sourceNumber = "ABC123";
+		String valueToEncode = customerName + personalId + phoneNumber + sourceNumber;
+		String result = BankRSAUtil.generateSignature(valueToEncode);
+		System.out.println("result: " + result);
+		System.out.println("Verify data: " + BankRSAUtil.verifySignature(valueToEncode, result));
 		// String bankAccountEncrypted = BankEncryptUtil.encrypt("686839999");
 		// System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
 
@@ -142,9 +146,24 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(Arrays.asList("*"));
-		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-		configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+		// configuration.setAllowedOrigins(Arrays.asList("*"));
+		// configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE",
+		// "OPTIONS"));
+		// configuration.setAllowedHeaders(Arrays.asList("Authorization",
+		// "Content-Type"));
+		///
+		// Thêm các tiêu đề bổ sung cho hỗ trợ Multipart
+		// configuration.setAllowedHeaders(Arrays.asList("Authorization",
+		// "Content-Type", "X-Requested-With", "accept",
+		// "Origin", "Access-Control-Request-Method",
+		// "Access-Control-Request-Headers"));
+		// configuration
+		// .setExposedHeaders(Arrays.asList("Access-Control-Allow-Origin",
+		// "Access-Control-Allow-Credentials"));
+		///
+		configuration.addAllowedOrigin("*");
+		configuration.addAllowedHeader("*");
+		configuration.addAllowedMethod("*");
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;

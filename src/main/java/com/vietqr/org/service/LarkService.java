@@ -13,6 +13,8 @@ public interface LarkService {
 
     public List<LarkEntity> getLarksByUserId(String userId);
 
+    public LarkEntity getLarkById(String id);
+
     public void removeLarkById(String id);
 
 }

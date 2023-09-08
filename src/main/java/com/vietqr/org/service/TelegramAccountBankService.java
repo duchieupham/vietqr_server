@@ -16,6 +16,8 @@ public interface TelegramAccountBankService {
 
     public void removeTelAccBankByTelId(String telId);
 
+    public void removeTelAccBankByTelIdAndBankId(String telId, String bankId);
+
     // for case send msg
     public List<String> getChatIdsByBankId(String bankId);
 }

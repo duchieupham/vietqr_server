@@ -162,28 +162,28 @@ public class BranchMemberController {
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
             // push notification
-            LocalDateTime currentDateTime = LocalDateTime.now();
-            long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
-            UUID notificationUUID = UUID.randomUUID();
-            String title = NotificationUtil.getNotiTitleRemoveMember();
-            String message = NotificationUtil.getNotiDescRemoveMember();
-            NotificationEntity notiEntity = new NotificationEntity();
-            notiEntity.setId(notificationUUID.toString());
-            notiEntity.setRead(false);
-            notiEntity.setMessage(message);
-            notiEntity.setTime(time);
-            notiEntity.setType(NotificationUtil.getNotiTypeRemoveMember());
-            notiEntity.setUserId(dto.getUserId());
-            notiEntity.setData(dto.getBusinessId());
-            notificationService.insertNotification(notiEntity);
-            List<FcmTokenEntity> fcmTokens = new ArrayList<>();
-            fcmTokens = fcmTokenService.getFcmTokensByUserId(dto.getUserId());
-            Map<String, String> data = new HashMap<>();
-            data.put("notificationType", NotificationUtil.getNotiTypeRemoveMember());
-            data.put("notificationId", notificationUUID.toString());
-            firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
-                    title,
-                    message);
+            // LocalDateTime currentDateTime = LocalDateTime.now();
+            // long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+            // UUID notificationUUID = UUID.randomUUID();
+            // String title = NotificationUtil.getNotiTitleRemoveMember();
+            // String message = NotificationUtil.getNotiDescRemoveMember();
+            // NotificationEntity notiEntity = new NotificationEntity();
+            // notiEntity.setId(notificationUUID.toString());
+            // notiEntity.setRead(false);
+            // notiEntity.setMessage(message);
+            // notiEntity.setTime(time);
+            // notiEntity.setType(NotificationUtil.getNotiTypeRemoveMember());
+            // notiEntity.setUserId(dto.getUserId());
+            // notiEntity.setData(dto.getBusinessId());
+            // notificationService.insertNotification(notiEntity);
+            // List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+            // fcmTokens = fcmTokenService.getFcmTokensByUserId(dto.getUserId());
+            // Map<String, String> data = new HashMap<>();
+            // data.put("notificationType", NotificationUtil.getNotiTypeRemoveMember());
+            // data.put("notificationId", notificationUUID.toString());
+            // firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
+            // title,
+            // message);
         } catch (Exception e) {
             logger.error("MEMBER: branch-member: removeMemberFromBusiness ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
