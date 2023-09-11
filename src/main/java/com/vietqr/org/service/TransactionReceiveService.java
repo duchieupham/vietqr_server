@@ -3,6 +3,7 @@ package com.vietqr.org.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import com.vietqr.org.entity.TransactionReceiveEntity;
+import com.vietqr.org.dto.TransByCusSyncDTO;
 import com.vietqr.org.dto.TransStatisticByDateDTO;
 import com.vietqr.org.dto.TransStatisticByMonthDTO;
 import com.vietqr.org.dto.TransStatisticDTO;
@@ -51,5 +52,7 @@ public interface TransactionReceiveService {
     public List<TransStatisticByDateDTO> getTransStatisticByDate(String bankId);
 
     public List<TransStatisticByMonthDTO> getTransStatisticByMonth(String bankId);
+
+    public List<TransByCusSyncDTO> getTransactionsByCustomerSync(String bankId, String customerSyncId, int offset);
 
 }

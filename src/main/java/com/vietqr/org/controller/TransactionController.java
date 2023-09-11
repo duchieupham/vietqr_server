@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.vietqr.org.dto.ResponseMessageDTO;
+import com.vietqr.org.dto.TransByCusSyncDTO;
 import com.vietqr.org.dto.TransImgIdDTO;
 import com.vietqr.org.dto.TransReceiveRpaDTO;
 import com.vietqr.org.dto.TransStatisticByDateDTO;
@@ -459,5 +460,22 @@ public class TransactionController {
             logger.error("convertTimeStringToInteger: ERORR: " + e.toString());
         }
         return result;
+    }
+
+    @GetMapping("admin/transactions/customer-sync")
+    public ResponseEntity<List<TransByCusSyncDTO>> getTransactionsByCustomerSync(
+            @RequestParam(value = "bankId") String bankId,
+            @RequestParam(value = "customerSyncId") String customerSyncId,
+            @RequestParam(value = "offset") int offset) {
+        List<TransByCusSyncDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            result = transactionReceiveService.getTransactionsByCustomerSync(bankId, customerSyncId, offset);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getTransactionsByCustomerSync: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
     }
 }

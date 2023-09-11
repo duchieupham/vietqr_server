@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.vietqr.org.dto.AccountBankReceiveByCusSyncDTO;
 import com.vietqr.org.dto.AccountBankReceiveDTO;
 import com.vietqr.org.dto.AccountBankReceiveDetailDTO;
 import com.vietqr.org.dto.AccountBankReceiveDetailWT;
@@ -957,6 +958,22 @@ public class AccountBankReceiveController {
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
 			System.out.println("Error at getBankAccountRPAs: " + e.toString());
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	// For admin get list bank account by customersyncid
+	@GetMapping("admin/account-bank/list")
+	public ResponseEntity<List<AccountBankReceiveByCusSyncDTO>> getBankAccountsByCusSyncId(
+			@RequestParam(value = "customerSyncId") String customerSyncId) {
+		List<AccountBankReceiveByCusSyncDTO> result = new ArrayList<>();
+		HttpStatus httpStatus = null;
+		try {
+			result = accountBankService.getBankAccountsByCusSyncId(customerSyncId);
+			httpStatus = HttpStatus.OK;
+		} catch (Exception e) {
+			System.out.println("Error at getBankAccountsByCusSyncId: " + e.toString());
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(result, httpStatus);

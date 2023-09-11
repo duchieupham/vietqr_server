@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.dto.AccountBankConnectBranchDTO;
+import com.vietqr.org.dto.AccountBankReceiveByCusSyncDTO;
 import com.vietqr.org.dto.AccountBankReceiveRPAItemDTO;
 import com.vietqr.org.dto.AccountBankWpDTO;
 import com.vietqr.org.dto.BusinessBankDTO;
@@ -109,6 +110,26 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
 	@Override
 	public List<AccountBankReceiveRPAItemDTO> getBankAccountsRPA(String userId) {
 		return accountBankRepo.getBankAccountsRPA(userId);
+	}
+
+	@Override
+	public List<AccountBankReceiveByCusSyncDTO> getBankAccountsByCusSyncId(String customerSyncId) {
+		return accountBankRepo.getBankAccountsByCusSyncId(customerSyncId);
+	}
+
+	@Override
+	public String checkExistedBankAccountByBankAccount(String bankAccount) {
+		return accountBankRepo.checkExistedBankAccountByBankAccount(bankAccount);
+	}
+
+	@Override
+	public void updateBankAccountSync(boolean sync, String id) {
+		accountBankRepo.updateBankAccountSync(sync, id);
+	}
+
+	@Override
+	public String checkMMSBankAccount(String bankAccount) {
+		return accountBankRepo.checkMMSBankAccount(bankAccount);
 	}
 
 }

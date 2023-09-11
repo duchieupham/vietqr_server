@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import com.vietqr.org.entity.TransactionReceiveEntity;
+import com.vietqr.org.dto.TransByCusSyncDTO;
 import com.vietqr.org.dto.TransStatisticByDateDTO;
 import com.vietqr.org.dto.TransStatisticByMonthDTO;
 import com.vietqr.org.dto.TransStatisticDTO;
@@ -150,5 +151,18 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "WHERE bank_id = :bankId AND status = 1 "
                         + "GROUP BY month ORDER BY month DESC ", nativeQuery = true)
         List<TransStatisticByMonthDTO> getTransStatisticByMonth(@Param(value = "bankId") String bankId);
+
+        @Query(value = "SELECT a.id, a.amount, a.bank_account as bankAccount, a.bank_id as bankId, a.content, a.order_id as orderId, "
+                        + "a.ref_id as referenceId, a.reference_number as referenceNumber, a.sign, a.status, a.time, a.time_paid as timePaid, a.trace_id as traceId, a.trans_type as transType,  "
+                        + "a.type  "
+                        + "FROM transaction_receive a  "
+                        + "INNER JOIN account_customer_bank b  "
+                        + "ON a.bank_id = b.bank_id  "
+                        + "WHERE a.bank_id = :bankId AND b.customer_sync_id = :customerSyncId "
+                        + "ORDER BY a.time DESC "
+                        + "LIMIT :offset, 20 ", nativeQuery = true)
+        List<TransByCusSyncDTO> getTransactionsByCustomerSync(@Param(value = "bankId") String bankId,
+                        @Param(value = "customerSyncId") String customerSyncId,
+                        @Param(value = "offset") int offset);
 
 }

@@ -4,6 +4,8 @@ public interface CustomerSyncListDTO {
 
     String getId();
 
+    String getMerchant();
+
     String getUrl();
 
     String getIp();

@@ -5,7 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.vietqr.org.dto.CustomerSyncInformationDTO;
+import com.vietqr.org.dto.CusSyncApiInfoDTO;
+import com.vietqr.org.dto.CusSyncEcInfoDTO;
 import com.vietqr.org.dto.CustomerSyncListDTO;
 import com.vietqr.org.entity.CustomerSyncEntity;
 import com.vietqr.org.repository.CustomerSyncRepository;
@@ -52,8 +53,34 @@ public class CustomerSyncServiceImpl implements CustomerSyncService {
     }
 
     @Override
-    public CustomerSyncInformationDTO getCustomerSyncInformationById(String id) {
-        return repo.getCustomerSyncInformationById(id);
+    public Integer checkCustomerSyncTypeById(String id) {
+        return repo.checkCustomerSyncTypeById(id);
+    }
+
+    @Override
+    public CusSyncApiInfoDTO getCustomerSyncApiInfo(String id) {
+        return repo.getCustomerSyncApiInfo(id);
+    }
+
+    @Override
+    public CusSyncEcInfoDTO getCustomerSyncEcInfo(String id) {
+        return repo.getCustomerSyncEcInfo(id);
+    }
+
+    @Override
+    public void updateCustomerSyncStatus(boolean active, String customerSyncId) {
+        repo.updateCustomerSyncStatus(active, customerSyncId);
+    }
+
+    @Override
+    public List<String> checkExistedMerchant(String merchant) {
+        return repo.checkExistedMerchant(merchant);
+    }
+
+    @Override
+    public void updateCustomerSync(String url, String ip, String password, String port, String suffix,
+            String username, String customerSyncId) {
+        repo.updateCustomerSync(url, ip, password, port, suffix, username, customerSyncId);
     }
 
     // @Override

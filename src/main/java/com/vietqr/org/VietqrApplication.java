@@ -30,7 +30,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.vietqr.org.security.JWTAuthorizationFilter;
-import com.vietqr.org.util.BankRSAUtil;
+import com.vietqr.org.util.BankEncryptUtil;
 // import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.WebSocketConfig;
 
@@ -47,18 +47,27 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
+		String bankAccountEncrypted = BankEncryptUtil.encrypt("0706550526");
+		System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
 
-		String customerName = "John Doe";
-		String personalId = "123456789";
-		String phoneNumber = "555-1234";
-		String sourceNumber = "ABC123";
-		String valueToEncode = customerName + personalId + phoneNumber + sourceNumber;
-		String result = BankRSAUtil.generateSignature(valueToEncode);
-		System.out.println("result: " + result);
-		System.out.println("Verify data: " + BankRSAUtil.verifySignature(valueToEncode, result));
-		// String bankAccountEncrypted = BankEncryptUtil.encrypt("686839999");
-		// System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
+		// String customerName = "NGUYEN VAN A";
+		// String personalId = "387782195958";
+		// String phoneNumber = "0886524111";
+		// String sourceNumber = "9704222070155452";
+		// String valueToEncode = customerName + personalId + phoneNumber +
+		// sourceNumber;
+		// String result = BankRSAUtil.generateSignature(valueToEncode);
+		// System.out.println("result: " + result);
+		// System.out.println("Verify data: " +
+		// BankRSAUtil.verifySignature(valueToEncode, result));
 
+		// String prefix = "unassign";
+		// String resourceBank = "";
+		// String result2 = BankRSAUtil.generateSignature(prefix + resourceBank);
+		// String resourceCard = "";
+		// String result3 = BankRSAUtil.generateSignature(prefix + resourceCard);
+		// System.out.println("result2: " + result2);
+		// System.out.println("result3: " + result3);
 		// List<String> data = new ArrayList<>();
 		// data.add("Thanh toan QR-VQR869d78447a VRCfc8QjM2sCA NG CHUYEN:CUSTOMER");
 		// data.add("VQR303f2894 ce");

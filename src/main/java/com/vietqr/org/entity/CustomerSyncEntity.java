@@ -48,12 +48,18 @@ public class CustomerSyncEntity implements Serializable {
     @Column(name = "token")
     private String token;
 
+    @Column(name = "merchant")
+    private String merchant;
+
+    @Column(name = "address")
+    private String address;
+
     public CustomerSyncEntity() {
         super();
     }
 
     public CustomerSyncEntity(String id, String username, String password, String ipAddress, String port,
-            String suffixUrl, String information, boolean active, String token) {
+            String suffixUrl, String information, boolean active, String token, String merchant, String address) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -63,6 +69,8 @@ public class CustomerSyncEntity implements Serializable {
         this.information = information;
         this.active = active;
         this.token = token;
+        this.merchant = merchant;
+        this.address = address;
     }
 
     public String getId() {
@@ -143,6 +151,22 @@ public class CustomerSyncEntity implements Serializable {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public String getMerchant() {
+        return merchant;
+    }
+
+    public void setMerchant(String merchant) {
+        this.merchant = merchant;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
 }

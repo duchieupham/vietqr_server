@@ -10,7 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.vietqr.org.dto.CustomerSyncInformationDTO;
+import com.vietqr.org.dto.CusSyncApiInfoDTO;
+import com.vietqr.org.dto.CusSyncEcInfoDTO;
 import com.vietqr.org.dto.CustomerSyncListDTO;
 import com.vietqr.org.entity.CustomerSyncEntity;
 
@@ -41,39 +42,83 @@ public interface CustomerSyncRepository extends JpaRepository<CustomerSyncEntity
         String checkExistedCustomerSyncByInformation(@Param(value = "information") String information);
 
         // web admin
-        @Query(value = "SELECT a.id, a.information AS url, a.ip_address AS ip, a.port, "
+        @Query(value = "SELECT a.id, a.merchant, a.information AS url, a.ip_address AS ip, a.port, "
                         + "CASE "
-                        + "WHEN c.is_sync = 1 OR (c.is_sync = 0 AND c.is_wp_sync = 1) THEN 1 "
-                        + "WHEN c.is_sync = 0 AND c.is_wp_sync = 0 THEN 0 "
-                        + "ELSE NULL "
+                        + "WHEN a.active = true THEN 1 "
+                        + "WHEN a.active = false THEN 0 "
                         + "END AS active, "
                         + "CASE "
                         + "WHEN a.user_id IS NOT NULL AND a.user_id <> '' THEN 'Ecommerce' "
                         + "ELSE 'API service' "
                         + "END AS platform "
-                        + "FROM customer_sync a "
-                        + "INNER JOIN account_customer_bank b ON a.id = b.customer_sync_id "
-                        + "INNER JOIN account_bank_receive c ON b.bank_id = c.id ", nativeQuery = true)
+                        + "FROM customer_sync a ", nativeQuery = true)
         List<CustomerSyncListDTO> getCustomerSyncList();
 
-        @Query(value = "SELECT a.id, a.information AS url, a.ip_address AS ip, a.port, "
-                        + "CASE "
-                        + "WHEN c.is_sync = 1 OR (c.is_sync = 0 AND c.is_wp_sync = 1) THEN 1 "
-                        + "WHEN c.is_sync = 0 AND c.is_wp_sync = 0 THEN 0 "
-                        + "ELSE NULL "
-                        + "END AS active, "
-                        + "CASE "
-                        + "WHEN a.user_id IS NOT NULL AND a.user_id <> '' THEN 'Ecommerce' "
-                        + "ELSE 'API service' "
-                        + "END AS platform, "
-                        + "c.bank_account as bankAccount, c.id as bankId, d.bank_short_name as bankShortName, c.bank_account_name as userBankName, "
-                        + "c.phone_authenticated as phoneAuthenticated, c.national_id as nationalId, e.phone_no as phoneNo, f.last_name as lastName, f.middle_name as middleName, f.first_name as firstName, f.email, f.address "
+        // 0 => API Service
+        // 1 => E-Commerce
+        // get user type by id
+        @Query(value = "SELECT CASE WHEN user_id IS NOT NULL AND user_id <> '' THEN 1 ELSE 0 END as platform "
+                        + "FROM customer_sync "
+                        + "WHERE id = :id ", nativeQuery = true)
+        Integer checkCustomerSyncTypeById(@Param(value = "id") String id);
+
+        // get user info type API service
+        @Query(value = "SELECT a.id, a.merchant, "
+                        + "CASE  "
+                        + "WHEN a.active = true THEN 1  "
+                        + "WHEN a.active = false THEN 0 "
+                        + "END as active,  "
+                        + "CASE  "
+                        + "WHEN a.user_id IS NOT NULL AND a.user_id <> '' THEN 'Ecommerce' ELSE 'API service'  "
+                        + "END as platform,  "
+                        + "a.information as url, a.ip_address as ip, a.port, a.suffix_url as suffix, a.address, a.username as customerUsername, a.password as customerPassword,  "
+                        + "c.id as accountCustomerId, c.username as systemUsername, c.password as systemPassword "
                         + "FROM customer_sync a "
-                        + "INNER JOIN account_customer_bank b ON a.id = b.customer_sync_id "
-                        + "INNER JOIN account_bank_receive c ON b.bank_id = c.id "
-                        + "INNER JOIN bank_type d ON c.bank_type_id = d.id "
-                        + "INNER JOIN account_login e ON c.user_id = e.id "
-                        + "INNER JOIN account_information f ON c.user_id = f.user_id "
-                        + "WHERE a.id = :id", nativeQuery = true)
-        CustomerSyncInformationDTO getCustomerSyncInformationById(@Param(value = "id") String id);
+                        + "INNER JOIN account_customer_bank b  "
+                        + "ON a.id = b.customer_sync_id "
+                        + "INNER JOIN account_customer c  "
+                        + "ON c.id = b.account_customer_id  "
+                        + "WHERE a.id = :id ", nativeQuery = true)
+        CusSyncApiInfoDTO getCustomerSyncApiInfo(@Param(value = "id") String id);
+
+        // get user info type E-Commerce
+        @Query(value = "SELECT a.id,  "
+                        + "CASE  "
+                        + "WHEN a.active = true THEN 1  "
+                        + "WHEN a.active = false THEN 0 "
+                        + "END as active,  "
+                        + "CASE  "
+                        + "WHEN a.user_id IS NOT NULL AND a.user_id <> '' THEN 'Ecommerce' ELSE 'API service'  "
+                        + "END as platform,  "
+                        + "a.information as url, a.ip_address as ip, a.port, a.suffix_url as suffix, a.username as customerUsername, a.password as customerPassword,  "
+                        + "c.id as accountCustomerId, c.username as systemUsername, c.password as systemPassword "
+                        + "FROM customer_sync a "
+                        + "INNER JOIN account_customer_bank b  "
+                        + "ON a.id = b.customer_sync_id "
+                        + "INNER JOIN account_customer c  "
+                        + "ON c.id = b.account_customer_id  "
+                        + "WHERE a.id = :id ", nativeQuery = true)
+        CusSyncEcInfoDTO getCustomerSyncEcInfo(@Param(value = "id") String id);
+
+        @Transactional
+        @Modifying
+        @Query(value = "UPDATE customer_sync SET active = :active WHERE id = :customerSyncId ", nativeQuery = true)
+        void updateCustomerSyncStatus(@Param(value = "active") boolean active,
+                        @Param(value = "customerSyncId") String customerSyncId);
+
+        @Query(value = "SELECT merchant FROM customer_sync WHERE merchant = :merchant", nativeQuery = true)
+        List<String> checkExistedMerchant(@Param(value = "merchant") String merchant);
+
+        @Transactional
+        @Modifying
+        @Query(value = "UPDATE customer_sync SET information = :url, ip_address = :ip, password = :password, port = :port "
+                        + "suffix_url = :suffix, username = :username WHERE id = :customerSyncId ", nativeQuery = true)
+        void updateCustomerSync(
+                        @Param(value = "url") String url,
+                        @Param(value = "ip") String ip,
+                        @Param(value = "password") String password,
+                        @Param(value = "port") String port,
+                        @Param(value = "suffix") String suffix,
+                        @Param(value = "username") String username,
+                        @Param(value = "customerSyncId") String customerSyncId);
 }

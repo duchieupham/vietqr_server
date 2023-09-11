@@ -12,4 +12,6 @@ public interface TerminalBankService {
     public TerminalBankEntity getTerminalBankByTerminalId(String terminalId);
 
     public TerminalBankEntity getTerminalBankByBankAccount(String bankAccount);
+
+    public String checkExistedTerminalAddress(String address);
 }

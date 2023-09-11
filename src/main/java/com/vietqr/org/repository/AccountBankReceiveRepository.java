@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.vietqr.org.dto.AccountBankConnectBranchDTO;
+import com.vietqr.org.dto.AccountBankReceiveByCusSyncDTO;
 import com.vietqr.org.dto.AccountBankReceiveRPAItemDTO;
 import com.vietqr.org.dto.AccountBankWpDTO;
 import com.vietqr.org.dto.BusinessBankDTO;
@@ -25,6 +26,10 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "ON a.bank_type_id = b.id "
 			+ "WHERE a.user_id = :userId AND is_rpa_sync = 1 ", nativeQuery = true)
 	List<AccountBankReceiveRPAItemDTO> getBankAccountsRPA(@Param(value = "userId") String userId);
+
+	@Query(value = "SELECT id FROM account_bank_receive "
+			+ "WHERE bank_account = :bankAccount AND is_authenticated = true AND mms_active = true ", nativeQuery = true)
+	String checkMMSBankAccount(@Param(value = "bankAccount") String bankAccount);
 
 	@Transactional
 	@Modifying
@@ -56,6 +61,11 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			@Param(value = "phoneAuthenticated") String phoneAuthenticated,
 			@Param(value = "bankAccountName") String bankAccountName, @Param(value = "bankAccount") String bankAccount,
 			@Param(value = "bankId") String bankId);
+
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_bank_receive SET is_sync = :sync WHERE id = :id ", nativeQuery = true)
+	void updateBankAccountSync(@Param(value = "sync") boolean sync, @Param(value = "id") String id);
 
 	@Transactional
 	@Modifying
@@ -141,4 +151,28 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 
 	@Query(value = "SELECT user_id FROM account_bank_receive WHERE id = :bankId", nativeQuery = true)
 	String getUserIdByBankId(@Param(value = "bankId") String bankId);
+
+	// get bank account by customer sync id
+	@Query(value = "SELECT a.id as accountCustomerId, a.customer_sync_id as customerSyncId, a.bank_id as bankId, b.bank_account as bankAccount, b.bank_account_name as customerBankName, "
+			+ "b.bank_type_id as bankTypeId, b.national_id as nationalId, b.phone_authenticated as phoneAuthenticated, b.user_id as userId, b.is_authenticated as authenticated,  "
+			+ "c.bank_code as bankCode, c.bank_short_name as bankShortName, c.img_id as imgId,  "
+			+ "CASE  "
+			+ "WHEN b.is_sync = true AND b.mms_active = false THEN 1  "
+			+ "WHEN b.is_sync = true AND b.mms_active = true THEN 2  "
+			+ "WHEN b.is_sync = false AND b.mms_active = true THEN 1  "
+			+ "END as flow  "
+			+ "FROM account_customer_bank a "
+			+ "INNER JOIN account_bank_receive b "
+			+ "ON a.bank_id = b.id  "
+			+ "INNER JOIN bank_type c  "
+			+ "ON b.bank_type_id = c.id  "
+			+ "WHERE a.customer_sync_id = :customerSyncId ", nativeQuery = true)
+	List<AccountBankReceiveByCusSyncDTO> getBankAccountsByCusSyncId(
+			@Param(value = "customerSyncId") String customerSyncId);
+
+	// check existed bankAccount
+	@Query(value = "SELECT id FROM account_bank_receive "
+			+ "WHERE bank_account = :bankAccount AND status = true AND is_authenticated = true ", nativeQuery = true)
+	String checkExistedBankAccountByBankAccount(@Param(value = "bankAccount") String bankAccount);
+
 }

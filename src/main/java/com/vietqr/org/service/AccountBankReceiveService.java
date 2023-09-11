@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.dto.AccountBankConnectBranchDTO;
+import com.vietqr.org.dto.AccountBankReceiveByCusSyncDTO;
 import com.vietqr.org.dto.AccountBankReceiveRPAItemDTO;
 import com.vietqr.org.dto.AccountBankWpDTO;
 import com.vietqr.org.dto.BusinessBankDTO;
@@ -53,4 +54,13 @@ public interface AccountBankReceiveService {
 
 	// public AccountBankReceiveEntity getBankAccountAuthenticatedByAccount(String
 	// bankAccount);
+
+	public List<AccountBankReceiveByCusSyncDTO> getBankAccountsByCusSyncId(String customerSyncId);
+
+	// for test env
+	public String checkExistedBankAccountByBankAccount(String bankAccount);
+
+	public void updateBankAccountSync(boolean sync, String id);
+
+	public String checkMMSBankAccount(String bankAccount);
 }

@@ -27,4 +27,9 @@ public class TerminalBankServiceImpl implements TerminalBankService {
         return repository.getTerminalBankByBankAccount(bankAccount);
     }
 
+    @Override
+    public String checkExistedTerminalAddress(String address) {
+        return repository.checkExistedTerminalAddress(address);
+    }
+
 }

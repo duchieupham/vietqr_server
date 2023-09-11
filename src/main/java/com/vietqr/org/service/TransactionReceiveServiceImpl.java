@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.vietqr.org.repository.TransactionReceiveRepository;
 import java.util.List;
 import com.vietqr.org.entity.TransactionReceiveEntity;
+import com.vietqr.org.dto.TransByCusSyncDTO;
 import com.vietqr.org.dto.TransStatisticByDateDTO;
 import com.vietqr.org.dto.TransStatisticByMonthDTO;
 import com.vietqr.org.dto.TransStatisticDTO;
@@ -114,6 +115,11 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     @Override
     public List<TransactionRelatedDTO> getTransactionsByStatus(int status, int offset, String bankId) {
         return repo.getTransactionsByStatus(status, offset, bankId);
+    }
+
+    @Override
+    public List<TransByCusSyncDTO> getTransactionsByCustomerSync(String bankId, String customerSyncId, int offset) {
+        return repo.getTransactionsByCustomerSync(bankId, customerSyncId, offset);
     }
 
 }

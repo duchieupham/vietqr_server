@@ -4,7 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.vietqr.org.dto.CustomerSyncInformationDTO;
+import com.vietqr.org.dto.CusSyncApiInfoDTO;
+import com.vietqr.org.dto.CusSyncEcInfoDTO;
 import com.vietqr.org.dto.CustomerSyncListDTO;
 import com.vietqr.org.entity.CustomerSyncEntity;
 
@@ -25,7 +26,22 @@ public interface CustomerSyncService {
 
     public List<CustomerSyncListDTO> getCustomerSyncList();
 
-    public CustomerSyncInformationDTO getCustomerSyncInformationById(String id);
-
     // public List<String> checkExistedCustomerSyncByUsername(String username);
+
+    // 0 => API Service
+    // 1 => E-Commerce
+    // get user type by id
+    Integer checkCustomerSyncTypeById(String id);
+
+    CusSyncApiInfoDTO getCustomerSyncApiInfo(String id);
+
+    CusSyncEcInfoDTO getCustomerSyncEcInfo(String id);
+
+    public void updateCustomerSyncStatus(boolean active, String customerSyncId);
+
+    List<String> checkExistedMerchant(String merchant);
+
+    public void updateCustomerSync(String url, String ip, String password, String port, String suffix,
+            String username, String customerSyncId);
+
 }

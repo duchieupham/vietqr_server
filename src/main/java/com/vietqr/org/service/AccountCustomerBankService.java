@@ -18,4 +18,7 @@ public interface AccountCustomerBankService {
     public List<String> checkExistedCustomerSyncByUsername(String username);
 
     public List<String> checkExistedAccountCustomerBankByBankAccount(String bankAccount, String customerSyncId);
+
+    public void removeBankAccountFromCustomerSync(String bankId, String customerSyncId);
+
 }

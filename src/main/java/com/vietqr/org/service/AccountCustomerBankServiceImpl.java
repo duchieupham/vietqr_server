@@ -39,4 +39,9 @@ public class AccountCustomerBankServiceImpl implements AccountCustomerBankServic
         return repo.checkExistedCustomerSyncByUsername(username);
     }
 
+    @Override
+    public void removeBankAccountFromCustomerSync(String bankId, String customerSyncId) {
+        repo.removeBankAccountFromCustomerSync(bankId, customerSyncId);
+    }
+
 }

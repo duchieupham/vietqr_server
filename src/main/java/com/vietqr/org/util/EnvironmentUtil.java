@@ -1,7 +1,7 @@
 package com.vietqr.org.util;
 
 public class EnvironmentUtil {
-    private static boolean IS_PRODUCTION = true;
+    private static boolean IS_PRODUCTION = false;
 
     // DINO SOFT - VOICE
     private static final String VOICE_REQUEST_URL = "http://103.141.140.202:8009/tts/v1/speak";
@@ -91,10 +91,17 @@ public class EnvironmentUtil {
     private static final String BANK_TYPE_ID_RECHARGE_UAT = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
     private static final String BANK_TYPE_ID_RECHARGE_PROD = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
 
+    //
+    private static final String DEFAULT_USER_ID_TEST = "62ad476d-3b6b-4926-9890-fa6a20144f7f";
+
     // Social Network config
     // Telegram
     private static final String TELEGRAM_BOT_USERNAME = "vietqr_bot";
     private static final String TELEGRAM_BOT_TOKEN = "6603683411:AAGTCde6C-7kt4gR5gTvcDA_jmYIqs0SJJM";
+
+    public static String getDefaultUserIdTest() {
+        return (IS_PRODUCTION == false) ? DEFAULT_USER_ID_TEST : "";
+    }
 
     public static boolean isProduction() {
         return IS_PRODUCTION;
