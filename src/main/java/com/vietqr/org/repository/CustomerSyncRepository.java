@@ -111,7 +111,7 @@ public interface CustomerSyncRepository extends JpaRepository<CustomerSyncEntity
 
         @Transactional
         @Modifying
-        @Query(value = "UPDATE customer_sync SET information = :url, ip_address = :ip, password = :password, port = :port "
+        @Query(value = "UPDATE customer_sync SET information = :url, ip_address = :ip, password = :password, port = :port, "
                         + "suffix_url = :suffix, username = :username WHERE id = :customerSyncId ", nativeQuery = true)
         void updateCustomerSync(
                         @Param(value = "url") String url,

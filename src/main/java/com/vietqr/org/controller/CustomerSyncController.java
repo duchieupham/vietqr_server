@@ -290,9 +290,14 @@ public class CustomerSyncController {
             if (dto != null && dto.getMerchantName() != null && !dto.getMerchantName().trim().isEmpty()) {
                 List<String> checkExistedMerchant = customerSyncService.checkExistedMerchant(dto.getMerchantName());
                 if (checkExistedMerchant != null && !checkExistedMerchant.isEmpty()) {
+                    // if existed: -> show msg
+                    logger.error("insertNewCustomerSync: EXISTED MERCHANT NAME");
+                    result = new ResponseMessageDTO("FAILED", "E85");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    ///
+                } else {
                     // if not: pass
                     //
-
                     String checkExistedAddress = terminalBankService.checkExistedTerminalAddress(dto.getAddress());
                     // 2. check address
                     if (checkExistedAddress != null && !checkExistedAddress.isEmpty()) {
@@ -532,11 +537,6 @@ public class CustomerSyncController {
                             }
                         }
                     }
-                } else {
-                    // if existed: -> show msg
-                    logger.error("insertNewCustomerSync: EXISTED MERCHANT NAME");
-                    result = new ResponseMessageDTO("FAILED", "E85");
-                    httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {
                 logger.error("insertNewCustomerSync: INVALID REQUEST BODY");
