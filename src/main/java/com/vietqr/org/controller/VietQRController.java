@@ -518,8 +518,34 @@ public class VietQRController {
 								qrCode = requestVietQRMMS(requestDTO);
 								if (qrCode != null) {
 									VietQRMMSDTO vietQRMMSDTO = new VietQRMMSDTO(qrCode);
-									httpStatus = HttpStatus.OK;
-									result = vietQRMMSDTO;
+									//
+									String bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
+									if (bankTypeId != null && !bankTypeId.trim().isEmpty()) {
+										VietQRDTO vietQRDTO = new VietQRDTO();
+										// get cai value
+										BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(bankTypeId);
+										//
+										String bankAccount = "";
+										String userBankName = "";
+										bankAccount = dto.getBankAccount();
+										userBankName = dto.getUserBankName().trim().toUpperCase();
+										// generate VietQRDTO
+										vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
+										vietQRDTO.setBankName(bankTypeEntity.getBankName());
+										vietQRDTO.setBankAccount(bankAccount);
+										vietQRDTO.setUserBankName(userBankName);
+										vietQRDTO.setAmount(dto.getAmount() + "");
+										vietQRDTO.setContent(dto.getContent());
+										vietQRDTO.setQrCode(qrCode);
+										vietQRDTO.setImgId(bankTypeEntity.getImgId());
+										vietQRDTO.setExisting(0);
+										result = vietQRDTO;
+										httpStatus = HttpStatus.OK;
+										result = vietQRMMSDTO;
+									} else {
+										result = new ResponseMessageDTO("FAILED", "E24");
+										httpStatus = HttpStatus.BAD_REQUEST;
+									}
 								} else {
 									logger.error("generateVietQRMMS: ERROR: Invalid get QR Code");
 									result = new ResponseMessageDTO("FAILED", "E05");
@@ -565,6 +591,7 @@ public class VietQRController {
 				}
 			}
 		}
+
 	}
 
 	private String requestVietQRMMS(VietQRMMSRequestDTO dto) {
