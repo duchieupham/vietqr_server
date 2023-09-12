@@ -30,7 +30,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.vietqr.org.security.JWTAuthorizationFilter;
-import com.vietqr.org.util.BankEncryptUtil;
+import com.vietqr.org.util.AESUtil;
+// import com.vietqr.org.util.BankEncryptUtil;
 // import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.WebSocketConfig;
 
@@ -47,8 +48,15 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
-		String bankAccountEncrypted = BankEncryptUtil.encrypt("0706550526");
-		System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
+		//
+		// String password = "Hokdoithu1997";
+		// String encryptAESPassword = AESUtil.encrypt(password);
+		// String decryptAESPassword = AESUtil.decrypt(encryptAESPassword);
+		// System.out.println("en: " + encryptAESPassword);
+		// System.out.println("de: " + decryptAESPassword);
+		//
+		// String bankAccountEncrypted = BankEncryptUtil.encrypt("0706550526");
+		// System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
 
 		// String customerName = "NGUYEN VAN A";
 		// String personalId = "387782195958";

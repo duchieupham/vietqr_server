@@ -1238,11 +1238,11 @@ public class TransactionBankController {
 					data.put("time", "" + time);
 					data.put("refId", "" + dto.getTransactionid());
 					data.put("status", "1");
-					data.put("traceId", "" + traceId);
+					data.put("transType", dto.getTransType());
 					if (traceId == null || traceId.isEmpty()) {
-						data.put("transType", "");
+						data.put("traceId", "");
 					} else {
-						data.put("transType", dto.getTransType());
+						data.put("traceId", traceId);
 					}
 					firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
 							NotificationUtil
