@@ -603,6 +603,7 @@ public class ContactController {
                         contactListDTO.setStatus(entity.getStatus());
                         contactListDTO.setType(entity.getType());
                         contactListDTO.setColorType(entity.getColorType());
+                        contactListDTO.setRelation(entity.getRelation());
                         if (entity.getType() == 1) {
                             contactListDTO.setDescription("VietQR ID");
                             String imgId = contactService.getImgIdByWalletId(entity.getValue());
@@ -663,6 +664,7 @@ public class ContactController {
                         contactListDTO.setStatus(entity.getStatus());
                         contactListDTO.setType(entity.getType());
                         contactListDTO.setColorType(entity.getColorType());
+                        contactListDTO.setRelation(entity.getRelation());
                         if (entity.getType() == 1) {
                             contactListDTO.setDescription("VietQR ID");
                             String imgId = contactService.getImgIdByWalletId(entity.getValue());
@@ -720,6 +722,7 @@ public class ContactController {
                         contactListDTO.setStatus(entity.getStatus());
                         contactListDTO.setType(entity.getType());
                         contactListDTO.setColorType(entity.getColorType());
+                        contactListDTO.setRelation(entity.getRelation());
                         if (entity.getType() == 1) {
                             contactListDTO.setDescription("VietQR ID");
                             String imgId = contactService.getImgIdByWalletId(entity.getValue());
@@ -777,6 +780,7 @@ public class ContactController {
                     result.setAdditionalData(entity.getAdditionalData());
                     result.setType(entity.getType());
                     result.setStatus(entity.getStatus());
+                    result.setRelation(entity.getRelation());
                     String bankShortName = "";
                     String bankName = "";
                     String imgId = "";
