@@ -134,6 +134,7 @@ public class CustomerSyncController {
                     result = cusSyncDTO;
                     httpStatus = HttpStatus.OK;
                 } else {
+                    System.out.println("getCustomerSyncInfo: NOT FOUND CUS_SYNC - cusSyncDTO = null");
                     logger.error("getCustomerSyncInfo: NOT FOUND CUS_SYNC");
                     result = new ResponseMessageDTO("FAILED", "E81");
                     httpStatus = HttpStatus.BAD_REQUEST;

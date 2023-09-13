@@ -85,4 +85,14 @@ public class ContactServiceImpl implements ContactService {
         repo.updateImgIdById(imgId, id);
     }
 
+    @Override
+    public void updateContactRelation(int relation, String id) {
+        repo.updateContactRelation(relation, id);
+    }
+
+    @Override
+    public List<ContactEntity> getContactPublicByUserIdWithPagging(int offset) {
+        return repo.getContactPublicByUserIdWithPagging(offset);
+    }
+
 }

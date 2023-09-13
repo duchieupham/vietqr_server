@@ -32,7 +32,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.vietqr.org.security.JWTAuthorizationFilter;
 import com.vietqr.org.util.AESUtil;
 // import com.vietqr.org.util.BankEncryptUtil;
-// import com.vietqr.org.util.BankEncryptUtil;
+import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.WebSocketConfig;
 
 @SpringBootApplication
@@ -55,7 +55,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// System.out.println("en: " + encryptAESPassword);
 		// System.out.println("de: " + decryptAESPassword);
 		//
-		// String bankAccountEncrypted = BankEncryptUtil.encrypt("0706550526");
+		// String bankAccountEncrypted = BankEncryptUtil.encrypt("0373903524");
 		// System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
 
 		// String customerName = "NGUYEN VAN A";

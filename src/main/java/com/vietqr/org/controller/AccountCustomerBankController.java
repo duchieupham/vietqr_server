@@ -67,7 +67,11 @@ public class AccountCustomerBankController {
                             result = new ResponseMessageDTO("FAILED", "E83");
                             httpStatus = HttpStatus.BAD_REQUEST;
                         } else {
-                            // 2.1.1.2. if not added - do add acc_cus_bank
+                            // update is_sync = true in account_bank_receive
+                            accountBankReceiveService.updateBankSync(true, checkExistedBankAccount);
+                            // 2.1.1.2. if not
+                            // added - do add
+                            // acc_cus_bank
                             UUID uuid = UUID.randomUUID();
                             AccountCustomerBankEntity accountCustomerBankEntity = new AccountCustomerBankEntity();
                             accountCustomerBankEntity.setId(uuid.toString());
@@ -138,6 +142,8 @@ public class AccountCustomerBankController {
                             result = new ResponseMessageDTO("FAILED", "E83");
                             httpStatus = HttpStatus.BAD_REQUEST;
                         } else {
+                            // update is_sync = true in account bank_receive
+                            accountBankReceiveService.updateBankSync(true, checkExistedBankAccount);
                             // 2.1.2.2. if not existed - do add acc_cus_bank
                             UUID uuid = UUID.randomUUID();
                             AccountCustomerBankEntity accountCustomerBankEntity = new AccountCustomerBankEntity();
@@ -179,8 +185,12 @@ public class AccountCustomerBankController {
         HttpStatus httpStatus = null;
         try {
             if (dto != null) {
-                accountBankReceiveService.updateBankAccountSync(false, dto.getBankId());
                 accountCustomerBankService.removeBankAccountFromCustomerSync(dto.getBankId(), dto.getCustomerSyncId());
+                List<AccountCustomerBankEntity> checkExistedBankAccountFromMerchant = accountCustomerBankService
+                        .getAccountCustomerBankByBankId(dto.getBankId());
+                if (checkExistedBankAccountFromMerchant == null || checkExistedBankAccountFromMerchant.isEmpty()) {
+                    accountBankReceiveService.updateBankAccountSync(false, dto.getBankId());
+                }
                 result = new ResponseMessageDTO("SUCCESS", "");
                 httpStatus = HttpStatus.OK;
             } else {
@@ -194,4 +204,5 @@ public class AccountCustomerBankController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
 }

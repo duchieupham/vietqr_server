@@ -175,4 +175,10 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "WHERE bank_account = :bankAccount AND status = true AND is_authenticated = true ", nativeQuery = true)
 	String checkExistedBankAccountByBankAccount(@Param(value = "bankAccount") String bankAccount);
 
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_bank_receive "
+			+ "SET is_sync = :sync "
+			+ "WHERE id = :id ", nativeQuery = true)
+	void updateSyncBank(@Param(value = "sync") boolean sync, @Param(value = "id") String id);
 }

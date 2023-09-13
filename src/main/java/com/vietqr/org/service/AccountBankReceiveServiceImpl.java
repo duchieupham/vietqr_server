@@ -132,4 +132,9 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
 		return accountBankRepo.checkMMSBankAccount(bankAccount);
 	}
 
+	@Override
+	public void updateBankSync(boolean sync, String id) {
+		accountBankRepo.updateBankAccountSync(sync, id);
+	}
+
 }

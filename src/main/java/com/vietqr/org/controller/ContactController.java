@@ -26,8 +26,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.vietqr.org.dto.ContactDetailDTO;
 import com.vietqr.org.dto.ContactInsertDTO;
 import com.vietqr.org.dto.ContactInsertMultipartDTO;
+import com.vietqr.org.dto.ContactInsertWithRelationMultipartDTO;
 import com.vietqr.org.dto.ContactListDTO;
 import com.vietqr.org.dto.ContactRechargeDTO;
+import com.vietqr.org.dto.ContactRelationUpdateDTO;
 import com.vietqr.org.dto.ContactScanResultDTO;
 import com.vietqr.org.dto.ContactStatusUpdateDTO;
 import com.vietqr.org.dto.ContactUpdateDTO;
@@ -81,6 +83,150 @@ public class ContactController {
     @Autowired
     ImageService imageService;
 
+    // add contact with relation
+    // 1. check add chua
+    // 2. add
+    @PostMapping("contacts")
+    public ResponseEntity<ResponseMessageDTO> insertContacWithRelationtMultipart(
+            @ModelAttribute ContactInsertWithRelationMultipartDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null) {
+                String checkExisted = contactService.checkExistedRecord(dto.getUserId(), dto.getValue(), dto.getType());
+                if (checkExisted == null) {
+                    UUID uuid = UUID.randomUUID();
+                    LocalDateTime currentDateTime = LocalDateTime.now();
+                    long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+                    ContactEntity entity = new ContactEntity();
+                    entity.setId(uuid.toString());
+                    entity.setUserId(dto.getUserId());
+                    entity.setNickname(dto.getNickName());
+                    entity.setValue(dto.getValue());
+                    entity.setAdditionalData(dto.getAdditionalData());
+                    entity.setType(dto.getType());
+                    // 0: approved - 1: pending
+                    entity.setStatus(0);
+                    entity.setTime(time);
+                    //
+                    if (dto.getType() == 2) {
+                        entity.setBankTypeId(dto.getBankTypeId());
+                        entity.setBankAccount(dto.getBankAccount());
+                    } else {
+                        entity.setBankTypeId("");
+                        entity.setBankAccount("");
+                    }
+                    // set imgId
+                    // check img
+                    if (dto.getImage() != null) {
+                        UUID uuidImage = UUID.randomUUID();
+                        String fileName = StringUtils.cleanPath(dto.getImage().getOriginalFilename());
+                        ImageEntity imageEntity = new ImageEntity(uuidImage.toString(), fileName,
+                                dto.getImage().getBytes());
+                        imageService.insertImage(imageEntity);
+                        entity.setImgId(uuidImage.toString());
+                    } else {
+                        entity.setImgId("");
+                    }
+                    // set color Type
+                    entity.setColorType(dto.getColorType());
+                    entity.setRelation(dto.getRelation());
+                    int check = contactService.insertContact(entity);
+                    if (check == 1) {
+                        // push noti with other user if found user by walletId
+                        if (dto.getType() == 1 && dto.getValue() != null && !dto.getValue().isEmpty()) {
+                            String checkExistedUserId = accountWalletService.getUserIdByWalletId(dto.getValue());
+                            if (checkExistedUserId != null) {
+                                UUID uuid2 = UUID.randomUUID();
+                                ContactEntity entity2 = new ContactEntity();
+                                UserInfoWalletDTO userInfoWalletDTO = accountInformationService
+                                        .getUserInforWallet(dto.getUserId());
+                                if (userInfoWalletDTO != null) {
+                                    // insert 2
+                                    String nickname = userInfoWalletDTO.getLastName() + " "
+                                            + userInfoWalletDTO.getMiddleName() + " "
+                                            + userInfoWalletDTO.getFirstName();
+                                    entity2.setId(uuid2.toString());
+                                    entity2.setUserId(checkExistedUserId);
+                                    entity2.setNickname(nickname.trim());
+                                    entity2.setValue(userInfoWalletDTO.getWalletId());
+                                    entity2.setAdditionalData("");
+                                    // default type = 1
+                                    entity2.setType(1);
+                                    // 0: approved - 1: pending
+                                    entity2.setStatus(1);
+                                    entity2.setTime(time);
+                                    entity2.setBankTypeId("");
+                                    entity2.setBankAccount("");
+                                    entity2.setColorType(0);
+                                    entity2.setImgId("");
+                                    entity2.setRelation(0);
+                                    contactService.insertContact(entity2);
+                                    //
+                                    String title = NotificationUtil.getNotiTitleAddVietqrId();
+                                    String message = nickname + NotificationUtil.getNotiDescAddVietqrId();
+                                    // insert notification
+                                    UUID notificationUuid = UUID.randomUUID();
+                                    NotificationEntity notificationEntity = new NotificationEntity();
+                                    notificationEntity.setId(notificationUuid.toString());
+                                    notificationEntity.setRead(false);
+                                    notificationEntity.setMessage(message);
+                                    notificationEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
+                                    notificationEntity.setType(NotificationUtil.getNotiAddVietqrId());
+                                    notificationEntity.setUserId(checkExistedUserId);
+                                    notificationService.insertNotification(notificationEntity);
+                                    // push notification
+                                    List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+                                    fcmTokens = fcmTokenService.getFcmTokensByUserId(checkExistedUserId);
+                                    if (fcmTokens != null && !fcmTokens.isEmpty()) {
+                                        for (FcmTokenEntity fcmToken : fcmTokens) {
+                                            try {
+                                                if (!fcmToken.getToken().trim().isEmpty()) {
+                                                    FcmRequestDTO fcmDTO = new FcmRequestDTO();
+                                                    fcmDTO.setTitle(title);
+                                                    fcmDTO.setMessage(message);
+                                                    fcmDTO.setToken(fcmToken.getToken());
+                                                    firebaseMessagingService.sendPushNotificationToToken(fcmDTO);
+                                                    logger.info("Send notification to device " + fcmToken.getToken());
+                                                }
+                                            } catch (Exception e) {
+                                                logger.error("Error when Send Notification using FCM " + e.toString());
+                                                if (e.toString()
+                                                        .contains(
+                                                                "The registration token is not a valid FCM registration token")) {
+                                                    fcmTokenService.deleteFcmToken(fcmToken.getToken());
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                        result = new ResponseMessageDTO("SUCCESS", "");
+                        httpStatus = HttpStatus.OK;
+                    } else {
+                        result = new ResponseMessageDTO("FAILED", "E48");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    }
+                } else {
+                    logger.error("insertContact: EXISTED RECORD");
+                    result = new ResponseMessageDTO("FAILED", "E47");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                logger.error("insertContact: INVALID REQUEST BODY");
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("insertContact: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     // add contact
     // 1. check add chua
     // 2. add
@@ -128,6 +274,7 @@ public class ContactController {
                     }
                     // set color Type
                     entity.setColorType(dto.getColorType());
+                    entity.setRelation(0);
                     int check = contactService.insertContact(entity);
                     if (check == 1) {
                         // push noti with other user if found user by walletId
@@ -157,6 +304,7 @@ public class ContactController {
                                     entity2.setBankAccount("");
                                     entity2.setColorType(0);
                                     entity2.setImgId("");
+                                    entity2.setRelation(0);
                                     contactService.insertContact(entity2);
                                     //
                                     String title = NotificationUtil.getNotiTitleAddVietqrId();
@@ -257,6 +405,7 @@ public class ContactController {
                         entity.setBankTypeId("");
                         entity.setBankAccount("");
                     }
+                    entity.setRelation(0);
                     int check = contactService.insertContact(entity);
                     if (check == 1) {
                         // push noti with other user if found user by walletId
@@ -286,6 +435,7 @@ public class ContactController {
                                     entity2.setBankAccount("");
                                     entity2.setColorType(0);
                                     entity2.setImgId("");
+                                    entity2.setRelation(0);
                                     contactService.insertContact(entity2);
                                     //
                                     String title = NotificationUtil.getNotiTitleAddVietqrId();
@@ -346,6 +496,31 @@ public class ContactController {
             }
         } catch (Exception e) {
             logger.error("insertContact: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("contact/relation")
+    public ResponseEntity<ResponseMessageDTO> updateContactRelation(@RequestBody ContactRelationUpdateDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null) {
+                int relation = 0;
+                if (dto.getRelation() != null) {
+                    relation = dto.getRelation();
+                }
+                contactService.updateContactRelation(relation, dto.getId());
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            } else {
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("updateContactRelation: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -415,6 +590,8 @@ public class ContactController {
                 if (type == 9) {
                     contactList = contactService.getContactApprovedByUserIdWithPagging(userId,
                             offset);
+                } else if (type == 8) {
+                    contactList = contactService.getContactPublicByUserIdWithPagging(offset);
                 } else {
                     contactList = contactService.getContactApprovedByUserIdAndStatusWithPagging(userId, type, offset);
                 }

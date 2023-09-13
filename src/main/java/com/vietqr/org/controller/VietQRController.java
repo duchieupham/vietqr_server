@@ -329,7 +329,13 @@ public class VietQRController {
 		// luồng 2
 		String checkExistedMMSBank = accountBankService.checkMMSBankAccount(dto.getBankAccount());
 		boolean checkMMS = false;
-		if (checkExistedMMSBank != null && !checkExistedMMSBank.trim().isEmpty() && dto.getTransType().equals("C")) {
+		String transType = "C";
+		if (dto.getTransType() == null) {
+			transType = "C";
+		} else {
+			transType = dto.getTransType().trim();
+		}
+		if (checkExistedMMSBank != null && !checkExistedMMSBank.trim().isEmpty() && transType.equals("C")) {
 			checkMMS = true;
 		}
 		if (checkMMS == false) {

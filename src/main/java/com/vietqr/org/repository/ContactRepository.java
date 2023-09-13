@@ -26,6 +26,13 @@ public interface ContactRepository extends JpaRepository<ContactEntity, Long> {
         List<ContactEntity> getContactApprovedByUserIdWithPagging(@Param(value = "userId") String userId,
                         @Param(value = "offset") int offset);
 
+        @Query(value = "SELECT * FROM contact "
+                        + "WHERE relation = 1 AND status = 0 "
+                        + "ORDER BY nickname ASC "
+                        + "LIMIT :offset, 20", nativeQuery = true)
+        List<ContactEntity> getContactPublicByUserIdWithPagging(
+                        @Param(value = "offset") int offset);
+
         // contact approved by status with pagging
         @Query(value = "SELECT * FROM contact "
                         + "WHERE user_id = :userId AND status = 0 "
@@ -100,4 +107,9 @@ public interface ContactRepository extends JpaRepository<ContactEntity, Long> {
                         + "ON a.user_id = b.user_id "
                         + "WHERE a.wallet_id = :walletId", nativeQuery = true)
         String getImgIdByWalletId(@Param(value = "walletId") String walletId);
+
+        @Transactional
+        @Modifying
+        @Query(value = "UPDATE contact SET relation = :relation WHERE id = :id ", nativeQuery = true)
+        void updateContactRelation(@Param(value = "relation") int relation, @Param(value = "id") String id);
 }

@@ -54,12 +54,17 @@ public class ContactEntity implements Serializable {
     @Column(name = "colorType")
     private int colorType;
 
+    // NULL OR 0: private
+    // 1: public
+    @Column(name = "relation")
+    private Integer relation;
+
     public ContactEntity() {
         super();
     }
 
     public ContactEntity(String id, String userId, String nickname, String value, String additionalData, int type,
-            int status, long time, String bankTypeId, String bankAccount) {
+            int status, long time, String bankTypeId, String bankAccount, Integer relation) {
         this.id = id;
         this.userId = userId;
         this.nickname = nickname;
@@ -73,7 +78,8 @@ public class ContactEntity implements Serializable {
     }
 
     public ContactEntity(String id, String userId, String nickname, String value, String additionalData, int type,
-            int status, long time, String bankTypeId, String bankAccount, String imgId, int colorType) {
+            int status, long time, String bankTypeId, String bankAccount, String imgId, int colorType,
+            Integer relation) {
         this.id = id;
         this.userId = userId;
         this.nickname = nickname;
@@ -86,6 +92,7 @@ public class ContactEntity implements Serializable {
         this.bankAccount = bankAccount;
         this.imgId = imgId;
         this.colorType = colorType;
+        this.relation = relation;
     }
 
     public String getImgId() {
@@ -182,6 +189,14 @@ public class ContactEntity implements Serializable {
 
     public void setBankAccount(String bankAccount) {
         this.bankAccount = bankAccount;
+    }
+
+    public Integer getRelation() {
+        return relation;
+    }
+
+    public void setRelation(Integer relation) {
+        this.relation = relation;
     }
 
 }

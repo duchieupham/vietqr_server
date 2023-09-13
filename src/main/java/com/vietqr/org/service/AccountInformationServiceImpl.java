@@ -68,4 +68,9 @@ public class AccountInformationServiceImpl implements AccountInformationService 
 	public List<AccountSearchDTO> getAccountsSearch(String phoneNo) {
 		return accountInformationRepo.getAccountsSearch(phoneNo);
 	}
+
+	@Override
+	public List<AccountSearchDTO> getAccountSearchByFullname(String fullname) {
+		return accountInformationRepo.getAccountSearchByFullname(fullname);
+	}
 }

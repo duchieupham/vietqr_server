@@ -78,11 +78,11 @@ public interface CustomerSyncRepository extends JpaRepository<CustomerSyncEntity
                         + "ON a.id = b.customer_sync_id "
                         + "INNER JOIN account_customer c  "
                         + "ON c.id = b.account_customer_id  "
-                        + "WHERE a.id = :id ", nativeQuery = true)
+                        + "WHERE a.id = :id LIMIT 0, 1 ", nativeQuery = true)
         CusSyncApiInfoDTO getCustomerSyncApiInfo(@Param(value = "id") String id);
 
         // get user info type E-Commerce
-        @Query(value = "SELECT a.id,  "
+        @Query(value = "SELECT a.id, "
                         + "CASE  "
                         + "WHEN a.active = true THEN 1  "
                         + "WHEN a.active = false THEN 0 "
@@ -90,14 +90,13 @@ public interface CustomerSyncRepository extends JpaRepository<CustomerSyncEntity
                         + "CASE  "
                         + "WHEN a.user_id IS NOT NULL AND a.user_id <> '' THEN 'Ecommerce' ELSE 'API service'  "
                         + "END as platform,  "
-                        + "a.information as url, a.ip_address as ip, a.port, a.suffix_url as suffix, a.username as customerUsername, a.password as customerPassword,  "
-                        + "c.id as accountCustomerId, c.username as systemUsername, c.password as systemPassword "
-                        + "FROM customer_sync a "
-                        + "INNER JOIN account_customer_bank b  "
-                        + "ON a.id = b.customer_sync_id "
-                        + "INNER JOIN account_customer c  "
-                        + "ON c.id = b.account_customer_id  "
-                        + "WHERE a.id = :id ", nativeQuery = true)
+                        + "a.information as url, b.phone_no as phoneNo, c.email, c.first_name as firstName, c.middle_name as middleName, c.last_name as lastName "
+                        + "FROM customer_sync a  "
+                        + "INNER JOIN account_login b "
+                        + "ON a.user_id = b.id "
+                        + "INNER JOIN account_information c "
+                        + "ON a.user_id = c.user_id "
+                        + "WHERE a.id = :id LIMIT 0, 1", nativeQuery = true)
         CusSyncEcInfoDTO getCustomerSyncEcInfo(@Param(value = "id") String id);
 
         @Transactional

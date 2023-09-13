@@ -25,6 +25,8 @@ public interface AccountInformationService {
 
 	public AccountSearchDTO getAccountSearch(String phoneNo);
 
+	public List<AccountSearchDTO> getAccountSearchByFullname(String fullname);
+
 	public void udpateStatus(int status, String userId);
 
 	public List<AccountSearchDTO> getAccountsSearch(String phoneNo);

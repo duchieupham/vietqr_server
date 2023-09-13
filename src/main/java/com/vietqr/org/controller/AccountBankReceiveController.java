@@ -248,6 +248,7 @@ public class AccountBankReceiveController {
 				contactEntity.setBankAccount(dto.getBankAccount());
 				contactEntity.setImgId("");
 				contactEntity.setColorType(0);
+				contactEntity.setRelation(0);
 				contactService.insertContact(contactEntity);
 			}
 			//
@@ -510,6 +511,7 @@ public class AccountBankReceiveController {
 				contactEntity.setBankAccount(dto.getBankAccount());
 				contactEntity.setImgId("");
 				contactEntity.setColorType(0);
+				contactEntity.setRelation(0);
 				contactService.insertContact(contactEntity);
 			}
 			//

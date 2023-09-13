@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vietqr.org.dto.AccountMemberBranchDTO;
@@ -97,6 +98,92 @@ public class BranchMemberController {
             logger.error("MEMBER: branch-member:checkAndSearchMemberFromBusiness ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<Object>(result, httpStatus);
+    }
+
+    // 0: phone
+    // 1: name
+    @GetMapping("branch-member/search")
+    public ResponseEntity<Object> checkAndSearchMemberFromBusinessByFullname(
+            @RequestParam(value = "type") int type,
+            @RequestParam(value = "value") String value,
+            @RequestParam(value = "businessId") String businessId) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            // check type
+            if (type == 0) {
+                // 0: phone
+                // 1. search user from system
+                AccountSearchDTO dto = accountInformationService.getAccountSearch(value);
+                if (dto == null) {
+                    result = new ResponseMessageDTO("CHECK", "C01");
+                    httpStatus = HttpStatus.valueOf(201);
+                } else {
+                    AccountSearchMemberDTO accountSearchMemberDTO = new AccountSearchMemberDTO();
+                    accountSearchMemberDTO.setId(dto.getId());
+                    accountSearchMemberDTO.setPhoneNo(dto.getPhoneNo());
+                    accountSearchMemberDTO.setFirstName(dto.getFirstName());
+                    accountSearchMemberDTO.setMiddleName(dto.getMiddleName());
+                    accountSearchMemberDTO.setLastName(dto.getLastName());
+                    accountSearchMemberDTO.setImgId(dto.getImgId());
+                    // 2. check user existed from business
+                    String checkExisted = branchMemberService.checkUserExistedFromBusiness(businessId, dto.getId());
+                    if (checkExisted != null && !checkExisted.isEmpty()) {
+                        // existed
+                        accountSearchMemberDTO.setExisted(1);
+                    } else {
+                        // not existed
+                        accountSearchMemberDTO.setExisted(0);
+                    }
+                    result = accountSearchMemberDTO;
+                    httpStatus = HttpStatus.OK;
+                }
+            } else if (type == 1) {
+                // 1: name
+                List<AccountSearchMemberDTO> searchResult = new ArrayList<>();
+                List<AccountSearchDTO> dtos = accountInformationService.getAccountSearchByFullname(value);
+
+                if (dtos != null && !dtos.isEmpty()) {
+                    for (AccountSearchDTO search : dtos) {
+                        String checkExisted = branchMemberService.checkUserExistedFromBusiness(businessId,
+                                search.getId());
+                        AccountSearchMemberDTO accountSearchMemberDTO = new AccountSearchMemberDTO();
+                        accountSearchMemberDTO.setId(search.getId());
+                        accountSearchMemberDTO.setPhoneNo(search.getPhoneNo());
+                        accountSearchMemberDTO.setFirstName(search.getFirstName());
+                        accountSearchMemberDTO.setMiddleName(search.getMiddleName());
+                        accountSearchMemberDTO.setLastName(search.getLastName());
+                        accountSearchMemberDTO.setImgId(search.getImgId());
+                        if (checkExisted != null && !checkExisted.trim().isEmpty()) {
+                            accountSearchMemberDTO.setExisted(1);
+                        } else {
+                            accountSearchMemberDTO.setExisted(0);
+                        }
+                        searchResult.add(accountSearchMemberDTO);
+
+                    }
+                    if (searchResult != null && !searchResult.isEmpty()) {
+                        result = searchResult;
+                        httpStatus = HttpStatus.OK;
+                    } else {
+                        result = new ResponseMessageDTO("CHECK", "C01");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    }
+                } else {
+                    result = new ResponseMessageDTO("CHECK", "C01");
+                    httpStatus = HttpStatus.valueOf(201);
+                }
+            } else {
+                // error
+                result = new ResponseMessageDTO("FAILED", "E88");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+
+        } catch (Exception e) {
+            logger.error("MEMBER: branch-member:checkAndSearchMemberFromBusiness ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
         }
         return new ResponseEntity<Object>(result, httpStatus);
     }

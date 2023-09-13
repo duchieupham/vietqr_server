@@ -36,4 +36,8 @@ public interface ContactService {
     public List<ContactEntity> getContactApprovedByUserIdAndStatusWithPagging(String userId, int type, int offset);
 
     public void updateImgIdById(String imgId, String id);
+
+    public void updateContactRelation(int relation, String id);
+
+    public List<ContactEntity> getContactPublicByUserIdWithPagging(int offset);
 }

@@ -60,6 +60,13 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
 			+ "FROM account_login a "
 			+ "INNER JOIN account_information b "
 			+ "ON a.id = b.user_id "
+			+ "WHERE CONCAT(b.last_name, '-' ,b.middle_name, '-' , b.first_name) LIKE %:fullname%", nativeQuery = true)
+	List<AccountSearchDTO> getAccountSearchByFullname(@Param(value = "fullname") String fullname);
+
+	@Query(value = "SELECT a.id, a.phone_no as phoneNo, b.first_name as firstName, b.middle_name as middleName, b.last_name as lastName, b.img_id as imgId, b.carrier_type_id as carrierTypeId "
+			+ "FROM account_login a "
+			+ "INNER JOIN account_information b "
+			+ "ON a.id = b.user_id "
 			+ "WHERE a.phone_no LIKE %:phoneNo% AND a.status = 1", nativeQuery = true)
 	List<AccountSearchDTO> getAccountsSearch(@Param(value = "phoneNo") String phoneNo);
 

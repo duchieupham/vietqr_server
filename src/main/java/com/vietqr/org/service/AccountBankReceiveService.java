@@ -63,4 +63,6 @@ public interface AccountBankReceiveService {
 	public void updateBankAccountSync(boolean sync, String id);
 
 	public String checkMMSBankAccount(String bankAccount);
+
+	public void updateBankSync(boolean sync, String id);
 }
