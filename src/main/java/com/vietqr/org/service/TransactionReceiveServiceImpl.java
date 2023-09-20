@@ -7,11 +7,13 @@ import com.vietqr.org.repository.TransactionReceiveRepository;
 import java.util.List;
 import com.vietqr.org.entity.TransactionReceiveEntity;
 import com.vietqr.org.dto.TransByCusSyncDTO;
+import com.vietqr.org.dto.TransReceiveAdminDetailDTO;
 import com.vietqr.org.dto.TransStatisticByDateDTO;
 import com.vietqr.org.dto.TransStatisticByMonthDTO;
 import com.vietqr.org.dto.TransStatisticDTO;
 import com.vietqr.org.dto.TransactionCheckStatusDTO;
 import com.vietqr.org.dto.TransactionDetailDTO;
+import com.vietqr.org.dto.TransactionReceiveAdminListDTO;
 import com.vietqr.org.dto.TransactionRelatedDTO;
 
 @Service
@@ -120,6 +122,55 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     @Override
     public List<TransByCusSyncDTO> getTransactionsByCustomerSync(String bankId, String customerSyncId, int offset) {
         return repo.getTransactionsByCustomerSync(bankId, customerSyncId, offset);
+    }
+
+    //
+    //
+    //
+    /// ADMIN
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByBankAccountAllDate(String value, int offset) {
+        return repo.getTransByBankAccountAllDate(value, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByBankAccountFromDate(String value, String fromDate,
+            String toDate, long offset) {
+        fromDate = fromDate + " 00:00:00";
+        toDate = toDate + " 23:59:59";
+        return repo.getTransByBankAccountFromDate(value, fromDate, toDate, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getAllTransAllDate(long offset) {
+        return repo.getAllTransAllDate(offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getAllTransFromDate(String fromDate, String toDate, long offset) {
+        fromDate = fromDate + " 00:00:00";
+        toDate = toDate + " 23:59:59";
+        return repo.getAllTransFromDate(fromDate, toDate, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByFtCode(String value, long offset) {
+        return repo.getTransByFtCode(value, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByOrderId(String value, long offset) {
+        return repo.getTransByOrderId(value, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByContent(String value, long offset) {
+        return repo.getTransByContent(value, offset);
+    }
+
+    @Override
+    public TransReceiveAdminDetailDTO getDetailTransReceiveAdmin(String id) {
+        return repo.getDetailTransReceiveAdmin(id);
     }
 
 }

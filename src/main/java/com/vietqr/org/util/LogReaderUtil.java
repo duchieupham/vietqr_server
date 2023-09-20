@@ -37,10 +37,10 @@ public class LogReaderUtil {
                 try (BufferedReader reader = new BufferedReader(
                         new InputStreamReader(channelSftp.get(remoteFilePath)))) {
                     String line;
-                    int count = 0;
+                    // int count = 0;
                     while ((line = reader.readLine()) != null) {
-                        count++;
-                        System.out.println("\nLine " + count + ": " + line);
+                        // count++;
+                        // System.out.println("\nLine " + count + ": " + line);
                         result.add(line);
                     }
                     // if (contentBuilder != null) {

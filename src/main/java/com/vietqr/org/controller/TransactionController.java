@@ -29,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.TransByCusSyncDTO;
 import com.vietqr.org.dto.TransImgIdDTO;
+import com.vietqr.org.dto.TransReceiveAdminDetailDTO;
 import com.vietqr.org.dto.TransReceiveRpaDTO;
 import com.vietqr.org.dto.TransStatisticByDateDTO;
 import com.vietqr.org.dto.TransStatisticByMonthDTO;
@@ -40,11 +41,13 @@ import com.vietqr.org.dto.TransactionCheckStatusDTO;
 import com.vietqr.org.dto.TransactionDateDTO;
 import com.vietqr.org.dto.TransactionDetailDTO;
 import com.vietqr.org.dto.TransactionInputDTO;
+import com.vietqr.org.dto.TransactionReceiveAdminListDTO;
 import com.vietqr.org.dto.TransactionRelatedDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.entity.ImageEntity;
 import com.vietqr.org.entity.TransactionRPAEntity;
 import com.vietqr.org.entity.TransactionReceiveImageEntity;
+import com.vietqr.org.entity.TransactionReceiveLogEntity;
 import com.vietqr.org.service.AccountBankReceiveService;
 import com.vietqr.org.service.BankTypeService;
 import com.vietqr.org.service.ImageService;
@@ -52,6 +55,7 @@ import com.vietqr.org.service.TransactionBankService;
 import com.vietqr.org.service.TransactionRPAService;
 import com.vietqr.org.service.TransactionReceiveBranchService;
 import com.vietqr.org.service.TransactionReceiveImageService;
+import com.vietqr.org.service.TransactionReceiveLogService;
 import com.vietqr.org.service.TransactionReceiveService;
 
 @RestController
@@ -87,6 +91,9 @@ public class TransactionController {
     @Autowired
     TransactionRPAService transactionRPAService;
 
+    @Autowired
+    TransactionReceiveLogService transactionReceiveLogService;
+
     @PostMapping("transaction-branch")
     public ResponseEntity<List<TransactionRelatedDTO>> getTransactionsByBranchId(
             @Valid @RequestBody TransactionBranchInputDTO dto) {
@@ -104,6 +111,95 @@ public class TransactionController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error(e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("admin/transactions")
+    public ResponseEntity<List<TransactionReceiveAdminListDTO>> getTransactionAdmin(
+            @RequestParam(value = "type") int type,
+            @RequestParam(value = "value") String value,
+            @RequestParam(value = "from") String fromDate,
+            @RequestParam(value = "to") String toDate,
+            @RequestParam(value = "offset") int offset) {
+        List<TransactionReceiveAdminListDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            // type (search by)
+            // - 0: bankAccount
+            // - 1: reference_number (FT Code)
+            // - 2: order_id
+            // - 3: content
+            // - 9: all
+            if (type == 0) {
+                if (!fromDate.trim().isEmpty() && !fromDate.trim().equals("0") && !toDate.trim().isEmpty()
+                        && !toDate.trim().equals("0")) {
+                    result = transactionReceiveService.getTransByBankAccountFromDate(value, fromDate, toDate, offset);
+                } else {
+                    result = transactionReceiveService.getTransByBankAccountAllDate(value, offset);
+                }
+                httpStatus = HttpStatus.OK;
+            } else if (type == 1) {
+                result = transactionReceiveService.getTransByFtCode(value, offset);
+                httpStatus = HttpStatus.OK;
+            } else if (type == 2) {
+                result = transactionReceiveService.getTransByOrderId(value, offset);
+                httpStatus = HttpStatus.OK;
+            } else if (type == 3) {
+                result = transactionReceiveService.getTransByContent(value, offset);
+                httpStatus = HttpStatus.OK;
+            } else if (type == 9) {
+                if (!fromDate.trim().isEmpty() && !fromDate.trim().equals("0") && !toDate.trim().isEmpty()
+                        && !toDate.trim().equals("0")) {
+                    result = transactionReceiveService.getAllTransFromDate(fromDate, toDate, offset);
+                } else {
+                    result = transactionReceiveService.getAllTransAllDate(offset);
+                }
+                httpStatus = HttpStatus.OK;
+            } else {
+                logger.error("getTransactionAdmin: ERROR: INVALID TYPE");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("getTransactionAdmin: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // get trans receive admin detail
+    @GetMapping("admin/transaction")
+    public ResponseEntity<TransReceiveAdminDetailDTO> getTransactionDetailAdmin(
+            @RequestParam(value = "id") String id) {
+        TransReceiveAdminDetailDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            result = transactionReceiveService.getDetailTransReceiveAdmin(id);
+            if (result != null) {
+                httpStatus = HttpStatus.OK;
+            } else {
+                logger.error("getTransactionDetailAdmin: NOT FOUND DETAIL TRANSACTION");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("getTransactionDetailAdmin: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // get log callback by transaction id
+    @GetMapping("admin/transaction/log")
+    public ResponseEntity<List<TransactionReceiveLogEntity>> getTransactionReceiveLogsByTransId(
+            @RequestParam(value = "id") String id) {
+        List<TransactionReceiveLogEntity> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            result = transactionReceiveLogService.getTransactionReceiveLogsByTransId(id);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getTransactionReceiveLogsByTransId: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);

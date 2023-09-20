@@ -58,13 +58,13 @@ import com.vietqr.org.service.TransactionBankService;
 import com.vietqr.org.service.TransactionReceiveService;
 import com.vietqr.org.service.TransactionWalletService;
 import com.vietqr.org.service.TransactionReceiveBranchService;
+import com.vietqr.org.service.TransactionReceiveLogService;
 import com.vietqr.org.service.BranchMemberService;
 import com.vietqr.org.service.BusinessInformationService;
 import com.vietqr.org.service.CustomerSyncService;
 import com.vietqr.org.service.BranchInformationService;
 import com.vietqr.org.service.NotificationService;
 import com.vietqr.org.service.TelegramAccountBankService;
-import com.vietqr.org.service.TextToSpeechService;
 import com.vietqr.org.service.FcmTokenService;
 import com.vietqr.org.service.FirebaseMessagingService;
 import com.vietqr.org.service.LarkAccountBankService;
@@ -75,6 +75,7 @@ import com.vietqr.org.service.AccountWalletService;
 import com.vietqr.org.service.BankReceiveBranchService;
 import com.vietqr.org.service.BankTypeService;
 import com.vietqr.org.entity.TransactionReceiveEntity;
+import com.vietqr.org.entity.TransactionReceiveLogEntity;
 import com.vietqr.org.entity.TransactionWalletEntity;
 import com.vietqr.org.entity.TransactionReceiveBranchEntity;
 import com.vietqr.org.entity.NotificationEntity;
@@ -162,10 +163,10 @@ public class TransactionBankController {
 	private SocketHandler socketHandler;
 
 	@Autowired
-	private TextToSpeechService textToSpeechService;
+	TelegramAccountBankService telegramAccountBankService;
 
 	@Autowired
-	TelegramAccountBankService telegramAccountBankService;
+	TransactionReceiveLogService transactionReceiveLogService;
 
 	@Autowired
 	AccountLoginService accountLoginService;
@@ -385,7 +386,8 @@ public class TransactionBankController {
 									if (transactionReceiveEntity != null) {
 										orderId = transactionReceiveEntity.getOrderId();
 										sign = transactionReceiveEntity.getSign();
-										result = getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
+										result = getCustomerSyncEntities(transactionReceiveEntity.getId(), dto,
+												accountBankEntity, time, orderId, sign);
 										updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time, nf);
 										// check if recharge => do update status and push data to customer
 										////////// USER RECHAGE VQR || USER RECHARGE MOBILE
@@ -399,18 +401,22 @@ public class TransactionBankController {
 										logger.info(
 												"transaction-sync - cannot find transaction receive. Receive new transaction outside system");
 										// process here
-										result = getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
-										insertNewTransaction(dto, accountBankEntity, time, traceId, uuid, nf, "", "");
+										UUID transcationUUID = UUID.randomUUID();
+										result = getCustomerSyncEntities(transcationUUID.toString(), dto,
+												accountBankEntity, time, orderId, sign);
+										insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity, time,
+												traceId, uuid, nf, "", "");
 									}
 									// }
 								} else {
 									logger.info(
 											"transaction-sync - traceId is empty. Receive new transaction outside system");
-									result = getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
-									insertNewTransaction(dto, accountBankEntity, time, traceId, uuid, nf, "", "");
+									UUID transcationUUID = UUID.randomUUID();
+									result = getCustomerSyncEntities(transcationUUID.toString(), dto, accountBankEntity,
+											time, orderId, sign);
+									insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity, time,
+											traceId, uuid, nf, "", "");
 								}
-							} else {
-								logger.info("transaction-sync - cannot find account bank or account bank is deactive");
 							}
 						} else {
 							logger.error("Transaction-sync: Duplicate Reference number");
@@ -421,6 +427,8 @@ public class TransactionBankController {
 					}
 				}
 
+			} else {
+				logger.info("transaction-sync - cannot find account bank or account bank is deactive");
 			}
 
 		}
@@ -525,7 +533,8 @@ public class TransactionBankController {
 									if (transactionReceiveEntity != null) {
 										orderId = transactionReceiveEntity.getOrderId();
 										sign = transactionReceiveEntity.getSign();
-										getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
+										getCustomerSyncEntities(transactionReceiveEntity.getId(), dto,
+												accountBankEntity, time, orderId, sign);
 										updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time, nf);
 										// check if recharge => do update status and push data to customer
 										////////// USER RECHAGE VQR || USER RECHARGE MOBILE
@@ -539,18 +548,22 @@ public class TransactionBankController {
 										logger.info(
 												"transaction-sync - cannot find transaction receive. Receive new transaction outside system");
 										// process here
-										getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
-										insertNewTransaction(dto, accountBankEntity, time, traceId, uuid, nf, "", "");
+										UUID transcationUUID = UUID.randomUUID();
+										getCustomerSyncEntities(transcationUUID.toString(), dto, accountBankEntity,
+												time, orderId, sign);
+										insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity, time,
+												traceId, uuid, nf, "", "");
 									}
 									// }
 								} else {
 									logger.info(
 											"transaction-sync - traceId is empty. Receive new transaction outside system");
-									getCustomerSyncEntities(dto, accountBankEntity, time, orderId, sign);
-									insertNewTransaction(dto, accountBankEntity, time, traceId, uuid, nf, "", "");
+									UUID transcationUUID = UUID.randomUUID();
+									getCustomerSyncEntities(transcationUUID.toString(), dto, accountBankEntity, time,
+											orderId, sign);
+									insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity, time,
+											traceId, uuid, nf, "", "");
 								}
-							} else {
-								logger.info("transaction-sync - cannot find account bank or account bank is deactive");
 							}
 						} else {
 							logger.error("Transaction-sync: Duplicate Reference number");
@@ -561,6 +574,8 @@ public class TransactionBankController {
 					}
 				}
 
+			} else {
+				logger.info("transaction-sync - cannot find account bank or account bank is deactive");
 			}
 
 		}
@@ -1135,14 +1150,15 @@ public class TransactionBankController {
 	// insert new transaction mean it's not created from business. So DO NOT need to
 	// push to users
 	@Async
-	private void insertNewTransaction(TransactionBankDTO dto, AccountBankReceiveEntity accountBankEntity, long time,
+	private void insertNewTransaction(String transcationUUID, TransactionBankDTO dto,
+			AccountBankReceiveEntity accountBankEntity, long time,
 			String traceId, UUID uuid, NumberFormat nf, String orderId, String sign) {
 
 		BankTypeEntity bankTypeEntity = bankTypeService
 				.getBankTypeById(accountBankEntity.getBankTypeId());
-		UUID transcationUUID = UUID.randomUUID();
+
 		TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
-		transactionEntity.setId(transcationUUID.toString());
+		transactionEntity.setId(transcationUUID);
 		transactionEntity.setBankAccount(accountBankEntity.getBankAccount());
 		transactionEntity.setBankId(accountBankEntity.getId());
 		if (traceId == null || traceId.isEmpty()) {
@@ -1174,7 +1190,7 @@ public class TransactionBankController {
 			transactionBranchEntity.setId(uuidTransBranch.toString());
 			transactionBranchEntity.setBranchId(bankReceiveBranchEntity.getBranchId());
 			transactionBranchEntity.setBusinessId(bankReceiveBranchEntity.getBusinessId());
-			transactionBranchEntity.setTransactionReceiveId(transcationUUID.toString());
+			transactionBranchEntity.setTransactionReceiveId(transcationUUID);
 			// insert and push noti
 
 			// find userIds into business_member and branch_member
@@ -1215,7 +1231,7 @@ public class TransactionBankController {
 					notiEntity.setTime(time);
 					notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
 					notiEntity.setUserId(userId);
-					notiEntity.setData(transcationUUID.toString());
+					notiEntity.setData(transcationUUID);
 					notificationService.insertNotification(notiEntity);
 					List<FcmTokenEntity> fcmTokens = new ArrayList<>();
 					fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
@@ -2127,8 +2143,9 @@ public class TransactionBankController {
 		return result;
 	}
 
-	private TokenDTO getCustomerSyncToken(CustomerSyncEntity entity) {
+	private TokenDTO getCustomerSyncToken(String transReceiveId, CustomerSyncEntity entity, long time) {
 		TokenDTO result = null;
+		ResponseMessageDTO msgDTO = null;
 		try {
 			String key = entity.getUsername() + ":" + entity.getPassword();
 			String encodedKey = Base64.getEncoder().encodeToString(key.getBytes());
@@ -2185,6 +2202,7 @@ public class TransactionBankController {
 					.blockOptional();
 			if (resultOptional.isPresent()) {
 				result = resultOptional.get();
+				msgDTO = new ResponseMessageDTO("SUCCESS", "");
 				if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
 					logger.info("Token got: " + result.getAccess_token() + " - from: " + entity.getIpAddress());
 				} else {
@@ -2194,6 +2212,7 @@ public class TransactionBankController {
 				// System.out.println("Token got: " + result.getAccess_token() + " - from: " +
 				// entity.getIpAddress());
 			} else {
+				msgDTO = new ResponseMessageDTO("FAILED", "E05");
 				if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
 					logger.info("Token could not be retrieved from: " + entity.getIpAddress());
 				} else {
@@ -2201,6 +2220,7 @@ public class TransactionBankController {
 				}
 			}
 		} catch (Exception e) {
+			msgDTO = new ResponseMessageDTO("FAILED", "E05 - " + e.toString());
 			if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
 				logger.error("Error at getCustomerSyncToken: " + entity.getIpAddress() + " - " + e.toString());
 				// System.out.println("Error at getCustomerSyncToken: " + entity.getIpAddress()
@@ -2208,11 +2228,34 @@ public class TransactionBankController {
 			} else {
 				logger.error("Error at getCustomerSyncToken: " + entity.getInformation() + " - " + e.toString());
 			}
+		} finally {
+			if (msgDTO != null) {
+				UUID logUUID = UUID.randomUUID();
+				String suffixUrl = "";
+				if (entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty()) {
+					suffixUrl = "/" + entity.getSuffixUrl();
+				}
+				String address = "";
+				if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
+					address = "http://" + entity.getIpAddress() + ":" + entity.getPort() + suffixUrl
+							+ "/api/token_generate";
+				} else {
+					address = entity.getInformation() + suffixUrl + "/api/token_generate";
+				}
+				TransactionReceiveLogEntity logEntity = new TransactionReceiveLogEntity();
+				logEntity.setId(logUUID.toString());
+				logEntity.setTransactionId(transReceiveId);
+				logEntity.setStatus(msgDTO.getStatus());
+				logEntity.setMessage(msgDTO.getMessage());
+				logEntity.setTime(time);
+				logEntity.setUrlCallback(address);
+				transactionReceiveLogService.insert(logEntity);
+			}
 		}
 		return result;
 	}
 
-	private ResponseMessageDTO pushNewTransactionToCustomerSync(CustomerSyncEntity entity,
+	private ResponseMessageDTO pushNewTransactionToCustomerSync(String transReceiveId, CustomerSyncEntity entity,
 			TransactionBankCustomerDTO dto,
 			long time) {
 		ResponseMessageDTO result = null;
@@ -2230,7 +2273,7 @@ public class TransactionBankController {
 			if (entity.getUsername() != null && !entity.getUsername().trim().isEmpty() &&
 					entity.getPassword() != null
 					&& !entity.getPassword().trim().isEmpty()) {
-				tokenDTO = getCustomerSyncToken(entity);
+				tokenDTO = getCustomerSyncToken(transReceiveId, entity, time);
 			} else if (entity.getToken() != null && !entity.getToken().trim().isEmpty()) {
 				logger.info("Get token from record: " + entity.getId());
 				tokenDTO = new TokenDTO(entity.getToken(), "Bearer", 0);
@@ -2434,6 +2477,29 @@ public class TransactionBankController {
 								+ e.toString()
 								+ " at: " + responseTime);
 			}
+		} finally {
+			if (result != null) {
+				UUID logUUID = UUID.randomUUID();
+				String suffixUrl = "";
+				if (entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty()) {
+					suffixUrl = "/" + entity.getSuffixUrl();
+				}
+				String address = "";
+				if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
+					address = "http://" + entity.getIpAddress() + ":" + entity.getPort() + suffixUrl
+							+ "/bank/api/transaction-sync";
+				} else {
+					address = entity.getInformation() + suffixUrl + "/bank/api/transaction-sync";
+				}
+				TransactionReceiveLogEntity logEntity = new TransactionReceiveLogEntity();
+				logEntity.setId(logUUID.toString());
+				logEntity.setTransactionId(transReceiveId);
+				logEntity.setStatus(result.getStatus());
+				logEntity.setMessage(result.getMessage());
+				logEntity.setTime(time);
+				logEntity.setUrlCallback(address);
+				transactionReceiveLogService.insert(logEntity);
+			}
 		}
 		return result;
 	}
@@ -2577,7 +2643,7 @@ public class TransactionBankController {
 	// }
 	// }
 
-	private ResponseMessageDTO getCustomerSyncEntities(TransactionBankDTO dto,
+	private ResponseMessageDTO getCustomerSyncEntities(String transReceiveId, TransactionBankDTO dto,
 			AccountBankReceiveEntity accountBankEntity,
 			long time, String orderId, String sign) {
 		ResponseMessageDTO result = new ResponseMessageDTO("SUCCESS", "");
@@ -2612,7 +2678,8 @@ public class TransactionBankController {
 						if (customerSyncEntity != null) {
 							System.out.println("customerSyncEntity: " + customerSyncEntity.getId() + " - "
 									+ customerSyncEntity.getInformation());
-							result = pushNewTransactionToCustomerSync(customerSyncEntity, transactionBankCustomerDTO,
+							result = pushNewTransactionToCustomerSync(transReceiveId, customerSyncEntity,
+									transactionBankCustomerDTO,
 									time);
 						}
 					}

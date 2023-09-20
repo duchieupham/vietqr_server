@@ -1,14 +1,17 @@
 package com.vietqr.org.service;
 
 import java.util.List;
+
 import org.springframework.stereotype.Service;
 import com.vietqr.org.entity.TransactionReceiveEntity;
 import com.vietqr.org.dto.TransByCusSyncDTO;
+import com.vietqr.org.dto.TransReceiveAdminDetailDTO;
 import com.vietqr.org.dto.TransStatisticByDateDTO;
 import com.vietqr.org.dto.TransStatisticByMonthDTO;
 import com.vietqr.org.dto.TransStatisticDTO;
 import com.vietqr.org.dto.TransactionCheckStatusDTO;
 import com.vietqr.org.dto.TransactionDetailDTO;
+import com.vietqr.org.dto.TransactionReceiveAdminListDTO;
 import com.vietqr.org.dto.TransactionRelatedDTO;
 
 @Service
@@ -55,4 +58,34 @@ public interface TransactionReceiveService {
 
     public List<TransByCusSyncDTO> getTransactionsByCustomerSync(String bankId, String customerSyncId, int offset);
 
+    // admin
+    List<TransactionReceiveAdminListDTO> getTransByBankAccountAllDate(String value, int offset);
+
+    List<TransactionReceiveAdminListDTO> getTransByBankAccountFromDate(
+            String value,
+            String fromDate,
+            String toDate,
+            long offset);
+
+    List<TransactionReceiveAdminListDTO> getAllTransAllDate(
+            long offset);
+
+    List<TransactionReceiveAdminListDTO> getAllTransFromDate(
+            String fromDate,
+            String toDate,
+            long offset);
+
+    List<TransactionReceiveAdminListDTO> getTransByFtCode(
+            String value,
+            long offset);
+
+    List<TransactionReceiveAdminListDTO> getTransByOrderId(
+            String value,
+            long offset);
+
+    List<TransactionReceiveAdminListDTO> getTransByContent(
+            String value,
+            long offset);
+
+    TransReceiveAdminDetailDTO getDetailTransReceiveAdmin(String id);
 }
