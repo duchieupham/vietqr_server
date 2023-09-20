@@ -159,7 +159,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "CASE  "
 			+ "WHEN b.is_sync = true AND b.mms_active = false THEN 1  "
 			+ "WHEN b.is_sync = true AND b.mms_active = true THEN 2  "
-			+ "WHEN b.is_sync = false AND b.mms_active = true THEN 1  "
+			+ "WHEN b.is_sync = false AND b.mms_active = true THEN 2  "
 			+ "END as flow  "
 			+ "FROM account_customer_bank a "
 			+ "INNER JOIN account_bank_receive b "
@@ -181,4 +181,5 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "SET is_sync = :sync "
 			+ "WHERE id = :id ", nativeQuery = true)
 	void updateSyncBank(@Param(value = "sync") boolean sync, @Param(value = "id") String id);
+
 }
