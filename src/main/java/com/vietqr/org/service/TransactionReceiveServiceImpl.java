@@ -173,4 +173,14 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
         return repo.getDetailTransReceiveAdmin(id);
     }
 
+    @Override
+    public TransStatisticDTO getTransStatisticCustomerSync(String customerSyncId) {
+        return repo.getTransStatisticCustomerSync(customerSyncId);
+    }
+
+    @Override
+    public TransStatisticDTO getTransStatisticCustomerSyncByMonth(String customerSyncId, String month) {
+        return repo.getTransStatisticCustomerSyncByMonth(customerSyncId, month);
+    }
+
 }

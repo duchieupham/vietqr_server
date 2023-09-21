@@ -147,6 +147,7 @@ public class TransactionController {
                 result = transactionReceiveService.getTransByOrderId(value, offset);
                 httpStatus = HttpStatus.OK;
             } else if (type == 3) {
+                value = value.replace("-", " ");
                 result = transactionReceiveService.getTransByContent(value, offset);
                 httpStatus = HttpStatus.OK;
             } else if (type == 9) {
@@ -568,6 +569,32 @@ public class TransactionController {
         try {
             result = transactionReceiveService.getTransactionsByCustomerSync(bankId, customerSyncId, offset);
             httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getTransactionsByCustomerSync: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("admin/transactions/statistic")
+    public ResponseEntity<TransStatisticDTO> getTransStatisticAdmin(
+            @RequestParam(value = "type") int type,
+            @RequestParam(value = "customerSyncId") String customerSyncId,
+            @RequestParam(value = "month") String month) {
+        TransStatisticDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            // type = 9 => all
+            // type = 0 => month
+            if (type == 0) {
+                result = transactionReceiveService.getTransStatisticCustomerSyncByMonth(customerSyncId, month);
+                httpStatus = HttpStatus.OK;
+            } else if (type == 9) {
+                result = transactionReceiveService.getTransStatisticCustomerSync(customerSyncId);
+                httpStatus = HttpStatus.OK;
+            } else {
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
         } catch (Exception e) {
             logger.error("getTransactionsByCustomerSync: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;

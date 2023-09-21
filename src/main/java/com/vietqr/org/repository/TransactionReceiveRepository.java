@@ -246,7 +246,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
         //
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                         + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, a.sign, a.trace_id as traceId, a.type, b.bank_account_name as userBankName,  "
-                        + "b.national_id as nationalId, b.phone_authenticated as phoneAuthenticated, b.is_sync as sync, c.bank_code as bankCode, c.bank_short_name as bankShortName, c.bank_name as bankName, c.img_id as imgId, "
+                        + "b.national_id as nationalId, b.phone_authenticated as phoneAuthenticated, b.is_authenticated as sync, c.bank_code as bankCode, c.bank_short_name as bankShortName, c.bank_name as bankName, c.img_id as imgId, "
                         + "CASE  "
                         + "WHEN b.is_sync = true AND b.mms_active = false THEN 1  "
                         + "WHEN b.is_sync = true AND b.mms_active = true THEN 2  "
@@ -260,4 +260,29 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON b.bank_type_id = c.id  "
                         + "WHERE a.id = :transactionId ", nativeQuery = true)
         TransReceiveAdminDetailDTO getDetailTransReceiveAdmin(@Param(value = "transactionId") String transactionId);
+
+        @Query(value = "SELECT COUNT(b.id) AS totalTrans, "
+                        + "SUM(CASE WHEN b.trans_type = 'C' AND b.status = 1 THEN b.amount ELSE 0 END) AS totalCashIn,  "
+                        + "SUM(CASE WHEN b.trans_type = 'D' AND b.status = 1 THEN b.amount ELSE 0 END) AS totalCashOut, "
+                        + "SUM(CASE WHEN b.trans_type = 'C' AND b.status = 1 THEN 1 ELSE 0 END) AS totalTransC,  "
+                        + "SUM(CASE WHEN b.trans_type = 'D' AND b.status = 1 THEN 1 ELSE 0 END) AS totalTransD  "
+                        + "FROM account_customer_bank a  "
+                        + "INNER JOIN transaction_receive b "
+                        + "ON a.bank_id = b.bank_id  "
+                        + "WHERE a.customer_sync_id = :customerSyncId AND status = 1 ", nativeQuery = true)
+        TransStatisticDTO getTransStatisticCustomerSync(@Param(value = "customerSyncId") String customerSyncId);
+
+        @Query(value = "SELECT COUNT(b.id) AS totalTrans, "
+                        + "SUM(CASE WHEN b.trans_type = 'C' AND b.status = 1 THEN b.amount ELSE 0 END) AS totalCashIn,  "
+                        + "SUM(CASE WHEN b.trans_type = 'D' AND b.status = 1 THEN b.amount ELSE 0 END) AS totalCashOut, "
+                        + "SUM(CASE WHEN b.trans_type = 'C' AND b.status = 1 THEN 1 ELSE 0 END) AS totalTransC,  "
+                        + "SUM(CASE WHEN b.trans_type = 'D' AND b.status = 1 THEN 1 ELSE 0 END) AS totalTransD  "
+                        + "FROM account_customer_bank a  "
+                        + "INNER JOIN transaction_receive b "
+                        + "ON a.bank_id = b.bank_id  "
+                        + "WHERE a.customer_sync_id = :customerSyncId AND status = 1 "
+                        + "AND DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(b.time), '+00:00', '+07:00'), '%Y-%m') = :month "
+                        + "GROUP BY DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(b.time), '+00:00', '+07:00'), '%Y-%m') ", nativeQuery = true)
+        TransStatisticDTO getTransStatisticCustomerSyncByMonth(@Param(value = "customerSyncId") String customerSyncId,
+                        @Param(value = "month") String month);
 }
