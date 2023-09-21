@@ -612,7 +612,13 @@ public class TransactionBankController {
 				if (m.find()) {
 					traceId = m.group(0);
 				} else {
-					traceId = "";
+					String pattern2 = "VQR[0-9a-f]{10}";
+					Pattern regex = Pattern.compile(pattern2);
+					Matcher matcher = regex.matcher(inputString);
+
+					if (matcher.find()) {
+						traceId = matcher.group();
+					}
 				}
 			}
 

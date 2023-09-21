@@ -20,19 +20,20 @@ import com.vietqr.org.util.LogReaderUtil;
 public class LogReaderController {
     private static final Logger logger = Logger.getLogger(LogReaderController.class);
 
-    @GetMapping("log-reader")
-    public ResponseEntity<Object> getLogByDate(@RequestParam(value = "date") String date) {
-        Object result = null;
-        HttpStatus httpStatus = null;
-        try {
-            List<String> log = LogReaderUtil.readLogFile(date);
-            result = log;
-            httpStatus = HttpStatus.OK;
-        } catch (Exception e) {
-            logger.error("getLogByDate: ERROR: " + e.toString());
-            result = new ResponseMessageDTO("FAILED", "E05");
-            httpStatus = HttpStatus.BAD_REQUEST;
-        }
-        return new ResponseEntity<>(result, httpStatus);
-    }
+    // @GetMapping("log-reader")
+    // public ResponseEntity<Object> getLogByDate(@RequestParam(value = "date")
+    // String date) {
+    // Object result = null;
+    // HttpStatus httpStatus = null;
+    // try {
+    // List<String> log = LogReaderUtil.readLogFile(date);
+    // result = log;
+    // httpStatus = HttpStatus.OK;
+    // } catch (Exception e) {
+    // logger.error("getLogByDate: ERROR: " + e.toString());
+    // result = new ResponseMessageDTO("FAILED", "E05");
+    // httpStatus = HttpStatus.BAD_REQUEST;
+    // }
+    // return new ResponseEntity<>(result, httpStatus);
+    // }
 }
