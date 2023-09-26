@@ -44,4 +44,9 @@ public class AccountCustomerBankServiceImpl implements AccountCustomerBankServic
         repo.removeBankAccountFromCustomerSync(bankId, customerSyncId);
     }
 
+    @Override
+    public List<String> getBankIdsByCustomerSyncId(String customerSyncId) {
+        return repo.getBankIdsByCustomerSyncId(customerSyncId);
+    }
+
 }

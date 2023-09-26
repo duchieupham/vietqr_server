@@ -1,8 +1,10 @@
 package com.vietqr.org;
 
 import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -32,10 +34,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.vietqr.org.security.JWTAuthorizationFilter;
-import com.vietqr.org.util.AESUtil;
-// import com.vietqr.org.util.BankEncryptUtil;
-import com.vietqr.org.util.BankEncryptUtil;
-import com.vietqr.org.util.LogReaderUtil;
 import com.vietqr.org.util.WebSocketConfig;
 
 @SpringBootApplication
@@ -52,10 +50,18 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
 
-		String inputString = "QRVQR1b49cbd3af VRCysDQYbqPH0- Ma GD ACSP/ 0m483714 NG CHUYEN:CUSTOMER 1123355589";
-		String prefix = "VQR";
-		String traceId = getTraceId(inputString, prefix);
-		System.out.println("===============TRACE ID: " + traceId);
+		// int durationMonths = 6;
+		// String startDateString = calculateStartDate(durationMonths);
+		// String endDateString = calculateEndDate(startDateString, durationMonths);
+
+		// System.out.println("Start Date: " + startDateString);
+		// System.out.println("End Date: " + endDateString);
+
+		// String inputString = "QRVQR1b49cbd3af VRCysDQYbqPH0- Ma GD ACSP/ 0m483714 NG
+		// CHUYEN:CUSTOMER 1123355589";
+		// String prefix = "VQR";
+		// String traceId = getTraceId(inputString, prefix);
+		// System.out.println("===============TRACE ID: " + traceId);
 		//
 		// String password = "Hokdoithu1997";
 		// String encryptAESPassword = AESUtil.encrypt(password);
@@ -124,56 +130,6 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// traceId);
 		// count++;
 		// }
-	}
-
-	public static String getTraceId(String inputString, String prefix) {
-		String result = "";
-		try {
-			inputString = inputString.replaceAll("[\\-/:]", " ");
-			String[] newPaths = inputString.split("\\s+");
-			String traceId = "";
-			int indexSaved = -1;
-			for (int i = 0; i < newPaths.length; i++) {
-				if (newPaths[i].contains(prefix)) {
-					if (newPaths[i].length() >= 13) {
-						traceId = newPaths[i].substring(0, 13);
-						break;
-					}
-					traceId = newPaths[i];
-					indexSaved = i;
-				} else if (indexSaved != -1 && i == indexSaved + 1) {
-					if (traceId.length() < 13) {
-						traceId += newPaths[i].substring(0, Math.min(13 - traceId.length(), newPaths[i].length()));
-					}
-				}
-			}
-
-			if (!traceId.trim().isEmpty()) {
-				String pattern = prefix + ".{10}";
-				Pattern r = Pattern.compile(pattern);
-				Matcher m = r.matcher(traceId);
-				if (m.find()) {
-					traceId = m.group(0);
-				} else {
-					String pattern2 = "VQR[0-9a-f]{10}";
-					Pattern regex = Pattern.compile(pattern2);
-					Matcher matcher = regex.matcher(inputString);
-
-					if (matcher.find()) {
-						traceId = matcher.group();
-					}
-
-				}
-			} else {
-				traceId = "";
-			}
-
-			result = traceId;
-		} catch (Exception e) {
-			System.out.println("ERROR: " + e.toString());
-		}
-
-		return result;
 	}
 
 	@Bean

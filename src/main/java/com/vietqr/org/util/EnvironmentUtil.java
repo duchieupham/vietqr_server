@@ -1,7 +1,7 @@
 package com.vietqr.org.util;
 
 public class EnvironmentUtil {
-    private static boolean IS_PRODUCTION = true;
+    private static boolean IS_PRODUCTION = false;
 
     // DINO SOFT - VOICE
     private static final String VOICE_REQUEST_URL = "http://103.141.140.202:8009/tts/v1/speak";
@@ -70,27 +70,29 @@ public class EnvironmentUtil {
     private static final String VNPT_EPAY_PARTNER_NAME_UAT = "BLUECOM";
     private static final String VNPT_EPAY_PARTNER_NAME_PROD = "BLUECOM";
 
+    ///////////////////////////////////
     // for recharge into VietQR VN
     private static final String BUSINESS_ID_RECHARGE_UAT = "";
-    private static final String BUSINESS_ID_RECHARGE_PROD = "b75f30cc-15b8-462d-8194-03651cb69ef3";
+    private static final String BUSINESS_ID_RECHARGE_PROD = "bb6ca0e0-f085-4f03-9166-18cbfc840d63";
     //
     private static final String BRANCH_ID_RECHARGE_UAT = "";
-    private static final String BRANCH_ID_RECHARGE_PROD = "51f334ab-3b07-4bd9-a617-1c986c76344b";
+    private static final String BRANCH_ID_RECHARGE_PROD = "3edf55a8-c85b-40d7-b5f9-eb0bf5c1224b";
     //
     private static final String CAI_VALUE_RECHARGE = "970422";
     //
     private static final String BANK_LOGO_ID_RECHARGE_UAT = "58b7190b-a294-4b14-968f-cd365593893e";
     private static final String BANK_LOGO_ID_RECHARGE_PROD = "58b7190b-a294-4b14-968f-cd365593893e";
     //
-    private static final String BANK_ID_RECHARGE_UAT = "85310662-d161-4891-b0aa-481ddb97a66b";
-    private static final String BANK_ID_RECHARGE_PROD = "BNS01";
+    private static final String BANK_ID_RECHARGE_UAT = "";
+    private static final String BANK_ID_RECHARGE_PROD = "172ff268-6d2e-4bcf-8aaa-1902badfcc63";
     //
-    private static final String BANK_ACCOUNT_RECHARGE_UAT = "1123355589";
-    private static final String BANK_ACCOUNT_RECHARGE_PROD = "1123355589";
+    private static final String BANK_ACCOUNT_RECHARGE_UAT = "";
+    private static final String BANK_ACCOUNT_RECHARGE_PROD = "0801133666888";
     //
     private static final String BANK_TYPE_ID_RECHARGE_UAT = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
     private static final String BANK_TYPE_ID_RECHARGE_PROD = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
 
+    ///////////////////////////////////
     //
     private static final String DEFAULT_USER_ID_TEST = "62ad476d-3b6b-4926-9890-fa6a20144f7f";
 

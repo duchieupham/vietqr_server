@@ -21,4 +21,6 @@ public interface AccountCustomerBankService {
 
     public void removeBankAccountFromCustomerSync(String bankId, String customerSyncId);
 
+    public List<String> getBankIdsByCustomerSyncId(String customerSyncId);
+
 }

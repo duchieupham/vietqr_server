@@ -40,4 +40,7 @@ public interface AccountCustomerBankRepository extends JpaRepository<AccountCust
         @Query(value = "DELETE FROM account_customer_bank WHERE bank_id = :bankId AND customer_sync_id = :customerSyncId ", nativeQuery = true)
         void removeBankAccountFromCustomerSync(@Param(value = "bankId") String bankId,
                         @Param(value = "customerSyncId") String customerSyncId);
+
+        @Query(value = "SELECT bank_id FROM account_customer_bank WHERE customer_sync_id = :customerSyncId ", nativeQuery = true)
+        List<String> getBankIdsByCustomerSyncId(@Param(value = "customerSyncId") String customerSyncId);
 }
