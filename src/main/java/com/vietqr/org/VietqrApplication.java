@@ -34,6 +34,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.vietqr.org.security.JWTAuthorizationFilter;
+import com.vietqr.org.util.BankEncryptUtil;
+import com.vietqr.org.util.BankRSAUtil;
 import com.vietqr.org.util.WebSocketConfig;
 
 @SpringBootApplication
@@ -49,6 +51,11 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
+
+		// String checkSum =
+		// BankEncryptUtil.generateMD5RefundCustomerChecksum("1123355589",
+		// "FT23270646346788", "SABAccessKey");
+		// System.out.println("CHECKSUM: " + checkSum);
 
 		// int durationMonths = 6;
 		// String startDateString = calculateStartDate(durationMonths);
@@ -85,9 +92,10 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// System.out.println("Verify data: " +
 		// BankRSAUtil.verifySignature(valueToEncode, result));
 
-		// String prefix = "unassign";
-		// String resourceBank = "";
-		// String result2 = BankRSAUtil.generateSignature(prefix + resourceBank);
+		String prefix = "unassign";
+		String resourceBank = "RSID-eef52137-86b2-4812-bc05-54a522fbf226";
+		String result2 = BankRSAUtil.generateSignature(prefix + resourceBank);
+		System.out.println("result2: " + result2);
 		// String resourceCard = "";
 		// String result3 = BankRSAUtil.generateSignature(prefix + resourceCard);
 		// System.out.println("result2: " + result2);
