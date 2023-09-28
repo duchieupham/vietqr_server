@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.vietqr.org.dto.AnnualFeeMerchantDTO;
 import com.vietqr.org.dto.CusSyncApiInfoDTO;
 import com.vietqr.org.dto.CusSyncEcInfoDTO;
 import com.vietqr.org.dto.CustomerSyncListDTO;
@@ -17,6 +18,9 @@ import com.vietqr.org.entity.CustomerSyncEntity;
 
 @Repository
 public interface CustomerSyncRepository extends JpaRepository<CustomerSyncEntity, Long> {
+
+        @Query(value = "SELECT id as customerSyncId, merchant FROM customer_sync ", nativeQuery = true)
+        List<AnnualFeeMerchantDTO> getMerchantForServiceFee();
 
         @Query(value = "SELECT * FROM customer_sync WHERE active = true", nativeQuery = true)
         List<CustomerSyncEntity> getCustomerSyncEntities();

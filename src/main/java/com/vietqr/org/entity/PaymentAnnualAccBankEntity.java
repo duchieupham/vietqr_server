@@ -25,12 +25,17 @@ public class PaymentAnnualAccBankEntity implements Serializable {
     @Column(name = "accountBankFeeId")
     private String accountBankFeeId;
 
+    @Column(name = "totalPayment")
+    private Long totalPayment;
+
     @Column(name = "fromDate")
     private String fromDate;
 
     @Column(name = "toDate")
     private String toDate;
 
+    // 0: Unpaid
+    // 1: paid
     @Column(name = "status")
     private Integer status;
 
@@ -38,11 +43,13 @@ public class PaymentAnnualAccBankEntity implements Serializable {
         super();
     }
 
-    public PaymentAnnualAccBankEntity(String id, String bankId, String accountBankFeeId, String fromDate, String toDate,
+    public PaymentAnnualAccBankEntity(String id, String bankId, String accountBankFeeId, Long totalPayment,
+            String fromDate, String toDate,
             Integer status) {
         this.id = id;
         this.bankId = bankId;
         this.accountBankFeeId = accountBankFeeId;
+        this.totalPayment = totalPayment;
         this.fromDate = fromDate;
         this.toDate = toDate;
         this.status = status;
@@ -94,6 +101,14 @@ public class PaymentAnnualAccBankEntity implements Serializable {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public Long getTotalPayment() {
+        return totalPayment;
+    }
+
+    public void setTotalPayment(Long totalPayment) {
+        this.totalPayment = totalPayment;
     }
 
 }

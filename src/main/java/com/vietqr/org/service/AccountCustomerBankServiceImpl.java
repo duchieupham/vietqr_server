@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.vietqr.org.dto.AnnualFeeBankDTO;
 import com.vietqr.org.entity.AccountCustomerBankEntity;
 import com.vietqr.org.repository.AccountCustomerBankRepository;
 
@@ -47,6 +48,11 @@ public class AccountCustomerBankServiceImpl implements AccountCustomerBankServic
     @Override
     public List<String> getBankIdsByCustomerSyncId(String customerSyncId) {
         return repo.getBankIdsByCustomerSyncId(customerSyncId);
+    }
+
+    @Override
+    public List<AnnualFeeBankDTO> getBanksAnnualFee(String customerSyncId) {
+        return repo.getBanksAnnualFee(customerSyncId);
     }
 
 }

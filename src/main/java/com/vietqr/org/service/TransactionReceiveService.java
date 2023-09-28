@@ -11,6 +11,7 @@ import com.vietqr.org.dto.TransStatisticByMonthDTO;
 import com.vietqr.org.dto.TransStatisticDTO;
 import com.vietqr.org.dto.TransactionCheckStatusDTO;
 import com.vietqr.org.dto.TransactionDetailDTO;
+import com.vietqr.org.dto.TransactionFeeDTO;
 import com.vietqr.org.dto.TransactionReceiveAdminListDTO;
 import com.vietqr.org.dto.TransactionRelatedDTO;
 
@@ -93,4 +94,8 @@ public interface TransactionReceiveService {
         TransStatisticDTO getTransStatisticCustomerSync(String customerSyncId);
 
         TransStatisticDTO getTransStatisticCustomerSyncByMonth(String customerSyncId, String month);
+
+        TransactionFeeDTO getTransactionFeeCountingTypeAll(String bankId, String month);
+
+        TransactionFeeDTO getTransactionFeeCountingTypeSystem(String bankId, String month);
 }

@@ -13,6 +13,7 @@ import com.vietqr.org.dto.TransStatisticByMonthDTO;
 import com.vietqr.org.dto.TransStatisticDTO;
 import com.vietqr.org.dto.TransactionCheckStatusDTO;
 import com.vietqr.org.dto.TransactionDetailDTO;
+import com.vietqr.org.dto.TransactionFeeDTO;
 import com.vietqr.org.dto.TransactionReceiveAdminListDTO;
 import com.vietqr.org.dto.TransactionRelatedDTO;
 
@@ -181,6 +182,16 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     @Override
     public TransStatisticDTO getTransStatisticCustomerSyncByMonth(String customerSyncId, String month) {
         return repo.getTransStatisticCustomerSyncByMonth(customerSyncId, month);
+    }
+
+    @Override
+    public TransactionFeeDTO getTransactionFeeCountingTypeAll(String bankId, String month) {
+        return repo.getTransactionFeeCountingTypeAll(bankId, month);
+    }
+
+    @Override
+    public TransactionFeeDTO getTransactionFeeCountingTypeSystem(String bankId, String month) {
+        return repo.getTransactionFeeCountingTypeSystem(bankId, month);
     }
 
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.vietqr.org.dto.AnnualFeeBankDTO;
 import com.vietqr.org.entity.AccountCustomerBankEntity;
 
 @Service
@@ -22,5 +23,7 @@ public interface AccountCustomerBankService {
     public void removeBankAccountFromCustomerSync(String bankId, String customerSyncId);
 
     public List<String> getBankIdsByCustomerSyncId(String customerSyncId);
+
+    public List<AnnualFeeBankDTO> getBanksAnnualFee(String customerSyncId);
 
 }

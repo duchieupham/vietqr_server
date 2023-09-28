@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.vietqr.org.dto.AnnualFeeMerchantDTO;
 import com.vietqr.org.dto.CusSyncApiInfoDTO;
 import com.vietqr.org.dto.CusSyncEcInfoDTO;
 import com.vietqr.org.dto.CustomerSyncListDTO;
@@ -81,6 +82,11 @@ public class CustomerSyncServiceImpl implements CustomerSyncService {
     public void updateCustomerSync(String url, String ip, String password, String port, String suffix,
             String username, String customerSyncId) {
         repo.updateCustomerSync(url, ip, password, port, suffix, username, customerSyncId);
+    }
+
+    @Override
+    public List<AnnualFeeMerchantDTO> getMerchantForServiceFee() {
+        return repo.getMerchantForServiceFee();
     }
 
     // @Override

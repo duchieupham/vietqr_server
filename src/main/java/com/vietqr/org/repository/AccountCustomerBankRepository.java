@@ -10,10 +10,20 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.vietqr.org.dto.AnnualFeeBankDTO;
 import com.vietqr.org.entity.AccountCustomerBankEntity;
 
 @Repository
 public interface AccountCustomerBankRepository extends JpaRepository<AccountCustomerBankEntity, Long> {
+
+        @Query(value = "SELECT a.id as bankId, a.bank_account as bankAccount, b.bank_code as bankCode, b.bank_short_name as bankShortName "
+                        + "FROM account_customer_bank f  "
+                        + "INNER JOIN account_bank_receive a  "
+                        + "ON f.bank_id = a.id  "
+                        + "INNER JOIN bank_type b "
+                        + "ON a.bank_type_id = b.id "
+                        + "WHERE f.customer_sync_id = :customerSyncId ", nativeQuery = true)
+        List<AnnualFeeBankDTO> getBanksAnnualFee(@Param(value = "customerSyncId") String customerSyncId);
 
         @Query(value = "SELECT * FROM account_customer_bank WHERE bank_id = :bankId", nativeQuery = true)
         List<AccountCustomerBankEntity> getAccountCustomerBankByBankId(@Param(value = "bankId") String bankId);

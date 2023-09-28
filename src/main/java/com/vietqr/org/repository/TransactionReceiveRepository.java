@@ -17,6 +17,7 @@ import com.vietqr.org.dto.TransStatisticByMonthDTO;
 import com.vietqr.org.dto.TransStatisticDTO;
 import com.vietqr.org.dto.TransactionCheckStatusDTO;
 import com.vietqr.org.dto.TransactionDetailDTO;
+import com.vietqr.org.dto.TransactionFeeDTO;
 import com.vietqr.org.dto.TransactionReceiveAdminListDTO;
 import com.vietqr.org.dto.TransactionRelatedDTO;
 
@@ -284,5 +285,29 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "AND DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(b.time), '+00:00', '+07:00'), '%Y-%m') = :month "
                         + "GROUP BY DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(b.time), '+00:00', '+07:00'), '%Y-%m') ", nativeQuery = true)
         TransStatisticDTO getTransStatisticCustomerSyncByMonth(@Param(value = "customerSyncId") String customerSyncId,
+                        @Param(value = "month") String month);
+
+        @Query(value = "SELECT "
+                        + "DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(time), '+00:00', '+07:00'), '%Y-%m') AS month, "
+                        + "COUNT(*) as totalTrans, "
+                        + "SUM(amount) as totalAmount "
+                        + "FROM transaction_receive  "
+                        + "WHERE bank_id = :bankId AND status = 1 "
+                        + "AND DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(time), '+00:00', '+07:00'), '%Y-%m') = :month "
+                        + "GROUP BY month ", nativeQuery = true)
+        TransactionFeeDTO getTransactionFeeCountingTypeAll(
+                        @Param(value = "bankId") String bankId,
+                        @Param(value = "month") String month);
+
+        @Query(value = "SELECT "
+                        + "DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(time), '+00:00', '+07:00'), '%Y-%m') AS month, "
+                        + "COUNT(*) as totalTrans, "
+                        + "SUM(amount) as totalAmount "
+                        + "FROM transaction_receive  "
+                        + "WHERE bank_id = :bankId AND status = 1 AND type = 0 "
+                        + "AND DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(time), '+00:00', '+07:00'), '%Y-%m') = :month "
+                        + "GROUP BY month ", nativeQuery = true)
+        TransactionFeeDTO getTransactionFeeCountingTypeSystem(
+                        @Param(value = "bankId") String bankId,
                         @Param(value = "month") String month);
 }
