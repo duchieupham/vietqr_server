@@ -1,7 +1,7 @@
 package com.vietqr.org.util;
 
 public class EnvironmentUtil {
-    private static boolean IS_PRODUCTION = true;
+    private static boolean IS_PRODUCTION = false;
 
     // DINO SOFT - VOICE
     private static final String VOICE_REQUEST_URL = "http://103.141.140.202:8009/tts/v1/speak";
@@ -70,6 +70,23 @@ public class EnvironmentUtil {
     private static final String VNPT_EPAY_PARTNER_NAME_UAT = "BLUECOM";
     private static final String VNPT_EPAY_PARTNER_NAME_PROD = "BLUECOM";
 
+    ////////////////////////////////////
+    // for get qr recharge VNPT Epay
+    // Default Bank information:
+    // Vietcombank: 0011002572864
+    // CÔNG TY CỔ PHẦN THANH TOÁN ĐIỆN TỬ VNPT
+    private static final String VNPT_EPAY_REQUEST_PAYMENT_BANK_TYPE_ID_UAT = "ebd51e4f-6036-431d-a5c8-0dbde770ea0f";
+    private static final String VNPT_EPAY_REQUEST_PAYMENT_BANK_TYPE_ID_PROD = "ebd51e4f-6036-431d-a5c8-0dbde770ea0f";
+
+    private static final String VNPT_EPAY_REQUEST_PAYMENT_CAI_UAT = "970436";
+    private static final String VNPT_EPAY_REQUEST_PAYMENT_CAI_PROD = "970436";
+
+    private static final String VNPT_EPAY_REQUEST_PAYMENT_BANK_ACCOUNT_UAT = "0011002572864";
+    private static final String VNPT_EPAY_REQUEST_PAYMENT_BANK_ACCOUNT_PROD = "0011002572864";
+
+    private static final String VNPT_EPAY_REQUEST_PAYMENT_BANK_USER_NAME_UAT = "CT CP THANH TOAN DIEN TU VNPT";
+    private static final String VNPT_EPAY_REQUEST_PAYMENT_BANK_USER_NAME_PROD = "CT CP THANH TOAN DIEN TU VNPT";
+
     ///////////////////////////////////
     // for recharge into VietQR VN
     private static final String BUSINESS_ID_RECHARGE_UAT = "";
@@ -100,6 +117,25 @@ public class EnvironmentUtil {
     // Telegram
     private static final String TELEGRAM_BOT_USERNAME = "vietqr_bot";
     private static final String TELEGRAM_BOT_TOKEN = "6603683411:AAGTCde6C-7kt4gR5gTvcDA_jmYIqs0SJJM";
+
+    public static String getVNPTEpayRequestPaymentBankUsername() {
+        return (IS_PRODUCTION == false) ? VNPT_EPAY_REQUEST_PAYMENT_BANK_USER_NAME_UAT
+                : VNPT_EPAY_REQUEST_PAYMENT_BANK_USER_NAME_PROD;
+    }
+
+    public static String getVNPTEpayRequestPaymentBankAccount() {
+        return (IS_PRODUCTION == false) ? VNPT_EPAY_REQUEST_PAYMENT_BANK_ACCOUNT_UAT
+                : VNPT_EPAY_REQUEST_PAYMENT_BANK_ACCOUNT_PROD;
+    }
+
+    public static String getVNPTEpayRequestPaymentBankTypeId() {
+        return (IS_PRODUCTION == false) ? VNPT_EPAY_REQUEST_PAYMENT_BANK_TYPE_ID_UAT
+                : VNPT_EPAY_REQUEST_PAYMENT_BANK_TYPE_ID_PROD;
+    }
+
+    public static String getVNPTEpayRequestPaymentCAI() {
+        return (IS_PRODUCTION == false) ? VNPT_EPAY_REQUEST_PAYMENT_CAI_UAT : VNPT_EPAY_REQUEST_PAYMENT_CAI_PROD;
+    }
 
     public static String getDefaultUserIdTest() {
         return (IS_PRODUCTION == false) ? DEFAULT_USER_ID_TEST : "";

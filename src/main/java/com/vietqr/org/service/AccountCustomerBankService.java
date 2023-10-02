@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.vietqr.org.dto.AccountBankReceiveServiceItemDTO;
 import com.vietqr.org.dto.AnnualFeeBankDTO;
 import com.vietqr.org.entity.AccountCustomerBankEntity;
 
@@ -25,5 +26,7 @@ public interface AccountCustomerBankService {
     public List<String> getBankIdsByCustomerSyncId(String customerSyncId);
 
     public List<AnnualFeeBankDTO> getBanksAnnualFee(String customerSyncId);
+
+    public List<AccountBankReceiveServiceItemDTO> getBankAccountsByMerchantId(String customerSyncId);
 
 }

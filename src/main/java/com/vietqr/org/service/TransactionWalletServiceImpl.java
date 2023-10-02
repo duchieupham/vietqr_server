@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.dto.TransWalletListDTO;
+import com.vietqr.org.dto.TransactionVNPTItemDTO;
+import com.vietqr.org.dto.VNPTEpayTransCounterDTO;
 import com.vietqr.org.entity.TransactionWalletEntity;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,9 +49,10 @@ public class TransactionWalletServiceImpl implements TransactionWalletService {
     }
 
     @Override
-    public void updateTransactionWallet(int status, long timePaid, String amount, String userId, String otp,
+    public void updateTransactionWallet(int status, long timePaid, String amount, String phoneNoRC, String userId,
+            String otp,
             int paymentType) {
-        repo.updateTransactionWallet(status, timePaid, amount, userId, otp, paymentType);
+        repo.updateTransactionWallet(status, timePaid, amount, phoneNoRC, userId, otp, paymentType);
     }
 
     @Override
@@ -71,6 +74,21 @@ public class TransactionWalletServiceImpl implements TransactionWalletService {
     @Override
     public List<TransWalletListDTO> getTransactionWalletListByStatus(String userId, int status, int offset) {
         return repo.getTransactionWalletListByStatus(userId, status, offset);
+    }
+
+    @Override
+    public List<TransactionVNPTItemDTO> getTransactionsVNPT(int offset) {
+        return repo.getTransactionsVNPT(offset);
+    }
+
+    @Override
+    public List<TransactionVNPTItemDTO> getTransactionsVNPTFilter(int status, int offset) {
+        return repo.getTransactionsVNPTFilter(status, offset);
+    }
+
+    @Override
+    public VNPTEpayTransCounterDTO getVNPTEpayCounter() {
+        return repo.getVNPTEpayCounter();
     }
 
 }

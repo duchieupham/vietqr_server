@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.vietqr.org.dto.AccountBankReceiveServiceItemDTO;
 import com.vietqr.org.dto.AnnualFeeBankDTO;
 import com.vietqr.org.entity.AccountCustomerBankEntity;
 
@@ -53,4 +54,17 @@ public interface AccountCustomerBankRepository extends JpaRepository<AccountCust
 
         @Query(value = "SELECT bank_id FROM account_customer_bank WHERE customer_sync_id = :customerSyncId ", nativeQuery = true)
         List<String> getBankIdsByCustomerSyncId(@Param(value = "customerSyncId") String customerSyncId);
+
+        @Query(value = "SELECT a.bank_id as bankId, c.bank_account as bankAccount, c.bank_account_name as userBankName, d.bank_short_name as bankShortName, d.bank_code as bankCode, d.bank_name as bankName, d.img_id as imgId "
+                        + "FROM account_customer_bank a  "
+                        + "INNER JOIN customer_sync b  "
+                        + "ON a.customer_sync_id = b.id  "
+                        + "INNER JOIN account_bank_receive c  "
+                        + "ON a.bank_id = c.id  "
+                        + "INNER JOIN bank_type d  "
+                        + "ON c.bank_type_id = d.id  "
+                        + "WHERE a.customer_sync_id = :customerSyncId ", nativeQuery = true)
+        List<AccountBankReceiveServiceItemDTO> getBankAccountsByMerchantId(
+                        @Param(value = "customerSyncId") String customerSyncId);
+
 }

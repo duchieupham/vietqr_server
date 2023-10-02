@@ -9,6 +9,7 @@ import com.vietqr.org.dto.AnnualFeeMerchantDTO;
 import com.vietqr.org.dto.CusSyncApiInfoDTO;
 import com.vietqr.org.dto.CusSyncEcInfoDTO;
 import com.vietqr.org.dto.CustomerSyncListDTO;
+import com.vietqr.org.dto.MerchantServiceItemDTO;
 import com.vietqr.org.entity.CustomerSyncEntity;
 import com.vietqr.org.repository.CustomerSyncRepository;
 
@@ -87,6 +88,11 @@ public class CustomerSyncServiceImpl implements CustomerSyncService {
     @Override
     public List<AnnualFeeMerchantDTO> getMerchantForServiceFee() {
         return repo.getMerchantForServiceFee();
+    }
+
+    @Override
+    public List<MerchantServiceItemDTO> getMerchantsMappingService() {
+        return repo.getMerchantsMappingService();
     }
 
     // @Override

@@ -713,6 +713,7 @@ public class TransactionBankController {
 												.updateTransactionWallet(1, timeM,
 														tranMobileEntity.getAmount()
 																+ "",
+														phoneNo,
 														userId, otp,
 														1);
 									} else if (topupResponseCode == 23 || topupResponseCode == 99) {
@@ -721,6 +722,7 @@ public class TransactionBankController {
 												.updateTransactionWallet(3, timeM,
 														tranMobileEntity.getAmount()
 																+ "",
+														phoneNo,
 														userId, otp,
 														1);
 										System.out.println(
@@ -733,6 +735,7 @@ public class TransactionBankController {
 												.updateTransactionWallet(3, timeM,
 														tranMobileEntity.getAmount()
 																+ "",
+														phoneNo,
 														userId, otp,
 														1);
 										System.out.println(
@@ -746,6 +749,7 @@ public class TransactionBankController {
 												.updateTransactionWallet(3, timeM,
 														tranMobileEntity.getAmount()
 																+ "",
+														phoneNo,
 														userId, otp,
 														1);
 										System.out.println(
@@ -757,6 +761,7 @@ public class TransactionBankController {
 												.updateTransactionWallet(3, timeM,
 														tranMobileEntity.getAmount()
 																+ "",
+														phoneNo,
 														userId, otp,
 														1);
 										System.out.println(

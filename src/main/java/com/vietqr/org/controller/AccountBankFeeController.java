@@ -31,6 +31,7 @@ import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.ServiceFeeBankItemDTO;
 import com.vietqr.org.dto.ServiceFeeMerchantItemDTO;
 import com.vietqr.org.dto.ServiceFeeMonthItemDTO;
+import com.vietqr.org.dto.TotalPaymentDTO;
 import com.vietqr.org.dto.TransactionFeeDTO;
 import com.vietqr.org.entity.AccountBankFeeEntity;
 import com.vietqr.org.entity.PaymentAnnualAccBankEntity;
@@ -502,6 +503,139 @@ public class AccountBankFeeController {
         } catch (Exception e) {
             logger.error("updateApplyDate: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // get total transaction and total Payment by month
+    @GetMapping("bank/service-fee/total")
+    public ResponseEntity<TotalPaymentDTO> getTotalByMonth(
+            @RequestParam(value = "month") String month) {
+        TotalPaymentDTO result = null;
+        HttpStatus httpStatus = null;
+        Long totalPaymentForAll = 0L;
+        Long totalPaymentUnpaid = 0L;
+        Long totalPaymentPaid = 0L;
+        Long totalTransForAll = 0L;
+        try {
+            List<AnnualFeeMerchantDTO> merchants = customerSyncService.getMerchantForServiceFee();
+            if (merchants != null && !merchants.isEmpty()) {
+                //
+                for (AnnualFeeMerchantDTO merchant : merchants) {
+                    if (merchant.getCustomerSyncId() != null) {
+                        List<AnnualFeeBankDTO> banks = accountCustomerBankService
+                                .getBanksAnnualFee(merchant.getCustomerSyncId());
+                        if (banks != null && !banks.isEmpty()) {
+                            for (AnnualFeeBankDTO bank : banks) {
+                                List<AccountBankFeeEntity> fees = accountBankFeeService
+                                        .getAccountBankFeesByBankId(bank.getBankId());
+                                if (fees != null && !fees.isEmpty()) {
+                                    for (AccountBankFeeEntity fee : fees) {
+
+                                        Long totalTrans = 0L;
+                                        Long totalAmount = 0L;
+                                        Long totalPaymentService = 0L;
+                                        Long totalPaymentServiceAfterVat = 0L;
+                                        Long totalPaymentServiceByTransFee = 0L;
+                                        Long totalPaymentServiceByPercentAmount = 0L;
+                                        int statusFee = 0;
+                                        // getCountingTransType = 0 => count all
+                                        // getCountingTransType = 1 => count only system transaction
+                                        if (fee.getCountingTransType() != null && fee.getCountingTransType() == 0) {
+                                            TransactionFeeDTO transFee = transactionReceiveService
+                                                    .getTransactionFeeCountingTypeAll(fee.getBankId(), month);
+                                            if (transFee != null) {
+                                                totalTrans = transFee.getTotalTrans();
+                                                totalAmount = transFee.getTotalAmount();
+                                                //
+                                                totalPaymentServiceByTransFee = totalTrans * fee.getTransFee();
+                                                totalPaymentServiceByPercentAmount = (Long) Math
+                                                        .round(fee.getPercentFee() * totalAmount / 100);
+                                                totalPaymentService = totalPaymentServiceByTransFee
+                                                        + totalPaymentServiceByPercentAmount;
+                                                totalPaymentServiceAfterVat = (Long) Math.round(totalPaymentService
+                                                        + (fee.getVat() * totalPaymentService / 100)
+                                                        - fee.getAnnualFee());
+                                                if (totalPaymentServiceAfterVat < 0) {
+                                                    totalPaymentServiceAfterVat = 0L;
+                                                }
+
+                                                // check status
+                                                PaymentFeeAccBankEntity checkPaid = paymentFeeAccBankService
+                                                        .checkExistedRecord(fee.getBankId(), fee.getId(), month);
+                                                if (checkPaid != null && checkPaid.getStatus() != null) {
+                                                    statusFee = checkPaid.getStatus();
+                                                } else {
+                                                    statusFee = 0;
+                                                }
+                                                ///
+                                                if (statusFee == 0) {
+                                                    totalPaymentUnpaid += totalPaymentServiceAfterVat;
+                                                } else if (statusFee == 1) {
+                                                    totalPaymentPaid += totalPaymentServiceAfterVat;
+                                                }
+                                                totalTransForAll += totalTrans;
+                                                totalPaymentForAll += totalPaymentServiceAfterVat;
+                                            }
+                                        } else if (fee.getCountingTransType() != null
+                                                && fee.getCountingTransType() == 1) {
+                                            TransactionFeeDTO transFee = transactionReceiveService
+                                                    .getTransactionFeeCountingTypeSystem(fee.getBankId(), month);
+                                            if (transFee != null) {
+                                                totalTrans = transFee.getTotalTrans();
+                                                totalAmount = transFee.getTotalAmount();
+                                                //
+                                                totalPaymentServiceByTransFee = totalTrans * fee.getTransFee();
+                                                totalPaymentServiceByPercentAmount = (Long) Math
+                                                        .round(fee.getPercentFee() * totalAmount / 100);
+                                                totalPaymentService = totalPaymentServiceByTransFee
+                                                        + totalPaymentServiceByPercentAmount;
+                                                totalPaymentServiceAfterVat = (Long) Math.round(totalPaymentService
+                                                        + (fee.getVat() * totalPaymentService / 100)
+                                                        - fee.getAnnualFee());
+                                                if (totalPaymentServiceAfterVat < 0) {
+                                                    totalPaymentServiceAfterVat = 0L;
+                                                }
+
+                                                // check status
+                                                PaymentFeeAccBankEntity checkPaid = paymentFeeAccBankService
+                                                        .checkExistedRecord(fee.getBankId(), fee.getId(), month);
+                                                if (checkPaid != null && checkPaid.getStatus() != null) {
+                                                    statusFee = checkPaid.getStatus();
+                                                } else {
+                                                    statusFee = 0;
+                                                }
+
+                                                ///
+                                                if (statusFee == 0) {
+                                                    totalPaymentUnpaid += totalPaymentServiceAfterVat;
+                                                } else if (statusFee == 1) {
+                                                    totalPaymentPaid += totalPaymentServiceAfterVat;
+                                                }
+                                                totalTransForAll += totalTrans;
+                                                totalPaymentForAll += totalPaymentServiceAfterVat;
+                                            }
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            //
+            result = new TotalPaymentDTO();
+            result.setTotalTrans(totalTransForAll);
+            result.setTotalPayment(totalPaymentForAll);
+            result.setTotalPaymentUnpaid(totalPaymentUnpaid);
+            result.setTotalPaymentPaid(totalPaymentPaid);
+            //
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getTotalByMonth: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
     }

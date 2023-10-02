@@ -25,6 +25,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vietqr.org.dto.AccountBankReceiveServiceItemDTO;
 import com.vietqr.org.dto.CusSyncApiInfoDTO;
 import com.vietqr.org.dto.CusSyncEcInfoDTO;
 import com.vietqr.org.dto.CustomerSyncInsertDTO;
@@ -32,6 +33,8 @@ import com.vietqr.org.dto.CustomerSyncListDTO;
 import com.vietqr.org.dto.CustomerSyncStatusDTO;
 import com.vietqr.org.dto.CustomerSyncTokenTestDTO;
 import com.vietqr.org.dto.CustomerSyncUpdateDTO;
+import com.vietqr.org.dto.MerchantServiceDTO;
+import com.vietqr.org.dto.MerchantServiceItemDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.entity.AccountCustomerBankEntity;
@@ -548,6 +551,38 @@ public class CustomerSyncController {
         } catch (Exception e) {
             logger.error("insertNewCustomerSync: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // get list merchant-bankaccounts to mapping service
+    @GetMapping("customer-sync/service-mapping")
+    public ResponseEntity<List<MerchantServiceDTO>> getMerchantsToMappingService() {
+        List<MerchantServiceDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            List<MerchantServiceItemDTO> merchants = customerSyncService.getMerchantsMappingService();
+            if (merchants != null && !merchants.isEmpty()) {
+                for (MerchantServiceItemDTO merchant : merchants) {
+                    MerchantServiceDTO merchantService = new MerchantServiceDTO();
+                    merchantService.setCustomerSyncId(merchant.getCustomerSyncId());
+                    merchantService.setMerchant(merchant.getMerchant());
+                    if (merchant.getCustomerSyncId() != null) {
+                        List<AccountBankReceiveServiceItemDTO> bankAccounts = accountCustomerBankService
+                                .getBankAccountsByMerchantId(merchant.getCustomerSyncId());
+                        if (bankAccounts != null && !bankAccounts.isEmpty()) {
+                            merchantService.setBankAccounts(bankAccounts);
+                        }
+                    }
+                    if (merchantService.getBankAccounts() != null && !merchantService.getBankAccounts().isEmpty()) {
+                        result.add(merchantService);
+                    }
+                }
+            }
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getMerchantsToMappingService: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);

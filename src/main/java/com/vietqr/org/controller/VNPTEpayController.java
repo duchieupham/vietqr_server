@@ -20,13 +20,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vietqr.org.dto.EpayBalanceDTO;
 import com.vietqr.org.dto.MobileRechargeDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
+import com.vietqr.org.dto.VietQRDTO;
 import com.vietqr.org.dto.VietQRGenerateDTO;
 import com.vietqr.org.entity.AccountWalletEntity;
+import com.vietqr.org.entity.BankTypeEntity;
 import com.vietqr.org.entity.CarrierTypeEntity;
 import com.vietqr.org.entity.FcmTokenEntity;
 import com.vietqr.org.entity.NotificationEntity;
@@ -34,6 +37,7 @@ import com.vietqr.org.entity.TransactionReceiveBranchEntity;
 import com.vietqr.org.entity.TransactionReceiveEntity;
 import com.vietqr.org.entity.TransactionWalletEntity;
 import com.vietqr.org.service.AccountWalletService;
+import com.vietqr.org.service.BankTypeService;
 import com.vietqr.org.service.CarrierTypeService;
 import com.vietqr.org.service.FcmTokenService;
 import com.vietqr.org.service.FirebaseMessagingService;
@@ -81,7 +85,53 @@ public class VNPTEpayController {
     TransactionReceiveBranchService transactionReceiveBranchService;
 
     @Autowired
+    BankTypeService bankTypeService;
+
+    @Autowired
     private SocketHandler socketHandler;
+
+    // GET QR RECHARGE VNPT EPAY
+    // Default Bank information:
+    // Vietcombank: 0011002572864
+    // CÔNG TY CỔ PHẦN THANH TOÁN ĐIỆN TỬ VNPT
+    @GetMapping("epay/request-payment-qr")
+    public ResponseEntity<VietQRDTO> getRequestPaymentQR(
+            @RequestParam(value = "amount") String amount) {
+        VietQRDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            String requestPaymentBankTypeId = EnvironmentUtil.getVNPTEpayRequestPaymentBankTypeId();
+            String caiValue = EnvironmentUtil.getVNPTEpayRequestPaymentCAI();
+            String bankAccount = EnvironmentUtil.getVNPTEpayRequestPaymentBankAccount();
+            String userBankName = EnvironmentUtil.getVNPTEpayRequestPaymentBankUsername();
+            String content = "BLUECOM NAP TIEN 247";
+            BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(requestPaymentBankTypeId);
+            // generate VietQRGenerateDTO
+            VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+            vietQRGenerateDTO.setCaiValue(caiValue);
+            vietQRGenerateDTO.setBankAccount(bankAccount);
+            vietQRGenerateDTO.setAmount(amount);
+            vietQRGenerateDTO.setContent(content);
+            String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+            // generate VietQRDTO
+            VietQRDTO vietQRDTO = new VietQRDTO();
+            vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
+            vietQRDTO.setBankName(bankTypeEntity.getBankName());
+            vietQRDTO.setBankAccount(bankAccount);
+            vietQRDTO.setUserBankName(userBankName);
+            vietQRDTO.setQrCode(qr);
+            vietQRDTO.setImgId(bankTypeEntity.getImgId());
+            vietQRDTO.setAmount(amount);
+            vietQRDTO.setContent(content);
+            vietQRDTO.setTransactionId("");
+            httpStatus = HttpStatus.OK;
+            result = vietQRDTO;
+        } catch (Exception e) {
+            logger.error("getRequestPaymentQR: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 
     // api nap tien dien thoai
     // 1. check so du
@@ -134,7 +184,7 @@ public class VNPTEpayController {
                                                     LocalDateTime currentDateTime = LocalDateTime.now();
                                                     long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
                                                     transactionWalletService.updateTransactionWallet(1, time,
-                                                            amount + "",
+                                                            amount + "", dto.getPhoneNo(),
                                                             dto.getUserId(), dto.getOtp(), 1);
                                                     //
                                                     ///

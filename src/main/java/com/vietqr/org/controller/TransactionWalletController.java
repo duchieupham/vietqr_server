@@ -31,6 +31,8 @@ import com.vietqr.org.dto.RequestPaymentDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.TransWalletInsertDTO;
 import com.vietqr.org.dto.TransWalletListDTO;
+import com.vietqr.org.dto.TransactionVNPTItemDTO;
+import com.vietqr.org.dto.VNPTEpayTransCounterDTO;
 import com.vietqr.org.dto.VietQRDTO;
 import com.vietqr.org.dto.VietQRGenerateDTO;
 import com.vietqr.org.entity.TransactionReceiveBranchEntity;
@@ -105,6 +107,7 @@ public class TransactionWalletController {
                         transactionWalletEntity.setPaymentType(dto.getPaymentType());
                         transactionWalletEntity.setPaymentMethod(0);
                         transactionWalletEntity.setReferenceNumber("");
+                        transactionWalletEntity.setPhoneNoRC("");
                         transactionWalletService.insertTransactionWallet(transactionWalletEntity);
                         //
                         result = new ResponseMessageDTO("SUCCESS", otp);
@@ -226,6 +229,7 @@ public class TransactionWalletController {
                     transactionWalletEntity.setPaymentType(0);
                     transactionWalletEntity.setPaymentMethod(1);
                     transactionWalletEntity.setReferenceNumber("");
+                    transactionWalletEntity.setPhoneNoRC("");
                     transactionWalletService.insertTransactionWallet(transactionWalletEntity);
                     // final
                     result = vietQRDTO;
@@ -277,5 +281,41 @@ public class TransactionWalletController {
     // get list by userId
 
     // get chi tiết
+
+    // get VNPT Epay Transaction
+    @GetMapping("transaction-wallet/vnpt-epay")
+    public ResponseEntity<List<TransactionVNPTItemDTO>> getTransactionsVNPTFilter(
+            @RequestParam(value = "status") int status,
+            @RequestParam(value = "offset") int offset) {
+        List<TransactionVNPTItemDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            if (status == 9) {
+                result = transactionWalletService.getTransactionsVNPT(offset);
+            } else {
+                result = transactionWalletService.getTransactionsVNPTFilter(status, offset);
+            }
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getTransactionsVNPTFilter: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // get VNPT Epay Statistic
+    @GetMapping("transaction-wallet/vnpt-epay/statistic")
+    public ResponseEntity<VNPTEpayTransCounterDTO> getVNPTEpayStatisticTransaction() {
+        VNPTEpayTransCounterDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            result = transactionWalletService.getVNPTEpayCounter();
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getVNPTEpayStatisticTransaction: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 
 }

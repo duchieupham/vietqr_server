@@ -8,6 +8,7 @@ import com.vietqr.org.dto.AnnualFeeMerchantDTO;
 import com.vietqr.org.dto.CusSyncApiInfoDTO;
 import com.vietqr.org.dto.CusSyncEcInfoDTO;
 import com.vietqr.org.dto.CustomerSyncListDTO;
+import com.vietqr.org.dto.MerchantServiceItemDTO;
 import com.vietqr.org.entity.CustomerSyncEntity;
 
 @Service
@@ -46,5 +47,7 @@ public interface CustomerSyncService {
             String username, String customerSyncId);
 
     List<AnnualFeeMerchantDTO> getMerchantForServiceFee();
+
+    public List<MerchantServiceItemDTO> getMerchantsMappingService();
 
 }

@@ -14,6 +14,7 @@ import com.vietqr.org.dto.AnnualFeeMerchantDTO;
 import com.vietqr.org.dto.CusSyncApiInfoDTO;
 import com.vietqr.org.dto.CusSyncEcInfoDTO;
 import com.vietqr.org.dto.CustomerSyncListDTO;
+import com.vietqr.org.dto.MerchantServiceItemDTO;
 import com.vietqr.org.entity.CustomerSyncEntity;
 
 @Repository
@@ -124,4 +125,7 @@ public interface CustomerSyncRepository extends JpaRepository<CustomerSyncEntity
                         @Param(value = "suffix") String suffix,
                         @Param(value = "username") String username,
                         @Param(value = "customerSyncId") String customerSyncId);
+
+        @Query(value = "SELECT id AS customerSyncId, merchant FROM customer_sync ", nativeQuery = true)
+        List<MerchantServiceItemDTO> getMerchantsMappingService();
 }

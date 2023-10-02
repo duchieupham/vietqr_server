@@ -1,10 +1,6 @@
 package com.vietqr.org;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -36,6 +32,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.vietqr.org.security.JWTAuthorizationFilter;
 import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.BankRSAUtil;
+import com.vietqr.org.util.RandomCodeUtil;
 import com.vietqr.org.util.WebSocketConfig;
 
 @SpringBootApplication
@@ -52,9 +49,14 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
 
-		String checkSum = BankEncryptUtil.generateMD5RefundCustomerChecksum("1123355589",
-				"FT23271640370141", "SABAccessKey");
-		System.out.println("CHECKSUM: " + checkSum);
+		// String checkSum =
+		// BankEncryptUtil.generateMD5RefundCustomerChecksum("1123355589",
+		// "FT23271640370141", "SABAccessKey");
+		// System.out.println("CHECKSUM: " + checkSum);
+
+		// get random request Payment MB Bank
+		String randomCode = "RVCK" + RandomCodeUtil.generateRandomId(8);
+		System.out.println("randomCode: " + randomCode);
 
 		// int durationMonths = 6;
 		// String startDateString = calculateStartDate(durationMonths);
@@ -84,12 +86,13 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// String personalId = "387782195958";
 		// String phoneNumber = "0886524111";
 		// String sourceNumber = "9704222070155452";
-		// String valueToEncode = customerName + personalId + phoneNumber +
-		// sourceNumber;
-		// String result = BankRSAUtil.generateSignature(valueToEncode);
-		// System.out.println("result: " + result);
-		// System.out.println("Verify data: " +
-		// BankRSAUtil.verifySignature(valueToEncode, result));
+		String valueToEncode = "RSID-eef52137-86b2-4812-bc05-54a522fbf226" + "USER NAME TEST" + "5169867955365"
+				+ "NGUYEN VAN A"
+				+ "0868525356" + "10000";
+		String result = BankRSAUtil.generateSignature(valueToEncode);
+		System.out.println("result: " + result);
+		System.out.println("Verify data: " +
+				BankRSAUtil.verifySignature(valueToEncode, result));
 
 		// String prefix = "unassign";
 		// String resourceBank = "RSID-eef52137-86b2-4812-bc05-54a522fbf226";
@@ -142,21 +145,6 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		// configuration.setAllowedOrigins(Arrays.asList("*"));
-		// configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE",
-		// "OPTIONS"));
-		// configuration.setAllowedHeaders(Arrays.asList("Authorization",
-		// "Content-Type"));
-		///
-		// Thêm các tiêu đề bổ sung cho hỗ trợ Multipart
-		// configuration.setAllowedHeaders(Arrays.asList("Authorization",
-		// "Content-Type", "X-Requested-With", "accept",
-		// "Origin", "Access-Control-Request-Method",
-		// "Access-Control-Request-Headers"));
-		// configuration
-		// .setExposedHeaders(Arrays.asList("Access-Control-Allow-Origin",
-		// "Access-Control-Allow-Credentials"));
-		///
 		configuration.addAllowedOrigin("*");
 		configuration.addAllowedHeader("*");
 		configuration.addAllowedMethod("*");
