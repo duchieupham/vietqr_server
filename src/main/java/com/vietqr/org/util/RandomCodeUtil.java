@@ -60,4 +60,11 @@ public class RandomCodeUtil {
 		}
 		return code.toString();
 	}
+
+	// random color type Contact entity from 0-4
+	public static int generateRandomColorType() {
+		Random random = new Random();
+		int randomNumber = random.nextInt(5); // Sinh số ngẫu nhiên từ 0 đến 4
+		return randomNumber;
+	}
 }

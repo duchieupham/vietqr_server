@@ -34,9 +34,12 @@ import com.vietqr.org.dto.ContactScanResultDTO;
 import com.vietqr.org.dto.ContactStatusUpdateDTO;
 import com.vietqr.org.dto.ContactUpdateDTO;
 import com.vietqr.org.dto.ContactUpdateMultipartDTO;
+import com.vietqr.org.dto.ContactVcardUpdateMultipartDTO;
 import com.vietqr.org.dto.FcmRequestDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.UserInfoWalletDTO;
+import com.vietqr.org.dto.VCardInputDTO;
+import com.vietqr.org.dto.VcardInputListDTO;
 import com.vietqr.org.entity.AccountInformationEntity;
 import com.vietqr.org.entity.BankTypeEntity;
 import com.vietqr.org.entity.ContactEntity;
@@ -52,6 +55,8 @@ import com.vietqr.org.service.FirebaseMessagingService;
 import com.vietqr.org.service.ImageService;
 import com.vietqr.org.service.NotificationService;
 import com.vietqr.org.util.NotificationUtil;
+import com.vietqr.org.util.RandomCodeUtil;
+import com.vietqr.org.util.VCardUtil;
 
 @RestController
 @CrossOrigin
@@ -227,6 +232,7 @@ public class ContactController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // OLD
     // add contact
     // 1. check add chua
     // 2. add
@@ -371,6 +377,7 @@ public class ContactController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // OLD
     // add contact
     // 1. check add chua
     // 2. add
@@ -561,6 +568,7 @@ public class ContactController {
     }
 
     // get list contact for recharge
+    // ONLY TYPE VietQR ID
     @GetMapping("contact/recharge")
     private ResponseEntity<List<ContactRechargeDTO>> getContactForRecharge(
             @RequestParam(value = "userId") String userId) {
@@ -628,6 +636,9 @@ public class ContactController {
                             }
                             contactListDTO.setDescription(description.trim());
                             contactListDTO.setImgId(imgId);
+                        } else if (entity.getType() == 4) {
+                            contactListDTO.setDescription(entity.getPhoneNo().trim());
+                            contactListDTO.setImgId(entity.getImgId());
                         } else {
                             contactListDTO.setDescription("Khác");
                             contactListDTO.setImgId(entity.getImgId());
@@ -687,6 +698,9 @@ public class ContactController {
                             }
                             contactListDTO.setDescription(description.trim());
                             contactListDTO.setImgId(imgId);
+                        } else if (entity.getType() == 4) {
+                            contactListDTO.setDescription(entity.getPhoneNo().trim());
+                            contactListDTO.setImgId(entity.getImgId());
                         } else {
                             contactListDTO.setDescription("Khác");
                             contactListDTO.setImgId(entity.getImgId());
@@ -699,7 +713,9 @@ public class ContactController {
                 logger.error("getContactListApproved: INVALID USER ID");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
-        } catch (Exception e) {
+        } catch (
+
+        Exception e) {
             logger.error("getContactListApproved: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -745,6 +761,9 @@ public class ContactController {
                             }
                             contactListDTO.setDescription(description.trim());
                             contactListDTO.setImgId(imgId);
+                        } else if (entity.getType() == 4) {
+                            contactListDTO.setDescription(entity.getPhoneNo().trim());
+                            contactListDTO.setImgId(entity.getImgId());
                         } else {
                             contactListDTO.setDescription("Khác");
                             contactListDTO.setImgId(entity.getImgId());
@@ -781,6 +800,13 @@ public class ContactController {
                     result.setType(entity.getType());
                     result.setStatus(entity.getStatus());
                     result.setRelation(entity.getRelation());
+                    // set vcard
+                    result.setEmail(entity.getEmail());
+                    result.setAddress(entity.getAddress());
+                    result.setCompany(entity.getCompany());
+                    result.setWebsite(entity.getWebsite());
+                    result.setPhoneNo(entity.getPhoneNo());
+                    //
                     String bankShortName = "";
                     String bankName = "";
                     String imgId = "";
@@ -951,4 +977,139 @@ public class ContactController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
+    // API test generate QR VCard
+    @PostMapping("contact/test-vcard")
+    public ResponseEntity<ResponseMessageDTO> testGenerateQRVcard(
+            @RequestBody VCardInputDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            String qr = VCardUtil.getVcardQR(dto);
+            System.out.println("QR Vcard: \n" + qr);
+            result = new ResponseMessageDTO("SUCCESS", qr);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            logger.error("testGenerateQRVcard: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // only apply for contact type = 4: VCard
+    @PostMapping("contacts/vcard")
+    ResponseEntity<ResponseMessageDTO> insertVcards(
+            @RequestBody VcardInputListDTO list) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            List<ContactEntity> entities = new ArrayList<>();
+            if (list != null && list.getList() != null && !list.getList().isEmpty()) {
+                LocalDateTime currentDateTime = LocalDateTime.now();
+                long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+                if (list.getList().size() <= 50) {
+                    for (VCardInputDTO item : list.getList()) {
+                        if (item.getPhoneNo() != null && !item.getPhoneNo().trim().isEmpty()
+                                && item.getFullname() != null && !item.getFullname().trim().isEmpty()) {
+                            UUID uuid = UUID.randomUUID();
+                            ContactEntity entity = new ContactEntity();
+                            int colorType = RandomCodeUtil.generateRandomColorType();
+                            //
+                            entity.setId(uuid.toString());
+                            entity.setUserId(item.getUserId());
+                            entity.setNickname(item.getFullname().trim());
+                            entity.setAdditionalData(item.getAdditionalData());
+                            entity.setType(4);
+                            entity.setStatus(0);
+                            entity.setTime(time);
+                            entity.setBankTypeId("");
+                            entity.setBankAccount("");
+                            entity.setImgId("");
+                            entity.setColorType(colorType);
+                            entity.setRelation(0);
+                            entity.setEmail(item.getEmail());
+                            entity.setAddress(item.getAddress());
+                            entity.setCompany(item.getCompanyName());
+                            entity.setWebsite(item.getWebsite());
+                            entity.setPhoneNo(item.getPhoneNo());
+                            // generate
+                            String qr = VCardUtil.getVcardQR(item);
+                            entity.setValue(qr);
+
+                            // add into list
+                            entities.add(entity);
+                        }
+                    }
+                    if (entities != null && !entities.isEmpty()) {
+                        contactService.insertAllContact(entities);
+                    }
+                    result = new ResponseMessageDTO("SUCCESS", "");
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    result = new ResponseMessageDTO("FAILED", "E92");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("insertVcards: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // update contact Vcard
+    @PostMapping("contacts/vcard/update")
+    public ResponseEntity<ResponseMessageDTO> updateContactVcardMultipart(
+            @ModelAttribute ContactVcardUpdateMultipartDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null) {
+                VCardInputDTO input = new VCardInputDTO();
+                input.setFullname(dto.getNickname().trim());
+                input.setPhoneNo(dto.getPhoneNo());
+                input.setEmail(dto.getEmail());
+                input.setCompanyName(dto.getCompany());
+                input.setWebsite(dto.getWebsite());
+                input.setAddress(dto.getAddress());
+                String newQR = VCardUtil.getVcardQR(input);
+                contactService.updateContactVcard(dto.getNickname().trim(), dto.getNote(), dto.getColorType(),
+                        dto.getAddress(), dto.getCompany(), dto.getEmail(), dto.getPhoneNo(), dto.getWebsite(), newQR,
+                        dto.getId());
+                if (dto.getImage() != null) {
+                    if (dto.getImgId() != null && !dto.getImgId().trim().isEmpty()) {
+                        String fileName = StringUtils.cleanPath(dto.getImage().getOriginalFilename());
+                        // System.out.println(fileName);
+                        imageService.updateImage(dto.getImage().getBytes(), fileName, dto.getImgId());
+                    } else {
+                        UUID uuidImage = UUID.randomUUID();
+                        String fileName = StringUtils.cleanPath(dto.getImage().getOriginalFilename());
+                        ImageEntity imageEntity = new ImageEntity(uuidImage.toString(), fileName,
+                                dto.getImage().getBytes());
+                        imageService.insertImage(imageEntity);
+                        // update contact image
+                        contactService.updateImgIdById(uuidImage.toString(), dto.getId());
+                    }
+                }
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            } else {
+                logger.error("updateContactVcardMultipart: INVALID REQUEST BODY");
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            logger.error("updateContact: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
 }

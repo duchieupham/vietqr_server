@@ -74,6 +74,25 @@ public interface ContactRepository extends JpaRepository<ContactEntity, Long> {
                         @Param(value = "additionalData") String additionalData,
                         @Param(value = "id") String id);
 
+        // update contact color type = 4
+        @Transactional
+        @Modifying
+        @Query(value = "UPDATE contact SET nickname = :nickname, additional_data = :note, color_type = :colorType, "
+                        + "address = :address, company = :company, email = :email, "
+                        + "phone_no = :phoneNo, website = :website, value = :value "
+                        + "WHERE id = :id", nativeQuery = true)
+        void updateContactVcard(
+                        @Param(value = "nickname") String nickname,
+                        @Param(value = "note") String note,
+                        @Param(value = "colorType") int colorType,
+                        @Param(value = "address") String address,
+                        @Param(value = "company") String conpany,
+                        @Param(value = "email") String email,
+                        @Param(value = "phoneNo") String phoneNo,
+                        @Param(value = "website") String website,
+                        @Param(value = "value") String value,
+                        @Param(value = "id") String id);
+
         @Transactional
         @Modifying
         @Query(value = "UPDATE contact SET nickname = :nickname, additional_data = :additionalData, color_type = :colorType "

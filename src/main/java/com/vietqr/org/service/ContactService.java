@@ -11,6 +11,8 @@ public interface ContactService {
 
     public int insertContact(ContactEntity entity);
 
+    public int insertAllContact(List<ContactEntity> entities);
+
     public List<ContactEntity> getContactApprovedByUserId(String userId);
 
     public List<ContactEntity> getContactPendingByUserId(String userId);
@@ -40,4 +42,10 @@ public interface ContactService {
     public void updateContactRelation(int relation, String id);
 
     public List<ContactEntity> getContactPublicByUserIdWithPagging(int offset);
+
+    public void updateContactVcard(
+            String nickname, String note, int colorType, String address,
+            String company, String email, String phoneNo, String website,
+            String value, String id);
+
 }

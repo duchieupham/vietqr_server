@@ -77,8 +77,8 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// System.out.println("en: " + encryptAESPassword);
 		// System.out.println("de: " + decryptAESPassword);
 		//
-		// String bankAccountEncrypted = BankEncryptUtil.encrypt("0913120170");
-		// System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
+		String bankAccountEncrypted = BankEncryptUtil.encrypt("0336121993");
+		System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
 
 		// LogReaderUtil.readLogFile("2023-09-13");
 

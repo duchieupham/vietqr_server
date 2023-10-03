@@ -95,4 +95,15 @@ public class ContactServiceImpl implements ContactService {
         return repo.getContactPublicByUserIdWithPagging(offset);
     }
 
+    @Override
+    public int insertAllContact(List<ContactEntity> entities) {
+        return repo.saveAll(entities) == null ? 0 : 1;
+    }
+
+    @Override
+    public void updateContactVcard(String nickname, String note, int colorType, String address, String company,
+            String email, String phoneNo, String website, String value, String id) {
+        repo.updateContactVcard(nickname, note, colorType, address, company, email, phoneNo, website, value, id);
+    }
+
 }

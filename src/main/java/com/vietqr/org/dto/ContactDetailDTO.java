@@ -21,6 +21,12 @@ public class ContactDetailDTO implements Serializable {
     private String bankAccount;
     private int colorType;
     private Integer relation;
+    // for vcard
+    private String email;
+    private String address;
+    private String company;
+    private String website;
+    private String phoneNo;
 
     public ContactDetailDTO() {
         super();
@@ -40,6 +46,68 @@ public class ContactDetailDTO implements Serializable {
         this.bankAccount = bankAccount;
         this.colorType = colorType;
         this.relation = relation;
+    }
+
+    public ContactDetailDTO(String id, String nickname, String value, String additionalData, int type, int status,
+            String bankShortName, String bankName, String imgId, String bankAccount, int colorType, Integer relation,
+            String email, String address, String company, String website, String phoneNo) {
+        this.id = id;
+        this.nickname = nickname;
+        this.value = value;
+        this.additionalData = additionalData;
+        this.type = type;
+        this.status = status;
+        this.bankShortName = bankShortName;
+        this.bankName = bankName;
+        this.imgId = imgId;
+        this.bankAccount = bankAccount;
+        this.colorType = colorType;
+        this.relation = relation;
+        this.email = email;
+        this.address = address;
+        this.company = company;
+        this.website = website;
+        this.phoneNo = phoneNo;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getCompany() {
+        return company;
+    }
+
+    public void setCompany(String company) {
+        this.company = company;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
+    }
+
+    public String getPhoneNo() {
+        return phoneNo;
+    }
+
+    public void setPhoneNo(String phoneNo) {
+        this.phoneNo = phoneNo;
     }
 
     public String getId() {
