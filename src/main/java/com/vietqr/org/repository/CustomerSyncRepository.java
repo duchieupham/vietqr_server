@@ -32,6 +32,8 @@ public interface CustomerSyncRepository extends JpaRepository<CustomerSyncEntity
         @Query(value = "SELECT user_id FROM customer_sync WHERE user_id = :userId", nativeQuery = true)
         String checkExistedCustomerSync(@Param(value = "userId") String userId);
 
+        // @Query(value = "SELECT id FROM customer_sync WHERE ")
+
         // @Query(value = "SELECT id FROM customer_sync WHERE username = :username AND
         // active = true", nativeQuery = true)
         // List<String> checkExistedCustomerSyncByUsername(@Param(value = "username")

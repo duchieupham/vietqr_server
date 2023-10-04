@@ -106,4 +106,24 @@ public class ContactServiceImpl implements ContactService {
         repo.updateContactVcard(nickname, note, colorType, address, company, email, phoneNo, website, value, id);
     }
 
+    @Override
+    public List<ContactEntity> searchContactByNickname(String userId, String nickname) {
+        return repo.searchContactByNickname(userId, nickname);
+    }
+
+    @Override
+    public List<ContactEntity> searchContactByNicknameGlobal(String nickname) {
+        return repo.searchContactByNicknameGlobal(nickname);
+    }
+
+    @Override
+    public List<ContactEntity> searchContactByNicknameAndType(String userId, int type, String nickname) {
+        return repo.searchContactByNicknameAndType(userId, type, nickname);
+    }
+
+    @Override
+    public List<String> checkExistedVcard(String userId, String phoneNo) {
+        return repo.checkExistedVcard(userId, phoneNo);
+    }
+
 }

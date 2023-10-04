@@ -33,10 +33,38 @@ public interface ContactRepository extends JpaRepository<ContactEntity, Long> {
         List<ContactEntity> getContactPublicByUserIdWithPagging(
                         @Param(value = "offset") int offset);
 
+        ///
+        // search contact
+        @Query(value = "SELECT * FROM contact "
+                        + "WHERE user_id = :userId AND status = 0 "
+                        + "AND nickname LIKE %:nickname% "
+                        + "ORDER BY nickname ASC ", nativeQuery = true)
+        List<ContactEntity> searchContactByNickname(
+                        @Param(value = "userId") String userId,
+                        @Param(value = "nickname") String nickname);
+
+        @Query(value = "SELECT * FROM contact "
+                        + "WHERE relation = 1 AND status = 0 "
+                        + "AND nickname LIKE %:nickname% "
+                        + "ORDER BY nickname ASC ", nativeQuery = true)
+        List<ContactEntity> searchContactByNicknameGlobal(
+                        @Param(value = "nickname") String nickname);
+
+        @Query(value = "SELECT * FROM contact "
+                        + "WHERE user_id = :userId AND status = 0 "
+                        + "AND type = :type "
+                        + "AND nickname LIKE %:nickname% "
+                        + "ORDER BY nickname ASC ", nativeQuery = true)
+        List<ContactEntity> searchContactByNicknameAndType(
+                        @Param(value = "userId") String userId,
+                        @Param(value = "type") int type,
+                        @Param(value = "nickname") String nickname);
+        ///
+
         // contact approved by status with pagging
         @Query(value = "SELECT * FROM contact "
                         + "WHERE user_id = :userId AND status = 0 "
-                        + "AND TYPE = :type "
+                        + "AND type = :type "
                         + "ORDER BY nickname ASC "
                         + "LIMIT :offset, 20", nativeQuery = true)
         List<ContactEntity> getContactApprovedByUserIdAndStatusWithPagging(@Param(value = "userId") String userId,
@@ -131,4 +159,11 @@ public interface ContactRepository extends JpaRepository<ContactEntity, Long> {
         @Modifying
         @Query(value = "UPDATE contact SET relation = :relation WHERE id = :id ", nativeQuery = true)
         void updateContactRelation(@Param(value = "relation") int relation, @Param(value = "id") String id);
+
+        @Query(value = "SELECT id FROM contact "
+                        + "WHERE user_id = :userId AND phone_no = :phoneNo "
+                        + "AND type = 4", nativeQuery = true)
+        List<String> checkExistedVcard(
+                        @Param(value = "userId") String userId,
+                        @Param(value = "phoneNo") String phoneNo);
 }

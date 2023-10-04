@@ -31,6 +31,7 @@ import com.vietqr.org.dto.ContactListDTO;
 import com.vietqr.org.dto.ContactRechargeDTO;
 import com.vietqr.org.dto.ContactRelationUpdateDTO;
 import com.vietqr.org.dto.ContactScanResultDTO;
+import com.vietqr.org.dto.ContactSearchDTO;
 import com.vietqr.org.dto.ContactStatusUpdateDTO;
 import com.vietqr.org.dto.ContactUpdateDTO;
 import com.vietqr.org.dto.ContactUpdateMultipartDTO;
@@ -585,6 +586,81 @@ public class ContactController {
     }
 
     // get list contact approved with filter
+    @PostMapping("contacts/search")
+    public ResponseEntity<List<ContactListDTO>> searchContactListApprovedFilters(
+            @RequestBody ContactSearchDTO dto) {
+        List<ContactListDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null) {
+                if (dto.getUserId() != null && !dto.getUserId().trim().isEmpty()) {
+                    List<ContactEntity> contactList = new ArrayList<>();
+                    if (dto.getType() == 9) {
+                        contactList = contactService.searchContactByNickname(dto.getUserId(), dto.getNickname());
+                    } else if (dto.getType() == 8) {
+                        contactList = contactService.searchContactByNicknameGlobal(dto.getNickname());
+                    } else {
+                        contactList = contactService.searchContactByNicknameAndType(dto.getUserId(), dto.getType(),
+                                dto.getNickname());
+                    }
+                    if (contactList != null && !contactList.isEmpty()) {
+                        for (ContactEntity entity : contactList) {
+                            ContactListDTO contactListDTO = new ContactListDTO();
+                            contactListDTO.setId(entity.getId());
+                            contactListDTO.setNickname(entity.getNickname());
+                            contactListDTO.setStatus(entity.getStatus());
+                            contactListDTO.setType(entity.getType());
+                            contactListDTO.setColorType(entity.getColorType());
+                            contactListDTO.setRelation(entity.getRelation());
+                            if (entity.getType() == 1) {
+                                contactListDTO.setDescription("VietQR ID");
+                                String imgId = contactService.getImgIdByWalletId(entity.getValue());
+                                if (imgId != null) {
+                                    contactListDTO.setImgId(imgId);
+                                } else {
+                                    contactListDTO.setImgId("");
+                                }
+                            } else if (entity.getType() == 2) {
+                                // find bankName by bankTypeId
+                                String description = "";
+                                String imgId = "";
+                                if (entity.getBankTypeId() != null && !entity.getBankTypeId().isEmpty()
+                                        && entity.getBankAccount() != null && !entity.getBankAccount().isEmpty()) {
+                                    BankTypeEntity bankTypeEntity = bankTypeService
+                                            .getBankTypeById(entity.getBankTypeId());
+                                    if (bankTypeEntity != null) {
+                                        description = bankTypeEntity.getBankShortName() + " - "
+                                                + entity.getBankAccount();
+                                        imgId = bankTypeEntity.getImgId();
+                                    }
+                                }
+                                contactListDTO.setDescription(description.trim());
+                                contactListDTO.setImgId(imgId);
+                            } else if (entity.getType() == 4) {
+                                contactListDTO.setDescription(entity.getPhoneNo().trim());
+                                contactListDTO.setImgId(entity.getImgId());
+                            } else {
+                                contactListDTO.setDescription("Khác");
+                                contactListDTO.setImgId(entity.getImgId());
+                            }
+                            result.add(contactListDTO);
+                        }
+                    }
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    logger.error("getContactListApproved: INVALID USER ID");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            }
+        } catch (Exception e) {
+            logger.error("getContactListApproved: ERROR: " + e.toString());
+            System.out.println("getContactListApproved: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // get list contact approved with filter
     @GetMapping("contact/list")
     public ResponseEntity<List<ContactListDTO>> getContactListApprovedFilters(
             @RequestParam(value = "userId") String userId,
@@ -821,7 +897,7 @@ public class ContactController {
                     // VietQR ID
                     if (entity.getType() == 1) {
                         imgId = contactService.getImgIdByWalletId(entity.getValue());
-                    } else if (entity.getType() == 3) {
+                    } else if (entity.getType() == 3 || entity.getType() == 4) {
                         imgId = entity.getImgId();
                     }
                     result.setBankShortName(bankShortName);
@@ -1012,33 +1088,37 @@ public class ContactController {
                     for (VCardInputDTO item : list.getList()) {
                         if (item.getPhoneNo() != null && !item.getPhoneNo().trim().isEmpty()
                                 && item.getFullname() != null && !item.getFullname().trim().isEmpty()) {
-                            UUID uuid = UUID.randomUUID();
-                            ContactEntity entity = new ContactEntity();
-                            int colorType = RandomCodeUtil.generateRandomColorType();
-                            //
-                            entity.setId(uuid.toString());
-                            entity.setUserId(item.getUserId());
-                            entity.setNickname(item.getFullname().trim());
-                            entity.setAdditionalData(item.getAdditionalData());
-                            entity.setType(4);
-                            entity.setStatus(0);
-                            entity.setTime(time);
-                            entity.setBankTypeId("");
-                            entity.setBankAccount("");
-                            entity.setImgId("");
-                            entity.setColorType(colorType);
-                            entity.setRelation(0);
-                            entity.setEmail(item.getEmail());
-                            entity.setAddress(item.getAddress());
-                            entity.setCompany(item.getCompanyName());
-                            entity.setWebsite(item.getWebsite());
-                            entity.setPhoneNo(item.getPhoneNo());
-                            // generate
-                            String qr = VCardUtil.getVcardQR(item);
-                            entity.setValue(qr);
+                            List<String> checkExistedRecord = contactService.checkExistedVcard(item.getUserId(),
+                                    item.getPhoneNo());
+                            if (checkExistedRecord == null || checkExistedRecord.isEmpty()) {
+                                UUID uuid = UUID.randomUUID();
+                                ContactEntity entity = new ContactEntity();
+                                int colorType = RandomCodeUtil.generateRandomColorType();
+                                //
+                                entity.setId(uuid.toString());
+                                entity.setUserId(item.getUserId());
+                                entity.setNickname(item.getFullname().trim());
+                                entity.setAdditionalData(item.getAdditionalData());
+                                entity.setType(4);
+                                entity.setStatus(0);
+                                entity.setTime(time);
+                                entity.setBankTypeId("");
+                                entity.setBankAccount("");
+                                entity.setImgId("");
+                                entity.setColorType(colorType);
+                                entity.setRelation(0);
+                                entity.setEmail(item.getEmail());
+                                entity.setAddress(item.getAddress());
+                                entity.setCompany(item.getCompanyName());
+                                entity.setWebsite(item.getWebsite());
+                                entity.setPhoneNo(item.getPhoneNo());
+                                // generate
+                                String qr = VCardUtil.getVcardQR(item);
+                                entity.setValue(qr);
 
-                            // add into list
-                            entities.add(entity);
+                                // add into list
+                                entities.add(entity);
+                            }
                         }
                     }
                     if (entities != null && !entities.isEmpty()) {

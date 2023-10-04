@@ -48,4 +48,11 @@ public interface ContactService {
             String company, String email, String phoneNo, String website,
             String value, String id);
 
+    public List<ContactEntity> searchContactByNickname(String userId, String nickname);
+
+    public List<ContactEntity> searchContactByNicknameGlobal(String nickname);
+
+    public List<ContactEntity> searchContactByNicknameAndType(String userId, int type, String nickname);
+
+    public List<String> checkExistedVcard(String userId, String phoneNo);
 }

@@ -53,7 +53,7 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/api/admin")
+@RequestMapping("/api")
 public class CustomerSyncController {
     private static final Logger logger = Logger.getLogger(CustomerSyncController.class);
 
@@ -75,7 +75,7 @@ public class CustomerSyncController {
     @Autowired
     AccountCustomerService accountCustomerService;
 
-    @GetMapping("customer-sync")
+    @GetMapping("admin/customer-sync")
     public ResponseEntity<List<CustomerSyncListDTO>> getCustomerSyncList() {
         List<CustomerSyncListDTO> result = new ArrayList<>();
         HttpStatus httpStatus = null;
@@ -89,7 +89,7 @@ public class CustomerSyncController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @PostMapping("customer-sync/information")
+    @PostMapping("admin/customer-sync/information")
     public ResponseEntity<ResponseMessageDTO> updateCustomerSync(@RequestBody CustomerSyncUpdateDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
@@ -112,7 +112,7 @@ public class CustomerSyncController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @GetMapping("customer-sync/information")
+    @GetMapping("admin/customer-sync/information")
     public ResponseEntity<Object> getCustomerSyncInfo(@RequestParam(value = "id") String id) {
         Object result = null;
         HttpStatus httpStatus = null;
@@ -156,8 +156,55 @@ public class CustomerSyncController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // @GetMapping("customer-sync/information")
+    // public ResponseEntity<Object>
+    // getCustomerSyncInfoByAccountId(@RequestParam(value = "userId") String userId)
+    // {
+    // Object result = null;
+    // HttpStatus httpStatus = null;
+    // try {
+    // // 0 => API Service
+    // // 1 => E-Commerce
+    // Integer cusSyncType = customerSyncService.checkCustomerSyncTypeById();
+    // if (cusSyncType != null && cusSyncType == 0) {
+    // CusSyncApiInfoDTO cusSyncDTO = customerSyncService.getCustomerSyncApiInfo();
+    // if (cusSyncDTO != null) {
+    // result = cusSyncDTO;
+    // httpStatus = HttpStatus.OK;
+    // } else {
+    // System.out.println("getCustomerSyncInfo: NOT FOUND CUS_SYNC");
+    // logger.error("getCustomerSyncInfo: NOT FOUND CUS_SYNC");
+    // result = new ResponseMessageDTO("FAILED", "E81");
+    // httpStatus = HttpStatus.BAD_REQUEST;
+    // }
+    // } else if (cusSyncType != null && cusSyncType == 1) {
+    // CusSyncEcInfoDTO cusSyncDTO = customerSyncService.getCustomerSyncEcInfo();
+    // if (cusSyncDTO != null) {
+    // result = cusSyncDTO;
+    // httpStatus = HttpStatus.OK;
+    // } else {
+    // System.out.println("getCustomerSyncInfo: NOT FOUND CUS_SYNC - cusSyncDTO =
+    // null");
+    // logger.error("getCustomerSyncInfo: NOT FOUND CUS_SYNC");
+    // result = new ResponseMessageDTO("FAILED", "E81");
+    // httpStatus = HttpStatus.BAD_REQUEST;
+    // }
+    // } else {
+    // System.out.println("getCustomerSyncInfo: NOT FOUND TYPE");
+    // logger.error("getCustomerSyncInfo: NOT FOUND TYPE");
+    // result = new ResponseMessageDTO("FAILED", "E80");
+    // httpStatus = HttpStatus.BAD_REQUEST;
+    // }
+    // } catch (Exception e) {
+    // logger.error("getCustomerSyncList: ERROR: " + e.toString());
+    // result = new ResponseMessageDTO("FAILED", "E05");
+    // httpStatus = HttpStatus.BAD_REQUEST;
+    // }
+    // return new ResponseEntity<>(result, httpStatus);
+    // }
+
     // test get token customer
-    @PostMapping("customer-sync/check-token")
+    @PostMapping("admin/customer-sync/check-token")
     public ResponseEntity<ResponseMessageDTO> checkTokenCustomerSync(@RequestBody CustomerSyncTokenTestDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
@@ -230,7 +277,7 @@ public class CustomerSyncController {
     }
 
     // get systemPassword for customer
-    @GetMapping("customer-sync/system-password")
+    @GetMapping("admin/customer-sync/system-password")
     public ResponseEntity<ResponseMessageDTO> getSystemPasswordForCustomer(
             @RequestParam(value = "username") String username) {
         ResponseMessageDTO result = null;
@@ -259,7 +306,7 @@ public class CustomerSyncController {
     }
 
     // update status customer sync
-    @PostMapping("customer-sync/status")
+    @PostMapping("admin/customer-sync/status")
     public ResponseEntity<ResponseMessageDTO> updateCustomerSyncStatus(@RequestBody CustomerSyncStatusDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
@@ -285,7 +332,7 @@ public class CustomerSyncController {
     }
 
     // add customer sync
-    @PostMapping("customer-sync")
+    @PostMapping("admin/customer-sync")
     public ResponseEntity<ResponseMessageDTO> insertNewCustomerSync(@RequestBody CustomerSyncInsertDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
@@ -557,7 +604,7 @@ public class CustomerSyncController {
     }
 
     // get list merchant-bankaccounts to mapping service
-    @GetMapping("customer-sync/service-mapping")
+    @GetMapping("admin/customer-sync/service-mapping")
     public ResponseEntity<List<MerchantServiceDTO>> getMerchantsToMappingService() {
         List<MerchantServiceDTO> result = new ArrayList<>();
         HttpStatus httpStatus = null;

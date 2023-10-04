@@ -54,12 +54,23 @@ public class CustomerSyncEntity implements Serializable {
     @Column(name = "address")
     private String address;
 
+    // for declare master merchant
+    @Column(name = "master")
+    private Boolean master;
+
+    @Column(name = "accountId")
+    private String accountId;
+
+    @Column(name = "refId")
+    private String refId;
+
     public CustomerSyncEntity() {
         super();
     }
 
     public CustomerSyncEntity(String id, String username, String password, String ipAddress, String port,
-            String suffixUrl, String information, boolean active, String token, String merchant, String address) {
+            String suffixUrl, String information, boolean active, String token, String merchant, String address,
+            Boolean master, String accountId, String refId) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -71,6 +82,9 @@ public class CustomerSyncEntity implements Serializable {
         this.token = token;
         this.merchant = merchant;
         this.address = address;
+        this.master = master;
+        this.accountId = accountId;
+        this.refId = refId;
     }
 
     public String getId() {
@@ -167,6 +181,30 @@ public class CustomerSyncEntity implements Serializable {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public Boolean getMaster() {
+        return master;
+    }
+
+    public void setMaster(Boolean master) {
+        this.master = master;
+    }
+
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
+    }
+
+    public String getRefId() {
+        return refId;
+    }
+
+    public void setRefId(String refId) {
+        this.refId = refId;
     }
 
 }
