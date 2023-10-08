@@ -24,4 +24,11 @@ public interface TransactionReceiveAdminListDTO {
 
     String getTransType();
 
+    //
+    Integer getType();
+
+    String getUserBankName();
+
+    String getBankShortName();
+
 }

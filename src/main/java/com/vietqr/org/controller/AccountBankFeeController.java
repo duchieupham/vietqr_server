@@ -47,7 +47,7 @@ import com.vietqr.org.service.TransactionReceiveService;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/api/admin")
+@RequestMapping("/api")
 public class AccountBankFeeController {
     private static final Logger logger = Logger.getLogger(ServiceFeeController.class);
 
@@ -75,7 +75,7 @@ public class AccountBankFeeController {
     // TWO types insert:
     // 0. add merchant - all bankID belong to merchant apply fee
     // 1. add bank - bank apply fee
-    @PostMapping("bank/service-fee")
+    @PostMapping("admin/bank/service-fee")
     public ResponseEntity<ResponseMessageDTO> insertBankFee(
             @RequestBody AccountBankFeeInsertDTO dto) {
         ResponseMessageDTO result = null;
@@ -243,7 +243,7 @@ public class AccountBankFeeController {
     }
 
     // get annual list by merchant
-    @GetMapping("merchant/service-fee/annual")
+    @GetMapping("admin/merchant/service-fee/annual")
     public ResponseEntity<List<AnnualFeeMerchantItemDTO>> getAnnualFeeList() {
         List<AnnualFeeMerchantItemDTO> result = new ArrayList<>();
         HttpStatus httpStatus = null;
@@ -312,7 +312,7 @@ public class AccountBankFeeController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @GetMapping("merchant/service-fee/transaction")
+    @GetMapping("admin/merchant/service-fee/transaction")
     public ResponseEntity<List<ServiceFeeMerchantItemDTO>> getServiceFeeList(
             @RequestParam(value = "month") String month) {
         List<ServiceFeeMerchantItemDTO> result = new ArrayList<>();
@@ -475,7 +475,7 @@ public class AccountBankFeeController {
     // update status transaction fee
 
     // update duration fee service - bank
-    @PostMapping("bank/service-fee/date")
+    @PostMapping("admin/bank/service-fee/date")
     public ResponseEntity<ResponseMessageDTO> updateApplyDate(
             @RequestBody AccountBankFeeDateUpdateDTO dto) {
         ResponseMessageDTO result = null;
@@ -509,7 +509,7 @@ public class AccountBankFeeController {
     }
 
     // get total transaction and total Payment by month
-    @GetMapping("bank/service-fee/total")
+    @GetMapping("admin/bank/service-fee/total")
     public ResponseEntity<TotalPaymentDTO> getTotalByMonth(
             @RequestParam(value = "month") String month) {
         TotalPaymentDTO result = null;
@@ -640,4 +640,170 @@ public class AccountBankFeeController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    //
+    @GetMapping("bank/service-fee/transaction")
+    public ResponseEntity<List<ServiceFeeMerchantItemDTO>> getServiceFeeListByCustomerSyncId(
+            @RequestParam(value = "customerSyncId") String customerSyncId,
+            @RequestParam(value = "month") String month) {
+        List<ServiceFeeMerchantItemDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            if (customerSyncId != null && !customerSyncId.trim().isEmpty()) {
+                List<AnnualFeeMerchantDTO> merchants = customerSyncService.getMerchantForServiceFeeById(customerSyncId);
+                if (merchants != null && !merchants.isEmpty()) {
+                    //
+                    for (AnnualFeeMerchantDTO merchant : merchants) {
+                        ServiceFeeMerchantItemDTO dto = new ServiceFeeMerchantItemDTO();
+                        List<ServiceFeeBankItemDTO> bankItems = new ArrayList<>();
+                        int status = 1;
+                        boolean allStatusOne = true;
+                        Long totalPayment = 0L;
+                        dto.setCustomerSyncId(merchant.getCustomerSyncId());
+                        dto.setMerchant(merchant.getMerchant());
+                        //
+                        if (merchant.getCustomerSyncId() != null) {
+                            List<AnnualFeeBankDTO> banks = accountCustomerBankService
+                                    .getBanksAnnualFee(merchant.getCustomerSyncId());
+                            if (banks != null && !banks.isEmpty()) {
+                                for (AnnualFeeBankDTO bank : banks) {
+                                    ServiceFeeBankItemDTO bankItem = new ServiceFeeBankItemDTO();
+                                    bankItem.setBankId(bank.getBankId());
+                                    bankItem.setBankAccount(bank.getBankAccount());
+                                    bankItem.setBankCode(bank.getBankCode());
+                                    bankItem.setBankShortName(bank.getBankShortName());
+                                    //
+                                    List<ServiceFeeMonthItemDTO> feeItems = new ArrayList<>();
+                                    List<AccountBankFeeEntity> fees = accountBankFeeService
+                                            .getAccountBankFeesByBankId(bank.getBankId());
+                                    if (fees != null && !fees.isEmpty()) {
+                                        for (AccountBankFeeEntity fee : fees) {
+                                            ServiceFeeMonthItemDTO feeItem = new ServiceFeeMonthItemDTO();
+                                            feeItem.setAccountBankFeeId(fee.getId());
+                                            feeItem.setServiceFeeId(fee.getServiceFeeId());
+                                            feeItem.setShortName(fee.getShortName());
+                                            feeItem.setVat(fee.getVat());
+                                            feeItem.setCountingTransType(fee.getCountingTransType());
+                                            feeItem.setDiscountAmount(fee.getAnnualFee());
+                                            //
+                                            Long totalTrans = 0L;
+                                            Long totalAmount = 0L;
+                                            Long totalPaymentService = 0L;
+                                            Long totalPaymentServiceAfterVat = 0L;
+                                            Long totalPaymentServiceByTransFee = 0L;
+                                            Long totalPaymentServiceByPercentAmount = 0L;
+                                            int statusFee = 0;
+                                            // getCountingTransType = 0 => count all
+                                            // getCountingTransType = 1 => count only system transaction
+                                            if (fee.getCountingTransType() != null && fee.getCountingTransType() == 0) {
+                                                TransactionFeeDTO transFee = transactionReceiveService
+                                                        .getTransactionFeeCountingTypeAll(fee.getBankId(), month);
+                                                if (transFee != null) {
+                                                    totalTrans = transFee.getTotalTrans();
+                                                    totalAmount = transFee.getTotalAmount();
+                                                    //
+                                                    totalPaymentServiceByTransFee = totalTrans * fee.getTransFee();
+                                                    totalPaymentServiceByPercentAmount = (Long) Math
+                                                            .round(fee.getPercentFee() * totalAmount / 100);
+                                                    totalPaymentService = totalPaymentServiceByTransFee
+                                                            + totalPaymentServiceByPercentAmount;
+                                                    totalPaymentServiceAfterVat = (Long) Math.round(totalPaymentService
+                                                            + (fee.getVat() * totalPaymentService / 100)
+                                                            - fee.getAnnualFee());
+                                                    if (totalPaymentServiceAfterVat < 0) {
+                                                        totalPaymentServiceAfterVat = 0L;
+                                                    }
+                                                    //
+                                                    feeItem.setTotalTrans(totalTrans);
+                                                    feeItem.setTotalAmount(totalAmount);
+                                                    feeItem.setTotalPayment(totalPaymentServiceAfterVat);
+                                                    // check status
+                                                    PaymentFeeAccBankEntity checkPaid = paymentFeeAccBankService
+                                                            .checkExistedRecord(fee.getBankId(), fee.getId(), month);
+                                                    if (checkPaid != null && checkPaid.getStatus() != null) {
+                                                        statusFee = checkPaid.getStatus();
+                                                    } else {
+                                                        statusFee = 0;
+                                                    }
+                                                    feeItem.setStatus(statusFee);
+                                                    //
+                                                    feeItems.add(feeItem);
+                                                }
+                                            } else if (fee.getCountingTransType() != null
+                                                    && fee.getCountingTransType() == 1) {
+                                                TransactionFeeDTO transFee = transactionReceiveService
+                                                        .getTransactionFeeCountingTypeSystem(fee.getBankId(), month);
+                                                if (transFee != null) {
+                                                    totalTrans = transFee.getTotalTrans();
+                                                    totalAmount = transFee.getTotalAmount();
+                                                    //
+                                                    totalPaymentServiceByTransFee = totalTrans * fee.getTransFee();
+                                                    totalPaymentServiceByPercentAmount = (Long) Math
+                                                            .round(fee.getPercentFee() * totalAmount / 100);
+                                                    totalPaymentService = totalPaymentServiceByTransFee
+                                                            + totalPaymentServiceByPercentAmount;
+                                                    totalPaymentServiceAfterVat = (Long) Math.round(totalPaymentService
+                                                            + (fee.getVat() * totalPaymentService / 100)
+                                                            - fee.getAnnualFee());
+                                                    if (totalPaymentServiceAfterVat < 0) {
+                                                        totalPaymentServiceAfterVat = 0L;
+                                                    }
+                                                    //
+                                                    feeItem.setTotalTrans(totalTrans);
+                                                    feeItem.setTotalAmount(totalAmount);
+                                                    feeItem.setTotalPayment(totalPaymentServiceAfterVat);
+                                                    // check status
+                                                    PaymentFeeAccBankEntity checkPaid = paymentFeeAccBankService
+                                                            .checkExistedRecord(fee.getBankId(), fee.getId(), month);
+                                                    if (checkPaid != null && checkPaid.getStatus() != null) {
+                                                        statusFee = checkPaid.getStatus();
+                                                    } else {
+                                                        statusFee = 0;
+                                                    }
+                                                    feeItem.setStatus(statusFee);
+                                                    //
+                                                    feeItems.add(feeItem);
+                                                }
+                                            }
+
+                                        }
+                                    }
+                                    //
+                                    if (feeItems != null && !feeItems.isEmpty()) {
+                                        for (ServiceFeeMonthItemDTO feeItem : feeItems) {
+                                            totalPayment += feeItem.getTotalPayment();
+                                            if (feeItem.getStatus() != null && feeItem.getStatus() != 1) {
+                                                allStatusOne = false;
+                                            } else if (feeItem.getStatus() == null) {
+                                                allStatusOne = false;
+                                            }
+                                        }
+                                        bankItem.setFees(feeItems);
+                                        bankItems.add(bankItem);
+                                    }
+                                }
+                            }
+                        }
+                        dto.setTotalPayment(totalPayment);
+                        if (!allStatusOne) {
+                            status = 0; // Nếu biến cờ không được đánh dấu, gán giá trị 0 cho status
+                        }
+                        dto.setStatus(status);
+                        if (bankItems != null && !bankItems.isEmpty()) {
+                            dto.setBankAccounts(bankItems);
+                            result.add(dto);
+                        }
+                    }
+                }
+                httpStatus = HttpStatus.OK;
+            } else {
+                logger.error("getServiceFeeListByCustomerSyncId: ERROR: INVALID REQUEST BODY");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+
+        } catch (Exception e) {
+            logger.error("getServiceFeeList: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 }

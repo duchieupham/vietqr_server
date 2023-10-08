@@ -23,8 +23,15 @@ public interface CustomerSyncRepository extends JpaRepository<CustomerSyncEntity
         @Query(value = "SELECT id as customerSyncId, merchant FROM customer_sync ", nativeQuery = true)
         List<AnnualFeeMerchantDTO> getMerchantForServiceFee();
 
+        @Query(value = "SELECT id as customerSyncId, merchant FROM customer_sync WHERE id = :customerSyncId ", nativeQuery = true)
+        List<AnnualFeeMerchantDTO> getMerchantForServiceFeeById(
+                        @Param(value = "customerSyncId") String customerSyncId);
+
         @Query(value = "SELECT * FROM customer_sync WHERE active = true", nativeQuery = true)
         List<CustomerSyncEntity> getCustomerSyncEntities();
+
+        @Query(value = "SELECT * FROM customer_sync WHERE active = true AND account_id = :accountId ", nativeQuery = true)
+        List<CustomerSyncEntity> getCustomerSyncByAccountId(@Param(value = "accountId") String accountId);
 
         @Query(value = "SELECT * FROM customer_sync WHERE id = :id", nativeQuery = true)
         CustomerSyncEntity getCustomerSyncById(@Param(value = "id") String id);

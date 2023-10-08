@@ -2,6 +2,7 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import com.vietqr.org.entity.TransactionReceiveEntity;
 import com.vietqr.org.dto.TransByCusSyncDTO;
@@ -98,4 +99,80 @@ public interface TransactionReceiveService {
         TransactionFeeDTO getTransactionFeeCountingTypeAll(String bankId, String month);
 
         TransactionFeeDTO getTransactionFeeCountingTypeSystem(String bankId, String month);
+
+        //
+        List<TransactionReceiveAdminListDTO> getTransByFtCodeAndMerchantId(
+                        String value,
+                        String merchantId,
+                        long offset);
+
+        List<TransactionReceiveAdminListDTO> getTransByOrderIdAndMerchantId(
+                        String value,
+                        String merchantId,
+                        long offset);
+
+        List<TransactionReceiveAdminListDTO> getTransByContentAndMerchantId(
+                        String value,
+                        String merchantId,
+                        long offset);
+
+        List<TransactionReceiveAdminListDTO> getAllTransAllDateByMerchantId(
+                        String merchantId,
+                        long offset);
+
+        List<TransactionReceiveAdminListDTO> getAllTransFromDateByMerchantId(
+                        String fromDate,
+                        String toDate,
+                        String merchantId,
+                        long offset);
+
+        List<TransactionReceiveAdminListDTO> getTransByFtCodeAndUserId(
+                        String value,
+                        String userId,
+                        long offset);
+
+        List<TransactionReceiveAdminListDTO> getTransByOrderIdAndUserId(
+                        String value,
+                        String userId,
+                        long offset);
+
+        List<TransactionReceiveAdminListDTO> getTransByContentAndUserId(
+                        String value,
+                        String userId,
+                        long offset);
+
+        List<TransactionReceiveAdminListDTO> getAllTransAllDateByUserId(
+                        String userId,
+                        long offset);
+
+        List<TransactionReceiveAdminListDTO> getAllTransFromDateByUserId(
+                        String fromDate,
+                        String toDate,
+                        String userId,
+                        long offset);
+
+        List<TransactionReceiveAdminListDTO> exportTransByBankAccountFromDate(
+                        String value,
+                        String fromDate,
+                        String toDate);
+
+        List<TransactionReceiveAdminListDTO> exportTransByFtCodeAndMerchantId(
+                        String value,
+                        String merchantId);
+
+        List<TransactionReceiveAdminListDTO> exportTransByOrderIdAndMerchantId(
+                        String value,
+                        String merchantId);
+
+        List<TransactionReceiveAdminListDTO> exportTransByContentAndMerchantId(
+                        String value,
+                        String merchantId);
+
+        List<TransactionReceiveAdminListDTO> exportAllTransAllDateByMerchantId(
+                        String merchantId);
+
+        List<TransactionReceiveAdminListDTO> exportAllTransFromDateByMerchantId(
+                        String fromDate,
+                        String toDate,
+                        String merchantId);
 }

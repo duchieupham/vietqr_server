@@ -50,4 +50,7 @@ public interface CustomerSyncService {
 
     public List<MerchantServiceItemDTO> getMerchantsMappingService();
 
+    public List<CustomerSyncEntity> getCustomerSyncByAccountId(String accountId);
+
+    public List<AnnualFeeMerchantDTO> getMerchantForServiceFeeById(String customerSyncId);
 }

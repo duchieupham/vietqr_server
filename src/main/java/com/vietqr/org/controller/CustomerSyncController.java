@@ -33,6 +33,7 @@ import com.vietqr.org.dto.CustomerSyncListDTO;
 import com.vietqr.org.dto.CustomerSyncStatusDTO;
 import com.vietqr.org.dto.CustomerSyncTokenTestDTO;
 import com.vietqr.org.dto.CustomerSyncUpdateDTO;
+import com.vietqr.org.dto.MerchantInformationCheckDTO;
 import com.vietqr.org.dto.MerchantServiceDTO;
 import com.vietqr.org.dto.MerchantServiceItemDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
@@ -635,4 +636,54 @@ public class CustomerSyncController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // get customerSyncByAccountId
+    @GetMapping("customer-sync/information")
+    public ResponseEntity<Object> getCustomerSyncInformation(
+            @RequestParam(value = "accountId") String accountId) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (accountId != null && !accountId.trim().isEmpty()) {
+                List<CustomerSyncEntity> entities = customerSyncService.getCustomerSyncByAccountId(accountId);
+                if (entities != null && !entities.isEmpty()) {
+                    List<MerchantInformationCheckDTO> list = new ArrayList<>();
+                    for (CustomerSyncEntity entity : entities) {
+                        MerchantInformationCheckDTO dto = new MerchantInformationCheckDTO();
+                        dto.setCustomerSyncId(entity.getId());
+                        dto.setMerchantName(entity.getMerchant());
+                        dto.setIp(entity.getIpAddress());
+                        dto.setPort(entity.getPort());
+                        dto.setSuffix(entity.getSuffixUrl());
+                        dto.setIsActive(entity.isActive());
+                        dto.setUrl(entity.getInformation());
+                        dto.setIsMasterMerchant(entity.getMaster());
+                        dto.setAccountId(entity.getAccountId());
+                        dto.setRefId(entity.getRefId());
+                        String platform = "";
+                        if (entity.getUserId() != null && !entity.getUserId().trim().isEmpty()) {
+                            platform = "Ecomerce";
+                        } else {
+                            platform = "API Service";
+                        }
+                        dto.setPlatform(platform);
+                        list.add(dto);
+                    }
+                    result = list;
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    httpStatus = HttpStatus.OK;
+                    result = new ResponseMessageDTO("CHECK", "C07");
+                }
+            } else {
+                logger.error("getCustomerSyncInformation: INVALID REQUEST BODY");
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("getCustomerSyncInformation: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 }

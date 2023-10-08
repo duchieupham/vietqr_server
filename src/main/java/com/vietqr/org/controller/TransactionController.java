@@ -1,7 +1,11 @@
 package com.vietqr.org.controller;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -9,11 +13,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -57,6 +64,8 @@ import com.vietqr.org.service.TransactionReceiveBranchService;
 import com.vietqr.org.service.TransactionReceiveImageService;
 import com.vietqr.org.service.TransactionReceiveLogService;
 import com.vietqr.org.service.TransactionReceiveService;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 @RestController
 @CrossOrigin
@@ -147,7 +156,7 @@ public class TransactionController {
                 result = transactionReceiveService.getTransByOrderId(value, offset);
                 httpStatus = HttpStatus.OK;
             } else if (type == 3) {
-                value = value.replace("-", " ");
+                value = value.replace("-", " ").trim();
                 result = transactionReceiveService.getTransByContent(value, offset);
                 httpStatus = HttpStatus.OK;
             } else if (type == 9) {
@@ -167,6 +176,285 @@ public class TransactionController {
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("merchant/transactions")
+    public ResponseEntity<List<TransactionReceiveAdminListDTO>> getTransactionMerchant(
+            @RequestParam(value = "merchantId") String merchantId,
+            @RequestParam(value = "type") int type,
+            @RequestParam(value = "value") String value,
+            @RequestParam(value = "from") String fromDate,
+            @RequestParam(value = "to") String toDate,
+            @RequestParam(value = "offset") int offset) {
+        List<TransactionReceiveAdminListDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            // type (search by)
+            // - 0: bankAccount
+            // - 1: reference_number (FT Code)
+            // - 2: order_id
+            // - 3: content
+            // - 9: all
+            if (type == 0) {
+                if (!fromDate.trim().isEmpty() && !fromDate.trim().equals("0") && !toDate.trim().isEmpty()
+                        && !toDate.trim().equals("0")) {
+                    result = transactionReceiveService.getTransByBankAccountFromDate(value, fromDate, toDate, offset);
+                } else {
+                    result = transactionReceiveService.getTransByBankAccountAllDate(value, offset);
+                }
+                httpStatus = HttpStatus.OK;
+            } else if (type == 1) {
+                result = transactionReceiveService.getTransByFtCodeAndMerchantId(value, merchantId, offset);
+                httpStatus = HttpStatus.OK;
+            } else if (type == 2) {
+                result = transactionReceiveService.getTransByOrderIdAndMerchantId(value, merchantId, offset);
+                httpStatus = HttpStatus.OK;
+            } else if (type == 3) {
+                value = value.replace("-", " ").trim();
+                result = transactionReceiveService.getTransByContentAndMerchantId(value, merchantId, offset);
+                httpStatus = HttpStatus.OK;
+            } else if (type == 9) {
+                if (!fromDate.trim().isEmpty() && !fromDate.trim().equals("0") && !toDate.trim().isEmpty()
+                        && !toDate.trim().equals("0")) {
+                    result = transactionReceiveService.getAllTransFromDateByMerchantId(fromDate, toDate, merchantId,
+                            offset);
+                } else {
+                    result = transactionReceiveService.getAllTransAllDateByMerchantId(merchantId, offset);
+                }
+                httpStatus = HttpStatus.OK;
+            } else {
+                logger.error("getTransactionAdmin: ERROR: INVALID TYPE");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("getTransactionAdmin: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("user/transactions")
+    public ResponseEntity<List<TransactionReceiveAdminListDTO>> getTransactionUser(
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "type") int type,
+            @RequestParam(value = "value") String value,
+            @RequestParam(value = "from") String fromDate,
+            @RequestParam(value = "to") String toDate,
+            @RequestParam(value = "offset") int offset) {
+        List<TransactionReceiveAdminListDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            // type (search by)
+            // - 0: bankAccount
+            // - 1: reference_number (FT Code)
+            // - 2: order_id
+            // - 3: content
+            // - 9: all
+            if (type == 0) {
+                if (!fromDate.trim().isEmpty() && !fromDate.trim().equals("0") && !toDate.trim().isEmpty()
+                        && !toDate.trim().equals("0")) {
+                    result = transactionReceiveService.getTransByBankAccountFromDate(value, fromDate, toDate, offset);
+                } else {
+                    result = transactionReceiveService.getTransByBankAccountAllDate(value, offset);
+                }
+                httpStatus = HttpStatus.OK;
+            } else if (type == 1) {
+                result = transactionReceiveService.getTransByFtCodeAndUserId(value, userId, offset);
+                httpStatus = HttpStatus.OK;
+            } else if (type == 2) {
+                result = transactionReceiveService.getTransByOrderIdAndUserId(value, userId, offset);
+                httpStatus = HttpStatus.OK;
+            } else if (type == 3) {
+                value = value.replace("-", " ").trim();
+                result = transactionReceiveService.getTransByContentAndUserId(value, userId, offset);
+                httpStatus = HttpStatus.OK;
+            } else if (type == 9) {
+                if (!fromDate.trim().isEmpty() && !fromDate.trim().equals("0") && !toDate.trim().isEmpty()
+                        && !toDate.trim().equals("0")) {
+                    result = transactionReceiveService.getAllTransFromDateByUserId(fromDate, toDate, userId,
+                            offset);
+                } else {
+                    result = transactionReceiveService.getAllTransAllDateByUserId(userId, offset);
+                }
+                httpStatus = HttpStatus.OK;
+            } else {
+                logger.error("getTransactionAdmin: ERROR: INVALID TYPE");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("getTransactionAdmin: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    ////// export transaction
+    @GetMapping("merchant/transactions-export")
+    public ResponseEntity<byte[]> exporTransactionMerchant(
+            @RequestParam(value = "merchantId") String merchantId,
+            @RequestParam(value = "type") int type,
+            @RequestParam(value = "value") String value,
+            @RequestParam(value = "from") String fromDate,
+            @RequestParam(value = "to") String toDate,
+            HttpServletResponse response) {
+        List<TransactionReceiveAdminListDTO> list = new ArrayList<>();
+
+        try {
+            // type (search by)
+            // - 0: bankAccount
+            // - 1: reference_number (FT Code)
+            // - 2: order_id
+            // - 3: content
+            // - 9: all
+            String sheetName = "VietQRVN-Transaction";
+            if (type == 0) {
+                if (!fromDate.trim().isEmpty() && !fromDate.trim().equals("0") && !toDate.trim().isEmpty()
+                        && !toDate.trim().equals("0")) {
+                    list = transactionReceiveService.exportTransByBankAccountFromDate(value, fromDate, toDate);
+                    sheetName = value + "-from" + fromDate + "-to" + toDate;
+                }
+
+            } else if (type == 1) {
+                list = transactionReceiveService.exportTransByFtCodeAndMerchantId(value, merchantId);
+                sheetName = "VietQRVN-Transaction-" + value;
+
+            } else if (type == 2) {
+                list = transactionReceiveService.exportTransByOrderIdAndMerchantId(value, merchantId);
+                sheetName = "VietQRVN-Transaction-" + value;
+
+            } else if (type == 3) {
+                value = value.replace("-", " ").trim();
+                list = transactionReceiveService.exportTransByContentAndMerchantId(value, merchantId);
+                sheetName = "VietQRVN-Transaction-" + value;
+
+            } else if (type == 9) {
+                if (!fromDate.trim().isEmpty() && !fromDate.trim().equals("0") && !toDate.trim().isEmpty()
+                        && !toDate.trim().equals("0")) {
+                    list = transactionReceiveService.exportAllTransFromDateByMerchantId(fromDate, toDate, merchantId);
+                    sheetName = "VietQRVN-Transaction-" + fromDate + "-" + toDate;
+                }
+
+            } else {
+                logger.error("getTransactionAdmin: ERROR: INVALID TYPE");
+
+            }
+            if (list != null && !list.isEmpty()) {
+                // Create a new workbook and sheet
+                Workbook workbook = new XSSFWorkbook();
+                Sheet sheet = workbook.createSheet(sheetName);
+                // Create a header row
+                Row headerRow = sheet.createRow(0);
+                headerRow.createCell(0).setCellValue("STT");
+                headerRow.createCell(1).setCellValue("Số TK");
+                headerRow.createCell(2).setCellValue("Mã đơn hàng");
+                headerRow.createCell(3).setCellValue("Mã mã GD");
+                headerRow.createCell(4).setCellValue("Số tiền");
+                headerRow.createCell(5).setCellValue("Trạng thái");
+                headerRow.createCell(6).setCellValue("Thời gian tạo GD");
+                headerRow.createCell(7).setCellValue("Thời gian TT");
+                headerRow.createCell(8).setCellValue("Nội dung");
+                headerRow.createCell(9).setCellValue("Loại GD");
+
+                int counter = 0;
+                int rowNum = 1;
+                for (TransactionReceiveAdminListDTO item : list) {
+                    counter++;
+                    Row row = sheet.createRow(rowNum++);
+                    row.createCell(0).setCellValue(counter + "");
+                    String bankAccount = item.getBankAccount() + "\n" + item.getBankShortName();
+                    row.createCell(1).setCellValue(bankAccount);
+                    String orderId = "-";
+                    if (item.getOrderId() != null && !item.getOrderId().trim().isEmpty()) {
+                        orderId = item.getOrderId();
+                    }
+                    row.createCell(2).setCellValue(orderId);
+                    String refNumber = "-";
+                    if (item.getReferenceNumber() != null && !item.getReferenceNumber().trim().isEmpty()) {
+                        refNumber = item.getReferenceNumber();
+                    }
+                    row.createCell(3).setCellValue(refNumber);
+                    String prefix = "";
+                    if (item.getTransType().toUpperCase().equals("C")) {
+                        prefix = "+";
+                    } else {
+                        prefix = "-";
+                    }
+                    row.createCell(4).setCellValue(prefix + formatCurrency(item.getAmount()) + " VND");
+                    String status = "-";
+                    if (item.getStatus() == 0) {
+                        status = "Chờ thanh toán";
+                    } else if (item.getStatus() == 1) {
+                        status = "Thành công";
+                    } else if (item.getStatus() == 2) {
+                        status = "Đã huỷ";
+                    }
+                    row.createCell(5).setCellValue(status);
+                    row.createCell(6).setCellValue(generateTime(item.getTimeCreated()));
+                    row.createCell(7).setCellValue(generateTime(item.getTimePaid()));
+                    row.createCell(8).setCellValue(item.getContent());
+                    String typeTrans = "-";
+                    if (item.getType() == 0) {
+                        typeTrans = "Mã VietQR";
+                    } else if (item.getType() == 2) {
+                        typeTrans = "Khác";
+                    }
+                    row.createCell(9).setCellValue(typeTrans);
+                }
+                //
+                for (int i = 0; i < 9; i++) {
+                    sheet.autoSizeColumn(i);
+                }
+                // Set the response headers
+                response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+                response.setHeader("Content-Disposition", "attachment; filename=" + sheetName + ".xlsx");
+
+                // Write the workbook data directly to the response output stream
+                workbook.write(response.getOutputStream());
+                workbook.close();
+
+            }
+        } catch (Exception e) {
+            logger.error("getTransactionAdmin: ERROR: " + e.toString());
+
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    String formatCurrency(double amount) {
+        String result = "";
+        try {
+            DecimalFormat formatter = new DecimalFormat("#,###");
+            result = formatter.format(amount);
+        } catch (Exception e) {
+            logger.error("ERROR AT generateTime: " + e.toString());
+        }
+        return result;
+    }
+
+    String generateTime(long input) {
+        String result = "";
+        try {
+            // Chuyển đổi thời gian từ kiểu long thành đối tượng Instant
+            Instant instant = Instant.ofEpochSecond(input);
+
+            // Chuyển đổi thời gian từ Instant sang múi giờ UTC+7
+            ZoneId zoneId = ZoneId.of("UTC+7");
+            ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, zoneId);
+
+            // Định dạng chuỗi ngày tháng
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy\nHH:mm:ss");
+
+            // Lấy thời gian trong múi giờ UTC+7 dưới dạng chuỗi
+            String formattedDateTime = zonedDateTime.format(formatter);
+
+            result = formattedDateTime;
+            if (result.trim().contains("01/01/1970")) {
+                result = "-";
+            }
+        } catch (Exception e) {
+            logger.error("ERROR AT generateTime: " + e.toString());
+        }
+        return result;
     }
 
     // get trans receive admin detail

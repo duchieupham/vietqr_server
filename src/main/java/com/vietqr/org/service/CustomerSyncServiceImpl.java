@@ -95,6 +95,16 @@ public class CustomerSyncServiceImpl implements CustomerSyncService {
         return repo.getMerchantsMappingService();
     }
 
+    @Override
+    public List<CustomerSyncEntity> getCustomerSyncByAccountId(String accountId) {
+        return repo.getCustomerSyncByAccountId(accountId);
+    }
+
+    @Override
+    public List<AnnualFeeMerchantDTO> getMerchantForServiceFeeById(String customerSyncId) {
+        return repo.getMerchantForServiceFeeById(customerSyncId);
+    }
+
     // @Override
     // public List<String> checkExistedCustomerSyncByUsername(String username) {
     // return repo.checkExistedCustomerSyncByUsername(username);

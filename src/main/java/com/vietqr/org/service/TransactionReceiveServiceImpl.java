@@ -194,4 +194,92 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
         return repo.getTransactionFeeCountingTypeSystem(bankId, month);
     }
 
+    //
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByFtCodeAndMerchantId(String value, String merchantId,
+            long offset) {
+        return repo.getTransByFtCodeAndMerchantId(value, merchantId, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByOrderIdAndMerchantId(String value, String merchantId,
+            long offset) {
+        return repo.getTransByOrderIdAndMerchantId(value, merchantId, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByContentAndMerchantId(String value, String merchantId,
+            long offset) {
+        return repo.getTransByContentAndMerchantId(value, merchantId, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getAllTransAllDateByMerchantId(String merchantId, long offset) {
+        return repo.getAllTransAllDateByMerchantId(merchantId, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getAllTransFromDateByMerchantId(String fromDate, String toDate,
+            String merchantId, long offset) {
+        return repo.getAllTransFromDateByMerchantId(fromDate, toDate, merchantId, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByFtCodeAndUserId(String value, String userId, long offset) {
+        return repo.getTransByFtCodeAndUserId(value, userId, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByOrderIdAndUserId(String value, String userId, long offset) {
+        return repo.getTransByOrderIdAndUserId(value, userId, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByContentAndUserId(String value, String userId, long offset) {
+        return repo.getTransByContentAndUserId(value, userId, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getAllTransAllDateByUserId(String userId, long offset) {
+        return repo.getAllTransAllDateByUserId(userId, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getAllTransFromDateByUserId(String fromDate, String toDate,
+            String userId, long offset) {
+        return repo.getAllTransFromDateByUserId(fromDate, toDate, userId, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> exportTransByBankAccountFromDate(String value, String fromDate,
+            String toDate) {
+        return repo.exportTransByBankAccountFromDate(value, fromDate, toDate);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> exportTransByFtCodeAndMerchantId(String value, String merchantId) {
+        return repo.exportTransByFtCodeAndMerchantId(value, merchantId);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> exportTransByOrderIdAndMerchantId(String value, String merchantId) {
+        return repo.exportTransByOrderIdAndMerchantId(value, merchantId);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> exportTransByContentAndMerchantId(String value, String merchantId) {
+        return repo.exportTransByContentAndMerchantId(value, merchantId);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> exportAllTransAllDateByMerchantId(String merchantId) {
+        return repo.exportAllTransAllDateByMerchantId(merchantId);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> exportAllTransFromDateByMerchantId(String fromDate, String toDate,
+            String merchantId) {
+        return repo.exportAllTransFromDateByMerchantId(fromDate, toDate, merchantId);
+    }
+
 }

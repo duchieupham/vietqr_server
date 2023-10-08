@@ -172,22 +172,32 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
         //
         //
         /// ADMIN
-        @Query(value = "SELECT id, bank_account as bankAccount, amount, bank_id as bankId, content, order_id as orderId, reference_number as referenceNumber, "
-                        + "status, time as timeCreated, time_paid as timePaid, trans_type as transType "
-                        + "FROM transaction_receive "
-                        + "WHERE bank_account = :value "
-                        + "ORDER BY time DESC "
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "WHERE a.bank_account = :value "
+                        + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByBankAccountAllDate(
                         @Param(value = "value") String value,
                         @Param(value = "offset") long offset);
 
-        @Query(value = "SELECT id, bank_account AS bankAccount, amount, bank_id AS bankId, content, order_id AS orderId, reference_number AS referenceNumber, "
-                        + "status, time AS timeCreated, time_paid AS timePaid, trans_type AS transType  "
-                        + "FROM transaction_receive  "
-                        + "WHERE bank_account = :value "
-                        + "AND CONVERT_TZ(FROM_UNIXTIME(time), '+00:00', '+07:00') BETWEEN :fromDate AND :toDate "
-                        + "ORDER BY time DESC "
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "WHERE a.bank_account = :value "
+                        + "AND CONVERT_TZ(FROM_UNIXTIME(a.time), '+00:00', '+07:00') BETWEEN :fromDate AND :toDate "
+                        + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByBankAccountFromDate(
                         @Param(value = "value") String value,
@@ -195,54 +205,363 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         @Param(value = "toDate") String toDate,
                         @Param(value = "offset") long offset);
 
-        @Query(value = "SELECT id, bank_account as bankAccount, amount, bank_id as bankId, content, order_id as orderId, reference_number as referenceNumber, "
-                        + "status, time as timeCreated, time_paid as timePaid, trans_type as transType  "
-                        + "FROM transaction_receive  "
-                        + "ORDER BY time DESC "
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getAllTransAllDate(
                         @Param(value = "offset") long offset);
 
-        @Query(value = "SELECT id, bank_account AS bankAccount, amount, bank_id AS bankId, content, order_id AS orderId, reference_number AS referenceNumber, "
-                        + "status, time AS timeCreated, time_paid AS timePaid, trans_type AS transType "
-                        + "FROM transaction_receive "
-                        + "WHERE CONVERT_TZ(FROM_UNIXTIME(time), '+00:00', '+07:00') BETWEEN :fromDate AND :toDate "
-                        + "ORDER BY time DESC "
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "WHERE CONVERT_TZ(FROM_UNIXTIME(a.time), '+00:00', '+07:00') BETWEEN :fromDate AND :toDate "
+                        + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getAllTransFromDate(
                         @Param(value = "fromDate") String fromDate,
                         @Param(value = "toDate") String toDate,
                         @Param(value = "offset") long offset);
 
-        @Query(value = "SELECT id, bank_account as bankAccount, amount, bank_id as bankId, content, order_id as orderId, reference_number as referenceNumber, "
-                        + "status, time as timeCreated, time_paid as timePaid, trans_type as transType  "
-                        + "FROM transaction_receive  "
-                        + "WHERE reference_number LIKE %:value% "
-                        + "ORDER BY time DESC "
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "WHERE a.reference_number LIKE %:value% "
+                        + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByFtCode(
                         @Param(value = "value") String value,
                         @Param(value = "offset") long offset);
 
-        @Query(value = "SELECT id, bank_account as bankAccount, amount, bank_id as bankId, content, order_id as orderId, reference_number as referenceNumber, "
-                        + "status, time as timeCreated, time_paid as timePaid, trans_type as transType  "
-                        + "FROM transaction_receive  "
-                        + "WHERE order_id LIKE %:value% "
-                        + "ORDER BY time DESC "
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "WHERE a.order_id LIKE %:value% "
+                        + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByOrderId(
                         @Param(value = "value") String value,
                         @Param(value = "offset") long offset);
 
-        @Query(value = "SELECT id, bank_account as bankAccount, amount, bank_id as bankId, content, order_id as orderId, reference_number as referenceNumber, "
-                        + "status, time as timeCreated, time_paid as timePaid, trans_type as transType  "
-                        + "FROM transaction_receive  "
-                        + "WHERE content LIKE %:value% "
-                        + "ORDER BY time DESC "
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "WHERE a.content LIKE %:value% "
+                        + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByContent(
                         @Param(value = "value") String value,
                         @Param(value = "offset") long offset);
+
+        //////// MERCHANT WEB VIETQR
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "INNER JOIN account_customer_bank d "
+                        + "ON b.id = d.bank_id  "
+                        + "WHERE a.reference_number LIKE %:value% "
+                        + "AND d.customer_sync_id = :merchantId "
+                        + "ORDER BY a.time DESC "
+                        + "LIMIT :offset, 20 ", nativeQuery = true)
+        List<TransactionReceiveAdminListDTO> getTransByFtCodeAndMerchantId(
+                        @Param(value = "value") String value,
+                        @Param(value = "merchantId") String merchantId,
+                        @Param(value = "offset") long offset);
+
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "INNER JOIN account_customer_bank d "
+                        + "ON b.id = d.bank_id  "
+                        + "WHERE a.order_id LIKE %:value% "
+                        + "AND d.customer_sync_id = :merchantId "
+                        + "ORDER BY a.time DESC "
+                        + "LIMIT :offset, 20 ", nativeQuery = true)
+        List<TransactionReceiveAdminListDTO> getTransByOrderIdAndMerchantId(
+                        @Param(value = "value") String value,
+                        @Param(value = "merchantId") String merchantId,
+                        @Param(value = "offset") long offset);
+
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "INNER JOIN account_customer_bank d "
+                        + "ON b.id = d.bank_id  "
+                        + "WHERE a.content LIKE %:value% "
+                        + "AND d.customer_sync_id = :merchantId "
+                        + "ORDER BY a.time DESC "
+                        + "LIMIT :offset, 20 ", nativeQuery = true)
+        List<TransactionReceiveAdminListDTO> getTransByContentAndMerchantId(
+                        @Param(value = "value") String value,
+                        @Param(value = "merchantId") String merchantId,
+                        @Param(value = "offset") long offset);
+
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "INNER JOIN account_customer_bank d "
+                        + "ON b.id = d.bank_id  "
+                        + "AND d.customer_sync_id = :merchantId "
+                        + "ORDER BY a.time DESC "
+                        + "LIMIT :offset, 20 ", nativeQuery = true)
+        List<TransactionReceiveAdminListDTO> getAllTransAllDateByMerchantId(
+                        @Param(value = "merchantId") String merchantId,
+                        @Param(value = "offset") long offset);
+
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "ON b.bank_type_id = c.id "
+                        + "INNER JOIN account_customer_bank d "
+                        + "WHERE CONVERT_TZ(FROM_UNIXTIME(a.time), '+00:00', '+07:00') BETWEEN :fromDate AND :toDate "
+                        + "AND d.customer_sync_id = :merchantId "
+                        + "ORDER BY a.time DESC "
+                        + "LIMIT :offset, 20 ", nativeQuery = true)
+        List<TransactionReceiveAdminListDTO> getAllTransFromDateByMerchantId(
+                        @Param(value = "fromDate") String fromDate,
+                        @Param(value = "toDate") String toDate,
+                        @Param(value = "merchantId") String merchantId,
+                        @Param(value = "offset") long offset);
+        ///////////
+
+        //////// BANK ACCOUNT WEB VIETQR
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "WHERE a.reference_number LIKE %:value% "
+                        + "AND b.user_id = :userId "
+                        + "ORDER BY a.time DESC "
+                        + "LIMIT :offset, 20 ", nativeQuery = true)
+        List<TransactionReceiveAdminListDTO> getTransByFtCodeAndUserId(
+                        @Param(value = "value") String value,
+                        @Param(value = "userId") String userId,
+                        @Param(value = "offset") long offset);
+
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "WHERE a.order_id LIKE %:value% "
+                        + "AND b.user_id = :userId "
+                        + "ORDER BY a.time DESC "
+                        + "LIMIT :offset, 20 ", nativeQuery = true)
+        List<TransactionReceiveAdminListDTO> getTransByOrderIdAndUserId(
+                        @Param(value = "value") String value,
+                        @Param(value = "userId") String userId,
+                        @Param(value = "offset") long offset);
+
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "WHERE a.content LIKE %:value% "
+                        + "AND b.user_id = :userId "
+                        + "ORDER BY a.time DESC "
+                        + "LIMIT :offset, 20 ", nativeQuery = true)
+        List<TransactionReceiveAdminListDTO> getTransByContentAndUserId(
+                        @Param(value = "value") String value,
+                        @Param(value = "userId") String userId,
+                        @Param(value = "offset") long offset);
+
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "WHERE b.user_id = :userId "
+                        + "ORDER BY a.time DESC "
+                        + "LIMIT :offset, 20 ", nativeQuery = true)
+        List<TransactionReceiveAdminListDTO> getAllTransAllDateByUserId(
+                        @Param(value = "userId") String userId,
+                        @Param(value = "offset") long offset);
+
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "WHERE CONVERT_TZ(FROM_UNIXTIME(a.time), '+00:00', '+07:00') BETWEEN :fromDate AND :toDate "
+                        + "AND b.user_id = :userId "
+                        + "ORDER BY a.time DESC "
+                        + "LIMIT :offset, 20 ", nativeQuery = true)
+        List<TransactionReceiveAdminListDTO> getAllTransFromDateByUserId(
+                        @Param(value = "fromDate") String fromDate,
+                        @Param(value = "toDate") String toDate,
+                        @Param(value = "userId") String userId,
+                        @Param(value = "offset") long offset);
+        ///////////
+
+        /////// FOR EXPORT MERCHANT
+
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "WHERE a.bank_account = :value "
+                        + "AND CONVERT_TZ(FROM_UNIXTIME(a.time), '+00:00', '+07:00') BETWEEN :fromDate AND :toDate "
+                        + "ORDER BY a.time DESC ", nativeQuery = true)
+        List<TransactionReceiveAdminListDTO> exportTransByBankAccountFromDate(
+                        @Param(value = "value") String value,
+                        @Param(value = "fromDate") String fromDate,
+                        @Param(value = "toDate") String toDate);
+
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "INNER JOIN account_customer_bank d "
+                        + "ON b.id = d.bank_id  "
+                        + "WHERE a.reference_number LIKE %:value% "
+                        + "AND d.customer_sync_id = :merchantId "
+                        + "ORDER BY a.time DESC ", nativeQuery = true)
+        List<TransactionReceiveAdminListDTO> exportTransByFtCodeAndMerchantId(
+                        @Param(value = "value") String value,
+                        @Param(value = "merchantId") String merchantId);
+
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "INNER JOIN account_customer_bank d "
+                        + "ON b.id = d.bank_id  "
+                        + "WHERE a.order_id LIKE %:value% "
+                        + "AND d.customer_sync_id = :merchantId "
+                        + "ORDER BY a.time DESC ", nativeQuery = true)
+        List<TransactionReceiveAdminListDTO> exportTransByOrderIdAndMerchantId(
+                        @Param(value = "value") String value,
+                        @Param(value = "merchantId") String merchantId);
+
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "INNER JOIN account_customer_bank d "
+                        + "ON b.id = d.bank_id  "
+                        + "WHERE a.content LIKE %:value% "
+                        + "AND d.customer_sync_id = :merchantId "
+                        + "ORDER BY a.time DESC ", nativeQuery = true)
+        List<TransactionReceiveAdminListDTO> exportTransByContentAndMerchantId(
+                        @Param(value = "value") String value,
+                        @Param(value = "merchantId") String merchantId);
+
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "INNER JOIN account_customer_bank d "
+                        + "ON b.id = d.bank_id  "
+                        + "AND d.customer_sync_id = :merchantId "
+                        + "ORDER BY a.time DESC ", nativeQuery = true)
+        List<TransactionReceiveAdminListDTO> exportAllTransAllDateByMerchantId(
+                        @Param(value = "merchantId") String merchantId);
+
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
+                        + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                        + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "ON b.bank_type_id = c.id "
+                        + "INNER JOIN account_customer_bank d "
+                        + "WHERE CONVERT_TZ(FROM_UNIXTIME(a.time), '+00:00', '+07:00') BETWEEN :fromDate AND :toDate "
+                        + "AND d.customer_sync_id = :merchantId "
+                        + "ORDER BY a.time DESC ", nativeQuery = true)
+        List<TransactionReceiveAdminListDTO> exportAllTransFromDateByMerchantId(
+                        @Param(value = "fromDate") String fromDate,
+                        @Param(value = "toDate") String toDate,
+                        @Param(value = "merchantId") String merchantId);
 
         //
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
