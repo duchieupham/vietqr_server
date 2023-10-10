@@ -9,7 +9,7 @@ public class AccountLoginMethodDTO implements Serializable {
      */
     private static final long serialVersionUID = 1L;
 
-    // Method: CARD, USER_ID
+    // Method: CARD, NFC_CARD, USER_ID
     private String method;
     private String cardNumber;
     private String userId;

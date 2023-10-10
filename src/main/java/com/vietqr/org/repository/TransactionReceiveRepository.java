@@ -553,8 +553,8 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON a.bank_id = b.id "
                         + "INNER JOIN bank_type c "
                         + "ON b.bank_type_id = c.id "
-                        + "ON b.bank_type_id = c.id "
                         + "INNER JOIN account_customer_bank d "
+                        + "ON b.id = d.bank_id  "
                         + "WHERE CONVERT_TZ(FROM_UNIXTIME(a.time), '+00:00', '+07:00') BETWEEN :fromDate AND :toDate "
                         + "AND d.customer_sync_id = :merchantId "
                         + "ORDER BY a.time DESC ", nativeQuery = true)

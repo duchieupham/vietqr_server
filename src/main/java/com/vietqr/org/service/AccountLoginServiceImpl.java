@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.dto.AccountCheckDTO;
+import com.vietqr.org.dto.CardVQRInfoDTO;
 import com.vietqr.org.entity.AccountLoginEntity;
 import com.vietqr.org.repository.AccountLoginRepository;
 
@@ -13,86 +14,106 @@ import com.vietqr.org.repository.AccountLoginRepository;
 public class AccountLoginServiceImpl implements AccountLoginService {
 
 	@Autowired
-	AccountLoginRepository accountLoginRepository;
+	AccountLoginRepository repo;
 
 	@Override
 	public String login(String phoneNo, String password) {
-		return accountLoginRepository.login(phoneNo, password);
+		return repo.login(phoneNo, password);
 	}
 
 	@Override
 	public String checkOldPassword(String userId, String password) {
-		return accountLoginRepository.checkOldPassword(userId, password);
+		return repo.checkOldPassword(userId, password);
 	}
 
 	@Override
 	public void updatePassword(String password, String userId) {
-		accountLoginRepository.updatePassword(password, userId);
+		repo.updatePassword(password, userId);
 	}
 
 	@Override
 	public int insertAccountLogin(AccountLoginEntity entity) {
-		return accountLoginRepository.save(entity) == null ? 0 : 1;
+		return repo.save(entity) == null ? 0 : 1;
 	}
 
 	@Override
 	public AccountCheckDTO checkExistedPhoneNo(String phoneNo) {
-		return accountLoginRepository.checkExistedPhoneNo(phoneNo);
+		return repo.checkExistedPhoneNo(phoneNo);
 	}
 
 	@Override
 	public void updateStatus(int status, String userId) {
-		accountLoginRepository.updateStatus(status, userId);
+		repo.updateStatus(status, userId);
 	}
 
 	@Override
 	public String loginByEmail(String email, String password) {
-		return accountLoginRepository.loginByEmail(email, password);
+		return repo.loginByEmail(email, password);
 	}
 
 	@Override
 	public String getPhoneNoById(String userId) {
-		return accountLoginRepository.getPhoneNoById(userId);
+		return repo.getPhoneNoById(userId);
 	}
 
 	@Override
 	public void updateCardNumber(String cardNumber, String userId) {
-		accountLoginRepository.updateCardNumber(cardNumber, userId);
+		repo.updateCardNumber(cardNumber, userId);
 	}
 
 	@Override
 	public String checkExistedCardNumber(String cardNumber) {
-		return accountLoginRepository.checkExistedCardNumber(cardNumber);
+		return repo.checkExistedCardNumber(cardNumber);
 	}
 
 	@Override
 	public String loginByCardNumber(String cardNumber) {
-		return accountLoginRepository.loginByCardNumber(cardNumber);
+		return repo.loginByCardNumber(cardNumber);
 	}
 
 	@Override
 	public String getCardNumberByUserId(String userId) {
-		return accountLoginRepository.getCardNumberByUserId(userId);
+		return repo.getCardNumberByUserId(userId);
 	}
 
 	@Override
 	public List<String> getAllUserIds() {
-		return accountLoginRepository.getAllUserIds();
+		return repo.getAllUserIds();
 	}
 
 	@Override
 	public String getUserIdByPhoneNo(String phoneNo) {
-		return accountLoginRepository.getIdFromPhoneNo(phoneNo);
+		return repo.getIdFromPhoneNo(phoneNo);
 	}
 
 	@Override
 	public List<AccountLoginEntity> getAllAccountLogin() {
-		return accountLoginRepository.getAllAccountLogin();
+		return repo.getAllAccountLogin();
 	}
 
 	@Override
 	public String checkExistedUserByIdAndPassword(String userId, String password) {
-		return accountLoginRepository.checkExistedUserByIdAndPassword(userId, password);
+		return repo.checkExistedUserByIdAndPassword(userId, password);
+	}
+
+	@Override
+	public void updateCardNfcNumber(String cardNumber, String userId) {
+		repo.updateCardNfcNumber(cardNumber, userId);
+	}
+
+	@Override
+	public String checkExistedCardNfcNumber(String cardNumber) {
+		return repo.checkExistedCardNfcNumber(cardNumber);
+	}
+
+	@Override
+	public String loginByCardNfcNumber(String cardNumber) {
+		return repo.loginByCardNfcNumber(cardNumber);
+	}
+
+	@Override
+	public CardVQRInfoDTO getVcardInforByUserId(String userId) {
+		return repo.getVcardInforByUserId(userId);
 	}
 
 }

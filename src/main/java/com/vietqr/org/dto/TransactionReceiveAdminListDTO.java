@@ -6,7 +6,7 @@ public interface TransactionReceiveAdminListDTO {
 
     String getBankAccount();
 
-    Integer getAmount();
+    Long getAmount();
 
     String getBankId();
 

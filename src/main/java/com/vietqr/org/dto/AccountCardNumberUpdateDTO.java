@@ -11,6 +11,8 @@ public class AccountCardNumberUpdateDTO implements Serializable {
 
     private String userId;
     private String cardNumber;
+    // NULL <> CARD, NFC_CARD
+    private String cardType;
 
     public AccountCardNumberUpdateDTO() {
         super();
@@ -19,6 +21,12 @@ public class AccountCardNumberUpdateDTO implements Serializable {
     public AccountCardNumberUpdateDTO(String userId, String cardNumber) {
         this.userId = userId;
         this.cardNumber = cardNumber;
+    }
+
+    public AccountCardNumberUpdateDTO(String userId, String cardNumber, String cardType) {
+        this.userId = userId;
+        this.cardNumber = cardNumber;
+        this.cardType = cardType;
     }
 
     public String getUserId() {
@@ -35,6 +43,14 @@ public class AccountCardNumberUpdateDTO implements Serializable {
 
     public void setCardNumber(String cardNumber) {
         this.cardNumber = cardNumber;
+    }
+
+    public String getCardType() {
+        return cardType;
+    }
+
+    public void setCardType(String cardType) {
+        this.cardType = cardType;
     }
 
 }

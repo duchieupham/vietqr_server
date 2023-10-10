@@ -43,6 +43,7 @@ import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.TokenPluginDTO;
 import com.vietqr.org.dto.TokenPluginRequestDTO;
 import com.vietqr.org.dto.AccountSearchDTO;
+import com.vietqr.org.dto.CardVQRInfoDTO;
 import com.vietqr.org.entity.AccountInformationEntity;
 import com.vietqr.org.entity.AccountLoginEntity;
 import com.vietqr.org.entity.AccountSettingEntity;
@@ -509,26 +510,46 @@ public class AccountController {
 
 	@PostMapping("accounts/cardNumber")
 	public ResponseEntity<ResponseMessageDTO> updateCardNumberLogin(
-			@Valid @RequestBody AccountCardNumberUpdateDTO dto) {
+			@RequestBody AccountCardNumberUpdateDTO dto) {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
-			if (dto.getCardNumber().trim().isEmpty()) {
-				accountLoginService.updateCardNumber(dto.getCardNumber(), dto.getUserId());
-				result = new ResponseMessageDTO("SUCCESS", "");
-				httpStatus = HttpStatus.OK;
-			} else {
-				// check card number existed
-				String checkExisted = accountLoginService.checkExistedCardNumber(dto.getCardNumber());
-				if (checkExisted != null && !checkExisted.trim().isEmpty()) {
-					result = new ResponseMessageDTO("CHECK", "C05");
-					httpStatus = HttpStatus.BAD_REQUEST;
+			if (dto != null) {
+				if (dto.getCardNumber().trim().isEmpty()) {
+					if (dto.getCardType() == null || dto.getCardType().trim().toUpperCase().equals("CARD")) {
+						accountLoginService.updateCardNumber(dto.getCardNumber(), dto.getUserId());
+						result = new ResponseMessageDTO("SUCCESS", "");
+						httpStatus = HttpStatus.OK;
+					} else if (dto.getCardType() == null || dto.getCardType().trim().toUpperCase().equals("NFC_CARD")) {
+						accountLoginService.updateCardNfcNumber(dto.getCardNumber(), dto.getUserId());
+						result = new ResponseMessageDTO("SUCCESS", "");
+						httpStatus = HttpStatus.OK;
+					}
 				} else {
-					accountLoginService.updateCardNumber(dto.getCardNumber(), dto.getUserId());
-					result = new ResponseMessageDTO("SUCCESS", "");
-					httpStatus = HttpStatus.OK;
+					// check card number existed
+					String checkExisted = accountLoginService.checkExistedCardNumber(dto.getCardNumber());
+					if (checkExisted != null && !checkExisted.trim().isEmpty()) {
+						result = new ResponseMessageDTO("CHECK", "C05");
+						httpStatus = HttpStatus.BAD_REQUEST;
+					} else {
+						if (dto.getCardType() == null || dto.getCardType().trim().toUpperCase().equals("CARD")) {
+							accountLoginService.updateCardNumber(dto.getCardNumber(), dto.getUserId());
+							result = new ResponseMessageDTO("SUCCESS", "");
+							httpStatus = HttpStatus.OK;
+						} else if (dto.getCardType() == null
+								|| dto.getCardType().trim().toUpperCase().equals("NFC_CARD")) {
+							accountLoginService.updateCardNfcNumber(dto.getCardNumber(), dto.getUserId());
+							result = new ResponseMessageDTO("SUCCESS", "");
+							httpStatus = HttpStatus.OK;
+						}
+					}
 				}
+			} else {
+				logger.error("updateCardNumberLogin: INVALID REQUEST BODY");
+				result = new ResponseMessageDTO("FAILED", "E46");
+				httpStatus = HttpStatus.BAD_REQUEST;
 			}
+
 		} catch (Exception e) {
 			logger.error("updateCardNumberLogin: ERROR: " + e.toString());
 			result = new ResponseMessageDTO("FAILED", "E05");
@@ -558,20 +579,42 @@ public class AccountController {
 		return new ResponseEntity<>(result, httpStatus);
 	}
 
+	@GetMapping("accounts/cardNumber")
+	public ResponseEntity<CardVQRInfoDTO> getCardVQRInfoByUserId(@RequestParam(value = "userId") String userId) {
+		CardVQRInfoDTO result = null;
+		HttpStatus httpStatus = null;
+		try {
+			result = accountLoginService.getVcardInforByUserId(userId);
+			httpStatus = HttpStatus.OK;
+		} catch (Exception e) {
+			logger.error("getCardNumberByUserId: ERROR: " + e.toString());
+			System.out.println("getCardNumberByUserId: ERROR: " + e.toString());
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
 	// Method: CARD, USER_ID
 	@PostMapping("accounts/login")
-	public ResponseEntity<String> loginByMethod(@Valid @RequestBody AccountLoginMethodDTO dto) {
+	public ResponseEntity<String> loginByMethod(@RequestBody AccountLoginMethodDTO dto) {
 		String result = "";
 		HttpStatus httpStatus = null;
 		try {
 			String userId = "";
 			AccountInformationEntity accountInformationEntity = null;
 			// check method
+			// Method: CARD, NFC_CARD, USER_ID
 			if (dto.getMethod() != null && dto.getMethod().trim().toUpperCase().equals("CARD")) {
 				if (dto.getCardNumber() != null && !dto.getCardNumber().trim().isEmpty()) {
 					userId = accountLoginService.loginByCardNumber(dto.getCardNumber());
 				} else {
 					logger.error("LOGIN: INVALID cardNumber");
+				}
+			} else if (dto.getMethod() != null && dto.getMethod().trim().toUpperCase().equals("NFC_CARD")) {
+				if (dto.getCardNumber() != null && !dto.getCardNumber().trim().isEmpty()) {
+					userId = accountLoginService.loginByCardNfcNumber(dto.getCardNumber());
+				} else {
+					logger.error("LOGIN: INVALID CARD NFC NUMBER");
 				}
 			} else if (dto.getMethod() != null && dto.getMethod().trim().toUpperCase().equals("USER_ID")) {
 				if (dto.getUserId() != null && !dto.getUserId().trim().isEmpty()) {
@@ -647,7 +690,9 @@ public class AccountController {
 				logger.error("LOGIN: INVALID accountInformationEntity");
 				httpStatus = HttpStatus.BAD_REQUEST;
 			}
-		} catch (Exception e) {
+		} catch (
+
+		Exception e) {
 			logger.error("LOGIN: ERROR: " + e.toString());
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}

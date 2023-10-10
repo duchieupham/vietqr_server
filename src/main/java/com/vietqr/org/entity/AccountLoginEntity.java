@@ -35,6 +35,9 @@ public class AccountLoginEntity implements Serializable {
 	@Column(name = "cardNumber")
 	private String cardNumber;
 
+	@Column(name = "cardNfcNumber")
+	private String cardNfcNumber;
+
 	@Column(name = "time")
 	private long time;
 
@@ -43,7 +46,7 @@ public class AccountLoginEntity implements Serializable {
 	}
 
 	public AccountLoginEntity(String id, String phoneNo, String password, boolean status, String email,
-			String cardNumber, Long time) {
+			String cardNumber, String cardNfcNumber, Long time) {
 		super();
 		this.id = id;
 		this.phoneNo = phoneNo;
@@ -51,6 +54,7 @@ public class AccountLoginEntity implements Serializable {
 		this.status = status;
 		this.email = email;
 		this.cardNumber = cardNumber;
+		this.cardNfcNumber = cardNfcNumber;
 		this.time = time;
 	}
 
@@ -100,6 +104,14 @@ public class AccountLoginEntity implements Serializable {
 
 	public void setCardNumber(String cardNumber) {
 		this.cardNumber = cardNumber;
+	}
+
+	public String getCardNfcNumber() {
+		return cardNfcNumber;
+	}
+
+	public void setCardNfcNumber(String cardNfcNumber) {
+		this.cardNfcNumber = cardNfcNumber;
 	}
 
 	public long getTime() {

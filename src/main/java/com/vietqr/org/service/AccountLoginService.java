@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.dto.AccountCheckDTO;
+import com.vietqr.org.dto.CardVQRInfoDTO;
 import com.vietqr.org.entity.AccountLoginEntity;
 
 @Service
@@ -41,4 +42,12 @@ public interface AccountLoginService {
 	public List<AccountLoginEntity> getAllAccountLogin();
 
 	public String checkExistedUserByIdAndPassword(String userId, String password);
+
+	public void updateCardNfcNumber(String cardNumber, String userId);
+
+	public String checkExistedCardNfcNumber(String cardNumber);
+
+	public String loginByCardNfcNumber(String cardNumber);
+
+	public CardVQRInfoDTO getVcardInforByUserId(String userId);
 }

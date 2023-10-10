@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.vietqr.org.dto.AccountCheckDTO;
+import com.vietqr.org.dto.CardVQRInfoDTO;
 import com.vietqr.org.entity.AccountLoginEntity;
 
 @Repository
@@ -42,23 +43,51 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
 	@Query(value = "SELECT id FROM account_login WHERE email = :email AND password = :password AND status = 1", nativeQuery = true)
 	String loginByEmail(@Param(value = "email") String email, @Param(value = "password") String password);
 
+	////////
+	// UPDATE CARD
 	@Transactional
 	@Modifying
 	@Query(value = "UPDATE account_login SET card_number = :cardNumber WHERE id = :userId", nativeQuery = true)
 	void updateCardNumber(@Param(value = "cardNumber") String cardNumber, @Param(value = "userId") String userId);
 
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_login SET card_nfc_number = :cardNumber WHERE id = :userId", nativeQuery = true)
+	void updateCardNfcNumber(@Param(value = "cardNumber") String cardNumber, @Param(value = "userId") String userId);
+
+	//////////
+	//////////
 	@Query(value = "SELECT phone_no FROM account_login WHERE id = :userId", nativeQuery = true)
 	String getPhoneNoById(@Param(value = "userId") String userId);
 
+	///////
+	// CHECK EXISTED CARD
 	@Query(value = "SELECT card_number FROM account_login WHERE card_number = :cardNumber", nativeQuery = true)
 	String checkExistedCardNumber(@Param(value = "cardNumber") String cardNumber);
 
+	@Query(value = "SELECT card_number FROM account_login WHERE card_nfc_number = :cardNumber", nativeQuery = true)
+	String checkExistedCardNfcNumber(@Param(value = "cardNumber") String cardNumber);
+
+	////////
+	// LOGIN CARD
 	@Query(value = "SELECT id FROM account_login WHERE card_number = :cardNumber", nativeQuery = true)
 	String loginByCardNumber(@Param(value = "cardNumber") String cardNumber);
 
+	//
+	@Query(value = "SELECT id FROM account_login WHERE card_nfc_number = :cardNumber ", nativeQuery = true)
+	String loginByCardNfcNumber(@Param(value = "cardNumber") String cardNumber);
+
+	////////
+	// GET CARD INFO
 	@Query(value = "SELECT card_number FROM account_login WHERE id = :userId", nativeQuery = true)
 	String getCardNumberByUserId(@Param(value = "userId") String userId);
 
+	// CardVQRInfoDTO
+	@Query(value = "SELECT card_number as cardNumber, card_nfc_number as cardNfcNumber FROM account_login WHERE id = :userId ", nativeQuery = true)
+	CardVQRInfoDTO getVcardInforByUserId(@Param(value = "userId") String userId);
+
+	//////////
+	//////////
 	@Query(value = "SELECT id FROM account_login", nativeQuery = true)
 	List<String> getAllUserIds();
 
