@@ -9,11 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.vietqr.org.dto.AccountBankSmsDTO;
+import com.vietqr.org.dto.AccountBankSmsDetailDTO;
 import com.vietqr.org.dto.AccountBankSmsInsertDTO;
 import com.vietqr.org.dto.AccountBankSmsItemDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
@@ -32,8 +36,6 @@ public class AccountBankSmsController {
 
     @Autowired
     BankTypeService bankTypeService;
-
-    // api insert
 
     // api sync
     @PostMapping("account-bank/sms-sync")
@@ -55,6 +57,8 @@ public class AccountBankSmsController {
                         entity.setBankTypeId(bankTypeId);
                         entity.setStatus(true);
                         entity.setType(0);
+                        entity.setIsSync(false);
+                        entity.setIsLinked(false);
                         entities.add(entity);
                     }
                 }
@@ -78,6 +82,35 @@ public class AccountBankSmsController {
     }
 
     // api get list
+    @GetMapping("account-bank/sms/list")
+    public ResponseEntity<List<AccountBankSmsDTO>> getListBankAccountSmsBySmsId(
+            @RequestParam(value = "smsId") String smsId) {
+        List<AccountBankSmsDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            result = accountBankSmsService.getListBankAccountSmsBySmsId(smsId);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getListBankAccountSmsBySmsId: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 
     // api detail
+    @GetMapping("account-bank/sms/detail")
+    public ResponseEntity<AccountBankSmsDetailDTO> getAccountBankSmsDetail(
+            @RequestParam(value = "id") String id) {
+        AccountBankSmsDetailDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            result = accountBankSmsService.getAccountBankSmsDetail(id);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getAccountBankSmsDetail: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
 }

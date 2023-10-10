@@ -514,11 +514,18 @@ public class VietQRController {
 							// 3.B. If found => get bank token => create qr code
 							TokenProductBankDTO tokenBankDTO = TokenBankUtil.getBankMMSToken();
 							if (tokenBankDTO != null) {
+								String content = "";
+								if (dto.getContent() != null && !dto.getContent().trim().isEmpty()) {
+									content = dto.getContent();
+								} else {
+									String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
+									content = traceId;
+								}
 								VietQRMMSRequestDTO requestDTO = new VietQRMMSRequestDTO();
 								requestDTO.setToken(tokenBankDTO.getAccess_token());
 								requestDTO.setTerminalId(terminalBankEntity.getTerminalId());
 								requestDTO.setAmount(dto.getAmount() + "");
-								requestDTO.setContent(dto.getContent());
+								requestDTO.setContent(content);
 								requestDTO.setOrderId(dto.getOrderId());
 
 								qrCode = requestVietQRMMS(requestDTO);

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.dto.AccountBankSmsDTO;
+import com.vietqr.org.dto.AccountBankSmsDetailDTO;
 import com.vietqr.org.entity.AccountBankSmsEntity;
 import com.vietqr.org.repository.AccountBankSmsRepository;
 
@@ -33,6 +34,11 @@ public class AccountBankSmsServiceImpl implements AccountBankSmsService {
     @Override
     public AccountBankSmsDTO getBankAccountSmsById(String id) {
         return repo.getBankAccountSmsById(id);
+    }
+
+    @Override
+    public AccountBankSmsDetailDTO getAccountBankSmsDetail(String id) {
+        return repo.getAccountBankSmsDetail(id);
     }
 
 }

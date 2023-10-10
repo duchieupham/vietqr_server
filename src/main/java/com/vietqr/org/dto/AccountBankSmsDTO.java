@@ -20,4 +20,10 @@ public interface AccountBankSmsDTO {
 
     String getImgId();
 
+    Boolean getSync();
+
+    Boolean getLinked();
+
+    Boolean getStatus();
+
 }

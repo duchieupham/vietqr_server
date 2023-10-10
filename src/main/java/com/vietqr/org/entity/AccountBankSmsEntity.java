@@ -36,14 +36,20 @@ public class AccountBankSmsEntity implements Serializable {
     private String smsId;
 
     @Column(name = "status")
-    private boolean status;
+    private Boolean status;
+
+    @Column(name = "isSync")
+    private Boolean isSync;
+
+    @Column(name = "isLinked")
+    private Boolean isLinked;
 
     public AccountBankSmsEntity() {
         super();
     }
 
     public AccountBankSmsEntity(String id, String bankTypeId, String bankAccount, String bankAccountName, int type,
-            String smsId, boolean status) {
+            String smsId, Boolean status, Boolean isSync, Boolean isLinked) {
         this.id = id;
         this.bankTypeId = bankTypeId;
         this.bankAccount = bankAccount;
@@ -51,6 +57,8 @@ public class AccountBankSmsEntity implements Serializable {
         this.type = type;
         this.smsId = smsId;
         this.status = status;
+        this.isSync = isSync;
+        this.isLinked = isLinked;
     }
 
     public String getId() {
@@ -101,12 +109,32 @@ public class AccountBankSmsEntity implements Serializable {
         this.smsId = smsId;
     }
 
-    public boolean isStatus() {
+    public Boolean isStatus() {
         return status;
     }
 
-    public void setStatus(boolean status) {
+    public void setStatus(Boolean status) {
         this.status = status;
+    }
+
+    public Boolean getStatus() {
+        return status;
+    }
+
+    public Boolean getIsSync() {
+        return isSync;
+    }
+
+    public void setIsSync(Boolean isSync) {
+        this.isSync = isSync;
+    }
+
+    public Boolean getIsLinked() {
+        return isLinked;
+    }
+
+    public void setIsLinked(Boolean isLinked) {
+        this.isLinked = isLinked;
     }
 
 }
