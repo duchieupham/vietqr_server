@@ -548,7 +548,7 @@ public class VietQRController {
 										vietQRDTO.setBankAccount(bankAccount);
 										vietQRDTO.setUserBankName(userBankName);
 										vietQRDTO.setAmount(dto.getAmount() + "");
-										vietQRDTO.setContent(dto.getContent());
+										vietQRDTO.setContent(content);
 										vietQRDTO.setQrCode(qrCode);
 										vietQRDTO.setImgId(bankTypeEntity.getImgId());
 										vietQRDTO.setExisting(0);
@@ -591,13 +591,20 @@ public class VietQRController {
 				// 4. Insert transaction_receive
 				// (5. Insert notification)
 				if (accountBankEntity != null && qrCode != null && !qrCode.isEmpty()) {
+					String content = "";
+					if (dto.getContent() != null && !dto.getContent().trim().isEmpty()) {
+						content = dto.getContent();
+					} else {
+						String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
+						content = traceId;
+					}
 					LocalDateTime currentDateTime = LocalDateTime.now();
 					long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
 					VietQRMMSCreateDTO vietQRMMSCreateDTO = new VietQRMMSCreateDTO();
 					vietQRMMSCreateDTO.setBankAccount(dto.getBankAccount());
 					vietQRMMSCreateDTO.setBankCode(dto.getBankCode());
 					vietQRMMSCreateDTO.setAmount(dto.getAmount() + "");
-					vietQRMMSCreateDTO.setContent(dto.getContent());
+					vietQRMMSCreateDTO.setContent(content);
 					vietQRMMSCreateDTO.setOrderId(dto.getOrderId());
 					vietQRMMSCreateDTO.setSign(dto.getSign());
 					insertNewTransactionFlow2(accountBankEntity, vietQRMMSCreateDTO, time);
@@ -625,7 +632,14 @@ public class VietQRController {
 			data.put("additionalMobile", 0);
 			data.put("additionalEmail", 0);
 			data.put("referenceLabelCode", dto.getOrderId());
-			data.put("transactionPurpose", dto.getContent());
+			String content = "";
+			if (dto.getContent() != null && !dto.getContent().trim().isEmpty()) {
+				content = dto.getContent();
+			} else {
+				String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
+				content = traceId;
+			}
+			data.put("transactionPurpose", content);
 			UriComponents uriComponents = UriComponentsBuilder
 					.fromHttpUrl(EnvironmentUtil.getBankUrl()
 							+ "ms/offus/public/payment-service/payment/v1.0/createqr")
