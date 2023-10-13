@@ -65,7 +65,7 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
 	@Query(value = "SELECT card_number FROM account_login WHERE card_number = :cardNumber", nativeQuery = true)
 	String checkExistedCardNumber(@Param(value = "cardNumber") String cardNumber);
 
-	@Query(value = "SELECT card_number FROM account_login WHERE card_nfc_number = :cardNumber", nativeQuery = true)
+	@Query(value = "SELECT card_nfc_number FROM account_login WHERE card_nfc_number = :cardNumber", nativeQuery = true)
 	String checkExistedCardNfcNumber(@Param(value = "cardNumber") String cardNumber);
 
 	////////

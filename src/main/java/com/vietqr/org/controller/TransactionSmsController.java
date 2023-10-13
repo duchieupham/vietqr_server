@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vietqr.org.dto.ResponseMessageDTO;
+import com.vietqr.org.dto.TransactionSMSDetailDTO;
 import com.vietqr.org.dto.TransactionSmsInsertDTO;
 import com.vietqr.org.dto.TransactionSmsItemDTO;
 import com.vietqr.org.entity.TransactionSmsEntity;
@@ -142,8 +143,8 @@ public class TransactionSmsController {
 
     // get detail
     @GetMapping("transaction-sms/detail")
-    public ResponseEntity<TransactionSmsEntity> getTransactionSmsDetail(@RequestParam(value = "id") String id) {
-        TransactionSmsEntity result = null;
+    public ResponseEntity<TransactionSMSDetailDTO> getTransactionSmsDetail(@RequestParam(value = "id") String id) {
+        TransactionSMSDetailDTO result = null;
         HttpStatus httpStatus = null;
         try {
             result = transactionSmsService.getTransactionSmsDetail(id);

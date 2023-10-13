@@ -166,4 +166,13 @@ public interface ContactRepository extends JpaRepository<ContactEntity, Long> {
         List<String> checkExistedVcard(
                         @Param(value = "userId") String userId,
                         @Param(value = "phoneNo") String phoneNo);
+
+        @Query(value = "SELECT * FROM contact "
+                        + "WHERE type = 4 ", nativeQuery = true)
+        List<ContactEntity> getContactVcards();
+
+        @Transactional
+        @Modifying
+        @Query(value = "UPDATE contact SET sync_bitrix = true WHERE type = 4 ", nativeQuery = true)
+        void updateVcardSyncBitrix();
 }

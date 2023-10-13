@@ -55,4 +55,8 @@ public interface ContactService {
     public List<ContactEntity> searchContactByNicknameAndType(String userId, int type, String nickname);
 
     public List<String> checkExistedVcard(String userId, String phoneNo);
+
+    public List<ContactEntity> getContactVcards();
+
+    public void updateVcardSyncBitrix();
 }

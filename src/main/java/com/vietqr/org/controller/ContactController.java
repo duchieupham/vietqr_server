@@ -1,6 +1,11 @@
 package com.vietqr.org.controller;
 
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -11,6 +16,7 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -55,9 +61,12 @@ import com.vietqr.org.service.FcmTokenService;
 import com.vietqr.org.service.FirebaseMessagingService;
 import com.vietqr.org.service.ImageService;
 import com.vietqr.org.service.NotificationService;
+import com.vietqr.org.util.EnvironmentUtil;
 import com.vietqr.org.util.NotificationUtil;
 import com.vietqr.org.util.RandomCodeUtil;
 import com.vietqr.org.util.VCardUtil;
+
+import reactor.core.publisher.Mono;
 
 @RestController
 @CrossOrigin
@@ -1112,6 +1121,7 @@ public class ContactController {
                                 entity.setCompany(item.getCompanyName());
                                 entity.setWebsite(item.getWebsite());
                                 entity.setPhoneNo(item.getPhoneNo());
+                                entity.setSyncBitrix(false);
                                 // generate
                                 String qr = VCardUtil.getVcardQR(item);
                                 entity.setValue(qr);
@@ -1192,4 +1202,65 @@ public class ContactController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("contacts/vcard/sync-bitrix")
+    public ResponseEntity<ResponseMessageDTO> syncVcardsToBitrix() {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            List<ContactEntity> entities = contactService.getContactVcards();
+            if (entities != null && !entities.isEmpty()) {
+                for (ContactEntity entity : entities) {
+                    String originatorId = entity.getId();
+                    String name = entity.getNickname();
+                    String email = entity.getEmail();
+                    String valueType = "WORK";
+                    String phoneNo = entity.getPhoneNo();
+                    String post = "VCARD";
+                    String address = entity.getAddress();
+                    String address2 = entity.getCompany();
+                    String comment = entity.getAdditionalData();
+                    String web = entity.getWebsite();
+                    String vending = "VIETQR";
+                    String sourceDescription = "VIETQR-VCARD";
+                    // Thêm API gắn các request param ở đây
+                    // Xây dựng URL của API Bitrix với các tham số
+                    String apiUrl = "https://crm.bluecom.vn/rest/10/0ji9bblj3wuxq8bi/crm.contact.add.json" +
+                            "?FIELDS[ORIGINATOR_ID]=" + originatorId +
+                            "&FIELDS[NAME]=" + name +
+                            "&FIELDS[EMAIL][0][VALUE]=" + email +
+                            "&FIELDS[EMAIL][0][VALUE_TYPE]=" + valueType +
+                            "&FIELDS[PHONE][0][VALUE]" + phoneNo +
+                            "&FIELDS[POST]=" + post +
+                            "&FIELDS[ADDRESS]=" + address +
+                            "&FIELDS[ADDRESS_2]=" + address2 +
+                            "&FIELDS[COMMENTS]=" + comment +
+                            "&FIELDS[WEB]=" + web +
+                            "&FIELDS[VENDING]=" + vending +
+                            "&FIELDS[SOURCE_DESCRIPTION]=" + sourceDescription;
+                    UriComponents uriComponents = UriComponentsBuilder
+                            .fromHttpUrl(apiUrl)
+                            .buildAndExpand(/* add url parameter here */);
+                    WebClient webClient = WebClient.builder()
+                            .baseUrl(apiUrl)
+                            .build();
+                    Mono<ClientResponse> responseMono = webClient.get()
+                            .uri(uriComponents.toUri())
+                            .exchange();
+                    ClientResponse response = responseMono.block();
+                    if (!response.statusCode().is2xxSuccessful()) {
+                        logger.error("SYNC BITRIX FAILED ITEM: " + entity.getId() + " - " + entity.getPhoneNo());
+                    }
+                }
+                contactService.updateVcardSyncBitrix();
+            }
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            logger.error("syncVcardsToBitrix: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("syncVcardsToBitrix", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 }

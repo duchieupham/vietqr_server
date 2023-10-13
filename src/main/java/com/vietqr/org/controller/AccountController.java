@@ -515,22 +515,31 @@ public class AccountController {
 		HttpStatus httpStatus = null;
 		try {
 			if (dto != null) {
-				if (dto.getCardNumber().trim().isEmpty()) {
+				// check card number existed
+				String checkExisted = "";
+				if (dto.getCardNumber() != null && !dto.getCardNumber().isEmpty()) {
 					if (dto.getCardType() == null || dto.getCardType().trim().toUpperCase().equals("CARD")) {
-						accountLoginService.updateCardNumber(dto.getCardNumber(), dto.getUserId());
-						result = new ResponseMessageDTO("SUCCESS", "");
-						httpStatus = HttpStatus.OK;
-					} else if (dto.getCardType() == null || dto.getCardType().trim().toUpperCase().equals("NFC_CARD")) {
-						accountLoginService.updateCardNfcNumber(dto.getCardNumber(), dto.getUserId());
-						result = new ResponseMessageDTO("SUCCESS", "");
-						httpStatus = HttpStatus.OK;
+						checkExisted = accountLoginService.checkExistedCardNumber(dto.getCardNumber());
+					} else if (dto.getCardType() == null
+							|| dto.getCardType().trim().toUpperCase().equals("NFC_CARD")) {
+						checkExisted = accountLoginService.checkExistedCardNfcNumber(dto.getCardNumber());
 					}
+				}
+				if (checkExisted != null && !checkExisted.trim().isEmpty()) {
+					result = new ResponseMessageDTO("CHECK", "C05");
+					httpStatus = HttpStatus.BAD_REQUEST;
 				} else {
-					// check card number existed
-					String checkExisted = accountLoginService.checkExistedCardNumber(dto.getCardNumber());
-					if (checkExisted != null && !checkExisted.trim().isEmpty()) {
-						result = new ResponseMessageDTO("CHECK", "C05");
-						httpStatus = HttpStatus.BAD_REQUEST;
+					if (dto.getCardNumber().trim().isEmpty()) {
+						if (dto.getCardType() == null || dto.getCardType().trim().toUpperCase().equals("CARD")) {
+							accountLoginService.updateCardNumber(dto.getCardNumber(), dto.getUserId());
+							result = new ResponseMessageDTO("SUCCESS", "");
+							httpStatus = HttpStatus.OK;
+						} else if (dto.getCardType() == null
+								|| dto.getCardType().trim().toUpperCase().equals("NFC_CARD")) {
+							accountLoginService.updateCardNfcNumber(dto.getCardNumber(), dto.getUserId());
+							result = new ResponseMessageDTO("SUCCESS", "");
+							httpStatus = HttpStatus.OK;
+						}
 					} else {
 						if (dto.getCardType() == null || dto.getCardType().trim().toUpperCase().equals("CARD")) {
 							accountLoginService.updateCardNumber(dto.getCardNumber(), dto.getUserId());
@@ -549,7 +558,6 @@ public class AccountController {
 				result = new ResponseMessageDTO("FAILED", "E46");
 				httpStatus = HttpStatus.BAD_REQUEST;
 			}
-
 		} catch (Exception e) {
 			logger.error("updateCardNumberLogin: ERROR: " + e.toString());
 			result = new ResponseMessageDTO("FAILED", "E05");

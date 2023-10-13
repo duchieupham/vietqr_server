@@ -75,6 +75,9 @@ public class ContactEntity implements Serializable {
     @Column(name = "phoneNo")
     private String phoneNo;
 
+    @Column(name = "syncBitrix")
+    private Boolean syncBitrix;
+
     public ContactEntity() {
         super();
     }
@@ -113,7 +116,7 @@ public class ContactEntity implements Serializable {
 
     public ContactEntity(String id, String userId, String nickname, String value, String additionalData, int type,
             int status, long time, String bankTypeId, String bankAccount, String imgId, int colorType, Integer relation,
-            String email, String address, String company, String website, String phoneNo) {
+            String email, String address, String company, String website, String phoneNo, Boolean syncBitrix) {
         this.id = id;
         this.userId = userId;
         this.nickname = nickname;
@@ -132,6 +135,15 @@ public class ContactEntity implements Serializable {
         this.company = company;
         this.website = website;
         this.phoneNo = phoneNo;
+        this.syncBitrix = syncBitrix;
+    }
+
+    public Boolean getSyncBitrix() {
+        return syncBitrix;
+    }
+
+    public void setSyncBitrix(Boolean syncBitrix) {
+        this.syncBitrix = syncBitrix;
     }
 
     public String getImgId() {

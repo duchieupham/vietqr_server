@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.vietqr.org.dto.TransactionSMSDetailDTO;
 import com.vietqr.org.entity.TransactionSmsEntity;
 
 @Service
@@ -19,5 +20,7 @@ public interface TransactionSmsService {
 
     public List<TransactionSmsEntity> getTransactionsByBankIdAndStatus(String bankId, int status, int offset);
 
-    public TransactionSmsEntity getTransactionSmsDetail(String id);
+    // public TransactionSmsEntity getTransactionSmsDetail(String id);
+
+    public TransactionSMSDetailDTO getTransactionSmsDetail(String id);
 }

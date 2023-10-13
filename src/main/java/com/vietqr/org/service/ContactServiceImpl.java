@@ -126,4 +126,14 @@ public class ContactServiceImpl implements ContactService {
         return repo.checkExistedVcard(userId, phoneNo);
     }
 
+    @Override
+    public List<ContactEntity> getContactVcards() {
+        return repo.getContactVcards();
+    }
+
+    @Override
+    public void updateVcardSyncBitrix() {
+        repo.updateVcardSyncBitrix();
+    }
+
 }
