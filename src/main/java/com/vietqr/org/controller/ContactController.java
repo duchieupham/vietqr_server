@@ -1,7 +1,6 @@
 package com.vietqr.org.controller;
 
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponents;
@@ -16,7 +15,6 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -61,7 +59,6 @@ import com.vietqr.org.service.FcmTokenService;
 import com.vietqr.org.service.FirebaseMessagingService;
 import com.vietqr.org.service.ImageService;
 import com.vietqr.org.service.NotificationService;
-import com.vietqr.org.util.EnvironmentUtil;
 import com.vietqr.org.util.NotificationUtil;
 import com.vietqr.org.util.RandomCodeUtil;
 import com.vietqr.org.util.VCardUtil;
@@ -1208,47 +1205,64 @@ public class ContactController {
         HttpStatus httpStatus = null;
         try {
             List<ContactEntity> entities = contactService.getContactVcards();
+            int counter = 0;
             if (entities != null && !entities.isEmpty()) {
                 for (ContactEntity entity : entities) {
-                    String originatorId = entity.getId();
-                    String name = entity.getNickname();
-                    String email = entity.getEmail();
-                    String valueType = "WORK";
-                    String phoneNo = entity.getPhoneNo();
-                    String post = "VCARD";
-                    String address = entity.getAddress();
-                    String address2 = entity.getCompany();
-                    String comment = entity.getAdditionalData();
-                    String web = entity.getWebsite();
-                    String vending = "VIETQR";
-                    String sourceDescription = "VIETQR-VCARD";
-                    // Thêm API gắn các request param ở đây
-                    // Xây dựng URL của API Bitrix với các tham số
-                    String apiUrl = "https://crm.bluecom.vn/rest/10/0ji9bblj3wuxq8bi/crm.contact.add.json" +
-                            "?FIELDS[ORIGINATOR_ID]=" + originatorId +
-                            "&FIELDS[NAME]=" + name +
-                            "&FIELDS[EMAIL][0][VALUE]=" + email +
-                            "&FIELDS[EMAIL][0][VALUE_TYPE]=" + valueType +
-                            "&FIELDS[PHONE][0][VALUE]" + phoneNo +
-                            "&FIELDS[POST]=" + post +
-                            "&FIELDS[ADDRESS]=" + address +
-                            "&FIELDS[ADDRESS_2]=" + address2 +
-                            "&FIELDS[COMMENTS]=" + comment +
-                            "&FIELDS[WEB]=" + web +
-                            "&FIELDS[VENDING]=" + vending +
-                            "&FIELDS[SOURCE_DESCRIPTION]=" + sourceDescription;
-                    UriComponents uriComponents = UriComponentsBuilder
-                            .fromHttpUrl(apiUrl)
-                            .buildAndExpand(/* add url parameter here */);
-                    WebClient webClient = WebClient.builder()
-                            .baseUrl(apiUrl)
-                            .build();
-                    Mono<ClientResponse> responseMono = webClient.get()
-                            .uri(uriComponents.toUri())
-                            .exchange();
-                    ClientResponse response = responseMono.block();
-                    if (!response.statusCode().is2xxSuccessful()) {
-                        logger.error("SYNC BITRIX FAILED ITEM: " + entity.getId() + " - " + entity.getPhoneNo());
+                    if (entity.getSyncBitrix() == null || entity.getSyncBitrix() == false) {
+                        try {
+                            counter++;
+                            String originatorId = entity.getId();
+                            String name = entity.getNickname();
+                            String email = entity.getEmail();
+                            String valueType = "WORK";
+                            String phoneNo = entity.getPhoneNo();
+                            String post = "VCARD";
+                            String address = entity.getAddress();
+                            String address2 = entity.getCompany();
+                            String comment = entity.getAdditionalData();
+                            String web = removePrefix(entity.getWebsite());
+                            String vending = "VIETQR";
+                            String sourceDescription = "VIETQR-VCARD";
+                            // Thêm API gắn các request param ở đây
+                            // Xây dựng URL của API Bitrix với các tham số
+                            String apiUrl = "https://crm.bluecom.vn/rest/10/0ji9bblj3wuxq8bi/crm.contact.add.json" +
+                                    "?FIELDS[ORIGINATOR_ID]=" + originatorId +
+                                    "&FIELDS[NAME]=" + name +
+                                    "&FIELDS[EMAIL][0][VALUE]=" + email +
+                                    "&FIELDS[EMAIL][0][VALUE_TYPE]=" + valueType +
+                                    "&FIELDS[PHONE][0][VALUE]=" + phoneNo +
+                                    "&FIELDS[PHONE][0][VALUE_TYPE]=" + "WORK" +
+                                    "&FIELDS[POST]=" + post +
+                                    "&FIELDS[ADDRESS]=" + address +
+                                    "&FIELDS[ADDRESS_2]=" + address2 +
+                                    "&FIELDS[COMMENTS]=" + comment +
+                                    "&FIELDS[ORIGIN_ID]=" + web +
+                                    "&FIELDS[VENDING]=" + vending +
+                                    "&FIELDS[SOURCE_DESCRIPTION]=" + sourceDescription;
+                            UriComponents uriComponents = UriComponentsBuilder
+                                    .fromHttpUrl(apiUrl)
+                                    .buildAndExpand(/* add url parameter here */);
+                            WebClient webClient = WebClient.builder()
+                                    .baseUrl(apiUrl)
+                                    .build();
+                            Mono<ClientResponse> responseMono = webClient.get()
+                                    .uri(uriComponents.toUri())
+                                    .exchange();
+                            ClientResponse response = responseMono.block();
+                            if (response.statusCode().is2xxSuccessful()) {
+                                System.out.println(
+                                        "SYNC BITRIX SUCCESS ITEM " + counter + ": " + entity.getId() + " - "
+                                                + entity.getNickname() + " - "
+                                                + entity.getPhoneNo());
+                            } else {
+                                logger.error(
+                                        "SYNC BITRIX FAILED ITEM: " + entity.getId() + " - " + entity.getPhoneNo());
+                                System.out.println(
+                                        "SYNC BITRIX FAILED ITEM: " + entity.getId() + " - " + entity.getPhoneNo());
+                            }
+                        } catch (Exception e) {
+                            System.out.println("ERROR: " + e.toString());
+                        }
                     }
                 }
                 contactService.updateVcardSyncBitrix();
@@ -1262,5 +1276,12 @@ public class ContactController {
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
+    }
+
+    public static String removePrefix(String input) {
+        input = input.replaceAll("^www\\.", "");
+        input = input.replaceAll("^http://www\\.", "");
+        input = input.replaceAll("^https://www\\.", "");
+        return input;
     }
 }

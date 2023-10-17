@@ -36,7 +36,6 @@ import com.vietqr.org.dto.AccountInformationDTO;
 import com.vietqr.org.dto.AccountLoginMethodDTO;
 import com.vietqr.org.dto.AccountLoginDTO;
 import com.vietqr.org.dto.AccountPushLoginDTO;
-import com.vietqr.org.dto.FcmRequestDTO;
 import com.vietqr.org.dto.LogoutDTO;
 import com.vietqr.org.dto.PasswordUpdateDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
@@ -52,6 +51,7 @@ import com.vietqr.org.entity.AccountWalletEntity;
 import com.vietqr.org.entity.CustomerSyncEntity;
 import com.vietqr.org.entity.FcmTokenEntity;
 import com.vietqr.org.entity.ImageEntity;
+import com.vietqr.org.entity.LarkWebhookPartnerEntity;
 import com.vietqr.org.entity.NotificationEntity;
 import com.vietqr.org.entity.SystemSettingEntity;
 import com.vietqr.org.service.AccountBankReceiveService;
@@ -62,8 +62,8 @@ import com.vietqr.org.service.AccountShareService;
 import com.vietqr.org.service.AccountWalletService;
 import com.vietqr.org.service.CustomerSyncService;
 import com.vietqr.org.service.FcmTokenService;
-import com.vietqr.org.service.FirebaseMessagingService;
 import com.vietqr.org.service.ImageService;
+import com.vietqr.org.service.LarkWebhookPartnerService;
 import com.vietqr.org.service.MobileCarrierService;
 import com.vietqr.org.service.NotificationService;
 import com.vietqr.org.service.SystemSettingService;
@@ -120,11 +120,8 @@ public class AccountController {
 	@Autowired
 	SystemSettingService systemSettingService;
 
-	private FirebaseMessagingService firebaseMessagingService;
-
-	public AccountController(FirebaseMessagingService firebaseMessagingService) {
-		this.firebaseMessagingService = firebaseMessagingService;
-	}
+	@Autowired
+	LarkWebhookPartnerService larkWebhookPartnerService;
 
 	@PostMapping("accounts")
 	public ResponseEntity<String> login(@RequestBody AccountLoginDTO dto) {
@@ -460,8 +457,19 @@ public class AccountController {
 							+ "\\nNền tảng: " + dto.getPlatform()
 							+ "\\nIP: " + dto.getDevice()
 							+ msgSharingCode;
+					// SEND TO LARK VIETQR
 					SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
 					larkUtil.sendMessageToLark(larkMsg, systemSettingEntity.getWebhookUrl());
+					// SEND TO LARK PARTNER
+					List<LarkWebhookPartnerEntity> partners = new ArrayList<>();
+					partners = larkWebhookPartnerService.getLarkWebhookPartners();
+					if (partners != null && !partners.isEmpty()) {
+						for (LarkWebhookPartnerEntity partner : partners) {
+							if (partner.getWebhook() != null && !partner.getWebhook().trim().isEmpty()) {
+								larkUtil.sendMessageToLark(msgSharingCode, partner.getWebhook());
+							}
+						}
+					}
 					result = new ResponseMessageDTO("SUCCESS", "");
 					httpStatus = HttpStatus.OK;
 				} else {
@@ -661,25 +669,25 @@ public class AccountController {
 					notificationEntity.setUserId(userId);
 					notificationService.insertNotification(notificationEntity);
 					// push notification to devices
-					for (FcmTokenEntity fcmToken : fcmTokens) {
-						try {
-							if (!fcmToken.getToken().trim().isEmpty()) {
-								FcmRequestDTO fcmDTO = new FcmRequestDTO();
-								fcmDTO.setTitle(NotificationUtil.getNotiTitleLoginWarning());
-								fcmDTO.setMessage(messageNotification);
-								fcmDTO.setToken(fcmToken.getToken());
-								firebaseMessagingService.sendPushNotificationToToken(fcmDTO);
-								logger.info("Send notification to device " + fcmToken.getToken());
-							}
-						} catch (Exception e) {
-							logger.error("Error when Send Notification using FCM " + e.toString());
-							if (e.toString()
-									.contains("The registration token is not a valid FCM registration token")) {
-								fcmTokenService.deleteFcmToken(fcmToken.getToken());
-							}
+					// for (FcmTokenEntity fcmToken : fcmTokens) {
+					// try {
+					// if (!fcmToken.getToken().trim().isEmpty()) {
+					// FcmRequestDTO fcmDTO = new FcmRequestDTO();
+					// fcmDTO.setTitle(NotificationUtil.getNotiTitleLoginWarning());
+					// fcmDTO.setMessage(messageNotification);
+					// fcmDTO.setToken(fcmToken.getToken());
+					// firebaseMessagingService.sendPushNotificationToToken(fcmDTO);
+					// logger.info("Send notification to device " + fcmToken.getToken());
+					// }
+					// } catch (Exception e) {
+					// logger.error("Error when Send Notification using FCM " + e.toString());
+					// if (e.toString()
+					// .contains("The registration token is not a valid FCM registration token")) {
+					// fcmTokenService.deleteFcmToken(fcmToken.getToken());
+					// }
 
-						}
-					}
+					// }
+					// }
 				}
 				// insert new FCM token
 				FcmTokenEntity fcmTokenEntity = new FcmTokenEntity();
