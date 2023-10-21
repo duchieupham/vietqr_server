@@ -349,6 +349,7 @@ public class VNPTEpayController {
                                     transactionReceiveEntity.setCustomerBankAccount("");
                                     transactionReceiveEntity.setCustomerBankCode("");
                                     transactionReceiveEntity.setCustomerName("");
+                                    transactionReceiveEntity.setTerminalCode("");
                                     transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
                                     // insert transaction branch
                                     if (businessId != null && branchId != null && !businessId.trim().isEmpty()

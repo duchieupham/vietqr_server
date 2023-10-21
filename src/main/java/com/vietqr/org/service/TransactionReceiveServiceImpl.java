@@ -8,12 +8,14 @@ import java.util.List;
 import com.vietqr.org.entity.TransactionReceiveEntity;
 import com.vietqr.org.dto.TransByCusSyncDTO;
 import com.vietqr.org.dto.TransReceiveAdminDetailDTO;
+import com.vietqr.org.dto.TransReceiveResponseDTO;
 import com.vietqr.org.dto.TransStatisticByDateDTO;
 import com.vietqr.org.dto.TransStatisticByMonthDTO;
 import com.vietqr.org.dto.TransStatisticDTO;
 import com.vietqr.org.dto.TransactionCheckStatusDTO;
 import com.vietqr.org.dto.TransactionDetailDTO;
 import com.vietqr.org.dto.TransactionFeeDTO;
+import com.vietqr.org.dto.TransactionQRDTO;
 import com.vietqr.org.dto.TransactionReceiveAdminListDTO;
 import com.vietqr.org.dto.TransactionRelatedDTO;
 
@@ -280,6 +282,21 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     public List<TransactionReceiveAdminListDTO> exportAllTransFromDateByMerchantId(String fromDate, String toDate,
             String merchantId) {
         return repo.exportAllTransFromDateByMerchantId(fromDate, toDate, merchantId);
+    }
+
+    @Override
+    public TransactionQRDTO getTransactionQRById(String id) {
+        return repo.getTransactionQRById(id);
+    }
+
+    @Override
+    public List<TransReceiveResponseDTO> getTransByOrderId(String value, String bankAccount) {
+        return repo.getTransByOrderId(value, bankAccount);
+    }
+
+    @Override
+    public List<TransReceiveResponseDTO> getTransByReferenceNumber(String value, String bankAccount) {
+        return repo.getTransByReferenceNumber(value, bankAccount);
     }
 
 }

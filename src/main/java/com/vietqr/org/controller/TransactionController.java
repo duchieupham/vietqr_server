@@ -9,6 +9,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,6 +39,7 @@ import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.TransByCusSyncDTO;
 import com.vietqr.org.dto.TransImgIdDTO;
 import com.vietqr.org.dto.TransReceiveAdminDetailDTO;
+import com.vietqr.org.dto.TransReceiveResponseDTO;
 import com.vietqr.org.dto.TransReceiveRpaDTO;
 import com.vietqr.org.dto.TransStatisticByDateDTO;
 import com.vietqr.org.dto.TransStatisticByMonthDTO;
@@ -44,19 +47,25 @@ import com.vietqr.org.dto.TransStatisticDTO;
 import com.vietqr.org.dto.TransSyncRpaDTO;
 import com.vietqr.org.dto.TransactionBranchInputDTO;
 import com.vietqr.org.dto.TransactionCheckDTO;
+import com.vietqr.org.dto.TransactionCheckOrderInputDTO;
 import com.vietqr.org.dto.TransactionCheckStatusDTO;
 import com.vietqr.org.dto.TransactionDateDTO;
 import com.vietqr.org.dto.TransactionDetailDTO;
 import com.vietqr.org.dto.TransactionInputDTO;
+import com.vietqr.org.dto.TransactionQRDTO;
+import com.vietqr.org.dto.TransactionQRResponseDTO;
 import com.vietqr.org.dto.TransactionReceiveAdminListDTO;
 import com.vietqr.org.dto.TransactionRelatedDTO;
+import com.vietqr.org.dto.VietQRGenerateDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.entity.ImageEntity;
 import com.vietqr.org.entity.TransactionRPAEntity;
 import com.vietqr.org.entity.TransactionReceiveImageEntity;
 import com.vietqr.org.entity.TransactionReceiveLogEntity;
 import com.vietqr.org.service.AccountBankReceiveService;
+import com.vietqr.org.service.AccountCustomerBankService;
 import com.vietqr.org.service.BankTypeService;
+import com.vietqr.org.service.CaiBankService;
 import com.vietqr.org.service.ImageService;
 import com.vietqr.org.service.TransactionBankService;
 import com.vietqr.org.service.TransactionRPAService;
@@ -64,8 +73,14 @@ import com.vietqr.org.service.TransactionReceiveBranchService;
 import com.vietqr.org.service.TransactionReceiveImageService;
 import com.vietqr.org.service.TransactionReceiveLogService;
 import com.vietqr.org.service.TransactionReceiveService;
+import com.vietqr.org.util.BankEncryptUtil;
+import com.vietqr.org.util.TransactionRefIdUtil;
+import com.vietqr.org.util.VietQRUtil;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 @RestController
 @CrossOrigin
@@ -102,6 +117,12 @@ public class TransactionController {
 
     @Autowired
     TransactionReceiveLogService transactionReceiveLogService;
+
+    @Autowired
+    CaiBankService caiBankService;
+
+    @Autowired
+    AccountCustomerBankService accountCustomerBankService;
 
     @PostMapping("transaction-branch")
     public ResponseEntity<List<TransactionRelatedDTO>> getTransactionsByBranchId(
@@ -892,6 +913,180 @@ public class TransactionController {
             }
         } catch (Exception e) {
             logger.error("getTransactionsByCustomerSync: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    ///
+    // API check transaction by merchant token
+    @PostMapping("transactions/check-order")
+    public ResponseEntity<Object> checkTransactionStatus(
+            @RequestHeader("Authorization") String token,
+            @RequestBody TransactionCheckOrderInputDTO dto) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            // 1. get info from token
+            String username = getUsernameFromToken(token);
+            if (username != null && !username.trim().isEmpty()) {
+                // 2. If valid token, check valid object
+                if (dto != null) {
+                    // 3. If valid object, check condition (bank&trans belong to merchant)
+                    List<String> checkExistedCustomerSync = accountCustomerBankService
+                            .checkExistedCustomerSyncByUsername(username);
+                    if (checkExistedCustomerSync != null && !checkExistedCustomerSync.isEmpty()) {
+                        // 4. Check checksum
+                        String checkSum = BankEncryptUtil.generateMD5CheckOrderChecksum(dto.getBankAccount(), username);
+                        if (BankEncryptUtil.isMatchChecksum(dto.getCheckSum(), checkSum)) {
+                            // 5. Find transaction
+                            // 0: get by orderId
+                            // 1: get by referenceNumber
+                            List<TransReceiveResponseDTO> response = new ArrayList<>();
+                            if (dto.getValue() != null && !dto.getValue().trim().isEmpty()) {
+                                if (dto.getType() != null && dto.getType() == 0) {
+                                    response = transactionReceiveService.getTransByOrderId(dto.getValue(),
+                                            dto.getBankAccount());
+                                    if (response != null && !response.isEmpty()) {
+                                        result = response;
+                                        httpStatus = HttpStatus.OK;
+                                    } else {
+                                        logger.error("checkTransactionStatus: NOT FOUND TRANSACTION");
+                                        httpStatus = HttpStatus.BAD_REQUEST;
+                                        result = new ResponseMessageDTO("FAILED", "E96");
+                                    }
+                                } else if (dto.getType() != null && dto.getType() == 1) {
+                                    response = transactionReceiveService.getTransByReferenceNumber(dto.getValue(),
+                                            dto.getBankAccount());
+                                    if (response != null && !response.isEmpty()) {
+                                        result = response;
+                                        httpStatus = HttpStatus.OK;
+                                    } else {
+                                        logger.error("checkTransactionStatus: NOT FOUND TRANSACTION");
+                                        httpStatus = HttpStatus.BAD_REQUEST;
+                                        result = new ResponseMessageDTO("FAILED", "E96");
+                                    }
+                                } else {
+                                    logger.error("checkTransactionStatus: INVALID CHECK TYPE");
+                                    httpStatus = HttpStatus.BAD_REQUEST;
+                                    result = new ResponseMessageDTO("FAILED", "E95");
+                                }
+                            } else {
+                                System.out.println("checkTransactionStatus: INVALID REQUEST BODY");
+                                logger.error("checkTransactionStatus: INVALID REQUEST BODY");
+                                result = new ResponseMessageDTO("FAILED", "E46");
+                                httpStatus = HttpStatus.BAD_REQUEST;
+                            }
+                        } else {
+                            logger.error("checkTransactionStatus: INVALID CHECKSUM");
+                            httpStatus = HttpStatus.BAD_REQUEST;
+                            result = new ResponseMessageDTO("FAILED", "E39");
+                        }
+                    } else {
+                        System.out.println("checkTransactionStatus: BANK ACCOUNT IS NOT MATCH WITH MERCHANT INFO");
+                        logger.error("checkTransactionStatus: BANK ACCOUNT IS NOT MATCH WITH MERCHANT INFO");
+                        result = new ResponseMessageDTO("FAILED", "E77");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    }
+                } else {
+                    System.out.println("checkTransactionStatus: INVALID REQUEST BODY");
+                    logger.error("checkTransactionStatus: INVALID REQUEST BODY");
+                    result = new ResponseMessageDTO("FAILED", "E46");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                System.out.println("checkTransactionStatus: INVALID TOKEN");
+                logger.error("checkTransactionStatus: INVALID TOKEN");
+                result = new ResponseMessageDTO("FAILED", "E74");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            System.out.println("checkTransactionStatus: ERROR: " + e.toString());
+            logger.error("checkTransactionStatus: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    private String getUsernameFromToken(String token) {
+        String result = "";
+        if (token != null && !token.trim().isEmpty()) {
+            String secretKey = "mySecretKey";
+            String jwtToken = token.substring(7); // remove "Bearer " from the beginning
+            Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(jwtToken).getBody();
+            String userId = (String) claims.get("user");
+            if (userId != null) {
+                result = new String(Base64.getDecoder().decode(userId));
+            }
+        }
+        return result;
+    }
+
+    ///
+    // Get detail transaction QR
+    @GetMapping("transactions/qr-link")
+    public ResponseEntity<Object> getTransactionQR(@RequestParam(value = "refId") String refId) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (refId != null && !refId.trim().isEmpty()) {
+                String id = TransactionRefIdUtil.decryptTransactionId(refId);
+                TransactionQRDTO dto = transactionReceiveService.getTransactionQRById(id);
+                if (dto != null) {
+                    // generated QR
+                    VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+                    String caiValue = caiBankService.getCaiValue(dto.getBankTypeId());
+                    vietQRGenerateDTO.setCaiValue(caiValue);
+                    vietQRGenerateDTO.setBankAccount(dto.getBankAccount());
+                    String amount = "";
+                    String content = "";
+                    if (dto.getAmount() != null) {
+                        amount = dto.getAmount() + "";
+                    } else {
+                        amount = "0";
+                    }
+                    if (dto.getContent() != null && !dto.getContent().trim().isEmpty()) {
+                        content = dto.getContent();
+                    }
+                    vietQRGenerateDTO.setAmount(amount);
+                    vietQRGenerateDTO.setContent(content);
+                    String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+                    // process response
+                    TransactionQRResponseDTO responseDTO = new TransactionQRResponseDTO();
+                    responseDTO.setTransactionId(dto.getTransactionId());
+                    responseDTO.setQr(qr);
+                    responseDTO.setAmount(dto.getAmount());
+                    responseDTO.setContent(dto.getContent());
+                    responseDTO.setTransType(dto.getTransType());
+                    responseDTO.setTerminalCode(dto.getTerminalCode());
+                    responseDTO.setOrderId(dto.getOrderId());
+                    responseDTO.setSign("");
+                    responseDTO.setType(dto.getType());
+                    responseDTO.setStatus(dto.getStatus());
+                    responseDTO.setTimeCreated(dto.getTimeCreated());
+                    responseDTO.setBankTypeId(dto.getBankTypeId());
+                    responseDTO.setBankAccount(dto.getBankAccount());
+                    responseDTO.setBankCode(dto.getBankCode());
+                    responseDTO.setBankName(dto.getBankName());
+                    responseDTO.setBankShortName(dto.getBankShortName());
+                    responseDTO.setImgId(dto.getImgId());
+                    responseDTO.setUserBankName(dto.getUserBankName());
+                    result = responseDTO;
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    logger.error("getTransactionQR: NOT FOUND TRANSACTION");
+                    result = new ResponseMessageDTO("FAILED", "E94");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                logger.error("getTransactionQR: INVALID REQUEST BODY");
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("getTransactionQR: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);

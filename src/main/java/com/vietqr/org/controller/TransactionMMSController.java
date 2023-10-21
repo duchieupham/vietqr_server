@@ -38,12 +38,16 @@ import com.vietqr.org.dto.TransMMSCheckInDTO;
 import com.vietqr.org.dto.TransMMSCheckOutDTO;
 import com.vietqr.org.dto.TransactionBankCustomerDTO;
 import com.vietqr.org.dto.TransactionMMSResponseDTO;
+import com.vietqr.org.entity.AccountBankReceiveEntity;
+import com.vietqr.org.entity.BankTypeEntity;
 import com.vietqr.org.entity.CustomerSyncEntity;
 import com.vietqr.org.entity.TerminalAddressEntity;
 import com.vietqr.org.entity.TerminalBankEntity;
 import com.vietqr.org.entity.TransactionMMSEntity;
 import com.vietqr.org.entity.TransactionReceiveEntity;
 import com.vietqr.org.entity.TransactionReceiveLogEntity;
+import com.vietqr.org.service.AccountBankReceiveService;
+import com.vietqr.org.service.BankTypeService;
 import com.vietqr.org.service.CustomerSyncService;
 import com.vietqr.org.service.TerminalAddressService;
 import com.vietqr.org.service.TerminalBankService;
@@ -52,6 +56,9 @@ import com.vietqr.org.service.TransactionReceiveLogService;
 import com.vietqr.org.service.TransactionReceiveService;
 import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.EnvironmentUtil;
+import com.vietqr.org.util.NotificationUtil;
+import com.vietqr.org.util.SocketHandler;
+import com.vietqr.org.util.TransactionRefIdUtil;
 
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
@@ -83,6 +90,15 @@ public class TransactionMMSController {
 
     @Autowired
     TransactionReceiveLogService transactionReceiveLogService;
+
+    @Autowired
+    AccountBankReceiveService accountBankService;
+
+    @Autowired
+    BankTypeService bankTypeService;
+
+    @Autowired
+    SocketHandler socketHandler;
 
     @PostMapping("transaction-mms")
     public ResponseEntity<TransactionMMSResponseDTO> insertTransactionMMS(@RequestBody TransactionMMSEntity entity) {
@@ -137,6 +153,38 @@ public class TransactionMMSController {
                             transactionReceiveService.updateTransactionReceiveStatus(1, uuid.toString(),
                                     entity.getFtCode(), time,
                                     transactionReceiveEntity.getId());
+                            // default bankTypeId
+                            String bankTypeId = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
+                            BankTypeEntity bankTypeEntity = bankTypeService
+                                    .getBankTypeById(bankTypeId);
+                            AccountBankReceiveEntity accountBankEntity = accountBankService
+                                    .getAccountBankByBankAccountAndBankTypeId(transactionReceiveEntity.getBankAccount(),
+                                            bankTypeId);
+                            if (accountBankEntity != null) {
+                                Map<String, String> data = new HashMap<>();
+                                data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+                                data.put("notificationId", "");
+                                data.put("transactionReceiveId", transactionReceiveEntity.getId());
+                                data.put("bankAccount", accountBankEntity.getBankAccount());
+                                data.put("bankName", bankTypeEntity.getBankName());
+                                data.put("bankCode", bankTypeEntity.getBankCode());
+                                data.put("bankId", accountBankEntity.getId());
+                                data.put("branchName", "");
+                                data.put("businessName", "");
+                                data.put("content", transactionReceiveEntity.getContent());
+                                data.put("amount", "" + transactionReceiveEntity.getAmount());
+                                data.put("time", "" + time);
+                                data.put("refId", "" + entity.getId());
+                                data.put("status", "1");
+                                data.put("traceId", "");
+                                data.put("transType", "C");
+                                // send msg to QR Link
+                                String refId = TransactionRefIdUtil
+                                        .encryptTransactionId(transactionReceiveEntity.getId());
+                                socketHandler.sendMessageToTransactionRefId(refId, data);
+                            } else {
+                                logger.info("transaction-mms-sync: NOT FOUND accountBankEntity");
+                            }
                         } else {
                             logger.info("transaction-mms-sync: NOT FOUND transactionReceiveEntity");
                             // transactionReceiveEntity = null =>
@@ -736,6 +784,9 @@ public class TransactionMMSController {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
+            logger.info("refund: Bank Account: " + dto.getBankAccount());
+            logger.info("refund: FT Code: " + dto.getReferenceNumber());
+            logger.info("refund: Amount: " + dto.getAmount());
             String accessKey = "SABAccessKey";
             String checkSum = BankEncryptUtil.generateMD5RefundCustomerChecksum(dto.getBankAccount(),
                     dto.getReferenceNumber(), accessKey);

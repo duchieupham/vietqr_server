@@ -99,6 +99,7 @@ import com.vietqr.org.util.NotificationUtil;
 import com.vietqr.org.util.RandomCodeUtil;
 import com.vietqr.org.util.SocketHandler;
 import com.vietqr.org.util.TelegramUtil;
+import com.vietqr.org.util.TransactionRefIdUtil;
 import com.vietqr.org.util.VNPTEpayUtil;
 
 import reactor.core.publisher.Mono;
@@ -333,6 +334,32 @@ public class TransactionBankController {
 										dto.getTransType(), dto.getReciprocalAccount(), dto.getReciprocalBankCode(),
 										dto.getVa(),
 										dto.getValueDate(), uuid.toString());
+								Map<String, String> data = new HashMap<>();
+								data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+								data.put("notificationId", "");
+								data.put("transactionReceiveId", "");
+								data.put("bankAccount", "1123355589");
+								data.put("bankName", "Ngan hang TMCP Quan Doi");
+								data.put("bankCode", "MB");
+								data.put("bankId", "");
+								data.put("branchName", "");
+								data.put("businessName", "");
+								data.put("content", dto.getContent());
+								data.put("amount", "" + dto.getAmount());
+								data.put("time", "" + dto.getTransactiontime());
+								data.put("refId", "" + dto.getTransactionid());
+								data.put("status", "1");
+								data.put("traceId", "" + "");
+								data.put("transType", dto.getTransType());
+								try {
+									// send msg to QR Link
+									String refId = TransactionRefIdUtil
+											.encryptTransactionId(dto.getTransactionid());
+									socketHandler.sendMessageToTransactionRefId(refId, data);
+								} catch (IOException e) {
+									logger.error("WS: socketHandler.sendMessageToUser - updateTransaction ERROR: "
+											+ e.toString());
+								}
 								result = new ResponseMessageDTO("SUCCESS", "");
 							}
 						} else {
@@ -964,21 +991,14 @@ public class TransactionBankController {
 									.getNotiTitleUpdateTransaction(),
 							message);
 					try {
+						// send msg to user
 						socketHandler.sendMessageToUser(accountBankEntity.getUserId(), data);
+						// send msg to QR Link
+						String refId = TransactionRefIdUtil.encryptTransactionId(transactionReceiveEntity.getId());
+						socketHandler.sendMessageToTransactionRefId(refId, data);
 					} catch (IOException e) {
 						logger.error("WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
 					}
-					// if (requestId.trim().isEmpty()) {
-					// requestId = textToSpeechService.requestTTS(accountBankEntity.getUserId(),
-					// data, dto.getAmount() + "");
-					// } else {
-					// data.put("audioLink", textToSpeechService.find(requestId));
-					// try {
-					// socketHandler.sendMessageToUser(userId, data);
-					// } catch (Exception e) {
-					// logger.error("TTS-Transaction: Error: " + e.toString());
-					// }
-					// }
 
 				}
 				/////// DO INSERT TELEGRAM
@@ -1091,7 +1111,11 @@ public class TransactionBankController {
 							.getNotiTitleUpdateTransaction(),
 					message);
 			try {
+				// send msg to user
 				socketHandler.sendMessageToUser(accountBankEntity.getUserId(), data);
+				// send msg to QR Link
+				String refId = TransactionRefIdUtil.encryptTransactionId(transactionReceiveEntity.getId());
+				socketHandler.sendMessageToTransactionRefId(refId, data);
 			} catch (IOException e) {
 				logger.error("WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
 			}
@@ -1188,6 +1212,7 @@ public class TransactionBankController {
 		transactionEntity.setOrderId(orderId);
 		transactionEntity.setSign(sign);
 		transactionEntity.setTimePaid(time);
+		transactionEntity.setTerminalCode("");
 		transactionReceiveService.insertTransactionReceive(transactionEntity);
 		//
 		///
@@ -1276,22 +1301,14 @@ public class TransactionBankController {
 									.getNotiTitleUpdateTransaction(),
 							message);
 					try {
+						// send msg to user
 						socketHandler.sendMessageToUser(accountBankEntity.getUserId(), data);
+						// send msg to QR Link
+						String refId = TransactionRefIdUtil.encryptTransactionId(transcationUUID.toString());
+						socketHandler.sendMessageToTransactionRefId(refId, data);
 					} catch (IOException e) {
 						logger.error("WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
 					}
-					// if (requestId.trim().isEmpty()) {
-					// requestId = textToSpeechService.requestTTS(accountBankEntity.getUserId(),
-					// data, dto.getAmount() + "");
-					// } else {
-					// data.put("audioLink", textToSpeechService.find(requestId));
-					// try {
-					// socketHandler.sendMessageToUser(userId, data);
-					// } catch (Exception e) {
-					// logger.error("TTS-Transaction: Error: " + e.toString());
-					// }
-					// }
-
 				}
 				/////// DO INSERT TELEGRAM
 				List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
@@ -1405,7 +1422,11 @@ public class TransactionBankController {
 							.getNotiTitleUpdateTransaction(),
 					message);
 			try {
+				// send msg to user
 				socketHandler.sendMessageToUser(accountBankEntity.getUserId(), data);
+				// send msg to QR Link
+				String refId = TransactionRefIdUtil.encryptTransactionId(transcationUUID.toString());
+				socketHandler.sendMessageToTransactionRefId(refId, data);
 			} catch (IOException e) {
 				logger.error("WS: socketHandler.sendMessageToUser - insertNewTransaction ERROR: " + e.toString());
 			}
@@ -2514,145 +2535,6 @@ public class TransactionBankController {
 		}
 		return result;
 	}
-
-	// private void pushNewTransactionToCustomerSync(CustomerSyncEntity entity,
-	// TransactionBankCustomerDTO dto, long time) {
-	// try {
-	// SSLUtil.disableCertificateValidation();
-
-	// logger.info("pushNewTransactionToCustomerSync: orderId: " +
-	// dto.getOrderId());
-	// logger.info("pushNewTransactionToCustomerSync: sign: " + dto.getSign());
-	// TokenDTO tokenDTO = null;
-	// if (entity.getUsername() != null && !entity.getUsername().trim().isEmpty() &&
-	// entity.getPassword() != null
-	// && !entity.getPassword().trim().isEmpty()) {
-	// tokenDTO = getCustomerSyncToken(entity);
-	// } else if (entity.getToken() != null && !entity.getToken().trim().isEmpty())
-	// {
-	// logger.info("Get token from record: " + entity.getId());
-	// tokenDTO = new TokenDTO(entity.getToken(), "Bearer", 0);
-	// }
-	// Map<String, Object> data = new HashMap<>();
-	// data.put("transactionid", dto.getTransactionid());
-	// data.put("transactiontime", dto.getTransactiontime());
-	// data.put("referencenumber", dto.getReferencenumber());
-	// data.put("amount", dto.getAmount());
-	// data.put("content", dto.getContent());
-	// data.put("bankaccount", dto.getBankaccount());
-	// data.put("transType", dto.getTransType());
-	// data.put("orderId", dto.getOrderId());
-	// data.put("sign", dto.getSign());
-	// String suffixUrl = "";
-	// if (entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty()) {
-	// suffixUrl = entity.getSuffixUrl();
-	// }
-	// UriComponents uriComponents = null;
-	// WebClient webClient = null;
-	// if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
-	// uriComponents = UriComponentsBuilder
-	// .fromHttpUrl("http://" + entity.getIpAddress() + ":" + entity.getPort() + "/"
-	// + suffixUrl
-	// + "/bank/api/transaction-sync")
-	// .buildAndExpand(/* add url parameter here */);
-	// webClient = WebClient.builder()
-	// .baseUrl("http://" + entity.getIpAddress() + ":" + entity.getPort() + "/" +
-	// suffixUrl
-	// + "/bank/api/transaction-sync")
-	// .build();
-	// } else {
-	// uriComponents = UriComponentsBuilder
-	// .fromHttpUrl(entity.getInformation() + "/" + suffixUrl
-	// + "/bank/api/transaction-sync")
-	// .buildAndExpand(/* add url parameter here */);
-	// webClient = WebClient.builder()
-	// .baseUrl(entity.getInformation() + "/" + suffixUrl
-	// + "/bank/api/transaction-sync")
-	// .build();
-	// }
-	// //
-	// logger.info("uriComponents: " + uriComponents.toString());
-	// Mono<TransactionResponseDTO> responseMono = null;
-	// if (tokenDTO != null) {
-	// responseMono = webClient.post()
-	// .uri(uriComponents.toUri())
-	// .contentType(MediaType.APPLICATION_JSON)
-	// .header("Authorization", "Bearer " + tokenDTO.getAccess_token())
-	// .body(BodyInserters.fromValue(data))
-	// .retrieve()
-	// .bodyToMono(TransactionResponseDTO.class);
-	// } else {
-	// responseMono = webClient.post()
-	// .uri(uriComponents.toUri())
-	// .contentType(MediaType.APPLICATION_JSON)
-	// .body(BodyInserters.fromValue(data))
-	// .retrieve()
-	// .bodyToMono(TransactionResponseDTO.class);
-	// }
-	// responseMono.subscribe(transactionResponseDTO -> {
-	// LocalDateTime currentDateTime = LocalDateTime.now();
-	// long responseTime = currentDateTime.toEpochSecond(ZoneOffset.UTC);
-	// if (transactionResponseDTO != null && transactionResponseDTO.getObject() !=
-	// null) {
-	// if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
-	// logger.info("pushNewTransactionToCustomerSync SUCCESS: " +
-	// entity.getIpAddress() + " - "
-	// + transactionResponseDTO.getObject().getReftransactionid() + " at: "
-	// + responseTime);
-	// } else {
-	// logger.info("pushNewTransactionToCustomerSync SUCCESS: " +
-	// entity.getInformation() + " - "
-	// + transactionResponseDTO.getObject().getReftransactionid() + " at: "
-	// + responseTime);
-	// }
-	// // System.out.println("pushNewTransactionToCustomerSync SUCCESS: " +
-	// // entity.getIpAddress() + " - "
-	// // + transactionResponseDTO.getObject().getReftransactionid());
-	// } else {
-	// if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
-	// logger.error("Error at pushNewTransactionToCustomerSync: " +
-	// entity.getIpAddress() + " - "
-	// + (transactionResponseDTO != null ? transactionResponseDTO.getErrorReason() :
-	// "")
-	// + " at: " + responseTime);
-	// } else {
-	// logger.error("Error at pushNewTransactionToCustomerSync: " +
-	// entity.getInformation() + " - "
-	// + (transactionResponseDTO != null ? transactionResponseDTO.getErrorReason() :
-	// "")
-	// + " at: " + responseTime);
-	// }
-	// }
-	// }, error -> {
-	// LocalDateTime currentDateTime = LocalDateTime.now();
-	// long responseTime = currentDateTime.toEpochSecond(ZoneOffset.UTC);
-	// if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
-	// logger.error("Error at pushNewTransactionToCustomerSync: " +
-	// entity.getIpAddress() + " - "
-	// + error.toString() + " at: " + responseTime);
-	// } else {
-	// logger.error("Error at pushNewTransactionToCustomerSync: " +
-	// entity.getInformation() + " - "
-	// + error.toString() + " at: " + responseTime);
-	// }
-
-	// });
-	// } catch (Exception e) {
-	// LocalDateTime currentDateTime = LocalDateTime.now();
-	// long responseTime = currentDateTime.toEpochSecond(ZoneOffset.UTC);
-	// if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
-	// logger.error(
-	// "Error at pushNewTransactionToCustomerSync: " + entity.getIpAddress() + " - "
-	// + e.toString()
-	// + " at: " + responseTime);
-	// } else {
-	// logger.error(
-	// "Error at pushNewTransactionToCustomerSync: " + entity.getInformation() + " -
-	// " + e.toString()
-	// + " at: " + responseTime);
-	// }
-	// }
-	// }
 
 	private ResponseMessageDTO getCustomerSyncEntities(String transReceiveId, TransactionBankDTO dto,
 			AccountBankReceiveEntity accountBankEntity,

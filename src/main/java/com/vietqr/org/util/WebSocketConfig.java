@@ -32,18 +32,28 @@ public class WebSocketConfig implements WebSocketConfigurer {
                     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
                             WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
                         if (request instanceof ServletServerHttpRequest) {
+                            // LISTEN WEB SOCKET - DECLARE BY parameters.
                             ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
                             logger.info("WS: request: " + request.getURI().toString());
+                            // PUSH NOTI TO USER
                             String userId = servletRequest.getServletRequest().getParameter("userId");
-                            if (userId != null && !userId.isEmpty()) {
+                            if (userId != null && !userId.trim().isEmpty()) {
                                 logger.info("WS: beforeHandshake - userId: " + userId);
                                 attributes.put("userId", userId);
                                 return true;
                             }
+                            // FOR LOGIN BY WEB BY LOGIN ID
                             String loginId = servletRequest.getServletRequest().getParameter("loginId");
-                            if (loginId != null && !loginId.isEmpty()) {
+                            if (loginId != null && !loginId.trim().isEmpty()) {
                                 logger.info("WS: beforeHandshake - loginId: " + loginId);
                                 attributes.put("loginId", loginId);
+                                return true;
+                            }
+                            // FOR CHECK TRANSACTION STATUS
+                            String transactionRefId = servletRequest.getServletRequest().getParameter("refId");
+                            if (transactionRefId != null && !transactionRefId.trim().isEmpty()) {
+                                logger.info("WS: beforeHandshake - transactionRefId: " + transactionRefId);
+                                attributes.put("refId", transactionRefId);
                                 return true;
                             }
                         }

@@ -20,6 +20,7 @@ public class VietQRCreateCustomerDTO implements Serializable {
     private String customerName;
     private String orderId;
     private String sign;
+    private String terminalCode;
 
     public VietQRCreateCustomerDTO() {
         super();
@@ -34,6 +35,18 @@ public class VietQRCreateCustomerDTO implements Serializable {
         this.userBankName = userBankName;
         this.orderId = orderId;
         this.sign = sign;
+    }
+
+    public VietQRCreateCustomerDTO(Long amount, String content, String bankAccount, String bankCode,
+            String userBankName, String orderId, String sign, String terminalCode) {
+        this.amount = amount;
+        this.content = content;
+        this.bankAccount = bankAccount;
+        this.bankCode = bankCode;
+        this.userBankName = userBankName;
+        this.orderId = orderId;
+        this.sign = sign;
+        this.terminalCode = terminalCode;
     }
 
     public VietQRCreateCustomerDTO(String bankAccount, Long amount, String content,
@@ -51,6 +64,24 @@ public class VietQRCreateCustomerDTO implements Serializable {
         this.customerName = customerName;
         this.orderId = orderId;
         this.sign = sign;
+    }
+
+    public VietQRCreateCustomerDTO(String bankAccount, Long amount, String content,
+            String bankCode, String userBankName, int existing, String transType,
+            String customerBankAccount, String customerBankCode, String customerName,
+            String orderId, String sign, String terminalCode) {
+        this.amount = amount;
+        this.content = content;
+        this.bankAccount = bankAccount;
+        this.bankCode = bankCode;
+        this.userBankName = userBankName;
+        this.transType = transType;
+        this.customerBankAccount = customerBankAccount;
+        this.customerBankCode = customerBankCode;
+        this.customerName = customerName;
+        this.orderId = orderId;
+        this.sign = sign;
+        this.terminalCode = terminalCode;
     }
 
     public String getBankAccount() {
@@ -139,6 +170,14 @@ public class VietQRCreateCustomerDTO implements Serializable {
 
     public void setCustomerName(String customerName) {
         this.customerName = customerName;
+    }
+
+    public String getTerminalCode() {
+        return terminalCode;
+    }
+
+    public void setTerminalCode(String terminalCode) {
+        this.terminalCode = terminalCode;
     }
 
     @Override

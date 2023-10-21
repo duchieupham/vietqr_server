@@ -13,6 +13,8 @@ public class VietQRCreateFromTransactionDTO implements Serializable {
     private String amount;
     private String content;
     private String userId;
+    private String terminalCode;
+    private String transactionId;
 
     // newTransaction = true => create new Transaction and generate QR
     // newTransaction = false => generate QR
@@ -29,6 +31,17 @@ public class VietQRCreateFromTransactionDTO implements Serializable {
         this.content = content;
         this.userId = userId;
         this.newTransaction = newTransaction;
+    }
+
+    public VietQRCreateFromTransactionDTO(String bankId, String amount, String content, String userId,
+            boolean newTransaction, String terminalCode, String transactionId) {
+        this.bankId = bankId;
+        this.amount = amount;
+        this.content = content;
+        this.userId = userId;
+        this.newTransaction = newTransaction;
+        this.terminalCode = terminalCode;
+        this.transactionId = transactionId;
     }
 
     public String getBankId() {
@@ -69,6 +82,22 @@ public class VietQRCreateFromTransactionDTO implements Serializable {
 
     public void setNewTransaction(boolean newTransaction) {
         this.newTransaction = newTransaction;
+    }
+
+    public String getTerminalCode() {
+        return terminalCode;
+    }
+
+    public void setTerminalCode(String terminalCode) {
+        this.terminalCode = terminalCode;
+    }
+
+    public String getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
     }
 
 }

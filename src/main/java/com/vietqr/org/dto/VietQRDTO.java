@@ -20,13 +20,19 @@ public class VietQRDTO implements Serializable {
 	private int existing;
 	// transactionId to upload bill image
 	private String transactionId;
+	// transactionRefId to show QR Link
+	private String transactionRefId;
+	private String qrLink;
+	// terminalCode to show what terminal is
+	private String terminalCode;
 
 	public VietQRDTO() {
 		super();
 	}
 
 	public VietQRDTO(String bankCode, String bankName, String bankAccount, String userBankName, String amount,
-			String content, String qrCode, String imgId, int existing, String transactionId) {
+			String content, String qrCode, String imgId, int existing, String transactionId,
+			String transactionRefId, String terminalCode, String qrLink) {
 		super();
 		this.bankCode = bankCode;
 		this.bankName = bankName;
@@ -38,6 +44,9 @@ public class VietQRDTO implements Serializable {
 		this.imgId = imgId;
 		this.existing = existing;
 		this.transactionId = transactionId;
+		this.transactionRefId = transactionRefId;
+		this.terminalCode = terminalCode;
+		this.qrLink = qrLink;
 	}
 
 	public String getBankCode() {
@@ -118,6 +127,30 @@ public class VietQRDTO implements Serializable {
 
 	public void setTransactionId(String transactionId) {
 		this.transactionId = transactionId;
+	}
+
+	public String getTransactionRefId() {
+		return transactionRefId;
+	}
+
+	public void setTransactionRefId(String transactionRefId) {
+		this.transactionRefId = transactionRefId;
+	}
+
+	public String getTerminalCode() {
+		return terminalCode;
+	}
+
+	public void setTerminalCode(String terminalCode) {
+		this.terminalCode = terminalCode;
+	}
+
+	public String getQrLink() {
+		return qrLink;
+	}
+
+	public void setQrLink(String qrLink) {
+		this.qrLink = qrLink;
 	}
 
 	@Override

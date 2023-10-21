@@ -19,6 +19,7 @@ public class VietQRCreateDTO implements Serializable {
 	private String customerBankAccount;
 	private String customerBankCode;
 	private String customerName;
+	private String terminalCode;
 
 	public VietQRCreateDTO() {
 		super();
@@ -36,6 +37,18 @@ public class VietQRCreateDTO implements Serializable {
 	}
 
 	public VietQRCreateDTO(String bankId, String amount, String content, String branchId, String businessId,
+			String userId, String terminalCode) {
+		super();
+		this.bankId = bankId;
+		this.amount = amount;
+		this.content = content;
+		this.branchId = branchId;
+		this.businessId = businessId;
+		this.userId = userId;
+		this.terminalCode = terminalCode;
+	}
+
+	public VietQRCreateDTO(String bankId, String amount, String content, String branchId, String businessId,
 			String userId, String transType, String customerBankAccount, String customerBankCode, String customerName) {
 		this.bankId = bankId;
 		this.amount = amount;
@@ -47,6 +60,22 @@ public class VietQRCreateDTO implements Serializable {
 		this.customerBankAccount = customerBankAccount;
 		this.customerBankCode = customerBankCode;
 		this.customerName = customerName;
+	}
+
+	public VietQRCreateDTO(String bankId, String amount, String content, String branchId, String businessId,
+			String userId, String transType, String customerBankAccount, String customerBankCode, String customerName,
+			String terminalCode) {
+		this.bankId = bankId;
+		this.amount = amount;
+		this.content = content;
+		this.branchId = branchId;
+		this.businessId = businessId;
+		this.userId = userId;
+		this.transType = transType;
+		this.customerBankAccount = customerBankAccount;
+		this.customerBankCode = customerBankCode;
+		this.customerName = customerName;
+		this.terminalCode = terminalCode;
 	}
 
 	public String getTransType() {
@@ -127,6 +156,14 @@ public class VietQRCreateDTO implements Serializable {
 
 	public void setUserId(String userId) {
 		this.userId = userId;
+	}
+
+	public String getTerminalCode() {
+		return terminalCode;
+	}
+
+	public void setTerminalCode(String terminalCode) {
+		this.terminalCode = terminalCode;
 	}
 
 }

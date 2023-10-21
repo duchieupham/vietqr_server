@@ -20,6 +20,7 @@ public class SocketHandler extends TextWebSocketHandler {
 
     private List<WebSocketSession> notificationSessions = new ArrayList<>();
     private List<WebSocketSession> loginSessions = new ArrayList<>();
+    private List<WebSocketSession> transactionSessions = new ArrayList<>();
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -27,6 +28,7 @@ public class SocketHandler extends TextWebSocketHandler {
             logger.info("WS: add session: " + session.toString());
             String userId = (String) session.getAttributes().get("userId");
             String loginId = (String) session.getAttributes().get("loginId");
+            String transactionRefId = (String) session.getAttributes().get("refId");
 
             if (userId != null && !userId.trim().isEmpty()) {
                 // save userId for this session
@@ -37,6 +39,10 @@ public class SocketHandler extends TextWebSocketHandler {
                 // save loginId for this session
                 session.getAttributes().put("loginId", loginId);
                 loginSessions.add(session);
+            } else if (transactionRefId != null && !transactionRefId.trim().isEmpty()) {
+                // save transactionRefId for this session
+                session.getAttributes().put("refId", transactionRefId);
+                transactionSessions.add(session);
             } else {
                 logger.error("WS: userId is missing");
                 session.close();
@@ -54,8 +60,14 @@ public class SocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         notificationSessions.remove(session);
+        loginSessions.remove(session);
+        transactionSessions.remove(session);
+        //
         logger.info("WS: remove session: " + session.toString());
         logger.info("WS: notificationSessions size: " + notificationSessions.size());
+        logger.info("WS: notificationSessions size: " + loginSessions.size());
+        logger.info("WS: notificationSessions size: " + transactionSessions.size());
+        //
     }
 
     public void sendMessageLoginToWeb(String loginId, Map<String, String> message) throws IOException {
@@ -88,4 +100,18 @@ public class SocketHandler extends TextWebSocketHandler {
         }
     }
 
+    public void sendMessageToTransactionRefId(String refId, Map<String, String> message) throws IOException {
+        logger.info("WS: sendMessageToTransactionRefId");
+        logger.info("WS: transactionSessions: " + transactionSessions.size());
+        for (WebSocketSession session : transactionSessions) {
+            logger.info("WS: session ID: " + session.getId());
+            logger.info("WS: session Attributes: " + session.getAttributes());
+            Object sessionUserId = session.getAttributes().get("refId");
+            if (sessionUserId != null && sessionUserId.equals(refId)) {
+                ObjectMapper mapper = new ObjectMapper();
+                String jsonMessage = mapper.writeValueAsString(message);
+                session.sendMessage(new TextMessage(jsonMessage));
+            }
+        }
+    }
 }

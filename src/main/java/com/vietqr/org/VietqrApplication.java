@@ -33,6 +33,7 @@ import com.vietqr.org.security.JWTAuthorizationFilter;
 import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.BankRSAUtil;
 import com.vietqr.org.util.RandomCodeUtil;
+import com.vietqr.org.util.TransactionRefIdUtil;
 import com.vietqr.org.util.WebSocketConfig;
 
 @SpringBootApplication
@@ -49,15 +50,26 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
 
-		// String checkSum =
-		// BankEncryptUtil.generateMD5RefundCustomerChecksum("1123355589",
-		// "FT23271640370141", "SABAccessKey");
-		// System.out.println("CHECKSUM: " + checkSum);
+		// ENCRYPT - DECRYPT TRANSACTION ID
+		String transactionId = "a65ade25-e25d-4809-94ad-8f817e7e94ac";
+		String encrypted = TransactionRefIdUtil.encryptTransactionId(transactionId);
+		String decrypted = TransactionRefIdUtil.decryptTransactionId(encrypted);
+
+		System.out.println("TRANSACTION ENCRYPTED: " + encrypted);
+		System.out.println("TRANSACTION DECRYPTED: " + decrypted);
+
+		String checkSum = BankEncryptUtil.generateMD5CheckOrderChecksum("1123355589",
+				"system-admin-user2302");
+		System.out.println("CHECKSUM: " + checkSum);
 
 		// get random request Payment MB Bank
 		String randomCode = "RVCK" + RandomCodeUtil.generateRandomId(8);
 		System.out.println("randomCode: " + randomCode);
 
+		//
+		String checkSum2 = BankEncryptUtil.generateMD5RefundCustomerChecksum("1123355589",
+				"FT23293978692076", "SABAccessKey");
+		System.out.println("CHECKSUM REFUND: " + checkSum2);
 		// int durationMonths = 6;
 		// String startDateString = calculateStartDate(durationMonths);
 		// String endDateString = calculateEndDate(startDateString, durationMonths);
@@ -77,7 +89,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// System.out.println("en: " + encryptAESPassword);
 		// System.out.println("de: " + decryptAESPassword);
 		//
-		String bankAccountEncrypted = BankEncryptUtil.encrypt("863683979");
+		String bankAccountEncrypted = BankEncryptUtil.encrypt("0300105672008");
 		System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
 
 		// LogReaderUtil.readLogFile("2023-09-13");

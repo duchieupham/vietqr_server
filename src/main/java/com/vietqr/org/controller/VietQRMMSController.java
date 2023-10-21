@@ -40,6 +40,7 @@ import com.vietqr.org.service.TerminalBankService;
 import com.vietqr.org.service.TransactionReceiveService;
 import com.vietqr.org.util.EnvironmentUtil;
 import com.vietqr.org.util.TokenBankUtil;
+import com.vietqr.org.util.TransactionRefIdUtil;
 
 import reactor.core.publisher.Mono;
 
@@ -68,6 +69,7 @@ public class VietQRMMSController {
             @RequestHeader("Authorization") String token) {
         Object result = null;
         HttpStatus httpStatus = null;
+        UUID transactionUUID = UUID.randomUUID();
         // String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
         LocalDateTime requestLDT = LocalDateTime.now();
         long requestTime = requestLDT.toEpochSecond(ZoneOffset.UTC);
@@ -103,7 +105,9 @@ public class VietQRMMSController {
 
                             qrCode = requestVietQRMMS(requestDTO);
                             if (qrCode != null) {
-                                VietQRMMSDTO vietQRMMSDTO = new VietQRMMSDTO(qrCode);
+                                String refId = TransactionRefIdUtil.encryptTransactionId(transactionUUID.toString());
+                                String qrLink = EnvironmentUtil.getQRLink() + refId;
+                                VietQRMMSDTO vietQRMMSDTO = new VietQRMMSDTO(qrCode, refId, qrLink);
                                 httpStatus = HttpStatus.OK;
                                 result = vietQRMMSDTO;
                             } else {
@@ -140,18 +144,18 @@ public class VietQRMMSController {
             if (accountBankEntity != null && qrCode != null && !qrCode.isEmpty()) {
                 LocalDateTime currentDateTime = LocalDateTime.now();
                 long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
-                insertNewTransaction(accountBankEntity, dto, time);
+                insertNewTransaction(transactionUUID.toString(), accountBankEntity, dto, time);
             }
         }
     }
 
     @Async
-    private void insertNewTransaction(AccountBankReceiveEntity accountBankReceiveEntity, VietQRMMSCreateDTO dto,
+    private void insertNewTransaction(String transactionUUID, AccountBankReceiveEntity accountBankReceiveEntity,
+            VietQRMMSCreateDTO dto,
             long time) {
         try {
-            UUID transcationUUID = UUID.randomUUID();
             TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
-            transactionEntity.setId(transcationUUID.toString());
+            transactionEntity.setId(transactionUUID);
             transactionEntity.setBankAccount(accountBankReceiveEntity.getBankAccount());
             transactionEntity.setBankId(accountBankReceiveEntity.getId());
             transactionEntity.setContent(dto.getContent());
@@ -166,6 +170,7 @@ public class VietQRMMSController {
             transactionEntity.setOrderId(dto.getOrderId());
             transactionEntity.setSign(dto.getSign());
             transactionEntity.setTimePaid(time);
+            transactionEntity.setTerminalCode(dto.getTerminalCode());
             transactionReceiveService.insertTransactionReceive(transactionEntity);
             LocalDateTime endTime = LocalDateTime.now();
             long endTimeLong = endTime.toEpochSecond(ZoneOffset.UTC);

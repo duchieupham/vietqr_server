@@ -12,12 +12,14 @@ import org.springframework.stereotype.Repository;
 import com.vietqr.org.entity.TransactionReceiveEntity;
 import com.vietqr.org.dto.TransByCusSyncDTO;
 import com.vietqr.org.dto.TransReceiveAdminDetailDTO;
+import com.vietqr.org.dto.TransReceiveResponseDTO;
 import com.vietqr.org.dto.TransStatisticByDateDTO;
 import com.vietqr.org.dto.TransStatisticByMonthDTO;
 import com.vietqr.org.dto.TransStatisticDTO;
 import com.vietqr.org.dto.TransactionCheckStatusDTO;
 import com.vietqr.org.dto.TransactionDetailDTO;
 import com.vietqr.org.dto.TransactionFeeDTO;
+import com.vietqr.org.dto.TransactionQRDTO;
 import com.vietqr.org.dto.TransactionReceiveAdminListDTO;
 import com.vietqr.org.dto.TransactionRelatedDTO;
 
@@ -629,4 +631,41 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
         TransactionFeeDTO getTransactionFeeCountingTypeSystem(
                         @Param(value = "bankId") String bankId,
                         @Param(value = "month") String month);
+
+        @Query(value = "SELECT a.id as transactionId, a.bank_id as bankId, a.amount, a.content, "
+                        + "a.trans_type as transType, a.terminal_code as terminalCode, a.order_id as orderId, "
+                        + "a.type, a.status, a.time as timeCreated, a.bank_account as bankAccount, b.bank_type_id as bankTypeId, "
+                        + "c.bank_code as bankCode, c.bank_name as bankName, c.bank_short_name as bankShortName, c.img_id as imgId, b.bank_account_name as userBankName "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "INNER JOIN bank_type c "
+                        + "ON b.bank_type_id = c.id "
+                        + "WHERE a.id = :id ", nativeQuery = true)
+        TransactionQRDTO getTransactionQRById(@Param(value = "id") String id);
+
+        @Query(value = "SELECT a.reference_number as referenceNumber, a.order_id as orderId, a.amount, a.content, "
+                        + "a.trans_type as transType, a.status, a.type, a.time as timeCreated, a.time_paid as timePaid "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "WHERE a.order_id = :value "
+                        + "AND a.bank_account = :bankAccount "
+                        + "AND b.is_authenticated = true ", nativeQuery = true)
+        List<TransReceiveResponseDTO> getTransByOrderId(
+                        @Param(value = "value") String value,
+                        @Param(value = "bankAccount") String bankAccount);
+
+        @Query(value = "SELECT a.reference_number as referenceNumber, a.order_id as orderId, a.amount, a.content, "
+                        + "a.trans_type as transType, a.status, a.type, a.time as timeCreated, a.time_paid as timePaid "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN account_bank_receive b "
+                        + "ON a.bank_id = b.id "
+                        + "WHERE a.reference_number = :value "
+                        + "AND a.bank_account = :bankAccount "
+                        + "AND b.is_authenticated = true ", nativeQuery = true)
+        List<TransReceiveResponseDTO> getTransByReferenceNumber(
+                        @Param(value = "value") String value,
+                        @Param(value = "bankAccount") String bankAccount);
+
 }

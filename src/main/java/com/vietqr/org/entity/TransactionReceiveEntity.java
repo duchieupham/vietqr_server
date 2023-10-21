@@ -75,13 +75,16 @@ public class TransactionReceiveEntity implements Serializable {
 	@Column(name = "customerName")
 	private String customerName;
 
+	@Column(name = "terminalCode")
+	private String terminalCode;
+
 	public TransactionReceiveEntity() {
 		super();
 	}
 
 	public TransactionReceiveEntity(String id, String bankAccount, String bankId, String content, long amount,
 			long time, String refId, int type, int status, String traceId, String transType, String referenceNumber,
-			String sign, String orderId) {
+			String sign, String orderId, String terminalCode) {
 		this.id = id;
 		this.bankAccount = bankAccount;
 		this.bankId = bankId;
@@ -96,11 +99,13 @@ public class TransactionReceiveEntity implements Serializable {
 		this.referenceNumber = referenceNumber;
 		this.sign = sign;
 		this.orderId = orderId;
+		this.terminalCode = terminalCode;
 	}
 
 	public TransactionReceiveEntity(String id, String bankAccount, String bankId, String content, long amount,
 			long time, String refId, int type, int status, String traceId, String transType, String referenceNumber,
-			String orderId, String sign, String customerBankAccount, String customerBankCode, String customerName) {
+			String orderId, String sign, String customerBankAccount, String customerBankCode, String customerName,
+			String terminalCode) {
 		this.id = id;
 		this.bankAccount = bankAccount;
 		this.bankId = bankId;
@@ -118,12 +123,13 @@ public class TransactionReceiveEntity implements Serializable {
 		this.customerBankAccount = customerBankAccount;
 		this.customerBankCode = customerBankCode;
 		this.customerName = customerName;
+		this.terminalCode = terminalCode;
 	}
 
 	public TransactionReceiveEntity(String id, String bankAccount, String bankId, String content, long amount,
 			long time, long timePaid, String refId, int type, int status, String traceId, String transType,
 			String referenceNumber, String orderId, String sign, String customerBankAccount, String customerBankCode,
-			String customerName) {
+			String customerName, String terminalCode) {
 		this.id = id;
 		this.bankAccount = bankAccount;
 		this.bankId = bankId;
@@ -142,6 +148,7 @@ public class TransactionReceiveEntity implements Serializable {
 		this.customerBankAccount = customerBankAccount;
 		this.customerBankCode = customerBankCode;
 		this.customerName = customerName;
+		this.terminalCode = terminalCode;
 	}
 
 	public String getId() {
@@ -286,6 +293,14 @@ public class TransactionReceiveEntity implements Serializable {
 
 	public void setTimePaid(long timePaid) {
 		this.timePaid = timePaid;
+	}
+
+	public String getTerminalCode() {
+		return terminalCode;
+	}
+
+	public void setTerminalCode(String terminalCode) {
+		this.terminalCode = terminalCode;
 	}
 
 }

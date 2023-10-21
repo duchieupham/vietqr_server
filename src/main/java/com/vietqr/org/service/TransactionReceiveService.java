@@ -2,17 +2,18 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import com.vietqr.org.entity.TransactionReceiveEntity;
 import com.vietqr.org.dto.TransByCusSyncDTO;
 import com.vietqr.org.dto.TransReceiveAdminDetailDTO;
+import com.vietqr.org.dto.TransReceiveResponseDTO;
 import com.vietqr.org.dto.TransStatisticByDateDTO;
 import com.vietqr.org.dto.TransStatisticByMonthDTO;
 import com.vietqr.org.dto.TransStatisticDTO;
 import com.vietqr.org.dto.TransactionCheckStatusDTO;
 import com.vietqr.org.dto.TransactionDetailDTO;
 import com.vietqr.org.dto.TransactionFeeDTO;
+import com.vietqr.org.dto.TransactionQRDTO;
 import com.vietqr.org.dto.TransactionReceiveAdminListDTO;
 import com.vietqr.org.dto.TransactionRelatedDTO;
 
@@ -175,4 +176,10 @@ public interface TransactionReceiveService {
                         String fromDate,
                         String toDate,
                         String merchantId);
+
+        TransactionQRDTO getTransactionQRById(String id);
+
+        List<TransReceiveResponseDTO> getTransByOrderId(String value, String bankAccount);
+
+        List<TransReceiveResponseDTO> getTransByReferenceNumber(String value, String bankAccount);
 }

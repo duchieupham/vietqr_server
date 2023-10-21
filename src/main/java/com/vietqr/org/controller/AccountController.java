@@ -465,7 +465,8 @@ public class AccountController {
 					partners = larkWebhookPartnerService.getLarkWebhookPartners();
 					if (partners != null && !partners.isEmpty()) {
 						for (LarkWebhookPartnerEntity partner : partners) {
-							if (partner.getWebhook() != null && !partner.getWebhook().trim().isEmpty()) {
+							if (partner.getWebhook() != null && !partner.getWebhook().trim().isEmpty()
+									&& partner.getActive() != null && partner.getActive() == true) {
 								larkUtil.sendMessageToLark(msgSharingCode, partner.getWebhook());
 							}
 						}
@@ -802,9 +803,20 @@ public class AccountController {
 						+ "\\nEmail: " + dto.getEmail()
 						+ "\\nNgày sinh: " + dto.getBirthDate()
 						+ "\\nGiới tính: " + gender;
+				// SEND TO LARK VIETQR
 				SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
 				larkUtil.sendMessageToLark(larkMsg, systemSettingEntity.getWebhookUrl());
-				//
+				// SEND TO LARK PARTNER
+				List<LarkWebhookPartnerEntity> partners = new ArrayList<>();
+				partners = larkWebhookPartnerService.getLarkWebhookPartners();
+				if (partners != null && !partners.isEmpty()) {
+					for (LarkWebhookPartnerEntity partner : partners) {
+						if (partner.getWebhook() != null && !partner.getWebhook().trim().isEmpty()
+								&& partner.getActive() != null && partner.getActive() == true) {
+							larkUtil.sendMessageToLark(larkMsg, partner.getWebhook());
+						}
+					}
+				}
 				result = new ResponseMessageDTO("SUCCESS", "");
 				httpStatus = HttpStatus.OK;
 			} else {
