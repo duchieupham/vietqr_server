@@ -332,6 +332,8 @@ public class VietQRController {
 		Object result = null;
 		HttpStatus httpStatus = null;
 		UUID transactionUUID = UUID.randomUUID();
+		// for saving qr mms flow 2
+		String qrMMS = "";
 		// find bankAccount đã liên kết và mms = true và check transType = "C -> gọi
 		// luồng 2
 		String checkExistedMMSBank = accountBankService.checkMMSBankAccount(dto.getBankAccount());
@@ -544,7 +546,7 @@ public class VietQRController {
 								qrCode = requestVietQRMMS(requestDTO);
 								if (qrCode != null) {
 									// VietQRMMSDTO vietQRMMSDTO = new VietQRMMSDTO(qrCode);
-									//
+									qrMMS = qrCode;
 									String bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
 									if (bankTypeId != null && !bankTypeId.trim().isEmpty()) {
 										VietQRDTO vietQRDTO = new VietQRDTO();
@@ -628,7 +630,8 @@ public class VietQRController {
 					vietQRMMSCreateDTO.setOrderId(dto.getOrderId());
 					vietQRMMSCreateDTO.setSign(dto.getSign());
 					vietQRMMSCreateDTO.setTerminalCode(dto.getTerminalCode());
-					insertNewTransactionFlow2(transactionUUID.toString(), accountBankEntity, vietQRMMSCreateDTO, time);
+					insertNewTransactionFlow2(qrMMS, transactionUUID.toString(), accountBankEntity, vietQRMMSCreateDTO,
+							time);
 				}
 			}
 		}
@@ -738,7 +741,8 @@ public class VietQRController {
 	}
 
 	@Async
-	private void insertNewTransactionFlow2(String transcationUUID, AccountBankReceiveEntity accountBankReceiveEntity,
+	private void insertNewTransactionFlow2(String qrCode, String transcationUUID,
+			AccountBankReceiveEntity accountBankReceiveEntity,
 			VietQRMMSCreateDTO dto,
 			long time) {
 		try {
@@ -759,6 +763,8 @@ public class VietQRController {
 			transactionEntity.setSign(dto.getSign());
 			transactionEntity.setTimePaid(time);
 			transactionEntity.setTerminalCode(dto.getTerminalCode());
+			transactionEntity.setQrCode(qrCode);
+			transactionEntity.setUserId(accountBankReceiveEntity.getUserId());
 			transactionReceiveService.insertTransactionReceive(transactionEntity);
 			LocalDateTime endTime = LocalDateTime.now();
 			long endTimeLong = endTime.toEpochSecond(ZoneOffset.UTC);
@@ -797,6 +803,8 @@ public class VietQRController {
 				transactionEntity.setTraceId(traceId);
 				transactionEntity.setTimePaid(0);
 				transactionEntity.setTerminalCode(dto.getTerminalCode());
+				transactionEntity.setQrCode("");
+				transactionEntity.setUserId(accountBankEntity.getUserId());
 				if (dto.getTransType() != null) {
 					transactionEntity.setTransType(dto.getTransType());
 				} else {
@@ -970,6 +978,8 @@ public class VietQRController {
 				transactionEntity.setSign("");
 				transactionEntity.setTimePaid(0);
 				transactionEntity.setTerminalCode(dto.getTerminalCode());
+				transactionEntity.setQrCode("");
+				transactionEntity.setUserId(accountBankEntity.getUserId());
 				transactionReceiveService.insertTransactionReceive(transactionEntity);
 				// insert transaction branch if existing branchId and businessId. Else just do
 				// not map.

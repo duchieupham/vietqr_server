@@ -1024,7 +1024,7 @@ public class TransactionController {
     }
 
     ///
-    // Get detail transaction QR
+    // Get detail transaction QR LINK
     @GetMapping("transactions/qr-link")
     public ResponseEntity<Object> getTransactionQR(@RequestParam(value = "refId") String refId) {
         Object result = null;
@@ -1052,6 +1052,13 @@ public class TransactionController {
                     vietQRGenerateDTO.setAmount(amount);
                     vietQRGenerateDTO.setContent(content);
                     String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+                    // check bankAccount if mms_active = true
+                    //
+                    if (dto.getMmsActive() != null && dto.getMmsActive() == true) {
+                        if (dto.getQrCode() != null && !dto.getQrCode().trim().isEmpty()) {
+                            qr = dto.getQrCode();
+                        }
+                    }
                     // process response
                     TransactionQRResponseDTO responseDTO = new TransactionQRResponseDTO();
                     responseDTO.setTransactionId(dto.getTransactionId());

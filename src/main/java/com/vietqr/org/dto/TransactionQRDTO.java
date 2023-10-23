@@ -61,4 +61,8 @@ public interface TransactionQRDTO {
     String getImgId();
 
     String getUserBankName();
+
+    String getQrCode();
+
+    Boolean getMmsActive();
 }

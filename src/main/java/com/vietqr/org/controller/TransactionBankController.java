@@ -1213,6 +1213,8 @@ public class TransactionBankController {
 		transactionEntity.setSign(sign);
 		transactionEntity.setTimePaid(time);
 		transactionEntity.setTerminalCode("");
+		transactionEntity.setQrCode("");
+		transactionEntity.setUserId(accountBankEntity.getUserId());
 		transactionReceiveService.insertTransactionReceive(transactionEntity);
 		//
 		///

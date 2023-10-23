@@ -144,13 +144,14 @@ public class VietQRMMSController {
             if (accountBankEntity != null && qrCode != null && !qrCode.isEmpty()) {
                 LocalDateTime currentDateTime = LocalDateTime.now();
                 long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
-                insertNewTransaction(transactionUUID.toString(), accountBankEntity, dto, time);
+                insertNewTransaction(qrCode, transactionUUID.toString(), accountBankEntity, dto, time);
             }
         }
     }
 
     @Async
-    private void insertNewTransaction(String transactionUUID, AccountBankReceiveEntity accountBankReceiveEntity,
+    private void insertNewTransaction(String qrCode, String transactionUUID,
+            AccountBankReceiveEntity accountBankReceiveEntity,
             VietQRMMSCreateDTO dto,
             long time) {
         try {
@@ -171,6 +172,8 @@ public class VietQRMMSController {
             transactionEntity.setSign(dto.getSign());
             transactionEntity.setTimePaid(time);
             transactionEntity.setTerminalCode(dto.getTerminalCode());
+            transactionEntity.setQrCode(qrCode);
+            transactionEntity.setUserId(accountBankReceiveEntity.getUserId());
             transactionReceiveService.insertTransactionReceive(transactionEntity);
             LocalDateTime endTime = LocalDateTime.now();
             long endTimeLong = endTime.toEpochSecond(ZoneOffset.UTC);
