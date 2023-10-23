@@ -461,16 +461,23 @@ public class AccountController {
 					SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
 					larkUtil.sendMessageToLark(larkMsg, systemSettingEntity.getWebhookUrl());
 					// SEND TO LARK PARTNER
+
 					List<LarkWebhookPartnerEntity> partners = new ArrayList<>();
 					partners = larkWebhookPartnerService.getLarkWebhookPartners();
 					if (partners != null && !partners.isEmpty()) {
 						for (LarkWebhookPartnerEntity partner : partners) {
 							if (partner.getWebhook() != null && !partner.getWebhook().trim().isEmpty()
 									&& partner.getActive() != null && partner.getActive() == true) {
-								larkUtil.sendMessageToLark(msgSharingCode, partner.getWebhook());
+								try {
+									larkUtil.sendMessageToLark(msgSharingCode, partner.getWebhook());
+								} catch (Exception e) {
+									logger.error("registerAccount - send lark to customer: " + partner.getWebhook()
+											+ " - " + e.toString());
+								}
 							}
 						}
 					}
+
 					result = new ResponseMessageDTO("SUCCESS", "");
 					httpStatus = HttpStatus.OK;
 				} else {
@@ -490,7 +497,7 @@ public class AccountController {
 				httpStatus = HttpStatus.OK;
 			}
 		} catch (Exception e) {
-			System.out.println("Error at registerAccount: " + e.toString());
+			logger.error("Error at registerAccount: " + e.toString());
 			result = new ResponseMessageDTO("FAILED", "E04");
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}

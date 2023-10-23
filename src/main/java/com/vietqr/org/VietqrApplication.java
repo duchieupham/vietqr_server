@@ -206,6 +206,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 					.addFilterAfter(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
 					.authorizeRequests()
 					.antMatchers(HttpMethod.POST, "/api/token_generate").permitAll()
+					.antMatchers(HttpMethod.POST, "/api/vcard/generate").permitAll()
 					.antMatchers(HttpMethod.POST, "/bank/api/get_token_bank").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts-sms").permitAll()
