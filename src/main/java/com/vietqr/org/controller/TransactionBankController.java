@@ -542,8 +542,50 @@ public class TransactionBankController {
 			// .getAccountBankById(transactionReceiveEntity.getBankId());
 			if (accountBankEntity != null) {
 				if (accountBankEntity.isMmsActive() == true && dto.getTransType().trim().toUpperCase().equals("C")) {
-					logger.info(
-							"Transaction-sync: mms_active = true => do not update transaction_receive AND push data to customer sync");
+					if (!result.isError()) {
+						if (checkDuplicate) {
+							String traceId = getTraceId(dto.getContent(), "VQR");
+							String orderId = "";
+							String sign = "";
+							if (traceId != null && !traceId.isEmpty()) {
+								logger.info("transaction-sync - trace ID detect: " + traceId);
+								TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
+										.getTransactionByTraceIdAndAmount(traceId, dto.getAmount() + "",
+												dto.getTransType().trim().toUpperCase());
+								if (transactionReceiveEntity != null) {
+									if (transactionReceiveEntity.getQrCode() == null
+											|| transactionReceiveEntity.getQrCode().trim().isEmpty()) {
+										orderId = transactionReceiveEntity.getOrderId();
+										sign = transactionReceiveEntity.getSign();
+										getCustomerSyncEntities(transactionReceiveEntity.getId(), dto,
+												accountBankEntity, time, orderId, sign);
+										updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time,
+												nf);
+										// check if recharge => do update status and push data to customer
+										////////// USER RECHAGE VQR || USER RECHARGE MOBILE
+										if (transactionReceiveEntity.getType() == 5) {
+											// find transactionWallet by billNumber and status = 0
+											TransactionWalletEntity transactionWalletEntity = transactionWalletService
+													.getTransactionWalletByBillNumber(orderId);
+											processTransactionWallet(nf, time, dto, orderId, transactionWalletEntity);
+										}
+									}
+								} else {
+									logger.info(
+											"Transaction-sync: mms_active = true => do not update transaction_receive AND push data to customer sync");
+								}
+								// }
+							} else {
+								logger.info(
+										"Transaction-sync: mms_active = true => do not update transaction_receive AND push data to customer sync");
+							}
+
+						} else {
+							logger.error("Transaction-sync: Duplicate Reference number");
+						}
+					} else {
+						logger.error("Transaction-sync: Error receive data: " + result.toString());
+					}
 				} else {
 					if (!result.isError()) {
 						if (checkDuplicate) {

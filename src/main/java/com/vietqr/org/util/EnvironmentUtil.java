@@ -1,7 +1,7 @@
 package com.vietqr.org.util;
 
 public class EnvironmentUtil {
-    private static boolean IS_PRODUCTION = true;
+    private static boolean IS_PRODUCTION = false;
 
     // QR LINK
     private static final String QR_LINK = "https://vietqr.vn/qr-generated?token=";
