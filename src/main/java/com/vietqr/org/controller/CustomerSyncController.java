@@ -2,7 +2,9 @@ package com.vietqr.org.controller;
 
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponents;
@@ -217,6 +220,7 @@ public class CustomerSyncController {
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
+            System.out.println("checkTokenCustomerSync: ERROR: " + e.toString());
             logger.error("checkTokenCustomerSync: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05 - " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -232,10 +236,11 @@ public class CustomerSyncController {
             String encodedKey = Base64.getEncoder().encodeToString(key.getBytes());
             logger.info("key: " + encodedKey + " - username: " + username.trim() + " - password: "
                     + password.trim());
-            // System.out.println("key: " + encodedKey + " - username: " +
-            // entity.getUsername() + " - password: "
-            // + entity.getPassword());
 
+            System.out.println("key: " + encodedKey + " - username: " +
+                    username.trim() + " - password: "
+                    + password.trim());
+            Map<String, Object> data = new HashMap<>();
             UriComponents uriComponents = null;
             WebClient webClient = null;
             uriComponents = UriComponentsBuilder
@@ -245,17 +250,22 @@ public class CustomerSyncController {
             webClient = WebClient.builder()
                     .baseUrl(url.trim() + "/api/token_generate")
                     .build();
-            // System.out.println("uriComponents: " + uriComponents.toString());
+            System.out.println("uriComponents: " + uriComponents.toString());
             Mono<ClientResponse> responseMono = webClient.method(HttpMethod.POST)
                     .uri(uriComponents.toUri())
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Basic " + encodedKey)
+                    .body(BodyInserters.fromValue(data))
                     .exchange();
 
             ClientResponse response = responseMono.block();
+            // System.out.println("response: " + response.rawStatusCode() + " - " +
+            // response.releaseBody() + " - "
+            // + response.statusCode() + " - " + response.bodyToMono(String.class).block());
             //
             if (response.statusCode().is2xxSuccessful()) {
                 String json = response.bodyToMono(String.class).block();
+                System.out.println("json: " + json);
                 logger.info("Response pushNewTransactionToCustomerSync: " + json);
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode rootNode = objectMapper.readTree(json);

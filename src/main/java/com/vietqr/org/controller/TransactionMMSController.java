@@ -516,6 +516,7 @@ public class TransactionMMSController {
                     : "";
             UriComponents uriComponents = null;
             WebClient webClient = null;
+            Map<String, Object> data = new HashMap<>();
             if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
                 uriComponents = UriComponentsBuilder
                         .fromHttpUrl(
@@ -542,6 +543,7 @@ public class TransactionMMSController {
                     .uri(uriComponents.toUri())
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Basic " + encodedKey)
+                    .body(BodyInserters.fromValue(data))
                     .exchange()
                     .flatMap(clientResponse -> {
                         System.out.println("status code: " + clientResponse.statusCode());
