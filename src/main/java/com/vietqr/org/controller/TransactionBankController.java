@@ -837,8 +837,22 @@ public class TransactionBankController {
 												"transaction-sync: TRANSACTION FAILED: " + topupResponseCode);
 										logger.error("transaction-sync: TRANSACTION FAILED: " + topupResponseCode);
 									}
+									// update account wallet amount if vnpt epay failed
+									if (topupResponseCode != 0) {
+										// update amount account wallet
+										AccountWalletEntity accountWalletEntity = accountWalletService
+												.getAccountWalletByUserId(userIdRecharge);
+										if (accountWalletEntity != null) {
+											Long currentAmount = Long
+													.parseLong(accountWalletEntity.getAmount());
+											Long updatedAmount = currentAmount + dto.getAmount();
+											accountWalletService.updateAmount(updatedAmount + "",
+													accountWalletEntity.getId());
+											logger.info("transaction-sync: process wallet: refund user: "
+													+ userIdRecharge + " - " + dto.getAmount());
+										}
+									}
 									// push notification
-
 									NotificationEntity notiEntity = new NotificationEntity();
 									notiEntity.setId(notificationUUID.toString());
 									notiEntity.setRead(false);
@@ -875,7 +889,6 @@ public class TransactionBankController {
 								System.out.println("transaction-sync: INVALID OTP");
 								logger.error("transaction-sync: INVALID OTP");
 							}
-
 						} else {
 							System.out.println(
 									"transaction-sync: REFERENCE NUMBER INVALID: "

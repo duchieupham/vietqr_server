@@ -26,7 +26,7 @@ public class NotificationUtil {
 	private static final String NOTI_TITLE_ADD_VIETQR_ID = "Thêm bạn bè";
 	private static final String NOTI_TITLE_RECHARGE = "Thanh toán thành công";
 	private static final String NOTI_TITLE_MOBILE_TOPUP = "Nạp điện thoại thành công";
-	private static final String NOTI_TITLE_MOBILE_TOPUP_FAILED = "Nạp điện thoại thất bại";
+	private static final String NOTI_TITLE_MOBILE_TOPUP_FAILED = "Nạp điện thoại thất bại. Số tiền được hoàn lại vào tài khoản của bạn trên hệ thống VietQR VN.";
 
 	// Description
 	private static final String NOTI_DESC_LOGIN_WARNING_PREFIX = "Chúng tôi nhận thấy có lượt đăng nhập từ thiết bị ";

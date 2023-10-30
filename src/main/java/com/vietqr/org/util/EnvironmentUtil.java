@@ -1,10 +1,11 @@
 package com.vietqr.org.util;
 
 public class EnvironmentUtil {
-    private static boolean IS_PRODUCTION = true;
+    private static boolean IS_PRODUCTION = false;
 
     // QR LINK
-    private static final String QR_LINK = "https://vietqr.vn/qr-generated?token=";
+    private static final String QR_LINK_UAT = "https://vietqr.vn/test/qr-generated?token=";
+    private static final String QR_LINK_PROD = "https://vietqr.vn/qr-generated?token=";
 
     // DINO SOFT - VOICE
     private static final String VOICE_REQUEST_URL = "http://103.141.140.202:8009/tts/v1/speak";
@@ -122,7 +123,7 @@ public class EnvironmentUtil {
     private static final String TELEGRAM_BOT_TOKEN = "6603683411:AAGTCde6C-7kt4gR5gTvcDA_jmYIqs0SJJM";
 
     public static String getQRLink() {
-        return QR_LINK;
+        return (IS_PRODUCTION == false) ? QR_LINK_UAT : QR_LINK_PROD;
     }
 
     public static String getVNPTEpayRequestPaymentBankUsername() {
