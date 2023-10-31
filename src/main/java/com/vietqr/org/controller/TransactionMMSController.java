@@ -181,7 +181,7 @@ public class TransactionMMSController {
             LocalDateTime responseLocalTime = LocalDateTime.now();
             long responseTime = responseLocalTime.toEpochSecond(ZoneOffset.UTC);
             logger.info(
-                    "transaction-mms-sync: RESPONSE at: " + responseTime);
+                    "transaction-mms-sync: RESPONSE: " + result.getResCode() + " at: " + responseTime);
             // System.out.println(
             // "transaction-mms-sync: RESPONSE at: " + responseTime);
             return new ResponseEntity<>(result, httpStatus);

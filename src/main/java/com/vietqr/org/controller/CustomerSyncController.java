@@ -93,6 +93,30 @@ public class CustomerSyncController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("admin/customer-sync/sorted")
+    public ResponseEntity<List<CustomerSyncListDTO>> getCustomerSyncList(
+            @RequestParam(value = "type") int type) {
+        // type = 9 => all
+        // type = 0 => api service
+        // type = 1 => ecommerce
+        List<CustomerSyncListDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            if (type == 9) {
+                result = customerSyncService.getCustomerSyncList();
+            } else if (type == 0) {
+                result = customerSyncService.getCustomerSyncAPIList();
+            } else if (type == 1) {
+                result = customerSyncService.getCustomerSyncEcList();
+            }
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getCustomerSyncList: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @PostMapping("admin/customer-sync/information")
     public ResponseEntity<ResponseMessageDTO> updateCustomerSync(@RequestBody CustomerSyncUpdateDTO dto) {
         ResponseMessageDTO result = null;

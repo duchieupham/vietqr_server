@@ -4,9 +4,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -156,34 +153,38 @@ public class PostController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    public String formattedContent(String html, String postId) {
-        String result = "";
-        try {
-            if (html != null && !html.trim().isEmpty()) {
-                // get list base64 images
-                List<String> base64Images = ImageUtil.parseImages(html);
-                if (base64Images != null && !base64Images.isEmpty()) {
-                    for (String base64Image : base64Images) {
-                        if (base64Image != null && !base64Image.trim().isEmpty()) {
-                            // convert to byte and insert image
-                            byte[] imageConverted = ImageUtil.convertBase64ToByteArray(base64Image);
-                            if (imageConverted != null) {
-                                // UUID imagePostUUID = UUID.randomUUID();
+    // public String formattedContent(String html, String postId) {
+    // String result = "";
+    // try {
+    // if (html != null && !html.trim().isEmpty()) {
+    // // get list base64 images
+    // List<String> base64Images = ImageUtil.parseImages(html);
+    // if (base64Images != null && !base64Images.isEmpty()) {
+    // for (String base64Image : base64Images) {
+    // if (base64Image != null && !base64Image.trim().isEmpty()) {
+    // // convert to byte and insert image
+    // byte[] imageConverted = ImageUtil.convertBase64ToByteArray(base64Image);
+    // if (imageConverted != null) {
+    // // inser image post
+    // UUID imagePostUUID = UUID.randomUUID();
+    // ImagePostEntity imagePostEntity = new ImagePostEntity(
+    // imagePostUUID.toString(),
 
-                            }
-                            // map image post
+    // );
+    // }
+    // // map image post
 
-                            // replace content
-                        }
-                    }
+    // // replace content
+    // }
+    // }
 
-                }
-            }
-        } catch (Exception e) {
-            logger.error("formattedContent: ERROR: " + e.toString());
-        }
-        return result;
-    }
+    // }
+    // }
+    // } catch (Exception e) {
+    // logger.error("formattedContent: ERROR: " + e.toString());
+    // }
+    // return result;
+    // }
 
     @PostMapping("post/test/news")
     public ResponseEntity<ResponseMessageDTO> insertTestNews(@RequestBody PostTypeNewsInputDTO dto) {

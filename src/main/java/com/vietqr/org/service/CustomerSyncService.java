@@ -28,6 +28,10 @@ public interface CustomerSyncService {
 
     public List<CustomerSyncListDTO> getCustomerSyncList();
 
+    public List<CustomerSyncListDTO> getCustomerSyncAPIList();
+
+    public List<CustomerSyncListDTO> getCustomerSyncEcList();
+
     // public List<String> checkExistedCustomerSyncByUsername(String username);
 
     // 0 => API Service
