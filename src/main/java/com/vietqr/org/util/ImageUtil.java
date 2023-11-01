@@ -9,29 +9,33 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import com.vietqr.org.dto.ImagePostConvertDTO;
+
 public class ImageUtil {
 
     private static final Logger logger = Logger.getLogger(ImageUtil.class);
 
-    public static List<String> parseImages(String html) {
-        List<String> base64Images = new ArrayList<>();
+    public static List<ImagePostConvertDTO> parseImages(String html) {
+        List<ImagePostConvertDTO> imageDTOs = new ArrayList<>();
         try {
             if (html != null && !html.trim().isEmpty()) {
                 Document doc = Jsoup.parse(html);
                 // Lấy danh sách các thẻ img trong HTML
                 List<Element> imgElements = doc.select("img");
                 if (imgElements != null && !imgElements.isEmpty()) {
-                    // Lặp qua từng thẻ img và lấy giá trị base64 của hình ảnh
+                    // Lặp qua từng thẻ img và lấy giá trị base64 của hình ảnh cùng với tên
                     for (Element imgElement : imgElements) {
                         String base64Image = imgElement.attr("src").split(",")[1];
-                        base64Images.add(base64Image);
+                        String name = imgElement.attr("data-filename");
+                        ImagePostConvertDTO imageDTO = new ImagePostConvertDTO(base64Image, name);
+                        imageDTOs.add(imageDTO);
                     }
                 }
             }
         } catch (Exception e) {
             logger.error("parseImages: ERROR: " + e.toString());
         }
-        return base64Images;
+        return imageDTOs;
     }
 
     public static byte[] convertBase64ToByteArray(String base64Image) {

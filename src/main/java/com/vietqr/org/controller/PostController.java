@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.vietqr.org.dto.ImagePostConvertDTO;
 import com.vietqr.org.dto.PostTypeNewsInputDTO;
 import com.vietqr.org.dto.PostTypeNewsfeedInputDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
@@ -153,38 +154,45 @@ public class PostController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    // public String formattedContent(String html, String postId) {
-    // String result = "";
-    // try {
-    // if (html != null && !html.trim().isEmpty()) {
-    // // get list base64 images
-    // List<String> base64Images = ImageUtil.parseImages(html);
-    // if (base64Images != null && !base64Images.isEmpty()) {
-    // for (String base64Image : base64Images) {
-    // if (base64Image != null && !base64Image.trim().isEmpty()) {
-    // // convert to byte and insert image
-    // byte[] imageConverted = ImageUtil.convertBase64ToByteArray(base64Image);
-    // if (imageConverted != null) {
-    // // inser image post
-    // UUID imagePostUUID = UUID.randomUUID();
-    // ImagePostEntity imagePostEntity = new ImagePostEntity(
-    // imagePostUUID.toString(),
+    public String formattedContent(String html, String postId) {
+        String result = "";
+        try {
+            if (html != null && !html.trim().isEmpty()) {
 
-    // );
-    // }
-    // // map image post
+                // get list base64 images
+                List<ImagePostConvertDTO> imageConverts = ImageUtil.parseImages(html);
+                if (imageConverts != null && !imageConverts.isEmpty()) {
+                    int index = 0;
+                    for (ImagePostConvertDTO imageConvert : imageConverts) {
+                        UUID imagePostUUID = UUID.randomUUID();
+                        if (imageConvert != null && !imageConvert.getBase64Image().trim().isEmpty()) {
+                            // convert to byte and insert image
+                            byte[] imageConverted = ImageUtil.convertBase64ToByteArray(imageConvert.getBase64Image());
+                            if (imageConverted != null) {
+                                // insert image post
+                                ImagePostEntity imagePostEntity = new ImagePostEntity(
+                                        imagePostUUID.toString(),
+                                        imageConvert.getName(),
+                                        imageConverted);
+                                imagePostService.insert(imagePostEntity);
+                                // map post image
+                                UUID postImageUUID = UUID.randomUUID();
+                                PostImageEntity postImageEntity = new PostImageEntity(postImageUUID.toString(), postId,
+                                        index, imagePostUUID.toString());
+                                postImageService.insert(postImageEntity);
+                                index++;
+                            }
+                            // replace content
+                        }
+                    }
 
-    // // replace content
-    // }
-    // }
-
-    // }
-    // }
-    // } catch (Exception e) {
-    // logger.error("formattedContent: ERROR: " + e.toString());
-    // }
-    // return result;
-    // }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("formattedContent: ERROR: " + e.toString());
+        }
+        return result;
+    }
 
     @PostMapping("post/test/news")
     public ResponseEntity<ResponseMessageDTO> insertTestNews(@RequestBody PostTypeNewsInputDTO dto) {

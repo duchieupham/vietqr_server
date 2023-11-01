@@ -9,4 +9,6 @@ public interface ImagePostService {
 
     public int insert(ImagePostEntity entity);
 
+    public ImagePostEntity getImagePostById(String id);
+
 }

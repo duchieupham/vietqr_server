@@ -12,6 +12,7 @@ import com.vietqr.org.dto.TransReceiveResponseDTO;
 import com.vietqr.org.dto.TransStatisticByDateDTO;
 import com.vietqr.org.dto.TransStatisticByMonthDTO;
 import com.vietqr.org.dto.TransStatisticDTO;
+import com.vietqr.org.dto.TransStatisticMerchantDTO;
 import com.vietqr.org.dto.TransactionCheckStatusDTO;
 import com.vietqr.org.dto.TransactionDetailDTO;
 import com.vietqr.org.dto.TransactionFeeDTO;
@@ -297,6 +298,26 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     @Override
     public List<TransReceiveResponseDTO> getTransByReferenceNumber(String value, String bankAccount) {
         return repo.getTransByReferenceNumber(value, bankAccount);
+    }
+
+    @Override
+    public List<TransStatisticMerchantDTO> getStatisticYearByMerchantId(String id, String value) {
+        return repo.getStatisticYearByMerchantId(id, value);
+    }
+
+    @Override
+    public List<TransStatisticMerchantDTO> getStatisticMonthByMerchantId(String id, String value) {
+        return repo.getStatisticMonthByMerchantId(id, value);
+    }
+
+    @Override
+    public List<TransStatisticMerchantDTO> getStatisticYearByBankId(String id, String value) {
+        return repo.getStatisticYearByBankId(id, value);
+    }
+
+    @Override
+    public List<TransStatisticMerchantDTO> getStatisticMonthByBankId(String id, String value) {
+        return repo.getStatisticMonthByBankId(id, value);
     }
 
 }

@@ -17,4 +17,9 @@ public class ImagePostServiceImpl implements ImagePostService {
         return repo.save(entity) == null ? 0 : 1;
     }
 
+    @Override
+    public ImagePostEntity getImagePostById(String id) {
+        return repo.getImagePostById(id);
+    }
+
 }

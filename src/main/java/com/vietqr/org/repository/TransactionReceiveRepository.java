@@ -16,6 +16,7 @@ import com.vietqr.org.dto.TransReceiveResponseDTO;
 import com.vietqr.org.dto.TransStatisticByDateDTO;
 import com.vietqr.org.dto.TransStatisticByMonthDTO;
 import com.vietqr.org.dto.TransStatisticDTO;
+import com.vietqr.org.dto.TransStatisticMerchantDTO;
 import com.vietqr.org.dto.TransactionCheckStatusDTO;
 import com.vietqr.org.dto.TransactionDetailDTO;
 import com.vietqr.org.dto.TransactionFeeDTO;
@@ -590,7 +591,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "FROM account_customer_bank a  "
                         + "LEFT JOIN transaction_receive b "
                         + "ON a.bank_id = b.bank_id  "
-                        + "WHERE a.customer_sync_id = :customerSyncId AND status = 1 ", nativeQuery = true)
+                        + "WHERE a.customer_sync_id = :customerSyncId AND b.status = 1 ", nativeQuery = true)
         TransStatisticDTO getTransStatisticCustomerSync(@Param(value = "customerSyncId") String customerSyncId);
 
         @Query(value = "SELECT COUNT(b.id) AS totalTrans, "
@@ -601,7 +602,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "FROM account_customer_bank a  "
                         + "LEFT JOIN transaction_receive b "
                         + "ON a.bank_id = b.bank_id  "
-                        + "WHERE a.customer_sync_id = :customerSyncId AND status = 1 "
+                        + "WHERE a.customer_sync_id = :customerSyncId AND b.status = 1 "
                         + "AND DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(b.time), '+00:00', '+07:00'), '%Y-%m') = :month "
                         + "GROUP BY DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(b.time), '+00:00', '+07:00'), '%Y-%m') ", nativeQuery = true)
         TransStatisticDTO getTransStatisticCustomerSyncByMonth(@Param(value = "customerSyncId") String customerSyncId,
@@ -668,4 +669,70 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         @Param(value = "value") String value,
                         @Param(value = "bankAccount") String bankAccount);
 
+        // TransStatisticMerchantDTO
+        // * sort by year, list by month, by customer_sync_id */
+        @Query(value = "SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(b.time), '+00:00', '+07:00'), '%Y-%m') as time, COUNT(b.id) AS totalTrans,  "
+                        + "SUM(b.amount) AS totalAmount,  "
+                        + "SUM(CASE WHEN b.trans_type = 'C' AND b.status = 1 THEN b.amount ELSE 0 END) AS totalCredit, "
+                        + "SUM(CASE WHEN b.trans_type = 'D' AND b.status = 1 THEN b.amount ELSE 0 END) AS totalDebit, "
+                        + "SUM(CASE WHEN b.trans_type = 'C' AND b.status = 1 THEN 1 ELSE 0 END) AS totalTransC,  "
+                        + "SUM(CASE WHEN b.trans_type = 'D' AND b.status = 1 THEN 1 ELSE 0 END) AS totalTransD   "
+                        + "FROM account_customer_bank a   "
+                        + "LEFT JOIN transaction_receive b ON a.bank_id = b.bank_id   "
+                        + "WHERE a.customer_sync_id = :id AND b.status = 1  "
+                        + "AND DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(b.time), '+00:00', '+07:00'), '%Y') = :value "
+                        + "GROUP BY DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(b.time), '+00:00', '+07:00'), '%Y-%m') "
+                        + "ORDER BY time DESC", nativeQuery = true)
+        List<TransStatisticMerchantDTO> getStatisticYearByMerchantId(
+                        @Param(value = "id") String id,
+                        @Param(value = "value") String value);
+
+        // * sort by month, list by day, by customer_sync_id */
+        @Query(value = "SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(b.time), '+00:00', '+07:00'), '%Y-%m-%d') as time, COUNT(b.id) AS totalTrans,  "
+                        + "SUM(b.amount) AS totalAmount,  "
+                        + "SUM(CASE WHEN b.trans_type = 'C' AND b.status = 1 THEN b.amount ELSE 0 END) AS totalCredit, "
+                        + "SUM(CASE WHEN b.trans_type = 'D' AND b.status = 1 THEN b.amount ELSE 0 END) AS totalDebit, "
+                        + "SUM(CASE WHEN b.trans_type = 'C' AND b.status = 1 THEN 1 ELSE 0 END) AS totalTransC,  "
+                        + "SUM(CASE WHEN b.trans_type = 'D' AND b.status = 1 THEN 1 ELSE 0 END) AS totalTransD   "
+                        + "FROM account_customer_bank a   "
+                        + "LEFT JOIN transaction_receive b ON a.bank_id = b.bank_id   "
+                        + "WHERE a.customer_sync_id = :id AND b.status = 1  "
+                        + "AND DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(b.time), '+00:00', '+07:00'), '%Y-%m') = :value "
+                        + "GROUP BY DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(b.time), '+00:00', '+07:00'), '%Y-%m-%d') "
+                        + "ORDER BY time DESC", nativeQuery = true)
+        List<TransStatisticMerchantDTO> getStatisticMonthByMerchantId(
+                        @Param(value = "id") String id,
+                        @Param(value = "value") String value);
+
+        // * sort by year, list by month, by bank_id */
+        @Query(value = "SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(time), '+00:00', '+07:00'), '%Y-%m') as time, COUNT(id) AS totalTrans, "
+                        + "SUM(amount) AS totalAmount,  "
+                        + "SUM(CASE WHEN trans_type = 'C' AND status = 1 THEN amount ELSE 0 END) AS totalCredit,   "
+                        + "SUM(CASE WHEN trans_type = 'D' AND status = 1 THEN amount ELSE 0 END) AS totalDebit,  "
+                        + "SUM(CASE WHEN trans_type = 'C' AND status = 1 THEN 1 ELSE 0 END) AS totalTransC,   "
+                        + "SUM(CASE WHEN trans_type = 'D' AND status = 1 THEN 1 ELSE 0 END) AS totalTransD   "
+                        + "FROM transaction_receive  "
+                        + "WHERE bank_id = :id AND status = 1  "
+                        + "AND DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(time), '+00:00', '+07:00'), '%Y') = :value "
+                        + "GROUP BY DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(time), '+00:00', '+07:00'), '%Y-%m') "
+                        + "ORDER BY time DESC ", nativeQuery = true)
+        List<TransStatisticMerchantDTO> getStatisticYearByBankId(
+                        @Param(value = "id") String id,
+                        @Param(value = "value") String value);
+
+        // * sort by month, list by day, by bank_id */
+        @Query(value = "SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(time), '+00:00', '+07:00'), '%Y-%m-%d') as time, COUNT(id) AS totalTrans, "
+                        + "SUM(amount) AS totalAmount,  "
+                        + "SUM(CASE WHEN trans_type = 'C' AND status = 1 THEN amount ELSE 0 END) AS totalCredit,   "
+                        + "SUM(CASE WHEN trans_type = 'D' AND status = 1 THEN amount ELSE 0 END) AS totalDebit,  "
+                        + "SUM(CASE WHEN trans_type = 'C' AND status = 1 THEN 1 ELSE 0 END) AS totalTransC,   "
+                        + "SUM(CASE WHEN trans_type = 'D' AND status = 1 THEN 1 ELSE 0 END) AS totalTransD   "
+                        + "FROM transaction_receive  "
+                        + "WHERE bank_id = :id AND status = 1  "
+                        + "AND DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(time), '+00:00', '+07:00'), '%Y-%m') = :value "
+                        + "GROUP BY DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(time), '+00:00', '+07:00'), '%Y-%m-%d') "
+                        + "ORDER BY time DESC ", nativeQuery = true)
+        List<TransStatisticMerchantDTO> getStatisticMonthByBankId(
+                        @Param(value = "id") String id,
+                        @Param(value = "value") String value);
 }

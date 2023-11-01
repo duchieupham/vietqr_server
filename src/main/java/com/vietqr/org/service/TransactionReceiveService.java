@@ -10,6 +10,7 @@ import com.vietqr.org.dto.TransReceiveResponseDTO;
 import com.vietqr.org.dto.TransStatisticByDateDTO;
 import com.vietqr.org.dto.TransStatisticByMonthDTO;
 import com.vietqr.org.dto.TransStatisticDTO;
+import com.vietqr.org.dto.TransStatisticMerchantDTO;
 import com.vietqr.org.dto.TransactionCheckStatusDTO;
 import com.vietqr.org.dto.TransactionDetailDTO;
 import com.vietqr.org.dto.TransactionFeeDTO;
@@ -182,4 +183,12 @@ public interface TransactionReceiveService {
         List<TransReceiveResponseDTO> getTransByOrderId(String value, String bankAccount);
 
         List<TransReceiveResponseDTO> getTransByReferenceNumber(String value, String bankAccount);
+
+        List<TransStatisticMerchantDTO> getStatisticYearByMerchantId(String id, String value);
+
+        List<TransStatisticMerchantDTO> getStatisticMonthByMerchantId(String id, String value);
+
+        List<TransStatisticMerchantDTO> getStatisticYearByBankId(String id, String value);
+
+        List<TransStatisticMerchantDTO> getStatisticMonthByBankId(String id, String value);
 }

@@ -44,6 +44,7 @@ import com.vietqr.org.dto.TransReceiveRpaDTO;
 import com.vietqr.org.dto.TransStatisticByDateDTO;
 import com.vietqr.org.dto.TransStatisticByMonthDTO;
 import com.vietqr.org.dto.TransStatisticDTO;
+import com.vietqr.org.dto.TransStatisticMerchantDTO;
 import com.vietqr.org.dto.TransSyncRpaDTO;
 import com.vietqr.org.dto.TransactionBranchInputDTO;
 import com.vietqr.org.dto.TransactionCheckDTO;
@@ -1094,6 +1095,41 @@ public class TransactionController {
         } catch (Exception e) {
             logger.error("getTransactionQR: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("transactions/merchant/statistic")
+    public ResponseEntity<List<TransStatisticMerchantDTO>> getMerchantTransStatistic(
+            @RequestParam(value = "type") int type,
+            @RequestParam(value = "id") String id,
+            @RequestParam(value = "time") String time) {
+        List<TransStatisticMerchantDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            // value:
+            // 0: merchantId - year
+            // 1: merchantId - month
+            // 2: bankId - year
+            // 3: bankId - month
+            if (type == 0) {
+                result = transactionReceiveService.getStatisticYearByMerchantId(id, time);
+                httpStatus = HttpStatus.OK;
+            } else if (type == 1) {
+                result = transactionReceiveService.getStatisticMonthByMerchantId(id, time);
+                httpStatus = HttpStatus.OK;
+            } else if (type == 2) {
+                result = transactionReceiveService.getStatisticYearByBankId(id, time);
+                httpStatus = HttpStatus.OK;
+            } else if (type == 3) {
+                result = transactionReceiveService.getStatisticMonthByBankId(id, time);
+                httpStatus = HttpStatus.OK;
+            } else {
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("getMerchantTransStatistic: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);

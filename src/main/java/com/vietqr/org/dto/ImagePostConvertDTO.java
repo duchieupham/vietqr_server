@@ -11,16 +11,14 @@ public class ImagePostConvertDTO implements Serializable {
 
     private String base64Image;
     private String name;
-    private String style;
 
     public ImagePostConvertDTO() {
         super();
     }
 
-    public ImagePostConvertDTO(String base64Image, String name, String style) {
+    public ImagePostConvertDTO(String base64Image, String name) {
         this.base64Image = base64Image;
         this.name = name;
-        this.style = style;
     }
 
     public String getBase64Image() {
@@ -37,14 +35,6 @@ public class ImagePostConvertDTO implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getStyle() {
-        return style;
-    }
-
-    public void setStyle(String style) {
-        this.style = style;
     }
 
 }
