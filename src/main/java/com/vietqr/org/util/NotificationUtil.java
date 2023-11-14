@@ -14,6 +14,7 @@ public class NotificationUtil {
 	private static final String NOTI_ADD_VIETQR_ID = "N09";
 	private static final String NOTI_RECHARGE = "N10";
 	private static final String NOTI_MOBILE_TOPUP = "N11";
+	private static final String NOTI_TYPE_CANCEL_TRANSACTION = "N12";
 
 	// Title
 	private static final String NOTI_TITLE_TRANSACTION = "Thông báo biến động số dư";
@@ -216,6 +217,10 @@ public class NotificationUtil {
 
 	public static String getNotiDescRemoveMember() {
 		return NOTI_DESC_REMOVE_MEMBER;
+	}
+
+	public static String getNotiTypeCancelTransaction() {
+		return NOTI_TYPE_CANCEL_TRANSACTION;
 	}
 
 }

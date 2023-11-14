@@ -16,6 +16,7 @@ public class VietQRMMSCreateDTO implements Serializable {
     private String orderId;
     private String sign;
     private String terminalCode;
+    private String note;
 
     public VietQRMMSCreateDTO() {
         super();
@@ -32,7 +33,7 @@ public class VietQRMMSCreateDTO implements Serializable {
     }
 
     public VietQRMMSCreateDTO(String bankAccount, String bankCode, String amount, String content, String orderId,
-            String sign, String terminalCode) {
+            String sign, String terminalCode, String note) {
         this.bankAccount = bankAccount;
         this.bankCode = bankCode;
         this.amount = amount;
@@ -40,6 +41,7 @@ public class VietQRMMSCreateDTO implements Serializable {
         this.orderId = orderId;
         this.sign = sign;
         this.terminalCode = terminalCode;
+        this.note = note;
     }
 
     public String getBankAccount() {
@@ -96,6 +98,14 @@ public class VietQRMMSCreateDTO implements Serializable {
 
     public void setTerminalCode(String terminalCode) {
         this.terminalCode = terminalCode;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 
 }

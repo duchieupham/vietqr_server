@@ -9,6 +9,7 @@ import com.vietqr.org.entity.TransactionReceiveEntity;
 import com.vietqr.org.dto.TransByCusSyncDTO;
 import com.vietqr.org.dto.TransReceiveAdminDetailDTO;
 import com.vietqr.org.dto.TransReceiveResponseDTO;
+import com.vietqr.org.dto.TransReceiveStatisticFeeDTO;
 import com.vietqr.org.dto.TransStatisticByDateDTO;
 import com.vietqr.org.dto.TransStatisticByMonthDTO;
 import com.vietqr.org.dto.TransStatisticDTO;
@@ -318,6 +319,67 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     @Override
     public List<TransStatisticMerchantDTO> getStatisticMonthByBankId(String id, String value) {
         return repo.getStatisticMonthByBankId(id, value);
+    }
+
+    @Override
+    public void updateTransactionStatusById(int status, String id) {
+        repo.updateTransactionStatusById(status, id);
+    }
+
+    @Override
+    public void updateTransactionReceiveNote(String note, String id) {
+        repo.updateTransactionReceiveNote(note, id);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAllDate(String value, long offset) {
+        return repo.getTransByTerminalCodeAllDate(value, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByTerminalCodeFromDate(String value, String fromDate,
+            String toDate, long offset) {
+        return repo.getTransByTerminalCodeFromDate(value, fromDate, toDate, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAndMerchantIdAllDate(String value,
+            String merchantId, long offset) {
+        return repo.getTransByTerminalCodeAndMerchantIdAllDate(value, merchantId, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAndMerchantIdFromDate(String fromDate,
+            String toDate, String value, String merchantId, long offset) {
+        return repo.getTransByTerminalCodeAndMerchantIdFromDate(fromDate, toDate, value, merchantId, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAndUserIdAllDate(String value, String userId,
+            long offset) {
+        return repo.getTransByTerminalCodeAndUserIdAllDate(value, userId, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAndUserIdFromDate(String fromDate, String toDate,
+            String value, String userId, long offset) {
+        return repo.getTransByTerminalCodeAndUserIdFromDate(fromDate, toDate, value, userId, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> exportTransFromDateByTerminalCodeAndMerchantId(String fromDate,
+            String toDate, String value, String merchantId) {
+        return repo.exportTransFromDateByTerminalCodeAndMerchantId(fromDate, toDate, value, merchantId);
+    }
+
+    @Override
+    public TransReceiveStatisticFeeDTO getTransStatisticForServiceFee(String bankId, String month) {
+        return repo.getTransStatisticForServiceFee(bankId, month);
+    }
+
+    @Override
+    public TransReceiveStatisticFeeDTO getTransStatisticForServiceFeeWithSystemType(String bankId, String month) {
+        return repo.getTransStatisticForServiceFeeWithSystemType(bankId, month);
     }
 
 }

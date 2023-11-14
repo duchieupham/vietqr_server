@@ -31,4 +31,8 @@ public interface TransactionReceiveAdminListDTO {
 
     String getBankShortName();
 
+    String getTerminalCode();
+
+    String getNote();
+
 }

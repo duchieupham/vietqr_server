@@ -61,4 +61,9 @@ public class AccountCustomerBankServiceImpl implements AccountCustomerBankServic
         return repo.getBankAccountsByMerchantId(customerSyncId);
     }
 
+    @Override
+    public String getMerchantByBankId(String bankId) {
+        return repo.getMerchantByBankId(bankId);
+    }
+
 }

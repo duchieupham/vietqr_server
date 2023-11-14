@@ -18,4 +18,8 @@ public interface TransactionRelatedDTO {
     Integer getType();
 
     String getTransType();
+
+    // String getTerminalCode();
+
+    // String getNote();
 }

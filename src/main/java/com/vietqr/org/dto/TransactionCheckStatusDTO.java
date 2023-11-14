@@ -16,4 +16,8 @@ public interface TransactionCheckStatusDTO {
     String getTransType();
 
     Integer getStatus();
+
+    String getTerminalCode();
+
+    String getNote();
 }

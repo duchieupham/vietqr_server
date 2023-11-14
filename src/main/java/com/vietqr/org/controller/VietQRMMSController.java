@@ -174,6 +174,7 @@ public class VietQRMMSController {
             transactionEntity.setTerminalCode(dto.getTerminalCode());
             transactionEntity.setQrCode(qrCode);
             transactionEntity.setUserId(accountBankReceiveEntity.getUserId());
+            transactionEntity.setNote(dto.getNote());
             transactionReceiveService.insertTransactionReceive(transactionEntity);
             LocalDateTime endTime = LocalDateTime.now();
             long endTimeLong = endTime.toEpochSecond(ZoneOffset.UTC);

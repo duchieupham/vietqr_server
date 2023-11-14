@@ -1270,6 +1270,7 @@ public class TransactionBankController {
 		transactionEntity.setTerminalCode("");
 		transactionEntity.setQrCode("");
 		transactionEntity.setUserId(accountBankEntity.getUserId());
+		transactionEntity.setNote("");
 		transactionReceiveService.insertTransactionReceive(transactionEntity);
 		//
 		///

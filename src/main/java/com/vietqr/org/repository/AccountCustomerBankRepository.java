@@ -67,4 +67,12 @@ public interface AccountCustomerBankRepository extends JpaRepository<AccountCust
         List<AccountBankReceiveServiceItemDTO> getBankAccountsByMerchantId(
                         @Param(value = "customerSyncId") String customerSyncId);
 
+        @Query(value = "SELECT b.merchant "
+                        + "FROM account_customer_bank a "
+                        + "INNER JOIN customer_sync b "
+                        + "ON a.customer_sync_id = b.id "
+                        + "WHERE a.bank_id = :bankId "
+                        + "LIMIT 1", nativeQuery = true)
+        String getMerchantByBankId(@Param(value = "bankId") String bankId);
+
 }

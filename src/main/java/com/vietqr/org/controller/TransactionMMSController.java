@@ -57,6 +57,7 @@ import com.vietqr.org.service.TransactionReceiveService;
 import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.EnvironmentUtil;
 import com.vietqr.org.util.NotificationUtil;
+import com.vietqr.org.util.RandomCodeUtil;
 import com.vietqr.org.util.SocketHandler;
 import com.vietqr.org.util.TransactionRefIdUtil;
 
@@ -819,7 +820,7 @@ public class TransactionMMSController {
                 // "content":"Hoan tien test"
                 // }
                 UUID clientMessageId = UUID.randomUUID();
-                UUID transactionId = UUID.randomUUID();
+                String transactionId = RandomCodeUtil.generateRandomId(12);
                 Map<String, Object> data = new HashMap<>();
                 data.put("terminalID", terminalId);
                 data.put("traceTransfer", ftCode);

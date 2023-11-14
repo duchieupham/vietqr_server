@@ -980,4 +980,39 @@ public class AccountBankReceiveController {
 		}
 		return new ResponseEntity<>(result, httpStatus);
 	}
+
+	///
+	///
+	// Transfer bankAccount sync (flow 1 & 2)
+	///
+	// 1. check mms_sync (1 or 2) & check is_authenticated
+	// => unauthen: 0
+	// => authen & flow 1: 1
+	// => authen & flow 2: 2
+	///
+	// IF 2 to 1:
+	// 2. update mms_sync into bank_account_receive
+	///
+	// IF 1 to 2:
+	// 2. get customer sync info - address
+	// 3. get counting bankAccount into customersync
+	// 4. Check existing terminal by bankAccount
+	// 5. call sync TID MB
+	// 6. get list TID
+	// 7. insert terminal_bank
+	// 8. insert terminal_address
+	// 9. update mms_sync into bank_account_receive
+	public ResponseEntity<ResponseMessageDTO> transferBankAccountFlow() {
+		ResponseMessageDTO result = null;
+		HttpStatus httpStatus = null;
+		try {
+			//
+		} catch (Exception e) {
+			System.out.println("transferBankAccountFlow: ERROR: " + e.toString());
+			logger.error("transferBankAccountFlow: ERROR: " + e.toString());
+			result = new ResponseMessageDTO("FAILED", "E05");
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
 }

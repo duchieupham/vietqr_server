@@ -7,6 +7,7 @@ import com.vietqr.org.entity.TransactionReceiveEntity;
 import com.vietqr.org.dto.TransByCusSyncDTO;
 import com.vietqr.org.dto.TransReceiveAdminDetailDTO;
 import com.vietqr.org.dto.TransReceiveResponseDTO;
+import com.vietqr.org.dto.TransReceiveStatisticFeeDTO;
 import com.vietqr.org.dto.TransStatisticByDateDTO;
 import com.vietqr.org.dto.TransStatisticByMonthDTO;
 import com.vietqr.org.dto.TransStatisticDTO;
@@ -27,6 +28,10 @@ public interface TransactionReceiveService {
 
         public void updateTransactionReceiveStatus(int status, String refId, String referenceNumber, long timePaid,
                         String id);
+
+        public void updateTransactionReceiveNote(String note, String id);
+
+        public void updateTransactionStatusById(int status, String id);
 
         public List<TransactionRelatedDTO> getRelatedTransactionReceives(String businessId);
 
@@ -191,4 +196,31 @@ public interface TransactionReceiveService {
         List<TransStatisticMerchantDTO> getStatisticYearByBankId(String id, String value);
 
         List<TransStatisticMerchantDTO> getStatisticMonthByBankId(String id, String value);
+
+        /// TERMINAL CODE
+        List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAllDate(String value, long offset);
+
+        List<TransactionReceiveAdminListDTO> getTransByTerminalCodeFromDate(String value, String fromDate,
+                        String toDate, long offset);
+
+        List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAndMerchantIdAllDate(String value, String merchantId,
+                        long offset);
+
+        List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAndMerchantIdFromDate(String fromDate, String toDate,
+                        String value, String merchantId, long offset);
+
+        List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAndUserIdAllDate(String value, String userId,
+                        long offset);
+
+        List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAndUserIdFromDate(String fromDate, String toDate,
+                        String value, String userId, long offset);
+
+        List<TransactionReceiveAdminListDTO> exportTransFromDateByTerminalCodeAndMerchantId(String fromDate,
+                        String toDate, String value, String merchantId);
+
+        // for service fee
+        TransReceiveStatisticFeeDTO getTransStatisticForServiceFee(String bankId, String month);
+
+        TransReceiveStatisticFeeDTO getTransStatisticForServiceFeeWithSystemType(String bankId, String month);
+
 }

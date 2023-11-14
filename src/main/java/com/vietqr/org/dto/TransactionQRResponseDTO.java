@@ -28,6 +28,8 @@ public class TransactionQRResponseDTO implements Serializable {
     private String bankShortName;
     private String imgId;
     private String userBankName;
+    private String note;
+    private String merchant;
 
     public TransactionQRResponseDTO() {
         super();
@@ -36,7 +38,7 @@ public class TransactionQRResponseDTO implements Serializable {
     public TransactionQRResponseDTO(String transactionId, String qr, Long amount, String content, String transType,
             String terminalCode, String orderId, String sign, int type, int status, Long timeCreated, String bankTypeId,
             String bankAccount, String bankCode, String bankName, String bankShortName, String imgId,
-            String userBankName) {
+            String userBankName, String note, String merchant) {
         this.transactionId = transactionId;
         this.qr = qr;
         this.amount = amount;
@@ -55,6 +57,8 @@ public class TransactionQRResponseDTO implements Serializable {
         this.bankShortName = bankShortName;
         this.imgId = imgId;
         this.userBankName = userBankName;
+        this.note = note;
+        this.merchant = merchant;
     }
 
     public String getTransactionId() {
@@ -199,6 +203,22 @@ public class TransactionQRResponseDTO implements Serializable {
 
     public void setUserBankName(String userBankName) {
         this.userBankName = userBankName;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    public String getMerchant() {
+        return merchant;
+    }
+
+    public void setMerchant(String merchant) {
+        this.merchant = merchant;
     }
 
 }

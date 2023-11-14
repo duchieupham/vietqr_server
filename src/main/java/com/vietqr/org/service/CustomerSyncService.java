@@ -57,4 +57,6 @@ public interface CustomerSyncService {
     public List<CustomerSyncEntity> getCustomerSyncByAccountId(String accountId);
 
     public List<AnnualFeeMerchantDTO> getMerchantForServiceFeeById(String customerSyncId);
+
+    public String getMerchantNameById(String id);
 }

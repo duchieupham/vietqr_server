@@ -20,6 +20,7 @@ public class VietQRCreateDTO implements Serializable {
 	private String customerBankCode;
 	private String customerName;
 	private String terminalCode;
+	private String note;
 
 	public VietQRCreateDTO() {
 		super();
@@ -37,7 +38,7 @@ public class VietQRCreateDTO implements Serializable {
 	}
 
 	public VietQRCreateDTO(String bankId, String amount, String content, String branchId, String businessId,
-			String userId, String terminalCode) {
+			String userId, String terminalCode, String note) {
 		super();
 		this.bankId = bankId;
 		this.amount = amount;
@@ -46,6 +47,7 @@ public class VietQRCreateDTO implements Serializable {
 		this.businessId = businessId;
 		this.userId = userId;
 		this.terminalCode = terminalCode;
+		this.note = note;
 	}
 
 	public VietQRCreateDTO(String bankId, String amount, String content, String branchId, String businessId,
@@ -64,7 +66,23 @@ public class VietQRCreateDTO implements Serializable {
 
 	public VietQRCreateDTO(String bankId, String amount, String content, String branchId, String businessId,
 			String userId, String transType, String customerBankAccount, String customerBankCode, String customerName,
-			String terminalCode) {
+			String note) {
+		this.bankId = bankId;
+		this.amount = amount;
+		this.content = content;
+		this.branchId = branchId;
+		this.businessId = businessId;
+		this.userId = userId;
+		this.transType = transType;
+		this.customerBankAccount = customerBankAccount;
+		this.customerBankCode = customerBankCode;
+		this.customerName = customerName;
+		this.note = note;
+	}
+
+	public VietQRCreateDTO(String bankId, String amount, String content, String branchId, String businessId,
+			String userId, String transType, String customerBankAccount, String customerBankCode, String customerName,
+			String terminalCode, String note) {
 		this.bankId = bankId;
 		this.amount = amount;
 		this.content = content;
@@ -76,6 +94,7 @@ public class VietQRCreateDTO implements Serializable {
 		this.customerBankCode = customerBankCode;
 		this.customerName = customerName;
 		this.terminalCode = terminalCode;
+		this.note = note;
 	}
 
 	public String getTransType() {
@@ -164,6 +183,14 @@ public class VietQRCreateDTO implements Serializable {
 
 	public void setTerminalCode(String terminalCode) {
 		this.terminalCode = terminalCode;
+	}
+
+	public String getNote() {
+		return note;
+	}
+
+	public void setNote(String note) {
+		this.note = note;
 	}
 
 }

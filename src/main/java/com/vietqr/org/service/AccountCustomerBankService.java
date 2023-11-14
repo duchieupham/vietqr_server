@@ -29,4 +29,5 @@ public interface AccountCustomerBankService {
 
     public List<AccountBankReceiveServiceItemDTO> getBankAccountsByMerchantId(String customerSyncId);
 
+    public String getMerchantByBankId(String bankId);
 }

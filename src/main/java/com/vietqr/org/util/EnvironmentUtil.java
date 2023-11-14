@@ -1,11 +1,15 @@
 package com.vietqr.org.util;
 
 public class EnvironmentUtil {
-    private static boolean IS_PRODUCTION = false;
+    private static boolean IS_PRODUCTION = true;
 
+    /// NEWSFEED
     // LINK NEWS IMAGE
     private static final String IMAGE_POST_UAT_LINK = "";
     private static final String IMGAGE_POST_PROD_LINK = "";
+
+    // PARTNERS CONNECT
+    private static final String SERVICE_VHITEK_ACTIVE = "VHITEK_ACTIVE";
 
     // QR LINK
     private static final String QR_LINK_UAT = "https://vietqr.vn/test/qr-generated?token=";
@@ -117,6 +121,9 @@ public class EnvironmentUtil {
     private static final String BANK_TYPE_ID_RECHARGE_UAT = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
     private static final String BANK_TYPE_ID_RECHARGE_PROD = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
 
+    private static final String USER_ID_HOST_RECHARGE_UAT = "";
+    private static final String USER_ID_HOST_RECHARGE_PROD = "6e3712ab-48ea-4bfa-a50d-f7dd1f184efb";
+
     ///////////////////////////////////
     //
     private static final String DEFAULT_USER_ID_TEST = "62ad476d-3b6b-4926-9890-fa6a20144f7f";
@@ -125,6 +132,14 @@ public class EnvironmentUtil {
     // Telegram
     private static final String TELEGRAM_BOT_USERNAME = "vietqr_bot";
     private static final String TELEGRAM_BOT_TOKEN = "6603683411:AAGTCde6C-7kt4gR5gTvcDA_jmYIqs0SJJM";
+
+    public static String getServiceVhitekActive() {
+        return SERVICE_VHITEK_ACTIVE;
+    }
+
+    public static String getUserIdHostRecharge() {
+        return (IS_PRODUCTION == false) ? USER_ID_HOST_RECHARGE_UAT : USER_ID_HOST_RECHARGE_PROD;
+    }
 
     public static String getQRLink() {
         return (IS_PRODUCTION == false) ? QR_LINK_UAT : QR_LINK_PROD;

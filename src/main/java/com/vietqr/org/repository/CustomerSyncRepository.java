@@ -163,4 +163,7 @@ public interface CustomerSyncRepository extends JpaRepository<CustomerSyncEntity
 
         @Query(value = "SELECT id AS customerSyncId, merchant FROM customer_sync ", nativeQuery = true)
         List<MerchantServiceItemDTO> getMerchantsMappingService();
+
+        @Query(value = "SELECT merchant FROM customer_sync WHERE id = :id ", nativeQuery = true)
+        String getMerchantNameById(@Param(value = "id") String id);
 }

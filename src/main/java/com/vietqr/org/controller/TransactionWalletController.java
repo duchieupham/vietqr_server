@@ -163,6 +163,7 @@ public class TransactionWalletController {
                     String cai = EnvironmentUtil.getCAIRecharge();
                     String businessId = EnvironmentUtil.getBusinessIdRecharge();
                     String branchId = EnvironmentUtil.getBranchIdRecharge();
+                    String userIdHost = EnvironmentUtil.getUserIdHostRecharge();
                     // create VietQR
 
                     VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
@@ -204,6 +205,8 @@ public class TransactionWalletController {
                     transactionReceiveEntity.setCustomerBankCode("");
                     transactionReceiveEntity.setCustomerName("");
                     transactionReceiveEntity.setTerminalCode("");
+                    transactionReceiveEntity.setUserId(userIdHost);
+                    transactionReceiveEntity.setNote("");
                     transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
                     // insert transaction branch
                     if (businessId != null && branchId != null && !businessId.trim().isEmpty()

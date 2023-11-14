@@ -84,13 +84,16 @@ public class TransactionReceiveEntity implements Serializable {
 	@Column(name = "userId")
 	private String userId;
 
+	@Column(name = "note")
+	private String note;
+
 	public TransactionReceiveEntity() {
 		super();
 	}
 
 	public TransactionReceiveEntity(String id, String bankAccount, String bankId, String content, long amount,
 			long time, String refId, int type, int status, String traceId, String transType, String referenceNumber,
-			String sign, String orderId, String terminalCode, String qrCode, String userId) {
+			String sign, String orderId, String terminalCode, String qrCode, String userId, String note) {
 		this.id = id;
 		this.bankAccount = bankAccount;
 		this.bankId = bankId;
@@ -108,12 +111,13 @@ public class TransactionReceiveEntity implements Serializable {
 		this.terminalCode = terminalCode;
 		this.qrCode = qrCode;
 		this.userId = userId;
+		this.note = note;
 	}
 
 	public TransactionReceiveEntity(String id, String bankAccount, String bankId, String content, long amount,
 			long time, String refId, int type, int status, String traceId, String transType, String referenceNumber,
 			String orderId, String sign, String customerBankAccount, String customerBankCode, String customerName,
-			String terminalCode, String qrCode, String userId) {
+			String terminalCode, String qrCode, String userId, String note) {
 		this.id = id;
 		this.bankAccount = bankAccount;
 		this.bankId = bankId;
@@ -134,12 +138,13 @@ public class TransactionReceiveEntity implements Serializable {
 		this.terminalCode = terminalCode;
 		this.qrCode = qrCode;
 		this.userId = userId;
+		this.note = note;
 	}
 
 	public TransactionReceiveEntity(String id, String bankAccount, String bankId, String content, long amount,
 			long time, long timePaid, String refId, int type, int status, String traceId, String transType,
 			String referenceNumber, String orderId, String sign, String customerBankAccount, String customerBankCode,
-			String customerName, String terminalCode, String qrCode, String userId) {
+			String customerName, String terminalCode, String qrCode, String userId, String note) {
 		this.id = id;
 		this.bankAccount = bankAccount;
 		this.bankId = bankId;
@@ -161,6 +166,7 @@ public class TransactionReceiveEntity implements Serializable {
 		this.terminalCode = terminalCode;
 		this.qrCode = qrCode;
 		this.userId = userId;
+		this.note = note;
 	}
 
 	public String getId() {
@@ -329,6 +335,14 @@ public class TransactionReceiveEntity implements Serializable {
 
 	public void setUserId(String userId) {
 		this.userId = userId;
+	}
+
+	public String getNote() {
+		return note;
+	}
+
+	public void setNote(String note) {
+		this.note = note;
 	}
 
 }

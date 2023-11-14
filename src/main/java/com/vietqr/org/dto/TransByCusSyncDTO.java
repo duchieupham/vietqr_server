@@ -32,4 +32,7 @@ public interface TransByCusSyncDTO {
 
     Integer getType();
 
+    String getTerminalCode();
+
+    String getNote();
 }

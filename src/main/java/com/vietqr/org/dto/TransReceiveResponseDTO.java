@@ -28,4 +28,8 @@ public interface TransReceiveResponseDTO {
 
     Long getTimePaid();
 
+    String getTerminalCode();
+
+    String getNote();
+
 }

@@ -65,4 +65,6 @@ public interface TransactionQRDTO {
     String getQrCode();
 
     Boolean getMmsActive();
+
+    String getNote();
 }

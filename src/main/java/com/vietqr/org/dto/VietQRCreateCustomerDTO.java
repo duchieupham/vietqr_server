@@ -21,6 +21,7 @@ public class VietQRCreateCustomerDTO implements Serializable {
     private String orderId;
     private String sign;
     private String terminalCode;
+    private String note;
 
     public VietQRCreateCustomerDTO() {
         super();
@@ -38,7 +39,7 @@ public class VietQRCreateCustomerDTO implements Serializable {
     }
 
     public VietQRCreateCustomerDTO(Long amount, String content, String bankAccount, String bankCode,
-            String userBankName, String orderId, String sign, String terminalCode) {
+            String userBankName, String orderId, String sign, String terminalCode, String note) {
         this.amount = amount;
         this.content = content;
         this.bankAccount = bankAccount;
@@ -47,6 +48,7 @@ public class VietQRCreateCustomerDTO implements Serializable {
         this.orderId = orderId;
         this.sign = sign;
         this.terminalCode = terminalCode;
+        this.note = note;
     }
 
     public VietQRCreateCustomerDTO(String bankAccount, Long amount, String content,
@@ -69,7 +71,7 @@ public class VietQRCreateCustomerDTO implements Serializable {
     public VietQRCreateCustomerDTO(String bankAccount, Long amount, String content,
             String bankCode, String userBankName, int existing, String transType,
             String customerBankAccount, String customerBankCode, String customerName,
-            String orderId, String sign, String terminalCode) {
+            String orderId, String sign, String terminalCode, String note) {
         this.amount = amount;
         this.content = content;
         this.bankAccount = bankAccount;
@@ -82,6 +84,7 @@ public class VietQRCreateCustomerDTO implements Serializable {
         this.orderId = orderId;
         this.sign = sign;
         this.terminalCode = terminalCode;
+        this.note = note;
     }
 
     public String getBankAccount() {
@@ -178,6 +181,14 @@ public class VietQRCreateCustomerDTO implements Serializable {
 
     public void setTerminalCode(String terminalCode) {
         this.terminalCode = terminalCode;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 
     @Override

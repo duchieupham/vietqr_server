@@ -5,6 +5,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vietqr.org.dto.AccountBankFeeDateUpdateDTO;
+import com.vietqr.org.dto.AccountBankFeeInfoDTO;
 import com.vietqr.org.dto.AccountBankFeeInsertDTO;
 import com.vietqr.org.dto.AnnualFeeBankDTO;
 import com.vietqr.org.dto.AnnualFeeBankItemDTO;
@@ -33,6 +35,9 @@ import com.vietqr.org.dto.ServiceFeeBankItemDTO;
 import com.vietqr.org.dto.ServiceFeeMerchantItemDTO;
 import com.vietqr.org.dto.ServiceFeeMonthItemDTO;
 import com.vietqr.org.dto.TotalPaymentDTO;
+import com.vietqr.org.dto.TransFeeMerchantByMonthDTO;
+import com.vietqr.org.dto.TransFeeMerchantDTO;
+import com.vietqr.org.dto.TransReceiveStatisticFeeDTO;
 import com.vietqr.org.dto.TransactionFeeDTO;
 import com.vietqr.org.entity.AccountBankFeeEntity;
 import com.vietqr.org.entity.PaymentAnnualAccBankEntity;
@@ -340,7 +345,6 @@ public class AccountBankFeeController {
                             List<AnnualFeeBankDTO> banks = accountCustomerBankService
                                     .getBanksAnnualFee(merchant.getCustomerSyncId());
                             if (banks != null && !banks.isEmpty()) {
-
                                 for (AnnualFeeBankDTO bank : banks) {
                                     ServiceFeeBankItemDTO bankItem = new ServiceFeeBankItemDTO();
                                     bankItem.setBankId(bank.getBankId());
@@ -467,7 +471,7 @@ public class AccountBankFeeController {
                         dto.setStatus(status);
                         if (bankItems != null && !bankItems.isEmpty()) {
                             dto.setBankAccounts(bankItems);
-                            result.add(dto);
+                            // result.add(dto);
                         }
                         return dto;
                     });
@@ -478,304 +482,192 @@ public class AccountBankFeeController {
 
                 // Chờ tất cả các CompletableFuture hoàn thành
                 allFutures.join();
-
                 for (CompletableFuture<ServiceFeeMerchantItemDTO> future : futures) {
                     try {
-                        ServiceFeeMerchantItemDTO dto = future.getNow(null);
-                        if (dto != null && dto.getBankAccounts() != null && !dto.getBankAccounts().isEmpty()) {
+                        ServiceFeeMerchantItemDTO dto = future.get();
+                        if (dto.getBankAccounts() != null && !dto.getBankAccounts().isEmpty()) {
                             result.add(dto);
                         }
                     } catch (Exception e) {
-                        // Xử lý ngoại lệ nếu có
+                        logger.error("getServiceFeeList: add result error: " + e.toString());
                     }
                 }
             }
-
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             httpStatus = HttpStatus.BAD_REQUEST;
-            // Xử lý ngoại lệ nếu có
+            logger.error("getServiceFeeList: ERROR: " + e.toString());
         }
 
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    // @GetMapping("admin/merchant/service-fee/transaction")
-    // public ResponseEntity<List<ServiceFeeMerchantItemDTO>> getServiceFeeList(
-    // @RequestParam("month") String month) {
-    // try {
-    // List<AnnualFeeMerchantDTO> merchants =
-    // customerSyncService.getMerchantForServiceFee();
-    // List<CompletableFuture<ServiceFeeMerchantItemDTO>> futures =
-    // merchants.stream()
-    // .map(merchant -> CompletableFuture.supplyAsync(() ->
-    // processMerchant(merchant, month)))
-    // .collect(Collectors.toList());
-
-    // CompletableFuture<Void> allFutures =
-    // CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
-    // allFutures.join();
-
-    // List<ServiceFeeMerchantItemDTO> result = futures.stream()
-    // .map(CompletableFuture::join)
-    // .filter(Objects::nonNull)
-    // .collect(Collectors.toList());
-
-    // return ResponseEntity.ok(result);
-    // } catch (Exception e) {
-    // // Xử lý ngoại lệ nếu có
-    // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    // }
-    // }
-
-    // private ServiceFeeMerchantItemDTO processMerchant(AnnualFeeMerchantDTO
-    // merchant, String month) {
-    // ServiceFeeMerchantItemDTO dto = new ServiceFeeMerchantItemDTO();
-    // // Thực hiện xử lý thông tin phí dịch vụ của merchant tại đây
-    // List<ServiceFeeBankItemDTO> bankItems = new ArrayList<>();
-    // int status = 1;
-    // boolean allStatusOne = true;
-    // Long totalPayment = 0L;
-    // dto.setCustomerSyncId(merchant.getCustomerSyncId());
-    // dto.setMerchant(merchant.getMerchant());
-
-    // if (merchant.getCustomerSyncId() != null) {
-    // List<AnnualFeeBankDTO> banks =
-    // accountCustomerBankService.getBanksAnnualFee(merchant.getCustomerSyncId());
-    // for (AnnualFeeBankDTO bank : banks) {
-    // ServiceFeeBankItemDTO bankItem = new ServiceFeeBankItemDTO();
-    // bankItem.setBankId(bank.getBankId());
-    // bankItem.setBankAccount(bank.getBankAccount());
-    // bankItem.setBankCode(bank.getBankCode());
-    // bankItem.setBankShortName(bank.getBankShortName());
-
-    // List<ServiceFeeMonthItemDTO> feeItems = new ArrayList<>();
-    // List<AccountBankFeeEntity> fees =
-    // accountBankFeeService.getAccountBankFeesByBankId(bank.getBankId());
-    // for (AccountBankFeeEntity fee : fees) {
-    // ServiceFeeMonthItemDTO feeItem = new ServiceFeeMonthItemDTO();
-    // feeItem.setAccountBankFeeId(fee.getId());
-    // feeItem.setServiceFeeId(fee.getServiceFeeId());
-    // feeItem.setShortName(fee.getShortName());
-    // feeItem.setVat(fee.getVat());
-    // feeItem.setCountingTransType(fee.getCountingTransType());
-    // feeItem.setDiscountAmount(fee.getAnnualFee());
-
-    // Long totalTrans = 0L;
-    // Long totalAmount = 0L;
-    // Long totalPaymentService = 0L;
-    // Long totalPaymentServiceAfterVat = 0L;
-    // Long totalPaymentServiceByTransFee = 0L;
-    // Long totalPaymentServiceByPercentAmount = 0L;
-    // int statusFee = 0;
-
-    // if (fee.getCountingTransType() != null && fee.getCountingTransType() == 0) {
-    // TransactionFeeDTO transFee =
-    // transactionReceiveService.getTransactionFeeCountingTypeAll(
-    // fee.getBankId(), month);
-    // if (transFee != null) {
-    // totalTrans = transFee.getTotalTrans();
-    // totalAmount = transFee.getTotalAmount();
-
-    // totalPaymentServiceByTransFee = totalTrans * fee.getTransFee();
-    // totalPaymentServiceByPercentAmount = Math.round(fee.getPercentFee() *
-    // totalAmount / 100);
-    // totalPaymentService = totalPaymentServiceByTransFee +
-    // totalPaymentServiceByPercentAmount;
-    // totalPaymentServiceAfterVat = Math.round(totalPaymentService
-    // + (fee.getVat() * totalPaymentService / 100) - fee.getAnnualFee());
-
-    // if (totalPaymentServiceAfterVat < 0) {
-    // totalPaymentServiceAfterVat = 0L;
-    // }
-
-    // feeItem.setTotalTrans(totalTrans);
-    // feeItem.setTotalAmount(totalAmount);
-    // feeItem.setTotalPayment(totalPaymentServiceAfterVat);
-
-    // PaymentFeeAccBankEntity checkPaid =
-    // paymentFeeAccBankService.checkExistedRecord(
-    // fee.getBankId(), fee.getId(), month);
-    // statusFee = (checkPaid != null && checkPaid.getStatus() != null) ?
-    // checkPaid.getStatus()
-    // : 0;
-    // feeItem.setStatus(statusFee);
-    // feeItems.add(feeItem);
-    // }
-    // }
-    // }
-
-    // bankItem.setFees(feeItems);
-    // bankItems.add(bankItem);
-
-    // if (bankItems.size() > 0) {
-    // dto.setBankAccounts(bankItems);
-    // }
-    // }
-    // }
-
-    // return dto;
-    // }
-
     // OLD 45 giây
-    // @GetMapping("admin/merchant/service-fee/transaction2")
-    // public ResponseEntity<List<ServiceFeeMerchantItemDTO>> getServiceFeeList2(
-    // @RequestParam(value = "month") String month) {
-    // List<ServiceFeeMerchantItemDTO> result = new ArrayList<>();
-    // HttpStatus httpStatus = null;
-    // try {
-    // List<AnnualFeeMerchantDTO> merchants =
-    // customerSyncService.getMerchantForServiceFee();
-    // if (merchants != null && !merchants.isEmpty()) {
-    // //
-    // for (AnnualFeeMerchantDTO merchant : merchants) {
-    // ServiceFeeMerchantItemDTO dto = new ServiceFeeMerchantItemDTO();
-    // List<ServiceFeeBankItemDTO> bankItems = new ArrayList<>();
-    // int status = 1;
-    // boolean allStatusOne = true;
-    // Long totalPayment = 0L;
-    // dto.setCustomerSyncId(merchant.getCustomerSyncId());
-    // dto.setMerchant(merchant.getMerchant());
-    // //
-    // if (merchant.getCustomerSyncId() != null) {
-    // List<AnnualFeeBankDTO> banks = accountCustomerBankService
-    // .getBanksAnnualFee(merchant.getCustomerSyncId());
-    // if (banks != null && !banks.isEmpty()) {
-    // for (AnnualFeeBankDTO bank : banks) {
-    // ServiceFeeBankItemDTO bankItem = new ServiceFeeBankItemDTO();
-    // bankItem.setBankId(bank.getBankId());
-    // bankItem.setBankAccount(bank.getBankAccount());
-    // bankItem.setBankCode(bank.getBankCode());
-    // bankItem.setBankShortName(bank.getBankShortName());
-    // //
-    // List<ServiceFeeMonthItemDTO> feeItems = new ArrayList<>();
-    // List<AccountBankFeeEntity> fees = accountBankFeeService
-    // .getAccountBankFeesByBankId(bank.getBankId());
-    // if (fees != null && !fees.isEmpty()) {
-    // for (AccountBankFeeEntity fee : fees) {
-    // ServiceFeeMonthItemDTO feeItem = new ServiceFeeMonthItemDTO();
-    // feeItem.setAccountBankFeeId(fee.getId());
-    // feeItem.setServiceFeeId(fee.getServiceFeeId());
-    // feeItem.setShortName(fee.getShortName());
-    // feeItem.setVat(fee.getVat());
-    // feeItem.setCountingTransType(fee.getCountingTransType());
-    // feeItem.setDiscountAmount(fee.getAnnualFee());
-    // //
-    // Long totalTrans = 0L;
-    // Long totalAmount = 0L;
-    // Long totalPaymentService = 0L;
-    // Long totalPaymentServiceAfterVat = 0L;
-    // Long totalPaymentServiceByTransFee = 0L;
-    // Long totalPaymentServiceByPercentAmount = 0L;
-    // int statusFee = 0;
-    // // getCountingTransType = 0 => count all
-    // // getCountingTransType = 1 => count only system transaction
-    // if (fee.getCountingTransType() != null && fee.getCountingTransType() == 0) {
-    // TransactionFeeDTO transFee = transactionReceiveService
-    // .getTransactionFeeCountingTypeAll(fee.getBankId(), month);
-    // if (transFee != null) {
-    // totalTrans = transFee.getTotalTrans();
-    // totalAmount = transFee.getTotalAmount();
-    // //
-    // totalPaymentServiceByTransFee = totalTrans * fee.getTransFee();
-    // totalPaymentServiceByPercentAmount = (Long) Math
-    // .round(fee.getPercentFee() * totalAmount / 100);
-    // totalPaymentService = totalPaymentServiceByTransFee
-    // + totalPaymentServiceByPercentAmount;
-    // totalPaymentServiceAfterVat = (Long) Math.round(totalPaymentService
-    // + (fee.getVat() * totalPaymentService / 100)
-    // - fee.getAnnualFee());
-    // if (totalPaymentServiceAfterVat < 0) {
-    // totalPaymentServiceAfterVat = 0L;
-    // }
-    // //
-    // feeItem.setTotalTrans(totalTrans);
-    // feeItem.setTotalAmount(totalAmount);
-    // feeItem.setTotalPayment(totalPaymentServiceAfterVat);
-    // // check status
-    // PaymentFeeAccBankEntity checkPaid = paymentFeeAccBankService
-    // .checkExistedRecord(fee.getBankId(), fee.getId(), month);
-    // if (checkPaid != null && checkPaid.getStatus() != null) {
-    // statusFee = checkPaid.getStatus();
-    // } else {
-    // statusFee = 0;
-    // }
-    // feeItem.setStatus(statusFee);
-    // //
-    // feeItems.add(feeItem);
-    // }
-    // } else if (fee.getCountingTransType() != null
-    // && fee.getCountingTransType() == 1) {
-    // TransactionFeeDTO transFee = transactionReceiveService
-    // .getTransactionFeeCountingTypeSystem(fee.getBankId(), month);
-    // if (transFee != null) {
-    // totalTrans = transFee.getTotalTrans();
-    // totalAmount = transFee.getTotalAmount();
-    // //
-    // totalPaymentServiceByTransFee = totalTrans * fee.getTransFee();
-    // totalPaymentServiceByPercentAmount = (Long) Math
-    // .round(fee.getPercentFee() * totalAmount / 100);
-    // totalPaymentService = totalPaymentServiceByTransFee
-    // + totalPaymentServiceByPercentAmount;
-    // totalPaymentServiceAfterVat = (Long) Math.round(totalPaymentService
-    // + (fee.getVat() * totalPaymentService / 100)
-    // - fee.getAnnualFee());
-    // if (totalPaymentServiceAfterVat < 0) {
-    // totalPaymentServiceAfterVat = 0L;
-    // }
-    // //
-    // feeItem.setTotalTrans(totalTrans);
-    // feeItem.setTotalAmount(totalAmount);
-    // feeItem.setTotalPayment(totalPaymentServiceAfterVat);
-    // // check status
-    // PaymentFeeAccBankEntity checkPaid = paymentFeeAccBankService
-    // .checkExistedRecord(fee.getBankId(), fee.getId(), month);
-    // if (checkPaid != null && checkPaid.getStatus() != null) {
-    // statusFee = checkPaid.getStatus();
-    // } else {
-    // statusFee = 0;
-    // }
-    // feeItem.setStatus(statusFee);
-    // //
-    // feeItems.add(feeItem);
-    // }
-    // }
+    @GetMapping("admin/merchant/service-fee/transaction2")
+    public ResponseEntity<List<ServiceFeeMerchantItemDTO>> getServiceFeeList2(
+            @RequestParam(value = "month") String month) {
+        List<ServiceFeeMerchantItemDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            List<AnnualFeeMerchantDTO> merchants = customerSyncService.getMerchantForServiceFee();
+            if (merchants != null && !merchants.isEmpty()) {
+                //
+                for (AnnualFeeMerchantDTO merchant : merchants) {
+                    ServiceFeeMerchantItemDTO dto = new ServiceFeeMerchantItemDTO();
+                    List<ServiceFeeBankItemDTO> bankItems = new ArrayList<>();
+                    int status = 1;
+                    boolean allStatusOne = true;
+                    Long totalPayment = 0L;
+                    dto.setCustomerSyncId(merchant.getCustomerSyncId());
+                    dto.setMerchant(merchant.getMerchant());
+                    //
+                    if (merchant.getCustomerSyncId() != null) {
+                        List<AnnualFeeBankDTO> banks = accountCustomerBankService
+                                .getBanksAnnualFee(merchant.getCustomerSyncId());
+                        if (banks != null && !banks.isEmpty()) {
+                            for (AnnualFeeBankDTO bank : banks) {
+                                ServiceFeeBankItemDTO bankItem = new ServiceFeeBankItemDTO();
+                                bankItem.setBankId(bank.getBankId());
+                                bankItem.setBankAccount(bank.getBankAccount());
+                                bankItem.setBankCode(bank.getBankCode());
+                                bankItem.setBankShortName(bank.getBankShortName());
+                                //
+                                List<ServiceFeeMonthItemDTO> feeItems = new ArrayList<>();
+                                List<AccountBankFeeEntity> fees = accountBankFeeService
+                                        .getAccountBankFeesByBankId(bank.getBankId());
+                                if (fees != null && !fees.isEmpty()) {
+                                    for (AccountBankFeeEntity fee : fees) {
+                                        ServiceFeeMonthItemDTO feeItem = new ServiceFeeMonthItemDTO();
+                                        feeItem.setAccountBankFeeId(fee.getId());
+                                        feeItem.setServiceFeeId(fee.getServiceFeeId());
+                                        feeItem.setShortName(fee.getShortName());
+                                        feeItem.setVat(fee.getVat());
+                                        feeItem.setCountingTransType(fee.getCountingTransType());
+                                        feeItem.setDiscountAmount(fee.getAnnualFee());
+                                        //
+                                        Long totalTrans = 0L;
+                                        Long totalAmount = 0L;
+                                        Long totalPaymentService = 0L;
+                                        Long totalPaymentServiceAfterVat = 0L;
+                                        Long totalPaymentServiceByTransFee = 0L;
+                                        Long totalPaymentServiceByPercentAmount = 0L;
+                                        int statusFee = 0;
+                                        // getCountingTransType = 0 => count all
+                                        // getCountingTransType = 1 => count only system transaction
+                                        if (fee.getCountingTransType() != null && fee.getCountingTransType() == 0) {
+                                            TransactionFeeDTO transFee = transactionReceiveService
+                                                    .getTransactionFeeCountingTypeAll(fee.getBankId(), month);
+                                            if (transFee != null) {
+                                                totalTrans = transFee.getTotalTrans();
+                                                totalAmount = transFee.getTotalAmount();
+                                                //
+                                                totalPaymentServiceByTransFee = totalTrans * fee.getTransFee();
+                                                totalPaymentServiceByPercentAmount = (Long) Math
+                                                        .round(fee.getPercentFee() * totalAmount / 100);
+                                                totalPaymentService = totalPaymentServiceByTransFee
+                                                        + totalPaymentServiceByPercentAmount;
+                                                totalPaymentServiceAfterVat = (Long) Math.round(totalPaymentService
+                                                        + (fee.getVat() * totalPaymentService / 100)
+                                                        - fee.getAnnualFee());
+                                                if (totalPaymentServiceAfterVat < 0) {
+                                                    totalPaymentServiceAfterVat = 0L;
+                                                }
+                                                //
+                                                feeItem.setTotalTrans(totalTrans);
+                                                feeItem.setTotalAmount(totalAmount);
+                                                feeItem.setTotalPayment(totalPaymentServiceAfterVat);
+                                                // check status
+                                                PaymentFeeAccBankEntity checkPaid = paymentFeeAccBankService
+                                                        .checkExistedRecord(fee.getBankId(), fee.getId(), month);
+                                                if (checkPaid != null && checkPaid.getStatus() != null) {
+                                                    statusFee = checkPaid.getStatus();
+                                                } else {
+                                                    statusFee = 0;
+                                                }
+                                                feeItem.setStatus(statusFee);
+                                                //
+                                                feeItems.add(feeItem);
+                                            }
+                                        } else if (fee.getCountingTransType() != null
+                                                && fee.getCountingTransType() == 1) {
+                                            TransactionFeeDTO transFee = transactionReceiveService
+                                                    .getTransactionFeeCountingTypeSystem(fee.getBankId(), month);
+                                            if (transFee != null) {
+                                                totalTrans = transFee.getTotalTrans();
+                                                totalAmount = transFee.getTotalAmount();
+                                                //
+                                                totalPaymentServiceByTransFee = totalTrans * fee.getTransFee();
+                                                totalPaymentServiceByPercentAmount = (Long) Math
+                                                        .round(fee.getPercentFee() * totalAmount / 100);
+                                                totalPaymentService = totalPaymentServiceByTransFee
+                                                        + totalPaymentServiceByPercentAmount;
+                                                totalPaymentServiceAfterVat = (Long) Math.round(totalPaymentService
+                                                        + (fee.getVat() * totalPaymentService / 100)
+                                                        - fee.getAnnualFee());
+                                                if (totalPaymentServiceAfterVat < 0) {
+                                                    totalPaymentServiceAfterVat = 0L;
+                                                }
+                                                //
+                                                feeItem.setTotalTrans(totalTrans);
+                                                feeItem.setTotalAmount(totalAmount);
+                                                feeItem.setTotalPayment(totalPaymentServiceAfterVat);
+                                                // check status
+                                                PaymentFeeAccBankEntity checkPaid = paymentFeeAccBankService
+                                                        .checkExistedRecord(fee.getBankId(), fee.getId(), month);
+                                                if (checkPaid != null && checkPaid.getStatus() != null) {
+                                                    statusFee = checkPaid.getStatus();
+                                                } else {
+                                                    statusFee = 0;
+                                                }
+                                                feeItem.setStatus(statusFee);
+                                                //
+                                                feeItems.add(feeItem);
+                                            }
+                                        }
 
-    // }
-    // }
-    // //
-    // if (feeItems != null && !feeItems.isEmpty()) {
-    // for (ServiceFeeMonthItemDTO feeItem : feeItems) {
-    // totalPayment += feeItem.getTotalPayment();
-    // if (feeItem.getStatus() != null && feeItem.getStatus() != 1) {
-    // allStatusOne = false;
-    // } else if (feeItem.getStatus() == null) {
-    // allStatusOne = false;
-    // }
-    // }
-    // bankItem.setFees(feeItems);
-    // bankItems.add(bankItem);
-    // }
-    // }
-    // }
-    // }
-    // dto.setTotalPayment(totalPayment);
-    // if (!allStatusOne) {
-    // status = 0; // Nếu biến cờ không được đánh dấu, gán giá trị 0 cho status
-    // }
-    // dto.setStatus(status);
-    // if (bankItems != null && !bankItems.isEmpty()) {
-    // dto.setBankAccounts(bankItems);
-    // result.add(dto);
-    // }
-    // }
-    // }
-    // httpStatus = HttpStatus.OK;
-    // } catch (Exception e) {
-    // logger.error("getServiceFeeList: ERROR: " + e.toString());
-    // }
-    // return new ResponseEntity<>(result, httpStatus);
-    // }
+                                    }
+                                }
+                                //
+                                if (feeItems != null && !feeItems.isEmpty()) {
+                                    for (ServiceFeeMonthItemDTO feeItem : feeItems) {
+                                        totalPayment += feeItem.getTotalPayment();
+                                        if (feeItem.getStatus() != null && feeItem.getStatus() != 1) {
+                                            allStatusOne = false;
+                                        } else if (feeItem.getStatus() == null) {
+                                            allStatusOne = false;
+                                        }
+                                    }
+                                    bankItem.setFees(feeItems);
+                                    bankItems.add(bankItem);
+                                }
+                            }
+                        }
+                    }
+                    dto.setTotalPayment(totalPayment);
+                    if (!allStatusOne) {
+                        status = 0; // Nếu biến cờ không được đánh dấu, gán giá trị 0 cho status
+                    }
+                    dto.setStatus(status);
+                    if (bankItems != null && !bankItems.isEmpty()) {
+                        dto.setBankAccounts(bankItems);
+                        result.add(dto);
+                    }
+                }
+            }
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getServiceFeeList: ERROR: " + e.toString());
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // get fee by merchant with filters (unpaid, paid)
+    // input customerSyncId
+    // get bankAccounts
+    // get fee mapping
+    // process
+
+    // export fee excel
 
     // update status annual fee
 
@@ -1113,4 +1005,317 @@ public class AccountBankFeeController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
+    // 14 giây
+    // service fee by merchant (not admin)
+    // status = 0: Unpaid
+    // status = 1: paid
+    @GetMapping("bank/service-fee2")
+    public ResponseEntity<List<TransFeeMerchantByMonthDTO>> getServiceFeeByMerchantId2(
+            @RequestParam(value = "merchantId") String merchantId,
+            @RequestParam(value = "status") int status,
+            @RequestParam(value = "year") String year) {
+        List<TransFeeMerchantByMonthDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            if (merchantId != null && !merchantId.trim().isEmpty()) {
+                Integer yearInt = Integer.parseInt(year);
+                List<String> months = generateMonthList(yearInt);
+                List<AccountBankFeeInfoDTO> accountBankFees = accountBankFeeService
+                        .getAccountBankFeeByCustomerSyncId(merchantId);
+                String merchantName = customerSyncService.getMerchantNameById(merchantId);
+                for (String month : months) {
+                    TransFeeMerchantByMonthDTO transFeeMonthDTO = new TransFeeMerchantByMonthDTO();
+                    Long totalTrans = 0L;
+                    Long totalAmount = 0L;
+                    Long totalFee = 0L;
+                    Long totalVatFee = 0L;
+                    Long totalFeeAfterVat = 0L;
+                    Integer totalStatus = 1;
+                    transFeeMonthDTO.setMonth(month);
+                    transFeeMonthDTO.setMerchantName(merchantName);
+                    List<TransFeeMerchantDTO> transfeeMerchants = new ArrayList<>();
+                    if (accountBankFees != null && !accountBankFees.isEmpty()) {
+                        // set item
+                        for (AccountBankFeeInfoDTO accountBankFee : accountBankFees) {
+                            // check status paid/unpaid
+                            PaymentFeeAccBankEntity paymentFeeAccBankEntity = paymentFeeAccBankService
+                                    .checkExistedRecord(accountBankFee.getBankId(),
+                                            accountBankFee.getAccBankFeeId(), month);
+                            if (status == 0 && paymentFeeAccBankEntity == null) {
+                                TransFeeMerchantDTO transFeeMerchantDTO = new TransFeeMerchantDTO();
+                                TransReceiveStatisticFeeDTO tranStatisticDTO = null;
+                                if (accountBankFee.getCountingTransType() == 0) {
+                                    tranStatisticDTO = transactionReceiveService
+                                            .getTransStatisticForServiceFee(accountBankFee.getBankId(), month);
+                                } else if (accountBankFee.getCountingTransType() == 1) {
+                                    tranStatisticDTO = transactionReceiveService
+                                            .getTransStatisticForServiceFeeWithSystemType(accountBankFee.getBankId(),
+                                                    month);
+                                }
+                                //
+                                if (tranStatisticDTO != null && tranStatisticDTO.getTotalTrans() != 0) {
+                                    transFeeMerchantDTO.setBankAccount(accountBankFee.getBankAccount());
+                                    transFeeMerchantDTO.setBankShortName(accountBankFee.getBankShortName());
+                                    transFeeMerchantDTO.setBankCode(accountBankFee.getBankCode());
+                                    transFeeMerchantDTO.setServiceName(accountBankFee.getShortName());
+                                    transFeeMerchantDTO.setTotalTrans(tranStatisticDTO.getTotalTrans());
+                                    transFeeMerchantDTO.setTotalAmount(tranStatisticDTO.getTotalAmount());
+                                    transFeeMerchantDTO.setVat(accountBankFee.getVat());
+                                    transFeeMerchantDTO.setAnnualFee(accountBankFee.getAnnualFee());
+                                    // calculate fees
+                                    Long serviceFeeByTransFee = 0L;
+                                    Long serviceFeeByPercent = 0L;
+                                    Long serviceFee = 0L;
+                                    Long vatFee = 0L;
+                                    Long serviceFeeAfterVat = 0L;
+
+                                    //
+                                    serviceFeeByTransFee = tranStatisticDTO.getTotalTrans()
+                                            * accountBankFee.getTransFee();
+                                    serviceFeeByPercent = (Long) Math.round(
+                                            accountBankFee.getPercentFee() * tranStatisticDTO.getTotalAmount() / 100);
+                                    serviceFee = serviceFeeByTransFee + serviceFeeByPercent;
+                                    vatFee = (Long) Math.round(accountBankFee.getVat() * serviceFee / 100);
+                                    serviceFeeAfterVat = serviceFee + vatFee - accountBankFee.getAnnualFee();
+                                    if (serviceFeeAfterVat < 0) {
+                                        serviceFeeAfterVat = 0L;
+                                    }
+                                    //
+                                    transFeeMerchantDTO.setVatFee(vatFee);
+                                    transFeeMerchantDTO.setTotalFee(serviceFee);
+                                    transFeeMerchantDTO.setTotalFeeAfterVat(serviceFeeAfterVat);
+                                    transFeeMerchantDTO.setStatus(0);
+                                    //
+                                    totalTrans += tranStatisticDTO.getTotalTrans();
+                                    totalAmount += tranStatisticDTO.getTotalAmount();
+                                    totalFee += serviceFee;
+                                    totalVatFee += vatFee;
+                                    totalFeeAfterVat += serviceFeeAfterVat;
+                                    if (transFeeMerchantDTO.getStatus() == 0) {
+                                        totalStatus = 0;
+                                    }
+                                    //
+                                    transfeeMerchants.add(transFeeMerchantDTO);
+                                }
+
+                            } else if (status == 1 && paymentFeeAccBankEntity != null) {
+                                TransFeeMerchantDTO transFeeMerchantDTO = new TransFeeMerchantDTO();
+                                transFeeMerchantDTO.setBankAccount(accountBankFee.getBankAccount());
+                                transFeeMerchantDTO.setBankShortName(accountBankFee.getBankShortName());
+                                transFeeMerchantDTO.setBankCode(accountBankFee.getBankCode());
+                                transFeeMerchantDTO.setServiceName(accountBankFee.getShortName());
+                                transFeeMerchantDTO.setTotalTrans(paymentFeeAccBankEntity.getTotalTrans());
+                                transFeeMerchantDTO.setTotalAmount(paymentFeeAccBankEntity.getTotalAmount());
+                                transFeeMerchantDTO.setVat(accountBankFee.getVat());
+                                transFeeMerchantDTO.setAnnualFee(paymentFeeAccBankEntity.getAnnualFee());
+                                transFeeMerchantDTO.setVatFee(paymentFeeAccBankEntity.getVatFee());
+                                transFeeMerchantDTO.setTotalFee(paymentFeeAccBankEntity.getTotalFee());
+                                transFeeMerchantDTO.setTotalFeeAfterVat(paymentFeeAccBankEntity.getTotalFeeAfterVat());
+                                transFeeMerchantDTO.setStatus(0);
+                                //
+                                totalTrans += paymentFeeAccBankEntity.getTotalTrans();
+                                totalAmount += paymentFeeAccBankEntity.getTotalAmount();
+                                totalFee += paymentFeeAccBankEntity.getTotalFee();
+                                totalVatFee += paymentFeeAccBankEntity.getVatFee();
+                                totalFeeAfterVat += paymentFeeAccBankEntity.getTotalFeeAfterVat();
+                                if (transFeeMerchantDTO.getStatus() == 0) {
+                                    totalStatus = 0;
+                                }
+                                //
+                                transfeeMerchants.add(transFeeMerchantDTO);
+                            }
+
+                        }
+                        transFeeMonthDTO.setFees(transfeeMerchants);
+                        //
+                        transFeeMonthDTO.setTotalTrans(totalTrans);
+                        transFeeMonthDTO.setTotalAmount(totalAmount);
+                        transFeeMonthDTO.setTotalFee(totalFee);
+                        transFeeMonthDTO.setTotalVatFee(totalVatFee);
+                        transFeeMonthDTO.setTotalFeeAfterVat(totalFeeAfterVat);
+                        transFeeMonthDTO.setStatus(totalStatus);
+                        // set total fee by month
+                        if (transFeeMonthDTO.getFees() != null && !transFeeMonthDTO.getFees().isEmpty()) {
+                            result.add(transFeeMonthDTO);
+                        }
+                    }
+
+                }
+            }
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getServiceFeeByMerchantId: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // mới
+    @GetMapping("bank/service-fee")
+    public ResponseEntity<List<TransFeeMerchantByMonthDTO>> getServiceFeeByMerchantId(
+            @RequestParam(value = "merchantId") String merchantId,
+            @RequestParam(value = "status") int status,
+            @RequestParam(value = "year") String year) {
+        List<TransFeeMerchantByMonthDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            if (merchantId != null && !merchantId.trim().isEmpty()) {
+                Integer yearInt = Integer.parseInt(year);
+                List<String> months = generateMonthList(yearInt);
+                List<AccountBankFeeInfoDTO> accountBankFees = accountBankFeeService
+                        .getAccountBankFeeByCustomerSyncId(merchantId);
+                String merchantName = customerSyncService.getMerchantNameById(merchantId);
+                //
+                List<CompletableFuture<Void>> futures = new ArrayList<>();
+                //
+                for (String month : months) {
+                    CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                        TransFeeMerchantByMonthDTO transFeeMonthDTO = new TransFeeMerchantByMonthDTO();
+                        Long totalTrans = 0L;
+                        Long totalAmount = 0L;
+                        Long totalFee = 0L;
+                        Long totalVatFee = 0L;
+                        Long totalFeeAfterVat = 0L;
+                        Integer totalStatus = 1;
+                        transFeeMonthDTO.setMonth(month);
+                        transFeeMonthDTO.setMerchantName(merchantName);
+                        List<TransFeeMerchantDTO> transfeeMerchants = new ArrayList<>();
+
+                        if (accountBankFees != null && !accountBankFees.isEmpty()) {
+                            for (AccountBankFeeInfoDTO accountBankFee : accountBankFees) {
+                                // check status paid/unpaid
+                                PaymentFeeAccBankEntity paymentFeeAccBankEntity = paymentFeeAccBankService
+                                        .checkExistedRecord(accountBankFee.getBankId(),
+                                                accountBankFee.getAccBankFeeId(), month);
+                                if (status == 0 && paymentFeeAccBankEntity == null) {
+                                    TransFeeMerchantDTO transFeeMerchantDTO = new TransFeeMerchantDTO();
+                                    TransReceiveStatisticFeeDTO tranStatisticDTO = null;
+                                    if (accountBankFee.getCountingTransType() == 0) {
+                                        tranStatisticDTO = transactionReceiveService
+                                                .getTransStatisticForServiceFee(accountBankFee.getBankId(), month);
+                                    } else if (accountBankFee.getCountingTransType() == 1) {
+                                        tranStatisticDTO = transactionReceiveService
+                                                .getTransStatisticForServiceFeeWithSystemType(
+                                                        accountBankFee.getBankId(),
+                                                        month);
+                                    }
+                                    //
+                                    if (tranStatisticDTO != null && tranStatisticDTO.getTotalTrans() != 0) {
+                                        transFeeMerchantDTO.setBankAccount(accountBankFee.getBankAccount());
+                                        transFeeMerchantDTO.setBankShortName(accountBankFee.getBankShortName());
+                                        transFeeMerchantDTO.setBankCode(accountBankFee.getBankCode());
+                                        transFeeMerchantDTO.setServiceName(accountBankFee.getShortName());
+                                        transFeeMerchantDTO.setTotalTrans(tranStatisticDTO.getTotalTrans());
+                                        transFeeMerchantDTO.setTotalAmount(tranStatisticDTO.getTotalAmount());
+                                        transFeeMerchantDTO.setVat(accountBankFee.getVat());
+                                        transFeeMerchantDTO.setAnnualFee(accountBankFee.getAnnualFee());
+                                        // calculate fees
+                                        Long serviceFeeByTransFee = 0L;
+                                        Long serviceFeeByPercent = 0L;
+                                        Long serviceFee = 0L;
+                                        Long vatFee = 0L;
+                                        Long serviceFeeAfterVat = 0L;
+
+                                        //
+                                        serviceFeeByTransFee = tranStatisticDTO.getTotalTrans()
+                                                * accountBankFee.getTransFee();
+                                        serviceFeeByPercent = (Long) Math.round(
+                                                accountBankFee.getPercentFee() * tranStatisticDTO.getTotalAmount()
+                                                        / 100);
+                                        serviceFee = serviceFeeByTransFee + serviceFeeByPercent;
+                                        vatFee = (Long) Math.round(accountBankFee.getVat() * serviceFee / 100);
+                                        serviceFeeAfterVat = serviceFee + vatFee - accountBankFee.getAnnualFee();
+                                        if (serviceFeeAfterVat < 0) {
+                                            serviceFeeAfterVat = 0L;
+                                        }
+                                        //
+                                        transFeeMerchantDTO.setVatFee(vatFee);
+                                        transFeeMerchantDTO.setTotalFee(serviceFee);
+                                        transFeeMerchantDTO.setTotalFeeAfterVat(serviceFeeAfterVat);
+                                        transFeeMerchantDTO.setStatus(0);
+                                        //
+                                        totalTrans += tranStatisticDTO.getTotalTrans();
+                                        totalAmount += tranStatisticDTO.getTotalAmount();
+                                        totalFee += serviceFee;
+                                        totalVatFee += vatFee;
+                                        totalFeeAfterVat += serviceFeeAfterVat;
+                                        if (transFeeMerchantDTO.getStatus() == 0) {
+                                            totalStatus = 0;
+                                        }
+                                        //
+                                        transfeeMerchants.add(transFeeMerchantDTO);
+                                    }
+
+                                } else if (status == 1 && paymentFeeAccBankEntity != null) {
+                                    TransFeeMerchantDTO transFeeMerchantDTO = new TransFeeMerchantDTO();
+                                    transFeeMerchantDTO.setBankAccount(accountBankFee.getBankAccount());
+                                    transFeeMerchantDTO.setBankShortName(accountBankFee.getBankShortName());
+                                    transFeeMerchantDTO.setBankCode(accountBankFee.getBankCode());
+                                    transFeeMerchantDTO.setServiceName(accountBankFee.getShortName());
+                                    transFeeMerchantDTO.setTotalTrans(paymentFeeAccBankEntity.getTotalTrans());
+                                    transFeeMerchantDTO.setTotalAmount(paymentFeeAccBankEntity.getTotalAmount());
+                                    transFeeMerchantDTO.setVat(accountBankFee.getVat());
+                                    transFeeMerchantDTO.setAnnualFee(paymentFeeAccBankEntity.getAnnualFee());
+                                    transFeeMerchantDTO.setVatFee(paymentFeeAccBankEntity.getVatFee());
+                                    transFeeMerchantDTO.setTotalFee(paymentFeeAccBankEntity.getTotalFee());
+                                    transFeeMerchantDTO
+                                            .setTotalFeeAfterVat(paymentFeeAccBankEntity.getTotalFeeAfterVat());
+                                    transFeeMerchantDTO.setStatus(0);
+                                    //
+                                    totalTrans += paymentFeeAccBankEntity.getTotalTrans();
+                                    totalAmount += paymentFeeAccBankEntity.getTotalAmount();
+                                    totalFee += paymentFeeAccBankEntity.getTotalFee();
+                                    totalVatFee += paymentFeeAccBankEntity.getVatFee();
+                                    totalFeeAfterVat += paymentFeeAccBankEntity.getTotalFeeAfterVat();
+                                    if (transFeeMerchantDTO.getStatus() == 0) {
+                                        totalStatus = 0;
+                                    }
+                                    //
+                                    transfeeMerchants.add(transFeeMerchantDTO);
+                                }
+
+                            }
+
+                            transFeeMonthDTO.setFees(transfeeMerchants);
+                            // Xử lý logic tính toán các tổng số liệu
+                            transFeeMonthDTO.setTotalTrans(totalTrans);
+                            transFeeMonthDTO.setTotalAmount(totalAmount);
+                            transFeeMonthDTO.setTotalFee(totalFee);
+                            transFeeMonthDTO.setTotalVatFee(totalVatFee);
+                            transFeeMonthDTO.setTotalFeeAfterVat(totalFeeAfterVat);
+                            transFeeMonthDTO.setStatus(totalStatus);
+                            if (!transFeeMonthDTO.getFees().isEmpty()) {
+                                result.add(transFeeMonthDTO);
+                            }
+                        }
+                    });
+                    futures.add(future);
+                }
+                CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+                allFutures.get(); // Chờ tất cả các CompletableFuture hoàn thành trước khi trả về kết quả
+                if (result != null && !result.isEmpty()) {
+                    result.sort((o1, o2) -> o2.getMonth().compareTo(o1.getMonth()));
+                }
+            }
+            httpStatus = HttpStatus.OK;
+        } catch (
+
+        Exception e) {
+            logger.error("getServiceFeeByMerchantId: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    private List<String> generateMonthList(int year) {
+        List<String> monthList = new ArrayList<>();
+        for (int month = 12; month >= 1; month--) {
+            String monthString = String.format("%02d", month);
+            String formattedMonth = year + "-" + monthString;
+            monthList.add(formattedMonth);
+        }
+        return monthList;
+    }
+
 }

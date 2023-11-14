@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.vietqr.org.dto.AccountBankFeeInfoDTO;
 import com.vietqr.org.entity.AccountBankFeeEntity;
 import com.vietqr.org.repository.AccountbankFeeRepository;
 
@@ -32,6 +33,11 @@ public class AccountBankFeeServiceImpl implements AccountBankFeeService {
     @Override
     public void udpateEndDate(String date, String id) {
         repo.updateEndDate(date, id);
+    }
+
+    @Override
+    public List<AccountBankFeeInfoDTO> getAccountBankFeeByCustomerSyncId(String customerSyncId) {
+        return repo.getAccountBankFeeByCustomerSyncId(customerSyncId);
     }
 
 }

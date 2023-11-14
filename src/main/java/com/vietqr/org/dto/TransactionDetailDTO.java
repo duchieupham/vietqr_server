@@ -34,4 +34,8 @@ public interface TransactionDetailDTO {
     String getImgId();
 
     String getReferenceNumber();
+
+    String getTerminalCode();
+
+    String getNote();
 }

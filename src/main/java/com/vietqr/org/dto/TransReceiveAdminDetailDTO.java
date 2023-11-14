@@ -48,4 +48,7 @@ public interface TransReceiveAdminDetailDTO {
 
     Integer getFlow();
 
+    String getTerminalCode();
+
+    String getNote();
 }
