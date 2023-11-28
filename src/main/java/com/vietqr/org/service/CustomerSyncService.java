@@ -59,4 +59,8 @@ public interface CustomerSyncService {
     public List<AnnualFeeMerchantDTO> getMerchantForServiceFeeById(String customerSyncId);
 
     public String getMerchantNameById(String id);
+
+    public Integer getCountingCustomerSync();
+
+    public String checkExistedMerchantName(String merchantName);
 }

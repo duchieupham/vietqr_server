@@ -65,4 +65,12 @@ public interface AccountBankReceiveService {
 	public String checkMMSBankAccount(String bankAccount);
 
 	public void updateBankSync(boolean sync, String id);
+
+	public Boolean getAuthenticatedByBankId(String bankId);
+
+	public void updateMMSActive(boolean sync, boolean mmsActive, String bankId);
+
+	public String getUserIdByBankAccountAuthenticated(String bankAccount);
+
+	public Boolean getMMSActiveByBankId(String bankId);
 }

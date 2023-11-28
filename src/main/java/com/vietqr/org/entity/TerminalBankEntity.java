@@ -296,6 +296,14 @@ public class TerminalBankEntity implements Serializable {
         this.status = status;
     }
 
+    public String getBankAccountRawNumber() {
+        return bankAccountRawNumber;
+    }
+
+    public void setBankAccountRawNumber(String bankAccountRawNumber) {
+        this.bankAccountRawNumber = bankAccountRawNumber;
+    }
+
     @Override
     public String toString() {
         return "TerminalBankEntity [id=" + id + ", terminalId=" + terminalId + ", merchantId=" + merchantId

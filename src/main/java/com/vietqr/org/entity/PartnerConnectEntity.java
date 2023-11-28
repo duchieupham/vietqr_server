@@ -44,12 +44,15 @@ public class PartnerConnectEntity implements Serializable {
     @Column(name = "passwordBasic")
     private String passwordBasic;
 
+    @Column(name = "customerSyncId")
+    private String customerSyncId;
+
     public PartnerConnectEntity() {
         super();
     }
 
     public PartnerConnectEntity(String id, String service, String url1, String url2, String url3, String url4,
-            String url5, String usernameBasic, String passwordBasic) {
+            String url5, String usernameBasic, String passwordBasic, String customerSyncId) {
         this.id = id;
         this.service = service;
         this.url1 = url1;
@@ -59,6 +62,7 @@ public class PartnerConnectEntity implements Serializable {
         this.url5 = url5;
         this.usernameBasic = usernameBasic;
         this.passwordBasic = passwordBasic;
+        this.customerSyncId = customerSyncId;
     }
 
     public String getId() {
@@ -131,6 +135,14 @@ public class PartnerConnectEntity implements Serializable {
 
     public void setPasswordBasic(String passwordBasic) {
         this.passwordBasic = passwordBasic;
+    }
+
+    public String getCustomerSyncId() {
+        return customerSyncId;
+    }
+
+    public void setCustomerSyncId(String customerSyncId) {
+        this.customerSyncId = customerSyncId;
     }
 
 }

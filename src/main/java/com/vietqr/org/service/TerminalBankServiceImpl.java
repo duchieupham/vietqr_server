@@ -32,4 +32,9 @@ public class TerminalBankServiceImpl implements TerminalBankService {
         return repository.checkExistedTerminalAddress(address);
     }
 
+    @Override
+    public Integer getTerminalCounting() {
+        return repository.getTerminalCounting();
+    }
+
 }

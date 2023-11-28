@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.dto.AccountBankReceiveServiceItemDTO;
+import com.vietqr.org.dto.AccountCustomerBankInfoDTO;
 import com.vietqr.org.dto.AnnualFeeBankDTO;
 import com.vietqr.org.entity.AccountCustomerBankEntity;
 import com.vietqr.org.repository.AccountCustomerBankRepository;
@@ -64,6 +65,21 @@ public class AccountCustomerBankServiceImpl implements AccountCustomerBankServic
     @Override
     public String getMerchantByBankId(String bankId) {
         return repo.getMerchantByBankId(bankId);
+    }
+
+    @Override
+    public String checkExistedByBankIdAndCustomerSyncId(String bankId, String customerSyncId) {
+        return repo.checkExistedByBankIdAndCustomerSyncId(bankId, customerSyncId);
+    }
+
+    @Override
+    public AccountCustomerBankInfoDTO getBankSizeAndAddressByCustomerSyncId(String customerSyncId) {
+        return repo.getBankSizeAndAddressByCustomerSyncId(customerSyncId);
+    }
+
+    @Override
+    public String checkExistedBankAccountIntoMerchant(String bankAccount, String customerSyncId) {
+        return repo.checkExistedBankAccountIntoMerchant(bankAccount, customerSyncId);
     }
 
 }

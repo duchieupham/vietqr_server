@@ -19,4 +19,9 @@ public class TerminalAddressServiceImpl implements TerminalAddressService {
         return repository.getTerminalAddressByTerminalBankId(terminalBankId);
     }
 
+    @Override
+    public int insert(TerminalAddressEntity entity) {
+        return repository.save(entity) == null ? 0 : 1;
+    }
+
 }

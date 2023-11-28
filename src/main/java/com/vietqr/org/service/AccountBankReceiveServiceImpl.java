@@ -17,124 +17,144 @@ import com.vietqr.org.repository.AccountBankReceiveRepository;
 public class AccountBankReceiveServiceImpl implements AccountBankReceiveService {
 
 	@Autowired
-	AccountBankReceiveRepository accountBankRepo;
+	AccountBankReceiveRepository repo;
 
 	@Override
 	public int insertAccountBank(AccountBankReceiveEntity entity) {
-		return accountBankRepo.save(entity) == null ? 0 : 1;
+		return repo.save(entity) == null ? 0 : 1;
 	}
 
 	@Override
 	public void deleteAccountBank(String id) {
-		accountBankRepo.deleteAccountBank(id);
+		repo.deleteAccountBank(id);
 	}
 
 	@Override
 	public List<String> checkExistedBank(String bankAccount, String bankTypeId) {
-		return accountBankRepo.checkExistedBankAccount(bankAccount, bankTypeId);
+		return repo.checkExistedBankAccount(bankAccount, bankTypeId);
 	}
 
 	@Override
 	public AccountBankReceiveEntity getAccountBankById(String bankId) {
-		return accountBankRepo.getAccountBankById(bankId);
+		return repo.getAccountBankById(bankId);
 	}
 
 	@Override
 	public void updateRegisterAuthenticationBank(String nationalId, String phoneAuthenticated, String bankAccountName,
 			String bankAccount, String bankId) {
-		accountBankRepo.updateRegisterAuthenticationBank(nationalId, phoneAuthenticated, bankAccountName, bankAccount,
+		repo.updateRegisterAuthenticationBank(nationalId, phoneAuthenticated, bankAccountName, bankAccount,
 				bankId);
 	}
 
 	// @Override
 	// public AccountBankReceiveEntity getAccountBankByBankAccount(String
 	// bankAccount) {
-	// return accountBankRepo.getAccountBankByBankAccount(bankAccount);
+	// return repo.getAccountBankByBankAccount(bankAccount);
 	// }
 
 	@Override
 	public AccountBankReceiveEntity getAccountBankByBankAccountAndBankTypeId(String bankAccount, String bankTypeId) {
-		return accountBankRepo.getAccountBankByBankAccountAndBankTypeId(bankAccount, bankTypeId);
+		return repo.getAccountBankByBankAccountAndBankTypeId(bankAccount, bankTypeId);
 	}
 
 	@Override
 	public List<BusinessBankDTO> getBankByBranchId(String branchId) {
-		return accountBankRepo.getBankByBranchId(branchId);
+		return repo.getBankByBranchId(branchId);
 	}
 
 	@Override
 	public void unRegisterAuthenticationBank(String bankAccount) {
-		accountBankRepo.unRegisterAuthenticationBank(bankAccount);
+		repo.unRegisterAuthenticationBank(bankAccount);
 	}
 
 	@Override
 	public void updateStatusAccountBankByUserId(int status, String userId) {
-		accountBankRepo.updateStatusAccountBankByUserId(status, userId);
+		repo.updateStatusAccountBankByUserId(status, userId);
 	}
 
 	@Override
 	public List<AccountBankConnectBranchDTO> getAccountBankConnect(String userId) {
-		return accountBankRepo.getAccountBankConnect(userId);
+		return repo.getAccountBankConnect(userId);
 	}
 
 	@Override
 	public void updateBankType(String id, int type) {
-		accountBankRepo.updateBankType(id, type);
+		repo.updateBankType(id, type);
 	}
 
 	@Override
 	public List<AccountBankWpDTO> getAccountBankReceiveWps(String userId) {
-		return accountBankRepo.getAccountBankReceiveWps(userId);
+		return repo.getAccountBankReceiveWps(userId);
 	}
 
 	@Override
 	public void updateSyncWp(String userId, String bankId) {
-		accountBankRepo.updateSyncWp(userId, bankId);
+		repo.updateSyncWp(userId, bankId);
 	}
 
 	@Override
 	public String getBankAccountById(String bankId) {
-		return accountBankRepo.getBankAccountById(bankId);
+		return repo.getBankAccountById(bankId);
 	}
 
 	@Override
 	public List<String> checkExistedBankAccountSameUser(String bankAccount, String bankTypeId, String userId) {
-		return accountBankRepo.checkExistedBankAccountSameUser(bankAccount, bankTypeId, userId);
+		return repo.checkExistedBankAccountSameUser(bankAccount, bankTypeId, userId);
 	}
 
 	@Override
 	public String getUserIdByBankId(String bankId) {
-		return accountBankRepo.getUserIdByBankId(bankId);
+		return repo.getUserIdByBankId(bankId);
 	}
 
 	@Override
 	public List<AccountBankReceiveRPAItemDTO> getBankAccountsRPA(String userId) {
-		return accountBankRepo.getBankAccountsRPA(userId);
+		return repo.getBankAccountsRPA(userId);
 	}
 
 	@Override
 	public List<AccountBankReceiveByCusSyncDTO> getBankAccountsByCusSyncId(String customerSyncId) {
-		return accountBankRepo.getBankAccountsByCusSyncId(customerSyncId);
+		return repo.getBankAccountsByCusSyncId(customerSyncId);
 	}
 
 	@Override
 	public String checkExistedBankAccountByBankAccount(String bankAccount) {
-		return accountBankRepo.checkExistedBankAccountByBankAccount(bankAccount);
+		return repo.checkExistedBankAccountByBankAccount(bankAccount);
 	}
 
 	@Override
 	public void updateBankAccountSync(boolean sync, String id) {
-		accountBankRepo.updateBankAccountSync(sync, id);
+		repo.updateBankAccountSync(sync, id);
 	}
 
 	@Override
 	public String checkMMSBankAccount(String bankAccount) {
-		return accountBankRepo.checkMMSBankAccount(bankAccount);
+		return repo.checkMMSBankAccount(bankAccount);
 	}
 
 	@Override
 	public void updateBankSync(boolean sync, String id) {
-		accountBankRepo.updateBankAccountSync(sync, id);
+		repo.updateBankAccountSync(sync, id);
+	}
+
+	@Override
+	public Boolean getAuthenticatedByBankId(String bankId) {
+		return repo.getAuthenticatedByBankId(bankId);
+	}
+
+	@Override
+	public void updateMMSActive(boolean sync, boolean mmsActive, String bankId) {
+		repo.updateMMSActive(sync, mmsActive, bankId);
+	}
+
+	@Override
+	public String getUserIdByBankAccountAuthenticated(String bankAccount) {
+		return repo.getUserIdByBankAccountAuthenticated(bankAccount);
+	}
+
+	@Override
+	public Boolean getMMSActiveByBankId(String bankId) {
+		return repo.getMMSActiveByBankId(bankId);
 	}
 
 }

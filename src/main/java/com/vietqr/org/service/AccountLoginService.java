@@ -50,4 +50,6 @@ public interface AccountLoginService {
 	public String loginByCardNfcNumber(String cardNumber);
 
 	public CardVQRInfoDTO getVcardInforByUserId(String userId);
+
+	public void resetPassword(String password, String phoneNo);
 }

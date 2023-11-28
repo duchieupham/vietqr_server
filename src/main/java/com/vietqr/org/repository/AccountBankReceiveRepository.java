@@ -182,4 +182,26 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "WHERE id = :id ", nativeQuery = true)
 	void updateSyncBank(@Param(value = "sync") boolean sync, @Param(value = "id") String id);
 
+	@Query(value = "SELECT is_authenticated FROM account_bank_receive WHERE id = :bankId ", nativeQuery = true)
+	Boolean getAuthenticatedByBankId(@Param(value = "bankId") String bankId);
+
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_bank_receive "
+			+ "SET is_sync = :sync, mms_active = :mmsActive "
+			+ "WHERE id = :bankId ", nativeQuery = true)
+	public void updateMMSActive(
+			@Param(value = "sync") boolean sync,
+			@Param(value = "mmsActive") boolean mmsActive,
+			@Param(value = "bankId") String bankId);
+
+	@Query(value = "SELECT user_id FROM account_bank_receive "
+			+ "WHERE bank_account = :bankAccount "
+			+ "AND is_authenticated = true ", nativeQuery = true)
+	String getUserIdByBankAccountAuthenticated(@Param(value = "bankAccount") String bankAccount);
+
+	@Query(value = "SELECT mms_active "
+			+ "FROM account_bank_receive "
+			+ "WHERE id = :bankId ", nativeQuery = true)
+	Boolean getMMSActiveByBankId(@Param(value = "bankId") String bankId);
 }

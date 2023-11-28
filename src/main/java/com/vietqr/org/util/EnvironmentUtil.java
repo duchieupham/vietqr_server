@@ -1,7 +1,11 @@
 package com.vietqr.org.util;
 
 public class EnvironmentUtil {
-    private static boolean IS_PRODUCTION = false;
+    private static boolean IS_PRODUCTION = true;
+
+    // URL VIETQR VN
+    private static final String URL_VIETQR_VN_UAT = "https://dev.vietqr.org/vqr/api";
+    private static final String URL_VIETQR_VN_PROD = "https://api.vietqr.org/vqr/api";
 
     /// NEWSFEED
     // LINK NEWS IMAGE
@@ -10,6 +14,9 @@ public class EnvironmentUtil {
 
     // PARTNERS CONNECT
     private static final String SERVICE_VHITEK_ACTIVE = "VHITEK_ACTIVE";
+
+    // BANK ID TEST IOT
+    private static final String BANK_ID_TEST_IOT = "b93246bb-3b94-492e-a774-5ef50c4b619d";
 
     // QR LINK
     private static final String QR_LINK_UAT = "https://vietqr.vn/test/qr-generated?token=";
@@ -84,20 +91,26 @@ public class EnvironmentUtil {
 
     ////////////////////////////////////
     // for get qr recharge VNPT Epay
+    // OLD
     // Default Bank information:
     // Vietcombank: 0011002572864
     // CÔNG TY CỔ PHẦN THANH TOÁN ĐIỆN TỬ VNPT
-    private static final String VNPT_EPAY_REQUEST_PAYMENT_BANK_TYPE_ID_UAT = "ebd51e4f-6036-431d-a5c8-0dbde770ea0f";
-    private static final String VNPT_EPAY_REQUEST_PAYMENT_BANK_TYPE_ID_PROD = "ebd51e4f-6036-431d-a5c8-0dbde770ea0f";
 
-    private static final String VNPT_EPAY_REQUEST_PAYMENT_CAI_UAT = "970436";
-    private static final String VNPT_EPAY_REQUEST_PAYMENT_CAI_PROD = "970436";
+    // NEW
+    // Default Bank information:
+    // Vietcombank: 0011002572864
+    // CÔNG TY CỔ PHẦN THANH TOÁN ĐIỆN TỬ VNPT
+    private static final String VNPT_EPAY_REQUEST_PAYMENT_BANK_TYPE_ID_UAT = "332d84ed-bb2e-4ae2-98a8-0c2e6533cad5";
+    private static final String VNPT_EPAY_REQUEST_PAYMENT_BANK_TYPE_ID_PROD = "332d84ed-bb2e-4ae2-98a8-0c2e6533cad5";
 
-    private static final String VNPT_EPAY_REQUEST_PAYMENT_BANK_ACCOUNT_UAT = "0011002572864";
-    private static final String VNPT_EPAY_REQUEST_PAYMENT_BANK_ACCOUNT_PROD = "0011002572864";
+    private static final String VNPT_EPAY_REQUEST_PAYMENT_CAI_UAT = "970457";
+    private static final String VNPT_EPAY_REQUEST_PAYMENT_CAI_PROD = "970457";
 
-    private static final String VNPT_EPAY_REQUEST_PAYMENT_BANK_USER_NAME_UAT = "CT CP THANH TOAN DIEN TU VNPT";
-    private static final String VNPT_EPAY_REQUEST_PAYMENT_BANK_USER_NAME_PROD = "CT CP THANH TOAN DIEN TU VNPT";
+    private static final String VNPT_EPAY_REQUEST_PAYMENT_BANK_ACCOUNT_UAT = "902002261912";
+    private static final String VNPT_EPAY_REQUEST_PAYMENT_BANK_ACCOUNT_PROD = "902002261912";
+
+    private static final String VNPT_EPAY_REQUEST_PAYMENT_BANK_USER_NAME_UAT = "VNPT EPAY CONG TY CO PHAN BLUECOM VIET NAM";
+    private static final String VNPT_EPAY_REQUEST_PAYMENT_BANK_USER_NAME_PROD = "VNPT EPAY CONG TY CO PHAN BLUECOM VIET NAM";
 
     ///////////////////////////////////
     // for recharge into VietQR VN
@@ -132,6 +145,18 @@ public class EnvironmentUtil {
     // Telegram
     private static final String TELEGRAM_BOT_USERNAME = "vietqr_bot";
     private static final String TELEGRAM_BOT_TOKEN = "6603683411:AAGTCde6C-7kt4gR5gTvcDA_jmYIqs0SJJM";
+
+    public static String getUrlVietqrVnUat() {
+        return URL_VIETQR_VN_UAT;
+    }
+
+    public static String getUrlVietqrVnProd() {
+        return URL_VIETQR_VN_PROD;
+    }
+
+    public static String getBankIdTestIOT() {
+        return BANK_ID_TEST_IOT;
+    }
 
     public static String getServiceVhitekActive() {
         return SERVICE_VHITEK_ACTIVE;

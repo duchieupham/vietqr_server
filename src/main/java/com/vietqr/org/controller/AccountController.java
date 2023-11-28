@@ -34,6 +34,7 @@ import com.vietqr.org.dto.AccountCardNumberUpdateDTO;
 import com.vietqr.org.dto.AccountCheckDTO;
 import com.vietqr.org.dto.AccountInformationDTO;
 import com.vietqr.org.dto.AccountLoginMethodDTO;
+import com.vietqr.org.dto.AccountLoginPasswordResetDTO;
 import com.vietqr.org.dto.AccountLoginDTO;
 import com.vietqr.org.dto.AccountPushLoginDTO;
 import com.vietqr.org.dto.LogoutDTO;
@@ -920,6 +921,31 @@ public class AccountController {
 			}
 		} catch (Exception e) {
 			logger.error("getTokenPlugin: ERROR: " + e.toString());
+			result = new ResponseMessageDTO("FAILED", "E05");
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	// reset password
+	// phone no, password encrypt
+	@PostMapping("accounts/password/reset")
+	public ResponseEntity<ResponseMessageDTO> resetPassword(
+			@RequestBody AccountLoginPasswordResetDTO dto) {
+		ResponseMessageDTO result = null;
+		HttpStatus httpStatus = null;
+		try {
+			if (dto != null) {
+				accountLoginService.resetPassword(dto.getPassword(), dto.getPhoneNo());
+				result = new ResponseMessageDTO("SUCCESS", "");
+				httpStatus = HttpStatus.OK;
+			} else {
+				logger.error("resetPassword: INVALID REQUEST BODY");
+				result = new ResponseMessageDTO("FAILED", "E46");
+				httpStatus = HttpStatus.BAD_REQUEST;
+			}
+		} catch (Exception e) {
+			logger.error("resetPassword: ERROR: " + e.toString());
 			result = new ResponseMessageDTO("FAILED", "E05");
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}

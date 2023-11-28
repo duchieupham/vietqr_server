@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.vietqr.org.dto.AccountBankReceiveServiceItemDTO;
+import com.vietqr.org.dto.AccountCustomerBankInfoDTO;
 import com.vietqr.org.dto.AnnualFeeBankDTO;
 import com.vietqr.org.entity.AccountCustomerBankEntity;
 
@@ -46,6 +47,11 @@ public interface AccountCustomerBankRepository extends JpaRepository<AccountCust
                         + "WHERE b.username = :username ", nativeQuery = true)
         List<String> checkExistedCustomerSyncByUsername(@Param(value = "username") String username);
 
+        @Query(value = "SELECT id FROM account_customer_bank WHERE bank_account = :bankAccount AND customer_sync_id = :customerSyncId ", nativeQuery = true)
+        String checkExistedBankAccountIntoMerchant(
+                        @Param(value = "bankAccount") String bankAccount,
+                        @Param(value = "customerSyncId") String customerSyncId);
+
         @Transactional
         @Modifying
         @Query(value = "DELETE FROM account_customer_bank WHERE bank_id = :bankId AND customer_sync_id = :customerSyncId ", nativeQuery = true)
@@ -75,4 +81,18 @@ public interface AccountCustomerBankRepository extends JpaRepository<AccountCust
                         + "LIMIT 1", nativeQuery = true)
         String getMerchantByBankId(@Param(value = "bankId") String bankId);
 
+        @Query(value = "SELECT id FROM account_customer_bank "
+                        + "FROM account_customer_bank "
+                        + "WHERE bank_id = :bankId AND customer_sync_id = :customerSyncId ", nativeQuery = true)
+        String checkExistedByBankIdAndCustomerSyncId(
+                        @Param(value = "bankId") String bankId,
+                        @Param(value = "customerSyncId") String customerSyncId);
+
+        @Query(value = "SELECT COUNT(a.id) as totalBank, b.address, b.merchant as merchantName "
+                        + "FROM account_customer_bank a "
+                        + "LEFT JOIN customer_sync b "
+                        + "ON a.customer_sync_id = b.id "
+                        + "WHERE customer_sync_id = :customerSyncId ", nativeQuery = true)
+        AccountCustomerBankInfoDTO getBankSizeAndAddressByCustomerSyncId(
+                        @Param(value = "customerSyncId") String customerSyncId);
 }

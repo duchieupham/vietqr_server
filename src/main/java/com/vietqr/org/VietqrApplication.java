@@ -67,8 +67,8 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// System.out.println("CHECKSUM: " + checkSum);
 
 		// // get random request Payment MB Bank
-		// String randomCode = "RVCK" + RandomCodeUtil.generateRandomId(8);
-		// System.out.println("randomCode: " + randomCode);
+		String randomCode = "RVCK" + RandomCodeUtil.generateRandomId(8);
+		System.out.println("randomCode: " + randomCode);
 
 		// //
 		// String checkSum2 =
@@ -76,7 +76,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// "FT23293978692076", "SABAccessKey");
 		// System.out.println("CHECKSUM REFUND: " + checkSum2);
 
-		String bankAccountEncrypted = BankEncryptUtil.encrypt("0985336213");
+		String bankAccountEncrypted = BankEncryptUtil.encrypt("0909368665");
 		System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
 
 		// String valueToEncode = "RSID-eef52137-86b2-4812-bc05-54a522fbf226" + "USER
@@ -232,6 +232,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 					.antMatchers(HttpMethod.POST, "/api/accounts/logout").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts-sms/logout").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/transaction-mms").permitAll()
+					.antMatchers(HttpMethod.POST, "/api/accounts/password/reset").permitAll()
 					.antMatchers(HttpMethod.GET, "/api/bank-type/unauthenticated").permitAll()
 					.antMatchers(HttpMethod.GET, "/api/bank-types").permitAll()
 					.antMatchers(HttpMethod.GET, "/images/**").permitAll()

@@ -120,6 +120,16 @@ public class CustomerSyncServiceImpl implements CustomerSyncService {
         return repo.getMerchantNameById(id);
     }
 
+    @Override
+    public Integer getCountingCustomerSync() {
+        return repo.getCountingCustomerSync();
+    }
+
+    @Override
+    public String checkExistedMerchantName(String merchantName) {
+        return repo.checkExistedMerchantName(merchantName);
+    }
+
     // @Override
     // public List<String> checkExistedCustomerSyncByUsername(String username) {
     // return repo.checkExistedCustomerSyncByUsername(username);

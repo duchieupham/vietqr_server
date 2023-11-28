@@ -50,6 +50,14 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
 	@Query(value = "UPDATE account_login SET card_number = :cardNumber WHERE id = :userId", nativeQuery = true)
 	void updateCardNumber(@Param(value = "cardNumber") String cardNumber, @Param(value = "userId") String userId);
 
+	// reset password
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_login SET password = :password WHERE phone_no = :phoneNo ", nativeQuery = true)
+	void resetPassword(
+			@Param(value = "password") String password,
+			@Param(value = "phoneNo") String phoneNo);
+
 	@Transactional
 	@Modifying
 	@Query(value = "UPDATE account_login SET card_nfc_number = :cardNumber WHERE id = :userId", nativeQuery = true)

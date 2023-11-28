@@ -116,4 +116,9 @@ public class AccountLoginServiceImpl implements AccountLoginService {
 		return repo.getVcardInforByUserId(userId);
 	}
 
+	@Override
+	public void resetPassword(String password, String phoneNo) {
+		repo.resetPassword(password, phoneNo);
+	}
+
 }

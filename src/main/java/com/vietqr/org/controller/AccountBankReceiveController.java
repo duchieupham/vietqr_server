@@ -42,6 +42,7 @@ import com.vietqr.org.dto.AccountBankReceiveDetailDTO.TransactionBankListDTO;
 import com.vietqr.org.dto.AccountBankReceivePersonalDTO;
 import com.vietqr.org.dto.AccountBankReceiveRPAItemDTO;
 import com.vietqr.org.dto.AccountBankReceiveRpaDTO;
+import com.vietqr.org.dto.AccountBankReceiveTransferFlowDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.entity.AccountCustomerBankEntity;
 import com.vietqr.org.entity.AccountInformationEntity;
@@ -1001,12 +1002,32 @@ public class AccountBankReceiveController {
 	// 6. get list TID
 	// 7. insert terminal_bank
 	// 8. insert terminal_address
-	// 9. update mms_sync into bank_account_receive
-	public ResponseEntity<ResponseMessageDTO> transferBankAccountFlow() {
+	// 9. update mms_sync, is_sync into bank_account_receive
+	@PostMapping("account-bank/flow/switch")
+	public ResponseEntity<ResponseMessageDTO> transferBankAccountFlow(
+			@RequestBody AccountBankReceiveTransferFlowDTO dto) {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
-			//
+			if (dto != null) {
+				Boolean isMMSActive = accountBankService.getMMSActiveByBankId(dto.getBankId());
+				if (isMMSActive != null && isMMSActive == true) {
+					// flow 2
+				} else if (isMMSActive != null && isMMSActive == false) {
+					// flow 1
+				} else {
+					// err
+					System.out.println("transferBankAccountFlow: INVALID MMS ACTIVE/NOT FOUND BANK ACCOUNT");
+					logger.error("transferBankAccountFlow: INVALID MMS ACTIVE/NOT FOUND BANK ACCOUNT");
+					result = new ResponseMessageDTO("FAILED", "E108");
+					httpStatus = HttpStatus.BAD_REQUEST;
+				}
+			} else {
+				System.out.println("transferBankAccountFlow: INVALID REQUEST BODY");
+				logger.error("transferBankAccountFlow: INVALID REQUEST BODY");
+				result = new ResponseMessageDTO("FAILED", "E46");
+				httpStatus = HttpStatus.BAD_REQUEST;
+			}
 		} catch (Exception e) {
 			System.out.println("transferBankAccountFlow: ERROR: " + e.toString());
 			logger.error("transferBankAccountFlow: ERROR: " + e.toString());

@@ -166,4 +166,12 @@ public interface CustomerSyncRepository extends JpaRepository<CustomerSyncEntity
 
         @Query(value = "SELECT merchant FROM customer_sync WHERE id = :id ", nativeQuery = true)
         String getMerchantNameById(@Param(value = "id") String id);
+
+        // count customer
+        @Query(value = "SELECT COUNT(id) as counter FROM customer_sync ", nativeQuery = true)
+        Integer getCountingCustomerSync();
+
+        @Query(value = "SELECT id FROM customer_sync WHERE merchant = :merchantName", nativeQuery = true)
+        String checkExistedMerchantName(@Param(value = "merchantName") String merchantName);
+
 }
