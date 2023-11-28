@@ -421,6 +421,7 @@ public class CustomerSyncController {
         String result = "";
         try {
             token = removeBearer(token);
+            logger.info("getUserIdByBankAccountProduct: token: " + token);
             WebClient webClient = WebClient.builder()
                     .baseUrl(EnvironmentUtil.getUrlVietqrVnProd() + "/customer-sync/bank-account?bankAccount="
                             + bankAccount)
@@ -587,7 +588,7 @@ public class CustomerSyncController {
                             // 4. check Env
                             if (EnvironmentUtil.isProduction() == false) {
                                 //////////
-                                String userId = getUserIdByBankAccountProduct(customerSyncId, dto.getBankAccount());
+                                String userId = getUserIdByBankAccountProduct(customerSyncId, token);
                                 if (userId != null && !userId.trim().isEmpty()) {
                                     // test:
                                     // 5. check bankAccount existed
