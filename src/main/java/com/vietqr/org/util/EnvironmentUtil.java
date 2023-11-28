@@ -1,7 +1,7 @@
 package com.vietqr.org.util;
 
 public class EnvironmentUtil {
-    private static boolean IS_PRODUCTION = true;
+    private static boolean IS_PRODUCTION = false;
 
     // URL VIETQR VN
     private static final String URL_VIETQR_VN_UAT = "https://dev.vietqr.org/vqr/api";
