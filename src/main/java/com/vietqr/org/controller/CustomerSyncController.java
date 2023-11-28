@@ -449,7 +449,10 @@ public class CustomerSyncController {
                     logger.error("getUserIdByBankAccountProduct: NOT FOUND status");
                 }
             } else {
-                logger.error("getUserIdByBankAccountProduct: ERROR GET USER ID BY BANK ACCOUNT");
+                logger.error("getUserIdByBankAccountProduct: ERROR GET USER ID BY BANK ACCOUNT - statusCode: "
+                        + response.statusCode().toString());
+                String json = response.bodyToMono(String.class).block();
+                logger.error("getUserIdByBankAccountProduct: Response: " + json);
             }
         } catch (Exception e) {
             logger.error("getUserIdByBankAccountProduct: ERROR: " + e.toString());
