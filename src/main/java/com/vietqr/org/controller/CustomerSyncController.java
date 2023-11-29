@@ -588,7 +588,7 @@ public class CustomerSyncController {
                             // 4. check Env
                             if (EnvironmentUtil.isProduction() == false) {
                                 //////////
-                                String userId = getUserIdByBankAccountProduct(customerSyncId, token);
+                                String userId = getUserIdByBankAccountProduct(dto.getBankAccount(), token);
                                 if (userId != null && !userId.trim().isEmpty()) {
                                     // test:
                                     // 5. check bankAccount existed
