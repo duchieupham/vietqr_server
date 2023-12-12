@@ -2242,9 +2242,10 @@ public class TransactionBankController {
 			String encodedKey = Base64.getEncoder().encodeToString(key.getBytes());
 			logger.info("key: " + encodedKey + " - username: " + entity.getUsername() + " - password: "
 					+ entity.getPassword());
-			// System.out.println("key: " + encodedKey + " - username: " +
-			// entity.getUsername() + " - password: "
-			// + entity.getPassword());
+
+			System.out.println("key: " + encodedKey + " - username: " +
+					entity.getUsername() + " - password: "
+					+ entity.getPassword());
 			String suffixUrl = entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty()
 					? entity.getSuffixUrl()
 					: "";
@@ -2272,7 +2273,7 @@ public class TransactionBankController {
 								+ "/api/token_generate")
 						.build();
 			}
-			// System.out.println("uriComponents: " + uriComponents.toString());
+			System.out.println("uriComponents: " + uriComponents.getPath());
 			Mono<TokenDTO> responseMono = webClient.method(HttpMethod.POST)
 					.uri(uriComponents.toUri())
 					.contentType(MediaType.APPLICATION_JSON)
@@ -2301,9 +2302,6 @@ public class TransactionBankController {
 				} else {
 					logger.info("Token got: " + result.getAccess_token() + " - from: " + entity.getInformation());
 				}
-
-				// System.out.println("Token got: " + result.getAccess_token() + " - from: " +
-				// entity.getIpAddress());
 			} else {
 				msgDTO = new ResponseMessageDTO("FAILED", "E05");
 				if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
@@ -2427,11 +2425,12 @@ public class TransactionBankController {
 				// .retrieve()
 				// .bodyToMono(TransactionResponseDTO.class);
 			}
+
 			ClientResponse response = responseMono.block();
-			System.out.println("response: " + response.toString());
 			System.out.println("response status code: " + response.statusCode());
 			if (response.statusCode().is2xxSuccessful()) {
 				String json = response.bodyToMono(String.class).block();
+				System.out.println("Response pushNewTransactionToCustomerSync: " + json);
 				logger.info("Response pushNewTransactionToCustomerSync: " + json);
 				ObjectMapper objectMapper = new ObjectMapper();
 				JsonNode rootNode = objectMapper.readTree(json);
@@ -2447,6 +2446,7 @@ public class TransactionBankController {
 				}
 			} else {
 				String json = response.bodyToMono(String.class).block();
+				System.out.println("Response pushNewTransactionToCustomerSync: " + json);
 				logger.info("Response pushNewTransactionToCustomerSync: " + json);
 				result = new ResponseMessageDTO("FAILED", "E05 - " + json);
 			}

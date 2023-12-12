@@ -124,9 +124,9 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// System.out.println("TRANSACTION ENCRYPTED: " + encrypted);
 		// System.out.println("TRANSACTION DECRYPTED: " + decrypted);
 
-		// String checkSum = BankEncryptUtil.generateMD5CheckOrderChecksum("1123355589",
-		// "system-admin-user2302");
-		// System.out.println("CHECKSUM: " + checkSum);
+		String checkSum = BankEncryptUtil.generateMD5CheckOrderChecksum("202348866",
+				"customer-appgle-user2352");
+		System.out.println("CHECKSUM: " + checkSum);
 
 		// // get random request Payment MB Bank
 		// String randomCode = "RVCK" + RandomCodeUtil.generateRandomId(8);
