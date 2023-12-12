@@ -1,0 +1,10 @@
+{
+    "serviceId": "90V003",
+    "merchantId": "90V003",
+    "merchantName": "VMG",
+    "channelId": "211601",
+    "tranDate": "230809",
+    "tranDesc": "",
+    "ewalletToken": "946ae111fecde33d6791f939e67ca5b48d6eea2f7386bf02c48ddb9fa5d33fce",
+    "amount": "56000"
+}

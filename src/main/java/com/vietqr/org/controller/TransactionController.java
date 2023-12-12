@@ -1,5 +1,6 @@
 package com.vietqr.org.controller;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -24,7 +25,6 @@ import org.apache.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -354,17 +354,176 @@ public class TransactionController {
     }
 
     ////// export transaction
+    // @GetMapping("merchant/transactions-export")
+    // public ResponseEntity<byte[]> exporTransactionMerchant(
+    // @RequestParam(value = "merchantId") String merchantId,
+    // @RequestParam(value = "type") int type,
+    // @RequestParam(value = "value") String value,
+    // @RequestParam(value = "from") String fromDate,
+    // @RequestParam(value = "to") String toDate,
+    // HttpServletResponse response) {
+    // List<TransactionReceiveAdminListDTO> list = new ArrayList<>();
+
+    // try {
+    // // type (search by)
+    // // - 0: bankAccount
+    // // - 1: reference_number (FT Code)
+    // // - 2: order_id
+    // // - 3: content
+    // // - 4: terminal code
+    // // - 9: all
+    // String sheetName = "VietQRVN-Transaction";
+    // if (type == 0) {
+    // if (!fromDate.trim().isEmpty() && !fromDate.trim().equals("0") &&
+    // !toDate.trim().isEmpty()
+    // && !toDate.trim().equals("0")) {
+    // list = transactionReceiveService.exportTransByBankAccountFromDate(value,
+    // fromDate, toDate);
+    // }
+    // } else if (type == 1) {
+    // list = transactionReceiveService.exportTransByFtCodeAndMerchantId(value,
+    // merchantId);
+    // } else if (type == 2) {
+    // list = transactionReceiveService.exportTransByOrderIdAndMerchantId(value,
+    // merchantId);
+    // } else if (type == 3) {
+    // value = value.replace("-", " ").trim();
+    // list = transactionReceiveService.exportTransByContentAndMerchantId(value,
+    // merchantId);
+    // } else if (type == 4) {
+    // if (!fromDate.trim().isEmpty() && !fromDate.trim().equals("0") &&
+    // !toDate.trim().isEmpty()
+    // && !toDate.trim().equals("0")) {
+    // list =
+    // transactionReceiveService.exportTransFromDateByTerminalCodeAndMerchantId(fromDate,
+    // toDate,
+    // value, merchantId);
+    // }
+    // } else if (type == 9) {
+    // if (!fromDate.trim().isEmpty() && !fromDate.trim().equals("0") &&
+    // !toDate.trim().isEmpty()
+    // && !toDate.trim().equals("0")) {
+    // list = transactionReceiveService.exportAllTransFromDateByMerchantId(fromDate,
+    // toDate, merchantId);
+    // // System.out.println("TRUE DATE - list size: " + list.size());
+    // }
+    // // else {
+    // // // System.out.println("WRONG DATE");
+    // // }
+    // } else {
+    // logger.error("getTransactionAdmin: ERROR: INVALID TYPE");
+    // }
+    // sheetName = sheetName.replace(":", "");
+    // if (list != null && !list.isEmpty()) {
+    // // Create a new workbook and sheet
+    // Workbook workbook = new XSSFWorkbook();
+    // Sheet sheet = workbook.createSheet(sheetName);
+    // // Create a header row
+    // Row headerRow = sheet.createRow(0);
+    // headerRow.createCell(0).setCellValue("STT");
+    // headerRow.createCell(1).setCellValue("Số TK");
+    // headerRow.createCell(2).setCellValue("Ngân hàng");
+    // headerRow.createCell(3).setCellValue("Mã đơn hàng");
+    // headerRow.createCell(4).setCellValue("Mã mã GD");
+    // headerRow.createCell(5).setCellValue("Thu (VND)");
+    // headerRow.createCell(6).setCellValue("Chi (VND)");
+    // headerRow.createCell(7).setCellValue("Trạng thái");
+    // headerRow.createCell(8).setCellValue("Thời gian tạo GD");
+    // headerRow.createCell(9).setCellValue("Thời gian TT");
+    // headerRow.createCell(10).setCellValue("Mã điểm bán");
+    // headerRow.createCell(11).setCellValue("Nội dung");
+    // headerRow.createCell(12).setCellValue("Loại GD");
+    // headerRow.createCell(13).setCellValue("Ghi chú");
+    // int counter = 0;
+    // int rowNum = 1;
+    // for (TransactionReceiveAdminListDTO item : list) {
+    // counter++;
+    // Row row = sheet.createRow(rowNum++);
+    // row.createCell(0).setCellValue(counter + "");
+    // row.createCell(1).setCellValue(item.getBankAccount());
+    // row.createCell(2).setCellValue(item.getBankShortName());
+
+    // String orderId = "";
+    // if (item.getOrderId() != null && !item.getOrderId().trim().isEmpty()) {
+    // orderId = item.getOrderId();
+    // }
+    // row.createCell(3).setCellValue(orderId);
+    // String refNumber = "";
+    // if (item.getReferenceNumber() != null &&
+    // !item.getReferenceNumber().trim().isEmpty()) {
+    // refNumber = item.getReferenceNumber();
+    // }
+    // row.createCell(4).setCellValue(refNumber);
+    // if (item.getTransType().toUpperCase().equals("C")) {
+    // row.createCell(5).setCellValue(item.getAmount());
+    // row.createCell(6).setCellValue("");
+    // } else {
+    // row.createCell(5).setCellValue("");
+    // row.createCell(6).setCellValue(item.getAmount());
+    // }
+    // String status = "";
+    // if (item.getStatus() == 0) {
+    // status = "Chờ thanh toán";
+    // } else if (item.getStatus() == 1) {
+    // status = "Thành công";
+    // } else if (item.getStatus() == 2) {
+    // status = "Đã huỷ";
+    // }
+    // row.createCell(7).setCellValue(status);
+    // row.createCell(8).setCellValue(generateTime(item.getTimeCreated()));
+    // row.createCell(9).setCellValue(generateTime(item.getTimePaid()));
+    // String terminalCode = "-";
+    // if (item.getTerminalCode() != null &&
+    // !item.getTerminalCode().trim().isEmpty()) {
+    // terminalCode = item.getTerminalCode();
+    // }
+    // row.createCell(10).setCellValue(terminalCode);
+    // row.createCell(11).setCellValue(item.getContent());
+    // String typeTrans = "-";
+    // if (item.getType() == 0) {
+    // typeTrans = "Mã VietQR";
+    // } else if (item.getType() == 2) {
+    // typeTrans = "Khác";
+    // }
+    // row.createCell(12).setCellValue(typeTrans);
+    // String note = "-";
+    // if (item.getNote() != null && !item.getNote().trim().isEmpty()) {
+    // note = item.getNote();
+    // }
+    // row.createCell(13).setCellValue(note);
+    // }
+    // //
+    // for (int i = 0; i < 9; i++) {
+    // sheet.autoSizeColumn(i);
+    // }
+    // // Set the response headers
+    // response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+    // response.setHeader("Content-Disposition", "attachment; filename=" + sheetName
+    // + ".xlsx");
+
+    // // Write the workbook data directly to the response output stream
+    // workbook.write(response.getOutputStream());
+    // workbook.close();
+
+    // }
+    // } catch (Exception e) {
+    // logger.error("getTransactionAdmin: ERROR: " + e.toString());
+    // System.out.println("ERROR EXPORT: " + e.toString());
+    // }
+    // return new ResponseEntity<>(HttpStatus.OK);
+    // }
+
     @GetMapping("merchant/transactions-export")
-    public ResponseEntity<byte[]> exporTransactionMerchant(
+    public ResponseEntity<byte[]> exportTransactions(
             @RequestParam(value = "merchantId") String merchantId,
             @RequestParam(value = "type") int type,
             @RequestParam(value = "value") String value,
             @RequestParam(value = "from") String fromDate,
             @RequestParam(value = "to") String toDate,
             HttpServletResponse response) {
-        List<TransactionReceiveAdminListDTO> list = new ArrayList<>();
-
         try {
+
+            List<TransactionReceiveAdminListDTO> list = new ArrayList<>();
             // type (search by)
             // - 0: bankAccount
             // - 1: reference_number (FT Code)
@@ -372,12 +531,8 @@ public class TransactionController {
             // - 3: content
             // - 4: terminal code
             // - 9: all
-            String sheetName = "VietQRVN-Transaction";
-            if (type == 0) {
-                if (!fromDate.trim().isEmpty() && !fromDate.trim().equals("0") && !toDate.trim().isEmpty()
-                        && !toDate.trim().equals("0")) {
-                    list = transactionReceiveService.exportTransByBankAccountFromDate(value, fromDate, toDate);
-                }
+            if (type == 0 && !fromDate.trim().isEmpty() && !toDate.trim().isEmpty()) {
+                list = transactionReceiveService.exportTransByBankAccountFromDate(value, fromDate, toDate);
             } else if (type == 1) {
                 list = transactionReceiveService.exportTransByFtCodeAndMerchantId(value, merchantId);
             } else if (type == 2) {
@@ -385,119 +540,124 @@ public class TransactionController {
             } else if (type == 3) {
                 value = value.replace("-", " ").trim();
                 list = transactionReceiveService.exportTransByContentAndMerchantId(value, merchantId);
-            } else if (type == 4) {
-                if (!fromDate.trim().isEmpty() && !fromDate.trim().equals("0") && !toDate.trim().isEmpty()
-                        && !toDate.trim().equals("0")) {
-                    list = transactionReceiveService.exportTransFromDateByTerminalCodeAndMerchantId(fromDate, toDate,
-                            value, merchantId);
-                }
-            } else if (type == 9) {
-                if (!fromDate.trim().isEmpty() && !fromDate.trim().equals("0") && !toDate.trim().isEmpty()
-                        && !toDate.trim().equals("0")) {
-                    list = transactionReceiveService.exportAllTransFromDateByMerchantId(fromDate, toDate, merchantId);
-                    // System.out.println("TRUE DATE - list size: " + list.size());
-                }
-                // else {
-                // // System.out.println("WRONG DATE");
-                // }
+            } else if (type == 4 && !fromDate.trim().isEmpty() && !toDate.trim().isEmpty()) {
+                list = transactionReceiveService.exportTransFromDateByTerminalCodeAndMerchantId(fromDate, toDate,
+                        value, merchantId);
+            } else if (type == 9 && !fromDate.trim().isEmpty() && !toDate.trim().isEmpty()) {
+                list = transactionReceiveService.exportAllTransFromDateByMerchantId(fromDate, toDate, merchantId);
             } else {
-                logger.error("getTransactionAdmin: ERROR: INVALID TYPE");
+                logger.error("exportTransactions: ERROR: INVALID TYPE");
+                // Trả về lỗi nếu loại không hợp lệ
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
-            sheetName = sheetName.replace(":", "");
-            if (list != null && !list.isEmpty()) {
-                // Create a new workbook and sheet
-                Workbook workbook = new XSSFWorkbook();
-                Sheet sheet = workbook.createSheet(sheetName);
-                // Create a header row
+
+            if (list.isEmpty()) {
+                logger.error("exportTransactions: ERROR: NO DATA FOUND");
+                // Trả về lỗi nếu không tìm thấy dữ liệu
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+
+            try (Workbook workbook = new XSSFWorkbook()) {
+                Sheet sheet = workbook.createSheet("VietQRVN-Transaction");
+
+                // Tạo hàng tiêu đề
                 Row headerRow = sheet.createRow(0);
-                headerRow.createCell(0).setCellValue("STT");
-                headerRow.createCell(1).setCellValue("Số TK");
-                headerRow.createCell(2).setCellValue("Ngân hàng");
-                headerRow.createCell(3).setCellValue("Mã đơn hàng");
-                headerRow.createCell(4).setCellValue("Mã mã GD");
-                headerRow.createCell(5).setCellValue("Thu (VND)");
-                headerRow.createCell(6).setCellValue("Chi (VND)");
-                headerRow.createCell(7).setCellValue("Trạng thái");
-                headerRow.createCell(8).setCellValue("Thời gian tạo GD");
-                headerRow.createCell(9).setCellValue("Thời gian TT");
-                headerRow.createCell(10).setCellValue("Mã điểm bán");
-                headerRow.createCell(11).setCellValue("Nội dung");
-                headerRow.createCell(12).setCellValue("Loại GD");
-                headerRow.createCell(13).setCellValue("Ghi chú");
-                int counter = 0;
-                int rowNum = 1;
+                String[] headers = { "STT", "Số TK", "Ngân hàng", "Mã đơn hàng", "Mã mã GD", "Thu (VND)", "Chi (VND)",
+                        "Trạng thái",
+                        "Thời gian tạo GD", "Thời gian TT", "Mã điểm bán", "Nội dung", "Loại GD", "Ghi chú" };
+
+                for (int i = 0; i < headers.length; i++) {
+                    headerRow.createCell(i).setCellValue(headers[i]);
+                }
+
+                int counter = 1;
                 for (TransactionReceiveAdminListDTO item : list) {
-                    counter++;
-                    Row row = sheet.createRow(rowNum++);
-                    row.createCell(0).setCellValue(counter + "");
+                    Row row = sheet.createRow(counter++);
+                    row.createCell(0).setCellValue(String.valueOf(counter));
                     row.createCell(1).setCellValue(item.getBankAccount());
                     row.createCell(2).setCellValue(item.getBankShortName());
-
-                    String orderId = "";
-                    if (item.getOrderId() != null && !item.getOrderId().trim().isEmpty()) {
-                        orderId = item.getOrderId();
-                    }
-                    row.createCell(3).setCellValue(orderId);
-                    String refNumber = "";
-                    if (item.getReferenceNumber() != null && !item.getReferenceNumber().trim().isEmpty()) {
-                        refNumber = item.getReferenceNumber();
-                    }
-                    row.createCell(4).setCellValue(refNumber);
-                    if (item.getTransType().toUpperCase().equals("C")) {
+                    row.createCell(3).setCellValue(
+                            item.getOrderId() != null && !item.getOrderId().trim().isEmpty() ? item.getOrderId() : "");
+                    row.createCell(4)
+                            .setCellValue(
+                                    item.getReferenceNumber() != null && !item.getReferenceNumber().trim().isEmpty()
+                                            ? item.getReferenceNumber()
+                                            : "");
+                    if (item.getTransType().equalsIgnoreCase("C")) {
                         row.createCell(5).setCellValue(item.getAmount());
                         row.createCell(6).setCellValue("");
                     } else {
                         row.createCell(5).setCellValue("");
                         row.createCell(6).setCellValue(item.getAmount());
                     }
-                    String status = "";
-                    if (item.getStatus() == 0) {
-                        status = "Chờ thanh toán";
-                    } else if (item.getStatus() == 1) {
-                        status = "Thành công";
-                    } else if (item.getStatus() == 2) {
-                        status = "Đã huỷ";
-                    }
+                    String status = getStatusText(item.getStatus());
                     row.createCell(7).setCellValue(status);
-                    row.createCell(8).setCellValue(generateTime(item.getTimeCreated()));
-                    row.createCell(9).setCellValue(generateTime(item.getTimePaid()));
-                    String terminalCode = "-";
-                    if (item.getTerminalCode() != null && !item.getTerminalCode().trim().isEmpty()) {
-                        terminalCode = item.getTerminalCode();
+                    row.createCell(8).setCellValue(generateTime(item.getTimeCreated(), false));
+                    boolean isNotFormat = false;
+                    if (item.getStatus() != 1) {
+                        isNotFormat = true;
                     }
-                    row.createCell(10).setCellValue(terminalCode);
+                    row.createCell(9).setCellValue(generateTime(item.getTimePaid(), isNotFormat));
+                    row.createCell(10)
+                            .setCellValue(item.getTerminalCode() != null && !item.getTerminalCode().trim().isEmpty()
+                                    ? item.getTerminalCode()
+                                    : "-");
                     row.createCell(11).setCellValue(item.getContent());
-                    String typeTrans = "-";
-                    if (item.getType() == 0) {
-                        typeTrans = "Mã VietQR";
-                    } else if (item.getType() == 2) {
-                        typeTrans = "Khác";
-                    }
+                    String typeTrans = getTransactionTypeText(item.getType());
                     row.createCell(12).setCellValue(typeTrans);
-                    String note = "-";
-                    if (item.getNote() != null && !item.getNote().trim().isEmpty()) {
-                        note = item.getNote();
-                    }
-                    row.createCell(13).setCellValue(note);
+                    row.createCell(13).setCellValue(item.getNote() != null ? item.getNote() : "");
                 }
-                //
-                for (int i = 0; i < 9; i++) {
-                    sheet.autoSizeColumn(i);
-                }
-                // Set the response headers
-                response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
-                response.setHeader("Content-Disposition", "attachment; filename=" + sheetName + ".xlsx");
 
-                // Write the workbook data directly to the response output stream
-                workbook.write(response.getOutputStream());
-                workbook.close();
+                // Tạo một mảng byte từ workbook
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                workbook.write(outputStream);
+                byte[] fileContent = outputStream.toByteArray();
 
+                // Thiết lập các thông số của response
+                response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                response.setHeader("Content-Disposition", "attachment; filename=transactions.xlsx");
+                response.setContentLength(fileContent.length);
+
+                // Ghi dữ liệu vào response
+                response.getOutputStream().write(fileContent);
             }
+            response.getOutputStream().flush();
+
+            // Trả về response thành công
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (IOException e) {
+            logger.error("exportTransactions: ERROR: " + e.getMessage());
+            // Trả về lỗi nếu có lỗi khi ghi tệp Excel
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            logger.error("getTransactionAdmin: ERROR: " + e.toString());
-            System.out.println("ERROR EXPORT: " + e.toString());
+            logger.error("exportTransactions: ERROR: " + e.toString());
+            System.out.println("exportTransactions: ERROR: " + e.toString());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    private String getStatusText(int status) {
+        switch (status) {
+            case 0:
+                return "Chờ thanh toán";
+            case 1:
+                return "Thành công";
+            case 2:
+                return "Đã huỷ";
+            default:
+                return "";
+        }
+    }
+
+    private String getTransactionTypeText(int type) {
+        switch (type) {
+            case 0:
+                return "Mã VietQR";
+            case 2:
+                return "Khác";
+            default:
+                return "-";
+        }
     }
 
     String formatCurrency(double amount) {
@@ -511,26 +671,33 @@ public class TransactionController {
         return result;
     }
 
-    String generateTime(long input) {
+    String generateTime(Long input, Boolean isNotFormat) {
         String result = "";
         try {
-            // Chuyển đổi thời gian từ kiểu long thành đối tượng Instant
-            Instant instant = Instant.ofEpochSecond(input);
-
-            // Chuyển đổi thời gian từ Instant sang múi giờ UTC+7
-            ZoneId zoneId = ZoneId.of("UTC+7");
-            ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, zoneId);
-
-            // Định dạng chuỗi ngày tháng
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy\nHH:mm:ss");
-
-            // Lấy thời gian trong múi giờ UTC+7 dưới dạng chuỗi
-            String formattedDateTime = zonedDateTime.format(formatter);
-
-            result = formattedDateTime;
-            if (result.trim().contains("01/01/1970")) {
+            if (isNotFormat == true) {
                 result = "-";
+            } else {
+                if (input != null) {
+                    // Chuyển đổi thời gian từ kiểu long thành đối tượng Instant
+                    Instant instant = Instant.ofEpochSecond(input);
+
+                    // Chuyển đổi thời gian từ Instant sang múi giờ UTC+7
+                    ZoneId zoneId = ZoneId.of("UTC+7");
+                    ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, zoneId);
+
+                    // Định dạng chuỗi ngày tháng
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy\nHH:mm:ss");
+
+                    // Lấy thời gian trong múi giờ UTC+7 dưới dạng chuỗi
+                    String formattedDateTime = zonedDateTime.format(formatter);
+
+                    result = formattedDateTime;
+                    if (result.trim().contains("01/01/1970")) {
+                        result = "-";
+                    }
+                }
             }
+
         } catch (Exception e) {
             logger.error("ERROR AT generateTime: " + e.toString());
         }
@@ -601,6 +768,51 @@ public class TransactionController {
                 result = transactionReceiveService.getTransactions(offset, bankId);
             } else {
                 result = transactionReceiveService.getTransactionsByStatus(status, offset, bankId);
+            }
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getTransactionsFilter: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("transactions/list")
+    public ResponseEntity<List<TransactionRelatedDTO>> getTransactionsMobile(
+            @RequestParam(value = "bankId") String bankId,
+            @RequestParam(value = "type") int type,
+            @RequestParam(value = "value") String value,
+            @RequestParam(value = "from") String from,
+            @RequestParam(value = "to") String to,
+            @RequestParam(value = "offset") int offset) {
+        List<TransactionRelatedDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            // type = 9: all
+            // type = 1: reference_number
+            // type = 2: order_id
+            // type = 3: content
+            // type = 4: terminal code
+            // type = 5: status
+            if (type == 9) {
+                result = transactionReceiveService.getTransactions(offset, bankId);
+            } else if (type == 1) {
+                result = transactionReceiveService.getTransactionsByFtCode(value, offset, bankId);
+            } else if (type == 2) {
+                result = transactionReceiveService.getTransactionsByOrderId(value, offset, bankId);
+            } else if (type == 3) {
+                result = transactionReceiveService.getTransactionsByContent(value, offset, bankId);
+            } else if (type == 4) {
+                if (from == null || from.trim().equals("0")) {
+                    result = transactionReceiveService.getTransactionsByTerminalCode(value, offset, bankId);
+                } else {
+                    result = transactionReceiveService.getTransactionsByTerminalCodeAndDate(value, offset, from, to,
+                            bankId);
+                }
+            } else if (type == 5) {
+                Integer status = Integer.parseInt(value);
+                result = transactionReceiveService.getTransactionsByStatus(status, offset,
+                        bankId);
             }
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {

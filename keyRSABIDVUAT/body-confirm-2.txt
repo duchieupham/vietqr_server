@@ -1,0 +1,10 @@
+{
+    "serviceId":"BC0001",
+    "merchantId":"BC0001",
+    "merchantName":"BLUECOM",
+    "channelId":"211701",
+    "transDate":"231128",
+    "payerId":"001085019549",
+    "confirmId":"BC1234567895",
+    "otpNumber":"342287"
+}

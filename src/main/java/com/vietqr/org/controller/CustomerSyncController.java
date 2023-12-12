@@ -312,10 +312,12 @@ public class CustomerSyncController {
             } else {
                 String json = response.bodyToMono(String.class).block();
                 logger.info("Token could not be retrieved from: " + url + " - error: " + json);
+                System.out.println("Token could not be retrieved from: " + url + " - error: " + json);
                 result = new ResponseMessageDTO("FAILED", "E05 - " + json);
             }
         } catch (Exception e) {
             logger.error("Error at getCustomerSyncToken: " + url + " - " + e.toString());
+            System.out.println("Error at getCustomerSyncToken: " + url + " - " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05 - " + e.toString());
         }
         return result;
@@ -1079,4 +1081,22 @@ public class CustomerSyncController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
+    // get customer sync (2 env.)
+    // @GetMapping("customer-sync/information")
+    // public ResponseEntity<List<Object>> getCustomerSyncInformation(
+    // @RequestParam(value = "customerSyncId") String customerSyncId,
+    // @RequestParam(value = "customerSyncTestId") String customerSyncTestId) {
+    // List<Object> result = new ArrayList<>();
+    // HttpStatus httpStatus = null;
+    // try {
+    // //
+    // } catch (Exception e) {
+    // logger.error("getCustomerSyncInformation: ERROR: " + e.toString());
+    // httpStatus = HttpStatus.BAD_REQUEST;
+    // }
+    // return new ResponseEntity<>(result, httpStatus);
+    // }
+
+    // update customer sync info
 }

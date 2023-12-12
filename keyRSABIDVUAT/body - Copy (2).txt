@@ -1,0 +1,19 @@
+{
+    "serviceId": "082004",
+    "merchantId": "0820041",
+    "merchantName": "",
+    "channelId": "211701",
+    "payerId": "0912343219",
+    "payerName": "MI  WOIV DEPJ",
+    "payerIdentity": "768902876",
+    "payerMobile": "0912343219",
+    "payerDebit": "9704180000024599011",
+    "payerDebitType": "809",
+    "registerSmartbanking": "0",
+    "extraInfo1": "",
+    "extraInfo2": "",
+    "extraInfo3": "",
+    "extraInfo4": "",
+    "extraInfo5": "",
+    "receiverName": ""
+}

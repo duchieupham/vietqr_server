@@ -1,0 +1,18 @@
+{
+    "serviceId": "264002",
+    "merchantId": "2640021",
+    "merchantName": "VIDIVA",
+    "channelId": "211701",
+    "tranDate": null,
+    "tranDesc": null,
+    "ewalletToken": "b03c8235f5b958766c2bd551b4697d1e3ddca1726a915d8144ea0fe50144ca43",
+    "amount": "1100000",
+    "confirmId": "0320220601072739JK11QLP2IHHXTRF09X6T2J2B66UUHWADAD1",
+    "otpNumber": "047100",
+    "otpType": null,
+    "extraInfo1": null,
+    "extraInfo2": null,
+    "extraInfo3": null,
+    "extraInfo4": null,
+    "extraInfo5": null
+}

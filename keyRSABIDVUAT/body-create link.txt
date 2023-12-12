@@ -1,0 +1,26 @@
+{
+    "body": {
+        "serviceId": "90V005",
+        "merchantId": "90V005",
+        "merchantName": "VMG Pay",
+        "channelId": "211601",
+        "Trandate": "230906",
+        "Trans_Id": "12111222",
+        "Trans_Desc": "Lien ket vi User: AIVITRAN. Ma giao dich: 4094287",
+        "Amount": "20000",
+        "Curr": "VND",
+        "Payer_Id": null,
+        "Payer_Name": null,
+        "Payer_Addr": "ha noi",
+        "Type": "806",
+        "Custmer_Id": null,
+        "Customer_Name": "hiepvd",
+        "IssueDate": "0122",
+        "FromProcess": "",
+        "extraInfo1": null,
+        "extraInfo2": null,
+        "extraInfo3": null,
+        "extraInfo4": null,
+        "extraInfo5": null
+    }
+}

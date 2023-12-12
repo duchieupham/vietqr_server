@@ -223,4 +223,15 @@ public interface TransactionReceiveService {
 
         TransReceiveStatisticFeeDTO getTransStatisticForServiceFeeWithSystemType(String bankId, String month);
 
+        //
+        List<TransactionRelatedDTO> getTransactionsByFtCode(String value, int offset, String bankId);
+
+        List<TransactionRelatedDTO> getTransactionsByOrderId(String value, int offset, String bankId);
+
+        List<TransactionRelatedDTO> getTransactionsByContent(String value, int offset, String bankId);
+
+        List<TransactionRelatedDTO> getTransactionsByTerminalCode(String value, int offset, String bankId);
+
+        List<TransactionRelatedDTO> getTransactionsByTerminalCodeAndDate(String value, int offset, String fromDate,
+                        String toDate, String bankId);
 }

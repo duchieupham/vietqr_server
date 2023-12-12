@@ -81,14 +81,62 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
 
         @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, a.time_paid as timePaid,a.status,a.type,a.trans_type as transType "
                         + "FROM transaction_receive a "
-                        + "WHERE a.bank_id=:bankId AND a.status = :status "
+                        + "WHERE a.bank_id= :bankId AND a.status = :status "
                         + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
         List<TransactionRelatedDTO> getTransactionsByStatus(@Param(value = "status") int status,
                         @Param(value = "offset") int offset,
                         @Param(value = "bankId") String bankId);
 
+        @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, a.time_paid as timePaid,a.status,a.type,a.trans_type as transType "
+                        + "FROM transaction_receive a "
+                        + "WHERE a.bank_id= :bankId AND a.reference_number = :value "
+                        + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransactionsByFtCode(
+                        @Param(value = "value") String value,
+                        @Param(value = "offset") int offset,
+                        @Param(value = "bankId") String bankId);
+
+        @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, a.time_paid as timePaid,a.status,a.type,a.trans_type as transType "
+                        + "FROM transaction_receive a "
+                        + "WHERE a.bank_id= :bankId AND a.order_id = :value "
+                        + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransactionsByOrderId(
+                        @Param(value = "value") String value,
+                        @Param(value = "offset") int offset,
+                        @Param(value = "bankId") String bankId);
+
+        @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, a.time_paid as timePaid,a.status,a.type,a.trans_type as transType "
+                        + "FROM transaction_receive a "
+                        + "WHERE a.bank_id= :bankId AND a.content LIKE %:value% "
+                        + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransactionsByContent(
+                        @Param(value = "value") String value,
+                        @Param(value = "offset") int offset,
+                        @Param(value = "bankId") String bankId);
+
+        @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, a.time_paid as timePaid,a.status,a.type,a.trans_type as transType "
+                        + "FROM transaction_receive a "
+                        + "WHERE a.bank_id= :bankId AND a.terminal_code LIKE %:value% "
+                        + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransactionsByTerminalCode(
+                        @Param(value = "value") String value,
+                        @Param(value = "offset") int offset,
+                        @Param(value = "bankId") String bankId);
+
+        @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, a.time_paid as timePaid,a.status,a.type,a.trans_type as transType "
+                        + "FROM transaction_receive a "
+                        + "WHERE a.bank_id= :bankId AND a.terminal_code LIKE %:value% "
+                        + "AND CONVERT_TZ(FROM_UNIXTIME(a.time), '+00:00', '+07:00') BETWEEN :fromDate AND :toDate "
+                        + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransactionsByTerminalCodeAndDate(
+                        @Param(value = "value") String value,
+                        @Param(value = "offset") int offset,
+                        @Param(value = "fromDate") String fromDate,
+                        @Param(value = "toDate") String toDate,
+                        @Param(value = "bankId") String bankId);
+
         @Query(value = "SELECT a.id, a.amount, a.bank_id as bankId, b.bank_account as bankAccount, a.content, a.ref_id as refId, a.status, a.time, a.time_paid as timePaid, a.type, a.trace_id as traceId, a.trans_type as transType, b.bank_account_name as bankAccountName, c.bank_code as bankCode, c.bank_name as bankName, c.img_id as imgId, a.reference_number as referenceNumber, "
-                        + "a.terminal_code as terminalCode, a.note "
+                        + "a.terminal_code as terminalCode, a.note, a.order_id as orderId, c.bank_short_name as bankShortName "
                         + "FROM transaction_receive a "
                         + "INNER JOIN account_bank_receive b "
                         + "ON a.bank_id = b.id "

@@ -1,7 +1,16 @@
 package com.vietqr.org;
 
 import java.io.IOException;
+import java.security.Key;
+import java.security.PrivateKey;
+import java.util.Base64;
 
+import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
+import org.jose4j.jwe.JsonWebEncryption;
+import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
+import org.jose4j.jws.AlgorithmIdentifiers;
+import org.jose4j.jws.JsonWebSignature;
+import org.jose4j.keys.AesKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -29,11 +38,15 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import com.google.gson.Gson;
+import com.vietqr.org.dto.example.Header;
+import com.vietqr.org.dto.example.JweObj;
+import com.vietqr.org.dto.example.Recipients;
 import com.vietqr.org.security.JWTAuthorizationFilter;
 import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.BankRSAUtil;
+import com.vietqr.org.util.JwsUtil;
 import com.vietqr.org.util.RandomCodeUtil;
-import com.vietqr.org.util.TransactionRefIdUtil;
 import com.vietqr.org.util.WebSocketConfig;
 
 @SpringBootApplication
@@ -47,8 +60,57 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		return new RestTemplate();
 	}
 
+	public static void test() {
+		try {
+			String myKey = JwsUtil.getSymmatricKey();
+			// byte[] decodedKey =
+			// Base64.getDecoder().decode("746163353431386f6b6d6e626c6f7071746163353431386f6b6d6e626c6f7033");
+			Key key = new AesKey(JwsUtil.hexStringToBytes(myKey));
+			JsonWebEncryption jwe = new JsonWebEncryption();
+			// String payload =
+			// "{\"RequestDateTime\":\"2022-12-01T02:54:32.746Z\",\"RequestID\":\"1669863273\",\"Language\":\"vi\",\"Data\":{\"CifNo\":\"136030\",\"channel\":\"SMB\"}}";
+			// JWE
+			String payload = JwsUtil.getPayLoad();
+			jwe.setPayload(payload);
+			jwe.setAlgorithmHeaderValue(KeyManagementAlgorithmIdentifiers.A256KW);
+			jwe.setEncryptionMethodHeaderParameter(ContentEncryptionAlgorithmIdentifiers.AES_128_CBC_HMAC_SHA_256);
+			jwe.setKey(key);
+			String serializedJwe = jwe.getCompactSerialization();
+			String[] split = serializedJwe.split("\\.");
+			Gson gson = new Gson();
+			String protected_ = split[0];
+			byte[] decodedBytes = Base64.getDecoder().decode(protected_);
+			String decodedString = new String(decodedBytes);
+			Header h = gson.fromJson(decodedString, Header.class);
+			String encryptedKey = split[1];
+			String iv = split[2];
+			String ciphertext = split[3];
+			String tag = split[4];
+			Recipients recipient = new Recipients();
+			recipient.setHeader(h);
+			recipient.setEncrypted_key(encryptedKey);
+			Recipients[] recipients = new Recipients[1];
+			recipients[0] = recipient;
+			JweObj j = new JweObj(recipients, protected_, ciphertext, iv, tag);
+			String jweString = gson.toJson(j);
+			System.out.println("Serialized Encrypted JWE: " + jweString);
+			// JWS
+			JsonWebSignature jws = new JsonWebSignature();
+			jws.setPayload(jweString);
+			jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.RSA_USING_SHA256);
+			PrivateKey privateKey = JwsUtil.getPrivateKey();
+			jws.setKey(privateKey);
+			String jwsString = jws.getCompactSerialization();
+			System.out.println("Serialized Signed JWS: " + jwsString);
+			// System.out.println(j.toString());
+		} catch (Exception e) {
+			System.out.println("test: ERROR: " + e.toString());
+		}
+	}
+
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
+		// test();
 		// generate check sum mms sync
 		// String dataCheckSum = BankEncryptUtil.generateMD5Checksum("test09",
 		// "", "20231030224801", "1000");
@@ -67,8 +129,8 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// System.out.println("CHECKSUM: " + checkSum);
 
 		// // get random request Payment MB Bank
-		String randomCode = "RVCK" + RandomCodeUtil.generateRandomId(8);
-		System.out.println("randomCode: " + randomCode);
+		// String randomCode = "RVCK" + RandomCodeUtil.generateRandomId(8);
+		// System.out.println("randomCode: " + randomCode);
 
 		// //
 		// String checkSum2 =
@@ -76,13 +138,14 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// "FT23293978692076", "SABAccessKey");
 		// System.out.println("CHECKSUM REFUND: " + checkSum2);
 
-		String bankAccountEncrypted = BankEncryptUtil.encrypt("0909368665");
+		String bankAccountEncrypted = BankEncryptUtil.encrypt("80803793979");
 		System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
 
+		/// generate signature to request payment MB
 		// String valueToEncode = "RSID-eef52137-86b2-4812-bc05-54a522fbf226" + "USER
-		// NAME TEST" + "5169867955365"
+		/// NAME TEST" + "5169867955365"
 		// + "NGUYEN VAN A"
-		// + "0868525356" + "10000";
+		// + "0868525356" + "25000";
 		// String result = BankRSAUtil.generateSignature(valueToEncode);
 		// System.out.println("result: " + result);
 		// System.out.println("Verify data: " +

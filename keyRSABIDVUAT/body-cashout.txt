@@ -1,0 +1,17 @@
+{
+ 	"requestId": "221219035867",
+        "serviceId": "369002",
+        "merchantId": "3690022",
+        "merchantName": "VNPOST",
+        "channelId": "211701",
+        "tranDate": "221219",
+        "tranDesc": "",
+        "ewalletToken": "97cb2481d962a4bc2b342708fb5bbec60e6f7003cb4c42aaceb4d8f15629dc22",
+        "payerMobile": "0337425151",
+        "amount": 500000,
+        "extraInfo1": null,
+        "extraInfo2": null,
+        "extraInfo3": null,
+        "extraInfo4": null,
+        "extraInfo5": null
+}

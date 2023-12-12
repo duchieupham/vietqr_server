@@ -38,4 +38,8 @@ public interface TransactionDetailDTO {
     String getTerminalCode();
 
     String getNote();
+
+    String getOrderId();
+
+    String getBankShortName();
 }

@@ -382,4 +382,30 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
         return repo.getTransStatisticForServiceFeeWithSystemType(bankId, month);
     }
 
+    @Override
+    public List<TransactionRelatedDTO> getTransactionsByFtCode(String value, int offset, String bankId) {
+        return repo.getTransactionsByFtCode(value, offset, bankId);
+    }
+
+    @Override
+    public List<TransactionRelatedDTO> getTransactionsByOrderId(String value, int offset, String bankId) {
+        return repo.getTransactionsByOrderId(value, offset, bankId);
+    }
+
+    @Override
+    public List<TransactionRelatedDTO> getTransactionsByContent(String value, int offset, String bankId) {
+        return repo.getTransactionsByContent(value, offset, bankId);
+    }
+
+    @Override
+    public List<TransactionRelatedDTO> getTransactionsByTerminalCode(String value, int offset, String bankId) {
+        return repo.getTransactionsByTerminalCode(value, offset, bankId);
+    }
+
+    @Override
+    public List<TransactionRelatedDTO> getTransactionsByTerminalCodeAndDate(String value, int offset, String fromDate,
+            String toDate, String bankId) {
+        return repo.getTransactionsByTerminalCodeAndDate(value, offset, fromDate, toDate, bankId);
+    }
+
 }
