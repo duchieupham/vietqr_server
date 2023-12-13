@@ -110,7 +110,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
-		// test();
+		test();
 		// generate check sum mms sync
 		// String dataCheckSum = BankEncryptUtil.generateMD5Checksum("test09",
 		// "", "20231030224801", "1000");
@@ -124,9 +124,9 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// System.out.println("TRANSACTION ENCRYPTED: " + encrypted);
 		// System.out.println("TRANSACTION DECRYPTED: " + decrypted);
 
-		String checkSum = BankEncryptUtil.generateMD5CheckOrderChecksum("202348866",
-				"customer-appgle-user2352");
-		System.out.println("CHECKSUM: " + checkSum);
+		// String checkSum = BankEncryptUtil.generateMD5CheckOrderChecksum("202348866",
+		// "customer-appgle-user2352");
+		// System.out.println("CHECKSUM: " + checkSum);
 
 		// // get random request Payment MB Bank
 		// String randomCode = "RVCK" + RandomCodeUtil.generateRandomId(8);
@@ -138,8 +138,8 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// "FT23293978692076", "SABAccessKey");
 		// System.out.println("CHECKSUM REFUND: " + checkSum2);
 
-		String bankAccountEncrypted = BankEncryptUtil.encrypt("80803793979");
-		System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
+		// String bankAccountEncrypted = BankEncryptUtil.encrypt("80803793979");
+		// System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
 
 		/// generate signature to request payment MB
 		// String valueToEncode = "RSID-eef52137-86b2-4812-bc05-54a522fbf226" + "USER

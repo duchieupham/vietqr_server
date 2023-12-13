@@ -1,0 +1,8 @@
+{
+    "serviceId":"BC0001",
+    "merchantId":"BC0001",
+    "merchantName":"BLUECOM",
+    "channelId":"211701",
+    "ewalletToken":"3ad995515bc8194d5eba23b33c9dad8c5432da77£506a89£0224f3e@eaad342c",
+    "amount":"10000"
+}
