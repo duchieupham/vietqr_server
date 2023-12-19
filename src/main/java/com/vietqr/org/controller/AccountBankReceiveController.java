@@ -222,6 +222,7 @@ public class AccountBankReceiveController {
 			entity.setRpaSync(false);
 			entity.setUsername("");
 			entity.setPassword("");
+			entity.setEwalletToken("");
 			accountBankService.insertAccountBank(entity);
 			// insert bank-receive-personal
 			UUID uuidPersonal = UUID.randomUUID();
@@ -400,17 +401,23 @@ public class AccountBankReceiveController {
 		return result;
 	}
 
+	// button "Liên kết tài khoản - cho việc liên kết sau đó"
 	// register authentication
 	// for case user created bank before and then register authentication
 	@PostMapping("account-bank/register-authentication")
 	public ResponseEntity<ResponseMessageDTO> registerAuthentication(
-			@Valid @RequestBody RegisterAuthenticationDTO dto) {
+			@RequestBody RegisterAuthenticationDTO dto) {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
 			// update bank-receive
+			String ewalletToken = "";
+			if (dto.getEwalletToken() != null) {
+				ewalletToken = dto.getEwalletToken();
+			}
 			accountBankService.updateRegisterAuthenticationBank(dto.getNationalId(), dto.getPhoneAuthenticated(),
 					dto.getBankAccountName(), dto.getBankAccount(),
+					ewalletToken,
 					dto.getBankId());
 			//
 			LarkUtil larkUtil = new LarkUtil();
@@ -459,9 +466,8 @@ public class AccountBankReceiveController {
 	//
 
 	// register bank account with authenticated
-
 	@PostMapping("account-bank")
-	public ResponseEntity<ResponseMessageDTO> insertPersonalAccountBank(@Valid @RequestBody AccountBankReceiveDTO dto) {
+	public ResponseEntity<ResponseMessageDTO> insertPersonalAccountBank(@RequestBody AccountBankReceiveDTO dto) {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
@@ -484,6 +490,12 @@ public class AccountBankReceiveController {
 			entity.setRpaSync(false);
 			entity.setUsername("");
 			entity.setPassword("");
+			if (dto.getEwalletToken() != null) {
+				entity.setEwalletToken(dto.getEwalletToken());
+			} else {
+				entity.setEwalletToken("");
+			}
+
 			accountBankService.insertAccountBank(entity);
 			// if (dto.getType() == 0) {
 			// insert bank receive personal
@@ -601,6 +613,8 @@ public class AccountBankReceiveController {
 				result.setAuthenticated(accountBankEntity.isAuthenticated());
 				result.setNationalId(accountBankEntity.getNationalId());
 				result.setQrCode(qr);
+				result.setEwalletToken(accountBankEntity.getEwalletToken());
+				result.setUnlinkedType(bankTypeEntity.getUnlinkedType());
 				result.setPhoneAuthenticated(accountBankEntity.getPhoneAuthenticated());
 				List<String> branchIds = new ArrayList<>();
 				branchIds = branchInformationService.getBranchIdsByBankId(bankId);
@@ -693,6 +707,8 @@ public class AccountBankReceiveController {
 				result.setNationalId(accountBankEntity.getNationalId());
 				result.setQrCode(qr);
 				result.setCaiValue(caiValue);
+				result.setEwalletToken(accountBankEntity.getEwalletToken());
+				result.setUnlinkedType(bankTypeEntity.getUnlinkedType());
 				result.setPhoneAuthenticated(accountBankEntity.getPhoneAuthenticated());
 				List<String> branchIds = new ArrayList<>();
 				branchIds = branchInformationService.getBranchIdsByBankId(bankId);
@@ -923,6 +939,7 @@ public class AccountBankReceiveController {
 					entity.setRpaSync(true);
 					entity.setUsername(dto.getUsername());
 					entity.setPassword(dto.getPassword());
+					entity.setEwalletToken("");
 					accountBankService.insertAccountBank(entity);
 					// insert account_bank_personal
 					UUID uuidPersonal = UUID.randomUUID();

@@ -16,13 +16,14 @@ public class BankTypeDTO implements Serializable {
 	private String imageId;
 	private int status;
 	private String caiValue;
+	private int unlinkedType;
 
 	public BankTypeDTO() {
 		super();
 	}
 
 	public BankTypeDTO(String id, String bankCode, String bankName, String bankShortName, String imageId, int status,
-			String caiValue) {
+			String caiValue, int unlinkedType) {
 		super();
 		this.id = id;
 		this.bankCode = bankCode;
@@ -31,6 +32,7 @@ public class BankTypeDTO implements Serializable {
 		this.imageId = imageId;
 		this.status = status;
 		this.caiValue = caiValue;
+		this.unlinkedType = unlinkedType;
 	}
 
 	public String getId() {
@@ -87,6 +89,14 @@ public class BankTypeDTO implements Serializable {
 
 	public void setCaiValue(String caiValue) {
 		this.caiValue = caiValue;
+	}
+
+	public int getUnlinkedType() {
+		return unlinkedType;
+	}
+
+	public void setUnlinkedType(int unlinkedType) {
+		this.unlinkedType = unlinkedType;
 	}
 
 }

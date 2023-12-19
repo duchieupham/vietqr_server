@@ -26,6 +26,8 @@ public class AccountBankReceiveDetailDTO implements Serializable {
     private String nationalId;
     private String qrCode;
     private String phoneAuthenticated;
+    private String ewalletToken;
+    private Integer unlinkedType;
     private List<BusinessBankDetailDTO> businessDetails;
     private List<TransactionBankListDTO> transactions;
 
@@ -37,7 +39,9 @@ public class AccountBankReceiveDetailDTO implements Serializable {
             String bankName, String imgId, String bankTypeId, int bankTypeStatus, String caiValue, String userId,
             int type,
             boolean isAuthenticated, String nationalId,
-            String phoneAuthenticated, String qrCode, List<BusinessBankDetailDTO> businessDetails,
+            String phoneAuthenticated, String qrCode,
+            String ewalletToken, Integer unlinkedType,
+            List<BusinessBankDetailDTO> businessDetails,
             List<TransactionBankListDTO> transactions) {
         this.id = id;
         this.bankAccount = bankAccount;
@@ -54,6 +58,8 @@ public class AccountBankReceiveDetailDTO implements Serializable {
         this.nationalId = nationalId;
         this.qrCode = qrCode;
         this.phoneAuthenticated = phoneAuthenticated;
+        this.ewalletToken = ewalletToken;
+        this.unlinkedType = unlinkedType;
         this.businessDetails = businessDetails;
         this.transactions = transactions;
     }
@@ -176,6 +182,22 @@ public class AccountBankReceiveDetailDTO implements Serializable {
 
     public void setQrCode(String qrCode) {
         this.qrCode = qrCode;
+    }
+
+    public String getEwalletToken() {
+        return ewalletToken;
+    }
+
+    public void setEwalletToken(String ewalletToken) {
+        this.ewalletToken = ewalletToken;
+    }
+
+    public Integer getUnlinkedType() {
+        return unlinkedType;
+    }
+
+    public void setUnlinkedType(Integer unlinkedType) {
+        this.unlinkedType = unlinkedType;
     }
 
     public List<BusinessBankDetailDTO> getBusinessDetails() {

@@ -41,13 +41,15 @@ public class BankTypeEntity implements Serializable {
 	@Column(name = "rpaContainId")
 	private boolean rpaContainId;
 
+	@Column(name = "unlinkedType")
+	private int unlinkedType;
+
 	public BankTypeEntity() {
 		super();
 	}
 
 	public BankTypeEntity(String id, String bankCode, String bankName, String bankShortName, String imgId,
-			String swiftCode, int status, boolean rpaContainId) {
-		super();
+			String swiftCode, int status, boolean rpaContainId, int unlinkedType) {
 		this.id = id;
 		this.bankCode = bankCode;
 		this.bankName = bankName;
@@ -56,6 +58,7 @@ public class BankTypeEntity implements Serializable {
 		this.swiftCode = swiftCode;
 		this.status = status;
 		this.rpaContainId = rpaContainId;
+		this.unlinkedType = unlinkedType;
 	}
 
 	public String getId() {
@@ -120,6 +123,14 @@ public class BankTypeEntity implements Serializable {
 
 	public void setRpaContainId(boolean rpaContainId) {
 		this.rpaContainId = rpaContainId;
+	}
+
+	public int getUnlinkedType() {
+		return unlinkedType;
+	}
+
+	public void setUnlinkedType(int unlinkedType) {
+		this.unlinkedType = unlinkedType;
 	}
 
 }

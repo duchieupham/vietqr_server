@@ -18,6 +18,8 @@ public class AccountBankReceiveDTO implements Serializable {
 	private String phoneAuthenticated;
 	// for business
 	private String branchId;
+	// for BIDV
+	private String ewalletToken;
 
 	public AccountBankReceiveDTO() {
 		super();
@@ -35,6 +37,21 @@ public class AccountBankReceiveDTO implements Serializable {
 		this.phoneAuthenticated = phoneAuthenticated;
 		this.type = type;
 		this.branchId = branchId;
+	}
+
+	public AccountBankReceiveDTO(String bankTypeId, String bankAccount, String userBankName, String userId,
+			String nationalId, String phoneAuthenticated, int type,
+			String branchId, String ewalletToken) {
+		super();
+		this.bankTypeId = bankTypeId;
+		this.bankAccount = bankAccount;
+		this.userBankName = userBankName;
+		this.userId = userId;
+		this.nationalId = nationalId;
+		this.phoneAuthenticated = phoneAuthenticated;
+		this.type = type;
+		this.branchId = branchId;
+		this.ewalletToken = ewalletToken;
 	}
 
 	public String getBankTypeId() {
@@ -100,4 +117,13 @@ public class AccountBankReceiveDTO implements Serializable {
 	public void setBranchId(String branchId) {
 		this.branchId = branchId;
 	}
+
+	public String getEwalletToken() {
+		return ewalletToken;
+	}
+
+	public void setEwalletToken(String ewalletToken) {
+		this.ewalletToken = ewalletToken;
+	}
+
 }

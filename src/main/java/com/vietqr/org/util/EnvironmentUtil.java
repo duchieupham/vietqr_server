@@ -1,7 +1,50 @@
 package com.vietqr.org.util;
 
 public class EnvironmentUtil {
-    private static boolean IS_PRODUCTION = true;
+    private static boolean IS_PRODUCTION = false;
+
+    ///
+    // BIDV
+    // request - confirm linked bank Account
+    private static final String BIDV_URL_GET_TOKEN_UAT = "https://bidv.net:9303/bidvorg/service/openapi/oauth2/token";
+    private static final String BIDV_URL_GET_TOKEN_PROD = "https://bidv.net:9303/bidvorg/service/openapi/oauth2/token";
+
+    private static final String BIDV_LINKED_URL_REQUEST_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/create-ewallet-link-collection/v1";
+    private static final String BIDV_LINKED_URL_REQUEST_PROD = "https://www.bidv.net:9303/bidvorg/service/open-banking/create-ewallet-link-collection/v1";
+
+    private static final String BIDV_LINKED_URL_CONFIRM_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/confirm-ewallet-link-collection/v1";
+    private static final String BIDV_LINKED_URL_CONFIRM_PROD = "https://www.bidv.net:9303/bidvorg/service/open-banking/confirm-ewallet-link-collection/v1";
+
+    private static final String BIDV_UNLINKED_URL_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/remove-ewallet-link-collection/v1";
+    private static final String BIDV_UNLINKED_URL_PROD = "https://www.bidv.net:9303/bidvorg/service/open-banking/remove-ewallet-link-collection/v1";
+
+    private static final String BIDV_GET_TOKEN_CLIENT_ID_UAT = "c87962d6c3bf521c4f0911589863ff06";
+    private static final String BIDV_GET_TOKEN_CLIENT_ID_PROD = "c87962d6c3bf521c4f0911589863ff06";
+
+    private static final String BIDV_GET_TOKEN_CLIENT_SECRET_UAT = "ee2d23a34ce3cdc2a4c3d6d5b794fd3c";
+    private static final String BIDV_GET_TOKEN_CLIENT_SECRET_PROD = "ee2d23a34ce3cdc2a4c3d6d5b794fd3c";
+
+    private static final String BIDV_LINKED_SERVICE_ID_UAT = "BC0001";
+    private static final String BIDV_LINKED_SERVICE_ID_PROD = "BC0001";
+
+    private static final String BIDV_LINKED_MERCHANT_ID_UAT = "BC0001";
+    private static final String BIDV_LINKED_MERCHANT_ID_PROD = "BC0001";
+
+    private static final String BIDV_LINKED_MERCHANT_NAME_UAT = "BLUECOM";
+    private static final String BIDV_LINKED_MERCHANT_NAME_PROD = "BLUECOM";
+
+    private static final String BIDV_LINKED_CHANNEL_ID_UAT = "211701";
+    private static final String BIDV_LINKED_CHANNEL_ID_PROD = "211701";
+
+    private static final String BIDV_LINKED_PAYER_DEBIT_TYPE_ACC_UAT = "810";
+    private static final String BIDV_LINKED_PAYER_DEBIT_TYPE_ACC_PROD = "810";
+    // private static final String BIDV_LINKED_PAYER_DEBIT_TYPE_CARD_PROD = "810";
+    // private static final String BIDV_LINKED_PAYER_DEBIT_TYPE_CARD_PROD = "810";
+
+    ///
+    // IP ADDRESS
+    private static final String IP_VIETQRVN_UAT = "112.78.1.220";
+    private static final String IP_VIETQRVN_PROD = "112.78.1.209";
 
     // URL VIETQR VN
     private static final String URL_VIETQR_VN_UAT = "https://dev.vietqr.org/vqr/api";
@@ -145,6 +188,59 @@ public class EnvironmentUtil {
     // Telegram
     private static final String TELEGRAM_BOT_USERNAME = "vietqr_bot";
     private static final String TELEGRAM_BOT_TOKEN = "6603683411:AAGTCde6C-7kt4gR5gTvcDA_jmYIqs0SJJM";
+
+    //
+
+    public static String getIpVietQRVN() {
+        return (IS_PRODUCTION == false) ? IP_VIETQRVN_PROD : IP_VIETQRVN_UAT;
+    }
+
+    // BIDV BIDV_UNLINKED_URL_UAT
+    public static String getBidvUrlUnlinked() {
+        return (IS_PRODUCTION == false) ? BIDV_UNLINKED_URL_PROD : BIDV_UNLINKED_URL_UAT;
+    }
+
+    public static String getBidvUrlGetToken() {
+        return (IS_PRODUCTION == false) ? BIDV_URL_GET_TOKEN_PROD : BIDV_URL_GET_TOKEN_UAT;
+    }
+
+    public static String getBidvUrlLinkedRequest() {
+        return (IS_PRODUCTION == false) ? BIDV_LINKED_URL_REQUEST_PROD : BIDV_LINKED_URL_REQUEST_UAT;
+    }
+
+    public static String getBidvUrlLinkedConfirm() {
+        return (IS_PRODUCTION == false) ? BIDV_LINKED_URL_CONFIRM_PROD : BIDV_LINKED_URL_CONFIRM_UAT;
+    }
+
+    public static String getBidvGetTokenClientId() {
+        return (IS_PRODUCTION == false) ? BIDV_GET_TOKEN_CLIENT_ID_PROD : BIDV_GET_TOKEN_CLIENT_ID_UAT;
+    }
+
+    public static String getBidvGetTokenClientSecret() {
+        return (IS_PRODUCTION == false) ? BIDV_GET_TOKEN_CLIENT_SECRET_PROD : BIDV_GET_TOKEN_CLIENT_SECRET_UAT;
+    }
+
+    public static String getBidvLinkedServiceId() {
+        return (IS_PRODUCTION == false) ? BIDV_LINKED_SERVICE_ID_PROD : BIDV_LINKED_SERVICE_ID_UAT;
+    }
+
+    public static final String getBidvLinkedMerchantId() {
+        return (IS_PRODUCTION == false) ? BIDV_LINKED_MERCHANT_ID_PROD : BIDV_LINKED_MERCHANT_ID_UAT;
+    }
+
+    public static String getBidvLinkedMerchantName() {
+        return (IS_PRODUCTION == false) ? BIDV_LINKED_MERCHANT_NAME_PROD : BIDV_LINKED_MERCHANT_NAME_UAT;
+    }
+
+    public static String getBidvLinkedChannelId() {
+        return (IS_PRODUCTION == false) ? BIDV_LINKED_CHANNEL_ID_PROD : BIDV_LINKED_CHANNEL_ID_UAT;
+    }
+
+    public static String getBidvLinkedPayerDebitTypeAcc() {
+        return (IS_PRODUCTION == false) ? BIDV_LINKED_PAYER_DEBIT_TYPE_ACC_PROD : BIDV_LINKED_PAYER_DEBIT_TYPE_ACC_UAT;
+    }
+
+    ///
 
     public static String getUrlVietqrVnUat() {
         return URL_VIETQR_VN_UAT;

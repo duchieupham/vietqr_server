@@ -65,13 +65,17 @@ public class AccountBankReceiveEntity implements Serializable {
 	@Column(name = "password")
 	private String password;
 
+	@Column(name = "ewalletToken")
+	private String ewalletToken;
+
 	public AccountBankReceiveEntity() {
 		super();
 	}
 
 	public AccountBankReceiveEntity(String id, String bankTypeId, String bankAccount, String bankAccountName,
 			String nationalId, String phoneAuthenticated, int type, String userId, boolean isAuthenticated,
-			boolean isSync, boolean isWpSync, boolean status, String orderId, String sign, boolean mmsActive) {
+			boolean isSync, boolean isWpSync, boolean status, String orderId, String sign, boolean mmsActive,
+			String ewalletToken) {
 		super();
 		this.id = id;
 		this.bankTypeId = bankTypeId;
@@ -86,6 +90,7 @@ public class AccountBankReceiveEntity implements Serializable {
 		this.isWpSync = isWpSync;
 		this.status = status;
 		this.mmsActive = mmsActive;
+		this.ewalletToken = ewalletToken;
 	}
 
 	public boolean isRpaSync() {
@@ -214,6 +219,14 @@ public class AccountBankReceiveEntity implements Serializable {
 
 	public void setMmsActive(boolean mmsActive) {
 		this.mmsActive = mmsActive;
+	}
+
+	public String getEwalletToken() {
+		return ewalletToken;
+	}
+
+	public void setEwalletToken(String ewalletToken) {
+		this.ewalletToken = ewalletToken;
 	}
 
 	@Override

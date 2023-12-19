@@ -41,9 +41,9 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
 
 	@Override
 	public void updateRegisterAuthenticationBank(String nationalId, String phoneAuthenticated, String bankAccountName,
-			String bankAccount, String bankId) {
+			String bankAccount, String ewalletToken, String bankId) {
 		repo.updateRegisterAuthenticationBank(nationalId, phoneAuthenticated, bankAccountName, bankAccount,
-				bankId);
+				ewalletToken, bankId);
 	}
 
 	// @Override

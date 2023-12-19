@@ -14,18 +14,20 @@ public class RegisterAuthenticationDTO implements Serializable {
     private String phoneAuthenticated;
     private String bankAccountName;
     private String bankAccount;
+    private String ewalletToken;
 
     public RegisterAuthenticationDTO() {
         super();
     }
 
     public RegisterAuthenticationDTO(String bankId, String nationalId, String phoneAuthenticated,
-            String bankAccountName, String bankAccount) {
+            String bankAccountName, String bankAccount, String ewalletToken) {
         this.bankId = bankId;
         this.nationalId = nationalId;
         this.phoneAuthenticated = phoneAuthenticated;
         this.bankAccount = bankAccount;
         this.bankAccountName = bankAccountName;
+        this.ewalletToken = ewalletToken;
     }
 
     public String getBankId() {
@@ -66,6 +68,14 @@ public class RegisterAuthenticationDTO implements Serializable {
 
     public void setBankAccount(String bankAccount) {
         this.bankAccount = bankAccount;
+    }
+
+    public String getEwalletToken() {
+        return ewalletToken;
+    }
+
+    public void setEwalletToken(String ewalletToken) {
+        this.ewalletToken = ewalletToken;
     }
 
 }

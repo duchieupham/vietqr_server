@@ -57,7 +57,7 @@ public class BankTypeController {
 			UUID uuidImage = UUID.randomUUID();
 			String fileName = StringUtils.cleanPath(imgUrl.getOriginalFilename());
 			BankTypeEntity entity = new BankTypeEntity(uuid.toString(), bankCode, bankName, bankShortName,
-					uuidImage.toString(), swiftCode, 0, false);
+					uuidImage.toString(), swiftCode, 0, false, 0);
 			bankTypeService.insertBankType(entity);
 			// insert image
 			ImageEntity imageEntity = new ImageEntity(uuidImage.toString(), fileName, imgUrl.getBytes());
@@ -120,6 +120,7 @@ public class BankTypeController {
 					dto.setStatus(entity.getStatus());
 					String caiValue = caiBankService.getCaiValue(dto.getId());
 					dto.setCaiValue(caiValue);
+					dto.setUnlinkedType(entity.getUnlinkedType());
 					result.add(dto);
 				}
 			}
@@ -131,6 +132,7 @@ public class BankTypeController {
 		return new ResponseEntity<>(result, httpStatus);
 	}
 
+	// bank type in login screens
 	@GetMapping("bank-type/unauthenticated")
 	public ResponseEntity<List<BankTypeDTO>> getBankTypesUnauthenticated() {
 		List<BankTypeDTO> result = new ArrayList<>();
@@ -147,6 +149,7 @@ public class BankTypeController {
 					dto.setImageId(entity.getImgId());
 					dto.setStatus(0);
 					dto.setCaiValue("");
+					dto.setUnlinkedType(entity.getUnlinkedType());
 					result.add(dto);
 				}
 			}

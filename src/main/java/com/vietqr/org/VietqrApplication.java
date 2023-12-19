@@ -62,6 +62,9 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void test() {
 		try {
+			// String clientXCertificate = JwsUtil.getClientXCertificate();
+			// System.out.println("client x certificate: " + clientXCertificate);
+			///
 			String myKey = JwsUtil.getSymmatricKey();
 			// byte[] decodedKey =
 			// Base64.getDecoder().decode("746163353431386f6b6d6e626c6f7071746163353431386f6b6d6e626c6f7033");
@@ -110,7 +113,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
-		test();
+		// test();
 		// generate check sum mms sync
 		// String dataCheckSum = BankEncryptUtil.generateMD5Checksum("test09",
 		// "", "20231030224801", "1000");
@@ -138,7 +141,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// "FT23293978692076", "SABAccessKey");
 		// System.out.println("CHECKSUM REFUND: " + checkSum2);
 
-		// String bankAccountEncrypted = BankEncryptUtil.encrypt("80803793979");
+		// String bankAccountEncrypted = BankEncryptUtil.encrypt("0969366262");
 		// System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
 
 		/// generate signature to request payment MB

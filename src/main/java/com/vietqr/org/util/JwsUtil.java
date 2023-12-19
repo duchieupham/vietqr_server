@@ -1,5 +1,6 @@
 package com.vietqr.org.util;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -16,6 +17,7 @@ import org.bouncycastle.util.io.pem.PemReader;
 public class JwsUtil {
 
     static String path = "keyRSABIDVUAT/";
+    // static String path = "/opt/keyRSABIDVUAT/";
 
     public static byte[] hexStringToBytes(String s) {
         byte[] ans = new byte[s.length() / 2];
@@ -41,6 +43,46 @@ public class JwsUtil {
             PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(content);
             PrivateKey privateKey = factory.generatePrivate(privateKeySpec);
             return privateKey;
+        }
+    }
+
+    // public static PrivateKey getClientXCertificate()
+    // throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
+    // KeyFactory factory = KeyFactory.getInstance("RSA");
+    // File file = new File(path + "certificate.pem");
+    // try (FileReader keyReader = new FileReader(file); PemReader pemReader = new
+    // PemReader(keyReader)) {
+    // PemObject pemObject = pemReader.readPemObject();
+    // byte[] content = pemObject.getContent();
+    // PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(content);
+    // PrivateKey privateKey = factory.generatePrivate(privateKeySpec);
+    // return privateKey;
+    // }
+    // }
+
+    public static String getClientXCertificate() throws IOException {
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader(path + "certificate.pem"));
+            StringBuilder certificateBuilder = new StringBuilder();
+            String line;
+            boolean isInsideCertificate = false;
+
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("-----BEGIN CERTIFICATE-----")) {
+                    isInsideCertificate = true;
+                } else if (line.startsWith("-----END CERTIFICATE-----")) {
+                    isInsideCertificate = false;
+                } else if (isInsideCertificate) {
+                    certificateBuilder.append(line.trim());
+                }
+            }
+
+            return certificateBuilder.toString();
+        } finally {
+            if (reader != null) {
+                reader.close();
+            }
         }
     }
 
