@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,7 @@ import com.vietqr.org.dto.AnnualFeeMerchantDTO;
 import com.vietqr.org.dto.AnnualFeeMerchantItemDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.ServiceFeeBankItemDTO;
+import com.vietqr.org.dto.ServiceFeeDashboardDTO;
 import com.vietqr.org.dto.ServiceFeeMerchantItemDTO;
 import com.vietqr.org.dto.ServiceFeeMonthItemDTO;
 import com.vietqr.org.dto.TotalPaymentDTO;
@@ -320,9 +322,14 @@ public class AccountBankFeeController {
 
     // 6 giây
     @GetMapping("admin/merchant/service-fee/transaction")
-    public ResponseEntity<List<ServiceFeeMerchantItemDTO>> getServiceFeeList(
+    public ResponseEntity<ServiceFeeDashboardDTO> getServiceFeeList(
             @RequestParam(value = "month") String month) {
-        List<ServiceFeeMerchantItemDTO> result = new ArrayList<>();
+        ServiceFeeDashboardDTO result = null;
+        AtomicLong totalAmountM = new AtomicLong(0L);
+        AtomicLong totalTransM = new AtomicLong(0L);
+        Long totalUnpaidMonth = 0L;
+        Long totalPaidMonth = 0L;
+        List<ServiceFeeMerchantItemDTO> list = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
             List<AnnualFeeMerchantDTO> merchants = customerSyncService.getMerchantForServiceFee();
@@ -337,6 +344,10 @@ public class AccountBankFeeController {
                         int status = 1;
                         boolean allStatusOne = true;
                         Long totalPayment = 0L;
+                        //
+                        Long totalTransMonth = 0L;
+                        Long totalAmountMonth = 0L;
+                        //
                         dto.setCustomerSyncId(merchant.getCustomerSyncId());
                         dto.setMerchant(merchant.getMerchant());
                         //
@@ -456,14 +467,17 @@ public class AccountBankFeeController {
                                             } else if (feeItem.getStatus() == null) {
                                                 allStatusOne = false;
                                             }
+                                            totalAmountMonth += feeItem.getTotalAmount();
+                                            totalTransMonth += feeItem.getTotalTrans();
                                         }
                                         bankItem.setFees(feeItems);
                                         bankItems.add(bankItem);
                                     }
                                 }
                             }
-
                         }
+                        totalAmountM.addAndGet(totalAmountMonth);
+                        totalTransM.addAndGet(totalTransMonth);
                         dto.setTotalPayment(totalPayment);
                         if (!allStatusOne) {
                             status = 0; // Nếu biến cờ không được đánh dấu, gán giá trị 0 cho status
@@ -486,13 +500,27 @@ public class AccountBankFeeController {
                     try {
                         ServiceFeeMerchantItemDTO dto = future.get();
                         if (dto.getBankAccounts() != null && !dto.getBankAccounts().isEmpty()) {
-                            result.add(dto);
+                            list.add(dto);
+                            if (dto.getStatus() == 0) {
+                                totalUnpaidMonth += dto.getTotalPayment();
+                            }
+                            if (dto.getStatus() == 1) {
+                                totalPaidMonth += dto.getTotalPayment();
+                            }
                         }
                     } catch (Exception e) {
                         logger.error("getServiceFeeList: add result error: " + e.toString());
                     }
                 }
             }
+            //
+            result = new ServiceFeeDashboardDTO();
+            result.setList(list);
+            result.setTotalAmount(totalAmountM.get());
+            result.setTotalTrans(totalTransM.get());
+            result.setTotalPaid(totalPaidMonth);
+            result.setTotalUnpaid(totalUnpaidMonth);
+            //
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             httpStatus = HttpStatus.BAD_REQUEST;

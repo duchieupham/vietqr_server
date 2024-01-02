@@ -44,9 +44,7 @@ import com.vietqr.org.dto.example.JweObj;
 import com.vietqr.org.dto.example.Recipients;
 import com.vietqr.org.security.JWTAuthorizationFilter;
 import com.vietqr.org.util.BankEncryptUtil;
-import com.vietqr.org.util.BankRSAUtil;
 import com.vietqr.org.util.JwsUtil;
-import com.vietqr.org.util.RandomCodeUtil;
 import com.vietqr.org.util.WebSocketConfig;
 
 @SpringBootApplication
@@ -141,8 +139,8 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// "FT23293978692076", "SABAccessKey");
 		// System.out.println("CHECKSUM REFUND: " + checkSum2);
 
-		// String bankAccountEncrypted = BankEncryptUtil.encrypt("0969366262");
-		// System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
+		String bankAccountEncrypted = BankEncryptUtil.encrypt("0856618668");
+		System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
 
 		/// generate signature to request payment MB
 		// String valueToEncode = "RSID-eef52137-86b2-4812-bc05-54a522fbf226" + "USER

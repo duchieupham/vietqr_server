@@ -2228,6 +2228,7 @@ public class TransactionBankController {
 				String clientXCertification = JwsUtil.getClientXCertificate();
 				System.out.println("\n\nToken BIDV: " + token);
 				System.out.println("\n\nclientXCertification BIDV: " + clientXCertification);
+				// System.out.println("\n\nTime: " + "2020-01-31T09:59:34.000+10:12");
 				Mono<ClientResponse> responseMono = webClient.post()
 						.uri(uriComponents.toUri())
 						.contentType(MediaType.APPLICATION_JSON)
@@ -2236,7 +2237,7 @@ public class TransactionBankController {
 						.header("X-Client-Certificate", clientXCertification)
 						.header("X-API-Interaction-ID", interactionId.toString())
 						.header("X-Idempotency-Key", idemKey.toString())
-						.header("TimeStamp", getSystemTimeWithOffset())
+						.header("Timestamp", "2020-01-31T09:59:34.000+10:12")
 						.header("X-Customer-IP-Address", EnvironmentUtil.getIpVietQRVN())
 						.header("Authorization", "Bearer " + token)
 						.header("X-JWS-Signature", jwsString)
@@ -2250,13 +2251,45 @@ public class TransactionBankController {
 					System.out.println("Response unlinkedBankOTP: " + json);
 					ObjectMapper objectMapper = new ObjectMapper();
 					JsonNode rootNode = objectMapper.readTree(json);
-					if (rootNode.get("errorCode") != null) {
-						String errCode = rootNode.get("errorCode").asText();
-						if (errCode.trim().equals("000")) {
-							result = new ResponseMessageDTO("SUCCESS", "");
-							// do update status bank_account from authen => unauthen
-							accountBankService.unRegisterAuthenticationBank(dto.getBankAccount());
-							httpStatus = HttpStatus.OK;
+					// if (rootNode.get("errorCode") != null) {
+					// String errCode = rootNode.get("errorCode").asText();
+					// if (errCode.trim().equals("000")) {
+					// result = new ResponseMessageDTO("SUCCESS", "");
+					// // do update status bank_account from authen => unauthen
+					// accountBankService.unRegisterAuthenticationBank(dto.getBankAccount());
+					// httpStatus = HttpStatus.OK;
+					// } else {
+					// result = new ResponseMessageDTO("FAILED", "E05");
+					// httpStatus = HttpStatus.BAD_REQUEST;
+					// }
+					// } else {
+					// result = new ResponseMessageDTO("FAILED", "E05");
+					// httpStatus = HttpStatus.BAD_REQUEST;
+					// }
+					if (rootNode.get("body") != null) {
+						if (rootNode.get("body").get("additionalInfo") != null) {
+							if (rootNode.get("body").get("additionalInfo").get("detailedError") != null) {
+								if (rootNode.get("body").get("additionalInfo").get("detailedError")
+										.get("errorCode") != null) {
+									String errorCode = rootNode.get("body").get("additionalInfo").get("detailedError")
+											.get("errorCode").asText();
+									if (errorCode != null && errorCode.trim().equals("000")) {
+										// do update status bank_account from authen => unauthen
+										accountBankService.unRegisterAuthenticationBank(dto.getBankAccount());
+										result = new ResponseMessageDTO("SUCCESS", "");
+										httpStatus = HttpStatus.OK;
+									} else {
+										result = new ResponseMessageDTO("FAILED", "E05");
+										httpStatus = HttpStatus.BAD_REQUEST;
+									}
+								} else {
+									result = new ResponseMessageDTO("FAILED", "E05");
+									httpStatus = HttpStatus.BAD_REQUEST;
+								}
+							} else {
+								result = new ResponseMessageDTO("FAILED", "E05");
+								httpStatus = HttpStatus.BAD_REQUEST;
+							}
 						} else {
 							result = new ResponseMessageDTO("FAILED", "E05");
 							httpStatus = HttpStatus.BAD_REQUEST;
@@ -2688,7 +2721,7 @@ public class TransactionBankController {
 		// Định dạng thời gian theo yêu cầu (2020-01-31T09:59:34.000+07:00)
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 		String formattedTime = offsetDateTime.format(formatter);
-
+		System.out.println("getSystemTimeWithOffset: formattedTime: " + formattedTime);
 		return formattedTime;
 	}
 
