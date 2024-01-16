@@ -29,10 +29,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.vietqr.org.dto.AccountCardNumberUpdateDTO;
 import com.vietqr.org.dto.AccountCheckDTO;
 import com.vietqr.org.dto.AccountInformationDTO;
+import com.vietqr.org.dto.AccountInformationSyncDTO;
 import com.vietqr.org.dto.AccountLoginMethodDTO;
 import com.vietqr.org.dto.AccountLoginPasswordResetDTO;
 import com.vietqr.org.dto.AccountLoginDTO;
@@ -72,9 +77,11 @@ import com.vietqr.org.util.LarkUtil;
 import com.vietqr.org.util.NotificationUtil;
 import com.vietqr.org.util.RandomCodeUtil;
 import com.vietqr.org.util.SocketHandler;
+import com.vietqr.org.util.StringUtil;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import reactor.core.publisher.Mono;
 
 @RestController
 @CrossOrigin
@@ -338,6 +345,7 @@ public class AccountController {
 				LocalDateTime currentDateTime = LocalDateTime.now();
 				long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
 				accountLoginEntity.setTime(time);
+				accountLoginEntity.setSyncBitrix(false);
 				accountLoginService.insertAccountLogin(accountLoginEntity);
 
 				// insert account_information
@@ -507,7 +515,7 @@ public class AccountController {
 
 	// push data from mobile to server to send login information
 	@PostMapping("accounts/push")
-	public ResponseEntity<ResponseMessageDTO> sendDataToLogin(@Valid @RequestBody AccountPushLoginDTO dto) {
+	public ResponseEntity<ResponseMessageDTO> sendDataToLogin(@RequestBody AccountPushLoginDTO dto) {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
@@ -515,7 +523,32 @@ public class AccountController {
 			data.put("loginId", dto.getLoginId());
 			data.put("userId", dto.getUserId());
 			data.put("randomKey", dto.getRandomKey());
+			result = new ResponseMessageDTO("SUCCESS", "");
 			socketHandler.sendMessageLoginToWeb(dto.getLoginId(), data);
+			httpStatus = HttpStatus.OK;
+		} catch (Exception e) {
+			logger.error("sendDataToLogin: ERROR: " + e.toString());
+			result = new ResponseMessageDTO("FAILED", "E05");
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	// push data from mobile to server to send login information
+	@PostMapping("accounts/push/ec")
+	public ResponseEntity<ResponseMessageDTO> sendDataToEcLogin(@RequestBody AccountPushLoginDTO dto) {
+		ResponseMessageDTO result = null;
+		HttpStatus httpStatus = null;
+		try {
+			Map<String, String> data = new HashMap<>();
+			data.put("ecLoginId", dto.getLoginId());
+			data.put("randomKey", dto.getRandomKey());
+			AccountInformationEntity accountInformationEntity = accountInformationService
+					.getAccountInformation(dto.getUserId());
+			String token = getJWTInfinitiveToken(accountInformationEntity, dto.getPhoneNo(), dto.getUrl());
+			data.put("token", token);
+			result = new ResponseMessageDTO("SUCCESS", "");
+			socketHandler.sendMessageEcLoginToWeb(dto.getLoginId(), data);
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
 			logger.error("sendDataToLogin: ERROR: " + e.toString());
@@ -947,6 +980,85 @@ public class AccountController {
 		} catch (Exception e) {
 			logger.error("resetPassword: ERROR: " + e.toString());
 			result = new ResponseMessageDTO("FAILED", "E05");
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	@GetMapping("accounts/sync-bitrix")
+	public ResponseEntity<ResponseMessageDTO> syncAccountToBitrix() {
+		ResponseMessageDTO result = null;
+		HttpStatus httpStatus = null;
+		try {
+			List<AccountInformationSyncDTO> entities = accountInformationService.getUserInformationSync();
+			int counter = 0;
+			if (entities != null && !entities.isEmpty()) {
+				for (AccountInformationSyncDTO entity : entities) {
+					try {
+						counter++;
+						String originatorId = entity.getId();
+						String name = entity.getLastName() + " " + entity.getMiddleName() + " " + entity.getFirstName();
+						String email = "";
+						if (entity.getEmail() != null) {
+							email = entity.getEmail();
+						}
+						String valueType = "WORK";
+						String phoneNo = StringUtil.formatPhoneNumber(entity.getPhoneNo());
+						String post = "USER";
+						String address = entity.getAddress();
+						String address2 = "";
+						String comment = entity.getBirthDate();
+						String web = "";
+						String vending = "VIETQR";
+						String sourceDescription = "VIETQR-USER";
+						// Thêm API gắn các request param ở đây
+						// Xây dựng URL của API Bitrix với các tham số
+						String apiUrl = "https://crm.bluecom.vn/rest/10/0ji9bblj3wuxq8bi/crm.contact.add.json" +
+								"?FIELDS[ORIGINATOR_ID]=" + originatorId +
+								"&FIELDS[NAME]=" + name.trim() +
+								"&FIELDS[EMAIL][0][VALUE]=" + email +
+								"&FIELDS[EMAIL][0][VALUE_TYPE]=" + valueType +
+								"&FIELDS[PHONE][0][VALUE]=" + phoneNo +
+								"&FIELDS[PHONE][0][VALUE_TYPE]=" + "WORK" +
+								"&FIELDS[POST]=" + post +
+								"&FIELDS[ADDRESS]=" + address +
+								"&FIELDS[ADDRESS_2]=" + address2 +
+								"&FIELDS[COMMENTS]=" + comment +
+								"&FIELDS[ORIGIN_ID]=" + web +
+								"&FIELDS[VENDING]=" + vending +
+								"&FIELDS[SOURCE_DESCRIPTION]=" + sourceDescription;
+						UriComponents uriComponents = UriComponentsBuilder
+								.fromHttpUrl(apiUrl)
+								.buildAndExpand(/* add url parameter here */);
+						WebClient webClient = WebClient.builder()
+								.baseUrl(apiUrl)
+								.build();
+						Mono<ClientResponse> responseMono = webClient.get()
+								.uri(uriComponents.toUri())
+								.exchange();
+						ClientResponse response = responseMono.block();
+						if (response.statusCode().is2xxSuccessful()) {
+							System.out.println(
+									"SYNC BITRIX SUCCESS ITEM " + counter + ": " + entity.getId() + " - "
+											+ name.trim() + " - "
+											+ entity.getPhoneNo());
+						} else {
+							logger.error(
+									"SYNC BITRIX FAILED ITEM: " + entity.getId() + " - " + entity.getPhoneNo());
+							System.out.println(
+									"SYNC BITRIX FAILED ITEM: " + entity.getId() + " - " + entity.getPhoneNo());
+						}
+					} catch (Exception e) {
+						System.out.println("ERROR: " + e.toString());
+					}
+				}
+			}
+			result = new ResponseMessageDTO("SUCCESS", "");
+			httpStatus = HttpStatus.OK;
+		} catch (Exception e) {
+			System.out.println(e.toString());
+			logger.error("syncVcardsToBitrix: ERROR: " + e.toString());
+			result = new ResponseMessageDTO("syncVcardsToBitrix", "E05");
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(result, httpStatus);

@@ -41,6 +41,9 @@ public class AccountLoginEntity implements Serializable {
 	@Column(name = "time")
 	private long time;
 
+	@Column(name = "syncBitrix")
+	private Boolean syncBitrix;
+
 	public AccountLoginEntity() {
 		super();
 	}
@@ -56,6 +59,19 @@ public class AccountLoginEntity implements Serializable {
 		this.cardNumber = cardNumber;
 		this.cardNfcNumber = cardNfcNumber;
 		this.time = time;
+	}
+
+	public AccountLoginEntity(String id, String phoneNo, String password, boolean status, String email,
+			String cardNumber, String cardNfcNumber, long time, Boolean syncBitrix) {
+		this.id = id;
+		this.phoneNo = phoneNo;
+		this.password = password;
+		this.status = status;
+		this.email = email;
+		this.cardNumber = cardNumber;
+		this.cardNfcNumber = cardNfcNumber;
+		this.time = time;
+		this.syncBitrix = syncBitrix;
 	}
 
 	public String getId() {
@@ -120,6 +136,14 @@ public class AccountLoginEntity implements Serializable {
 
 	public void setTime(long time) {
 		this.time = time;
+	}
+
+	public Boolean getSyncBitrix() {
+		return syncBitrix;
+	}
+
+	public void setSyncBitrix(Boolean syncBitrix) {
+		this.syncBitrix = syncBitrix;
 	}
 
 }

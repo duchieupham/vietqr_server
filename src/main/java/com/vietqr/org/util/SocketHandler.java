@@ -20,6 +20,7 @@ public class SocketHandler extends TextWebSocketHandler {
 
     private List<WebSocketSession> notificationSessions = new ArrayList<>();
     private List<WebSocketSession> loginSessions = new ArrayList<>();
+    private List<WebSocketSession> ecLoginSessions = new ArrayList<>();
     private List<WebSocketSession> transactionSessions = new ArrayList<>();
 
     @Override
@@ -28,6 +29,7 @@ public class SocketHandler extends TextWebSocketHandler {
             logger.info("WS: add session: " + session.toString());
             String userId = (String) session.getAttributes().get("userId");
             String loginId = (String) session.getAttributes().get("loginId");
+            String ecLoginId = (String) session.getAttributes().get("ecLoginId");
             String transactionRefId = (String) session.getAttributes().get("refId");
 
             if (userId != null && !userId.trim().isEmpty()) {
@@ -39,6 +41,10 @@ public class SocketHandler extends TextWebSocketHandler {
                 // save loginId for this session
                 session.getAttributes().put("loginId", loginId);
                 loginSessions.add(session);
+            } else if (ecLoginId != null && !ecLoginId.trim().isEmpty()) {
+                // save loginId for this session
+                session.getAttributes().put("ecLoginId", ecLoginId);
+                ecLoginSessions.add(session);
             } else if (transactionRefId != null && !transactionRefId.trim().isEmpty()) {
                 // save transactionRefId for this session
                 session.getAttributes().put("refId", transactionRefId);
@@ -65,9 +71,25 @@ public class SocketHandler extends TextWebSocketHandler {
         //
         logger.info("WS: remove session: " + session.toString());
         logger.info("WS: notificationSessions size: " + notificationSessions.size());
-        logger.info("WS: notificationSessions size: " + loginSessions.size());
-        logger.info("WS: notificationSessions size: " + transactionSessions.size());
+        logger.info("WS: loginSessions size: " + loginSessions.size());
+        logger.info("WS: ecLoginSessions size: " + ecLoginSessions.size());
+        logger.info("WS: transactionSessions size: " + transactionSessions.size());
         //
+    }
+
+    public void sendMessageEcLoginToWeb(String ecLoginId, Map<String, String> message) throws IOException {
+        logger.info("WS: sendMessageEcLoginToWeb");
+        logger.info("WS: ecLoginSessions: " + ecLoginSessions.size());
+        for (WebSocketSession session : ecLoginSessions) {
+            logger.info("WS: ec-login session ID: " + session.getId());
+            logger.info("WS: ec-login session Attributes: " + session.getAttributes());
+            Object sessionEcLoginId = session.getAttributes().get("ecLoginId");
+            if (sessionEcLoginId != null && sessionEcLoginId.equals(ecLoginId)) {
+                ObjectMapper mapper = new ObjectMapper();
+                String jsonMessage = mapper.writeValueAsString(message);
+                session.sendMessage(new TextMessage(jsonMessage));
+            }
+        }
     }
 
     public void sendMessageLoginToWeb(String loginId, Map<String, String> message) throws IOException {

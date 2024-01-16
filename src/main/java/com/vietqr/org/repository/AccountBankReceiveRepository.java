@@ -161,15 +161,20 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "WHEN b.is_sync = true AND b.mms_active = false THEN 1  "
 			+ "WHEN b.is_sync = true AND b.mms_active = true THEN 2  "
 			+ "WHEN b.is_sync = false AND b.mms_active = true THEN 2  "
-			+ "END as flow  "
+			+ "END as flow, "
+			+ "d.service_fee_id as serviceFeeId, d.short_name as serviceFeeName "
 			+ "FROM account_customer_bank a "
 			+ "INNER JOIN account_bank_receive b "
 			+ "ON a.bank_id = b.id  "
 			+ "INNER JOIN bank_type c  "
 			+ "ON b.bank_type_id = c.id  "
-			+ "WHERE a.customer_sync_id = :customerSyncId ", nativeQuery = true)
+			+ "LEFT JOIN account_bank_fee d "
+			+ "ON b.id = d.bank_id "
+			+ "WHERE a.customer_sync_id = :customerSyncId "
+			+ "LIMIT :offset, 20", nativeQuery = true)
 	List<AccountBankReceiveByCusSyncDTO> getBankAccountsByCusSyncId(
-			@Param(value = "customerSyncId") String customerSyncId);
+			@Param(value = "customerSyncId") String customerSyncId,
+			@Param(value = "offset") int offset);
 
 	// check existed bankAccount
 	@Query(value = "SELECT id FROM account_bank_receive "

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.entity.AccountInformationEntity;
+import com.vietqr.org.dto.AccountInformationSyncDTO;
 import com.vietqr.org.dto.AccountSearchDTO;
 import com.vietqr.org.dto.UserInfoWalletDTO;
 
@@ -34,4 +35,6 @@ public interface AccountInformationService {
 	public UserInfoWalletDTO getUserInforWallet(String userId);
 
 	public void updateCarrierTypeIdByUserId(String carrierTypeId, String userId);
+
+	public List<AccountInformationSyncDTO> getUserInformationSync();
 }

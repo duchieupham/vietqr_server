@@ -55,7 +55,7 @@ public interface AccountBankReceiveService {
 	// public AccountBankReceiveEntity getBankAccountAuthenticatedByAccount(String
 	// bankAccount);
 
-	public List<AccountBankReceiveByCusSyncDTO> getBankAccountsByCusSyncId(String customerSyncId);
+	public List<AccountBankReceiveByCusSyncDTO> getBankAccountsByCusSyncId(String customerSyncId, int offset);
 
 	// for test env
 	public String checkExistedBankAccountByBankAccount(String bankAccount);

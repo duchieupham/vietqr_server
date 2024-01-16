@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.vietqr.org.entity.AccountInformationEntity;
 import com.vietqr.org.repository.AccountInformationRepository;
+import com.vietqr.org.dto.AccountInformationSyncDTO;
 import com.vietqr.org.dto.AccountSearchDTO;
 import com.vietqr.org.dto.UserInfoWalletDTO;;
 
@@ -72,5 +73,10 @@ public class AccountInformationServiceImpl implements AccountInformationService 
 	@Override
 	public List<AccountSearchDTO> getAccountSearchByFullname(String fullname) {
 		return accountInformationRepo.getAccountSearchByFullname(fullname);
+	}
+
+	@Override
+	public List<AccountInformationSyncDTO> getUserInformationSync() {
+		return accountInformationRepo.getUserInformationSync();
 	}
 }

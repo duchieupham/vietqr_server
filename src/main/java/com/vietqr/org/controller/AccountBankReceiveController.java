@@ -986,11 +986,12 @@ public class AccountBankReceiveController {
 	// For admin get list bank account by customersyncid
 	@GetMapping("admin/account-bank/list")
 	public ResponseEntity<List<AccountBankReceiveByCusSyncDTO>> getBankAccountsByCusSyncId(
-			@RequestParam(value = "customerSyncId") String customerSyncId) {
+			@RequestParam(value = "customerSyncId") String customerSyncId,
+			@RequestParam(value = "offset") int offset) {
 		List<AccountBankReceiveByCusSyncDTO> result = new ArrayList<>();
 		HttpStatus httpStatus = null;
 		try {
-			result = accountBankService.getBankAccountsByCusSyncId(customerSyncId);
+			result = accountBankService.getBankAccountsByCusSyncId(customerSyncId, offset);
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
 			System.out.println("Error at getBankAccountsByCusSyncId: " + e.toString());

@@ -113,8 +113,8 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
 	}
 
 	@Override
-	public List<AccountBankReceiveByCusSyncDTO> getBankAccountsByCusSyncId(String customerSyncId) {
-		return repo.getBankAccountsByCusSyncId(customerSyncId);
+	public List<AccountBankReceiveByCusSyncDTO> getBankAccountsByCusSyncId(String customerSyncId, int offset) {
+		return repo.getBankAccountsByCusSyncId(customerSyncId, offset);
 	}
 
 	@Override

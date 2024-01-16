@@ -29,4 +29,7 @@ public interface AccountBankReceiveByCusSyncDTO {
 
     Integer getFlow();
 
+    String getServiceFeeId();
+
+    String getServiceFeeName();
 }

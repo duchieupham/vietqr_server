@@ -28,4 +28,24 @@ public class StringUtil {
         }
         return hashtags;
     }
+
+    public static String formatPhoneNumber(String phoneNumber) {
+        String result = phoneNumber;
+        try {
+            // Xóa tất cả các khoảng trắng
+            String formattedNumber = phoneNumber.replaceAll("\\s+", "");
+
+            // Kiểm tra nếu số điện thoại bắt đầu bằng "+84"
+            if (formattedNumber.startsWith("+84")) {
+                // Thay thế "+84" bằng "0"
+                formattedNumber = formattedNumber.replace("+84", "0");
+            }
+            result = formattedNumber;
+        } catch (Exception e) {
+            logger.error("formatPhoneNumber: ERROR: " + e.toString());
+            System.out.println("formatPhoneNumber: ERROR: " + e.toString());
+        }
+
+        return result;
+    }
 }

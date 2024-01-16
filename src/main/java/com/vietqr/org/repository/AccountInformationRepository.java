@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.vietqr.org.dto.AccountInformationSyncDTO;
 import com.vietqr.org.dto.AccountSearchDTO;
 import com.vietqr.org.dto.UserInfoWalletDTO;
 import com.vietqr.org.entity.AccountInformationEntity;
@@ -81,4 +82,11 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
 			+ "ON a.user_id = b.user_id "
 			+ "WHERE a.user_id = :userId", nativeQuery = true)
 	UserInfoWalletDTO getUserInforWallet(@Param(value = "userId") String userId);
+
+	@Query(value = "SELECT a.id, a.phone_no as phoneNo, b.address, b.email, b.last_name as lastName, "
+			+ "b.middle_name as middleName, b.first_name as firstName, b.birth_date as birthDate "
+			+ "FROM account_login a "
+			+ "INNER JOIN account_information b "
+			+ "ON a.id = b.user_id ", nativeQuery = true)
+	List<AccountInformationSyncDTO> getUserInformationSync();
 }

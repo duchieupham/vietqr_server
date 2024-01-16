@@ -61,6 +61,7 @@ import com.vietqr.org.service.ImageService;
 import com.vietqr.org.service.NotificationService;
 import com.vietqr.org.util.NotificationUtil;
 import com.vietqr.org.util.RandomCodeUtil;
+import com.vietqr.org.util.StringUtil;
 import com.vietqr.org.util.VCardUtil;
 
 import reactor.core.publisher.Mono;
@@ -1212,10 +1213,16 @@ public class ContactController {
                         try {
                             counter++;
                             String originatorId = entity.getId();
-                            String name = entity.getNickname();
-                            String email = entity.getEmail();
+                            String name = "";
+                            if (entity.getNickname() != null) {
+                                name = entity.getNickname();
+                            }
+                            String email = "";
+                            if (entity.getEmail() != null) {
+                                email = entity.getEmail();
+                            }
                             String valueType = "WORK";
-                            String phoneNo = entity.getPhoneNo();
+                            String phoneNo = StringUtil.formatPhoneNumber(entity.getPhoneNo());
                             String post = "VCARD";
                             String address = entity.getAddress();
                             String address2 = entity.getCompany();
@@ -1272,7 +1279,7 @@ public class ContactController {
         } catch (Exception e) {
             System.out.println(e.toString());
             logger.error("syncVcardsToBitrix: ERROR: " + e.toString());
-            result = new ResponseMessageDTO("syncVcardsToBitrix", "E05");
+            result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);

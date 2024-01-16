@@ -49,6 +49,13 @@ public class WebSocketConfig implements WebSocketConfigurer {
                                 attributes.put("loginId", loginId);
                                 return true;
                             }
+                            // FOR LOGIN BY EC (WORDPRESS)
+                            String ecLoginId = servletRequest.getServletRequest().getParameter("ecLoginId");
+                            if (ecLoginId != null && !ecLoginId.trim().isEmpty()) {
+                                logger.info("WS: beforeHandshake - ecLoginId: " + ecLoginId);
+                                attributes.put("ecLoginId", ecLoginId);
+                                return true;
+                            }
                             // FOR CHECK TRANSACTION STATUS
                             String transactionRefId = servletRequest.getServletRequest().getParameter("refId");
                             if (transactionRefId != null && !transactionRefId.trim().isEmpty()) {
