@@ -111,9 +111,9 @@ public class JwsUtil {
         StringBuilder sb = new StringBuilder();
 
         try {
-            // File file = new File(path + "body.txt");
-            // File file = new File(path + "body-confirm-2.txt");
-            File file = new File(path + "request-banking.txt");
+            File file = new File(path + "/merchant/request-add.txt");
+            // File file = new File(path + "confirm-add.txt");
+
             Scanner myReader = new Scanner(file);
             while (myReader.hasNextLine()) {
                 sb.append(myReader.nextLine());
