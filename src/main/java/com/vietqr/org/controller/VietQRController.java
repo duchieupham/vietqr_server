@@ -228,7 +228,7 @@ public class VietQRController {
 				vietQRGenerateDTO.setCaiValue(caiValue);
 				vietQRGenerateDTO.setBankAccount(accountBankEntity.getBankAccount());
 				String qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
-				//generate QR image
+				// generate QR image
 				byte[] centerVietQrIcon = imageService.getImageById(EnvironmentUtil.getVietQrIcon());
 				byte[] headerVietQr = imageService.getImageById(EnvironmentUtil.getVietQrLogo());
 				byte[] bottomLeftIcon = imageService.getImageById(EnvironmentUtil.getNapasLogo());
@@ -258,6 +258,7 @@ public class VietQRController {
 				httpStatus = HttpStatus.BAD_REQUEST;
 			}
 		} catch (Exception e) {
+			System.out.println("generateQRBankImage: ERROR: " + e.toString());
 			logger.error(e.toString());
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
@@ -274,14 +275,15 @@ public class VietQRController {
 			byte[] headerVietQr = imageService.getImageById(EnvironmentUtil.getVietQrLogo());
 			byte[] bottonLeftIcon = imageService.getImageById(EnvironmentUtil.getNapasLogo());
 			byte[] qrImage = VietQRUtil.generateVietQRImg(qr, headerVietQr, centerVietQrIcon, bottonLeftIcon);
-//			String fileName = "vietqr_" + UUID.randomUUID() + ".jpg";
-//			UUID uuidImage = UUID.randomUUID();
-//			ImageEntity imageEntity = new ImageEntity(uuidImage.toString(), fileName, qrImage);
-//			imageService.insertImage(imageEntity);
+			// String fileName = "vietqr_" + UUID.randomUUID() + ".jpg";
+			// UUID uuidImage = UUID.randomUUID();
+			// ImageEntity imageEntity = new ImageEntity(uuidImage.toString(), fileName,
+			// qrImage);
+			// imageService.insertImage(imageEntity);
 			result = qrImage;
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
-//			result = new ResponseMessageDTO("FAILED", "Unexpected Error.");
+			// result = new ResponseMessageDTO("FAILED", "Unexpected Error.");
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(result, httpStatus);

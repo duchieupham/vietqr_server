@@ -3,18 +3,22 @@ package com.vietqr.org.util;
 // import org.springframework.scheduling.annotation.Async;
 
 import com.google.zxing.BarcodeFormat;
-import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.vietqr.org.dto.VietQRGenerateDTO;
 
 import javax.imageio.ImageIO;
+
+import org.apache.log4j.Logger;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class VietQRUtil {
+	private static final Logger logger = Logger.getLogger(VietQRUtil.class);
+
 	private static final int QR_CODE_WIDTH = 400;
 	private static final int QR_CODE_HEIGHT = 600;
 	private static final int CENTER_ICON_WIDTH = 30;
@@ -23,7 +27,6 @@ public class VietQRUtil {
 	private static final int HEADER_HEIGHT = 60;
 	private static final int BOTTOM_LEFT_WIDTH = 100;
 	private static final int BOTTOM_LEFT_HEIGHT = 30;
-
 
 	// @Async
 	public static String generateStaticQR(VietQRGenerateDTO dto) {
@@ -215,7 +218,8 @@ public class VietQRUtil {
 		}
 	}
 
-	private static void drawImage(Graphics2D graphics, byte[] imageBytes, int xPos, int yPos, int imgWidth, int imgHeight) throws IOException {
+	private static void drawImage(Graphics2D graphics, byte[] imageBytes, int xPos, int yPos, int imgWidth,
+			int imgHeight) throws IOException {
 		if (imageBytes != null && imageBytes.length != 0) {
 			BufferedImage image = ImageUtil.byteArrayToBufferedImage(imageBytes);
 			graphics.drawImage(image, xPos, yPos, imgWidth, imgHeight, null);
@@ -237,8 +241,10 @@ public class VietQRUtil {
 			graphics.setColor(Color.BLACK);
 
 			drawQRCode(bitMatrix, graphics, QR_CODE_WIDTH, QR_CODE_HEIGHT);
-			drawImage(graphics, centerIcon, (QR_CODE_WIDTH - CENTER_ICON_WIDTH) / 2, (QR_CODE_HEIGHT - CENTER_ICON_HEIGHT) / 2, CENTER_ICON_WIDTH, CENTER_ICON_HEIGHT);
-			drawImage(graphics, header, (QR_CODE_WIDTH - HEADER_WIDTH) / 2, 140 - HEADER_HEIGHT, HEADER_WIDTH, HEADER_HEIGHT);
+			drawImage(graphics, centerIcon, (QR_CODE_WIDTH - CENTER_ICON_WIDTH) / 2,
+					(QR_CODE_HEIGHT - CENTER_ICON_HEIGHT) / 2, CENTER_ICON_WIDTH, CENTER_ICON_HEIGHT);
+			drawImage(graphics, header, (QR_CODE_WIDTH - HEADER_WIDTH) / 2, 140 - HEADER_HEIGHT, HEADER_WIDTH,
+					HEADER_HEIGHT);
 			drawImage(graphics, bottonLeft, 40, 460, BOTTOM_LEFT_WIDTH, BOTTOM_LEFT_HEIGHT);
 
 			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -247,7 +253,8 @@ public class VietQRUtil {
 			result = byteArrayOutputStream.toByteArray();
 		} catch (Exception e) {
 			result = new byte[0];
-			System.out.println("Error at generateVietQRImg: " + e.toString());
+			System.out.println("generateVietQRImg: ERROR: " + e.toString());
+			logger.error("generateVietQRImg: ERROR: " + e.toString());
 		}
 
 		return result;
