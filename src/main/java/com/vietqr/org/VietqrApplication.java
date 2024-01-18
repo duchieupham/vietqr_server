@@ -43,7 +43,6 @@ import com.vietqr.org.dto.example.Header;
 import com.vietqr.org.dto.example.JweObj;
 import com.vietqr.org.dto.example.Recipients;
 import com.vietqr.org.security.JWTAuthorizationFilter;
-import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.JwsUtil;
 import com.vietqr.org.util.WebSocketConfig;
 
@@ -111,7 +110,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
-//		test();
+		// test();
 		//
 		// generate check sum mms sync
 		// String dataCheckSum = BankEncryptUtil.generateMD5Checksum("test09",

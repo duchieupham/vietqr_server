@@ -13,12 +13,13 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
 public class AutomationManagementService {
-    private static final org.apache.log4j.Logger logger = Logger.getLogger(LarkController.class);
+    private static final Logger logger = Logger.getLogger(LarkController.class);
 
     @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 30 8 * * ?")
     public void scheduleExecuteTask() {
@@ -49,18 +50,18 @@ public class AutomationManagementService {
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(BodyInserters.fromValue(data))
                         .exchange();
-                ClientResponse response = responseMono.block();
+                responseMono.block();
             } catch (Exception e) {
                 logger.error("Error at scheduleExecuteTask: " + e.toString());
             }
         }
     }
 
-//    @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 00 21 * * ?")
-//    public void myScheduledTask() {
-//        // Your task logic goes here
-//        System.out.println("System time is: " + LocalDateTime.now());
-//    }
+    // @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 19 09 * * ?")
+    // public void myScheduledTask() {
+    // // Your task logic goes here
+    // System.out.println("System time is: " + LocalDateTime.now());
+    // }
 
     @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 30 17 * * ?")
     public void scheduleUpdateTask() {
@@ -91,7 +92,7 @@ public class AutomationManagementService {
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(BodyInserters.fromValue(data))
                         .exchange();
-                ClientResponse response = responseMono.block();
+                responseMono.block();
             } catch (Exception e) {
                 logger.error("Error at scheduleUpdateTask: " + e.toString());
             }
