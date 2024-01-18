@@ -123,6 +123,10 @@ public class ClickupController {
                 title = "TASK TRỄ DEADLINE";
                 description = "Truy cập đường dẫn " + link + " để cập nhật lại DUE DATE và ghi chú lại lý do.";
                 content = title + "\n\n" + taskName + "\n" + assignee + "\n" + dueDate + "\n\n" + description;
+            } else if (type != null && type.trim().equals("9")) {
+                title = "TASK CÓ BÌNH LUẬN MỚI";
+                description = "Truy cập đường dẫn " + link + " để xem thông tin chi tiết.";
+                content = title + "\n\n" + taskName + "\n" + assignee + "\n" + dueDate + "\n\n" + description;
             }
 
             // create JSON
