@@ -189,6 +189,10 @@ public class EnvironmentUtil {
     private static final String TELEGRAM_BOT_USERNAME = "vietqr_bot";
     private static final String TELEGRAM_BOT_TOKEN = "6603683411:AAGTCde6C-7kt4gR5gTvcDA_jmYIqs0SJJM";
 
+    // Google Chat
+    private static final String GOOGLE_CHAT_KEY = "AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI";
+    private static final String GOOGLE_CHAT_TOKEN = "q9cgRDssTNVRgIQCYkfq06Sfh8nS-h4RD3Nrfby9NJk";
+
     //
 
     public static String getIpVietQRVN() {
@@ -419,6 +423,14 @@ public class EnvironmentUtil {
 
     public static String getPasswordBankMMSAccess() {
         return (IS_PRODUCTION == false) ? PASSWORD_BANK_MMS_ACCESS_UAT : PASSWORD_BANK_MMS_ACCESS_PROD;
+    }
+
+    public static String getGoogleChatKey() {
+        return GOOGLE_CHAT_KEY;
+    }
+
+    public static String getGoogleChatToken() {
+        return GOOGLE_CHAT_TOKEN;
     }
 
 }
