@@ -311,6 +311,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 					.antMatchers(HttpMethod.GET, "/api/export-transactions").permitAll()
 					.antMatchers(HttpMethod.GET, "/api/merchant/transactions-export").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/clickup/task-supporter").permitAll()
+					.antMatchers(HttpMethod.POST, "/api/qr/generate-image").permitAll()
 					.anyRequest().authenticated();
 		}
 

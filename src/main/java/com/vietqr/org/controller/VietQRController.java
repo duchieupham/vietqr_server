@@ -13,6 +13,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import com.vietqr.org.entity.*;
+import com.vietqr.org.service.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -49,28 +51,6 @@ import com.vietqr.org.dto.VietQRDTO;
 import com.vietqr.org.dto.VietQRGenerateDTO;
 import com.vietqr.org.dto.VietQRMMSCreateDTO;
 import com.vietqr.org.dto.VietQRMMSRequestDTO;
-import com.vietqr.org.entity.AccountBankReceiveEntity;
-import com.vietqr.org.entity.BankTypeEntity;
-import com.vietqr.org.entity.CaiBankEntity;
-import com.vietqr.org.entity.NotificationEntity;
-import com.vietqr.org.entity.TerminalBankEntity;
-import com.vietqr.org.entity.TransactionReceiveBranchEntity;
-import com.vietqr.org.entity.TransactionReceiveEntity;
-import com.vietqr.org.entity.FcmTokenEntity;
-import com.vietqr.org.service.AccountBankReceivePersonalService;
-import com.vietqr.org.service.AccountBankReceiveService;
-import com.vietqr.org.service.BankReceiveBranchService;
-import com.vietqr.org.service.BankTypeService;
-import com.vietqr.org.service.CaiBankService;
-import com.vietqr.org.service.TransactionReceiveService;
-import com.vietqr.org.service.BranchMemberService;
-import com.vietqr.org.service.TransactionReceiveBranchService;
-import com.vietqr.org.service.BranchInformationService;
-import com.vietqr.org.service.NotificationService;
-import com.vietqr.org.service.TerminalBankService;
-import com.vietqr.org.service.TextToSpeechService;
-import com.vietqr.org.service.FcmTokenService;
-import com.vietqr.org.service.FirebaseMessagingService;
 import com.vietqr.org.util.VietQRUtil;
 
 import io.jsonwebtoken.Claims;
@@ -133,6 +113,9 @@ public class VietQRController {
 	private TextToSpeechService textToSpeechService;
 
 	private FirebaseMessagingService firebaseMessagingService;
+
+	@Autowired
+	private ImageService imageService;
 
 	public VietQRController(FirebaseMessagingService firebaseMessagingService) {
 		this.firebaseMessagingService = firebaseMessagingService;
@@ -222,6 +205,83 @@ public class VietQRController {
 		} catch (Exception e) {
 			System.out.println("Error at insertCaiBank: " + e.toString());
 			result = new ResponseMessageDTO("FAILED", "Unexpected Error.");
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	@PostMapping("account-bank/qr/generate-image")
+	public ResponseEntity<VietQRDTO> generateQRBankImage(@Valid @RequestBody BankDetailInputDTO dto) {
+		VietQRDTO result = null;
+		HttpStatus httpStatus = null;
+		try {
+			AccountBankReceiveEntity accountBankEntity = accountBankService.getAccountBankById(dto.getBankId());
+			if (accountBankEntity != null) {
+				// 1.Generate VietQR
+				// get bank information
+				// get bank type information
+				BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(accountBankEntity.getBankTypeId());
+				// get cai value
+				String caiValue = caiBankService.getCaiValue(bankTypeEntity.getId());
+				// generate VietQRGenerateDTO
+				VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+				vietQRGenerateDTO.setCaiValue(caiValue);
+				vietQRGenerateDTO.setBankAccount(accountBankEntity.getBankAccount());
+				String qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
+				//generate QR image
+				byte[] centerVietQrIcon = imageService.getImageById(EnvironmentUtil.getVietQrIcon());
+				byte[] headerVietQr = imageService.getImageById(EnvironmentUtil.getVietQrLogo());
+				byte[] bottomLeftIcon = imageService.getImageById(EnvironmentUtil.getNapasLogo());
+				byte[] qrImage = VietQRUtil.generateVietQRImg(qr, headerVietQr, centerVietQrIcon, bottomLeftIcon);
+				String fileName = "vietqr_" + UUID.randomUUID() + ".jpg";
+				UUID uuidImage = UUID.randomUUID();
+				ImageEntity imageEntity = new ImageEntity(uuidImage.toString(), fileName, qrImage);
+				imageService.insertImage(imageEntity);
+				// generate VietQRDTO
+				VietQRDTO vietQRDTO = new VietQRDTO();
+				vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
+				vietQRDTO.setBankName(bankTypeEntity.getBankName());
+				vietQRDTO.setBankAccount(accountBankEntity.getBankAccount());
+				vietQRDTO.setUserBankName(accountBankEntity.getBankAccountName().toUpperCase());
+				vietQRDTO.setQrCode(qr);
+				vietQRDTO.setImgId(bankTypeEntity.getImgId());
+				vietQRDTO.setAmount("");
+				vietQRDTO.setContent("");
+				vietQRDTO.setTransactionId("");
+				vietQRDTO.setTerminalCode("");
+				vietQRDTO.setTransactionRefId("");
+				vietQRDTO.setQrLink(String.format("%s%s", EnvironmentUtil.getVietQrUrlApi(),
+						uuidImage));
+				httpStatus = HttpStatus.OK;
+				result = vietQRDTO;
+			} else {
+				httpStatus = HttpStatus.BAD_REQUEST;
+			}
+		} catch (Exception e) {
+			logger.error(e.toString());
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	@PostMapping(value = "qr/generate-image", produces = MediaType.IMAGE_JPEG_VALUE)
+	public ResponseEntity<byte[]> generateImage(@RequestParam String content) {
+		byte[] result = new byte[0];
+		HttpStatus httpStatus = null;
+		try {
+			String qr = content;
+			byte[] centerVietQrIcon = imageService.getImageById(EnvironmentUtil.getVietQrIcon());
+			byte[] headerVietQr = imageService.getImageById(EnvironmentUtil.getVietQrLogo());
+			byte[] bottonLeftIcon = imageService.getImageById(EnvironmentUtil.getNapasLogo());
+			byte[] qrImage = VietQRUtil.generateVietQRImg(qr, headerVietQr, centerVietQrIcon, bottonLeftIcon);
+//			String fileName = "vietqr_" + UUID.randomUUID() + ".jpg";
+//			UUID uuidImage = UUID.randomUUID();
+//			ImageEntity imageEntity = new ImageEntity(uuidImage.toString(), fileName, qrImage);
+//			imageService.insertImage(imageEntity);
+			result = qrImage;
+			httpStatus = HttpStatus.OK;
+		} catch (Exception e) {
+//			result = new ResponseMessageDTO("FAILED", "Unexpected Error.");
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(result, httpStatus);
