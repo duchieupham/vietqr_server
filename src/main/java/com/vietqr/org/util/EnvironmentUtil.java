@@ -180,6 +180,22 @@ public class EnvironmentUtil {
     private static final String USER_ID_HOST_RECHARGE_UAT = "";
     private static final String USER_ID_HOST_RECHARGE_PROD = "6e3712ab-48ea-4bfa-a50d-f7dd1f184efb";
 
+    // VIET QR ICON ID
+    private static final String VIET_QR_ICON_UAT = "f628e7b4-e65c-4b36-a4a8-e53bd4c7e372";
+    private static final String VIET_QR_ICON_PROD = "a50ee10a-d248-42ec-95f1-5ec322cfdf8e";
+
+    // VIET QR LOGO ID
+    private static final String VIET_QR_LOGO_UAT = "01d9a285-c201-4adc-bdca-f1b31104b12b";
+    private static final String VIET_QR_LOGO_PROD = "115a2a25-994b-4e53-bac9-64e6fc57651b";
+
+    // NAPAS LOGO ID
+    private static final String NAPAS_LOGO_UAT = "012c5110-0da8-457e-b737-93f4443d98d0";
+    private static final String NAPAS_LOGO_PROD = "596da7a9-9a9b-408a-b7dc-220301424ba1";
+
+    // VIET QR URL API
+    private static final String VIET_QR_URL_API_UAT = "https://dev.vietqr.org/vqr/api/images/";
+    private static final String VIET_QR_URL_API_PROD = "https://api.vietqr.org/vqr/api/images/";
+
     ///////////////////////////////////
     //
     private static final String DEFAULT_USER_ID_TEST = "62ad476d-3b6b-4926-9890-fa6a20144f7f";
@@ -433,4 +449,19 @@ public class EnvironmentUtil {
         return GOOGLE_CHAT_TOKEN;
     }
 
+    public static String getVietQrIcon() {
+        return (IS_PRODUCTION == false) ? VIET_QR_ICON_UAT : VIET_QR_ICON_PROD;
+    }
+
+    public static String getVietQrLogo() {
+        return (IS_PRODUCTION == false) ? VIET_QR_LOGO_UAT : VIET_QR_ICON_PROD;
+    }
+
+    public static String getNapasLogo() {
+        return (IS_PRODUCTION == false) ? NAPAS_LOGO_UAT : NAPAS_LOGO_PROD;
+    }
+
+    public static String getVietQrUrlApi() {
+        return (IS_PRODUCTION == false) ? VIET_QR_URL_API_UAT : VIET_QR_URL_API_PROD;
+    }
 }

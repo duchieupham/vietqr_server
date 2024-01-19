@@ -195,6 +195,7 @@ public class AccountBankReceiveController {
 		return new ResponseEntity<>(result, httpStatus);
 	}
 
+	// Button thêm tài khoản (không liên kết)
 	@PostMapping("account-bank/unauthenticated")
 	public ResponseEntity<ResponseMessageDTO> insertAccountBankWithouthAuthenticate(
 			@Valid @RequestBody AccountBankUnauthenticatedDTO dto) {

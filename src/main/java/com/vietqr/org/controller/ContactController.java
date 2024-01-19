@@ -893,12 +893,14 @@ public class ContactController {
                     String bankShortName = "";
                     String bankName = "";
                     String imgId = "";
+                    String bankCode = "";
                     if (entity.getBankTypeId() != null && !entity.getBankTypeId().isEmpty()) {
                         BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(entity.getBankTypeId());
                         if (bankTypeEntity != null) {
                             bankShortName = bankTypeEntity.getBankShortName();
                             bankName = bankTypeEntity.getBankName();
                             imgId = bankTypeEntity.getImgId();
+                            bankCode = bankTypeEntity.getBankCode();
                         }
                     }
                     // VietQR ID
@@ -907,6 +909,7 @@ public class ContactController {
                     } else if (entity.getType() == 3 || entity.getType() == 4) {
                         imgId = entity.getImgId();
                     }
+                    result.setBankCode(bankCode);
                     result.setBankShortName(bankShortName);
                     result.setBankName(bankName);
                     if (imgId != null) {

@@ -15,10 +15,13 @@ public class ContactDetailDTO implements Serializable {
     private String additionalData;
     private int type;
     private int status;
+    // for bank account
     private String bankShortName;
     private String bankName;
-    private String imgId;
+    private String bankCode;
     private String bankAccount;
+    //
+    private String imgId;
     private int colorType;
     private Integer relation;
     // for vcard
@@ -33,13 +36,15 @@ public class ContactDetailDTO implements Serializable {
     }
 
     public ContactDetailDTO(String id, String nickname, String value, String additionalData, int type, int status,
-            String bankShortName, String bankName, String imgId, String bankAccount, int colorType, Integer relation) {
+            String bankCode, String bankShortName, String bankName, String imgId, String bankAccount, int colorType,
+            Integer relation) {
         this.id = id;
         this.nickname = nickname;
         this.value = value;
         this.additionalData = additionalData;
         this.type = type;
         this.status = status;
+        this.bankCode = bankCode;
         this.bankShortName = bankShortName;
         this.bankName = bankName;
         this.imgId = imgId;
@@ -49,7 +54,8 @@ public class ContactDetailDTO implements Serializable {
     }
 
     public ContactDetailDTO(String id, String nickname, String value, String additionalData, int type, int status,
-            String bankShortName, String bankName, String imgId, String bankAccount, int colorType, Integer relation,
+            String bankCode, String bankShortName, String bankName, String imgId, String bankAccount, int colorType,
+            Integer relation,
             String email, String address, String company, String website, String phoneNo) {
         this.id = id;
         this.nickname = nickname;
@@ -57,6 +63,7 @@ public class ContactDetailDTO implements Serializable {
         this.additionalData = additionalData;
         this.type = type;
         this.status = status;
+        this.bankCode = bankCode;
         this.bankShortName = bankShortName;
         this.bankName = bankName;
         this.imgId = imgId;
@@ -156,6 +163,14 @@ public class ContactDetailDTO implements Serializable {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public String getBankCode() {
+        return bankCode;
+    }
+
+    public void setBankCode(String bankCode) {
+        this.bankCode = bankCode;
     }
 
     public String getBankShortName() {

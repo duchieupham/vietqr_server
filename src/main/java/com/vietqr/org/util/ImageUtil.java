@@ -1,5 +1,8 @@
 package com.vietqr.org.util;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -10,6 +13,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import com.vietqr.org.dto.ImagePostConvertDTO;
+
+import javax.imageio.ImageIO;
 
 public class ImageUtil {
 
@@ -53,5 +58,15 @@ public class ImageUtil {
             logger.error("convertBase64ToByteArray: ERROR: " + e.toString());
         }
         return result;
+    }
+
+    public static BufferedImage byteArrayToBufferedImage(byte[] imageBytes) {
+        try {
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(imageBytes);
+            return ImageIO.read(byteArrayInputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
