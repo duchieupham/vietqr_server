@@ -19,13 +19,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.vietqr.org.dto.AccountSettingDTO;
 import com.vietqr.org.dto.AccountSettingUpdateDTO;
 import com.vietqr.org.dto.AccountSettingVoiceDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
+import com.vietqr.org.dto.UserSettingUpdateDTO;
 import com.vietqr.org.entity.AccountSettingEntity;
 import com.vietqr.org.entity.ImageEntity;
+import com.vietqr.org.entity.SystemSettingEntity;
 import com.vietqr.org.service.AccountSettingService;
 import com.vietqr.org.service.ImageService;
+import com.vietqr.org.service.SystemSettingService;
+import com.vietqr.org.service.ThemeUiService;
 
 @RestController
 @CrossOrigin
@@ -37,25 +42,63 @@ public class AccountSettingController {
     AccountSettingService accountSettingService;
 
     @Autowired
+    SystemSettingService systemSettingService;
+
+    @Autowired
+    ThemeUiService themeUiService;
+
+    @Autowired
     ImageService imageService;
 
     @GetMapping("accounts/setting/{userId}")
-    public ResponseEntity<AccountSettingEntity> getAccountSetting(@PathVariable("userId") String userId) {
-        AccountSettingEntity result = null;
+    public ResponseEntity<AccountSettingDTO> getAccountSetting(@PathVariable("userId") String userId) {
+        AccountSettingDTO result = null;
         HttpStatus httpStatus = null;
         try {
             if (userId != null && !userId.trim().isEmpty()) {
-                result = accountSettingService.getAccountSettingEntity(userId);
-                httpStatus = HttpStatus.OK;
+                AccountSettingEntity entity = accountSettingService.getAccountSettingEntity(userId);
+                //
+                if (entity != null) {
+                    //
+                    result = new AccountSettingDTO();
+                    result.setId(entity.getId());
+                    result.setUserId(entity.getUserId());
+                    result.setGuideMobile(entity.isGuideWeb());
+                    result.setGuideMobile(entity.isGuideMobile());
+                    result.setVoiceWeb(entity.isVoiceWeb());
+                    result.setVoiceMobile(entity.isVoiceMobile());
+                    result.setVoiceMobileKiot(entity.isVoiceMobileKiot());
+                    result.setStatus(entity.isStatus());
+                    result.setEdgeImgId(entity.getEdgeImgId());
+                    result.setFooterImgId(entity.getFooterImgId());
+                    // theme processing
+                    SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
+                    String themeImgUrl = "";
+                    if (systemSettingEntity.isEventTheme() == true) {
+                        themeImgUrl = systemSettingEntity.getThemeImgUrl();
+                    } else {
+                        themeImgUrl = themeUiService.getImgUrlByType(entity.getThemeType());
+                    }
+                    result.setThemeImgUrl(themeImgUrl);
+                    // logo url
+                    result.setLogoUrl(systemSettingEntity.getLogoUrl());
+                    result.setKeepScreenOn(entity.isKeepScreenOn());
+                    result.setQrShowType(entity.getQrShowType());
+                    //
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    logger.error("getAccountSetting: NOT FOUND ACCOUNT SETTING ENTITY");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
             } else {
-                logger.error("getAccountSetting: UserID = null or empty");
+                logger.error("getAccountSetting: INVALID REQUEST BODY");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("getAccountSetting: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
-        return new ResponseEntity<AccountSettingEntity>(result, httpStatus);
+        return new ResponseEntity<AccountSettingDTO>(result, httpStatus);
     }
 
     @PostMapping("accounts/setting/image")
@@ -98,7 +141,7 @@ public class AccountSettingController {
     }
 
     @PostMapping("accounts/setting")
-    public ResponseEntity<ResponseMessageDTO> updateGuideWebUser(@Valid @RequestBody AccountSettingUpdateDTO dto) {
+    public ResponseEntity<ResponseMessageDTO> updateGuideWebUser(@RequestBody AccountSettingUpdateDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
@@ -152,4 +195,66 @@ public class AccountSettingController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @PostMapping("accounts/setting/theme")
+    public ResponseEntity<ResponseMessageDTO> updateThemeType(
+            @RequestBody UserSettingUpdateDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null) {
+                Integer themeType = Integer.parseInt(dto.getValue().toString());
+                accountSettingService.updateThemeType(themeType, dto.getUserId());
+            } else {
+                logger.error("updateThemeType: INVALID REQUEST BODY");
+                result = new ResponseMessageDTO("FAILED", "E46");
+            }
+        } catch (Exception e) {
+            logger.error("updateThemeType: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("accounts/setting/screen")
+    public ResponseEntity<ResponseMessageDTO> updateKeepScreen(
+            @RequestBody UserSettingUpdateDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null) {
+                Boolean keepScreenOn = Boolean.parseBoolean(dto.getValue().toString());
+                accountSettingService.updateKeepScreenOn(keepScreenOn, dto.getUserId());
+            } else {
+                logger.error("updateKeepScreen: INVALID REQUEST BODY");
+                result = new ResponseMessageDTO("FAILED", "E46");
+            }
+        } catch (Exception e) {
+            logger.error("updateKeepScreen: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("accounts/setting/qr-show-type")
+    public ResponseEntity<ResponseMessageDTO> updateQrShowType(
+            @RequestBody UserSettingUpdateDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null) {
+                Integer qrShowType = Integer.parseInt(dto.getValue().toString());
+                accountSettingService.updateQrShowType(qrShowType, dto.getUserId());
+            } else {
+                logger.error("updateQrShowType: INVALID REQUEST BODY");
+                result = new ResponseMessageDTO("FAILED", "E46");
+            }
+        } catch (Exception e) {
+            logger.error("updateQrShowType: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 }

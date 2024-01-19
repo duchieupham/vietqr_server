@@ -56,4 +56,20 @@ public interface AccountSettingRepository extends JpaRepository<AccountSettingEn
     @Modifying
     @Query(value = "UPDATE account_setting SET footer_img_id = :imgId WHERE user_id = :userId", nativeQuery = true)
     void updateFooterImgId(@Param(value = "imgId") String imgId, @Param(value = "userId") String userId);
+
+    //
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE account_setting SET theme_type = :value WHERE user_id = :userId", nativeQuery = true)
+    void updateThemeType(@Param(value = "value") int value, @Param(value = "userId") String userId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE account_setting SET keep_screen_on = :value WHERE user_id = :userId", nativeQuery = true)
+    void updateKeepScreenOn(@Param(value = "value") boolean value, @Param(value = "userId") String userId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE account_setting SET qr_show_type = :value WHERE user_id = :userId", nativeQuery = true)
+    void updateQrShowType(@Param(value = "value") int value, @Param(value = "userId") String userId);
 }

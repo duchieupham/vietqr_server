@@ -31,17 +31,29 @@ public class SystemSettingEntity implements Serializable {
     @Column(name = "webhookUrl")
     private String webhookUrl;
 
+    @Column(name = "isEventTheme")
+    private boolean isEventTheme;
+
+    @Column(name = "themeImgUrl")
+    private String themeImgUrl;
+
+    @Column(name = "logoUrl")
+    private String logoUrl;
+
     public SystemSettingEntity() {
         super();
     }
 
     public SystemSettingEntity(String id, String androidVersion, String iosVersion, String telegramChatId,
-            String webhookUrl) {
+            String webhookUrl, boolean isEventTheme, String themeImgUrl, String logoUrl) {
         this.id = id;
         this.androidVersion = androidVersion;
         this.iosVersion = iosVersion;
         this.telegramChatId = telegramChatId;
         this.webhookUrl = webhookUrl;
+        this.isEventTheme = isEventTheme;
+        this.themeImgUrl = themeImgUrl;
+        this.logoUrl = logoUrl;
     }
 
     public String getId() {
@@ -82,6 +94,30 @@ public class SystemSettingEntity implements Serializable {
 
     public void setWebhookUrl(String webhookUrl) {
         this.webhookUrl = webhookUrl;
+    }
+
+    public boolean isEventTheme() {
+        return isEventTheme;
+    }
+
+    public void setEventTheme(boolean isEventTheme) {
+        this.isEventTheme = isEventTheme;
+    }
+
+    public String getThemeImgUrl() {
+        return themeImgUrl;
+    }
+
+    public void setThemeImgUrl(String themeImgUrl) {
+        this.themeImgUrl = themeImgUrl;
+    }
+
+    public String getLogoUrl() {
+        return logoUrl;
+    }
+
+    public void setLogoUrl(String logoUrl) {
+        this.logoUrl = logoUrl;
     }
 
 }

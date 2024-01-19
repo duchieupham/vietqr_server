@@ -26,4 +26,10 @@ public interface AccountSettingService {
     public void updateEdgeImgId(String imgId, String userId);
 
     public void updateFooterImgId(String imgId, String userId);
+
+    public void updateThemeType(int value, String userId);
+
+    public void updateKeepScreenOn(boolean value, String userId);
+
+    public void updateQrShowType(int value, String userId);
 }

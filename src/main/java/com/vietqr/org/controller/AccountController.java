@@ -394,6 +394,15 @@ public class AccountController {
 				accountSettingEntity.setAccessCount(1);
 				accountSettingEntity.setEdgeImgId("");
 				accountSettingEntity.setFooterImgId("");
+				// default theme type
+				accountSettingEntity.setThemeType(1);
+				//
+				accountSettingEntity.setKeepScreenOn(false);
+				//
+				// 0: rectangular
+				// 1: square
+				accountSettingEntity.setQrShowType(0);
+				//
 				accountSettingService.insertAccountSetting(accountSettingEntity);
 				///
 				// insert account wallet

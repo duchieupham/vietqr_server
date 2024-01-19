@@ -1,77 +1,45 @@
-package com.vietqr.org.entity;
+package com.vietqr.org.dto;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
-@Entity
-@Table(name = "AccountSetting")
-public class AccountSettingEntity implements Serializable {
+public class AccountSettingDTO implements Serializable {
 
     /**
      *
      */
     private static final long serialVersionUID = 1L;
 
-    @Id
-    @Column(name = "id")
     private String id;
-
-    @Column(name = "userId")
     private String userId;
-
-    @Column(name = "guideWeb")
+    // guideline
     private boolean guideWeb;
-
-    @Column(name = "guideMobile")
     private boolean guideMobile;
-
-    @Column(name = "voiceWeb")
+    // voice
     private boolean voiceWeb;
-
-    @Column(name = "voiceMobile")
     private boolean voiceMobile;
-
-    @Column(name = "voiceMobileKiot")
     private boolean voiceMobileKiot;
-
-    @Column(name = "status")
+    // status for checking deactive user
     private boolean status;
-
-    @Column(name = "lastLogin")
-    private long lastLogin;
-
-    @Column(name = "accessCount")
-    private long accessCount;
-
-    @Column(name = "edgeImgId")
+    // image kiot
     private String edgeImgId;
-
-    @Column(name = "footerImgId")
     private String footerImgId;
-
-    @Column(name = "themeType")
+    // theme
     private int themeType;
-
-    @Column(name = "keepScreenOn")
+    private String themeImgUrl;
+    // logo
+    private String logoUrl;
+    // keep screen on
     private boolean keepScreenOn;
-
-    // 0: rectangular
-    // 1: square
-    @Column(name = "qrShowType")
+    // qr show type (rectangular or square)
     private int qrShowType;
 
-    public AccountSettingEntity() {
+    public AccountSettingDTO() {
         super();
     }
 
-    public AccountSettingEntity(String id, String userId, boolean guideWeb, boolean guideMobile, boolean voiceWeb,
-            boolean voiceMobile, boolean voiceMobileKiot, boolean status, long lastLogin, long accessCount,
-            String edgeImgId, String footerImgId,
-            int themeType, boolean keepScreenOn, int qrShowType) {
+    public AccountSettingDTO(String id, String userId, boolean guideWeb, boolean guideMobile, boolean voiceWeb,
+            boolean voiceMobile, boolean voiceMobileKiot, boolean status, String edgeImgId, String footerImgId,
+            int themeType, String themeImgUrl, String logoUrl, boolean keepScreenOn, int qrShowType) {
         this.id = id;
         this.userId = userId;
         this.guideWeb = guideWeb;
@@ -80,11 +48,11 @@ public class AccountSettingEntity implements Serializable {
         this.voiceMobile = voiceMobile;
         this.voiceMobileKiot = voiceMobileKiot;
         this.status = status;
-        this.lastLogin = lastLogin;
-        this.accessCount = accessCount;
         this.edgeImgId = edgeImgId;
         this.footerImgId = footerImgId;
         this.themeType = themeType;
+        this.themeImgUrl = themeImgUrl;
+        this.logoUrl = logoUrl;
         this.keepScreenOn = keepScreenOn;
         this.qrShowType = qrShowType;
     }
@@ -153,22 +121,6 @@ public class AccountSettingEntity implements Serializable {
         this.status = status;
     }
 
-    public long getLastLogin() {
-        return lastLogin;
-    }
-
-    public void setLastLogin(long lastLogin) {
-        this.lastLogin = lastLogin;
-    }
-
-    public long getAccessCount() {
-        return accessCount;
-    }
-
-    public void setAccessCount(long accessCount) {
-        this.accessCount = accessCount;
-    }
-
     public String getEdgeImgId() {
         return edgeImgId;
     }
@@ -191,6 +143,22 @@ public class AccountSettingEntity implements Serializable {
 
     public void setThemeType(int themeType) {
         this.themeType = themeType;
+    }
+
+    public String getThemeImgUrl() {
+        return themeImgUrl;
+    }
+
+    public void setThemeImgUrl(String themeImgUrl) {
+        this.themeImgUrl = themeImgUrl;
+    }
+
+    public String getLogoUrl() {
+        return logoUrl;
+    }
+
+    public void setLogoUrl(String logoUrl) {
+        this.logoUrl = logoUrl;
     }
 
     public boolean isKeepScreenOn() {

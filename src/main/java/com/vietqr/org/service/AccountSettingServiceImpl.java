@@ -61,5 +61,20 @@ public class AccountSettingServiceImpl implements AccountSettingService {
     public void updateFooterImgId(String imgId, String userId) {
         repo.updateFooterImgId(imgId, userId);
     }
-    
+
+    @Override
+    public void updateThemeType(int value, String userId) {
+        repo.updateThemeType(value, userId);
+    }
+
+    @Override
+    public void updateKeepScreenOn(boolean value, String userId) {
+        repo.updateKeepScreenOn(value, userId);
+    }
+
+    @Override
+    public void updateQrShowType(int value, String userId) {
+        repo.updateQrShowType(value, userId);
+    }
+
 }
