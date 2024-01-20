@@ -3,7 +3,7 @@ package com.vietqr.org.dto;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
-public class MemberDeleteInputDTO implements Serializable {
+public class MemberInsertDTO implements Serializable {
 
     /**
      *
@@ -11,24 +11,16 @@ public class MemberDeleteInputDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @NotBlank
-    private String userId;
-    @NotBlank
     private String bankId;
+    @NotBlank
+    private String userId;
 
-    public MemberDeleteInputDTO() {
+    public MemberInsertDTO() {
         super();
     }
 
-    public MemberDeleteInputDTO(String userId, String bankId) {
-        this.userId = userId;
+    public MemberInsertDTO(String bankId, String userId) {
         this.bankId = bankId;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
         this.userId = userId;
     }
 
@@ -38,6 +30,14 @@ public class MemberDeleteInputDTO implements Serializable {
 
     public void setBankId(String bankId) {
         this.bankId = bankId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
 }

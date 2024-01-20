@@ -28,7 +28,7 @@ public class AccountBankReceiveDetailDTO implements Serializable {
     private String phoneAuthenticated;
     private String ewalletToken;
     private Integer unlinkedType;
-    private List<BusinessBankDetailDTO> businessDetails;
+//    private List<BusinessBankDetailDTO> businessDetails;
     private List<TransactionBankListDTO> transactions;
 
     public AccountBankReceiveDetailDTO() {
@@ -60,7 +60,7 @@ public class AccountBankReceiveDetailDTO implements Serializable {
         this.phoneAuthenticated = phoneAuthenticated;
         this.ewalletToken = ewalletToken;
         this.unlinkedType = unlinkedType;
-        this.businessDetails = businessDetails;
+//        this.businessDetails = businessDetails;
         this.transactions = transactions;
     }
 
@@ -200,13 +200,13 @@ public class AccountBankReceiveDetailDTO implements Serializable {
         this.unlinkedType = unlinkedType;
     }
 
-    public List<BusinessBankDetailDTO> getBusinessDetails() {
-        return businessDetails;
-    }
-
-    public void setBusinessDetails(List<BusinessBankDetailDTO> businessDetails) {
-        this.businessDetails = businessDetails;
-    }
+//    public List<BusinessBankDetailDTO> getBusinessDetails() {
+//        return businessDetails;
+//    }
+//
+//    public void setBusinessDetails(List<BusinessBankDetailDTO> businessDetails) {
+//        this.businessDetails = businessDetails;
+//    }
 
     public List<TransactionBankListDTO> getTransactions() {
         return transactions;

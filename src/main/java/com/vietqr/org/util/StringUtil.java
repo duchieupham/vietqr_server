@@ -29,6 +29,23 @@ public class StringUtil {
         return hashtags;
     }
 
+    public static String hiddenString(String input, int digitsToShow) {
+        String result = "";
+        try {
+            StringBuilder hiddenString = new StringBuilder();
+
+            for (int i = 0; i < input.length() - digitsToShow; i++) {
+                hiddenString.append('*');
+            }
+
+            hiddenString.append(input.substring(input.length() - digitsToShow));
+            result = hiddenString.toString();
+        } catch (Exception e) {
+            logger.error("hiddenString: ERROR: " + e.toString());
+        }
+        return result;
+    }
+
     public static String formatPhoneNumber(String phoneNumber) {
         String result = phoneNumber;
         try {

@@ -1,5 +1,6 @@
 package com.vietqr.org.dto;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 public class AccountBankReceiveDTO implements Serializable {
@@ -9,15 +10,18 @@ public class AccountBankReceiveDTO implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	@NotBlank
 	private String bankTypeId;
+	@NotBlank
 	private String bankAccount;
+	@NotBlank
 	private String userBankName;
+	@NotBlank
 	private String userId;
-	private int type;
+	@NotBlank
 	private String nationalId;
+	@NotBlank
 	private String phoneAuthenticated;
-	// for business
-	private String branchId;
 	// for BIDV
 	private String ewalletToken;
 
@@ -26,8 +30,7 @@ public class AccountBankReceiveDTO implements Serializable {
 	}
 
 	public AccountBankReceiveDTO(String bankTypeId, String bankAccount, String userBankName, String userId,
-			String nationalId, String phoneAuthenticated, int type,
-			String branchId) {
+			String nationalId, String phoneAuthenticated) {
 		super();
 		this.bankTypeId = bankTypeId;
 		this.bankAccount = bankAccount;
@@ -35,13 +38,10 @@ public class AccountBankReceiveDTO implements Serializable {
 		this.userId = userId;
 		this.nationalId = nationalId;
 		this.phoneAuthenticated = phoneAuthenticated;
-		this.type = type;
-		this.branchId = branchId;
 	}
 
 	public AccountBankReceiveDTO(String bankTypeId, String bankAccount, String userBankName, String userId,
-			String nationalId, String phoneAuthenticated, int type,
-			String branchId, String ewalletToken) {
+			String nationalId, String phoneAuthenticated, String ewalletToken) {
 		super();
 		this.bankTypeId = bankTypeId;
 		this.bankAccount = bankAccount;
@@ -49,8 +49,6 @@ public class AccountBankReceiveDTO implements Serializable {
 		this.userId = userId;
 		this.nationalId = nationalId;
 		this.phoneAuthenticated = phoneAuthenticated;
-		this.type = type;
-		this.branchId = branchId;
 		this.ewalletToken = ewalletToken;
 	}
 
@@ -86,14 +84,6 @@ public class AccountBankReceiveDTO implements Serializable {
 		this.phoneAuthenticated = phoneAuthenticated;
 	}
 
-	public int getType() {
-		return type;
-	}
-
-	public void setType(int type) {
-		this.type = type;
-	}
-
 	public String getBankAccount() {
 		return bankAccount;
 	}
@@ -108,14 +98,6 @@ public class AccountBankReceiveDTO implements Serializable {
 
 	public void setUserId(String userId) {
 		this.userId = userId;
-	}
-
-	public String getBranchId() {
-		return branchId;
-	}
-
-	public void setBranchId(String branchId) {
-		this.branchId = branchId;
 	}
 
 	public String getEwalletToken() {

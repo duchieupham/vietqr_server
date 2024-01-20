@@ -1,5 +1,6 @@
 package com.vietqr.org.dto;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 public class RegisterAuthenticationDTO implements Serializable {
@@ -9,10 +10,15 @@ public class RegisterAuthenticationDTO implements Serializable {
      */
     private static final long serialVersionUID = 1L;
 
+    @NotBlank
     private String bankId;
+    @NotBlank
     private String nationalId;
+    @NotBlank
     private String phoneAuthenticated;
+    @NotBlank
     private String bankAccountName;
+    @NotBlank
     private String bankAccount;
     private String ewalletToken;
 

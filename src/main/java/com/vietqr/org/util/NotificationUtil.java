@@ -22,8 +22,8 @@ public class NotificationUtil {
 	private static final String NOTI_TITLE_NEW_MEMBER = "Thành viên mới";
 	private static final String NOTI_TITLE_NEW_TRANSACTION = "Giao dịch mới";
 	private static final String NOTI_TITLE_UPDATE_TRANSACTION = "Biến động số dư";
-	private static final String NOTI_TITLE_ADD_MEMBER = "Thông báo từ doanh nghiệp";
-	private static final String NOTI_TITLE_REMOVE_MEMBER = "Thông báo từ doanh nghiệp";
+	private static final String NOTI_TITLE_ADD_MEMBER = "Thông báo chia sẻ biến động số dư";
+	private static final String NOTI_TITLE_REMOVE_MEMBER = "Thông báo chia sẻ biến động số dư";
 	private static final String NOTI_TITLE_ADD_VIETQR_ID = "Thêm bạn bè";
 	private static final String NOTI_TITLE_RECHARGE = "Thanh toán thành công";
 	private static final String NOTI_TITLE_MOBILE_TOPUP = "Nạp điện thoại thành công";
@@ -41,7 +41,7 @@ public class NotificationUtil {
 	private static final String NOTI_DESC_UPDATE_TRANS_SUFFIX_2 = "|GD: ";
 	private static final String NOTI_DESC_UPDATE_TRANS_SUFFIX_3 = "|CN: ";
 	private static final String NOTI_DESC_UPDATE_TRANS_SUFFIX_4 = "|ND: ";
-	private static final String NOTI_DESC_ADD_MEMBER = "Bạn vừa được thêm vào là thành viên của Doanh nghiệp ";
+	private static final String NOTI_DESC_ADD_MEMBER = "Bạn đã được chia sẻ thông báo biến động số dư từ số tài khoản %s.";
 	private static final String NOTI_DESC_REMOVE_MEMBER = "Bạn vừa được quản lý xoá khỏi Doanh nghiệp ";
 	private static final String NOTI_DESC_ADD_VIETQR_ID = " vừa thêm bạn vào danh bạ của họ. Hãy trở thành bạn bè với nhau trên VietQR VN";
 	private static final String NOTI_DESC_RECHARGE_1 = "Quý khách đã nạp thành công số tiền ";

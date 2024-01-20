@@ -29,7 +29,7 @@ public class AccountBankReceiveDetailWT implements Serializable {
     private String phoneAuthenticated;
     private String ewalletToken;
     private Integer unlinkedType;
-    private List<BusinessBankDetailDTO> businessDetails;
+//    private List<BusinessBankDetailDTO> businessDetails;
 
     public AccountBankReceiveDetailWT() {
         super();
@@ -57,7 +57,7 @@ public class AccountBankReceiveDetailWT implements Serializable {
         this.phoneAuthenticated = phoneAuthenticated;
         this.ewalletToken = ewalletToken;
         this.unlinkedType = unlinkedType;
-        this.businessDetails = businessDetails;
+//        this.businessDetails = businessDetails;
 
     }
 
@@ -189,12 +189,12 @@ public class AccountBankReceiveDetailWT implements Serializable {
         this.unlinkedType = unlinkedType;
     }
 
-    public List<BusinessBankDetailDTO> getBusinessDetails() {
-        return businessDetails;
-    }
-
-    public void setBusinessDetails(List<BusinessBankDetailDTO> businessDetails) {
-        this.businessDetails = businessDetails;
-    }
+//    public List<BusinessBankDetailDTO> getBusinessDetails() {
+//        return businessDetails;
+//    }
+//
+//    public void setBusinessDetails(List<BusinessBankDetailDTO> businessDetails) {
+//        this.businessDetails = businessDetails;
+//    }
 
 }

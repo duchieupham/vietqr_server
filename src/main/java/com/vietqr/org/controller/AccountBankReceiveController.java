@@ -5,9 +5,14 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import com.vietqr.org.dto.*;
+import com.vietqr.org.entity.*;
+import com.vietqr.org.service.*;
+import com.vietqr.org.util.FormatUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,56 +29,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vietqr.org.dto.AccountBankReceiveByCusSyncDTO;
-import com.vietqr.org.dto.AccountBankReceiveDTO;
-import com.vietqr.org.dto.AccountBankReceiveDetailDTO;
-import com.vietqr.org.dto.AccountBankReceiveDetailWT;
-import com.vietqr.org.dto.AccountBankResponseDTO;
-import com.vietqr.org.dto.AccountBankSyncWpDTO;
-import com.vietqr.org.dto.AccountBankUnauthenticatedDTO;
-import com.vietqr.org.dto.AccountBankWpDTO;
-import com.vietqr.org.dto.BankAccountRemoveDTO;
-import com.vietqr.org.dto.RegisterAuthenticationDTO;
-import com.vietqr.org.dto.ResponseMessageDTO;
-import com.vietqr.org.dto.VietQRGenerateDTO;
 import com.vietqr.org.dto.AccountBankReceiveDetailDTO.BranchBankDetailDTO;
 import com.vietqr.org.dto.AccountBankReceiveDetailDTO.BusinessBankDetailDTO;
 import com.vietqr.org.dto.AccountBankReceiveDetailDTO.TransactionBankListDTO;
-import com.vietqr.org.dto.AccountBankReceivePersonalDTO;
-import com.vietqr.org.dto.AccountBankReceiveRPAItemDTO;
-import com.vietqr.org.dto.AccountBankReceiveRpaDTO;
-import com.vietqr.org.dto.AccountBankReceiveTransferFlowDTO;
-import com.vietqr.org.entity.AccountBankReceiveEntity;
-import com.vietqr.org.entity.AccountCustomerBankEntity;
-import com.vietqr.org.entity.AccountInformationEntity;
-import com.vietqr.org.entity.BankReceivePersonalEntity;
-import com.vietqr.org.entity.BankTypeEntity;
-import com.vietqr.org.entity.BranchInformationEntity;
-import com.vietqr.org.entity.BusinessInformationEntity;
-import com.vietqr.org.entity.ContactEntity;
-import com.vietqr.org.entity.SystemSettingEntity;
-import com.vietqr.org.entity.TransactionReceiveEntity;
-import com.vietqr.org.service.AccountBankReceivePersonalService;
-import com.vietqr.org.service.AccountBankReceiveService;
-import com.vietqr.org.service.AccountCustomerBankService;
-import com.vietqr.org.service.AccountInformationService;
-import com.vietqr.org.service.AccountLoginService;
-import com.vietqr.org.service.BankReceiveBranchService;
-import com.vietqr.org.service.BankTypeService;
-import com.vietqr.org.service.BranchMemberService;
-import com.vietqr.org.service.BusinessInformationService;
-import com.vietqr.org.service.CaiBankService;
-import com.vietqr.org.service.ContactService;
-import com.vietqr.org.service.CustomerSyncService;
-import com.vietqr.org.service.SystemSettingService;
-import com.vietqr.org.service.TransactionReceiveService;
 import com.vietqr.org.util.LarkUtil;
 import com.vietqr.org.util.VietQRUtil;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-
-import com.vietqr.org.service.BranchInformationService;
 
 @RestController
 @CrossOrigin
@@ -82,28 +45,22 @@ public class AccountBankReceiveController {
 	private static final Logger logger = Logger.getLogger(AccountBankReceiveController.class);
 
 	@Autowired
-	AccountBankReceiveService accountBankService;
+	AccountBankReceiveService accountBankReceiveService;
 
 	@Autowired
 	BankTypeService bankTypeService;
 
 	@Autowired
-	AccountBankReceivePersonalService bankReceivePersonalService;
+	AccountBankReceiveShareService accountBankReceiveShareService;
+
+	@Autowired
+	AccountBankReceivePersonalService accountBankReceivePersonalService;
 
 	@Autowired
 	BankReceiveBranchService bankReceiveBranchService;
 
 	@Autowired
-	BranchInformationService branchInformationService;
-
-	@Autowired
-	BranchMemberService branchMemberService;
-
-	@Autowired
 	CaiBankService caiBankService;
-
-	@Autowired
-	BusinessInformationService businessInformationService;
 
 	@Autowired
 	TransactionReceiveService transactionReceiveService;
@@ -137,7 +94,7 @@ public class AccountBankReceiveController {
 		HttpStatus httpStatus = null;
 		try {
 			// check existed if bank account is authenticated
-			List<String> check = accountBankService.checkExistedBank(bankAccount, bankTypeId);
+			List<String> check = accountBankReceiveService.checkExistedBank(bankAccount, bankTypeId);
 			if (check == null || check.isEmpty()) {
 				result = new ResponseMessageDTO("SUCCESS", "");
 				httpStatus = HttpStatus.OK;
@@ -163,7 +120,7 @@ public class AccountBankReceiveController {
 		HttpStatus httpStatus = null;
 		try {
 			// check existed same user
-			List<String> checkExistedSameUser = accountBankService
+			List<String> checkExistedSameUser = accountBankReceiveService
 					.checkExistedBankAccountSameUser(bankAccount, bankTypeId, userId);
 			System.out.println("type" + type);
 			if (checkExistedSameUser == null || checkExistedSameUser.isEmpty()) {
@@ -172,7 +129,7 @@ public class AccountBankReceiveController {
 					httpStatus = HttpStatus.OK;
 				} else {
 					// check existed if bank account is authenticated
-					List<String> check = accountBankService.checkExistedBank(bankAccount, bankTypeId);
+					List<String> check = accountBankReceiveService.checkExistedBank(bankAccount, bankTypeId);
 					if (check == null || check.isEmpty()) {
 						result = new ResponseMessageDTO("SUCCESS", "");
 						httpStatus = HttpStatus.OK;
@@ -197,7 +154,7 @@ public class AccountBankReceiveController {
 
 	// Button thêm tài khoản (không liên kết)
 	@PostMapping("account-bank/unauthenticated")
-	public ResponseEntity<ResponseMessageDTO> insertAccountBankWithouthAuthenticate(
+	public ResponseEntity<ResponseMessageDTO> insertAccountBankWithoutAuthenticate(
 			@Valid @RequestBody AccountBankUnauthenticatedDTO dto) {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
@@ -224,14 +181,17 @@ public class AccountBankReceiveController {
 			entity.setUsername("");
 			entity.setPassword("");
 			entity.setEwalletToken("");
-			accountBankService.insertAccountBank(entity);
-			// insert bank-receive-personal
-			UUID uuidPersonal = UUID.randomUUID();
-			BankReceivePersonalEntity personalEntity = new BankReceivePersonalEntity();
-			personalEntity.setId(uuidPersonal.toString());
-			personalEntity.setBankId(uuid.toString());
-			personalEntity.setUserId(dto.getUserId());
-			bankReceivePersonalService.insertAccountBankReceivePersonal(personalEntity);
+			accountBankReceiveService.insertAccountBank(entity);
+
+			// insert account-bank-receive-share
+			UUID uuidShare = UUID.randomUUID();
+			AccountBankReceiveShareEntity accountBankReceiveShareEntity = new AccountBankReceiveShareEntity();
+			accountBankReceiveShareEntity.setId(uuidShare.toString());
+			accountBankReceiveShareEntity.setBankId(uuid.toString());
+			accountBankReceiveShareEntity.setUserId(dto.getUserId());
+			accountBankReceiveShareEntity.setOwner(true);
+			accountBankReceiveShareService.insertAccountBankReceiveShare(accountBankReceiveShareEntity);
+
 			// insert contact
 			String checkExistedContact = contactService.checkExistedRecord(dto.getUserId(), qr, 2);
 			if (checkExistedContact == null) {
@@ -304,7 +264,7 @@ public class AccountBankReceiveController {
 		HttpStatus httpStatus = null;
 		try {
 			String userId = getUserIdFromToken(token);
-			result = accountBankService.getAccountBankReceiveWps(userId);
+			result = accountBankReceiveService.getAccountBankReceiveWps(userId);
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
 			logger.error("getAccountBankReceiveWps: ERROR: " + e.toString());
@@ -341,7 +301,7 @@ public class AccountBankReceiveController {
 								entity.setId(uuid.toString());
 								entity.setAccountCustomerId("");
 								entity.setBankId(dto.getBankId());
-								String bankAccount = accountBankService.getBankAccountById(dto.getBankId());
+								String bankAccount = accountBankReceiveService.getBankAccountById(dto.getBankId());
 								entity.setBankAccount(bankAccount);
 								entity.setCustomerSyncId(customerSyncId);
 								accountCustomerBankService.insert(entity);
@@ -355,7 +315,7 @@ public class AccountBankReceiveController {
 					} else {
 						logger.info("updateSyncWp: NOT FOUND HOSTING - user_id: " + userId);
 					}
-					accountBankService.updateSyncWp(userId, dto.getBankId());
+					accountBankReceiveService.updateSyncWp(userId, dto.getBankId());
 					result = new ResponseMessageDTO("SUCCESS", "");
 					httpStatus = HttpStatus.OK;
 				} else {
@@ -407,7 +367,7 @@ public class AccountBankReceiveController {
 	// for case user created bank before and then register authentication
 	@PostMapping("account-bank/register-authentication")
 	public ResponseEntity<ResponseMessageDTO> registerAuthentication(
-			@RequestBody RegisterAuthenticationDTO dto) {
+			@Valid @RequestBody RegisterAuthenticationDTO dto) {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
@@ -416,13 +376,13 @@ public class AccountBankReceiveController {
 			if (dto.getEwalletToken() != null) {
 				ewalletToken = dto.getEwalletToken();
 			}
-			accountBankService.updateRegisterAuthenticationBank(dto.getNationalId(), dto.getPhoneAuthenticated(),
+			accountBankReceiveService.updateRegisterAuthenticationBank(dto.getNationalId(), dto.getPhoneAuthenticated(),
 					dto.getBankAccountName(), dto.getBankAccount(),
 					ewalletToken,
 					dto.getBankId());
 			//
 			LarkUtil larkUtil = new LarkUtil();
-			AccountBankReceiveEntity accountBankReceiveEntity = accountBankService.getAccountBankById(dto.getBankId());
+			AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService.getAccountBankById(dto.getBankId());
 			String phoneNo = accountInformationService.getPhoneNoByUserId(accountBankReceiveEntity.getUserId());
 			AccountInformationEntity accountInformationEntity = accountInformationService
 					.getAccountInformation(accountBankReceiveEntity.getUserId());
@@ -468,7 +428,7 @@ public class AccountBankReceiveController {
 
 	// register bank account with authenticated
 	@PostMapping("account-bank")
-	public ResponseEntity<ResponseMessageDTO> insertPersonalAccountBank(@RequestBody AccountBankReceiveDTO dto) {
+	public ResponseEntity<ResponseMessageDTO> insertAccountBank(@Valid @RequestBody AccountBankReceiveDTO dto) {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
@@ -479,7 +439,7 @@ public class AccountBankReceiveController {
 			entity.setBankTypeId(dto.getBankTypeId());
 			entity.setBankAccount(dto.getBankAccount());
 			entity.setBankAccountName(dto.getUserBankName());
-			entity.setType(dto.getType());
+			entity.setType(0);
 			entity.setUserId(dto.getUserId());
 			entity.setNationalId(dto.getNationalId());
 			entity.setPhoneAuthenticated(dto.getPhoneAuthenticated());
@@ -497,15 +457,15 @@ public class AccountBankReceiveController {
 				entity.setEwalletToken("");
 			}
 
-			accountBankService.insertAccountBank(entity);
-			// if (dto.getType() == 0) {
-			// insert bank receive personal
-			UUID uuidPersonal = UUID.randomUUID();
-			BankReceivePersonalEntity personalEntity = new BankReceivePersonalEntity();
-			personalEntity.setId(uuidPersonal.toString());
-			personalEntity.setBankId(uuid.toString());
-			personalEntity.setUserId(dto.getUserId());
-			bankReceivePersonalService.insertAccountBankReceivePersonal(personalEntity);
+			accountBankReceiveService.insertAccountBank(entity);
+			// insert account-bank-receive-share
+			UUID uuidShare = UUID.randomUUID();
+			AccountBankReceiveShareEntity accountBankReceiveShareEntity = new AccountBankReceiveShareEntity();
+			accountBankReceiveShareEntity.setId(uuidShare.toString());
+			accountBankReceiveShareEntity.setBankId(uuid.toString());
+			accountBankReceiveShareEntity.setUserId(dto.getUserId());
+			accountBankReceiveShareEntity.setOwner(true);
+			accountBankReceiveShareService.insertAccountBankReceiveShare(accountBankReceiveShareEntity);
 			// insert contact
 			String checkExistedContact = contactService.checkExistedRecord(dto.getUserId(), qr, 2);
 			if (checkExistedContact == null) {
@@ -589,7 +549,7 @@ public class AccountBankReceiveController {
 		HttpStatus httpStatus = null;
 		try {
 			// get
-			AccountBankReceiveEntity accountBankEntity = accountBankService.getAccountBankById(bankId);
+			AccountBankReceiveEntity accountBankEntity = accountBankReceiveService.getAccountBankById(bankId);
 			if (accountBankEntity != null) {
 				BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(accountBankEntity.getBankTypeId());
 				// get cai value
@@ -617,53 +577,53 @@ public class AccountBankReceiveController {
 				result.setEwalletToken(accountBankEntity.getEwalletToken());
 				result.setUnlinkedType(bankTypeEntity.getUnlinkedType());
 				result.setPhoneAuthenticated(accountBankEntity.getPhoneAuthenticated());
-				List<String> branchIds = new ArrayList<>();
-				branchIds = branchInformationService.getBranchIdsByBankId(bankId);
-				// get list branch linked
-				List<BranchInformationEntity> branchEntities = new ArrayList<>();
-				if (branchIds != null && !branchIds.isEmpty()) {
-					for (String branchId : branchIds) {
-						BranchInformationEntity branchEntity = branchInformationService.getBranchById(branchId);
-						branchEntities.add(branchEntity);
-					}
-				}
-				// get list business linked
-				List<BusinessInformationEntity> businessEntities = new ArrayList<>();
-				if (branchEntities != null && !branchEntities.isEmpty()) {
-					for (BranchInformationEntity branch : branchEntities) {
-						BusinessInformationEntity businessEntity = businessInformationService
-								.getBusinessById(branch.getBusinessId());
-						businessEntities.add(businessEntity);
-					}
-				}
-				// map business and branch
-				List<BusinessBankDetailDTO> businessBankDetailDTOs = new ArrayList<>();
-				if (businessEntities != null && !businessEntities.isEmpty()) {
-					//
-					for (BusinessInformationEntity business : businessEntities) {
-						BusinessBankDetailDTO businessBankDTO = new BusinessBankDetailDTO();
-						businessBankDTO.setBusinessId(business.getId());
-						businessBankDTO.setBusinessName(business.getName());
-						businessBankDTO.setImgId(business.getImgId());
-						businessBankDTO.setCoverImgId(business.getCoverImgId());
-						List<BranchBankDetailDTO> branchBanks = new ArrayList<>();
-						if (branchEntities != null && !branchEntities.isEmpty()) {
-							for (BranchInformationEntity branch : branchEntities) {
-								if (branch.getBusinessId().equals(business.getId())) {
-									BranchBankDetailDTO branchBank = new BranchBankDetailDTO();
-									branchBank.setBranchId(branch.getId());
-									branchBank.setBranchName(branch.getName());
-									branchBank.setCode(branch.getCode());
-									branchBank.setAddress(branch.getAddress());
-									branchBanks.add(branchBank);
-								}
-							}
-						}
-						businessBankDTO.setBranchDetails(branchBanks);
-						businessBankDetailDTOs.add(businessBankDTO);
-					}
-				}
-				result.setBusinessDetails(businessBankDetailDTOs);
+//				List<String> branchIds = new ArrayList<>();
+//				branchIds = branchInformationService.getBranchIdsByBankId(bankId);
+//				// get list branch linked
+//				List<BranchInformationEntity> branchEntities = new ArrayList<>();
+//				if (branchIds != null && !branchIds.isEmpty()) {
+//					for (String branchId : branchIds) {
+//						BranchInformationEntity branchEntity = branchInformationService.getBranchById(branchId);
+//						branchEntities.add(branchEntity);
+//					}
+//				}
+//				// get list business linked
+//				List<BusinessInformationEntity> businessEntities = new ArrayList<>();
+//				if (branchEntities != null && !branchEntities.isEmpty()) {
+//					for (BranchInformationEntity branch : branchEntities) {
+//						BusinessInformationEntity businessEntity = businessInformationService
+//								.getBusinessById(branch.getBusinessId());
+//						businessEntities.add(businessEntity);
+//					}
+//				}
+//				// map business and branch
+//				List<BusinessBankDetailDTO> businessBankDetailDTOs = new ArrayList<>();
+//				if (businessEntities != null && !businessEntities.isEmpty()) {
+//					//
+//					for (BusinessInformationEntity business : businessEntities) {
+//						BusinessBankDetailDTO businessBankDTO = new BusinessBankDetailDTO();
+//						businessBankDTO.setBusinessId(business.getId());
+//						businessBankDTO.setBusinessName(business.getName());
+//						businessBankDTO.setImgId(business.getImgId());
+//						businessBankDTO.setCoverImgId(business.getCoverImgId());
+//						List<BranchBankDetailDTO> branchBanks = new ArrayList<>();
+//						if (branchEntities != null && !branchEntities.isEmpty()) {
+//							for (BranchInformationEntity branch : branchEntities) {
+//								if (branch.getBusinessId().equals(business.getId())) {
+//									BranchBankDetailDTO branchBank = new BranchBankDetailDTO();
+//									branchBank.setBranchId(branch.getId());
+//									branchBank.setBranchName(branch.getName());
+//									branchBank.setCode(branch.getCode());
+//									branchBank.setAddress(branch.getAddress());
+//									branchBanks.add(branchBank);
+//								}
+//							}
+//						}
+//						businessBankDTO.setBranchDetails(branchBanks);
+//						businessBankDetailDTOs.add(businessBankDTO);
+//					}
+//				}
+//				result.setBusinessDetails(businessBankDetailDTOs);
 
 				httpStatus = HttpStatus.OK;
 			} else {
@@ -682,7 +642,7 @@ public class AccountBankReceiveController {
 		HttpStatus httpStatus = null;
 		try {
 			// get
-			AccountBankReceiveEntity accountBankEntity = accountBankService.getAccountBankById(bankId);
+			AccountBankReceiveEntity accountBankEntity = accountBankReceiveService.getAccountBankById(bankId);
 			if (accountBankEntity != null) {
 				BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(accountBankEntity.getBankTypeId());
 				// get cai value
@@ -711,53 +671,53 @@ public class AccountBankReceiveController {
 				result.setEwalletToken(accountBankEntity.getEwalletToken());
 				result.setUnlinkedType(bankTypeEntity.getUnlinkedType());
 				result.setPhoneAuthenticated(accountBankEntity.getPhoneAuthenticated());
-				List<String> branchIds = new ArrayList<>();
-				branchIds = branchInformationService.getBranchIdsByBankId(bankId);
-				// get list branch linked
-				List<BranchInformationEntity> branchEntities = new ArrayList<>();
-				if (branchIds != null && !branchIds.isEmpty()) {
-					for (String branchId : branchIds) {
-						BranchInformationEntity branchEntity = branchInformationService.getBranchById(branchId);
-						branchEntities.add(branchEntity);
-					}
-				}
-				// get list business linked
-				List<BusinessInformationEntity> businessEntities = new ArrayList<>();
-				if (branchEntities != null && !branchEntities.isEmpty()) {
-					for (BranchInformationEntity branch : branchEntities) {
-						BusinessInformationEntity businessEntity = businessInformationService
-								.getBusinessById(branch.getBusinessId());
-						businessEntities.add(businessEntity);
-					}
-				}
-				// map business and branch
-				List<BusinessBankDetailDTO> businessBankDetailDTOs = new ArrayList<>();
-				if (businessEntities != null && !businessEntities.isEmpty()) {
-					//
-					for (BusinessInformationEntity business : businessEntities) {
-						BusinessBankDetailDTO businessBankDTO = new BusinessBankDetailDTO();
-						businessBankDTO.setBusinessId(business.getId());
-						businessBankDTO.setBusinessName(business.getName());
-						businessBankDTO.setImgId(business.getImgId());
-						businessBankDTO.setCoverImgId(business.getCoverImgId());
-						List<BranchBankDetailDTO> branchBanks = new ArrayList<>();
-						if (branchEntities != null && !branchEntities.isEmpty()) {
-							for (BranchInformationEntity branch : branchEntities) {
-								if (branch.getBusinessId().equals(business.getId())) {
-									BranchBankDetailDTO branchBank = new BranchBankDetailDTO();
-									branchBank.setBranchId(branch.getId());
-									branchBank.setBranchName(branch.getName());
-									branchBank.setCode(branch.getCode());
-									branchBank.setAddress(branch.getAddress());
-									branchBanks.add(branchBank);
-								}
-							}
-						}
-						businessBankDTO.setBranchDetails(branchBanks);
-						businessBankDetailDTOs.add(businessBankDTO);
-					}
-				}
-				result.setBusinessDetails(businessBankDetailDTOs);
+//				List<String> branchIds = new ArrayList<>();
+//				branchIds = branchInformationService.getBranchIdsByBankId(bankId);
+//				// get list branch linked
+//				List<BranchInformationEntity> branchEntities = new ArrayList<>();
+//				if (branchIds != null && !branchIds.isEmpty()) {
+//					for (String branchId : branchIds) {
+//						BranchInformationEntity branchEntity = branchInformationService.getBranchById(branchId);
+//						branchEntities.add(branchEntity);
+//					}
+//				}
+//				// get list business linked
+//				List<BusinessInformationEntity> businessEntities = new ArrayList<>();
+//				if (branchEntities != null && !branchEntities.isEmpty()) {
+//					for (BranchInformationEntity branch : branchEntities) {
+//						BusinessInformationEntity businessEntity = businessInformationService
+//								.getBusinessById(branch.getBusinessId());
+//						businessEntities.add(businessEntity);
+//					}
+//				}
+//				// map business and branch
+//				List<BusinessBankDetailDTO> businessBankDetailDTOs = new ArrayList<>();
+//				if (businessEntities != null && !businessEntities.isEmpty()) {
+//					//
+//					for (BusinessInformationEntity business : businessEntities) {
+//						BusinessBankDetailDTO businessBankDTO = new BusinessBankDetailDTO();
+//						businessBankDTO.setBusinessId(business.getId());
+//						businessBankDTO.setBusinessName(business.getName());
+//						businessBankDTO.setImgId(business.getImgId());
+//						businessBankDTO.setCoverImgId(business.getCoverImgId());
+//						List<BranchBankDetailDTO> branchBanks = new ArrayList<>();
+//						if (branchEntities != null && !branchEntities.isEmpty()) {
+//							for (BranchInformationEntity branch : branchEntities) {
+//								if (branch.getBusinessId().equals(business.getId())) {
+//									BranchBankDetailDTO branchBank = new BranchBankDetailDTO();
+//									branchBank.setBranchId(branch.getId());
+//									branchBank.setBranchName(branch.getName());
+//									branchBank.setCode(branch.getCode());
+//									branchBank.setAddress(branch.getAddress());
+//									branchBanks.add(branchBank);
+//								}
+//							}
+//						}
+//						businessBankDTO.setBranchDetails(branchBanks);
+//						businessBankDetailDTOs.add(businessBankDTO);
+//					}
+//				}
+//				result.setBusinessDetails(businessBankDetailDTOs);
 				// get related transaction
 				List<TransactionBankListDTO> transactions = new ArrayList<>();
 				List<TransactionReceiveEntity> transactionEntities = transactionReceiveService
@@ -790,92 +750,35 @@ public class AccountBankReceiveController {
 		return new ResponseEntity<>(result, httpStatus);
 	}
 
+
 	@GetMapping("account-bank/{userId}")
-	public ResponseEntity<List<AccountBankResponseDTO>> getAccountBanks(@PathVariable("userId") String userId) {
-		List<AccountBankResponseDTO> result = new ArrayList<>();
+	public ResponseEntity<List<AccountBankShareResponseDTO>> getAccountBankBackups(@PathVariable("userId") String userId) {
+		List<AccountBankShareResponseDTO> result = new ArrayList<>();
 		HttpStatus httpStatus = null;
-		System.out.println("userId: " + userId);
 		try {
-			// get list personal bank
+			// get list banks
 			//
-			List<AccountBankReceivePersonalDTO> personalBanks = bankReceivePersonalService
-					.getBankReceivePersonals(userId);
-			System.out.println("personalBanks size: " + personalBanks.size());
-			if (personalBanks != null && !personalBanks.isEmpty()) {
-				for (AccountBankReceivePersonalDTO personalBank : personalBanks) {
-					AccountBankResponseDTO dto = new AccountBankResponseDTO();
-					dto.setId(personalBank.getBankId());
-					dto.setBankAccount(personalBank.getBankAccount());
-					dto.setUserBankName(personalBank.getUserBankName());
-					dto.setBankCode(personalBank.getBankCode());
-					dto.setBankName(personalBank.getBankName());
-					dto.setImgId(personalBank.getImgId());
-					dto.setType(personalBank.getBankType());
-					// dto.setNationalId(personalBank.getNationalId());
-					// dto.setPhoneAuthenticated(personalBank.getPhoneAuthenticated());
-					dto.setBranchId("");
-					dto.setBusinessId("");
-					dto.setBranchName("");
-					// dto.setBranchCode("");
-					dto.setBusinessName("");
-					dto.setAuthenticated(personalBank.getAuthenticated());
-					dto.setUserId(personalBank.getUserId());
-					// dto.setBusinessCode("");
-					result.add(dto);
-				}
-			}
-			// get list business bank (with branch)
-			List<String> branchIds = new ArrayList<>();
-			// 1. check user is admin/manager of business or not.
-			List<String> branchIdsByUserIdBusiness = branchInformationService.getBranchIdsByUserIdBusiness(userId);
-			// 2. get list branch id of user
-			// 3. get list business bank by userId
-			List<String> branchIdsByUserIdBranch = branchMemberService.getBranchIdsByUserId(userId);
-			// add all branchIds
-			if (branchIdsByUserIdBusiness != null && !branchIdsByUserIdBusiness.isEmpty()) {
-				branchIds.addAll(branchIdsByUserIdBusiness);
-			}
-			if (branchIdsByUserIdBranch != null && !branchIdsByUserIdBranch.isEmpty()) {
-				branchIds.addAll(branchIdsByUserIdBranch);
-			}
-			List<AccountBankReceivePersonalDTO> businessBanks = new ArrayList<>();
-			if (branchIds != null && !branchIds.isEmpty()) {
-				for (String branchId : branchIds) {
-					List<AccountBankReceivePersonalDTO> banks = bankReceiveBranchService
-							.getBankReceiveBranchs(branchId);
-					if (banks != null && !banks.isEmpty()) {
-						for (AccountBankReceivePersonalDTO bank : banks) {
-							businessBanks.add(bank);
-						}
-					}
-				}
-			}
-			if (businessBanks != null && !businessBanks.isEmpty()) {
-				for (AccountBankReceivePersonalDTO bank : businessBanks) {
-					AccountBankResponseDTO dto = new AccountBankResponseDTO();
-					dto.setId(bank.getBankId());
-					dto.setBankAccount(bank.getBankAccount());
-					dto.setUserBankName(bank.getUserBankName());
-					dto.setBankCode(bank.getBankCode());
-					dto.setBankName(bank.getBankName());
-					dto.setImgId(bank.getImgId());
-					dto.setType(bank.getBankType());
-					// dto.setNationalId(bank.getNationalId());
-					// dto.setPhoneAuthenticated(bank.getPhoneAuthenticated());
-					dto.setBranchId(bank.getBranchId());
-					dto.setBusinessId(bank.getBusinessId());
-					dto.setBranchName(bank.getBranchName());
-					dto.setBusinessName(bank.getBusinessName());
-					dto.setAuthenticated(bank.getAuthenticated());
-					dto.setUserId(bank.getUserId());
-					// dto.setBranchCode(bank.getBranchCode());
-					// dto.setBusinessCode(bank.getBusinessCode());
-					result.add(dto);
-				}
+			List<AccountBankReceiveShareDTO> banks = accountBankReceiveShareService
+					.getAccountBankReceiveShares(userId);
+			if (!FormatUtil.isListNullOrEmpty(banks)) {
+				result = banks.stream().map(item -> {
+					AccountBankShareResponseDTO dto = new AccountBankShareResponseDTO();
+					dto.setId(item.getBankId());
+					dto.setBankAccount(item.getBankAccount());
+					dto.setBankShortName(item.getBankShortName());
+					dto.setUserBankName(item.getUserBankName());
+					dto.setBankCode(item.getBankCode());
+					dto.setBankName(item.getBankName());
+					dto.setImgId(item.getImgId());
+					dto.setType(item.getBankType());
+					dto.setAuthenticated(item.getAuthenticated());
+					dto.setUserId(item.getUserId());
+					dto.setIsOwner(item.getIsOwner());
+					return dto;
+				}).collect(Collectors.toList());
 			}
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
-			System.out.println("Error at getAccountBantks: " + e.toString());
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(result, httpStatus);
@@ -896,11 +799,11 @@ public class AccountBankReceiveController {
 				// 3. remove bank_receive
 				//
 				if (dto.getType() == 0) {
-					bankReceivePersonalService.deleteBankReceivePersonalByBankId(dto.getBankId());
+					accountBankReceivePersonalService.deleteBankReceivePersonalByBankId(dto.getBankId());
 				} else if (dto.getType() == 1) {
 					bankReceiveBranchService.deleteBankReceiveBranchByBankId(dto.getBankId());
 				}
-				accountBankService.deleteAccountBank(dto.getBankId());
+				accountBankReceiveService.deleteAccountBank(dto.getBankId());
 				result = new ResponseMessageDTO("SUCCESS", "");
 				httpStatus = HttpStatus.OK;
 			}
@@ -920,7 +823,7 @@ public class AccountBankReceiveController {
 		try {
 			String bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
 			if (bankTypeId != null && !bankTypeId.trim().isEmpty()) {
-				List<String> check = accountBankService.checkExistedBank(dto.getBankAccount(), bankTypeId);
+				List<String> check = accountBankReceiveService.checkExistedBank(dto.getBankAccount(), bankTypeId);
 				if (check == null || check.isEmpty()) {
 					UUID uuid = UUID.randomUUID();
 					AccountBankReceiveEntity entity = new AccountBankReceiveEntity();
@@ -941,14 +844,14 @@ public class AccountBankReceiveController {
 					entity.setUsername(dto.getUsername());
 					entity.setPassword(dto.getPassword());
 					entity.setEwalletToken("");
-					accountBankService.insertAccountBank(entity);
+					accountBankReceiveService.insertAccountBank(entity);
 					// insert account_bank_personal
 					UUID uuidPersonal = UUID.randomUUID();
 					BankReceivePersonalEntity personalEntity = new BankReceivePersonalEntity();
 					personalEntity.setId(uuidPersonal.toString());
 					personalEntity.setBankId(uuid.toString());
 					personalEntity.setUserId(dto.getUserId());
-					bankReceivePersonalService.insertAccountBankReceivePersonal(personalEntity);
+					accountBankReceivePersonalService.insertAccountBankReceivePersonal(personalEntity);
 					result = new ResponseMessageDTO("SUCCESS", "");
 					httpStatus = HttpStatus.OK;
 				} else {
@@ -975,7 +878,7 @@ public class AccountBankReceiveController {
 		List<AccountBankReceiveRPAItemDTO> result = new ArrayList<>();
 		HttpStatus httpStatus = null;
 		try {
-			result = accountBankService.getBankAccountsRPA(userId);
+			result = accountBankReceiveService.getBankAccountsRPA(userId);
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
 			System.out.println("Error at getBankAccountRPAs: " + e.toString());
@@ -992,7 +895,7 @@ public class AccountBankReceiveController {
 		List<AccountBankReceiveByCusSyncDTO> result = new ArrayList<>();
 		HttpStatus httpStatus = null;
 		try {
-			result = accountBankService.getBankAccountsByCusSyncId(customerSyncId, offset);
+			result = accountBankReceiveService.getBankAccountsByCusSyncId(customerSyncId, offset);
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
 			System.out.println("Error at getBankAccountsByCusSyncId: " + e.toString());
@@ -1029,7 +932,7 @@ public class AccountBankReceiveController {
 		HttpStatus httpStatus = null;
 		try {
 			if (dto != null) {
-				Boolean isMMSActive = accountBankService.getMMSActiveByBankId(dto.getBankId());
+				Boolean isMMSActive = accountBankReceiveService.getMMSActiveByBankId(dto.getBankId());
 				if (isMMSActive != null && isMMSActive == true) {
 					// flow 2
 				} else if (isMMSActive != null && isMMSActive == false) {

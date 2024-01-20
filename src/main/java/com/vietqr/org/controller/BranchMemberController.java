@@ -245,7 +245,7 @@ public class BranchMemberController {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            branchMemberService.removeMemberFromBusiness(dto.getUserId(), dto.getBusinessId());
+            branchMemberService.removeMemberFromBusiness(dto.getUserId(), dto.getBankId());
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
             // push notification
