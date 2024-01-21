@@ -40,12 +40,19 @@ public class SystemSettingEntity implements Serializable {
     @Column(name = "logoUrl")
     private String logoUrl;
 
+    @Column(name = "themeVersion")
+    private String themeVersion;
+
+    @Column(name = "logoVersion")
+    private String logoVersion;
+
     public SystemSettingEntity() {
         super();
     }
 
     public SystemSettingEntity(String id, String androidVersion, String iosVersion, String telegramChatId,
-            String webhookUrl, boolean isEventTheme, String themeImgUrl, String logoUrl) {
+            String webhookUrl, boolean isEventTheme, String themeImgUrl, String logoUrl,
+            String themeVersion, String logoVersion) {
         this.id = id;
         this.androidVersion = androidVersion;
         this.iosVersion = iosVersion;
@@ -54,6 +61,8 @@ public class SystemSettingEntity implements Serializable {
         this.isEventTheme = isEventTheme;
         this.themeImgUrl = themeImgUrl;
         this.logoUrl = logoUrl;
+        this.themeVersion = themeVersion;
+        this.logoVersion = logoVersion;
     }
 
     public String getId() {
@@ -118,6 +127,22 @@ public class SystemSettingEntity implements Serializable {
 
     public void setLogoUrl(String logoUrl) {
         this.logoUrl = logoUrl;
+    }
+
+    public String getThemeVersion() {
+        return themeVersion;
+    }
+
+    public void setThemeVersion(String themeVersion) {
+        this.themeVersion = themeVersion;
+    }
+
+    public String getLogoVersion() {
+        return logoVersion;
+    }
+
+    public void setLogoVersion(String logoVersion) {
+        this.logoVersion = logoVersion;
     }
 
 }

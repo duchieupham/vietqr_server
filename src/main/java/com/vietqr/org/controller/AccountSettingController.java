@@ -23,6 +23,7 @@ import com.vietqr.org.dto.AccountSettingDTO;
 import com.vietqr.org.dto.AccountSettingUpdateDTO;
 import com.vietqr.org.dto.AccountSettingVoiceDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
+import com.vietqr.org.dto.UserSettingUpdateCheckDTO;
 import com.vietqr.org.dto.UserSettingUpdateDTO;
 import com.vietqr.org.entity.AccountSettingEntity;
 import com.vietqr.org.entity.ImageEntity;
@@ -74,11 +75,14 @@ public class AccountSettingController {
                     // theme processing
                     SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
                     String themeImgUrl = "";
+                    int themeType = 0;
                     if (systemSettingEntity.isEventTheme() == true) {
                         themeImgUrl = systemSettingEntity.getThemeImgUrl();
                     } else {
                         themeImgUrl = themeUiService.getImgUrlByType(entity.getThemeType());
+                        themeType = entity.getThemeType();
                     }
+                    result.setThemeType(themeType);
                     result.setThemeImgUrl(themeImgUrl);
                     // logo url
                     result.setLogoUrl(systemSettingEntity.getLogoUrl());
@@ -202,14 +206,16 @@ public class AccountSettingController {
         HttpStatus httpStatus = null;
         try {
             if (dto != null) {
-                Integer themeType = Integer.parseInt(dto.getValue().toString());
-                accountSettingService.updateThemeType(themeType, dto.getUserId());
+                accountSettingService.updateThemeType(dto.getValue(), dto.getUserId());
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
             } else {
                 logger.error("updateThemeType: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
             }
         } catch (Exception e) {
             logger.error("updateThemeType: ERROR: " + e.toString());
+            System.out.println("updateThemeType: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -218,13 +224,14 @@ public class AccountSettingController {
 
     @PostMapping("accounts/setting/screen")
     public ResponseEntity<ResponseMessageDTO> updateKeepScreen(
-            @RequestBody UserSettingUpdateDTO dto) {
+            @RequestBody UserSettingUpdateCheckDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
             if (dto != null) {
-                Boolean keepScreenOn = Boolean.parseBoolean(dto.getValue().toString());
-                accountSettingService.updateKeepScreenOn(keepScreenOn, dto.getUserId());
+                accountSettingService.updateKeepScreenOn(dto.getValue(), dto.getUserId());
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
             } else {
                 logger.error("updateKeepScreen: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
@@ -244,8 +251,9 @@ public class AccountSettingController {
         HttpStatus httpStatus = null;
         try {
             if (dto != null) {
-                Integer qrShowType = Integer.parseInt(dto.getValue().toString());
-                accountSettingService.updateQrShowType(qrShowType, dto.getUserId());
+                accountSettingService.updateQrShowType(dto.getValue(), dto.getUserId());
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
             } else {
                 logger.error("updateQrShowType: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");

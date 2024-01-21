@@ -2,30 +2,30 @@ package com.vietqr.org.dto;
 
 import java.io.Serializable;
 
-public class UserSettingUpdateDTO implements Serializable {
+public class UserSettingUpdateCheckDTO implements Serializable {
 
     /**
      *
      */
     private static final long serialVersionUID = 1L;
 
-    private int value;
+    private boolean value;
     private String userId;
 
-    public UserSettingUpdateDTO() {
+    public UserSettingUpdateCheckDTO() {
         super();
     }
 
-    public UserSettingUpdateDTO(int value, String userId) {
+    public UserSettingUpdateCheckDTO(boolean value, String userId) {
         this.value = value;
         this.userId = userId;
     }
 
-    public int getValue() {
+    public boolean getValue() {
         return value;
     }
 
-    public void setValue(int value) {
+    public void setValue(boolean value) {
         this.value = value;
     }
 
