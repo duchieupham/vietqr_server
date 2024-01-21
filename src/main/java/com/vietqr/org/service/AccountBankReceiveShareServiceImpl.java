@@ -44,4 +44,9 @@ public class AccountBankReceiveShareServiceImpl implements AccountBankReceiveSha
     public String checkUserExistedFromBankReceiveShare(String bankId, String id) {
         return repo.checkUserExistedFromBank(bankId, id);
     }
+
+    @Override
+    public void deleteAccountBankReceiveShareByBankId(String bankId) {
+        repo.deleteAccountBankReceiveShareByBankId(bankId);
+    }
 }

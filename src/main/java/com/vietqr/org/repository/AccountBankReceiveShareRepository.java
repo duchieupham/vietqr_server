@@ -53,4 +53,9 @@ public interface AccountBankReceiveShareRepository
             + "AND user_id = :userId ", nativeQuery = true)
     String checkUserExistedFromBank(@Param(value = "userId") String userId,
                                     @Param(value = "bankId") String bankId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM account_bank_receive_share WHERE bank_id = :bankId", nativeQuery = true)
+    void deleteAccountBankReceiveShareByBankId(String bankId);
 }

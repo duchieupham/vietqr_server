@@ -21,4 +21,6 @@ public interface AccountBankReceiveShareService {
     public void removeAllMemberFromBankReceiveShare(String bankId);
 
     public String checkUserExistedFromBankReceiveShare(String bankId, String id);
+
+    public void deleteAccountBankReceiveShareByBankId(String bankId);
 }
