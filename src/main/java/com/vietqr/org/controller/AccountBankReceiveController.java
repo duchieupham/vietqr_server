@@ -29,8 +29,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vietqr.org.dto.AccountBankReceiveDetailDTO.BranchBankDetailDTO;
-import com.vietqr.org.dto.AccountBankReceiveDetailDTO.BusinessBankDetailDTO;
 import com.vietqr.org.dto.AccountBankReceiveDetailDTO.TransactionBankListDTO;
 import com.vietqr.org.util.LarkUtil;
 import com.vietqr.org.util.VietQRUtil;
@@ -382,7 +380,8 @@ public class AccountBankReceiveController {
 					dto.getBankId());
 			//
 			LarkUtil larkUtil = new LarkUtil();
-			AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService.getAccountBankById(dto.getBankId());
+			AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService
+					.getAccountBankById(dto.getBankId());
 			String phoneNo = accountInformationService.getPhoneNoByUserId(accountBankReceiveEntity.getUserId());
 			AccountInformationEntity accountInformationEntity = accountInformationService
 					.getAccountInformation(accountBankReceiveEntity.getUserId());
@@ -577,53 +576,54 @@ public class AccountBankReceiveController {
 				result.setEwalletToken(accountBankEntity.getEwalletToken());
 				result.setUnlinkedType(bankTypeEntity.getUnlinkedType());
 				result.setPhoneAuthenticated(accountBankEntity.getPhoneAuthenticated());
-//				List<String> branchIds = new ArrayList<>();
-//				branchIds = branchInformationService.getBranchIdsByBankId(bankId);
-//				// get list branch linked
-//				List<BranchInformationEntity> branchEntities = new ArrayList<>();
-//				if (branchIds != null && !branchIds.isEmpty()) {
-//					for (String branchId : branchIds) {
-//						BranchInformationEntity branchEntity = branchInformationService.getBranchById(branchId);
-//						branchEntities.add(branchEntity);
-//					}
-//				}
-//				// get list business linked
-//				List<BusinessInformationEntity> businessEntities = new ArrayList<>();
-//				if (branchEntities != null && !branchEntities.isEmpty()) {
-//					for (BranchInformationEntity branch : branchEntities) {
-//						BusinessInformationEntity businessEntity = businessInformationService
-//								.getBusinessById(branch.getBusinessId());
-//						businessEntities.add(businessEntity);
-//					}
-//				}
-//				// map business and branch
-//				List<BusinessBankDetailDTO> businessBankDetailDTOs = new ArrayList<>();
-//				if (businessEntities != null && !businessEntities.isEmpty()) {
-//					//
-//					for (BusinessInformationEntity business : businessEntities) {
-//						BusinessBankDetailDTO businessBankDTO = new BusinessBankDetailDTO();
-//						businessBankDTO.setBusinessId(business.getId());
-//						businessBankDTO.setBusinessName(business.getName());
-//						businessBankDTO.setImgId(business.getImgId());
-//						businessBankDTO.setCoverImgId(business.getCoverImgId());
-//						List<BranchBankDetailDTO> branchBanks = new ArrayList<>();
-//						if (branchEntities != null && !branchEntities.isEmpty()) {
-//							for (BranchInformationEntity branch : branchEntities) {
-//								if (branch.getBusinessId().equals(business.getId())) {
-//									BranchBankDetailDTO branchBank = new BranchBankDetailDTO();
-//									branchBank.setBranchId(branch.getId());
-//									branchBank.setBranchName(branch.getName());
-//									branchBank.setCode(branch.getCode());
-//									branchBank.setAddress(branch.getAddress());
-//									branchBanks.add(branchBank);
-//								}
-//							}
-//						}
-//						businessBankDTO.setBranchDetails(branchBanks);
-//						businessBankDetailDTOs.add(businessBankDTO);
-//					}
-//				}
-//				result.setBusinessDetails(businessBankDetailDTOs);
+				// List<String> branchIds = new ArrayList<>();
+				// branchIds = branchInformationService.getBranchIdsByBankId(bankId);
+				// // get list branch linked
+				// List<BranchInformationEntity> branchEntities = new ArrayList<>();
+				// if (branchIds != null && !branchIds.isEmpty()) {
+				// for (String branchId : branchIds) {
+				// BranchInformationEntity branchEntity =
+				// branchInformationService.getBranchById(branchId);
+				// branchEntities.add(branchEntity);
+				// }
+				// }
+				// // get list business linked
+				// List<BusinessInformationEntity> businessEntities = new ArrayList<>();
+				// if (branchEntities != null && !branchEntities.isEmpty()) {
+				// for (BranchInformationEntity branch : branchEntities) {
+				// BusinessInformationEntity businessEntity = businessInformationService
+				// .getBusinessById(branch.getBusinessId());
+				// businessEntities.add(businessEntity);
+				// }
+				// }
+				// // map business and branch
+				// List<BusinessBankDetailDTO> businessBankDetailDTOs = new ArrayList<>();
+				// if (businessEntities != null && !businessEntities.isEmpty()) {
+				// //
+				// for (BusinessInformationEntity business : businessEntities) {
+				// BusinessBankDetailDTO businessBankDTO = new BusinessBankDetailDTO();
+				// businessBankDTO.setBusinessId(business.getId());
+				// businessBankDTO.setBusinessName(business.getName());
+				// businessBankDTO.setImgId(business.getImgId());
+				// businessBankDTO.setCoverImgId(business.getCoverImgId());
+				// List<BranchBankDetailDTO> branchBanks = new ArrayList<>();
+				// if (branchEntities != null && !branchEntities.isEmpty()) {
+				// for (BranchInformationEntity branch : branchEntities) {
+				// if (branch.getBusinessId().equals(business.getId())) {
+				// BranchBankDetailDTO branchBank = new BranchBankDetailDTO();
+				// branchBank.setBranchId(branch.getId());
+				// branchBank.setBranchName(branch.getName());
+				// branchBank.setCode(branch.getCode());
+				// branchBank.setAddress(branch.getAddress());
+				// branchBanks.add(branchBank);
+				// }
+				// }
+				// }
+				// businessBankDTO.setBranchDetails(branchBanks);
+				// businessBankDetailDTOs.add(businessBankDTO);
+				// }
+				// }
+				// result.setBusinessDetails(businessBankDetailDTOs);
 
 				httpStatus = HttpStatus.OK;
 			} else {
@@ -671,53 +671,54 @@ public class AccountBankReceiveController {
 				result.setEwalletToken(accountBankEntity.getEwalletToken());
 				result.setUnlinkedType(bankTypeEntity.getUnlinkedType());
 				result.setPhoneAuthenticated(accountBankEntity.getPhoneAuthenticated());
-//				List<String> branchIds = new ArrayList<>();
-//				branchIds = branchInformationService.getBranchIdsByBankId(bankId);
-//				// get list branch linked
-//				List<BranchInformationEntity> branchEntities = new ArrayList<>();
-//				if (branchIds != null && !branchIds.isEmpty()) {
-//					for (String branchId : branchIds) {
-//						BranchInformationEntity branchEntity = branchInformationService.getBranchById(branchId);
-//						branchEntities.add(branchEntity);
-//					}
-//				}
-//				// get list business linked
-//				List<BusinessInformationEntity> businessEntities = new ArrayList<>();
-//				if (branchEntities != null && !branchEntities.isEmpty()) {
-//					for (BranchInformationEntity branch : branchEntities) {
-//						BusinessInformationEntity businessEntity = businessInformationService
-//								.getBusinessById(branch.getBusinessId());
-//						businessEntities.add(businessEntity);
-//					}
-//				}
-//				// map business and branch
-//				List<BusinessBankDetailDTO> businessBankDetailDTOs = new ArrayList<>();
-//				if (businessEntities != null && !businessEntities.isEmpty()) {
-//					//
-//					for (BusinessInformationEntity business : businessEntities) {
-//						BusinessBankDetailDTO businessBankDTO = new BusinessBankDetailDTO();
-//						businessBankDTO.setBusinessId(business.getId());
-//						businessBankDTO.setBusinessName(business.getName());
-//						businessBankDTO.setImgId(business.getImgId());
-//						businessBankDTO.setCoverImgId(business.getCoverImgId());
-//						List<BranchBankDetailDTO> branchBanks = new ArrayList<>();
-//						if (branchEntities != null && !branchEntities.isEmpty()) {
-//							for (BranchInformationEntity branch : branchEntities) {
-//								if (branch.getBusinessId().equals(business.getId())) {
-//									BranchBankDetailDTO branchBank = new BranchBankDetailDTO();
-//									branchBank.setBranchId(branch.getId());
-//									branchBank.setBranchName(branch.getName());
-//									branchBank.setCode(branch.getCode());
-//									branchBank.setAddress(branch.getAddress());
-//									branchBanks.add(branchBank);
-//								}
-//							}
-//						}
-//						businessBankDTO.setBranchDetails(branchBanks);
-//						businessBankDetailDTOs.add(businessBankDTO);
-//					}
-//				}
-//				result.setBusinessDetails(businessBankDetailDTOs);
+				// List<String> branchIds = new ArrayList<>();
+				// branchIds = branchInformationService.getBranchIdsByBankId(bankId);
+				// // get list branch linked
+				// List<BranchInformationEntity> branchEntities = new ArrayList<>();
+				// if (branchIds != null && !branchIds.isEmpty()) {
+				// for (String branchId : branchIds) {
+				// BranchInformationEntity branchEntity =
+				// branchInformationService.getBranchById(branchId);
+				// branchEntities.add(branchEntity);
+				// }
+				// }
+				// // get list business linked
+				// List<BusinessInformationEntity> businessEntities = new ArrayList<>();
+				// if (branchEntities != null && !branchEntities.isEmpty()) {
+				// for (BranchInformationEntity branch : branchEntities) {
+				// BusinessInformationEntity businessEntity = businessInformationService
+				// .getBusinessById(branch.getBusinessId());
+				// businessEntities.add(businessEntity);
+				// }
+				// }
+				// // map business and branch
+				// List<BusinessBankDetailDTO> businessBankDetailDTOs = new ArrayList<>();
+				// if (businessEntities != null && !businessEntities.isEmpty()) {
+				// //
+				// for (BusinessInformationEntity business : businessEntities) {
+				// BusinessBankDetailDTO businessBankDTO = new BusinessBankDetailDTO();
+				// businessBankDTO.setBusinessId(business.getId());
+				// businessBankDTO.setBusinessName(business.getName());
+				// businessBankDTO.setImgId(business.getImgId());
+				// businessBankDTO.setCoverImgId(business.getCoverImgId());
+				// List<BranchBankDetailDTO> branchBanks = new ArrayList<>();
+				// if (branchEntities != null && !branchEntities.isEmpty()) {
+				// for (BranchInformationEntity branch : branchEntities) {
+				// if (branch.getBusinessId().equals(business.getId())) {
+				// BranchBankDetailDTO branchBank = new BranchBankDetailDTO();
+				// branchBank.setBranchId(branch.getId());
+				// branchBank.setBranchName(branch.getName());
+				// branchBank.setCode(branch.getCode());
+				// branchBank.setAddress(branch.getAddress());
+				// branchBanks.add(branchBank);
+				// }
+				// }
+				// }
+				// businessBankDTO.setBranchDetails(branchBanks);
+				// businessBankDetailDTOs.add(businessBankDTO);
+				// }
+				// }
+				// result.setBusinessDetails(businessBankDetailDTOs);
 				// get related transaction
 				List<TransactionBankListDTO> transactions = new ArrayList<>();
 				List<TransactionReceiveEntity> transactionEntities = transactionReceiveService
@@ -750,9 +751,9 @@ public class AccountBankReceiveController {
 		return new ResponseEntity<>(result, httpStatus);
 	}
 
-
 	@GetMapping("account-bank/{userId}")
-	public ResponseEntity<List<AccountBankShareResponseDTO>> getAccountBankBackups(@PathVariable("userId") String userId) {
+	public ResponseEntity<List<AccountBankShareResponseDTO>> getAccountBankBackups(
+			@PathVariable("userId") String userId) {
 		List<AccountBankShareResponseDTO> result = new ArrayList<>();
 		HttpStatus httpStatus = null;
 		try {
