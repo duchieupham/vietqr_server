@@ -794,16 +794,8 @@ public class AccountBankReceiveController {
 				result = new ResponseMessageDTO("CHECK", "C04");
 				httpStatus = HttpStatus.OK;
 			} else {
-				// 1.check type = 0 => personal; type = 1 => business
-				// 2.a remove bank_receive_branch by bank_id
-				// 2.b remvoe bank_receive_personal by bank_id
-				// 3. remove bank_receive
-				//
-				if (dto.getType() == 0) {
-					accountBankReceivePersonalService.deleteBankReceivePersonalByBankId(dto.getBankId());
-				} else if (dto.getType() == 1) {
-					bankReceiveBranchService.deleteBankReceiveBranchByBankId(dto.getBankId());
-				}
+				// remove account bank receive share
+				accountBankReceiveShareService.deleteAccountBankReceiveShareByBankId(dto.getBankId());
 				accountBankReceiveService.deleteAccountBank(dto.getBankId());
 				result = new ResponseMessageDTO("SUCCESS", "");
 				httpStatus = HttpStatus.OK;

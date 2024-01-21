@@ -10,7 +10,6 @@ public class BankAccountRemoveDTO implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private String bankId;
-	private int type;
 	private boolean authenticated;
 
 	public BankAccountRemoveDTO() {
@@ -20,7 +19,6 @@ public class BankAccountRemoveDTO implements Serializable {
 	public BankAccountRemoveDTO(String bankId, int type, boolean authenticated) {
 		super();
 		this.bankId = bankId;
-		this.type = type;
 		this.authenticated = authenticated;
 	}
 
@@ -38,14 +36,6 @@ public class BankAccountRemoveDTO implements Serializable {
 
 	public void setAuthenticated(boolean authenticated) {
 		this.authenticated = authenticated;
-	}
-
-	public int getType() {
-		return type;
-	}
-
-	public void setType(int type) {
-		this.type = type;
 	}
 
 }
