@@ -20,7 +20,7 @@ import java.util.Map;
 public class AutomationManagementService {
     private static final Logger logger = Logger.getLogger(LarkController.class);
 
-    @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 30 8 * * ?")
+    @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 30 8 * * MON-FRI")
     public void scheduleExecuteTask() {
         if (!EnvironmentUtil.isProduction()) {
             String content = "CHÀO BUỔI SÁNG MỌI NGƯỜI " +
@@ -56,13 +56,13 @@ public class AutomationManagementService {
         }
     }
 
-    // @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 19 09 * * ?")
+    // @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 19 09 * * MON-FRI")
     // public void myScheduledTask() {
     // // Your task logic goes here
     // System.out.println("System time is: " + LocalDateTime.now());
     // }
 
-    @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 30 17 * * ?")
+    @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 30 17 * * MON-FRI")
     public void scheduleUpdateTask() {
         if (!EnvironmentUtil.isProduction()) {
             String content = "CUỐI NGÀY RỒI!!! " +
