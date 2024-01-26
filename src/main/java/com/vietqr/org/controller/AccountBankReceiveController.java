@@ -775,6 +775,15 @@ public class AccountBankReceiveController {
 					dto.setAuthenticated(item.getAuthenticated());
 					dto.setUserId(item.getUserId());
 					dto.setIsOwner(item.getIsOwner());
+					dto.setBankTypeStatus(item.getBankTypeStatus());
+
+					BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(item.getBankTypeId());
+					String caiValue = caiBankService.getCaiValue(bankTypeEntity.getId());
+					VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+					vietQRGenerateDTO.setCaiValue(caiValue);
+					vietQRGenerateDTO.setBankAccount(item.getBankAccount());
+					String qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
+					dto.setQrCode(qr);
 					return dto;
 				}).collect(Collectors.toList());
 			}

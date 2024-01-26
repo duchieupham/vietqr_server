@@ -23,6 +23,8 @@ public class AccountBankShareResponseDTO implements Serializable {
     private boolean isAuthenticated;
     private String userId;
     private boolean isOwner;
+    private int bankTypeStatus;
+    private String qrCode;
 
     public AccountBankShareResponseDTO() {
         super();
@@ -31,7 +33,7 @@ public class AccountBankShareResponseDTO implements Serializable {
     public AccountBankShareResponseDTO(String id, String bankAccount, String userBankName,
                                        String bankShortName, String bankCode, String bankName,
                                        String imgId, int type, boolean isAuthenticated, String userId,
-                                       boolean isOwner) {
+                                       boolean isOwner, int bankTypeStatus, String qrCode) {
         this.id = id;
         this.bankAccount = bankAccount;
         this.userBankName = userBankName;
@@ -43,6 +45,8 @@ public class AccountBankShareResponseDTO implements Serializable {
         this.isAuthenticated = isAuthenticated;
         this.userId = userId;
         this.isOwner = isOwner;
+        this.bankTypeStatus = bankTypeStatus;
+        this.qrCode = qrCode;
     }
 
     public String getId() {
@@ -131,5 +135,21 @@ public class AccountBankShareResponseDTO implements Serializable {
 
     public void setIsOwner(boolean owner) {
         this.isOwner = owner;
+    }
+
+    public int getBankTypeStatus() {
+        return bankTypeStatus;
+    }
+
+    public void setBankTypeStatus(int bankTypeStatus) {
+        this.bankTypeStatus = bankTypeStatus;
+    }
+
+    public String getQrCode() {
+        return qrCode;
+    }
+
+    public void setQrCode(String qrCode) {
+        this.qrCode = qrCode;
     }
 }

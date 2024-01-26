@@ -17,7 +17,7 @@ public interface AccountBankReceiveShareRepository
         extends JpaRepository<AccountBankReceiveShareEntity, Long> {
     @Query(value = "SELECT a.bank_id as bankId, b.bank_account as bankAccount, b.bank_account_name as userBankName, " +
             "c.bank_name as bankName, c.bank_short_name as bankShortName, c.bank_code as bankCode, c.img_id as imgId, b.type as bankType, b.is_authenticated as authenticated, " +
-            "b.user_id as userId, a.is_owner as isOwner "
+            "b.user_id as userId, a.is_owner as isOwner , c.status as bankTypeStatus, c.id as bankTypeId "
             + "FROM account_bank_receive_share a "
             + "INNER JOIN account_bank_receive b "
             + "ON a.bank_id = b.id "

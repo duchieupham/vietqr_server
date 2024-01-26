@@ -24,6 +24,11 @@ public interface AccountBankReceiveShareDTO {
     boolean getAuthenticated();
 
     String getUserId();
+
     boolean getIsOwner();
+
+    int getBankTypeStatus();
+
+    String getBankTypeId();
 
 }
