@@ -671,55 +671,7 @@ public class AccountBankReceiveController {
 				result.setEwalletToken(accountBankEntity.getEwalletToken());
 				result.setUnlinkedType(bankTypeEntity.getUnlinkedType());
 				result.setPhoneAuthenticated(accountBankEntity.getPhoneAuthenticated());
-				// List<String> branchIds = new ArrayList<>();
-				// branchIds = branchInformationService.getBranchIdsByBankId(bankId);
-				// // get list branch linked
-				// List<BranchInformationEntity> branchEntities = new ArrayList<>();
-				// if (branchIds != null && !branchIds.isEmpty()) {
-				// for (String branchId : branchIds) {
-				// BranchInformationEntity branchEntity =
-				// branchInformationService.getBranchById(branchId);
-				// branchEntities.add(branchEntity);
-				// }
-				// }
-				// // get list business linked
-				// List<BusinessInformationEntity> businessEntities = new ArrayList<>();
-				// if (branchEntities != null && !branchEntities.isEmpty()) {
-				// for (BranchInformationEntity branch : branchEntities) {
-				// BusinessInformationEntity businessEntity = businessInformationService
-				// .getBusinessById(branch.getBusinessId());
-				// businessEntities.add(businessEntity);
-				// }
-				// }
-				// // map business and branch
-				// List<BusinessBankDetailDTO> businessBankDetailDTOs = new ArrayList<>();
-				// if (businessEntities != null && !businessEntities.isEmpty()) {
-				// //
-				// for (BusinessInformationEntity business : businessEntities) {
-				// BusinessBankDetailDTO businessBankDTO = new BusinessBankDetailDTO();
-				// businessBankDTO.setBusinessId(business.getId());
-				// businessBankDTO.setBusinessName(business.getName());
-				// businessBankDTO.setImgId(business.getImgId());
-				// businessBankDTO.setCoverImgId(business.getCoverImgId());
-				// List<BranchBankDetailDTO> branchBanks = new ArrayList<>();
-				// if (branchEntities != null && !branchEntities.isEmpty()) {
-				// for (BranchInformationEntity branch : branchEntities) {
-				// if (branch.getBusinessId().equals(business.getId())) {
-				// BranchBankDetailDTO branchBank = new BranchBankDetailDTO();
-				// branchBank.setBranchId(branch.getId());
-				// branchBank.setBranchName(branch.getName());
-				// branchBank.setCode(branch.getCode());
-				// branchBank.setAddress(branch.getAddress());
-				// branchBanks.add(branchBank);
-				// }
-				// }
-				// }
-				// businessBankDTO.setBranchDetails(branchBanks);
-				// businessBankDetailDTOs.add(businessBankDTO);
-				// }
-				// }
-				// result.setBusinessDetails(businessBankDetailDTOs);
-				// get related transaction
+
 				List<TransactionBankListDTO> transactions = new ArrayList<>();
 				List<TransactionReceiveEntity> transactionEntities = transactionReceiveService
 						.getTransactionByBankId(bankId);
@@ -775,6 +727,15 @@ public class AccountBankReceiveController {
 					dto.setAuthenticated(item.getAuthenticated());
 					dto.setUserId(item.getUserId());
 					dto.setIsOwner(item.getIsOwner());
+					dto.setBankTypeStatus(item.getBankTypeStatus());
+
+					BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(item.getBankTypeId());
+					String caiValue = caiBankService.getCaiValue(bankTypeEntity.getId());
+					VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+					vietQRGenerateDTO.setCaiValue(caiValue);
+					vietQRGenerateDTO.setBankAccount(item.getBankAccount());
+					String qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
+					dto.setQrCode(qr);
 					return dto;
 				}).collect(Collectors.toList());
 			}

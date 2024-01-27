@@ -38,7 +38,7 @@ import com.vietqr.org.util.NotificationUtil;
 @CrossOrigin
 @RequestMapping("/api")
 public class MemberAccountBankReceiveController {
-    private static final Logger logger = Logger.getLogger(BranchMemberController.class);
+    private static final Logger logger = Logger.getLogger(MemberAccountBankReceiveController.class);
 
     @Autowired
     AccountInformationService accountInformationService;

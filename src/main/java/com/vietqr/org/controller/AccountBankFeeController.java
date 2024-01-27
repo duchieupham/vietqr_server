@@ -215,6 +215,7 @@ public class AccountBankFeeController {
         } catch (Exception e) {
             logger.error("insertBankFee: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
     }

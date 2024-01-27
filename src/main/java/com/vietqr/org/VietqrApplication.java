@@ -59,8 +59,8 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void test() {
 		try {
-			// String clientXCertificate = JwsUtil.getClientXCertificate();
-			// System.out.println("client x certificate: " + clientXCertificate);
+			String clientXCertificate = JwsUtil.getClientXCertificate();
+			System.out.println("client x certificate: " + clientXCertificate + "\n\n\n\n");
 			///
 			String myKey = JwsUtil.getSymmatricKey();
 			// byte[] decodedKey =
@@ -110,7 +110,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
-		// test();
+		test();
 		//
 		// generate check sum mms sync
 		// String dataCheckSum = BankEncryptUtil.generateMD5Checksum("test09",
