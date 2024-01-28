@@ -43,6 +43,7 @@ import com.vietqr.org.dto.example.Header;
 import com.vietqr.org.dto.example.JweObj;
 import com.vietqr.org.dto.example.Recipients;
 import com.vietqr.org.security.JWTAuthorizationFilter;
+import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.JwsUtil;
 import com.vietqr.org.util.WebSocketConfig;
 
@@ -110,7 +111,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
-		test();
+		// test();
 		//
 		// generate check sum mms sync
 		// String dataCheckSum = BankEncryptUtil.generateMD5Checksum("test09",
@@ -139,7 +140,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// "FT23293978692076", "SABAccessKey");
 		// System.out.println("CHECKSUM REFUND: " + checkSum2);
 
-		// String bankAccountEncrypted = BankEncryptUtil.encrypt("0670166362222");
+		// String bankAccountEncrypted = BankEncryptUtil.encrypt("0933456662");
 		// System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
 
 		/// generate signature to request payment MB

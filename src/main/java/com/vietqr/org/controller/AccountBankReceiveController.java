@@ -673,23 +673,24 @@ public class AccountBankReceiveController {
 				result.setPhoneAuthenticated(accountBankEntity.getPhoneAuthenticated());
 
 				List<TransactionBankListDTO> transactions = new ArrayList<>();
-				List<TransactionReceiveEntity> transactionEntities = transactionReceiveService
-						.getTransactionByBankId(bankId);
-				if (transactionEntities != null && !transactionEntities.isEmpty()) {
-					for (TransactionReceiveEntity transactionEntity : transactionEntities) {
-						TransactionBankListDTO transaction = new TransactionBankListDTO();
-						transaction.setTransactionId(transactionEntity.getId());
-						transaction.setBankAccount(transactionEntity.getBankAccount());
-						transaction.setBankId(transactionEntity.getBankId());
-						transaction.setAmount(transactionEntity.getAmount() + "");
-						transaction.setContent(transactionEntity.getContent());
-						transaction.setStatus(transactionEntity.getStatus());
-						transaction.setTime(transactionEntity.getTime());
-						transaction.setType(transactionEntity.getType());
-						transaction.setTransType(transactionEntity.getTransType());
-						transactions.add(transaction);
-					}
-				}
+				// List<TransactionReceiveEntity> transactionEntities =
+				// transactionReceiveService
+				// .getTransactionByBankId(bankId);
+				// if (transactionEntities != null && !transactionEntities.isEmpty()) {
+				// for (TransactionReceiveEntity transactionEntity : transactionEntities) {
+				// TransactionBankListDTO transaction = new TransactionBankListDTO();
+				// transaction.setTransactionId(transactionEntity.getId());
+				// transaction.setBankAccount(transactionEntity.getBankAccount());
+				// transaction.setBankId(transactionEntity.getBankId());
+				// transaction.setAmount(transactionEntity.getAmount() + "");
+				// transaction.setContent(transactionEntity.getContent());
+				// transaction.setStatus(transactionEntity.getStatus());
+				// transaction.setTime(transactionEntity.getTime());
+				// transaction.setType(transactionEntity.getType());
+				// transaction.setTransType(transactionEntity.getTransType());
+				// transactions.add(transaction);
+				// }
+				// }
 				result.setTransactions(transactions);
 				httpStatus = HttpStatus.OK;
 			} else {
