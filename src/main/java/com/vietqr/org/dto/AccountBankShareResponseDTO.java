@@ -17,22 +17,29 @@ public class AccountBankShareResponseDTO implements Serializable {
     private String bankName;
     private String imgId;
     private int type;
-    // private String nationalId;
-    // private String phoneAuthenticated;
+    private String bankTypeId;
     private boolean isAuthenticated;
+    private String nationalId;
+    private String phoneAuthenticated;
     private String userId;
     private boolean isOwner;
     private int bankTypeStatus;
     private String qrCode;
+    private String caiValue;
+    private String ewalletToken;
+    private Integer unlinkedType;
 
     public AccountBankShareResponseDTO() {
         super();
     }
 
+
     public AccountBankShareResponseDTO(String id, String bankAccount, String userBankName,
-            String bankShortName, String bankCode, String bankName,
-            String imgId, int type, boolean isAuthenticated, String userId,
-            boolean isOwner, int bankTypeStatus, String qrCode) {
+                                       String bankShortName, String bankCode, String bankName,
+                                       String imgId, int type, String bankTypeId, boolean isAuthenticated,
+                                       String nationalId, String phoneAuthenticated, String userId,
+                                       boolean isOwner, int bankTypeStatus, String qrCode, String caiValue,
+                                       String ewalletToken, Integer unlinkedType) {
         this.id = id;
         this.bankAccount = bankAccount;
         this.userBankName = userBankName;
@@ -41,11 +48,33 @@ public class AccountBankShareResponseDTO implements Serializable {
         this.bankName = bankName;
         this.imgId = imgId;
         this.type = type;
+        this.bankTypeId = bankTypeId;
         this.isAuthenticated = isAuthenticated;
+        this.nationalId = nationalId;
+        this.phoneAuthenticated = phoneAuthenticated;
         this.userId = userId;
         this.isOwner = isOwner;
         this.bankTypeStatus = bankTypeStatus;
         this.qrCode = qrCode;
+        this.caiValue = caiValue;
+        this.ewalletToken = ewalletToken;
+        this.unlinkedType = unlinkedType;
+    }
+
+    public String getCaiValue() {
+        return caiValue;
+    }
+
+    public void setCaiValue(String caiValue) {
+        this.caiValue = caiValue;
+    }
+
+    public String getPhoneAuthenticated() {
+        return phoneAuthenticated;
+    }
+
+    public void setPhoneAuthenticated(String phoneAuthenticated) {
+        this.phoneAuthenticated = phoneAuthenticated;
     }
 
     public String getId() {
@@ -146,6 +175,38 @@ public class AccountBankShareResponseDTO implements Serializable {
 
     public String getQrCode() {
         return qrCode;
+    }
+
+    public String getBankTypeId() {
+        return bankTypeId;
+    }
+
+    public void setBankTypeId(String bankTypeId) {
+        this.bankTypeId = bankTypeId;
+    }
+
+    public String getNationalId() {
+        return nationalId;
+    }
+
+    public void setNationalId(String nationalId) {
+        this.nationalId = nationalId;
+    }
+
+    public String getEwalletToken() {
+        return ewalletToken;
+    }
+
+    public void setEwalletToken(String ewalletToken) {
+        this.ewalletToken = ewalletToken;
+    }
+
+    public Integer getUnlinkedType() {
+        return unlinkedType;
+    }
+
+    public void setUnlinkedType(Integer unlinkedType) {
+        this.unlinkedType = unlinkedType;
     }
 
     public void setQrCode(String qrCode) {

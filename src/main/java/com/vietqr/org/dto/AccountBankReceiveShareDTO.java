@@ -31,4 +31,7 @@ public interface AccountBankReceiveShareDTO {
 
     String getBankTypeId();
 
+    String getCaiValue();
+
+    Integer getUnlinkedType();
 }

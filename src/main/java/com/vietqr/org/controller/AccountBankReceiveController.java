@@ -725,13 +725,19 @@ public class AccountBankReceiveController {
 					dto.setBankName(item.getBankName());
 					dto.setImgId(item.getImgId());
 					dto.setType(item.getBankType());
+					dto.setBankTypeId(item.getBankTypeId());
+					dto.setEwalletToken("");
+					dto.setUnlinkedType(item.getUnlinkedType());
+					dto.setNationalId(item.getNationalId());
 					dto.setAuthenticated(item.getAuthenticated());
 					dto.setUserId(item.getUserId());
 					dto.setIsOwner(item.getIsOwner());
+					dto.setPhoneAuthenticated(item.getPhoneAuthenticated());
 					dto.setBankTypeStatus(item.getBankTypeStatus());
 
 					BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(item.getBankTypeId());
 					String caiValue = caiBankService.getCaiValue(bankTypeEntity.getId());
+					dto.setCaiValue(caiValue);
 					VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
 					vietQRGenerateDTO.setCaiValue(caiValue);
 					vietQRGenerateDTO.setBankAccount(item.getBankAccount());
