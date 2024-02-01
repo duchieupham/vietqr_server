@@ -1,9 +1,0 @@
-{
-    "serviceId": "BC0001",
-    "channelId": "211701",
-    "merchantId": "BC0001",
-    "merchantName": "BLUECOM",
-    "payerId":"",
-    "confirmId":"",
-    "otpNumber":""
-}

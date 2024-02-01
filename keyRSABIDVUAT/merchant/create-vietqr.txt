@@ -1,0 +1,7 @@
+{
+    "serviceId": "BC0001",
+    "code": "V2QRBC0001",
+    "name": "Pham Duc Hieu",
+    "amount": "10000",
+    "description": "test tao ma VietQR"
+}

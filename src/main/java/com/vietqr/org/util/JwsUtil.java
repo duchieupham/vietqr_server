@@ -111,7 +111,11 @@ public class JwsUtil {
         StringBuilder sb = new StringBuilder();
 
         try {
-            File file = new File(path + "/merchant/request-add.txt");
+            // File file = new File(path + "/merchant/request-add.txt");
+            // File file = new File(path + "/merchant/confirm-add.txt");
+            File file = new File(path + "/merchant/create-vietqr.txt");
+
+            ///
             // File file = new File(path + "confirm-add.txt");
 
             Scanner myReader = new Scanner(file);

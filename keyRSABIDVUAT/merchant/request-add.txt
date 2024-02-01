@@ -6,5 +6,6 @@
     "accountNo": "8840778405",
     "accountName": "Pham Duc Hieu",
     "identity": "075097013267",
-    "mobile": "0931865469"
+    "mobile": "0931865469",
+    "merchantType": "1"
 }
