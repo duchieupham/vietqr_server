@@ -531,6 +531,7 @@ public class TransactionBankController {
 								// System.out.println("After insert");
 							}
 						} else {
+							// MB push gì về collect hết
 							// System.out.println("accountBankEntity = null");
 							logger.info("accountBankEntity = null");
 							transactionBankService.insertTransactionBank(dto.getTransactionid(),
@@ -587,6 +588,8 @@ public class TransactionBankController {
 												nf);
 										// check if recharge => do update status and push data to customer
 										////////// USER RECHAGE VQR || USER RECHARGE MOBILE
+										// giao dịch nạp tiền đt (VNPTePay) của Bluecom
+										// bỏ qua
 										if (transactionReceiveEntity.getType() == 5) {
 											// find transactionWallet by billNumber and status = 0
 											TransactionWalletEntity transactionWalletEntity = transactionWalletService
@@ -642,8 +645,10 @@ public class TransactionBankController {
 												"transaction-sync - cannot find transaction receive. Receive new transaction outside system");
 										// process here
 										UUID transcationUUID = UUID.randomUUID();
+										//push websocket
 										getCustomerSyncEntities(transcationUUID.toString(), dto, accountBankEntity,
 												time, orderId, sign);
+										// push notification
 										insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity, time,
 												traceId, uuid, nf, "", "");
 									}
@@ -988,6 +993,7 @@ public class TransactionBankController {
 		}
 	}
 
+	// cập nhaatk transaction và push notification cho user
 	@Async
 	private void updateTransaction(TransactionBankDTO dto, TransactionReceiveEntity transactionReceiveEntity,
 			AccountBankReceiveEntity accountBankEntity, long time, NumberFormat nf) {

@@ -539,6 +539,7 @@ public class AccountBankReceiveController {
 		vietQRGenerateDTO.setBankAccount(bankAccount);
 		result = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
 		return result;
+
 	}
 
 	@GetMapping("account-bank/detail/web/{bankId}")

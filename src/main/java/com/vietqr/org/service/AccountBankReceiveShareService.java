@@ -1,7 +1,6 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.dto.AccountBankReceiveShareDTO;
-import com.vietqr.org.dto.AccountMemberDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.AccountBankReceiveShareEntity;
 import org.springframework.stereotype.Service;
 
@@ -23,4 +22,32 @@ public interface AccountBankReceiveShareService {
     public String checkUserExistedFromBankReceiveShare(String bankId, String id);
 
     public void deleteAccountBankReceiveShareByBankId(String bankId);
+
+    public void removeTerminalGroupByTerminalId(String terminalId);
+
+    public void removeMemberFromTerminal(String terminalId, String userId);
+
+    public String checkUserExistedFromTerminal(String terminalId, String userId);
+
+    public List<AccountMemberDTO> getMembersFromTerminalId(String terminalId);
+
+    public void removeBankAccountFromTerminal(String terminalId, String bankId);
+
+    List<TerminalBankResponseDTO> getTerminalBankByTerminalId(String id);
+
+    List<ITerminalBankResponseDTO> getTerminalBanksByTerminalIds(List<String> terminalIds);
+
+    List<IBankShareResponseDTO> getTerminalBankByUserId(String userId, int offset);
+
+    int countNumberOfBankShareByUserId(String userId);
+
+    List<String> getBankIdsFromTerminalId(String terminalId);
+
+    int insertAccountBankReceiveShare(List<AccountBankReceiveShareEntity> entities);
+
+    List<IBankShareResponseDTO> getTerminalBankShareByUserId(String userId, int offset);
+
+    int countNumberOfTerminalBankShareByUserId(String userId);
+
+    List<String> getUserIdsFromTerminalId(String terminalId, String userId);
 }

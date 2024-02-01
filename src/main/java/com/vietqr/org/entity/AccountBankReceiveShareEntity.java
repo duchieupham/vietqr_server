@@ -22,6 +22,8 @@ public class AccountBankReceiveShareEntity implements Serializable {
     private String bankId;
     @Column(name = "isOwner")
     private boolean isOwner;
+    @Column(name = "terminalId")
+    private String terminalId;
 
     public AccountBankReceiveShareEntity() {
         super();
@@ -66,9 +68,17 @@ public class AccountBankReceiveShareEntity implements Serializable {
         isOwner = owner;
     }
 
+    public String getTerminalId() {
+        return terminalId;
+    }
+
+    public void setTerminalId(String terminalId) {
+        this.terminalId = terminalId;
+    }
+
     @Override
     public String toString() {
         return "AccountBankReceiveShare [id=" + id + ", userId=" + userId + ", bankId=" + bankId
-                + ", isOwner=" + isOwner + "]";
+                + ", isOwner=" + isOwner + ", TerminalId=" + terminalId + "]";
     }
 }

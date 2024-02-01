@@ -1,7 +1,6 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.dto.AccountBankReceiveShareDTO;
-import com.vietqr.org.dto.AccountMemberDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.AccountBankReceiveShareEntity;
 import com.vietqr.org.repository.AccountBankReceiveShareRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +17,27 @@ public class AccountBankReceiveShareServiceImpl implements AccountBankReceiveSha
     @Override
     public int insertAccountBankReceiveShare(AccountBankReceiveShareEntity entity) {
         return repo.save(entity) == null ? 0 : 1;
+    }
+
+
+    @Override
+    public int insertAccountBankReceiveShare(List<AccountBankReceiveShareEntity> entities) {
+        return repo.saveAll(entities) == null ? 0 : 1;
+    }
+
+    @Override
+    public List<IBankShareResponseDTO> getTerminalBankShareByUserId(String userId, int offset) {
+        return repo.getTerminalBankShareByUserId(userId, offset);
+    }
+
+    @Override
+    public int countNumberOfTerminalBankShareByUserId(String userId) {
+        return repo.countNumberOfTerminalBankShareByUserId(userId);
+    }
+
+    @Override
+    public List<String> getUserIdsFromTerminalId(String terminalId, String userId) {
+        return repo.getUserIdsFromTerminalId(terminalId, userId);
     }
 
     @Override
@@ -49,4 +69,55 @@ public class AccountBankReceiveShareServiceImpl implements AccountBankReceiveSha
     public void deleteAccountBankReceiveShareByBankId(String bankId) {
         repo.deleteAccountBankReceiveShareByBankId(bankId);
     }
+
+    @Override
+    public void removeTerminalGroupByTerminalId(String terminalId) {
+        repo.removeTerminalGroupByTerminalId(terminalId);
+    }
+
+    @Override
+    public void removeMemberFromTerminal(String terminalId, String userId) {
+        repo.removeMemberFromTerminal(terminalId, userId);
+    }
+
+    @Override
+    public String checkUserExistedFromTerminal(String terminalId, String userId) {
+        return repo.checkUserExistedFromTerminal(terminalId, userId);
+    }
+
+    @Override
+    public List<AccountMemberDTO> getMembersFromTerminalId(String terminalId) {
+        return repo.getMembersFromTerminal(terminalId);
+    }
+
+    @Override
+    public void removeBankAccountFromTerminal(String terminalId, String bankId) {
+        repo.removeBankAccountFromTerminal(terminalId, bankId);
+    }
+
+    @Override
+    public List<TerminalBankResponseDTO> getTerminalBankByTerminalId(String id) {
+        return null;
+    }
+
+    @Override
+    public List<ITerminalBankResponseDTO> getTerminalBanksByTerminalIds(List<String> terminalIds) {
+        return repo.findByTerminalIdIn(terminalIds);
+    }
+
+    @Override
+    public List<IBankShareResponseDTO> getTerminalBankByUserId(String userId, int offset) {
+        return repo.findBankShareByUserId(userId, offset);
+    }
+
+    @Override
+    public int countNumberOfBankShareByUserId(String userId) {
+        return repo.countNumberOfBankShareByUserId(userId);
+    }
+
+    @Override
+    public List<String> getBankIdsFromTerminalId(String terminalId) {
+        return repo.getBankIdsFromTerminalId(terminalId);
+    }
+
 }

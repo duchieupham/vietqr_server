@@ -65,4 +65,8 @@ public class StringUtil {
 
         return result;
     }
+
+    public static boolean isNullOrEmpty(String str) {
+        return str == null || str.trim().isEmpty();
+    }
 }

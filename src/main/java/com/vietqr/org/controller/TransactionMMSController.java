@@ -126,6 +126,7 @@ public class TransactionMMSController {
             }
             terminalBankEntity = terminalBankService
                     .getTerminalBankByTerminalId(entity.getTerminalLabel());
+            //check input cua MB bank
             result = validateTransactionBank(entity, terminalBankEntity);
             if (result.getResCode().equals("00")) {
                 // insert TransactionMMSEntity
@@ -223,6 +224,7 @@ public class TransactionMMSController {
                                     "transaction-mms-sync: terminalBankEntity = NULL; CANNOT push data to customerSync");
                         }
                         // push notification to qr link
+                        // qr link nao push ve qr link đó
                         // default bankTypeId
                         String bankTypeId = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
                         BankTypeEntity bankTypeEntity = bankTypeService
