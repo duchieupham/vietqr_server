@@ -29,6 +29,10 @@ public class StringUtil {
         return hashtags;
     }
 
+    public static boolean isEmptyOrEqualsZero(String input) {
+        return input == null || input.trim().isEmpty() || input.trim().equals("0");
+    }
+
     public static String hiddenString(String input, int digitsToShow) {
         String result = "";
         try {

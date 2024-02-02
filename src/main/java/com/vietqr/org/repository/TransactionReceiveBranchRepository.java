@@ -25,24 +25,24 @@ public interface TransactionReceiveBranchRepository extends JpaRepository<Transa
         TransactionReceiveBranchEntity getTransactionBranchByTransactionId(
                         @Param(value = "transactionId") String transactionId);
 
-        @Query(value = "SELECT a.id as transactionId, a.amount, a.bank_account as bankAccount, a.content, a.time, a.time_paid as timePaid, a.status, a.type, a.trans_type as transType "
-                        // + "a.terminal_code as terminalCode, a.note "
-                        + "FROM transaction_receive a "
-                        + "INNER JOIN transaction_receive_branch b "
-                        + "ON a.id = b.transaction_receive_id "
-                        + "WHERE b.branch_id = :branchId "
-                        + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
-        List<TransactionRelatedDTO> getTransactionsByBranchId(@Param(value = "branchId") String branchId,
-                        @Param(value = "offset") int offset);
-
-        @Query(value = "SELECT a.id as transactionId, a.amount, a.bank_account as bankAccount, a.content, a.time, a.time_paid as timePaid, a.status, a.type, a.trans_type as transType "
-                        // + "a.terminal_code as terminalCode, a.note "
-                        + "FROM transaction_receive a "
-                        + "INNER JOIN transaction_receive_branch b "
-                        + "ON a.id = b.transaction_receive_id "
-                        + "WHERE b.business_id = :businessId "
-                        + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
-        List<TransactionRelatedDTO> getTransactionsByBusinessId(@Param(value = "businessId") String businessId,
-                        @Param(value = "offset") int offset);
+//        @Query(value = "SELECT a.id as transactionId, a.amount, a.bank_account as bankAccount, a.content, a.time, a.time_paid as timePaid, a.status, a.type, a.trans_type as transType "
+//                        // + "a.terminal_code as terminalCode, a.note "
+//                        + "FROM transaction_receive a "
+//                        + "INNER JOIN transaction_receive_branch b "
+//                        + "ON a.id = b.transaction_receive_id "
+//                        + "WHERE b.branch_id = :branchId "
+//                        + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+//        List<TransactionRelatedDTO> getTransactionsByBranchId(@Param(value = "branchId") String branchId,
+//                        @Param(value = "offset") int offset);
+//
+//        @Query(value = "SELECT a.id as transactionId, a.amount, a.bank_account as bankAccount, a.content, a.time, a.time_paid as timePaid, a.status, a.type, a.trans_type as transType "
+//                        // + "a.terminal_code as terminalCode, a.note "
+//                        + "FROM transaction_receive a "
+//                        + "INNER JOIN transaction_receive_branch b "
+//                        + "ON a.id = b.transaction_receive_id "
+//                        + "WHERE b.business_id = :businessId "
+//                        + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+//        List<TransactionRelatedDTO> getTransactionsByBusinessId(@Param(value = "businessId") String businessId,
+//                        @Param(value = "offset") int offset);
 
 }

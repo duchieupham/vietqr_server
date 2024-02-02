@@ -26,14 +26,14 @@ public class TransactionReceiveBranchServiceImpl implements TransactionReceiveBr
         return repo.getTransactionBranchByTransactionId(transactionId);
     }
 
-    @Override
-    public List<TransactionRelatedDTO> getTransactionsByBranchId(String branchId, int offset) {
-        return repo.getTransactionsByBranchId(branchId, offset);
-    }
-
-    @Override
-    public List<TransactionRelatedDTO> getTransactionsByBusinessId(String businessId, int offset) {
-        return repo.getTransactionsByBusinessId(businessId, offset);
-    }
+//    @Override
+//    public List<TransactionRelatedDTO> getTransactionsByBranchId(String branchId, int offset) {
+//        return repo.getTransactionsByBranchId(branchId, offset);
+//    }
+//
+//    @Override
+//    public List<TransactionRelatedDTO> getTransactionsByBusinessId(String businessId, int offset) {
+//        return repo.getTransactionsByBusinessId(businessId, offset);
+//    }
 
 }

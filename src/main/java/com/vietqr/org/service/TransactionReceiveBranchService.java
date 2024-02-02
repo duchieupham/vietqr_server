@@ -13,7 +13,7 @@ public interface TransactionReceiveBranchService {
 
     public TransactionReceiveBranchEntity getTransactionBranchByTransactionId(String transactionId);
 
-    public List<TransactionRelatedDTO> getTransactionsByBranchId(String branchId, int offset);
-
-    public List<TransactionRelatedDTO> getTransactionsByBusinessId(String businessId, int offset);
+//    public List<TransactionRelatedDTO> getTransactionsByBranchId(String branchId, int offset);
+//
+//    public List<TransactionRelatedDTO> getTransactionsByBusinessId(String businessId, int offset);
 }

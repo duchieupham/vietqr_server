@@ -1,5 +1,6 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,10 +39,10 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
         repo.updateTransactionReceiveStatus(status, refId, referenceNumber, timePaid, id);
     }
 
-    @Override
-    public List<TransactionRelatedDTO> getRelatedTransactionReceives(String businessId) {
-        return repo.getRelatedTransactionReceives(businessId);
-    }
+//    @Override
+//    public List<TransactionRelatedDTO> getRelatedTransactionReceives(String businessId) {
+//        return repo.getRelatedTransactionReceives(businessId);
+//    }
 
     @Override
     public TransactionDetailDTO getTransactionById(String id) {
@@ -51,47 +52,55 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     @Override
     public TransactionReceiveEntity getTransactionByTraceIdAndAmount(String id, String amount, String transType) {
         Long amountParsed = Long.parseLong(amount);
-        return repo.getTransactionByTraceId(id, amountParsed, transType);
+        return repo.getTransactionByTraceId(id, amountParsed, transType, DateTimeUtil.get2LastPartition(), DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
-    @Override
-    public List<TransactionReceiveEntity> getTransactionByBankId(String bankId) {
-        return repo.getRelatedTransactionByBankId(bankId);
-    }
+//    // not use
+//    @Override
+//    public List<TransactionReceiveEntity> getTransactionByBankId(String bankId) {
+//        return repo.getRelatedTransactionByBankId(bankId);
+//    }
 
     @Override
     public List<TransactionRelatedDTO> getTransactions(int offset, String bankId) {
-        return repo.getTransactions(offset, bankId);
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.getTransactions(offset, bankId, time, DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
-    public TransactionReceiveEntity getTransactionReceiveById(String id) {
-        return repo.getTransactionReceiveById(id);
+    public List<TransactionRelatedDTO> getTransactions(int offset, String bankId, String fromDate, String toDate) {
+        return repo.getTransactions(offset, bankId, DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
+
+//    @Override
+//    public TransactionReceiveEntity getTransactionReceiveById(String id) {
+//        return repo.getTransactionReceiveById(id);
+//    }
 
     @Override
     public TransactionReceiveEntity getTransactionByOrderId(String orderId, String amount) {
-        return repo.getTransactionByOrderId(orderId, amount);
+        return repo.getTransactionByOrderId(orderId, amount, DateTimeUtil.get2LastPartition(), DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public TransactionReceiveEntity findTransactionReceiveByFtCode(String ftCode) {
-        return repo.findTransactionReceiveByFtCode(ftCode);
+        return repo.findTransactionReceiveByFtCode(ftCode, DateTimeUtil.get2LastPartition(), DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public TransactionReceiveEntity getTransactionReceiveByRefNumberAndOrderId(String referenceNumber, String orderId) {
-        return repo.getTransactionReceiveByRefNumberAndOrderId(referenceNumber, orderId);
+        return repo.getTransactionReceiveByRefNumberAndOrderId(referenceNumber, orderId, DateTimeUtil.get2LastPartition(), DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public TransactionReceiveEntity getTransactionReceiveByRefNumber(String referenceNumber) {
-        return repo.getTransactionReceiveByRefNumber(referenceNumber);
+        return repo.getTransactionReceiveByRefNumber(referenceNumber, DateTimeUtil.get2LastPartition(), DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public TransactionReceiveEntity getTransactionReceiveByOrderId(String orderId) {
-        return repo.getTransactionReceiveByOrderId(orderId);
+        return repo.getTransactionReceiveByOrderId(orderId, DateTimeUtil.get2LastPartition(), DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
@@ -120,13 +129,31 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public List<TransactionRelatedDTO> getTransactionsByStatus(int status, int offset, String bankId, String fromDate,
+            String toDate) {
+        return repo.getTransactionsByStatus(status, offset, bankId, DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
     public List<TransactionRelatedDTO> getTransactionsByStatus(int status, int offset, String bankId) {
-        return repo.getTransactionsByStatus(status, offset, bankId);
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.getTransactionsByStatus(status, offset, bankId, time, DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransByCusSyncDTO> getTransactionsByCustomerSync(String bankId, String customerSyncId, int offset) {
-        return repo.getTransactionsByCustomerSync(bankId, customerSyncId, offset);
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.getTransactionsByCustomerSync(bankId, customerSyncId, offset, time, DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransByCusSyncDTO> getTransactionsByCustomerSync(String bankId, String customerSyncId, int offset,
+                                                                 String fromDate, String toDate) {
+        return repo.getTransactionsByCustomerSync(bankId, customerSyncId,
+                offset, DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate),
+                DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     //
@@ -135,7 +162,8 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     /// ADMIN
     @Override
     public List<TransactionReceiveAdminListDTO> getTransByBankAccountAllDate(String value, int offset) {
-        return repo.getTransByBankAccountAllDate(value, offset);
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.getTransByBankAccountAllDate(value, offset, time, DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
@@ -143,34 +171,61 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
             String toDate, long offset) {
         fromDate = fromDate + " 00:00:00";
         toDate = toDate + " 23:59:59";
-        return repo.getTransByBankAccountFromDate(value, fromDate, toDate, offset);
+        return repo.getTransByBankAccountFromDate(value, DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), offset, DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> getAllTransAllDate(long offset) {
-        return repo.getAllTransAllDate(offset);
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.getAllTransAllDate(offset, time, DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> getAllTransFromDate(String fromDate, String toDate, long offset) {
         fromDate = fromDate + " 00:00:00";
         toDate = toDate + " 23:59:59";
-        return repo.getAllTransFromDate(fromDate, toDate, offset);
+        return repo.getAllTransFromDate(DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), offset, DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByFtCode(String value, long offset, String fromDate,
+            String toDate) {
+        return repo.getTransByFtCode(value, offset, DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> getTransByFtCode(String value, long offset) {
-        return repo.getTransByFtCode(value, offset);
+        return repo.getTransByFtCode(value, offset, DateTimeUtil.get3MonthsPreviousAsLongInt(),
+                DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByOrderId(String value, long offset, String fromDate,
+            String toDate) {
+        return repo.getTransByOrderId(value, offset, DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> getTransByOrderId(String value, long offset) {
-        return repo.getTransByOrderId(value, offset);
+        return repo.getTransByOrderId(value, offset, DateTimeUtil.get3MonthsPreviousAsLongInt(),
+                DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByContent(String value, long offset, String fromDate,
+            String toDate) {
+        return repo.getTransByContent(value, offset, DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> getTransByContent(String value, long offset) {
-        return repo.getTransByContent(value, offset);
+        return repo.getTransByContent(value, offset, DateTimeUtil.get3MonthsPreviousAsLongInt(),
+                DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
@@ -201,89 +256,162 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     //
     @Override
     public List<TransactionReceiveAdminListDTO> getTransByFtCodeAndMerchantId(String value, String merchantId,
-            long offset) {
-        return repo.getTransByFtCodeAndMerchantId(value, merchantId, offset);
+            long offset, String fromDate, String toDate) {
+        return repo.getTransByFtCodeAndMerchantId(value, merchantId, offset, DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByFtCodeAndMerchantId(String value, String merchantId, long offset) {
+        return repo.getTransByFtCodeAndMerchantId(value, merchantId, offset, DateTimeUtil.get3MonthsPreviousAsLongInt(),
+                DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> getTransByOrderIdAndMerchantId(String value, String merchantId,
-            long offset) {
-        return repo.getTransByOrderIdAndMerchantId(value, merchantId, offset);
+            long offset, String fromDate, String toDate) {
+        return repo.getTransByOrderIdAndMerchantId(value, merchantId, offset, DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByOrderIdAndMerchantId(String value, String merchantId, long offset) {
+        return repo.getTransByOrderIdAndMerchantId(value, merchantId, offset, DateTimeUtil.get3MonthsPreviousAsLongInt(),
+                DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> getTransByContentAndMerchantId(String value, String merchantId,
-            long offset) {
-        return repo.getTransByContentAndMerchantId(value, merchantId, offset);
+            long offset, String fromDate, String toDate) {
+        return repo.getTransByContentAndMerchantId(value, merchantId, offset, DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByContentAndMerchantId(String value, String merchantId, long offset) {
+        return repo.getTransByContentAndMerchantId(value, merchantId, offset, DateTimeUtil.get3MonthsPreviousAsLongInt(),
+                DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> getAllTransAllDateByMerchantId(String merchantId, long offset) {
-        return repo.getAllTransAllDateByMerchantId(merchantId, offset);
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.getAllTransAllDateByMerchantId(merchantId, offset, time, DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> getAllTransFromDateByMerchantId(String fromDate, String toDate,
             String merchantId, long offset) {
-        return repo.getAllTransFromDateByMerchantId(fromDate, toDate, merchantId, offset);
+        return repo.getAllTransFromDateByMerchantId(DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), merchantId, offset, DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByFtCodeAndUserId(String value, String userId, long offset,
+                                                                          String fromDate, String toDate) {
+        return repo.getTransByFtCodeAndUserId(value, userId, offset, DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> getTransByFtCodeAndUserId(String value, String userId, long offset) {
-        return repo.getTransByFtCodeAndUserId(value, userId, offset);
+        return repo.getTransByFtCodeAndUserId(value, userId, offset, DateTimeUtil.get3MonthsPreviousAsLongInt(),
+                DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByOrderIdAndUserId(String value, String userId, long offset,
+            String fromDate, String toDate) {
+        return repo.getTransByOrderIdAndUserId(value, userId, offset, DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> getTransByOrderIdAndUserId(String value, String userId, long offset) {
-        return repo.getTransByOrderIdAndUserId(value, userId, offset);
+        return repo.getTransByOrderIdAndUserId(value, userId, offset, DateTimeUtil.get3MonthsPreviousAsLongInt(),
+                DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByContentAndUserId(String value, String userId, long offset,
+                                                                           String fromDate, String toDate) {
+        return repo.getTransByContentAndUserId(value, userId, offset, DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> getTransByContentAndUserId(String value, String userId, long offset) {
-        return repo.getTransByContentAndUserId(value, userId, offset);
+        return repo.getTransByContentAndUserId(value, userId, offset, DateTimeUtil.get3MonthsPreviousAsLongInt(),
+                DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> getAllTransAllDateByUserId(String userId, long offset) {
-        return repo.getAllTransAllDateByUserId(userId, offset);
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.getAllTransAllDateByUserId(userId, offset, time, DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> getAllTransFromDateByUserId(String fromDate, String toDate,
             String userId, long offset) {
-        return repo.getAllTransFromDateByUserId(fromDate, toDate, userId, offset);
+        return repo.getAllTransFromDateByUserId(DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), userId, offset, DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> exportTransByBankAccountFromDate(String value, String fromDate,
             String toDate) {
-        return repo.exportTransByBankAccountFromDate(value, fromDate, toDate);
+        return repo.exportTransByBankAccountFromDate(value, DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> exportTransByFtCodeAndMerchantId(String value, String merchantId) {
-        return repo.exportTransByFtCodeAndMerchantId(value, merchantId);
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.exportTransByFtCodeAndMerchantId(value, merchantId, time, DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> exportTransByFtCodeAndMerchantId(String value, String merchantId, String fromDate, String toDate) {
+        return repo.exportTransByFtCodeAndMerchantId(value, merchantId, DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> exportTransByOrderIdAndMerchantId(String value, String merchantId) {
-        return repo.exportTransByOrderIdAndMerchantId(value, merchantId);
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.exportTransByOrderIdAndMerchantId(value, merchantId, time, DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> exportTransByOrderIdAndMerchantId(String value, String merchantId, String fromDate, String toDate) {
+        return repo.exportTransByOrderIdAndMerchantId(value, merchantId, DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> exportTransByContentAndMerchantId(String value, String merchantId) {
-        return repo.exportTransByContentAndMerchantId(value, merchantId);
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.exportTransByContentAndMerchantId(value, merchantId, time, DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> exportTransByContentAndMerchantId(String value, String merchantId, String fromDate, String toDate) {
+        return repo.exportTransByContentAndMerchantId(value, merchantId, DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> exportAllTransAllDateByMerchantId(String merchantId) {
-        return repo.exportAllTransAllDateByMerchantId(merchantId);
+        return repo.exportAllTransAllDateByMerchantId(merchantId, DateTimeUtil.get3MonthsPreviousAsLongInt(),
+                DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> exportAllTransFromDateByMerchantId(String fromDate, String toDate,
             String merchantId) {
-        return repo.exportAllTransFromDateByMerchantId(fromDate, toDate, merchantId);
+        return repo.exportAllTransFromDateByMerchantId(DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), merchantId, DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
@@ -293,12 +421,14 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
 
     @Override
     public List<TransReceiveResponseDTO> getTransByOrderId(String value, String bankAccount) {
-        return repo.getTransByOrderId(value, bankAccount);
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.getTransByOrderId(value, bankAccount, time, DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransReceiveResponseDTO> getTransByReferenceNumber(String value, String bankAccount) {
-        return repo.getTransByReferenceNumber(value, bankAccount);
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.getTransByReferenceNumber(value, bankAccount, time, DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
@@ -333,43 +463,50 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
 
     @Override
     public List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAllDate(String value, long offset) {
-        return repo.getTransByTerminalCodeAllDate(value, offset);
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.getTransByTerminalCodeAllDate(value, offset, time, DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> getTransByTerminalCodeFromDate(String value, String fromDate,
             String toDate, long offset) {
-        return repo.getTransByTerminalCodeFromDate(value, fromDate, toDate, offset);
+        return repo.getTransByTerminalCodeFromDate(value, DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), offset, DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAndMerchantIdAllDate(String value,
             String merchantId, long offset) {
-        return repo.getTransByTerminalCodeAndMerchantIdAllDate(value, merchantId, offset);
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.getTransByTerminalCodeAndMerchantIdAllDate(value, merchantId, offset, time, DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAndMerchantIdFromDate(String fromDate,
             String toDate, String value, String merchantId, long offset) {
-        return repo.getTransByTerminalCodeAndMerchantIdFromDate(fromDate, toDate, value, merchantId, offset);
+        return repo.getTransByTerminalCodeAndMerchantIdFromDate(DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), value, merchantId, offset, DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAndUserIdAllDate(String value, String userId,
             long offset) {
-        return repo.getTransByTerminalCodeAndUserIdAllDate(value, userId, offset);
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.getTransByTerminalCodeAndUserIdAllDate(value, userId, offset, time, DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAndUserIdFromDate(String fromDate, String toDate,
             String value, String userId, long offset) {
-        return repo.getTransByTerminalCodeAndUserIdFromDate(fromDate, toDate, value, userId, offset);
+        return repo.getTransByTerminalCodeAndUserIdFromDate(DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), value, userId, offset, DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionReceiveAdminListDTO> exportTransFromDateByTerminalCodeAndMerchantId(String fromDate,
             String toDate, String value, String merchantId) {
-        return repo.exportTransFromDateByTerminalCodeAndMerchantId(fromDate, toDate, value, merchantId);
+        return repo.exportTransFromDateByTerminalCodeAndMerchantId(DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), value, merchantId, DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
@@ -383,29 +520,67 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public List<TransactionRelatedDTO> getTransactionsByFtCode(String value, int offset, String bankId, String fromDate,
+            String toDate) {
+        return repo.getTransactionsByFtCode(value, offset, bankId, DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
     public List<TransactionRelatedDTO> getTransactionsByFtCode(String value, int offset, String bankId) {
-        return repo.getTransactionsByFtCode(value, offset, bankId);
+        return repo.getTransactionsByFtCode(value, offset, bankId, DateTimeUtil.get3MonthsPreviousAsLongInt(),
+                DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionRelatedDTO> getTransactionsByOrderId(String value, int offset, String bankId, String fromDate,
+            String toDate) {
+        return repo.getTransactionsByOrderId(value, offset, bankId, DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionRelatedDTO> getTransactionsByOrderId(String value, int offset, String bankId) {
-        return repo.getTransactionsByOrderId(value, offset, bankId);
+        return repo.getTransactionsByOrderId(value, offset, bankId,
+                DateTimeUtil.get3MonthsPreviousAsLongInt(), DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionRelatedDTO> getTransactionsByContent(String value, int offset, String bankId, String fromDate,
+            String toDate) {
+        return repo.getTransactionsByContent(value, offset, bankId, DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionRelatedDTO> getTransactionsByContent(String value, int offset, String bankId) {
-        return repo.getTransactionsByContent(value, offset, bankId);
-    }
-
-    @Override
-    public List<TransactionRelatedDTO> getTransactionsByTerminalCode(String value, int offset, String bankId) {
-        return repo.getTransactionsByTerminalCode(value, offset, bankId);
+        return repo.getTransactionsByContent(value, offset, bankId,
+                DateTimeUtil.get3MonthsPreviousAsLongInt(), DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<TransactionRelatedDTO> getTransactionsByTerminalCodeAndDate(String value, int offset, String fromDate,
             String toDate, String bankId) {
-        return repo.getTransactionsByTerminalCodeAndDate(value, offset, fromDate, toDate, bankId);
+        return repo.getTransactionsByTerminalCode(value, offset, DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate), bankId, DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> exportTransByBankAccountAllDate(String value) {
+        return repo.exportTransByBankAccountAllDate(value, DateTimeUtil.get3MonthsPreviousAsLongInt(),
+                DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> exportTransByTerminalCodeAndMerchantIdAllDate(String value, String merchantId) {
+        return repo.exportTransFromDateByTerminalCodeAndMerchantId(DateTimeUtil.get3MonthsPreviousAsLongInt(), value, merchantId,
+                DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionRelatedDTO> getTransactionsByTerminalCodeAllDate(String value, int offset, String bankId) {
+        return repo.getTransactionsByTerminalCode(value, offset, bankId, DateTimeUtil.get3MonthsPreviousAsLongInt(),
+                DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
 }
