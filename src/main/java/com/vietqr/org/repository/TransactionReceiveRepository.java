@@ -53,11 +53,10 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
         void updateTransactionReceiveNote(@Param(value = "note") String note, @Param(value = "id") String id);
 
         @Query(value = "SELECT * FROM transaction_receive " +
-                "WHERE (time + :timeZone) >= :time AND order_id = :orderId AND status = 0 AND amount = :amount", nativeQuery = true)
+                "WHERE time >= :time AND order_id = :orderId AND status = 0 AND amount = :amount", nativeQuery = true)
         TransactionReceiveEntity getTransactionByOrderId(@Param(value = "orderId") String orderId,
                                                          @Param(value = "amount") String amount,
-                                                         @Param(value = "time") long time,
-                                                         @Param(value = "timeZone") long timeZone);
+                                                         @Param(value = "time") long time);
 
         // @Transactional
         // @Modifying
@@ -78,144 +77,132 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
         @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, a.time_paid as timePaid,a.status,a.type,a.trans_type as transType "
                         + "FROM transaction_receive a "
                         + "WHERE a.bank_id=:bankId AND a.status != 2 "
-                        + "AND (a.time + :timeZone) >= :time "
+                        + "AND a.time >= :time "
                         + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
         List<TransactionRelatedDTO> getTransactions(@Param(value = "offset") int offset,
                                                     @Param(value = "bankId") String bankId,
-                                                    @Param(value = "time") long time,
-                                                    @Param(value = "timeZone") long timeZone);
+                                                    @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, a.time_paid as timePaid,a.status,a.type,a.trans_type as transType "
                 + "FROM transaction_receive a "
                 + "WHERE a.bank_id=:bankId AND a.status != 2 "
-                + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
         List<TransactionRelatedDTO> getTransactions(@Param(value = "offset") int offset,
                                                     @Param(value = "bankId") String bankId,
                                                     @Param(value = "fromDate") long fromDate,
-                                                    @Param(value = "toDate") long toDate,
-                                                    @Param(value = "timeZone") long timeZone);
+                                                    @Param(value = "toDate") long toDate);
 
         @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, a.time_paid as timePaid,a.status,a.type,a.trans_type as transType "
                         + "FROM transaction_receive a "
                         + "WHERE a.bank_id= :bankId AND a.status = :status "
-                        + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                        + "AND a.time BETWEEN :fromDate AND :toDate "
                         + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
         List<TransactionRelatedDTO> getTransactionsByStatus(@Param(value = "status") int status,
                                                             @Param(value = "offset") int offset,
                                                             @Param(value = "bankId") String bankId,
                                                             @Param(value = "fromDate") long fromDate,
-                                                            @Param(value = "toDate") long toDate,
-                                                            @Param(value = "timeZone") long timeZone);
+                                                            @Param(value = "toDate") long toDate);
 
         @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, a.time_paid as timePaid,a.status,a.type,a.trans_type as transType "
                 + "FROM transaction_receive a "
                 + "WHERE a.bank_id= :bankId AND a.status = :status "
-                + "AND (a.time + :timeZone) >= :time "
+                + "AND a.time >= :time "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
         List<TransactionRelatedDTO> getTransactionsByStatus(@Param(value = "status") int status,
                                                             @Param(value = "offset") int offset,
                                                             @Param(value = "bankId") String bankId,
-                                                            @Param(value = "time") long time,
-                                                            @Param(value = "timeZone") long timeZone);
+                                                            @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, a.time_paid as timePaid,a.status,a.type,a.trans_type as transType "
                         + "FROM transaction_receive a "
                         + "WHERE a.bank_id= :bankId AND a.reference_number = :value "
-                        + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                        + "AND a.time BETWEEN :fromDate AND :toDate "
                         + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
         List<TransactionRelatedDTO> getTransactionsByFtCode(@Param(value = "value") String value,
                                                             @Param(value = "offset") int offset,
                                                             @Param(value = "bankId") String bankId,
                                                             @Param(value = "fromDate") long fromDate,
-                                                            @Param(value = "toDate") long toDate,
-                                                            @Param(value = "timeZone") long timeZone);
+                                                            @Param(value = "toDate") long toDate);
 
         @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, a.time_paid as timePaid,a.status,a.type,a.trans_type as transType "
                 + "FROM transaction_receive a "
                 + "WHERE a.bank_id= :bankId AND a.reference_number = :value "
-                + "AND (a.time + :timeZone) >= :time "
+                + "AND a.time >= :time "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
         List<TransactionRelatedDTO> getTransactionsByFtCode(@Param(value = "value") String value,
                                                             @Param(value = "offset") int offset,
                                                             @Param(value = "bankId") String bankId,
-                                                            @Param(value = "time") long time,
-                                                            @Param(value = "timeZone") long timeZone);
+                                                            @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, a.time_paid as timePaid,a.status,a.type,a.trans_type as transType "
                         + "FROM transaction_receive a "
                         + "WHERE a.bank_id= :bankId AND a.order_id = :value "
-                        + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                        + "AND a.time BETWEEN :fromDate AND :toDate "
                         + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
         List<TransactionRelatedDTO> getTransactionsByOrderId(
                         @Param(value = "value") String value,
                         @Param(value = "offset") int offset,
                         @Param(value = "bankId") String bankId,
                         @Param(value = "fromDate") long fromDate,
-                        @Param(value = "toDate") long toDate,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "toDate") long toDate);
 
         @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, a.time_paid as timePaid,a.status,a.type,a.trans_type as transType "
                 + "FROM transaction_receive a "
                 + "WHERE a.bank_id= :bankId AND a.order_id = :value "
-                + "AND (a.time + :timeZone) >= :time "
+                + "AND a.time >= :time "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
         List<TransactionRelatedDTO> getTransactionsByOrderId(
                 @Param(value = "value") String value,
                 @Param(value = "offset") int offset,
                 @Param(value = "bankId") String bankId,
-                @Param(value = "time") long time,
-                @Param(value = "timeZone") long timeZone);
+                @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, a.time_paid as timePaid,a.status,a.type,a.trans_type as transType "
                         + "FROM transaction_receive a "
                         + "WHERE a.bank_id= :bankId AND a.content LIKE %:value% "
-                        + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                        + "AND a.time BETWEEN :fromDate AND :toDate "
                         + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
         List<TransactionRelatedDTO> getTransactionsByContent(
                         @Param(value = "value") String value,
                         @Param(value = "offset") int offset,
                         @Param(value = "bankId") String bankId,
                         @Param(value = "fromDate") long fromDate,
-                        @Param(value = "toDate") long toDate,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "toDate") long toDate);
 
         @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, a.time_paid as timePaid,a.status,a.type,a.trans_type as transType "
                 + "FROM transaction_receive a "
                 + "WHERE a.bank_id= :bankId AND a.content LIKE %:value% "
-                + "AND (a.time + :timeZone) >= :time "
+                + "AND a.time >= :time "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
         List<TransactionRelatedDTO> getTransactionsByContent(
                 @Param(value = "value") String value,
                 @Param(value = "offset") int offset,
                 @Param(value = "bankId") String bankId,
-                @Param(value = "time") long time,
-                @Param(value = "timeZone") long timeZone);
+                @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, a.time_paid as timePaid,a.status,a.type,a.trans_type as transType "
                         + "FROM transaction_receive a "
                         + "WHERE a.bank_id= :bankId AND a.terminal_code LIKE %:value% "
-                        + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                        + "AND a.time BETWEEN :fromDate AND :toDate "
                         + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
         List<TransactionRelatedDTO> getTransactionsByTerminalCode(
                         @Param(value = "value") String value,
                         @Param(value = "offset") int offset,
                         @Param(value = "fromDate") long fromDate,
                         @Param(value = "toDate") long toDate,
-                        @Param(value = "bankId") String bankId,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "bankId") String bankId);
 
         @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, a.time_paid as timePaid,a.status,a.type,a.trans_type as transType "
                 + "FROM transaction_receive a "
                 + "WHERE a.bank_id= :bankId AND a.terminal_code LIKE %:value% "
-                + "AND (a.time + :timeZone) >= :time "
+                + "AND a.time >= :time "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
         List<TransactionRelatedDTO> getTransactionsByTerminalCode(
                 @Param(value = "value") String value,
                 @Param(value = "offset") int offset,
                 @Param(value = "bankId") String bankId,
-                @Param(value = "time") long time,
-                @Param(value = "timeZone") long timeZone);
+                @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id, a.amount, a.bank_id as bankId, b.bank_account as bankAccount, a.content, a.ref_id as refId, a.status, a.time, a.time_paid as timePaid, a.type, a.trace_id as traceId, a.trans_type as transType, b.bank_account_name as bankAccountName, c.bank_code as bankCode, c.bank_name as bankName, c.img_id as imgId, a.reference_number as referenceNumber, "
                         + "a.terminal_code as terminalCode, a.note, a.order_id as orderId, c.bank_short_name as bankShortName "
@@ -232,15 +219,14 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "JOIN account_bank_receive abr ON tr.bank_id = abr.id "
                         + "JOIN bank_type bt ON abr.bank_type_id = bt.id "
                         + "WHERE tr.trace_id = :id "
-                        + "AND (tr.time + :timeZone) >= :time "
+                        + "AND tr.time >= :time "
                         + "AND tr.amount = :amount "
                         + "AND tr.status = 0 "
                         + "AND tr.trans_type = :transType "
                         + "AND bt.status = 1", nativeQuery = true)
         TransactionReceiveEntity getTransactionByTraceId(@Param(value = "id") String id,
                         @Param(value = "amount") Long amount, @Param(value = "transType") String transType,
-                                                         @Param(value = "time") long time,
-                                                         @Param(value = "timeZone") long timeZone);
+                                                         @Param(value = "time") long time);
 
 //        @Query(value = "SELECT * "
 //                        + "FROM transaction_receive "
@@ -248,34 +234,30 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
 //                        + "ORDER BY time DESC LIMIT 5", nativeQuery = true)
 //        List<TransactionReceiveEntity> getRelatedTransactionByBankId(@Param(value = "bankId") String bankId);
 
-        @Query(value = "SELECT * FROM transaction_receive WHERE (time + :timeZone) >= :time AND reference_number = :referenceNumber AND trans_type = 'C'", nativeQuery = true)
+        @Query(value = "SELECT * FROM transaction_receive WHERE time >= :time AND reference_number = :referenceNumber AND trans_type = 'C'", nativeQuery = true)
         TransactionReceiveEntity findTransactionReceiveByFtCode(
                         @Param(value = "referenceNumber") String referenceNumber,
-                        @Param(value = "time") long time,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "time") long time);
 
-        @Query(value = "SELECT * FROM transaction_receive WHERE (time + :timeZone) >= :time AND reference_number = :referenceNumber AND order_id = :orderId", nativeQuery = true)
+        @Query(value = "SELECT * FROM transaction_receive WHERE time >= :time AND reference_number = :referenceNumber AND order_id = :orderId", nativeQuery = true)
         TransactionReceiveEntity getTransactionReceiveByRefNumberAndOrderId(
                         @Param(value = "referenceNumber") String referenceNumber,
                         @Param(value = "orderId") String orderId,
-                        @Param(value = "time") long time,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "time") long time);
 
-        @Query(value = "SELECT a.* FROM transaction_receive a WHERE (a.time + :timeZone) >= :time AND a.reference_number = :referenceNumber", nativeQuery = true)
+        @Query(value = "SELECT a.* FROM transaction_receive a WHERE a.time >= :time AND a.reference_number = :referenceNumber", nativeQuery = true)
         TransactionReceiveEntity getTransactionReceiveByRefNumber(
                 @Param(value = "referenceNumber") String referenceNumber,
-                @Param(value = "time") long time,
-                @Param(value = "timeZone") long timeZone);
+                @Param(value = "time") long time);
 
 //        TransactionReceiveEntity getTransactionReceiveByRefNumber(
 //                        @Param(value = "referenceNumber") String referenceNumber,
 //                        @Param(value = "partitions") List<String> partitions);
 
-        @Query(value = "SELECT * FROM transaction_receive WHERE order_id = :orderId AND (time + :timeZone) >= :time ", nativeQuery = true)
+        @Query(value = "SELECT * FROM transaction_receive WHERE order_id = :orderId AND time >= :time ", nativeQuery = true)
         TransactionReceiveEntity getTransactionReceiveByOrderId(
                         @Param(value = "orderId") String orderId,
-                        @Param(value = "time") long time,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "time") long time);
 
         @Query(value = "SELECT a.amount, a.bank_account as bankAccount, c.bank_name as bankName, a.time, a.content, a.reference_number as referenceNumber, a.trans_type as transType, a.status, "
                         + "a.terminal_code as terminalCode, a.note "
@@ -329,14 +311,13 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "INNER JOIN account_customer_bank b  "
                         + "ON a.bank_id = b.bank_id  "
                         + "WHERE a.bank_id = :bankId AND b.customer_sync_id = :customerSyncId "
-                        + "AND (a.time + :timeZone) >= :time "
+                        + "AND a.time >= :time "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransByCusSyncDTO> getTransactionsByCustomerSync(@Param(value = "bankId") String bankId,
                         @Param(value = "customerSyncId") String customerSyncId,
                         @Param(value = "offset") int offset,
-                        @Param(value = "time") long time,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id, a.amount, a.bank_account as bankAccount, a.bank_id as bankId, a.content, a.order_id as orderId, "
                 + "a.ref_id as referenceId, a.reference_number as referenceNumber, a.sign, a.status, a.time, a.time_paid as timePaid, a.trace_id as traceId, a.trans_type as transType,  "
@@ -345,15 +326,14 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "INNER JOIN account_customer_bank b  "
                 + "ON a.bank_id = b.bank_id  "
                 + "WHERE a.bank_id = :bankId AND b.customer_sync_id = :customerSyncId "
-                + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
                 + "ORDER BY a.time DESC "
                 + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransByCusSyncDTO> getTransactionsByCustomerSync(@Param(value = "bankId") String bankId,
                                                               @Param(value = "customerSyncId") String customerSyncId,
                                                               @Param(value = "offset") int offset,
                                                               @Param(value = "fromDate") long fromDate,
-                                                                @Param(value = "toDate") long toDate,
-                                                              @Param(value = "timeZone") long timeZone);
+                                                                @Param(value = "toDate") long toDate);
 
         //
         //
@@ -370,14 +350,13 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "LEFT JOIN bank_type c "
                         + "ON b.bank_type_id = c.id "
                         + "WHERE a.bank_account = :value "
-                        + "AND (a.time + :timeZone) >= :time "
+                        + "AND a.time >= :time "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByBankAccountAllDate(
                         @Param(value = "value") String value,
                         @Param(value = "offset") long offset,
-                        @Param(value = "time") long time,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                         + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -389,15 +368,14 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "LEFT JOIN bank_type c "
                         + "ON b.bank_type_id = c.id "
                         + "WHERE a.bank_account = :value "
-                        + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                        + "AND a.time BETWEEN :fromDate AND :toDate "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByBankAccountFromDate(
                         @Param(value = "value") String value,
                         @Param(value = "fromDate") long fromDate,
                         @Param(value = "toDate") long toDate,
-                        @Param(value = "offset") long offset,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "offset") long offset);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                         + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -409,14 +387,13 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "LEFT JOIN bank_type c "
                         + "ON b.bank_type_id = c.id "
                         + "WHERE a.terminal_code = :value "
-                        + "AND (a.time + :timeZone) >= :time "
+                        + "AND a.time >= :time "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAllDate(
                         @Param(value = "value") String value,
                         @Param(value = "offset") long offset,
-                        @Param(value = "time") long time,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                         + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -428,15 +405,14 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "LEFT JOIN bank_type c "
                         + "ON b.bank_type_id = c.id "
                         + "WHERE a.terminal_code = :value "
-                        + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                        + "AND a.time BETWEEN :fromDate AND :toDate "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByTerminalCodeFromDate(
                         @Param(value = "value") String value,
                         @Param(value = "fromDate") long fromDate,
                         @Param(value = "toDate") long toDate,
-                        @Param(value = "offset") long offset,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "offset") long offset);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                         + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -447,13 +423,12 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON a.bank_id = b.id "
                         + "LEFT JOIN bank_type c "
                         + "ON b.bank_type_id = c.id "
-                        + "WHERE (a.time + :timeZone) >= :time "
+                        + "WHERE a.time >= :time "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getAllTransAllDate(
                         @Param(value = "offset") long offset,
-                        @Param(value = "time") long time,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                         + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -464,14 +439,13 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON a.bank_id = b.id "
                         + "LEFT JOIN bank_type c "
                         + "ON b.bank_type_id = c.id "
-                        + "WHERE (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                        + "WHERE a.time BETWEEN :fromDate AND :toDate "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getAllTransFromDate(
                         @Param(value = "fromDate") long fromDate,
                         @Param(value = "toDate") long toDate,
-                        @Param(value = "offset") long offset,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "offset") long offset);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                         + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -483,15 +457,14 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "LEFT JOIN bank_type c "
                         + "ON b.bank_type_id = c.id "
                         + "WHERE a.reference_number LIKE %:value% "
-                        + "AND (a.time + :timeZone) between :fromDate AND :toDate "
+                        + "AND a.time between :fromDate AND :toDate "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByFtCode(
                         @Param(value = "value") String value,
                         @Param(value = "offset") long offset,
                         @Param(value = "fromDate") long fromDate,
-                        @Param(value = "toDate") long toDate,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "toDate") long toDate);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                 + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -503,14 +476,13 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "LEFT JOIN bank_type c "
                 + "ON b.bank_type_id = c.id "
                 + "WHERE a.reference_number LIKE %:value% "
-                + "AND (a.time + :timeZone) >= :time "
+                + "AND a.time >= :time "
                 + "ORDER BY a.time DESC "
                 + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByFtCode(
                 @Param(value = "value") String value,
                 @Param(value = "offset") long offset,
-                @Param(value = "time") long time,
-                @Param(value = "timeZone") long timeZone);
+                @Param(value = "time") long time);
 
         // check
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
@@ -523,15 +495,14 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "LEFT JOIN bank_type c "
                         + "ON b.bank_type_id = c.id "
                         + "WHERE a.order_id LIKE %:value% "
-                        + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                        + "AND a.time BETWEEN :fromDate AND :toDate "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByOrderId(
                         @Param(value = "value") String value,
                         @Param(value = "offset") long offset,
                         @Param(value = "fromDate") long fromDate,
-                        @Param(value = "toDate") long toDate,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "toDate") long toDate);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                 + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -543,14 +514,13 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "LEFT JOIN bank_type c "
                 + "ON b.bank_type_id = c.id "
                 + "WHERE a.order_id LIKE %:value% "
-                + "AND (a.time + :timeZone) >= :time "
+                + "AND a.time >= :time "
                 + "ORDER BY a.time DESC "
                 + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByOrderId(
                 @Param(value = "value") String value,
                 @Param(value = "offset") long offset,
-                @Param(value = "time") long time,
-                @Param(value = "timeZone") long timeZone);
+                @Param(value = "time") long time);
 
         // check
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
@@ -563,15 +533,14 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "LEFT JOIN bank_type c "
                         + "ON b.bank_type_id = c.id "
                         + "WHERE a.content LIKE %:value% "
-                        + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                        + "AND a.time BETWEEN :fromDate AND :toDate "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByContent(
                         @Param(value = "value") String value,
                         @Param(value = "offset") long offset,
                         @Param(value = "fromDate") long fromDate,
-                        @Param(value = "toDate") long toDate,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "toDate") long toDate);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                 + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -583,14 +552,13 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "LEFT JOIN bank_type c "
                 + "ON b.bank_type_id = c.id "
                 + "WHERE a.content LIKE %:value% "
-                + "AND (a.time + :timeZone) >= :time "
+                + "AND a.time >= :time "
                 + "ORDER BY a.time DESC "
                 + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByContent(
                 @Param(value = "value") String value,
                 @Param(value = "offset") long offset,
-                @Param(value = "time") long time,
-                @Param(value = "timeZone") long timeZone);
+                @Param(value = "time") long time);
 
         //////// MERCHANT WEB VIETQR
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
@@ -606,7 +574,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON b.id = d.bank_id  "
                         + "WHERE a.reference_number LIKE %:value% "
                         + "AND d.customer_sync_id = :merchantId "
-                        + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                        + "AND a.time BETWEEN :fromDate AND :toDate "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByFtCodeAndMerchantId(
@@ -614,8 +582,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         @Param(value = "merchantId") String merchantId,
                         @Param(value = "offset") long offset,
                         @Param(value = "fromDate") long fromDate,
-                        @Param(value = "toDate") long toDate,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "toDate") long toDate);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                 + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -630,15 +597,14 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "ON b.id = d.bank_id  "
                 + "WHERE a.reference_number LIKE %:value% "
                 + "AND d.customer_sync_id = :merchantId "
-                + "AND (a.time + :timeZone) >= :time "
+                + "AND a.time >= :time "
                 + "ORDER BY a.time DESC "
                 + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByFtCodeAndMerchantId(
                 @Param(value = "value") String value,
                 @Param(value = "merchantId") String merchantId,
                 @Param(value = "offset") long offset,
-                @Param(value = "time") long time,
-                @Param(value = "timeZone") long timeZone);
+                @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                         + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -653,7 +619,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON b.id = d.bank_id  "
                         + "WHERE a.order_id LIKE %:value% "
                         + "AND d.customer_sync_id = :merchantId "
-                        + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                        + "AND a.time BETWEEN :fromDate AND :toDate "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByOrderIdAndMerchantId(
@@ -661,8 +627,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         @Param(value = "merchantId") String merchantId,
                         @Param(value = "offset") long offset,
                         @Param(value = "fromDate") long fromDate,
-                        @Param(value = "toDate") long toDate,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "toDate") long toDate);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                 + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -677,15 +642,14 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "ON b.id = d.bank_id  "
                 + "WHERE a.order_id LIKE %:value% "
                 + "AND d.customer_sync_id = :merchantId "
-                + "AND (a.time + :timeZone) >= :time "
+                + "AND a.time >= :time "
                 + "ORDER BY a.time DESC "
                 + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByOrderIdAndMerchantId(
                 @Param(value = "value") String value,
                 @Param(value = "merchantId") String merchantId,
                 @Param(value = "offset") long offset,
-                @Param(value = "time") long time,
-                @Param(value = "timeZone") long timeZone);
+                @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                         + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -700,7 +664,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON b.id = d.bank_id  "
                         + "WHERE a.content LIKE %:value% "
                         + "AND d.customer_sync_id = :merchantId "
-                        + "AND (a.time + :timeZone) BETWEEN :fromDate and :toDate "
+                        + "AND a.time BETWEEN :fromDate and :toDate "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByContentAndMerchantId(
@@ -708,8 +672,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         @Param(value = "merchantId") String merchantId,
                         @Param(value = "offset") long offset,
                         @Param(value = "fromDate") long fromDate,
-                        @Param(value = "toDate") long toDate,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "toDate") long toDate);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                 + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -724,15 +687,14 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "ON b.id = d.bank_id  "
                 + "WHERE a.content LIKE %:value% "
                 + "AND d.customer_sync_id = :merchantId "
-                + "AND (a.time + :timeZone) >= :time "
+                + "AND a.time >= :time "
                 + "ORDER BY a.time DESC "
                 + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByContentAndMerchantId(
                 @Param(value = "value") String value,
                 @Param(value = "merchantId") String merchantId,
                 @Param(value = "offset") long offset,
-                @Param(value = "time") long time,
-                @Param(value = "timeZone") long timeZone);
+                @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                         + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -747,15 +709,14 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON b.id = d.bank_id  "
                         + "WHERE a.terminal_code = :value "
                         + "AND d.customer_sync_id = :merchantId "
-                        + "AND (a.time + :timeZone) >= :time "
+                        + "AND a.time >= :time "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAndMerchantIdAllDate(
                         @Param(value = "value") String value,
                         @Param(value = "merchantId") String merchantId,
                         @Param(value = "offset") long offset,
-                        @Param(value = "time") long time,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                         + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -768,7 +729,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON b.bank_type_id = c.id "
                         + "INNER JOIN account_customer_bank d "
                         + "ON b.id = d.bank_id  "
-                        + "WHERE (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                        + "WHERE a.time BETWEEN :fromDate AND :toDate "
                         + "AND a.terminal_code = :value "
                         + "AND d.customer_sync_id = :merchantId "
                         + "ORDER BY a.time DESC "
@@ -778,8 +739,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         @Param(value = "toDate") long toDate,
                         @Param(value = "value") String value,
                         @Param(value = "merchantId") String merchantId,
-                        @Param(value = "offset") long offset,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "offset") long offset);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                         + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -793,14 +753,13 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "INNER JOIN account_customer_bank d "
                         + "ON b.id = d.bank_id  "
                         + "WHERE d.customer_sync_id = :merchantId "
-                        + "AND (a.time + :timeZone) >= :time "
+                        + "AND a.time >= :time "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getAllTransAllDateByMerchantId(
                         @Param(value = "merchantId") String merchantId,
                         @Param(value = "offset") long offset,
-                        @Param(value = "time") long time,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                         + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -813,7 +772,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON b.bank_type_id = c.id "
                         + "INNER JOIN account_customer_bank d "
                         + "ON a.bank_id = d.bank_id "
-                        + "WHERE (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                        + "WHERE a.time BETWEEN :fromDate AND :toDate "
                         + "AND d.customer_sync_id = :merchantId "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
@@ -821,8 +780,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         @Param(value = "fromDate") long fromDate,
                         @Param(value = "toDate") long toDate,
                         @Param(value = "merchantId") String merchantId,
-                        @Param(value = "offset") long offset,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "offset") long offset);
         ///////////
 
         //////// BANK ACCOUNT WEB VIETQR
@@ -837,7 +795,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON b.bank_type_id = c.id "
                         + "WHERE a.reference_number LIKE %:value% "
                         + "AND a.user_id = :userId "
-                        + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                        + "AND a.time BETWEEN :fromDate AND :toDate "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByFtCodeAndUserId(
@@ -845,8 +803,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         @Param(value = "userId") String userId,
                         @Param(value = "offset") long offset,
                         @Param(value = "fromDate") long fromDate,
-                        @Param(value = "toDate") long toDate,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "toDate") long toDate);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                 + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -859,15 +816,14 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "ON b.bank_type_id = c.id "
                 + "WHERE a.reference_number LIKE %:value% "
                 + "AND a.user_id = :userId "
-                + "AND (a.time + :timeZone) >= :time "
+                + "AND a.time >= :time "
                 + "ORDER BY a.time DESC "
                 + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByFtCodeAndUserId(
                 @Param(value = "value") String value,
                 @Param(value = "userId") String userId,
                 @Param(value = "offset") long offset,
-                @Param(value = "time") long time,
-                @Param(value = "timeZone") long timeZone);
+                @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                         + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -880,7 +836,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON b.bank_type_id = c.id "
                         + "WHERE a.order_id LIKE %:value% "
                         + "AND a.user_id = :userId "
-                        + "AND (a.time + :timeZone) BETWEEN :fromDate and :toDate "
+                        + "AND a.time BETWEEN :fromDate and :toDate "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByOrderIdAndUserId(
@@ -888,8 +844,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         @Param(value = "userId") String userId,
                         @Param(value = "offset") long offset,
                         @Param(value = "fromDate") long fromDate,
-                        @Param(value = "toDate") long toDate,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "toDate") long toDate);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                 + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -902,15 +857,14 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "ON b.bank_type_id = c.id "
                 + "WHERE a.order_id LIKE %:value% "
                 + "AND a.user_id = :userId "
-                + "AND (a.time + :timeZone) >= :time "
+                + "AND a.time >= :time "
                 + "ORDER BY a.time DESC "
                 + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByOrderIdAndUserId(
                 @Param(value = "value") String value,
                 @Param(value = "userId") String userId,
                 @Param(value = "offset") long offset,
-                @Param(value = "time") long time,
-                @Param(value = "timeZone") long timeZone);
+                @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                         + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -923,7 +877,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON b.bank_type_id = c.id "
                         + "WHERE a.content LIKE %:value% "
                         + "AND a.user_id = :userId "
-                        + "AND (a.time + :timeZone) between :fromDate and :toDate "
+                        + "AND a.time between :fromDate and :toDate "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByContentAndUserId(
@@ -931,8 +885,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         @Param(value = "userId") String userId,
                         @Param(value = "offset") long offset,
                         @Param(value = "fromDate") long fromDate,
-                        @Param(value = "toDate") long toDate,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "toDate") long toDate);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                 + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -945,15 +898,14 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "ON b.bank_type_id = c.id "
                 + "WHERE a.content LIKE %:value% "
                 + "AND a.user_id = :userId "
-                + "AND (a.time + :timeZone) >= :time "
+                + "AND a.time >= :time "
                 + "ORDER BY a.time DESC "
                 + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByContentAndUserId(
                 @Param(value = "value") String value,
                 @Param(value = "userId") String userId,
                 @Param(value = "offset") long offset,
-                @Param(value = "time") long time,
-                @Param(value = "timeZone") long timeZone);
+                @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                         + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -966,15 +918,14 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON b.bank_type_id = c.id "
                         + "WHERE a.terminal_code = :value "
                         + "AND a.user_id = :userId "
-                        + "AND (a.time + :timeZone) >= :time "
+                        + "AND a.time >= :time "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAndUserIdAllDate(
                         @Param(value = "value") String value,
                         @Param(value = "userId") String userId,
                         @Param(value = "offset") long offset,
-                        @Param(value = "time") long time,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                         + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -985,7 +936,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON a.bank_id = b.id "
                         + "LEFT JOIN bank_type c "
                         + "ON b.bank_type_id = c.id "
-                        + "WHERE (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                        + "WHERE a.time BETWEEN :fromDate AND :toDate "
                         + "AND a.terminal_code = :value "
                         + "AND a.user_id = :userId "
                         + "ORDER BY a.time DESC "
@@ -995,8 +946,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         @Param(value = "toDate") long toDate,
                         @Param(value = "value") String value,
                         @Param(value = "userId") String userId,
-                        @Param(value = "offset") long offset,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "offset") long offset);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                         + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -1008,14 +958,13 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "LEFT JOIN bank_type c "
                         + "ON b.bank_type_id = c.id "
                         + "WHERE a.user_id = :userId "
-                        + "AND (a.time + :timeZone) >= :time "
+                        + "AND a.time >= :time "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getAllTransAllDateByUserId(
                         @Param(value = "userId") String userId,
                         @Param(value = "offset") long offset,
-                        @Param(value = "time") long time,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                         + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -1026,7 +975,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON a.bank_id = b.id "
                         + "LEFT JOIN bank_type c "
                         + "ON b.bank_type_id = c.id "
-                        + "WHERE (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                        + "WHERE a.time BETWEEN :fromDate AND :toDate "
                         + "AND a.user_id = :userId "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
@@ -1034,8 +983,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         @Param(value = "fromDate") long fromDate,
                         @Param(value = "toDate") long toDate,
                         @Param(value = "userId") String userId,
-                        @Param(value = "offset") long offset,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "offset") long offset);
         ///////////
 
         /////// FOR EXPORT MERCHANT
@@ -1050,13 +998,12 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "LEFT JOIN bank_type c "
                         + "ON b.bank_type_id = c.id "
                         + "WHERE a.bank_account = :value "
-                        + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                        + "AND a.time BETWEEN :fromDate AND :toDate "
                         + "ORDER BY a.time DESC ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> exportTransByBankAccountFromDate(
                         @Param(value = "value") String value,
                         @Param(value = "fromDate") long fromDate,
-                        @Param(value = "toDate") long toDate,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "toDate") long toDate);
 
         // check export
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
@@ -1071,14 +1018,13 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "LEFT JOIN account_customer_bank d "
                         + "ON b.id = d.bank_id  "
                         + "WHERE a.reference_number LIKE %:value% "
-                        + "AND (a.time + :timeZone) >= :time "
+                        + "AND a.time >= :time "
                         + "AND d.customer_sync_id = :merchantId "
                         + "ORDER BY a.time DESC ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> exportTransByFtCodeAndMerchantId(
                         @Param(value = "value") String value,
                         @Param(value = "merchantId") String merchantId,
-                        @Param(value = "time") long time,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                 + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -1092,15 +1038,14 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "LEFT JOIN account_customer_bank d "
                 + "ON b.id = d.bank_id  "
                 + "WHERE a.reference_number LIKE %:value% "
-                + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
                 + "AND d.customer_sync_id = :merchantId "
                 + "ORDER BY a.time DESC ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> exportTransByFtCodeAndMerchantId(
                 @Param(value = "value") String value,
                 @Param(value = "merchantId") String merchantId,
                 @Param(value = "fromDate") long fromDate,
-                @Param(value = "toDate") long toDate,
-                @Param(value = "timeZone") long timeZone);
+                @Param(value = "toDate") long toDate);
 
         // check export
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
@@ -1116,13 +1061,12 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON b.id = d.bank_id  "
                         + "WHERE a.order_id LIKE %:value% "
                         + "AND d.customer_sync_id = :merchantId "
-                        + "AND (a.time + :timeZone) >= :time "
+                        + "AND a.time >= :time "
                         + "ORDER BY a.time DESC ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> exportTransByOrderIdAndMerchantId(
                         @Param(value = "value") String value,
                         @Param(value = "merchantId") String merchantId,
-                        @Param(value = "time") long time,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                 + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -1137,14 +1081,13 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "ON b.id = d.bank_id  "
                 + "WHERE a.order_id LIKE %:value% "
                 + "AND d.customer_sync_id = :merchantId "
-                + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
                 + "ORDER BY a.time DESC ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> exportTransByOrderIdAndMerchantId(
                 @Param(value = "value") String value,
                 @Param(value = "merchantId") String merchantId,
                 @Param(value = "fromDate") long fromDate,
-                @Param(value = "toDate") long toDate,
-                @Param(value = "timeZone") long timeZone);
+                @Param(value = "toDate") long toDate);
 
         // check export
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
@@ -1160,13 +1103,12 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON b.id = d.bank_id  "
                         + "WHERE a.content LIKE %:value% "
                         + "AND d.customer_sync_id = :merchantId "
-                        + "AND (a.time + :timeZone) >= :time "
+                        + "AND a.time >= :time "
                         + "ORDER BY a.time DESC ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> exportTransByContentAndMerchantId(
                         @Param(value = "value") String value,
                         @Param(value = "merchantId") String merchantId,
-                        @Param(value = "time") long time,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                 + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -1181,14 +1123,13 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "ON b.id = d.bank_id  "
                 + "WHERE a.content LIKE %:value% "
                 + "AND d.customer_sync_id = :merchantId "
-                + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
                 + "ORDER BY a.time DESC ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> exportTransByContentAndMerchantId(
                 @Param(value = "value") String value,
                 @Param(value = "merchantId") String merchantId,
                 @Param(value = "fromDate") long fromDate,
-                @Param(value = "toDate") long toDate,
-                @Param(value = "timeZone") long timeZone);
+                @Param(value = "toDate") long toDate);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                         + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -1202,12 +1143,11 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "LEFT JOIN account_customer_bank d "
                         + "ON b.id = d.bank_id  "
                         + "AND d.customer_sync_id = :merchantId "
-                        + "WHERE (a.time + :timeZone) >= :time "
+                        + "WHERE a.time >= :time "
                         + "ORDER BY a.time DESC ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> exportAllTransAllDateByMerchantId(
                         @Param(value = "merchantId") String merchantId,
-                        @Param(value = "time") long time,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "time") long time);
 
         // check export
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
@@ -1221,14 +1161,13 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON b.bank_type_id = c.id "
                         + "LEFT JOIN account_customer_bank d "
                         + "ON b.id = d.bank_id  "
-                        + "WHERE (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                        + "WHERE a.time BETWEEN :fromDate AND :toDate "
                         + "AND d.customer_sync_id = :merchantId "
                         + "ORDER BY a.time DESC ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> exportAllTransFromDateByMerchantId(
                         @Param(value = "fromDate") long fromDate,
                         @Param(value = "toDate") long toDate,
-                        @Param(value = "merchantId") String merchantId,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "merchantId") String merchantId);
 
         // check export
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
@@ -1242,7 +1181,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON b.bank_type_id = c.id "
                         + "LEFT JOIN account_customer_bank d "
                         + "ON b.id = d.bank_id  "
-                        + "WHERE (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                        + "WHERE a.time BETWEEN :fromDate AND :toDate "
                         + "AND a.terminal_code = :value "
                         + "AND d.customer_sync_id = :merchantId "
                         + "ORDER BY a.time DESC ", nativeQuery = true)
@@ -1250,8 +1189,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         @Param(value = "fromDate") long fromDate,
                         @Param(value = "toDate") long toDate,
                         @Param(value = "value") String value,
-                        @Param(value = "merchantId") String merchantId,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "merchantId") String merchantId);
 
         //
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
@@ -1341,14 +1279,13 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "LEFT JOIN account_bank_receive b "
                         + "ON a.bank_id = b.id "
                         + "WHERE a.order_id = :value "
-                        + "AND (a.time + :timeZone) >= :time "
+                        + "AND a.time >= :time "
                         + "AND a.bank_account = :bankAccount "
                         + "AND b.is_authenticated = true ", nativeQuery = true)
         List<TransReceiveResponseDTO> getTransByOrderId(
                         @Param(value = "value") String value,
                         @Param(value = "bankAccount") String bankAccount,
-                        @Param(value = "time") long time,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "time") long time);
 
         @Query(value = "SELECT a.reference_number as referenceNumber, a.order_id as orderId, a.amount, a.content, "
                 + "a.trans_type as transType, a.status, a.type, a.time as timeCreated, a.time_paid as timePaid "
@@ -1356,15 +1293,14 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "LEFT JOIN account_bank_receive b "
                 + "ON a.bank_id = b.id "
                 + "WHERE a.order_id = :value "
-                + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
                 + "AND a.bank_account = :bankAccount "
                 + "AND b.is_authenticated = true ", nativeQuery = true)
         List<TransReceiveResponseDTO> getTransByOrderId(
                 @Param(value = "value") String value,
                 @Param(value = "bankAccount") String bankAccount,
                 @Param(value = "fromDate") long fromDate,
-                @Param(value = "toDate") long toDate,
-                @Param(value = "timeZone") long timeZone);
+                @Param(value = "toDate") long toDate);
 
         // check
         @Query(value = "SELECT a.reference_number as referenceNumber, a.order_id as orderId, a.amount, a.content, "
@@ -1374,13 +1310,12 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON a.bank_id = b.id "
                         + "WHERE a.reference_number = :value "
                         + "AND a.bank_account = :bankAccount "
-                        + "AND (a.time + :timeZone) >= :time "
+                        + "AND a.time >= :time "
                         + "AND b.is_authenticated = true ", nativeQuery = true)
         List<TransReceiveResponseDTO> getTransByReferenceNumber(
                         @Param(value = "value") String value,
                         @Param(value = "bankAccount") String bankAccount,
-                        @Param(value = "time") long time,
-                        @Param(value = "timeZone") long timeZone);
+                        @Param(value = "time") long time);
 
         @Query(value = "SELECT a.reference_number as referenceNumber, a.order_id as orderId, a.amount, a.content, "
                 + "a.trans_type as transType, a.status, a.type, a.time as timeCreated, a.time_paid as timePaid "
@@ -1389,14 +1324,13 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "ON a.bank_id = b.id "
                 + "WHERE a.reference_number = :value "
                 + "AND a.bank_account = :bankAccount "
-                + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
                 + "AND b.is_authenticated = true ", nativeQuery = true)
         List<TransReceiveResponseDTO> getTransByReferenceNumber(
                 @Param(value = "value") String value,
                 @Param(value = "bankAccount") String bankAccount,
                 @Param(value = "fromDate") long fromDate,
-                @Param(value = "toDate") long toDate,
-                @Param(value = "timeZone") long timeZone);
+                @Param(value = "toDate") long toDate);
 
         // TransStatisticMerchantDTO
         // * sort by year, list by month, by customer_sync_id */
@@ -1494,12 +1428,11 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "LEFT JOIN bank_type c "
                 + "ON b.bank_type_id = c.id "
                 + "WHERE a.bank_account = :value "
-                + "AND (a.time + :timeZone) >= :time "
+                + "AND a.time >= :time "
                 + "ORDER BY a.time DESC ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> exportTransByBankAccountAllDate(
                 @Param(value = "value") String value,
-                @Param(value = "time") long time,
-                @Param(value = "timeZone") long timeZone);
+                @Param(value = "time") long time);
 
         @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                 + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
@@ -1512,13 +1445,12 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "ON b.bank_type_id = c.id "
                 + "LEFT JOIN account_customer_bank d "
                 + "ON b.id = d.bank_id  "
-                + "WHERE (a.time + :timeZone) >= :time "
+                + "WHERE a.time >= :time "
                 + "AND a.terminal_code = :value "
                 + "AND d.customer_sync_id = :merchantId "
                 + "ORDER BY a.time DESC ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> exportTransFromDateByTerminalCodeAndMerchantId(
                 @Param(value = "time") long time,
                 @Param(value = "value") String value,
-                @Param(value = "merchantId") String merchantId,
-                @Param(value = "timeZone") long timeZone);
+                @Param(value = "merchantId") String merchantId);
 }
