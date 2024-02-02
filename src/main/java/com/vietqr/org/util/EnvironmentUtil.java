@@ -205,11 +205,21 @@ public class EnvironmentUtil {
     private static final String TELEGRAM_BOT_USERNAME = "vietqr_bot";
     private static final String TELEGRAM_BOT_TOKEN = "6603683411:AAGTCde6C-7kt4gR5gTvcDA_jmYIqs0SJJM";
 
-    // Google Chat
+    // Google Chat for task push notification
     private static final String GOOGLE_CHAT_KEY = "AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI";
     private static final String GOOGLE_CHAT_TOKEN = "q9cgRDssTNVRgIQCYkfq06Sfh8nS-h4RD3Nrfby9NJk";
 
-    //
+    // Static VietQR from MB
+    private static final String MB_QR_CODE_STATIC_TYPE = "1";
+    private static final String MB_QR_INIT_STATIC_METHOD = "11";
+
+    public static String getMbQrCodeStaticType() {
+        return MB_QR_CODE_STATIC_TYPE;
+    }
+
+    public static String getMbQrInitStaticMethod() {
+        return MB_QR_INIT_STATIC_METHOD;
+    }
 
     public static String getIpVietQRVN() {
         return (IS_PRODUCTION == false) ? IP_VIETQRVN_PROD : IP_VIETQRVN_UAT;
@@ -454,7 +464,7 @@ public class EnvironmentUtil {
     }
 
     public static String getVietQrLogo() {
-        return (IS_PRODUCTION == false) ? VIET_QR_LOGO_UAT : VIET_QR_ICON_PROD;
+        return (IS_PRODUCTION == false) ? VIET_QR_LOGO_UAT : VIET_QR_LOGO_PROD;
     }
 
     public static String getNapasLogo() {
