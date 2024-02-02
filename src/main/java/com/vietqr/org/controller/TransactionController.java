@@ -176,22 +176,27 @@ public class TransactionController {
                 switch (type) {
                     case 0:
                         result = transactionReceiveService.getTransByBankAccountAllDate(value, offset);
+                        httpStatus = HttpStatus.OK;
                         break;
                     case 1:
                         result = transactionReceiveService.getTransByFtCode(value, offset);
+                        httpStatus = HttpStatus.OK;
                         break;
                     case 2:
                         result = transactionReceiveService.getTransByOrderId(value, offset);
+                        httpStatus = HttpStatus.OK;
                         break;
                     case 3:
                         value = value.replace("-", " ").trim();
                         result = transactionReceiveService.getTransByContent(value, offset);
+                        httpStatus = HttpStatus.OK;
                         break;
                     case 4:
                         result = transactionReceiveService.getTransByTerminalCodeAllDate(value, offset);
                         break;
                     case 9:
                         result = transactionReceiveService.getAllTransAllDate(offset);
+                        httpStatus = HttpStatus.OK;
                         break;
                     default:
                         logger.error("getTransactionAdmin: ERROR: INVALID TYPE");
@@ -874,8 +879,8 @@ public class TransactionController {
             @RequestParam(value = "bankId") String bankId,
             @RequestParam(value = "status") int status,
             @RequestParam(value = "offset") int offset,
-            @RequestParam(value = "fromDate") String fromDate,
-            @RequestParam(value = "toDate") String toDate) {
+            @RequestParam(value = "from") String fromDate,
+            @RequestParam(value = "to") String toDate) {
         List<TransactionRelatedDTO> result = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
@@ -918,19 +923,23 @@ public class TransactionController {
                 switch (type) {
                     case 9:
                         result = transactionReceiveService.getTransactions(offset, bankId);
+                        httpStatus = HttpStatus.OK;
                         break;
                     case 1:
                         result = transactionReceiveService.getTransactionsByFtCode(value, offset, bankId);
                         break;
                     case 2:
                         result = transactionReceiveService.getTransactionsByOrderId(value, offset, bankId);
+                        httpStatus = HttpStatus.OK;
                         break;
                     case 3:
                         value = value.replace("-", " ").trim();
                         result = transactionReceiveService.getTransactionsByContent(value, offset, bankId);
+                        httpStatus = HttpStatus.OK;
                         break;
                     case 4:
                         result = transactionReceiveService.getTransactionsByTerminalCodeAllDate(value, offset, bankId);
+                        httpStatus = HttpStatus.OK;
                         break;
                     default:
                         logger.error("getTransactionsMobile: ERROR: INVALID TYPE");
@@ -941,24 +950,30 @@ public class TransactionController {
                 switch (type) {
                     case 9:
                         result = transactionReceiveService.getTransactions(offset, bankId, from, to);
+                        httpStatus = HttpStatus.OK;
                         break;
                     case 1:
                         result = transactionReceiveService.getTransactionsByFtCode(value, offset, bankId, from, to);
+                        httpStatus = HttpStatus.OK;
                         break;
                     case 2:
                         result = transactionReceiveService.getTransactionsByOrderId(value, offset, bankId, from, to);
+                        httpStatus = HttpStatus.OK;
                         break;
                     case 3:
                         value = value.replace("-", " ").trim();
                         result = transactionReceiveService.getTransactionsByContent(value, offset, bankId, from, to);
+                        httpStatus = HttpStatus.OK;
                         break;
                     case 4:
                         result = transactionReceiveService.getTransactionsByTerminalCodeAndDate(value, offset, from, to,
                                 bankId);
+                        httpStatus = HttpStatus.OK;
                         break;
                     case 5:
                         Integer status = Integer.parseInt(value);
                         result = transactionReceiveService.getTransactionsByStatus(status, offset, bankId, from, to);
+                        httpStatus = HttpStatus.OK;
                         break;
                     default:
                         logger.error("getTransactionsMobile: ERROR: INVALID TYPE");

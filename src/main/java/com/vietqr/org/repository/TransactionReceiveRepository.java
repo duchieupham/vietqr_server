@@ -606,7 +606,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON b.id = d.bank_id  "
                         + "WHERE a.reference_number LIKE %:value% "
                         + "AND d.customer_sync_id = :merchantId "
-                        + "AND (a.time + :timeZone) between :fromDate AND :toDate "
+                        + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByFtCodeAndMerchantId(
@@ -653,7 +653,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON b.id = d.bank_id  "
                         + "WHERE a.order_id LIKE %:value% "
                         + "AND d.customer_sync_id = :merchantId "
-                        + "AND (a.time + :timeZone) between :fromDate AND :toDate "
+                        + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByOrderIdAndMerchantId(
@@ -837,7 +837,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON b.bank_type_id = c.id "
                         + "WHERE a.reference_number LIKE %:value% "
                         + "AND a.user_id = :userId "
-                        + "AND (a.time + :timeZone) between :fromDate AND :toDate "
+                        + "AND (a.time + :timeZone) BETWEEN :fromDate AND :toDate "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByFtCodeAndUserId(
@@ -880,7 +880,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "ON b.bank_type_id = c.id "
                         + "WHERE a.order_id LIKE %:value% "
                         + "AND a.user_id = :userId "
-                        + "AND (a.time + :timeZone) between :fromDate and :toDate "
+                        + "AND (a.time + :timeZone) BETWEEN :fromDate and :toDate "
                         + "ORDER BY a.time DESC "
                         + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByOrderIdAndUserId(
@@ -902,7 +902,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "ON b.bank_type_id = c.id "
                 + "WHERE a.order_id LIKE %:value% "
                 + "AND a.user_id = :userId "
-                + "AND (a.time + :timeZone) >= time "
+                + "AND (a.time + :timeZone) >= :time "
                 + "ORDER BY a.time DESC "
                 + "LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransByOrderIdAndUserId(

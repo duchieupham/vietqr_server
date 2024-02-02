@@ -169,8 +169,6 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     @Override
     public List<TransactionReceiveAdminListDTO> getTransByBankAccountFromDate(String value, String fromDate,
             String toDate, long offset) {
-        fromDate = fromDate + " 00:00:00";
-        toDate = toDate + " 23:59:59";
         return repo.getTransByBankAccountFromDate(value, DateTimeUtil.getDateTimeAsLongInt(fromDate),
                 DateTimeUtil.getDateTimeAsLongInt(toDate), offset, DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
@@ -183,8 +181,6 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
 
     @Override
     public List<TransactionReceiveAdminListDTO> getAllTransFromDate(String fromDate, String toDate, long offset) {
-        fromDate = fromDate + " 00:00:00";
-        toDate = toDate + " 23:59:59";
         return repo.getAllTransFromDate(DateTimeUtil.getDateTimeAsLongInt(fromDate),
                 DateTimeUtil.getDateTimeAsLongInt(toDate), offset, DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
