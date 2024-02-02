@@ -39,8 +39,8 @@ import com.vietqr.org.service.BankTypeService;
 import com.vietqr.org.service.TerminalBankService;
 import com.vietqr.org.service.TransactionReceiveService;
 import com.vietqr.org.util.EnvironmentUtil;
-import com.vietqr.org.util.TokenBankUtil;
 import com.vietqr.org.util.TransactionRefIdUtil;
+import com.vietqr.org.util.bank.mb.MBTokenUtil;
 
 import reactor.core.publisher.Mono;
 
@@ -94,7 +94,7 @@ public class VietQRMMSController {
                         httpStatus = HttpStatus.BAD_REQUEST;
                     } else {
                         // 3.B. If found => get bank token => create qr code
-                        TokenProductBankDTO tokenBankDTO = TokenBankUtil.getBankMMSToken();
+                        TokenProductBankDTO tokenBankDTO = MBTokenUtil.getMBBankToken();
                         if (tokenBankDTO != null) {
                             VietQRMMSRequestDTO requestDTO = new VietQRMMSRequestDTO();
                             requestDTO.setToken(tokenBankDTO.getAccess_token());

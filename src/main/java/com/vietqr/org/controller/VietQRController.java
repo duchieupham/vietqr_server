@@ -52,6 +52,7 @@ import com.vietqr.org.dto.VietQRGenerateDTO;
 import com.vietqr.org.dto.VietQRMMSCreateDTO;
 import com.vietqr.org.dto.VietQRMMSRequestDTO;
 import com.vietqr.org.util.VietQRUtil;
+import com.vietqr.org.util.bank.mb.MBTokenUtil;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -61,7 +62,6 @@ import com.vietqr.org.util.EnvironmentUtil;
 import com.vietqr.org.util.NotificationUtil;
 import com.vietqr.org.util.RandomCodeUtil;
 import com.vietqr.org.util.SocketHandler;
-import com.vietqr.org.util.TokenBankUtil;
 import com.vietqr.org.util.TransactionRefIdUtil;
 
 @RestController
@@ -590,7 +590,7 @@ public class VietQRController {
 							httpStatus = HttpStatus.BAD_REQUEST;
 						} else {
 							// 3.B. If found => get bank token => create qr code
-							TokenProductBankDTO tokenBankDTO = TokenBankUtil.getBankMMSToken();
+							TokenProductBankDTO tokenBankDTO = MBTokenUtil.getMBBankToken();
 							if (tokenBankDTO != null) {
 								String content = "";
 								if (dto.getContent() != null && !dto.getContent().trim().isEmpty()) {

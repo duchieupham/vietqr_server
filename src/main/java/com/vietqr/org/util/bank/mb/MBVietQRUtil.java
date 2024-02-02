@@ -97,6 +97,7 @@ public class MBVietQRUtil {
             if (qrCode != null) {
                 if (qrCode.trim().contains("0010A000000727")) {
                     String valueBankTransfer = qrCode.split("0010A000000727")[1];
+                    // 0208QRIBFTTA = quick transfer NAPAS
                     String valueBankInfo = valueBankTransfer.split("0208QRIBFTTA")[0];
                     // 970422 = MB Bank
                     String valueBankAccount = valueBankInfo.split("0006970422")[1];
