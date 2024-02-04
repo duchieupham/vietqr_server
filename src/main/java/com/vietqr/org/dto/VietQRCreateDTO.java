@@ -12,51 +12,44 @@ public class VietQRCreateDTO implements Serializable {
 	private String bankId;
 	private String amount;
 	private String content;
-	private String branchId;
-	private String businessId;
 	private String userId;
 	private String transType;
 	private String customerBankAccount;
 	private String customerBankCode;
 	private String customerName;
 	private String terminalCode;
+	private String orderId;
 	private String note;
 
 	public VietQRCreateDTO() {
 		super();
 	}
 
-	public VietQRCreateDTO(String bankId, String amount, String content, String branchId, String businessId,
+	public VietQRCreateDTO(String bankId, String amount, String content,
 			String userId) {
 		super();
 		this.bankId = bankId;
 		this.amount = amount;
 		this.content = content;
-		this.branchId = branchId;
-		this.businessId = businessId;
 		this.userId = userId;
 	}
 
-	public VietQRCreateDTO(String bankId, String amount, String content, String branchId, String businessId,
+	public VietQRCreateDTO(String bankId, String amount, String content,
 			String userId, String terminalCode, String note) {
 		super();
 		this.bankId = bankId;
 		this.amount = amount;
 		this.content = content;
-		this.branchId = branchId;
-		this.businessId = businessId;
 		this.userId = userId;
 		this.terminalCode = terminalCode;
 		this.note = note;
 	}
 
-	public VietQRCreateDTO(String bankId, String amount, String content, String branchId, String businessId,
+	public VietQRCreateDTO(String bankId, String amount, String content,
 			String userId, String transType, String customerBankAccount, String customerBankCode, String customerName) {
 		this.bankId = bankId;
 		this.amount = amount;
 		this.content = content;
-		this.branchId = branchId;
-		this.businessId = businessId;
 		this.userId = userId;
 		this.transType = transType;
 		this.customerBankAccount = customerBankAccount;
@@ -64,14 +57,12 @@ public class VietQRCreateDTO implements Serializable {
 		this.customerName = customerName;
 	}
 
-	public VietQRCreateDTO(String bankId, String amount, String content, String branchId, String businessId,
+	public VietQRCreateDTO(String bankId, String amount, String content,
 			String userId, String transType, String customerBankAccount, String customerBankCode, String customerName,
 			String note) {
 		this.bankId = bankId;
 		this.amount = amount;
 		this.content = content;
-		this.branchId = branchId;
-		this.businessId = businessId;
 		this.userId = userId;
 		this.transType = transType;
 		this.customerBankAccount = customerBankAccount;
@@ -80,20 +71,34 @@ public class VietQRCreateDTO implements Serializable {
 		this.note = note;
 	}
 
-	public VietQRCreateDTO(String bankId, String amount, String content, String branchId, String businessId,
+	public VietQRCreateDTO(String bankId, String amount, String content,
 			String userId, String transType, String customerBankAccount, String customerBankCode, String customerName,
 			String terminalCode, String note) {
 		this.bankId = bankId;
 		this.amount = amount;
 		this.content = content;
-		this.branchId = branchId;
-		this.businessId = businessId;
 		this.userId = userId;
 		this.transType = transType;
 		this.customerBankAccount = customerBankAccount;
 		this.customerBankCode = customerBankCode;
 		this.customerName = customerName;
 		this.terminalCode = terminalCode;
+		this.note = note;
+	}
+
+	public VietQRCreateDTO(String bankId, String amount, String content,
+			String userId, String transType, String customerBankAccount, String customerBankCode, String customerName,
+			String terminalCode, String orderId, String note) {
+		this.bankId = bankId;
+		this.amount = amount;
+		this.content = content;
+		this.userId = userId;
+		this.transType = transType;
+		this.customerBankAccount = customerBankAccount;
+		this.customerBankCode = customerBankCode;
+		this.customerName = customerName;
+		this.terminalCode = terminalCode;
+		this.orderId = orderId;
 		this.note = note;
 	}
 
@@ -153,22 +158,6 @@ public class VietQRCreateDTO implements Serializable {
 		this.content = content;
 	}
 
-	public String getBranchId() {
-		return branchId;
-	}
-
-	public void setBranchId(String branchId) {
-		this.branchId = branchId;
-	}
-
-	public String getBusinessId() {
-		return businessId;
-	}
-
-	public void setBusinessId(String businessId) {
-		this.businessId = businessId;
-	}
-
 	public String getUserId() {
 		return userId;
 	}
@@ -191,6 +180,14 @@ public class VietQRCreateDTO implements Serializable {
 
 	public void setNote(String note) {
 		this.note = note;
+	}
+
+	public String getOrderId() {
+		return orderId;
+	}
+
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
 	}
 
 }

@@ -37,4 +37,9 @@ public class TerminalBankServiceImpl implements TerminalBankService {
         return repository.getTerminalCounting();
     }
 
+    @Override
+    public String getBankAccountByTerminalLabel(String terminalLabel) {
+        return repository.getBankAccountByTerminalLabel(terminalLabel);
+    }
+
 }

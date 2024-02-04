@@ -92,7 +92,7 @@ public class AccountBankReceiveController {
 		HttpStatus httpStatus = null;
 		try {
 			// check existed if bank account is authenticated
-			List<String> check = accountBankReceiveService.checkExistedBank(bankAccount, bankTypeId);
+			String check = accountBankReceiveService.checkExistedBank(bankAccount, bankTypeId);
 			if (check == null || check.isEmpty()) {
 				result = new ResponseMessageDTO("SUCCESS", "");
 				httpStatus = HttpStatus.OK;
@@ -127,7 +127,7 @@ public class AccountBankReceiveController {
 					httpStatus = HttpStatus.OK;
 				} else {
 					// check existed if bank account is authenticated
-					List<String> check = accountBankReceiveService.checkExistedBank(bankAccount, bankTypeId);
+					String check = accountBankReceiveService.checkExistedBank(bankAccount, bankTypeId);
 					if (check == null || check.isEmpty()) {
 						result = new ResponseMessageDTO("SUCCESS", "");
 						httpStatus = HttpStatus.OK;
@@ -785,7 +785,7 @@ public class AccountBankReceiveController {
 		try {
 			String bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
 			if (bankTypeId != null && !bankTypeId.trim().isEmpty()) {
-				List<String> check = accountBankReceiveService.checkExistedBank(dto.getBankAccount(), bankTypeId);
+				String check = accountBankReceiveService.checkExistedBank(dto.getBankAccount(), bankTypeId);
 				if (check == null || check.isEmpty()) {
 					UUID uuid = UUID.randomUUID();
 					AccountBankReceiveEntity entity = new AccountBankReceiveEntity();

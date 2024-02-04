@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.vietqr.org.dto.AccountBankConnectBranchDTO;
 import com.vietqr.org.dto.AccountBankReceiveByCusSyncDTO;
+import com.vietqr.org.dto.AccountBankReceiveForNotiDTO;
 import com.vietqr.org.dto.AccountBankReceiveRPAItemDTO;
 import com.vietqr.org.dto.AccountBankWpDTO;
 import com.vietqr.org.dto.BusinessBankDTO;
@@ -30,7 +31,7 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     }
 
     @Override
-    public List<String> checkExistedBank(String bankAccount, String bankTypeId) {
+    public String checkExistedBank(String bankAccount, String bankTypeId) {
         return repo.checkExistedBankAccount(bankAccount, bankTypeId);
     }
 
@@ -41,7 +42,7 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
 
     @Override
     public void updateRegisterAuthenticationBank(String nationalId, String phoneAuthenticated, String bankAccountName,
-                                                 String bankAccount, String ewalletToken, String bankId) {
+            String bankAccount, String ewalletToken, String bankId) {
         repo.updateRegisterAuthenticationBank(nationalId, phoneAuthenticated, bankAccountName, bankAccount,
                 ewalletToken, bankId);
     }
@@ -157,4 +158,8 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
         return repo.getMMSActiveByBankId(bankId);
     }
 
+    @Override
+    public AccountBankReceiveForNotiDTO findAccountBankIden(String bankAccount, String bankTypeId) {
+        return repo.findAccountBankIden(bankAccount, bankTypeId);
+    }
 }

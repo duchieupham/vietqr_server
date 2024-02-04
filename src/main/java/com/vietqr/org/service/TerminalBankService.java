@@ -16,4 +16,6 @@ public interface TerminalBankService {
     public String checkExistedTerminalAddress(String address);
 
     public Integer getTerminalCounting();
+
+    public String getBankAccountByTerminalLabel(String terminalLabel);
 }

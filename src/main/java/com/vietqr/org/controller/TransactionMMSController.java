@@ -1,11 +1,16 @@
 package com.vietqr.org.controller;
 
+import java.io.IOException;
+import java.text.NumberFormat;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,6 +36,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vietqr.org.dto.AccountBankReceiveForNotiDTO;
 import com.vietqr.org.dto.RefundRequestDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.TokenDTO;
@@ -42,6 +48,8 @@ import com.vietqr.org.dto.TransactionMMSResponseDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.entity.BankTypeEntity;
 import com.vietqr.org.entity.CustomerSyncEntity;
+import com.vietqr.org.entity.FcmTokenEntity;
+import com.vietqr.org.entity.NotificationEntity;
 import com.vietqr.org.entity.TerminalAddressEntity;
 import com.vietqr.org.entity.TerminalBankEntity;
 import com.vietqr.org.entity.TransactionMMSEntity;
@@ -51,6 +59,11 @@ import com.vietqr.org.service.AccountBankReceiveService;
 import com.vietqr.org.service.AccountCustomerBankService;
 import com.vietqr.org.service.BankTypeService;
 import com.vietqr.org.service.CustomerSyncService;
+import com.vietqr.org.service.FcmTokenService;
+import com.vietqr.org.service.FirebaseMessagingService;
+import com.vietqr.org.service.LarkAccountBankService;
+import com.vietqr.org.service.NotificationService;
+import com.vietqr.org.service.TelegramAccountBankService;
 import com.vietqr.org.service.TerminalAddressService;
 import com.vietqr.org.service.TerminalBankService;
 import com.vietqr.org.service.TransactionMMSService;
@@ -58,9 +71,11 @@ import com.vietqr.org.service.TransactionReceiveLogService;
 import com.vietqr.org.service.TransactionReceiveService;
 import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.EnvironmentUtil;
+import com.vietqr.org.util.LarkUtil;
 import com.vietqr.org.util.NotificationUtil;
 import com.vietqr.org.util.RandomCodeUtil;
 import com.vietqr.org.util.SocketHandler;
+import com.vietqr.org.util.TelegramUtil;
 import com.vietqr.org.util.TransactionRefIdUtil;
 
 import io.jsonwebtoken.Claims;
@@ -108,6 +123,21 @@ public class TransactionMMSController {
     @Autowired
     SocketHandler socketHandler;
 
+    @Autowired
+    NotificationService notificationService;
+
+    @Autowired
+    FcmTokenService fcmTokenService;
+
+    @Autowired
+    FirebaseMessagingService firebaseMessagingService;
+
+    @Autowired
+    TelegramAccountBankService telegramAccountBankService;
+
+    @Autowired
+    LarkAccountBankService larkAccountBankService;
+
     @PostMapping("transaction-mms")
     public ResponseEntity<TransactionMMSResponseDTO> insertTransactionMMS(@RequestBody TransactionMMSEntity entity) {
         TransactionMMSResponseDTO result = null;
@@ -126,7 +156,7 @@ public class TransactionMMSController {
             }
             terminalBankEntity = terminalBankService
                     .getTerminalBankByTerminalId(entity.getTerminalLabel());
-            //check input cua MB bank
+            // check input cua MB bank
             result = validateTransactionBank(entity, terminalBankEntity);
             if (result.getResCode().equals("00")) {
                 // insert TransactionMMSEntity
@@ -146,25 +176,30 @@ public class TransactionMMSController {
                     // status = 0
                     // (traceId => bill_number)
                     if (result != null && result.getResCode().equals("00")) {
-                        transactionReceiveEntity = transactionReceiveService
-                                .getTransactionByOrderId(entity.getReferenceLabelCode(), entity.getDebitAmount());
-                        if (transactionReceiveEntity != null) {
-                            // transactionReceiveEntity != null:
-                            // update status transaction receive
-                            transactionReceiveService.updateTransactionReceiveStatus(1, uuid.toString(),
-                                    entity.getFtCode(), time,
-                                    transactionReceiveEntity.getId());
-                            LocalDateTime updateLocalTime = LocalDateTime.now();
-                            long updateTime = updateLocalTime.toEpochSecond(ZoneOffset.UTC);
-                            logger.info(
-                                    "transaction-mms-sync: updateTransactionReceiveStatus SUCCESS at: " + updateTime);
-                            // System.out.println(
-                            // "transaction-mms-sync: updateTransactionReceiveStatus SUCCESS at: " +
-                            // updateTime);
-                        } else {
-                            logger.info("transaction-mms-sync: NOT FOUND transactionReceiveEntity");
+                        // referenceLabelCode is empty => static QR
+                        // referenceLabelCode is not empty => transaction QR
+                        if (entity.getReferenceLabelCode() != null
+                                && !entity.getReferenceLabelCode().trim().isEmpty()) {
+                            // TRANSACTION QR
+                            transactionReceiveEntity = transactionReceiveService
+                                    .getTransactionByOrderId(entity.getReferenceLabelCode(), entity.getDebitAmount());
+                            if (transactionReceiveEntity != null) {
+                                // transactionReceiveEntity != null:
+                                // update status transaction receive
+                                transactionReceiveService.updateTransactionReceiveStatus(1, uuid.toString(),
+                                        entity.getFtCode(), time,
+                                        transactionReceiveEntity.getId());
+                                LocalDateTime updateLocalTime = LocalDateTime.now();
+                                long updateTime = updateLocalTime.toEpochSecond(ZoneOffset.UTC);
+                                logger.info(
+                                        "transaction-mms-sync: updateTransactionReceiveStatus SUCCESS at: "
+                                                + updateTime);
+                            } else {
+                                logger.info("transaction-mms-sync: NOT FOUND transactionReceiveEntity");
+                            }
+                            ///
                         }
-                        ///
+
                     }
                 } else {
                     httpStatus = HttpStatus.BAD_REQUEST;
@@ -211,6 +246,12 @@ public class TransactionMMSController {
             final TerminalBankEntity tempTerminalBank = terminalBankEntity;
             Thread thread = new Thread(() -> {
                 if (tempResult != null && tempResult.getResCode().equals("00")) {
+                    // tempTransReceive is null => static QR
+                    // tempTransReceive is not empty => transaction QR
+
+                    ///
+                    //
+                    // TRANSACTION QR
                     if (tempTransReceive != null) {
                         // push data to customerSync
                         if (tempTerminalBank != null) {
@@ -268,11 +309,172 @@ public class TransactionMMSController {
                         } else {
                             logger.info("transaction-mms-sync: NOT FOUND accountBankEntity");
                         }
+                    } else {
+                        /// STATTIC QR
+                        //
+                        //
+                        // get trace Transfer to find VietQR terminal
+                        // if VietQR terminal existed, insert new transaction
+                        ///
+                        ///
+                        // (now ignore find VietQR terminal, to test static VietQR)
+                        //
+                        // 1. find bankAccount by terminal label.
+                        String bankAccount = terminalBankService
+                                .getBankAccountByTerminalLabel(entity.getTerminalLabel());
+                        if (bankAccount != null && !bankAccount.trim().isEmpty()) {
+                            // 2. find bankId by bankAccount AND is_authenticated = true.
+                            // default bank type id of MB
+                            String bankTypeId = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
+                            AccountBankReceiveForNotiDTO bankDTO = accountBankService.findAccountBankIden(bankAccount,
+                                    bankTypeId);
+                            if (bankDTO.getBankId() != null) {
+                                // 3. insert transaction_receive with bankId found.
+                                UUID transcationUUID = UUID.randomUUID();
+                                TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
+                                transactionEntity.setId(transcationUUID.toString());
+                                transactionEntity.setBankAccount(bankAccount);
+                                transactionEntity.setBankId(bankDTO.getBankId());
+                                // get content from terminalCode from terminal (now ignore to test static
+                                // VietQR)
+                                transactionEntity.setContent("");
+                                //
+                                transactionEntity.setAmount(Long.parseLong(entity.getDebitAmount()));
+                                // final LocalDateTime currentDateTime = LocalDateTime.now();
+                                // long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+                                transactionEntity.setTime(time);
+                                transactionEntity.setRefId(uuid.toString());
+                                transactionEntity.setType(1);
+                                transactionEntity.setTraceId("");
+                                transactionEntity.setTransType("C");
+                                transactionEntity.setReferenceNumber(entity.getFtCode());
+                                transactionEntity.setOrderId("");
+                                transactionEntity.setSign("");
+                                transactionEntity.setTimePaid(time);
+                                // ignore terminal code now for test
+                                transactionEntity.setTerminalCode("");
+                                transactionEntity.setQrCode("");
+                                //
+                                transactionEntity.setUserId(bankDTO.getUserId());
+                                transactionEntity.setNote("");
+                                transactionReceiveService.insertTransactionReceive(transactionEntity);
+                                // 4. insert and push notification to user.
+                                UUID notificationUUID = UUID.randomUUID();
+                                NumberFormat nf = NumberFormat.getInstance(Locale.US);
+                                NotificationEntity notiEntity = new NotificationEntity();
+                                String prefix = "+";
+                                String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
+                                        + bankAccount
+                                        + NotificationUtil.getNotiDescUpdateTransSuffix2()
+                                        + prefix + nf.format(entity.getDebitAmount())
+                                        + NotificationUtil.getNotiDescUpdateTransSuffix4()
+                                        + entity.getTraceTransfer();
+                                // String title = NotificationUtil.getNotiTitleNewTransaction();
+                                notiEntity.setId(notificationUUID.toString());
+                                notiEntity.setRead(false);
+                                notiEntity.setMessage(message);
+                                notiEntity.setTime(time);
+                                notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
+                                notiEntity.setUserId(bankDTO.getUserId());
+                                notiEntity.setData(transcationUUID.toString());
+                                notificationService.insertNotification(notiEntity);
+                                List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+                                fcmTokens = fcmTokenService.getFcmTokensByUserId(bankDTO.getUserId());
+                                Map<String, String> data = new HashMap<>();
+                                data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+                                data.put("notificationId", notificationUUID.toString());
+                                data.put("transactionReceiveId", transcationUUID.toString());
+                                data.put("bankAccount", bankAccount);
+                                data.put("bankName", bankDTO.getBankName());
+                                data.put("bankCode", bankDTO.getBankCode());
+                                data.put("bankId", bankDTO.getBankId());
+                                data.put("content", "");
+                                data.put("amount", "" + entity.getDebitAmount());
+                                data.put("time", "" + time);
+                                data.put("refId", "" + uuid.toString());
+                                data.put("status", "1");
+                                data.put("traceId", "");
+                                data.put("transType", "C");
+                                firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
+                                        NotificationUtil
+                                                .getNotiTitleUpdateTransaction(),
+                                        message);
+                                try {
+                                    // send msg to user
+                                    socketHandler.sendMessageToUser(bankDTO.getUserId(), data);
+                                    // send msg to QR Link
+                                    String refId = TransactionRefIdUtil
+                                            .encryptTransactionId(transcationUUID.toString());
+                                    socketHandler.sendMessageToTransactionRefId(refId, data);
+                                } catch (IOException e) {
+                                    logger.error("WS: socketHandler.sendMessageToUser - insertNewTransaction ERROR: "
+                                            + e.toString());
+                                }
+                                /////// DO INSERT TELEGRAM
+                                List<String> chatIds = telegramAccountBankService
+                                        .getChatIdsByBankId(bankDTO.getBankId());
+                                if (chatIds != null && !chatIds.isEmpty()) {
+                                    TelegramUtil telegramUtil = new TelegramUtil();
+
+                                    String telegramMsg = prefix + nf.format(entity.getDebitAmount()) + " VND"
+                                            + " | TK: " + bankDTO.getBankShortName() + " - "
+                                            + bankAccount
+                                            + " | " + convertLongToDate(time)
+                                            + " | " + entity.getFtCode()
+                                            + " | ND: " + entity.getTraceTransfer();
+                                    for (String chatId : chatIds) {
+                                        telegramUtil.sendMsg(chatId, telegramMsg);
+                                    }
+                                }
+
+                                /////// DO INSERT LARK
+                                List<String> webhooks = larkAccountBankService
+                                        .getWebhooksByBankId(bankDTO.getBankId());
+                                if (webhooks != null && !webhooks.isEmpty()) {
+                                    LarkUtil larkUtil = new LarkUtil();
+
+                                    String larkMsg = prefix + nf.format(entity.getDebitAmount()) + " VND"
+                                            + " | TK: " + bankDTO.getBankShortName() + " - "
+                                            + bankAccount
+                                            + " | " + convertLongToDate(time)
+                                            + " | " + entity.getFtCode()
+                                            + " | ND: " + entity.getTraceTransfer();
+                                    for (String webhook : webhooks) {
+                                        larkUtil.sendMessageToLark(larkMsg, webhook);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             });
             thread.start();
         }
+    }
+
+    public String convertLongToDate(long timestamp) {
+        String result = "";
+        try {
+            // Tạo một đối tượng Instant từ timestamp
+            Instant instant = Instant.ofEpochSecond(timestamp);
+
+            // Tạo một đối tượng LocalDateTime từ Instant và ZoneOffset.UTC
+            LocalDateTime dateTime = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+
+            // Chuyển đổi múi giờ từ UTC sang UTC+7
+            ZoneOffset offset = ZoneOffset.ofHours(7);
+            dateTime = dateTime.plusHours(offset.getTotalSeconds() / 3600);
+
+            // Định dạng ngày tháng năm
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+
+            // Chuyển đổi thành chuỗi ngày tháng năm
+            result = dateTime.format(formatter);
+
+        } catch (Exception e) {
+            logger.error("convertLongToDate: ERROR: " + e.toString());
+        }
+        return result;
     }
 
     private void getCustomerSyncEntities(String transReceiveId, String terminalBankId, String ftCode,

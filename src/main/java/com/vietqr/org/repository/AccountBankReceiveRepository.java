@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import com.vietqr.org.dto.AccountBankConnectBranchDTO;
 import com.vietqr.org.dto.AccountBankReceiveByCusSyncDTO;
+import com.vietqr.org.dto.AccountBankReceiveForNotiDTO;
 import com.vietqr.org.dto.AccountBankReceiveRPAItemDTO;
 import com.vietqr.org.dto.AccountBankWpDTO;
 import com.vietqr.org.dto.BusinessBankDTO;
@@ -37,7 +38,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	void deleteAccountBank(@Param(value = "id") String id);
 
 	@Query(value = "SELECT id FROM account_bank_receive WHERE bank_account = :bankAccount AND bank_type_id = :bankTypeId AND is_authenticated = true ", nativeQuery = true)
-	List<String> checkExistedBankAccount(@Param(value = "bankAccount") String bankAccount,
+	String checkExistedBankAccount(@Param(value = "bankAccount") String bankAccount,
 			@Param(value = "bankTypeId") String bankTypeId);
 
 	@Query(value = "SELECT id FROM account_bank_receive WHERE bank_account = :bankAccount AND bank_type_id = :bankTypeId AND user_id = :userId ", nativeQuery = true)
@@ -210,4 +211,17 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "FROM account_bank_receive "
 			+ "WHERE id = :bankId ", nativeQuery = true)
 	Boolean getMMSActiveByBankId(@Param(value = "bankId") String bankId);
+
+	// bankId
+	// bankName
+	// bankCode
+	@Query(value = "SELECT a.id as bankId, b.bank_name as bankName, b.bank_code as bankCode, a.user_id as userId, b.bank_short_name as bankShortName "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN bank_type b "
+			+ "ON a.bank_type_id = b.id "
+			+ "WHERE a.bank_account = :bankAccount AND a.bank_type_id = :bankTypeId "
+			+ "AND a.is_authenticated = true ", nativeQuery = true)
+	AccountBankReceiveForNotiDTO findAccountBankIden(@Param(value = "bankAccount") String bankAccount,
+			@Param(value = "bankTypeId") String bankTypeId);
+
 }

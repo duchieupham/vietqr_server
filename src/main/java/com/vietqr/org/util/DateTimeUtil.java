@@ -28,8 +28,7 @@ public class DateTimeUtil {
 
     public static long get3MonthsPreviousAsLongInt() {
         LocalDateTime localDateTime = LocalDateTime.now().minusMonths(3).withDayOfMonth(1).with(LocalTime.MIN);
-        ZoneId gmtPlus7 = ZoneId.of(GMT_PLUS_7);
-        return localDateTime.atZone(gmtPlus7).toEpochSecond();
+        return localDateTime.toEpochSecond(ZoneOffset.UTC);
     }
 
     public static long get2LastPartition() {

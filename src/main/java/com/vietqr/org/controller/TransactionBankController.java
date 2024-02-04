@@ -645,7 +645,7 @@ public class TransactionBankController {
 												"transaction-sync - cannot find transaction receive. Receive new transaction outside system");
 										// process here
 										UUID transcationUUID = UUID.randomUUID();
-										//push websocket
+										// push websocket
 										getCustomerSyncEntities(transcationUUID.toString(), dto, accountBankEntity,
 												time, orderId, sign);
 										// push notification
@@ -1305,273 +1305,279 @@ public class TransactionBankController {
 		//
 		///
 		// check bank existed business branch
-		BankReceiveBranchEntity bankReceiveBranchEntity = bankReceiveBranchService
-				.getBankReceiveBranchByBankId(accountBankEntity.getId());
-		if (bankReceiveBranchEntity != null) {
-			// insert transaction branch
-			TransactionReceiveBranchEntity transactionBranchEntity = new TransactionReceiveBranchEntity();
-			UUID uuidTransBranch = UUID.randomUUID();
-			transactionBranchEntity.setId(uuidTransBranch.toString());
-			transactionBranchEntity.setBranchId(bankReceiveBranchEntity.getBranchId());
-			transactionBranchEntity.setBusinessId(bankReceiveBranchEntity.getBusinessId());
-			transactionBranchEntity.setTransactionReceiveId(transcationUUID);
-			// insert and push noti
+		// BankReceiveBranchEntity bankReceiveBranchEntity = bankReceiveBranchService
+		// .getBankReceiveBranchByBankId(accountBankEntity.getId());
+		// if (bankReceiveBranchEntity != null) {
+		// // insert transaction branch
+		// TransactionReceiveBranchEntity transactionBranchEntity = new
+		// TransactionReceiveBranchEntity();
+		// UUID uuidTransBranch = UUID.randomUUID();
+		// transactionBranchEntity.setId(uuidTransBranch.toString());
+		// transactionBranchEntity.setBranchId(bankReceiveBranchEntity.getBranchId());
+		// transactionBranchEntity.setBusinessId(bankReceiveBranchEntity.getBusinessId());
+		// transactionBranchEntity.setTransactionReceiveId(transcationUUID);
+		// // insert and push noti
 
-			// find userIds into business_member and branch_member
-			List<String> userIds = branchMemberService
-					.getUserIdsByBusinessIdAndBranchId(transactionBranchEntity.getBusinessId(),
-							transactionBranchEntity.getBranchId());
-			// insert AND push notification to users belong to
-			// admin business/ member of branch
-			String prefix = "";
-			if (dto.getTransType().toUpperCase().equals("D")) {
-				prefix = "-";
-			} else {
-				prefix = "+";
-			}
-			if (userIds != null && !userIds.isEmpty()) {
-				// String requestId = "";
-				for (String userId : userIds) {
-					// insert notification
-					UUID notificationUUID = UUID.randomUUID();
-					NotificationEntity notiEntity = new NotificationEntity();
-					BranchInformationEntity branchEntity = branchInformationService
-							.getBranchById(transactionBranchEntity.getBranchId());
-					BusinessInformationEntity businessEntity = businessInformationService
-							.getBusinessById(branchEntity.getBusinessId());
+		// // find userIds into business_member and branch_member
+		// List<String> userIds = branchMemberService
+		// .getUserIdsByBusinessIdAndBranchId(transactionBranchEntity.getBusinessId(),
+		// transactionBranchEntity.getBranchId());
+		// // insert AND push notification to users belong to
+		// // admin business/ member of branch
+		// String prefix = "";
+		// if (dto.getTransType().toUpperCase().equals("D")) {
+		// prefix = "-";
+		// } else {
+		// prefix = "+";
+		// }
+		// if (userIds != null && !userIds.isEmpty()) {
+		// // String requestId = "";
+		// for (String userId : userIds) {
+		// // insert notification
+		// UUID notificationUUID = UUID.randomUUID();
+		// NotificationEntity notiEntity = new NotificationEntity();
+		// BranchInformationEntity branchEntity = branchInformationService
+		// .getBranchById(transactionBranchEntity.getBranchId());
+		// BusinessInformationEntity businessEntity = businessInformationService
+		// .getBusinessById(branchEntity.getBusinessId());
 
-					String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
-							+ accountBankEntity.getBankAccount()
-							+ NotificationUtil.getNotiDescUpdateTransSuffix2()
-							+ prefix + nf.format(dto.getAmount())
-							+ NotificationUtil.getNotiDescUpdateTransSuffix3()
-							+ branchEntity.getName()
-							+ NotificationUtil.getNotiDescUpdateTransSuffix4()
-							+ dto.getContent();
-					// String title = NotificationUtil.getNotiTitleNewTransaction();
-					notiEntity.setId(notificationUUID.toString());
-					notiEntity.setRead(false);
-					notiEntity.setMessage(message);
-					notiEntity.setTime(time);
-					notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
-					notiEntity.setUserId(userId);
-					notiEntity.setData(transcationUUID);
-					notificationService.insertNotification(notiEntity);
-					List<FcmTokenEntity> fcmTokens = new ArrayList<>();
-					fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
-					Map<String, String> data = new HashMap<>();
-					data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
-					data.put("notificationId", notificationUUID.toString());
-					data.put("transactionReceiveId", transcationUUID.toString());
-					data.put("bankAccount", accountBankEntity.getBankAccount());
-					data.put("bankName", bankTypeEntity.getBankName());
-					data.put("bankCode", bankTypeEntity.getBankCode());
-					data.put("bankId", accountBankEntity.getId());
-					data.put("branchName", branchEntity.getName());
-					data.put("businessName", businessEntity.getName());
-					if (traceId == null || traceId.isEmpty()) {
-						data.put("content", dto.getContent().trim());
-					} else {
-						data.put("content", traceId + "." + dto.getContent());
-					}
-					data.put("amount", "" + dto.getAmount() + "");
-					data.put("time", "" + time);
-					data.put("refId", "" + dto.getTransactionid());
-					data.put("status", "1");
-					data.put("transType", dto.getTransType());
-					if (traceId == null || traceId.isEmpty()) {
-						data.put("traceId", "");
-					} else {
-						data.put("traceId", traceId);
-					}
-					firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
-							NotificationUtil
-									.getNotiTitleUpdateTransaction(),
-							message);
-					try {
-						// send msg to user
-						socketHandler.sendMessageToUser(accountBankEntity.getUserId(), data);
-						// send msg to QR Link
-						String refId = TransactionRefIdUtil.encryptTransactionId(transcationUUID.toString());
-						socketHandler.sendMessageToTransactionRefId(refId, data);
-					} catch (IOException e) {
-						logger.error("WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
-					}
-				}
-				/////// DO INSERT TELEGRAM
-				List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
-				if (chatIds != null && !chatIds.isEmpty()) {
-					TelegramUtil telegramUtil = new TelegramUtil();
-					// String telegramMsg2 = "Thanh toán thành công 🎉."
-					// + "\nTài khoản: " + bankTypeEntity.getBankShortName() + " - "
-					// + accountBankEntity.getBankAccount()
-					// + "\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
-					// + "\nMã giao dịch: " + dto.getReferencenumber()
-					// + "\nThời gian: " + convertLongToDate(time)
-					// + "\nNội dung: " + dto.getContent();
-					// String telegramMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
-					// + "| TK: " + bankTypeEntity.getBankShortName() + " - "
-					// + accountBankEntity.getBankAccount()
-					// + "| Ma GD: " + dto.getReferencenumber()
-					// + "| ND: " + dto.getContent()
-					// + "| " + convertLongToDate(time);
-					String telegramMsg = prefix + nf.format(dto.getAmount()) + " VND"
-							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-							+ accountBankEntity.getBankAccount()
-							+ " | " + convertLongToDate(time)
-							+ " | " + dto.getReferencenumber()
-							+ " | ND: " + dto.getContent();
+		// String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
+		// + accountBankEntity.getBankAccount()
+		// + NotificationUtil.getNotiDescUpdateTransSuffix2()
+		// + prefix + nf.format(dto.getAmount())
+		// + NotificationUtil.getNotiDescUpdateTransSuffix3()
+		// + branchEntity.getName()
+		// + NotificationUtil.getNotiDescUpdateTransSuffix4()
+		// + dto.getContent();
+		// // String title = NotificationUtil.getNotiTitleNewTransaction();
+		// notiEntity.setId(notificationUUID.toString());
+		// notiEntity.setRead(false);
+		// notiEntity.setMessage(message);
+		// notiEntity.setTime(time);
+		// notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
+		// notiEntity.setUserId(userId);
+		// notiEntity.setData(transcationUUID);
+		// notificationService.insertNotification(notiEntity);
+		// List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+		// fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
+		// Map<String, String> data = new HashMap<>();
+		// data.put("notificationType",
+		// NotificationUtil.getNotiTypeUpdateTransaction());
+		// data.put("notificationId", notificationUUID.toString());
+		// data.put("transactionReceiveId", transcationUUID.toString());
+		// data.put("bankAccount", accountBankEntity.getBankAccount());
+		// data.put("bankName", bankTypeEntity.getBankName());
+		// data.put("bankCode", bankTypeEntity.getBankCode());
+		// data.put("bankId", accountBankEntity.getId());
+		// data.put("branchName", branchEntity.getName());
+		// data.put("businessName", businessEntity.getName());
+		// if (traceId == null || traceId.isEmpty()) {
+		// data.put("content", dto.getContent().trim());
+		// } else {
+		// data.put("content", traceId + "." + dto.getContent());
+		// }
+		// data.put("amount", "" + dto.getAmount() + "");
+		// data.put("time", "" + time);
+		// data.put("refId", "" + dto.getTransactionid());
+		// data.put("status", "1");
+		// data.put("transType", dto.getTransType());
+		// if (traceId == null || traceId.isEmpty()) {
+		// data.put("traceId", "");
+		// } else {
+		// data.put("traceId", traceId);
+		// }
+		// firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
+		// NotificationUtil
+		// .getNotiTitleUpdateTransaction(),
+		// message);
+		// try {
+		// // send msg to user
+		// socketHandler.sendMessageToUser(accountBankEntity.getUserId(), data);
+		// // send msg to QR Link
+		// String refId =
+		// TransactionRefIdUtil.encryptTransactionId(transcationUUID.toString());
+		// socketHandler.sendMessageToTransactionRefId(refId, data);
+		// } catch (IOException e) {
+		// logger.error("WS: socketHandler.sendMessageToUser - updateTransaction ERROR:
+		// " + e.toString());
+		// }
+		// }
+		// /////// DO INSERT TELEGRAM
+		// List<String> chatIds =
+		// telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
+		// if (chatIds != null && !chatIds.isEmpty()) {
+		// TelegramUtil telegramUtil = new TelegramUtil();
+		// // String telegramMsg2 = "Thanh toán thành công 🎉."
+		// // + "\nTài khoản: " + bankTypeEntity.getBankShortName() + " - "
+		// // + accountBankEntity.getBankAccount()
+		// // + "\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
+		// // + "\nMã giao dịch: " + dto.getReferencenumber()
+		// // + "\nThời gian: " + convertLongToDate(time)
+		// // + "\nNội dung: " + dto.getContent();
+		// // String telegramMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
+		// // + "| TK: " + bankTypeEntity.getBankShortName() + " - "
+		// // + accountBankEntity.getBankAccount()
+		// // + "| Ma GD: " + dto.getReferencenumber()
+		// // + "| ND: " + dto.getContent()
+		// // + "| " + convertLongToDate(time);
+		// String telegramMsg = prefix + nf.format(dto.getAmount()) + " VND"
+		// + " | TK: " + bankTypeEntity.getBankShortName() + " - "
+		// + accountBankEntity.getBankAccount()
+		// + " | " + convertLongToDate(time)
+		// + " | " + dto.getReferencenumber()
+		// + " | ND: " + dto.getContent();
 
-					for (String chatId : chatIds) {
-						telegramUtil.sendMsg(chatId, telegramMsg);
-					}
-				}
+		// for (String chatId : chatIds) {
+		// telegramUtil.sendMsg(chatId, telegramMsg);
+		// }
+		// }
 
-				/////// DO INSERT LARK
-				List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-				if (webhooks != null && !webhooks.isEmpty()) {
-					LarkUtil larkUtil = new LarkUtil();
-					// String larkMsg2 = "Thanh toán thành công 🎉."
-					// + "\\nTài khoản: " + bankTypeEntity.getBankShortName() + " - "
-					// + accountBankEntity.getBankAccount()
-					// + "\\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
-					// + "\\nMã giao dịch: " + dto.getReferencenumber()
-					// + "\\nThời gian: " + convertLongToDate(time)
-					// + "\\nNội dung: " + dto.getContent();
-					// String larkMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
-					// + "| TK: " + bankTypeEntity.getBankShortName() + " - "
-					// + accountBankEntity.getBankAccount()
-					// + "| Ma GD: " + dto.getReferencenumber()
-					// + "| ND: " + dto.getContent()
-					// + "| " + convertLongToDate(time);
-					String larkMsg = prefix + nf.format(dto.getAmount()) + " VND"
-							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-							+ accountBankEntity.getBankAccount()
-							+ " | " + convertLongToDate(time)
-							+ " | " + dto.getReferencenumber()
-							+ " | ND: " + dto.getContent();
-					for (String webhook : webhooks) {
-						larkUtil.sendMessageToLark(larkMsg, webhook);
-					}
-				}
-				// textToSpeechService.delete(requestId);
-			} else {
-				logger.info("transaction-sync - userIds empty.");
-			}
-			//
+		// /////// DO INSERT LARK
+		// List<String> webhooks =
+		// larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+		// if (webhooks != null && !webhooks.isEmpty()) {
+		// LarkUtil larkUtil = new LarkUtil();
+		// // String larkMsg2 = "Thanh toán thành công 🎉."
+		// // + "\\nTài khoản: " + bankTypeEntity.getBankShortName() + " - "
+		// // + accountBankEntity.getBankAccount()
+		// // + "\\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
+		// // + "\\nMã giao dịch: " + dto.getReferencenumber()
+		// // + "\\nThời gian: " + convertLongToDate(time)
+		// // + "\\nNội dung: " + dto.getContent();
+		// // String larkMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
+		// // + "| TK: " + bankTypeEntity.getBankShortName() + " - "
+		// // + accountBankEntity.getBankAccount()
+		// // + "| Ma GD: " + dto.getReferencenumber()
+		// // + "| ND: " + dto.getContent()
+		// // + "| " + convertLongToDate(time);
+		// String larkMsg = prefix + nf.format(dto.getAmount()) + " VND"
+		// + " | TK: " + bankTypeEntity.getBankShortName() + " - "
+		// + accountBankEntity.getBankAccount()
+		// + " | " + convertLongToDate(time)
+		// + " | " + dto.getReferencenumber()
+		// + " | ND: " + dto.getContent();
+		// for (String webhook : webhooks) {
+		// larkUtil.sendMessageToLark(larkMsg, webhook);
+		// }
+		// }
+		// // textToSpeechService.delete(requestId);
+		// } else {
+		// logger.info("transaction-sync - userIds empty.");
+		// }
+		// //
+		// } else {
+
+		// }
+
+		//
+		//
+		// insert notification
+		UUID notificationUUID = UUID.randomUUID();
+		NotificationEntity notiEntity = new NotificationEntity();
+		String prefix = "";
+		if (dto.getTransType().toUpperCase().equals("D")) {
+			prefix = "-";
 		} else {
-			//
-			//
-			// insert notification
-			UUID notificationUUID = UUID.randomUUID();
-			NotificationEntity notiEntity = new NotificationEntity();
-			String prefix = "";
-			if (dto.getTransType().toUpperCase().equals("D")) {
-				prefix = "-";
-			} else {
-				prefix = "+";
-			}
-			String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
+			prefix = "+";
+		}
+		String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
+				+ accountBankEntity.getBankAccount()
+				+ NotificationUtil.getNotiDescUpdateTransSuffix2()
+				+ prefix + nf.format(dto.getAmount())
+				+ NotificationUtil.getNotiDescUpdateTransSuffix4()
+				+ dto.getContent();
+		// String title = NotificationUtil.getNotiTitleNewTransaction();
+		notiEntity.setId(notificationUUID.toString());
+		notiEntity.setRead(false);
+		notiEntity.setMessage(message);
+		notiEntity.setTime(time);
+		notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
+		notiEntity.setUserId(accountBankEntity.getUserId());
+		notiEntity.setData(transcationUUID.toString());
+		notificationService.insertNotification(notiEntity);
+		List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+		fcmTokens = fcmTokenService.getFcmTokensByUserId(accountBankEntity.getUserId());
+		Map<String, String> data = new HashMap<>();
+		data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+		data.put("notificationId", notificationUUID.toString());
+		data.put("transactionReceiveId", transcationUUID.toString());
+		data.put("bankAccount", accountBankEntity.getBankAccount());
+		data.put("bankName", bankTypeEntity.getBankName());
+		data.put("bankCode", bankTypeEntity.getBankCode());
+		data.put("bankId", accountBankEntity.getId());
+		data.put("content", dto.getContent());
+		data.put("amount", "" + dto.getAmount());
+		data.put("time", "" + time);
+		data.put("refId", "" + dto.getTransactionid());
+		data.put("status", "1");
+		data.put("traceId", "");
+		data.put("transType", dto.getTransType());
+		firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
+				NotificationUtil
+						.getNotiTitleUpdateTransaction(),
+				message);
+		try {
+			// send msg to user
+			socketHandler.sendMessageToUser(accountBankEntity.getUserId(), data);
+			// send msg to QR Link
+			String refId = TransactionRefIdUtil.encryptTransactionId(transcationUUID.toString());
+			socketHandler.sendMessageToTransactionRefId(refId, data);
+		} catch (IOException e) {
+			logger.error("WS: socketHandler.sendMessageToUser - insertNewTransaction ERROR: " + e.toString());
+		}
+		/////// DO INSERT TELEGRAM
+		List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
+		if (chatIds != null && !chatIds.isEmpty()) {
+			TelegramUtil telegramUtil = new TelegramUtil();
+			// String telegramMsg2 = "Thanh toán thành công 🎉."
+			// + "\nTài khoản: " + bankTypeEntity.getBankShortName() + " - " +
+			// accountBankEntity.getBankAccount()
+			// + "\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
+			// + "\nMã giao dịch: " + dto.getReferencenumber()
+			// + "\nThời gian: " + convertLongToDate(time)
+			// + "\nNội dung: " + dto.getContent();
+			// String telegramMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
+			// + "| TK: " + bankTypeEntity.getBankShortName() + " - "
+			// + accountBankEntity.getBankAccount()
+			// + "| Ma GD: " + dto.getReferencenumber()
+			// + "| ND: " + dto.getContent()
+			// + "| " + convertLongToDate(time);
+			String telegramMsg = prefix + nf.format(dto.getAmount()) + " VND"
+					+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
 					+ accountBankEntity.getBankAccount()
-					+ NotificationUtil.getNotiDescUpdateTransSuffix2()
-					+ prefix + nf.format(dto.getAmount())
-					+ NotificationUtil.getNotiDescUpdateTransSuffix4()
-					+ dto.getContent();
-			// String title = NotificationUtil.getNotiTitleNewTransaction();
-			notiEntity.setId(notificationUUID.toString());
-			notiEntity.setRead(false);
-			notiEntity.setMessage(message);
-			notiEntity.setTime(time);
-			notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
-			notiEntity.setUserId(accountBankEntity.getUserId());
-			notiEntity.setData(transcationUUID.toString());
-			notificationService.insertNotification(notiEntity);
-			List<FcmTokenEntity> fcmTokens = new ArrayList<>();
-			fcmTokens = fcmTokenService.getFcmTokensByUserId(accountBankEntity.getUserId());
-			Map<String, String> data = new HashMap<>();
-			data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
-			data.put("notificationId", notificationUUID.toString());
-			data.put("transactionReceiveId", transcationUUID.toString());
-			data.put("bankAccount", accountBankEntity.getBankAccount());
-			data.put("bankName", bankTypeEntity.getBankName());
-			data.put("bankCode", bankTypeEntity.getBankCode());
-			data.put("bankId", accountBankEntity.getId());
-			data.put("branchName", "");
-			data.put("businessName", "");
-			data.put("content", dto.getContent());
-			data.put("amount", "" + dto.getAmount());
-			data.put("time", "" + time);
-			data.put("refId", "" + dto.getTransactionid());
-			data.put("status", "1");
-			data.put("traceId", "");
-			data.put("transType", dto.getTransType());
-			firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
-					NotificationUtil
-							.getNotiTitleUpdateTransaction(),
-					message);
-			try {
-				// send msg to user
-				socketHandler.sendMessageToUser(accountBankEntity.getUserId(), data);
-				// send msg to QR Link
-				String refId = TransactionRefIdUtil.encryptTransactionId(transcationUUID.toString());
-				socketHandler.sendMessageToTransactionRefId(refId, data);
-			} catch (IOException e) {
-				logger.error("WS: socketHandler.sendMessageToUser - insertNewTransaction ERROR: " + e.toString());
+					+ " | " + convertLongToDate(time)
+					+ " | " + dto.getReferencenumber()
+					+ " | ND: " + dto.getContent();
+			for (String chatId : chatIds) {
+				telegramUtil.sendMsg(chatId, telegramMsg);
 			}
-			/////// DO INSERT TELEGRAM
-			List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
-			if (chatIds != null && !chatIds.isEmpty()) {
-				TelegramUtil telegramUtil = new TelegramUtil();
-				// String telegramMsg2 = "Thanh toán thành công 🎉."
-				// + "\nTài khoản: " + bankTypeEntity.getBankShortName() + " - " +
-				// accountBankEntity.getBankAccount()
-				// + "\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
-				// + "\nMã giao dịch: " + dto.getReferencenumber()
-				// + "\nThời gian: " + convertLongToDate(time)
-				// + "\nNội dung: " + dto.getContent();
-				// String telegramMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
-				// + "| TK: " + bankTypeEntity.getBankShortName() + " - "
-				// + accountBankEntity.getBankAccount()
-				// + "| Ma GD: " + dto.getReferencenumber()
-				// + "| ND: " + dto.getContent()
-				// + "| " + convertLongToDate(time);
-				String telegramMsg = prefix + nf.format(dto.getAmount()) + " VND"
-						+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-						+ accountBankEntity.getBankAccount()
-						+ " | " + convertLongToDate(time)
-						+ " | " + dto.getReferencenumber()
-						+ " | ND: " + dto.getContent();
-				for (String chatId : chatIds) {
-					telegramUtil.sendMsg(chatId, telegramMsg);
-				}
-			}
+		}
 
-			/////// DO INSERT LARK
-			List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-			if (webhooks != null && !webhooks.isEmpty()) {
-				LarkUtil larkUtil = new LarkUtil();
-				// String larkMsg2 = "Thanh toán thành công 🎉."
-				// + "\\nTài khoản: " + bankTypeEntity.getBankShortName() + " - " +
-				// accountBankEntity.getBankAccount()
-				// + "\\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
-				// + "\\nMã giao dịch: " + dto.getReferencenumber()
-				// + "\\nThời gian: " + convertLongToDate(time)
-				// + "\\nNội dung: " + dto.getContent();
-				// String larkMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
-				// + "| TK: " + bankTypeEntity.getBankShortName() + " - "
-				// + accountBankEntity.getBankAccount()
-				// + "| Ma GD: " + dto.getReferencenumber()
-				// + "| ND: " + dto.getContent()
-				// + "| " + convertLongToDate(time);
-				String larkMsg = prefix + nf.format(dto.getAmount()) + " VND"
-						+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-						+ accountBankEntity.getBankAccount()
-						+ " | " + convertLongToDate(time)
-						+ " | " + dto.getReferencenumber()
-						+ " | ND: " + dto.getContent();
-				for (String webhook : webhooks) {
-					larkUtil.sendMessageToLark(larkMsg, webhook);
-				}
+		/////// DO INSERT LARK
+		List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+		if (webhooks != null && !webhooks.isEmpty()) {
+			LarkUtil larkUtil = new LarkUtil();
+			// String larkMsg2 = "Thanh toán thành công 🎉."
+			// + "\\nTài khoản: " + bankTypeEntity.getBankShortName() + " - " +
+			// accountBankEntity.getBankAccount()
+			// + "\\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
+			// + "\\nMã giao dịch: " + dto.getReferencenumber()
+			// + "\\nThời gian: " + convertLongToDate(time)
+			// + "\\nNội dung: " + dto.getContent();
+			// String larkMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
+			// + "| TK: " + bankTypeEntity.getBankShortName() + " - "
+			// + accountBankEntity.getBankAccount()
+			// + "| Ma GD: " + dto.getReferencenumber()
+			// + "| ND: " + dto.getContent()
+			// + "| " + convertLongToDate(time);
+			String larkMsg = prefix + nf.format(dto.getAmount()) + " VND"
+					+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+					+ accountBankEntity.getBankAccount()
+					+ " | " + convertLongToDate(time)
+					+ " | " + dto.getReferencenumber()
+					+ " | ND: " + dto.getContent();
+			for (String webhook : webhooks) {
+				larkUtil.sendMessageToLark(larkMsg, webhook);
 			}
 		}
 

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.vietqr.org.dto.AccountBankConnectBranchDTO;
 import com.vietqr.org.dto.AccountBankReceiveByCusSyncDTO;
+import com.vietqr.org.dto.AccountBankReceiveForNotiDTO;
 import com.vietqr.org.dto.AccountBankReceiveRPAItemDTO;
 import com.vietqr.org.dto.AccountBankWpDTO;
 import com.vietqr.org.dto.BusinessBankDTO;
@@ -18,7 +19,7 @@ public interface AccountBankReceiveService {
 
 	public void deleteAccountBank(String id);
 
-	public List<String> checkExistedBank(String bankAccount, String bankTypeId);
+	public String checkExistedBank(String bankAccount, String bankTypeId);
 
 	public AccountBankReceiveEntity getAccountBankById(String bankId);
 
@@ -73,4 +74,6 @@ public interface AccountBankReceiveService {
 	public String getUserIdByBankAccountAuthenticated(String bankAccount);
 
 	public Boolean getMMSActiveByBankId(String bankId);
+
+	public AccountBankReceiveForNotiDTO findAccountBankIden(String bankAccount, String bankTypeId);
 }
