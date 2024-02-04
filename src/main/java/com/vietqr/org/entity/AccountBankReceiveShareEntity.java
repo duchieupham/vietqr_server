@@ -24,6 +24,8 @@ public class AccountBankReceiveShareEntity implements Serializable {
     private boolean isOwner;
     @Column(name = "terminalId")
     private String terminalId;
+    @Column(name = "qrCode")
+    private String qrCode;
 
     public AccountBankReceiveShareEntity() {
         super();
@@ -76,9 +78,17 @@ public class AccountBankReceiveShareEntity implements Serializable {
         this.terminalId = terminalId;
     }
 
+    public String getQrCode() {
+        return qrCode;
+    }
+
+    public void setQrCode(String qrCode) {
+        this.qrCode = qrCode;
+    }
+
     @Override
     public String toString() {
         return "AccountBankReceiveShare [id=" + id + ", userId=" + userId + ", bankId=" + bankId
-                + ", isOwner=" + isOwner + ", TerminalId=" + terminalId + "]";
+                + ", isOwner=" + isOwner + ", terminalId=" + terminalId + ", qrCode=" + qrCode + "]";
     }
 }

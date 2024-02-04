@@ -1,7 +1,7 @@
 package com.vietqr.org.dto;
 
 public class TerminalShareDTO {
-    private String terminalId;
+    private String id;
 
     private String terminalName;
 
@@ -18,8 +18,8 @@ public class TerminalShareDTO {
     public TerminalShareDTO() {
     }
 
-    public TerminalShareDTO(String terminalId, String terminalName, int totalMembers, String terminalCode, String terminalAddress, boolean isDefault, String bankId) {
-        this.terminalId = terminalId;
+    public TerminalShareDTO(String id, String terminalName, int totalMembers, String terminalCode, String terminalAddress, boolean isDefault, String bankId) {
+        this.id = id;
         this.terminalName = terminalName;
         this.totalMembers = totalMembers;
         this.terminalCode = terminalCode;
@@ -36,12 +36,12 @@ public class TerminalShareDTO {
         this.bankId = bankId;
     }
 
-    public String getTerminalId() {
-        return terminalId;
+    public String getId() {
+        return id;
     }
 
-    public void setTerminalId(String terminalId) {
-        this.terminalId = terminalId;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getTerminalName() {

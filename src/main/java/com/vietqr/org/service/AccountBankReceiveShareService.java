@@ -33,8 +33,6 @@ public interface AccountBankReceiveShareService {
 
     public void removeBankAccountFromTerminal(String terminalId, String bankId);
 
-    List<TerminalBankResponseDTO> getTerminalBankByTerminalId(String id);
-
     List<ITerminalBankResponseDTO> getTerminalBanksByTerminalIds(List<String> terminalIds);
 
     List<IBankShareResponseDTO> getTerminalBankByUserId(String userId, int offset);
@@ -50,4 +48,6 @@ public interface AccountBankReceiveShareService {
     int countNumberOfTerminalBankShareByUserId(String userId);
 
     List<String> getUserIdsFromTerminalId(String terminalId, String userId);
+
+    List<TerminalBankReceiveDTO> getAccountBankReceiveShareByTerminalId(String userId, String terminalId);
 }

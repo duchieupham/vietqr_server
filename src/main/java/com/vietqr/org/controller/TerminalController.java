@@ -6,6 +6,7 @@ import com.vietqr.org.service.AccountBankReceiveShareService;
 import com.vietqr.org.service.TerminalService;
 import com.vietqr.org.util.FormatUtil;
 import com.vietqr.org.util.StringUtil;
+import com.vietqr.org.util.VietQRUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -86,6 +87,7 @@ public class TerminalController {
                         accountBankReceiveShareEntity.setUserId(userId);
                         accountBankReceiveShareEntity.setOwner(false);
                         accountBankReceiveShareEntity.setTerminalId(uuid.toString());
+                        accountBankReceiveShareEntity.setQrCode("");
                         entities.add(accountBankReceiveShareEntity);
                     }
                 }
@@ -96,6 +98,7 @@ public class TerminalController {
                         accountBankReceiveShareEntity.setBankId(bankId);
                         accountBankReceiveShareEntity.setUserId(dto.getUserId());
                         accountBankReceiveShareEntity.setOwner(true);
+                        accountBankReceiveShareEntity.setQrCode("");
                         accountBankReceiveShareEntity.setTerminalId(uuid.toString());
                         entities.add(accountBankReceiveShareEntity);
                     }
@@ -109,6 +112,7 @@ public class TerminalController {
                             accountBankReceiveShareEntity.setBankId(bankId);
                             accountBankReceiveShareEntity.setUserId(userId);
                             accountBankReceiveShareEntity.setOwner(false);
+                            accountBankReceiveShareEntity.setQrCode("");
                             accountBankReceiveShareEntity.setTerminalId(uuid.toString());
                             entities.add(accountBankReceiveShareEntity);
                         }
@@ -127,7 +131,7 @@ public class TerminalController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @PutMapping("terminal/update")
+    @PostMapping("terminal/update")
     public ResponseEntity<ResponseMessageDTO> updateTerminal(@Valid @RequestBody TerminalUpdateDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
@@ -155,6 +159,23 @@ public class TerminalController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("terminal/bank-account")
+    public ResponseEntity<List<TerminalBankReceiveDTO>> getBankAccountNotAvailable(
+            @Valid @RequestParam String terminalId,
+            @Valid @RequestParam String userId) {
+        List<TerminalBankReceiveDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            List<TerminalBankReceiveDTO> banks = accountBankReceiveShareService
+                    .getAccountBankReceiveShareByTerminalId(userId, terminalId);
+            result = banks;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @PostMapping("terminal/bank-account")
     public ResponseEntity<ResponseMessageDTO> insertBankAccountTerminal(@Valid @RequestBody TerminalBankInsertDTO dto) {
         ResponseMessageDTO result = null;
@@ -171,6 +192,7 @@ public class TerminalController {
                     accountBankReceiveShareEntity.setBankId(dto.getBankId());
                     accountBankReceiveShareEntity.setUserId(userId);
                     accountBankReceiveShareEntity.setOwner(false);
+                    accountBankReceiveShareEntity.setQrCode("");
                     accountBankReceiveShareEntity.setTerminalId(dto.getTerminalId());
                     entities.add(accountBankReceiveShareEntity);
                 }
@@ -181,6 +203,7 @@ public class TerminalController {
             accountBankReceiveShareEntity.setBankId(dto.getBankId());
             accountBankReceiveShareEntity.setUserId(dto.getUserId());
             accountBankReceiveShareEntity.setOwner(true);
+            accountBankReceiveShareEntity.setQrCode("");
             accountBankReceiveShareEntity.setTerminalId(dto.getTerminalId());
             entities.add(accountBankReceiveShareEntity);
             accountBankReceiveShareService.insertAccountBankReceiveShare(entities);
@@ -225,7 +248,6 @@ public class TerminalController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    // not done
     @GetMapping("terminal/detail/{terminalId}")
     public ResponseEntity<TerminalDetailResponseDTO> getTerminalById(@PathVariable String terminalId) {
         TerminalDetailResponseDTO result = null;
@@ -240,6 +262,7 @@ public class TerminalController {
             responseDTO.setUserId(dto.getUserId());
             responseDTO.setDefault(dto.getIsDefault());
             responseDTO.setTotalMember(dto.getTotalMember());
+            responseDTO.setQrCode("");
             List<String> terminalIds = new ArrayList<>();
             terminalIds.add(terminalId);
             List<ITerminalBankResponseDTO> iTerminalBankResponseDTOS = accountBankReceiveShareService.getTerminalBanksByTerminalIds(terminalIds);
@@ -421,7 +444,7 @@ public class TerminalController {
     private List<TerminalShareDTO> mapInterfToTerminalShare(List<ITerminalShareDTO> iTerminalShareDTOList) {
         List<TerminalShareDTO> terminalShareDTOS = iTerminalShareDTOList.stream().map(item -> {
             TerminalShareDTO terminalShareDTO = new TerminalShareDTO();
-            terminalShareDTO.setTerminalId(item.getTerminalId());
+            terminalShareDTO.setId(item.getTerminalId());
             terminalShareDTO.setBankId(item.getBankId());
             terminalShareDTO.setTerminalName(item.getTerminalName());
             terminalShareDTO.setTerminalCode(item.getTerminalCode());

@@ -41,6 +41,11 @@ public class AccountBankReceiveShareServiceImpl implements AccountBankReceiveSha
     }
 
     @Override
+    public List<TerminalBankReceiveDTO> getAccountBankReceiveShareByTerminalId(String userId, String terminalId) {
+        return repo.getAccountBankReceiveShareByTerminalId(userId, terminalId);
+    }
+
+    @Override
     public List<AccountBankReceiveShareDTO> getAccountBankReceiveShares(String userId) {
         return repo.getAccountBankReceiveShare(userId);
     }
@@ -93,11 +98,6 @@ public class AccountBankReceiveShareServiceImpl implements AccountBankReceiveSha
     @Override
     public void removeBankAccountFromTerminal(String terminalId, String bankId) {
         repo.removeBankAccountFromTerminal(terminalId, bankId);
-    }
-
-    @Override
-    public List<TerminalBankResponseDTO> getTerminalBankByTerminalId(String id) {
-        return null;
     }
 
     @Override

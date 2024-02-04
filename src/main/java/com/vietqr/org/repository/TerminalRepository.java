@@ -38,9 +38,13 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
     List<TerminalResponseInterfaceDTO> getTerminalsByUserId(@Param(value = "userId") String userId,
                                                             @Param(value = "offset") int offset);
 
-    @Query(value = "SELECT DISTINCT a.id as terminalId, a.name as terminalName, (count(DISTINCT b.user_id) + 1) as totalMembers, a.code as terminalCode, " +
+    @Query(value = "SELECT DISTINCT a.id as terminalId, a.name as terminalName, c.total as totalMembers, a.code as terminalCode, " +
             "a.address as terminalAddress, a.is_default as isDefault, b.bank_id as bankId "
             + "FROM terminal a "
+            + "INNER JOIN ( "
+            + "SELECT terminal_id, COUNT(DISTINCT user_id) as total "
+            + "FROM account_bank_receive_share WHERE terminal_id IS NOT NULL "
+            + "AND terminal_id != '' GROUP BY terminal_id) c ON a.id = c.terminal_id "
             + "INNER JOIN account_bank_receive_share b "
             + "ON a.id = b.terminal_id "
             + "WHERE b.bank_id IN :bankIds " +
@@ -48,18 +52,23 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             "GROUP BY a.id, b.bank_id ", nativeQuery = true)
     List<ITerminalShareDTO> getTerminalSharesByBankIds(List<String> bankIds, String userId);
 
-    @Query(value = "SELECT a.id as id, a.name as name, (count(DISTINCT b.user_id) + 1) as totalMembers, a.code as code, " +
+    @Query(value = "SELECT a.id as id, a.name as name, " +
+            "c.total as totalMembers, a.code as code, " +
             "a.address as address, a.is_default as isDefault, a.user_id as userId "
             + "FROM terminal a "
+            + "INNER JOIN ( "
+            + "SELECT terminal_id, COUNT(DISTINCT user_id) as total "
+            + "FROM account_bank_receive_share WHERE terminal_id IS NOT NULL "
+            + "AND terminal_id != '' GROUP BY terminal_id) c ON a.id = c.terminal_id "
             + "INNER JOIN account_bank_receive_share b "
             + "ON a.id = b.terminal_id "
-            + "WHERE a.user_id != :userId "
+            + "WHERE b.is_owner = false "
             + "AND b.user_id = :userId " +
             "GROUP BY b.terminal_id " +
             "LIMIT :offset, 20", nativeQuery = true)
     List<TerminalResponseInterfaceDTO> getTerminalsShareByUserId(String userId, int offset);
 
-    @Query(value = "SELECT count(CASE WHEN b.user_id = :userId THEN a.id END) FROM terminal a "
+    @Query(value = "SELECT count(DISTINCT CASE WHEN b.user_id = :userId THEN a.id END) FROM terminal a "
             + "INNER JOIN account_bank_receive_share b "
             + "ON a.id = b.terminal_id "
             + "WHERE a.user_id != :userId "

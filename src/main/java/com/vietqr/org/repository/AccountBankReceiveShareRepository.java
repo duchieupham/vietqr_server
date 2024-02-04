@@ -14,7 +14,7 @@ import java.util.List;
 @Repository
 public interface AccountBankReceiveShareRepository
         extends JpaRepository<AccountBankReceiveShareEntity, Long> {
-    @Query(value = "SELECT a.bank_id as bankId, b.bank_account as bankAccount, b.bank_account_name as userBankName, " +
+    @Query(value = "SELECT DISTINCT a.bank_id as bankId, b.bank_account as bankAccount, b.bank_account_name as userBankName, " +
             "c.bank_name as bankName, c.bank_short_name as bankShortName, b.phone_authenticated as phoneAuthenticated, " +
             " c.bank_code as bankCode, c.img_id as imgId, b.type as bankType, b.is_authenticated as authenticated, " +
             "b.user_id as userId, a.is_owner as isOwner , c.status as bankTypeStatus, c.id as bankTypeId, " +
@@ -77,7 +77,7 @@ public interface AccountBankReceiveShareRepository
             + "LIMIT 1", nativeQuery = true)
     String checkUserExistedFromTerminal(String terminalId, String userId);
 
-    @Query(value = "SELECT a.id, a.phone_no as phoneNo, b.first_name as firstName, "
+    @Query(value = "SELECT DISTINCT a.id, a.phone_no as phoneNo, b.first_name as firstName, "
             + "b.middle_name as middleName, b.last_name as lastName, b.img_id as imgId, c.is_owner as isOwner "
             + "FROM account_login a "
             + "INNER JOIN account_information b "
@@ -92,18 +92,6 @@ public interface AccountBankReceiveShareRepository
     @Query(value = "DELETE FROM account_bank_receive_share " +
             "WHERE terminal_id = :terminalId AND bank_id = :bankId", nativeQuery = true)
     void removeBankAccountFromTerminal(String terminalId, String bankId);
-
-    @Query(value = "SELECT c.id as bankId, d.bank_name as bankName, d.bank_code as bankCode, c.bank_account as bankAccount, c.bank_account_name as userBankName, " +
-            "d.bank_short_name as bankShortName, d.img_id as imgId "
-            + "FROM terminal a "
-            + "INNER JOIN account_bank_receive_share b "
-            + "ON a.id = b.terminal_id "
-            + "INNER JOIN account_bank_receive c "
-            + "ON c.id = b.bank_id " +
-            "INNER JOIN bank_type d " +
-            "ON d.id = c.bank_type_id "
-            + "WHERE b.terminal_id = :terminalId", nativeQuery = true)
-    List<TerminalBankResponseDTO> getTerminalBankByTerminalId(String terminalId);
 
     @Query(value = "SELECT DISTINCT b.terminal_id as terminalId, c.id as bankId, d.bank_name as bankName, d.bank_code as bankCode, c.bank_account as bankAccount, c.bank_account_name as userBankName, " +
             "d.bank_short_name as bankShortName, d.img_id as imgId "
@@ -125,13 +113,13 @@ public interface AccountBankReceiveShareRepository
             "ON a.id = b.bank_id " +
             "INNER JOIN bank_type c " +
             "ON a.bank_type_id = c.id " +
-            "WHERE b.user_id = :userId " +
+            "WHERE b.user_id = :userId AND b.is_owner = true " +
             "AND b.terminal_id IS NOT NULL AND b.terminal_id != '' " +
             "LIMIT :offset, 20", nativeQuery = true)
     List<IBankShareResponseDTO> findBankShareByUserId(String userId, int offset);
 
     @Query(value = "SELECT count(distinct bank_id) FROM account_bank_receive_share " +
-            "WHERE user_id = :userId " +
+            "WHERE user_id = :userId AND is_owner = true " +
             "AND terminal_id IS NOT NULL AND terminal_id != '' ", nativeQuery = true)
     int countNumberOfBankShareByUserId(String userId);
 
@@ -139,7 +127,7 @@ public interface AccountBankReceiveShareRepository
             "WHERE terminal_id = :terminalId", nativeQuery = true)
     List<String> getBankIdsFromTerminalId(@Param("terminalId") String terminalId);
 
-    @Query(value = "SELECT count(CASE WHEN a.user_id = :userId THEN a.bank_id END) FROM account_bank_receive_share a " +
+    @Query(value = "SELECT count(DISTINCT CASE WHEN a.user_id = :userId AND a.bank_id != '' THEN a.bank_id END) FROM account_bank_receive_share a " +
             "INNER JOIN terminal b " +
             "ON a.terminal_id = b.id " +
             "WHERE b.user_id != :userId " +
@@ -165,4 +153,16 @@ public interface AccountBankReceiveShareRepository
     @Query(value = "SELECT DISTINCT user_id FROM account_bank_receive_share " +
             "WHERE terminal_id = :terminalId AND user_id != :userId", nativeQuery = true)
     List<String> getUserIdsFromTerminalId(String terminalId, String userId);
+
+    @Query(value = "SELECT DISTINCT b.id as bankId, b.bank_account as bankAccount, b.bank_account_name as userBankName, "
+            + "c.bank_name as bankName, c.bank_short_name as bankShortName, "
+            + " c.bank_code as bankCode, c.img_id as imgId, "
+            + "b.user_id as userId "
+            + "FROM account_bank_receive b "
+            + "INNER JOIN bank_type c "
+            + "ON b.bank_type_id = c.id "
+            + "WHERE b.user_id = :userId AND b.id NOT IN "
+            + "(SELECT a.bank_id FROM account_bank_receive_share a WHERE a.terminal_id = :terminalId AND a.terminal_id IS NOT NULL AND a.terminal_id != '') "
+            + "AND b.is_authenticated = true ", nativeQuery = true)
+    List<TerminalBankReceiveDTO> getAccountBankReceiveShareByTerminalId(String userId, String terminalId);
 }

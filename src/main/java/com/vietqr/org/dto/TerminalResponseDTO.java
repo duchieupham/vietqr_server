@@ -1,6 +1,5 @@
 package com.vietqr.org.dto;
 
-import java.io.Serializable;
 import java.util.List;
 
 public class TerminalResponseDTO implements TerminalResponseInterfaceDTO {

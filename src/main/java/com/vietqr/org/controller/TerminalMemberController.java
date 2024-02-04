@@ -35,6 +35,17 @@ public class TerminalMemberController {
         try {
             List<String> bankIds = accountBankReceiveShareService.getBankIdsFromTerminalId(dto.getTerminalId());
             List<AccountBankReceiveShareEntity> entities = new ArrayList<>();
+            // add member to group terminal
+            AccountBankReceiveShareEntity entityMember = new AccountBankReceiveShareEntity();
+            entityMember.setId(UUID.randomUUID().toString());
+            entityMember.setBankId("");
+            entityMember.setUserId(dto.getUserId());
+            entityMember.setOwner(false);
+            entityMember.setQrCode("");
+            entityMember.setTerminalId(dto.getTerminalId());
+            entities.add(entityMember);
+
+            // share bank to member
             if (!FormatUtil.isListNullOrEmpty(bankIds)) {
                 for (String bankId : bankIds) {
                     AccountBankReceiveShareEntity entity = new AccountBankReceiveShareEntity();
@@ -42,17 +53,10 @@ public class TerminalMemberController {
                     entity.setBankId(bankId);
                     entity.setUserId(dto.getUserId());
                     entity.setOwner(false);
+                    entity.setQrCode("");
                     entity.setTerminalId(dto.getTerminalId());
                     entities.add(entity);
                 }
-            } else {
-                AccountBankReceiveShareEntity entity = new AccountBankReceiveShareEntity();
-                entity.setId(UUID.randomUUID().toString());
-                entity.setBankId("");
-                entity.setUserId(dto.getUserId());
-                entity.setOwner(false);
-                entity.setTerminalId(dto.getTerminalId());
-                entities.add(entity);
             }
 
             accountBankReceiveShareService.insertAccountBankReceiveShare(entities);
