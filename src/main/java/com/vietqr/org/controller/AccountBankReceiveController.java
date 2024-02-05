@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -44,6 +45,9 @@ public class AccountBankReceiveController {
 
 	@Autowired
 	AccountBankReceiveService accountBankReceiveService;
+
+	@Autowired
+	TerminalService terminalService;
 
 	@Autowired
 	BankTypeService bankTypeService;
@@ -700,6 +704,37 @@ public class AccountBankReceiveController {
 		} catch (Exception e) {
 			System.out.println(e.toString());
 			logger.error(e.toString());
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	private List<TerminalResponseDTO> mapInterfToTerminalResponse(List<TerminalResponseInterfaceDTO> terminalInters) {
+		List<TerminalResponseDTO> terminals = terminalInters.stream().map(item -> {
+			TerminalResponseDTO terminalResponseDTO = new TerminalResponseDTO();
+			terminalResponseDTO.setId(item.getId());
+			terminalResponseDTO.setName(item.getName());
+			terminalResponseDTO.setAddress(item.getAddress());
+			terminalResponseDTO.setCode(item.getCode());
+			terminalResponseDTO.setDefault(item.getIsDefault());
+			terminalResponseDTO.setUserId(item.getUserId());
+			terminalResponseDTO.setTotalMembers(item.getTotalMembers());
+			return terminalResponseDTO;
+		}).collect(Collectors.toList());
+		return terminals;
+	}
+
+	@GetMapping("account-bank/terminal")
+	public ResponseEntity<List<TerminalCodeResponseDTO>> getTerminalsOfBank(
+			@Valid @RequestParam String userId,
+			@Valid @RequestParam String bankId) {
+		List<TerminalCodeResponseDTO> result = new ArrayList<>();
+		HttpStatus httpStatus = null;
+		try {
+			List<TerminalCodeResponseDTO> terminalInters = terminalService.getTerminalsByUserIdAndBankId(userId, bankId);
+			result = terminalInters;
+			httpStatus = HttpStatus.OK;
+		} catch (Exception e) {
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(result, httpStatus);

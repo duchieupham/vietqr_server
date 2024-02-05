@@ -3,6 +3,7 @@ package com.vietqr.org.service;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.TerminalEntity;
 import org.jvnet.hk2.annotations.Service;
+
 import java.util.List;
 
 @Service
@@ -28,6 +29,8 @@ public interface TerminalService {
     TerminalEntity findTerminalById(String id);
 
     List<TerminalResponseInterfaceDTO> getTerminalsByUserIdAndBankId(String userId, String bankId, int offset);
+
+    List<TerminalCodeResponseDTO> getTerminalsByUserIdAndBankId(String userId, String bankId);
 
     int countNumberOfTerminalByUserIdAndBankId(String userId, String bankId);
 }
