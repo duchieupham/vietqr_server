@@ -26,4 +26,8 @@ public interface TerminalService {
     int countNumberOfTerminalShareByUserId(String userId);
 
     TerminalEntity findTerminalById(String id);
+
+    List<TerminalResponseInterfaceDTO> getTerminalsByUserIdAndBankId(String userId, String bankId, int offset);
+
+    int countNumberOfTerminalByUserIdAndBankId(String userId, String bankId);
 }

@@ -63,4 +63,14 @@ public class TerminalServiceImpl implements TerminalService {
         return repo.findTerminalById(id);
     }
 
+    @Override
+    public List<TerminalResponseInterfaceDTO> getTerminalsByUserIdAndBankId(String userId, String bankId, int offset) {
+        return repo.getTerminalsByUserIdAndBankId(userId, bankId, offset);
+    }
+
+    @Override
+    public int countNumberOfTerminalByUserIdAndBankId(String userId, String bankId) {
+        return repo.countNumberOfTerminalByUserIdAndBankId(userId, bankId);
+    }
+
 }
