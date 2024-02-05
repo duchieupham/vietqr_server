@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -731,7 +730,8 @@ public class AccountBankReceiveController {
 		List<TerminalCodeResponseDTO> result = new ArrayList<>();
 		HttpStatus httpStatus = null;
 		try {
-			List<TerminalCodeResponseDTO> terminalInters = terminalService.getTerminalsByUserIdAndBankId(userId, bankId);
+			List<TerminalCodeResponseDTO> terminalInters = terminalService.getTerminalsByUserIdAndBankId(userId,
+					bankId);
 			result = terminalInters;
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {

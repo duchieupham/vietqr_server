@@ -16,8 +16,8 @@ import org.bouncycastle.util.io.pem.PemReader;
 
 public class JwsUtil {
 
-    static String path = "keyRSABIDVUAT/";
-    // static String path = "/opt/keyRSABIDVUAT/";
+    // static String path = "keyRSABIDVUAT/";
+    static String path = "/opt/keyRSABIDVUAT/";
 
     public static byte[] hexStringToBytes(String s) {
         byte[] ans = new byte[s.length() / 2];
@@ -45,20 +45,6 @@ public class JwsUtil {
             return privateKey;
         }
     }
-
-    // public static PrivateKey getClientXCertificate()
-    // throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
-    // KeyFactory factory = KeyFactory.getInstance("RSA");
-    // File file = new File(path + "certificate.pem");
-    // try (FileReader keyReader = new FileReader(file); PemReader pemReader = new
-    // PemReader(keyReader)) {
-    // PemObject pemObject = pemReader.readPemObject();
-    // byte[] content = pemObject.getContent();
-    // PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(content);
-    // PrivateKey privateKey = factory.generatePrivate(privateKeySpec);
-    // return privateKey;
-    // }
-    // }
 
     public static String getClientXCertificate() throws IOException {
         BufferedReader reader = null;
@@ -111,9 +97,9 @@ public class JwsUtil {
         StringBuilder sb = new StringBuilder();
 
         try {
-            // File file = new File(path + "/merchant/request-add.txt");
+            File file = new File(path + "/merchant/request-add.txt");
             // File file = new File(path + "/merchant/confirm-add.txt");
-            File file = new File(path + "/merchant/create-vietqr.txt");
+            // File file = new File(path + "/merchant/create-vietqr.txt");
 
             ///
             // File file = new File(path + "confirm-add.txt");
