@@ -176,6 +176,45 @@ public class TerminalController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("terminal/bank")
+    public ResponseEntity<TerminalShareResponseDTO> getTerminalsOfBank(
+            @Valid @RequestParam String userId,
+            @Valid @RequestParam String bankId,
+            @Valid @RequestParam int offset) {
+        TerminalShareResponseDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            TerminalShareResponseDTO dto = new TerminalShareResponseDTO();
+            List<TerminalResponseInterfaceDTO> terminalInters = terminalService.getTerminalsByUserIdAndBankId(userId, bankId, offset);
+            List<TerminalResponseDTO> terminals = mapInterfToTerminalResponse(terminalInters);
+            int total = terminalService.countNumberOfTerminalByUserIdAndBankId(userId, bankId);
+            dto.setTotalTerminals(total);
+            dto.setUserId(userId);
+
+            // Fetch all banks associated with the terminals in a single database call
+            List<ITerminalBankResponseDTO> allBankInters = accountBankReceiveShareService.getTerminalBanksByTerminalIds(
+                    terminals.stream().map(TerminalResponseInterfaceDTO::getId).collect(Collectors.toList())
+            );
+            List<TerminalBankResponseDTO> allBanks = mapInterfTerminalBankToDto(allBankInters);
+
+            // Map the banks to the respective terminals
+            Map<String, List<TerminalBankResponseDTO>> terminalBanksMap = allBanks.stream()
+                    .collect(Collectors.groupingBy(TerminalBankResponseDTO::getTerminalId));
+
+            terminals.forEach(terminal -> {
+                terminal.setBanks(terminalBanksMap.getOrDefault(terminal.getId(), new ArrayList<>()));
+            });
+            dto.setTerminals(terminals);
+
+            result = dto;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+
     @PostMapping("terminal/bank-account")
     public ResponseEntity<ResponseMessageDTO> insertBankAccountTerminal(@Valid @RequestBody TerminalBankInsertDTO dto) {
         ResponseMessageDTO result = null;

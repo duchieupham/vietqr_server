@@ -84,4 +84,25 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
 
     @Query(value = "SELECT * FROM terminal WHERE id = :id", nativeQuery = true)
     TerminalEntity findTerminalById(String id);
+
+    @Query(value = "SELECT a.id as id, c.total as totalMembers, " +
+            "a.name as name, a.address as address, " +
+            "a.code as code, a.is_default as isDefault, a.user_id as userId " +
+            "FROM terminal a " +
+            "INNER JOIN ( "
+            + "SELECT terminal_id, COUNT(DISTINCT user_id) as total "
+            + "FROM account_bank_receive_share WHERE terminal_id IS NOT NULL "
+            + "AND terminal_id != '' GROUP BY terminal_id) c ON a.id = c.terminal_id " +
+            "INNER JOIN account_bank_receive_share b " +
+            "ON b.terminal_id = a.id " +
+            "WHERE b.user_id = :userId " +
+            "AND b.bank_id = :bankId " +
+            "GROUP BY b.terminal_id " +
+            "LIMIT :offset, 20", nativeQuery = true)
+    List<TerminalResponseInterfaceDTO> getTerminalsByUserIdAndBankId(String userId, String bankId, int offset);
+
+    @Query(value = "SELECT COUNT(DISTINCT terminal_id) FROM account_bank_receive_share " +
+            "WHERE user_id = :userId AND bank_id = :bankId AND terminal_id IS NOT NULL " +
+            "AND terminal_id != ''", nativeQuery = true)
+    int countNumberOfTerminalByUserIdAndBankId(String userId, String bankId);
 }
