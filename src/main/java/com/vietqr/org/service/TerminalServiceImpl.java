@@ -69,6 +69,11 @@ public class TerminalServiceImpl implements TerminalService {
     }
 
     @Override
+    public List<TerminalCodeResponseDTO> getTerminalsByUserIdAndBankId(String userId, String bankId) {
+        return repo.getTerminalsByUserIdAndBankId(userId, bankId);
+    }
+
+    @Override
     public int countNumberOfTerminalByUserIdAndBankId(String userId, String bankId) {
         return repo.countNumberOfTerminalByUserIdAndBankId(userId, bankId);
     }

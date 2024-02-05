@@ -101,6 +101,18 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             "LIMIT :offset, 20", nativeQuery = true)
     List<TerminalResponseInterfaceDTO> getTerminalsByUserIdAndBankId(String userId, String bankId, int offset);
 
+    @Query(value = "SELECT a.id as terminalId, " +
+            "a.name as terminalName, a.address as terminalAddress, " +
+            "a.code as terminalCode, a.user_id as userId " +
+            "FROM terminal a " +
+            "INNER JOIN account_bank_receive_share b " +
+            "ON b.terminal_id = a.id " +
+            "WHERE b.user_id = :userId " +
+            "AND b.bank_id = :bankId " +
+            "GROUP BY b.terminal_id ", nativeQuery = true)
+    List<TerminalCodeResponseDTO> getTerminalsByUserIdAndBankId(String userId, String bankId);
+
+
     @Query(value = "SELECT COUNT(DISTINCT terminal_id) FROM account_bank_receive_share " +
             "WHERE user_id = :userId AND bank_id = :bankId AND terminal_id IS NOT NULL " +
             "AND terminal_id != ''", nativeQuery = true)
