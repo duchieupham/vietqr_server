@@ -16,8 +16,8 @@ import org.bouncycastle.util.io.pem.PemReader;
 
 public class JwsUtil {
 
-    // static String path = "keyRSABIDVUAT/";
-    static String path = "/opt/keyRSABIDVUAT/";
+    static String path = "keyRSABIDVUAT/";
+    // static String path = "/opt/keyRSABIDVUAT/";
 
     public static byte[] hexStringToBytes(String s) {
         byte[] ans = new byte[s.length() / 2];
@@ -97,9 +97,10 @@ public class JwsUtil {
         StringBuilder sb = new StringBuilder();
 
         try {
-            File file = new File(path + "/merchant/request-add.txt");
+            // File file = new File(path + "/merchant/request-add.txt");
             // File file = new File(path + "/merchant/confirm-add.txt");
             // File file = new File(path + "/merchant/create-vietqr.txt");
+            File file = new File(path + "/merchant/unregister.txt");
 
             ///
             // File file = new File(path + "confirm-add.txt");
