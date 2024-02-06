@@ -1,12 +1,17 @@
 package com.vietqr.org.controller;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.dto.mb.VietQRStaticMMSRequestDTO;
 import com.vietqr.org.entity.*;
+import com.vietqr.org.service.AccountBankReceiveService;
 import com.vietqr.org.service.AccountBankReceiveShareService;
+import com.vietqr.org.service.TerminalBankService;
 import com.vietqr.org.service.TerminalService;
 import com.vietqr.org.util.FormatUtil;
 import com.vietqr.org.util.StringUtil;
 import com.vietqr.org.util.VietQRUtil;
+import com.vietqr.org.util.bank.mb.MBTokenUtil;
+import com.vietqr.org.util.bank.mb.MBVietQRUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,10 +22,7 @@ import javax.validation.Valid;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -35,7 +37,13 @@ public class TerminalController {
     private TerminalService terminalService;
 
     @Autowired
+    private AccountBankReceiveService accountBankReceiveService;
+
+    @Autowired
     private AccountBankReceiveShareService accountBankReceiveShareService;
+
+    @Autowired
+    private TerminalBankService terminalBankService;
 
     @GetMapping("terminal/generate-code")
     public ResponseEntity<ResponseDataDTO> generateTerminalCode() {
@@ -58,7 +66,7 @@ public class TerminalController {
         HttpStatus httpStatus = null;
         try {
             UUID uuid = UUID.randomUUID();
-
+            Map<String, QRStaticCreateDTO> qrMap = new HashMap<>();
             //return terminal id if the code is existed
             String checkExistedCode = terminalService.checkExistedTerminal(dto.getCode());
             if (!StringUtil.isNullOrEmpty(checkExistedCode)) {
@@ -98,8 +106,36 @@ public class TerminalController {
                         accountBankReceiveShareEntity.setBankId(bankId);
                         accountBankReceiveShareEntity.setUserId(dto.getUserId());
                         accountBankReceiveShareEntity.setOwner(true);
-                        accountBankReceiveShareEntity.setQrCode("");
                         accountBankReceiveShareEntity.setTerminalId(uuid.toString());
+                        AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService.getAccountBankById(bankId);
+                        if (accountBankReceiveEntity != null) {
+                            // luồng ưu tiên
+                            if (!accountBankReceiveEntity.isMmsActive()) {
+                                TerminalBankEntity terminalBankEntity =
+                                        terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
+                                if (terminalBankEntity != null && "MB".equals(terminalBankEntity.getBankCode())) {
+                                    String qr = MBVietQRUtil.generateStaticVietQRMMS(
+                                            new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
+                                            terminalBankEntity.getTerminalId(), ""));
+                                    accountBankReceiveShareEntity.setQrCode(qr);
+                                    String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
+                                    accountBankReceiveShareEntity.setTraceTransfer(traceTransfer);
+                                    qrMap.put(bankId, new QRStaticCreateDTO(qr, traceTransfer));
+                                } else {
+                                    logger.error("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
+                                }
+                            } else {
+                                // luồng thuong
+                                String qrCodeContent = "SQR" + dto.getCode();
+                                String bankAccount = accountBankReceiveEntity.getBankAccount();
+                                String caiValue = accountBankReceiveService.getCaiValueByBankId(bankId);
+                                VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", qrCodeContent, bankAccount);
+                                String qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
+                                accountBankReceiveShareEntity.setQrCode(qr);
+                                accountBankReceiveShareEntity.setTraceTransfer("");
+                                qrMap.put(bankId, new QRStaticCreateDTO(qr, ""));
+                            }
+                        }
                         entities.add(accountBankReceiveShareEntity);
                     }
                 }
@@ -112,7 +148,11 @@ public class TerminalController {
                             accountBankReceiveShareEntity.setBankId(bankId);
                             accountBankReceiveShareEntity.setUserId(userId);
                             accountBankReceiveShareEntity.setOwner(false);
-                            accountBankReceiveShareEntity.setQrCode("");
+                            QRStaticCreateDTO qrStaticCreateDTO = qrMap.get(bankId);
+                            if (qrStaticCreateDTO != null) {
+                                accountBankReceiveShareEntity.setTraceTransfer(qrStaticCreateDTO.getTraceTransfer());
+                                accountBankReceiveShareEntity.setQrCode(qrStaticCreateDTO.getQrCode());
+                            }
                             accountBankReceiveShareEntity.setTerminalId(uuid.toString());
                             entities.add(accountBankReceiveShareEntity);
                         }
@@ -231,7 +271,35 @@ public class TerminalController {
                     accountBankReceiveShareEntity.setBankId(dto.getBankId());
                     accountBankReceiveShareEntity.setUserId(userId);
                     accountBankReceiveShareEntity.setOwner(false);
-                    accountBankReceiveShareEntity.setQrCode("");
+                    AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService.getAccountBankById(dto.getBankId());
+                    if (accountBankReceiveEntity != null) {
+                        // luồng thường
+                        TerminalEntity terminalEntity = terminalService.findTerminalById(dto.getTerminalId());
+                        if (!accountBankReceiveEntity.isMmsActive()) {
+                            String qrCodeContent = "SQR" + terminalEntity.getCode();
+                            String bankAccount = accountBankReceiveEntity.getBankAccount();
+                            String caiValue = accountBankReceiveService.getCaiValueByBankId(dto.getBankId());
+                            VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", qrCodeContent, bankAccount);
+                            String qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
+                            accountBankReceiveShareEntity.setQrCode(qr);
+                            accountBankReceiveShareEntity.setTraceTransfer("");
+                        } else {
+                            // luồng ưu tien
+                            TerminalBankEntity terminalBankEntity =
+                                    terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
+                            if (terminalBankEntity != null && "MB".equals(terminalBankEntity.getBankCode())) {
+                                String qr = MBVietQRUtil.generateStaticVietQRMMS(
+                                        new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
+                                                terminalBankEntity.getTerminalId(), ""));
+                                accountBankReceiveShareEntity.setQrCode(qr);
+                                String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
+                                accountBankReceiveShareEntity.setTraceTransfer(traceTransfer);
+                            } else {
+                                logger.error("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
+                            }
+
+                        }
+                    }
                     accountBankReceiveShareEntity.setTerminalId(dto.getTerminalId());
                     entities.add(accountBankReceiveShareEntity);
                 }

@@ -33,4 +33,10 @@ public interface TerminalService {
     List<TerminalCodeResponseDTO> getTerminalsByUserIdAndBankId(String userId, String bankId);
 
     int countNumberOfTerminalByUserIdAndBankId(String userId, String bankId);
+
+    List<String> getUserIdsByTerminalCode(String terminalCode);
+
+    TerminalEntity getTerminalByTerminalCode(String terminalCode, String bankAccount);
+
+    String getTerminalByTraceTransfer(String traceTransfer);
 }

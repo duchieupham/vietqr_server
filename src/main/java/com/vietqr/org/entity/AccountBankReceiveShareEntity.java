@@ -26,16 +26,29 @@ public class AccountBankReceiveShareEntity implements Serializable {
     private String terminalId;
     @Column(name = "qrCode")
     private String qrCode;
+    @Column(name = "traceTransfer")
+    private String traceTransfer;
 
     public AccountBankReceiveShareEntity() {
         super();
     }
 
-    public AccountBankReceiveShareEntity(String id, String userId, String bankId, boolean isOwner) {
+    public AccountBankReceiveShareEntity(String id, String userId, String bankId, boolean isOwner, String terminalId, String qrCode, String traceTransfer) {
         this.id = id;
         this.userId = userId;
         this.bankId = bankId;
         this.isOwner = isOwner;
+        this.terminalId = terminalId;
+        this.qrCode = qrCode;
+        this.traceTransfer = traceTransfer;
+    }
+
+    public String getTraceTransfer() {
+        return traceTransfer;
+    }
+
+    public void setTraceTransfer(String traceTransfer) {
+        this.traceTransfer = traceTransfer;
     }
 
     public String getId() {

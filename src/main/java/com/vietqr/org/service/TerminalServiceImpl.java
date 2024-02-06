@@ -78,4 +78,19 @@ public class TerminalServiceImpl implements TerminalService {
         return repo.countNumberOfTerminalByUserIdAndBankId(userId, bankId);
     }
 
+    @Override
+    public List<String> getUserIdsByTerminalCode(String terminalCode) {
+        return repo.getUserIdsByTerminalCode(terminalCode);
+    }
+
+    @Override
+    public TerminalEntity getTerminalByTerminalCode(String terminalCode, String bankAccount) {
+        return repo.getTerminalByTerminalCodeAndBankAccount(terminalCode, bankAccount);
+    }
+
+    @Override
+    public String getTerminalByTraceTransfer(String traceTransfer) {
+        return repo.getTerminalByTraceTransfer(traceTransfer);
+    }
+
 }

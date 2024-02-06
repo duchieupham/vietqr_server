@@ -209,15 +209,15 @@ public class TransactionWalletController {
                     transactionReceiveEntity.setNote("");
                     transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
                     // insert transaction branch
-                    if (businessId != null && branchId != null && !businessId.trim().isEmpty()
-                            && !branchId.trim().isEmpty()) {
-                        TransactionReceiveBranchEntity transactionReceiveBranchEntity = new TransactionReceiveBranchEntity();
-                        transactionReceiveBranchEntity.setId(transcationReceiveBranchUUID.toString());
-                        transactionReceiveBranchEntity.setBusinessId(businessId);
-                        transactionReceiveBranchEntity.setBranchId(branchId);
-                        transactionReceiveBranchEntity.setTransactionReceiveId(transReceiveUUID.toString());
-                        transactionReceiveBranchService.insertTransactionReceiveBranch(transactionReceiveBranchEntity);
-                    }
+//                    if (businessId != null && branchId != null && !businessId.trim().isEmpty()
+//                            && !branchId.trim().isEmpty()) {
+//                        TransactionReceiveBranchEntity transactionReceiveBranchEntity = new TransactionReceiveBranchEntity();
+//                        transactionReceiveBranchEntity.setId(transcationReceiveBranchUUID.toString());
+//                        transactionReceiveBranchEntity.setBusinessId(businessId);
+//                        transactionReceiveBranchEntity.setBranchId(branchId);
+//                        transactionReceiveBranchEntity.setTransactionReceiveId(transReceiveUUID.toString());
+//                        transactionReceiveBranchService.insertTransactionReceiveBranch(transactionReceiveBranchEntity);
+//                    }
                     // insert transaction_wallet
                     TransactionWalletEntity transactionWalletEntity = new TransactionWalletEntity();
                     transactionWalletEntity.setId(transWalletUUID.toString());

@@ -165,7 +165,6 @@ public class MemberAccountBankReceiveController {
                 result = new ResponseMessageDTO("SUCCESS", "");
                 httpStatus = HttpStatus.OK;
                 // push notification
-                // có thể bị ảnh hưởng do đã xóa khái niệm doanh nghiệp
                 LocalDateTime currentDateTime = LocalDateTime.now();
                 long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
                 UUID notificationUUID = UUID.randomUUID();

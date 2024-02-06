@@ -33,7 +33,6 @@ import com.vietqr.org.entity.BankTypeEntity;
 import com.vietqr.org.entity.CarrierTypeEntity;
 import com.vietqr.org.entity.FcmTokenEntity;
 import com.vietqr.org.entity.NotificationEntity;
-import com.vietqr.org.entity.TransactionReceiveBranchEntity;
 import com.vietqr.org.entity.TransactionReceiveEntity;
 import com.vietqr.org.entity.TransactionWalletEntity;
 import com.vietqr.org.service.AccountWalletService;
@@ -355,17 +354,17 @@ public class VNPTEpayController {
                                     transactionReceiveEntity.setNote("");
                                     transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
                                     // insert transaction branch
-                                    if (businessId != null && branchId != null && !businessId.trim().isEmpty()
-                                            && !branchId.trim().isEmpty()) {
-                                        TransactionReceiveBranchEntity transactionReceiveBranchEntity = new TransactionReceiveBranchEntity();
-                                        transactionReceiveBranchEntity.setId(transcationReceiveBranchUUID.toString());
-                                        transactionReceiveBranchEntity.setBusinessId(businessId);
-                                        transactionReceiveBranchEntity.setBranchId(branchId);
-                                        transactionReceiveBranchEntity
-                                                .setTransactionReceiveId(transReceiveUUID.toString());
-                                        transactionReceiveBranchService
-                                                .insertTransactionReceiveBranch(transactionReceiveBranchEntity);
-                                    }
+//                                    if (businessId != null && branchId != null && !businessId.trim().isEmpty()
+//                                            && !branchId.trim().isEmpty()) {
+//                                        TransactionReceiveBranchEntity transactionReceiveBranchEntity = new TransactionReceiveBranchEntity();
+//                                        transactionReceiveBranchEntity.setId(transcationReceiveBranchUUID.toString());
+//                                        transactionReceiveBranchEntity.setBusinessId(businessId);
+//                                        transactionReceiveBranchEntity.setBranchId(branchId);
+//                                        transactionReceiveBranchEntity
+//                                                .setTransactionReceiveId(transReceiveUUID.toString());
+//                                        transactionReceiveBranchService
+//                                                .insertTransactionReceiveBranch(transactionReceiveBranchEntity);
+//                                    }
                                     // insert transaction_wallet VQR
                                     TransactionWalletEntity transactionWalletEntity = new TransactionWalletEntity();
                                     transactionWalletEntity.setId(transWalletVQRUUID.toString());
