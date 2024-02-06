@@ -384,7 +384,7 @@ public class TransactionController {
     }
 
     @GetMapping("terminal/transactions")
-    public ResponseEntity<List<TransactionTerminalRelatedDTO>> getTransactionUser(
+    public ResponseEntity<List<TransactionRelatedDTO>> getTransactionUser(
             @RequestParam(value = "userId") String userId,
             @RequestParam(value = "bankId") String bankId,
             @RequestParam(value = "terminalCode") String terminalCode,
@@ -393,25 +393,18 @@ public class TransactionController {
             @RequestParam(value = "from") String fromDate,
             @RequestParam(value = "to") String toDate,
             @RequestParam(value = "offset") int offset) {
-        List<TransactionTerminalRelatedDTO> result = new ArrayList<>();
+        List<TransactionRelatedDTO> result = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
             // type = 9: all
             // type = 1: reference_number
             // type = 2: order_id
             // type = 3: content
-            // type = 4: terminal code
             // type = 5: status
             boolean checkEmptyDate = StringUtil.isEmptyOrEqualsZero(fromDate) || StringUtil.isEmptyOrEqualsZero(toDate);
             boolean checkEmptyTerminal = StringUtil.isNullOrEmpty(terminalCode);
-            if (checkEmptyTerminal && checkEmptyDate)
-//            if (checkEmptyDate)
-            {
+            if (checkEmptyTerminal && checkEmptyDate) {
                 switch (type) {
-                    case 5:
-                        result = transactionReceiveService.getTransTerminalByStatus(bankId, userId, value, offset);
-                        httpStatus = HttpStatus.OK;
-                        break;
                     case 1:
                         result = transactionReceiveService.getTransTerminalByFtCode(bankId, userId, value, offset);
                         httpStatus = HttpStatus.OK;
@@ -425,10 +418,10 @@ public class TransactionController {
                         result = transactionReceiveService.getTransTerminalByContent(bankId, userId, value, offset);
                         httpStatus = HttpStatus.OK;
                         break;
-//                    case 4:
-//                        result = transactionReceiveService.getTransByTerminalCodeAndUserIdAllDate(value, userId, offset);
-//                        httpStatus = HttpStatus.OK;
-//                        break;
+                    case 5:
+                        result = transactionReceiveService.getTransTerminalByStatus(bankId, userId, Integer.parseInt(value), offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
                     case 9:
                         result = transactionReceiveService.getAllTransTerminal(bankId, userId, offset);
                         httpStatus = HttpStatus.OK;
@@ -440,11 +433,6 @@ public class TransactionController {
                 }
             } else if (checkEmptyTerminal && !checkEmptyDate) {
                 switch (type) {
-                    case 5:
-                        result = transactionReceiveService
-                                .getTransTerminalByStatus(bankId, userId, value, fromDate, toDate, offset);
-                        httpStatus = HttpStatus.OK;
-                        break;
                     case 1:
                         result = transactionReceiveService
                                 .getTransTerminalByFtCode(bankId, userId, value, fromDate, toDate, offset);
@@ -461,6 +449,11 @@ public class TransactionController {
                                 .getTransTerminalByContent(bankId, userId, value, fromDate, toDate, offset);
                         httpStatus = HttpStatus.OK;
                         break;
+                    case 5:
+                        result = transactionReceiveService
+                                .getTransTerminalByStatus(bankId, userId, Integer.parseInt(value), fromDate, toDate, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
                     case 9:
                         result = transactionReceiveService
                                 .getAllTransTerminal(bankId, userId, fromDate, toDate, offset);
@@ -473,11 +466,6 @@ public class TransactionController {
                 }
             } else if (!checkEmptyTerminal && checkEmptyDate) {
                 switch (type) {
-                    case 5:
-                        result = transactionReceiveService
-                                .getTransTerminalByStatus(bankId, userId, value, terminalCode, offset);
-                        httpStatus = HttpStatus.OK;
-                        break;
                     case 1:
                         result = transactionReceiveService
                                 .getTransTerminalByFtCode(bankId, userId, value, terminalCode, offset);
@@ -494,6 +482,11 @@ public class TransactionController {
                                 .getTransTerminalByContent(bankId, userId, value, terminalCode, offset);
                         httpStatus = HttpStatus.OK;
                         break;
+                    case 5:
+                        result = transactionReceiveService
+                                .getTransTerminalByStatus(bankId, userId, Integer.parseInt(value), terminalCode, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
                     case 9:
                         result = transactionReceiveService
                                 .getAllTransTerminal(bankId, userId, terminalCode, offset);
@@ -506,11 +499,6 @@ public class TransactionController {
                 }
             } else {
                 switch (type) {
-                    case 5:
-                        result = transactionReceiveService
-                                .getTransTerminalByStatus(bankId, userId, value, terminalCode, fromDate, toDate, offset);
-                        httpStatus = HttpStatus.OK;
-                        break;
                     case 1:
                         result = transactionReceiveService
                                 .getTransTerminalByFtCode(bankId, userId, value, terminalCode, fromDate, toDate, offset);
@@ -525,6 +513,11 @@ public class TransactionController {
                         value = value.replace("-", " ").trim();
                         result = transactionReceiveService
                                 .getTransTerminalByContent(bankId, userId, value, terminalCode, fromDate, toDate, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 5:
+                        result = transactionReceiveService
+                                .getTransTerminalByStatus(bankId, userId, Integer.parseInt(value), terminalCode, fromDate, toDate, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 9:

@@ -319,43 +319,43 @@ public interface TransactionReceiveService {
 
         List<TransactionRelatedDTO> getTransactionsByTerminalCodeAllDate(String value, int offset, String bankId);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByStatus(String bankId, String userId, String value, int offset);
+        List<TransactionRelatedDTO> getTransTerminalByStatus(String bankId, String userId, int value, int offset);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, int offset);
+        List<TransactionRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, int offset);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, int offset);
+        List<TransactionRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, int offset);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, int offset);
+        List<TransactionRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, int offset);
 
-        List<TransactionTerminalRelatedDTO> getAllTransTerminal(String bankId, String userId, int offset);
+        List<TransactionRelatedDTO> getAllTransTerminal(String bankId, String userId, int offset);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByStatus(String bankId, String userId, String value, String fromDate, String toDate, int offset);
+        List<TransactionRelatedDTO> getTransTerminalByStatus(String bankId, String userId, int value, String fromDate, String toDate, int offset);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, String fromDate, String toDate, int offset);
+        List<TransactionRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, String fromDate, String toDate, int offset);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, String fromDate, String toDate, int offset);
+        List<TransactionRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, String fromDate, String toDate, int offset);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, String fromDate, String toDate, int offset);
+        List<TransactionRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, String fromDate, String toDate, int offset);
 
-        List<TransactionTerminalRelatedDTO> getAllTransTerminal(String bankId, String userId, String fromDate, String toDate, int offset);
+        List<TransactionRelatedDTO> getAllTransTerminal(String bankId, String userId, String fromDate, String toDate, int offset);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByStatus(String bankId, String userId, String value, String terminalCode, int offset);
+        List<TransactionRelatedDTO> getTransTerminalByStatus(String bankId, String userId, int value, String terminalCode, int offset);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, String terminalCode, int offset);
+        List<TransactionRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, String terminalCode, int offset);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, String terminalCode, int offset);
+        List<TransactionRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, String terminalCode, int offset);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, String terminalCode, int offset);
+        List<TransactionRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, String terminalCode, int offset);
 
-        List<TransactionTerminalRelatedDTO> getAllTransTerminal(String bankId, String userId, String terminalCode, int offset);
+        List<TransactionRelatedDTO> getAllTransTerminal(String bankId, String userId, String terminalCode, int offset);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByStatus(String bankId, String userId, String value, String terminalCode, String fromDate, String toDate, int offset);
+        List<TransactionRelatedDTO> getTransTerminalByStatus(String bankId, String userId, int value, String terminalCode, String fromDate, String toDate, int offset);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, String terminalCode, String fromDate, String toDate, int offset);
+        List<TransactionRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, String terminalCode, String fromDate, String toDate, int offset);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, String terminalCode, String fromDate, String toDate, int offset);
+        List<TransactionRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, String terminalCode, String fromDate, String toDate, int offset);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, String terminalCode, String fromDate, String toDate, int offset);
+        List<TransactionRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, String terminalCode, String fromDate, String toDate, int offset);
 
-        List<TransactionTerminalRelatedDTO> getAllTransTerminal(String bankId, String userId, String terminalCode, String fromDate, String toDate, int offset);
+        List<TransactionRelatedDTO> getAllTransTerminal(String bankId, String userId, String terminalCode, String fromDate, String toDate, int offset);
 }

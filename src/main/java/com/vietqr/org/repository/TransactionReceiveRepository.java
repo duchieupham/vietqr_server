@@ -1441,94 +1441,228 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 @Param(value = "value") String value,
                 @Param(value = "merchantId") String merchantId);
 
-        @Query(value = "SELECT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+        @Query(value = "SELECT DISTINCT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
                 + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
-                + " a.type as type, a.trans_type as transType, c.code as terminalCode, c.name as terminalName "
+                + " a.type as type, a.trans_type as transType "
                 + "FROM transaction_receive a "
                 + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
-                + "INNER JOIN terminal c ON a.terminal_code = c.terminal_code "
+                + "INNER JOIN terminal c ON a.terminal_code = c.code "
                 + "WHERE a.bank_id = :bankId AND a.status = :value "
                 + "AND a.time >= :time AND b.user_id = :userId "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
-        List<TransactionTerminalRelatedDTO> getTransTerminalByStatus(
-                String bankId, String userId, String value, int offset, long time);
+        List<TransactionRelatedDTO> getTransTerminalByStatus(
+                String bankId, String userId, int value, int offset, long time);
 
-        @Query(value = "SELECT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+        @Query(value = "SELECT DISTINCT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
                 + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
-                + " a.type as type, a.trans_type as transType, c.code as terminalCode, c.name as terminalName "
+                + " a.type as type, a.trans_type as transType "
                 + "FROM transaction_receive a "
                 + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
-                + "INNER JOIN terminal c ON a.terminal_code = c.terminal_code "
+                + "INNER JOIN terminal c ON a.terminal_code = c.code "
                 + "WHERE a.bank_id = :bankId AND a.reference_number = :value "
                 + "AND a.time >= :time AND b.user_id = :userId "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
-        List<TransactionTerminalRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, int offset, long time);
+        List<TransactionRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, int offset, long time);
 
-        @Query(value = "SELECT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+        @Query(value = "SELECT DISTINCT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
                 + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
-                + " a.type as type, a.trans_type as transType, c.code as terminalCode, c.name as terminalName "
+                + " a.type as type, a.trans_type as transType "
                 + "FROM transaction_receive a "
                 + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
-                + "INNER JOIN terminal c ON a.terminal_code = c.terminal_code "
+                + "INNER JOIN terminal c ON a.terminal_code = c.code "
                 + "WHERE a.bank_id = :bankId AND a.order_id = :value "
                 + "AND a.time >= :time AND b.user_id = :userId "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
-        List<TransactionTerminalRelatedDTO> getTransTerminalByOrderId(
+        List<TransactionRelatedDTO> getTransTerminalByOrderId(
                 String bankId, String userId, String value, int offset, long time);
 
-        @Query(value = "SELECT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+        @Query(value = "SELECT DISTINCT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
                 + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
-                + " a.type as type, a.trans_type as transType, c.code as terminalCode, c.name as terminalName "
+                + " a.type as type, a.trans_type as transType "
                 + "FROM transaction_receive a "
                 + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
-                + "INNER JOIN terminal c ON a.terminal_code = c.terminal_code "
+                + "INNER JOIN terminal c ON a.terminal_code = c.code "
                 + "WHERE a.bank_id = :bankId AND a.content LIKE %:value% "
                 + "AND a.time >= :time AND b.user_id = :userId "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
-        List<TransactionTerminalRelatedDTO> getTransTerminalByContent(
+        List<TransactionRelatedDTO> getTransTerminalByContent(
                 String bankId, String userId, String value, int offset, long time);
 
-        @Query(value = "SELECT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+        @Query(value = "SELECT DISTINCT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
                 + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
-                + " a.type as type, a.trans_type as transType, c.code as terminalCode, c.name as terminalName "
+                + " a.type as type, a.trans_type as transType "
                 + "FROM transaction_receive a "
                 + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
-                + "INNER JOIN terminal c ON a.terminal_code = c.terminal_code "
+                + "INNER JOIN terminal c ON a.terminal_code = c.code "
                 + "WHERE a.bank_id = :bankId "
                 + "AND a.time >= :time AND b.user_id = :userId "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
-        List<TransactionTerminalRelatedDTO> getAllTransTerminal(
+        List<TransactionRelatedDTO> getAllTransTerminal(
                 String bankId, String userId, int offset, long time);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByStatus(String bankId, String userId, String value, int offset, long fromDate, long toDate);
+        @Query(value = "SELECT DISTINCT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+                + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
+                + " a.type as type, a.trans_type as transType "
+                + "FROM transaction_receive a "
+                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
+                + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "WHERE a.bank_id = :bankId AND a.status = :value "
+                + "AND a.time BETWEEN :fromDate AND :toDate AND b.user_id = :userId "
+                + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransTerminalByStatus(String bankId, String userId, int value, int offset, long fromDate, long toDate);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, int offset, long fromDate, long toDate);
+        @Query(value = "SELECT DISTINCT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+                + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
+                + " a.type as type, a.trans_type as transType "
+                + "FROM transaction_receive a "
+                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
+                + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "WHERE a.bank_id = :bankId AND a.reference_number = :value "
+                + "AND a.time BETWEEN :fromDate AND :toDate AND b.user_id = :userId "
+                + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, int offset, long fromDate, long toDate);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, int offset, long fromDate, long toDate);
+        @Query(value = "SELECT DISTINCT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+                + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
+                + " a.type as type, a.trans_type as transType "
+                + "FROM transaction_receive a "
+                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
+                + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "WHERE a.bank_id = :bankId AND a.order_id = :value "
+                + "AND a.time BETWEEN :fromDate AND :toDate AND b.user_id = :userId "
+                + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, int offset, long fromDate, long toDate);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, int offset, long fromDate, long toDate);
+        @Query(value = "SELECT DISTINCT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+                + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
+                + " a.type as type, a.trans_type as transType "
+                + "FROM transaction_receive a "
+                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
+                + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "WHERE a.bank_id = :bankId AND a.content LIKE %:value% "
+                + "AND a.time BETWEEN :fromDate AND :toDate AND b.user_id = :userId "
+                + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, int offset, long fromDate, long toDate);
 
-        List<TransactionTerminalRelatedDTO> getAllTransTerminal(String bankId, String userId, int offset, long fromDate, long toDate);
+        @Query(value = "SELECT DISTINCT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+                + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
+                + " a.type as type, a.trans_type as transType "
+                + "FROM transaction_receive a "
+                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
+                + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "WHERE a.bank_id = :bankId "
+                + "AND a.time BETWEEN :fromDate AND :toDate AND b.user_id = :userId "
+                + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getAllTransTerminal(String bankId, String userId, int offset, long fromDate, long toDate);
 
+        @Query(value = "SELECT DISTINCT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+                + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
+                + " a.type as type, a.trans_type as transType "
+                + "FROM transaction_receive a "
+                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
+                + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "WHERE a.bank_id = :bankId AND a.terminal_code = :terminalCode AND a.status = :value "
+                + "AND a.time >= :time AND b.user_id = :userId "
+                + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransTerminalByStatus(String bankId, String userId, int value, String terminalCode, int offset, long time);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByStatus(String bankId, String userId, String value, String terminalCode, int offset, long time);
+        @Query(value = "SELECT DISTINCT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+                + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
+                + " a.type as type, a.trans_type as transType "
+                + "FROM transaction_receive a "
+                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
+                + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "WHERE a.bank_id = :bankId AND a.terminal_code = :terminalCode AND a.reference_number = :value "
+                + "AND a.time >= :time AND b.user_id = :userId "
+                + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, String terminalCode, int offset, long time);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, String terminalCode, int offset, long time);
+        @Query(value = "SELECT DISTINCT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+                + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
+                + " a.type as type, a.trans_type as transType "
+                + "FROM transaction_receive a "
+                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
+                + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "WHERE a.bank_id = :bankId AND a.terminal_code = :terminalCode AND a.order_id = :value "
+                + "AND a.time >= :time AND b.user_id = :userId "
+                + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, String terminalCode, int offset, long time);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, String terminalCode, int offset, long time);
+        @Query(value = "SELECT DISTINCT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+                + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
+                + " a.type as type, a.trans_type as transType "
+                + "FROM transaction_receive a "
+                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
+                + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "WHERE a.bank_id = :bankId AND a.terminal_code = :terminalCode AND a.content LIKE %:value% "
+                + "AND a.time >= :time AND b.user_id = :userId "
+                + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, String terminalCode, int offset, long time);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, String terminalCode, int offset, long time);
+        @Query(value = "SELECT DISTINCT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+                + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
+                + " a.type as type, a.trans_type as transType "
+                + "FROM transaction_receive a "
+                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
+                + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "WHERE a.bank_id = :bankId AND a.terminal_code = :terminalCode "
+                + "AND a.time >= :time AND b.user_id = :userId "
+                + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getAllTransTerminal(String bankId, String userId, String terminalCode, int offset, long time);
 
-        List<TransactionTerminalRelatedDTO> getAllTransTerminal(String bankId, String userId, String terminalCode, int offset, long time);
+        @Query(value = "SELECT DISTINCT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+                + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
+                + " a.type as type, a.trans_type as transType "
+                + "FROM transaction_receive a "
+                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
+                + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "WHERE a.bank_id = :bankId AND a.terminal_code = :terminalCode AND a.status = :value "
+                + "AND a.time BETWEEN :fromDate AND :toDate AND b.user_id = :userId "
+                + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransTerminalByStatus(String bankId, String userId, int value, String terminalCode, int offset, long fromDate, long toDate);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByStatus(String bankId, String userId, String value, String terminalCode, int offset, long fromDate, long toDate);
+        @Query(value = "SELECT DISTINCT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+                + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
+                + " a.type as type, a.trans_type as transType "
+                + "FROM transaction_receive a "
+                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
+                + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "WHERE a.bank_id = :bankId AND a.terminal_code = :terminalCode AND a.reference_number = :value "
+                + "AND a.time BETWEEN :fromDate AND :toDate AND b.user_id = :userId "
+                + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, String terminalCode, int offset, long fromDate, long toDate);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, String terminalCode, int offset, long fromDate, long toDate);
+        @Query(value = "SELECT DISTINCT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+                + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
+                + " a.type as type, a.trans_type as transType "
+                + "FROM transaction_receive a "
+                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
+                + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "WHERE a.bank_id = :bankId AND a.terminal_code = :terminalCode AND a.order_id = :value "
+                + "AND a.time BETWEEN :fromDate AND :toDate AND b.user_id = :userId "
+                + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, String terminalCode, int offset, long fromDate, long toDate);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, String terminalCode, int offset, long fromDate, long toDate);
+        @Query(value = "SELECT DISTINCT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+                + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
+                + " a.type as type, a.trans_type as transType "
+                + "FROM transaction_receive a "
+                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
+                + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "WHERE a.bank_id = :bankId AND a.terminal_code = :terminalCode AND a.content LIKE %:value% "
+                + "AND a.time BETWEEN :fromDate AND :toDate AND b.user_id = :userId "
+                + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, String terminalCode, int offset, long fromDate, long toDate);
 
-        List<TransactionTerminalRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, String terminalCode, int offset, long fromDate, long toDate);
-
-        List<TransactionTerminalRelatedDTO> getAllTransTerminal(String bankId, String userId, String terminalCode, int offset, long fromDate, long toDate);
+        @Query(value = "SELECT DISTINCT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+                + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
+                + " a.type as type, a.trans_type as transType "
+                + "FROM transaction_receive a "
+                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
+                + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "WHERE a.bank_id = :bankId AND a.terminal_code = :terminalCode "
+                + "AND a.time BETWEEN :fromDate AND :toDate AND b.user_id = :userId "
+                + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getAllTransTerminal(String bankId, String userId, String terminalCode, int offset, long fromDate, long toDate);
 }
 
