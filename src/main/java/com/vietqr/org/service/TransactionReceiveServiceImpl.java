@@ -1,5 +1,6 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.dto.*;
 import com.vietqr.org.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -7,21 +8,6 @@ import org.springframework.stereotype.Service;
 import com.vietqr.org.repository.TransactionReceiveRepository;
 import java.util.List;
 import com.vietqr.org.entity.TransactionReceiveEntity;
-import com.vietqr.org.dto.AccountBankReceiveForNotiDTO;
-import com.vietqr.org.dto.TransByCusSyncDTO;
-import com.vietqr.org.dto.TransReceiveAdminDetailDTO;
-import com.vietqr.org.dto.TransReceiveResponseDTO;
-import com.vietqr.org.dto.TransReceiveStatisticFeeDTO;
-import com.vietqr.org.dto.TransStatisticByDateDTO;
-import com.vietqr.org.dto.TransStatisticByMonthDTO;
-import com.vietqr.org.dto.TransStatisticDTO;
-import com.vietqr.org.dto.TransStatisticMerchantDTO;
-import com.vietqr.org.dto.TransactionCheckStatusDTO;
-import com.vietqr.org.dto.TransactionDetailDTO;
-import com.vietqr.org.dto.TransactionFeeDTO;
-import com.vietqr.org.dto.TransactionQRDTO;
-import com.vietqr.org.dto.TransactionReceiveAdminListDTO;
-import com.vietqr.org.dto.TransactionRelatedDTO;
 
 @Service
 public class TransactionReceiveServiceImpl implements TransactionReceiveService {
@@ -605,6 +591,126 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     @Override
     public List<TransactionRelatedDTO> getTransactionsByTerminalCodeAllDate(String value, int offset, String bankId) {
         return repo.getTransactionsByTerminalCode(value, offset, bankId, DateTimeUtil.get3MonthsPreviousAsLongInt());
+    }
+
+    @Override
+    public List<TransactionTerminalRelatedDTO> getTransTerminalByStatus(String bankId, String userId, String value, int offset) {
+        return repo.getTransTerminalByStatus(bankId, userId, value, offset, DateTimeUtil.get3MonthsPreviousAsLongInt());
+    }
+
+    @Override
+    public List<TransactionTerminalRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, int offset) {
+        return repo.getTransTerminalByFtCode(bankId, userId, value, offset, DateTimeUtil.get3MonthsPreviousAsLongInt());
+    }
+
+    @Override
+    public List<TransactionTerminalRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, int offset) {
+        return repo.getTransTerminalByOrderId(bankId, userId, value, offset, DateTimeUtil.get3MonthsPreviousAsLongInt());
+    }
+
+    @Override
+    public List<TransactionTerminalRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, int offset) {
+        return repo.getTransTerminalByContent(bankId, userId, value, offset, DateTimeUtil.get3MonthsPreviousAsLongInt());
+    }
+
+    @Override
+    public List<TransactionTerminalRelatedDTO> getAllTransTerminal(String bankId, String userId, int offset) {
+        return repo.getAllTransTerminal(bankId, userId, offset, DateTimeUtil.get3MonthsPreviousAsLongInt());
+    }
+
+    @Override
+    public List<TransactionTerminalRelatedDTO> getTransTerminalByStatus(String bankId, String userId, String value, String fromDate, String toDate, int offset) {
+        return repo.getTransTerminalByStatus(bankId, userId, value, offset,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionTerminalRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, String fromDate, String toDate, int offset) {
+        return repo.getTransTerminalByFtCode(bankId, userId, value, offset,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionTerminalRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, String fromDate, String toDate, int offset) {
+        return repo.getTransTerminalByOrderId(bankId, userId, value, offset,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionTerminalRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, String fromDate, String toDate, int offset) {
+        return repo.getTransTerminalByContent(bankId, userId, value, offset,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionTerminalRelatedDTO> getAllTransTerminal(String bankId, String userId, String fromDate, String toDate, int offset) {
+        return repo.getAllTransTerminal(bankId, userId, offset,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionTerminalRelatedDTO> getTransTerminalByStatus(String bankId, String userId, String value, String terminalCode, int offset) {
+        return repo.getTransTerminalByStatus(bankId, userId, value, terminalCode, offset, DateTimeUtil.get3MonthsPreviousAsLongInt());
+    }
+
+    @Override
+    public List<TransactionTerminalRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, String terminalCode, int offset) {
+        return repo.getTransTerminalByFtCode(bankId, userId, value, terminalCode, offset, DateTimeUtil.get3MonthsPreviousAsLongInt());
+    }
+
+    @Override
+    public List<TransactionTerminalRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, String terminalCode, int offset) {
+        return repo.getTransTerminalByOrderId(bankId, userId, value, terminalCode, offset, DateTimeUtil.get3MonthsPreviousAsLongInt());
+    }
+
+    @Override
+    public List<TransactionTerminalRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, String terminalCode, int offset) {
+        return repo.getTransTerminalByContent(bankId, userId, value, terminalCode, offset, DateTimeUtil.get3MonthsPreviousAsLongInt());
+    }
+
+    @Override
+    public List<TransactionTerminalRelatedDTO> getAllTransTerminal(String bankId, String userId, String terminalCode, int offset) {
+        return repo.getAllTransTerminal(bankId, userId, terminalCode, offset, DateTimeUtil.get3MonthsPreviousAsLongInt());
+    }
+
+    @Override
+    public List<TransactionTerminalRelatedDTO> getTransTerminalByStatus(String bankId, String userId, String value, String terminalCode, String fromDate, String toDate, int offset) {
+        return repo.getTransTerminalByStatus(bankId, userId, value, terminalCode, offset,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionTerminalRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, String terminalCode, String fromDate, String toDate, int offset) {
+        return repo.getTransTerminalByFtCode(bankId, userId, value, terminalCode, offset,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionTerminalRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, String terminalCode, String fromDate, String toDate, int offset) {
+        return repo.getTransTerminalByOrderId(bankId, userId, value, terminalCode, offset,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionTerminalRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, String terminalCode, String fromDate, String toDate, int offset) {
+        return repo.getTransTerminalByContent(bankId, userId, value, terminalCode, offset,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionTerminalRelatedDTO> getAllTransTerminal(String bankId, String userId, String terminalCode, String fromDate, String toDate, int offset) {
+        return repo.getAllTransTerminal(bankId, userId, terminalCode, offset,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
 }
