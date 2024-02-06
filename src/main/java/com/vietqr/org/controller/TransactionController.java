@@ -21,6 +21,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.vietqr.org.dto.*;
 import com.vietqr.org.util.*;
 import org.apache.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -39,32 +40,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.vietqr.org.dto.ResponseMessageDTO;
-import com.vietqr.org.dto.TransByCusSyncDTO;
-import com.vietqr.org.dto.TransImgIdDTO;
-import com.vietqr.org.dto.TransQRCancelDTO;
-import com.vietqr.org.dto.TransReceiveAdminDetailDTO;
-import com.vietqr.org.dto.TransReceiveResponseDTO;
-import com.vietqr.org.dto.TransReceiveRpaDTO;
-import com.vietqr.org.dto.TransStatisticByDateDTO;
-import com.vietqr.org.dto.TransStatisticByMonthDTO;
-import com.vietqr.org.dto.TransStatisticDTO;
-import com.vietqr.org.dto.TransStatisticMerchantDTO;
-import com.vietqr.org.dto.TransStatisticMerchantDTOImpl;
-import com.vietqr.org.dto.TransSyncRpaDTO;
-import com.vietqr.org.dto.TransactionBranchInputDTO;
-import com.vietqr.org.dto.TransactionCheckDTO;
-import com.vietqr.org.dto.TransactionCheckOrderInputDTO;
-import com.vietqr.org.dto.TransactionCheckStatusDTO;
-import com.vietqr.org.dto.TransactionDateDTO;
-import com.vietqr.org.dto.TransactionDetailDTO;
-import com.vietqr.org.dto.TransactionInputDTO;
-import com.vietqr.org.dto.TransactionQRDTO;
-import com.vietqr.org.dto.TransactionQRResponseDTO;
-import com.vietqr.org.dto.TransactionReceiveAdminListDTO;
-import com.vietqr.org.dto.TransactionReceiveNoteUpdateDTO;
-import com.vietqr.org.dto.TransactionRelatedDTO;
-import com.vietqr.org.dto.VietQRGenerateDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.entity.ImageEntity;
 import com.vietqr.org.entity.TransactionRPAEntity;
@@ -131,28 +106,6 @@ public class TransactionController {
 
     @Autowired
     AccountCustomerBankService accountCustomerBankService;
-
-//    @PostMapping("transaction-branch")
-//    public ResponseEntity<List<TransactionRelatedDTO>> getTransactionsByBranchId(
-//            @Valid @RequestBody TransactionBranchInputDTO dto) {
-//        List<TransactionRelatedDTO> result = new ArrayList<>();
-//        HttpStatus httpStatus = null;
-//        try {
-//            if (dto.getBranchId().trim().equals("all")) {
-//                // get transaction by businessId
-//                result = transactionReceiveBranchService.getTransactionsByBusinessId(dto.getBusinessId(),
-//                        dto.getOffset());
-//            } else {
-//                // get transaction by branchId
-//                result = transactionReceiveBranchService.getTransactionsByBranchId(dto.getBranchId(), dto.getOffset());
-//            }
-//            httpStatus = HttpStatus.OK;
-//        } catch (Exception e) {
-//            logger.error(e.toString());
-//            httpStatus = HttpStatus.BAD_REQUEST;
-//        }
-//        return new ResponseEntity<>(result, httpStatus);
-//    }
 
     @GetMapping("admin/transactions")
     public ResponseEntity<List<TransactionReceiveAdminListDTO>> getTransactionAdmin(
@@ -419,6 +372,161 @@ public class TransactionController {
                         break;
                     default:
                         logger.error("getTransactionUser : ERROR: INVALID TYPE");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        break;
+                }
+            }
+        } catch (Exception e) {
+            logger.error("getTransactionAdmin: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("terminal/transactions")
+    public ResponseEntity<List<TransactionRelatedDTO>> getTransactionUser(
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "bankId") String bankId,
+            @RequestParam(value = "terminalCode") String terminalCode,
+            @RequestParam(value = "type") int type,
+            @RequestParam(value = "value") String value,
+            @RequestParam(value = "from") String fromDate,
+            @RequestParam(value = "to") String toDate,
+            @RequestParam(value = "offset") int offset) {
+        List<TransactionRelatedDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            // type = 9: all
+            // type = 1: reference_number
+            // type = 2: order_id
+            // type = 3: content
+            // type = 5: status
+            boolean checkEmptyDate = StringUtil.isEmptyOrEqualsZero(fromDate) || StringUtil.isEmptyOrEqualsZero(toDate);
+            boolean checkEmptyTerminal = StringUtil.isNullOrEmpty(terminalCode);
+            if (checkEmptyTerminal && checkEmptyDate) {
+                switch (type) {
+                    case 1:
+                        result = transactionReceiveService.getTransTerminalByFtCode(bankId, userId, value, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 2:
+                        result = transactionReceiveService.getTransTerminalByOrderId(bankId, userId, value, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 3:
+                        value = value.replace("-", " ").trim();
+                        result = transactionReceiveService.getTransTerminalByContent(bankId, userId, value, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 5:
+                        result = transactionReceiveService.getTransTerminalByStatus(bankId, userId, Integer.parseInt(value), offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 9:
+                        result = transactionReceiveService.getAllTransTerminal(bankId, userId, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    default:
+                        logger.error("getTransactionUser: ERROR: INVALID TYPE");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        break;
+                }
+            } else if (checkEmptyTerminal && !checkEmptyDate) {
+                switch (type) {
+                    case 1:
+                        result = transactionReceiveService
+                                .getTransTerminalByFtCode(bankId, userId, value, fromDate, toDate, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 2:
+                        result = transactionReceiveService
+                                .getTransTerminalByOrderId(bankId, userId, value, fromDate, toDate, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 3:
+                        value = value.replace("-", " ").trim();
+                        result = transactionReceiveService
+                                .getTransTerminalByContent(bankId, userId, value, fromDate, toDate, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 5:
+                        result = transactionReceiveService
+                                .getTransTerminalByStatus(bankId, userId, Integer.parseInt(value), fromDate, toDate, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 9:
+                        result = transactionReceiveService
+                                .getAllTransTerminal(bankId, userId, fromDate, toDate, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    default:
+                        logger.error("getTransactionUser: ERROR: INVALID TYPE");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        break;
+                }
+            } else if (!checkEmptyTerminal && checkEmptyDate) {
+                switch (type) {
+                    case 1:
+                        result = transactionReceiveService
+                                .getTransTerminalByFtCode(bankId, userId, value, terminalCode, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 2:
+                        result = transactionReceiveService
+                                .getTransTerminalByOrderId(bankId, userId, value, terminalCode, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 3:
+                        value = value.replace("-", " ").trim();
+                        result = transactionReceiveService
+                                .getTransTerminalByContent(bankId, userId, value, terminalCode, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 5:
+                        result = transactionReceiveService
+                                .getTransTerminalByStatus(bankId, userId, Integer.parseInt(value), terminalCode, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 9:
+                        result = transactionReceiveService
+                                .getAllTransTerminal(bankId, userId, terminalCode, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    default:
+                        logger.error("getTransactionUser: ERROR: INVALID TYPE");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        break;
+                }
+            } else {
+                switch (type) {
+                    case 1:
+                        result = transactionReceiveService
+                                .getTransTerminalByFtCode(bankId, userId, value, terminalCode, fromDate, toDate, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 2:
+                        result = transactionReceiveService
+                                .getTransTerminalByOrderId(bankId, userId, value, terminalCode, fromDate, toDate, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 3:
+                        value = value.replace("-", " ").trim();
+                        result = transactionReceiveService
+                                .getTransTerminalByContent(bankId, userId, value, terminalCode, fromDate, toDate, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 5:
+                        result = transactionReceiveService
+                                .getTransTerminalByStatus(bankId, userId, Integer.parseInt(value), terminalCode, fromDate, toDate, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 9:
+                        result = transactionReceiveService
+                                .getAllTransTerminal(bankId, userId, terminalCode, fromDate, toDate, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    default:
+                        logger.error("getTransactionUser: ERROR: INVALID TYPE");
                         httpStatus = HttpStatus.BAD_REQUEST;
                         break;
                 }

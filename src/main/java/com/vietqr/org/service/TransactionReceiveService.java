@@ -2,22 +2,9 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+import com.vietqr.org.dto.*;
 import org.springframework.stereotype.Service;
 import com.vietqr.org.entity.TransactionReceiveEntity;
-import com.vietqr.org.dto.TransByCusSyncDTO;
-import com.vietqr.org.dto.TransReceiveAdminDetailDTO;
-import com.vietqr.org.dto.TransReceiveResponseDTO;
-import com.vietqr.org.dto.TransReceiveStatisticFeeDTO;
-import com.vietqr.org.dto.TransStatisticByDateDTO;
-import com.vietqr.org.dto.TransStatisticByMonthDTO;
-import com.vietqr.org.dto.TransStatisticDTO;
-import com.vietqr.org.dto.TransStatisticMerchantDTO;
-import com.vietqr.org.dto.TransactionCheckStatusDTO;
-import com.vietqr.org.dto.TransactionDetailDTO;
-import com.vietqr.org.dto.TransactionFeeDTO;
-import com.vietqr.org.dto.TransactionQRDTO;
-import com.vietqr.org.dto.TransactionReceiveAdminListDTO;
-import com.vietqr.org.dto.TransactionRelatedDTO;
 
 @Service
 public interface TransactionReceiveService {
@@ -332,4 +319,43 @@ public interface TransactionReceiveService {
 
         List<TransactionRelatedDTO> getTransactionsByTerminalCodeAllDate(String value, int offset, String bankId);
 
+        List<TransactionRelatedDTO> getTransTerminalByStatus(String bankId, String userId, int value, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, int offset);
+
+        List<TransactionRelatedDTO> getAllTransTerminal(String bankId, String userId, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalByStatus(String bankId, String userId, int value, String fromDate, String toDate, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, String fromDate, String toDate, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, String fromDate, String toDate, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, String fromDate, String toDate, int offset);
+
+        List<TransactionRelatedDTO> getAllTransTerminal(String bankId, String userId, String fromDate, String toDate, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalByStatus(String bankId, String userId, int value, String terminalCode, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, String terminalCode, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, String terminalCode, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, String terminalCode, int offset);
+
+        List<TransactionRelatedDTO> getAllTransTerminal(String bankId, String userId, String terminalCode, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalByStatus(String bankId, String userId, int value, String terminalCode, String fromDate, String toDate, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, String terminalCode, String fromDate, String toDate, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, String terminalCode, String fromDate, String toDate, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, String terminalCode, String fromDate, String toDate, int offset);
+
+        List<TransactionRelatedDTO> getAllTransTerminal(String bankId, String userId, String terminalCode, String fromDate, String toDate, int offset);
 }
