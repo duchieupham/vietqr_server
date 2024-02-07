@@ -78,4 +78,6 @@ public interface AccountBankReceiveService {
 	public Boolean getMMSActiveByBankId(String bankId);
 
 	public AccountBankReceiveForNotiDTO findAccountBankIden(String bankAccount, String bankTypeId);
+
+    String checkIsOwner(String bankId, String userId);
 }

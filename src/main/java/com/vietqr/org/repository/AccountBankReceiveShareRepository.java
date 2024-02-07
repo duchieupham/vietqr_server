@@ -94,7 +94,7 @@ public interface AccountBankReceiveShareRepository
     void removeBankAccountFromTerminal(String terminalId, String bankId);
 
     @Query(value = "SELECT DISTINCT b.terminal_id as terminalId, c.id as bankId, d.bank_name as bankName, d.bank_code as bankCode, c.bank_account as bankAccount, c.bank_account_name as userBankName, " +
-            "d.bank_short_name as bankShortName, d.img_id as imgId "
+            "d.bank_short_name as bankShortName, d.img_id as imgId, b.qr_code as qrCode "
             + "FROM terminal a "
             + "INNER JOIN account_bank_receive_share b "
             + "ON a.id = b.terminal_id "

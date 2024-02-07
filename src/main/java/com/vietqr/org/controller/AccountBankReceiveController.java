@@ -159,7 +159,6 @@ public class AccountBankReceiveController {
 			@Valid @RequestBody AccountBankUnauthenticatedDTO dto) {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
-		System.out.println(dto.toString());
 		try {
 			// insert bankAccount receive
 			UUID uuid = UUID.randomUUID();

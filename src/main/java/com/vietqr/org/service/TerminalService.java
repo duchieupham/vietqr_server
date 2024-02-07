@@ -39,4 +39,6 @@ public interface TerminalService {
     TerminalEntity getTerminalByTerminalCode(String terminalCode, String bankAccount);
 
     String getTerminalByTraceTransfer(String traceTransfer);
+
+    List<TerminalEntity> getAllTerminalNoQRCode();
 }
