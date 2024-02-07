@@ -10,11 +10,14 @@ public class TerminalBankResponseDTO {
     private String userBankName;
     private String bankShortName;
     private String imgId;
+    private String qrCode;
 
     public TerminalBankResponseDTO() {
     }
 
-    public TerminalBankResponseDTO(String terminalId, String bankId, String bankName, String bankCode, String bankAccount, String userBankName, String bankShortName, String imgId) {
+    public TerminalBankResponseDTO(String terminalId, String bankId, String bankName, String bankCode,
+                                   String bankAccount, String userBankName, String bankShortName, String imgId,
+                                   String qrCode) {
         this.terminalId = terminalId;
         this.bankId = bankId;
         this.bankName = bankName;
@@ -23,6 +26,15 @@ public class TerminalBankResponseDTO {
         this.userBankName = userBankName;
         this.bankShortName = bankShortName;
         this.imgId = imgId;
+        this.qrCode = qrCode;
+    }
+
+    public String getQrCode() {
+        return qrCode;
+    }
+
+    public void setQrCode(String qrCode) {
+        this.qrCode = qrCode;
     }
 
     public String getTerminalId() {

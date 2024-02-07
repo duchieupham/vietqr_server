@@ -259,26 +259,38 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
         TransactionCheckStatusDTO getTransactionCheckStatus(@Param(value = "transactionId") String transactionId);
 
         // check statistic
-        @Query(value = "SELECT COUNT(*) AS totalTrans, "
-                        + "SUM(CASE WHEN trans_type = 'C' THEN amount ELSE 0 END) AS totalCashIn, "
-                        + "SUM(CASE WHEN trans_type = 'D' THEN amount ELSE 0 END) AS totalCashOut, "
-                        + "SUM(CASE WHEN trans_type = 'C' THEN 1 ELSE 0 END) AS totalTransC, "
-                        + "SUM(CASE WHEN trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
-                        + "FROM transaction_receive "
-                        + "WHERE bank_id = :bankId AND status = 1", nativeQuery = true)
-        TransStatisticDTO getTransactionOverview(@Param(value = "bankId") String bankId);
-
-        // check statistic
-        @Query(value = "SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(time), '+00:00', '+07:00'), '%Y-%m-%d') AS date, "
-                        + "COUNT(*) AS totalTrans, "
+        @Query(value = "SELECT COUNT(id) AS totalTrans, "
                         + "SUM(CASE WHEN trans_type = 'C' THEN amount ELSE 0 END) AS totalCashIn, "
                         + "SUM(CASE WHEN trans_type = 'D' THEN amount ELSE 0 END) AS totalCashOut, "
                         + "SUM(CASE WHEN trans_type = 'C' THEN 1 ELSE 0 END) AS totalTransC, "
                         + "SUM(CASE WHEN trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
                         + "FROM transaction_receive "
                         + "WHERE bank_id = :bankId AND status = 1 "
+                        + "AND time BETWEEN :fromDate AND :toDate", nativeQuery = true)
+        TransStatisticDTO getTransactionOverview(@Param(value = "bankId") String bankId,
+                                                 @Param(value = "fromDate") long fromDate,
+                                                 @Param(value = "toDate") long toDate);
+
+        @Query(value = "SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(a.time), '+00:00', '+07:00'), '%Y-%m-%d') AS date, "
+                        + "COUNT(a.id) AS totalTrans, "
+                        + "SUM(CASE WHEN a.trans_type = 'C' THEN amount ELSE 0 END) AS totalCashIn, "
+                        + "SUM(CASE WHEN a.trans_type = 'D' THEN amount ELSE 0 END) AS totalCashOut, "
+                        + "SUM(CASE WHEN a.trans_type = 'C' THEN 1 ELSE 0 END) AS totalTransC, "
+                        + "SUM(CASE WHEN a.trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
+                        + "FROM transaction_receive a "
+                        + "INNER JOIN terminal b ON b.code = a.terminal_code "
+                        + "INNER JOIN account_bank_receive_share c ON c.terminal_id = b.id "
+                        + "WHERE c.bank_id = :bankId AND a.status = 1 "
+                        + "AND b.code = :terminalCode "
+                        + "AND c.user_id = :userId "
+                        + "AND a.time BETWEEN :fromDate AND :toDate "
                         + "GROUP BY date ORDER BY date DESC ", nativeQuery = true)
-        List<TransStatisticByDateDTO> getTransStatisticByDate(@Param(value = "bankId") String bankId);
+        List<TransStatisticByDateDTO> getTransStatisticByTerminalId(
+                @Param(value = "bankId") String bankId,
+                @Param(value = "terminalCode") String terminalCode,
+                @Param(value = "userId") String userId,
+                @Param(value = "fromDate") long fromDate,
+                @Param(value = "toDate") long toDate);
 
         // check statistic
         @Query(value = "SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(time), '+00:00', '+07:00'), '%Y-%m') AS month, "
@@ -1666,5 +1678,59 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "AND a.time BETWEEN :fromDate AND :toDate AND b.user_id = :userId "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
         List<TransactionRelatedDTO> getAllTransTerminal(String bankId, String userId, String terminalCode, int offset, long fromDate, long toDate);
+
+        @Query(value = "SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(a.time), '+00:00', '+07:00'), '%Y-%m-%d') AS date, "
+                + "COUNT(a.id) AS totalTrans, "
+                + "SUM(CASE WHEN a.trans_type = 'C' THEN amount ELSE 0 END) AS totalCashIn, "
+                + "SUM(CASE WHEN a.trans_type = 'D' THEN amount ELSE 0 END) AS totalCashOut, "
+                + "SUM(CASE WHEN a.trans_type = 'C' THEN 1 ELSE 0 END) AS totalTransC, "
+                + "SUM(CASE WHEN a.trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
+                + "FROM transaction_receive a "
+                + "INNER JOIN terminal b ON b.code = a.terminal_code "
+                + "INNER JOIN account_bank_receive_share c ON c.terminal_id = b.id "
+                + "WHERE c.bank_id = :bankId AND a.status = 1 "
+                + "AND c.user_id = :userId "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "GROUP BY date ORDER BY date DESC ", nativeQuery = true)
+        List<TransStatisticByDateDTO> getTransStatisticByTerminalId(String bankId, String userId, long fromDate, long toDate);
+
+        @Query(value = "SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(time), '+00:00', '+07:00'), '%Y-%m-%d') AS date, "
+                + "COUNT(id) AS totalTrans, "
+                + "SUM(CASE WHEN trans_type = 'C' THEN amount ELSE 0 END) AS totalCashIn, "
+                + "SUM(CASE WHEN trans_type = 'D' THEN amount ELSE 0 END) AS totalCashOut, "
+                + "SUM(CASE WHEN trans_type = 'C' THEN 1 ELSE 0 END) AS totalTransC, "
+                + "SUM(CASE WHEN trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
+                + "FROM transaction_receive "
+                + "WHERE bank_id = :bankId AND status = 1 "
+                + "AND time BETWEEN :fromDate AND :toDate "
+                + "GROUP BY date ORDER BY date DESC ", nativeQuery = true)
+        List<TransStatisticByDateDTO> getTransStatisticByBankId(String bankId, long fromDate, long toDate);
+
+        @Query(value = "SELECT COUNT(a.id) AS totalTrans, "
+                + "SUM(CASE WHEN a.trans_type = 'C' THEN a.amount ELSE 0 END) AS totalCashIn, "
+                + "SUM(CASE WHEN a.trans_type = 'D' THEN a.amount ELSE 0 END) AS totalCashOut, "
+                + "SUM(CASE WHEN a.trans_type = 'C' THEN 1 ELSE 0 END) AS totalTransC, "
+                + "SUM(CASE WHEN a.trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
+                + "FROM transaction_receive a "
+                + "INNER JOIN terminal b ON b.code = a.terminal_code "
+                + "INNER JOIN account_bank_receive_share c ON c.terminal_id = b.id "
+                + "WHERE c.bank_id = :bankId AND a.status = 1 "
+                + "AND c.user_id = :userId "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "AND b.code = :terminalCode", nativeQuery = true)
+        TransStatisticDTO getTransactionOverview(String bankId, String terminalCode, String userId, long fromDate, long toDate);
+
+        @Query(value = "SELECT COUNT(a.id) AS totalTrans, "
+                + "SUM(CASE WHEN a.trans_type = 'C' THEN a.amount ELSE 0 END) AS totalCashIn, "
+                + "SUM(CASE WHEN a.trans_type = 'D' THEN a.amount ELSE 0 END) AS totalCashOut, "
+                + "SUM(CASE WHEN a.trans_type = 'C' THEN 1 ELSE 0 END) AS totalTransC, "
+                + "SUM(CASE WHEN a.trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
+                + "FROM transaction_receive a "
+                + "INNER JOIN terminal b ON b.code = a.terminal_code "
+                + "INNER JOIN account_bank_receive_share c ON c.terminal_id = b.id "
+                + "WHERE c.bank_id = :bankId AND a.status = 1 "
+                + "AND c.user_id = :userId "
+                + "AND a.time BETWEEN :fromDate AND :toDate ", nativeQuery = true)
+        TransStatisticDTO getTransactionOverview(String bankId, String userId, long fromDate, long toDate);
 }
 

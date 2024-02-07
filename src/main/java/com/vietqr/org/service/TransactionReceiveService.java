@@ -52,9 +52,15 @@ public interface TransactionReceiveService {
 
         public TransactionCheckStatusDTO getTransactionCheckStatus(String transactionId);
 
-        public TransStatisticDTO getTransactionOverview(String bankId);
+        public TransStatisticDTO getTransactionOverview(String bankId, String month, String userId);
 
-        public List<TransStatisticByDateDTO> getTransStatisticByDate(String bankId);
+        //bankId, month, userId
+        public List<TransStatisticByDateDTO> getTransStatisticByTerminalId(String bankId,
+                                                                           String month, String userId);
+
+        public List<TransStatisticByDateDTO> getTransStatisticByTerminalId(String bankId,
+                                                                           String terminalCode,
+                                                                           String month, String userId);
 
         public List<TransStatisticByMonthDTO> getTransStatisticByMonth(String bankId);
 
@@ -358,4 +364,10 @@ public interface TransactionReceiveService {
         List<TransactionRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, String terminalCode, String fromDate, String toDate, int offset);
 
         List<TransactionRelatedDTO> getAllTransTerminal(String bankId, String userId, String terminalCode, String fromDate, String toDate, int offset);
+
+        TransStatisticDTO getTransactionOverview(String bankId, String terminalCode, String month, String userId);
+
+        TransStatisticDTO getTransactionOverview(String bankId, String month);
+
+        List<TransStatisticByDateDTO> getTransStatisticByBankId(String bankId, String month);
 }

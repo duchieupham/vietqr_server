@@ -167,4 +167,9 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     public AccountBankReceiveForNotiDTO findAccountBankIden(String bankAccount, String bankTypeId) {
         return repo.findAccountBankIden(bankAccount, bankTypeId);
     }
+
+    @Override
+    public String checkIsOwner(String bankId, String userId) {
+        return repo.checkIsOwner(bankId, userId);
+    }
 }

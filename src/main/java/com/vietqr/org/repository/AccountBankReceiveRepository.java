@@ -229,4 +229,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			"INNER JOIN account_bank_receive c ON c.bank_type_id = b.id" +
 			" WHERE c.id = :bankId", nativeQuery = true)
     String getCaiValueByBankId(String bankId);
+
+	@Query(value = "SELECT id FROM account_bank_receive WHERE id = :bankId AND user_id = :userId", nativeQuery = true)
+    String checkIsOwner(String bankId, String userId);
 }

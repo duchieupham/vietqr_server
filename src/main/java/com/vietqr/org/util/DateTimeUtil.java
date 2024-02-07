@@ -1,9 +1,8 @@
 package com.vietqr.org.util;
 
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import com.vietqr.org.dto.StartEndMonthDTO;
+
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,5 +33,18 @@ public class DateTimeUtil {
     public static long get2LastPartition() {
         LocalDateTime localDateTime = LocalDateTime.now().minusMonths(1).withDayOfMonth(1).with(LocalTime.MIN);
         return localDateTime.toEpochSecond(ZoneOffset.UTC);
+    }
+
+    public static StartEndMonthDTO getStartEndMonth(String month) {
+        String dateTime = month + "-01 00:00:00";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DateTimeFormat);
+        LocalDateTime localDateTime = LocalDateTime.parse(dateTime, formatter);
+                LocalDateTime fromDate = localDateTime
+                .withDayOfMonth(1).with(LocalTime.MIN);
+        YearMonth yearMonth = YearMonth.of(fromDate.getYear(), fromDate.getMonth());
+        LocalDateTime toDate = localDateTime
+                .withDayOfMonth(yearMonth.lengthOfMonth()).with(LocalTime.MAX);
+        return new StartEndMonthDTO(fromDate.toEpochSecond(ZoneOffset.UTC),
+                toDate.toEpochSecond(ZoneOffset.UTC));
     }
 }

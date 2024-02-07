@@ -10,7 +10,7 @@ public class TerminalDetailResponseDTO {
     private String userId;
     private boolean isDefault;
     private int totalMember;
-    private String qrCode;
+//    private String qrCode;
     private List<TerminalBankResponseDTO> banks;
 
     private List<AccountMemberDTO> members;
@@ -99,13 +99,5 @@ public class TerminalDetailResponseDTO {
 
     public void setMembers(List<AccountMemberDTO> members) {
         this.members = members;
-    }
-
-    public String getQrCode() {
-        return qrCode;
-    }
-
-    public void setQrCode(String qrCode) {
-        this.qrCode = qrCode;
     }
 }

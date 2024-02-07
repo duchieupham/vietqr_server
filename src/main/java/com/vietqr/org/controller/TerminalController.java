@@ -439,7 +439,7 @@ public class TerminalController {
             responseDTO.setUserId(dto.getUserId());
             responseDTO.setDefault(dto.getIsDefault());
             responseDTO.setTotalMember(dto.getTotalMember());
-            responseDTO.setQrCode("");
+//            responseDTO.setQrCode("");
             List<String> terminalIds = new ArrayList<>();
             terminalIds.add(terminalId);
             List<ITerminalBankResponseDTO> iTerminalBankResponseDTOS = accountBankReceiveShareService.getTerminalBanksByTerminalIds(terminalIds);
@@ -644,6 +644,7 @@ public class TerminalController {
             terminalBankResponseDTO.setUserBankName(item.getUserBankName());
             terminalBankResponseDTO.setBankShortName(item.getBankShortName());
             terminalBankResponseDTO.setImgId(item.getImgId());
+            terminalBankResponseDTO.setQrCode(item.getQrCode() != null ? item.getQrCode() : "");
             return terminalBankResponseDTO;
         }).collect(Collectors.toList());
         return allBankShares;

@@ -1360,12 +1360,32 @@ public class TransactionController {
     }
 
     @GetMapping("transaction/overview/{bankId}")
-    public ResponseEntity<TransStatisticDTO> getTransactionOverview(@PathVariable("bankId") String bankId) {
-        TransStatisticDTO result = null;
+    public ResponseEntity<TransStatisticResponseDTO> getTransactionOverview(
+            @PathVariable("bankId") String bankId,
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "terminalCode") String terminalCode,
+            @RequestParam(value = "month") String month) {
+        TransStatisticResponseDTO result = null;
+        TransStatisticDTO dto = null;
         HttpStatus httpStatus = null;
         try {
-            result = transactionReceiveService.getTransactionOverview(bankId);
-            if (result != null) {
+            String checkIsOwner = accountBankReceiveService.checkIsOwner(bankId, userId);
+            if (!StringUtil.isNullOrEmpty(checkIsOwner) && StringUtil.isNullOrEmpty(terminalCode)) {
+                dto = transactionReceiveService.getTransactionOverview(bankId, month);
+            } else {
+                if (StringUtil.isNullOrEmpty(terminalCode)) {
+                    dto = transactionReceiveService.getTransactionOverview(bankId, month, userId);
+                } else {
+                    dto = transactionReceiveService.getTransactionOverview(bankId, terminalCode, month, userId);
+                }
+            }
+            if (dto != null) {
+                result = new TransStatisticResponseDTO();
+                result.setTotalCashIn(dto.getTotalCashIn()!= null ? dto.getTotalCashIn() : 0);
+                result.setTotalCashOut(dto.getTotalCashOut()!= null ? dto.getTotalCashOut() : 0);
+                result.setTotalTransC(dto.getTotalTransC()!= null ? dto.getTotalTransC() : 0);
+                result.setTotalTransD(dto.getTotalTransD()!= null ? dto.getTotalTransD() : 0);
+                result.setTotalTrans(dto.getTotalTrans()!= null ? dto.getTotalTrans() : 0);
                 httpStatus = HttpStatus.OK;
             } else {
                 httpStatus = HttpStatus.BAD_REQUEST;
@@ -1380,25 +1400,31 @@ public class TransactionController {
 
     @GetMapping("transaction/statistic")
     public ResponseEntity<Object> getTransactionStatistic(
+            @RequestParam(value = "terminalCode") String terminalCode,
             @RequestParam(value = "bankId") String bankId,
-            @RequestParam(value = "type") int type) {
+            @RequestParam(value = "month") String month,
+            @RequestParam(value = "userId") String userId) {
         Object result = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
-            // type = 1 => sort by date
-            // type = 2 => sort by month
-            if (type == 1) {
-                List<TransStatisticByDateDTO> transactions = transactionReceiveService.getTransStatisticByDate(bankId);
-                result = transactions;
-                httpStatus = HttpStatus.OK;
-            } else if (type == 2) {
-                List<TransStatisticByMonthDTO> transactions = transactionReceiveService
-                        .getTransStatisticByMonth(bankId);
+            String checkIsOwner = accountBankReceiveService.checkIsOwner(bankId, userId);
+            if (!StringUtil.isNullOrEmpty(checkIsOwner) && StringUtil.isNullOrEmpty(terminalCode)) {
+                List<TransStatisticByDateDTO> transactions
+                        = transactionReceiveService.getTransStatisticByBankId(bankId, month);
                 result = transactions;
                 httpStatus = HttpStatus.OK;
             } else {
-                logger.error("Error at getTransactionStatistic: INVALID TYPE");
-                httpStatus = HttpStatus.BAD_REQUEST;
+                if (StringUtil.isNullOrEmpty(terminalCode)) {
+                    List<TransStatisticByDateDTO> transactions
+                            = transactionReceiveService.getTransStatisticByTerminalId(bankId, month, userId);
+                    result = transactions;
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    List<TransStatisticByDateDTO> transactions
+                            = transactionReceiveService.getTransStatisticByTerminalId(bankId, terminalCode, month, userId);
+                    result = transactions;
+                    httpStatus = HttpStatus.OK;
+                }
             }
         } catch (Exception e) {
             System.out.println("Error at getTransactionStatistic: " + e.toString());
