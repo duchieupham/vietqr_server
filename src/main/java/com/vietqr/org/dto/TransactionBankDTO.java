@@ -14,6 +14,8 @@ public class TransactionBankDTO implements Serializable {
 	private int amount;
 	private String content;
 	private String bankaccount;
+
+	// C or D
 	private String transType;
 	private String reciprocalAccount;
 	private String reciprocalBankCode;

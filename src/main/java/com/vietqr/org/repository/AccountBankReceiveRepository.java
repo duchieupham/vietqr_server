@@ -224,4 +224,9 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	AccountBankReceiveForNotiDTO findAccountBankIden(@Param(value = "bankAccount") String bankAccount,
 			@Param(value = "bankTypeId") String bankTypeId);
 
+	@Query(value = "SELECT a.cai_value FROM cai_bank a " +
+			"INNER JOIN bank_type b ON b.id = a.bank_type_id " +
+			"INNER JOIN account_bank_receive c ON c.bank_type_id = b.id" +
+			" WHERE c.id = :bankId", nativeQuery = true)
+    String getCaiValueByBankId(String bankId);
 }

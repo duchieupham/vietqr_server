@@ -23,6 +23,8 @@ public interface AccountBankReceiveService {
 
 	public AccountBankReceiveEntity getAccountBankById(String bankId);
 
+	public String getCaiValueByBankId(String bankId);
+
 	public void updateRegisterAuthenticationBank(String nationalId, String phoneAuthenticated, String bankAccountName,
 			String bankAccount, String ewalletToken, String bankId);
 

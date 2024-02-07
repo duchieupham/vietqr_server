@@ -117,4 +117,20 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             "WHERE user_id = :userId AND bank_id = :bankId AND terminal_id IS NOT NULL " +
             "AND terminal_id != ''", nativeQuery = true)
     int countNumberOfTerminalByUserIdAndBankId(String userId, String bankId);
+
+    @Query(value = "SELECT DISTINCT a.user_id FROM account_bank_receive_share a " +
+            "INNER JOIN terminal b ON a.terminal_id = b.id WHERE code = :terminalCode", nativeQuery = true)
+    List<String> getUserIdsByTerminalCode(String terminalCode);
+
+    @Query(value = "SELECT a.* FROM terminal a " +
+            "INNER JOIN account_bank_receive_share b ON a.id = b.terminal_id " +
+            "INNER JOIN account_bank_receive c ON c.id = b.bank_id " +
+            "WHERE a.code = :terminalCode AND c.bank_account = :bankAccount " +
+            "AND c.is_authenticated = true ", nativeQuery = true)
+    TerminalEntity getTerminalByTerminalCodeAndBankAccount(String terminalCode, String bankAccount);
+
+    @Query(value = "SELECT DISTINCT a.id FROM terminal a " +
+            "INNER JOIN account_bank_receive_share b ON a.id = b.terminal_id " +
+            "WHERE trace_transfer = :traceTransfer", nativeQuery = true)
+    String getTerminalByTraceTransfer(String traceTransfer);
 }
