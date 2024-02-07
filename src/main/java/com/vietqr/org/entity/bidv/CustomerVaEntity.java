@@ -28,6 +28,12 @@ public class CustomerVaEntity implements Serializable {
     @Column(name = "bankId")
     private String bankId;
 
+    @Column(name = "userId")
+    private String userId;
+
+    @Column(name = "customerId")
+    private String customerId;
+
     @Column(name = "bankAccount")
     private String bankAccount;
 
@@ -50,12 +56,15 @@ public class CustomerVaEntity implements Serializable {
         super();
     }
 
-    public CustomerVaEntity(String id, String merchantId, String merchantName, String bankId, String bankAccount,
-            String userBankName, String nationalId, String phoneAuthenticated, String merchantType) {
+    public CustomerVaEntity(String id, String merchantId, String merchantName, String bankId, String userId,
+            String customerId, String bankAccount, String userBankName, String nationalId, String phoneAuthenticated,
+            String merchantType) {
         this.id = id;
         this.merchantId = merchantId;
         this.merchantName = merchantName;
         this.bankId = bankId;
+        this.userId = userId;
+        this.customerId = customerId;
         this.bankAccount = bankAccount;
         this.userBankName = userBankName;
         this.nationalId = nationalId;
@@ -93,6 +102,22 @@ public class CustomerVaEntity implements Serializable {
 
     public void setBankId(String bankId) {
         this.bankId = bankId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
     }
 
     public String getBankAccount() {

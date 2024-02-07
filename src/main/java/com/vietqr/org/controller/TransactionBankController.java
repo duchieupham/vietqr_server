@@ -33,6 +33,8 @@ import com.google.gson.Gson;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.service.*;
 import com.vietqr.org.util.*;
+import com.vietqr.org.util.bank.bidv.BIDVUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;

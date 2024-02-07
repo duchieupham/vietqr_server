@@ -1,7 +1,9 @@
-package com.vietqr.org.util;
+package com.vietqr.org.util.bank.bidv;
 
 import com.vietqr.org.dto.ConfirmLinkedBankDTO;
 import com.vietqr.org.dto.RequestLinkedBankDTO;
+import com.vietqr.org.dto.bidv.ConfirmCustomerVaDTO;
+import com.vietqr.org.dto.bidv.RequestCustomerVaDTO;
 
 public class BIDVUtil {
 
@@ -76,6 +78,45 @@ public class BIDVUtil {
         result += "\"ewalletToken\":" + "\"" + ewalletToken + "\",";
         result += "\"payerId\":" + "\"" + payerId + "\",";
         result += "\"unlinkAll\":" + "\"" + unlinkAll + "\"";
+        result += "}";
+        return result;
+    }
+
+    public static String generateRequestVaBody(
+            String serviceId,
+            String channelId,
+            String merchantId,
+            String merchantName,
+            RequestCustomerVaDTO dto,
+            String merchantType) {
+        String result = "";
+        result = "{";
+        result += "\"serviceId\":" + "\"" + serviceId + "\",";
+        result += "\"channelId\":" + "\"" + channelId + "\",";
+        result += "\"merchantId\":" + "\"" + merchantId + "\",";
+        result += "\"merchantName\":" + "\"" + merchantName + "\",";
+        result += "\"accountNo\":" + "\"" + dto.getBankAccount() + "\",";
+        result += "\"accountName\":" + "\"" + dto.getUserBankName() + "\",";
+        result += "\"identity\":" + "\"" + dto.getNationalId() + "\",";
+        result += "\"mobile\":" + "\"" + dto.getPhoneAuthenticated() + "\",";
+        result += "\"merchantType\":" + "\"" + merchantType + "\"";
+        result += "}";
+        return result;
+    }
+
+    // no need because no need to encrypted confirm add va API
+    public static String generateConfirmVaBody(
+            String serviceId,
+            String channelId,
+            ConfirmCustomerVaDTO dto) {
+        String result = "";
+        result = "{";
+        result += "\"serviceId\":" + "\"" + serviceId + "\",";
+        result += "\"channelId\":" + "\"" + channelId + "\",";
+        result += "\"merchantId\":" + "\"" + dto.getMerchantId() + "\",";
+        result += "\"merchantName\":" + "\"" + dto.getMerchantName() + "\",";
+        result += "\"confirmId\":" + "\"" + dto.getConfirmId() + "\",";
+        result += "\"otpNumber\":" + "\"" + dto.getOtpNumber() + "\"";
         result += "}";
         return result;
     }

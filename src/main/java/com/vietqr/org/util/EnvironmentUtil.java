@@ -36,6 +36,17 @@ public class EnvironmentUtil {
     private static final String BIDV_LINKED_CHANNEL_ID_UAT = "211701";
     private static final String BIDV_LINKED_CHANNEL_ID_PROD = "211701";
 
+    // BIDV
+    // request - confirm add merchant va
+    private static final String BIDV_URL_REQUEST_ADD_MERCHANT_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/createVAQLBH/v1";
+    private static final String BIDV_URL_REQUEST_ADD_MERCHANT_PROD = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/createVAQLBH/v1";
+
+    private static final String BIDV_URL_CONFIRM_ADD_MERCHANT_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/confirmVAQLBH/v1";
+    private static final String BIDV_URL_CONFIRM_ADD_MERCHANT_PROD = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/confirmVAQLBH/v1";
+
+    private static final String BIDV_URL_UNREGISTER_MERCHANT_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/deleteVAQLBH/v1";
+    private static final String BIDV_URL_UNREGISTER_MERCHANT_PROD = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/deleteVAQLBH/v1";
+
     private static final String BIDV_LINKED_PAYER_DEBIT_TYPE_ACC_UAT = "810";
     private static final String BIDV_LINKED_PAYER_DEBIT_TYPE_ACC_PROD = "810";
     // private static final String BIDV_LINKED_PAYER_DEBIT_TYPE_CARD_PROD = "810";
@@ -212,6 +223,18 @@ public class EnvironmentUtil {
     // Static VietQR from MB
     private static final String MB_QR_CODE_STATIC_TYPE = "1";
     private static final String MB_QR_INIT_STATIC_METHOD = "11";
+
+    public static String getBidvUrlRequestAddMerchant() {
+        return (IS_PRODUCTION == false) ? BIDV_URL_REQUEST_ADD_MERCHANT_UAT : BIDV_URL_REQUEST_ADD_MERCHANT_PROD;
+    }
+
+    public static final String getBidvUrlConfirmAddMerchant() {
+        return (IS_PRODUCTION == false) ? BIDV_URL_CONFIRM_ADD_MERCHANT_UAT : BIDV_URL_CONFIRM_ADD_MERCHANT_PROD;
+    }
+
+    public static final String getBidvUrlUnregisterMerchant() {
+        return (IS_PRODUCTION == false) ? BIDV_URL_UNREGISTER_MERCHANT_UAT : BIDV_URL_UNREGISTER_MERCHANT_PROD;
+    }
 
     public static String getMbQrCodeStaticType() {
         return MB_QR_CODE_STATIC_TYPE;
