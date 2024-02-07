@@ -483,7 +483,8 @@ public class TransactionBankController {
 					if (checkDuplicate) {
 						// có taài khoản bank trong he thong VietQR
 						if (accountBankEntity != null) {
-							// nêếu mms_active = true và transType = C => không insert transaction_bank do đã insert ở luồng ưu tiên
+							// nêếu mms_active = true và transType = C => không insert transaction_bank do
+							// đã insert ở luồng ưu tiên
 							if (accountBankEntity.isMmsActive() == true
 									&& dto.getTransType().trim().toUpperCase().equals("C")) {
 								// System.out.println("isMmsActive");
@@ -980,7 +981,7 @@ public class TransactionBankController {
 				time,
 				transactionReceiveEntity.getId());
 
-			// push notification
+		// push notification
 		// find userIds into terminal
 		if (StringUtil.isNullOrEmpty(transactionReceiveEntity.getTerminalCode()) == false) {
 			// find all userIds belong to terminal
@@ -1036,17 +1037,17 @@ public class TransactionBankController {
 						data.put("status", "1");
 						data.put("traceId", "" + transactionReceiveEntity.getTraceId());
 						data.put("transType", dto.getTransType());
-						executorService.submit(() ->
-								pushNotification(NotificationUtil
-										.getNotiTitleUpdateTransaction(), message, notiEntity, data, userId));
+						executorService.submit(() -> pushNotification(NotificationUtil
+								.getNotiTitleUpdateTransaction(), message, notiEntity, data, userId));
 						try {
 							// send msg to QR Link
 							String refId = TransactionRefIdUtil.encryptTransactionId(transactionReceiveEntity.getId());
 							socketHandler.sendMessageToTransactionRefId(refId, data);
 						} catch (IOException e) {
-							logger.error("WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
+							logger.error(
+									"WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
 						}
-			}
+					}
 					executorService.shutdown();
 				}
 				/////// DO INSERT TELEGRAM
@@ -1134,9 +1135,10 @@ public class TransactionBankController {
 			notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
 			notiEntity.setUserId(accountBankEntity.getUserId());
 			notiEntity.setData(transactionReceiveEntity.getId());
-//			notificationService.insertNotification(notiEntity);
-//			List<FcmTokenEntity> fcmTokens = new ArrayList<>();
-//			fcmTokens = fcmTokenService.getFcmTokensByUserId(accountBankEntity.getUserId());
+			// notificationService.insertNotification(notiEntity);
+			// List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+			// fcmTokens =
+			// fcmTokenService.getFcmTokensByUserId(accountBankEntity.getUserId());
 			Map<String, String> data = new HashMap<>();
 			data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
 			data.put("notificationId", notificationUUID.toString());
@@ -1154,15 +1156,15 @@ public class TransactionBankController {
 			data.put("status", "1");
 			data.put("traceId", "");
 			data.put("transType", dto.getTransType());
-//			firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
-//					NotificationUtil
-//							.getNotiTitleUpdateTransaction(),
-//					message);
+			// firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
+			// NotificationUtil
+			// .getNotiTitleUpdateTransaction(),
+			// message);
 			pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
 					message, notiEntity, data, accountBankEntity.getUserId());
 			try {
 				// send msg to user
-//				socketHandler.sendMessageToUser(accountBankEntity.getUserId(), data);
+				// socketHandler.sendMessageToUser(accountBankEntity.getUserId(), data);
 				// send msg to QR Link
 				String refId = TransactionRefIdUtil.encryptTransactionId(transactionReceiveEntity.getId());
 				socketHandler.sendMessageToTransactionRefId(refId, data);
@@ -1281,7 +1283,7 @@ public class TransactionBankController {
 							accountBankEntity.getBankAccount());
 			if (terminalEntity != null) {
 				List<String> userIds = terminalService
-						.getUserIdsByTerminalCode(transactionReceiveEntity.getTerminalCode());
+						.getUserIdsByTerminalCode(transactionEntity.getTerminalCode());
 				String prefix = "";
 				if (dto.getTransType().toUpperCase().equals("D")) {
 					prefix = "-";
@@ -1311,32 +1313,32 @@ public class TransactionBankController {
 						notiEntity.setTime(time);
 						notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
 						notiEntity.setUserId(userId);
-						notiEntity.setData(transactionReceiveEntity.getId());
+						notiEntity.setData(transactionEntity.getId());
 						data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
 						data.put("notificationId", notificationUUID.toString());
-						data.put("transactionReceiveId", transactionReceiveEntity.getId());
-						data.put("bankAccount", transactionReceiveEntity.getBankAccount());
+						data.put("transactionReceiveId", transactionEntity.getId());
+						data.put("bankAccount", transactionEntity.getBankAccount());
 						data.put("bankName", bankTypeEntity.getBankName());
 						data.put("bankCode", bankTypeEntity.getBankCode());
-						data.put("bankId", transactionReceiveEntity.getBankId());
+						data.put("bankId", transactionEntity.getBankId());
 						data.put("terminalName", terminalEntity.getName());
 						data.put("terminalCode", terminalEntity.getCode());
-						data.put("content", transactionReceiveEntity.getContent());
-						data.put("amount", "" + transactionReceiveEntity.getAmount());
-						data.put("time", "" + transactionReceiveEntity.getTime());
+						data.put("content", transactionEntity.getContent());
+						data.put("amount", "" + transactionEntity.getAmount());
+						data.put("time", "" + transactionEntity.getTime());
 						data.put("refId", "" + dto.getTransactionid());
 						data.put("status", "1");
-						data.put("traceId", "" + transactionReceiveEntity.getTraceId());
+						data.put("traceId", "" + transactionEntity.getTraceId());
 						data.put("transType", dto.getTransType());
-						executorService.submit(() ->
-								pushNotification(NotificationUtil
-										.getNotiTitleUpdateTransaction(), message, notiEntity, data, userId));
+						executorService.submit(() -> pushNotification(NotificationUtil
+								.getNotiTitleUpdateTransaction(), message, notiEntity, data, userId));
 						try {
 							// send msg to QR Link
-							String refId = TransactionRefIdUtil.encryptTransactionId(transactionReceiveEntity.getId());
+							String refId = TransactionRefIdUtil.encryptTransactionId(transactionEntity.getId());
 							socketHandler.sendMessageToTransactionRefId(refId, data);
 						} catch (IOException e) {
-							logger.error("WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
+							logger.error(
+									"WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
 						}
 					}
 					executorService.shutdown();
