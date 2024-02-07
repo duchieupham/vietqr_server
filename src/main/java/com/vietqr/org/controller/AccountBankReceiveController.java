@@ -190,6 +190,9 @@ public class AccountBankReceiveController {
 			accountBankReceiveShareEntity.setBankId(uuid.toString());
 			accountBankReceiveShareEntity.setUserId(dto.getUserId());
 			accountBankReceiveShareEntity.setOwner(true);
+			accountBankReceiveShareEntity.setTraceTransfer("");
+			accountBankReceiveShareEntity.setQrCode("");
+			accountBankReceiveShareEntity.setTerminalId("");
 			accountBankReceiveShareService.insertAccountBankReceiveShare(accountBankReceiveShareEntity);
 
 			// insert contact
@@ -466,6 +469,9 @@ public class AccountBankReceiveController {
 			accountBankReceiveShareEntity.setBankId(uuid.toString());
 			accountBankReceiveShareEntity.setUserId(dto.getUserId());
 			accountBankReceiveShareEntity.setOwner(true);
+			accountBankReceiveShareEntity.setTraceTransfer("");
+			accountBankReceiveShareEntity.setQrCode("");
+			accountBankReceiveShareEntity.setTerminalId("");
 			accountBankReceiveShareService.insertAccountBankReceiveShare(accountBankReceiveShareEntity);
 			// insert contact
 			String checkExistedContact = contactService.checkExistedRecord(dto.getUserId(), qr, 2);
