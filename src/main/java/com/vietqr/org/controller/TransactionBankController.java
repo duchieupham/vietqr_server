@@ -33,6 +33,8 @@ import com.google.gson.Gson;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.service.*;
 import com.vietqr.org.util.*;
+import com.vietqr.org.util.bank.bidv.BIDVUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -1256,7 +1258,7 @@ public class TransactionBankController {
 		transactionEntity.setAmount(Long.parseLong(dto.getAmount() + ""));
 		transactionEntity.setTime(time);
 		transactionEntity.setRefId(uuid.toString());
-		transactionEntity.setType(2);
+		transactionEntity.setType(1);
 		transactionEntity.setStatus(1);
 		transactionEntity.setTraceId("");
 		transactionEntity.setTransType(dto.getTransType());
@@ -1283,7 +1285,7 @@ public class TransactionBankController {
 							accountBankEntity.getBankAccount());
 			if (terminalEntity != null) {
 				List<String> userIds = terminalService
-						.getUserIdsByTerminalCode(transactionEntity.getTerminalCode());
+						.getUserIdsByTerminalCode(terminalEntity.getCode());
 				String prefix = "";
 				if (dto.getTransType().toUpperCase().equals("D")) {
 					prefix = "-";

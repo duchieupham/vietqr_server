@@ -93,4 +93,9 @@ public class TerminalServiceImpl implements TerminalService {
         return repo.getTerminalByTraceTransfer(traceTransfer);
     }
 
+    @Override
+    public List<TerminalEntity> getAllTerminalNoQRCode() {
+        return repo.getAllTerminalNoQRCode();
+    }
+
 }

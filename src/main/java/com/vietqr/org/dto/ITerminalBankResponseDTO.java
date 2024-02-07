@@ -9,4 +9,5 @@ public interface ITerminalBankResponseDTO {
     String getUserBankName();
     String getBankShortName();
     String getImgId();
+    String getQrCode();
 }
