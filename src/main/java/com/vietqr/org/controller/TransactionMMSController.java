@@ -14,7 +14,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import com.vietqr.org.entity.*;
+import com.vietqr.org.service.*;
+import com.vietqr.org.util.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -45,38 +50,6 @@ import com.vietqr.org.dto.TransMMSCheckInDTO;
 import com.vietqr.org.dto.TransMMSCheckOutDTO;
 import com.vietqr.org.dto.TransactionBankCustomerDTO;
 import com.vietqr.org.dto.TransactionMMSResponseDTO;
-import com.vietqr.org.entity.AccountBankReceiveEntity;
-import com.vietqr.org.entity.BankTypeEntity;
-import com.vietqr.org.entity.CustomerSyncEntity;
-import com.vietqr.org.entity.FcmTokenEntity;
-import com.vietqr.org.entity.NotificationEntity;
-import com.vietqr.org.entity.TerminalAddressEntity;
-import com.vietqr.org.entity.TerminalBankEntity;
-import com.vietqr.org.entity.TransactionMMSEntity;
-import com.vietqr.org.entity.TransactionReceiveEntity;
-import com.vietqr.org.entity.TransactionReceiveLogEntity;
-import com.vietqr.org.service.AccountBankReceiveService;
-import com.vietqr.org.service.AccountCustomerBankService;
-import com.vietqr.org.service.BankTypeService;
-import com.vietqr.org.service.CustomerSyncService;
-import com.vietqr.org.service.FcmTokenService;
-import com.vietqr.org.service.FirebaseMessagingService;
-import com.vietqr.org.service.LarkAccountBankService;
-import com.vietqr.org.service.NotificationService;
-import com.vietqr.org.service.TelegramAccountBankService;
-import com.vietqr.org.service.TerminalAddressService;
-import com.vietqr.org.service.TerminalBankService;
-import com.vietqr.org.service.TransactionMMSService;
-import com.vietqr.org.service.TransactionReceiveLogService;
-import com.vietqr.org.service.TransactionReceiveService;
-import com.vietqr.org.util.BankEncryptUtil;
-import com.vietqr.org.util.EnvironmentUtil;
-import com.vietqr.org.util.LarkUtil;
-import com.vietqr.org.util.NotificationUtil;
-import com.vietqr.org.util.RandomCodeUtil;
-import com.vietqr.org.util.SocketHandler;
-import com.vietqr.org.util.TelegramUtil;
-import com.vietqr.org.util.TransactionRefIdUtil;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -115,10 +88,16 @@ public class TransactionMMSController {
     AccountBankReceiveService accountBankService;
 
     @Autowired
+    AccountBankReceiveShareService accountBankReceiveShareService;
+
+    @Autowired
     BankTypeService bankTypeService;
 
     @Autowired
     AccountCustomerBankService accountCustomerBankService;
+
+    @Autowired
+    TerminalService terminalService;
 
     @Autowired
     SocketHandler socketHandler;
@@ -293,6 +272,46 @@ public class TransactionMMSController {
                             // send msg to QR Link
                             String refId = TransactionRefIdUtil
                                     .encryptTransactionId(tempTransReceive.getId());
+//                            if (!accountBankEntity.isMmsActive() || !accountBankEntity.isSync()) {
+//                                // push notification to user
+////                                String terminalCode = tempTransReceive.getTerminalCode();
+//                                if (StringUtil.isNullOrEmpty(tempTransReceive.getTerminalCode())) {
+//                                    TerminalEntity terminalEntity = terminalService
+//                                            .getTerminalByTerminalCode(tempTransReceive.getTerminalCode());
+//                                    NumberFormat nf = NumberFormat.getInstance(Locale.US);
+//                                    String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
+//                                            + accountBankEntity.getBankAccount()
+//                                            + NotificationUtil.getNotiDescUpdateTransSuffix2()
+//                                            + "+" + nf.format(tempTransReceive.getAmount())
+//                                            + NotificationUtil.getNotiDescUpdateTransSuffix3()
+//                                            + terminalEntity.getName()
+//                                            + NotificationUtil.getNotiDescUpdateTransSuffix4()
+//                                            + tempTransReceive.getContent();
+//                                    List<String> userIds = terminalService
+//                                            .getUserIdsByTerminalCode(tempTransReceive.getTerminalCode());
+//
+//                                    if (!FormatUtil.isListNullOrEmpty(userIds)) {
+//                                        int numThread = userIds.size();
+//                                        ExecutorService executorService = Executors.newFixedThreadPool(numThread);
+//                                        for (String userId : userIds) {
+//                                            UUID notificationUUID = UUID.randomUUID();
+//                                            NotificationEntity notiEntity = new NotificationEntity();
+//                                            notiEntity.setId(notificationUUID.toString());
+//                                            notiEntity.setRead(false);
+//                                            notiEntity.setMessage(message);
+//                                            notiEntity.setTime(time);
+//                                            notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
+//                                            notiEntity.setUserId(userId);
+//                                            notiEntity.setData(tempTransReceive.getId());
+//                                            executorService.submit(() ->
+//                                                    pushNotification(NotificationUtil
+//                                                            .getNotiTitleUpdateTransaction(), message, notiEntity, data, userId));
+//                                        }
+//                                        executorService.shutdown();
+//                                    }
+//                                }
+//
+//                            }
                             try {
                                 LocalDateTime startRequestDateTime = LocalDateTime.now();
                                 long startRequestTime = startRequestDateTime.toEpochSecond(ZoneOffset.UTC);
@@ -312,8 +331,41 @@ public class TransactionMMSController {
                     } else {
                         /// STATTIC QR
                         //
+//                        String traceTransfer = entity.getTraceTransfer();
                         //
                         // get trace Transfer to find VietQR terminal
+//                        String terminalId = terminalService
+//                                .getTerminalByTraceTransfer(traceTransfer);
+
+                        // if exist terminalId, find bankAccount by terminalId
+//                        if (terminalId != null && !terminalId.trim().isEmpty()) {
+//                            List<String> userIds = terminalService
+//                                    .getUserIdsByTerminalCode(terminalId);
+//                            int numThread = userIds.size();
+//                            ExecutorService executorService = Executors.newFixedThreadPool(numThread);
+//                            for (String userId : userIds) {
+//                                UUID notificationUUID = UUID.randomUUID();
+//                                NotificationEntity notiEntity = new NotificationEntity();
+//                                NumberFormat nf = NumberFormat.getInstance(Locale.US);
+//                                String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
+//                                        + entity.getDebitAmount()
+//                                        + NotificationUtil.getNotiDescUpdateTransSuffix2()
+//                                        + "+" + nf.format(entity.getDebitAmount())
+//                                        + NotificationUtil.getNotiDescUpdateTransSuffix3()
+//                                        + entity.getTraceTransfer()
+//                                        + NotificationUtil.getNotiDescUpdateTransSuffix4()
+//                                        + entity.getTraceTransfer();
+//                                notiEntity.setId(notificationUUID.toString());
+//                                notiEntity.setRead(false);
+//                                notiEntity.setMessage(message);
+//                                notiEntity.setTime(time);
+//                                notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
+//                                notiEntity.setUserId(userId);
+//                                notiEntity.setData(uuid.toString());
+//                                executorService.submit(() ->
+//                                        pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(), message, notiEntity, null, userId));
+//                            }
+//                        }
                         // if VietQR terminal existed, insert new transaction
                         ///
                         ///
@@ -452,6 +504,31 @@ public class TransactionMMSController {
         }
     }
 
+//    private void pushNotification(String title, String message, NotificationEntity notiEntity, Map<String, String> data,
+//                                  String userId) {
+//        try {
+//            Thread.sleep(2000);
+//        } catch (Exception e) {
+//            logger.error("pushNotification: ERROR: " + e.toString());
+//        }
+//        if (notiEntity != null) {
+//            notificationService.insertNotification(notiEntity);
+//        }
+//        List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+//        fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
+//        firebaseMessagingService.sendUsersNotificationWithData(data,
+//                fcmTokens,
+//                title, message);
+//        try {
+//            socketHandler.sendMessageToUser(userId,
+//                    data);
+//        } catch (IOException e) {
+//            logger.error(
+//                    "transaction-sync: WS: socketHandler.sendMessageToUser - RECHARGE ERROR: "
+//                            + e.toString());
+//        }
+//    }
+
     public String convertLongToDate(long timestamp) {
         String result = "";
         try {
@@ -478,7 +555,7 @@ public class TransactionMMSController {
     }
 
     private void getCustomerSyncEntities(String transReceiveId, String terminalBankId, String ftCode,
-            TransactionReceiveEntity transactionReceiveEntity, long time) {
+                                         TransactionReceiveEntity transactionReceiveEntity, long time) {
         try {
             // find customerSyncEntities by terminal_bank_id
             List<TerminalAddressEntity> terminalAddressEntities = new ArrayList<>();
@@ -520,8 +597,8 @@ public class TransactionMMSController {
     }
 
     private ResponseMessageDTO pushNewTransactionToCustomerSync(String transReceiveId, CustomerSyncEntity entity,
-            TransactionBankCustomerDTO dto,
-            long time) {
+                                                                TransactionBankCustomerDTO dto,
+                                                                long time) {
         ResponseMessageDTO result = null;
         // final ResponseMessageDTO[] results = new ResponseMessageDTO[1];
         // final List<ResponseMessageDTO> results = new ArrayList<>();
@@ -798,7 +875,7 @@ public class TransactionMMSController {
 
     // get result - TransactionMMSResponseDTO
     private TransactionMMSResponseDTO validateTransactionBank(TransactionMMSEntity entity,
-            TerminalBankEntity terminalBankEntity) {
+                                                              TerminalBankEntity terminalBankEntity) {
         TransactionMMSResponseDTO result = null;
         try {
             if (entity != null) {
