@@ -1049,6 +1049,11 @@ public class TransactionController {
                         result = transactionReceiveService.getTransactionsByTerminalCodeAllDate(value, offset, bankId);
                         httpStatus = HttpStatus.OK;
                         break;
+                    case 5:
+                        Integer status = Integer.parseInt(value);
+                        result = transactionReceiveService.getTransactionsByStatus(status, offset, bankId);
+                        httpStatus = HttpStatus.OK;
+                        break;
                     default:
                         logger.error("getTransactionsMobile: ERROR: INVALID TYPE");
                         httpStatus = HttpStatus.BAD_REQUEST;
@@ -1079,8 +1084,12 @@ public class TransactionController {
                         httpStatus = HttpStatus.OK;
                         break;
                     case 5:
-                        Integer status = Integer.parseInt(value);
-                        result = transactionReceiveService.getTransactionsByStatus(status, offset, bankId, from, to);
+                        if (!StringUtil.isNullOrEmpty(value)) {
+                            Integer status = Integer.parseInt(value);
+                            result = transactionReceiveService.getTransactionsByStatus(status, offset, bankId, from, to);
+                        } else {
+                            result = transactionReceiveService.getTransactions(offset, bankId, from, to);
+                        }
                         httpStatus = HttpStatus.OK;
                         break;
                     default:

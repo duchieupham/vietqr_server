@@ -80,7 +80,9 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                                                     @Param(value = "fromDate") long fromDate,
                                                     @Param(value = "toDate") long toDate);
 
-        @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, a.time_paid as timePaid,a.status,a.type,a.trans_type as transType "
+        @Query(value = "SELECT a.id as transactionId,a.amount, " +
+                "a.bank_account as bankAccount,a.content,a.time, a.time_paid as timePaid," +
+                "a.status,a.type,a.trans_type as transType "
                         + "FROM transaction_receive a "
                         + "WHERE a.bank_id= :bankId AND a.status = :status "
                         + "AND a.time BETWEEN :fromDate AND :toDate "

@@ -110,13 +110,13 @@ public class TerminalController {
                         AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService.getAccountBankById(bankId);
                         if (accountBankReceiveEntity != null) {
                             // luồng ưu tiên
-                            if (!accountBankReceiveEntity.isMmsActive()) {
+                            if (accountBankReceiveEntity.isMmsActive()) {
                                 TerminalBankEntity terminalBankEntity =
                                         terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
                                 if (terminalBankEntity != null && "MB".equals(terminalBankEntity.getBankCode())) {
                                     String qr = MBVietQRUtil.generateStaticVietQRMMS(
                                             new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
-                                            terminalBankEntity.getTerminalId(), ""));
+                                            terminalBankEntity.getTerminalId(), dto.getCode()));
                                     accountBankReceiveShareEntity.setQrCode(qr);
                                     String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
                                     accountBankReceiveShareEntity.setTraceTransfer(traceTransfer);
@@ -130,7 +130,7 @@ public class TerminalController {
                                 String bankAccount = accountBankReceiveEntity.getBankAccount();
                                 String caiValue = accountBankReceiveService.getCaiValueByBankId(bankId);
                                 VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", qrCodeContent, bankAccount);
-                                String qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
+                                String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
                                 accountBankReceiveShareEntity.setQrCode(qr);
                                 accountBankReceiveShareEntity.setTraceTransfer("");
                                 qrMap.put(bankId, new QRStaticCreateDTO(qr, ""));
@@ -254,6 +254,76 @@ public class TerminalController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // run 1 time
+//    @PutMapping("terminal/update-code-all")
+//    public ResponseEntity<ResponseMessageDTO> updateAll() {
+//        ResponseMessageDTO result = null;
+//        HttpStatus httpStatus = null;
+//        try {
+//            List<TerminalEntity> terminalEntities = terminalService.getAllTerminalNoQRCode();
+//            // get list userIds in terminal
+//            List<String> userIds = accountBankReceiveShareService.getUserIdsFromTerminalId(dto.getTerminalId(), dto.getUserId());
+//            // insert account-bank-receive-share
+//            List<AccountBankReceiveShareEntity> entities = new ArrayList<>();
+//            if (!FormatUtil.isListNullOrEmpty(userIds)) {
+//                for (String userId : userIds) {
+//                    AccountBankReceiveShareEntity accountBankReceiveShareEntity = new AccountBankReceiveShareEntity();
+//                    accountBankReceiveShareEntity.setId(UUID.randomUUID().toString());
+//                    accountBankReceiveShareEntity.setBankId(dto.getBankId());
+//                    accountBankReceiveShareEntity.setUserId(userId);
+//                    accountBankReceiveShareEntity.setOwner(false);
+//                    AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService.getAccountBankById(dto.getBankId());
+//                    if (accountBankReceiveEntity != null) {
+//                        // luồng thường
+//                        TerminalEntity terminalEntity = terminalService.findTerminalById(dto.getTerminalId());
+//                        if (accountBankReceiveEntity.isMmsActive() == false) {
+//                            String qrCodeContent = "SQR" + terminalEntity.getCode();
+//                            String bankAccount = accountBankReceiveEntity.getBankAccount();
+//                            String caiValue = accountBankReceiveService.getCaiValueByBankId(dto.getBankId());
+//                            VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", qrCodeContent, bankAccount);
+//                            String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+//                            accountBankReceiveShareEntity.setQrCode(qr);
+//                            accountBankReceiveShareEntity.setTraceTransfer("");
+//                        } else {
+//                            // luồng ưu tien
+//                            TerminalBankEntity terminalBankEntity =
+//                                    terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
+//                            if (terminalBankEntity != null && "MB".equals(terminalBankEntity.getBankCode())) {
+//                                String qr = MBVietQRUtil.generateStaticVietQRMMS(
+//                                        new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
+//                                                terminalBankEntity.getTerminalId(), ""));
+//                                accountBankReceiveShareEntity.setQrCode(qr);
+//                                String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
+//                                accountBankReceiveShareEntity.setTraceTransfer(traceTransfer);
+//                            } else {
+//                                logger.error("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
+//                            }
+//
+//                        }
+//                    }
+//                    accountBankReceiveShareEntity.setTerminalId(dto.getTerminalId());
+//                    entities.add(accountBankReceiveShareEntity);
+//                }
+//            }
+//            UUID uuidShare = UUID.randomUUID();
+//            AccountBankReceiveShareEntity accountBankReceiveShareEntity = new AccountBankReceiveShareEntity();
+//            accountBankReceiveShareEntity.setId(uuidShare.toString());
+//            accountBankReceiveShareEntity.setBankId(dto.getBankId());
+//            accountBankReceiveShareEntity.setUserId(dto.getUserId());
+//            accountBankReceiveShareEntity.setOwner(true);
+//            accountBankReceiveShareEntity.setQrCode("");
+//            accountBankReceiveShareEntity.setTerminalId(dto.getTerminalId());
+//            entities.add(accountBankReceiveShareEntity);
+//            accountBankReceiveShareService.insertAccountBankReceiveShare(entities);
+//
+//            result = new ResponseMessageDTO("SUCCESS", "");
+//            httpStatus = HttpStatus.OK;
+//        } catch (Exception e) {
+//            result = new ResponseMessageDTO("FAILED", "E05");
+//            httpStatus = HttpStatus.BAD_REQUEST;
+//        }
+//        return new ResponseEntity<>(result, httpStatus);
+//    }
 
     @PostMapping("terminal/bank-account")
     public ResponseEntity<ResponseMessageDTO> insertBankAccountTerminal(@Valid @RequestBody TerminalBankInsertDTO dto) {
@@ -275,12 +345,12 @@ public class TerminalController {
                     if (accountBankReceiveEntity != null) {
                         // luồng thường
                         TerminalEntity terminalEntity = terminalService.findTerminalById(dto.getTerminalId());
-                        if (!accountBankReceiveEntity.isMmsActive()) {
+                        if (accountBankReceiveEntity.isMmsActive() == false) {
                             String qrCodeContent = "SQR" + terminalEntity.getCode();
                             String bankAccount = accountBankReceiveEntity.getBankAccount();
                             String caiValue = accountBankReceiveService.getCaiValueByBankId(dto.getBankId());
                             VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", qrCodeContent, bankAccount);
-                            String qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
+                            String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
                             accountBankReceiveShareEntity.setQrCode(qr);
                             accountBankReceiveShareEntity.setTraceTransfer("");
                         } else {

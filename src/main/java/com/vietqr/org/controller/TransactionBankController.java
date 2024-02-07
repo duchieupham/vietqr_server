@@ -1256,7 +1256,7 @@ public class TransactionBankController {
 		transactionEntity.setAmount(Long.parseLong(dto.getAmount() + ""));
 		transactionEntity.setTime(time);
 		transactionEntity.setRefId(uuid.toString());
-		transactionEntity.setType(2);
+		transactionEntity.setType(1);
 		transactionEntity.setStatus(1);
 		transactionEntity.setTraceId("");
 		transactionEntity.setTransType(dto.getTransType());
@@ -1283,7 +1283,7 @@ public class TransactionBankController {
 							accountBankEntity.getBankAccount());
 			if (terminalEntity != null) {
 				List<String> userIds = terminalService
-						.getUserIdsByTerminalCode(transactionEntity.getTerminalCode());
+						.getUserIdsByTerminalCode(terminalEntity.getCode());
 				String prefix = "";
 				if (dto.getTransType().toUpperCase().equals("D")) {
 					prefix = "-";
