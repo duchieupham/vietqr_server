@@ -39,7 +39,7 @@ public interface AccountBankReceiveShareService {
 
     int countNumberOfBankShareByUserId(String userId);
 
-    List<String> getBankIdsFromTerminalId(String terminalId);
+    List<BankQRTerminalDTO> getBankIdsFromTerminalId(String terminalId);
 
     int insertAccountBankReceiveShare(List<AccountBankReceiveShareEntity> entities);
 

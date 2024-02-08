@@ -33,7 +33,7 @@ public class TerminalMemberController {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            List<String> bankIds = accountBankReceiveShareService.getBankIdsFromTerminalId(dto.getTerminalId());
+            List<BankQRTerminalDTO> bankIds = accountBankReceiveShareService.getBankIdsFromTerminalId(dto.getTerminalId());
             List<AccountBankReceiveShareEntity> entities = new ArrayList<>();
             // add member to group terminal
             AccountBankReceiveShareEntity entityMember = new AccountBankReceiveShareEntity();
@@ -42,18 +42,20 @@ public class TerminalMemberController {
             entityMember.setUserId(dto.getUserId());
             entityMember.setOwner(false);
             entityMember.setQrCode("");
+            entityMember.setTraceTransfer("");
             entityMember.setTerminalId(dto.getTerminalId());
             entities.add(entityMember);
 
             // share bank to member
             if (!FormatUtil.isListNullOrEmpty(bankIds)) {
-                for (String bankId : bankIds) {
+                for (BankQRTerminalDTO bankId : bankIds) {
                     AccountBankReceiveShareEntity entity = new AccountBankReceiveShareEntity();
                     entity.setId(UUID.randomUUID().toString());
-                    entity.setBankId(bankId);
+                    entity.setBankId(bankId.getBankId());
                     entity.setUserId(dto.getUserId());
                     entity.setOwner(false);
-                    entity.setQrCode("");
+                    entity.setQrCode(bankId.getQrCode() + "");
+                    entity.setTraceTransfer(bankId.getTraceTransfer() + "");
                     entity.setTerminalId(dto.getTerminalId());
                     entities.add(entity);
                 }
