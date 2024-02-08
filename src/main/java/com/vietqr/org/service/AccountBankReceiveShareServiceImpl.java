@@ -116,7 +116,7 @@ public class AccountBankReceiveShareServiceImpl implements AccountBankReceiveSha
     }
 
     @Override
-    public List<String> getBankIdsFromTerminalId(String terminalId) {
+    public List<BankQRTerminalDTO> getBankIdsFromTerminalId(String terminalId) {
         return repo.getBankIdsFromTerminalId(terminalId);
     }
 

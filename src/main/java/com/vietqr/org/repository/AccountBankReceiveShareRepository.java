@@ -123,9 +123,9 @@ public interface AccountBankReceiveShareRepository
             "AND terminal_id IS NOT NULL AND terminal_id != '' ", nativeQuery = true)
     int countNumberOfBankShareByUserId(String userId);
 
-    @Query(value = "SELECT DISTINCT bank_id FROM account_bank_receive_share " +
+    @Query(value = "SELECT DISTINCT bank_id as bankId, qr_code as qrCode, trance_transfer as traceTransfer FROM account_bank_receive_share " +
             "WHERE terminal_id = :terminalId", nativeQuery = true)
-    List<String> getBankIdsFromTerminalId(@Param("terminalId") String terminalId);
+    List<BankQRTerminalDTO> getBankIdsFromTerminalId(@Param("terminalId") String terminalId);
 
     @Query(value = "SELECT count(DISTINCT CASE WHEN a.user_id = :userId AND a.bank_id != '' THEN a.bank_id END) FROM account_bank_receive_share a " +
             "INNER JOIN terminal b " +
