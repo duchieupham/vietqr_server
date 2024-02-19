@@ -750,4 +750,20 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
                 dto.getToDate() - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
+    @Override
+    public List<TransStatisticByDateDTO> getTransStatisticByTerminalIdNotSync(String bankId, String terminalCode, String month) {
+        StartEndMonthDTO dto = DateTimeUtil.getStartEndMonth(month);
+        return repo.getTransStatisticByTerminalIdNotSync(bankId, terminalCode,
+                dto.getFromDate() - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                dto.getToDate() - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public TransStatisticDTO getTransactionOverviewNotSync(String bankId, String terminalCode, String month) {
+        StartEndMonthDTO dto = DateTimeUtil.getStartEndMonth(month);
+        return repo.getTransactionOverviewNotSync(bankId, terminalCode,
+                dto.getFromDate() - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                dto.getToDate() - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
 }

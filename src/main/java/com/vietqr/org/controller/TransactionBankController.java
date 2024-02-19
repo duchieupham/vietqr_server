@@ -1111,6 +1111,83 @@ public class TransactionBankController {
 				// textToSpeechService.delete(requestId);
 			} else {
 				logger.info("transaction-sync - userIds empty.");
+				// not have terminal in terminal table but still available in transaction_receive
+				// insert notification
+				UUID notificationUUID = UUID.randomUUID();
+				NotificationEntity notiEntity = new NotificationEntity();
+				String prefix = "";
+				if (dto.getTransType().toUpperCase().equals("D")) {
+					prefix = "-";
+				} else {
+					prefix = "+";
+				}
+				String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
+						+ accountBankEntity.getBankAccount()
+						+ NotificationUtil.getNotiDescUpdateTransSuffix2()
+						+ prefix + nf.format(dto.getAmount())
+						+ NotificationUtil.getNotiDescUpdateTransSuffix4()
+						+ dto.getContent();
+				notiEntity.setId(notificationUUID.toString());
+				notiEntity.setRead(false);
+				notiEntity.setMessage(message);
+				notiEntity.setTime(time);
+				notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
+				notiEntity.setUserId(accountBankEntity.getUserId());
+				notiEntity.setData(transactionReceiveEntity.getId());
+				Map<String, String> data = new HashMap<>();
+				data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+				data.put("notificationId", notificationUUID.toString());
+				data.put("transactionReceiveId", transactionReceiveEntity.getId());
+				data.put("bankAccount", accountBankEntity.getBankAccount());
+				data.put("bankName", bankTypeEntity.getBankName());
+				data.put("bankCode", bankTypeEntity.getBankCode());
+				data.put("bankId", accountBankEntity.getId());
+				data.put("terminalName", "");
+				data.put("terminalCode", transactionReceiveEntity.getTerminalCode());
+				data.put("content", dto.getContent());
+				data.put("amount", "" + dto.getAmount());
+				data.put("time", "" + time);
+				data.put("refId", "" + dto.getTransactionid());
+				data.put("status", "1");
+				data.put("traceId", "");
+				data.put("transType", dto.getTransType());
+				pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
+						message, notiEntity, data, accountBankEntity.getUserId());
+				try {
+					String refId = TransactionRefIdUtil.encryptTransactionId(transactionReceiveEntity.getId());
+					socketHandler.sendMessageToTransactionRefId(refId, data);
+				} catch (IOException e) {
+					logger.error("WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
+				}
+				/////// DO INSERT TELEGRAM
+				List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
+				if (chatIds != null && !chatIds.isEmpty()) {
+					TelegramUtil telegramUtil = new TelegramUtil();
+					String telegramMsg = prefix + nf.format(dto.getAmount()) + " VND"
+							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+							+ accountBankEntity.getBankAccount()
+							+ " | " + convertLongToDate(time)
+							+ " | " + dto.getReferencenumber()
+							+ " | ND: " + dto.getContent();
+					for (String chatId : chatIds) {
+						telegramUtil.sendMsg(chatId, telegramMsg);
+					}
+				}
+
+				/////// DO INSERT LARK
+				List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+				if (webhooks != null && !webhooks.isEmpty()) {
+					LarkUtil larkUtil = new LarkUtil();
+					String larkMsg = prefix + nf.format(dto.getAmount()) + " VND"
+							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+							+ accountBankEntity.getBankAccount()
+							+ " | " + convertLongToDate(time)
+							+ " | " + dto.getReferencenumber()
+							+ " | ND: " + dto.getContent();
+					for (String webhook : webhooks) {
+						larkUtil.sendMessageToLark(larkMsg, webhook);
+					}
+				}
 			}
 		} else {
 			logger.info("transaction-sync - no have terminal is empty.");
