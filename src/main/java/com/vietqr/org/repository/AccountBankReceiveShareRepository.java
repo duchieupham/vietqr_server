@@ -165,4 +165,8 @@ public interface AccountBankReceiveShareRepository
             + "(SELECT a.bank_id FROM account_bank_receive_share a WHERE a.terminal_id = :terminalId AND a.terminal_id IS NOT NULL AND a.terminal_id != '') "
             + "AND b.is_authenticated = true ", nativeQuery = true)
     List<TerminalBankReceiveDTO> getAccountBankReceiveShareByTerminalId(String userId, String terminalId);
+
+    @Query(value = "SELECT * FROM account_bank_receive_share WHERE terminal_id = :terminalId " +
+            "AND bank_id IS NOT NULL AND bank_id != ''", nativeQuery = true)
+    List<AccountBankReceiveShareEntity> getAccountBankReceiveShareByTerminalId(String terminalId);
 }

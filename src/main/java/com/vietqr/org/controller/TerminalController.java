@@ -178,16 +178,73 @@ public class TerminalController {
         HttpStatus httpStatus = null;
         try {
             //return terminal id if the code is existed
-            String checkExistedCode = terminalService.checkExistedTerminal(dto.getCode());
+            String checkExistedCode = "";
+            if (!StringUtil.isNullOrEmpty(dto.getCode())) {
+                checkExistedCode = terminalService.checkExistedTerminal(dto.getCode());
+            }
             if (!StringUtil.isNullOrEmpty(checkExistedCode) && !checkExistedCode.equals(dto.getId())) {
                 result = new ResponseMessageDTO("FAILED", "E110");
                 httpStatus = HttpStatus.BAD_REQUEST;
             } else {
                 TerminalEntity entity = terminalService.findTerminalById(dto.getId());
-                entity.setName(StringUtil.isNullOrEmpty(dto.getName()) ? entity.getName() : dto.getName());
-                entity.setCode(StringUtil.isNullOrEmpty(dto.getCode()) ? entity.getCode() : dto.getCode());
-                entity.setAddress(StringUtil.isNullOrEmpty(dto.getAddress()) ? entity.getAddress() : dto.getAddress());
-                terminalService.insertTerminal(entity);
+                if (entity != null) {
+                    entity.setName(StringUtil.isNullOrEmpty(dto.getName()) ? entity.getName() : dto.getName());
+                    entity.setCode(StringUtil.isNullOrEmpty(dto.getCode()) ? entity.getCode() : dto.getCode());
+                    entity.setAddress(StringUtil.isNullOrEmpty(dto.getAddress()) ? entity.getAddress() : dto.getAddress());
+                    terminalService.insertTerminal(entity);
+                }
+
+                if (StringUtil.isNullOrEmpty(checkExistedCode) &&
+                        StringUtil.isNullOrEmpty(dto.getCode()) == false) {
+                    // update account-bank-receive-share
+                    // get all account-bank-receive-share have bank_id by terminal id
+                    List<AccountBankReceiveShareEntity> entities =
+                            accountBankReceiveShareService.getAccountBankReceiveShareByTerminalId(dto.getId());
+                    Map<String, QRStaticCreateDTO> qrMap = new HashMap<>();
+                    if (!FormatUtil.isListNullOrEmpty(entities)) {
+                        List<String> bankIds = entities.stream().map(AccountBankReceiveShareEntity::getBankId)
+                                .distinct().collect(Collectors.toList());
+
+                        for (String bankId : bankIds) {
+                            AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService.getAccountBankById(bankId);
+                            if (accountBankReceiveEntity != null) {
+                                // luồng ưu tiên
+                                if (accountBankReceiveEntity.isMmsActive()) {
+                                    TerminalBankEntity terminalBankEntity =
+                                            terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
+                                    if (terminalBankEntity != null && "MB".equals(terminalBankEntity.getBankCode())) {
+                                        String qr = MBVietQRUtil.generateStaticVietQRMMS(
+                                                new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
+                                                        terminalBankEntity.getTerminalId(), dto.getCode()));
+                                        String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
+                                        qrMap.put(bankId, new QRStaticCreateDTO(qr, traceTransfer));
+                                    } else {
+                                        logger.error("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
+                                    }
+                                } else {
+                                    // luồng thuong
+                                    String qrCodeContent = "SQR" + dto.getCode();
+                                    String bankAccount = accountBankReceiveEntity.getBankAccount();
+                                    String caiValue = accountBankReceiveService.getCaiValueByBankId(bankId);
+                                    VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", qrCodeContent, bankAccount);
+                                    String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+                                    qrMap.put(bankId, new QRStaticCreateDTO(qr, ""));
+                                }
+                            }
+                        }
+
+                        // update qr and trance transfer
+                        for (AccountBankReceiveShareEntity accountBankReceiveShareEntity : entities) {
+                            QRStaticCreateDTO qrStaticCreateDTO = qrMap.get(accountBankReceiveShareEntity.getBankId());
+                            if (qrStaticCreateDTO != null) {
+                                accountBankReceiveShareEntity.setQrCode(qrStaticCreateDTO.getQrCode());
+                                accountBankReceiveShareEntity.setTraceTransfer(qrStaticCreateDTO.getTraceTransfer());
+                            }
+                        }
+                        // update all
+                        accountBankReceiveShareService.insertAccountBankReceiveShare(entities);
+                    }
+                }
 
                 result = new ResponseMessageDTO("SUCCESS", "");
                 httpStatus = HttpStatus.OK;

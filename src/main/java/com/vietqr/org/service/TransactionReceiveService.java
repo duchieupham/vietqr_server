@@ -370,4 +370,8 @@ public interface TransactionReceiveService {
         TransStatisticDTO getTransactionOverview(String bankId, String month);
 
         List<TransStatisticByDateDTO> getTransStatisticByBankId(String bankId, String month);
+
+        List<TransStatisticByDateDTO> getTransStatisticByTerminalIdNotSync(String bankId, String terminalCode, String month);
+
+        TransStatisticDTO getTransactionOverviewNotSync(String bankId, String terminalCode, String month);
 }
