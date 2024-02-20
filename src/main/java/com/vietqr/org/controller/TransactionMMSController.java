@@ -365,6 +365,7 @@ public class TransactionMMSController {
                                 transactionEntity.setTime(time);
                                 transactionEntity.setRefId(uuid.toString());
                                 transactionEntity.setType(1);
+                                transactionEntity.setStatus(1);
                                 transactionEntity.setTraceId("");
                                 transactionEntity.setTransType("C");
                                 transactionEntity.setReferenceNumber(entity.getFtCode());
@@ -415,7 +416,7 @@ public class TransactionMMSController {
                                     data.put("bankName", bankDTO.getBankName());
                                     data.put("bankCode", bankDTO.getBankCode());
                                     data.put("bankId", bankDTO.getBankId());
-                                    data.put("content", "");
+                                    data.put("content","" + traceTransfer);
                                     data.put("amount", "" + entity.getDebitAmount());
                                     data.put("time", "" + time);
                                     data.put("refId", "" + uuid.toString());
