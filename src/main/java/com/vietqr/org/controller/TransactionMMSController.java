@@ -357,7 +357,7 @@ public class TransactionMMSController {
                                 transactionEntity.setBankId(bankDTO.getBankId());
                                 // get content from terminalCode from terminal (now ignore to test static
                                 // VietQR)
-                                transactionEntity.setContent("");
+                                transactionEntity.setContent(traceTransfer);
                                 //
                                 transactionEntity.setAmount(Long.parseLong(entity.getDebitAmount()));
                                 // final LocalDateTime currentDateTime = LocalDateTime.now();
