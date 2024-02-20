@@ -1732,5 +1732,32 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "AND c.user_id = :userId "
                 + "AND a.time BETWEEN :fromDate AND :toDate ", nativeQuery = true)
         TransStatisticDTO getTransactionOverview(String bankId, String userId, long fromDate, long toDate);
+
+        @Query(value = "SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(time), '+00:00', '+07:00'), '%Y-%m-%d') AS date, "
+                + "COUNT(id) AS totalTrans, "
+                + "SUM(CASE WHEN trans_type = 'C' THEN amount ELSE 0 END) AS totalCashIn, "
+                + "SUM(CASE WHEN trans_type = 'D' THEN amount ELSE 0 END) AS totalCashOut, "
+                + "SUM(CASE WHEN trans_type = 'C' THEN 1 ELSE 0 END) AS totalTransC, "
+                + "SUM(CASE WHEN trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
+                + "FROM transaction_receive "
+                + "WHERE bank_id = :bankId AND status = 1 "
+                + "AND terminal_code = :terminalCode "
+                + "AND time BETWEEN :fromDate AND :toDate "
+                + "GROUP BY date ORDER BY date DESC ", nativeQuery = true)
+        List<TransStatisticByDateDTO> getTransStatisticByTerminalIdNotSync(String bankId,
+                                                                           String terminalCode,
+                                                                           long fromDate,
+                                                                           long toDate);
+
+        @Query(value = "SELECT COUNT(id) AS totalTrans, "
+                + "SUM(CASE WHEN trans_type = 'C' THEN amount ELSE 0 END) AS totalCashIn, "
+                + "SUM(CASE WHEN trans_type = 'D' THEN amount ELSE 0 END) AS totalCashOut, "
+                + "SUM(CASE WHEN trans_type = 'C' THEN 1 ELSE 0 END) AS totalTransC, "
+                + "SUM(CASE WHEN trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
+                + "FROM transaction_receive "
+                + "WHERE bank_id = :bankId AND status = 1 "
+                + "AND terminal_code = :terminalCode "
+                + "AND time BETWEEN :fromDate AND :toDate", nativeQuery = true)
+        TransStatisticDTO getTransactionOverviewNotSync(String bankId, String terminalCode, long fromDate, long toDate);
 }
 

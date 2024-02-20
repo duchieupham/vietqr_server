@@ -137,4 +137,7 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
     @Query(value = "SELECT DISTINCT a.* FROM terminal a INNER JOIN account_bank_receive_share b WHERE (b.qr_code IS NULL OR b.qr_code = '') " +
             "AND b.bank_id IS NOT NULL AND b.bank_id != '' ", nativeQuery = true)
     List<TerminalEntity> getAllTerminalNoQRCode();
+
+    @Query(value = "SELECT * FROM terminal WHERE code = :terminalCode", nativeQuery = true)
+    TerminalEntity getTerminalByTerminalCode(String terminalCode);
 }

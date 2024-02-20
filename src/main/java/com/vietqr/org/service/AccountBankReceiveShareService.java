@@ -50,4 +50,6 @@ public interface AccountBankReceiveShareService {
     List<String> getUserIdsFromTerminalId(String terminalId, String userId);
 
     List<TerminalBankReceiveDTO> getAccountBankReceiveShareByTerminalId(String userId, String terminalId);
+
+    List<AccountBankReceiveShareEntity> getAccountBankReceiveShareByTerminalId(String terminalId);
 }

@@ -10,18 +10,14 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.entity.*;
+import com.vietqr.org.service.*;
 import com.vietqr.org.util.*;
 import org.apache.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -39,23 +35,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.vietqr.org.entity.AccountBankReceiveEntity;
-import com.vietqr.org.entity.ImageEntity;
-import com.vietqr.org.entity.TransactionRPAEntity;
-import com.vietqr.org.entity.TransactionReceiveImageEntity;
-import com.vietqr.org.entity.TransactionReceiveLogEntity;
-import com.vietqr.org.service.AccountBankReceiveService;
-import com.vietqr.org.service.AccountCustomerBankService;
-import com.vietqr.org.service.BankTypeService;
-import com.vietqr.org.service.CaiBankService;
-import com.vietqr.org.service.ImageService;
-import com.vietqr.org.service.TransactionBankService;
-import com.vietqr.org.service.TransactionRPAService;
-import com.vietqr.org.service.TransactionReceiveBranchService;
-import com.vietqr.org.service.TransactionReceiveImageService;
-import com.vietqr.org.service.TransactionReceiveLogService;
-import com.vietqr.org.service.TransactionReceiveService;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -82,6 +61,9 @@ public class TransactionController {
 
     @Autowired
     ImageService imageService;
+
+    @Autowired
+    TerminalService terminalService;
 
     @Autowired
     TransactionReceiveImageService transactionReceiveImageService;
@@ -1379,7 +1361,7 @@ public class TransactionController {
                     dto = transactionReceiveService.getTransactionOverview(bankId, terminalCode, month, userId);
                 }
             }
-            if (dto != null) {
+            if (dto != null && Objects.nonNull(dto.getTotalCashIn()) && Objects.nonNull(dto.getTotalCashOut())) {
                 result = new TransStatisticResponseDTO();
                 result.setTotalCashIn(dto.getTotalCashIn()!= null ? dto.getTotalCashIn() : 0);
                 result.setTotalCashOut(dto.getTotalCashOut()!= null ? dto.getTotalCashOut() : 0);
@@ -1387,7 +1369,30 @@ public class TransactionController {
                 result.setTotalTransD(dto.getTotalTransD()!= null ? dto.getTotalTransD() : 0);
                 result.setTotalTrans(dto.getTotalTrans()!= null ? dto.getTotalTrans() : 0);
                 httpStatus = HttpStatus.OK;
-            } else {
+
+            } else if (!StringUtil.isNullOrEmpty(checkIsOwner) && !StringUtil.isNullOrEmpty(terminalCode)) {
+                dto = transactionReceiveService.getTransactionOverviewNotSync(bankId, terminalCode, month);
+                if (dto != null) {
+                    result = new TransStatisticResponseDTO();
+                    result.setTotalCashIn(dto.getTotalCashIn()!= null ? dto.getTotalCashIn() : 0);
+                    result.setTotalCashOut(dto.getTotalCashOut()!= null ? dto.getTotalCashOut() : 0);
+                    result.setTotalTransC(dto.getTotalTransC()!= null ? dto.getTotalTransC() : 0);
+                    result.setTotalTransD(dto.getTotalTransD()!= null ? dto.getTotalTransD() : 0);
+                    result.setTotalTrans(dto.getTotalTrans()!= null ? dto.getTotalTrans() : 0);
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else if (dto != null) {
+                result = new TransStatisticResponseDTO();
+                result.setTotalCashIn(dto.getTotalCashIn()!= null ? dto.getTotalCashIn() : 0);
+                result.setTotalCashOut(dto.getTotalCashOut()!= null ? dto.getTotalCashOut() : 0);
+                result.setTotalTransC(dto.getTotalTransC()!= null ? dto.getTotalTransC() : 0);
+                result.setTotalTransD(dto.getTotalTransD()!= null ? dto.getTotalTransD() : 0);
+                result.setTotalTrans(dto.getTotalTrans()!= null ? dto.getTotalTrans() : 0);
+                httpStatus = HttpStatus.OK;
+            }
+            else {
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
@@ -1399,12 +1404,12 @@ public class TransactionController {
     }
 
     @GetMapping("transaction/statistic")
-    public ResponseEntity<Object> getTransactionStatistic(
+    public ResponseEntity<List<TransStatisticByDateDTO>> getTransactionStatistic(
             @RequestParam(value = "terminalCode") String terminalCode,
             @RequestParam(value = "bankId") String bankId,
             @RequestParam(value = "month") String month,
             @RequestParam(value = "userId") String userId) {
-        Object result = new ArrayList<>();
+        List<TransStatisticByDateDTO> result = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
             String checkIsOwner = accountBankReceiveService.checkIsOwner(bankId, userId);
@@ -1426,6 +1431,17 @@ public class TransactionController {
                     httpStatus = HttpStatus.OK;
                 }
             }
+            // if result is empty and is_owner = true and terminalCode is not null
+            if (result == null || result.isEmpty()) {
+                httpStatus = null;
+                if (!StringUtil.isNullOrEmpty(checkIsOwner) && !StringUtil.isNullOrEmpty(terminalCode)) {
+                    List<TransStatisticByDateDTO> transactions
+                            = transactionReceiveService.getTransStatisticByTerminalIdNotSync(bankId, terminalCode, month);
+                    result = transactions;
+                    httpStatus = HttpStatus.OK;
+                }
+            }
+
         } catch (Exception e) {
             System.out.println("Error at getTransactionStatistic: " + e.toString());
             logger.error("Error at getTransactionStatistic: " + e.toString());
