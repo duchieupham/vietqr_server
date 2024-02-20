@@ -4,18 +4,13 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import com.vietqr.org.dto.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.vietqr.org.dto.AccountBankConnectBranchDTO;
-import com.vietqr.org.dto.AccountBankReceiveByCusSyncDTO;
-import com.vietqr.org.dto.AccountBankReceiveForNotiDTO;
-import com.vietqr.org.dto.AccountBankReceiveRPAItemDTO;
-import com.vietqr.org.dto.AccountBankWpDTO;
-import com.vietqr.org.dto.BusinessBankDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 
 @Repository
@@ -232,4 +227,16 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 
 	@Query(value = "SELECT id FROM account_bank_receive WHERE id = :bankId AND user_id = :userId", nativeQuery = true)
     String checkIsOwner(String bankId, String userId);
+
+	@Query(value = "SELECT a.id as bankId, b.bank_name as bankName, b.bank_code as bankCode, a.user_id as userId, "
+			+ "b.bank_short_name as bankShortName, a.bank_account as bankAccount "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN bank_type b "
+			+ "ON a.bank_type_id = b.id "
+			+ "INNER JOIN account_bank_receive_share c "
+			+ "ON a.id = c.bank_id "
+			+ "WHERE a.bank_type_id = :bankTypeId "
+			+ "AND a.is_authenticated = true "
+			+ "AND c.trace_transfer = :traceTransfer LIMIT 1", nativeQuery = true)
+	AccountBankReceiveShareForNotiDTO findAccountBankByTraceTransfer(String traceTransfer, String bankTypeId);
 }
