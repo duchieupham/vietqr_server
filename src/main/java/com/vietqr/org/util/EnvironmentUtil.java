@@ -180,10 +180,10 @@ public class EnvironmentUtil {
     private static final String BANK_LOGO_ID_RECHARGE_PROD = "58b7190b-a294-4b14-968f-cd365593893e";
     //
     private static final String BANK_ID_RECHARGE_UAT = "";
-    private static final String BANK_ID_RECHARGE_PROD = "172ff268-6d2e-4bcf-8aaa-1902badfcc63";
+    private static final String BANK_ID_RECHARGE_PROD = "bb25279e-b7e6-405e-bdce-a697794f465f";
     //
     private static final String BANK_ACCOUNT_RECHARGE_UAT = "";
-    private static final String BANK_ACCOUNT_RECHARGE_PROD = "0801133666888";
+    private static final String BANK_ACCOUNT_RECHARGE_PROD = "0020108679008";
     //
     private static final String BANK_TYPE_ID_RECHARGE_UAT = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
     private static final String BANK_TYPE_ID_RECHARGE_PROD = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
