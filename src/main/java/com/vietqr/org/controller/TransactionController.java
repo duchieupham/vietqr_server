@@ -1383,6 +1383,14 @@ public class TransactionController {
                 } else {
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
+            } else if (dto != null) {
+                result = new TransStatisticResponseDTO();
+                result.setTotalCashIn(dto.getTotalCashIn()!= null ? dto.getTotalCashIn() : 0);
+                result.setTotalCashOut(dto.getTotalCashOut()!= null ? dto.getTotalCashOut() : 0);
+                result.setTotalTransC(dto.getTotalTransC()!= null ? dto.getTotalTransC() : 0);
+                result.setTotalTransD(dto.getTotalTransD()!= null ? dto.getTotalTransD() : 0);
+                result.setTotalTrans(dto.getTotalTrans()!= null ? dto.getTotalTrans() : 0);
+                httpStatus = HttpStatus.OK;
             }
             else {
                 httpStatus = HttpStatus.BAD_REQUEST;
