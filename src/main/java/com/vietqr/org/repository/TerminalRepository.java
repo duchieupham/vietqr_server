@@ -131,7 +131,7 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
 
     @Query(value = "SELECT DISTINCT a.id FROM terminal a " +
             "INNER JOIN account_bank_receive_share b ON a.id = b.terminal_id " +
-            "WHERE trace_transfer = :traceTransfer", nativeQuery = true)
+            "WHERE trace_transfer = :traceTransfer AND is_owner = true ", nativeQuery = true)
     String getTerminalByTraceTransfer(String traceTransfer);
 
     @Query(value = "SELECT DISTINCT a.* FROM terminal a INNER JOIN account_bank_receive_share b WHERE (b.qr_code IS NULL OR b.qr_code = '') " +

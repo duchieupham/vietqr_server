@@ -2,15 +2,10 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+import com.vietqr.org.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.vietqr.org.dto.AccountBankConnectBranchDTO;
-import com.vietqr.org.dto.AccountBankReceiveByCusSyncDTO;
-import com.vietqr.org.dto.AccountBankReceiveForNotiDTO;
-import com.vietqr.org.dto.AccountBankReceiveRPAItemDTO;
-import com.vietqr.org.dto.AccountBankWpDTO;
-import com.vietqr.org.dto.BusinessBankDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.repository.AccountBankReceiveRepository;
 
@@ -171,5 +166,10 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     @Override
     public String checkIsOwner(String bankId, String userId) {
         return repo.checkIsOwner(bankId, userId);
+    }
+
+    @Override
+    public AccountBankReceiveShareForNotiDTO findAccountBankByTraceTransfer(String traceTransfer, String bankTypeId) {
+        return repo.findAccountBankByTraceTransfer(traceTransfer, bankTypeId);
     }
 }

@@ -98,13 +98,6 @@ public class FirebaseMessagingService {
 
 	public void sendUsersNotificationWithData(Map<String, String> data, List<FcmTokenEntity> fcmTokens, String title,
 			String message) {
-//		System.out.println("Before sleep: " + LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
-//		try {
-//			Thread.sleep(2000);
-//		} catch (InterruptedException e) {
-//			Thread.currentThread().interrupt();
-//		}
-//		System.out.println("After sleep: " + LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
 
 		if (fcmTokens != null && !fcmTokens.isEmpty()) {
 			for (FcmTokenEntity fcmToken : fcmTokens) {
@@ -132,6 +125,10 @@ public class FirebaseMessagingService {
 				}
 			}
 		}
+		LocalDateTime notification = LocalDateTime.now();
+		long notificationTime = notification.toEpochSecond(ZoneOffset.UTC);
+		logger.info(
+				"sendUsersNotificationWithData: pushNotificationSuccess at:" + notificationTime);
 	}
 
 	// private Map<String, String> getSamplePayloadData() {

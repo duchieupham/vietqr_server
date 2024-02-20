@@ -2,14 +2,9 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+import com.vietqr.org.dto.*;
 import org.springframework.stereotype.Service;
 
-import com.vietqr.org.dto.AccountBankConnectBranchDTO;
-import com.vietqr.org.dto.AccountBankReceiveByCusSyncDTO;
-import com.vietqr.org.dto.AccountBankReceiveForNotiDTO;
-import com.vietqr.org.dto.AccountBankReceiveRPAItemDTO;
-import com.vietqr.org.dto.AccountBankWpDTO;
-import com.vietqr.org.dto.BusinessBankDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 
 @Service
@@ -80,4 +75,6 @@ public interface AccountBankReceiveService {
 	public AccountBankReceiveForNotiDTO findAccountBankIden(String bankAccount, String bankTypeId);
 
     String checkIsOwner(String bankId, String userId);
+
+	AccountBankReceiveShareForNotiDTO findAccountBankByTraceTransfer(String traceTransfer, String bankTypeId);
 }
