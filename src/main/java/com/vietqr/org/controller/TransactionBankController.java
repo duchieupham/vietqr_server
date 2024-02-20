@@ -1246,32 +1246,6 @@ public class TransactionBankController {
 		BankTypeEntity bankTypeEntity = bankTypeService
 				.getBankTypeById(accountBankEntity.getBankTypeId());
 
-		TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
-		transactionEntity.setId(transcationUUID);
-		transactionEntity.setBankAccount(accountBankEntity.getBankAccount());
-		transactionEntity.setBankId(accountBankEntity.getId());
-		if (traceId == null || traceId.isEmpty()) {
-			transactionEntity.setContent(dto.getContent().trim());
-		} else {
-			transactionEntity.setContent(traceId + "." + dto.getContent());
-		}
-		transactionEntity.setAmount(Long.parseLong(dto.getAmount() + ""));
-		transactionEntity.setTime(time);
-		transactionEntity.setRefId(uuid.toString());
-		transactionEntity.setType(1);
-		transactionEntity.setStatus(1);
-		transactionEntity.setTraceId("");
-		transactionEntity.setTransType(dto.getTransType());
-		transactionEntity.setReferenceNumber(dto.getReferencenumber());
-		transactionEntity.setOrderId(orderId);
-		transactionEntity.setSign(sign);
-		transactionEntity.setTimePaid(time);
-		transactionEntity.setTerminalCode("");
-		transactionEntity.setQrCode("");
-		transactionEntity.setUserId(accountBankEntity.getUserId());
-		transactionEntity.setNote("");
-		transactionReceiveService.insertTransactionReceive(transactionEntity);
-
 		String terminalCodeContent = getTraceId(dto.getContent(), "SQR");
 		String terminalCode = "";
 		if (terminalCodeContent.length() > 3) {
@@ -1284,6 +1258,31 @@ public class TransactionBankController {
 					.getTerminalByTerminalCode(terminalCode,
 							accountBankEntity.getBankAccount());
 			if (terminalEntity != null) {
+				TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
+				transactionEntity.setId(transcationUUID);
+				transactionEntity.setBankAccount(accountBankEntity.getBankAccount());
+				transactionEntity.setBankId(accountBankEntity.getId());
+				if (traceId == null || traceId.isEmpty()) {
+					transactionEntity.setContent(dto.getContent().trim());
+				} else {
+					transactionEntity.setContent(traceId + "." + dto.getContent());
+				}
+				transactionEntity.setAmount(Long.parseLong(dto.getAmount() + ""));
+				transactionEntity.setTime(time);
+				transactionEntity.setRefId(uuid.toString());
+				transactionEntity.setType(1);
+				transactionEntity.setStatus(1);
+				transactionEntity.setTraceId("");
+				transactionEntity.setTransType(dto.getTransType());
+				transactionEntity.setReferenceNumber(dto.getReferencenumber());
+				transactionEntity.setOrderId(orderId);
+				transactionEntity.setSign(sign);
+				transactionEntity.setTimePaid(time);
+				transactionEntity.setTerminalCode(terminalCode);
+				transactionEntity.setQrCode("");
+				transactionEntity.setUserId(accountBankEntity.getUserId());
+				transactionEntity.setNote("");
+				transactionReceiveService.insertTransactionReceive(transactionEntity);
 				List<String> userIds = terminalService
 						.getUserIdsByTerminalCode(terminalEntity.getCode());
 				String prefix = "";
@@ -1408,6 +1407,31 @@ public class TransactionBankController {
 				//
 				//
 				// insert notification
+				TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
+				transactionEntity.setId(transcationUUID);
+				transactionEntity.setBankAccount(accountBankEntity.getBankAccount());
+				transactionEntity.setBankId(accountBankEntity.getId());
+				if (traceId == null || traceId.isEmpty()) {
+					transactionEntity.setContent(dto.getContent().trim());
+				} else {
+					transactionEntity.setContent(traceId + "." + dto.getContent());
+				}
+				transactionEntity.setAmount(Long.parseLong(dto.getAmount() + ""));
+				transactionEntity.setTime(time);
+				transactionEntity.setRefId(uuid.toString());
+				transactionEntity.setType(2);
+				transactionEntity.setStatus(1);
+				transactionEntity.setTraceId("");
+				transactionEntity.setTransType(dto.getTransType());
+				transactionEntity.setReferenceNumber(dto.getReferencenumber());
+				transactionEntity.setOrderId(orderId);
+				transactionEntity.setSign(sign);
+				transactionEntity.setTimePaid(time);
+				transactionEntity.setTerminalCode(terminalCode);
+				transactionEntity.setQrCode("");
+				transactionEntity.setUserId(accountBankEntity.getUserId());
+				transactionEntity.setNote("");
+				transactionReceiveService.insertTransactionReceive(transactionEntity);
 				UUID notificationUUID = UUID.randomUUID();
 				NotificationEntity notiEntity = new NotificationEntity();
 				String prefix = "";
@@ -1519,6 +1543,32 @@ public class TransactionBankController {
 			}
 		} else {
 
+			//insert transactions:
+			TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
+			transactionEntity.setId(transcationUUID);
+			transactionEntity.setBankAccount(accountBankEntity.getBankAccount());
+			transactionEntity.setBankId(accountBankEntity.getId());
+			if (traceId == null || traceId.isEmpty()) {
+				transactionEntity.setContent(dto.getContent().trim());
+			} else {
+				transactionEntity.setContent(traceId + "." + dto.getContent());
+			}
+			transactionEntity.setAmount(Long.parseLong(dto.getAmount() + ""));
+			transactionEntity.setTime(time);
+			transactionEntity.setRefId(uuid.toString());
+			transactionEntity.setType(2);
+			transactionEntity.setStatus(1);
+			transactionEntity.setTraceId("");
+			transactionEntity.setTransType(dto.getTransType());
+			transactionEntity.setReferenceNumber(dto.getReferencenumber());
+			transactionEntity.setOrderId(orderId);
+			transactionEntity.setSign(sign);
+			transactionEntity.setTimePaid(time);
+			transactionEntity.setTerminalCode("");
+			transactionEntity.setQrCode("");
+			transactionEntity.setUserId(accountBankEntity.getUserId());
+			transactionEntity.setNote("");
+			transactionReceiveService.insertTransactionReceive(transactionEntity);
 			//
 			//
 			// insert notification
