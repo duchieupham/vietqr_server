@@ -114,7 +114,7 @@ public class TerminalController {
                             if (accountBankReceiveEntity.isMmsActive()) {
                                 TerminalBankEntity terminalBankEntity =
                                         terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
-                                if (terminalBankEntity != null && "MB".equals(terminalBankEntity.getBankCode())) {
+                                if (terminalBankEntity != null) {
                                     String qr = MBVietQRUtil.generateStaticVietQRMMS(
                                             new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
                                             terminalBankEntity.getTerminalId(), dto.getCode()));
@@ -212,7 +212,7 @@ public class TerminalController {
                                 if (accountBankReceiveEntity.isMmsActive()) {
                                     TerminalBankEntity terminalBankEntity =
                                             terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
-                                    if (terminalBankEntity != null && "MB".equals(terminalBankEntity.getBankCode())) {
+                                    if (terminalBankEntity != null) {
                                         String qr = MBVietQRUtil.generateStaticVietQRMMS(
                                                 new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
                                                         terminalBankEntity.getTerminalId(), dto.getCode()));
@@ -334,7 +334,7 @@ public class TerminalController {
                     // luồng ưu tien
                     TerminalBankEntity terminalBankEntity =
                             terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
-                    if (terminalBankEntity != null && "MB".equals(terminalBankEntity.getBankCode())) {
+                    if (terminalBankEntity != null) {
                         qr = MBVietQRUtil.generateStaticVietQRMMS(
                                 new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
                                         terminalBankEntity.getTerminalId(), ""));
