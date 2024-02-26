@@ -3,13 +3,8 @@ package com.vietqr.org.controller;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.mb.VietQRStaticMMSRequestDTO;
 import com.vietqr.org.entity.*;
-import com.vietqr.org.service.AccountBankReceiveService;
-import com.vietqr.org.service.AccountBankReceiveShareService;
-import com.vietqr.org.service.TerminalBankService;
-import com.vietqr.org.service.TerminalService;
-import com.vietqr.org.util.FormatUtil;
-import com.vietqr.org.util.StringUtil;
-import com.vietqr.org.util.VietQRUtil;
+import com.vietqr.org.service.*;
+import com.vietqr.org.util.*;
 import com.vietqr.org.util.bank.mb.MBTokenUtil;
 import com.vietqr.org.util.bank.mb.MBVietQRUtil;
 import org.apache.log4j.Logger;
@@ -19,10 +14,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @RestController
@@ -44,6 +42,18 @@ public class TerminalController {
 
     @Autowired
     private TerminalBankService terminalBankService;
+
+    @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
+    private FcmTokenService fcmTokenService;
+
+    @Autowired
+    private FirebaseMessagingService firebaseMessagingService;
+
+    @Autowired
+    private SocketHandler socketHandler;
 
     @GetMapping("terminal/generate-code")
     public ResponseEntity<ResponseDataDTO> generateTerminalCode() {
@@ -174,6 +184,40 @@ public class TerminalController {
         } catch (Exception e) {
             result = new ResponseMessageDTO("FAILED", "Unexpected Error.");
             httpStatus = HttpStatus.BAD_REQUEST;
+        } finally {
+            if (httpStatus.is2xxSuccessful()) {
+                Thread thread = new Thread(() -> {
+                    if (dto.getUserIds() != null && !dto.getUserIds().isEmpty()) {
+                        int numThread = dto.getUserIds().size();
+                        ExecutorService executorService = Executors.newFixedThreadPool(numThread);
+                        for (String userId : dto.getUserIds()) {
+                            Map<String, String> data = new HashMap<>();
+                            // insert notification
+                            UUID notificationUUID = UUID.randomUUID();
+                            LocalDateTime currentDateTime = LocalDateTime.now();
+                            long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+                            String title = NotificationUtil.getNotiTitleAddMember();
+                            String message = String.format(NotificationUtil.getNotiDescAddMember(), dto.getName());
+                            NotificationEntity notiEntity = new NotificationEntity();
+                            notiEntity.setId(notificationUUID.toString());
+                            notiEntity.setRead(false);
+                            notiEntity.setMessage(message);
+                            notiEntity.setTime(time);
+                            notiEntity.setType(NotificationUtil.getNotiTypeAddMember());
+                            notiEntity.setUserId(dto.getUserId());
+                            notiEntity.setData(dto.getCode());
+                            // data thay đổi
+                            data.put("notificationType", NotificationUtil.getNotiTypeAddMember());
+                            data.put("notificationId", notificationUUID.toString());
+                            data.put("terminalCode", dto.getCode());
+                            data.put("terminalName", dto.getName());
+                            executorService.submit(() -> pushNotification(title, message, notiEntity, data, userId));
+                        }
+                        executorService.shutdown();
+                    }
+                });
+                thread.start();
+            }
         }
         return new ResponseEntity<>(result, httpStatus);
     }
@@ -675,5 +719,25 @@ public class TerminalController {
         } catch (Exception e) {
         }
         return result;
+    }
+
+    private void pushNotification(String title, String message, NotificationEntity notiEntity, Map<String, String> data,
+                                  String userId) {
+        try {
+            if (notiEntity != null) {
+                notificationService.insertNotification(notiEntity);
+            }
+            List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+            fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
+            firebaseMessagingService.sendUsersNotificationWithData(data,
+                    fcmTokens,
+                    title, message);
+            socketHandler.sendMessageToUser(userId,
+                    data);
+        } catch (IOException e) {
+            logger.error(
+                    "Add member to terminal: WS: push Notification - RECHARGE ERROR: "
+                            + e.toString());
+        }
     }
 }

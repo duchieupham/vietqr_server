@@ -1,10 +1,9 @@
 package com.vietqr.org.controller;
 
 import com.vietqr.org.dto.*;
-import com.vietqr.org.entity.AccountBankReceiveShareEntity;
-import com.vietqr.org.service.AccountBankReceiveShareService;
-import com.vietqr.org.service.AccountInformationService;
-import com.vietqr.org.util.FormatUtil;
+import com.vietqr.org.entity.*;
+import com.vietqr.org.service.*;
+import com.vietqr.org.util.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,9 +11,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.io.IOException;
+import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @RestController
 @CrossOrigin
@@ -26,7 +29,22 @@ public class TerminalMemberController {
     private AccountBankReceiveShareService accountBankReceiveShareService;
 
     @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
     private AccountInformationService accountInformationService;
+
+    @Autowired
+    private FirebaseMessagingService firebaseMessagingService;
+
+    @Autowired
+    private TerminalService terminalService;
+
+    @Autowired
+    private FcmTokenService fcmTokenService;
+
+    @Autowired
+    private SocketHandler socketHandler;
 
     @PostMapping("terminal-member")
     public ResponseEntity<ResponseMessageDTO> addMemberToTerminal(@Valid @RequestBody TerminalMemberInsertDTO dto) {
@@ -68,6 +86,35 @@ public class TerminalMemberController {
         } catch (Exception e) {
             result = new ResponseMessageDTO("FAILED", "Unexpected Error.");
             httpStatus = HttpStatus.BAD_REQUEST;
+        } finally {
+            if (httpStatus != null && httpStatus.is2xxSuccessful()) {
+                Thread thread = new Thread(() -> {
+                    TerminalEntity terminalEntity = terminalService.findTerminalById(dto.getTerminalId());
+                    Map<String, String> data = new HashMap<>();
+                    // insert notification
+                    UUID notificationUUID = UUID.randomUUID();
+                    LocalDateTime currentDateTime = LocalDateTime.now();
+                    long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+                    String title = NotificationUtil.getNotiTitleAddMember();
+                    String message = String.format(NotificationUtil.getNotiDescAddMember(), terminalEntity.getName());
+                    NotificationEntity notiEntity = new NotificationEntity();
+                    notiEntity.setId(notificationUUID.toString());
+                    notiEntity.setRead(false);
+                    notiEntity.setMessage(message);
+                    notiEntity.setTime(time);
+                    notiEntity.setType(NotificationUtil.getNotiTypeAddMember());
+                    notiEntity.setUserId(dto.getUserId());
+                    notiEntity.setData(terminalEntity.getCode());
+                    // data thay đổi
+                    data.put("notificationType", NotificationUtil.getNotiTypeAddMember());
+                    data.put("notificationId", notificationUUID.toString());
+                    data.put("terminalCode", terminalEntity.getCode());
+                    data.put("terminalName", terminalEntity.getName());
+                    pushNotification(title, message, notiEntity, data, dto.getUserId());
+
+                });
+                thread.start();
+            }
         }
         return new ResponseEntity<>(result, httpStatus);
     }
@@ -192,6 +239,26 @@ public class TerminalMemberController {
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
+    }
+
+    private void pushNotification(String title, String message, NotificationEntity notiEntity, Map<String, String> data,
+                                  String userId) {
+        try {
+            if (notiEntity != null) {
+                notificationService.insertNotification(notiEntity);
+            }
+            List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+            fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
+            firebaseMessagingService.sendUsersNotificationWithData(data,
+                    fcmTokens,
+                    title, message);
+            socketHandler.sendMessageToUser(userId,
+                    data);
+        } catch (IOException e) {
+            logger.error(
+                    "Add member to terminal: WS: push Notification - RECHARGE ERROR: "
+                            + e.toString());
+        }
     }
 
 }

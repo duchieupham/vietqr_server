@@ -1459,8 +1459,8 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
                 + " a.type as type, a.trans_type as transType "
                 + "FROM transaction_receive a "
-                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
                 + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "INNER JOIN account_bank_receive_share b ON (a.bank_id = b.bank_id AND b.terminal_id = c.id) "
                 + "WHERE a.bank_id = :bankId AND a.status = :value "
                 + "AND a.time >= :time AND b.user_id = :userId "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
@@ -1471,8 +1471,8 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
                 + " a.type as type, a.trans_type as transType "
                 + "FROM transaction_receive a "
-                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
                 + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "INNER JOIN account_bank_receive_share b ON (a.bank_id = b.bank_id AND b.terminal_id = c.id) "
                 + "WHERE a.bank_id = :bankId AND a.reference_number = :value "
                 + "AND a.time >= :time AND b.user_id = :userId "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
@@ -1482,8 +1482,8 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
                 + " a.type as type, a.trans_type as transType "
                 + "FROM transaction_receive a "
-                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
                 + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "INNER JOIN account_bank_receive_share b ON (a.bank_id = b.bank_id AND b.terminal_id = c.id) "
                 + "WHERE a.bank_id = :bankId AND a.order_id = :value "
                 + "AND a.time >= :time AND b.user_id = :userId "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
@@ -1494,8 +1494,8 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
                 + " a.type as type, a.trans_type as transType "
                 + "FROM transaction_receive a "
-                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
                 + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "INNER JOIN account_bank_receive_share b ON (a.bank_id = b.bank_id AND b.terminal_id = c.id) "
                 + "WHERE a.bank_id = :bankId AND a.content LIKE %:value% "
                 + "AND a.time >= :time AND b.user_id = :userId "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
@@ -1506,8 +1506,8 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
                 + " a.type as type, a.trans_type as transType "
                 + "FROM transaction_receive a "
-                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
                 + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "INNER JOIN account_bank_receive_share b ON (a.bank_id = b.bank_id AND b.terminal_id = c.id) "
                 + "WHERE a.bank_id = :bankId "
                 + "AND a.time >= :time AND b.user_id = :userId "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
@@ -1518,8 +1518,8 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
                 + " a.type as type, a.trans_type as transType "
                 + "FROM transaction_receive a "
-                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
                 + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "INNER JOIN account_bank_receive_share b ON (a.bank_id = b.bank_id AND b.terminal_id = c.id) "
                 + "WHERE a.bank_id = :bankId AND a.status = :value "
                 + "AND a.time BETWEEN :fromDate AND :toDate AND b.user_id = :userId "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
@@ -1529,8 +1529,8 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
                 + " a.type as type, a.trans_type as transType "
                 + "FROM transaction_receive a "
-                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
                 + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "INNER JOIN account_bank_receive_share b ON (a.bank_id = b.bank_id AND b.terminal_id = c.id) "
                 + "WHERE a.bank_id = :bankId AND a.reference_number = :value "
                 + "AND a.time BETWEEN :fromDate AND :toDate AND b.user_id = :userId "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
@@ -1540,8 +1540,8 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
                 + " a.type as type, a.trans_type as transType "
                 + "FROM transaction_receive a "
-                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
                 + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "INNER JOIN account_bank_receive_share b ON (a.bank_id = b.bank_id AND b.terminal_id = c.id) "
                 + "WHERE a.bank_id = :bankId AND a.order_id = :value "
                 + "AND a.time BETWEEN :fromDate AND :toDate AND b.user_id = :userId "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
@@ -1551,8 +1551,8 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
                 + " a.type as type, a.trans_type as transType "
                 + "FROM transaction_receive a "
-                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
                 + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "INNER JOIN account_bank_receive_share b ON (a.bank_id = b.bank_id AND b.terminal_id = c.id) "
                 + "WHERE a.bank_id = :bankId AND a.content LIKE %:value% "
                 + "AND a.time BETWEEN :fromDate AND :toDate AND b.user_id = :userId "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
@@ -1562,8 +1562,8 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
                 + " a.type as type, a.trans_type as transType "
                 + "FROM transaction_receive a "
-                + "INNER JOIN account_bank_receive_share b ON a.bank_id = b.bank_id "
                 + "INNER JOIN terminal c ON a.terminal_code = c.code "
+                + "INNER JOIN account_bank_receive_share b ON (a.bank_id = b.bank_id AND b.terminal_id = c.id) "
                 + "WHERE a.bank_id = :bankId "
                 + "AND a.time BETWEEN :fromDate AND :toDate AND b.user_id = :userId "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
