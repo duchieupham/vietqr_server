@@ -204,7 +204,7 @@ public class TerminalController {
                             notiEntity.setMessage(message);
                             notiEntity.setTime(time);
                             notiEntity.setType(NotificationUtil.getNotiTypeAddMember());
-                            notiEntity.setUserId(dto.getUserId());
+                            notiEntity.setUserId(userId);
                             notiEntity.setData(dto.getCode());
                             // data thay đổi
                             data.put("notificationType", NotificationUtil.getNotiTypeAddMember());
