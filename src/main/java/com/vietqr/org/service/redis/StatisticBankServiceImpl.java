@@ -5,7 +5,6 @@ import com.vietqr.org.dto.SumEachBankDTO;
 import com.vietqr.org.entity.redis.StatisticBankEntity;
 import com.vietqr.org.entity.redis.SumEachBankEntity;
 import com.vietqr.org.repository.AccountBankReceiveRepository;
-import com.vietqr.org.repository.AccountBankReceiveShareRepository;
 import com.vietqr.org.repository.redis.StatisticBankRepository;
 import com.vietqr.org.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -156,11 +155,6 @@ public class StatisticBankServiceImpl implements StatisticBankService {
             // save new all time;
         }
         return result;
-    }
-
-    @Override
-    public void delete(String key) {
-        repo.deleteById(key);
     }
 
     @Override

@@ -9,7 +9,5 @@ public interface StatisticBankService {
 
     public StatisticBankEntity getStatisticBankByDate(String date);
 
-    void delete(String key);
-
     void deleteAllRedis();
 }
