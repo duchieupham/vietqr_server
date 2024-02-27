@@ -27,7 +27,8 @@ public class AccountBankReceiveShareServiceImpl implements AccountBankReceiveSha
 
     @Override
     public List<IBankShareResponseDTO> getTerminalBankShareByUserId(String userId, int offset) {
-        return repo.getTerminalBankShareByUserId(userId, offset);
+//        return repo.getTerminalBankShareByUserId(userId, offset);
+        return repo.getTerminalBankShareByUserId(userId);
     }
 
     @Override
@@ -117,7 +118,8 @@ public class AccountBankReceiveShareServiceImpl implements AccountBankReceiveSha
 
     @Override
     public List<IBankShareResponseDTO> getTerminalBankByUserId(String userId, int offset) {
-        return repo.findBankShareByUserId(userId, offset);
+//        return repo.findBankShareByUserId(userId, offset);
+        return repo.findBankShareByUserId(userId);
     }
 
     @Override

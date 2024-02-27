@@ -35,7 +35,8 @@ public class TerminalServiceImpl implements TerminalService {
 
     @Override
     public List<TerminalResponseInterfaceDTO> getTerminalsByUserId(String userId, int offset) {
-        return repo.getTerminalsByUserId(userId, offset);
+//        return repo.getTerminalsByUserId(userId, offset);
+        return repo.getTerminalsByUserId(userId);
     }
 
     @Override
@@ -50,7 +51,8 @@ public class TerminalServiceImpl implements TerminalService {
 
     @Override
     public List<TerminalResponseInterfaceDTO> getTerminalSharesByUserId(String userId, int offset) {
-        return repo.getTerminalsShareByUserId(userId, offset);
+//        return repo.getTerminalsShareByUserId(userId, offset);
+        return repo.getTerminalsShareByUserId(userId);
     }
 
     @Override
@@ -65,7 +67,8 @@ public class TerminalServiceImpl implements TerminalService {
 
     @Override
     public List<TerminalResponseInterfaceDTO> getTerminalsByUserIdAndBankId(String userId, String bankId, int offset) {
-        return repo.getTerminalsByUserIdAndBankId(userId, bankId, offset);
+//        return repo.getTerminalsByUserIdAndBankId(userId, bankId, offset);
+        return repo.getTerminalsByUserIdAndBankIdOffset(userId, bankId);
     }
 
     @Override

@@ -115,9 +115,10 @@ public interface AccountBankReceiveShareRepository
             "INNER JOIN bank_type c " +
             "ON a.bank_type_id = c.id " +
             "WHERE b.user_id = :userId AND b.is_owner = true " +
-            "AND b.terminal_id IS NOT NULL AND b.terminal_id != '' " +
-            "LIMIT :offset, 20", nativeQuery = true)
-    List<IBankShareResponseDTO> findBankShareByUserId(String userId, int offset);
+            "AND b.terminal_id IS NOT NULL AND b.terminal_id != '' "
+//            "LIMIT :offset, 20"
+            , nativeQuery = true)
+    List<IBankShareResponseDTO> findBankShareByUserId(String userId);
 
     @Query(value = "SELECT count(distinct bank_id) FROM account_bank_receive_share " +
             "WHERE user_id = :userId AND is_owner = true " +
@@ -147,9 +148,10 @@ public interface AccountBankReceiveShareRepository
             "ON d.id = b.terminal_id " +
             "WHERE d.user_id != :userId " +
             "AND b.terminal_id IS NOT NULL AND b.terminal_id != '' " +
-            "AND b.user_id = :userId " +
-            "LIMIT :offset, 20", nativeQuery = true)
-    List<IBankShareResponseDTO> getTerminalBankShareByUserId(String userId, int offset);
+            "AND b.user_id = :userId "
+//            "LIMIT :offset, 20"
+            , nativeQuery = true)
+    List<IBankShareResponseDTO> getTerminalBankShareByUserId(String userId);
 
     @Query(value = "SELECT DISTINCT user_id FROM account_bank_receive_share " +
             "WHERE terminal_id = :terminalId AND user_id != :userId", nativeQuery = true)
