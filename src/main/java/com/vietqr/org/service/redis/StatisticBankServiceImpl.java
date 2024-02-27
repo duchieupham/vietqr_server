@@ -7,10 +7,12 @@ import com.vietqr.org.entity.redis.SumEachBankEntity;
 import com.vietqr.org.repository.AccountBankReceiveRepository;
 import com.vietqr.org.repository.redis.StatisticBankRepository;
 import com.vietqr.org.util.DateTimeUtil;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
@@ -21,6 +23,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class StatisticBankServiceImpl implements StatisticBankService {
+
+    private static final Logger logger = Logger.getLogger(StatisticBankServiceImpl.class);
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
@@ -42,8 +46,16 @@ public class StatisticBankServiceImpl implements StatisticBankService {
     @Override
     public StatisticBankEntity getAllTime() {
         StatisticBankEntity result = null;
+        LocalDateTime nowrd = LocalDateTime.now();
+        logger.info("Start query redis StatisticBankServiceImpl getAllTime: " + nowrd.toInstant(ZoneOffset.UTC));
         result = repo.findById("ALL_TIME").orElse(null);
+        LocalDateTime endrd = LocalDateTime.now();
+        logger.info("End query redis StatisticBankServiceImpl getAllTime: " + endrd.toInstant(ZoneOffset.UTC));
+        logger.info("Sum time redis: " + (Duration.between(endrd, nowrd)));
+
         if (result == null) {
+            LocalDateTime nowdb = LocalDateTime.now();
+            logger.info("Start query db StatisticBankServiceImpl getAllTime: " + nowdb.toInstant(ZoneOffset.UTC));
             result = new StatisticBankEntity();
             LocalDateTime now = LocalDateTime.now().atZone(ZoneOffset.UTC).toLocalDateTime();
             LocalDateTime yesterday = now.minusDays(1).with(LocalTime.MAX);
@@ -56,6 +68,9 @@ public class StatisticBankServiceImpl implements StatisticBankService {
             List<SumEachBankDTO> sumEachBankDTOS = accountBankReceiveRepository
                     .sumEachBank(0 - DateTimeUtil.GMT_PLUS_7_OFFSET,
                             startEndTimeDTO.getToDate() - DateTimeUtil.GMT_PLUS_7_OFFSET);
+            LocalDateTime enddb = LocalDateTime.now();
+            logger.info("End query db StatisticBankServiceImpl getAllTime: " + enddb.toInstant(ZoneOffset.UTC));
+            logger.info("Sum time db: " + (Duration.between(enddb, nowdb)));
             List<SumEachBankEntity> sumEachBankEntities = new ArrayList<>();
             sumEachBankEntities = sumEachBankDTOS.stream().map(sumEachBankDTO -> {
                 SumEachBankEntity sumEachBankEntity = new SumEachBankEntity();
@@ -72,6 +87,7 @@ public class StatisticBankServiceImpl implements StatisticBankService {
             result.setSumEachBankEntities(sumEachBankEntities);
             statisticBankRepository.save(result);
         }
+        logger.info("===================================================================");
         return result;
     }
 
@@ -79,12 +95,23 @@ public class StatisticBankServiceImpl implements StatisticBankService {
     public StatisticBankEntity getStatisticBankByDate(String date) {
         StatisticBankEntity result = null;
         String key = DateTimeUtil.getSimpleDate(date);
+        LocalDateTime nowrd = LocalDateTime.now();
+        logger.info("Start query redis StatisticBankServiceImpl getStatisticBankByDate: " + nowrd.toInstant(ZoneOffset.UTC));
         result = repo.findById(key).orElse(null);
+        LocalDateTime endrd = LocalDateTime.now();
+        logger.info("End query redis StatisticBankServiceImpl getStatisticBankByDate: " + endrd.toInstant(ZoneOffset.UTC));
+        logger.info("Sum time redis: " + (Duration.between(endrd, nowrd)));
         if (result == null) {
             StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndADate(date);
+            LocalDateTime nowdb = LocalDateTime.now();
+            logger.info("Start query db StatisticBankServiceImpl getStatisticBankByDate: " + nowdb.toInstant(ZoneOffset.UTC));
             List<SumEachBankDTO> sumEachBankDTOS = accountBankReceiveRepository
                     .sumEachBank(startEndTimeDTO.getFromDate() - DateTimeUtil.GMT_PLUS_7_OFFSET,
                             startEndTimeDTO.getToDate() - DateTimeUtil.GMT_PLUS_7_OFFSET);
+            LocalDateTime enddb = LocalDateTime.now();
+            logger.info("Start query db StatisticBankServiceImpl getStatisticBankByDate: " + enddb.toInstant(ZoneOffset.UTC));
+            logger.info("Sum time db: " + (Duration.between(enddb, nowdb)));
+            logger.info("===================================================================");
             List<SumEachBankEntity> sumEachBankEntities = new ArrayList<>();
             sumEachBankEntities = sumEachBankDTOS.stream().map(sumEachBankDTO -> {
                 SumEachBankEntity sumEachBankEntity = new SumEachBankEntity();

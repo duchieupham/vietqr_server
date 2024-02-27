@@ -2,10 +2,12 @@ package com.vietqr.org.controller;
 
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.redis.StatisticBankEntity;
+import com.vietqr.org.entity.redis.StatisticUserEntity;
 import com.vietqr.org.entity.redis.SumBankEntity;
 import com.vietqr.org.service.AccountBankReceiveService;
 import com.vietqr.org.service.AccountLoginService;
 import com.vietqr.org.service.redis.StatisticBankService;
+import com.vietqr.org.service.redis.StatisticUserService;
 import com.vietqr.org.service.redis.SumOfBankService;
 import com.vietqr.org.service.redis.SumOfUserService;
 import org.apache.log4j.Logger;
@@ -25,6 +27,9 @@ public class StatisticController {
 
     @Autowired
     private StatisticBankService statisticBankService;
+
+    @Autowired
+    private StatisticUserService statisticUserService;
 
     @Autowired
     private AccountLoginService accountLoginService;
@@ -90,6 +95,32 @@ public class StatisticController {
             } else {
                 result = sumOfUserService.findByDate(date);
             }
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("statistic-user-previous")
+    public ResponseEntity<Iterable<StatisticUserEntity>> getPreviousUser() {
+        Iterable<StatisticUserEntity> result = null;
+        HttpStatus httpStatus = null;
+        try {
+            result = statisticUserService.findAll();
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("statistic-user-previous")
+    public ResponseEntity<List<StatisticUserEntity>> getPreviousUser(@RequestParam String date) {
+        List<StatisticUserEntity> result = null;
+        HttpStatus httpStatus = null;
+        try {
+            result = statisticUserService.findByDate(date);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             httpStatus = HttpStatus.BAD_REQUEST;
