@@ -52,4 +52,6 @@ public interface AccountBankReceiveShareService {
     List<TerminalBankReceiveDTO> getAccountBankReceiveShareByTerminalId(String userId, String terminalId);
 
     List<AccountBankReceiveShareEntity> getAccountBankReceiveShareByTerminalId(String terminalId);
+
+    int countBankAccountByTerminalId(String terminalId);
 }
