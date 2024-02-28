@@ -25,7 +25,7 @@ public class StatisticUserEntity {
 
     private String registerPlatform;
 
-    private String registerDate;
+    private long registerDate;
 
     private String date;
 
@@ -96,15 +96,6 @@ public class StatisticUserEntity {
     public void setRegisterPlatform(String registerPlatform) {
         this.registerPlatform = registerPlatform;
     }
-
-    public String getRegisterDate() {
-        return registerDate;
-    }
-
-    public void setRegisterDate(String registerDate) {
-        this.registerDate = registerDate;
-    }
-
     public String getDate() {
         return date;
     }
@@ -129,10 +120,27 @@ public class StatisticUserEntity {
         this.timeZone = timeZone;
     }
 
+    public long getExpiration() {
+        return expiration;
+    }
+
+    public void setExpiration(long expiration) {
+        this.expiration = expiration;
+    }
+
+    public long getRegisterDate() {
+        return registerDate;
+    }
+
+    public void setRegisterDate(long registerDate) {
+        this.registerDate = registerDate;
+    }
+
     public StatisticUserEntity(String id, String userId, String phoneNo,
                                String email, String fullName, String address,
                                String ipAddress, String registerPlatform,
-                               String registerDate, String date, long dateValue, String timeZone) {
+                               long registerDate, String date, long dateValue,
+                               String timeZone) {
         this.id = id;
         this.userId = userId;
         this.phoneNo = phoneNo;

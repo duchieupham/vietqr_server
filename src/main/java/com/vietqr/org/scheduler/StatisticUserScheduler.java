@@ -1,21 +1,17 @@
 package com.vietqr.org.scheduler;
 
-import com.vietqr.org.dto.SumEachBankDTO;
-import com.vietqr.org.dto.SumOfBankDTO;
-import com.vietqr.org.entity.redis.StatisticBankEntity;
-import com.vietqr.org.entity.redis.SumBankEntity;
-import com.vietqr.org.entity.redis.SumEachBankEntity;
-import com.vietqr.org.entity.redis.SumUserEntity;
+import com.vietqr.org.dto.*;
+import com.vietqr.org.entity.redis.*;
 import com.vietqr.org.service.AccountBankReceiveService;
 import com.vietqr.org.service.AccountLoginService;
-import com.vietqr.org.service.redis.StatisticBankService;
-import com.vietqr.org.service.redis.SumOfBankService;
-import com.vietqr.org.service.redis.SumOfUserService;
+import com.vietqr.org.service.redis.*;
 import com.vietqr.org.util.DateTimeUtil;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
@@ -26,11 +22,19 @@ import java.util.stream.Collectors;
 @Component
 public class StatisticUserScheduler {
 
+    private static final Logger logger = Logger.getLogger(StatisticUserScheduler.class);
+
     @Autowired
     private AccountLoginService accountLoginService;
 
     @Autowired
     private StatisticBankService statisticBankService;
+
+    @Autowired
+    private RegisterBankService registerBankService;
+
+    @Autowired
+    private StatisticUserService statisticUserService;
 
     @Autowired
     private AccountBankReceiveService accountBankReceiveService;
@@ -44,7 +48,7 @@ public class StatisticUserScheduler {
     @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 0 0 * * *")
     public void sumOfUserPreviousDate() {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime yesterday = now.minusDays(1);
+        LocalDateTime yesterday = now.minusDays(1).with(LocalTime.MAX);
         int sumOfUser = accountLoginService.sumOfUserByStartDateEndDate(DateTimeUtil.getDateString(yesterday));
         SumUserEntity sumUserEntity = new SumUserEntity();
         sumUserEntity.setDate(DateTimeUtil.getDateString(yesterday));
@@ -63,7 +67,7 @@ public class StatisticUserScheduler {
     @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 0 0 * * *")
     public void sumOfBankPreviousDate() {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime yesterday = now.minusDays(1);
+        LocalDateTime yesterday = now.minusDays(1).with(LocalTime.MAX);
         SumOfBankDTO sumOfBank = accountBankReceiveService
                 .sumOfBankByStartDateEndDate(DateTimeUtil.getDateString(yesterday));
         SumBankEntity sumBankEntity = new SumBankEntity();
@@ -90,7 +94,7 @@ public class StatisticUserScheduler {
     @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 0 0 * * *")
     public void sumOfEachBankPreviousDate() {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime yesterday = now.minusDays(1);
+        LocalDateTime yesterday = now.minusDays(1).with(LocalTime.MAX);
         List<SumEachBankDTO> sumEachBankDTOS = accountBankReceiveService
                 .sumEachBank(DateTimeUtil.getDateString(yesterday));
         List<SumEachBankEntity> sumEachBankEntities = sumEachBankDTOS.stream().map(sumEachBankDTO -> {
@@ -160,5 +164,65 @@ public class StatisticUserScheduler {
             statisticBankService.save(statisticAllTime);
         }
         // save new all time;
+    }
+
+    @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 0 0 * * *")
+    public void setStatisticUserEveryDay() {
+        try {
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime yesterday = now.minusDays(1);
+            statisticUserService.removeAll();
+            List<RegisterUserDTO> result = accountLoginService.getAllRegisterUser(DateTimeUtil.getDateString(yesterday));
+            List<StatisticUserEntity> list = result.stream().map(item -> {
+                StatisticUserEntity entity = new StatisticUserEntity();
+                entity.setDate(DateTimeUtil.getDateString(yesterday));
+                entity.setDateValue(item.getTime());
+                entity.setTimeZone(DateTimeUtil.GMT_PLUS_7);
+                entity.setId(item.getId());
+                entity.setUserId(item.getId());
+                entity.setPhoneNo(item.getPhoneNo());
+                entity.setEmail(item.getEmail());
+                entity.setFullName(item.getFullName());
+                entity.setAddress(item.getAddress());
+                entity.setIpAddress(item.getUserIp());
+                entity.setRegisterPlatform(item.getRegisterPlatform());
+                entity.setRegisterDate(item.getTime());
+                return entity;
+            }).collect(Collectors.toList());
+            statisticUserService.saveAll(list);
+        } catch (Exception e) {
+            logger.error("Error setStatisticUserEveryDay: ", e);
+        }
+    }
+
+    @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 0 0 * * *")
+    public void setStatisticBankAccountEveryDay() {
+        try {
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime yesterday = now.minusDays(1);
+            registerBankService.removeAll();
+            List<RegisterBankResponseDTO> result = accountBankReceiveService.getListBankByDate(DateTimeUtil.getDateString(yesterday));
+            List<RegisterBankEntity> list = result.stream().map(item -> {
+                RegisterBankEntity entity = new RegisterBankEntity();
+                entity.setId(item.getId());
+                entity.setBankName(item.getBankName());
+                entity.setBankAccount(item.getBankAccount());
+                entity.setBankAccountName(item.getBankAccountName());
+                entity.setBankShortName(item.getBankShortName());
+                entity.setBankCode(item.getBankCode());
+                entity.setIsAuthenticated(item.getIsAuthenticated());
+                entity.setNationId(item.getNationId());
+                entity.setPhoneAuthenticated(item.getPhoneAuthenticated());
+                entity.setUserId(item.getUserId());
+                entity.setPhoneAccount(item.getPhoneAccount());
+                entity.setDate(DateTimeUtil.getDateString(yesterday));
+                entity.setTimeZone(DateTimeUtil.GMT_PLUS_7);
+                entity.setTimeValue(yesterday.with(LocalTime.MIN).toEpochSecond(ZoneOffset.UTC));
+                return entity;
+            }).collect(Collectors.toList());
+            registerBankService.saveAll(list);
+        } catch (Exception e) {
+            logger.error("Error setStatisticBankAccountEveryDay: ", e);
+        }
     }
 }

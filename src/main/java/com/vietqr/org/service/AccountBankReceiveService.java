@@ -81,6 +81,8 @@ public interface AccountBankReceiveService {
 
     List<RegisterBankResponseDTO> getListBankByDate(String fromDate, String toDate, int offset);
 
+    List<RegisterBankResponseDTO> getListBankByDate(String date);
+
     List<RegisterBankResponseDTO> getListBankByDateAndPhone(String fromDate, String toDate, String value, int offset);
 
     List<RegisterBankResponseDTO> getListBankByDateAndBankTypeId(String fromDate, String toDate, String bankTypeId, int offset);
@@ -88,8 +90,6 @@ public interface AccountBankReceiveService {
     List<RegisterBankResponseDTO> getListBankByDateAndBankAccount(String fromDate, String toDate, String value, int offset);
 
     List<RegisterBankResponseDTO> getListBankByDateAndBankName(String fromDate, String toDate, String value, int offset);
-
-    public List<String> getAllDate();
 
     public SumOfBankDTO sumOfBankByStartDateEndDate(String date);
 

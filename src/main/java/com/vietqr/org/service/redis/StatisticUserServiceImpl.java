@@ -2,7 +2,6 @@ package com.vietqr.org.service.redis;
 
 import com.vietqr.org.dto.RegisterUserDTO;
 import com.vietqr.org.dto.StartEndTimeDTO;
-import com.vietqr.org.dto.SumOfBankDTO;
 import com.vietqr.org.entity.redis.StatisticUserEntity;
 import com.vietqr.org.repository.AccountLoginRepository;
 import com.vietqr.org.repository.redis.StatisticUserRepository;
@@ -62,7 +61,7 @@ public class StatisticUserServiceImpl implements StatisticUserService {
             entity.setAddress(item.getAddress());
             entity.setIpAddress(item.getUserIp());
             entity.setRegisterPlatform(item.getRegisterPlatform());
-            entity.setRegisterDate(date);
+            entity.setRegisterDate(startEndTimeDTO.getFromDate());
             return entity;
         }).collect(Collectors.toList());
         LocalDateTime end = LocalDateTime.now();
@@ -72,5 +71,15 @@ public class StatisticUserServiceImpl implements StatisticUserService {
         logger.info("===================================================================");
         return list;
 
+    }
+
+    @Override
+    public void removeAll() {
+        repo.deleteAll();
+    }
+
+    @Override
+    public void saveAll(List<StatisticUserEntity> list) {
+        repo.saveAll(list);
     }
 }

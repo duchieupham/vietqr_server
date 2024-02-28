@@ -1,15 +1,13 @@
 package com.vietqr.org.controller;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.entity.redis.RegisterBankEntity;
 import com.vietqr.org.entity.redis.StatisticBankEntity;
 import com.vietqr.org.entity.redis.StatisticUserEntity;
 import com.vietqr.org.entity.redis.SumBankEntity;
 import com.vietqr.org.service.AccountBankReceiveService;
 import com.vietqr.org.service.AccountLoginService;
-import com.vietqr.org.service.redis.StatisticBankService;
-import com.vietqr.org.service.redis.StatisticUserService;
-import com.vietqr.org.service.redis.SumOfBankService;
-import com.vietqr.org.service.redis.SumOfUserService;
+import com.vietqr.org.service.redis.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,10 +27,10 @@ public class StatisticController {
     private StatisticBankService statisticBankService;
 
     @Autowired
-    private StatisticUserService statisticUserService;
+    private RegisterBankService registerBankService;
 
     @Autowired
-    private AccountLoginService accountLoginService;
+    private StatisticUserService statisticUserService;
 
     @Autowired
     private AccountBankReceiveService accountBankReceiveService;
@@ -44,41 +42,12 @@ public class StatisticController {
     private SumOfBankService sumOfBankService;
 
     @GetMapping("statistic-user")
-    public ResponseEntity<List<RegisterUserResponseDTO>> getStatisticUser(
-            @RequestParam String fromDate,
-            @RequestParam String toDate,
-            @RequestParam int type,
-            @RequestParam String value,
-            @RequestParam int offset) {
-        List<RegisterUserResponseDTO> result = new ArrayList<>();
+    public ResponseEntity<Iterable<StatisticUserEntity>> getStatisticUser() {
+        Iterable<StatisticUserEntity> result = new ArrayList<>();
         HttpStatus httpStatus = null;
-        // type
-        // 0: phone
-        // 1: fullName
-        // 2: registerPlatform
-        // 9: all
         try {
-            switch (type) {
-                case 0:
-                    result = accountLoginService.getAllRegisterUserResponseByPhone(fromDate, toDate, value, offset);
-                    httpStatus = HttpStatus.OK;
-                    break;
-                case 1:
-                    result = accountLoginService.getAllRegisterUserResponseByName(fromDate, toDate, value, offset);
-                    httpStatus = HttpStatus.OK;
-                    break;
-                case 2:
-                    result = accountLoginService.getAllRegisterUserResponseByPlatform(fromDate, toDate, value, offset);
-                    httpStatus = HttpStatus.OK;
-                    break;
-                case 9:
-                    result = accountLoginService.getAllRegisterUserResponse(fromDate, toDate, offset);
-                    httpStatus = HttpStatus.OK;
-                    break;
-                default:
-                    httpStatus = HttpStatus.BAD_REQUEST;
-                    break;
-            }
+            result = statisticUserService.findAll();
+            httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -129,45 +98,13 @@ public class StatisticController {
     }
 
     @GetMapping("statistic-bank")
-    public ResponseEntity<List<RegisterBankResponseDTO>> getListBank(@RequestParam String fromDate,
-                                                                     @RequestParam String toDate,
-                                                                     @RequestParam(defaultValue = "9") int type,
-                                                                     @RequestParam(required = false) String value,
-                                                                     @RequestParam int offset) {
-        // type
-        // 0: phone
-        // 1: bankTypeId
-        // 2: bankAccount
-        // 3: bankName
-        // 9: all
+    public ResponseEntity<List<RegisterBankResponseDTO>> getListBank() {
         List<RegisterBankResponseDTO> result = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
-            switch (type) {
-                case 0:
-                    result = accountBankReceiveService.getListBankByDateAndPhone(fromDate, toDate, value, offset);
-                    httpStatus = HttpStatus.OK;
-                    break;
-                case 1:
-                    result = accountBankReceiveService.getListBankByDateAndBankTypeId(fromDate, toDate, value, offset);
-                    httpStatus = HttpStatus.OK;
-                    break;
-                case 2:
-                    result = accountBankReceiveService.getListBankByDateAndBankAccount(fromDate, toDate, value, offset);
-                    httpStatus = HttpStatus.OK;
-                    break;
-                case 3:
-                    result = accountBankReceiveService.getListBankByDateAndBankName(fromDate, toDate, value, offset);
-                    httpStatus = HttpStatus.OK;
-                    break;
-                case 9:
-                    result = accountBankReceiveService.getListBankByDate(fromDate, toDate, offset);
-                    httpStatus = HttpStatus.OK;
-                    break;
-                default:
-                    httpStatus = HttpStatus.BAD_REQUEST;
-                    break;
-            }
+            List<RegisterBankEntity> registerBankEntities = registerBankService.findAll();
+//            result = accountBankReceiveService.getListBank();
+            httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             httpStatus = HttpStatus.BAD_REQUEST;
         }

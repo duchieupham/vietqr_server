@@ -10,4 +10,8 @@ public interface StatisticUserService {
     Iterable<StatisticUserEntity> findAll();
 
     List<StatisticUserEntity> findByDate(String date);
+
+    void removeAll();
+
+    void saveAll(List<StatisticUserEntity> list);
 }
