@@ -1,5 +1,7 @@
 package com.vietqr.org.controller;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -88,6 +90,9 @@ public class AccountCustomerBankController {
                         UUID uuid = UUID.randomUUID();
                         AccountBankReceiveEntity accountBankReceiveEntity = new AccountBankReceiveEntity();
                         accountBankReceiveEntity.setId(uuid.toString());
+                        LocalDateTime currentDateTime = LocalDateTime.now();
+                        long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+                        accountBankReceiveEntity.setTimeCreated(time);
                         accountBankReceiveEntity.setBankAccount(dto.getBankAccount());
                         accountBankReceiveEntity.setBankAccountName(dto.getUserBankName());
                         accountBankReceiveEntity.setBankTypeId(EnvironmentUtil.getBankTypeIdRecharge());

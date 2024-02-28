@@ -2,6 +2,7 @@ package com.vietqr.org.service;
 
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.AccountBankReceiveShareEntity;
+import com.vietqr.org.entity.redis.StatisticBankEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

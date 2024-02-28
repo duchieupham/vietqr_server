@@ -1,6 +1,8 @@
 package com.vietqr.org.controller;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -605,6 +607,9 @@ public class CustomerSyncController {
                                         accountBankReceiveEntity.setId(uuidAccountBank.toString());
                                         accountBankReceiveEntity.setBankAccount(dto.getBankAccount());
                                         accountBankReceiveEntity.setBankAccountName(dto.getUserBankName());
+                                        LocalDateTime currentDateTime = LocalDateTime.now();
+                                        long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+                                        accountBankReceiveEntity.setTimeCreated(time);
                                         accountBankReceiveEntity.setBankTypeId(EnvironmentUtil.getBankTypeIdRecharge());
                                         accountBankReceiveEntity.setAuthenticated(true);
                                         accountBankReceiveEntity.setSync(true);

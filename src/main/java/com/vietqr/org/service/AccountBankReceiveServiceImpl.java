@@ -3,6 +3,7 @@ package com.vietqr.org.service;
 import java.util.List;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -172,4 +173,64 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     public AccountBankReceiveShareForNotiDTO findAccountBankByTraceTransfer(String traceTransfer, String bankTypeId) {
         return repo.findAccountBankByTraceTransfer(traceTransfer, bankTypeId);
     }
+
+    @Override
+    public List<RegisterBankResponseDTO> getListBankByDate(String fromDate, String toDate, int offset) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndDate(fromDate, toDate);
+        return repo.getListBankByDate(startEndTimeDTO.getFromDate() - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                startEndTimeDTO.getToDate() - DateTimeUtil.GMT_PLUS_7_OFFSET, offset);
+    }
+
+    @Override
+    public List<RegisterBankResponseDTO> getListBankByDateAndPhone(String fromDate, String toDate, String value, int offset) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndDate(fromDate, toDate);
+        return repo.getListBankByDateAndPhone(startEndTimeDTO.getFromDate() - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                startEndTimeDTO.getToDate() - DateTimeUtil.GMT_PLUS_7_OFFSET, value, offset);
+    }
+
+    @Override
+    public List<RegisterBankResponseDTO> getListBankByDateAndBankTypeId(String fromDate, String toDate, String value, int offset) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndDate(fromDate, toDate);
+        return repo.getListBankByDateAndBankTypeId(startEndTimeDTO.getFromDate() - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                startEndTimeDTO.getToDate() - DateTimeUtil.GMT_PLUS_7_OFFSET, value, offset);
+    }
+
+    @Override
+    public List<RegisterBankResponseDTO> getListBankByDateAndBankAccount(String fromDate,
+                                                                         String toDate,
+                                                                         String value, int offset) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndDate(fromDate, toDate);
+        return repo.getListBankByDateAndBankAccount(startEndTimeDTO.getFromDate() - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                startEndTimeDTO.getToDate() - DateTimeUtil.GMT_PLUS_7_OFFSET, value, offset);
+    }
+
+    @Override
+    public List<RegisterBankResponseDTO> getListBankByDateAndBankName(String fromDate,
+                                                                      String toDate,
+                                                                      String value, int offset) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndDate(fromDate, toDate);
+        return repo.getListBankByDateAndBankName(startEndTimeDTO.getFromDate() - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                startEndTimeDTO.getToDate() - DateTimeUtil.GMT_PLUS_7_OFFSET, value, offset);
+    }
+
+
+    @Override
+    public List<String> getAllDate() {
+        return repo.getAllDate();
+    }
+
+    @Override
+    public SumOfBankDTO sumOfBankByStartDateEndDate(String date) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndADate(date);
+        return repo.sumOfBankByStartDateEndDate(startEndTimeDTO.getFromDate() - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                startEndTimeDTO.getToDate() - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<SumEachBankDTO> sumEachBank(String date) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndADate(date);
+        return repo.sumEachBank(startEndTimeDTO.getFromDate() - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                startEndTimeDTO.getToDate() - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
 }

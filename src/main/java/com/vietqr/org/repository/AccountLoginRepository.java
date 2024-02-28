@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import com.vietqr.org.dto.RegisterUserDTO;
+import com.vietqr.org.dto.RegisterUserResponseDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -104,4 +106,41 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
 
 	@Query(value = "SELECT * FROM account_login", nativeQuery = true)
 	List<AccountLoginEntity> getAllAccountLogin();
+
+	@Query(value = "SELECT COUNT(id) FROM account_login WHERE time BETWEEN :startDate AND :endDate", nativeQuery = true)
+	int sumOfUserByStartDateEndDate(@Param(value = "startDate") long startDate, @Param(value = "endDate") long endDate);
+
+	@Query(value = "SELECT a.id as id, a.phone_no AS phoneNo, " +
+			"b.email AS email, a.time AS time, b.birth_date AS birthDate, " +
+			"b.address, b.register_platform as registerPlatform, " +
+			"CONCAT(b.last_name, ' ', b.middle_name, ' ', b.first_name) AS fullName, " +
+			"b.user_ip AS userIp FROM account_login a " +
+			"INNER JOIN account_information b " +
+			"ON a.id = b.user_id WHERE time BETWEEN :startDate AND :endDate", nativeQuery = true)
+	List<RegisterUserDTO> getAllRegisterUser(@Param(value = "startDate") long startDate,
+											 @Param(value = "endDate") long endDate);
+
+	@Query(value = "SELECT DISTINCT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(time), '+00:00', '+07:00'), '%Y-%m-%d') FROM account_login", nativeQuery = true)
+	List<String> getAllDate();
+
+	@Query(value = "SELECT a.id as id, a.phone_no AS phoneNo, " +
+			"b.email AS email, a.time AS time, b.birth_date AS birthDate, " +
+			"b.address, b.register_platform as registerPlatform, " +
+			"CONCAT(b.last_name, ' ', b.middle_name, ' ', b.first_name) AS fullName, " +
+			"b.user_ip AS userIp FROM account_login a " +
+			"INNER JOIN account_information b " +
+			"ON a.id = b.user_id WHERE time BETWEEN :fromDate AND :toDate " +
+			"LIMIT :offset, 20", nativeQuery = true)
+    List<RegisterUserResponseDTO> getAllRegisterUserResponse(long fromDate, long toDate, int offset);
+
+	@Query(value = "SELECT a.id as id, a.phone_no AS phoneNo, " +
+			"b.email AS email, a.time AS time, b.birth_date AS birthDate, " +
+			"b.address, b.register_platform as registerPlatform, " +
+			"CONCAT(b.last_name, ' ', b.middle_name, ' ', b.first_name) AS fullName, " +
+			"b.user_ip AS userIp FROM account_login a " +
+			"INNER JOIN account_information b " +
+			"ON a.id = b.user_id WHERE time BETWEEN :fromDate AND :toDate " +
+			"AND phone_no = :value " +
+			"LIMIT :offset, 20", nativeQuery = true)
+    List<RegisterUserResponseDTO> getAllRegisterUserResponseByPhone(long fromDate, long toDate, String value, int offset);
 }

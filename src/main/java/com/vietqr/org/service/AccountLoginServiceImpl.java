@@ -2,11 +2,11 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+import com.vietqr.org.dto.*;
+import com.vietqr.org.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.vietqr.org.dto.AccountCheckDTO;
-import com.vietqr.org.dto.CardVQRInfoDTO;
 import com.vietqr.org.entity.AccountLoginEntity;
 import com.vietqr.org.repository.AccountLoginRepository;
 
@@ -119,6 +119,47 @@ public class AccountLoginServiceImpl implements AccountLoginService {
 	@Override
 	public void resetPassword(String password, String phoneNo) {
 		repo.resetPassword(password, phoneNo);
+	}
+
+	@Override
+	public int sumOfUserByStartDateEndDate(String date) {
+		StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndADate(date);
+		return repo.sumOfUserByStartDateEndDate(startEndTimeDTO.getFromDate(), startEndTimeDTO.getToDate());
+	}
+
+	@Override
+	public List<RegisterUserDTO> getAllRegisterUser(String date) {
+		StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndADate(date);
+		return repo.getAllRegisterUser(startEndTimeDTO.getFromDate() - DateTimeUtil.GMT_PLUS_7_OFFSET,
+				startEndTimeDTO.getToDate() - DateTimeUtil.GMT_PLUS_7_OFFSET);
+	}
+
+	@Override
+	public List<RegisterUserResponseDTO> getAllRegisterUserResponse(String fromDate, String toDate, int offset) {
+		StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndDate(fromDate, toDate);
+		return repo.getAllRegisterUserResponse(startEndTimeDTO.getFromDate() - DateTimeUtil.GMT_PLUS_7_OFFSET,
+				startEndTimeDTO.getToDate() - DateTimeUtil.GMT_PLUS_7_OFFSET, offset);
+	}
+
+	@Override
+	public List<String> getAllDate() {
+		return repo.getAllDate();
+	}
+
+	@Override
+	public List<RegisterUserResponseDTO> getAllRegisterUserResponseByPhone(String fromDate, String toDate, String value, int offset) {
+		StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndDate(fromDate, toDate);
+		return repo.getAllRegisterUserResponseByPhone(startEndTimeDTO.getFromDate(), startEndTimeDTO.getToDate(), value, offset);
+	}
+
+	@Override
+	public List<RegisterUserResponseDTO> getAllRegisterUserResponseByName(String fromDate, String toDate, String value, int offset) {
+		return null;
+	}
+
+	@Override
+	public List<RegisterUserResponseDTO> getAllRegisterUserResponseByPlatform(String fromDate, String toDate, String value, int offset) {
+		return null;
 	}
 
 }

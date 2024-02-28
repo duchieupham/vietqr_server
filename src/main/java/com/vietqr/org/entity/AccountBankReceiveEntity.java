@@ -65,6 +65,9 @@ public class AccountBankReceiveEntity implements Serializable {
 	@Column(name = "password")
 	private String password;
 
+	@Column(name = "time_created")
+	private long timeCreated;
+
 	@Column(name = "ewalletToken")
 	private String ewalletToken;
 
@@ -91,6 +94,14 @@ public class AccountBankReceiveEntity implements Serializable {
 		this.status = status;
 		this.mmsActive = mmsActive;
 		this.ewalletToken = ewalletToken;
+	}
+
+	public long getTimeCreated() {
+		return timeCreated;
+	}
+
+	public void setTimeCreated(long timeCreated) {
+		this.timeCreated = timeCreated;
 	}
 
 	public boolean isRpaSync() {

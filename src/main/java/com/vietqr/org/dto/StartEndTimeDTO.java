@@ -1,13 +1,13 @@
 package com.vietqr.org.dto;
 
-public class StartEndMonthDTO {
+public class StartEndTimeDTO {
     private long fromDate;
     private long toDate;
 
-    public StartEndMonthDTO() {
+    public StartEndTimeDTO() {
     }
 
-    public StartEndMonthDTO(long fromDate, long toDate) {
+    public StartEndTimeDTO(long fromDate, long toDate) {
         this.fromDate = fromDate;
         this.toDate = toDate;
     }

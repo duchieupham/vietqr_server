@@ -239,4 +239,78 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "AND a.is_authenticated = true "
 			+ "AND c.trace_transfer = :traceTransfer LIMIT 1", nativeQuery = true)
 	AccountBankReceiveShareForNotiDTO findAccountBankByTraceTransfer(String traceTransfer, String bankTypeId);
+
+	@Query(value = "SELECT a.id as bankId, b.bank_name as bankName, b.bank_code as bankCode, a.user_id as userId, "
+			+ "b.bank_short_name as bankShortName, a.bank_account as bankAccount "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN bank_type b "
+			+ "ON a.bank_type_id = b.id "
+			+ "WHERE a.time BETWEEN :fromDate AND :toDate "
+			+ "LIMIT :offset, 20", nativeQuery = true)
+    List<RegisterBankResponseDTO> getListBankByDate(long fromDate, long toDate, int offset);
+
+	@Query(value = "SELECT a.id as bankId, b.bank_name as bankName, b.bank_code as bankCode, a.user_id as userId, "
+			+ "b.bank_short_name as bankShortName, a.bank_account as bankAccount "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN bank_type b "
+			+ "ON a.bank_type_id = b.id "
+			+ "INNER JOIN account_login c "
+			+ "ON a.user_id = c.id "
+			+ "WHERE a.time BETWEEN :fromDate AND :toDate "
+			+ "AND c.phone_no = :value "
+			+ "LIMIT :offset, 20", nativeQuery = true)
+	List<RegisterBankResponseDTO> getListBankByDateAndPhone(long fromDate, long toDate, String value, int offset);
+
+	@Query(value = "SELECT a.id as bankId, b.bank_name as bankName, b.bank_code as bankCode, a.user_id as userId, "
+			+ "b.bank_short_name as bankShortName, a.bank_account as bankAccount "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN bank_type b "
+			+ "ON a.bank_type_id = b.id "
+			+ "WHERE a.time BETWEEN :fromDate AND :toDate "
+			+ "AND a.bank_type_id = :value "
+			+ "LIMIT :offset, 20", nativeQuery = true)
+	List<RegisterBankResponseDTO> getListBankByDateAndBankTypeId(long fromDate, long toDate, String value, int offset);
+
+	@Query(value = "SELECT a.id as bankId, b.bank_name as bankName, b.bank_code as bankCode, a.user_id as userId, "
+			+ "b.bank_short_name as bankShortName, a.bank_account as bankAccount "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN bank_type b "
+			+ "ON a.bank_type_id = b.id "
+			+ "WHERE a.time BETWEEN :fromDate AND :toDate "
+			+ "AND a.bank_account = :value "
+			+ "LIMIT :offset, 20", nativeQuery = true)
+	List<RegisterBankResponseDTO> getListBankByDateAndBankAccount(long fromDate, long toDate, String value, int offset);
+
+	@Query(value = "SELECT a.id as bankId, b.bank_name as bankName, b.bank_code as bankCode, a.user_id as userId, "
+		+ "b.bank_short_name as bankShortName, a.bank_account as bankAccount "
+		+ "FROM account_bank_receive a "
+		+ "INNER JOIN bank_type b "
+		+ "ON a.bank_type_id = b.id "
+		+ "WHERE a.time BETWEEN :fromDate AND :toDate "
+		+ "AND b.bank_name = :value "
+		+ "LIMIT :offset, 20", nativeQuery = true)
+	List<RegisterBankResponseDTO> getListBankByDateAndBankName(long fromDate, long toDate, String value, int offset);
+
+	@Query(value = "SELECT DISTINCT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(time_created), '+00:00', '+07:00'), '%Y-%m-%d') FROM account_bank_receive", nativeQuery = true)
+	List<String> getAllDate();
+
+	@Query(value = "SELECT COUNT(a.id) as numberOfBank, COUNT(DISTINCT a.id) as numberOfBankAuthenticated, " +
+			"COUNT(DISTINCT a.user_id) as numberOfBankNotAuthenticated " +
+			"FROM account_bank_receive a " +
+			"WHERE a.time_created BETWEEN :fromDate AND :toDate ", nativeQuery = true)
+	SumOfBankDTO sumOfBankByStartDateEndDate(long fromDate, long toDate);
+
+	@Query(value = "SELECT COUNT(a.id) AS numberOfBank, " +
+			"COUNT( CASE WHEN a.is_authenticated = true THEN a.id END) AS numberOfBankAuthenticated, " +
+			"COUNT( CASE WHEN a.is_authenticated = false THEN a.id END) AS numberOfBankNotAuthenticated, " +
+			"b.bank_name AS bankName, " +
+			"a.bank_type_id AS bankTypeId, " +
+			"b.bank_short_name AS bankShortName, " +
+			"b.img_id AS imgId, " +
+			"b.bank_code AS bankCode " +
+			"FROM account_bank_receive a " +
+			"INNER JOIN bank_type b ON a.bank_type_id = b.id " +
+			"WHERE a.time_created BETWEEN :fromDate AND :toDate " +
+			"GROUP BY a.bank_type_id ", nativeQuery = true)
+	List<SumEachBankDTO> sumEachBank(long fromDate, long toDate);
 }

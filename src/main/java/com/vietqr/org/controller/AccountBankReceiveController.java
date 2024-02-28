@@ -168,6 +168,9 @@ public class AccountBankReceiveController {
 			entity.setBankTypeId(dto.getBankTypeId());
 			entity.setBankAccount(dto.getBankAccount());
 			entity.setBankAccountName(dto.getUserBankName());
+			LocalDateTime currentTime = LocalDateTime.now();
+			long timeCreated = currentTime.toEpochSecond(ZoneOffset.UTC);
+			entity.setTimeCreated(timeCreated);
 			entity.setType(0);
 			entity.setUserId(dto.getUserId());
 			entity.setNationalId("");
@@ -440,6 +443,9 @@ public class AccountBankReceiveController {
 			String qr = getStaticQR(dto.getBankAccount(), dto.getBankTypeId());
 			AccountBankReceiveEntity entity = new AccountBankReceiveEntity();
 			entity.setId(uuid.toString());
+			LocalDateTime currentTime = LocalDateTime.now();
+			long timeCreated = currentTime.toEpochSecond(ZoneOffset.UTC);
+			entity.setTimeCreated(timeCreated);
 			entity.setBankTypeId(dto.getBankTypeId());
 			entity.setBankAccount(dto.getBankAccount());
 			entity.setBankAccountName(dto.getUserBankName());
@@ -839,6 +845,9 @@ public class AccountBankReceiveController {
 					entity.setPhoneAuthenticated("");
 					entity.setAuthenticated(true);
 					entity.setSync(false);
+					LocalDateTime currentDateTime = LocalDateTime.now();
+					long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+					entity.setTimeCreated(time);
 					entity.setWpSync(false);
 					entity.setStatus(true);
 					entity.setMmsActive(false);
