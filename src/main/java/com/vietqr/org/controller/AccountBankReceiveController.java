@@ -181,6 +181,7 @@ public class AccountBankReceiveController {
 			entity.setUsername("");
 			entity.setPassword("");
 			entity.setEwalletToken("");
+			entity.setTerminalLength(10);
 			accountBankReceiveService.insertAccountBank(entity);
 
 			// insert account-bank-receive-share
@@ -455,6 +456,7 @@ public class AccountBankReceiveController {
 			entity.setRpaSync(false);
 			entity.setUsername("");
 			entity.setPassword("");
+			entity.setTerminalLength(10);
 			if (dto.getEwalletToken() != null) {
 				entity.setEwalletToken(dto.getEwalletToken());
 			} else {
@@ -846,6 +848,7 @@ public class AccountBankReceiveController {
 					entity.setUsername(dto.getUsername());
 					entity.setPassword(dto.getPassword());
 					entity.setEwalletToken("");
+					entity.setTerminalLength(10);
 					accountBankReceiveService.insertAccountBank(entity);
 					// insert account_bank_personal
 					UUID uuidPersonal = UUID.randomUUID();
