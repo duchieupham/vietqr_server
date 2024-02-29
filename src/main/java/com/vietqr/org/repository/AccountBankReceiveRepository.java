@@ -239,4 +239,8 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "AND a.is_authenticated = true "
 			+ "AND c.trace_transfer = :traceTransfer LIMIT 1", nativeQuery = true)
 	AccountBankReceiveShareForNotiDTO findAccountBankByTraceTransfer(String traceTransfer, String bankTypeId);
+
+	@Query(value = "SELECT terminal_length as terminalLength, id as bankId "
+			+ "FROM account_bank_receive WHERE id = :bankId", nativeQuery = true)
+    TerminalLengthDTO getTerminalLengthByBankId(String bankId);
 }

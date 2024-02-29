@@ -77,4 +77,6 @@ public interface AccountBankReceiveService {
     String checkIsOwner(String bankId, String userId);
 
 	AccountBankReceiveShareForNotiDTO findAccountBankByTraceTransfer(String traceTransfer, String bankTypeId);
+
+    TerminalLengthDTO getTerminalLengthByBankId(String bankId);
 }

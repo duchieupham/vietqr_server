@@ -324,6 +324,22 @@ public class TerminalController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("terminal/terminal-length")
+    public ResponseEntity<TerminalLengthDTO> getTerminalCodeLength(
+            @Valid @RequestParam String bankId) {
+        TerminalLengthDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            TerminalLengthDTO dto = accountBankReceiveService
+                    .getTerminalLengthByBankId(bankId);
+            result = dto;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @GetMapping("terminal/bank")
     public ResponseEntity<TerminalShareResponseDTO> getTerminalsOfBank(
             @Valid @RequestParam String userId,

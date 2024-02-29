@@ -172,4 +172,9 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     public AccountBankReceiveShareForNotiDTO findAccountBankByTraceTransfer(String traceTransfer, String bankTypeId) {
         return repo.findAccountBankByTraceTransfer(traceTransfer, bankTypeId);
     }
+
+    @Override
+    public TerminalLengthDTO getTerminalLengthByBankId(String bankId) {
+        return repo.getTerminalLengthByBankId(bankId);
+    }
 }
