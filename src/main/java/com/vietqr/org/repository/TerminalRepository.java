@@ -130,7 +130,7 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             "INNER JOIN account_bank_receive_share b ON a.id = b.terminal_id " +
             "INNER JOIN account_bank_receive c ON c.id = b.bank_id " +
             "WHERE a.code = :terminalCode AND c.bank_account = :bankAccount " +
-            "AND c.is_authenticated = true ", nativeQuery = true)
+            "AND c.is_authenticated = true LIMIT 1", nativeQuery = true)
     TerminalEntity getTerminalByTerminalCodeAndBankAccount(String terminalCode, String bankAccount);
 
     @Query(value = "SELECT DISTINCT a.id FROM terminal a " +
