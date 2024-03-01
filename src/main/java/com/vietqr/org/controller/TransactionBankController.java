@@ -656,6 +656,55 @@ public class TransactionBankController {
 
 	}
 
+	public String getTraceId(String inputString, String prefix, int length) {
+		String result = "";
+		length = length + 3;
+		try {
+			inputString = inputString.replaceAll("\\.", " ");
+			inputString = inputString.replaceAll("\\-", " ");
+			String[] newPaths = inputString.split("\\s+");
+			String traceId = "";
+			int indexSaved = -1;
+			for (int i = 0; i < newPaths.length; i++) {
+				if (newPaths[i].contains(prefix)) {
+					if (newPaths[i].length() >= length) {
+						traceId = newPaths[i].substring(0, length);
+						break;
+					}
+					traceId = newPaths[i];
+					indexSaved = i;
+				} else if (indexSaved != -1 && i == indexSaved + 1) {
+					if (traceId.length() < length) {
+						traceId += newPaths[i].substring(0, Math.min(length - traceId.length(), newPaths[i].length()));
+					}
+				}
+			}
+
+			if (!traceId.isEmpty()) {
+				String pattern = String.format("VQR.{%s}", length - 3);
+				Pattern r = Pattern.compile(pattern);
+				Matcher m = r.matcher(traceId);
+				if (m.find()) {
+					traceId = m.group(0);
+				} else {
+					String pattern2 =String.format("VQR[0-9a-f]{%s}", length - 3);
+					Pattern regex = Pattern.compile(pattern2);
+					Matcher matcher = regex.matcher(inputString);
+
+					if (matcher.find()) {
+						traceId = matcher.group();
+					}
+				}
+			}
+
+			result = traceId;
+		} catch (Exception e) {
+			System.out.println("ERROR: " + e.toString());
+		}
+
+		return result;
+	}
+
 	public String getTraceId(String inputString, String prefix) {
 		String result = "";
 		try {
@@ -1322,14 +1371,19 @@ public class TransactionBankController {
 
 		BankTypeEntity bankTypeEntity = bankTypeService
 				.getBankTypeById(accountBankEntity.getBankTypeId());
-
-		String terminalCodeContent = getTraceId(dto.getContent(), "SQR");
+		// get terminalCode
+		int length = accountBankEntity.getTerminalLength();
+		String terminalCodeContent = "";
+		if (length > 0) {
+			terminalCodeContent = getTraceId(dto.getContent(), "SQR", length);
+		}
 		String terminalCode = "";
 		if (terminalCodeContent.length() > 3) {
 			// find terminal by terminalCode
 			terminalCode = terminalCodeContent.substring(3);
 		}
 		if (StringUtil.isNullOrEmpty(terminalCode) == false) {
+			logger.info("transaction-sync - insertNewTransaction - terminalCode: " + terminalCode);
 			// find all userIds belong to terminal
 			TerminalEntity terminalEntity = terminalService
 					.getTerminalByTerminalCode(terminalCode,

@@ -617,6 +617,7 @@ public class CustomerSyncController {
                                         accountBankReceiveEntity.setRpaSync(false);
                                         accountBankReceiveEntity.setPassword("");
                                         accountBankReceiveEntity.setUsername("");
+                                        accountBankReceiveEntity.setTerminalLength(10);
                                         accountBankReceiveService.insertAccountBank(accountBankReceiveEntity);
                                         //
                                         UUID uuid2 = UUID.randomUUID();

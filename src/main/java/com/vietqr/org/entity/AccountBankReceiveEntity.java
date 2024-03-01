@@ -68,6 +68,9 @@ public class AccountBankReceiveEntity implements Serializable {
 	@Column(name = "ewalletToken")
 	private String ewalletToken;
 
+	@Column(name = "terminalLength")
+	private int terminalLength;
+
 	public AccountBankReceiveEntity() {
 		super();
 	}
@@ -91,6 +94,14 @@ public class AccountBankReceiveEntity implements Serializable {
 		this.status = status;
 		this.mmsActive = mmsActive;
 		this.ewalletToken = ewalletToken;
+	}
+
+	public int getTerminalLength() {
+		return terminalLength;
+	}
+
+	public void setTerminalLength(int terminalLength) {
+		this.terminalLength = terminalLength;
 	}
 
 	public boolean isRpaSync() {
