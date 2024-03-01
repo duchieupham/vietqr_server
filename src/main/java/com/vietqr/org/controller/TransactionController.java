@@ -1503,6 +1503,9 @@ public class TransactionController {
                             = transactionReceiveService.getTransStatisticByTerminalIdNotSync(bankId, terminalCode, fromDate, toDate);
                     result = transactions;
                     httpStatus = HttpStatus.OK;
+                }  else {
+                    result = new ArrayList<>();
+                    httpStatus = HttpStatus.OK;
                 }
             }
 
@@ -1549,6 +1552,9 @@ public class TransactionController {
                     List<TransStatisticByDateDTO> transactions
                             = transactionReceiveService.getTransStatisticByTerminalIdNotSync(bankId, terminalCode, month);
                     result = transactions;
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    result = new ArrayList<>();
                     httpStatus = HttpStatus.OK;
                 }
             }
