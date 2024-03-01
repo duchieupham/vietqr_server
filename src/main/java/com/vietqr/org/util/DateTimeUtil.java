@@ -47,4 +47,14 @@ public class DateTimeUtil {
         return new StartEndMonthDTO(fromDate.toEpochSecond(ZoneOffset.UTC),
                 toDate.toEpochSecond(ZoneOffset.UTC));
     }
+
+    public static StartEndMonthDTO getStartEndDate(String date) {
+        String dateTime = date + " 00:00:00";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DateTimeFormat);
+        LocalDateTime localDateTime = LocalDateTime.parse(dateTime, formatter);
+        LocalDateTime fromDate = localDateTime.with(LocalTime.MIN);
+        LocalDateTime toDate = localDateTime.with(LocalTime.MAX);
+        return new StartEndMonthDTO(fromDate.toEpochSecond(ZoneOffset.UTC),
+                toDate.toEpochSecond(ZoneOffset.UTC));
+    }
 }

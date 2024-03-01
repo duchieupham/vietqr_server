@@ -766,4 +766,75 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
                 dto.getToDate() - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
+    @Override
+    public TransStatisticDTO getTransactionOverviewNotSync(String bankId, String terminalCode, String fromDate, String toDate) {
+        long startTime = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long endTime = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getTransactionOverviewNotSync(bankId, terminalCode,
+                startTime - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                endTime - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransStatisticByTimeDTO> getTransStatisticByTerminalIdNotSync(String bankId, String terminalCode, String fromDate, String toDate) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getTransStatisticByTerminalIdNotSyncByDate(bankId, terminalCode,
+                fromTime - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                toTime - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransStatisticByTimeDTO> getTransStatisticByTerminalIdAndDate(String bankId, String terminalCode, String fromDate, String toDate, String userId) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getTransStatisticByTerminalIdAndDate(bankId, terminalCode, userId,
+                fromTime - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                toTime - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransStatisticByTimeDTO> getTransStatisticByTerminalIdAndDate(String bankId, String fromDate, String toDate, String userId) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getTransStatisticByTerminalIdAndDate(bankId, userId,
+                fromTime - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                toTime - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransStatisticByTimeDTO> getTransStatisticByBankIdAndDate(String bankId, String fromDate, String toDate) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getTransStatisticByBankIdAndDate(bankId,
+                fromTime - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                toTime - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public TransStatisticDTO getTransactionOverviewByDay(String bankId, String fromDate, String toDate) {
+        long startDate = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long endDate = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getTransactionOverview(bankId, startDate - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                endDate - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public TransStatisticDTO getTransactionOverviewByDay(String bankId, String fromDate, String toDate, String userId) {
+        long startDate = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long endDate = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getTransactionOverview(bankId, userId,
+                startDate - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                endDate - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public TransStatisticDTO getTransactionOverviewByDay(String bankId, String terminalCode, String fromDate, String toDate, String userId) {
+        long startDate = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long endDate = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getTransactionOverview(bankId, terminalCode, userId,
+                startDate - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                endDate - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
 }

@@ -374,4 +374,20 @@ public interface TransactionReceiveService {
         List<TransStatisticByDateDTO> getTransStatisticByTerminalIdNotSync(String bankId, String terminalCode, String month);
 
         TransStatisticDTO getTransactionOverviewNotSync(String bankId, String terminalCode, String month);
+
+        TransStatisticDTO getTransactionOverviewByDay(String bankId, String fromDate, String toDate);
+
+        TransStatisticDTO getTransactionOverviewByDay(String bankId, String fromDate, String toDate, String userId);
+
+        TransStatisticDTO getTransactionOverviewByDay(String bankId, String terminalCode, String fromDate, String toDate, String userId);
+
+        TransStatisticDTO getTransactionOverviewNotSync(String bankId, String terminalCode, String fromDate, String toDate);
+
+        List<TransStatisticByTimeDTO> getTransStatisticByTerminalIdNotSync(String bankId, String terminalCode, String fromDate, String toDate);
+
+        List<TransStatisticByTimeDTO> getTransStatisticByTerminalIdAndDate(String bankId, String terminalCode, String fromDate, String toDate, String userId);
+
+        List<TransStatisticByTimeDTO> getTransStatisticByTerminalIdAndDate(String bankId, String fromDate, String toDate, String userId);
+
+        List<TransStatisticByTimeDTO> getTransStatisticByBankIdAndDate(String bankId, String fromDate, String toDate);
 }

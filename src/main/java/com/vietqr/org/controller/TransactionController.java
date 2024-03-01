@@ -1403,6 +1403,117 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("transaction/overview-by-day/{bankId}")
+    public ResponseEntity<TransStatisticResponseDTO> getTransactionOverview(
+            @PathVariable("bankId") String bankId,
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "terminalCode") String terminalCode,
+            @RequestParam(value = "fromDate") String fromDate,
+            @RequestParam(value = "toDate") String toDate) {
+        TransStatisticResponseDTO result = null;
+        TransStatisticDTO dto = null;
+        HttpStatus httpStatus = null;
+        try {
+            String checkIsOwner = accountBankReceiveService.checkIsOwner(bankId, userId);
+            if (!StringUtil.isNullOrEmpty(checkIsOwner) && StringUtil.isNullOrEmpty(terminalCode)) {
+                dto = transactionReceiveService.getTransactionOverviewByDay(bankId, fromDate, toDate);
+            } else {
+                if (StringUtil.isNullOrEmpty(terminalCode)) {
+                    dto = transactionReceiveService.getTransactionOverviewByDay(bankId, fromDate, toDate, userId);
+                } else {
+                    dto = transactionReceiveService.getTransactionOverviewByDay(bankId, terminalCode, fromDate, toDate, userId);
+                }
+            }
+            if (dto != null && Objects.nonNull(dto.getTotalCashIn()) && Objects.nonNull(dto.getTotalCashOut())) {
+                result = new TransStatisticResponseDTO();
+                result.setTotalCashIn(dto.getTotalCashIn()!= null ? dto.getTotalCashIn() : 0);
+                result.setTotalCashOut(dto.getTotalCashOut()!= null ? dto.getTotalCashOut() : 0);
+                result.setTotalTransC(dto.getTotalTransC()!= null ? dto.getTotalTransC() : 0);
+                result.setTotalTransD(dto.getTotalTransD()!= null ? dto.getTotalTransD() : 0);
+                result.setTotalTrans(dto.getTotalTrans()!= null ? dto.getTotalTrans() : 0);
+                httpStatus = HttpStatus.OK;
+
+            } else if (!StringUtil.isNullOrEmpty(checkIsOwner) && !StringUtil.isNullOrEmpty(terminalCode)) {
+                dto = transactionReceiveService.getTransactionOverviewNotSync(bankId, terminalCode, fromDate, toDate);
+                if (dto != null) {
+                    result = new TransStatisticResponseDTO();
+                    result.setTotalCashIn(dto.getTotalCashIn()!= null ? dto.getTotalCashIn() : 0);
+                    result.setTotalCashOut(dto.getTotalCashOut()!= null ? dto.getTotalCashOut() : 0);
+                    result.setTotalTransC(dto.getTotalTransC()!= null ? dto.getTotalTransC() : 0);
+                    result.setTotalTransD(dto.getTotalTransD()!= null ? dto.getTotalTransD() : 0);
+                    result.setTotalTrans(dto.getTotalTrans()!= null ? dto.getTotalTrans() : 0);
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else if (dto != null) {
+                result = new TransStatisticResponseDTO();
+                result.setTotalCashIn(dto.getTotalCashIn()!= null ? dto.getTotalCashIn() : 0);
+                result.setTotalCashOut(dto.getTotalCashOut()!= null ? dto.getTotalCashOut() : 0);
+                result.setTotalTransC(dto.getTotalTransC()!= null ? dto.getTotalTransC() : 0);
+                result.setTotalTransD(dto.getTotalTransD()!= null ? dto.getTotalTransD() : 0);
+                result.setTotalTrans(dto.getTotalTrans()!= null ? dto.getTotalTrans() : 0);
+                httpStatus = HttpStatus.OK;
+            }
+            else {
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            System.out.println("Error at getBankOverview: " + e.toString());
+            logger.error("Error at getBankOverview: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("transaction/statistic-by-date")
+    public ResponseEntity<List<TransStatisticByTimeDTO>> getTransactionStatisticByDate(
+            @RequestParam(value = "terminalCode") String terminalCode,
+            @RequestParam(value = "bankId") String bankId,
+            @RequestParam(value = "fromDate") String fromDate,
+            @RequestParam(value = "toDate") String toDate,
+            @RequestParam(value = "userId") String userId) {
+        List<TransStatisticByTimeDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            String checkIsOwner = accountBankReceiveService.checkIsOwner(bankId, userId);
+            if (!StringUtil.isNullOrEmpty(checkIsOwner) && StringUtil.isNullOrEmpty(terminalCode)) {
+                List<TransStatisticByTimeDTO> transactions
+                        = transactionReceiveService.getTransStatisticByBankIdAndDate(bankId, fromDate, toDate);
+                result = transactions;
+                httpStatus = HttpStatus.OK;
+            } else {
+                if (StringUtil.isNullOrEmpty(terminalCode)) {
+                    List<TransStatisticByTimeDTO> transactions
+                            = transactionReceiveService.getTransStatisticByTerminalIdAndDate(bankId, fromDate, toDate, userId);
+                    result = transactions;
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    List<TransStatisticByTimeDTO> transactions
+                            = transactionReceiveService.getTransStatisticByTerminalIdAndDate(bankId, terminalCode, fromDate, toDate, userId);
+                    result = transactions;
+                    httpStatus = HttpStatus.OK;
+                }
+            }
+            // if result is empty and is_owner = true and terminalCode is not null
+            if (result == null || result.isEmpty()) {
+                httpStatus = null;
+                if (!StringUtil.isNullOrEmpty(checkIsOwner) && !StringUtil.isNullOrEmpty(terminalCode)) {
+                    List<TransStatisticByTimeDTO> transactions
+                            = transactionReceiveService.getTransStatisticByTerminalIdNotSync(bankId, terminalCode, fromDate, toDate);
+                    result = transactions;
+                    httpStatus = HttpStatus.OK;
+                }
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error at getTransactionStatistic: " + e.toString());
+            logger.error("Error at getTransactionStatistic: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @GetMapping("transaction/statistic")
     public ResponseEntity<List<TransStatisticByDateDTO>> getTransactionStatistic(
             @RequestParam(value = "terminalCode") String terminalCode,

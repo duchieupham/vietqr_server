@@ -1759,5 +1759,62 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "AND terminal_code = :terminalCode "
                 + "AND time BETWEEN :fromDate AND :toDate", nativeQuery = true)
         TransStatisticDTO getTransactionOverviewNotSync(String bankId, String terminalCode, long fromDate, long toDate);
+
+        @Query(value = "SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME((FLOOR(time / 3600))*3600), '+00:00', '+07:00'), '%Y-%m-%d %H:00') AS timeDate, "
+                + "COUNT(id) AS totalTrans, "
+                + "SUM(CASE WHEN trans_type = 'C' THEN amount ELSE 0 END) AS totalCashIn, "
+                + "SUM(CASE WHEN trans_type = 'D' THEN amount ELSE 0 END) AS totalCashOut, "
+                + "SUM(CASE WHEN trans_type = 'C' THEN 1 ELSE 0 END) AS totalTransC, "
+                + "SUM(CASE WHEN trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
+                + "FROM transaction_receive "
+                + "WHERE bank_id = :bankId AND status = 1 "
+                + "AND time BETWEEN :fromDate AND :toDate "
+                + "GROUP BY timeDate ORDER BY timeDate DESC ", nativeQuery = true)
+        List<TransStatisticByTimeDTO> getTransStatisticByBankIdAndDate(String bankId, long fromDate, long toDate);
+
+        @Query(value = "SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME((FLOOR(a.time / 3600))*3600), '+00:00', '+07:00'), '%Y-%m-%d %H:00') AS timeDate, "
+                + "COUNT(a.id) AS totalTrans, "
+                + "SUM(CASE WHEN a.trans_type = 'C' THEN amount ELSE 0 END) AS totalCashIn, "
+                + "SUM(CASE WHEN a.trans_type = 'D' THEN amount ELSE 0 END) AS totalCashOut, "
+                + "SUM(CASE WHEN a.trans_type = 'C' THEN 1 ELSE 0 END) AS totalTransC, "
+                + "SUM(CASE WHEN a.trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
+                + "FROM transaction_receive a "
+                + "INNER JOIN terminal b ON b.code = a.terminal_code "
+                + "INNER JOIN account_bank_receive_share c ON c.terminal_id = b.id "
+                + "WHERE c.bank_id = :bankId AND a.status = 1 "
+                + "AND c.user_id = :userId "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "GROUP BY timeDate ORDER BY timeDate DESC ", nativeQuery = true)
+        List<TransStatisticByTimeDTO> getTransStatisticByTerminalIdAndDate(String bankId, String userId, long fromDate, long toDate);
+
+        @Query(value = "SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME((FLOOR(a.time / 3600))*3600), '+00:00', '+07:00'), '%Y-%m-%d %H:00') AS timeDate, "
+                + "COUNT(a.id) AS totalTrans, "
+                + "SUM(CASE WHEN a.trans_type = 'C' THEN amount ELSE 0 END) AS totalCashIn, "
+                + "SUM(CASE WHEN a.trans_type = 'D' THEN amount ELSE 0 END) AS totalCashOut, "
+                + "SUM(CASE WHEN a.trans_type = 'C' THEN 1 ELSE 0 END) AS totalTransC, "
+                + "SUM(CASE WHEN a.trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
+                + "FROM transaction_receive a "
+                + "INNER JOIN terminal b ON b.code = a.terminal_code "
+                + "INNER JOIN account_bank_receive_share c ON c.terminal_id = b.id "
+                + "WHERE c.bank_id = :bankId AND a.status = 1 "
+                + "AND b.code = :terminalCode "
+                + "AND c.user_id = :userId "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "GROUP BY timeDate ORDER BY timeDate DESC ", nativeQuery = true)
+        List<TransStatisticByTimeDTO> getTransStatisticByTerminalIdAndDate(String bankId, String terminalCode, String userId, long fromDate, long toDate);
+
+        @Query(value = "SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME((FLOOR(time / 3600))*3600), '+00:00', '+07:00'), '%Y-%m-%d %H:00') AS timeDate, "
+                + "COUNT(id) AS totalTrans, "
+                + "SUM(CASE WHEN trans_type = 'C' THEN amount ELSE 0 END) AS totalCashIn, "
+                + "SUM(CASE WHEN trans_type = 'D' THEN amount ELSE 0 END) AS totalCashOut, "
+                + "SUM(CASE WHEN trans_type = 'C' THEN 1 ELSE 0 END) AS totalTransC, "
+                + "SUM(CASE WHEN trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
+                + "FROM transaction_receive "
+                + "WHERE bank_id = :bankId AND status = 1 "
+                + "AND terminal_code = :terminalCode "
+                + "AND time BETWEEN :fromDate AND :toDate "
+                + "GROUP BY timeDate ORDER BY timeDate DESC ", nativeQuery = true)
+        List<TransStatisticByTimeDTO> getTransStatisticByTerminalIdNotSyncByDate(String bankId, String terminalCode, long fromDate, long toDate);
+
 }
 
