@@ -34,10 +34,10 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             "WHERE a.user_id = :userId " +
             "AND b.bank_id IS NOT NULL AND b.bank_id != '' " +
             "GROUP BY b.terminal_id "
-//            + "LIMIT :offset, 20"
+            + "LIMIT :offset, 20"
             , nativeQuery = true)
-    List<TerminalResponseInterfaceDTO> getTerminalsByUserId(@Param(value = "userId") String userId
-//                                                            @Param(value = "offset") int offset
+    List<TerminalResponseInterfaceDTO> getTerminalsByUserId(@Param(value = "userId") String userId,
+                                                            @Param(value = "offset") int offset
     );
 
     @Query(value = "SELECT DISTINCT a.id as terminalId, a.name as terminalName, c.total as totalMembers, a.code as terminalCode, " +
@@ -66,10 +66,10 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             + "ON a.id = b.terminal_id "
             + "WHERE b.is_owner = false "
             + "AND b.user_id = :userId " +
-            "GROUP BY b.terminal_id "
-//            "LIMIT :offset, 20"
+            "GROUP BY b.terminal_id " +
+            "LIMIT :offset, 20"
             , nativeQuery = true)
-    List<TerminalResponseInterfaceDTO> getTerminalsShareByUserId(String userId);
+    List<TerminalResponseInterfaceDTO> getTerminalsShareByUserId(String userId, int offset);
 
     @Query(value = "SELECT count(DISTINCT CASE WHEN b.user_id = :userId THEN a.id END) FROM terminal a "
             + "INNER JOIN account_bank_receive_share b "
@@ -100,10 +100,9 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             "ON b.terminal_id = a.id " +
             "WHERE b.user_id = :userId " +
             "AND b.bank_id = :bankId " +
-            "GROUP BY b.terminal_id "
-//            "LIMIT :offset, 20"
-            , nativeQuery = true)
-    List<TerminalResponseInterfaceDTO> getTerminalsByUserIdAndBankIdOffset(String userId, String bankId);
+            "GROUP BY b.terminal_id " +
+            "LIMIT :offset, 20", nativeQuery = true)
+    List<TerminalResponseInterfaceDTO> getTerminalsByUserIdAndBankId(String userId, String bankId, int offset);
 
     @Query(value = "SELECT a.id as terminalId, " +
             "a.name as terminalName, a.address as terminalAddress, " +
