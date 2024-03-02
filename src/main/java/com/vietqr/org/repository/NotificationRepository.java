@@ -29,7 +29,7 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
 	void updateNotificationStatus(@Param(value = "userId") String userId);
 
 	@Query(value = "SELECT count(*) as count FROM notification WHERE is_read = 0 AND user_id = :userId "
-			+ "time BETWEEN :fromDate AND :toDate ", nativeQuery = true)
+			+ "AND time BETWEEN :fromDate AND :toDate ", nativeQuery = true)
 	int getNotificationCountByUserId(@Param(value = "userId") String userId,
 									 @Param(value = "fromDate") long fromDate,
 									 @Param(value = "toDate") long toDate);
