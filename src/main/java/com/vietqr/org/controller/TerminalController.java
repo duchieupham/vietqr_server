@@ -8,12 +8,18 @@ import com.vietqr.org.util.*;
 import com.vietqr.org.util.bank.mb.MBTokenUtil;
 import com.vietqr.org.util.bank.mb.MBVietQRUtil;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -65,6 +71,276 @@ public class TerminalController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             result = new ResponseDataDTO("");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("terminal/web")
+    public ResponseEntity<MerchantDetailDTO> getTerminalByUserId(
+            @RequestParam String userId,
+            @RequestParam int offset,
+            @RequestParam String merchantId,
+            @RequestParam String value
+    ) {
+        MerchantDetailDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            MerchantDetailDTO dto = new MerchantDetailDTO();
+            List<TerminalDetailWebDTO> terminalDetailWebDTOS = new ArrayList<>();
+            if (StringUtil.isNullOrEmpty(value)) {
+                if (offset == 20) {
+                    for (int i = 0; i <= 12; i++) {
+                        TerminalDetailWebDTO terminalDetailWebDTO =
+                                new TerminalDetailWebDTO();
+                        terminalDetailWebDTO.setTerminalId(UUID.randomUUID().toString());
+                        terminalDetailWebDTO.setTerminalName("Tous les Jours Vincom Center");
+                        terminalDetailWebDTO.setTerminalAddress("Hầm B3, Le Thanh Ton, P. Ben Nghe Q1, Tp.Hồ Chí Minh");
+                        terminalDetailWebDTO.setTotalTrans(100);
+                        terminalDetailWebDTO.setTotalAmount(1000000);
+                        terminalDetailWebDTO.setTotalMember(10);
+                        terminalDetailWebDTO.setTerminalCode("TLJ00" + i);
+                        terminalDetailWebDTO.setBankName("MBBank - Ngân hàng Quân đội");
+                        terminalDetailWebDTO.setBankAccount("1234567890");
+                        terminalDetailWebDTO.setBankShortName("MB");
+                        terminalDetailWebDTO.setBankAccountName("Tour les Jours");
+                        terminalDetailWebDTOS.add(terminalDetailWebDTO);
+                    }
+                } else {
+                    for (int i = 0; i <= 20; i++) {
+                        TerminalDetailWebDTO terminalDetailWebDTO =
+                                new TerminalDetailWebDTO();
+                        terminalDetailWebDTO.setTerminalId(UUID.randomUUID().toString());
+                        terminalDetailWebDTO.setTerminalName("Tous les Jours Vincom Center");
+                        terminalDetailWebDTO.setTerminalAddress("Hầm B3, Le Thanh Ton, P. Ben Nghe Q1, Tp.Hồ Chí Minh");
+                        terminalDetailWebDTO.setTotalTrans(100);
+                        terminalDetailWebDTO.setTotalAmount(1000000);
+                        terminalDetailWebDTO.setTotalMember(10);
+                        terminalDetailWebDTO.setTerminalCode("TLJ00" + i);
+                        terminalDetailWebDTO.setBankName("MBBank - Ngân hàng Quân đội");
+                        terminalDetailWebDTO.setBankAccount("1234567890");
+                        terminalDetailWebDTO.setBankShortName("MB");
+                        terminalDetailWebDTO.setBankAccountName("Tour les Jours");
+                        terminalDetailWebDTOS.add(terminalDetailWebDTO);
+                    }
+                }
+            } else {
+                TerminalDetailWebDTO terminalDetailWebDTO =
+                        new TerminalDetailWebDTO();
+                terminalDetailWebDTO.setTerminalId(UUID.randomUUID().toString());
+                terminalDetailWebDTO.setTerminalName("Tous les Jours Vincom Center");
+                terminalDetailWebDTO.setTerminalAddress("Hầm B3, Le Thanh Ton, P. Ben Nghe Q1, Tp.Hồ Chí Minh");
+                terminalDetailWebDTO.setTotalTrans(100);
+                terminalDetailWebDTO.setTotalAmount(1000000);
+                terminalDetailWebDTO.setTotalMember(10);
+                terminalDetailWebDTO.setTerminalCode("TLJ0003");
+                terminalDetailWebDTO.setBankName("MBBank - Ngân hàng Quân đội");
+                terminalDetailWebDTO.setBankAccount("1234567890");
+                terminalDetailWebDTO.setBankShortName("MB");
+                terminalDetailWebDTO.setBankAccountName("Tour les Jours");
+                terminalDetailWebDTOS.add(terminalDetailWebDTO);
+            }
+
+            dto.setMerchantId(UUID.randomUUID().toString());
+            dto.setMerchantName("Tous les Jours");
+            dto.setMerchantAddress("Vincom Center");
+            dto.setTotalTerminals(40);
+            dto.setTerminals(terminalDetailWebDTOS);
+            result = dto;
+            if (userId.equals("empty")) {
+                result = new MerchantDetailDTO();
+                result.setTotalTerminals(0);
+                result.setTerminals(new ArrayList<>());
+                result.setMerchantId("");
+                result.setMerchantName("");
+                result.setMerchantAddress("");
+            }
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("terminal/web/export")
+    public ResponseEntity<byte[]> exportExcelTerminal(
+            @RequestParam String merchantId,
+            HttpServletResponse response
+    ) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            MerchantDetailDTO dto = new MerchantDetailDTO();
+            List<TerminalDetailWebDTO> list = new ArrayList<>();
+            for (int i = 0; i <= 43; i++) {
+                TerminalDetailWebDTO terminalDetailWebDTO =
+                        new TerminalDetailWebDTO();
+                terminalDetailWebDTO.setTerminalId(UUID.randomUUID().toString());
+                terminalDetailWebDTO.setTerminalName("Tous les Jours Vincom Center");
+                terminalDetailWebDTO.setTerminalAddress("Hầm B3, Le Thanh Ton, P. Ben Nghe Q1, Tp.Hồ Chí Minh");
+                terminalDetailWebDTO.setTotalTrans(100);
+                terminalDetailWebDTO.setTotalAmount(1000000);
+                terminalDetailWebDTO.setTotalMember(10);
+                terminalDetailWebDTO.setTerminalCode("TLJ00" + i);
+                terminalDetailWebDTO.setBankName("MBBank - Ngân hàng Quân đội");
+                terminalDetailWebDTO.setBankAccount("1234567890");
+                terminalDetailWebDTO.setBankShortName("MB");
+                terminalDetailWebDTO.setBankAccountName("Tour les Jours");
+                list.add(terminalDetailWebDTO);
+            }
+            try (Workbook workbook = new XSSFWorkbook()) {
+                Sheet sheet = workbook.createSheet("VietQRVN-MerchantId");
+
+                // Tạo hàng tiêu đề
+                Row headerRow = sheet.createRow(0);
+                String[] headers = {"STT", "Tên Cửa Hàng", "Thành viên", "Mã điểm bán", "TK Ngân hàng", "Địa chỉ"};
+
+                for (int i = 0; i < headers.length; i++) {
+                    headerRow.createCell(i).setCellValue(headers[i]);
+                }
+
+                int counter = 1;
+                for (TerminalDetailWebDTO item : list) {
+                    Row row = sheet.createRow(counter++);
+                    row.createCell(0).setCellValue(String.valueOf(counter));
+                    row.createCell(1).setCellValue(item.getTerminalName());
+                    row.createCell(2).setCellValue(item.getTotalMember());
+                    row.createCell(3).setCellValue(item.getTerminalCode());
+                    row.createCell(4).setCellValue(item.getBankShortName() + " - " + item.getBankAccount());
+                    row.createCell(5).setCellValue(item.getTerminalAddress());
+                }
+
+                // Tạo một mảng byte từ workbook
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                workbook.write(outputStream);
+                byte[] fileContent = outputStream.toByteArray();
+
+                // Thiết lập các thông số của response
+                response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                response.setHeader("Content-Disposition", "attachment; filename=list-shops.xlsx");
+                response.setContentLength(fileContent.length);
+
+                // Ghi dữ liệu vào response
+                response.getOutputStream().write(fileContent);
+            }
+            response.getOutputStream().flush();
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "Unexpected Error.");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("terminal/web/member-detail/export/{terminalId}")
+    public ResponseEntity<byte[]> exportMemberExcel(
+            @PathVariable String terminalId,
+            HttpServletResponse response
+    ) {
+        HttpStatus httpStatus = null;
+        try {
+            MerchantDetailDTO dto = new MerchantDetailDTO();
+            List<AccountTerminalMemberDTO> list = new ArrayList<>();
+            for (int i = 0; i <= 43; i++) {
+                AccountTerminalMemberDTO accountTerminalMemberDTO =
+                        new AccountTerminalMemberDTO();
+                accountTerminalMemberDTO.setId(UUID.randomUUID().toString());
+                accountTerminalMemberDTO.setPhoneNo("0987654321");
+                accountTerminalMemberDTO.setFullName("Nguyễn Văn A");
+                accountTerminalMemberDTO.setImgId("1234567890");
+                accountTerminalMemberDTO.setRole("Nhân viên");
+                list.add(accountTerminalMemberDTO);
+            }
+            try (Workbook workbook = new XSSFWorkbook()) {
+                Sheet sheet = workbook.createSheet("VietQRVN-ListMember");
+
+                // Tạo hàng tiêu đề
+                Row headerRow = sheet.createRow(0);
+                String[] headers = {"STT", "Họ tên", "Số điện thoại", "Vai trò"};
+
+                for (int i = 0; i < headers.length; i++) {
+                    headerRow.createCell(i).setCellValue(headers[i]);
+                }
+
+                int counter = 1;
+                for (AccountTerminalMemberDTO item : list) {
+                    Row row = sheet.createRow(counter++);
+                    row.createCell(0).setCellValue(String.valueOf(counter));
+                    row.createCell(1).setCellValue(item.getFullName());
+                    row.createCell(2).setCellValue(item.getPhoneNo());
+                    row.createCell(3).setCellValue(item.getRole());
+                }
+
+                // Tạo một mảng byte từ workbook
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                workbook.write(outputStream);
+                byte[] fileContent = outputStream.toByteArray();
+
+                // Thiết lập các thông số của response
+                response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                response.setHeader("Content-Disposition", "attachment; filename=list-members.xlsx");
+                response.setContentLength(fileContent.length);
+
+                // Ghi dữ liệu vào response
+                response.getOutputStream().write(fileContent);
+            }
+            response.getOutputStream().flush();
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("terminal/web/member-detail/{terminalId}")
+    public ResponseEntity<List<AccountTerminalMemberDTO>> getTerminalMemberByTerminalId(
+            @PathVariable String terminalId,
+            @RequestParam int offset,
+            @RequestParam String value,
+            @RequestParam int type
+    ) {
+        List<AccountTerminalMemberDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            if (StringUtil.isNullOrEmpty(value) && type == 9) {
+                if (offset == 20) {
+                    for (int i = 0; i <= 12; i++) {
+                        AccountTerminalMemberDTO accountTerminalMemberDTO =
+                                new AccountTerminalMemberDTO();
+                        accountTerminalMemberDTO.setId(UUID.randomUUID().toString());
+                        accountTerminalMemberDTO.setPhoneNo("0987654321");
+                        accountTerminalMemberDTO.setFullName("Nguyễn Văn A");
+                        accountTerminalMemberDTO.setImgId("1234567890");
+                        accountTerminalMemberDTO.setRole("Nhân viên");
+                        result.add(accountTerminalMemberDTO);
+                    }
+                } else {
+                    for (int i = 0; i <= 20; i++) {
+                        AccountTerminalMemberDTO accountTerminalMemberDTO =
+                                new AccountTerminalMemberDTO();
+                        accountTerminalMemberDTO.setId(UUID.randomUUID().toString());
+                        accountTerminalMemberDTO.setPhoneNo("0987654321");
+                        accountTerminalMemberDTO.setFullName("Nguyễn Văn A");
+                        accountTerminalMemberDTO.setImgId("1234567890");
+                        accountTerminalMemberDTO.setRole("Nhân viên");
+                        result.add(accountTerminalMemberDTO);
+                    }
+                }
+            } else {
+                AccountTerminalMemberDTO accountTerminalMemberDTO =
+                        new AccountTerminalMemberDTO();
+                accountTerminalMemberDTO.setId(UUID.randomUUID().toString());
+                accountTerminalMemberDTO.setPhoneNo("0987654321");
+                accountTerminalMemberDTO.setFullName("Nguyễn Văn A");
+                accountTerminalMemberDTO.setImgId("1234567890");
+                accountTerminalMemberDTO.setRole("Nhân viên");
+                result.add(accountTerminalMemberDTO);
+            }
+            if (terminalId.equals("empty")) {
+                result = new ArrayList<>();
+            }
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
