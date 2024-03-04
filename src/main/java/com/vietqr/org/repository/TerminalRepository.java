@@ -148,18 +148,16 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
     TerminalEntity getTerminalByTerminalCode(String terminalCode);
 
     @Query(value = "SELECT a.id AS terminalId, a.name AS terminalName, "
-            + "a.address AS terminalAddress, COALESCE(d.total_trans, 0) AS totalTrans, "
-            + "COALESCE(d.total_amount, 0) AS totalAmount, "
+            + "a.address AS terminalAddress, "
             + "a.code AS terminalCode, f.bank_name AS bankName, e.bank_account AS bankAccount, "
             + "f.bank_short_name as bankShortName, e.bank_account_name AS bankAccountName "
             + "FROM terminal a "
-            + "INNER JOIN merchant b ON b.id = a.merchant_id "
             + "INNER JOIN account_bank_receive_share c ON c.terminal_id = a.id "
-            + "LEFT JOIN terminal_statistic d ON d.terminal_id = a.id "
             + "INNER JOIN account_bank_receive e ON e.id = c.bank_id "
             + "INNER JOIN bank_type f ON f.id = e.bank_type_id "
             + "WHERE c.user_id = :userId "
             + "AND a.name LIKE %:value% "
+            + "ORDER BY a.code ASC "
             + "LIMIT :offset, 20", nativeQuery = true)
     List<ITerminalDetailWebDTO> getTerminalWebByUserId(@RequestParam(value = "userId") String userId,
                                                        @RequestParam(value = "offset") int offset,
