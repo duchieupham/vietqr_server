@@ -101,24 +101,26 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
 			+ "LIMIT :offset, 20", nativeQuery = true)
     List<IAccountTerminalMemberDTO> getMembersWebByTerminalId(String terminalId, int offset);
 
-	@Query(value = "SELECT DISTINCT a.user_id AS id, a.phone_no AS phoneNo, a.img_id AS imgId, "
-			+ "a.birth_date AS birthDate, a.email AS email, a.nation_id AS nationId, "
-			+ "CONCAT(c.last_name, ' ', c.middle_name, ' ', c.first_name) AS fullName, "
+	@Query(value = "SELECT DISTINCT a.user_id AS id, c.phone_no AS phoneNo, a.img_id AS imgId, "
+			+ "a.birth_date AS birthDate, a.email AS email, a.national_id AS nationalId, "
+			+ "CONCAT(a.last_name, ' ', a.middle_name, ' ', a.first_name) AS fullName, "
 			+ "a.gender AS gender, b.is_owner AS isOwner FROM account_information a "
-			+ "INNER JOIN account_bank_receive_share b ON b.bank_id = a.user_id "
+			+ "INNER JOIN account_login c ON c.id = a.user_id "
+			+ "INNER JOIN account_bank_receive_share b ON b.user_id = a.user_id "
 			+ "WHERE b.terminal_id = :terminalId "
-			+ "AND CONCAT(b.last_name, ' ' ,b.middle_name, ' ' , b.first_name) LIKE %:value% "
+			+ "AND CONCAT(a.last_name, ' ' ,a.middle_name, ' ' , a.first_name) LIKE %:value% "
 			+ "AND a.status = 1 "
 			+ "LIMIT :offset, 20", nativeQuery = true)
 	List<IAccountTerminalMemberDTO> getMembersWebByTerminalIdAndFullName(String terminalId, String value, int offset);
 
-	@Query(value = "SELECT DISTINCT a.user_id AS id, a.phone_no AS phoneNo, a.img_id AS imgId, "
-			+ "a.birth_date AS birthDate, a.email AS email, a.nation_id AS nationId, "
-			+ "CONCAT(c.last_name, ' ', c.middle_name, ' ', c.first_name) AS fullName, "
+	@Query(value = "SELECT DISTINCT a.user_id AS id, c.phone_no AS phoneNo, a.img_id AS imgId, "
+			+ "a.birth_date AS birthDate, a.email AS email, a.national_id AS nationalId, "
+			+ "CONCAT(a.last_name, ' ', a.middle_name, ' ', a.first_name) AS fullName, "
 			+ "a.gender AS gender, b.is_owner AS isOwner FROM account_information a "
-			+ "INNER JOIN account_bank_receive_share b ON b.bank_id = a.user_id "
+			+ "INNER JOIN account_login c ON c.id = a.user_id "
+			+ "INNER JOIN account_bank_receive_share b ON b.user_id = a.user_id "
 			+ "WHERE b.terminal_id = :terminalId "
-			+ "AND a.phone_no = :value "
+			+ "AND c.phone_no LIKE %:value% "
 			+ "AND a.status = 1 "
 			+ "LIMIT :offset, 20", nativeQuery = true)
 	List<IAccountTerminalMemberDTO> getMembersWebByTerminalIdAndPhoneNo(String terminalId, String value, int offset);

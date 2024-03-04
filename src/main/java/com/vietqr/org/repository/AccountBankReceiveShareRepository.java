@@ -182,4 +182,8 @@ public interface AccountBankReceiveShareRepository
             "b.img_id as imgId, b.birth_date as birthDate, b.email as email, " +
             "b.national_id as nationalId,", nativeQuery = true)
     List<IAccountTerminalMemberDTO> getMembersWebByTerminalId(String terminalId, int offset);
+
+    @Query(value = "SELECT COUNT(DISTINCT user_id) FROM account_bank_receive_share " +
+            "WHERE terminal_id = :terminalId AND user_id IS NOT NULL AND user_id != ''", nativeQuery = true)
+    int countMembersByTerminalId(String terminalId);
 }

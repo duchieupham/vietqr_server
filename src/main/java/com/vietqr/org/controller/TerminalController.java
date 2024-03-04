@@ -101,22 +101,25 @@ public class TerminalController {
             MerchantDetailDTO dto = new MerchantDetailDTO();
             List<TerminalDetailWebDTO> terminals = new ArrayList<>();
             if (StringUtil.isNullOrEmpty(merchantId)) {
-                MerchantWebResponseDTO merchantDTO = merchantService.getMerchantByUserIdLimit(userId);
-                dto.setMerchantId(merchantDTO.getId());
-                dto.setMerchantName(merchantDTO.getName());
-                dto.setMerchantAddress(merchantDTO.getAddress());
-                dto.setTotalTerminals(merchantDTO.getTotalTerminals());
+//                MerchantWebResponseDTO merchantDTO = merchantService.getMerchantByUserIdLimit(userId);
+                dto.setMerchantId("");
+                dto.setMerchantName("");
+                dto.setMerchantAddress("");
+                int countTerminal = terminalService.countNumberOfTerminalByUserId(userId);
+                dto.setTotalTerminals(countTerminal);
 
+                // chua truyen time, query xuong db nhieu lan
                 List<ITerminalDetailWebDTO> terminalResponses = terminalService.getTerminalByUserId(userId, offset, value);
                 terminals = terminalResponses.stream().map(terminal -> {
                     TerminalDetailWebDTO terminalDetailWebDTO = new TerminalDetailWebDTO();
                     terminalDetailWebDTO.setTerminalId(terminal.getTerminalId());
                     terminalDetailWebDTO.setTerminalName(terminal.getTerminalName());
                     terminalDetailWebDTO.setTerminalAddress(terminal.getTerminalAddress());
-                    terminalDetailWebDTO.setTotalTrans(terminal.getTotalTrans());
-                    terminalDetailWebDTO.setTotalAmount(terminal.getTotalAmount());
-                    terminalDetailWebDTO.setTotalMember(terminal.getTotalMember());
+                    terminalDetailWebDTO.setTotalTrans(0);
+                    terminalDetailWebDTO.setTotalAmount(0);
                     terminalDetailWebDTO.setTerminalCode(terminal.getTerminalCode());
+                    int totalMembers = accountBankReceiveShareService.countMembersByTerminalId(terminal.getTerminalId());
+                    terminalDetailWebDTO.setTotalMember(totalMembers);
                     terminalDetailWebDTO.setBankName(terminal.getBankName());
                     terminalDetailWebDTO.setBankAccount(terminal.getBankAccount());
                     terminalDetailWebDTO.setBankShortName(terminal.getBankShortName());
@@ -146,6 +149,7 @@ public class TerminalController {
             // get detail of merchant
             dto.setTerminals(terminals);
             result = dto;
+            httpStatus = HttpStatus.OK;
 
         } catch (Exception e) {
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -313,22 +317,26 @@ public class TerminalController {
                 dto.setName(terminalWebResponseDTO.getName());
                 dto.setAddress(terminalWebResponseDTO.getAddress());
                 dto.setCode(terminalWebResponseDTO.getCode());
-                dto.setTotalTrans(terminalWebResponseDTO.getTotalTrans());
-                dto.setTotalAmount(terminalWebResponseDTO.getTotalAmount());
-                long prevDate = DateTimeUtil.getPrevDate();
-                long prevMonth = DateTimeUtil.getPrevMonth();
-                long amountPrevDate = terminalStatisticService.getTotalAmountPrevious(terminalId, prevDate);
-                long amountPrevMonth = terminalStatisticService.getTotalAmountPrevious(terminalId, prevMonth);
-                if (amountPrevDate == 0) {
-                    dto.setRevGrowthPrevDate(0);
-                } else {
-                    dto.setRevGrowthPrevDate((int) ((terminalWebResponseDTO.getTotalAmount() - amountPrevDate) * 100 / amountPrevDate));
-                }
-                if (amountPrevMonth == 0) {
-                    dto.setRevGrowthPrevMonth(0);
-                } else {
-                    dto.setRevGrowthPrevMonth((int) ((terminalWebResponseDTO.getTotalAmount() - amountPrevMonth) * 100 / amountPrevMonth));
-                }
+                dto.setTotalTrans(0);
+                dto.setTotalAmount(0);
+                dto.setRevGrowthPrevDate(0);
+                dto.setRevGrowthPrevMonth(0);
+//                dto.setTotalTrans(terminalWebResponseDTO.getTotalTrans());
+//                dto.setTotalAmount(terminalWebResponseDTO.getTotalAmount());
+//                long prevDate = DateTimeUtil.getPrevDate();
+//                long prevMonth = DateTimeUtil.getPrevMonth();
+//                long amountPrevDate = terminalStatisticService.getTotalAmountPrevious(terminalId, prevDate);
+//                long amountPrevMonth = terminalStatisticService.getTotalAmountPrevious(terminalId, prevMonth);
+//                if (amountPrevDate == 0) {
+//                    dto.setRevGrowthPrevDate(0);
+//                } else {
+//                    dto.setRevGrowthPrevDate((int) ((terminalWebResponseDTO.getTotalAmount() - amountPrevDate) * 100 / amountPrevDate));
+//                }
+//                if (amountPrevMonth == 0) {
+//                    dto.setRevGrowthPrevMonth(0);
+//                } else {
+//                    dto.setRevGrowthPrevMonth((int) ((terminalWebResponseDTO.getTotalAmount() - amountPrevMonth) * 100 / amountPrevMonth));
+//                }
                 dto.setBank(terminal);
                 result = dto;
                 httpStatus = HttpStatus.OK;
@@ -416,80 +424,110 @@ public class TerminalController {
         }
     }
 
-    @GetMapping("terminal/web/transaction-detail/{terminalId}")
-    public ResponseEntity<List<ITransactionRelatedDetailDTO>> getTerminalTransactionByTerminalId(
-            @PathVariable String terminalId,
-            @RequestParam String userId,
-            @RequestParam(value = "type") int type,
-            @RequestParam(value = "value") String value,
-            @RequestParam(value = "fromDate") String fromDate,
-            @RequestParam(value = "toDate") String toDate,
-            @RequestParam(value = "offset") int offset
-    ) {
-        List<ITransactionRelatedDetailDTO> result = new ArrayList<>();
-        HttpStatus httpStatus = null;
-        try {
-            // type = 9: all
-            // type = 1: reference_number
-            // type = 2: order_id
-            // type = 3: content
-            // type = 5: status
-            switch (type) {
-                case 1:
-                    result = transactionReceiveService
-                            .getTransTerminalByIdAndByFtCode(terminalId, value, fromDate, toDate, offset);
-                    httpStatus = HttpStatus.OK;
-                    break;
-                case 2:
-                    result = transactionReceiveService
-                            .getTransTerminalByIdAndByOrderId(terminalId, value, fromDate, toDate, offset);
-                    httpStatus = HttpStatus.OK;
-                    break;
-                case 3:
-                    value = value.replace("-", " ").trim();
-                    result = transactionReceiveService
-                            .getTransTerminalByIdAndByContent(terminalId, value, fromDate, toDate, offset);
-                    httpStatus = HttpStatus.OK;
-                    break;
-                case 5:
-                    result = transactionReceiveService
-                            .getTransTerminalByIdAndByStatus(terminalId, Integer.parseInt(value), fromDate, toDate, offset);
-                    httpStatus = HttpStatus.OK;
-                    break;
-                case 9:
-                    result = transactionReceiveService
-                            .getAllTransTerminalById(terminalId, fromDate, toDate, offset);
-                    httpStatus = HttpStatus.OK;
-                    break;
-                default:
-                    logger.error("getTransactionUser: ERROR: INVALID TYPE");
-                    httpStatus = HttpStatus.BAD_REQUEST;
-                    break;
-            }
-            httpStatus = HttpStatus.OK;
-        } catch (Exception e) {
-            httpStatus = HttpStatus.BAD_REQUEST;
-        }
-        return new ResponseEntity<>(result, httpStatus);
-    }
+//    @GetMapping("terminal/web/transaction-detail/{terminalId}")
+//    public ResponseEntity<Object> getTerminalTransactionByTerminalId(
+//            @PathVariable String terminalId,
+//            @RequestParam String userId,
+//            @RequestParam(value = "type") int type,
+//            @RequestParam(value = "value") String value,
+//            @RequestParam(value = "fromDate") String fromDate,
+//            @RequestParam(value = "toDate") String toDate,
+//            @RequestParam(value = "offset") int offset
+//    ) {
+//        Object result = null;
+//        List<ITransactionRelatedDetailDTO> dtos = new ArrayList<>();
+//        HttpStatus httpStatus = null;
+//        try {
+//            // type = 9: all
+//            // type = 1: reference_number
+//            // type = 2: order_id
+//            // type = 3: content
+//            // type = 5: status
+//            String checkInTerminal = accountBankReceiveShareService.checkUserExistedFromTerminal(terminalId, userId);
+//            if (StringUtil.isNullOrEmpty(checkInTerminal)) {
+//                result = new ResponseMessageDTO("FAILED", "E113");
+//                httpStatus = HttpStatus.BAD_REQUEST;
+//            } else {
+//                switch (type) {
+//                    case 1:
+//                        dtos = transactionReceiveService.getTransTerminalByIdAndByFtCode(terminalId, value, fromDate, toDate, offset);
+//                        result = dtos;
+//                        httpStatus = HttpStatus.OK;
+//                        break;
+//                    case 2:
+//                        dtos = transactionReceiveService.getTransTerminalByIdAndByOrderId(terminalId, value, fromDate, toDate, offset);
+//                        result = dtos;
+//                        httpStatus = HttpStatus.OK;
+//                        break;
+//                    case 3:
+//                        value = value.replace("-", " ").trim();
+//                        dtos = transactionReceiveService.getTransTerminalByIdAndByContent(terminalId, value, fromDate, toDate, offset);
+//                        result = dtos;
+//                        httpStatus = HttpStatus.OK;
+//                        break;
+//                    case 5:
+//                        dtos = transactionReceiveService.getTransTerminalByIdAndByStatus(terminalId, Integer.parseInt(value), fromDate, toDate, offset);
+//                        result = dtos;
+//                        httpStatus = HttpStatus.OK;
+//                        break;
+//                    case 9:
+//                        dtos = transactionReceiveService.getAllTransTerminalById(terminalId, fromDate, toDate, offset);
+//                        result = dtos;
+//                        httpStatus = HttpStatus.OK;
+//                        break;
+//                    default:
+//                        logger.error("getTransactionUser: ERROR: INVALID TYPE");
+//                        httpStatus = HttpStatus.BAD_REQUEST;
+//                        break;
+//                }
+//            }
+//        } catch (Exception e) {
+//            httpStatus = HttpStatus.BAD_REQUEST;
+//        }
+//        return new ResponseEntity<>(result, httpStatus);
+//    }
 
     @GetMapping("terminal/web/member-detail/{terminalId}")
-    public ResponseEntity<List<AccountTerminalMemberDTO>> getTerminalMemberByTerminalId(
+    public ResponseEntity<Object> getTerminalMemberByTerminalId(
             @PathVariable String terminalId,
+            @RequestParam String userId,
             @RequestParam int offset,
             @RequestParam String value,
             @RequestParam int type
     ) {
-        List<AccountTerminalMemberDTO> result = new ArrayList<>();
+        Object result = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
-            switch (type) {
-                case 0:
-                    List<IAccountTerminalMemberDTO> responsePhoneNo = accountInformationService.getMembersWebByTerminalIdAndPhoneNo(terminalId, value, offset);
-                    if (FormatUtil.isListNullOrEmpty(responsePhoneNo)) {
-                        result = new ArrayList<>();
-                    } else {
-                        result = responsePhoneNo.stream().map(item -> {
+            String checkInTerminal = accountBankReceiveShareService.checkUserExistedFromTerminal(terminalId, userId);
+            if (StringUtil.isNullOrEmpty(checkInTerminal)) {
+                result = new ResponseMessageDTO("FAILED", "E113");
+                httpStatus = HttpStatus.OK;
+            } else {
+                switch (type) {
+                    case 0:
+                        List<IAccountTerminalMemberDTO> responsePhoneNo = accountInformationService.getMembersWebByTerminalIdAndPhoneNo(terminalId, value, offset);
+                        if (FormatUtil.isListNullOrEmpty(responsePhoneNo)) {
+                            result = new ArrayList<>();
+                        } else {
+                            result = responsePhoneNo.stream().map(item -> {
+                                AccountTerminalMemberDTO dto = new AccountTerminalMemberDTO();
+                                dto.setId(item.getId());
+                                dto.setPhoneNo(item.getPhoneNo());
+                                dto.setFullName(item.getFullName());
+                                dto.setImgId(item.getImgId());
+                                dto.setBirthDate(item.getBirthDate());
+                                dto.setEmail(item.getEmail());
+                                dto.setNationalId(item.getNationalId());
+                                dto.setGender(item.getGender());
+                                dto.setRole(item.getIsOwner() ? "Quản lí" : "Nhân viên");
+                                return dto;
+                            }).collect(Collectors.toList());
+                        }
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 1:
+                        List<IAccountTerminalMemberDTO> responseFullName = accountInformationService.getMembersWebByTerminalIdAndFullName(terminalId, value, offset);
+                        result = responseFullName.stream().map(item -> {
                             AccountTerminalMemberDTO dto = new AccountTerminalMemberDTO();
                             dto.setId(item.getId());
                             dto.setPhoneNo(item.getPhoneNo());
@@ -502,46 +540,12 @@ public class TerminalController {
                             dto.setRole(item.getIsOwner() ? "Quản lí" : "Nhân viên");
                             return dto;
                         }).collect(Collectors.toList());
-                    }
-                    httpStatus = HttpStatus.OK;
-                    break;
-                case 1:
-                    List<IAccountTerminalMemberDTO> responseFullName = accountInformationService.getMembersWebByTerminalIdAndFullName(terminalId, value, offset);
-                    result = responseFullName.stream().map(item -> {
-                        AccountTerminalMemberDTO dto = new AccountTerminalMemberDTO();
-                        dto.setId(item.getId());
-                        dto.setPhoneNo(item.getPhoneNo());
-                        dto.setFullName(item.getFullName());
-                        dto.setImgId(item.getImgId());
-                        dto.setBirthDate(item.getBirthDate());
-                        dto.setEmail(item.getEmail());
-                        dto.setNationalId(item.getNationalId());
-                        dto.setGender(item.getGender());
-                        dto.setRole(item.getIsOwner() ? "Quản lí" : "Nhân viên");
-                        return dto;
-                    }).collect(Collectors.toList());
-                    httpStatus = HttpStatus.OK;
-                    break;
-                case 9:
-                    List<IAccountTerminalMemberDTO> responseAll = accountInformationService.getMembersWebByTerminalId(terminalId, offset);
-                    result = responseAll.stream().map(item -> {
-                        AccountTerminalMemberDTO dto = new AccountTerminalMemberDTO();
-                        dto.setId(item.getId());
-                        dto.setPhoneNo(item.getPhoneNo());
-                        dto.setFullName(item.getFullName());
-                        dto.setImgId(item.getImgId());
-                        dto.setBirthDate(item.getBirthDate());
-                        dto.setEmail(item.getEmail());
-                        dto.setNationalId(item.getNationalId());
-                        dto.setGender(item.getGender());
-                        dto.setRole(item.getIsOwner() ? "Quản lí" : "Nhân viên");
-                        return dto;
-                    }).collect(Collectors.toList());
-                    httpStatus = HttpStatus.OK;
-                    break;
-                default:
-                    httpStatus = HttpStatus.BAD_REQUEST;
-                    break;
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    default:
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        break;
+                }
             }
         } catch (Exception e) {
             httpStatus = HttpStatus.BAD_REQUEST;

@@ -23,7 +23,8 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
     @Query(value = "DELETE FROM terminal WHERE id = :id", nativeQuery = true)
     void removeTerminalById(String id);
 
-    @Query(value = "SELECT count(id) FROM terminal WHERE user_id = :userId", nativeQuery = true)
+    @Query(value = "SELECT COUNT(DISTINCT terminal_id) FROM account_bank_receive_share WHERE user_id = :userId"
+            + " AND terminal_id IS NOT NULL AND terminal_id != ''", nativeQuery = true)
     int countNumberOfTerminalByUserId(@Param(value = "userId") String userId);
 
     @Query(value = "SELECT a.id as id, count(DISTINCT b.user_id) as totalMembers, " +
@@ -147,24 +148,22 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
     TerminalEntity getTerminalByTerminalCode(String terminalCode);
 
     @Query(value = "SELECT a.id AS terminalId, a.name AS terminalName, "
-            + "a.address AS terminalAddress, d.total_trans AS totalTrans, "
-            + "d.total_amount AS totalAmount, count(distinct c.user_id) AS totalMember, "
+            + "a.address AS terminalAddress, COALESCE(d.total_trans, 0) AS totalTrans, "
+            + "COALESCE(d.total_amount, 0) AS totalAmount, "
             + "a.code AS terminalCode, f.bank_name AS bankName, e.bank_account AS bankAccount, "
             + "f.bank_short_name as bankShortName, e.bank_account_name AS bankAccountName "
             + "FROM terminal a "
             + "INNER JOIN merchant b ON b.id = a.merchant_id "
             + "INNER JOIN account_bank_receive_share c ON c.terminal_id = a.id "
-            + "INNER JOIN terminal_statistic d ON d.terminal_id = a.id "
+            + "LEFT JOIN terminal_statistic d ON d.terminal_id = a.id "
             + "INNER JOIN account_bank_receive e ON e.id = c.bank_id "
             + "INNER JOIN bank_type f ON f.id = e.bank_type_id "
             + "WHERE c.user_id = :userId "
             + "AND a.name LIKE %:value% "
-            + "AND d.time = :time "
             + "LIMIT :offset, 20", nativeQuery = true)
     List<ITerminalDetailWebDTO> getTerminalWebByUserId(@RequestParam(value = "userId") String userId,
                                                        @RequestParam(value = "offset") int offset,
-                                                       @RequestParam(value = "value") String value,
-                                                       @RequestParam(value = "time") long time);
+                                                       @RequestParam(value = "value") String value);
 
     @Query(value = "SELECT a.id AS terminalId, a.name AS terminalName, "
             + "a.address AS terminalAddress, d.total_trans AS totalTrans, "
@@ -189,20 +188,19 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
                                                                     @RequestParam(value = "time") long time);
 
     @Query(value = "SELECT a.terminal_id AS terminalId, a.bank_id AS bankId, "
-            + "c.bank_name AS bankName, c.bankCode AS bankCode, "
+            + "c.bank_name AS bankName, c.bank_code AS bankCode, "
             + "b.bank_account AS bankAccount, b.bank_account_name AS userBankName, "
-            + "b.bank_short_name AS bankShortName, a.qr_code AS qrCode, c.img_id AS imgId "
+            + "c.bank_short_name AS bankShortName, a.qr_code AS qrCode, c.img_id AS imgId "
             + "FROM account_bank_receive_share a "
             + "INNER JOIN account_bank_receive b ON a.bank_id = b.id "
             + "INNER JOIN bank_type c ON c.id = b.bank_type_id "
-            + "WHERE id = :terminalId "
+            + "WHERE a.terminal_id = :terminalId "
             + "AND a.user_id = :userId ", nativeQuery = true)
     ITerminalBankResponseDTO getTerminalResponseById(String terminalId, String userId);
 
     @Query(value = "SELECT a.id as Id, a.name AS name, "
-            + "a.address AS address, a.code AS code, b.total_trans as totalTrans, "
-            + "a.totalAmount as totalAmount FROM terminal a "
-            + "INNER JOIN terminal_statistic b ON b.terminal_id = a.id "
-            + "WHERE terminal_id = :terminalId", nativeQuery = true)
+            + "a.address AS address, a.code AS code "
+            + "FROM terminal a "
+            + "WHERE a.id = :terminalId", nativeQuery = true)
     ITerminalWebResponseDTO getTerminalWebById(String terminalId);
 }

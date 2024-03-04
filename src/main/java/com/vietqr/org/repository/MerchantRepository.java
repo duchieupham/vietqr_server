@@ -21,14 +21,13 @@ public interface MerchantRepository extends JpaRepository<MerchantEntity, Long> 
 
     @Query(value = "SELECT a.id AS id, a.name AS name, "
             + "a.address AS address, count(b.id) AS totalTerminals "
-            + "FROM merchant a INNER JOIN terminal b ON a.terminl_id = b.id "
-            + "WHERE id = :merchantId "
-            + "GROUP BY a.id", nativeQuery = true)
+            + "FROM merchant a INNER JOIN terminal b ON a.id = b.merchant_id "
+            + "WHERE id = :merchantId ", nativeQuery = true)
     MerchantWebResponseDTO getMerchantWebResponseDTO(String merchantId);
 
     @Query(value = "SELECT a.id AS id, a.name AS name, "
             + "a.address AS address, COUNT(DISTINCT b.id) AS totalTerminals "
-            + "FROM merchant a INNER JOIN terminal b ON a.terminl_id = b.id "
+            + "FROM merchant a INNER JOIN terminal b ON a.id = b.merchant_id "
             + "INNER JOIN account_bank_receive_share c ON b.id = c.terminal_id "
             + "WHERE c.user_id = :userId "
             + "GROUP BY a.id "
