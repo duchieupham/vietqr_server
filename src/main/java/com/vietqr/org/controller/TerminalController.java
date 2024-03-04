@@ -41,6 +41,15 @@ public class TerminalController {
     private TerminalService terminalService;
 
     @Autowired
+    private TransactionReceiveService transactionReceiveService;
+
+    @Autowired
+    private MerchantService merchantService;
+
+    @Autowired
+    private AccountInformationService accountInformationService;
+
+    @Autowired
     private AccountBankReceiveService accountBankReceiveService;
 
     @Autowired
@@ -51,6 +60,9 @@ public class TerminalController {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private TerminalStatisticService terminalStatisticService;
 
     @Autowired
     private FcmTokenService fcmTokenService;
@@ -86,98 +98,16 @@ public class TerminalController {
         MerchantDetailDTO result = null;
         HttpStatus httpStatus = null;
         try {
-//            MerchantDetailDTO dto = new MerchantDetailDTO();
-//            List<TerminalDetailWebDTO> terminalDetailWebDTOS = new ArrayList<>();
-//            if (StringUtil.isNullOrEmpty(value)) {
-//                if (offset == 20) {
-//                    for (int i = 0; i <= 12; i++) {
-//                        TerminalDetailWebDTO terminalDetailWebDTO =
-//                                new TerminalDetailWebDTO();
-//                        terminalDetailWebDTO.setTerminalId(UUID.randomUUID().toString());
-//                        terminalDetailWebDTO.setTerminalName("Tous les Jours Vincom Center");
-//                        terminalDetailWebDTO.setTerminalAddress("Hầm B3, Le Thanh Ton, P. Ben Nghe Q1, Tp.Hồ Chí Minh");
-//                        terminalDetailWebDTO.setTotalTrans(100);
-//                        terminalDetailWebDTO.setTotalAmount(1000000);
-//                        terminalDetailWebDTO.setTotalMember(10);
-//                        terminalDetailWebDTO.setTerminalCode("TLJ00" + i);
-//                        terminalDetailWebDTO.setBankName("MBBank - Ngân hàng Quân đội");
-//                        terminalDetailWebDTO.setBankAccount("1234567890");
-//                        terminalDetailWebDTO.setBankShortName("MB");
-//                        terminalDetailWebDTO.setBankAccountName("Tour les Jours");
-//                        terminalDetailWebDTOS.add(terminalDetailWebDTO);
-//                    }
-//                } else {
-//                    for (int i = 0; i <= 20; i++) {
-//                        TerminalDetailWebDTO terminalDetailWebDTO =
-//                                new TerminalDetailWebDTO();
-//                        terminalDetailWebDTO.setTerminalId(UUID.randomUUID().toString());
-//                        terminalDetailWebDTO.setTerminalName("Tous les Jours Vincom Center");
-//                        terminalDetailWebDTO.setTerminalAddress("Hầm B3, Le Thanh Ton, P. Ben Nghe Q1, Tp.Hồ Chí Minh");
-//                        terminalDetailWebDTO.setTotalTrans(100);
-//                        terminalDetailWebDTO.setTotalAmount(1000000);
-//                        terminalDetailWebDTO.setTotalMember(10);
-//                        terminalDetailWebDTO.setTerminalCode("TLJ00" + i);
-//                        terminalDetailWebDTO.setBankName("MBBank - Ngân hàng Quân đội");
-//                        terminalDetailWebDTO.setBankAccount("1234567890");
-//                        terminalDetailWebDTO.setBankShortName("MB");
-//                        terminalDetailWebDTO.setBankAccountName("Tour les Jours");
-//                        terminalDetailWebDTOS.add(terminalDetailWebDTO);
-//                    }
-//                }
-//            } else {
-//                TerminalDetailWebDTO terminalDetailWebDTO =
-//                        new TerminalDetailWebDTO();
-//                terminalDetailWebDTO.setTerminalId(UUID.randomUUID().toString());
-//                terminalDetailWebDTO.setTerminalName("Tous les Jours Vincom Center");
-//                terminalDetailWebDTO.setTerminalAddress("Hầm B3, Le Thanh Ton, P. Ben Nghe Q1, Tp.Hồ Chí Minh");
-//                terminalDetailWebDTO.setTotalTrans(100);
-//                terminalDetailWebDTO.setTotalAmount(1000000);
-//                terminalDetailWebDTO.setTotalMember(10);
-//                terminalDetailWebDTO.setTerminalCode("TLJ0003");
-//                terminalDetailWebDTO.setBankName("MBBank - Ngân hàng Quân đội");
-//                terminalDetailWebDTO.setBankAccount("1234567890");
-//                terminalDetailWebDTO.setBankShortName("MB");
-//                terminalDetailWebDTO.setBankAccountName("Tour les Jours");
-//                terminalDetailWebDTOS.add(terminalDetailWebDTO);
-//            }
-//
-//            dto.setMerchantId(UUID.randomUUID().toString());
-//            dto.setMerchantName("Tous les Jours");
-//            dto.setMerchantAddress("Vincom Center");
-//            dto.setTotalTerminals(40);
-//            dto.setTerminals(terminalDetailWebDTOS);
-//            result = dto;
-//            if (userId.equals("empty")) {
-//                result = new MerchantDetailDTO();
-//                result.setTotalTerminals(0);
-//                result.setTerminals(new ArrayList<>());
-//                result.setMerchantId("");
-//                result.setMerchantName("");
-//                result.setMerchantAddress("");
-//            }
-//            httpStatus = HttpStatus.OK;
             MerchantDetailDTO dto = new MerchantDetailDTO();
             List<TerminalDetailWebDTO> terminals = new ArrayList<>();
             if (StringUtil.isNullOrEmpty(merchantId)) {
-            List<ITerminalDetailWebDTO> terminalResponses = terminalService.getTerminalByUserId(userId, offset, value);
-            terminals = terminalResponses.stream().map(terminal -> {
-                TerminalDetailWebDTO terminalDetailWebDTO = new TerminalDetailWebDTO();
-                terminalDetailWebDTO.setTerminalId(terminal.getTerminalId());
-                terminalDetailWebDTO.setTerminalName(terminal.getTerminalName());
-                terminalDetailWebDTO.setTerminalAddress(terminal.getTerminalAddress());
-                terminalDetailWebDTO.setTotalTrans(terminal.getTotalTrans());
-                terminalDetailWebDTO.setTotalAmount(terminal.getTotalAmount());
-                terminalDetailWebDTO.setTotalMember(terminal.getTotalMember());
-                terminalDetailWebDTO.setTerminalCode(terminal.getTerminalCode());
-                terminalDetailWebDTO.setBankName(terminal.getBankName());
-                terminalDetailWebDTO.setBankAccount(terminal.getBankAccount());
-                terminalDetailWebDTO.setBankShortName(terminal.getBankShortName());
-                terminalDetailWebDTO.setBankAccountName(terminal.getBankAccountName());
-                return terminalDetailWebDTO;
-            }).collect(Collectors.toList());
-            } else {
-                List<ITerminalDetailWebDTO> terminalResponses = terminalService
-                        .getTerminalByUserIdAndMerchantId(merchantId, userId, offset, value);
+                MerchantWebResponseDTO merchantDTO = merchantService.getMerchantByUserIdLimit(userId);
+                dto.setMerchantId(merchantDTO.getId());
+                dto.setMerchantName(merchantDTO.getName());
+                dto.setMerchantAddress(merchantDTO.getAddress());
+                dto.setTotalTerminals(merchantDTO.getTotalTerminals());
+
+                List<ITerminalDetailWebDTO> terminalResponses = terminalService.getTerminalByUserId(userId, offset, value);
                 terminals = terminalResponses.stream().map(terminal -> {
                     TerminalDetailWebDTO terminalDetailWebDTO = new TerminalDetailWebDTO();
                     terminalDetailWebDTO.setTerminalId(terminal.getTerminalId());
@@ -193,12 +123,27 @@ public class TerminalController {
                     terminalDetailWebDTO.setBankAccountName(terminal.getBankAccountName());
                     return terminalDetailWebDTO;
                 }).collect(Collectors.toList());
+            } else {
+                List<ITerminalDetailWebDTO> terminalResponses = new ArrayList<>();
+//                List<ITerminalDetailWebDTO> terminalResponses = terminalService
+//                        .getTerminalByUserIdAndMerchantId(merchantId, userId, offset, value);
+//                terminals = terminalResponses.stream().map(terminal -> {
+//                    TerminalDetailWebDTO terminalDetailWebDTO = new TerminalDetailWebDTO();
+//                    terminalDetailWebDTO.setTerminalId(terminal.getTerminalId());
+//                    terminalDetailWebDTO.setTerminalName(terminal.getTerminalName());
+//                    terminalDetailWebDTO.setTerminalAddress(terminal.getTerminalAddress());
+//                    terminalDetailWebDTO.setTotalTrans(terminal.getTotalTrans());
+//                    terminalDetailWebDTO.setTotalAmount(terminal.getTotalAmount());
+//                    terminalDetailWebDTO.setTotalMember(terminal.getTotalMember());
+//                    terminalDetailWebDTO.setTerminalCode(terminal.getTerminalCode());
+//                    terminalDetailWebDTO.setBankName(terminal.getBankName());
+//                    terminalDetailWebDTO.setBankAccount(terminal.getBankAccount());
+//                    terminalDetailWebDTO.setBankShortName(terminal.getBankShortName());
+//                    terminalDetailWebDTO.setBankAccountName(terminal.getBankAccountName());
+//                    return terminalDetailWebDTO;
+//                }).collect(Collectors.toList());
             }
             // get detail of merchant
-            dto.setMerchantId(UUID.randomUUID().toString());
-            dto.setMerchantName("Tous les Jours");
-            dto.setMerchantAddress("Vincom Center");
-            dto.setTotalTerminals(40);
             dto.setTerminals(terminals);
             result = dto;
 
@@ -339,34 +284,56 @@ public class TerminalController {
     }
 
     @GetMapping("terminal/web/detail/{terminalId}")
-    public ResponseEntity<TerminalWebDetailResponseDTO> getTerminalDetailByTerminalId(
-            @PathVariable String terminalId
+    public ResponseEntity<Object> getTerminalDetailByTerminalId(
+            @PathVariable String terminalId,
+            @RequestParam String userId
     ) {
-        TerminalWebDetailResponseDTO result = null;
+        Object result = null;
         HttpStatus httpStatus = null;
         try {
             TerminalWebDetailResponseDTO dto = new TerminalWebDetailResponseDTO();
-            TerminalBankResponseDTO terminalBankResponseDTO = new TerminalBankResponseDTO();
-            terminalBankResponseDTO.setBankName("MBBank - Ngân hàng Quân đội");
-            terminalBankResponseDTO.setBankAccount("123456789");
-            terminalBankResponseDTO.setBankShortName("MB");
-            terminalBankResponseDTO.setUserBankName("Tour les Jours");
-            terminalBankResponseDTO.setImgId("58b7190b-a294-4b14-968f-cd365593893e");
-            terminalBankResponseDTO.setBankCode("MB");
-            terminalBankResponseDTO.setBankId("aa4e489b-254e-4351-9cd4-f62e09c63ebc");
-            terminalBankResponseDTO.setQrCode("");
-            terminalBankResponseDTO.setTerminalId(terminalId);
-            dto.setId(UUID.randomUUID().toString());
-            dto.setName("Tous les Jours Vincom Center");
-            dto.setAddress("Hầm B3, Le Thanh Ton, P. Ben Nghe Q1, Tp.Hồ Chí Minh");
-            dto.setCode("TLJ0001");
-            dto.setTotalTrans(100);
-            dto.setTotalAmount(1000000);
-            dto.setRevGrowthPrevDate(10);
-            dto.setRevGrowthPrevMonth(-20);
-            dto.setBank(terminalBankResponseDTO);
-            result = dto;
-            httpStatus = HttpStatus.OK;
+            TerminalBankResponseDTO terminal = new TerminalBankResponseDTO();
+            ITerminalBankResponseDTO terminalResponse = terminalService.getTerminalResponseById(terminalId, userId);
+            if (terminalResponse == null) {
+                result = new ResponseMessageDTO("FAILED", "E113");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            } else {
+                terminal.setBankName(terminalResponse.getBankName());
+                terminal.setBankAccount(terminalResponse.getBankAccount());
+                terminal.setBankShortName(terminalResponse.getBankShortName());
+                terminal.setUserBankName(terminalResponse.getUserBankName());
+                terminal.setImgId(terminalResponse.getImgId());
+                terminal.setBankCode(terminalResponse.getBankCode());
+                terminal.setBankId(terminalResponse.getBankId());
+                terminal.setQrCode(terminalResponse.getQrCode());
+                terminal.setTerminalId(terminalId);
+                dto.setId(terminalId);
+                ITerminalWebResponseDTO terminalWebResponseDTO = terminalService.getTerminalWebById(terminalId);
+                dto.setId(terminalWebResponseDTO.getId());
+                dto.setName(terminalWebResponseDTO.getName());
+                dto.setAddress(terminalWebResponseDTO.getAddress());
+                dto.setCode(terminalWebResponseDTO.getCode());
+                dto.setTotalTrans(terminalWebResponseDTO.getTotalTrans());
+                dto.setTotalAmount(terminalWebResponseDTO.getTotalAmount());
+                long prevDate = DateTimeUtil.getPrevDate();
+                long prevMonth = DateTimeUtil.getPrevMonth();
+                long amountPrevDate = terminalStatisticService.getTotalAmountPrevious(terminalId, prevDate);
+                long amountPrevMonth = terminalStatisticService.getTotalAmountPrevious(terminalId, prevMonth);
+                if (amountPrevDate == 0) {
+                    dto.setRevGrowthPrevDate(0);
+                } else {
+                    dto.setRevGrowthPrevDate((int) ((terminalWebResponseDTO.getTotalAmount() - amountPrevDate) * 100 / amountPrevDate));
+                }
+                if (amountPrevMonth == 0) {
+                    dto.setRevGrowthPrevMonth(0);
+                } else {
+                    dto.setRevGrowthPrevMonth((int) ((terminalWebResponseDTO.getTotalAmount() - amountPrevMonth) * 100 / amountPrevMonth));
+                }
+                dto.setBank(terminal);
+                result = dto;
+                httpStatus = HttpStatus.OK;
+            }
+
         } catch (Exception e) {
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -450,57 +417,54 @@ public class TerminalController {
     }
 
     @GetMapping("terminal/web/transaction-detail/{terminalId}")
-    public ResponseEntity<List<TransactionRelatedDetailDTO>> getTerminalTransactionByTerminalId(
+    public ResponseEntity<List<ITransactionRelatedDetailDTO>> getTerminalTransactionByTerminalId(
             @PathVariable String terminalId,
+            @RequestParam String userId,
             @RequestParam(value = "type") int type,
             @RequestParam(value = "value") String value,
             @RequestParam(value = "fromDate") String fromDate,
             @RequestParam(value = "toDate") String toDate,
             @RequestParam(value = "offset") int offset
     ) {
-        List<TransactionRelatedDetailDTO> result = new ArrayList<>();
+        List<ITransactionRelatedDetailDTO> result = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
-            if (offset == 20) {
-                for (int i = 0; i < 12; i++) {
-                    TransactionRelatedDetailDTO transactionRelatedDetailDTO = new TransactionRelatedDetailDTO();
-                    transactionRelatedDetailDTO.setTransactionId(UUID.randomUUID().toString());
-                    transactionRelatedDetailDTO.setAmount(1000000);
-                    transactionRelatedDetailDTO.setBankAccount("1234567890");
-                    transactionRelatedDetailDTO.setBankName("MBBank - Ngân hàng Quân đội");
-                    transactionRelatedDetailDTO.setBankShortName("MBBank");
-                    transactionRelatedDetailDTO.setBankCode("MB");
-                    transactionRelatedDetailDTO.setContent("SQRTLJ0001, Đoạn text này nhằm mục đich kéo nó dài ra để test chứ cũng không có gì đặc biệt");
-                    transactionRelatedDetailDTO.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
-                    transactionRelatedDetailDTO.setTimePaid(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
-                    transactionRelatedDetailDTO.setStatus(1);
-                    transactionRelatedDetailDTO.setType(1);
-                    transactionRelatedDetailDTO.setNote("");
-                    transactionRelatedDetailDTO.setReferenceNumber("FT1234567890");
-                    transactionRelatedDetailDTO.setOrderId(UUID.randomUUID().toString());
-                    transactionRelatedDetailDTO.setTerminalCode("TLJ0001");
-                    result.add(transactionRelatedDetailDTO);
-                }
-            } else {
-                for (int i = 0; i < 20; i++) {
-                    TransactionRelatedDetailDTO transactionRelatedDetailDTO = new TransactionRelatedDetailDTO();
-                    transactionRelatedDetailDTO.setTransactionId(UUID.randomUUID().toString());
-                    transactionRelatedDetailDTO.setAmount(1000000);
-                    transactionRelatedDetailDTO.setBankAccount("1234567890");
-                    transactionRelatedDetailDTO.setBankName("MBBank - Ngân hàng Quân đội");
-                    transactionRelatedDetailDTO.setBankShortName("MBBank");
-                    transactionRelatedDetailDTO.setBankCode("MB");
-                    transactionRelatedDetailDTO.setContent("SQRTLJ0001, Đoạn text này nhằm mục đich kéo nó dài ra để test chứ cũng không có gì đặc biệt");
-                    transactionRelatedDetailDTO.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
-                    transactionRelatedDetailDTO.setTimePaid(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
-                    transactionRelatedDetailDTO.setStatus(1);
-                    transactionRelatedDetailDTO.setType(1);
-                    transactionRelatedDetailDTO.setNote("");
-                    transactionRelatedDetailDTO.setReferenceNumber("FT1234567890");
-                    transactionRelatedDetailDTO.setOrderId(UUID.randomUUID().toString());
-                    transactionRelatedDetailDTO.setTerminalCode("TLJ0001");
-                    result.add(transactionRelatedDetailDTO);
-                }
+            // type = 9: all
+            // type = 1: reference_number
+            // type = 2: order_id
+            // type = 3: content
+            // type = 5: status
+            switch (type) {
+                case 1:
+                    result = transactionReceiveService
+                            .getTransTerminalByIdAndByFtCode(terminalId, value, fromDate, toDate, offset);
+                    httpStatus = HttpStatus.OK;
+                    break;
+                case 2:
+                    result = transactionReceiveService
+                            .getTransTerminalByIdAndByOrderId(terminalId, value, fromDate, toDate, offset);
+                    httpStatus = HttpStatus.OK;
+                    break;
+                case 3:
+                    value = value.replace("-", " ").trim();
+                    result = transactionReceiveService
+                            .getTransTerminalByIdAndByContent(terminalId, value, fromDate, toDate, offset);
+                    httpStatus = HttpStatus.OK;
+                    break;
+                case 5:
+                    result = transactionReceiveService
+                            .getTransTerminalByIdAndByStatus(terminalId, Integer.parseInt(value), fromDate, toDate, offset);
+                    httpStatus = HttpStatus.OK;
+                    break;
+                case 9:
+                    result = transactionReceiveService
+                            .getAllTransTerminalById(terminalId, fromDate, toDate, offset);
+                    httpStatus = HttpStatus.OK;
+                    break;
+                default:
+                    logger.error("getTransactionUser: ERROR: INVALID TYPE");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    break;
             }
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
@@ -519,44 +483,66 @@ public class TerminalController {
         List<AccountTerminalMemberDTO> result = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
-            if (StringUtil.isNullOrEmpty(value) && type == 9) {
-                if (offset == 20) {
-                    for (int i = 0; i <= 12; i++) {
-                        AccountTerminalMemberDTO accountTerminalMemberDTO =
-                                new AccountTerminalMemberDTO();
-                        accountTerminalMemberDTO.setId(UUID.randomUUID().toString());
-                        accountTerminalMemberDTO.setPhoneNo("0987654321");
-                        accountTerminalMemberDTO.setFullName("Nguyễn Văn A");
-                        accountTerminalMemberDTO.setImgId("1234567890");
-                        accountTerminalMemberDTO.setRole("Nhân viên");
-                        result.add(accountTerminalMemberDTO);
+            switch (type) {
+                case 0:
+                    List<IAccountTerminalMemberDTO> responsePhoneNo = accountInformationService.getMembersWebByTerminalIdAndPhoneNo(terminalId, value, offset);
+                    if (FormatUtil.isListNullOrEmpty(responsePhoneNo)) {
+                        result = new ArrayList<>();
+                    } else {
+                        result = responsePhoneNo.stream().map(item -> {
+                            AccountTerminalMemberDTO dto = new AccountTerminalMemberDTO();
+                            dto.setId(item.getId());
+                            dto.setPhoneNo(item.getPhoneNo());
+                            dto.setFullName(item.getFullName());
+                            dto.setImgId(item.getImgId());
+                            dto.setBirthDate(item.getBirthDate());
+                            dto.setEmail(item.getEmail());
+                            dto.setNationalId(item.getNationalId());
+                            dto.setGender(item.getGender());
+                            dto.setRole(item.getIsOwner() ? "Quản lí" : "Nhân viên");
+                            return dto;
+                        }).collect(Collectors.toList());
                     }
-                } else {
-                    for (int i = 0; i <= 20; i++) {
-                        AccountTerminalMemberDTO accountTerminalMemberDTO =
-                                new AccountTerminalMemberDTO();
-                        accountTerminalMemberDTO.setId(UUID.randomUUID().toString());
-                        accountTerminalMemberDTO.setPhoneNo("0987654321");
-                        accountTerminalMemberDTO.setFullName("Nguyễn Văn A");
-                        accountTerminalMemberDTO.setImgId("1234567890");
-                        accountTerminalMemberDTO.setRole("Nhân viên");
-                        result.add(accountTerminalMemberDTO);
-                    }
-                }
-            } else {
-                AccountTerminalMemberDTO accountTerminalMemberDTO =
-                        new AccountTerminalMemberDTO();
-                accountTerminalMemberDTO.setId(UUID.randomUUID().toString());
-                accountTerminalMemberDTO.setPhoneNo("0987654321");
-                accountTerminalMemberDTO.setFullName("Nguyễn Văn A");
-                accountTerminalMemberDTO.setImgId("1234567890");
-                accountTerminalMemberDTO.setRole("Nhân viên");
-                result.add(accountTerminalMemberDTO);
+                    httpStatus = HttpStatus.OK;
+                    break;
+                case 1:
+                    List<IAccountTerminalMemberDTO> responseFullName = accountInformationService.getMembersWebByTerminalIdAndFullName(terminalId, value, offset);
+                    result = responseFullName.stream().map(item -> {
+                        AccountTerminalMemberDTO dto = new AccountTerminalMemberDTO();
+                        dto.setId(item.getId());
+                        dto.setPhoneNo(item.getPhoneNo());
+                        dto.setFullName(item.getFullName());
+                        dto.setImgId(item.getImgId());
+                        dto.setBirthDate(item.getBirthDate());
+                        dto.setEmail(item.getEmail());
+                        dto.setNationalId(item.getNationalId());
+                        dto.setGender(item.getGender());
+                        dto.setRole(item.getIsOwner() ? "Quản lí" : "Nhân viên");
+                        return dto;
+                    }).collect(Collectors.toList());
+                    httpStatus = HttpStatus.OK;
+                    break;
+                case 9:
+                    List<IAccountTerminalMemberDTO> responseAll = accountInformationService.getMembersWebByTerminalId(terminalId, offset);
+                    result = responseAll.stream().map(item -> {
+                        AccountTerminalMemberDTO dto = new AccountTerminalMemberDTO();
+                        dto.setId(item.getId());
+                        dto.setPhoneNo(item.getPhoneNo());
+                        dto.setFullName(item.getFullName());
+                        dto.setImgId(item.getImgId());
+                        dto.setBirthDate(item.getBirthDate());
+                        dto.setEmail(item.getEmail());
+                        dto.setNationalId(item.getNationalId());
+                        dto.setGender(item.getGender());
+                        dto.setRole(item.getIsOwner() ? "Quản lí" : "Nhân viên");
+                        return dto;
+                    }).collect(Collectors.toList());
+                    httpStatus = HttpStatus.OK;
+                    break;
+                default:
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    break;
             }
-            if (terminalId.equals("empty")) {
-                result = new ArrayList<>();
-            }
-            httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             httpStatus = HttpStatus.BAD_REQUEST;
         }

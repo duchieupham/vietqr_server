@@ -30,4 +30,9 @@ public class TerminalStatisticServiceImpl implements TerminalStatisticService {
         long time = DateTimeUtil.getDateTimeAsLongInt(date);
         return repo.findByTerminalIdAndTime(terminalId, time);
     }
+
+    @Override
+    public long getTotalAmountPrevious(String terminalId, long time) {
+        return repo.getTotalAmountPrevious(terminalId, time);
+    }
 }

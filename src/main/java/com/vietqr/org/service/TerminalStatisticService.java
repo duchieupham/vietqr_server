@@ -10,4 +10,6 @@ public interface TerminalStatisticService {
     boolean updateTerminalStatistic(TerminalStatisticEntity entity);
 
     TerminalStatisticEntity findByTerminalIdAndTime(String terminalId, String date);
+
+    long getTotalAmountPrevious(String terminalId, long time);
 }

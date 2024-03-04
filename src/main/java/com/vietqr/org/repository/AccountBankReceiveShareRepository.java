@@ -177,4 +177,9 @@ public interface AccountBankReceiveShareRepository
             "WHERE terminal_id = :terminalId AND bank_id IS NOT NULL AND bank_id != '' " +
             "AND terminal_id IS NOT NULL AND terminal_id != ''", nativeQuery = true)
     int countBankAccountByTerminalId(String terminalId);
+
+    @Query(value = "SELECT a.id, a.phone_no as phoneNo, b.first_name as fullName, " +
+            "b.img_id as imgId, b.birth_date as birthDate, b.email as email, " +
+            "b.national_id as nationalId,", nativeQuery = true)
+    List<IAccountTerminalMemberDTO> getMembersWebByTerminalId(String terminalId, int offset);
 }

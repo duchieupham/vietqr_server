@@ -45,4 +45,8 @@ public interface TerminalService {
     List<ITerminalDetailWebDTO> getTerminalByUserId(String userId, int offset, String value);
 
     List<ITerminalDetailWebDTO> getTerminalByUserIdAndMerchantId(String merchantId, String userId, int offset, String value);
+
+    ITerminalBankResponseDTO getTerminalResponseById(String terminalId, String userId);
+
+    ITerminalWebResponseDTO getTerminalWebById(String terminalId);
 }

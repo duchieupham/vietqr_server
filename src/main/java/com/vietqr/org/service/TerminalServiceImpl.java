@@ -116,4 +116,14 @@ public class TerminalServiceImpl implements TerminalService {
                 dto.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
+    @Override
+    public ITerminalBankResponseDTO getTerminalResponseById(String terminalId, String userId) {
+        return repo.getTerminalResponseById(terminalId, userId);
+    }
+
+    @Override
+    public ITerminalWebResponseDTO getTerminalWebById(String terminalId) {
+        return repo.getTerminalWebById(terminalId);
+    }
+
 }
