@@ -3,6 +3,7 @@ package com.vietqr.org.service;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.TerminalEntity;
 import com.vietqr.org.repository.TerminalRepository;
+import com.vietqr.org.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -99,6 +100,20 @@ public class TerminalServiceImpl implements TerminalService {
     @Override
     public List<TerminalEntity> getAllTerminalNoQRCode() {
         return repo.getAllTerminalNoQRCode();
+    }
+
+    @Override
+    public List<ITerminalDetailWebDTO> getTerminalByUserId(String userId, int offset, String value) {
+        StartEndTimeDTO dto = DateTimeUtil.getStartEndCurrentDate();
+        return repo.getTerminalWebByUserId(userId, offset, value,
+                dto.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<ITerminalDetailWebDTO> getTerminalByUserIdAndMerchantId(String merchantId, String userId, int offset, String value) {
+        StartEndTimeDTO dto = DateTimeUtil.getStartEndCurrentDate();
+        return repo.getTerminalWebByUserIdAndMerchantId(merchantId, userId, offset, value,
+                dto.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
 }

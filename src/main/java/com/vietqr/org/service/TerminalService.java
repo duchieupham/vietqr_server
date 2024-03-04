@@ -41,4 +41,8 @@ public interface TerminalService {
     String getTerminalByTraceTransfer(String traceTransfer);
 
     List<TerminalEntity> getAllTerminalNoQRCode();
+
+    List<ITerminalDetailWebDTO> getTerminalByUserId(String userId, int offset, String value);
+
+    List<ITerminalDetailWebDTO> getTerminalByUserIdAndMerchantId(String merchantId, String userId, int offset, String value);
 }

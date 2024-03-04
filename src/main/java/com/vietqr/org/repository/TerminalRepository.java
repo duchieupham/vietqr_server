@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -144,4 +145,15 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
 
     @Query(value = "SELECT * FROM terminal WHERE code = :terminalCode", nativeQuery = true)
     TerminalEntity getTerminalByTerminalCode(String terminalCode);
+
+    List<ITerminalDetailWebDTO> getTerminalWebByUserId(@RequestParam(value = "userId") String userId,
+                                                       @RequestParam(value = "offset") int offset,
+                                                       @RequestParam(value = "value") String value,
+                                                       @RequestParam(value = "time") long time);
+
+    List<ITerminalDetailWebDTO> getTerminalWebByUserIdAndMerchantId(@RequestParam(value = "merchantId") String merchantId,
+                                                                    @RequestParam(value = "userId") String userId,
+                                                                    @RequestParam(value = "offset") int offset,
+                                                                    @RequestParam(value = "value") String value,
+                                                                    @RequestParam(value = "time") long time);
 }
