@@ -812,6 +812,50 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public List<ITransactionRelatedDetailDTO> getTransTerminalByIdAndByFtCode(String terminalId, String value, String fromDate, String toDate, int offset) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getTransTerminalByIdAndByFtCode(terminalId, value, fromTime - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                toTime - DateTimeUtil.GMT_PLUS_7_OFFSET, offset);
+    }
+
+    @Override
+    public List<ITransactionRelatedDetailDTO> getTransTerminalByIdAndByOrderId(String terminalId, String value, String fromDate, String toDate, int offset) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getTransTerminalByIdAndByOrderId(terminalId, value,
+                fromTime - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                toTime - DateTimeUtil.GMT_PLUS_7_OFFSET, offset);
+    }
+
+    @Override
+    public List<ITransactionRelatedDetailDTO> getTransTerminalByIdAndByContent(String terminalId, String value, String fromDate, String toDate, int offset) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getTransTerminalByIdAndByContent(terminalId, value,
+                fromTime - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                toTime - DateTimeUtil.GMT_PLUS_7_OFFSET, offset);
+    }
+
+    @Override
+    public List<ITransactionRelatedDetailDTO> getTransTerminalByIdAndByStatus(String terminalId, int status, String fromDate, String toDate, int offset) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getTransTerminalByIdAndByStatus(terminalId, status,
+                fromTime - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                toTime - DateTimeUtil.GMT_PLUS_7_OFFSET, offset);
+    }
+
+    @Override
+    public List<ITransactionRelatedDetailDTO> getAllTransTerminalById(String terminalId, String fromDate, String toDate, int offset) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getAllTransTerminalById(terminalId,
+                fromTime - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                toTime - DateTimeUtil.GMT_PLUS_7_OFFSET, offset);
+    }
+
+    @Override
     public TransStatisticDTO getTransactionOverviewByDay(String bankId, String fromDate, String toDate) {
         long startDate = DateTimeUtil.getDateTimeAsLongInt(fromDate);
         long endDate = DateTimeUtil.getDateTimeAsLongInt(toDate);

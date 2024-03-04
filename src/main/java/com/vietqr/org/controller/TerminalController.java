@@ -8,12 +8,18 @@ import com.vietqr.org.util.*;
 import com.vietqr.org.util.bank.mb.MBTokenUtil;
 import com.vietqr.org.util.bank.mb.MBVietQRUtil;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -35,6 +41,15 @@ public class TerminalController {
     private TerminalService terminalService;
 
     @Autowired
+    private TransactionReceiveService transactionReceiveService;
+
+    @Autowired
+    private MerchantService merchantService;
+
+    @Autowired
+    private AccountInformationService accountInformationService;
+
+    @Autowired
     private AccountBankReceiveService accountBankReceiveService;
 
     @Autowired
@@ -45,6 +60,9 @@ public class TerminalController {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private TerminalStatisticService terminalStatisticService;
 
     @Autowired
     private FcmTokenService fcmTokenService;
@@ -65,6 +83,471 @@ public class TerminalController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             result = new ResponseDataDTO("");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("terminal/web")
+    public ResponseEntity<MerchantDetailDTO> getTerminalByUserId(
+            @RequestParam String userId,
+            @RequestParam int offset,
+            @RequestParam String merchantId,
+            @RequestParam String value
+    ) {
+        MerchantDetailDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            MerchantDetailDTO dto = new MerchantDetailDTO();
+            List<TerminalDetailWebDTO> terminals = new ArrayList<>();
+            if (StringUtil.isNullOrEmpty(merchantId)) {
+//                MerchantWebResponseDTO merchantDTO = merchantService.getMerchantByUserIdLimit(userId);
+                dto.setMerchantId("");
+                dto.setMerchantName("");
+                dto.setMerchantAddress("");
+                int countTerminal = terminalService.countNumberOfTerminalByUserId(userId);
+                dto.setTotalTerminals(countTerminal);
+
+                // chua truyen time, query xuong db nhieu lan
+                List<ITerminalDetailWebDTO> terminalResponses = terminalService.getTerminalByUserId(userId, offset, value);
+                terminals = terminalResponses.stream().map(terminal -> {
+                    TerminalDetailWebDTO terminalDetailWebDTO = new TerminalDetailWebDTO();
+                    terminalDetailWebDTO.setTerminalId(terminal.getTerminalId());
+                    terminalDetailWebDTO.setTerminalName(terminal.getTerminalName());
+                    terminalDetailWebDTO.setTerminalAddress(terminal.getTerminalAddress());
+                    terminalDetailWebDTO.setTotalTrans(0);
+                    terminalDetailWebDTO.setTotalAmount(0);
+                    terminalDetailWebDTO.setTerminalCode(terminal.getTerminalCode());
+                    int totalMembers = accountBankReceiveShareService.countMembersByTerminalId(terminal.getTerminalId());
+                    terminalDetailWebDTO.setTotalMember(totalMembers);
+                    terminalDetailWebDTO.setBankName(terminal.getBankName());
+                    terminalDetailWebDTO.setBankAccount(terminal.getBankAccount());
+                    terminalDetailWebDTO.setBankShortName(terminal.getBankShortName());
+                    terminalDetailWebDTO.setBankAccountName(terminal.getBankAccountName());
+                    return terminalDetailWebDTO;
+                }).collect(Collectors.toList());
+            } else {
+                List<ITerminalDetailWebDTO> terminalResponses = new ArrayList<>();
+//                List<ITerminalDetailWebDTO> terminalResponses = terminalService
+//                        .getTerminalByUserIdAndMerchantId(merchantId, userId, offset, value);
+//                terminals = terminalResponses.stream().map(terminal -> {
+//                    TerminalDetailWebDTO terminalDetailWebDTO = new TerminalDetailWebDTO();
+//                    terminalDetailWebDTO.setTerminalId(terminal.getTerminalId());
+//                    terminalDetailWebDTO.setTerminalName(terminal.getTerminalName());
+//                    terminalDetailWebDTO.setTerminalAddress(terminal.getTerminalAddress());
+//                    terminalDetailWebDTO.setTotalTrans(terminal.getTotalTrans());
+//                    terminalDetailWebDTO.setTotalAmount(terminal.getTotalAmount());
+//                    terminalDetailWebDTO.setTotalMember(terminal.getTotalMember());
+//                    terminalDetailWebDTO.setTerminalCode(terminal.getTerminalCode());
+//                    terminalDetailWebDTO.setBankName(terminal.getBankName());
+//                    terminalDetailWebDTO.setBankAccount(terminal.getBankAccount());
+//                    terminalDetailWebDTO.setBankShortName(terminal.getBankShortName());
+//                    terminalDetailWebDTO.setBankAccountName(terminal.getBankAccountName());
+//                    return terminalDetailWebDTO;
+//                }).collect(Collectors.toList());
+            }
+            // get detail of merchant
+            dto.setTerminals(terminals);
+            result = dto;
+            httpStatus = HttpStatus.OK;
+
+        } catch (Exception e) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("terminal/web/export")
+    public ResponseEntity<byte[]> exportExcelTerminal(
+            @RequestParam String merchantId,
+            HttpServletResponse response
+    ) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            MerchantDetailDTO dto = new MerchantDetailDTO();
+            List<TerminalDetailWebDTO> list = new ArrayList<>();
+            for (int i = 0; i <= 43; i++) {
+                TerminalDetailWebDTO terminalDetailWebDTO =
+                        new TerminalDetailWebDTO();
+                terminalDetailWebDTO.setTerminalId(UUID.randomUUID().toString());
+                terminalDetailWebDTO.setTerminalName("Tous les Jours Vincom Center");
+                terminalDetailWebDTO.setTerminalAddress("Hầm B3, Le Thanh Ton, P. Ben Nghe Q1, Tp.Hồ Chí Minh");
+                terminalDetailWebDTO.setTotalTrans(100);
+                terminalDetailWebDTO.setTotalAmount(1000000);
+                terminalDetailWebDTO.setTotalMember(10);
+                terminalDetailWebDTO.setTerminalCode("TLJ00" + i);
+                terminalDetailWebDTO.setBankName("MBBank - Ngân hàng Quân đội");
+                terminalDetailWebDTO.setBankAccount("1234567890");
+                terminalDetailWebDTO.setBankShortName("MB");
+                terminalDetailWebDTO.setBankAccountName("Tour les Jours");
+                list.add(terminalDetailWebDTO);
+            }
+            try (Workbook workbook = new XSSFWorkbook()) {
+                Sheet sheet = workbook.createSheet("VietQRVN-MerchantId");
+
+                // Tạo hàng tiêu đề
+                Row headerRow = sheet.createRow(0);
+                String[] headers = {"STT", "Tên Cửa Hàng", "Thành viên", "Mã điểm bán", "TK Ngân hàng", "Địa chỉ"};
+
+                for (int i = 0; i < headers.length; i++) {
+                    headerRow.createCell(i).setCellValue(headers[i]);
+                }
+
+                int counter = 1;
+                for (TerminalDetailWebDTO item : list) {
+                    Row row = sheet.createRow(counter++);
+                    row.createCell(0).setCellValue(String.valueOf(counter));
+                    row.createCell(1).setCellValue(item.getTerminalName());
+                    row.createCell(2).setCellValue(item.getTotalMember());
+                    row.createCell(3).setCellValue(item.getTerminalCode());
+                    row.createCell(4).setCellValue(item.getBankShortName() + " - " + item.getBankAccount());
+                    row.createCell(5).setCellValue(item.getTerminalAddress());
+                }
+
+                // Tạo một mảng byte từ workbook
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                workbook.write(outputStream);
+                byte[] fileContent = outputStream.toByteArray();
+
+                // Thiết lập các thông số của response
+                response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                response.setHeader("Content-Disposition", "attachment; filename=list-shops.xlsx");
+                response.setContentLength(fileContent.length);
+
+                // Ghi dữ liệu vào response
+                response.getOutputStream().write(fileContent);
+            }
+            response.getOutputStream().flush();
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "Unexpected Error.");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("terminal/web/member-detail/export/{terminalId}")
+    public ResponseEntity<byte[]> exportMemberExcel(
+            @PathVariable String terminalId,
+            HttpServletResponse response
+    ) {
+        HttpStatus httpStatus = null;
+        try {
+            MerchantDetailDTO dto = new MerchantDetailDTO();
+            List<AccountTerminalMemberDTO> list = new ArrayList<>();
+            for (int i = 0; i <= 43; i++) {
+                AccountTerminalMemberDTO accountTerminalMemberDTO =
+                        new AccountTerminalMemberDTO();
+                accountTerminalMemberDTO.setId(UUID.randomUUID().toString());
+                accountTerminalMemberDTO.setPhoneNo("0987654321");
+                accountTerminalMemberDTO.setFullName("Nguyễn Văn A");
+                accountTerminalMemberDTO.setImgId("1234567890");
+                accountTerminalMemberDTO.setRole("Nhân viên");
+                list.add(accountTerminalMemberDTO);
+            }
+            try (Workbook workbook = new XSSFWorkbook()) {
+                Sheet sheet = workbook.createSheet("VietQRVN-ListMember");
+
+                // Tạo hàng tiêu đề
+                Row headerRow = sheet.createRow(0);
+                String[] headers = {"STT", "Họ tên", "Số điện thoại", "Vai trò"};
+
+                for (int i = 0; i < headers.length; i++) {
+                    headerRow.createCell(i).setCellValue(headers[i]);
+                }
+
+                int counter = 1;
+                for (AccountTerminalMemberDTO item : list) {
+                    Row row = sheet.createRow(counter++);
+                    row.createCell(0).setCellValue(String.valueOf(counter));
+                    row.createCell(1).setCellValue(item.getFullName());
+                    row.createCell(2).setCellValue(item.getPhoneNo());
+                    row.createCell(3).setCellValue(item.getRole());
+                }
+
+                // Tạo một mảng byte từ workbook
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                workbook.write(outputStream);
+                byte[] fileContent = outputStream.toByteArray();
+
+                // Thiết lập các thông số của response
+                response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                response.setHeader("Content-Disposition", "attachment; filename=list-members.xlsx");
+                response.setContentLength(fileContent.length);
+
+                // Ghi dữ liệu vào response
+                response.getOutputStream().write(fileContent);
+            }
+            response.getOutputStream().flush();
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("terminal/web/detail/{terminalId}")
+    public ResponseEntity<Object> getTerminalDetailByTerminalId(
+            @PathVariable String terminalId,
+            @RequestParam String userId
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            TerminalWebDetailResponseDTO dto = new TerminalWebDetailResponseDTO();
+            TerminalBankResponseDTO terminal = new TerminalBankResponseDTO();
+            ITerminalBankResponseDTO terminalResponse = terminalService.getTerminalResponseById(terminalId, userId);
+            if (terminalResponse == null) {
+                result = new ResponseMessageDTO("FAILED", "E113");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            } else {
+                terminal.setBankName(terminalResponse.getBankName());
+                terminal.setBankAccount(terminalResponse.getBankAccount());
+                terminal.setBankShortName(terminalResponse.getBankShortName());
+                terminal.setUserBankName(terminalResponse.getUserBankName());
+                terminal.setImgId(terminalResponse.getImgId());
+                terminal.setBankCode(terminalResponse.getBankCode());
+                terminal.setBankId(terminalResponse.getBankId());
+                terminal.setQrCode(terminalResponse.getQrCode());
+                terminal.setTerminalId(terminalId);
+                dto.setId(terminalId);
+                ITerminalWebResponseDTO terminalWebResponseDTO = terminalService.getTerminalWebById(terminalId);
+                dto.setId(terminalWebResponseDTO.getId());
+                dto.setName(terminalWebResponseDTO.getName());
+                dto.setAddress(terminalWebResponseDTO.getAddress());
+                dto.setCode(terminalWebResponseDTO.getCode());
+                dto.setTotalTrans(0);
+                dto.setTotalAmount(0);
+                dto.setRevGrowthPrevDate(0);
+                dto.setRevGrowthPrevMonth(0);
+//                dto.setTotalTrans(terminalWebResponseDTO.getTotalTrans());
+//                dto.setTotalAmount(terminalWebResponseDTO.getTotalAmount());
+//                long prevDate = DateTimeUtil.getPrevDate();
+//                long prevMonth = DateTimeUtil.getPrevMonth();
+//                long amountPrevDate = terminalStatisticService.getTotalAmountPrevious(terminalId, prevDate);
+//                long amountPrevMonth = terminalStatisticService.getTotalAmountPrevious(terminalId, prevMonth);
+//                if (amountPrevDate == 0) {
+//                    dto.setRevGrowthPrevDate(0);
+//                } else {
+//                    dto.setRevGrowthPrevDate((int) ((terminalWebResponseDTO.getTotalAmount() - amountPrevDate) * 100 / amountPrevDate));
+//                }
+//                if (amountPrevMonth == 0) {
+//                    dto.setRevGrowthPrevMonth(0);
+//                } else {
+//                    dto.setRevGrowthPrevMonth((int) ((terminalWebResponseDTO.getTotalAmount() - amountPrevMonth) * 100 / amountPrevMonth));
+//                }
+                dto.setBank(terminal);
+                result = dto;
+                httpStatus = HttpStatus.OK;
+            }
+
+        } catch (Exception e) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("terminal/web/transaction-detail/export/{terminalId}")
+    public ResponseEntity<byte[]> getTerminalTransactionByTerminalId(
+            @PathVariable String terminalId,
+            @RequestParam(value = "type") int type,
+            @RequestParam(value = "value") String value,
+            @RequestParam(value = "fromDate") String fromDate,
+            @RequestParam(value = "toDate") String toDate,
+            HttpServletResponse response) throws IOException {
+        List<TransactionRelatedDetailDTO> list = new ArrayList<>();
+        for (int i = 0; i < 20; i++) {
+            TransactionRelatedDetailDTO transactionRelatedDetailDTO = new TransactionRelatedDetailDTO();
+            transactionRelatedDetailDTO.setTransactionId(UUID.randomUUID().toString());
+            transactionRelatedDetailDTO.setAmount(1000000);
+            transactionRelatedDetailDTO.setBankAccount("1234567890");
+            transactionRelatedDetailDTO.setBankName("MBBank - Ngân hàng Quân đội");
+            transactionRelatedDetailDTO.setBankShortName("MBBank");
+            transactionRelatedDetailDTO.setBankCode("MB");
+            transactionRelatedDetailDTO.setContent("SQRTLJ0001, Đoạn text này nhằm mục đich kéo nó dài ra để test chứ cũng không có gì đặc biệt");
+            transactionRelatedDetailDTO.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+            transactionRelatedDetailDTO.setTimePaid(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+            transactionRelatedDetailDTO.setStatus(1);
+            transactionRelatedDetailDTO.setType(1);
+            transactionRelatedDetailDTO.setNote("");
+            transactionRelatedDetailDTO.setReferenceNumber("FT1234567890");
+            transactionRelatedDetailDTO.setOrderId(UUID.randomUUID().toString());
+            transactionRelatedDetailDTO.setTerminalCode("TLJ0001");
+            list.add(transactionRelatedDetailDTO);
+        }
+
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("VietQRVN-ListMember");
+
+            // Tạo hàng tiêu đề
+            Row headerRow = sheet.createRow(0);
+            String[] headers = {"STT", "Thời gian tạo", "Mã điểm bán", "Số tiền"};
+
+            for (int i = 0; i < headers.length; i++) {
+                headerRow.createCell(i).setCellValue(headers[i]);
+            }
+
+            int counter = 1;
+            for (TransactionRelatedDetailDTO item : list) {
+                Row row = sheet.createRow(counter++);
+                row.createCell(0).setCellValue(String.valueOf(counter));
+                row.createCell(1).setCellValue(item.getTime());
+                row.createCell(2).setCellValue(item.getTerminalCode());
+                row.createCell(3).setCellValue(item.getAmount());
+            }
+
+            // Tạo một mảng byte từ workbook
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            byte[] fileContent = outputStream.toByteArray();
+
+            // Thiết lập các thông số của response
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename=list-trans.xlsx");
+            response.setContentLength(fileContent.length);
+
+            // Ghi dữ liệu vào response
+            response.getOutputStream().write(fileContent);
+        }
+        response.getOutputStream().flush();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("terminal/export-excel")
+    public void test() {
+        try {
+            ExcelExportService excelExportService = new ExcelExportService();
+            excelExportService.testRowAccessWindowSize();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+//    @GetMapping("terminal/web/transaction-detail/{terminalId}")
+//    public ResponseEntity<Object> getTerminalTransactionByTerminalId(
+//            @PathVariable String terminalId,
+//            @RequestParam String userId,
+//            @RequestParam(value = "type") int type,
+//            @RequestParam(value = "value") String value,
+//            @RequestParam(value = "fromDate") String fromDate,
+//            @RequestParam(value = "toDate") String toDate,
+//            @RequestParam(value = "offset") int offset
+//    ) {
+//        Object result = null;
+//        List<ITransactionRelatedDetailDTO> dtos = new ArrayList<>();
+//        HttpStatus httpStatus = null;
+//        try {
+//            // type = 9: all
+//            // type = 1: reference_number
+//            // type = 2: order_id
+//            // type = 3: content
+//            // type = 5: status
+//            String checkInTerminal = accountBankReceiveShareService.checkUserExistedFromTerminal(terminalId, userId);
+//            if (StringUtil.isNullOrEmpty(checkInTerminal)) {
+//                result = new ResponseMessageDTO("FAILED", "E113");
+//                httpStatus = HttpStatus.BAD_REQUEST;
+//            } else {
+//                switch (type) {
+//                    case 1:
+//                        dtos = transactionReceiveService.getTransTerminalByIdAndByFtCode(terminalId, value, fromDate, toDate, offset);
+//                        result = dtos;
+//                        httpStatus = HttpStatus.OK;
+//                        break;
+//                    case 2:
+//                        dtos = transactionReceiveService.getTransTerminalByIdAndByOrderId(terminalId, value, fromDate, toDate, offset);
+//                        result = dtos;
+//                        httpStatus = HttpStatus.OK;
+//                        break;
+//                    case 3:
+//                        value = value.replace("-", " ").trim();
+//                        dtos = transactionReceiveService.getTransTerminalByIdAndByContent(terminalId, value, fromDate, toDate, offset);
+//                        result = dtos;
+//                        httpStatus = HttpStatus.OK;
+//                        break;
+//                    case 5:
+//                        dtos = transactionReceiveService.getTransTerminalByIdAndByStatus(terminalId, Integer.parseInt(value), fromDate, toDate, offset);
+//                        result = dtos;
+//                        httpStatus = HttpStatus.OK;
+//                        break;
+//                    case 9:
+//                        dtos = transactionReceiveService.getAllTransTerminalById(terminalId, fromDate, toDate, offset);
+//                        result = dtos;
+//                        httpStatus = HttpStatus.OK;
+//                        break;
+//                    default:
+//                        logger.error("getTransactionUser: ERROR: INVALID TYPE");
+//                        httpStatus = HttpStatus.BAD_REQUEST;
+//                        break;
+//                }
+//            }
+//        } catch (Exception e) {
+//            httpStatus = HttpStatus.BAD_REQUEST;
+//        }
+//        return new ResponseEntity<>(result, httpStatus);
+//    }
+
+    @GetMapping("terminal/web/member-detail/{terminalId}")
+    public ResponseEntity<Object> getTerminalMemberByTerminalId(
+            @PathVariable String terminalId,
+            @RequestParam String userId,
+            @RequestParam int offset,
+            @RequestParam String value,
+            @RequestParam int type
+    ) {
+        Object result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            String checkInTerminal = accountBankReceiveShareService.checkUserExistedFromTerminal(terminalId, userId);
+            if (StringUtil.isNullOrEmpty(checkInTerminal)) {
+                result = new ResponseMessageDTO("FAILED", "E113");
+                httpStatus = HttpStatus.OK;
+            } else {
+                switch (type) {
+                    case 0:
+                        List<IAccountTerminalMemberDTO> responsePhoneNo = accountInformationService.getMembersWebByTerminalIdAndPhoneNo(terminalId, value, offset);
+                        if (FormatUtil.isListNullOrEmpty(responsePhoneNo)) {
+                            result = new ArrayList<>();
+                        } else {
+                            result = responsePhoneNo.stream().map(item -> {
+                                AccountTerminalMemberDTO dto = new AccountTerminalMemberDTO();
+                                dto.setId(item.getId());
+                                dto.setPhoneNo(item.getPhoneNo());
+                                dto.setFullName(item.getFullName());
+                                dto.setImgId(item.getImgId());
+                                dto.setBirthDate(item.getBirthDate());
+                                dto.setEmail(item.getEmail());
+                                dto.setNationalId(item.getNationalId());
+                                dto.setGender(item.getGender());
+                                dto.setRole(item.getIsOwner() ? "Quản lí" : "Nhân viên");
+                                return dto;
+                            }).collect(Collectors.toList());
+                        }
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 1:
+                        List<IAccountTerminalMemberDTO> responseFullName = accountInformationService.getMembersWebByTerminalIdAndFullName(terminalId, value, offset);
+                        result = responseFullName.stream().map(item -> {
+                            AccountTerminalMemberDTO dto = new AccountTerminalMemberDTO();
+                            dto.setId(item.getId());
+                            dto.setPhoneNo(item.getPhoneNo());
+                            dto.setFullName(item.getFullName());
+                            dto.setImgId(item.getImgId());
+                            dto.setBirthDate(item.getBirthDate());
+                            dto.setEmail(item.getEmail());
+                            dto.setNationalId(item.getNationalId());
+                            dto.setGender(item.getGender());
+                            dto.setRole(item.getIsOwner() ? "Quản lí" : "Nhân viên");
+                            return dto;
+                        }).collect(Collectors.toList());
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    default:
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        break;
+                }
+            }
+        } catch (Exception e) {
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);

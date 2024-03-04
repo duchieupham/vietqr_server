@@ -2,6 +2,7 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+import com.vietqr.org.dto.IAccountTerminalMemberDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -78,5 +79,20 @@ public class AccountInformationServiceImpl implements AccountInformationService 
 	@Override
 	public List<AccountInformationSyncDTO> getUserInformationSync() {
 		return accountInformationRepo.getUserInformationSync();
+	}
+
+	@Override
+	public List<IAccountTerminalMemberDTO> getMembersWebByTerminalId(String terminalId, int offset) {
+		return accountInformationRepo.getMembersWebByTerminalId(terminalId, offset);
+	}
+
+	@Override
+	public List<IAccountTerminalMemberDTO> getMembersWebByTerminalIdAndPhoneNo(String terminalId, String value, int offset) {
+		return accountInformationRepo.getMembersWebByTerminalIdAndPhoneNo(terminalId, value, offset);
+	}
+
+	@Override
+	public List<IAccountTerminalMemberDTO> getMembersWebByTerminalIdAndFullName(String terminalId, String value, int offset) {
+		return accountInformationRepo.getMembersWebByTerminalIdAndFullName(terminalId, value, offset);
 	}
 }

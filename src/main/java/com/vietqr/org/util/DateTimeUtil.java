@@ -72,4 +72,22 @@ public class DateTimeUtil {
         startEndTimeDTO.setEndTime(localDateTime.with(LocalTime.MAX).toEpochSecond(ZoneOffset.UTC));
         return startEndTimeDTO;
     }
+
+    public static StartEndTimeDTO getStartEndCurrentDate() {
+        StartEndTimeDTO startEndTimeDTO = new StartEndTimeDTO();
+        LocalDateTime localDateTime = LocalDateTime.now().atZone(ZoneId.of(GMT_PLUS_7)).toLocalDateTime();
+        startEndTimeDTO.setStartTime(localDateTime.with(LocalTime.MIN).toEpochSecond(ZoneOffset.UTC));
+        startEndTimeDTO.setEndTime(localDateTime.with(LocalTime.MAX).toEpochSecond(ZoneOffset.UTC));
+        return startEndTimeDTO;
+    }
+
+    public static long getPrevDate() {
+        LocalDateTime localDateTime = LocalDateTime.now().atZone(ZoneId.of(GMT_PLUS_7)).toLocalDateTime();
+        return localDateTime.minusDays(1).with(LocalTime.MIN).toEpochSecond(ZoneOffset.UTC);
+    }
+
+    public static long getPrevMonth() {
+        LocalDateTime localDateTime = LocalDateTime.now().atZone(ZoneId.of(GMT_PLUS_7)).toLocalDateTime();
+        return localDateTime.minusMonths(1).with(LocalTime.MIN).toEpochSecond(ZoneOffset.UTC);
+    }
 }

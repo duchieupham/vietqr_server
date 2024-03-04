@@ -2,6 +2,7 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+import com.vietqr.org.dto.IAccountTerminalMemberDTO;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.entity.AccountInformationEntity;
@@ -37,4 +38,10 @@ public interface AccountInformationService {
 	public void updateCarrierTypeIdByUserId(String carrierTypeId, String userId);
 
 	public List<AccountInformationSyncDTO> getUserInformationSync();
+
+	List<IAccountTerminalMemberDTO> getMembersWebByTerminalId(String terminalId, int offset);
+
+	List<IAccountTerminalMemberDTO> getMembersWebByTerminalIdAndPhoneNo(String terminalId, String value, int offset);
+
+	List<IAccountTerminalMemberDTO> getMembersWebByTerminalIdAndFullName(String terminalId, String value, int offset);
 }

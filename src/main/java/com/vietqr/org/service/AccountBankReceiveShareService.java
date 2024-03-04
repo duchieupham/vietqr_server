@@ -54,4 +54,8 @@ public interface AccountBankReceiveShareService {
     List<AccountBankReceiveShareEntity> getAccountBankReceiveShareByTerminalId(String terminalId);
 
     int countBankAccountByTerminalId(String terminalId);
+
+    List<IAccountTerminalMemberDTO> getMembersWebByTerminalId(String terminalId, int offset);
+
+    int countMembersByTerminalId(String terminalId);
 }
