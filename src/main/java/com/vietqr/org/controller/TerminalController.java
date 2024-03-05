@@ -424,68 +424,68 @@ public class TerminalController {
         }
     }
 
-//    @GetMapping("terminal/web/transaction-detail/{terminalId}")
-//    public ResponseEntity<Object> getTerminalTransactionByTerminalId(
-//            @PathVariable String terminalId,
-//            @RequestParam String userId,
-//            @RequestParam(value = "type") int type,
-//            @RequestParam(value = "value") String value,
-//            @RequestParam(value = "fromDate") String fromDate,
-//            @RequestParam(value = "toDate") String toDate,
-//            @RequestParam(value = "offset") int offset
-//    ) {
-//        Object result = null;
-//        List<ITransactionRelatedDetailDTO> dtos = new ArrayList<>();
-//        HttpStatus httpStatus = null;
-//        try {
-//            // type = 9: all
-//            // type = 1: reference_number
-//            // type = 2: order_id
-//            // type = 3: content
-//            // type = 5: status
-//            String checkInTerminal = accountBankReceiveShareService.checkUserExistedFromTerminal(terminalId, userId);
-//            if (StringUtil.isNullOrEmpty(checkInTerminal)) {
-//                result = new ResponseMessageDTO("FAILED", "E113");
-//                httpStatus = HttpStatus.BAD_REQUEST;
-//            } else {
-//                switch (type) {
-//                    case 1:
-//                        dtos = transactionReceiveService.getTransTerminalByIdAndByFtCode(terminalId, value, fromDate, toDate, offset);
-//                        result = dtos;
-//                        httpStatus = HttpStatus.OK;
-//                        break;
-//                    case 2:
-//                        dtos = transactionReceiveService.getTransTerminalByIdAndByOrderId(terminalId, value, fromDate, toDate, offset);
-//                        result = dtos;
-//                        httpStatus = HttpStatus.OK;
-//                        break;
-//                    case 3:
-//                        value = value.replace("-", " ").trim();
-//                        dtos = transactionReceiveService.getTransTerminalByIdAndByContent(terminalId, value, fromDate, toDate, offset);
-//                        result = dtos;
-//                        httpStatus = HttpStatus.OK;
-//                        break;
-//                    case 5:
-//                        dtos = transactionReceiveService.getTransTerminalByIdAndByStatus(terminalId, Integer.parseInt(value), fromDate, toDate, offset);
-//                        result = dtos;
-//                        httpStatus = HttpStatus.OK;
-//                        break;
-//                    case 9:
-//                        dtos = transactionReceiveService.getAllTransTerminalById(terminalId, fromDate, toDate, offset);
-//                        result = dtos;
-//                        httpStatus = HttpStatus.OK;
-//                        break;
-//                    default:
-//                        logger.error("getTransactionUser: ERROR: INVALID TYPE");
-//                        httpStatus = HttpStatus.BAD_REQUEST;
-//                        break;
-//                }
-//            }
-//        } catch (Exception e) {
-//            httpStatus = HttpStatus.BAD_REQUEST;
-//        }
-//        return new ResponseEntity<>(result, httpStatus);
-//    }
+    @GetMapping("terminal/web/transaction-detail/{terminalId}")
+    public ResponseEntity<Object> getTerminalTransactionByTerminalId(
+            @PathVariable String terminalId,
+            @RequestParam String userId,
+            @RequestParam(value = "type") int type,
+            @RequestParam(value = "value") String value,
+            @RequestParam(value = "fromDate") String fromDate,
+            @RequestParam(value = "toDate") String toDate,
+            @RequestParam(value = "offset") int offset
+    ) {
+        Object result = null;
+        List<ITransactionRelatedDetailDTO> dtos = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            // type = 9: all
+            // type = 1: reference_number
+            // type = 2: order_id
+            // type = 3: content
+            // type = 5: status
+            String checkInTerminal = accountBankReceiveShareService.checkUserExistedFromTerminal(terminalId, userId);
+            if (StringUtil.isNullOrEmpty(checkInTerminal)) {
+                result = new ResponseMessageDTO("FAILED", "E113");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            } else {
+                switch (type) {
+                    case 1:
+                        dtos = transactionReceiveService.getTransTerminalByIdAndByFtCode(terminalId, value, fromDate, toDate, offset);
+                        result = dtos;
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 2:
+                        dtos = transactionReceiveService.getTransTerminalByIdAndByOrderId(terminalId, value, fromDate, toDate, offset);
+                        result = dtos;
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 3:
+                        value = value.replace("-", " ").trim();
+                        dtos = transactionReceiveService.getTransTerminalByIdAndByContent(terminalId, value, fromDate, toDate, offset);
+                        result = dtos;
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 5:
+                        dtos = transactionReceiveService.getTransTerminalByIdAndByStatus(terminalId, Integer.parseInt(value), fromDate, toDate, offset);
+                        result = dtos;
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 9:
+                        dtos = transactionReceiveService.getAllTransTerminalById(terminalId, fromDate, toDate, offset);
+                        result = dtos;
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    default:
+                        logger.error("getTransactionUser: ERROR: INVALID TYPE");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        break;
+                }
+            }
+        } catch (Exception e) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 
     @GetMapping("terminal/web/member-detail/{terminalId}")
     public ResponseEntity<Object> getTerminalMemberByTerminalId(
