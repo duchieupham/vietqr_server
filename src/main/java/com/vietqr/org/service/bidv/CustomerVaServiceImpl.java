@@ -22,4 +22,14 @@ public class CustomerVaServiceImpl implements CustomerVaService {
         return repo.getCustomerVaLength();
     }
 
+    @Override
+    public CustomerVaEntity getCustomerVaInfoByBankId(String bankId) {
+        return repo.getCustomerVaInfoByBankId(bankId);
+    }
+
+    @Override
+    public void removeCustomerVa(String userId, String merchantId) {
+        repo.removeCustomerVa(userId, merchantId);
+    }
+
 }

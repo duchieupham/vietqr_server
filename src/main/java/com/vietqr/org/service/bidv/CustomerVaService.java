@@ -10,4 +10,8 @@ public interface CustomerVaService {
     public int insert(CustomerVaEntity entity);
 
     public Long getCustomerVaLength();
+
+    public CustomerVaEntity getCustomerVaInfoByBankId(String bankId);
+
+    public void removeCustomerVa(String userId, String merchantId);
 }
