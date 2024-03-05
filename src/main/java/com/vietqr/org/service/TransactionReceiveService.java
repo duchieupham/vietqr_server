@@ -11,6 +11,8 @@ public interface TransactionReceiveService {
 
         public int insertTransactionReceive(TransactionReceiveEntity entity);
 
+        public int insertTransactionReceiveWithCheckDuplicated(TransactionReceiveEntity entity);
+
         public int insertAllTransactionReceive(List<TransactionReceiveEntity> entities);
 
         public void updateTransactionReceiveStatus(int status, String refId, String referenceNumber, long timePaid,

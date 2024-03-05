@@ -21,6 +21,17 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public int insertTransactionReceiveWithCheckDuplicated(TransactionReceiveEntity entity) {
+//        return repo.save(entity) == null ? 0 : 1;
+        return repo.insertWithCheckDuplicated(entity.getId(), entity.getAmount(), entity.getBankAccount(),
+                entity.getBankId(), entity.getContent(), entity.getCustomerBankAccount(), entity.getCustomerBankCode(),
+                entity.getCustomerName(), entity.getOrderId(), entity.getRefId(), entity.getReferenceNumber(),
+                entity.getSign(), entity.getStatus(), entity.getTime(), entity.getTimePaid(), entity.getTraceId(),
+                entity.getTransType(), entity.getType(), entity.getTerminalCode(), entity.getQrCode(), entity.getUserId(),
+                entity.getNote());
+    }
+
+    @Override
     public void updateTransactionReceiveStatus(int status, String refId, String referenceNumber, long timePaid,
             String id) {
         repo.updateTransactionReceiveStatus(status, refId, referenceNumber, timePaid, id);

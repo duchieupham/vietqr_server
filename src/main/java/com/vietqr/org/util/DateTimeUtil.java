@@ -8,6 +8,8 @@ import java.time.format.DateTimeFormatter;
 public class DateTimeUtil {
     private static final String GMT_PLUS_7 = "GMT+7";
     private static final String DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
+
+    private static final String DateFormat = "yyyy-MM-dd";
     // 7 * 60 * 60
     public static final long GMT_PLUS_7_OFFSET = 25200;
 
@@ -86,8 +88,34 @@ public class DateTimeUtil {
         return localDateTime.minusDays(1).with(LocalTime.MIN).toEpochSecond(ZoneOffset.UTC);
     }
 
+    public static String getCurrentDateAsString() {
+        LocalDateTime localDateTime = LocalDateTime.now().atZone(ZoneId.of(GMT_PLUS_7)).toLocalDateTime();
+        return localDateTime.with(LocalTime.MIN).format(DateTimeFormatter.ofPattern(DateFormat));
+    }
+
+    public static String getPrevDateAsString() {
+        LocalDateTime localDateTime = LocalDateTime.now().atZone(ZoneId.of(GMT_PLUS_7)).toLocalDateTime();
+        return localDateTime.with(LocalTime.MIN).minusDays(1).format(DateTimeFormatter.ofPattern(DateFormat));
+    }
+
+    public static String getPrevMonthAsString() {
+        LocalDateTime localDateTime = LocalDateTime.now().atZone(ZoneId.of(GMT_PLUS_7)).toLocalDateTime();
+        return localDateTime.minusMonths(1).with(LocalTime.MIN).format(DateTimeFormatter.ofPattern(DateFormat));
+    }
+
+
+
     public static long getPrevMonth() {
         LocalDateTime localDateTime = LocalDateTime.now().atZone(ZoneId.of(GMT_PLUS_7)).toLocalDateTime();
         return localDateTime.minusMonths(1).with(LocalTime.MIN).toEpochSecond(ZoneOffset.UTC);
+    }
+
+    public static StartEndTimeDTO getStartEndTime(String fromDate, String toDate) {
+        StartEndTimeDTO startEndTimeDTO = new StartEndTimeDTO();
+        LocalDateTime fromTime = LocalDateTime.parse(fromDate + " 00:00:00", DateTimeFormatter.ofPattern(DateTimeFormat));
+        LocalDateTime toTime = LocalDateTime.parse(toDate + " 23:59:59", DateTimeFormatter.ofPattern(DateTimeFormat));
+        startEndTimeDTO.setStartTime(fromTime.toEpochSecond(ZoneOffset.UTC));
+        startEndTimeDTO.setEndTime(toTime.toEpochSecond(ZoneOffset.UTC));
+        return startEndTimeDTO;
     }
 }
