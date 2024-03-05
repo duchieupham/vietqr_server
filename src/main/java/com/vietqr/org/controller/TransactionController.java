@@ -275,6 +275,7 @@ public class TransactionController {
     }
 
     @GetMapping("user/transactions")
+    // check check
     public ResponseEntity<List<TransactionReceiveAdminListDTO>> getTransactionUser(
             @RequestParam(value = "userId") String userId,
             @RequestParam(value = "type") int type,
@@ -290,32 +291,39 @@ public class TransactionController {
             // - 1: reference_number (FT Code)
             // - 2: order_id
             // - 3: content
+            // - 4: terminal code
             // - 9: all
             boolean checkEmptyDate = StringUtil.isEmptyOrEqualsZero(fromDate) || StringUtil.isEmptyOrEqualsZero(toDate);
             if (checkEmptyDate) {
                 switch (type) {
                     case 0:
+                        //not check_owner yet
                         result = transactionReceiveService.getTransByBankAccountAllDate(value, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 1:
+                        // not check all case yet ()
                         result = transactionReceiveService.getTransByFtCodeAndUserId(value, userId, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 2:
+                        // not check all case yet ()
                         result = transactionReceiveService.getTransByOrderIdAndUserId(value, userId, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 3:
+                        // not check all case yet ()
                         value = value.replace("-", " ").trim();
                         result = transactionReceiveService.getTransByContentAndUserId(value, userId, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 4:
+                        // not check all case yet ()
                         result = transactionReceiveService.getTransByTerminalCodeAndUserIdAllDate(value, userId, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 9:
+                        // not check all case yet ()
                         result = transactionReceiveService.getAllTransAllDateByUserId(userId, offset);
                         httpStatus = HttpStatus.OK;
                         break;
@@ -327,28 +335,34 @@ public class TransactionController {
             } else {
                 switch (type) {
                     case 0:
+                        // not check all case yet ()
                         result = transactionReceiveService.getTransByBankAccountFromDate(value, fromDate, toDate, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 1:
+                        // not check all case yet ()
                         result = transactionReceiveService.getTransByFtCodeAndUserId(value, userId, offset, fromDate, toDate);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 2:
+                        // not check all case yet ()
                         result = transactionReceiveService.getTransByOrderIdAndUserId(value, userId, offset, fromDate, toDate);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 3:
+                        // not check all case yet ()
                         value = value.replace("-", " ").trim();
                         result = transactionReceiveService.getTransByContentAndUserId(value, userId, offset, fromDate, toDate);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 4:
+                        // not check all case yet ()
                         result = transactionReceiveService.getTransByTerminalCodeAndUserIdFromDate(fromDate, toDate, value,
                                 userId, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 9:
+                        // not check all case yet ()
                         result = transactionReceiveService.getAllTransFromDateByUserId(fromDate, toDate, userId, offset);
                         httpStatus = HttpStatus.OK;
                         break;
