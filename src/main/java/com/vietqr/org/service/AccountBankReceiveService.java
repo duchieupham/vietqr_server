@@ -74,7 +74,9 @@ public interface AccountBankReceiveService {
 
 	public AccountBankReceiveForNotiDTO findAccountBankIden(String bankAccount, String bankTypeId);
 
-    String checkIsOwner(String bankId, String userId);
+	String checkIsOwner(String bankId, String userId);
 
 	AccountBankReceiveShareForNotiDTO findAccountBankByTraceTransfer(String traceTransfer, String bankTypeId);
+
+	public String checkExistedBankAccountByBankAccountAndBankCode(String bankAccount, String bankCode);
 }

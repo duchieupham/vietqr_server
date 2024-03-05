@@ -8,4 +8,6 @@ import com.vietqr.org.entity.bidv.CustomerVaEntity;
 public interface CustomerVaService {
 
     public int insert(CustomerVaEntity entity);
+
+    public Long getCustomerVaLength();
 }

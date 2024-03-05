@@ -120,4 +120,17 @@ public class BIDVUtil {
         result += "}";
         return result;
     }
+
+    public static String generateUnregisterVaBody(
+            String serviceId,
+            String channelId,
+            String merchantId) {
+        String result = "";
+        result = "{";
+        result += "\"serviceId\":" + "\"" + serviceId + "\",";
+        result += "\"channelId\":" + "\"" + channelId + "\",";
+        result += "\"merchantId\":" + "\"" + merchantId + "\"";
+        result += "}";
+        return result;
+    }
 }
