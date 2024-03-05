@@ -186,9 +186,11 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     @Override
     public List<TransactionReceiveAdminListDTO> getTransByBankAccountFromDate(String value, String fromDate,
             String toDate, long offset) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
         return repo.getTransByBankAccountFromDate(value,
-                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
-                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET, offset);
+                fromTime,
+                toTime, offset);
     }
 
     @Override
@@ -862,6 +864,24 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
         long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate);
         long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate);
         return repo.getAllTransTerminalById(terminalId,
+                fromTime - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                toTime - DateTimeUtil.GMT_PLUS_7_OFFSET, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByTerminalCodeFromDateTerminal(String fromDate, String toDate, String value, String userId, int offset) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getTransByTerminalCodeAndUserIdFromDateTerminal(
+                fromTime - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                toTime - DateTimeUtil.GMT_PLUS_7_OFFSET, value, userId, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByBankAccountFromDateTerminal(String userId, String value, String fromDate, String toDate, int offset) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getTransByBankAccountFromDateTerminal(userId, value,
                 fromTime - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 toTime - DateTimeUtil.GMT_PLUS_7_OFFSET, offset);
     }

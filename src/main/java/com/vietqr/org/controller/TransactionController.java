@@ -75,6 +75,9 @@ public class TransactionController {
     AccountBankReceiveService accountBankReceiveService;
 
     @Autowired
+    AccountBankReceiveShareService accountBankReceiveShareService;
+
+    @Autowired
     TransactionRPAService transactionRPAService;
 
     @Autowired
@@ -327,7 +330,12 @@ public class TransactionController {
             } else {
                 switch (type) {
                     case 0:
-                        result = transactionReceiveService.getTransByBankAccountFromDate(value, fromDate, toDate, offset);
+                        String check = accountBankReceiveShareService.checkUserExistedFromBankAccount(userId, value);
+                        if (StringUtil.isNullOrEmpty(check)) {
+                            result = transactionReceiveService.getTransByBankAccountFromDate(value, fromDate, toDate, offset);
+                        } else {
+                            result = transactionReceiveService.getTransByBankAccountFromDateTerminal(userId, value, fromDate, toDate, offset);
+                        }
                         httpStatus = HttpStatus.OK;
                         break;
                     case 1:
@@ -344,8 +352,14 @@ public class TransactionController {
                         httpStatus = HttpStatus.OK;
                         break;
                     case 4:
-                        result = transactionReceiveService.getTransByTerminalCodeAndUserIdFromDate(fromDate, toDate, value,
-                                userId, offset);
+                        ////
+                        String id = accountBankReceiveShareService.checkUserExistedFromBankByTerminalCode(value, userId);
+                        if (id != null && !id.isEmpty()) {
+                            result = transactionReceiveService.getTransByTerminalCodeFromDateTerminal(fromDate, toDate, value, userId, offset);
+                        } else {
+                            result = transactionReceiveService.getTransByTerminalCodeAndUserIdFromDate(fromDate, toDate, value,
+                                    userId, offset);
+                        }
                         httpStatus = HttpStatus.OK;
                         break;
                     case 9:

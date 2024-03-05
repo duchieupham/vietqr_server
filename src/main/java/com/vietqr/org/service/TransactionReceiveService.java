@@ -402,4 +402,8 @@ public interface TransactionReceiveService {
         List<ITransactionRelatedDetailDTO> getTransTerminalByIdAndByStatus(String terminalId, int status, String fromDate, String toDate, int offset);
 
         List<ITransactionRelatedDetailDTO> getAllTransTerminalById(String terminalId, String fromDate, String toDate, int offset);
+
+        List<TransactionReceiveAdminListDTO> getTransByTerminalCodeFromDateTerminal(String fromDate, String toDate, String value, String userId, int offset);
+
+        List<TransactionReceiveAdminListDTO> getTransByBankAccountFromDateTerminal(String userId, String value, String fromDate, String toDate, int offset);
 }

@@ -58,4 +58,8 @@ public interface AccountBankReceiveShareService {
     List<IAccountTerminalMemberDTO> getMembersWebByTerminalId(String terminalId, int offset);
 
     int countMembersByTerminalId(String terminalId);
+
+    String checkUserExistedFromBankAccount(String userId, String value);
+
+    String checkUserExistedFromBankByTerminalCode(String value, String userId);
 }

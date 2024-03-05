@@ -16,7 +16,7 @@ public interface CustomerVaRepository extends JpaRepository<CustomerVaEntity, Lo
     @Query(value = "SELECT COUNT(id) FROM customer_va", nativeQuery = true)
     Long getCustomerVaLength();
 
-    @Query(value = "SELECT * FROM customer_va WHERE bank_id = :bankId", nativeQuery = true)
+    @Query(value = "SELECT * FROM customer_va WHERE bank_id = :bankId LIMIT 1", nativeQuery = true)
     CustomerVaEntity getCustomerVaInfoByBankId(@Param(value = "bankId") String bankId);
 
     @Transactional
