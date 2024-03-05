@@ -22,6 +22,9 @@ public class CustomerInvoiceEntity implements Serializable {
     @Column(name = "customerId")
     private String customerId;
 
+    @Column(name = "name")
+    private String name;
+
     // BIDV quy định:
     // 0: Gạch nợ không khớp số tiền
     // 1: Gạch nợ khớp số tiền
@@ -34,6 +37,12 @@ public class CustomerInvoiceEntity implements Serializable {
     @Column(name = "billId")
     private String billId;
 
+    @Column(name = "timeCreated")
+    private Long timeCreated;
+
+    @Column(name = "timePaid")
+    private Long timePaid;
+
     // 0: Chưa thanh toán
     // 1: Đã thanh toán
     @Column(name = "status")
@@ -43,12 +52,20 @@ public class CustomerInvoiceEntity implements Serializable {
         super();
     }
 
-    public CustomerInvoiceEntity(String id, String customerId, int type, Long amount, String billId, int status) {
+    public CustomerInvoiceEntity(String id, String customerId,
+            String name,
+            int type,
+            Long amount, String billId,
+            Long timeCreated, Long timePaid,
+            int status) {
         this.id = id;
         this.customerId = customerId;
+        this.name = name;
         this.type = type;
         this.amount = amount;
         this.billId = billId;
+        this.timeCreated = timeCreated;
+        this.timePaid = timePaid;
         this.status = status;
     }
 
@@ -66,6 +83,14 @@ public class CustomerInvoiceEntity implements Serializable {
 
     public void setCustomerId(String customerId) {
         this.customerId = customerId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public int getType() {
@@ -90,6 +115,22 @@ public class CustomerInvoiceEntity implements Serializable {
 
     public void setBillId(String billId) {
         this.billId = billId;
+    }
+
+    public Long getTimeCreated() {
+        return timeCreated;
+    }
+
+    public void setTimeCreated(Long timeCreated) {
+        this.timeCreated = timeCreated;
+    }
+
+    public Long getTimePaid() {
+        return timePaid;
+    }
+
+    public void setTimePaid(Long timePaid) {
+        this.timePaid = timePaid;
     }
 
     public int getStatus() {

@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -97,6 +98,8 @@ public class CustomerVaController {
         try {
             result = CustomerVaUtil.unregisterCustomerVa(merchantId);
             if (result.getStatus().equals("SUCCESS")) {
+                // remove record from database
+                customerVaService.removeCustomerVa(userId, merchantId);
                 httpStatus = HttpStatus.OK;
             } else {
                 httpStatus = HttpStatus.BAD_REQUEST;
@@ -138,6 +141,29 @@ public class CustomerVaController {
 
         } catch (Exception e) {
             logger.error("unregisterCustomerVa: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // get customer VA info
+    @GetMapping("customer-va/information")
+    public ResponseEntity<Object> getCustomerVaInformation(
+            @RequestParam(value = "bankId") String bankId) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            CustomerVaEntity entity = customerVaService.getCustomerVaInfoByBankId(bankId);
+            if (entity != null) {
+                result = entity;
+                httpStatus = HttpStatus.OK;
+            } else {
+                result = new ResponseMessageDTO("CHECK", "C11");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("getCustomerVaInformation: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }

@@ -1,0 +1,22 @@
+package com.vietqr.org.service.bidv;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.vietqr.org.dto.bidv.CustomerInvoiceDataDTO;
+import com.vietqr.org.entity.bidv.CustomerInvoiceEntity;
+
+@Service
+public interface CustomerInvoiceService {
+
+    public int insert(CustomerInvoiceEntity entity);
+
+    public String checkExistedBillId(String billId);
+
+    public List<CustomerInvoiceDataDTO> getCustomerInvoiceAllStatus(String customerId, int offset);
+
+    public CustomerInvoiceDataDTO getCustomerInvoiceByBillId(String billId);
+
+    public void removeInvocieByBillId(String billId);
+}
