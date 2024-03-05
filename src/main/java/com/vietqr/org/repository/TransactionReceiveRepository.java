@@ -1889,5 +1889,26 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "AND a.time BETWEEN :fromDate AND :toDate "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
         List<ITransactionRelatedDetailDTO> getAllTransTerminalById(String terminalId, long fromDate, long toDate, int offset);
+
+        @Transactional
+        @Modifying
+        @Query(value = "INSERT INTO transaction_receive (id, amount, bank_account, bank_id, content, " +
+                "customer_bank_account, customer_bank_code, customer_name, order_id, " +
+                "ref_id, reference_number, sign, status, time, time_paid, trace_id, trans_type, " +
+                "type, terminal_code, qr_code, user_id, note) " +
+                "SELECT :id, :amount, :bankAccount, :bankId, :content, :customerBankAccount, :customerBankCode, " +
+                ":customerName, :orderId, :refId, :referenceNumber, :sign, :status, " +
+                ":time, :timePaid, :traceId, :transType, :type, :terminalCode, :qrCode, :userId, :note " +
+                "WHERE NOT EXISTS (" +
+                "SELECT 1 " +
+                "FROM transaction_receive " +
+                "WHERE reference_number = :referenceNumber " +
+                "AND trans_type = :transType) " +
+                "LIMIT 1;", nativeQuery = true)
+        int insertWithCheckDuplicated(String id, long amount, String bankAccount, String bankId, String content,
+                                      String customerBankAccount, String customerBankCode, String customerName,
+                                      String orderId, String refId, String referenceNumber, String sign, int status,
+                                      long time, long timePaid, String traceId, String transType, int type,
+                                      String terminalCode, String qrCode, String userId, String note);
 }
 
