@@ -52,13 +52,16 @@ public class CustomerVaEntity implements Serializable {
     @Column(name = "merchantType")
     private String merchantType;
 
+    @Column(name = "vaNumber")
+    private String vaNumber;
+
     public CustomerVaEntity() {
         super();
     }
 
     public CustomerVaEntity(String id, String merchantId, String merchantName, String bankId, String userId,
             String customerId, String bankAccount, String userBankName, String nationalId, String phoneAuthenticated,
-            String merchantType) {
+            String merchantType, String vaNumber) {
         this.id = id;
         this.merchantId = merchantId;
         this.merchantName = merchantName;
@@ -70,6 +73,7 @@ public class CustomerVaEntity implements Serializable {
         this.nationalId = nationalId;
         this.phoneAuthenticated = phoneAuthenticated;
         this.merchantType = merchantType;
+        this.vaNumber = vaNumber;
     }
 
     public String getId() {
@@ -158,6 +162,14 @@ public class CustomerVaEntity implements Serializable {
 
     public void setMerchantType(String merchantType) {
         this.merchantType = merchantType;
+    }
+
+    public String getVaNumber() {
+        return vaNumber;
+    }
+
+    public void setVaNumber(String vaNumber) {
+        this.vaNumber = vaNumber;
     }
 
 }

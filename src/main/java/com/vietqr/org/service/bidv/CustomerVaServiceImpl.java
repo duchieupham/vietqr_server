@@ -17,4 +17,9 @@ public class CustomerVaServiceImpl implements CustomerVaService {
         return repo.save(entity) == null ? 0 : 1;
     }
 
+    @Override
+    public Long getCustomerVaLength() {
+        return repo.getCustomerVaLength();
+    }
+
 }

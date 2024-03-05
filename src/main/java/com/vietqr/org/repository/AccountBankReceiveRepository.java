@@ -223,10 +223,10 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			"INNER JOIN bank_type b ON b.id = a.bank_type_id " +
 			"INNER JOIN account_bank_receive c ON c.bank_type_id = b.id" +
 			" WHERE c.id = :bankId", nativeQuery = true)
-    String getCaiValueByBankId(String bankId);
+	String getCaiValueByBankId(String bankId);
 
 	@Query(value = "SELECT id FROM account_bank_receive WHERE id = :bankId AND user_id = :userId", nativeQuery = true)
-    String checkIsOwner(String bankId, String userId);
+	String checkIsOwner(String bankId, String userId);
 
 	@Query(value = "SELECT a.id as bankId, b.bank_name as bankName, b.bank_code as bankCode, a.user_id as userId, "
 			+ "b.bank_short_name as bankShortName, a.bank_account as bankAccount "
@@ -239,4 +239,15 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "AND a.is_authenticated = true "
 			+ "AND c.trace_transfer = :traceTransfer LIMIT 1", nativeQuery = true)
 	AccountBankReceiveShareForNotiDTO findAccountBankByTraceTransfer(String traceTransfer, String bankTypeId);
+
+	@Query(value = "SELECT a.id "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN bank_type b "
+			+ "ON a.bank_type_id = b.id "
+			+ "WHERE a.bank_account = :bankAccount "
+			+ "AND b.bank_code = :bankCode "
+			+ "AND a.is_authenticated = true", nativeQuery = true)
+	String checkExistedBankAccountByBankAccountAndBankCode(
+			@Param(value = "bankAccount") String bankAccount,
+			@Param(value = "bankCode") String bankCode);
 }

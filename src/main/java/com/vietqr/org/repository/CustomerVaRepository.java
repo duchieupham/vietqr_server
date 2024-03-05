@@ -9,5 +9,6 @@ import com.vietqr.org.entity.bidv.CustomerVaEntity;
 @Repository
 public interface CustomerVaRepository extends JpaRepository<CustomerVaEntity, Long> {
 
-    // @Query(value = "", nativeQuery = true)
+    @Query(value = "SELECT COUNT(id) FROM customer_va", nativeQuery = true)
+    Long getCustomerVaLength();
 }

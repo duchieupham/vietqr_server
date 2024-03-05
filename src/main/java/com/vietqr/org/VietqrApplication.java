@@ -50,6 +50,7 @@ import com.vietqr.org.util.BankEncryptUtil;
 // import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.JwsUtil;
 import com.vietqr.org.util.WebSocketConfig;
+import com.vietqr.org.util.bank.bidv.CustomerVaUtil;
 
 @SpringBootApplication
 @ComponentScan(basePackages = { "com.vietqr.org" })
@@ -115,6 +116,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
+
 		// test();
 		// CustomerSyncEntity customerSyncEntity = new CustomerSyncEntity("",
 		// "test-viet-qr",
