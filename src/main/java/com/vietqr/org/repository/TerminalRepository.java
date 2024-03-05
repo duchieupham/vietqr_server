@@ -201,4 +201,16 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             + "FROM terminal a "
             + "WHERE a.id = :terminalId", nativeQuery = true)
     ITerminalWebResponseDTO getTerminalWebById(String terminalId);
+
+    @Query(value = "SELECT a.id AS terminalId, a.name AS terminalName, "
+            + "a.address AS terminalAddress, "
+            + "a.code AS terminalCode, f.bank_name AS bankName, e.bank_account AS bankAccount, "
+            + "f.bank_short_name as bankShortName, e.bank_account_name AS bankAccountName "
+            + "FROM terminal a "
+            + "INNER JOIN account_bank_receive_share c ON c.terminal_id = a.id "
+            + "INNER JOIN account_bank_receive e ON e.id = c.bank_id "
+            + "INNER JOIN bank_type f ON f.id = e.bank_type_id "
+            + "WHERE c.user_id = :userId "
+            + "ORDER BY a.code ASC ", nativeQuery = true)
+    List<ITerminalDetailWebDTO> getTerminalByUserIdForExport(String userId);
 }

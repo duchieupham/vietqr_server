@@ -11,6 +11,8 @@ import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,6 +38,8 @@ public class TerminalController {
     private static final Logger logger = Logger.getLogger(TerminalController.class);
     private static final String CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final int CODE_LENGTH = 10;
+
+    private static final int ROW_ACCESS_WINDOW_SIZE = 100;
 
     @Autowired
     private TerminalService terminalService;
@@ -159,33 +163,18 @@ public class TerminalController {
 
     @GetMapping("terminal/web/export")
     public ResponseEntity<byte[]> exportExcelTerminal(
-            @RequestParam String merchantId,
+            @RequestParam String userId,
             HttpServletResponse response
     ) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
             MerchantDetailDTO dto = new MerchantDetailDTO();
-            List<TerminalDetailWebDTO> list = new ArrayList<>();
-            for (int i = 0; i <= 43; i++) {
-                TerminalDetailWebDTO terminalDetailWebDTO =
-                        new TerminalDetailWebDTO();
-                terminalDetailWebDTO.setTerminalId(UUID.randomUUID().toString());
-                terminalDetailWebDTO.setTerminalName("Tous les Jours Vincom Center");
-                terminalDetailWebDTO.setTerminalAddress("Hầm B3, Le Thanh Ton, P. Ben Nghe Q1, Tp.Hồ Chí Minh");
-                terminalDetailWebDTO.setTotalTrans(100);
-                terminalDetailWebDTO.setTotalAmount(1000000);
-                terminalDetailWebDTO.setTotalMember(10);
-                terminalDetailWebDTO.setTerminalCode("TLJ00" + i);
-                terminalDetailWebDTO.setBankName("MBBank - Ngân hàng Quân đội");
-                terminalDetailWebDTO.setBankAccount("1234567890");
-                terminalDetailWebDTO.setBankShortName("MB");
-                terminalDetailWebDTO.setBankAccountName("Tour les Jours");
-                list.add(terminalDetailWebDTO);
-            }
-            try (Workbook workbook = new XSSFWorkbook()) {
-                Sheet sheet = workbook.createSheet("VietQRVN-MerchantId");
-
+            List<ITerminalDetailWebDTO> list = terminalService.getTerminalByUserIdForExport(userId);
+            try (SXSSFWorkbook workbook = new SXSSFWorkbook()) {
+                workbook.setCompressTempFiles(true);
+                SXSSFSheet sheet = workbook.createSheet("VietQRVN-Shops");
+                sheet.setRandomAccessWindowSize(ROW_ACCESS_WINDOW_SIZE);
                 // Tạo hàng tiêu đề
                 Row headerRow = sheet.createRow(0);
                 String[] headers = {"STT", "Tên Cửa Hàng", "Thành viên", "Mã điểm bán", "TK Ngân hàng", "Địa chỉ"};
@@ -195,13 +184,13 @@ public class TerminalController {
                 }
 
                 int counter = 1;
-                for (TerminalDetailWebDTO item : list) {
+                for (ITerminalDetailWebDTO item : list) {
                     Row row = sheet.createRow(counter++);
                     row.createCell(0).setCellValue(String.valueOf(counter));
                     row.createCell(1).setCellValue(item.getTerminalName());
                     row.createCell(2).setCellValue(item.getTotalMember());
                     row.createCell(3).setCellValue(item.getTerminalCode());
-                    row.createCell(4).setCellValue(item.getBankShortName() + " - " + item.getBankAccount());
+                    row.createCell(4).setCellValue(item.getBankAccount() + " - " + item.getBankShortName());
                     row.createCell(5).setCellValue(item.getTerminalAddress());
                 }
 

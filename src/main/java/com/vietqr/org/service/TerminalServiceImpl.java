@@ -125,4 +125,9 @@ public class TerminalServiceImpl implements TerminalService {
         return repo.getTerminalWebById(terminalId);
     }
 
+    @Override
+    public List<ITerminalDetailWebDTO> getTerminalByUserIdForExport(String userId) {
+        return repo.getTerminalByUserIdForExport(userId);
+    }
+
 }
