@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.dto.bidv.CustomerInvoiceDataDTO;
+import com.vietqr.org.dto.bidv.CustomerInvoiceInfoDataDTO;
 import com.vietqr.org.entity.bidv.CustomerInvoiceEntity;
 import com.vietqr.org.repository.CustomerInvoiceRepository;
 
@@ -38,6 +39,16 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
     @Override
     public void removeInvocieByBillId(String billId) {
         repo.removeInvocieByBillId(billId);
+    }
+
+    @Override
+    public CustomerInvoiceInfoDataDTO getCustomerInvoiceInfo(String customerId) {
+        return repo.getCustomerInvoiceInfo(customerId);
+    }
+
+    @Override
+    public void updateCustomerVaInvoice(int status, Long timePaid, String billId) {
+        repo.updateCustomerVaInvoice(status, timePaid, billId);
     }
 
 }

@@ -120,14 +120,13 @@ public class CustomerVaController {
         HttpStatus httpStatus = null;
         try {
             UUID uuid = UUID.randomUUID();
-            UUID customerId = UUID.randomUUID();
             CustomerVaEntity entity = new CustomerVaEntity();
             entity.setId(uuid.toString());
             entity.setMerchantId(dto.getMerchantId());
             entity.setMerchantName(dto.getMerchantName());
             entity.setBankId(dto.getBankId());
             entity.setUserId(dto.getUserId());
-            entity.setCustomerId(customerId.toString());
+            entity.setCustomerId(dto.getVaNumber().substring(4));
             entity.setBankAccount(dto.getBankAccount());
             entity.setUserBankName(dto.getUserBankName());
             entity.setNationalId(dto.getNationalId());

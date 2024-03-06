@@ -46,6 +46,45 @@ public class BankEncryptUtil {
         return result;
     }
 
+    public static String generateMD5GetBillForBankChecksum(String secretCode, String serviceId, String customerId) {
+        String result = "";
+        try {
+            String plainText = secretCode + serviceId + customerId;
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(plainText.getBytes());
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b & 0xff));
+            }
+            result = sb.toString();
+        } catch (Exception e) {
+            logger.error("generateMD5GetBillForBankChecksum: ERROR: " + e.toString());
+        }
+        return result;
+    }
+
+    public static String generateMD5PayBillForBankChecksum(String secretCode,
+            String transId,
+            String billId,
+            String amount) {
+        String result = "";
+        try {
+            String plainText = secretCode + transId + billId + amount;
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(plainText.getBytes());
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b & 0xff));
+            }
+            result = sb.toString();
+        } catch (Exception e) {
+            logger.error("generateMD5GetBillForBankChecksum: ERROR: " + e.toString());
+        }
+        return result;
+    }
+
     public static String generateMD5RefundCustomerChecksum(String bankAccount, String ftCode,
             String accessKey) {
         String result = "";

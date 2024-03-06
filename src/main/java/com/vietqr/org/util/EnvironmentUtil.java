@@ -52,6 +52,11 @@ public class EnvironmentUtil {
     // private static final String BIDV_LINKED_PAYER_DEBIT_TYPE_CARD_PROD = "810";
     // private static final String BIDV_LINKED_PAYER_DEBIT_TYPE_CARD_PROD = "810";
 
+    // BIDV
+    // authentication for Get Bill & Pay Bill
+    private static final String BIDV_SECRET_KEY = "QklEVkJMVUVDT01BY2Nlc3NLZXk=";
+    private static final String BIDV_ACCESS_KEY = "bank-bidv-0002";
+
     ///
     // IP ADDRESS
     private static final String IP_VIETQRVN_UAT = "112.78.1.220";
@@ -223,6 +228,14 @@ public class EnvironmentUtil {
     // Static VietQR from MB
     private static final String MB_QR_CODE_STATIC_TYPE = "1";
     private static final String MB_QR_INIT_STATIC_METHOD = "11";
+
+    public static String getBidvSecretKey() {
+        return BIDV_SECRET_KEY;
+    }
+
+    public static String getBidvAccessKey() {
+        return BIDV_ACCESS_KEY;
+    }
 
     public static String getBidvUrlRequestAddMerchant() {
         return (IS_PRODUCTION == false) ? BIDV_URL_REQUEST_ADD_MERCHANT_UAT : BIDV_URL_REQUEST_ADD_MERCHANT_PROD;

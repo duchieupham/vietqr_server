@@ -17,4 +17,9 @@ public class AccountCustomerServiceImpl implements AccountCustomerService {
         return repo.save(entity) == null ? 0 : 1;
     }
 
+    @Override
+    public String getAccessKey(String password) {
+        return repo.getAccessKey(password);
+    }
+
 }
