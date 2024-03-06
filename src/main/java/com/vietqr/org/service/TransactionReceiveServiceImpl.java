@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.repository.TransactionReceiveRepository;
+
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import com.vietqr.org.entity.TransactionReceiveEntity;
 
@@ -23,12 +26,13 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     @Override
     public int insertTransactionReceiveWithCheckDuplicated(TransactionReceiveEntity entity) {
 //        return repo.save(entity) == null ? 0 : 1;
+        long timeCheck = DateTimeUtil.getCurrentDateTimeAsNumber() - 120 - DateTimeUtil.GMT_PLUS_7_OFFSET;
         return repo.insertWithCheckDuplicated(entity.getId(), entity.getAmount(), entity.getBankAccount(),
                 entity.getBankId(), entity.getContent(), entity.getCustomerBankAccount(), entity.getCustomerBankCode(),
                 entity.getCustomerName(), entity.getOrderId(), entity.getRefId(), entity.getReferenceNumber(),
                 entity.getSign(), entity.getStatus(), entity.getTime(), entity.getTimePaid(), entity.getTraceId(),
                 entity.getTransType(), entity.getType(), entity.getTerminalCode(), entity.getQrCode(), entity.getUserId(),
-                entity.getNote());
+                entity.getNote(), timeCheck);
     }
 
     @Override

@@ -1919,13 +1919,14 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 "SELECT 1 " +
                 "FROM transaction_receive " +
                 "WHERE reference_number = :referenceNumber " +
+                "AND time >= :timeCheck " +
                 "AND trans_type = :transType) " +
                 "LIMIT 1;", nativeQuery = true)
         int insertWithCheckDuplicated(String id, long amount, String bankAccount, String bankId, String content,
                                       String customerBankAccount, String customerBankCode, String customerName,
                                       String orderId, String refId, String referenceNumber, String sign, int status,
                                       long time, long timePaid, String traceId, String transType, int type,
-                                      String terminalCode, String qrCode, String userId, String note);
+                                      String terminalCode, String qrCode, String userId, String note, long timeCheck);
 
         @Query(value = "SELECT DISTINCT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, a.order_id as orderId, a.reference_number as referenceNumber, "
                 + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
