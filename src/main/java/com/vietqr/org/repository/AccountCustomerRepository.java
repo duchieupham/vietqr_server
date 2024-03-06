@@ -12,4 +12,7 @@ public interface AccountCustomerRepository extends JpaRepository<AccountCustomer
 
     @Query(value = "SELECT * FROM account_customer WHERE username = :username AND available = true", nativeQuery = true)
     AccountCustomerEntity getUserByUsername(@Param(value = "username") String username);
+
+    @Query(value = "SELECT username FROM account_customer WHERE password = :password ", nativeQuery = true)
+    String getAccessKey(@Param(value = "password") String password);
 }

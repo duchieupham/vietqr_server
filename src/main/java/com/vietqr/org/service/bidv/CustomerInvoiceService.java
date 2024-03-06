@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.dto.bidv.CustomerInvoiceDataDTO;
+import com.vietqr.org.dto.bidv.CustomerInvoiceInfoDataDTO;
 import com.vietqr.org.entity.bidv.CustomerInvoiceEntity;
 
 @Service
@@ -19,4 +20,8 @@ public interface CustomerInvoiceService {
     public CustomerInvoiceDataDTO getCustomerInvoiceByBillId(String billId);
 
     public void removeInvocieByBillId(String billId);
+
+    public CustomerInvoiceInfoDataDTO getCustomerInvoiceInfo(String customerId);
+
+    public void updateCustomerVaInvoice(int status, Long timePaid, String billId);
 }
