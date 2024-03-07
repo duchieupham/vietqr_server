@@ -1427,12 +1427,16 @@ public class TransactionBankController {
 				if (check == 0) {
 					logger.info("transaction-sync - insertNewTransaction - insertTransactionReceive failed: Duplicated when insert");
 				} else {
-					TransactionTerminalEntity transactionTerminalEntity = new TransactionTerminalEntity();
-					transactionTerminalEntity.setId(UUID.randomUUID().toString());
-					transactionTerminalEntity.setTerminalCode(terminalCode);
-					transactionTerminalEntity.setTime(time);
-					transactionTerminalEntity.setAmount(Long.parseLong(dto.getAmount() + ""));
-					transactionTerminalService.insertTransactionTerminal(transactionTerminalEntity);
+					final String tempTerminalCode = terminalCode;
+					Thread thread = new Thread(() -> {
+						TransactionTerminalTempEntity transactionTerminalTempEntity = new TransactionTerminalTempEntity();
+						transactionTerminalTempEntity.setId(UUID.randomUUID().toString());
+						transactionTerminalTempEntity.setTerminalCode(tempTerminalCode);
+						transactionTerminalTempEntity.setTime(time);
+						transactionTerminalTempEntity.setAmount(Long.parseLong(dto.getAmount() + ""));
+						transactionTerminalService.insertTransactionTerminal(transactionTerminalTempEntity);
+					});
+					thread.start();
 					List<String> userIds = terminalService
 							.getUserIdsByTerminalCode(terminalEntity.getCode());
 					String prefix = "";

@@ -2,7 +2,7 @@ package com.vietqr.org.service;
 
 import com.vietqr.org.dto.RevenueTerminalDTO;
 import com.vietqr.org.dto.StartEndTimeDTO;
-import com.vietqr.org.entity.TransactionTerminalEntity;
+import com.vietqr.org.entity.TransactionTerminalTempEntity;
 import com.vietqr.org.repository.TransactionTerminalRepository;
 import com.vietqr.org.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +17,8 @@ public class TransactionTerminalServiceImpl implements TransactionTerminalServic
     private TransactionTerminalRepository repo;
 
     @Override
-    public List<TransactionTerminalEntity> getAllTransactionTerminalByDateAndTerminalCode(String terminalCode,
-                                                                                          String fromDate, String toDate) {
+    public List<TransactionTerminalTempEntity> getAllTransactionTerminalByDateAndTerminalCode(String terminalCode,
+                                                                                              String fromDate, String toDate) {
         StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndTime(fromDate, toDate);
         return repo.findAllByTerminalCodeAndTimeBetween(terminalCode,
                 startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET,
@@ -26,8 +26,8 @@ public class TransactionTerminalServiceImpl implements TransactionTerminalServic
     }
 
     @Override
-    public int insertTransactionTerminal(TransactionTerminalEntity transactionTerminalEntity) {
-        return repo.save(transactionTerminalEntity) != null ? 0 : 1;
+    public int insertTransactionTerminal(TransactionTerminalTempEntity transactionTerminalTempEntity) {
+        return repo.save(transactionTerminalTempEntity) != null ? 0 : 1;
     }
 
     @Override
