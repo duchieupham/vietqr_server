@@ -294,84 +294,86 @@ public class TransactionController {
             // - 2: order_id
             // - 3: content
             // - 9: all
-            boolean checkEmptyDate = StringUtil.isEmptyOrEqualsZero(fromDate) || StringUtil.isEmptyOrEqualsZero(toDate);
-            if (checkEmptyDate) {
-                switch (type) {
-                    case 0:
-                        result = transactionReceiveService.getTransByBankAccountAllDate(value, offset);
-                        httpStatus = HttpStatus.OK;
-                        break;
-                    case 1:
-                        result = transactionReceiveService.getTransByFtCodeAndUserId(value, userId, offset);
-                        httpStatus = HttpStatus.OK;
-                        break;
-                    case 2:
-                        result = transactionReceiveService.getTransByOrderIdAndUserId(value, userId, offset);
-                        httpStatus = HttpStatus.OK;
-                        break;
-                    case 3:
-                        value = value.replace("-", " ").trim();
-                        result = transactionReceiveService.getTransByContentAndUserId(value, userId, offset);
-                        httpStatus = HttpStatus.OK;
-                        break;
-                    case 4:
-                        result = transactionReceiveService.getTransByTerminalCodeAndUserIdAllDate(value, userId, offset);
-                        httpStatus = HttpStatus.OK;
-                        break;
-                    case 9:
-                        result = transactionReceiveService.getAllTransAllDateByUserId(userId, offset);
-                        httpStatus = HttpStatus.OK;
-                        break;
-                    default:
-                        logger.error("getTransactionUser: ERROR: INVALID TYPE");
-                        httpStatus = HttpStatus.BAD_REQUEST;
-                        break;
-                }
-            } else {
-                switch (type) {
-                    case 0:
-                        String check = accountBankReceiveShareService.checkUserExistedFromBankAccount(userId, value);
-                        if (StringUtil.isNullOrEmpty(check)) {
-                            result = transactionReceiveService.getTransByBankAccountFromDate(value, fromDate, toDate, offset);
-                        } else {
-                            result = transactionReceiveService.getTransByBankAccountFromDateTerminal(userId, value, fromDate, toDate, offset);
-                        }
-                        httpStatus = HttpStatus.OK;
-                        break;
-                    case 1:
-                        result = transactionReceiveService.getTransByFtCodeAndUserId(value, userId, offset, fromDate, toDate);
-                        httpStatus = HttpStatus.OK;
-                        break;
-                    case 2:
-                        result = transactionReceiveService.getTransByOrderIdAndUserId(value, userId, offset, fromDate, toDate);
-                        httpStatus = HttpStatus.OK;
-                        break;
-                    case 3:
-                        value = value.replace("-", " ").trim();
-                        result = transactionReceiveService.getTransByContentAndUserId(value, userId, offset, fromDate, toDate);
-                        httpStatus = HttpStatus.OK;
-                        break;
-                    case 4:
-                        ////
-                        String id = accountBankReceiveShareService.checkUserExistedFromBankByTerminalCode(value, userId);
-                        if (id != null && !id.isEmpty()) {
-                            result = transactionReceiveService.getTransByTerminalCodeFromDateTerminal(fromDate, toDate, value, userId, offset);
-                        } else {
-                            result = transactionReceiveService.getTransByTerminalCodeAndUserIdFromDate(fromDate, toDate, value,
-                                    userId, offset);
-                        }
-                        httpStatus = HttpStatus.OK;
-                        break;
-                    case 9:
-                        result = transactionReceiveService.getAllTransFromDateByUserId(fromDate, toDate, userId, offset);
-                        httpStatus = HttpStatus.OK;
-                        break;
-                    default:
-                        logger.error("getTransactionUser : ERROR: INVALID TYPE");
-                        httpStatus = HttpStatus.BAD_REQUEST;
-                        break;
-                }
-            }
+//            boolean checkEmptyDate = StringUtil.isEmptyOrEqualsZero(fromDate) || StringUtil.isEmptyOrEqualsZero(toDate);
+//            if (checkEmptyDate) {
+//                switch (type) {
+//                    case 0:
+//                        result = transactionReceiveService.getTransByBankAccountAllDate(value, offset);
+//                        httpStatus = HttpStatus.OK;
+//                        break;
+//                    case 1:
+//                        result = transactionReceiveService.getTransByFtCodeAndUserId(value, userId, offset);
+//                        httpStatus = HttpStatus.OK;
+//                        break;
+//                    case 2:
+//                        result = transactionReceiveService.getTransByOrderIdAndUserId(value, userId, offset);
+//                        httpStatus = HttpStatus.OK;
+//                        break;
+//                    case 3:
+//                        value = value.replace("-", " ").trim();
+//                        result = transactionReceiveService.getTransByContentAndUserId(value, userId, offset);
+//                        httpStatus = HttpStatus.OK;
+//                        break;
+//                    case 4:
+//                        result = transactionReceiveService.getTransByTerminalCodeAndUserIdAllDate(value, userId, offset);
+//                        httpStatus = HttpStatus.OK;
+//                        break;
+//                    case 9:
+//                        result = transactionReceiveService.getAllTransAllDateByUserId(userId, offset);
+//                        httpStatus = HttpStatus.OK;
+//                        break;
+//                    default:
+//                        logger.error("getTransactionUser: ERROR: INVALID TYPE");
+//                        httpStatus = HttpStatus.BAD_REQUEST;
+//                        break;
+//                }
+//            } else {
+//                switch (type) {
+//                    case 0:
+//                        String check = accountBankReceiveShareService.checkUserExistedFromBankAccount(userId, value);
+//                        if (StringUtil.isNullOrEmpty(check)) {
+//                            result = transactionReceiveService.getTransByBankAccountFromDate(value, fromDate, toDate, offset);
+//                        } else {
+//                            result = transactionReceiveService.getTransByBankAccountFromDateTerminal(userId, value, fromDate, toDate, offset);
+//                        }
+//                        httpStatus = HttpStatus.OK;
+//                        break;
+//                    case 1:
+//                        result = transactionReceiveService.getTransByFtCodeAndUserId(value, userId, offset, fromDate, toDate);
+//                        httpStatus = HttpStatus.OK;
+//                        break;
+//                    case 2:
+//                        result = transactionReceiveService.getTransByOrderIdAndUserId(value, userId, offset, fromDate, toDate);
+//                        httpStatus = HttpStatus.OK;
+//                        break;
+//                    case 3:
+//                        value = value.replace("-", " ").trim();
+//                        result = transactionReceiveService.getTransByContentAndUserId(value, userId, offset, fromDate, toDate);
+//                        httpStatus = HttpStatus.OK;
+//                        break;
+//                    case 4:
+//                        ////
+//                        String id = accountBankReceiveShareService.checkUserExistedFromBankByTerminalCode(value, userId);
+//                        if (id != null && !id.isEmpty()) {
+//                            result = transactionReceiveService.getTransByTerminalCodeFromDateTerminal(fromDate, toDate, value, userId, offset);
+//                        } else {
+//                            result = transactionReceiveService.getTransByTerminalCodeAndUserIdFromDate(fromDate, toDate, value,
+//                                    userId, offset);
+//                        }
+//                        httpStatus = HttpStatus.OK;
+//                        break;
+//                    case 9:
+//                        result = transactionReceiveService.getAllTransFromDateByUserId(fromDate, toDate, userId, offset);
+//                        httpStatus = HttpStatus.OK;
+//                        break;
+//                    default:
+//                        logger.error("getTransactionUser : ERROR: INVALID TYPE");
+//                        httpStatus = HttpStatus.BAD_REQUEST;
+//                        break;
+//                }
+//            }
+            result = new ArrayList<>();
+            httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("getTransactionAdmin: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
