@@ -113,7 +113,7 @@ public class TransactionBankController {
 	TransactionBankService transactionBankService;
 
 	@Autowired
-	TransactionTerminalService transactionTerminalService;
+	TransactionTerminalTempService transactionTerminalTempService;
 
 	@Autowired
 	TransactionReceiveService transactionReceiveService;
@@ -542,11 +542,13 @@ public class TransactionBankController {
 			// ko có lỗi thì return cho bank trước khi qua finally
 			return new ResponseEntity<>(result, httpStatus);
 		} finally {
+			TransactionResponseDTO finalResult = result;
+			Thread thread = new Thread(() -> {
 			// AccountBankReceiveEntity accountBankEntity = accountBankService
 			// .getAccountBankById(transactionReceiveEntity.getBankId());
 			if (accountBankEntity != null) {
 				if (accountBankEntity.isMmsActive() == true && dto.getTransType().trim().toUpperCase().equals("C")) {
-					if (!result.isError()) {
+					if (!finalResult.isError()) {
 						if (checkDuplicate) {
 							String traceId = getTraceId(dto.getContent(), "VQR");
 							String orderId = "";
@@ -590,10 +592,10 @@ public class TransactionBankController {
 							logger.error("Transaction-sync: Duplicate Reference number");
 						}
 					} else {
-						logger.error("Transaction-sync: Error receive data: " + result.toString());
+						logger.error("Transaction-sync: Error receive data: " + finalResult.toString());
 					}
 				} else {
-					if (!result.isError()) {
+					if (!finalResult.isError()) {
 						if (checkDuplicate) {
 							if (accountBankEntity != null) {
 								// find transaction by id
@@ -654,7 +656,8 @@ public class TransactionBankController {
 			} else {
 				logger.info("transaction-sync - cannot find account bank or account bank is deactive");
 			}
-
+		});
+		thread.start();
 		}
 
 	}
@@ -1434,7 +1437,7 @@ public class TransactionBankController {
 						transactionTerminalTempEntity.setTerminalCode(tempTerminalCode);
 						transactionTerminalTempEntity.setTime(time);
 						transactionTerminalTempEntity.setAmount(Long.parseLong(dto.getAmount() + ""));
-						transactionTerminalService.insertTransactionTerminal(transactionTerminalTempEntity);
+						transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTempEntity);
 					});
 					thread.start();
 					List<String> userIds = terminalService

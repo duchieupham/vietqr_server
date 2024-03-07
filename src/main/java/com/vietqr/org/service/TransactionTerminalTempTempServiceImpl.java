@@ -3,7 +3,7 @@ package com.vietqr.org.service;
 import com.vietqr.org.dto.RevenueTerminalDTO;
 import com.vietqr.org.dto.StartEndTimeDTO;
 import com.vietqr.org.entity.TransactionTerminalTempEntity;
-import com.vietqr.org.repository.TransactionTerminalRepository;
+import com.vietqr.org.repository.TransactionTerminalTempRepository;
 import com.vietqr.org.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,10 +11,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class TransactionTerminalServiceImpl implements TransactionTerminalService {
+public class TransactionTerminalTempTempServiceImpl implements TransactionTerminalTempService {
 
     @Autowired
-    private TransactionTerminalRepository repo;
+    private TransactionTerminalTempRepository repo;
 
     @Override
     public List<TransactionTerminalTempEntity> getAllTransactionTerminalByDateAndTerminalCode(String terminalCode,
