@@ -1422,8 +1422,8 @@ public class TransactionBankController {
 				transactionEntity.setQrCode("");
 				transactionEntity.setUserId(accountBankEntity.getUserId());
 				transactionEntity.setNote("");
-				int check = transactionReceiveService.insertTransactionReceiveWithCheckDuplicated(transactionEntity);
-//				int check = transactionReceiveService.insertTransactionReceive(transactionEntity);
+				//int check = transactionReceiveService.insertTransactionReceiveWithCheckDuplicated(transactionEntity);
+				int check = transactionReceiveService.insertTransactionReceive(transactionEntity);
 				if (check == 0) {
 					logger.info("transaction-sync - insertNewTransaction - insertTransactionReceive failed: Duplicated when insert");
 				} else {
@@ -1583,8 +1583,8 @@ public class TransactionBankController {
 				transactionEntity.setQrCode("");
 				transactionEntity.setUserId(accountBankEntity.getUserId());
 				transactionEntity.setNote("");
-				int check = transactionReceiveService.insertTransactionReceiveWithCheckDuplicated(transactionEntity);
-//				int check = transactionReceiveService.insertTransactionReceive(transactionEntity);
+				//int check = transactionReceiveService.insertTransactionReceiveWithCheckDuplicated(transactionEntity);
+				int check = transactionReceiveService.insertTransactionReceive(transactionEntity);
 				if (check == 0) {
 					logger.info("transaction-sync - insertNewTransaction - insertTransactionReceive failed: Duplicated when insert");
 				} else {
@@ -1725,8 +1725,8 @@ public class TransactionBankController {
 			transactionEntity.setQrCode("");
 			transactionEntity.setUserId(accountBankEntity.getUserId());
 			transactionEntity.setNote("");
-			int check = transactionReceiveService.insertTransactionReceiveWithCheckDuplicated(transactionEntity);
-//			int check = transactionReceiveService.insertTransactionReceive(transactionEntity);
+			//int check = transactionReceiveService.insertTransactionReceiveWithCheckDuplicated(transactionEntity);
+			int check = transactionReceiveService.insertTransactionReceive(transactionEntity);
 			//
 			//
 			if (check == 0) {
