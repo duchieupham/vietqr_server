@@ -6,8 +6,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "TransactionTerminal")
-public class TransactionTerminalEntity {
+@Table(name = "TransactionTerminalTemp")
+public class TransactionTerminalTempEntity {
     @Id
     @Column(name = "id")
     private String id;
@@ -18,10 +18,10 @@ public class TransactionTerminalEntity {
     @Column(name = "amount")
     private long amount;
 
-    public TransactionTerminalEntity() {
+    public TransactionTerminalTempEntity() {
     }
 
-    public TransactionTerminalEntity(String id, String terminalCode, long time, long amount) {
+    public TransactionTerminalTempEntity(String id, String terminalCode, long time, long amount) {
         this.id = id;
         this.terminalCode = terminalCode;
         this.time = time;
