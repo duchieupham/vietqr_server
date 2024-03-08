@@ -118,4 +118,8 @@ public class DateTimeUtil {
         startEndTimeDTO.setEndTime(toTime.toEpochSecond(ZoneOffset.UTC));
         return startEndTimeDTO;
     }
+
+    public static String removeTimeInDateTimeString(String fromDate) {
+        return fromDate.substring(0, 10);
+    }
 }

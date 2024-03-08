@@ -29,3 +29,4 @@ public interface TerminalBankRepository extends JpaRepository<TerminalBankEntity
     @Query(value = "SELECT bank_account_raw_number FROM terminal_bank WHERE terminal_id = :terminalLabel ", nativeQuery = true)
     String getBankAccountByTerminalLabel(@Param(value = "terminalLabel") String terminalLabel);
 }
+
