@@ -1422,11 +1422,11 @@ public class TransactionBankController {
 				transactionEntity.setQrCode("");
 				transactionEntity.setUserId(accountBankEntity.getUserId());
 				transactionEntity.setNote("");
-				int check = transactionReceiveService.insertTransactionReceiveWithCheckDuplicated(transactionEntity);
-//				int check = transactionReceiveService.insertTransactionReceive(transactionEntity);
-				if (check == 0) {
-					logger.info("transaction-sync - insertNewTransaction - insertTransactionReceive failed: Duplicated when insert");
-				} else {
+				//int check = transactionReceiveService.insertTransactionReceiveWithCheckDuplicated(transactionEntity);
+				int check = transactionReceiveService.insertTransactionReceive(transactionEntity);
+//				if (check == 0) {
+//					logger.info("transaction-sync - insertNewTransaction - insertTransactionReceive failed: Duplicated when insert");
+//				} else {
 					TransactionTerminalEntity transactionTerminalEntity = new TransactionTerminalEntity();
 					transactionTerminalEntity.setId(UUID.randomUUID().toString());
 					transactionTerminalEntity.setTerminalCode(terminalCode);
@@ -1550,7 +1550,7 @@ public class TransactionBankController {
 							larkUtil.sendMessageToLark(larkMsg, webhook);
 						}
 					}
-				}
+//				}
 
 				// textToSpeechService.delete(requestId);
 			} else {
@@ -1583,11 +1583,11 @@ public class TransactionBankController {
 				transactionEntity.setQrCode("");
 				transactionEntity.setUserId(accountBankEntity.getUserId());
 				transactionEntity.setNote("");
-				int check = transactionReceiveService.insertTransactionReceiveWithCheckDuplicated(transactionEntity);
-//				int check = transactionReceiveService.insertTransactionReceive(transactionEntity);
-				if (check == 0) {
-					logger.info("transaction-sync - insertNewTransaction - insertTransactionReceive failed: Duplicated when insert");
-				} else {
+				//int check = transactionReceiveService.insertTransactionReceiveWithCheckDuplicated(transactionEntity);
+				int check = transactionReceiveService.insertTransactionReceive(transactionEntity);
+//				if (check == 0) {
+//					logger.info("transaction-sync - insertNewTransaction - insertTransactionReceive failed: Duplicated when insert");
+//				} else {
 					UUID notificationUUID = UUID.randomUUID();
 					NotificationEntity notiEntity = new NotificationEntity();
 					String prefix = "";
@@ -1696,7 +1696,7 @@ public class TransactionBankController {
 							larkUtil.sendMessageToLark(larkMsg, webhook);
 						}
 					}
-				}
+//				}
 			}
 		} else {
 
@@ -1725,13 +1725,13 @@ public class TransactionBankController {
 			transactionEntity.setQrCode("");
 			transactionEntity.setUserId(accountBankEntity.getUserId());
 			transactionEntity.setNote("");
-			int check = transactionReceiveService.insertTransactionReceiveWithCheckDuplicated(transactionEntity);
-//			int check = transactionReceiveService.insertTransactionReceive(transactionEntity);
+			//int check = transactionReceiveService.insertTransactionReceiveWithCheckDuplicated(transactionEntity);
+			int check = transactionReceiveService.insertTransactionReceive(transactionEntity);
 			//
 			//
-			if (check == 0) {
-				logger.info("transaction-sync - insertNewTransaction - insertTransactionReceive failed: Duplicated when insert");
-			} else {
+//			if (check == 0) {
+//				logger.info("transaction-sync - insertNewTransaction - insertTransactionReceive failed: Duplicated when insert");
+//			} else {
 				// insert notification
 				UUID notificationUUID = UUID.randomUUID();
 				NotificationEntity notiEntity = new NotificationEntity();
@@ -1841,7 +1841,7 @@ public class TransactionBankController {
 						larkUtil.sendMessageToLark(larkMsg, webhook);
 					}
 				}
-			}
+//			}
 		}
 
 	}
