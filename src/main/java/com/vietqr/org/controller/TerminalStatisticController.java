@@ -62,16 +62,21 @@ public class TerminalStatisticController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @GetMapping("terminal-statistic/top5")
+    @GetMapping("terminal-statistic/top")
     public ResponseEntity<List<TopTerminalDTO>> getTop5Terminal(
             @RequestParam String userId,
             @RequestParam String merchantId,
+            @RequestParam int pageSize,
             @RequestParam String fromDate,
             @RequestParam String toDate) {
         List<TopTerminalDTO> result = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
-            ITopTerminalDTO dto = transactionTerminalTempService.getTop5TerminalByDate(userId, fromDate, toDate);
+            List<ITopTerminalDTO> dtos = transactionTerminalTempService
+                    .getTopTerminalByDate(userId, fromDate, toDate, pageSize);
+            result = dtos.stream().collect(ArrayList::new, (list, dto) -> {
+                list.add(new TopTerminalDTO(dto.getTerminalName(), dto.getSumAmount(), dto.getDate()));
+            }, ArrayList::addAll);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("Get top 5 terminal error", e);

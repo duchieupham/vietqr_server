@@ -26,10 +26,24 @@ public interface TransactionTerminalTempRepository extends JpaRepository<Transac
             "FROM transaction_terminal_temp a " +
             "INNER JOIN terminal b ON b.code = a.terminal_code " +
             "INNER JOIN account_bank_receive_share c ON c.terminal_id = b.id " +
-            "WHERE c.user_id = :userId AND time >= :fromDate AND time <= :toDate", nativeQuery = true)
+            "WHERE c.user_id = :userId AND time >= :fromDate AND time <= :toDate ", nativeQuery = true)
     IStatisticMerchantDTO getStatisticMerchantByDate(String userId, long fromDate, long toDate);
 
+    @Query(value = "SELECT COALESCE(COUNT(a.id), 0) AS countTrans, COALESCE(SUM(a.amount), 0) AS sumAmount, " +
+            "DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME((FLOOR(time / 7200))*7200), '+00:00', '+07:00'), '%Y-%m-%d %H:00') AS timeDate " +
+            "FROM transaction_terminal_temp a " +
+            "INNER JOIN terminal b ON b.code = a.terminal_code " +
+            "INNER JOIN account_bank_receive_share c ON c.terminal_id = b.id " +
+            "WHERE c.user_id = :userId AND time >= :fromDate AND time <= :toDate " +
+            "GROUP BY timeDate ORDER BY timeDate ASC ", nativeQuery = true)
     List<IStatisticTerminalDTO> getStatisticMerchantByDateEveryHour(String userId, long fromDate, long toDate);
 
-    List<ITopTerminalDTO> getTop5TerminalByDate(String userId, long fromDate, long toDate);
+    @Query(value = "SELECT COALESCE(COUNT(a.id), 0) AS countTrans, COALESCE(SUM(a.amount), 0) AS sumAmount, " +
+            "b.code AS terminalCode, b.name AS terminalName " +
+            "FROM transaction_terminal_temp a " +
+            "INNER JOIN terminal b ON b.code = a.terminal_code " +
+            "INNER JOIN account_bank_receive_share c ON c.terminal_id = b.id " +
+            "WHERE c.user_id = :userId AND time >= :fromDate AND time <= :toDate " +
+            "GROUP BY a.terminal_code, b.name ORDER BY sumAmount DESC LIMIT :pageSize", nativeQuery = true)
+    List<ITopTerminalDTO> getTopTerminalByDate(String userId, long fromDate, long toDate, int pageSize);
 }

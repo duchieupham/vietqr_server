@@ -39,16 +39,29 @@ public class TransactionTerminalTempTempServiceImpl implements TransactionTermin
 
     @Override
     public IStatisticMerchantDTO getStatisticMerchantByDate(String userId, String fromDate, String toDate) {
-        return repo.getStatisticMerchantByDate(userId, fromDate, toDate);
+        long from = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long to = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getStatisticMerchantByDate(userId,
+                from - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                to - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
     public List<IStatisticTerminalDTO> getStatisticMerchantByDateEveryHour(String userId, String fromDate, String toDate) {
-        return repo.getStatisticMerchantByDateEveryHour(userId, fromDate, toDate);
+        long from = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long to = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getStatisticMerchantByDateEveryHour(userId,
+                from - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                to - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
-    public List<ITopTerminalDTO> getTop5TerminalByDate(String userId, String fromDate, String toDate) {
-        return repo.getTop5TerminalByDate(userId, fromDate, toDate);
+    public List<ITopTerminalDTO> getTopTerminalByDate(String userId, String fromDate, String toDate, int pageSize) {
+        long from = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long to = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getTopTerminalByDate(userId,
+                from - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                to - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                pageSize);
     }
 }

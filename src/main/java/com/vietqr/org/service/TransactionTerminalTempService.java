@@ -19,5 +19,5 @@ public interface TransactionTerminalTempService {
 
     List<IStatisticTerminalDTO> getStatisticMerchantByDateEveryHour(String userId, String fromDate, String toDate);
 
-    List<ITopTerminalDTO> getTop5TerminalByDate(String userId, String fromDate, String toDate);
+    List<ITopTerminalDTO> getTopTerminalByDate(String userId, String fromDate, String toDate, int pazeSize);
 }
