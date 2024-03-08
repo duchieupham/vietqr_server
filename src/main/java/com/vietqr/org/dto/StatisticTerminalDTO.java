@@ -1,40 +1,40 @@
 package com.vietqr.org.dto;
 
 public class StatisticTerminalDTO {
-    private int countTrans;
-    private long sumAmount;
-    private String time;
+    private int totalTrans;
+    private long totalAmount;
+    private String timeDate;
 
-    public StatisticTerminalDTO(int countTrans, long sumAmount, String time) {
-        this.countTrans = countTrans;
-        this.sumAmount = sumAmount;
-        this.time = time;
+    public StatisticTerminalDTO(int totalTrans, long totalAmount, String timeDate) {
+        this.totalTrans = totalTrans;
+        this.totalAmount = totalAmount;
+        this.timeDate = timeDate;
     }
 
     public StatisticTerminalDTO() {
     }
 
-    public int getCountTrans() {
-        return countTrans;
+    public int getTotalTrans() {
+        return totalTrans;
     }
 
-    public void setCountTrans(int countTrans) {
-        this.countTrans = countTrans;
+    public void setTotalTrans(int totalTrans) {
+        this.totalTrans = totalTrans;
     }
 
-    public long getSumAmount() {
-        return sumAmount;
+    public long getTotalAmount() {
+        return totalAmount;
     }
 
-    public void setSumAmount(long sumAmount) {
-        this.sumAmount = sumAmount;
+    public void setTotalAmount(long totalAmount) {
+        this.totalAmount = totalAmount;
     }
 
-    public String getTime() {
-        return time;
+    public String getTimeDate() {
+        return timeDate;
     }
 
-    public void setTime(String time) {
-        this.time = time;
+    public void setTimeDate(String timeDate) {
+        this.timeDate = timeDate;
     }
 }

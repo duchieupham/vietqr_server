@@ -8,13 +8,13 @@ public class StatisticMerchantDTO {
     private int totalTrans;
     private long totalAmount;
     private int totalTerminal;
-    private int ratePreviousDay;
+    private int ratePreviousDate;
     private int ratePreviousMonth;
 
     public StatisticMerchantDTO() {
     }
 
-    public StatisticMerchantDTO(String merchantId, String merchantName, String vsoCode, String date, int totalTrans, long totalAmount, int totalTerminal, int ratePreviousDay, int ratePreviousMonth) {
+    public StatisticMerchantDTO(String merchantId, String merchantName, String vsoCode, String date, int totalTrans, long totalAmount, int totalTerminal, int ratePreviousDate, int ratePreviousMonth) {
         this.merchantId = merchantId;
         this.merchantName = merchantName;
         this.vsoCode = vsoCode;
@@ -22,7 +22,7 @@ public class StatisticMerchantDTO {
         this.totalTrans = totalTrans;
         this.totalAmount = totalAmount;
         this.totalTerminal = totalTerminal;
-        this.ratePreviousDay = ratePreviousDay;
+        this.ratePreviousDate = ratePreviousDate;
         this.ratePreviousMonth = ratePreviousMonth;
     }
 
@@ -82,12 +82,12 @@ public class StatisticMerchantDTO {
         this.totalTerminal = totalTerminal;
     }
 
-    public int getRatePreviousDay() {
-        return ratePreviousDay;
+    public int getratePreviousDate() {
+        return ratePreviousDate;
     }
 
-    public void setRatePreviousDay(int ratePreviousDay) {
-        this.ratePreviousDay = ratePreviousDay;
+    public void setratePreviousDate(int ratePreviousDate) {
+        this.ratePreviousDate = ratePreviousDate;
     }
 
     public int getRatePreviousMonth() {

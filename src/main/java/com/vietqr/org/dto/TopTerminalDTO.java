@@ -1,13 +1,20 @@
 package com.vietqr.org.dto;
 
 public class TopTerminalDTO {
+    private String terminalId;
+    private String terminalCode;
+    private String terminalAddress;
     private String terminalName;
-    private long sumAmount;
+    private long totalAmount;
     private String date;
 
-    public TopTerminalDTO(String terminalName, long sumAmount, String date) {
+    public TopTerminalDTO(String terminalId, String terminalCode, String terminalAddress,
+                          String terminalName, long totalAmount, String date) {
+        this.terminalId = terminalId;
+        this.terminalCode = terminalCode;
+        this.terminalAddress = terminalAddress;
         this.terminalName = terminalName;
-        this.sumAmount = sumAmount;
+        this.totalAmount = totalAmount;
         this.date = date;
     }
 
@@ -22,12 +29,36 @@ public class TopTerminalDTO {
         this.terminalName = terminalName;
     }
 
-    public long getSumAmount() {
-        return sumAmount;
+    public String getTerminalId() {
+        return terminalId;
     }
 
-    public void setSumAmount(long sumAmount) {
-        this.sumAmount = sumAmount;
+    public void setTerminalId(String terminalId) {
+        this.terminalId = terminalId;
+    }
+
+    public String getTerminalCode() {
+        return terminalCode;
+    }
+
+    public void setTerminalCode(String terminalCode) {
+        this.terminalCode = terminalCode;
+    }
+
+    public String getTerminalAddress() {
+        return terminalAddress;
+    }
+
+    public void setTerminalAddress(String terminalAddress) {
+        this.terminalAddress = terminalAddress;
+    }
+
+    public long getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(long totalAmount) {
+        this.totalAmount = totalAmount;
     }
 
     public String getDate() {
