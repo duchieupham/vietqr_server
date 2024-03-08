@@ -1,7 +1,6 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.dto.RevenueTerminalDTO;
-import com.vietqr.org.dto.StartEndTimeDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.TransactionTerminalTempEntity;
 import com.vietqr.org.repository.TransactionTerminalTempRepository;
 import com.vietqr.org.util.DateTimeUtil;
@@ -36,5 +35,20 @@ public class TransactionTerminalTempTempServiceImpl implements TransactionTermin
         return repo.getTotalTranByTerminalCodeAndTimeBetween(terminalCode,
                 startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public IStatisticMerchantDTO getStatisticMerchantByDate(String userId, String fromDate, String toDate) {
+        return repo.getStatisticMerchantByDate(userId, fromDate, toDate);
+    }
+
+    @Override
+    public List<IStatisticTerminalDTO> getStatisticMerchantByDateEveryHour(String userId, String fromDate, String toDate) {
+        return repo.getStatisticMerchantByDateEveryHour(userId, fromDate, toDate);
+    }
+
+    @Override
+    public List<ITopTerminalDTO> getTop5TerminalByDate(String userId, String fromDate, String toDate) {
+        return repo.getTop5TerminalByDate(userId, fromDate, toDate);
     }
 }

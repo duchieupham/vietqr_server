@@ -1,6 +1,6 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.dto.RevenueTerminalDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.TransactionTerminalTempEntity;
 import org.springframework.stereotype.Service;
 
@@ -14,4 +14,10 @@ public interface TransactionTerminalTempService {
     int insertTransactionTerminal(TransactionTerminalTempEntity transactionTerminalTempEntity);
 
     RevenueTerminalDTO getTotalTranByTerminalCodeAndTimeBetween(String terminalCode, String fromTime, String toTime);
+
+    IStatisticMerchantDTO getStatisticMerchantByDate(String userId, String fromDate, String toDate);
+
+    List<IStatisticTerminalDTO> getStatisticMerchantByDateEveryHour(String userId, String fromDate, String toDate);
+
+    List<ITopTerminalDTO> getTop5TerminalByDate(String userId, String fromDate, String toDate);
 }
