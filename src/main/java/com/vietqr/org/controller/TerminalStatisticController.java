@@ -55,10 +55,10 @@ public class TerminalStatisticController {
                                 userId, DateTimeUtil.getPrevDateAsString()
                                 , DateTimeUtil.getPrevDateAsString());
                 if (revenueTerminalDTOPrevDate != null) {
-                    int revGrowthPrevDate = revenueTerminalDTOPrevDate.getTotalAmount() == 0 ? 0 :
-                            (int) ((dto.getTotalAmount() - revenueTerminalDTOPrevDate.getTotalAmount())
-                                    / revenueTerminalDTOPrevDate.getTotalAmount());
-                    result.setratePreviousDate(revGrowthPrevDate * 100);
+                    double revGrowthPrevDate = revenueTerminalDTOPrevDate.getTotalAmount() == 0 ? 0 :
+                            (double) (dto.getTotalAmount() - revenueTerminalDTOPrevDate.getTotalAmount())
+                                    / revenueTerminalDTOPrevDate.getTotalAmount();
+                    result.setratePreviousDate((int) (revGrowthPrevDate * 100));
                 } else {
                     result.setratePreviousDate(0);
                 }
@@ -67,10 +67,10 @@ public class TerminalStatisticController {
                                 userId, DateTimeUtil.getPrevMonthAsString(), DateTimeUtil.getPrevMonthAsString());
 
                 if (revenueTerminalDTOPrevMonth != null) {
-                    int revGrowthPrevMonth = revenueTerminalDTOPrevMonth.getTotalAmount() == 0 ? 0 :
-                            (int) ((dto.getTotalAmount() - revenueTerminalDTOPrevMonth.getTotalAmount())
+                    double revGrowthPrevMonth = revenueTerminalDTOPrevMonth.getTotalAmount() == 0 ? 0 :
+                            (double) ((dto.getTotalAmount() - revenueTerminalDTOPrevMonth.getTotalAmount())
                                     / revenueTerminalDTOPrevMonth.getTotalAmount());
-                    result.setRatePreviousMonth(revGrowthPrevMonth * 100);
+                    result.setRatePreviousMonth((int) (revGrowthPrevMonth * 100));
                 } else {
                     result.setRatePreviousMonth(0);
                 }
@@ -106,12 +106,14 @@ public class TerminalStatisticController {
                             dto.setTotalTrans(item.getTotalTrans());
                             dto.setTotalAmount(item.getTotalAmount());
                             RevenueTerminalDTO revGrowthPrevDate = transactionTerminalTempService
-                                    .getTotalTranByUserIdAndTimeBetween(
-                                            userId, DateTimeUtil.getPrevDateAsString(), DateTimeUtil.getPrevDateAsString());
+                                    .getTotalTranByTerminalCodeAndTimeBetween(
+                                            dto.getTerminalCode(), DateTimeUtil.getPrevDateAsString(),
+                                            DateTimeUtil.getPrevDateAsString());
                             if (revGrowthPrevDate != null) {
-                                dto.setRatePreviousDate(revGrowthPrevDate.getTotalAmount() == 0 ? 0 :
-                                        (int) ((item.getTotalAmount() - revGrowthPrevDate.getTotalAmount()) * 100
-                                                / revGrowthPrevDate.getTotalAmount()));
+                                double revGrowthPrevDateNum = revGrowthPrevDate.getTotalAmount() == 0 ? 0 :
+                                        (double) (dto.getTotalAmount() - revGrowthPrevDate.getTotalAmount())
+                                                / revGrowthPrevDate.getTotalAmount();
+                                dto.setRatePreviousDate((int) (revGrowthPrevDateNum * 100));
                             } else {
                                 dto.setRatePreviousDate(0);
                             }

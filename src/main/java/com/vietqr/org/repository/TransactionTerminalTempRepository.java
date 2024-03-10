@@ -51,7 +51,7 @@ public interface TransactionTerminalTempRepository extends JpaRepository<Transac
             "INNER JOIN terminal b ON b.code = a.terminal_code " +
             "INNER JOIN account_bank_receive_share c ON c.terminal_id = b.id " +
             "WHERE c.user_id = :userId AND time >= :fromDate AND time <= :toDate " +
-            "GROUP BY a.terminal_code ORDER BY totalAmount DESC", nativeQuery = true)
+            "ORDER BY totalAmount DESC", nativeQuery = true)
     RevenueTerminalDTO getTotalTranByUserAndTimeBetween(String userId, long fromDate, long toDate);
 
     @Query(value = "SELECT COALESCE(a.totalTrans, 0) AS totalTrans, COALESCE(a.totalAmount, 0) AS totalAmount, " +
