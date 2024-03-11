@@ -14,9 +14,9 @@ public class DateTimeUtil {
     public static final long GMT_PLUS_7_OFFSET = 25200;
 
     public static long getCurrentDateTimeAsNumber() {
-        LocalDateTime localDateTime = LocalDateTime.now();
         ZoneId gmtPlus7 = ZoneId.of(GMT_PLUS_7);
-        return localDateTime.atZone(gmtPlus7).toEpochSecond();
+        LocalDateTime localDateTime = LocalDateTime.now(gmtPlus7);
+        return localDateTime.toEpochSecond(ZoneOffset.UTC);
     }
 
     public static long getDateTimeAsLongInt(String dateTime) {

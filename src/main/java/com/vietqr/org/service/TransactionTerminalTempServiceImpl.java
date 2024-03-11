@@ -30,9 +30,9 @@ public class TransactionTerminalTempServiceImpl implements TransactionTerminalTe
     }
 
     @Override
-    public RevenueTerminalDTO getTotalTranByUserIdAndTimeBetween(String terminalCode, String fromDate, String toDate) {
+    public RevenueTerminalDTO getTotalTranByUserIdAndTimeBetween(String userId, String fromDate, String toDate) {
         StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndTime(fromDate, toDate);
-        return repo.getTotalTranByUserAndTimeBetween(terminalCode,
+        return repo.getTotalTranByUserAndTimeBetween(userId,
                 startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
@@ -80,5 +80,21 @@ public class TransactionTerminalTempServiceImpl implements TransactionTerminalTe
         return repo.getStatisticMerchantByDateEveryTerminal(userId,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET, offset);
+    }
+
+    @Override
+    public RevenueTerminalDTO getTotalTranByUserIdAndTimeBetweenWithCurrentTime(String userId, String fromDate, long currentTime) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndTime(fromDate, fromDate);
+        return repo.getTotalTranByUserAndTimeBetween(userId,
+                startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                currentTime - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public RevenueTerminalDTO getTotalTranByTerminalCodeAndTimeBetweenWithCurrentTime(String terminalCode, String fromDate, long currentDateTimeAsNumber) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndTime(fromDate, fromDate);
+        return repo.getTotalTranByTerminalCodeAndTimeBetween(terminalCode,
+                startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                currentDateTimeAsNumber - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 }

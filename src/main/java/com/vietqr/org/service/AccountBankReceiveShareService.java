@@ -62,4 +62,6 @@ public interface AccountBankReceiveShareService {
     String checkUserExistedFromBankAccount(String userId, String value);
 
     String checkUserExistedFromBankByTerminalCode(String value, String userId);
+
+    String checkUserExistedFromBankAccountAndIsOwner(String userId, String bankId);
 }
