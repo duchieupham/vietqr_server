@@ -46,12 +46,11 @@ public interface TransactionTerminalTempRepository extends JpaRepository<Transac
             "ORDER BY totalAmount DESC LIMIT :pageSize", nativeQuery = true)
     List<ITopTerminalDTO> getTopTerminalByDate(String userId, long fromDate, long toDate, int pageSize);
 
-    @Query(value = "SELECT COALESCE(COUNT(a.id), 0) AS totalTrans, COALESCE(SUM(a.amount), 0) AS totalAmount " +
-            "FROM transaction_terminal_temp a " +
+    @Query(value = "SELECT COALESCE(COUNT(ab.id), 0) AS totalTrans, COALESCE(SUM(ab.amount), 0) AS totalAmount " +
+            "FROM (SELECT DISTINCT a.id, a.amount FROM transaction_terminal_temp a " +
             "INNER JOIN terminal b ON b.code = a.terminal_code " +
             "INNER JOIN account_bank_receive_share c ON c.terminal_id = b.id " +
-            "WHERE c.user_id = :userId AND time >= :fromDate AND time <= :toDate " +
-            "ORDER BY totalAmount DESC", nativeQuery = true)
+            "WHERE c.user_id = :userId AND time >= :fromDate AND time <= :toDate) AS ab", nativeQuery = true)
     RevenueTerminalDTO getTotalTranByUserAndTimeBetween(String userId, long fromDate, long toDate);
 
     @Query(value = "SELECT COALESCE(a.totalTrans, 0) AS totalTrans, COALESCE(a.totalAmount, 0) AS totalAmount, " +
@@ -60,8 +59,7 @@ public interface TransactionTerminalTempRepository extends JpaRepository<Transac
             "LEFT JOIN (SELECT terminal_code, COALESCE(COUNT(id), 0) AS totalTrans, " +
             "COALESCE(SUM(amount), 0) AS totalAmount FROM transaction_terminal_temp " +
             "WHERE time >= :fromDate AND time <= :toDate GROUP BY terminal_code) a ON b.code = a.terminal_code " +
-            "INNER JOIN account_bank_receive_share c ON c.terminal_id = b.id " +
-            "WHERE c.user_id = :userId " +
-            "ORDER BY totalAmount DESC LIMIT :offset, 10", nativeQuery = true)
+            "INNER JOIN (SELECT DISTINCT c.user_id, c.terminal_id FROM account_bank_receive_share c WHERE c.user_id = :userId) c ON c.terminal_id = b.id " +
+            "ORDER BY b.code ASC LIMIT :offset, 10", nativeQuery = true)
     List<IStatisticTerminalOverViewDTO> getStatisticMerchantByDateEveryTerminal(String userId, long fromDate, long toDate, int offset);
 }

@@ -19,7 +19,13 @@ public interface TransactionRelatedDTO {
 
     String getTransType();
 
-    // String getTerminalCode();
+     String getTerminalCode();
 
-    // String getNote();
+     String getNote();
+
+     String getReferenceNumber();
+
+     String getOrderId();
+
+     String getBankShortName();
 }

@@ -177,4 +177,9 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     public String checkExistedBankAccountByBankAccountAndBankCode(String bankAccount, String bankCode) {
         return repo.checkExistedBankAccountByBankAccountAndBankCode(bankAccount, bankCode);
     }
+
+    @Override
+    public String getBankShortNameByBankId(String bankId) {
+        return repo.getBankShortNameByBankId(bankId);
+    }
 }

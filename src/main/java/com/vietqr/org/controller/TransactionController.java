@@ -11,6 +11,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -382,7 +383,7 @@ public class TransactionController {
     }
 
     @GetMapping("terminal/transactions")
-    public ResponseEntity<List<TransactionRelatedDTO>> getTransactionUser(
+    public ResponseEntity<List<TransactionRelatedResponseDTO>> getTransactionUser(
             @RequestParam(value = "userId") String userId,
             @RequestParam(value = "bankId") String bankId,
             @RequestParam(value = "terminalCode") String terminalCode,
@@ -391,7 +392,8 @@ public class TransactionController {
             @RequestParam(value = "from") String fromDate,
             @RequestParam(value = "to") String toDate,
             @RequestParam(value = "offset") int offset) {
-        List<TransactionRelatedDTO> result = new ArrayList<>();
+        List<TransactionRelatedResponseDTO> result = new ArrayList<>();
+        List<TransactionRelatedDTO> dtos = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
             // type = 9: all
@@ -404,24 +406,24 @@ public class TransactionController {
             if (checkEmptyTerminal && checkEmptyDate) {
                 switch (type) {
                     case 1:
-                        result = transactionReceiveService.getTransTerminalByFtCode(bankId, userId, value, offset);
+                        dtos = transactionReceiveService.getTransTerminalByFtCode(bankId, userId, value, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 2:
-                        result = transactionReceiveService.getTransTerminalByOrderId(bankId, userId, value, offset);
+                        dtos = transactionReceiveService.getTransTerminalByOrderId(bankId, userId, value, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 3:
                         value = value.replace("-", " ").trim();
-                        result = transactionReceiveService.getTransTerminalByContent(bankId, userId, value, offset);
+                        dtos = transactionReceiveService.getTransTerminalByContent(bankId, userId, value, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 5:
-                        result = transactionReceiveService.getTransTerminalByStatus(bankId, userId, Integer.parseInt(value), offset);
+                        dtos = transactionReceiveService.getTransTerminalByStatus(bankId, userId, Integer.parseInt(value), offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 9:
-                        result = transactionReceiveService.getAllTransTerminal(bankId, userId, offset);
+                        dtos = transactionReceiveService.getAllTransTerminal(bankId, userId, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     default:
@@ -432,28 +434,28 @@ public class TransactionController {
             } else if (checkEmptyTerminal && !checkEmptyDate) {
                 switch (type) {
                     case 1:
-                        result = transactionReceiveService
+                        dtos = transactionReceiveService
                                 .getTransTerminalByFtCode(bankId, userId, value, fromDate, toDate, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 2:
-                        result = transactionReceiveService
+                        dtos = transactionReceiveService
                                 .getTransTerminalByOrderId(bankId, userId, value, fromDate, toDate, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 3:
                         value = value.replace("-", " ").trim();
-                        result = transactionReceiveService
+                        dtos = transactionReceiveService
                                 .getTransTerminalByContent(bankId, userId, value, fromDate, toDate, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 5:
-                        result = transactionReceiveService
+                        dtos = transactionReceiveService
                                 .getTransTerminalByStatus(bankId, userId, Integer.parseInt(value), fromDate, toDate, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 9:
-                        result = transactionReceiveService
+                        dtos = transactionReceiveService
                                 .getAllTransTerminal(bankId, userId, fromDate, toDate, offset);
                         httpStatus = HttpStatus.OK;
                         break;
@@ -465,28 +467,28 @@ public class TransactionController {
             } else if (!checkEmptyTerminal && checkEmptyDate) {
                 switch (type) {
                     case 1:
-                        result = transactionReceiveService
+                        dtos = transactionReceiveService
                                 .getTransTerminalByFtCode(bankId, userId, value, terminalCode, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 2:
-                        result = transactionReceiveService
+                        dtos = transactionReceiveService
                                 .getTransTerminalByOrderId(bankId, userId, value, terminalCode, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 3:
                         value = value.replace("-", " ").trim();
-                        result = transactionReceiveService
+                        dtos = transactionReceiveService
                                 .getTransTerminalByContent(bankId, userId, value, terminalCode, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 5:
-                        result = transactionReceiveService
+                        dtos = transactionReceiveService
                                 .getTransTerminalByStatus(bankId, userId, Integer.parseInt(value), terminalCode, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 9:
-                        result = transactionReceiveService
+                        dtos = transactionReceiveService
                                 .getAllTransTerminal(bankId, userId, terminalCode, offset);
                         httpStatus = HttpStatus.OK;
                         break;
@@ -498,28 +500,28 @@ public class TransactionController {
             } else {
                 switch (type) {
                     case 1:
-                        result = transactionReceiveService
+                        dtos = transactionReceiveService
                                 .getTransTerminalByFtCode(bankId, userId, value, terminalCode, fromDate, toDate, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 2:
-                        result = transactionReceiveService
+                        dtos = transactionReceiveService
                                 .getTransTerminalByOrderId(bankId, userId, value, terminalCode, fromDate, toDate, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 3:
                         value = value.replace("-", " ").trim();
-                        result = transactionReceiveService
+                        dtos = transactionReceiveService
                                 .getTransTerminalByContent(bankId, userId, value, terminalCode, fromDate, toDate, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 5:
-                        result = transactionReceiveService
+                        dtos = transactionReceiveService
                                 .getTransTerminalByStatus(bankId, userId, Integer.parseInt(value), terminalCode, fromDate, toDate, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 9:
-                        result = transactionReceiveService
+                        dtos = transactionReceiveService
                                 .getAllTransTerminal(bankId, userId, terminalCode, fromDate, toDate, offset);
                         httpStatus = HttpStatus.OK;
                         break;
@@ -529,6 +531,26 @@ public class TransactionController {
                         break;
                 }
             }
+            String bankShortName = accountBankReceiveService.getBankShortNameByBankId(bankId);
+            result = dtos.stream().map(dto -> {
+                TransactionRelatedResponseDTO responseDTO = new TransactionRelatedResponseDTO();
+                responseDTO.setTransactionId(dto.getTransactionId());
+                responseDTO.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
+                responseDTO.setBankAccount(dto.getBankAccount());
+                responseDTO.setBankShortName(bankShortName != null ? bankShortName : "");
+                responseDTO.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
+                responseDTO.setTransType(dto.getTransType());
+                responseDTO.setAmount(dto.getAmount());
+                responseDTO.setStatus(dto.getStatus());
+                responseDTO.setTime(dto.getTime());
+                responseDTO.setTimePaid(dto.getTimePaid());
+                responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
+                responseDTO.setContent(dto.getContent());
+                responseDTO.setType(dto.getType());
+                responseDTO.setNote(dto.getNote() != null ? dto.getNote() : "");
+                return responseDTO;
+
+            }).collect(Collectors.toList());
         } catch (Exception e) {
             logger.error("getTransactionAdmin: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -980,6 +1002,82 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("transactions/unsettled")
+    public ResponseEntity<List<TransactionReceiveAdminListDTO>> getUnsettledTransactions(
+            @RequestParam(value = "bankId") String bankId,
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "type") int type,
+            @RequestParam(value = "value") String value,
+            @RequestParam(value = "offset") int offset,
+            @RequestParam(value = "fromDate") String fromDate,
+            @RequestParam(value = "toDate") String toDate) {
+        List<TransactionReceiveAdminListDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            // type = 9: all
+            // type = 1: reference_number
+            // type = 2: order_id
+            // type = 3: content
+            // type = 4: terminal code
+            String isOwner = accountBankReceiveShareService.checkUserExistedFromBankAccountAndIsOwner(userId, bankId);
+            if (isOwner != null && !isOwner.isEmpty()) {
+                switch (type) {
+                    case 9:
+                        result = transactionReceiveService.getUnsettledTransactions(bankId, fromDate, toDate, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 1:
+                        result = transactionReceiveService.getUnsettledTransactionsByFtCode(bankId, value, fromDate, toDate, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 2:
+                        result = transactionReceiveService.getUnsettledTransactionsByOrderId(bankId, value, fromDate, toDate, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 3:
+                        value = value.replace("-", " ").trim();
+                        result = transactionReceiveService.getUnsettledTransactionsByContent(bankId, value, fromDate, toDate, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 4:
+                        result = transactionReceiveService.getUnsettledTransactionsByTerminalCode(bankId, value, fromDate, toDate, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    default:
+                        logger.error("getUnsettledTransactions: ERROR: INVALID TYPE");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        break;
+                }
+            } else {
+                result = new ArrayList<>();
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+
+//            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getUnsettledTransactions: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("transaction/map-terminal")
+    public ResponseEntity<ResponseMessageDTO> mapTransactionToTerminal(
+            @RequestBody MapTransactionToTerminalDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            transactionReceiveService.updateTransactionReceiveTerminal(dto.getTransactionId(), dto.getTerminalCode());
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E46");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+
     @GetMapping("transactions")
     public ResponseEntity<List<TransactionRelatedDTO>> getTransactionsFilter(
             @RequestParam(value = "bankId") String bankId,
@@ -1008,14 +1106,15 @@ public class TransactionController {
     }
 
     @GetMapping("transactions/list")
-    public ResponseEntity<List<TransactionRelatedDTO>> getTransactionsMobile(
+    public ResponseEntity<List<TransactionRelatedResponseDTO>> getTransactionsMobile(
             @RequestParam(value = "bankId") String bankId,
             @RequestParam(value = "type") int type,
             @RequestParam(value = "value") String value,
             @RequestParam(value = "from") String from,
             @RequestParam(value = "to") String to,
             @RequestParam(value = "offset") int offset) {
-        List<TransactionRelatedDTO> result = new ArrayList<>();
+        List<TransactionRelatedResponseDTO> result = new ArrayList<>();
+        List<TransactionRelatedDTO> dtos = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
             // type = 9: all
@@ -1028,74 +1127,82 @@ public class TransactionController {
             if (checkEmptyDate) {
                 switch (type) {
                     case 9:
-                        result = transactionReceiveService.getTransactions(offset, bankId);
-                        httpStatus = HttpStatus.OK;
+                        dtos = transactionReceiveService.getTransactions(offset, bankId);
                         break;
                     case 1:
-                        result = transactionReceiveService.getTransactionsByFtCode(value, offset, bankId);
+                        dtos = transactionReceiveService.getTransactionsByFtCode(value, offset, bankId);
                         break;
                     case 2:
-                        result = transactionReceiveService.getTransactionsByOrderId(value, offset, bankId);
-                        httpStatus = HttpStatus.OK;
+                        dtos = transactionReceiveService.getTransactionsByOrderId(value, offset, bankId);
                         break;
                     case 3:
                         value = value.replace("-", " ").trim();
-                        result = transactionReceiveService.getTransactionsByContent(value, offset, bankId);
-                        httpStatus = HttpStatus.OK;
+                        dtos = transactionReceiveService.getTransactionsByContent(value, offset, bankId);
                         break;
                     case 4:
-                        result = transactionReceiveService.getTransactionsByTerminalCodeAllDate(value, offset, bankId);
-                        httpStatus = HttpStatus.OK;
+                        dtos = transactionReceiveService.getTransactionsByTerminalCodeAllDate(value, offset, bankId);
                         break;
                     case 5:
                         Integer status = Integer.parseInt(value);
-                        result = transactionReceiveService.getTransactionsByStatus(status, offset, bankId);
-                        httpStatus = HttpStatus.OK;
+                        dtos = transactionReceiveService.getTransactionsByStatus(status, offset, bankId);
                         break;
                     default:
                         logger.error("getTransactionsMobile: ERROR: INVALID TYPE");
-                        httpStatus = HttpStatus.BAD_REQUEST;
                         break;
                 }
             } else {
                 switch (type) {
                     case 9:
-                        result = transactionReceiveService.getTransactions(offset, bankId, from, to);
-                        httpStatus = HttpStatus.OK;
+                        dtos = transactionReceiveService.getTransactions(offset, bankId, from, to);
                         break;
                     case 1:
-                        result = transactionReceiveService.getTransactionsByFtCode(value, offset, bankId, from, to);
-                        httpStatus = HttpStatus.OK;
+                        dtos = transactionReceiveService.getTransactionsByFtCode(value, offset, bankId, from, to);
                         break;
                     case 2:
-                        result = transactionReceiveService.getTransactionsByOrderId(value, offset, bankId, from, to);
-                        httpStatus = HttpStatus.OK;
+                        dtos = transactionReceiveService.getTransactionsByOrderId(value, offset, bankId, from, to);
                         break;
                     case 3:
                         value = value.replace("-", " ").trim();
-                        result = transactionReceiveService.getTransactionsByContent(value, offset, bankId, from, to);
-                        httpStatus = HttpStatus.OK;
+                        dtos = transactionReceiveService.getTransactionsByContent(value, offset, bankId, from, to);
                         break;
                     case 4:
-                        result = transactionReceiveService.getTransactionsByTerminalCodeAndDate(value, offset, from, to,
+                        dtos = transactionReceiveService.getTransactionsByTerminalCodeAndDate(value, offset, from, to,
                                 bankId);
-                        httpStatus = HttpStatus.OK;
                         break;
                     case 5:
                         if (!StringUtil.isNullOrEmpty(value)) {
                             Integer status = Integer.parseInt(value);
-                            result = transactionReceiveService.getTransactionsByStatus(status, offset, bankId, from, to);
+                            dtos = transactionReceiveService.getTransactionsByStatus(status, offset, bankId, from, to);
                         } else {
-                            result = transactionReceiveService.getTransactions(offset, bankId, from, to);
+                            dtos = transactionReceiveService.getTransactions(offset, bankId, from, to);
                         }
-                        httpStatus = HttpStatus.OK;
                         break;
                     default:
                         logger.error("getTransactionsMobile: ERROR: INVALID TYPE");
-                        httpStatus = HttpStatus.BAD_REQUEST;
                         break;
                 }
             }
+            String bankShortName = accountBankReceiveService.getBankShortNameByBankId(bankId);
+            result = dtos.stream().map(dto -> {
+                TransactionRelatedResponseDTO responseDTO = new TransactionRelatedResponseDTO();
+                responseDTO.setTransactionId(dto.getTransactionId());
+                responseDTO.setReferenceNumber(dto.getReferenceNumber());
+                responseDTO.setBankAccount(dto.getBankAccount());
+                responseDTO.setBankShortName(bankShortName != null ? bankShortName : "");
+                responseDTO.setOrderId(dto.getOrderId());
+                responseDTO.setTransType(dto.getTransType());
+                responseDTO.setAmount(dto.getAmount());
+                responseDTO.setStatus(dto.getStatus());
+                responseDTO.setTime(dto.getTime());
+                responseDTO.setTimePaid(dto.getTimePaid());
+                responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
+                responseDTO.setContent(dto.getContent());
+                responseDTO.setType(dto.getType());
+                responseDTO.setNote(dto.getNote() != null ? dto.getNote() : "");
+                return responseDTO;
+
+            }).collect(Collectors.toList());
+            httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("getTransactionsFilter: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;

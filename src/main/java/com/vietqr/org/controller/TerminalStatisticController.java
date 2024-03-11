@@ -51,10 +51,10 @@ public class TerminalStatisticController {
                 result.setTotalTerminal(countTerminal);
 
                 RevenueTerminalDTO revenueTerminalDTOPrevDate = transactionTerminalTempService
-                        .getTotalTranByUserIdAndTimeBetween(
-                                userId, DateTimeUtil.getPrevDateAsString()
-                                , DateTimeUtil.getPrevDateAsString());
-                if (revenueTerminalDTOPrevDate != null) {
+                        .getTotalTranByUserIdAndTimeBetweenWithCurrentTime(
+                                userId, DateTimeUtil.getPrevDateAsString(),
+                                DateTimeUtil.getCurrentDateTimeAsNumber() - 86400);
+                if (revenueTerminalDTOPrevDate != null && revenueTerminalDTOPrevDate.getTotalAmount() != 0 && revenueTerminalDTOPrevDate.getTotalTrans() != 0) {
                     double revGrowthPrevDate = revenueTerminalDTOPrevDate.getTotalAmount() == 0 ? 0 :
                             (double) (dto.getTotalAmount() - revenueTerminalDTOPrevDate.getTotalAmount())
                                     / revenueTerminalDTOPrevDate.getTotalAmount();
@@ -66,7 +66,7 @@ public class TerminalStatisticController {
                         .getTotalTranByUserIdAndTimeBetween(
                                 userId, DateTimeUtil.getPrevMonthAsString(), DateTimeUtil.getPrevMonthAsString());
 
-                if (revenueTerminalDTOPrevMonth != null) {
+                if (revenueTerminalDTOPrevMonth != null && revenueTerminalDTOPrevMonth.getTotalTrans() != 0 && revenueTerminalDTOPrevMonth.getTotalAmount() != 0) {
                     double revGrowthPrevMonth = revenueTerminalDTOPrevMonth.getTotalAmount() == 0 ? 0 :
                             (double) ((dto.getTotalAmount() - revenueTerminalDTOPrevMonth.getTotalAmount())
                                     / revenueTerminalDTOPrevMonth.getTotalAmount());
@@ -106,10 +106,10 @@ public class TerminalStatisticController {
                             dto.setTotalTrans(item.getTotalTrans());
                             dto.setTotalAmount(item.getTotalAmount());
                             RevenueTerminalDTO revGrowthPrevDate = transactionTerminalTempService
-                                    .getTotalTranByTerminalCodeAndTimeBetween(
+                                    .getTotalTranByTerminalCodeAndTimeBetweenWithCurrentTime(
                                             dto.getTerminalCode(), DateTimeUtil.getPrevDateAsString(),
-                                            DateTimeUtil.getPrevDateAsString());
-                            if (revGrowthPrevDate != null) {
+                                            DateTimeUtil.getCurrentDateTimeAsNumber() - 86400);
+                            if (revGrowthPrevDate != null && revGrowthPrevDate.getTotalAmount() != 0 && revGrowthPrevDate.getTotalTrans() != 0) {
                                 double revGrowthPrevDateNum = revGrowthPrevDate.getTotalAmount() == 0 ? 0 :
                                         (double) (dto.getTotalAmount() - revGrowthPrevDate.getTotalAmount())
                                                 / revGrowthPrevDate.getTotalAmount();

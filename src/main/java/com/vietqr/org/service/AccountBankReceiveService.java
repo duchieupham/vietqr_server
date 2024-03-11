@@ -79,4 +79,6 @@ public interface AccountBankReceiveService {
 	AccountBankReceiveShareForNotiDTO findAccountBankByTraceTransfer(String traceTransfer, String bankTypeId);
 
 	public String checkExistedBankAccountByBankAccountAndBankCode(String bankAccount, String bankCode);
+
+    String getBankShortNameByBankId(String bankId);
 }

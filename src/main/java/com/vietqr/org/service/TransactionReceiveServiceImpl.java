@@ -891,6 +891,56 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public List<TransactionReceiveAdminListDTO> getUnsettledTransactions(String bankId, String fromDate, String toDate, int offset) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getUnsettledTransactions(bankId,
+                fromTime - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                toTime - DateTimeUtil.GMT_PLUS_7_OFFSET, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getUnsettledTransactionsByFtCode(String bankId, String value, String fromDate, String toDate, int offset) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getUnsettledTransactionsByFtCode(bankId, value,
+                fromTime - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                toTime - DateTimeUtil.GMT_PLUS_7_OFFSET, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getUnsettledTransactionsByOrderId(String bankId, String value, String fromDate, String toDate, int offset) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getUnsettledTransactionsByOrderId(bankId, value,
+                fromTime - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                toTime - DateTimeUtil.GMT_PLUS_7_OFFSET, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getUnsettledTransactionsByContent(String bankId, String value, String fromDate, String toDate, int offset) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getUnsettledTransactionsByContent(bankId, value,
+                fromTime - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                toTime - DateTimeUtil.GMT_PLUS_7_OFFSET, offset);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getUnsettledTransactionsByTerminalCode(String bankId, String value, String fromDate, String toDate, int offset) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate);
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate);
+        return repo.getUnsettledTransactionsByTerminalCode(bankId, value,
+                fromTime - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                toTime - DateTimeUtil.GMT_PLUS_7_OFFSET, offset);
+    }
+
+    @Override
+    public void updateTransactionReceiveTerminal(String transactionId, String terminalCode) {
+        repo.updateTransactionReceiveTerminalCode(transactionId, terminalCode);
+    }
+
+    @Override
     public TransStatisticDTO getTransactionOverviewByDay(String bankId, String fromDate, String toDate) {
         long startDate = DateTimeUtil.getDateTimeAsLongInt(fromDate);
         long endDate = DateTimeUtil.getDateTimeAsLongInt(toDate);

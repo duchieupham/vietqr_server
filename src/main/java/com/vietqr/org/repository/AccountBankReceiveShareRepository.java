@@ -196,4 +196,9 @@ public interface AccountBankReceiveShareRepository
             + "INNER JOIN terminal c ON c.id = a.terminal_id "
             + "WHERE a.user_id = :userId AND c.code = :value LIMIT 1", nativeQuery = true)
     String checkUserExistedFromBankByTerminalCode(String value, String userId);
+
+    @Query(value = "SELECT a.user_id FROM account_bank_receive_share a "
+            + "INNER JOIN account_bank_receive b ON b.id = a.bank_id "
+            + "WHERE a.user_id = :userId AND b.id = :bankId AND a.is_owner = true LIMIT 1", nativeQuery = true)
+    String checkUserExistedFromBankAccountAndIsOwner(String userId, String bankId);
 }

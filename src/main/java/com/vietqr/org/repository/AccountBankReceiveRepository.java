@@ -250,4 +250,8 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	String checkExistedBankAccountByBankAccountAndBankCode(
 			@Param(value = "bankAccount") String bankAccount,
 			@Param(value = "bankCode") String bankCode);
+
+	@Query(value = "SELECT b.bank_short_name FROM account_bank_receive a " +
+			"INNER JOIN bank_type b ON a.bank_type_id = b.id WHERE a.id = :bankId", nativeQuery = true)
+    String getBankShortNameByBankId(String bankId);
 }
