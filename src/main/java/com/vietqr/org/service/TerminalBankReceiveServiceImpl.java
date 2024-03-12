@@ -26,4 +26,9 @@ public class TerminalBankReceiveServiceImpl implements TerminalBankReceiveServic
     public String getTerminalByTraceTransfer(String traceTransfer) {
         return repo.getTerminalByTraceTransfer(traceTransfer);
     }
+
+    @Override
+    public TerminalBankReceiveEntity getTerminalBankReceiveByTerminalId(String terminalId) {
+        return repo.getTerminalBankReceiveByTerminalId(terminalId);
+    }
 }

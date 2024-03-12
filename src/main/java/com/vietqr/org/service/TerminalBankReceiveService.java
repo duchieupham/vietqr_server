@@ -12,4 +12,6 @@ public interface TerminalBankReceiveService {
     TerminalBankReceiveEntity getTerminalBankReceiveByTerminalIdAndBankId(String terminalId, String bankId);
 
     String getTerminalByTraceTransfer(String traceTransfer);
+
+    TerminalBankReceiveEntity getTerminalBankReceiveByTerminalId(String terminalId);
 }
