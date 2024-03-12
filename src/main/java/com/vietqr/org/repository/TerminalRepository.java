@@ -15,7 +15,7 @@ import java.util.List;
 @Repository
 public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> {
 
-    @Query(value = "SELECT id FROM terminal WHERE code = :code ", nativeQuery = true)
+    @Query(value = "SELECT id FROM terminal WHERE code = :code LIMIT 1", nativeQuery = true)
     String checkTerminalExisted(String code);
 
     @Transactional
@@ -201,4 +201,28 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             + "FROM terminal a "
             + "WHERE a.id = :terminalId", nativeQuery = true)
     ITerminalWebResponseDTO getTerminalWebById(String terminalId);
+
+    @Query(value = "SELECT a.id FROM terminal a "
+            + "INNER JOIN merchant b ON a.merchant_id = b.id "
+            + "WHERE a.public_id = :terminalId "
+            + "AND a.merchant_id = :merchantId ", nativeQuery = true)
+    String checkExistedTerminalIntoMerchant(String terminalId, String merchantId);
+
+    @Query(value = "SELECT * FROM terminal WHERE public_id = :publicId", nativeQuery = true)
+    TerminalEntity findTerminalByPublicId(String publicId);
+
+    @Query(value = "SELECT a.public_id AS terminalId, "
+            + "a.name AS terminalName, a.code AS terminalCode, "
+            + "a.address AS terminalAddress, "
+            + "d.bank_code AS bankCode, c.bank_account AS bankAccount, "
+            + "c.bank_account_name AS bankAccountName, "
+            + "d.bank_name AS bankName, c.mms_active AS isMmsActive, "
+            + "b.data1 AS data1, b.data2 AS data2 "
+            + "FROM terminal a "
+            + "INNER JOIN terminal_bank_receive b ON a.id = b.terminal_id "
+            + "INNER JOIN account_bank_receive c ON b.bank_id = c.id "
+            + "INNER JOIN bank_type d ON d.id = c.bank_type_id "
+            + " WHERE a.merchant_id = :merchantId "
+            + "LIMIT :offset, :size ", nativeQuery = true)
+    List<ITerminalTidResponseDTO> getTerminalByMerchantId(String merchantId, int offset, int size);
 }

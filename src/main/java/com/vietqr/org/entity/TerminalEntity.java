@@ -30,6 +30,8 @@ public class TerminalEntity implements Serializable {
     private String merchantId;
     @Column(name = "userId")
     private String userId;
+    @Column(name = "publicId")
+    private String publicId;
 
     public TerminalEntity() {
     }
@@ -108,5 +110,13 @@ public class TerminalEntity implements Serializable {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getPublicId() {
+        return publicId;
+    }
+
+    public void setPublicId(String publicId) {
+        this.publicId = publicId;
     }
 }

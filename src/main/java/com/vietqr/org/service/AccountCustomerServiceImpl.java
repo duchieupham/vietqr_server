@@ -22,4 +22,9 @@ public class AccountCustomerServiceImpl implements AccountCustomerService {
         return repo.getAccessKey(password);
     }
 
+    @Override
+    public String getAccessKeyByUsername(String username) {
+        return repo.getAccessKeyByUsername(username);
+    }
+
 }

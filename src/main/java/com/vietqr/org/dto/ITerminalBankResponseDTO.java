@@ -5,6 +5,7 @@ public interface ITerminalBankResponseDTO {
     String getBankId();
     String getBankName();
     String getBankCode();
+    boolean getIsMmsActive();
     String getBankAccount();
     String getUserBankName();
     String getBankShortName();

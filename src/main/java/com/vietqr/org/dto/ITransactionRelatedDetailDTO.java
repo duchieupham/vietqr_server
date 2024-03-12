@@ -19,6 +19,8 @@ public interface ITransactionRelatedDetailDTO {
 
     long getTimePaid();
 
+    String getTransType();
+
     int getStatus();
 
     int getType();
