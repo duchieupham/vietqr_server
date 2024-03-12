@@ -116,14 +116,17 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
-		String checksum = BankEncryptUtil.generateMD5GetBillForBankChecksum("QklEVkJMVUVDT01BY2Nlc3NLZXk=", "BC0001",
-				"d0d6ba40-6370-4ff9-926e-5e86194f3062");
-		System.out.println("Checksum: " + checksum);
+		// String checksum =
+		// BankEncryptUtil.generateMD5GetBillForBankChecksum("QklEVkJMVUVDT01BY2Nlc3NLZXk=",
+		// "BC0001",
+		// "d0d6ba40-6370-4ff9-926e-5e86194f3062");
+		// System.out.println("Checksum: " + checksum);
 
-		String checksum2 = BankEncryptUtil.generateMD5PayBillForBankChecksum("QklEVkJMVUVDT01BY2Nlc3NLZXk=",
-				"000000000003", "vPo8XQ2W1Y", "567000");
+		// String checksum2 =
+		// BankEncryptUtil.generateMD5PayBillForBankChecksum("QklEVkJMVUVDT01BY2Nlc3NLZXk=",
+		// "000000000003", "vPo8XQ2W1Y", "567000");
 
-		System.out.println("Checksum2: " + checksum2);
+		// System.out.println("Checksum2: " + checksum2);
 
 		// test();
 		// CustomerSyncEntity customerSyncEntity = new CustomerSyncEntity("",
@@ -162,8 +165,8 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// "FT23293978692076", "SABAccessKey");
 		// System.out.println("CHECKSUM REFUND: " + checkSum2);
 
-		// String bankAccountEncrypted = BankEncryptUtil.encrypt("0368846020");
-		// System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
+		String bankAccountEncrypted = BankEncryptUtil.encrypt("0373568944");
+		System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
 
 		/// generate signature to request payment MB
 		// String valueToEncode = "RSID-eef52137-86b2-4812-bc05-54a522fbf226" + "USER
