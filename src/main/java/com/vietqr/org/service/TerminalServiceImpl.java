@@ -125,4 +125,23 @@ public class TerminalServiceImpl implements TerminalService {
         return repo.getTerminalWebById(terminalId);
     }
 
+    @Override
+    public String checkExistedTerminalIntoMerchant(String terminalId, String merchantId) {
+        return repo.checkExistedTerminalIntoMerchant(terminalId, merchantId);
+    }
+
+    @Override
+    public TerminalEntity findTerminalByPublicId(String terminalId) {
+        return repo.findTerminalByPublicId(terminalId);
+    }
+
+    @Override
+    public void insertAllTerminal(List<TerminalEntity> terminalEntities) {
+        repo.saveAll(terminalEntities);
+    }
+
+    @Override
+    public List<ITerminalTidResponseDTO> getTerminalByMerchantId(String merchantId, int offset, int size) {
+        return repo.getTerminalByMerchantId(merchantId, offset, size);
+    }
 }

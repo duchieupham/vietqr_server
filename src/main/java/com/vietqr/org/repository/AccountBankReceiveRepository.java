@@ -254,4 +254,14 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Query(value = "SELECT b.bank_short_name FROM account_bank_receive a " +
 			"INNER JOIN bank_type b ON a.bank_type_id = b.id WHERE a.id = :bankId", nativeQuery = true)
     String getBankShortNameByBankId(String bankId);
+
+	@Query(value = "SELECT a.* FROM account_bank_receive a "
+			+ "INNER JOIN bank_type b "
+			+ "ON b.id = a.bank_type_id "
+			+ "WHERE a.bank_account = :bankAccount "
+			+ "AND b.bank_code = :bankCode AND is_authenticated = TRUE ", nativeQuery = true)
+    AccountBankReceiveEntity checkExistedBankAccountAuthenticated(String bankAccount, String bankCode);
+
+	@Query(value = "SELECT a.bank_name FROM bank_type a WHERE a.id = :bankTypeId", nativeQuery = true)
+    String getBankNameByBankId(String bankTypeId);
 }

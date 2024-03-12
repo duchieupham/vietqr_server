@@ -41,8 +41,8 @@ public class MerchantController {
             long time = now.toEpochSecond(ZoneOffset.UTC);
             entity.setTimeCreated(time);
             entity.setVsoCode("");
-            entity.setType("");
-            entity.setUserId(dto.getUserId());
+//            entity.setType("");
+//            entity.setUserId(dto.getUserId());
             merchantService.insertMerchant(entity);
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;

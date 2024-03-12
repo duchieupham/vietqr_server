@@ -85,6 +85,25 @@ public class BankEncryptUtil {
         return result;
     }
 
+    public static String generateMD5SyncTidChecksum(String accessKey, String bankCode,
+                                                           String bankAccount) {
+        String result = "";
+        try {
+            String plainText = accessKey + bankCode + bankAccount;
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(plainText.getBytes());
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b & 0xff));
+            }
+            result = sb.toString();
+        } catch (Exception e) {
+            logger.error("generateMD5Checksum ERROR: " + e.toString());
+        }
+        return result;
+    }
+
     public static String generateMD5RefundCustomerChecksum(String bankAccount, String ftCode,
             String accessKey) {
         String result = "";

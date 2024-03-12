@@ -49,4 +49,12 @@ public interface TerminalService {
     ITerminalBankResponseDTO getTerminalResponseById(String terminalId, String userId);
 
     ITerminalWebResponseDTO getTerminalWebById(String terminalId);
+
+    String checkExistedTerminalIntoMerchant(String terminalId, String merchantId);
+
+    TerminalEntity findTerminalByPublicId(String terminalId);
+
+    void insertAllTerminal(List<TerminalEntity> terminalEntities);
+
+    List<ITerminalTidResponseDTO> getTerminalByMerchantId(String merchantId, int offset, int size);
 }

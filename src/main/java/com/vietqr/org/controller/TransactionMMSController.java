@@ -107,6 +107,9 @@ public class TransactionMMSController {
     TelegramAccountBankService telegramAccountBankService;
 
     @Autowired
+    TerminalBankReceiveService terminalBankReceiveService;
+
+    @Autowired
     LarkAccountBankService larkAccountBankService;
 
     @PostMapping("transaction-mms")
@@ -166,6 +169,7 @@ public class TransactionMMSController {
                                         "transaction-mms-sync: updateTransactionReceiveStatus SUCCESS at: "
                                                 + updateTime);
                             } else {
+                                //////////////////////////////////////////
                                 logger.info("transaction-mms-sync: NOT FOUND transactionReceiveEntity");
                             }
                             ///
@@ -333,6 +337,10 @@ public class TransactionMMSController {
                         if (StringUtil.isNullOrEmpty(traceTransfer) == false) {
                             terminalId = terminalService
                                     .getTerminalByTraceTransfer(traceTransfer);
+                            if (terminalId == null || terminalId.trim().isEmpty()) {
+                                terminalId = terminalBankReceiveService
+                                        .getTerminalByTraceTransfer(traceTransfer);
+                            }
                         }
                         // if exist terminalId, find bankAccount by terminalId
                         if (terminalId != null && !terminalId.trim().isEmpty()) {

@@ -182,4 +182,14 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     public String getBankShortNameByBankId(String bankId) {
         return repo.getBankShortNameByBankId(bankId);
     }
+
+    @Override
+    public AccountBankReceiveEntity checkExistedBankAccountAuthenticated(String bankAccount, String bankCode) {
+        return repo.checkExistedBankAccountAuthenticated(bankAccount, bankCode);
+    }
+
+    @Override
+    public String getBankNameByBankId(String bankTypeId) {
+        return repo.getBankNameByBankId(bankTypeId);
+    }
 }
