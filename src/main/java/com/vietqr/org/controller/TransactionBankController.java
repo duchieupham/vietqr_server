@@ -675,7 +675,7 @@ public class TransactionBankController {
 				if (newPaths[i].contains(prefix)) {
 					if (newPaths[i].length() >= length) {
 						traceId = newPaths[i].substring(0, length);
-						if (traceId.contains(prefix)) {
+						if (traceId.startsWith(prefix)) {
 							break;
 						} else {
 							int startIndex = newPaths[i].indexOf(prefix);
