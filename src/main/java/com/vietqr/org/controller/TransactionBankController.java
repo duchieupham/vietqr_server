@@ -675,7 +675,7 @@ public class TransactionBankController {
 				if (newPaths[i].contains(prefix)) {
 					if (newPaths[i].length() >= length) {
 						traceId = newPaths[i].substring(0, length);
-						if (traceId.contains(prefix)) {
+						if (traceId.startsWith(prefix)) {
 							break;
 						} else {
 							int startIndex = newPaths[i].indexOf(prefix);
@@ -1434,6 +1434,7 @@ public class TransactionBankController {
 					Thread thread = new Thread(() -> {
 						TransactionTerminalTempEntity transactionTerminalTempEntity = new TransactionTerminalTempEntity();
 						transactionTerminalTempEntity.setId(UUID.randomUUID().toString());
+						transactionTerminalTempEntity.setTransactionId(transcationUUID);
 						transactionTerminalTempEntity.setTerminalCode(tempTerminalCode);
 						transactionTerminalTempEntity.setTime(time);
 						transactionTerminalTempEntity.setAmount(Long.parseLong(dto.getAmount() + ""));

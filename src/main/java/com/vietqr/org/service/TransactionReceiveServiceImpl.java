@@ -7,8 +7,6 @@ import org.springframework.stereotype.Service;
 
 import com.vietqr.org.repository.TransactionReceiveRepository;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import com.vietqr.org.entity.TransactionReceiveEntity;
 
@@ -936,8 +934,13 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
-    public void updateTransactionReceiveTerminal(String transactionId, String terminalCode) {
-        repo.updateTransactionReceiveTerminalCode(transactionId, terminalCode);
+    public void updateTransactionReceiveTerminal(String transactionId, String terminalCode, int type) {
+        repo.updateTransactionReceiveTerminalCode(transactionId, terminalCode, type);
+    }
+
+    @Override
+    public TransactionReceiveEntity getTransactionReceiveById(String transactionId, String userId) {
+        return repo.getTransactionReceiveByIdAndUserId(transactionId, userId);
     }
 
     @Override

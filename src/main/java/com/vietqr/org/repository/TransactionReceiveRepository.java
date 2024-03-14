@@ -2110,7 +2110,11 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
 
         @Transactional
         @Modifying
-        @Query(value = "UPDATE transaction_receive SET terminal_code = :terminalCode, type = 1 WHERE id = :transactionId ", nativeQuery = true)
-        void updateTransactionReceiveTerminalCode(String transactionId, String terminalCode);
+        @Query(value = "UPDATE transaction_receive SET terminal_code = :terminalCode, type = :type, trans_status = 2 WHERE id = :transactionId ", nativeQuery = true)
+        void updateTransactionReceiveTerminalCode(String transactionId, String terminalCode, int type);
+
+        @Query(value = "SELECT a.* FROM transaction_receive a WHERE a.id = :transactionId "
+                + "AND a.user_id = :userId", nativeQuery = true)
+        TransactionReceiveEntity getTransactionReceiveByIdAndUserId(String transactionId, String userId);
 }
 

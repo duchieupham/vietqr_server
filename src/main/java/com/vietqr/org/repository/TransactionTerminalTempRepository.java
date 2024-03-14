@@ -62,4 +62,8 @@ public interface TransactionTerminalTempRepository extends JpaRepository<Transac
             "INNER JOIN (SELECT DISTINCT c.user_id, c.terminal_id FROM account_bank_receive_share c WHERE c.user_id = :userId) c ON c.terminal_id = b.id " +
             "ORDER BY b.code ASC LIMIT :offset, 10", nativeQuery = true)
     List<IStatisticTerminalOverViewDTO> getStatisticMerchantByDateEveryTerminal(String userId, long fromDate, long toDate, int offset);
+
+    @Query(value = "SELECT * FROM transaction_terminal_temp "
+            + "WHERE transaction_id = :transactionId LIMIT 1", nativeQuery = true)
+    TransactionTerminalTempEntity findByTransactionId(String transactionId);
 }

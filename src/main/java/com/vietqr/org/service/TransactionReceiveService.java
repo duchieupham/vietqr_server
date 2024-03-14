@@ -417,5 +417,7 @@ public interface TransactionReceiveService {
 
         List<TransactionReceiveAdminListDTO> getUnsettledTransactionsByTerminalCode(String bankId, String value, String fromDate, String toDate, int offset);
 
-        void updateTransactionReceiveTerminal(String transactionId, String terminalCode);
+        void updateTransactionReceiveTerminal(String transactionId, String terminalCode, int type);
+
+        TransactionReceiveEntity getTransactionReceiveById(String transactionId, String userId);
 }
