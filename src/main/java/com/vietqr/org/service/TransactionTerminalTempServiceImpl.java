@@ -97,4 +97,9 @@ public class TransactionTerminalTempServiceImpl implements TransactionTerminalTe
                 startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 currentDateTimeAsNumber - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
+
+    @Override
+    public TransactionTerminalTempEntity getTempByTransactionId(String transactionId) {
+        return repo.findByTransactionId(transactionId);
+    }
 }

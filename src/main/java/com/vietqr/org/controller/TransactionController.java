@@ -4,10 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -16,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.service.*;
@@ -59,6 +57,12 @@ public class TransactionController {
 
     @Autowired
     TransactionBankService transactionBankService;
+
+    @Autowired
+    TransactionReceiveHistoryService transactionReceiveHistoryService;
+
+    @Autowired
+    TransactionTerminalTempService transactionTerminalTempService;
 
     @Autowired
     ImageService imageService;
@@ -1063,13 +1067,74 @@ public class TransactionController {
 
     @PostMapping("transaction/map-terminal")
     public ResponseEntity<ResponseMessageDTO> mapTransactionToTerminal(
-            @RequestBody MapTransactionToTerminalDTO dto) {
+            @Valid @RequestBody MapTransactionToTerminalDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
+        ObjectMapper mapper = new ObjectMapper();
         try {
-            transactionReceiveService.updateTransactionReceiveTerminal(dto.getTransactionId(), dto.getTerminalCode());
-            result = new ResponseMessageDTO("SUCCESS", "");
-            httpStatus = HttpStatus.OK;
+            TransactionUpdateTerminalDTO data1 = new TransactionUpdateTerminalDTO();
+            TransactionUpdateTerminalDTO data2 = new TransactionUpdateTerminalDTO();
+            TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
+                    .getTransactionReceiveById(dto.getTransactionId(), dto.getUserId());
+            if (transactionReceiveEntity == null) {
+                result = new ResponseMessageDTO("FAILED", "E115");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            } else {
+                if (transactionReceiveEntity.getType() == 0) {
+                    //update terminal code
+                    transactionReceiveService.updateTransactionReceiveTerminal(dto.getTransactionId(), dto.getTerminalCode(), 0);
+                    data1.setTransactionId(dto.getTransactionId());
+                    data1.setTerminalCode(transactionReceiveEntity.getTerminalCode());
+                    data1.setType(transactionReceiveEntity.getType());
+//                    data1.setTransStatus(transactionReceiveEntity.getTransStatus());
+                    data2.setTransactionId(dto.getTransactionId());
+                    data2.setTerminalCode(dto.getTerminalCode());
+                    data2.setType(transactionReceiveEntity.getType());
+//                    data2.setTransStatus(transactionReceiveEntity.getTransStatus());
+                } else {
+                    // update terminal code
+                    transactionReceiveService.updateTransactionReceiveTerminal(dto.getTransactionId(), dto.getTerminalCode(), 1);
+                    data1.setTransactionId(dto.getTransactionId());
+                    data1.setTerminalCode(transactionReceiveEntity.getTerminalCode());
+                    data1.setType(transactionReceiveEntity.getType());
+//                    data1.setTransStatus(transactionReceiveEntity.getTransStatus());
+                    data2.setTransactionId(dto.getTransactionId());
+                    data2.setTerminalCode(dto.getTerminalCode());
+                    data2.setType(1);
+//                    data2.setTransStatus(transactionReceiveEntity.getTransStatus());
+                }
+
+                // insert for statistic
+                TransactionTerminalTempEntity transactionTerminalTemp = transactionTerminalTempService
+                        .getTempByTransactionId(dto.getTransactionId());
+                if (transactionTerminalTemp != null) {
+                    transactionTerminalTemp.setTerminalCode(dto.getTerminalCode());
+                } else {
+                    transactionTerminalTemp = new TransactionTerminalTempEntity();
+                    transactionTerminalTemp.setId(UUID.randomUUID().toString());
+                    transactionTerminalTemp.setTransactionId(dto.getTransactionId());
+                    transactionTerminalTemp.setTerminalCode(dto.getTerminalCode());
+                    transactionTerminalTemp.setTime(transactionReceiveEntity.getTimePaid());
+                    transactionTerminalTemp.setAmount(transactionReceiveEntity.getAmount());
+                }
+                transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTemp);
+
+                // save history
+                TransactionReceiveHistoryEntity transHistory = new TransactionReceiveHistoryEntity();
+                transHistory.setId(UUID.randomUUID().toString());
+                transHistory.setTransactionReceiveId(dto.getTransactionId());
+                transHistory.setUserId(dto.getUserId());
+                transHistory.setData1(mapper.writeValueAsString(data1));
+                transHistory.setData2(mapper.writeValueAsString(data2));
+                transHistory.setData3("");
+                transHistory.setType(2);
+                LocalDateTime localDateTime = LocalDateTime.now();
+                long timeUpdated = localDateTime.toEpochSecond(ZoneOffset.UTC);
+                transHistory.setTimeUpdated(timeUpdated);
+                transactionReceiveHistoryService.insertTransactionReceiveHistory(transHistory);
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            }
         } catch (Exception e) {
             result = new ResponseMessageDTO("FAILED", "E46");
             httpStatus = HttpStatus.BAD_REQUEST;

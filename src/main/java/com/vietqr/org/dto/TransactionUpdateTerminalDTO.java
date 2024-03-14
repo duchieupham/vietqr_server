@@ -1,22 +1,27 @@
 package com.vietqr.org.dto;
 
-import javax.validation.constraints.NotBlank;
-
-public class MapTransactionToTerminalDTO {
-    @NotBlank
+public class TransactionUpdateTerminalDTO {
     private String transactionId;
-    @NotBlank
     private String terminalCode;
-    @NotBlank
-    private String userId;
+    private int type;
 
-    public MapTransactionToTerminalDTO() {
-    }
+    private int transStatus;
 
-    public MapTransactionToTerminalDTO(String transactionId, String terminalCode, String userId) {
+    public TransactionUpdateTerminalDTO(String transactionId, String terminalCode, int type) {
         this.transactionId = transactionId;
         this.terminalCode = terminalCode;
-        this.userId = userId;
+        this.type = type;
+    }
+
+    public int getTransStatus() {
+        return transStatus;
+    }
+
+    public void setTransStatus(int transStatus) {
+        this.transStatus = transStatus;
+    }
+
+    public TransactionUpdateTerminalDTO() {
     }
 
     public String getTransactionId() {
@@ -35,11 +40,11 @@ public class MapTransactionToTerminalDTO {
         this.terminalCode = terminalCode;
     }
 
-    public String getUserId() {
-        return userId;
+    public int getType() {
+        return type;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setType(int type) {
+        this.type = type;
     }
 }

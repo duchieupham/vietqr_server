@@ -29,4 +29,6 @@ public interface TransactionTerminalTempService {
     RevenueTerminalDTO getTotalTranByUserIdAndTimeBetweenWithCurrentTime(String userId, String fromDate, long currentTime);
 
     RevenueTerminalDTO getTotalTranByTerminalCodeAndTimeBetweenWithCurrentTime(String terminalCode, String fromDate, long currentDateTimeAsNumber);
+
+    TransactionTerminalTempEntity getTempByTransactionId(String transactionId);
 }

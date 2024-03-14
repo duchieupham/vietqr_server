@@ -11,6 +11,8 @@ public class TransactionTerminalTempEntity {
     @Id
     @Column(name = "id")
     private String id;
+    @Column(name = "transactionId")
+    private String transactionId;
     @Column(name = "terminalCode")
     private String terminalCode;
     @Column(name = "time")
@@ -26,6 +28,14 @@ public class TransactionTerminalTempEntity {
         this.terminalCode = terminalCode;
         this.time = time;
         this.amount = amount;
+    }
+
+    public String getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
     }
 
     public String getId() {

@@ -1434,6 +1434,7 @@ public class TransactionBankController {
 					Thread thread = new Thread(() -> {
 						TransactionTerminalTempEntity transactionTerminalTempEntity = new TransactionTerminalTempEntity();
 						transactionTerminalTempEntity.setId(UUID.randomUUID().toString());
+						transactionTerminalTempEntity.setTransactionId(transcationUUID);
 						transactionTerminalTempEntity.setTerminalCode(tempTerminalCode);
 						transactionTerminalTempEntity.setTime(time);
 						transactionTerminalTempEntity.setAmount(Long.parseLong(dto.getAmount() + ""));
