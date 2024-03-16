@@ -144,4 +144,14 @@ public class TerminalServiceImpl implements TerminalService {
     public List<ITerminalTidResponseDTO> getTerminalByMerchantId(String merchantId, int offset, int size) {
         return repo.getTerminalByMerchantId(merchantId, offset, size);
     }
+
+    @Override
+    public String checkExistedRawTerminalCode(String terminalCode) {
+        return repo.checkExistedRawTerminalCode(terminalCode);
+    }
+
+    @Override
+    public List<TerminalCodeResponseDTO> getListTerminalResponseByBankIdAndUserId(String userId, String bankId) {
+        return repo.getListTerminalResponseByBankIdAndUserId(userId, bankId);
+    }
 }

@@ -20,6 +20,8 @@ public class TerminalEntity implements Serializable {
     private String name;
     @Column(name = "code")
     private String code;
+    @Column(name = "rawTerminalCode")
+    private String rawTerminalCode;
     @Column(name = "address")
     private String address;
     @Column(name = "isDefault")
@@ -118,5 +120,13 @@ public class TerminalEntity implements Serializable {
 
     public void setPublicId(String publicId) {
         this.publicId = publicId;
+    }
+
+    public String getRawTerminalCode() {
+        return rawTerminalCode;
+    }
+
+    public void setRawTerminalCode(String rawTerminalCode) {
+        this.rawTerminalCode = rawTerminalCode;
     }
 }

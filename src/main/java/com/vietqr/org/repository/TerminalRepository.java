@@ -225,4 +225,15 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             + " WHERE a.merchant_id = :merchantId "
             + "LIMIT :offset, :size ", nativeQuery = true)
     List<ITerminalTidResponseDTO> getTerminalByMerchantId(String merchantId, int offset, int size);
+
+    @Query(value = "SELECT raw_terminal_code FROM terminal WHERE raw_terminal_code = :terminalCode", nativeQuery = true)
+    String checkExistedRawTerminalCode(String terminalCode);
+
+    @Query(value = "SELECT a.id AS terminalId, a.name AS terminalName, "
+            + "a.address AS terminalAddress, a.code as terminalCode, "
+            + "a.user_id AS userId FROM terminal a "
+            + "INNER JOIN ON terminal_bank_receive b "
+            + "ON a.id = b.terminal_id "
+            + "WHERE a.user_id = :userId AND b.bank_id = :bankId ", nativeQuery = true)
+    List<TerminalCodeResponseDTO> getListTerminalResponseByBankIdAndUserId(String userId, String bankId);
 }

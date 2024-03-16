@@ -1135,22 +1135,21 @@ public class TerminalController {
 
     @PostMapping("tid/synchronize")
     public ResponseEntity<Object> syncTerminal(@RequestHeader("Authorization") String token,
-                                                           @Valid @RequestBody List<TerminalSyncDTO> dtos) {
+                                               @Valid @RequestBody List<TerminalSyncDTO> dtos) {
         Object result = null;
         HttpStatus httpStatus = null;
         List<TerminalTidResponseDTO> responses = new ArrayList<>();
+        String terminalCode = "";
         try {
             String username = getUsernameFromToken(token);
             if (username != null && !username.trim().isEmpty()) {
                 List<String> checkExistedCustomerSync = merchantConnectionService
                         .checkExistedCustomerSyncByUsername(username);
                 if (checkExistedCustomerSync != null && !checkExistedCustomerSync.isEmpty()) {
-            if (dtos != null && !dtos.isEmpty()) {
-
-
+                    if (dtos != null && !dtos.isEmpty()) {
                         boolean checkValid = true;
                         // for each dto validate and insert
-                        for (TerminalSyncDTO dto: dtos) {
+                        for (TerminalSyncDTO dto : dtos) {
                             // check sum of bank account
                             String accessKey = accountCustomerService.getAccessKeyByUsername(username);
                             String checkSum = BankEncryptUtil.generateMD5SyncTidChecksum(accessKey, dto.getBankCode(),
@@ -1160,71 +1159,79 @@ public class TerminalController {
                                 AccountBankReceiveEntity bankReceiveEntity = accountBankReceiveService
                                         .checkExistedBankAccountAuthenticated(dto.getBankAccount(), dto.getBankCode());
                                 if (bankReceiveEntity != null) {
-                                        String checkValidBankAccount = merchantBankReceiveService
-                                                .checkExistedBankAccountInOtherMerchant(
-                                                        bankReceiveEntity.getId(), checkExistedCustomerSync.get(0));
-                                        if (checkValidBankAccount == null || checkValidBankAccount.trim().isEmpty()) {
-                                            // co terminalId
-                                            if (dto.getTerminalId() != null && !dto.getTerminalId().trim().isEmpty()) {
-                                                String terminalId = terminalService.checkExistedTerminalIntoMerchant(dto.getTerminalId(), checkExistedCustomerSync.get(0));
-                                                if (terminalId != null && !terminalId.trim().isEmpty()) {
-                                                    checkValid = true;
-                                                    String checkExistedTerminalCode = "";
-                                                    if (dto.getTerminalCode() != null && !dto.getTerminalCode().trim().isEmpty()
-                                                            && dto.getTerminalCode().trim().length() == 10) {
-                                                        TerminalEntity entity = terminalService.findTerminalByPublicId(dto.getTerminalId());
-                                                        checkExistedTerminalCode = terminalService.checkExistedTerminal(dto.getTerminalCode());
-                                                        if (checkExistedTerminalCode != null && !checkExistedTerminalCode.trim().isEmpty() && !Objects.equals(entity.getId(), checkExistedTerminalCode)) {
-                                                            result = new ResponseMessageDTO("FAILED", "E110");
-                                                            httpStatus = HttpStatus.BAD_REQUEST;
-                                                            checkValid = false;
-                                                        } else {
-                                                            checkValid = true;
-                                                        }
-                                                    } else {
-                                                        dto.setTerminalCode(getRandomUniqueCode());
-                                                        checkValid = true;
-                                                    }
-                                                } else {
-                                                    logger.error("syncTerminal: ERROR: TERMINAL IS NOT EXISTED OR BELONG TO OTHER MERCHANT");
-                                                    httpStatus = HttpStatus.BAD_REQUEST;
-                                                    result = new ResponseMessageDTO("FAILED", "E113");
-                                                    checkValid = false;
-                                                    break;
-                                                }
-                                                if (dto.getTerminalCode() != null && !dto.getTerminalCode().trim().isEmpty()
-                                                && dto.getTerminalCode().trim().length() == 10) {
-                                                    checkValid = true;
-                                                } else {
-                                                    checkValid = true;
-                                                    result = new ResponseMessageDTO("FAILED", "E46");
-                                                    httpStatus = HttpStatus.BAD_REQUEST;
-                                                    break;
-                                                }
-                                            } else {
-                                                // khong co terminalId
-                                                if (dto.getTerminalCode() != null && !dto.getTerminalCode().trim().isEmpty()
-                                                        && dto.getTerminalCode().trim().length() == 10) {
-                                                    String checkExistedTerminalCode = terminalService.checkExistedTerminal(dto.getTerminalCode());
-                                                    if (checkExistedTerminalCode != null && !checkExistedTerminalCode.trim().isEmpty()) {
-                                                        result = new ResponseMessageDTO("FAILED", "E110");
-                                                        httpStatus = HttpStatus.BAD_REQUEST;
-                                                        checkValid = false;
-                                                        break;
-                                                    } else {
-                                                        checkValid = true;
-                                                    }
-                                                } else {
-                                                    dto.setTerminalCode(getRandomUniqueCode());
-                                                }
-                                            }
-                                        } else {
-                                            logger.error("syncTerminal: ERROR: INVALID BANK ACCOUNT");
+                                    String checkValidBankAccount = merchantBankReceiveService
+                                            .checkExistedBankAccountInOtherMerchant(
+                                                    bankReceiveEntity.getId(), checkExistedCustomerSync.get(0));
+                                    if (checkValidBankAccount == null || checkValidBankAccount.trim().isEmpty()) {
+                                        // co terminalId
+                                        if (dto.getTerminalId() != null && !dto.getTerminalId().trim().isEmpty()) {
+                                            // dang bao tri
+                                            logger.error("syncTerminal: ERROR: NOT IMPLEMENT");
                                             httpStatus = HttpStatus.BAD_REQUEST;
-                                            result = new ResponseMessageDTO("FAILED", "E40");
+                                            result = new ResponseMessageDTO("FAILED", "E116");
                                             checkValid = false;
                                             break;
+//                                                String terminalId = terminalService.checkExistedTerminalIntoMerchant(dto.getTerminalId(), checkExistedCustomerSync.get(0));
+//                                                if (terminalId != null && !terminalId.trim().isEmpty()) {
+//                                                    checkValid = true;
+//                                                    String checkExistedTerminalCode = "";
+//                                                    if (dto.getTerminalCode() != null && !dto.getTerminalCode().trim().isEmpty()
+//                                                            && dto.getTerminalCode().trim().length() <= 20) {
+//                                                        TerminalEntity entity = terminalService.findTerminalByPublicId(dto.getTerminalId());
+//                                                        checkExistedTerminalCode = terminalService.checkExistedTerminal(dto.getTerminalCode());
+//                                                        if (checkExistedTerminalCode != null && !checkExistedTerminalCode.trim().isEmpty() && !Objects.equals(entity.getId(), checkExistedTerminalCode)) {
+//                                                            result = new ResponseMessageDTO("FAILED", "E110");
+//                                                            httpStatus = HttpStatus.BAD_REQUEST;
+//                                                            checkValid = false;
+//                                                        } else {
+//                                                            checkValid = true;
+//                                                        }
+//                                                    } else {
+//                                                        dto.setTerminalCode(getRandomUniqueCode());
+//                                                        checkValid = true;
+//                                                    }
+//                                                } else {
+//                                                    logger.error("syncTerminal: ERROR: TERMINAL IS NOT EXISTED OR BELONG TO OTHER MERCHANT");
+//                                                    httpStatus = HttpStatus.BAD_REQUEST;
+//                                                    result = new ResponseMessageDTO("FAILED", "E113");
+//                                                    checkValid = false;
+//                                                    break;
+//                                                }
+//                                                if (dto.getTerminalCode() != null && !dto.getTerminalCode().trim().isEmpty()
+//                                                && dto.getTerminalCode().trim().length() <= 20) {
+//                                                    checkValid = true;
+//                                                } else {
+//                                                    checkValid = true;
+//                                                    result = new ResponseMessageDTO("FAILED", "E46");
+//                                                    httpStatus = HttpStatus.BAD_REQUEST;
+//                                                    break;
+//                                                }
+                                        } else {
+                                            // khong co terminalId
+                                            if (dto.getTerminalCode() != null && !dto.getTerminalCode().trim().isEmpty()
+                                                    && dto.getTerminalCode().trim().length() <= 20) {
+                                                String checkExistedTerminalCodeRaw = terminalService.checkExistedRawTerminalCode(dto.getTerminalCode());
+                                                if (checkExistedTerminalCodeRaw != null && !checkExistedTerminalCodeRaw.trim().isEmpty()) {
+                                                    result = new ResponseMessageDTO("FAILED", "E110");
+                                                    httpStatus = HttpStatus.BAD_REQUEST;
+                                                    checkValid = false;
+                                                    break;
+                                                } else {
+                                                    terminalCode = getRandomUniqueCodeInTerminalCode();
+                                                    checkValid = true;
+                                                }
+                                            } else {
+                                                terminalCode = getRandomUniqueCodeInTerminalCode();
+                                                dto.setTerminalCode(terminalCode);
+                                            }
                                         }
+                                    } else {
+                                        logger.error("syncTerminal: ERROR: INVALID BANK ACCOUNT");
+                                        httpStatus = HttpStatus.BAD_REQUEST;
+                                        result = new ResponseMessageDTO("FAILED", "E40");
+                                        checkValid = false;
+                                        break;
+                                    }
                                 } else {
                                     logger.error("syncTerminal: ERROR: INVALID BANK ACCOUNT");
                                     httpStatus = HttpStatus.BAD_REQUEST;
@@ -1247,96 +1254,91 @@ public class TerminalController {
                             List<TerminalEntity> terminalEntities = new ArrayList<>();
                             List<TerminalBankReceiveEntity> terminalBankReceiveEntities = new ArrayList<>();
                             List<MerchantBankReceiveEntity> merchantBankReceiveEntities = new ArrayList<>();
-                            for (TerminalSyncDTO dto: dtos) {
+                            for (TerminalSyncDTO dto : dtos) {
                                 TerminalTidResponseDTO response = new TerminalTidResponseDTO();
                                 //update Terminal
                                 if (dto.getTerminalId() != null && !dto.getTerminalId().trim().isEmpty()) {
-                                    TerminalEntity terminalEntity = terminalService.findTerminalByPublicId(dto.getTerminalId());
-//                                    TerminalBankReceiveEntity terminalBankService = new TerminalBankService();
-                                    terminalEntity.setAddress(dto.getTerminalAddress());
-                                    terminalEntity.setPublicId(dto.getTerminalId());
-                                    terminalEntity.setName(dto.getTerminalName());
-
-                                        terminalEntity.setCode(dto.getTerminalCode());
-                                        AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService
-                                                .checkExistedBankAccountAuthenticated(dto.getBankAccount(), dto.getBankCode());
-                                        if (accountBankReceiveEntity != null) {
-                                            TerminalBankReceiveEntity terminalBankReceiveEntity = terminalBankReceiveService
-                                                    .getTerminalBankReceiveByTerminalIdAndBankId(terminalEntity.getId(), accountBankReceiveEntity.getId());
-                                            terminalBankReceiveEntity.setBankId(accountBankReceiveEntity.getId());
-                                            // luồng ưu tiên
-                                            if (accountBankReceiveEntity.isMmsActive()) {
-                                                TerminalBankEntity terminalBankEntity =
-                                                        terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
-                                                if (terminalBankEntity != null) {
-                                                    String qr = MBVietQRUtil.generateStaticVietQRMMS(
-                                                            new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
-                                                                    terminalBankEntity.getTerminalId(), dto.getTerminalCode()));
-                                                    terminalBankReceiveEntity.setData2(qr);
-                                                    String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
-                                                    terminalBankReceiveEntity.setTraceTransfer(traceTransfer);
-                                                    terminalBankReceiveEntity.setData1("");
-                                                    terminalBankReceiveEntities.add(terminalBankReceiveEntity);
-                                                } else {
-                                                    logger.error("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
-                                                }
-                                            } else {
-                                                // luồng thuong
-                                                String qrCodeContent = "SQR" + dto.getTerminalCode();
-                                                String bankAccount = accountBankReceiveEntity.getBankAccount();
-                                                String caiValue = accountBankReceiveService.getCaiValueByBankId(accountBankReceiveEntity.getId());
-                                                VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", qrCodeContent, bankAccount);
-                                                String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
-                                                terminalBankReceiveEntity.setData1(qr);
-                                                terminalBankReceiveEntity.setData2("");
-                                                terminalBankReceiveEntity.setTraceTransfer("");
-                                                terminalBankReceiveEntities.add(terminalBankReceiveEntity);
-                                            }
-                                            String bankName = accountBankReceiveService.getBankNameByBankId(accountBankReceiveEntity.getBankTypeId());
-                                            response.setBankName(bankName);
-                                            if (accountBankReceiveEntity.isMmsActive()) {
-                                                response.setQrCode(terminalBankReceiveEntity.getData2());
-                                            } else {
-                                                response.setQrCode(terminalBankReceiveEntity.getData1());
-                                            }
-                                            response.setTerminalAddress(terminalEntity.getAddress());
-                                            response.setBankAccount(accountBankReceiveEntity.getBankAccount());
-                                            response.setTerminalId(terminalEntity.getPublicId());
-                                            response.setTerminalCode(terminalEntity.getCode());
-                                            response.setBankAccountName(accountBankReceiveEntity.getBankAccountName());
-                                            response.setBankCode(dto.getBankCode());
-                                            response.setTerminalName(terminalEntity.getName());
-                                        }
-                                        responses.add(response);
-                                    terminalEntities.add(terminalEntity);
+//                            TerminalEntity terminalEntity = terminalService.findTerminalByPublicId(dto.getTerminalId());
+//                            terminalEntity.setAddress(dto.getTerminalAddress());
+//                            terminalEntity.setPublicId(dto.getTerminalId());
+//                            terminalEntity.setName(dto.getTerminalName());
+//
+//                            terminalEntity.setRawTerminalCode(dto.getTerminalCode());
+//                            AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService
+//                                    .checkExistedBankAccountAuthenticated(dto.getBankAccount(), dto.getBankCode());
+//                            if (accountBankReceiveEntity != null) {
+//                                TerminalBankReceiveEntity terminalBankReceiveEntity = terminalBankReceiveService
+//                                        .getTerminalBankReceiveByTerminalIdAndBankId(terminalEntity.getId(), accountBankReceiveEntity.getId());
+//                                terminalBankReceiveEntity.setBankId(accountBankReceiveEntity.getId());
+//                                // luồng ưu tiên
+//                                if (accountBankReceiveEntity.isMmsActive()) {
+//                                    TerminalBankEntity terminalBankEntity =
+//                                            terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
+//                                    if (terminalBankEntity != null) {
+//                                        String qr = MBVietQRUtil.generateStaticVietQRMMS(
+//                                                new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
+//                                                        terminalBankEntity.getTerminalId(), dto.getTerminalCode()));
+//                                        terminalBankReceiveEntity.setData2(qr);
+//                                        String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
+//                                        terminalBankReceiveEntity.setTraceTransfer(traceTransfer);
+//                                        terminalBankReceiveEntity.setData1("");
+//                                        terminalBankReceiveEntities.add(terminalBankReceiveEntity);
+//                                    } else {
+//                                        logger.error("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
+//                                    }
+//                                } else {
+//                                    // luồng thuong
+//                                    String qrCodeContent = "SQR" + dto.getTerminalCode();
+//                                    String bankAccount = accountBankReceiveEntity.getBankAccount();
+//                                    String caiValue = accountBankReceiveService.getCaiValueByBankId(accountBankReceiveEntity.getId());
+//                                    VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", qrCodeContent, bankAccount);
+//                                    String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+//                                    terminalBankReceiveEntity.setData1(qr);
+//                                    terminalBankReceiveEntity.setData2("");
+//                                    terminalBankReceiveEntity.setTraceTransfer("");
+//                                    terminalBankReceiveEntities.add(terminalBankReceiveEntity);
+//                                }
+//                                String bankName = accountBankReceiveService.getBankNameByBankId(accountBankReceiveEntity.getBankTypeId());
+//                                response.setBankName(bankName);
+//                                if (accountBankReceiveEntity.isMmsActive()) {
+//                                    response.setQrCode(terminalBankReceiveEntity.getData2());
+//                                } else {
+//                                    response.setQrCode(terminalBankReceiveEntity.getData1());
+//                                }
+//                                response.setTerminalAddress(terminalEntity.getAddress());
+//                                response.setBankAccount(accountBankReceiveEntity.getBankAccount());
+//                                response.setTerminalId(terminalEntity.getPublicId());
+//                                response.setTerminalCode(terminalEntity.getCode());
+//                                response.setBankAccountName(accountBankReceiveEntity.getBankAccountName());
+//                                response.setBankCode(dto.getBankCode());
+//                                response.setTerminalName(terminalEntity.getName());
+//                            }
+//                            responses.add(response);
+//                            terminalEntities.add(terminalEntity);
                                 } else {
                                     // insert Terminal
                                     UUID terminalId = UUID.randomUUID();
                                     TerminalEntity entity = new TerminalEntity();
                                     entity.setId(terminalId.toString());
                                     entity.setName(dto.getTerminalName());
-                                    if (dto.getTerminalCode() == null || dto.getTerminalCode().trim().isEmpty()) {
-                                        dto.setTerminalCode(getRandomUniqueCode());
-                                        entity.setCode(dto.getTerminalCode());
-                                    } else if (dto.getTerminalCode().trim().length() == 10) {
-                                        entity.setCode(dto.getTerminalCode());
-                                    } else {
-                                        result = new ResponseMessageDTO("FAILED", "E46");
-                                    }
+                                    entity.setRawTerminalCode(dto.getTerminalCode());
+                                    entity.setCode(terminalCode);
                                     entity.setPublicId(UUID.randomUUID().toString());
                                     entity.setAddress(dto.getTerminalAddress());
                                     entity.setMerchantId(checkExistedCustomerSync.get(0));
-                                    entity.setUserId("");
                                     entity.setDefault(false);
                                     LocalDateTime now = LocalDateTime.now();
                                     entity.setTimeCreated(now.toEpochSecond(ZoneOffset.UTC));
                                     AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService
                                             .checkExistedBankAccountAuthenticated(dto.getBankAccount(), dto.getBankCode());
-
                                     TerminalBankReceiveEntity terminalBankReceiveEntity = new TerminalBankReceiveEntity();
                                     terminalBankReceiveEntity.setId(UUID.randomUUID().toString());
+                                    terminalBankReceiveEntity.setTypeOfQR(0);
+                                    terminalBankReceiveEntity.setRawTerminalCode("");
+                                    terminalBankReceiveEntity.setTerminalCode("");
                                     terminalBankReceiveEntity.setTerminalId(terminalId.toString());
                                     if (accountBankReceiveEntity != null) {
+                                        entity.setUserId(accountBankReceiveEntity.getUserId());
                                         terminalBankReceiveEntity.setBankId(accountBankReceiveEntity.getId());
                                         // luồng ưu tiên
                                         if (accountBankReceiveEntity.isMmsActive()) {
@@ -1345,7 +1347,7 @@ public class TerminalController {
                                             if (terminalBankEntity != null) {
                                                 String qr = MBVietQRUtil.generateStaticVietQRMMS(
                                                         new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
-                                                                terminalBankEntity.getTerminalId(), dto.getTerminalCode()));
+                                                                terminalBankEntity.getTerminalId(), terminalCode));
                                                 terminalBankReceiveEntity.setData2(qr);
                                                 String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
                                                 terminalBankReceiveEntity.setTraceTransfer(traceTransfer);
@@ -1356,7 +1358,7 @@ public class TerminalController {
                                             }
                                         } else {
                                             // luồng thuong
-                                            String qrCodeContent = "SQR" + dto.getTerminalCode();
+                                            String qrCodeContent = "SQR" + terminalCode;
                                             String bankAccount = accountBankReceiveEntity.getBankAccount();
                                             String caiValue = accountBankReceiveService.getCaiValueByBankId(accountBankReceiveEntity.getId());
                                             VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", qrCodeContent, bankAccount);
@@ -1386,7 +1388,7 @@ public class TerminalController {
                                         response.setTerminalAddress(entity.getAddress());
                                         response.setBankAccount(accountBankReceiveEntity.getBankAccount());
                                         response.setTerminalId(entity.getPublicId());
-                                        response.setTerminalCode(entity.getCode());
+                                        response.setTerminalCode(entity.getRawTerminalCode());
                                         response.setBankAccountName(accountBankReceiveEntity.getBankAccountName());
                                         response.setBankCode(dto.getBankCode());
                                         response.setTerminalName(entity.getName());
@@ -1403,19 +1405,19 @@ public class TerminalController {
                         }
 
 
+                    } else {
+                        System.out.println("syncTerminal: Request Body is null or empty");
+                        logger.error("syncTerminal: Request Body is null or empty");
+                        result = new ResponseMessageDTO("FAILED", "E46");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    }
                 } else {
-                System.out.println("syncTerminal: Request Body is null or empty");
-                logger.error("syncTerminal: Request Body is null or empty");
-                result = new ResponseMessageDTO("FAILED", "E46");
-                httpStatus = HttpStatus.BAD_REQUEST;
+                    // merchant is not existed
+                    System.out.println("refundForMerchant: MERCHANT IS NOT EXISTED");
+                    logger.error("refundForMerchant: MERCHANT IS NOT EXISTED");
+                    result = new ResponseMessageDTO("FAILED", "E104");
+                    httpStatus = HttpStatus.BAD_REQUEST;
                 }
-                } else {
-                // merchant is not existed
-                System.out.println("refundForMerchant: MERCHANT IS NOT EXISTED");
-                logger.error("refundForMerchant: MERCHANT IS NOT EXISTED");
-                result = new ResponseMessageDTO("FAILED", "E104");
-                httpStatus = HttpStatus.BAD_REQUEST;
-            }
             } else {
                 System.out.println("syncTerminal: INVALID TOKEN");
                 logger.error("syncTerminal: INVALID TOKEN");
@@ -1437,52 +1439,134 @@ public class TerminalController {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-                String username = getUsernameFromToken(token);
-                if (username != null && !username.trim().isEmpty()) {
-                    List<String> checkExistedCustomerSync = merchantConnectionService
-                            .checkExistedCustomerSyncByUsername(username);
-                    if (checkExistedCustomerSync != null && !checkExistedCustomerSync.isEmpty()) {
-                        TerminalSyncResponseDTO dto = new TerminalSyncResponseDTO();
-                        dto.setPage(page);
-                        dto.setSize(size);
-                        List<TerminalTidResponseDTO> responseDTOS = new ArrayList<>();
-                        List<ITerminalTidResponseDTO> list = terminalService
-                                .getTerminalByMerchantId(checkExistedCustomerSync.get(0), page * size, size);
-                        responseDTOS = list.stream().map(item -> {
-                            TerminalTidResponseDTO terminalTidResponseDTO = new TerminalTidResponseDTO();
-                            terminalTidResponseDTO.setTerminalId(item.getTerminalId());
-                            terminalTidResponseDTO.setTerminalName(item.getTerminalName());
-                            terminalTidResponseDTO.setTerminalCode(item.getTerminalCode());
-                            terminalTidResponseDTO.setTerminalAddress(item.getTerminalAddress());
-                            terminalTidResponseDTO.setBankCode(item.getBankCode());
-                            terminalTidResponseDTO.setBankAccount(item.getBankAccount());
-                            terminalTidResponseDTO.setBankAccountName(item.getBankAccountName());
-                            if (item.getIsMmsActive()) {
-                                terminalTidResponseDTO.setQrCode(item.getData2());
-                            } else {
-                                terminalTidResponseDTO.setQrCode(item.getData1());
-                            }
-                            terminalTidResponseDTO.setBankName(item.getBankName());
-                            return terminalTidResponseDTO;
-                        }).collect(Collectors.toList());
-                        dto.setItems(responseDTOS);
-                        result = dto;
-                        httpStatus = HttpStatus.OK;
+            logger.error("syncTerminal: ERROR: NOT IMPLEMENT");
+            httpStatus = HttpStatus.BAD_REQUEST;
+            result = new ResponseMessageDTO("FAILED", "E116");
+//                String username = getUsernameFromToken(token);
+//                if (username != null && !username.trim().isEmpty()) {
+//                    List<String> checkExistedCustomerSync = merchantConnectionService
+//                            .checkExistedCustomerSyncByUsername(username);
+//                    if (checkExistedCustomerSync != null && !checkExistedCustomerSync.isEmpty()) {
+//                        TerminalSyncResponseDTO dto = new TerminalSyncResponseDTO();
+//                        dto.setPage(page);
+//                        dto.setSize(size);
+//                        List<TerminalTidResponseDTO> responseDTOS = new ArrayList<>();
+//                        List<ITerminalTidResponseDTO> list = terminalService
+//                                .getTerminalByMerchantId(checkExistedCustomerSync.get(0), page * size, size);
+//                        responseDTOS = list.stream().map(item -> {
+//                            TerminalTidResponseDTO terminalTidResponseDTO = new TerminalTidResponseDTO();
+//                            terminalTidResponseDTO.setTerminalId(item.getTerminalId());
+//                            terminalTidResponseDTO.setTerminalName(item.getTerminalName());
+//                            terminalTidResponseDTO.setTerminalCode(item.getTerminalCode());
+//                            terminalTidResponseDTO.setTerminalAddress(item.getTerminalAddress());
+//                            terminalTidResponseDTO.setBankCode(item.getBankCode());
+//                            terminalTidResponseDTO.setBankAccount(item.getBankAccount());
+//                            terminalTidResponseDTO.setBankAccountName(item.getBankAccountName());
+//                            if (item.getIsMmsActive()) {
+//                                terminalTidResponseDTO.setQrCode(item.getData2());
+//                            } else {
+//                                terminalTidResponseDTO.setQrCode(item.getData1());
+//                            }
+//                            terminalTidResponseDTO.setBankName(item.getBankName());
+//                            return terminalTidResponseDTO;
+//                        }).collect(Collectors.toList());
+//                        dto.setItems(responseDTOS);
+//                        result = dto;
+//                        httpStatus = HttpStatus.OK;
+//
+//                    } else {
+//                        // merchant is not existed
+//                        System.out.println("refundForMerchant: MERCHANT IS NOT EXISTED");
+//                        logger.error("refundForMerchant: MERCHANT IS NOT EXISTED");
+//                        result = new ResponseMessageDTO("FAILED", "E104");
+//                        httpStatus = HttpStatus.BAD_REQUEST;
+//                    }
+//                } else {
+//                    System.out.println("syncTerminal: INVALID TOKEN");
+//                    logger.error("syncTerminal: INVALID TOKEN");
+//                    result = new ResponseMessageDTO("FAILED", "E74");
+//                    httpStatus = HttpStatus.BAD_REQUEST;
+//                }
 
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("terminal/list")
+    public ResponseEntity<List<TerminalCodeResponseDTO>> getListTerminalResponse(
+            @RequestParam String userId,
+            @RequestParam String bankId) {
+        List<TerminalCodeResponseDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            result = terminalService
+                    .getListTerminalResponseByBankIdAndUserId(userId, bankId);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("terminal/qr-box")
+    public ResponseEntity<ResponseMessageDTO> createQRBoxToTerminal(@Valid @RequestBody QRBoxRequestDto dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        String terminalCode = "";
+        try {
+            if (dto.getTerminalCode() == null || dto.getTerminalCode().trim().isEmpty()) {
+                dto.setTerminalCode(getRandomUniqueCodeInTerminalCode());
+                terminalCode = dto.getTerminalCode();
+            } else {
+                terminalCode = getRandomUniqueCodeInTerminalCode();
+            }
+            TerminalBankReceiveEntity terminalBankReceiveCurrent = terminalBankReceiveService
+                    .getTerminalBankByTerminalId(dto.getTerminalId());
+            AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService
+                    .getAccountBankById(terminalBankReceiveCurrent.getBankId());
+            TerminalBankReceiveEntity terminalBankReceiveEntity = new TerminalBankReceiveEntity();
+            terminalBankReceiveEntity.setId(UUID.randomUUID().toString());
+            terminalBankReceiveEntity.setTerminalId(dto.getTerminalId());
+            terminalBankReceiveEntity.setRawTerminalCode(dto.getTerminalCode());
+            terminalBankReceiveEntity.setTerminalCode(terminalCode);
+            terminalBankReceiveEntity.setTypeOfQR(1);
+
+            if (accountBankReceiveEntity != null) {
+                terminalBankReceiveEntity.setBankId(accountBankReceiveEntity.getId());
+                // luồng ưu tiên
+                if (accountBankReceiveEntity.isMmsActive()) {
+                    TerminalBankEntity terminalBankEntity =
+                            terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
+                    if (terminalBankEntity != null) {
+                        String qr = MBVietQRUtil.generateStaticVietQRMMS(
+                                new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
+                                        terminalBankEntity.getTerminalId(), terminalCode));
+                        terminalBankReceiveEntity.setData2(qr);
+                        String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
+                        terminalBankReceiveEntity.setTraceTransfer(traceTransfer);
+                        terminalBankReceiveEntity.setData1("");
+                        terminalBankReceiveService.insert(terminalBankReceiveEntity);
                     } else {
-                        // merchant is not existed
-                        System.out.println("refundForMerchant: MERCHANT IS NOT EXISTED");
-                        logger.error("refundForMerchant: MERCHANT IS NOT EXISTED");
-                        result = new ResponseMessageDTO("FAILED", "E104");
-                        httpStatus = HttpStatus.BAD_REQUEST;
+                        logger.error("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
                     }
                 } else {
-                    System.out.println("syncTerminal: INVALID TOKEN");
-                    logger.error("syncTerminal: INVALID TOKEN");
-                    result = new ResponseMessageDTO("FAILED", "E74");
-                    httpStatus = HttpStatus.BAD_REQUEST;
+                    // luồng thuong
+                    String qrCodeContent = "SQR" + terminalCode;
+                    String bankAccount = accountBankReceiveEntity.getBankAccount();
+                    String caiValue = accountBankReceiveService.getCaiValueByBankId(accountBankReceiveEntity.getId());
+                    VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", qrCodeContent, bankAccount);
+                    String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+                    terminalBankReceiveEntity.setData1(qr);
+                    terminalBankReceiveEntity.setData2("");
+                    terminalBankReceiveEntity.setTraceTransfer("");
+                    terminalBankReceiveService.insert(terminalBankReceiveEntity);
                 }
-
+            }
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -1588,6 +1672,24 @@ public class TerminalController {
             do {
                 code = getTerminalCode();
                 checkExistedCode = terminalService.checkExistedTerminal(code);
+            } while (!StringUtil.isNullOrEmpty(checkExistedCode));
+            result = code;
+        } catch (Exception e) {
+        }
+        return result;
+    }
+
+    private String getRandomUniqueCodeInTerminalCode() {
+        String result = "";
+        String checkExistedCode = "";
+        String code = "";
+        try {
+            do {
+                code = getTerminalCode();
+                checkExistedCode = terminalBankReceiveService.checkExistedTerminalCode(code);
+                if (checkExistedCode == null || checkExistedCode.trim().isEmpty()) {
+                    checkExistedCode = terminalService.checkExistedTerminal(code);
+                }
             } while (!StringUtil.isNullOrEmpty(checkExistedCode));
             result = code;
         } catch (Exception e) {

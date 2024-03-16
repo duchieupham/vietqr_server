@@ -620,7 +620,8 @@ public class TransactionMMSController {
             // find customerSyncEntities by terminal_bank_id
             List<TerminalAddressEntity> terminalAddressEntities = new ArrayList<>();
             // System.out.println("terminal Bank ID: " + terminalBankId);
-            terminalAddressEntities = terminalAddressService.getTerminalAddressByTerminalBankId(terminalBankId);
+            terminalAddressEntities = terminalAddressService
+                    .getTerminalAddressByTerminalBankId(terminalBankId);
             if (!terminalAddressEntities.isEmpty()) {
                 // System.out.println("terminalAddressEntites != empty");
                 TransactionBankCustomerDTO transactionBankCustomerDTO = new TransactionBankCustomerDTO();

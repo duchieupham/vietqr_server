@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.vietqr.org.entity.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -38,11 +39,6 @@ import com.vietqr.org.dto.TerminalSyncMBDTOs;
 import com.vietqr.org.dto.TokenDTO;
 import com.vietqr.org.dto.TokenProductBankDTO;
 import com.vietqr.org.dto.UserVhitekCreateDTO;
-import com.vietqr.org.entity.AccountCustomerBankEntity;
-import com.vietqr.org.entity.PartnerConnectEntity;
-import com.vietqr.org.entity.ServicePartnerCheckerEntity;
-import com.vietqr.org.entity.TerminalAddressEntity;
-import com.vietqr.org.entity.TerminalBankEntity;
 import com.vietqr.org.service.AccountBankReceiveService;
 import com.vietqr.org.service.AccountCustomerBankService;
 import com.vietqr.org.service.PartnerCheckerService;
@@ -324,6 +320,7 @@ public class VhitekActiveController {
     }
 
     // active terminal
+    ///////////////////////////////////////////////////
     @PostMapping("service/vhitek/active-terminal")
     public ResponseEntity<ResponseMessageDTO> activeTerminalVhitek2(
             @RequestBody TerminalActiveVhitekDTO dto) {
@@ -336,6 +333,7 @@ public class VhitekActiveController {
                 PartnerConnectEntity partnerConnectEntity = partnerConnectService
                         .getPartnerConnectByServiceName(serviceVhitekActive);
                 if (partnerConnectEntity != null) {
+                    ////////////////////////////////////////////////////////////////
                     result = insertBankIntoMerchant(dto.getBankId(), partnerConnectEntity.getCustomerSyncId(),
                             dto.getBankAccount(), dto.getUserBankName());
                     if (result.getStatus().equals("SUCCESS")) {
@@ -434,6 +432,7 @@ public class VhitekActiveController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+    ////////////////////////////////////////////////////////////////////////////////////
 
     // active terminal admin side
     @PostMapping("admin/service/terminal/active")
@@ -644,138 +643,47 @@ public class VhitekActiveController {
     }
 
     private ResponseMessageDTO insertBankIntoMerchant(String bankId, String customerSyncId, String bankAccount,
-            String bankAccountName) {
+                                                      String bankAccountName) {
         ResponseMessageDTO result = null;
         try {
-            // 1. check existed bank into vhitek merchant (except bank NGUYEN THU PHUONG MB)
-            if (bankId.equals(EnvironmentUtil.getBankIdTestIOT())) {
-                System.out.println("insertBankIntoMerchant: BANK ID TEST IOT. Ignore insert.");
-                logger.info("insertBankIntoMerchant: BANK ID TEST IOT. Ignore insert.");
-                result = new ResponseMessageDTO("SUCCESS", "");
-            } else {
-                String chekcExistedBank = accountCustomerBankService.checkExistedByBankIdAndCustomerSyncId(bankId,
-                        customerSyncId);
-                if (chekcExistedBank != null && !chekcExistedBank.trim().isEmpty()) {
-                    // 2.1. if existed, ignore
-                    System.out.println("insertBankIntoMerchant: BANK EXISTED INTO VHITEK MERCHANT");
-                    logger.info("insertBankIntoMerchant: BANK EXISTED INTO VHITEK MERCHANT");
-                    result = new ResponseMessageDTO("SUCCESS", "");
-                } else {
-                    // 2.2.1. if not existed, check is authenticated or not
-                    Boolean checkAuthenticated = accountBankReceiveService.getAuthenticatedByBankId(bankId);
-                    if (checkAuthenticated != null && checkAuthenticated == true) {
-                        // 2.2.2.2. if is authenticated, process add bank flow 2
-                        // - get size bank and address merchant
-                        AccountCustomerBankInfoDTO accountCustomerBankInfoDTO = accountCustomerBankService
-                                .getBankSizeAndAddressByCustomerSyncId(customerSyncId);
-                        if (accountCustomerBankInfoDTO != null) {
-                            // - get bank token
-                            TokenProductBankDTO tokenBankDTO = getBankToken();
-                            // - call sync TID
-                            String addressTerminal = "";
-                            String merchantName = "";
-                            Integer nextBank = accountCustomerBankInfoDTO.getTotalBank() + 1;
-                            if (accountCustomerBankInfoDTO.getTotalBank() == null
-                                    || accountCustomerBankInfoDTO.getTotalBank() == 0) {
-                                addressTerminal = accountCustomerBankInfoDTO.getAddress();
-                                merchantName = accountCustomerBankInfoDTO.getMerchantName();
-                            } else {
-                                addressTerminal = accountCustomerBankInfoDTO.getAddress() + " - "
-                                        + nextBank;
-                                merchantName = accountCustomerBankInfoDTO.getMerchantName() + nextBank;
-                            }
-                            String bankAccountEncrypted = BankEncryptUtil.encrypt(bankAccount);
-                            //
-                            TerminalSyncMBDTO terminalSyncDTO = new TerminalSyncMBDTO();
-                            terminalSyncDTO.setTerminalId(null);
-                            terminalSyncDTO.setTerminalName(merchantName);
-                            terminalSyncDTO.setTerminalAddress(addressTerminal);
-                            terminalSyncDTO.setProvinceCode("1");
-                            terminalSyncDTO.setDistrictCode("6");
-                            terminalSyncDTO.setWardsCode("178");
-                            terminalSyncDTO.setMccCode("1024");
-                            terminalSyncDTO.setFee(0);
-                            terminalSyncDTO.setBankCode("311");
-                            terminalSyncDTO.setBankCodeBranch("01311038");
-                            terminalSyncDTO.setBankAccountNumber(bankAccountEncrypted);
-                            terminalSyncDTO.setBankAccountName(bankAccountName);
-                            terminalSyncDTO.setBankCurrencyCode("1");
-                            boolean syncTID = syncTID(tokenBankDTO, terminalSyncDTO);
-                            if (syncTID == true) {
-                                // - insert terminal_bank
-                                Integer terminalCounting = terminalBankService.getTerminalCounting();
-                                Integer nextTerminal = terminalCounting + 1;
-                                TerminalBankEntity terminalBankEntity = new TerminalBankEntity();
-                                UUID terminalBankId = UUID.randomUUID();
-                                terminalBankEntity.setId(terminalBankId.toString());
-                                terminalBankEntity.setBankAccountName(bankAccountName);
-                                terminalBankEntity.setBankAccountNumber(bankAccountEncrypted);
-                                terminalBankEntity.setBankAccountRawNumber(bankAccount);
-                                terminalBankEntity.setBankCode("311");
-                                terminalBankEntity.setBankCurrencyCode("1");
-                                terminalBankEntity.setBankCurrencyName("VND");
-                                terminalBankEntity.setBankName("311 - TMCP Quan Doi");
-                                terminalBankEntity.setBranchName("NH TMCP QUAN DOI CN SGD 3");
-                                terminalBankEntity.setDistrictCode("6");
-                                terminalBankEntity.setFee(0);
-                                terminalBankEntity.setMccCode("1024");
-                                terminalBankEntity.setMccName("Dịch vụ tài chính");
-                                terminalBankEntity.setMerchantId("b8324764-3f83-4da0-a75f-aa0f13d0f700");
-                                terminalBankEntity.setProvinceCode("Hà Nội update");
-                                terminalBankEntity.setStatus(1);
-                                terminalBankEntity.setTerminalAddress(addressTerminal);
-                                terminalBankEntity.setTerminalId("BLC" + nextTerminal);
-                                terminalBankEntity.setTerminalName(merchantName);
-                                terminalBankEntity.setWardsCode("178");
-                                terminalBankEntity.setWardsName("Phường Cát Linh");
-                                terminalBankService.insertTerminalBank(terminalBankEntity);
-                                // - insert terminal adress
-                                TerminalAddressEntity terminalAddressEntity = new TerminalAddressEntity();
-                                UUID terminalAddressId = UUID.randomUUID();
-                                terminalAddressEntity.setId(terminalAddressId.toString());
-                                terminalAddressEntity.setTerminalBankId(terminalBankId.toString());
-                                terminalAddressEntity.setBankAccount(bankAccount);
-                                terminalAddressEntity.setBankId(bankId);
-                                terminalAddressEntity.setCustomerSyncId(customerSyncId);
-                                terminalAddressService.insert(terminalAddressEntity);
-                                //
-                                //
-                                // 2.2.3. add bank into customer_acc_bank
-                                AccountCustomerBankEntity accountCustomerBankEntity = new AccountCustomerBankEntity();
-                                UUID accountCustomerBankId = UUID.randomUUID();
-                                accountCustomerBankEntity.setId(accountCustomerBankId.toString());
-                                accountCustomerBankEntity.setAccountCustomerId("2fd81e94-66b6-439f-9a2f-b5e2e0ed730a");
-                                accountCustomerBankEntity.setBankAccount(bankAccount);
-                                accountCustomerBankEntity.setBankId(bankId);
-                                accountCustomerBankEntity.setCustomerSyncId(customerSyncId);
-                                accountCustomerBankService.insert(accountCustomerBankEntity);
-                                // 2.2.4. update is_sync & mms_sync = true
-                                accountBankReceiveService.updateMMSActive(true, true, bankId);
-                                // 2.2.5. response success
-                                System.out.println("insertBankIntoMerchant: SUCCESS SYNC MB & MERCHANT");
-                                logger.info("insertBankIntoMerchant: SUCCESS SYNC MB & MERCHANT");
-                                result = new ResponseMessageDTO("SUCCESS", "");
-                            } else {
-                                // - if err, res err. if success get list TID
-                                System.out.println("insertBankIntoMerchant: SYNC TID MB FAILED");
-                                logger.info("insertBankIntoMerchant: SYNC TID MB FAILED");
-                                result = new ResponseMessageDTO("FAILED", "E103");
-                            }
+            // 2.2.1. if not existed, check is authenticated or not
+            Boolean checkAuthenticated = accountBankReceiveService.getAuthenticatedByBankId(bankId);
+            if (checkAuthenticated != null && checkAuthenticated) {
+                AccountBankReceiveEntity accountBankReceiveEntity
+                        = accountBankReceiveService.getAccountBankById(bankId);
+                if (!accountBankReceiveEntity.isMmsActive()) {
+                    AccountCustomerBankEntity accountCustomerBankEntity = new AccountCustomerBankEntity();
+                    accountCustomerBankEntity.setBankId(bankId);
+                    accountCustomerBankEntity.setCustomerSyncId(EnvironmentUtil.getMerchantIdQrBoxDefault());
+                    accountCustomerBankEntity.setBankAccount(accountBankReceiveEntity.getBankAccount());
+                    accountCustomerBankEntity.setId(UUID.randomUUID().toString());
+                    accountCustomerBankService.insert(accountCustomerBankEntity);
 
-                        } else {
-                            System.out.println("insertBankIntoMerchant: NOT FOUND MERCHANT INFO");
-                            logger.info("insertBankIntoMerchant: NOT FOUND MERCHANT INFO");
-                            result = new ResponseMessageDTO("FAILED", "E102");
-                        }
-                    } else {
-                        //
-                        // 2.2.2.1. if not authenticated, response err
-                        System.out.println("insertBankIntoMerchant: BANK ACCOUNT IS NOT AUTHENTICATED");
-                        logger.info("insertBankIntoMerchant: BANK ACCOUNT IS NOT AUTHENTICATED");
-                        result = new ResponseMessageDTO("FAILED", "E101");
-                    }
+                } else {
+                    AccountCustomerBankEntity accountCustomerBankEntity = new AccountCustomerBankEntity();
+                    accountCustomerBankEntity.setBankId(bankId);
+                    accountCustomerBankEntity.setCustomerSyncId(EnvironmentUtil.getMerchantIdQrBoxDefault());
+                    accountCustomerBankEntity.setBankAccount(accountBankReceiveEntity.getBankAccount());
+                    accountCustomerBankEntity.setId(UUID.randomUUID().toString());
+
+                    TerminalAddressEntity terminalAddressEntity = new TerminalAddressEntity();
+                    TerminalBankEntity terminalBankEntity = terminalBankService.getTerminalBankByBankAccount(bankAccount);
+                    terminalAddressEntity.setBankId(bankId);
+                    terminalAddressEntity.setTerminalBankId(terminalBankEntity.getId());
+                    terminalAddressEntity.setCustomerSyncId(EnvironmentUtil.getMerchantIdQrBoxDefault());
+                    terminalAddressEntity.setBankAccount(accountBankReceiveEntity.getBankAccount());
+                    terminalAddressEntity.setId(UUID.randomUUID().toString());
+                    accountCustomerBankService.insert(accountCustomerBankEntity);
+                    terminalAddressService.insert(terminalAddressEntity);
                 }
+            } else {
+                //
+                // 2.2.2.1. if not authenticated, response err
+                System.out.println("insertBankIntoMerchant: BANK ACCOUNT IS NOT AUTHENTICATED");
+                logger.info("insertBankIntoMerchant: BANK ACCOUNT IS NOT AUTHENTICATED");
+                result = new ResponseMessageDTO("FAILED", "E101");
             }
+
         } catch (Exception e) {
             System.out.println("insertBankIntoMerchant: ERROR: " + e.toString());
             logger.error("insertBankIntoMerchant: ERROR: " + e.toString());

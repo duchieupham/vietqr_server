@@ -15,6 +15,16 @@ public class TerminalBankReceiveEntity {
     @Column(name = "terminalId")
     private String terminalId;
 
+    @Column(name = "terminalCode")
+    private String terminalCode;
+
+    @Column(name = "rawTerminalCode")
+    private String rawTerminalCode;
+
+    //0: QR default, 1: QR Box
+    @Column(name = "typeOfQR")
+    private int typeOfQR;
+
     @Column(name = "bankId")
     private String bankId;
 
@@ -36,6 +46,30 @@ public class TerminalBankReceiveEntity {
         this.bankId = bankId;
         this.data1 = data1;
         this.data2 = data2;
+    }
+
+    public String getRawTerminalCode() {
+        return rawTerminalCode;
+    }
+
+    public void setRawTerminalCode(String rawTerminalCode) {
+        this.rawTerminalCode = rawTerminalCode;
+    }
+
+    public int getTypeOfQR() {
+        return typeOfQR;
+    }
+
+    public void setTypeOfQR(int typeOfQR) {
+        this.typeOfQR = typeOfQR;
+    }
+
+    public String getTerminalCode() {
+        return terminalCode;
+    }
+
+    public void setTerminalCode(String terminalCode) {
+        this.terminalCode = terminalCode;
     }
 
     public String getTraceTransfer() {

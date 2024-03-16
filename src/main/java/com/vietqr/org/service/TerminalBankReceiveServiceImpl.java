@@ -18,6 +18,11 @@ public class TerminalBankReceiveServiceImpl implements TerminalBankReceiveServic
     }
 
     @Override
+    public void insert(TerminalBankReceiveEntity terminalBankReceiveEntity) {
+        repo.save(terminalBankReceiveEntity);
+    }
+
+    @Override
     public TerminalBankReceiveEntity getTerminalBankReceiveByTerminalIdAndBankId(String terminalId, String bankId) {
         return repo.getTerminalBankReceiveByTerminalIdAndBankId(terminalId, bankId);
     }
@@ -30,5 +35,15 @@ public class TerminalBankReceiveServiceImpl implements TerminalBankReceiveServic
     @Override
     public TerminalBankReceiveEntity getTerminalBankReceiveByTerminalId(String terminalId) {
         return repo.getTerminalBankReceiveByTerminalId(terminalId);
+    }
+
+    @Override
+    public String checkExistedTerminalCode(String code) {
+        return repo.checkExistedTerminalCode(code);
+    }
+
+    @Override
+    public TerminalBankReceiveEntity getTerminalBankByTerminalId(String terminalId) {
+        return repo.getTerminalBankByTerminalId(terminalId);
     }
 }

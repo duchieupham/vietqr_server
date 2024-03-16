@@ -57,4 +57,8 @@ public interface TerminalService {
     void insertAllTerminal(List<TerminalEntity> terminalEntities);
 
     List<ITerminalTidResponseDTO> getTerminalByMerchantId(String merchantId, int offset, int size);
+
+    String checkExistedRawTerminalCode(String terminalCode);
+
+    List<TerminalCodeResponseDTO> getListTerminalResponseByBankIdAndUserId(String userId, String bankId);
 }
