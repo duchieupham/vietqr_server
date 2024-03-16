@@ -61,4 +61,6 @@ public interface TerminalService {
     String checkExistedRawTerminalCode(String terminalCode);
 
     List<TerminalCodeResponseDTO> getListTerminalResponseByBankIdAndUserId(String userId, String bankId);
+
+    String getTerminalCodeByTerminalCode(String value);
 }

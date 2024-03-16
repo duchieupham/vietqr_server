@@ -20,4 +20,6 @@ public interface TerminalBankReceiveService {
     String checkExistedTerminalCode(String code);
 
     TerminalBankReceiveEntity getTerminalBankByTerminalId(String terminalId);
+
+    String getTerminalCodeByRawTerminalCode(String value);
 }

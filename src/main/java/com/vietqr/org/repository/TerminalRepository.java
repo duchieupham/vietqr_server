@@ -232,8 +232,11 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
     @Query(value = "SELECT a.id AS terminalId, a.name AS terminalName, "
             + "a.address AS terminalAddress, a.code as terminalCode, "
             + "a.user_id AS userId FROM terminal a "
-            + "INNER JOIN ON terminal_bank_receive b "
+            + "INNER JOIN terminal_bank_receive b "
             + "ON a.id = b.terminal_id "
             + "WHERE a.user_id = :userId AND b.bank_id = :bankId ", nativeQuery = true)
     List<TerminalCodeResponseDTO> getListTerminalResponseByBankIdAndUserId(String userId, String bankId);
+
+    @Query(value = "SELECT code FROM terminal WHERE code = :value LIMIT 1", nativeQuery = true)
+    String getTerminalCodeByTerminalCode(String value);
 }

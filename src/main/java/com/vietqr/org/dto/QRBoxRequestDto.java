@@ -5,14 +5,12 @@ import javax.validation.constraints.NotBlank;
 public class QRBoxRequestDto {
     @NotBlank
     private String terminalId;
-    private String terminalCode;
     @NotBlank
-    private String terminalName;
+    private String machineCode;
 
-    public QRBoxRequestDto(String terminalId, String terminalCode, String terminalName) {
+    public QRBoxRequestDto(String terminalId, String machineCode) {
         this.terminalId = terminalId;
-        this.terminalCode = terminalCode;
-        this.terminalName = terminalName;
+        this.machineCode = machineCode;
     }
 
     public QRBoxRequestDto() {
@@ -26,19 +24,11 @@ public class QRBoxRequestDto {
         this.terminalId = terminalId;
     }
 
-    public String getTerminalCode() {
-        return terminalCode;
+    public String getMachineCode() {
+        return machineCode;
     }
 
-    public void setTerminalCode(String terminalCode) {
-        this.terminalCode = terminalCode;
-    }
-
-    public String getTerminalName() {
-        return terminalName;
-    }
-
-    public void setTerminalName(String terminalName) {
-        this.terminalName = terminalName;
+    public void setMachineCode(String machineCode) {
+        this.machineCode = machineCode;
     }
 }

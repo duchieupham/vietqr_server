@@ -53,6 +53,9 @@ public class TransactionController {
     TransactionReceiveBranchService transactionReceiveBranchService;
 
     @Autowired
+    private TerminalBankReceiveService terminalBankReceiveService;
+
+    @Autowired
     TransactionReceiveService transactionReceiveService;
 
     @Autowired
@@ -1205,7 +1208,15 @@ public class TransactionController {
                         dtos = transactionReceiveService.getTransactionsByContent(value, offset, bankId);
                         break;
                     case 4:
-                        dtos = transactionReceiveService.getTransactionsByTerminalCodeAllDate(value, offset, bankId);
+                        String terminalCodeForSearch = "";
+                        terminalCodeForSearch = terminalService.getTerminalCodeByTerminalCode(value);
+                        if (terminalCodeForSearch == null || terminalCodeForSearch.isEmpty()) {
+                            terminalCodeForSearch = terminalBankReceiveService.getTerminalCodeByRawTerminalCode(value);
+                        }
+                        if (terminalCodeForSearch == null || terminalCodeForSearch.isEmpty()) {
+                            terminalCodeForSearch = value;
+                        }
+                        dtos = transactionReceiveService.getTransactionsByTerminalCodeAllDate(terminalCodeForSearch, offset, bankId);
                         break;
                     case 5:
                         Integer status = Integer.parseInt(value);
@@ -1231,7 +1242,15 @@ public class TransactionController {
                         dtos = transactionReceiveService.getTransactionsByContent(value, offset, bankId, from, to);
                         break;
                     case 4:
-                        dtos = transactionReceiveService.getTransactionsByTerminalCodeAndDate(value, offset, from, to,
+                        String terminalCodeForSearch = "";
+                        terminalCodeForSearch = terminalService.getTerminalCodeByTerminalCode(value);
+                        if (terminalCodeForSearch == null || terminalCodeForSearch.isEmpty()) {
+                            terminalCodeForSearch = terminalBankReceiveService.getTerminalCodeByRawTerminalCode(value);
+                        }
+                        if (terminalCodeForSearch == null || terminalCodeForSearch.isEmpty()) {
+                            terminalCodeForSearch = value;
+                        }
+                        dtos = transactionReceiveService.getTransactionsByTerminalCodeAndDate(terminalCodeForSearch, offset, from, to,
                                 bankId);
                         break;
                     case 5:

@@ -15,9 +15,18 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -44,6 +53,9 @@ public class TerminalController {
 
     @Autowired
     private MerchantConnectionService merchantConnectionService;
+
+    @Autowired
+    private PartnerConnectService partnerConnectService;
 
     @Autowired
     private MerchantBankReceiveService merchantBankReceiveService;
@@ -1516,10 +1528,11 @@ public class TerminalController {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         String terminalCode = "";
+        String qr = "";
         try {
-            if (dto.getTerminalCode() == null || dto.getTerminalCode().trim().isEmpty()) {
-                dto.setTerminalCode(getRandomUniqueCodeInTerminalCode());
-                terminalCode = dto.getTerminalCode();
+            if (dto.getMachineCode() == null || dto.getMachineCode().trim().isEmpty()) {
+                dto.setMachineCode(getRandomUniqueCodeInTerminalCode());
+                terminalCode = dto.getMachineCode();
             } else {
                 terminalCode = getRandomUniqueCodeInTerminalCode();
             }
@@ -1530,7 +1543,7 @@ public class TerminalController {
             TerminalBankReceiveEntity terminalBankReceiveEntity = new TerminalBankReceiveEntity();
             terminalBankReceiveEntity.setId(UUID.randomUUID().toString());
             terminalBankReceiveEntity.setTerminalId(dto.getTerminalId());
-            terminalBankReceiveEntity.setRawTerminalCode(dto.getTerminalCode());
+            terminalBankReceiveEntity.setRawTerminalCode(dto.getMachineCode());
             terminalBankReceiveEntity.setTerminalCode(terminalCode);
             terminalBankReceiveEntity.setTypeOfQR(1);
 
@@ -1541,14 +1554,13 @@ public class TerminalController {
                     TerminalBankEntity terminalBankEntity =
                             terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
                     if (terminalBankEntity != null) {
-                        String qr = MBVietQRUtil.generateStaticVietQRMMS(
+                        qr = MBVietQRUtil.generateStaticVietQRMMS(
                                 new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
                                         terminalBankEntity.getTerminalId(), terminalCode));
                         terminalBankReceiveEntity.setData2(qr);
                         String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
                         terminalBankReceiveEntity.setTraceTransfer(traceTransfer);
                         terminalBankReceiveEntity.setData1("");
-                        terminalBankReceiveService.insert(terminalBankReceiveEntity);
                     } else {
                         logger.error("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
                     }
@@ -1558,20 +1570,115 @@ public class TerminalController {
                     String bankAccount = accountBankReceiveEntity.getBankAccount();
                     String caiValue = accountBankReceiveService.getCaiValueByBankId(accountBankReceiveEntity.getId());
                     VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", qrCodeContent, bankAccount);
-                    String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+                    qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
                     terminalBankReceiveEntity.setData1(qr);
                     terminalBankReceiveEntity.setData2("");
                     terminalBankReceiveEntity.setTraceTransfer("");
-                    terminalBankReceiveService.insert(terminalBankReceiveEntity);
                 }
             }
-            result = new ResponseMessageDTO("SUCCESS", "");
-            httpStatus = HttpStatus.OK;
+
+            String serviceVhitekActive = EnvironmentUtil.getServiceVhitekActive();
+            PartnerConnectEntity partnerConnectEntity = partnerConnectService
+                    .getPartnerConnectByServiceName(serviceVhitekActive);
+
+            if (partnerConnectEntity != null) {
+                // get token
+                TokenDTO tokenDTO = getCustomerSyncToken(partnerConnectEntity);
+                if (tokenDTO != null) {
+
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("mid", dto.getMachineCode());
+                    data.put("qrCode", qr);
+                    // call api
+                    WebClient webClient = WebClient.builder()
+                            .baseUrl(partnerConnectEntity.getUrl5())
+                            .build();
+                    Mono<ClientResponse> responseMono = webClient.post()
+                            .header("Authorization", "Bearer " + tokenDTO.getAccess_token())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .body(BodyInserters.fromValue(data))
+                            .exchange();
+                    ClientResponse response = responseMono.block();
+                    if (response.statusCode().is2xxSuccessful()) {
+                        String json = response.bodyToMono(String.class).block();
+                        System.out.println("createQRBoxToTerminal: Response: " + json);
+                        logger.info("createQRBoxToTerminal: Response: " + json);
+
+                        terminalBankReceiveService.insert(terminalBankReceiveEntity);
+                        result = new ResponseMessageDTO("SUCCESS", "");
+                        httpStatus = HttpStatus.OK;
+                    } else {
+                        String json = response.bodyToMono(String.class).block();
+                        System.out.println("createQRBoxToTerminal: Response: " + json);
+                        logger.info("createQRBoxToTerminal: Response: " + json);
+                        result = new ResponseMessageDTO("FAILED", "E05");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    }
+
+                } else {
+                    result = new ResponseMessageDTO("FAILED", "E05");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                result = new ResponseMessageDTO("FAILED", "E05");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
         } catch (Exception e) {
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
+    }
+
+    private TokenDTO getCustomerSyncToken(PartnerConnectEntity entity) {
+        TokenDTO result = null;
+        try {
+            UriComponents uriComponents = UriComponentsBuilder
+                    .fromHttpUrl(entity.getUrl1())
+                    .buildAndExpand();
+            WebClient webClient = WebClient.builder()
+                    .baseUrl(entity.getUrl1())
+                    .build();
+            Map<String, Object> data = new HashMap<>();
+            String key = entity.getUsernameBasic() + ":" + entity.getPasswordBasic();
+            String encodedKey = Base64.getEncoder().encodeToString(key.getBytes());
+            logger.info("VhitekActiveController: getCustomerSyncToken: encodedKey: " + encodedKey);
+            System.out.println("VhitekActiveController: getCustomerSyncToken: encodedKey: " + encodedKey);
+            Mono<TokenDTO> responseMono = webClient.method(HttpMethod.POST)
+                    .uri(uriComponents.toUri())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Basic " + encodedKey)
+                    .body(BodyInserters.fromValue(data))
+                    .exchange()
+                    .flatMap(clientResponse -> {
+                        System.out.println(
+                                "VhitekActiveController: get token: status code: " + clientResponse.statusCode());
+                        if (clientResponse.statusCode().is2xxSuccessful()) {
+                            return clientResponse.bodyToMono(TokenDTO.class);
+                        } else {
+                            return clientResponse.bodyToMono(String.class)
+                                    .flatMap(error -> {
+                                        logger.info("Error response: " + error);
+                                        return Mono.empty();
+                                    });
+                        }
+                    });
+            Optional<TokenDTO> resultOptional = responseMono.subscribeOn(Schedulers.boundedElastic())
+                    .blockOptional();
+            if (resultOptional.isPresent()) {
+                result = resultOptional.get();
+                logger.info("VhitekActiveController: getCustomerSyncToken: token got: " + result.getAccess_token());
+                System.out.println(
+                        "VhitekActiveController: getCustomerSyncToken: token got: " + result.getAccess_token());
+            } else {
+                logger.info("VhitekActiveController: getCustomerSyncToken: Token could not be retrieved");
+                System.out.println("VhitekActiveController: getCustomerSyncToken: Token could not be retrieved");
+            }
+        } catch (Exception e) {
+            logger.info("VhitekActiveController: getCustomerSyncToken: ERROR: " + e.toString());
+            System.out.println("VhitekActiveController: getCustomerSyncToken:  ERROR: " + e.toString());
+        }
+        return result;
     }
 
     private String getUsernameFromToken(String token) {

@@ -320,7 +320,6 @@ public class VhitekActiveController {
     }
 
     // active terminal
-    ///////////////////////////////////////////////////
     @PostMapping("service/vhitek/active-terminal")
     public ResponseEntity<ResponseMessageDTO> activeTerminalVhitek2(
             @RequestBody TerminalActiveVhitekDTO dto) {
@@ -333,7 +332,6 @@ public class VhitekActiveController {
                 PartnerConnectEntity partnerConnectEntity = partnerConnectService
                         .getPartnerConnectByServiceName(serviceVhitekActive);
                 if (partnerConnectEntity != null) {
-                    ////////////////////////////////////////////////////////////////
                     result = insertBankIntoMerchant(dto.getBankId(), partnerConnectEntity.getCustomerSyncId(),
                             dto.getBankAccount(), dto.getUserBankName());
                     if (result.getStatus().equals("SUCCESS")) {
@@ -432,7 +430,6 @@ public class VhitekActiveController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-    ////////////////////////////////////////////////////////////////////////////////////
 
     // active terminal admin side
     @PostMapping("admin/service/terminal/active")
@@ -656,6 +653,7 @@ public class VhitekActiveController {
                     accountCustomerBankEntity.setBankId(bankId);
                     accountCustomerBankEntity.setCustomerSyncId(EnvironmentUtil.getMerchantIdQrBoxDefault());
                     accountCustomerBankEntity.setBankAccount(accountBankReceiveEntity.getBankAccount());
+                    accountCustomerBankEntity.setAccountCustomerId("");
                     accountCustomerBankEntity.setId(UUID.randomUUID().toString());
                     accountCustomerBankService.insert(accountCustomerBankEntity);
 
@@ -664,6 +662,7 @@ public class VhitekActiveController {
                     accountCustomerBankEntity.setBankId(bankId);
                     accountCustomerBankEntity.setCustomerSyncId(EnvironmentUtil.getMerchantIdQrBoxDefault());
                     accountCustomerBankEntity.setBankAccount(accountBankReceiveEntity.getBankAccount());
+                    accountCustomerBankEntity.setAccountCustomerId("");
                     accountCustomerBankEntity.setId(UUID.randomUUID().toString());
 
                     TerminalAddressEntity terminalAddressEntity = new TerminalAddressEntity();

@@ -22,7 +22,7 @@ public class TerminalBankReceiveEntity {
     private String rawTerminalCode;
 
     //0: QR default, 1: QR Box
-    @Column(name = "typeOfQR")
+    @Column(name = "typeOfQr")
     private int typeOfQR;
 
     @Column(name = "bankId")

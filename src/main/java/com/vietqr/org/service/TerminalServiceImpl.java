@@ -154,4 +154,9 @@ public class TerminalServiceImpl implements TerminalService {
     public List<TerminalCodeResponseDTO> getListTerminalResponseByBankIdAndUserId(String userId, String bankId) {
         return repo.getListTerminalResponseByBankIdAndUserId(userId, bankId);
     }
+
+    @Override
+    public String getTerminalCodeByTerminalCode(String value) {
+        return repo.getTerminalCodeByTerminalCode(value);
+    }
 }
