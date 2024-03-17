@@ -514,7 +514,7 @@ public class EnvironmentUtil {
         return (IS_PRODUCTION == false) ? VIET_QR_URL_API_UAT : VIET_QR_URL_API_PROD;
     }
 
-    public static String getMerchantIdQrBoxDefault() {
+    public static String getDefaultCustomerSyncIdIot() {
         return (IS_PRODUCTION == false) ? MERCHANT_ID_QR_BOX_DEFAULT_UAT : MERCHANT_ID_QR_BOX_DEFAULT_PROD;
     }
 }

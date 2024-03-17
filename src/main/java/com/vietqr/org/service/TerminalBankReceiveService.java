@@ -28,4 +28,6 @@ public interface TerminalBankReceiveService {
     TerminalBankReceiveEntity getTerminalBankReceiveByTraceTransfer(String traceTransfer);
 
     List<String> getTerminalCodeByMainTerminalCodeList(List<String> terminalCodeAccess);
+
+    String getTerminalBankReceiveByTerminalCode(String terminalCode);
 }

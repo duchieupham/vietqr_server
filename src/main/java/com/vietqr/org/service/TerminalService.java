@@ -38,6 +38,8 @@ public interface TerminalService {
 
     TerminalEntity getTerminalByTerminalCode(String terminalCode, String bankAccount);
 
+    TerminalEntity getTerminalByTerminalCode(String terminalCode);
+
     String getTerminalByTraceTransfer(String traceTransfer);
 
     List<TerminalEntity> getAllTerminalNoQRCode();

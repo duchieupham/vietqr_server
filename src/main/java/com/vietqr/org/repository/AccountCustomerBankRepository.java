@@ -95,4 +95,8 @@ public interface AccountCustomerBankRepository extends JpaRepository<AccountCust
                         + "WHERE customer_sync_id = :customerSyncId ", nativeQuery = true)
         AccountCustomerBankInfoDTO getBankSizeAndAddressByCustomerSyncId(
                         @Param(value = "customerSyncId") String customerSyncId);
+
+        @Query(value = "SELECT * FROM account_customer_bank "
+                + "WHERE customer_sync_id = :customerSyncId AND bank_id = :bankId", nativeQuery = true)
+        AccountCustomerBankEntity getAccountCustomerBankByBankIdAndMerchantId(String bankId, String customerSyncId);
 }

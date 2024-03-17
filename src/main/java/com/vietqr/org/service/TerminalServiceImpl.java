@@ -93,6 +93,11 @@ public class TerminalServiceImpl implements TerminalService {
     }
 
     @Override
+    public TerminalEntity getTerminalByTerminalCode(String terminalCode) {
+        return repo.getTerminalByTerminalCode(terminalCode);
+    }
+
+    @Override
     public String getTerminalByTraceTransfer(String traceTransfer) {
         return repo.getTerminalByTraceTransfer(traceTransfer);
     }

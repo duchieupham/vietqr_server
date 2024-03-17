@@ -31,7 +31,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vietqr.org.dto.AccountCustomerBankInfoDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.TerminalActiveVhitekDTO;
 import com.vietqr.org.dto.TerminalSyncMBDTO;
@@ -45,7 +44,6 @@ import com.vietqr.org.service.PartnerCheckerService;
 import com.vietqr.org.service.PartnerConnectService;
 import com.vietqr.org.service.TerminalAddressService;
 import com.vietqr.org.service.TerminalBankService;
-import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.EnvironmentUtil;
 
 import reactor.core.publisher.Mono;
@@ -348,6 +346,12 @@ public class VhitekActiveController {
                             WebClient webClient = WebClient.builder()
                                     .baseUrl(partnerConnectEntity.getUrl4())
                                     .build();
+                            LocalDateTime current = LocalDateTime.now();
+                            long timeRequest = current.toEpochSecond(ZoneOffset.UTC);
+                            System.out.println("VhitekActiveController: activeTerminalVhitek2: Response: " + data
+                                    + " at: " + timeRequest);
+                            logger.info("VhitekActiveController: activeTerminalVhitek2: Response: " + data
+                                    + " at: " + timeRequest);
                             Mono<ClientResponse> responseMono = webClient.post()
                                     .header("Authorization", "Bearer " + tokenDTO.getAccess_token())
                                     .contentType(MediaType.APPLICATION_JSON)
@@ -356,8 +360,12 @@ public class VhitekActiveController {
                             ClientResponse response = responseMono.block();
                             if (response.statusCode().is2xxSuccessful()) {
                                 String json = response.bodyToMono(String.class).block();
-                                System.out.println("activeTerminalVhitek: Response: " + json);
-                                logger.info("activeTerminalVhitek: Response: " + json);
+                                current = LocalDateTime.now();
+                                long timeResponse = current.toEpochSecond(ZoneOffset.UTC);
+                                System.out.println("VhitekActiveController: activeTerminalVhitek2: Response: " + json
+                                + " at: " + timeResponse);
+                                logger.info("VhitekActiveController: activeTerminalVhitek2: Response: " + json
+                                + " at: " + timeResponse);
                                 ObjectMapper objectMapper = new ObjectMapper();
                                 JsonNode rootNode = objectMapper.readTree(json);
                                 if (rootNode.get("detail") != null) {
@@ -399,9 +407,13 @@ public class VhitekActiveController {
                                     httpStatus = HttpStatus.BAD_REQUEST;
                                 }
                             } else {
+                                current = LocalDateTime.now();
+                                long timeResponse = current.toEpochSecond(ZoneOffset.UTC);
                                 String json = response.bodyToMono(String.class).block();
-                                System.out.println("activeTerminalVhitek: Response: " + json);
-                                logger.error("activeTerminalVhitek: Response: " + json);
+                                System.out.println("VhitekActiveController: activeTerminalVhitek2: Response: " + json
+                                + " at: " + timeResponse);
+                                logger.error("VhitekActiveController: activeTerminalVhitek2: Response: " + json
+                                        + " at: " + timeResponse);
                                 result = new ResponseMessageDTO("FAILED", "E05");
                                 httpStatus = HttpStatus.BAD_REQUEST;
                             }
@@ -648,32 +660,30 @@ public class VhitekActiveController {
             if (checkAuthenticated != null && checkAuthenticated) {
                 AccountBankReceiveEntity accountBankReceiveEntity
                         = accountBankReceiveService.getAccountBankById(bankId);
-                if (!accountBankReceiveEntity.isMmsActive()) {
-                    AccountCustomerBankEntity accountCustomerBankEntity = new AccountCustomerBankEntity();
+                AccountCustomerBankEntity accountCustomerBankEntity = accountCustomerBankService
+                        .getAccountCustomerBankByBankIdAndMerchantId(bankId, EnvironmentUtil.getDefaultCustomerSyncIdIot());
+                if (accountCustomerBankEntity == null) {
+                    accountCustomerBankEntity = new AccountCustomerBankEntity();
                     accountCustomerBankEntity.setBankId(bankId);
-                    accountCustomerBankEntity.setCustomerSyncId(EnvironmentUtil.getMerchantIdQrBoxDefault());
-                    accountCustomerBankEntity.setBankAccount(accountBankReceiveEntity.getBankAccount());
+                    accountCustomerBankEntity.setCustomerSyncId(EnvironmentUtil.getDefaultCustomerSyncIdIot());
+                    accountCustomerBankEntity.setBankAccount(bankAccount);
                     accountCustomerBankEntity.setAccountCustomerId("");
                     accountCustomerBankEntity.setId(UUID.randomUUID().toString());
                     accountCustomerBankService.insert(accountCustomerBankEntity);
-
-                } else {
-                    AccountCustomerBankEntity accountCustomerBankEntity = new AccountCustomerBankEntity();
-                    accountCustomerBankEntity.setBankId(bankId);
-                    accountCustomerBankEntity.setCustomerSyncId(EnvironmentUtil.getMerchantIdQrBoxDefault());
-                    accountCustomerBankEntity.setBankAccount(accountBankReceiveEntity.getBankAccount());
-                    accountCustomerBankEntity.setAccountCustomerId("");
-                    accountCustomerBankEntity.setId(UUID.randomUUID().toString());
-
-                    TerminalAddressEntity terminalAddressEntity = new TerminalAddressEntity();
-                    TerminalBankEntity terminalBankEntity = terminalBankService.getTerminalBankByBankAccount(bankAccount);
-                    terminalAddressEntity.setBankId(bankId);
-                    terminalAddressEntity.setTerminalBankId(terminalBankEntity.getId());
-                    terminalAddressEntity.setCustomerSyncId(EnvironmentUtil.getMerchantIdQrBoxDefault());
-                    terminalAddressEntity.setBankAccount(accountBankReceiveEntity.getBankAccount());
-                    terminalAddressEntity.setId(UUID.randomUUID().toString());
-                    accountCustomerBankService.insert(accountCustomerBankEntity);
-                    terminalAddressService.insert(terminalAddressEntity);
+                }
+                if (accountBankReceiveEntity.isMmsActive()) {
+                    TerminalAddressEntity terminalAddressEntity = terminalAddressService
+                            .getTerminalAddressByBankIdAndCustomerSyncId(bankId, EnvironmentUtil.getDefaultCustomerSyncIdIot());
+                    if (terminalAddressEntity == null) {
+                        terminalAddressEntity = new TerminalAddressEntity();
+                        TerminalBankEntity terminalBankEntity = terminalBankService.getTerminalBankByBankAccount(bankAccount);
+                        terminalAddressEntity.setBankId(bankId);
+                        terminalAddressEntity.setTerminalBankId(terminalBankEntity.getId());
+                        terminalAddressEntity.setCustomerSyncId(EnvironmentUtil.getDefaultCustomerSyncIdIot());
+                        terminalAddressEntity.setBankAccount(accountBankReceiveEntity.getBankAccount());
+                        terminalAddressEntity.setId(UUID.randomUUID().toString());
+                        terminalAddressService.insert(terminalAddressEntity);
+                    }
                 }
             } else {
                 //

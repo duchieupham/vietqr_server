@@ -2,18 +2,20 @@ package com.vietqr.org.dto;
 
 import javax.validation.constraints.NotBlank;
 
-public class QRBoxRequestDto {
+public class QRSyncRequestDTO {
     @NotBlank
     private String terminalId;
     @NotBlank
     private String machineCode;
+    @NotBlank
+    private String bankId;
 
-    public QRBoxRequestDto(String terminalId, String machineCode) {
+    public QRSyncRequestDTO(String terminalId, String machineCode) {
         this.terminalId = terminalId;
         this.machineCode = machineCode;
     }
 
-    public QRBoxRequestDto() {
+    public QRSyncRequestDTO() {
     }
 
     public String getTerminalId() {
@@ -30,5 +32,13 @@ public class QRBoxRequestDto {
 
     public void setMachineCode(String machineCode) {
         this.machineCode = machineCode;
+    }
+
+    public String getBankId() {
+        return bankId;
+    }
+
+    public void setBankId(String bankId) {
+        this.bankId = bankId;
     }
 }
