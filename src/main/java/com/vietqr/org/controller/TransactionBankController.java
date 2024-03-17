@@ -673,6 +673,7 @@ public class TransactionBankController {
 								String orderId = "";
 								String sign = "";
 								String rawCode = "";
+								String rawCodeResult = "";
 								if (traceId != null && !traceId.isEmpty()) {
 									logger.info("transaction-sync - trace ID detect: " + traceId);
 									TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
@@ -692,9 +693,14 @@ public class TransactionBankController {
 														.getTerminalBankReceiveByTerminalCode(transactionReceiveEntity.getTerminalCode());
 											}
 										}
+										if (rawCode == null || rawCode.trim().isEmpty()) {
+											rawCodeResult = "";
+										} else {
+											rawCodeResult = rawCode;
+										}
 
 										getCustomerSyncEntities(transactionReceiveEntity.getId(), dto,
-												accountBankEntity, time, orderId, sign, rawCode);
+												accountBankEntity, time, orderId, sign, rawCodeResult);
 										updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time, nf);
 										// check if recharge => do update status and push data to customer
 										////////// USER RECHAGE VQR || USER RECHARGE MOBILE
