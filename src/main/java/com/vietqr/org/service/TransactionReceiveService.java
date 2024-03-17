@@ -356,17 +356,17 @@ public interface TransactionReceiveService {
         List<TransactionRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, String terminalCode, int offset);
 
         List<TransactionRelatedDTO> getAllTransTerminal(String bankId, String userId, String terminalCode, int offset);
+//
+        List<TransactionRelatedDTO> getTransTerminalByStatus(String bankId, String userId, int value, List<String> terminalCode, String fromDate, String toDate, int offset);
 
-        List<TransactionRelatedDTO> getTransTerminalByStatus(String bankId, String userId, int value, String terminalCode, String fromDate, String toDate, int offset);
+        List<TransactionRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, List<String> terminalCode, String fromDate, String toDate, int offset);
 
-        List<TransactionRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, String terminalCode, String fromDate, String toDate, int offset);
+        List<TransactionRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, List<String> terminalCode, String fromDate, String toDate, int offset);
 
-        List<TransactionRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, String terminalCode, String fromDate, String toDate, int offset);
+        List<TransactionRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, List<String> terminalCode, String fromDate, String toDate, int offset);
 
-        List<TransactionRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, String terminalCode, String fromDate, String toDate, int offset);
-
-        List<TransactionRelatedDTO> getAllTransTerminal(String bankId, String userId, String terminalCode, String fromDate, String toDate, int offset);
-
+        List<TransactionRelatedDTO> getAllTransTerminal(String bankId, String userId, List<String> terminalCode, String fromDate, String toDate, int offset);
+//
         TransStatisticDTO getTransactionOverview(String bankId, String terminalCode, String month, String userId);
 
         TransStatisticDTO getTransactionOverview(String bankId, String month);
@@ -420,4 +420,8 @@ public interface TransactionReceiveService {
         void updateTransactionReceiveTerminal(String transactionId, String terminalCode, int type);
 
         TransactionReceiveEntity getTransactionReceiveById(String transactionId, String userId);
+
+        List<TransactionRelatedDTO> getTransactionsByTerminalCodeAllDateListCode(List<String> allTerminalCode, int offset, String bankId);
+
+        List<TransactionRelatedDTO> getTransactionsByTerminalCodeAndDateListCode(List<String> allTerminalCode, int offset, String bankId, String from, String to);
 }

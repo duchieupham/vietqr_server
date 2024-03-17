@@ -65,6 +65,9 @@ public class TransactionMMSController {
     TerminalBankService terminalBankService;
 
     @Autowired
+    TransactionTerminalTempService transactionTerminalTempService;
+
+    @Autowired
     TransactionReceiveService transactionReceiveService;
 
     @Autowired
@@ -332,6 +335,7 @@ public class TransactionMMSController {
                                 "transaction-mms-sync: staticQRTime-start at:" + staticQRTime);
                         // STATTIC QR
                         String terminalId = "";
+                        boolean insertTransaction = false;
                         // get trace Transfer to find VietQR terminal
                         String traceTransfer = entity.getTraceTransfer();
                         if (StringUtil.isNullOrEmpty(traceTransfer) == false) {
@@ -349,7 +353,7 @@ public class TransactionMMSController {
                                     .findTerminalById(terminalId);
 
                             TerminalBankReceiveEntity terminalBankReceiveEntity = terminalBankReceiveService
-                                    .getTerminalBankReceiveByTerminalId(terminalId);
+                                    .getTerminalBankReceiveByTraceTransfer(traceTransfer);
                             if (terminalBankReceiveEntity != null) {
                                 AccountBankReceiveEntity accountBankReceiveEntity = accountBankService
                                         .getAccountBankById(terminalBankReceiveEntity.getBankId());
@@ -368,13 +372,35 @@ public class TransactionMMSController {
                                 transactionReceiveEntity1.setTime(time);
                                 transactionReceiveEntity1.setTimePaid(time);
                                 transactionReceiveEntity1.setBankId(accountBankReceiveEntity.getId());
-                                transactionReceiveEntity1.setTerminalCode(terminalEntity.getCode());
+                                if (terminalBankReceiveEntity.getTerminalCode() != null
+                                        && !terminalBankReceiveEntity.getTerminalCode().trim().isEmpty()) {
+                                    transactionReceiveEntity1.setTerminalCode(terminalBankReceiveEntity.getTerminalCode());
+                                } else {
+                                    transactionReceiveEntity1.setTerminalCode(terminalEntity.getCode());
+                                }
                                 transactionReceiveEntity1.setContent(entity.getTraceTransfer());
                                 transactionReceiveEntity1.setBankAccount(accountBankReceiveEntity.getBankAccount());
                                 transactionReceiveEntity1.setQrCode("");
                                 transactionReceiveEntity1.setUserId(accountBankReceiveEntity.getUserId());
                                 transactionReceiveEntity1.setNote("");
                                 transactionReceiveService.insertTransactionReceive(transactionReceiveEntity1);
+                                String code = "";
+                                if (terminalBankReceiveEntity.getTerminalCode() != null
+                                        && !terminalBankReceiveEntity.getTerminalCode().trim().isEmpty()) {
+                                    code = terminalBankReceiveEntity.getTerminalCode();
+                                } else {
+                                    code = terminalEntity.getCode();
+                                }
+                                final String tempTerminalCode = code;
+                                TransactionTerminalTempEntity transactionTerminalTempEntity = new TransactionTerminalTempEntity();
+                                transactionTerminalTempEntity.setId(UUID.randomUUID().toString());
+                                transactionTerminalTempEntity.setTransactionId(transactionId);
+                                transactionTerminalTempEntity.setTerminalCode(tempTerminalCode);
+                                transactionTerminalTempEntity.setTime(time);
+                                transactionTerminalTempEntity.setAmount(Long.parseLong(entity.getDebitAmount() + ""));
+                                transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTempEntity);
+
+                                insertTransaction = true;
                                 BankTypeEntity bankTypeEntity = bankTypeService
                                         .getBankTypeById(accountBankReceiveEntity.getBankTypeId());
                                 NumberFormat nf = NumberFormat.getInstance(Locale.US);
@@ -465,7 +491,17 @@ public class TransactionMMSController {
                                 transactionEntity.setQrCode("");
                                 transactionEntity.setUserId(bankDTO.getUserId());
                                 transactionEntity.setNote("");
-                                transactionReceiveService.insertTransactionReceive(transactionEntity);
+                                if (!insertTransaction) {
+                                    transactionReceiveService.insertTransactionReceive(transactionEntity);
+                                    final String tempTerminalCode = terminalEntity.getCode();
+                                    TransactionTerminalTempEntity transactionTerminalTempEntity = new TransactionTerminalTempEntity();
+                                    transactionTerminalTempEntity.setId(UUID.randomUUID().toString());
+                                    transactionTerminalTempEntity.setTransactionId(transcationUUID.toString());
+                                    transactionTerminalTempEntity.setTerminalCode(tempTerminalCode);
+                                    transactionTerminalTempEntity.setTime(time);
+                                    transactionTerminalTempEntity.setAmount(Long.parseLong(entity.getDebitAmount() + ""));
+                                    transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTempEntity);
+                                }
                                 // check time insert transaction QR static success
                                 LocalDateTime insertStatic = LocalDateTime.now();
                                 long insertStaticTime = insertStatic.toEpochSecond(ZoneOffset.UTC);

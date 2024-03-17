@@ -59,7 +59,7 @@ public interface AccountBankReceiveShareService {
 
     int countMembersByTerminalId(String terminalId);
 
-    String checkUserExistedFromBankAccount(String userId, String value);
+    List<String> checkUserExistedFromBankId(String userId, String value);
 
     String checkUserExistedFromBankByTerminalCode(String value, String userId);
 

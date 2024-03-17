@@ -141,8 +141,12 @@ public class TerminalController {
                     terminalDetailWebDTO.setTerminalId(terminal.getTerminalId());
                     terminalDetailWebDTO.setTerminalName(terminal.getTerminalName());
                     terminalDetailWebDTO.setTerminalAddress(terminal.getTerminalAddress());
+                    List<String> listCode = new ArrayList<>();
+                    listCode = terminalBankReceiveService
+                            .getTerminalCodeByMainTerminalCode(terminal.getTerminalCode());
+                    listCode.add(terminal.getTerminalCode());
                     RevenueTerminalDTO revenueTerminalDTO = transactionTerminalTempService.getTotalTranByTerminalCodeAndTimeBetween(
-                            terminal.getTerminalCode(),
+                            listCode,
                             DateTimeUtil.getCurrentDateAsString(),
                             DateTimeUtil.getCurrentDateAsString());
                     if (revenueTerminalDTO != null) {
@@ -352,17 +356,21 @@ public class TerminalController {
                 dto.setName(terminalWebResponseDTO.getName());
                 dto.setAddress(terminalWebResponseDTO.getAddress());
                 dto.setCode(terminalWebResponseDTO.getCode());
+                List<String> listCode = new ArrayList<>();
+                listCode = terminalBankReceiveService
+                        .getTerminalCodeByMainTerminalCode(terminalWebResponseDTO.getCode());
+                listCode.add(terminalWebResponseDTO.getCode());
                 RevenueTerminalDTO revenueTerminalDTO = transactionTerminalTempService.getTotalTranByTerminalCodeAndTimeBetween(
-                        terminalWebResponseDTO.getCode(), DateTimeUtil.getCurrentDateAsString(), DateTimeUtil.getCurrentDateAsString());
+                        listCode, DateTimeUtil.getCurrentDateAsString(), DateTimeUtil.getCurrentDateAsString());
                 dto.setTotalTrans(revenueTerminalDTO.getTotalTrans());
                 dto.setTotalAmount(revenueTerminalDTO.getTotalAmount());
                 RevenueTerminalDTO revenueTerminalDTOPrevDate = transactionTerminalTempService.getTotalTranByTerminalCodeAndTimeBetweenWithCurrentTime(
-                        terminalWebResponseDTO.getCode(), DateTimeUtil.getPrevDateAsString(), DateTimeUtil.getCurrentDateTimeAsNumber() - 86400);
+                        listCode, DateTimeUtil.getPrevDateAsString(), DateTimeUtil.getCurrentDateTimeAsNumber() - 86400);
                 int revGrowthPrevDate = revenueTerminalDTOPrevDate.getTotalAmount() == 0 ? 0 :
                         (int) ((revenueTerminalDTO.getTotalAmount() - revenueTerminalDTOPrevDate.getTotalAmount()) * 100 / revenueTerminalDTOPrevDate.getTotalAmount());
                 dto.setRevGrowthPrevDate(revGrowthPrevDate);
                 RevenueTerminalDTO revenueTerminalDTOPrevMonth = transactionTerminalTempService.getTotalTranByTerminalCodeAndTimeBetween(
-                        terminalWebResponseDTO.getCode(), DateTimeUtil.getPrevMonthAsString(), DateTimeUtil.getPrevMonthAsString());
+                        listCode, DateTimeUtil.getPrevMonthAsString(), DateTimeUtil.getPrevMonthAsString());
                 int revGrowthPrevMonth = revenueTerminalDTOPrevMonth.getTotalAmount() == 0 ? 0 :
                         (int) ((revenueTerminalDTO.getTotalAmount() - revenueTerminalDTOPrevMonth.getTotalAmount()) * 100 / revenueTerminalDTOPrevDate.getTotalAmount());
                 dto.setRevGrowthPrevMonth(revGrowthPrevMonth);

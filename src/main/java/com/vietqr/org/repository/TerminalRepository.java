@@ -239,4 +239,9 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
 
     @Query(value = "SELECT code FROM terminal WHERE code = :value LIMIT 1", nativeQuery = true)
     String getTerminalCodeByTerminalCode(String value);
+
+    @Query(value = "SELECT a.* FROM terminal a "
+            + "INNER JOIN terminal_bank_receive b ON a.id = b.terminal_id "
+            + "WHERE b.terminal_code = :terminalCode", nativeQuery = true)
+    TerminalEntity getTerminalByTerminalBankReceiveCode(String terminalCode);
 }

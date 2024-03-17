@@ -159,4 +159,9 @@ public class TerminalServiceImpl implements TerminalService {
     public String getTerminalCodeByTerminalCode(String value) {
         return repo.getTerminalCodeByTerminalCode(value);
     }
+
+    @Override
+    public TerminalEntity getTerminalByTerminalBankReceiveCode(String terminalCode) {
+        return repo.getTerminalByTerminalBankReceiveCode(terminalCode);
+    }
 }

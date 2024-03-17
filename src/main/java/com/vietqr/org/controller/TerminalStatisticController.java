@@ -1,6 +1,7 @@
 package com.vietqr.org.controller;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.service.TerminalBankReceiveService;
 import com.vietqr.org.service.TerminalService;
 import com.vietqr.org.service.TransactionTerminalTempService;
 import com.vietqr.org.util.DateTimeUtil;
@@ -24,6 +25,9 @@ public class TerminalStatisticController {
 
     @Autowired
     private TransactionTerminalTempService transactionTerminalTempService;
+
+    @Autowired
+    private TerminalBankReceiveService terminalBankReceiveService;
 
     @Autowired
     private TerminalService terminalService;
@@ -105,10 +109,17 @@ public class TerminalStatisticController {
                             dto.setTerminalAddress(item.getTerminalAddress());
                             dto.setTotalTrans(item.getTotalTrans());
                             dto.setTotalAmount(item.getTotalAmount());
-                            RevenueTerminalDTO revGrowthPrevDate = transactionTerminalTempService
-                                    .getTotalTranByTerminalCodeAndTimeBetweenWithCurrentTime(
-                                            dto.getTerminalCode(), DateTimeUtil.getPrevDateAsString(),
-                                            DateTimeUtil.getCurrentDateTimeAsNumber() - 86400);
+                            List<String> listCode = new ArrayList<>();
+                            listCode = terminalBankReceiveService.getTerminalCodeByMainTerminalCode(item.getTerminalCode());
+                            listCode.add(item.getTerminalCode());
+//                            RevenueTerminalDTO revGrowthPrevDate = transactionTerminalTempService
+//                                    .getTotalTranByTerminalCodeAndTimeBetweenWithCurrentTime(
+//                                            dto.getTerminalCode(), DateTimeUtil.getPrevDateAsString(),
+//                                            DateTimeUtil.getCurrentDateTimeAsNumber() - 86400);
+                    RevenueTerminalDTO revGrowthPrevDate = transactionTerminalTempService
+                            .getTotalTranByTerminalCodeAndTimeBetweenWithCurrentTime(
+                                    listCode, DateTimeUtil.getPrevDateAsString(),
+                                    DateTimeUtil.getCurrentDateTimeAsNumber() - 86400);
                             if (revGrowthPrevDate != null && revGrowthPrevDate.getTotalAmount() != 0 && revGrowthPrevDate.getTotalTrans() != 0) {
                                 double revGrowthPrevDateNum = revGrowthPrevDate.getTotalAmount() == 0 ? 0 :
                                         (double) (dto.getTotalAmount() - revGrowthPrevDate.getTotalAmount())

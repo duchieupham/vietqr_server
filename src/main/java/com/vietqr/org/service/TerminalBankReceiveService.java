@@ -22,4 +22,10 @@ public interface TerminalBankReceiveService {
     TerminalBankReceiveEntity getTerminalBankByTerminalId(String terminalId);
 
     String getTerminalCodeByRawTerminalCode(String value);
+
+    List<String> getTerminalCodeByMainTerminalCode(String terminalCodeForSearch);
+
+    TerminalBankReceiveEntity getTerminalBankReceiveByTraceTransfer(String traceTransfer);
+
+    List<String> getTerminalCodeByMainTerminalCodeList(List<String> terminalCodeAccess);
 }

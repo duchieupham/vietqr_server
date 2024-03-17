@@ -63,4 +63,6 @@ public interface TerminalService {
     List<TerminalCodeResponseDTO> getListTerminalResponseByBankIdAndUserId(String userId, String bankId);
 
     String getTerminalCodeByTerminalCode(String value);
+
+    TerminalEntity getTerminalByTerminalBankReceiveCode(String terminalCode);
 }

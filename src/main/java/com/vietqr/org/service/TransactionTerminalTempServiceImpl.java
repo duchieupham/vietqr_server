@@ -38,7 +38,7 @@ public class TransactionTerminalTempServiceImpl implements TransactionTerminalTe
     }
 
     @Override
-    public RevenueTerminalDTO getTotalTranByTerminalCodeAndTimeBetween(String terminalCode, String fromDate, String toDate) {
+    public RevenueTerminalDTO getTotalTranByTerminalCodeAndTimeBetween(List<String> terminalCode, String fromDate, String toDate) {
         StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndTime(fromDate, toDate);
         return repo.getTotalTranByTerminalCodeAndTimeBetween(terminalCode,
                 startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET,
@@ -91,7 +91,7 @@ public class TransactionTerminalTempServiceImpl implements TransactionTerminalTe
     }
 
     @Override
-    public RevenueTerminalDTO getTotalTranByTerminalCodeAndTimeBetweenWithCurrentTime(String terminalCode, String fromDate, long currentDateTimeAsNumber) {
+    public RevenueTerminalDTO getTotalTranByTerminalCodeAndTimeBetweenWithCurrentTime(List<String> terminalCode, String fromDate, long currentDateTimeAsNumber) {
         StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndTime(fromDate, fromDate);
         return repo.getTotalTranByTerminalCodeAndTimeBetween(terminalCode,
                 startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET,

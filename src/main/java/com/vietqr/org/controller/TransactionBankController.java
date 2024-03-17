@@ -1400,6 +1400,11 @@ public class TransactionBankController {
 			TerminalEntity terminalEntity = terminalService
 					.getTerminalByTerminalCode(terminalCode,
 							accountBankEntity.getBankAccount());
+			if (terminalEntity == null) {
+				logger.info("transaction-sync - insertNewTransaction - terminalEntity is null: find terminalBankReceive");
+				terminalEntity = terminalService
+						.getTerminalByTerminalBankReceiveCode(terminalCode);
+			}
 			if (terminalEntity != null) {
 				TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
 				transactionEntity.setId(transcationUUID);
@@ -1501,6 +1506,41 @@ public class TransactionBankController {
 							}
 						}
 						executorService.shutdown();
+					} else {
+						Map<String, String> data = new HashMap<>();
+						UUID notificationUUID = UUID.randomUUID();
+						NotificationEntity notiEntity = new NotificationEntity();
+						String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
+								+ accountBankEntity.getBankAccount()
+								+ NotificationUtil.getNotiDescUpdateTransSuffix2()
+								+ prefix + nf.format(dto.getAmount())
+								+ NotificationUtil.getNotiDescUpdateTransSuffix3()
+								+ terminalEntity.getName()
+								+ NotificationUtil.getNotiDescUpdateTransSuffix4()
+								+ dto.getContent();
+						notiEntity.setId(notificationUUID.toString());
+						notiEntity.setRead(false);
+						notiEntity.setMessage(message);
+						notiEntity.setTime(time);
+						notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
+						notiEntity.setUserId(accountBankEntity.getUserId());
+						notiEntity.setData(transcationUUID.toString());
+						data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+						data.put("notificationId", notificationUUID.toString());
+						data.put("transactionReceiveId", transcationUUID.toString());
+						data.put("bankAccount", accountBankEntity.getBankAccount());
+						data.put("bankName", bankTypeEntity.getBankName());
+						data.put("bankCode", bankTypeEntity.getBankCode());
+						data.put("bankId", accountBankEntity.getId());
+						data.put("content", transactionEntity.getContent());
+						data.put("amount", "" + transactionEntity.getAmount());
+						data.put("time", "" + time);
+						data.put("refId", "" + uuid.toString());
+						data.put("status", "1");
+						data.put("traceId", "");
+						data.put("transType", "C");
+						pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
+								message, notiEntity, data, accountBankEntity.getUserId());
 					}
 					/////// DO INSERT TELEGRAM
 					List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
