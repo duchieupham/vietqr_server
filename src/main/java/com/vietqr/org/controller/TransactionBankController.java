@@ -1535,6 +1535,10 @@ public class TransactionBankController {
 				logger.info("transaction-sync - insertNewTransaction - terminalEntity is null: find terminalBankReceive");
 				terminalEntity = terminalService
 						.getTerminalByTerminalBankReceiveCode(terminalCode);
+				if (terminalEntity == null) {
+					terminalEntity = terminalService
+							.getTerminalByTerminalCode(terminalCode);
+				}
 			}
 			if (terminalEntity != null) {
 				TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();

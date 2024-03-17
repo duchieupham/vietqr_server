@@ -147,7 +147,7 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             "AND b.bank_id IS NOT NULL AND b.bank_id != '' ", nativeQuery = true)
     List<TerminalEntity> getAllTerminalNoQRCode();
 
-    @Query(value = "SELECT * FROM terminal WHERE code = :terminalCode", nativeQuery = true)
+    @Query(value = "SELECT * FROM terminal WHERE code = :terminalCode LIMIT 1", nativeQuery = true)
     TerminalEntity getTerminalByTerminalCode(String terminalCode);
 
     @Query(value = "SELECT a.id AS terminalId, a.name AS terminalName, "
