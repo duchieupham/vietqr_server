@@ -17,6 +17,6 @@ public interface TerminalAddressRepository extends JpaRepository<TerminalAddress
             @Param(value = "terminalBankId") String terminalBankId);
 
     @Query(value = "SELECT * FROM terminal_address WHERE " +
-            "bank_id = :bankId AND customer_sync_id = :customerSyncId", nativeQuery = true)
+            "bank_id = :bankId AND cusomer_sync_id = :customerSyncId LIMIT 1", nativeQuery = true)
     TerminalAddressEntity getTerminalAddressByBankIdAndCustomerSyncId(String bankId, String customerSyncId);
 }

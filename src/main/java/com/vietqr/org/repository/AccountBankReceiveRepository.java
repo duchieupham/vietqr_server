@@ -40,7 +40,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	List<String> checkExistedBankAccountSameUser(@Param(value = "bankAccount") String bankAccount,
 			@Param(value = "bankTypeId") String bankTypeId, @Param(value = "userId") String userId);
 
-	@Query(value = "SELECT * FROM account_bank_receive WHERE id = :bankId", nativeQuery = true)
+	@Query(value = "SELECT * FROM account_bank_receive WHERE id = :bankId LIMIT 1", nativeQuery = true)
 	AccountBankReceiveEntity getAccountBankById(@Param(value = "bankId") String bankId);
 
 	// @Query(value = "SELECT * FROM account_bank_receive WHERE bank_account =
@@ -184,7 +184,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "WHERE id = :id ", nativeQuery = true)
 	void updateSyncBank(@Param(value = "sync") boolean sync, @Param(value = "id") String id);
 
-	@Query(value = "SELECT is_authenticated FROM account_bank_receive WHERE id = :bankId ", nativeQuery = true)
+	@Query(value = "SELECT is_authenticated FROM account_bank_receive WHERE id = :bankId LIMIT 1", nativeQuery = true)
 	Boolean getAuthenticatedByBankId(@Param(value = "bankId") String bankId);
 
 	@Transactional

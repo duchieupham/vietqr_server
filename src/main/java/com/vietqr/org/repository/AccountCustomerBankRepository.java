@@ -97,7 +97,8 @@ public interface AccountCustomerBankRepository extends JpaRepository<AccountCust
                         @Param(value = "customerSyncId") String customerSyncId);
 
         @Query(value = "SELECT * FROM account_customer_bank "
-                + "WHERE (customer_sync_id = :customerSyncId OR customer_sync_id = 'c45156b9-8756-4c05-9e39-259e7d549918') "
-                + "AND bank_id = :bankId ", nativeQuery = true)
+                + "WHERE (customer_sync_id = :customerSyncId OR customer_sync_id = 'c45156b9-8756-4c05-9e39-259e7d549918' " +
+                "OR customer_sync_id = 'dbbb30dd-58d0-455b-963c-120d3b19f9bf') "
+                + "AND bank_id = :bankId LIMIT 1", nativeQuery = true)
         AccountCustomerBankEntity getAccountCustomerBankByBankIdAndMerchantId(String bankId, String customerSyncId);
 }

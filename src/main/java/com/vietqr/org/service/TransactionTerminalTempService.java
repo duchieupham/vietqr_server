@@ -13,11 +13,11 @@ public interface TransactionTerminalTempService {
 
     int insertTransactionTerminal(TransactionTerminalTempEntity transactionTerminalTempEntity);
 
-    RevenueTerminalDTO getTotalTranByUserIdAndTimeBetween(String userId, String fromDate, String toDate);
+    RevenueTerminalDTO getTotalTranByUserIdAndTimeBetween(List<String> terminalCode, String fromDate, String toDate);
 
     RevenueTerminalDTO getTotalTranByTerminalCodeAndTimeBetween(List<String> terminalCode, String fromTime, String toTime);
 
-    IStatisticMerchantDTO getStatisticMerchantByDate(String userId, String fromDate, String toDate);
+    IStatisticMerchantDTO getStatisticMerchantByDate(List<String> listTerminalCode, String fromDate, String toDate);
 
     List<IStatisticTerminalDTO> getStatisticMerchantByDateEveryHour(String userId, String fromDate, String toDate);
 
@@ -26,7 +26,7 @@ public interface TransactionTerminalTempService {
     List<IStatisticTerminalOverViewDTO> getStatisticMerchantByDateEveryTerminal(String userId,
                                                                                 String fromDate, String toDate, int offset);
 
-    RevenueTerminalDTO getTotalTranByUserIdAndTimeBetweenWithCurrentTime(String userId, String fromDate, long currentTime);
+    RevenueTerminalDTO getTotalTranByUserIdAndTimeBetweenWithCurrentTime(List<String> terminalCode, String fromDate, long currentTime);
 
     RevenueTerminalDTO getTotalTranByTerminalCodeAndTimeBetweenWithCurrentTime(List<String> terminalCode, String fromDate, long currentDateTimeAsNumber);
 

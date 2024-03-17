@@ -1538,11 +1538,16 @@ public class TerminalController {
         String terminalCode = "";
         String qr = "";
         try {
+            logger.info("TerminalController: createQRSyncToTerminal: Request: " + dto.toString());
             terminalCode = getRandomUniqueCodeInTerminalCode();
             AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService
                     .getAccountBankById(dto.getBankId());
-            TerminalBankReceiveEntity terminalBankReceiveEntity = new TerminalBankReceiveEntity();
-            terminalBankReceiveEntity.setId(UUID.randomUUID().toString());
+            TerminalBankReceiveEntity terminalBankReceiveEntity = terminalBankReceiveService
+                    .getTerminalBankReceiveByRawTerminalCode(dto.getMachineCode());
+            if (terminalBankReceiveEntity == null) {
+                terminalBankReceiveEntity = new TerminalBankReceiveEntity();
+                terminalBankReceiveEntity.setId(UUID.randomUUID().toString());
+            }
             terminalBankReceiveEntity.setTerminalId(dto.getTerminalId());
             terminalBankReceiveEntity.setRawTerminalCode(dto.getMachineCode());
             terminalBankReceiveEntity.setTerminalCode(terminalCode);
@@ -1611,9 +1616,9 @@ public class TerminalController {
                     if (response.statusCode().is2xxSuccessful()) {
                         String json = response.bodyToMono(String.class).block();
                         System.out.println("TerminalController: createQRSyncToTerminal: Response: " + json
-                        + "at: " + time);
-                        logger.info("TerminalController: createQRSyncToTerminal: Response: " + json
-                        + "at: " + time);
+                        + " at: " + time);
+                        logger.info("TerminalController: createQRSyncToTerminal: Response: " + json + " success status: " + response.statusCode()
+                        + " at: " + time);
 
                         terminalBankReceiveService.insert(terminalBankReceiveEntity);
                         result = new ResponseMessageDTO("SUCCESS", "");
@@ -1621,8 +1626,8 @@ public class TerminalController {
                     } else {
                         String json = response.bodyToMono(String.class).block();
                         System.out.println("createQRSyncToTerminal: Response: " + json);
-                        logger.info("TerminalController: createQRSyncToTerminal: Response: " + json
-                        + "at: " + time);
+                        logger.error("TerminalController: createQRSyncToTerminal: Response: " + json + " error status: " + response.statusCode()
+                        + " at: " + time);
                         result = new ResponseMessageDTO("FAILED", "E05");
                         httpStatus = HttpStatus.BAD_REQUEST;
                     }
@@ -1636,6 +1641,7 @@ public class TerminalController {
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
+            logger.error("TerminalController: createQRSyncToTerminal: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }

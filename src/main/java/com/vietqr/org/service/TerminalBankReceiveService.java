@@ -30,4 +30,6 @@ public interface TerminalBankReceiveService {
     List<String> getTerminalCodeByMainTerminalCodeList(List<String> terminalCodeAccess);
 
     String getTerminalBankReceiveByTerminalCode(String terminalCode);
+
+    TerminalBankReceiveEntity getTerminalBankReceiveByRawTerminalCode(String machineCode);
 }

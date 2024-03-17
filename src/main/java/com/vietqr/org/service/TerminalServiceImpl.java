@@ -169,4 +169,29 @@ public class TerminalServiceImpl implements TerminalService {
     public TerminalEntity getTerminalByTerminalBankReceiveCode(String terminalCode) {
         return repo.getTerminalByTerminalBankReceiveCode(terminalCode);
     }
+
+    @Override
+    public List<String> getAllCodeByUserId(String userId) {
+        return repo.getAllCodeByUserId(userId);
+    }
+
+    @Override
+    public List<String> getAllCodeByUserIdOwner(String userId) {
+        return repo.getAllCodeByUserIdOwner(userId);
+    }
+
+    @Override
+    public List<IStatisticTerminalOverViewDTO> getListTerminalByUserId(String userId, int offset) {
+        return repo.getListTerminalByUserId(userId, offset);
+    }
+
+    @Override
+    public List<IStatisticTerminalOverViewDTO> getListTerminalByUserIdNotOwner(String userId, int offset, int size) {
+        return repo.getListTerminalByUserIdNotOwner(userId, offset, size);
+    }
+
+    @Override
+    public int countNumberOfTerminalByUserIdOwner(String userId) {
+        return repo.countNumberOfTerminalByUserIdOwner(userId);
+    }
 }

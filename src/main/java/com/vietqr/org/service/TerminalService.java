@@ -67,4 +67,14 @@ public interface TerminalService {
     String getTerminalCodeByTerminalCode(String value);
 
     TerminalEntity getTerminalByTerminalBankReceiveCode(String terminalCode);
+
+    List<String> getAllCodeByUserId(String userId);
+
+    List<String> getAllCodeByUserIdOwner(String userId);
+
+    List<IStatisticTerminalOverViewDTO> getListTerminalByUserId(String userId, int offset);
+
+    List<IStatisticTerminalOverViewDTO> getListTerminalByUserIdNotOwner(String userId, int offset, int size);
+
+    int countNumberOfTerminalByUserIdOwner(String userId);
 }

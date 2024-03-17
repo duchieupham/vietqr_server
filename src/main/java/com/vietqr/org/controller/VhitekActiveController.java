@@ -324,6 +324,7 @@ public class VhitekActiveController {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         String serviceVhitekActive = EnvironmentUtil.getServiceVhitekActive();
+        logger.info("VhitekActiveController: activeTerminalVhitek2: Request: " + dto);
         try {
             if (dto != null) {
                 // get service urls
@@ -332,6 +333,7 @@ public class VhitekActiveController {
                 if (partnerConnectEntity != null) {
                     result = insertBankIntoMerchant(dto.getBankId(), partnerConnectEntity.getCustomerSyncId(),
                             dto.getBankAccount(), dto.getUserBankName());
+                    logger.info("VhitekActiveController: activeTerminalVhitek2: insertBankIntoMerchant: SUCCESS: " + result);
                     if (result.getStatus().equals("SUCCESS")) {
                         TokenDTO tokenDTO = getCustomerSyncToken(partnerConnectEntity);
                         if (tokenDTO != null) {
@@ -685,6 +687,7 @@ public class VhitekActiveController {
                         terminalAddressService.insert(terminalAddressEntity);
                     }
                 }
+                result = new ResponseMessageDTO("SUCCESS", "");
             } else {
                 //
                 // 2.2.2.1. if not authenticated, response err

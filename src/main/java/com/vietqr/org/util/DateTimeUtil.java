@@ -6,6 +6,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 
 public class DateTimeUtil {
+    public static final long A_DAY_TO_SECOND = 86400;
     private static final String GMT_PLUS_7 = "GMT+7";
     private static final String DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
 
