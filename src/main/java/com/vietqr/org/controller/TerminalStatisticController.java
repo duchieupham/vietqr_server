@@ -54,46 +54,53 @@ public class TerminalStatisticController {
             if (!listTerminalCode.isEmpty()) {
                 List<String> listCode = terminalBankReceiveService.getTerminalCodeByMainTerminalCodeList(listTerminalCode);
                 listCode.addAll(listTerminalCode);
-            IStatisticMerchantDTO dto = transactionTerminalTempService.getStatisticMerchantByDate(listCode, fromDate, toDate);
-            if (dto != null) {
-                result = new StatisticMerchantDTO();
-                result.setDate(dto.getDate());
-                result.setTotalTrans(dto.getTotalTrans());
-                result.setTotalAmount(dto.getTotalAmount());
-                result.setMerchantId("");
-                result.setDate(DateTimeUtil.removeTimeInDateTimeString(fromDate));
-                result.setMerchantName("");
-                result.setVsoCode("");
-                int countTerminal = listTerminalCode.size();
-                result.setTotalTerminal(countTerminal);
+                IStatisticMerchantDTO dto = transactionTerminalTempService.getStatisticMerchantByDate(listCode, fromDate, toDate);
+                if (dto != null) {
+                    result = new StatisticMerchantDTO();
+                    result.setDate(dto.getDate());
+                    result.setTotalTrans(dto.getTotalTrans());
+                    result.setTotalAmount(dto.getTotalAmount());
+                    result.setMerchantId("");
+                    result.setDate(DateTimeUtil.removeTimeInDateTimeString(fromDate));
+                    result.setMerchantName("");
+                    result.setVsoCode("");
+                    int countTerminal = listTerminalCode.size();
+                    result.setTotalTerminal(countTerminal);
+                    LocalDateTime now = LocalDateTime.now();
+                    long time = now.toEpochSecond(ZoneOffset.UTC);
+                    // + 7 xem đã qua ngày chưa;
+                    time += DateTimeUtil.GMT_PLUS_7_OFFSET;
+                    // đổi sang DateTime - đây là thời gian hiện tại
+                    LocalDateTime localDateTime = LocalDateTime.ofEpochSecond(time, 0, ZoneOffset.UTC);
+                    // đây là thời gian bắt ầu ngày hiện tại
+                    LocalDateTime startOfDay = localDateTime.toLocalDate().atStartOfDay();
+                    RevenueTerminalDTO revenueTerminalDTOPrevDate = transactionTerminalTempService
+                            .getTotalTranByUserIdAndTimeBetweenWithCurrentTime(
+                                    listCode, startOfDay.toEpochSecond(ZoneOffset.UTC) - DateTimeUtil.A_DAY_TO_SECOND,
+                                    localDateTime.toEpochSecond(ZoneOffset.UTC) - DateTimeUtil.A_DAY_TO_SECOND);
+                    if (revenueTerminalDTOPrevDate != null && revenueTerminalDTOPrevDate.getTotalAmount() != 0 && revenueTerminalDTOPrevDate.getTotalTrans() != 0) {
+                        double revGrowthPrevDate = revenueTerminalDTOPrevDate.getTotalAmount() == 0 ? 0 :
+                                (double) (dto.getTotalAmount() - revenueTerminalDTOPrevDate.getTotalAmount())
+                                        / revenueTerminalDTOPrevDate.getTotalAmount();
+                        result.setratePreviousDate((int) (revGrowthPrevDate * 100));
+                    } else {
+                        result.setratePreviousDate(0);
+                    }
+                    RevenueTerminalDTO revenueTerminalDTOPrevMonth = transactionTerminalTempService
+                            .getTotalTranByUserIdAndTimeBetween(
+                                    listCode, DateTimeUtil.getPrevMonthAsString(), DateTimeUtil.getPrevMonthAsString());
 
-                RevenueTerminalDTO revenueTerminalDTOPrevDate = transactionTerminalTempService
-                        .getTotalTranByUserIdAndTimeBetweenWithCurrentTime(
-                                listCode, DateTimeUtil.getPrevDateAsString(),
-                                DateTimeUtil.getCurrentDateTimeAsNumber() - - DateTimeUtil.A_DAY_TO_SECOND);
-                if (revenueTerminalDTOPrevDate != null && revenueTerminalDTOPrevDate.getTotalAmount() != 0 && revenueTerminalDTOPrevDate.getTotalTrans() != 0) {
-                    double revGrowthPrevDate = revenueTerminalDTOPrevDate.getTotalAmount() == 0 ? 0 :
-                            (double) (dto.getTotalAmount() - revenueTerminalDTOPrevDate.getTotalAmount())
-                                    / revenueTerminalDTOPrevDate.getTotalAmount();
-                    result.setratePreviousDate((int) (revGrowthPrevDate * 100));
-                } else {
-                    result.setratePreviousDate(0);
+                    if (revenueTerminalDTOPrevMonth != null && revenueTerminalDTOPrevMonth.getTotalTrans() != 0 && revenueTerminalDTOPrevMonth.getTotalAmount() != 0) {
+                        double revGrowthPrevMonth = revenueTerminalDTOPrevMonth.getTotalAmount() == 0 ? 0 :
+                                (double) ((dto.getTotalAmount() - revenueTerminalDTOPrevMonth.getTotalAmount())
+                                        / revenueTerminalDTOPrevMonth.getTotalAmount());
+                        result.setRatePreviousMonth((int) (revGrowthPrevMonth * 100));
+                    } else {
+                        result.setRatePreviousMonth(0);
+                    }
                 }
-                RevenueTerminalDTO revenueTerminalDTOPrevMonth = transactionTerminalTempService
-                        .getTotalTranByUserIdAndTimeBetween(
-                                listCode, DateTimeUtil.getPrevMonthAsString(), DateTimeUtil.getPrevMonthAsString());
 
-                if (revenueTerminalDTOPrevMonth != null && revenueTerminalDTOPrevMonth.getTotalTrans() != 0 && revenueTerminalDTOPrevMonth.getTotalAmount() != 0) {
-                    double revGrowthPrevMonth = revenueTerminalDTOPrevMonth.getTotalAmount() == 0 ? 0 :
-                            (double) ((dto.getTotalAmount() - revenueTerminalDTOPrevMonth.getTotalAmount())
-                                    / revenueTerminalDTOPrevMonth.getTotalAmount());
-                    result.setRatePreviousMonth((int) (revGrowthPrevMonth * 100));
-                } else {
-                    result.setRatePreviousMonth(0);
-                }
-            }
-
-            httpStatus = HttpStatus.OK;
+                httpStatus = HttpStatus.OK;
             } else {
                 httpStatus = HttpStatus.OK;
             }
@@ -117,10 +124,10 @@ public class TerminalStatisticController {
         try {
             List<IStatisticTerminalOverViewDTO> dtos = terminalService
                     .getListTerminalByUserId(userId, offset);
-            if (dtos!= null && dtos.size() < 10) {
+            if (dtos != null && dtos.size() < 10) {
                 int totalTerminalOwner = terminalService.countNumberOfTerminalByUserIdOwner(userId);
                 List<IStatisticTerminalOverViewDTO> dtos1 = terminalService
-                        .getListTerminalByUserIdNotOwner(userId, Math.abs(offset - totalTerminalOwner) % 10 , 10 - dtos.size());
+                        .getListTerminalByUserIdNotOwner(userId, Math.abs(offset - totalTerminalOwner) % 10, 10 - dtos.size());
                 dtos.addAll(dtos1);
             }
             if (dtos != null && !dtos.isEmpty()) {
@@ -137,10 +144,18 @@ public class TerminalStatisticController {
                                     listCode, DateTimeUtil.removeTimeInDateTimeString(fromDate), DateTimeUtil.removeTimeInDateTimeString(toDate));
                             dto.setTotalTrans(revGrowthToday.getTotalTrans());
                             dto.setTotalAmount(revGrowthToday.getTotalAmount());
+                            LocalDateTime now = LocalDateTime.now();
+                            long time = now.toEpochSecond(ZoneOffset.UTC);
+                            // + 7 xem đã qua ngày chưa;
+                            time += DateTimeUtil.GMT_PLUS_7_OFFSET;
+                            // đổi sang DateTime - đây là thời gian hiện tại
+                            LocalDateTime localDateTime = LocalDateTime.ofEpochSecond(time, 0, ZoneOffset.UTC);
+                            // đây là thời gian bắt ầu ngày hiện tại
+                            LocalDateTime startOfDay = localDateTime.toLocalDate().atStartOfDay();
                             RevenueTerminalDTO revGrowthPrevDate = transactionTerminalTempService
                                     .getTotalTranByTerminalCodeAndTimeBetweenWithCurrentTime(
-                                            listCode, DateTimeUtil.getPrevDateAsString(),
-                                            DateTimeUtil.getCurrentDateTimeAsNumber() - DateTimeUtil.A_DAY_TO_SECOND);
+                                            listCode, startOfDay.toEpochSecond(ZoneOffset.UTC) - DateTimeUtil.A_DAY_TO_SECOND,
+                                            localDateTime.toEpochSecond(ZoneOffset.UTC) - DateTimeUtil.A_DAY_TO_SECOND);
                             if (revGrowthPrevDate != null && revGrowthPrevDate.getTotalAmount() != 0 && revGrowthPrevDate.getTotalTrans() != 0) {
                                 double revGrowthPrevDateNum = revGrowthPrevDate.getTotalAmount() == 0 ? 0 :
                                         (double) (dto.getTotalAmount() - revGrowthPrevDate.getTotalAmount())

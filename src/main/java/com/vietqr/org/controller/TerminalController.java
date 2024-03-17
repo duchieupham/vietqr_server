@@ -364,8 +364,17 @@ public class TerminalController {
                         listCode, DateTimeUtil.getCurrentDateAsString(), DateTimeUtil.getCurrentDateAsString());
                 dto.setTotalTrans(revenueTerminalDTO.getTotalTrans());
                 dto.setTotalAmount(revenueTerminalDTO.getTotalAmount());
+                LocalDateTime now = LocalDateTime.now();
+                long time = now.toEpochSecond(ZoneOffset.UTC);
+                // + 7 xem đã qua ngày chưa;
+                time += DateTimeUtil.GMT_PLUS_7_OFFSET;
+                // đổi sang DateTime - đây là thời gian hiện tại
+                LocalDateTime localDateTime = LocalDateTime.ofEpochSecond(time, 0, ZoneOffset.UTC);
+                // đây là thời gian bắt ầu ngày hiện tại
+                LocalDateTime startOfDay = localDateTime.toLocalDate().atStartOfDay();
                 RevenueTerminalDTO revenueTerminalDTOPrevDate = transactionTerminalTempService.getTotalTranByTerminalCodeAndTimeBetweenWithCurrentTime(
-                        listCode, DateTimeUtil.getPrevDateAsString(), DateTimeUtil.getCurrentDateTimeAsNumber() - 86400);
+                        listCode, startOfDay.toEpochSecond(ZoneOffset.UTC) - DateTimeUtil.A_DAY_TO_SECOND,
+                        localDateTime.toEpochSecond(ZoneOffset.UTC) - DateTimeUtil.A_DAY_TO_SECOND);
                 int revGrowthPrevDate = revenueTerminalDTOPrevDate.getTotalAmount() == 0 ? 0 :
                         (int) ((revenueTerminalDTO.getTotalAmount() - revenueTerminalDTOPrevDate.getTotalAmount()) * 100 / revenueTerminalDTOPrevDate.getTotalAmount());
                 dto.setRevGrowthPrevDate(revGrowthPrevDate);
