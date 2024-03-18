@@ -67,8 +67,8 @@ public class AccountBankReceiveShareServiceImpl implements AccountBankReceiveSha
     }
 
     @Override
-    public String checkUserExistedFromBankAccount(String userId, String value) {
-        return repo.checkUserExistedFromBankAccount(userId, value);
+    public List<String> checkUserExistedFromBankId(String userId, String value) {
+        return repo.checkUserExistedFromBankId(userId, value);
     }
 
     @Override

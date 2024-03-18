@@ -93,6 +93,11 @@ public class TerminalServiceImpl implements TerminalService {
     }
 
     @Override
+    public TerminalEntity getTerminalByTerminalCode(String terminalCode) {
+        return repo.getTerminalByTerminalCode(terminalCode);
+    }
+
+    @Override
     public String getTerminalByTraceTransfer(String traceTransfer) {
         return repo.getTerminalByTraceTransfer(traceTransfer);
     }
@@ -143,5 +148,50 @@ public class TerminalServiceImpl implements TerminalService {
     @Override
     public List<ITerminalTidResponseDTO> getTerminalByMerchantId(String merchantId, int offset, int size) {
         return repo.getTerminalByMerchantId(merchantId, offset, size);
+    }
+
+    @Override
+    public String checkExistedRawTerminalCode(String terminalCode) {
+        return repo.checkExistedRawTerminalCode(terminalCode);
+    }
+
+    @Override
+    public List<TerminalCodeResponseDTO> getListTerminalResponseByBankIdAndUserId(String userId, String bankId) {
+        return repo.getListTerminalResponseByBankIdAndUserId(userId, bankId);
+    }
+
+    @Override
+    public String getTerminalCodeByTerminalCode(String value) {
+        return repo.getTerminalCodeByTerminalCode(value);
+    }
+
+    @Override
+    public TerminalEntity getTerminalByTerminalBankReceiveCode(String terminalCode) {
+        return repo.getTerminalByTerminalBankReceiveCode(terminalCode);
+    }
+
+    @Override
+    public List<String> getAllCodeByUserId(String userId) {
+        return repo.getAllCodeByUserId(userId);
+    }
+
+    @Override
+    public List<String> getAllCodeByUserIdOwner(String userId) {
+        return repo.getAllCodeByUserIdOwner(userId);
+    }
+
+    @Override
+    public List<IStatisticTerminalOverViewDTO> getListTerminalByUserId(String userId, int offset) {
+        return repo.getListTerminalByUserId(userId, offset);
+    }
+
+    @Override
+    public List<IStatisticTerminalOverViewDTO> getListTerminalByUserIdNotOwner(String userId, int offset, int size) {
+        return repo.getListTerminalByUserIdNotOwner(userId, offset, size);
+    }
+
+    @Override
+    public int countNumberOfTerminalByUserIdOwner(String userId) {
+        return repo.countNumberOfTerminalByUserIdOwner(userId);
     }
 }

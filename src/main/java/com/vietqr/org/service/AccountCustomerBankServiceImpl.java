@@ -82,4 +82,9 @@ public class AccountCustomerBankServiceImpl implements AccountCustomerBankServic
         return repo.checkExistedBankAccountIntoMerchant(bankAccount, customerSyncId);
     }
 
+    @Override
+    public AccountCustomerBankEntity getAccountCustomerBankByBankIdAndMerchantId(String bankId, String customerSyncId) {
+        return repo.getAccountCustomerBankByBankIdAndMerchantId(bankId, customerSyncId);
+    }
+
 }

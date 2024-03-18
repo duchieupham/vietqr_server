@@ -187,10 +187,10 @@ public interface AccountBankReceiveShareRepository
             "WHERE terminal_id = :terminalId AND user_id IS NOT NULL AND user_id != ''", nativeQuery = true)
     int countMembersByTerminalId(String terminalId);
 
-    @Query(value = "SELECT a.user_id FROM account_bank_receive_share a "
-            + "INNER JOIN account_bank_receive b ON b.id = a.bank_id "
-            + "WHERE a.user_id = :userId AND b.bank_account = :value AND a.is_owner = false LIMIT 1", nativeQuery = true)
-    String checkUserExistedFromBankAccount(String userId, String value);
+    @Query(value = "SELECT DISTINCT c.code FROM account_bank_receive_share a "
+            + "INNER JOIN terminal c ON c.id = a.terminal_id "
+            + "WHERE a.user_id = :userId AND a.bank_id = :bankId AND a.is_owner = false", nativeQuery = true)
+    List<String> checkUserExistedFromBankId(String userId, String bankId);
 
     @Query(value = "SELECT a.id FROM account_bank_receive_share a "
             + "INNER JOIN terminal c ON c.id = a.terminal_id "

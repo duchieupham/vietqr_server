@@ -20,6 +20,11 @@ public class TerminalAddressServiceImpl implements TerminalAddressService {
     }
 
     @Override
+    public TerminalAddressEntity getTerminalAddressByBankIdAndCustomerSyncId(String bankId, String customerSyncId) {
+        return repository.getTerminalAddressByBankIdAndCustomerSyncId(bankId, customerSyncId);
+    }
+
+    @Override
     public int insert(TerminalAddressEntity entity) {
         return repository.save(entity) == null ? 0 : 1;
     }

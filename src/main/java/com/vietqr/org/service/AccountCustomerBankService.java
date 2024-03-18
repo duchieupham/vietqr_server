@@ -37,4 +37,6 @@ public interface AccountCustomerBankService {
     AccountCustomerBankInfoDTO getBankSizeAndAddressByCustomerSyncId(String customerSyncId);
 
     String checkExistedBankAccountIntoMerchant(String bankAccount, String customerSyncId);
+
+    AccountCustomerBankEntity getAccountCustomerBankByBankIdAndMerchantId(String bankId, String merchantId);
 }

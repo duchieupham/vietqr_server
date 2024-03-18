@@ -38,6 +38,8 @@ public interface TerminalService {
 
     TerminalEntity getTerminalByTerminalCode(String terminalCode, String bankAccount);
 
+    TerminalEntity getTerminalByTerminalCode(String terminalCode);
+
     String getTerminalByTraceTransfer(String traceTransfer);
 
     List<TerminalEntity> getAllTerminalNoQRCode();
@@ -57,4 +59,22 @@ public interface TerminalService {
     void insertAllTerminal(List<TerminalEntity> terminalEntities);
 
     List<ITerminalTidResponseDTO> getTerminalByMerchantId(String merchantId, int offset, int size);
+
+    String checkExistedRawTerminalCode(String terminalCode);
+
+    List<TerminalCodeResponseDTO> getListTerminalResponseByBankIdAndUserId(String userId, String bankId);
+
+    String getTerminalCodeByTerminalCode(String value);
+
+    TerminalEntity getTerminalByTerminalBankReceiveCode(String terminalCode);
+
+    List<String> getAllCodeByUserId(String userId);
+
+    List<String> getAllCodeByUserIdOwner(String userId);
+
+    List<IStatisticTerminalOverViewDTO> getListTerminalByUserId(String userId, int offset);
+
+    List<IStatisticTerminalOverViewDTO> getListTerminalByUserIdNotOwner(String userId, int offset, int size);
+
+    int countNumberOfTerminalByUserIdOwner(String userId);
 }

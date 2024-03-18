@@ -128,6 +128,9 @@ public class TransactionBankController {
 	BranchMemberService branchMemberService;
 
 	@Autowired
+	TerminalBankReceiveService terminalBankReceiveService;
+
+	@Autowired
 	BranchInformationService branchInformationService;
 
 	@Autowired
@@ -396,6 +399,7 @@ public class TransactionBankController {
 								String traceId = getTraceId(dto.getContent(), "VQR");
 								String orderId = "";
 								String sign = "";
+								String rawCode = "";
 								if (traceId != null && !traceId.isEmpty()) {
 									logger.info("transaction-sync - trace ID detect: " + traceId);
 									TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
@@ -404,8 +408,19 @@ public class TransactionBankController {
 									if (transactionReceiveEntity != null) {
 										orderId = transactionReceiveEntity.getOrderId();
 										sign = transactionReceiveEntity.getSign();
+										if (transactionReceiveEntity.getTerminalCode() != null
+												&& !transactionReceiveEntity.getTerminalCode().trim().isEmpty()) {
+											TerminalEntity terminalEntity = terminalService
+													.getTerminalByTerminalCode(transactionReceiveEntity.getTerminalCode());
+											if (terminalEntity != null) {
+												rawCode = terminalEntity.getRawTerminalCode();
+											} else {
+												rawCode = terminalBankReceiveService
+														.getTerminalBankReceiveByTerminalCode(transactionReceiveEntity.getTerminalCode());
+											}
+										}
 										result = getCustomerSyncEntities(transactionReceiveEntity.getId(), dto,
-												accountBankEntity, time, orderId, sign);
+												accountBankEntity, time, orderId, sign, rawCode);
 										updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time, nf);
 										// check if recharge => do update status and push data to customer
 										////////// USER RECHAGE VQR || USER RECHARGE MOBILE
@@ -420,8 +435,30 @@ public class TransactionBankController {
 												"transaction-sync - cannot find transaction receive. Receive new transaction outside system");
 										// process here
 										UUID transcationUUID = UUID.randomUUID();
+										String terminalCodeContent = "";
+										if (accountBankEntity.getTerminalLength() > 0) {
+											terminalCodeContent = getTraceId(dto.getContent(), "SQR",
+													accountBankEntity.getTerminalLength());
+										}
+										String terminalCode = "";
+										if (terminalCodeContent.length() > 3) {
+											// find terminal by terminalCode
+											terminalCode = terminalCodeContent.substring(3);
+										}
+
+										if (!terminalCode.trim().isEmpty()) {
+											TerminalEntity terminalEntity = terminalService
+													.getTerminalByTerminalCode(terminalCode);
+											if (terminalEntity != null) {
+												rawCode = terminalEntity.getRawTerminalCode();
+											} else {
+												rawCode = terminalBankReceiveService
+														.getTerminalBankReceiveByTerminalCode(terminalCode);
+											}
+										}
+
 										result = getCustomerSyncEntities(transcationUUID.toString(), dto,
-												accountBankEntity, time, orderId, sign);
+												accountBankEntity, time, orderId, sign, rawCode);
 										insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity, time,
 												traceId, uuid, nf, "", "");
 									}
@@ -430,8 +467,29 @@ public class TransactionBankController {
 									logger.info(
 											"transaction-sync - traceId is empty. Receive new transaction outside system");
 									UUID transcationUUID = UUID.randomUUID();
+									String terminalCodeContent = "";
+									if (accountBankEntity.getTerminalLength() > 0) {
+										terminalCodeContent = getTraceId(dto.getContent(), "SQR",
+												accountBankEntity.getTerminalLength());
+									}
+									String terminalCode = "";
+									if (terminalCodeContent.length() > 3) {
+										// find terminal by terminalCode
+										terminalCode = terminalCodeContent.substring(3);
+									}
+
+									if (!terminalCode.trim().isEmpty()) {
+										TerminalEntity terminalEntity = terminalService
+												.getTerminalByTerminalCode(terminalCode);
+										if (terminalEntity != null) {
+											rawCode = terminalEntity.getRawTerminalCode();
+										} else {
+											rawCode = terminalBankReceiveService
+													.getTerminalBankReceiveByTerminalCode(terminalCode);
+										}
+									}
 									result = getCustomerSyncEntities(transcationUUID.toString(), dto, accountBankEntity,
-											time, orderId, sign);
+											time, orderId, sign, rawCode);
 									insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity, time,
 											traceId, uuid, nf, "", "");
 								}
@@ -553,6 +611,7 @@ public class TransactionBankController {
 							String traceId = getTraceId(dto.getContent(), "VQR");
 							String orderId = "";
 							String sign = "";
+							String rawCode = "";
 							if (traceId != null && !traceId.isEmpty()) {
 								logger.info("transaction-sync - trace ID detect: " + traceId);
 								TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
@@ -563,8 +622,19 @@ public class TransactionBankController {
 											|| transactionReceiveEntity.getQrCode().trim().isEmpty()) {
 										orderId = transactionReceiveEntity.getOrderId();
 										sign = transactionReceiveEntity.getSign();
+										if (transactionReceiveEntity.getTerminalCode() != null
+												&& !transactionReceiveEntity.getTerminalCode().trim().isEmpty()) {
+											TerminalEntity terminalEntity = terminalService
+													.getTerminalByTerminalCode(transactionReceiveEntity.getTerminalCode());
+											if (terminalEntity != null) {
+												rawCode = terminalEntity.getRawTerminalCode();
+											} else {
+												rawCode = terminalBankReceiveService
+														.getTerminalBankReceiveByTerminalCode(transactionReceiveEntity.getTerminalCode());
+											}
+										}
 										getCustomerSyncEntities(transactionReceiveEntity.getId(), dto,
-												accountBankEntity, time, orderId, sign);
+												accountBankEntity, time, orderId, sign, rawCode);
 										updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time,
 												nf);
 										// check if recharge => do update status and push data to customer
@@ -602,6 +672,8 @@ public class TransactionBankController {
 								String traceId = getTraceId(dto.getContent(), "VQR");
 								String orderId = "";
 								String sign = "";
+								String rawCode = "";
+								String rawCodeResult = "";
 								if (traceId != null && !traceId.isEmpty()) {
 									logger.info("transaction-sync - trace ID detect: " + traceId);
 									TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
@@ -610,8 +682,25 @@ public class TransactionBankController {
 									if (transactionReceiveEntity != null) {
 										orderId = transactionReceiveEntity.getOrderId();
 										sign = transactionReceiveEntity.getSign();
+										if (transactionReceiveEntity.getTerminalCode() != null
+												&& !transactionReceiveEntity.getTerminalCode().trim().isEmpty()) {
+											TerminalEntity terminalEntity = terminalService
+													.getTerminalByTerminalCode(transactionReceiveEntity.getTerminalCode());
+											if (terminalEntity != null) {
+												rawCode = terminalEntity.getRawTerminalCode();
+											} else {
+												rawCode = terminalBankReceiveService
+														.getTerminalBankReceiveByTerminalCode(transactionReceiveEntity.getTerminalCode());
+											}
+										}
+										if (rawCode == null || rawCode.trim().isEmpty()) {
+											rawCodeResult = "";
+										} else {
+											rawCodeResult = rawCode;
+										}
+
 										getCustomerSyncEntities(transactionReceiveEntity.getId(), dto,
-												accountBankEntity, time, orderId, sign);
+												accountBankEntity, time, orderId, sign, rawCodeResult);
 										updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time, nf);
 										// check if recharge => do update status and push data to customer
 										////////// USER RECHAGE VQR || USER RECHARGE MOBILE
@@ -627,8 +716,29 @@ public class TransactionBankController {
 										// process here
 										UUID transcationUUID = UUID.randomUUID();
 										// push websocket
+										String terminalCodeContent = "";
+										if (accountBankEntity.getTerminalLength() > 0) {
+											terminalCodeContent = getTraceId(dto.getContent(), "SQR",
+													accountBankEntity.getTerminalLength());
+										}
+										String terminalCode = "";
+										if (terminalCodeContent.length() > 3) {
+											// find terminal by terminalCode
+											terminalCode = terminalCodeContent.substring(3);
+										}
+
+										if (!terminalCode.trim().isEmpty()) {
+											TerminalEntity terminalEntity = terminalService
+													.getTerminalByTerminalCode(terminalCode);
+											if (terminalEntity != null) {
+												rawCode = terminalEntity.getRawTerminalCode();
+											} else {
+												rawCode = terminalBankReceiveService
+														.getTerminalBankReceiveByTerminalCode(terminalCode);
+											}
+										}
 										getCustomerSyncEntities(transcationUUID.toString(), dto, accountBankEntity,
-												time, orderId, sign);
+												time, orderId, sign, rawCode);
 										// push notification
 										insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity, time,
 												traceId, uuid, nf, "", "");
@@ -638,8 +748,29 @@ public class TransactionBankController {
 									logger.info(
 											"transaction-sync - traceId is empty. Receive new transaction outside system");
 									UUID transcationUUID = UUID.randomUUID();
+									String terminalCodeContent = "";
+									if (accountBankEntity.getTerminalLength() > 0) {
+										terminalCodeContent = getTraceId(dto.getContent(), "SQR",
+												accountBankEntity.getTerminalLength());
+									}
+									String terminalCode = "";
+									if (terminalCodeContent.length() > 3) {
+										// find terminal by terminalCode
+										terminalCode = terminalCodeContent.substring(3);
+									}
+
+									if (!terminalCode.trim().isEmpty()) {
+										TerminalEntity terminalEntity = terminalService
+												.getTerminalByTerminalCode(terminalCode);
+										if (terminalEntity != null) {
+											rawCode = terminalEntity.getRawTerminalCode();
+										} else {
+											rawCode = terminalBankReceiveService
+													.getTerminalBankReceiveByTerminalCode(terminalCode);
+										}
+									}
 									getCustomerSyncEntities(transcationUUID.toString(), dto, accountBankEntity, time,
-											orderId, sign);
+											orderId, sign, rawCode);
 									insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity, time,
 											traceId, uuid, nf, "", "");
 								}
@@ -1400,6 +1531,15 @@ public class TransactionBankController {
 			TerminalEntity terminalEntity = terminalService
 					.getTerminalByTerminalCode(terminalCode,
 							accountBankEntity.getBankAccount());
+			if (terminalEntity == null) {
+				logger.info("transaction-sync - insertNewTransaction - terminalEntity is null: find terminalBankReceive");
+				terminalEntity = terminalService
+						.getTerminalByTerminalBankReceiveCode(terminalCode);
+				if (terminalEntity == null) {
+					terminalEntity = terminalService
+							.getTerminalByTerminalCode(terminalCode);
+				}
+			}
 			if (terminalEntity != null) {
 				TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
 				transactionEntity.setId(transcationUUID);
@@ -1501,6 +1641,41 @@ public class TransactionBankController {
 							}
 						}
 						executorService.shutdown();
+					} else {
+						Map<String, String> data = new HashMap<>();
+						UUID notificationUUID = UUID.randomUUID();
+						NotificationEntity notiEntity = new NotificationEntity();
+						String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
+								+ accountBankEntity.getBankAccount()
+								+ NotificationUtil.getNotiDescUpdateTransSuffix2()
+								+ prefix + nf.format(dto.getAmount())
+								+ NotificationUtil.getNotiDescUpdateTransSuffix3()
+								+ terminalEntity.getName()
+								+ NotificationUtil.getNotiDescUpdateTransSuffix4()
+								+ dto.getContent();
+						notiEntity.setId(notificationUUID.toString());
+						notiEntity.setRead(false);
+						notiEntity.setMessage(message);
+						notiEntity.setTime(time);
+						notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
+						notiEntity.setUserId(accountBankEntity.getUserId());
+						notiEntity.setData(transcationUUID.toString());
+						data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+						data.put("notificationId", notificationUUID.toString());
+						data.put("transactionReceiveId", transcationUUID.toString());
+						data.put("bankAccount", accountBankEntity.getBankAccount());
+						data.put("bankName", bankTypeEntity.getBankName());
+						data.put("bankCode", bankTypeEntity.getBankCode());
+						data.put("bankId", accountBankEntity.getId());
+						data.put("content", transactionEntity.getContent());
+						data.put("amount", "" + transactionEntity.getAmount());
+						data.put("time", "" + time);
+						data.put("refId", "" + uuid.toString());
+						data.put("status", "1");
+						data.put("traceId", "");
+						data.put("transType", "C");
+						pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
+								message, notiEntity, data, accountBankEntity.getUserId());
 					}
 					/////// DO INSERT TELEGRAM
 					List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
@@ -3277,6 +3452,7 @@ public class TransactionBankController {
 			data.put("transType", dto.getTransType());
 			data.put("orderId", dto.getOrderId());
 			data.put("sign", dto.getSign());
+			data.put("terminalCode", dto.getTerminalCode());
 			String suffixUrl = "";
 			if (entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty()) {
 				suffixUrl = entity.getSuffixUrl();
@@ -3497,7 +3673,7 @@ public class TransactionBankController {
 
 	private ResponseMessageDTO getCustomerSyncEntities(String transReceiveId, TransactionBankDTO dto,
 			AccountBankReceiveEntity accountBankEntity,
-			long time, String orderId, String sign) {
+			long time, String orderId, String sign, String rawTerminalCode) {
 		ResponseMessageDTO result = new ResponseMessageDTO("SUCCESS", "");
 		try {
 			// 1. Check bankAccountEntity with sync = true (add sync boolean field)
@@ -3518,6 +3694,7 @@ public class TransactionBankController {
 				transactionBankCustomerDTO.setValueDate(dto.getValueDate());
 				transactionBankCustomerDTO.setSign(sign);
 				transactionBankCustomerDTO.setOrderId(orderId);
+				transactionBankCustomerDTO.setTerminalCode(rawTerminalCode);
 				logger.info("getCustomerSyncEntities: Order ID: " + orderId);
 				logger.info("getCustomerSyncEntities: Signature: " + sign);
 				List<AccountCustomerBankEntity> accountCustomerBankEntities = new ArrayList<>();

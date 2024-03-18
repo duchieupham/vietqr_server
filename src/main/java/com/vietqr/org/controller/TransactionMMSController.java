@@ -65,6 +65,9 @@ public class TransactionMMSController {
     TerminalBankService terminalBankService;
 
     @Autowired
+    TransactionTerminalTempService transactionTerminalTempService;
+
+    @Autowired
     TransactionReceiveService transactionReceiveService;
 
     @Autowired
@@ -231,9 +234,32 @@ public class TransactionMMSController {
                         // push data to customerSync
                         if (tempTerminalBank != null) {
                             System.out.println("terminal bank != null");
+                            String terminalId = "";
+                            String rawCode = "";
+                            String traceTransfer = entity.getTraceTransfer();
+                            if (StringUtil.isNullOrEmpty(traceTransfer) == false) {
+                                terminalId = terminalService
+                                        .getTerminalByTraceTransfer(traceTransfer);
+                                if (terminalId == null || terminalId.trim().isEmpty()) {
+                                    terminalId = terminalBankReceiveService
+                                            .getTerminalByTraceTransfer(traceTransfer);
+                                }
+                            }
+                            if (terminalId != null && !terminalId.trim().isEmpty()) {
+                                // if VietQR terminal existed, insert new transaction
+                                TerminalEntity terminalEntity = terminalService
+                                        .findTerminalById(terminalId);
+                                TerminalBankReceiveEntity terminalBankReceiveEntity = terminalBankReceiveService
+                                        .getTerminalBankReceiveByTraceTransfer(traceTransfer);
+                                if (terminalEntity != null) {
+                                    rawCode = terminalEntity.getRawTerminalCode();
+                                } else if (terminalBankReceiveEntity != null) {
+                                    rawCode = terminalBankReceiveEntity.getRawTerminalCode();
+                                }
+                            }
                             getCustomerSyncEntities(tempTransReceive.getId(), tempTerminalBank.getId(),
                                     entity.getFtCode(),
-                                    tempTransReceive, time);
+                                    tempTransReceive, time, rawCode);
                         } else {
                             // System.out.println("terminal bank = null");
                             logger.info(
@@ -332,6 +358,7 @@ public class TransactionMMSController {
                                 "transaction-mms-sync: staticQRTime-start at:" + staticQRTime);
                         // STATTIC QR
                         String terminalId = "";
+                        boolean insertTransaction = false;
                         // get trace Transfer to find VietQR terminal
                         String traceTransfer = entity.getTraceTransfer();
                         if (StringUtil.isNullOrEmpty(traceTransfer) == false) {
@@ -349,7 +376,7 @@ public class TransactionMMSController {
                                     .findTerminalById(terminalId);
 
                             TerminalBankReceiveEntity terminalBankReceiveEntity = terminalBankReceiveService
-                                    .getTerminalBankReceiveByTerminalId(terminalId);
+                                    .getTerminalBankReceiveByTraceTransfer(traceTransfer);
                             if (terminalBankReceiveEntity != null) {
                                 AccountBankReceiveEntity accountBankReceiveEntity = accountBankService
                                         .getAccountBankById(terminalBankReceiveEntity.getBankId());
@@ -368,13 +395,38 @@ public class TransactionMMSController {
                                 transactionReceiveEntity1.setTime(time);
                                 transactionReceiveEntity1.setTimePaid(time);
                                 transactionReceiveEntity1.setBankId(accountBankReceiveEntity.getId());
-                                transactionReceiveEntity1.setTerminalCode(terminalEntity.getCode());
+                                if (terminalBankReceiveEntity.getTerminalCode() != null
+                                        && !terminalBankReceiveEntity.getTerminalCode().trim().isEmpty()) {
+                                    transactionReceiveEntity1.setTerminalCode(terminalBankReceiveEntity.getTerminalCode());
+                                } else {
+                                    transactionReceiveEntity1.setTerminalCode(terminalEntity.getCode());
+                                }
                                 transactionReceiveEntity1.setContent(entity.getTraceTransfer());
                                 transactionReceiveEntity1.setBankAccount(accountBankReceiveEntity.getBankAccount());
                                 transactionReceiveEntity1.setQrCode("");
                                 transactionReceiveEntity1.setUserId(accountBankReceiveEntity.getUserId());
                                 transactionReceiveEntity1.setNote("");
                                 transactionReceiveService.insertTransactionReceive(transactionReceiveEntity1);
+                                String code = "";
+                                String rawCode = "";
+                                if (terminalBankReceiveEntity.getTerminalCode() != null
+                                        && !terminalBankReceiveEntity.getTerminalCode().trim().isEmpty()) {
+                                    code = terminalBankReceiveEntity.getTerminalCode();
+                                    rawCode = terminalBankReceiveEntity.getRawTerminalCode();
+                                } else {
+                                    code = terminalEntity.getCode();
+                                    rawCode = terminalEntity.getRawTerminalCode();
+                                }
+                                final String tempTerminalCode = code;
+                                TransactionTerminalTempEntity transactionTerminalTempEntity = new TransactionTerminalTempEntity();
+                                transactionTerminalTempEntity.setId(UUID.randomUUID().toString());
+                                transactionTerminalTempEntity.setTransactionId(transactionId);
+                                transactionTerminalTempEntity.setTerminalCode(tempTerminalCode);
+                                transactionTerminalTempEntity.setTime(time);
+                                transactionTerminalTempEntity.setAmount(Long.parseLong(entity.getDebitAmount() + ""));
+                                transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTempEntity);
+
+                                insertTransaction = true;
                                 BankTypeEntity bankTypeEntity = bankTypeService
                                         .getBankTypeById(accountBankReceiveEntity.getBankTypeId());
                                 NumberFormat nf = NumberFormat.getInstance(Locale.US);
@@ -416,10 +468,11 @@ public class TransactionMMSController {
                                         terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
                                 if (terminalBankEntitySync != null) {
                                     // push data to customerSync
+                                    ////////////////////////
                                     getCustomerSyncEntities(transactionReceiveEntity1.getId(),
                                             terminalBankEntitySync.getId(),
                                             entity.getFtCode(),
-                                            transactionReceiveEntity1, time);
+                                            transactionReceiveEntity1, time, rawCode);
                                 } else {
                                     logger.info("transaction-mms-sync: NOT FOUND TerminalBankEntity");
                                 }
@@ -465,7 +518,17 @@ public class TransactionMMSController {
                                 transactionEntity.setQrCode("");
                                 transactionEntity.setUserId(bankDTO.getUserId());
                                 transactionEntity.setNote("");
-                                transactionReceiveService.insertTransactionReceive(transactionEntity);
+                                if (!insertTransaction) {
+                                    transactionReceiveService.insertTransactionReceive(transactionEntity);
+                                    final String tempTerminalCode = terminalEntity.getCode();
+                                    TransactionTerminalTempEntity transactionTerminalTempEntity = new TransactionTerminalTempEntity();
+                                    transactionTerminalTempEntity.setId(UUID.randomUUID().toString());
+                                    transactionTerminalTempEntity.setTransactionId(transcationUUID.toString());
+                                    transactionTerminalTempEntity.setTerminalCode(tempTerminalCode);
+                                    transactionTerminalTempEntity.setTime(time);
+                                    transactionTerminalTempEntity.setAmount(Long.parseLong(entity.getDebitAmount() + ""));
+                                    transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTempEntity);
+                                }
                                 // check time insert transaction QR static success
                                 LocalDateTime insertStatic = LocalDateTime.now();
                                 long insertStaticTime = insertStatic.toEpochSecond(ZoneOffset.UTC);
@@ -615,12 +678,13 @@ public class TransactionMMSController {
     }
 
     private void getCustomerSyncEntities(String transReceiveId, String terminalBankId, String ftCode,
-            TransactionReceiveEntity transactionReceiveEntity, long time) {
+            TransactionReceiveEntity transactionReceiveEntity, long time, String rawTerminalCode) {
         try {
             // find customerSyncEntities by terminal_bank_id
             List<TerminalAddressEntity> terminalAddressEntities = new ArrayList<>();
             // System.out.println("terminal Bank ID: " + terminalBankId);
-            terminalAddressEntities = terminalAddressService.getTerminalAddressByTerminalBankId(terminalBankId);
+            terminalAddressEntities = terminalAddressService
+                    .getTerminalAddressByTerminalBankId(terminalBankId);
             if (!terminalAddressEntities.isEmpty()) {
                 // System.out.println("terminalAddressEntites != empty");
                 TransactionBankCustomerDTO transactionBankCustomerDTO = new TransactionBankCustomerDTO();
@@ -637,6 +701,8 @@ public class TransactionMMSController {
                 transactionBankCustomerDTO.setValueDate(0);
                 transactionBankCustomerDTO.setSign(transactionReceiveEntity.getSign());
                 transactionBankCustomerDTO.setOrderId(transactionReceiveEntity.getOrderId());
+                transactionBankCustomerDTO.setTerminalCode(rawTerminalCode != null ?
+                        rawTerminalCode : "");
                 for (TerminalAddressEntity terminalAddressEntity : terminalAddressEntities) {
                     CustomerSyncEntity customerSyncEntity = customerSyncService
                             .getCustomerSyncById(terminalAddressEntity.getCustomerSyncId());
@@ -692,6 +758,7 @@ public class TransactionMMSController {
             data.put("transType", dto.getTransType());
             data.put("orderId", dto.getOrderId());
             data.put("sign", dto.getSign());
+            data.put("terminalCode", dto.getTerminalCode());
             String suffixUrl = "";
             if (entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty()) {
                 suffixUrl = entity.getSuffixUrl();

@@ -27,6 +27,9 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             + " AND terminal_id IS NOT NULL AND terminal_id != ''", nativeQuery = true)
     int countNumberOfTerminalByUserId(@Param(value = "userId") String userId);
 
+    @Query(value = "SELECT COUNT(id) FROM terminal WHERE user_id = :userId ", nativeQuery = true)
+    int countNumberOfTerminalByUserIdOwner(@Param(value = "userId") String userId);
+
     @Query(value = "SELECT a.id as id, count(DISTINCT b.user_id) as totalMembers, " +
             "a.name as name, a.address as address, " +
             "a.code as code, a.is_default as isDefault, a.user_id as userId " +
@@ -144,7 +147,7 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             "AND b.bank_id IS NOT NULL AND b.bank_id != '' ", nativeQuery = true)
     List<TerminalEntity> getAllTerminalNoQRCode();
 
-    @Query(value = "SELECT * FROM terminal WHERE code = :terminalCode", nativeQuery = true)
+    @Query(value = "SELECT * FROM terminal WHERE code = :terminalCode LIMIT 1", nativeQuery = true)
     TerminalEntity getTerminalByTerminalCode(String terminalCode);
 
     @Query(value = "SELECT a.id AS terminalId, a.name AS terminalName, "
@@ -225,4 +228,50 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             + " WHERE a.merchant_id = :merchantId "
             + "LIMIT :offset, :size ", nativeQuery = true)
     List<ITerminalTidResponseDTO> getTerminalByMerchantId(String merchantId, int offset, int size);
+
+    @Query(value = "SELECT raw_terminal_code FROM terminal WHERE raw_terminal_code = :terminalCode", nativeQuery = true)
+    String checkExistedRawTerminalCode(String terminalCode);
+
+    @Query(value = "SELECT a.id AS terminalId, a.name AS terminalName, "
+            + "a.address AS terminalAddress, a.code as terminalCode, "
+            + "a.user_id AS userId FROM terminal a "
+            + "INNER JOIN terminal_bank_receive b "
+            + "ON a.id = b.terminal_id "
+            + "WHERE a.user_id = :userId AND b.bank_id = :bankId ", nativeQuery = true)
+    List<TerminalCodeResponseDTO> getListTerminalResponseByBankIdAndUserId(String userId, String bankId);
+
+    @Query(value = "SELECT code FROM terminal WHERE code = :value LIMIT 1", nativeQuery = true)
+    String getTerminalCodeByTerminalCode(String value);
+
+    @Query(value = "SELECT a.* FROM terminal a "
+            + "INNER JOIN terminal_bank_receive b ON a.id = b.terminal_id "
+            + "WHERE b.terminal_code = :terminalCode", nativeQuery = true)
+    TerminalEntity getTerminalByTerminalBankReceiveCode(String terminalCode);
+
+    @Query(value = "SELECT DISTINCT a.code FROM terminal a "
+            + "INNER JOIN account_bank_receive_share b ON a.id = b.terminal_id "
+            + "WHERE b.user_id = :userId", nativeQuery = true)
+    List<String> getAllCodeByUserId(String userId);
+
+    @Query(value = "SELECT a.code FROM terminal a "
+            + "WHERE a.user_id = :userId", nativeQuery = true)
+    List<String> getAllCodeByUserIdOwner(String userId);
+
+    @Query(value = "SELECT a.id AS terminalId, a.name AS terminalName, "
+            + "a.address AS terminalAddress, a.code AS terminalCode "
+            + "FROM terminal a "
+            + "WHERE a.user_id = :userId "
+            + "ORDER BY a.code ASC "
+            + "LIMIT :offset, 10", nativeQuery = true)
+    List<IStatisticTerminalOverViewDTO> getListTerminalByUserId(String userId, int offset);
+
+    @Query(value = "SELECT a.id AS terminalId, a.name AS terminalName, "
+            + "a.address AS terminalAddress, a.code AS terminalCode "
+            + "FROM terminal a "
+            + "INNER JOIN account_bank_receive_share b ON a.id = b.terminal_id "
+            + "WHERE b.user_id = :userId "
+            + "AND b.is_owner = false "
+            + "ORDER BY a.code ASC "
+            + "LIMIT :offset, :size", nativeQuery = true)
+    List<IStatisticTerminalOverViewDTO> getListTerminalByUserIdNotOwner(String userId, int offset, int size);
 }

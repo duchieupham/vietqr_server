@@ -148,6 +148,9 @@ public class EnvironmentUtil {
     private static final String VNPT_EPAY_PARTNER_NAME_UAT = "BLUECOM";
     private static final String VNPT_EPAY_PARTNER_NAME_PROD = "BLUECOM";
 
+    private static final String MERCHANT_ID_QR_BOX_DEFAULT_UAT = "";
+    private static final String MERCHANT_ID_QR_BOX_DEFAULT_PROD = "f6eab070-e370-11ee-8355-c43772815012";
+
     ////////////////////////////////////
     // for get qr recharge VNPT Epay
     // OLD
@@ -509,5 +512,9 @@ public class EnvironmentUtil {
 
     public static String getVietQrUrlApi() {
         return (IS_PRODUCTION == false) ? VIET_QR_URL_API_UAT : VIET_QR_URL_API_PROD;
+    }
+
+    public static String getDefaultCustomerSyncIdIot() {
+        return (IS_PRODUCTION == false) ? MERCHANT_ID_QR_BOX_DEFAULT_UAT : MERCHANT_ID_QR_BOX_DEFAULT_PROD;
     }
 }

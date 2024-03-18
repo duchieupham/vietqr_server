@@ -12,4 +12,6 @@ public interface TerminalAddressService {
     public int insert(TerminalAddressEntity entity);
 
     public List<TerminalAddressEntity> getTerminalAddressByTerminalBankId(String terminalBankId);
+
+    TerminalAddressEntity getTerminalAddressByBankIdAndCustomerSyncId(String bankId, String customerSyncId);
 }

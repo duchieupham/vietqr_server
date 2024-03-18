@@ -9,9 +9,27 @@ import java.util.List;
 public interface TerminalBankReceiveService {
     void insertAllTerminalBankReceive(List<TerminalBankReceiveEntity> terminalBankReceiveEntities);
 
+    void insert(TerminalBankReceiveEntity terminalBankReceiveEntity);
+
     TerminalBankReceiveEntity getTerminalBankReceiveByTerminalIdAndBankId(String terminalId, String bankId);
 
     String getTerminalByTraceTransfer(String traceTransfer);
 
     TerminalBankReceiveEntity getTerminalBankReceiveByTerminalId(String terminalId);
+
+    String checkExistedTerminalCode(String code);
+
+    TerminalBankReceiveEntity getTerminalBankByTerminalId(String terminalId);
+
+    String getTerminalCodeByRawTerminalCode(String value);
+
+    List<String> getTerminalCodeByMainTerminalCode(String terminalCodeForSearch);
+
+    TerminalBankReceiveEntity getTerminalBankReceiveByTraceTransfer(String traceTransfer);
+
+    List<String> getTerminalCodeByMainTerminalCodeList(List<String> terminalCodeAccess);
+
+    String getTerminalBankReceiveByTerminalCode(String terminalCode);
+
+    TerminalBankReceiveEntity getTerminalBankReceiveByRawTerminalCode(String machineCode);
 }

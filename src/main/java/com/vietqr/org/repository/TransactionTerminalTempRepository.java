@@ -16,15 +16,13 @@ public interface TransactionTerminalTempRepository extends JpaRepository<Transac
 
     @Query(value = "SELECT COALESCE(COUNT(id), 0) AS totalTrans, COALESCE(SUM(amount), 0) AS totalAmount " +
             "FROM transaction_terminal_temp " +
-            "WHERE terminal_code = :terminalCode AND time BETWEEN :fromTime AND :toTime", nativeQuery = true)
-    RevenueTerminalDTO getTotalTranByTerminalCodeAndTimeBetween(String terminalCode, long fromTime, long toTime);
+            "WHERE terminal_code IN (:terminalCode) AND time BETWEEN :fromTime AND :toTime", nativeQuery = true)
+    RevenueTerminalDTO getTotalTranByTerminalCodeAndTimeBetween(List<String> terminalCode, long fromTime, long toTime);
 
     @Query(value = "SELECT COALESCE(COUNT(a.id), 0) AS totalTrans, COALESCE(SUM(a.amount), 0) AS totalAmount " +
             "FROM transaction_terminal_temp a " +
-            "INNER JOIN terminal b ON b.code = a.terminal_code " +
-            "INNER JOIN account_bank_receive_share c ON c.terminal_id = b.id " +
-            "WHERE c.user_id = :userId AND time >= :fromDate AND time <= :toDate LIMIT 1", nativeQuery = true)
-    IStatisticMerchantDTO getStatisticMerchantByDate(String userId, long fromDate, long toDate);
+            "WHERE a.terminal_code IN (:terminalCode) AND time >= :fromDate AND time <= :toDate LIMIT 1", nativeQuery = true)
+    IStatisticMerchantDTO getStatisticMerchantByDate(List<String> terminalCode, long fromDate, long toDate);
 
     @Query(value = "SELECT COALESCE(COUNT(a.id), 0) AS totalTrans, COALESCE(SUM(a.amount), 0) AS totalAmount, " +
             "DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME((FLOOR(time / 7200))*7200), '+00:00', '+07:00'), '%Y-%m-%d %H:00') AS timeDate " +
@@ -47,11 +45,9 @@ public interface TransactionTerminalTempRepository extends JpaRepository<Transac
     List<ITopTerminalDTO> getTopTerminalByDate(String userId, long fromDate, long toDate, int pageSize);
 
     @Query(value = "SELECT COALESCE(COUNT(ab.id), 0) AS totalTrans, COALESCE(SUM(ab.amount), 0) AS totalAmount " +
-            "FROM (SELECT DISTINCT a.id, a.amount FROM transaction_terminal_temp a " +
-            "INNER JOIN terminal b ON b.code = a.terminal_code " +
-            "INNER JOIN account_bank_receive_share c ON c.terminal_id = b.id " +
-            "WHERE c.user_id = :userId AND time >= :fromDate AND time <= :toDate) AS ab", nativeQuery = true)
-    RevenueTerminalDTO getTotalTranByUserAndTimeBetween(String userId, long fromDate, long toDate);
+            "FROM (SELECT a.id, a.amount FROM transaction_terminal_temp a " +
+            "WHERE a.terminal_code IN (:terminalCode) AND time >= :fromDate AND time <= :toDate) AS ab", nativeQuery = true)
+    RevenueTerminalDTO getTotalTranByUserAndTimeBetween(List<String> terminalCode, long fromDate, long toDate);
 
     @Query(value = "SELECT COALESCE(a.totalTrans, 0) AS totalTrans, COALESCE(a.totalAmount, 0) AS totalAmount, " +
             "b.code AS terminalCode, b.name AS terminalName, b.id AS terminalId, b.address AS terminalAddress " +
