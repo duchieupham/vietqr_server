@@ -24,7 +24,8 @@ public interface AccountBankReceiveShareRepository
             + "ON a.bank_id = b.id "
             + "INNER JOIN bank_type c "
             + "ON b.bank_type_id = c.id "
-            + "WHERE a.user_id = :userId", nativeQuery = true)
+            + "WHERE a.user_id = :userId"
+            + "ORDER BY b.is_authenticated DESC, a.is_owner DESC", nativeQuery = true)
     List<AccountBankReceiveShareDTO> getAccountBankReceiveShare(@Param(value = "userId") String userId);
 
     @Query(value = "SELECT a.id, a.phone_no as phoneNo, b.first_name as firstName, b.middle_name as middleName, b.last_name as lastName, b.img_id as imgId, c.is_owner as isOwner "

@@ -36,6 +36,9 @@ public class TerminalStatisticController {
     @Autowired
     private TerminalService terminalService;
 
+    @Autowired
+    private MerchantService merchantService;
+
     @GetMapping("merchant/overview")
     public ResponseEntity<StatisticMerchantDTO> getStatisticTerminal(
             @RequestParam String userId,
@@ -161,6 +164,8 @@ public class TerminalStatisticController {
                                         (double) (dto.getTotalAmount() - revGrowthPrevDate.getTotalAmount())
                                                 / revGrowthPrevDate.getTotalAmount();
                                 dto.setRatePreviousDate((int) (revGrowthPrevDateNum * 100));
+                            } else if (revGrowthPrevDate != null && revGrowthPrevDate.getTotalAmount() == 0 && dto.getTotalAmount() != 0) {
+                                dto.setRatePreviousDate(100);
                             } else {
                                 dto.setRatePreviousDate(0);
                             }

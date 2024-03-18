@@ -1,5 +1,7 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.dto.AccountMemberDTO;
+import com.vietqr.org.dto.IStatisticMerchantDTO;
 import com.vietqr.org.dto.MerchantResponseDTO;
 import com.vietqr.org.dto.MerchantWebResponseDTO;
 import com.vietqr.org.entity.MerchantEntity;
@@ -33,6 +35,16 @@ public class MerchantServiceImpl implements MerchantService {
     @Override
     public MerchantWebResponseDTO getMerchantByUserIdLimit(String userId) {
         return repo.getMerchantByUserIdLimit(userId);
+    }
+
+    @Override
+    public IStatisticMerchantDTO getStatisticMerchantByMerchantAndUserId(String merchantId, String userId, String fromDate, String toDate) {
+        return repo.getStatisticMerchantByMerchantAndUserId(merchantId, userId, fromDate, toDate);
+    }
+
+    @Override
+    public int inactiveMerchantByMerchantId(String merchantId, String userId) {
+        return repo.inactiveMerchantByMerchantId(merchantId, userId);
     }
 
 

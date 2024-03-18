@@ -31,4 +31,6 @@ public interface TransactionTerminalTempService {
     RevenueTerminalDTO getTotalTranByTerminalCodeAndTimeBetweenWithCurrentTime(List<String> terminalCode, long fromDate, long currentDateTimeAsNumber);
 
     TransactionTerminalTempEntity getTempByTransactionId(String transactionId);
+
+    IStatisticMerchantDTO getStatisticMerchantByMerchantAndUserId(String merchantId, String userId, String fromDate, String toDate);
 }

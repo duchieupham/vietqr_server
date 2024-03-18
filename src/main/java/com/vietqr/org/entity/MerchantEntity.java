@@ -20,8 +20,8 @@ public class MerchantEntity {
     private String name;
     @Column(name = "address")
     private String address;
-    @Column(name = "vsoCode")
-    private String vsoCode;
+    @Column(name = "vso")
+    private String vso;
 
     //0 : api service
     //1: ecommerce
@@ -47,6 +47,9 @@ public class MerchantEntity {
 
     @Column(name = "isActive")
     private boolean isActive;
+
+    @Column(name = "userId")
+    private String userId;
 
     public MerchantEntity() {
     }
@@ -83,12 +86,12 @@ public class MerchantEntity {
         this.address = address;
     }
 
-    public String getVsoCode() {
-        return vsoCode;
+    public String getVso() {
+        return vso;
     }
 
-    public void setVsoCode(String vsoCode) {
-        this.vsoCode = vsoCode;
+    public void setVso(String vsoCode) {
+        this.vso = vsoCode;
     }
 
     public long getTimePublish() {
@@ -145,5 +148,13 @@ public class MerchantEntity {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

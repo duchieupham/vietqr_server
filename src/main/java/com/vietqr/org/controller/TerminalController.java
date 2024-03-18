@@ -624,7 +624,7 @@ public class TerminalController {
                     entity.setName(dto.getName());
                     entity.setCode(dto.getCode());
                     entity.setAddress(StringUtil.isNullOrEmpty(dto.getAddress()) ? "" : dto.getAddress());
-                    entity.setMerchantId("");
+                    entity.setMerchantId(dto.getMerchantId());
                     entity.setUserId(dto.getUserId());
                     entity.setDefault(false);
                     entity.setTimeCreated(time);

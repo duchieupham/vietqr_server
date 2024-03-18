@@ -62,4 +62,6 @@ public interface TransactionTerminalTempRepository extends JpaRepository<Transac
     @Query(value = "SELECT * FROM transaction_terminal_temp "
             + "WHERE transaction_id = :transactionId LIMIT 1", nativeQuery = true)
     TransactionTerminalTempEntity findByTransactionId(String transactionId);
+
+    IStatisticMerchantDTO getStatisticMerchantByMerchantAndUserId(String merchantId, String userId, long fromDate, long toDate);
 }

@@ -1,21 +1,19 @@
 package com.vietqr.org.dto;
 
+import javax.validation.constraints.NotBlank;
+
 public class MerchantRequestDTO {
+    @NotBlank
     private String name;
-    private String address;
-    private String VsoCode;
-    private String type;
+    @NotBlank
     private String userId;
 
     public MerchantRequestDTO() {
     }
 
-    public MerchantRequestDTO(String name, String address, String vsoCode,
-                              String type, String userId) {
+    public MerchantRequestDTO(String name,
+                              int type, String userId) {
         this.name = name;
-        this.address = address;
-        VsoCode = vsoCode;
-        this.type = type;
         this.userId = userId;
     }
 
@@ -25,30 +23,6 @@ public class MerchantRequestDTO {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getVsoCode() {
-        return VsoCode;
-    }
-
-    public void setVsoCode(String vsoCode) {
-        VsoCode = vsoCode;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public String getUserId() {

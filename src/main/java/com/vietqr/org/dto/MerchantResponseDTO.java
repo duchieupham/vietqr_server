@@ -7,5 +7,7 @@ public interface MerchantResponseDTO {
 
     String getAddress();
 
-    String getVsoCode();
+    String getVso();
+
+    String getUserId();
 }

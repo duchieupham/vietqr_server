@@ -1,5 +1,7 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.dto.AccountMemberDTO;
+import com.vietqr.org.dto.IStatisticMerchantDTO;
 import com.vietqr.org.dto.MerchantResponseDTO;
 import com.vietqr.org.dto.MerchantWebResponseDTO;
 import com.vietqr.org.entity.MerchantEntity;
@@ -16,4 +18,8 @@ public interface MerchantService {
     MerchantWebResponseDTO getMerchantWebResponseDTO(String merchantId);
 
     MerchantWebResponseDTO getMerchantByUserIdLimit(String userId);
+
+    IStatisticMerchantDTO getStatisticMerchantByMerchantAndUserId(String merchantId, String userId, String fromDate, String toDate);
+
+    int inactiveMerchantByMerchantId(String merchantId, String userId);
 }
