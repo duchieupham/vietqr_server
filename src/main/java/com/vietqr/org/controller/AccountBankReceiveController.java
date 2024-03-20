@@ -459,8 +459,10 @@ public class AccountBankReceiveController {
 			entity.setTerminalLength(10);
 			if (dto.getEwalletToken() != null) {
 				entity.setEwalletToken(dto.getEwalletToken());
+				logger.info("insertAccountBank: EWALLET TOKEN: " + dto.getEwalletToken());
 			} else {
 				entity.setEwalletToken("");
+				logger.info("insertAccountBank: EWALLET TOKEN: EMPTY");
 			}
 
 			accountBankReceiveService.insertAccountBank(entity);

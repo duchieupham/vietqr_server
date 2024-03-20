@@ -100,7 +100,8 @@ public class JwsUtil {
             // File file = new File(path + "/merchant/request-add.txt");
             // File file = new File(path + "/merchant/confirm-add.txt");
             // File file = new File(path + "/merchant/create-vietqr.txt");
-            File file = new File(path + "/merchant/unregister.txt");
+            // File file = new File(path + "/merchant/unregister.txt");
+            File file = new File(path + "/get-info.txt");
 
             ///
             // File file = new File(path + "confirm-add.txt");

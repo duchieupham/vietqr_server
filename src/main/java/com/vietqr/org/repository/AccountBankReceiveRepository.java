@@ -68,8 +68,20 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Modifying
 	@Query(value = "UPDATE account_bank_receive "
 			+ "SET is_authenticated = false "
-			+ "WHERE bank_account = :bankAccount AND is_authenticated = true", nativeQuery = true)
+			+ "WHERE bank_account = :bankAccount "
+			+ "AND is_authenticated = true", nativeQuery = true)
 	void unRegisterAuthenticationBank(@Param(value = "bankAccount") String bankAccount);
+
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_bank_receive "
+			+ "SET is_authenticated = false, "
+			+ "ewallet_token = '' "
+			+ "WHERE bank_account = :bankAccount "
+			+ "AND ewallet_token = :ewalletToken "
+			+ "AND is_authenticated = true", nativeQuery = true)
+	void unRegisterAuthenBank(@Param(value = "bankAccount") String bankAccount,
+			@Param(value = "ewalletToken") String ewalletToken);
 
 	@Query(value = "SELECT * FROM account_bank_receive WHERE bank_account = :bankAccount AND bank_type_id = :bankTypeId AND is_authenticated = true AND status = 1", nativeQuery = true)
 	AccountBankReceiveEntity getAccountBankByBankAccountAndBankTypeId(@Param(value = "bankAccount") String bankAccount,
@@ -253,15 +265,15 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 
 	@Query(value = "SELECT b.bank_short_name FROM account_bank_receive a " +
 			"INNER JOIN bank_type b ON a.bank_type_id = b.id WHERE a.id = :bankId", nativeQuery = true)
-    String getBankShortNameByBankId(String bankId);
+	String getBankShortNameByBankId(String bankId);
 
 	@Query(value = "SELECT a.* FROM account_bank_receive a "
 			+ "INNER JOIN bank_type b "
 			+ "ON b.id = a.bank_type_id "
 			+ "WHERE a.bank_account = :bankAccount "
 			+ "AND b.bank_code = :bankCode AND is_authenticated = TRUE ", nativeQuery = true)
-    AccountBankReceiveEntity checkExistedBankAccountAuthenticated(String bankAccount, String bankCode);
+	AccountBankReceiveEntity checkExistedBankAccountAuthenticated(String bankAccount, String bankCode);
 
 	@Query(value = "SELECT a.bank_name FROM bank_type a WHERE a.id = :bankTypeId", nativeQuery = true)
-    String getBankNameByBankId(String bankTypeId);
+	String getBankNameByBankId(String bankTypeId);
 }

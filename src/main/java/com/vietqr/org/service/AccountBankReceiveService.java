@@ -32,6 +32,8 @@ public interface AccountBankReceiveService {
 
 	public void unRegisterAuthenticationBank(String bankAccount);
 
+	public void unRegisterAuthenBank(String bankAccount, String ewalletToken);
+
 	public void updateStatusAccountBankByUserId(int status, String userId);
 
 	public List<AccountBankConnectBranchDTO> getAccountBankConnect(String userId);
@@ -80,9 +82,9 @@ public interface AccountBankReceiveService {
 
 	public String checkExistedBankAccountByBankAccountAndBankCode(String bankAccount, String bankCode);
 
-    String getBankShortNameByBankId(String bankId);
+	String getBankShortNameByBankId(String bankId);
 
 	AccountBankReceiveEntity checkExistedBankAccountAuthenticated(String bankAccount, String bankCode);
 
-    String getBankNameByBankId(String bankTypeId);
+	String getBankNameByBankId(String bankTypeId);
 }
