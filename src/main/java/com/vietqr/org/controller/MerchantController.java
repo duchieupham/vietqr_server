@@ -1,12 +1,16 @@
 package com.vietqr.org.controller;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.MerchantEntity;
 import com.vietqr.org.entity.MerchantMemberEntity;
+import com.vietqr.org.entity.MerchantMemberRoleEntity;
 import com.vietqr.org.service.AccountInformationService;
+import com.vietqr.org.service.MerchantMemberRoleService;
 import com.vietqr.org.service.MerchantMemberService;
 import com.vietqr.org.service.MerchantService;
+import com.vietqr.org.util.EnvironmentUtil;
 import com.vietqr.org.util.FormatUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +38,9 @@ public class MerchantController {
     private MerchantMemberService merchantMemberService;
 
     @Autowired
+    private MerchantMemberRoleService merchantMemberRoleService;
+
+    @Autowired
     private AccountInformationService accountInformationService;
 
     @PostMapping("merchant")
@@ -41,6 +48,7 @@ public class MerchantController {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
+            ObjectMapper mapper = new ObjectMapper();
             MerchantEntity entity = new MerchantEntity();
             String merchantId = UUID.randomUUID().toString();
             entity.setId(merchantId);
@@ -53,15 +61,44 @@ public class MerchantController {
             entity.setActive(true);
             entity.setMaster(false);
             entity.setVso("");
+            entity.setBusinessSector("");
+            entity.setBusinessType(0);
+            entity.setTaxId("");
             entity.setUserId(dto.getUserId());
             entity.setType(0);
             entity.setAccountCustomerMerchantId("");
             entity.setRefId("");
             entity.setPublicId(UUID.randomUUID().toString());
+
+            MerchantMemberEntity merchantMemberEntity = new MerchantMemberEntity();
+            String merchantMemberId = UUID.randomUUID().toString();
+            merchantMemberEntity.setId(merchantMemberId);
+            merchantMemberEntity.setMerchantId(merchantId);
+            merchantMemberEntity.setActive(true);
+            merchantMemberEntity.setUserId(dto.getUserId());
+            merchantMemberEntity.setTimeAdded(time);
+            merchantMemberEntity.setTerminalId("");
+
+            List<String> roleReceives = new ArrayList<>();
+            List<String> roleRefunds = new ArrayList<>();
+            roleReceives.add(EnvironmentUtil.getAdminRoleId());
+            roleRefunds.add(EnvironmentUtil.getOnlyReadReceiveTerminalRoleId());
+            MerchantMemberRoleEntity merchantMemberRoleEntity = new MerchantMemberRoleEntity();
+            merchantMemberRoleEntity.setId(UUID.randomUUID().toString());
+            merchantMemberRoleEntity.setMerchantMemberId(merchantMemberId);
+            merchantMemberRoleEntity.setUserId(dto.getUserId());
+            merchantMemberRoleEntity.setTransReceiveRoleIds(mapper
+                    .writeValueAsString(roleReceives));
+            merchantMemberRoleEntity.setTransRefundRoleIds(mapper
+                    .writeValueAsString(roleRefunds));
+
+            merchantMemberRoleService.insert(merchantMemberRoleEntity);
+            merchantMemberService.insert(merchantMemberEntity);
             merchantService.insertMerchant(entity);
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
+            logger.error("createMerchant: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -95,49 +132,26 @@ public class MerchantController {
                 httpStatus = HttpStatus.OK;
             }
         } catch (Exception e) {
+            logger.error("inactiveMerchant: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @GetMapping("merchant-member/{merchantId}")
-    public ResponseEntity<List<AccountMemberDTO>> getMemberByMerchantId(@PathVariable String merchantId) {
-        List<AccountMemberDTO> result = new ArrayList<>();
-        HttpStatus httpStatus = null;
-        try {
-            result = merchantMemberService.getMerchantMembersByUserId(merchantId);
-            httpStatus = HttpStatus.OK;
-        } catch (Exception e) {
-            httpStatus = HttpStatus.BAD_REQUEST;
-        }
-        return new ResponseEntity<>(result, httpStatus);
-    }
-
-    @PostMapping("merchant-member")
-    public ResponseEntity<ResponseMessageDTO> addMemberToMerchant(
-            @Valid @RequestBody MerchantMemberInsertDTO dto) {
-        ResponseMessageDTO result = null;
-        HttpStatus httpStatus = null;
-        try {
-            MerchantMemberEntity entity = new MerchantMemberEntity();
-            entity.setId(UUID.randomUUID().toString());
-            entity.setActive(true);
-            entity.setMerchantId(dto.getMerchantId());
-            entity.setUserId(dto.getUserId());
-            entity.setRole(dto.getRole());
-            LocalDateTime currentDateTime = LocalDateTime.now();
-            long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
-            entity.setTimeAdded(time);
-            merchantMemberService.insertMemberToMerchant(entity);
-            result = new ResponseMessageDTO("SUCCESS", "");
-            httpStatus = HttpStatus.OK;
-        } catch (Exception e) {
-            result = new ResponseMessageDTO("FAILED", "E05");
-            httpStatus = HttpStatus.BAD_REQUEST;
-        }
-        return new ResponseEntity<>(result, httpStatus);
-    }
+//    @GetMapping("merchant-member/{merchantId}")
+//    public ResponseEntity<List<AccountMemberDTO>> getMemberByMerchantId(@PathVariable String merchantId) {
+//        List<AccountMemberDTO> result = new ArrayList<>();
+//        HttpStatus httpStatus = null;
+//        try {
+//            result = merchantMemberService.getMerchantMembersByUserId(merchantId);
+//            httpStatus = HttpStatus.OK;
+//        } catch (Exception e) {
+//            logger.error("getMemberByMerchantId: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
+//            httpStatus = HttpStatus.BAD_REQUEST;
+//        }
+//        return new ResponseEntity<>(result, httpStatus);
+//    }
 
     @DeleteMapping("merchant-member/remove")
     public ResponseEntity<ResponseMessageDTO> removeMemberFromMerchant(
@@ -145,10 +159,19 @@ public class MerchantController {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            merchantMemberService.removeMemberFromMerchant(dto.getMerchantId(), dto.getUserId());
-            result = new ResponseMessageDTO("SUCCESS", "");
-            httpStatus = HttpStatus.OK;
+            String merchantMemberId = merchantMemberService
+                    .checkUserExistedFromMerchant(dto.getMerchantId(), dto.getUserId());
+            if (merchantMemberId == null || merchantMemberId.isEmpty()) {
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            } else {
+                merchantMemberRoleService.removeMerchantMemberRole(merchantMemberId, dto.getUserId());
+                merchantMemberService.removeMemberFromMerchant(dto.getMerchantId(), dto.getUserId());
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            }
         } catch (Exception e) {
+            logger.error("removeMemberFromMerchant: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -218,7 +241,7 @@ public class MerchantController {
                             searchResult.add(accountSearchMemberDTO);
 
                         }
-                        if (searchResult != null && !searchResult.isEmpty()) {
+                        if (!searchResult.isEmpty()) {
                             result = searchResult;
                             httpStatus = HttpStatus.OK;
                         } else {
@@ -237,6 +260,7 @@ public class MerchantController {
                     break;
             }
         } catch (Exception e) {
+            logger.error("getMemberByMerchantId: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);

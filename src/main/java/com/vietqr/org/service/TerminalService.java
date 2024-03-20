@@ -77,4 +77,6 @@ public interface TerminalService {
     List<IStatisticTerminalOverViewDTO> getListTerminalByUserIdNotOwner(String userId, int offset, int size);
 
     int countNumberOfTerminalByUserIdOwner(String userId);
+
+    List<TerminalMapperDTO> getTerminalsByUserIdAndMerchantId(String userId, String merchantId);
 }

@@ -194,4 +194,9 @@ public class TerminalServiceImpl implements TerminalService {
     public int countNumberOfTerminalByUserIdOwner(String userId) {
         return repo.countNumberOfTerminalByUserIdOwner(userId);
     }
+
+    @Override
+    public List<TerminalMapperDTO> getTerminalsByUserIdAndMerchantId(String userId, String merchantId) {
+        return repo.getTerminalsByUserIdAndMerchantId(userId, merchantId);
+    }
 }

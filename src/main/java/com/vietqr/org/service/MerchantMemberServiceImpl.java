@@ -1,6 +1,7 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.dto.AccountMemberDTO;
+import com.vietqr.org.dto.IMerchantMemberDTO;
+import com.vietqr.org.dto.IMerchantMemberDetailDTO;
 import com.vietqr.org.entity.MerchantMemberEntity;
 import com.vietqr.org.repository.MerchantMemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,22 +16,42 @@ public class MerchantMemberServiceImpl implements MerchantMemberService {
     private MerchantMemberRepository repo;
 
     @Override
-    public List<AccountMemberDTO> getMerchantMembersByUserId(String merchantId) {
-        return repo.getMerchantMembersByUserId(merchantId);
-    }
-
-    @Override
     public String checkUserExistedFromMerchant(String merchantId, String id) {
         return repo.checkUserExistedFromMerchant(merchantId, id);
     }
 
     @Override
-    public int insertMemberToMerchant(MerchantMemberEntity entity) {
+    public int insert(MerchantMemberEntity entity) {
         return repo.save(entity) != null ? 1 : 0;
     }
 
     @Override
     public void removeMemberFromMerchant(String merchantId, String userId) {
         repo.removeMemberFromMerchant(merchantId, userId);
+    }
+
+    @Override
+    public void insertAll(List<MerchantMemberEntity> entity) {
+        repo.saveAll(entity);
+    }
+
+    @Override
+    public List<IMerchantMemberDTO> findMerchantMemberByMerchantId(String merchantId, int page, int size) {
+        return repo.findMerchantMemberMerchantId(merchantId, page, size);
+    }
+
+    @Override
+    public IMerchantMemberDetailDTO getUserExistedFromMerchant(String merchantId, String userId) {
+        return repo.getUserExistedFromMerchant(merchantId, userId);
+    }
+
+    @Override
+    public void deleteMerchantMemberByUserIdAndMerchantId(String merchantId, String userId) {
+        repo.deleteMerchantMemberByUserIdAndMerchantId(merchantId, userId);
+    }
+
+    @Override
+    public int countMerchantMemberByMerchantId(String merchantId) {
+        return repo.countMerchantMemberByMerchantId(merchantId);
     }
 }

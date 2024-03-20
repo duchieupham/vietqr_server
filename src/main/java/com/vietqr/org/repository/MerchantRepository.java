@@ -18,7 +18,9 @@ import java.util.List;
 public interface MerchantRepository extends JpaRepository<MerchantEntity, Long> {
 
     @Query(value = "SELECT id AS id, name AS name, "
-            + "address AS address, vso AS vso, user_id AS userId"
+            + "address AS address, vso AS vso, user_id AS userId "
+            + "business_type AS businessType, business_sector AS businessSector, "
+            + "tax_id AS taxId "
             + "FROM merchant WHERE user_id = :userId AND is_active = 1 ", nativeQuery = true)
     List<MerchantResponseDTO> getMerchantsByUserId(
             @Param(value = "userId") String userId);

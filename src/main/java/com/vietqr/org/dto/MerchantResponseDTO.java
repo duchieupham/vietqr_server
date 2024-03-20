@@ -9,5 +9,11 @@ public interface MerchantResponseDTO {
 
     String getVso();
 
+    String getBusinessType();
+
+    String getBusinessSector();
+
+    String getTaxId();
+
     String getUserId();
 }

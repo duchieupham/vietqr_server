@@ -1,6 +1,7 @@
 package com.vietqr.org.controller;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.service.MerchantService;
 import com.vietqr.org.service.TerminalBankReceiveService;
 import com.vietqr.org.service.TerminalService;
 import com.vietqr.org.service.TransactionTerminalTempService;

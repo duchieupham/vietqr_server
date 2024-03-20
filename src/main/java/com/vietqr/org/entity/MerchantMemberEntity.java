@@ -8,12 +8,19 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "MerchantMember")
 public class MerchantMemberEntity {
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
     @Id
     @Column(name = "id")
     private String id;
 
     @Column(name = "merchantId")
     private String merchantId;
+
+    @Column(name = "terminalId")
+    private String terminalId;
 
     @Column(name = "userId")
     private String userId;
@@ -24,9 +31,6 @@ public class MerchantMemberEntity {
     @Column(name = "isActive")
     private boolean isActive;
 
-    @Column(name = "role")
-    private int role;
-
     public void setId(String id) {
         this.id = id;
     }
@@ -35,13 +39,20 @@ public class MerchantMemberEntity {
         return id;
     }
 
-    public MerchantMemberEntity(String id, String merchantId, String userId, long timeAdded, boolean isActive, int role) {
+    public MerchantMemberEntity(String id, String merchantId, String userId, long timeAdded, boolean isActive) {
         this.id = id;
         this.merchantId = merchantId;
         this.userId = userId;
         this.timeAdded = timeAdded;
         this.isActive = isActive;
-        this.role = role;
+    }
+
+    public String getTerminalId() {
+        return terminalId;
+    }
+
+    public void setTerminalId(String terminalId) {
+        this.terminalId = terminalId;
     }
 
     public MerchantMemberEntity() {
@@ -77,13 +88,5 @@ public class MerchantMemberEntity {
 
     public void setActive(boolean active) {
         isActive = active;
-    }
-
-    public int getRole() {
-        return role;
-    }
-
-    public void setRole(int role) {
-        this.role = role;
     }
 }

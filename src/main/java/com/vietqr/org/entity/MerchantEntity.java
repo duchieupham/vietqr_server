@@ -23,6 +23,16 @@ public class MerchantEntity {
     @Column(name = "vso")
     private String vso;
 
+    //0: cá nhân (default)
+    @Column(name = "businessType")
+    private int businessType;
+
+    @Column(name = "taxId")
+    private String taxId;
+
+    @Column(name = "businessSector")
+    private String businessSector;
+
     //0 : api service
     //1: ecommerce
     //2: base
@@ -52,6 +62,30 @@ public class MerchantEntity {
     private String userId;
 
     public MerchantEntity() {
+    }
+
+    public int getBusinessType() {
+        return businessType;
+    }
+
+    public void setBusinessType(int businessType) {
+        this.businessType = businessType;
+    }
+
+    public String getTaxId() {
+        return taxId;
+    }
+
+    public void setTaxId(String taxId) {
+        this.taxId = taxId;
+    }
+
+    public String getBusinessSector() {
+        return businessSector;
+    }
+
+    public void setBusinessSector(String businessSector) {
+        this.businessSector = businessSector;
     }
 
     public String getId() {

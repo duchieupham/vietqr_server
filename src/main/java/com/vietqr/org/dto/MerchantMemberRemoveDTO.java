@@ -1,11 +1,12 @@
 package com.vietqr.org.dto;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 
 public class MerchantMemberRemoveDTO {
-    @Valid
+    @NotBlank
     private String userId;
-    @Valid
+    @NotBlank
     private String merchantId;
 
     public MerchantMemberRemoveDTO() {

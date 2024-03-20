@@ -274,4 +274,13 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             + "ORDER BY a.code ASC "
             + "LIMIT :offset, :size", nativeQuery = true)
     List<IStatisticTerminalOverViewDTO> getListTerminalByUserIdNotOwner(String userId, int offset, int size);
+
+    @Query(value = "SELECT a.id AS terminalId, a.name AS terminalName, "
+            + "a.code AS terminalCode "
+            + "FROM terminal a "
+            + "INNER JOIN merchant_member b ON b.terminal_id = a.id "
+            + "WHERE b.merchant_id = :merchantId "
+            + "AND b.user_id = :userId AND b.terminal_id != '' ", nativeQuery = true)
+    List<TerminalMapperDTO> getTerminalsByUserIdAndMerchantId(@Param(value = "userId") String userId,
+                                                              @Param(value = "merchantId") String merchantId);
 }

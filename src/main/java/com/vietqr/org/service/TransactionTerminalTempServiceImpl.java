@@ -106,8 +106,9 @@ public class TransactionTerminalTempServiceImpl implements TransactionTerminalTe
     @Override
     public IStatisticMerchantDTO getStatisticMerchantByMerchantAndUserId(String merchantId, String userId, String fromDate, String toDate) {
         StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndTime(fromDate, fromDate);
-        return repo.getStatisticMerchantByMerchantAndUserId(merchantId, userId,
-                startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET,
-                startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET);
+        return null;
+//        return repo.getStatisticMerchantByMerchantAndUserId(merchantId, userId,
+//                startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET,
+//                startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 }
