@@ -48,6 +48,9 @@ public class MerchantEntity {
     @Column(name = "isActive")
     private boolean isActive;
 
+    @Column(name = "userId")
+    private String userId;
+
     public MerchantEntity() {
     }
 
@@ -145,5 +148,13 @@ public class MerchantEntity {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

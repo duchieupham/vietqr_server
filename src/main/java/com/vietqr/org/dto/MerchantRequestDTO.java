@@ -3,21 +3,21 @@ package com.vietqr.org.dto;
 public class MerchantRequestDTO {
     private String name;
     private String address;
-    private String VsoCode;
-    private String type;
+    private String vsoCode;
+    private int type;
     private String userId;
 
     public MerchantRequestDTO() {
     }
-
-    public MerchantRequestDTO(String name, String address, String vsoCode,
-                              String type, String userId) {
-        this.name = name;
-        this.address = address;
-        VsoCode = vsoCode;
-        this.type = type;
-        this.userId = userId;
-    }
+//
+//    public MerchantRequestDTO(String name, String address, String vsoCode,
+//                              String type, String userId) {
+//        this.name = name;
+//        this.address = address;
+//        VsoCode = vsoCode;
+//        this.type = type;
+//        this.userId = userId;
+//    }
 
     public String getName() {
         return name;
@@ -27,29 +27,29 @@ public class MerchantRequestDTO {
         this.name = name;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getVsoCode() {
-        return VsoCode;
-    }
-
-    public void setVsoCode(String vsoCode) {
-        VsoCode = vsoCode;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
+//    public String getAddress() {
+//        return address;
+//    }
+//
+//    public void setAddress(String address) {
+//        this.address = address;
+//    }
+//
+//    public String getVsoCode() {
+//        return VsoCode;
+//    }
+//
+//    public void setVsoCode(String vsoCode) {
+//        VsoCode = vsoCode;
+//    }
+//
+//    public String getType() {
+//        return type;
+//    }
+//
+//    public void setType(String type) {
+//        this.type = type;
+//    }
 
     public String getUserId() {
         return userId;

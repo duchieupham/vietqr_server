@@ -11,7 +11,7 @@ import java.util.List;
 public interface MerchantService {
     int insertMerchant(MerchantEntity merchantEntity);
 
-    List<MerchantResponseDTO> getMerchantsByUserId(String userId);
+    List<MerchantResponseDTO> getMerchantsByUserId(String userId, int offset);
 
     MerchantWebResponseDTO getMerchantWebResponseDTO(String merchantId);
 

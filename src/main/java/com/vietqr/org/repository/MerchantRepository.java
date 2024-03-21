@@ -13,11 +13,17 @@ import java.util.List;
 @Repository
 public interface MerchantRepository extends JpaRepository<MerchantEntity, Long> {
 
-    @Query(value = "SELECT id AS id, name AS name, "
-            + "address AS address, vso_code AS vsoCode"
-            + "FROM merchant WHERE user_id = :userId", nativeQuery = true)
+    @Query(value = "SELECT a.id AS id, a.name AS name, "
+            + "a.address AS address, a.vso_code AS vsoCode, "
+            + "COUNT(b.id) AS totalTerminals "
+            + "FROM merchant a "
+            + "LEFT JOIN terminal b ON a.id = b.merchant_id "
+            + "WHERE a.user_id = :userId "
+            + "GROUP BY a.id "
+            + "LIMIT :offset, 20", nativeQuery = true)
     List<MerchantResponseDTO> getMerchantsByUserId(
-            @Param(value = "userId") String userId);
+            @Param(value = "userId") String userId,
+            @Param(value = "offset") int offset);
 
     @Query(value = "SELECT a.id AS id, a.name AS name, "
             + "a.address AS address, count(b.id) AS totalTerminals "
