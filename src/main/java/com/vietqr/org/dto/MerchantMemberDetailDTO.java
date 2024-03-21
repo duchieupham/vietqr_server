@@ -8,7 +8,7 @@ public class MerchantMemberDetailDTO {
     private String fullName;
     private String imgId;
     private int existed;
-    private int role;
+    private int level;
     private List<TerminalMapperDTO> terminals;
     private List<RoleMemberDTO> transReceiveRoles;
     private List<RoleMemberDTO> transRefundRoles;
@@ -56,12 +56,12 @@ public class MerchantMemberDetailDTO {
         this.existed = existed;
     }
 
-    public int getRole() {
-        return role;
+    public int getLevel() {
+        return level;
     }
 
-    public void setRole(int role) {
-        this.role = role;
+    public void setLevel(int level) {
+        this.level = level;
     }
 
     public List<RoleMemberDTO> getTransReceiveRoles() {

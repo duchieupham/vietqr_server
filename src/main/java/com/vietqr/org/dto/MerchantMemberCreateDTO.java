@@ -4,8 +4,9 @@ import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 public class MerchantMemberCreateDTO {
-    private int role;
-    private List<String> functionIds;
+    private String merchantId;
+    private int level;
+    private List<String> roleIds;
 
     @NotBlank
     private String userId;
@@ -15,28 +16,36 @@ public class MerchantMemberCreateDTO {
     public MerchantMemberCreateDTO() {
     }
 
-    public MerchantMemberCreateDTO(int role, List<String> functionIds,
+    public MerchantMemberCreateDTO(int level, List<String> roleIds,
                                    String userId, List<String> terminalIds) {
-        this.role = role;
-        this.functionIds = functionIds;
+        this.level = level;
+        this.roleIds = roleIds;
         this.userId = userId;
         this.terminalIds = terminalIds;
     }
 
-    public int getRole() {
-        return role;
+    public int getLevel() {
+        return level;
     }
 
-    public void setRole(int role) {
-        this.role = role;
+    public String getMerchantId() {
+        return merchantId;
     }
 
-    public List<String> getFunctionIds() {
-        return functionIds;
+    public void setMerchantId(String merchantId) {
+        this.merchantId = merchantId;
     }
 
-    public void setFunctionIds(List<String> functionIds) {
-        this.functionIds = functionIds;
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    public List<String> getRoleIds() {
+        return roleIds;
+    }
+
+    public void setRoleIds(List<String> roleIds) {
+        this.roleIds = roleIds;
     }
 
     public List<String> getTerminalIds() {

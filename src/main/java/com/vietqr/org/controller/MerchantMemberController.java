@@ -67,16 +67,18 @@ public class MerchantMemberController {
                 if (memberDTO != null) {
                     merchantMemberDetailDTO.setExisted(1);
                     if (memberDTO.getTerminalId() == null || memberDTO.getTerminalId().isEmpty()) {
-                        merchantMemberDetailDTO.setRole(0);
+                        merchantMemberDetailDTO.setLevel(0);
                     } else {
-                        merchantMemberDetailDTO.setRole(1);
+                        merchantMemberDetailDTO.setLevel(1);
                     }
                     List<String> receiveRoles = mapper.readValue(memberDTO.getTransRefundRoles(), List.class);
                     List<RoleMemberDTO> transReceiveRoles = transReceiveRoleService.getRoleByIds(receiveRoles);
                     merchantMemberDetailDTO.setTransReceiveRoles(transReceiveRoles);
+                    merchantMemberDetailDTO.setTransRefundRoles(new ArrayList<>());
+                    merchantMemberDetailDTO.setTerminals(new ArrayList<>());
                 } else {
                     merchantMemberDetailDTO.setExisted(0);
-                    merchantMemberDetailDTO.setRole(0);
+                    merchantMemberDetailDTO.setLevel(0);
                     merchantMemberDetailDTO.setTransReceiveRoles(new ArrayList<>());
                     merchantMemberDetailDTO.setTransRefundRoles(new ArrayList<>());
                 }
@@ -91,9 +93,9 @@ public class MerchantMemberController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @PostMapping("merchant-member/{merchantId}")
+    @PostMapping("merchant-member")
     public ResponseEntity<ResponseMessageDTO> addNewMemberToMerchant(
-            @Valid @RequestBody MerchantMemberCreateDTO dto, @PathVariable String merchantId) {
+            @Valid @RequestBody MerchantMemberCreateDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
@@ -103,28 +105,25 @@ public class MerchantMemberController {
             MerchantMemberEntity entity = new MerchantMemberEntity();
             String merchantMemberId = UUID.randomUUID().toString();
             entity.setId(merchantMemberId);
-            entity.setMerchantId(merchantId);
+            entity.setMerchantId(dto.getMerchantId());
             entity.setUserId(dto.getUserId());
             entity.setActive(true);
             LocalDateTime now = LocalDateTime.now();
             long time = now.toEpochSecond(java.time.ZoneOffset.UTC);
             entity.setTimeAdded(time);
-            List<String> roles = new ArrayList<>();
             String transRole = "";
             String transRefundRole = "";
-            switch (dto.getRole()) {
+            switch (dto.getLevel()) {
                 case 0:
                     entity.setTerminalId("");
-                    roles = getTransReceiveRoleByUserId(dto.getRole());
-                    transRole = mapper.writeValueAsString(roles);
+                    transRole = mapper.writeValueAsString(dto.getRoleIds());
                     merchantMemberEntities.add(entity);
                     break;
                 case 1:
                     for (String terminalId : dto.getTerminalIds()) {
                         entity.setId(UUID.randomUUID().toString());
                         entity.setTerminalId(terminalId);
-                        roles = getTransRefundRoleByUserId(dto.getRole());
-                        transRefundRole = mapper.writeValueAsString(roles);
+                        transRefundRole = mapper.writeValueAsString(dto.getRoleIds());
                         merchantMemberEntities.add(entity);
                     }
                     break;
@@ -150,16 +149,16 @@ public class MerchantMemberController {
         } catch (Exception e) {
             logger.error("addNewMemberToMerchant: ERROR: " + e.getMessage()
                     + " - Request: " + dto.toString() + " - MerchantId: " +
-                    merchantId + " at: " + System.currentTimeMillis());
+                    dto.getMerchantId() + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @PostMapping("merchant-member/update/{merchantId}")
+    @PostMapping("merchant-member/update")
     public ResponseEntity<ResponseMessageDTO> updateMemberMemberRoleOfMerchant(
-            @Valid @RequestBody MerchantMemberCreateDTO dto, @PathVariable String merchantId) {
+            @Valid @RequestBody MerchantMemberCreateDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
@@ -169,7 +168,7 @@ public class MerchantMemberController {
             MerchantMemberEntity entity = new MerchantMemberEntity();
             String merchantMemberId = UUID.randomUUID().toString();
             entity.setId(merchantMemberId);
-            entity.setMerchantId(merchantId);
+            entity.setMerchantId(dto.getMerchantId());
             entity.setUserId(dto.getUserId());
             entity.setActive(true);
             LocalDateTime now = LocalDateTime.now();
@@ -178,18 +177,16 @@ public class MerchantMemberController {
             List<String> roles = new ArrayList<>();
             String transRole = "";
             String transRefundRole = "";
-            switch (dto.getRole()) {
+            switch (dto.getLevel()) {
                 case 0:
                     entity.setTerminalId("");
-                    roles = getTransReceiveRoleByUserId(dto.getRole());
-                    transRole = mapper.writeValueAsString(roles);
+                    transRole = mapper.writeValueAsString(dto.getRoleIds());
                     merchantMemberEntities.add(entity);
                 case 1:
                     for (String terminalId : dto.getTerminalIds()) {
                         entity.setId(UUID.randomUUID().toString());
                         entity.setTerminalId(terminalId);
-                        roles = getTransRefundRoleByUserId(dto.getRole());
-                        transRefundRole = mapper.writeValueAsString(roles);
+                        transRefundRole = mapper.writeValueAsString(dto.getRoleIds());
                         merchantMemberEntities.add(entity);
                     }
                     break;
@@ -207,8 +204,8 @@ public class MerchantMemberController {
                     merchantMemberRoleEntities.add(merchantMemberRoleEntity);
                 }
             }
-            merchantMemberRoleService.deleteMerchantMemberRoleByUserIdAndMerchantId(merchantId, dto.getUserId());
-            merchantMemberService.deleteMerchantMemberByUserIdAndMerchantId(merchantId, dto.getUserId());
+            merchantMemberRoleService.deleteMerchantMemberRoleByUserIdAndMerchantId(dto.getMerchantId(), dto.getUserId());
+            merchantMemberService.deleteMerchantMemberByUserIdAndMerchantId(dto.getMerchantId(), dto.getUserId());
             merchantMemberService.insertAll(merchantMemberEntities);
             merchantMemberRoleService.insertAll(merchantMemberRoleEntities);
 
@@ -217,7 +214,7 @@ public class MerchantMemberController {
         } catch (Exception e) {
             logger.error("updateMemberMemberRoleOfMerchant: ERROR: " + e.getMessage() + " Request: "
                     + dto.toString() + " - MerchantId: " +
-                    merchantId + " at: " + System.currentTimeMillis());
+                    dto.getMerchantId() + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -340,6 +337,7 @@ public class MerchantMemberController {
         switch (type) {
             case 0:
                 result.add(EnvironmentUtil.getOnlyReadReceiveMerchantRoleId());
+                result.add(EnvironmentUtil.getRequestReceiveMerchantRoleId());
                 break;
             case 1:
                 result.add(EnvironmentUtil.getOnlyReadReceiveMerchantRoleId());
