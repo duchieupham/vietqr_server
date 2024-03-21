@@ -8,4 +8,6 @@ public interface MerchantResponseDTO {
     String getAddress();
 
     String getVsoCode();
+
+    int getTotalTerminals();
 }

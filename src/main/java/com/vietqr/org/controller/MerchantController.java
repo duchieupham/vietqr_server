@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @CrossOrigin
@@ -33,20 +34,22 @@ public class MerchantController {
         HttpStatus httpStatus = null;
         try {
             MerchantEntity entity = new MerchantEntity();
-            String merchantId = java.util.UUID.randomUUID().toString();
+            String merchantId = UUID.randomUUID().toString();
             entity.setId(merchantId);
             entity.setName(dto.getName());
-            entity.setAddress(dto.getAddress());
+            entity.setAddress("");
             LocalDateTime now = LocalDateTime.now();
             long time = now.toEpochSecond(ZoneOffset.UTC);
             entity.setTimeCreated(time);
             entity.setVsoCode("");
+            entity.setUserId(dto.getUserId());
 //            entity.setType("");
 //            entity.setUserId(dto.getUserId());
             merchantService.insertMerchant(entity);
-            result = new ResponseMessageDTO("SUCCESS", "");
+            result = new ResponseMessageDTO("SUCCESS", merchantId);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
+            logger.error("createMerchant: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -54,12 +57,15 @@ public class MerchantController {
     }
 
     @GetMapping("merchant/{userId}")
-    public ResponseEntity<List<MerchantResponseDTO>> getMerchantsByUserId(@PathVariable String userId) {
+    public ResponseEntity<List<MerchantResponseDTO>> getMerchantsByUserId(@PathVariable String userId,
+                                                                          @RequestParam int offset) {
         List<MerchantResponseDTO> result = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
-            result = merchantService.getMerchantsByUserId(userId);
+            result = merchantService.getMerchantsByUserId(userId, offset);
+            httpStatus = HttpStatus.OK;
         } catch (Exception e) {
+            logger.error("getMerchantsByUserId: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
