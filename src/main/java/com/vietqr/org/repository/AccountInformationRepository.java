@@ -137,4 +137,15 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
 			+ "ON b.id = a.user_id "
 			+ "WHERE b.id = :userId AND b.status = 1", nativeQuery = true)
 	AccountSearchByPhoneNoDTO findAccountByUserId(@Param(value = "userId") String userId);
+
+	@Query(value = "SELECT DISTINCT a.user_id AS id, c.phone_no AS phoneNo, a.img_id AS imgId, "
+			+ "a.birth_date AS birthDate, a.email AS email, a.national_id AS nationalId, "
+			+ "CONCAT(a.last_name, ' ', a.middle_name, ' ', a.first_name) AS fullName, "
+			+ "a.gender AS gender, b.is_owner AS isOwner FROM account_information a "
+			+ "INNER JOIN account_login c ON c.id = a.user_id "
+			+ "INNER JOIN account_bank_receive_share b ON b.user_id = a.user_id "
+			+ "WHERE b.terminal_id = :terminalId "
+			+ "AND a.status = 1 "
+			+ "ORDER BY b.is_owner DESC ", nativeQuery = true)
+	List<IAccountTerminalMemberDTO> getMembersByTerminalId(String terminalId);
 }

@@ -1,5 +1,6 @@
 package com.vietqr.org.repository;
 
+import com.vietqr.org.dto.ISubTerminalDTO;
 import com.vietqr.org.entity.TerminalBankReceiveEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -56,4 +57,39 @@ public interface TerminalBankReceiveRepository extends JpaRepository<TerminalBan
     @Query(value = "SELECT * FROM terminal_bank_receive " +
             "WHERE raw_terminal_code = :machineCode LIMIT 1", nativeQuery = true)
     TerminalBankReceiveEntity getTerminalBankReceiveByRawTerminalCode(String machineCode);
+
+    @Query(value = "SELECT id AS subTerminalId, bank_id AS bankId, "
+            + "data1 AS qrCode1, data2 AS qrCode2, trace_transfer AS traceTransfer, "
+            + "terminal_code AS terminalCode, raw_terminal_code AS rawTerminalCode "
+            + "FROM terminal_bank_receive "
+            + "WHERE terminal_id = :terminalId "
+            + "AND raw_terminal_code LIKE %:value% "
+            + "AND type_of_qr = 1 "
+            + "ORDER BY raw_terminal_code ASC "
+            + "LIMIT :offset, :size ", nativeQuery = true)
+    List<ISubTerminalDTO> getListSubTerminalByTerminalId(String terminalId,
+                                                         int offset, int size, String value);
+
+    @Query(value = "SELECT id AS subTerminalId, bank_id AS bankId, "
+            + "data1 AS qrCode1, data2 AS qrCode2, trace_transfer AS traceTransfer, "
+            + "terminal_code AS terminalCode, raw_terminal_code AS rawTerminalCode "
+            + "FROM terminal_bank_receive "
+            + "WHERE id = :subTerminalId LIMIT 1", nativeQuery = true)
+    ISubTerminalDTO getSubTerminalDetailBySubTerminalId(String subTerminalId);
+
+    @Query(value = "SELECT COUNT(id) "
+            + "FROM terminal_bank_receive "
+            + "WHERE terminal_id = :terminalId "
+            + "AND raw_terminal_code LIKE %:value% "
+            + "AND type_of_qr = 1 ", nativeQuery = true)
+    int countSubTerminalByTerminalId(String terminalId, String value);
+
+    @Query(value = "SELECT id AS subTerminalId, bank_id AS bankId, "
+            + "data1 AS qrCode1, data2 AS qrCode2, trace_transfer AS traceTransfer, "
+            + "terminal_code AS terminalCode, raw_terminal_code AS rawTerminalCode "
+            + "FROM terminal_bank_receive "
+            + "WHERE terminal_id = :terminalId "
+            + "AND type_of_qr = 1 "
+            + "ORDER BY raw_terminal_code ASC ", nativeQuery = true)
+    List<ISubTerminalDTO> getListSubTerminalByTerminalId(String terminalId);
 }

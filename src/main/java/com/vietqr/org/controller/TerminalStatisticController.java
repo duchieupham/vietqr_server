@@ -142,7 +142,7 @@ public class TerminalStatisticController {
                             dto.setTerminalCode(item.getTerminalCode());
                             dto.setTerminalAddress(item.getTerminalAddress());
                             List<String> listCode = new ArrayList<>();
-                            listCode = terminalBankReceiveService.getTerminalCodeByMainTerminalCode(item.getTerminalCode());
+                            listCode = terminalBankReceiveService.getSubTerminalCodeByTerminalCode(item.getTerminalCode());
                             listCode.add(item.getTerminalCode());
                             RevenueTerminalDTO revGrowthToday = transactionTerminalTempService.getTotalTranByTerminalCodeAndTimeBetween(
                                     listCode, DateTimeUtil.removeTimeInDateTimeString(fromDate), DateTimeUtil.removeTimeInDateTimeString(toDate));

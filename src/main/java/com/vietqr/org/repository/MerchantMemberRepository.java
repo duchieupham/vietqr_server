@@ -35,8 +35,9 @@ public interface MerchantMemberRepository extends JpaRepository<MerchantMemberEn
             + "INNER JOIN account_information c ON a.user_id = c.user_id "
             + "INNER JOIN merchant_member_role d ON d.merchant_member_id = a.id "
             + "WHERE a.merchant_id = :merchantId AND a.is_active = TRUE "
+            + "AND (b.phone_no LIKE %:value% OR CONCAT(c.last_name, ' ', c.middle_name, ' ', c.first_name) LIKE %:value%) "
             + "LIMIT :offset, :size ", nativeQuery = true)
-    List<IMerchantMemberDTO> findMerchantMemberMerchantId(String merchantId, int offset, int size);
+    List<IMerchantMemberDTO> findMerchantMemberMerchantId(String merchantId, String value, int offset, int size);
 
     @Query(value = "SELECT a.terminal_id AS terminalId, b.id AS merchantMemberId, "
             + "b.trans_receive_role_ids AS transReceiveRoles, "

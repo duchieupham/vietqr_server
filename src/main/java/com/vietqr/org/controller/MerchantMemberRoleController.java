@@ -1,8 +1,6 @@
 package com.vietqr.org.controller;
 
-import com.vietqr.org.dto.DropListDTO;
 import com.vietqr.org.dto.RoleMemberDTO;
-import com.vietqr.org.service.MerchantMemberRoleService;
 import com.vietqr.org.service.TransactionReceiveRoleService;
 import com.vietqr.org.util.EnvironmentUtil;
 import org.apache.log4j.Logger;
@@ -22,9 +20,6 @@ public class MerchantMemberRoleController {
     private static final Logger logger = Logger.getLogger(MerchantMemberRoleController.class);
 
     @Autowired
-    private MerchantMemberRoleService merchantMemberRoleService;
-
-    @Autowired
     private TransactionReceiveRoleService transactionReceiveRoleService;
 
     @GetMapping("role-receive/{level}")
@@ -41,6 +36,7 @@ public class MerchantMemberRoleController {
                     roleIds.add(EnvironmentUtil.getOnlyReadReceiveMerchantRoleId());
                     dtos = transactionReceiveRoleService.findRoleByIds(roleIds);
                     httpStatus = HttpStatus.OK;
+                    break;
                 // 1: terminal
                 case 1:
                     roleIds.add(EnvironmentUtil.getOnlyReadReceiveTerminalRoleId());

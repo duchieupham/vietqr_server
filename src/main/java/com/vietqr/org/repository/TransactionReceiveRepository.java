@@ -2126,5 +2126,167 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "AND a.time BETWEEN :fromDate AND :toDate "
                 + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
         List<TransactionRelatedDTO> getTransactionsByTerminalCodeAndDateListCode(List<String> allTerminalCode, int offset, String bankId, long fromDate, long toDate);
+
+        @Query(value = "SELECT a.id AS transactionId, a.amount, a.bank_account AS bankAccount, a.content, a.time, "
+                + "a.time_paid AS timePaid, a.status, a.type,a.trans_type AS transType, "
+                + "a.reference_number AS referenceNumber, a.terminal_code AS terminalCode, "
+                + "a.note, a.order_id AS orderId, 'MBBank' AS bankShortName "
+                + "FROM transaction_receive a "
+                + "WHERE a.terminal_code IN (:codes) "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "ORDER BY a.time DESC LIMIT :offset, :size", nativeQuery = true)
+        List<TransactionRelatedDTO> getSubTerminalTransactions(List<String> codes, long fromDate,
+                                                                   long toDate, int offset, int size);
+
+        @Query(value = "SELECT COUNT(a.id) "
+                + "FROM transaction_receive a "
+                + "WHERE a.terminal_code IN (:codes) "
+                + "AND a.time BETWEEN :fromDate AND :toDate ", nativeQuery = true)
+        int getTotalSubTerminalTransactions(List<String> codes, long fromDate, long toDate);
+
+        @Query(value = "SELECT a.id AS transactionId, a.amount, a.bank_account AS bankAccount, a.content, a.time, "
+                + "a.time_paid AS timePaid, a.status, a.type,a.trans_type AS transType, "
+                + "a.reference_number AS referenceNumber, a.terminal_code AS terminalCode, "
+                + "a.note, a.order_id AS orderId "
+                + "FROM transaction_receive a "
+                + "WHERE a.terminal_code  IN (:codes) "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "AND a.reference_number = :value "
+                + "ORDER BY a.time DESC LIMIT :offset, :size", nativeQuery = true)
+        List<TransactionRelatedDTO> getSubTerminalTransactionsByFtCode(List<String> codes, String value,
+                                                                       long fromDate, long toDate,
+                                                                       int offset, int size);
+
+        @Query(value = "SELECT COUNT(a.id) "
+                + "FROM transaction_receive a "
+                + "WHERE a.terminal_code  IN (:codes) "
+                + "AND a.reference_number = :value "
+                + "AND a.time BETWEEN :fromDate AND :toDate ", nativeQuery = true)
+        int getTotalSubTerminalTransactionsByFtCode(List<String> codes, String value, long fromDate, long toDate);
+
+        @Query(value = "SELECT a.id AS transactionId, a.amount, a.bank_account AS bankAccount, a.content, a.time, "
+                + "a.time_paid AS timePaid, a.status, a.type,a.trans_type AS transType, "
+                + "a.reference_number AS referenceNumber, a.terminal_code AS terminalCode, "
+                + "a.note, a.order_id AS orderId "
+                + "FROM transaction_receive a "
+                + "WHERE a.terminal_code  IN (:codes) "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "AND a.order_id = :value "
+                + "ORDER BY a.time DESC LIMIT :offset, :size", nativeQuery = true)
+        List<TransactionRelatedDTO> getSubTerminalTransactionsByOrderId(List<String> codes, String value,
+                                                                                long fromDate, long toDate, int offset, int size);
+
+        @Query(value = "SELECT COUNT(a.id) "
+                + "FROM transaction_receive a "
+                + "WHERE a.terminal_code  IN (:codes) "
+                + "AND a.order_id = :value "
+                + "AND a.time BETWEEN :fromDate AND :toDate ", nativeQuery = true)
+        int getTotalSubTerminalTransactionsByOrderId(List<String> codes, String value, long fromDate, long toDate);
+
+        @Query(value = "SELECT a.id AS transactionId, a.amount, a.bank_account AS bankAccount, a.content, a.time, "
+                + "a.time_paid AS timePaid, a.status, a.type,a.trans_type AS transType, "
+                + "a.reference_number AS referenceNumber, a.terminal_code AS terminalCode, "
+                + "a.note, a.order_id AS orderId "
+                + "FROM transaction_receive a "
+                + "WHERE a.terminal_code  IN (:codes) "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "AND a.content LIKE %:value% "
+                + "ORDER BY a.time DESC LIMIT :offset, :size", nativeQuery = true)
+        List<TransactionRelatedDTO> getSubTerminalTransactionsByContent(List<String> codes, String value,
+                                                                                long fromDate, long toDate, int offset, int size);
+
+        @Query(value = "SELECT COUNT(a.id) "
+                + "FROM transaction_receive a "
+                + "WHERE a.terminal_code  IN (:codes) "
+                + "AND a.content LIKE %:value% "
+                + "AND a.time BETWEEN :fromDate AND :toDate ", nativeQuery = true)
+        int getTotalSubTerminalTransactionsByContent(List<String> codes, String value, long fromDate, long toDate);
+
+        @Query(value = "SELECT a.id AS transactionId, a.amount, a.bank_account AS bankAccount, a.content, a.time, "
+                + "a.time_paid AS timePaid, a.status, a.type,a.trans_type AS transType, "
+                + "a.reference_number AS referenceNumber, a.terminal_code AS terminalCode, "
+                + "a.note, a.order_id AS orderId "
+                + "FROM transaction_receive a "
+                + "WHERE a.terminal_code  IN (:codes) "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "AND a.amount = :value "
+                + "ORDER BY a.time DESC LIMIT :offset, :size", nativeQuery = true)
+        List<TransactionRelatedDTO> getSubTerminalTransactionsByAmount(List<String> codes, int value,
+                                                                               long fromDate, long toDate, int offset, int size);
+
+        @Query(value = "SELECT COUNT(a.id) "
+                + "FROM transaction_receive a "
+                + "WHERE a.terminal_code IN (:codes) "
+                + "AND a.amount = :value "
+                + "AND a.time BETWEEN :fromDate AND :toDate ", nativeQuery = true)
+        int getTotalSubTerminalTransactionsByAmount(List<String> codes, int value, long fromDate, long toDate);
+
+        @Query(value = "SELECT COUNT(id) AS totalTrans, "
+                + "SUM(CASE WHEN trans_type = 'C' THEN amount ELSE 0 END) AS totalCashIn, "
+                + "SUM(CASE WHEN trans_type = 'D' THEN amount ELSE 0 END) AS totalCashOut, "
+                + "SUM(CASE WHEN trans_type = 'C' THEN 1 ELSE 0 END) AS totalTransC, "
+                + "SUM(CASE WHEN trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
+                + "FROM transaction_receive "
+                + "WHERE terminal_code IN (:subTerminalCodes) AND status = 1 "
+                + "AND time BETWEEN :fromDate AND :toDate ", nativeQuery = true)
+        TransStatisticDTO getTransactionOverviewBySubTerminalCode(List<String> subTerminalCodes, long fromDate, long toDate);
+
+        @Query(value = "SELECT COUNT(id) AS totalTrans, "
+                + "SUM(CASE WHEN trans_type = 'C' THEN amount ELSE 0 END) AS totalCashIn, "
+                + "SUM(CASE WHEN trans_type = 'D' THEN amount ELSE 0 END) AS totalCashOut, "
+                + "SUM(CASE WHEN trans_type = 'C' THEN 1 ELSE 0 END) AS totalTransC, "
+                + "SUM(CASE WHEN trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
+                + "FROM transaction_receive "
+                + "WHERE terminal_code = :subTerminalCode AND status = 1 "
+                + "AND time BETWEEN :fromDate AND :toDate ", nativeQuery = true)
+        TransStatisticDTO getTransactionOverviewBySubTerminalCode(String subTerminalCode, long fromDate, long toDate);
+
+        @Query(value = "SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME((FLOOR(time / 3600))*3600), '+00:00', '+07:00'), '%Y-%m-%d %H:00') AS timeDate, "
+                + "COUNT(id) AS totalTrans, "
+                + "SUM(CASE WHEN trans_type = 'C' THEN amount ELSE 0 END) AS totalCashIn, "
+                + "SUM(CASE WHEN trans_type = 'D' THEN amount ELSE 0 END) AS totalCashOut, "
+                + "SUM(CASE WHEN trans_type = 'C' THEN 1 ELSE 0 END) AS totalTransC, "
+                + "SUM(CASE WHEN trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
+                + "FROM transaction_receive "
+                + "WHERE terminal_code IN (:codes) AND status = 1 "
+                + "AND time BETWEEN :fromDate AND :toDate "
+                + "GROUP BY timeDate ORDER BY timeDate ASC ", nativeQuery = true)
+        List<TransStatisticByTimeDTO> getTransStatisticSubTerminalByTerminalCodeDate(List<String> codes, long fromDate, long toDate);
+
+        @Query(value = "SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME((FLOOR(time / 3600))*3600), '+00:00', '+07:00'), '%Y-%m-%d %H:00') AS timeDate, "
+                + "COUNT(id) AS totalTrans, "
+                + "SUM(CASE WHEN trans_type = 'C' THEN amount ELSE 0 END) AS totalCashIn, "
+                + "SUM(CASE WHEN trans_type = 'D' THEN amount ELSE 0 END) AS totalCashOut, "
+                + "SUM(CASE WHEN trans_type = 'C' THEN 1 ELSE 0 END) AS totalTransC, "
+                + "SUM(CASE WHEN trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
+                + "FROM transaction_receive "
+                + "WHERE terminal_code = :subTerminalCode AND status = 1 "
+                + "AND time BETWEEN :fromDate AND :toDate "
+                + "GROUP BY timeDate ORDER BY timeDate ASC ", nativeQuery = true)
+        List<TransStatisticByTimeDTO> getTransStatisticSubTerminalByTerminalCodeDate(String subTerminalCode, long fromDate, long toDate);
+
+        @Query(value = "SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(time), '+00:00', '+07:00'), '%Y-%m-%d') AS timeDate, "
+                + "COUNT(id) AS totalTrans, "
+                + "SUM(CASE WHEN trans_type = 'C' THEN amount ELSE 0 END) AS totalCashIn, "
+                + "SUM(CASE WHEN trans_type = 'D' THEN amount ELSE 0 END) AS totalCashOut, "
+                + "SUM(CASE WHEN trans_type = 'C' THEN 1 ELSE 0 END) AS totalTransC, "
+                + "SUM(CASE WHEN trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
+                + "FROM transaction_receive "
+                + "WHERE terminal_code IN (:codes) AND status = 1 "
+                + "AND time BETWEEN :fromDate AND :toDate "
+                + "GROUP BY timeDate ORDER BY timeDate ASC ", nativeQuery = true)
+        List<TransStatisticByTimeDTO> getTransStatisticSubTerminalByTerminalCodeMonth(List<String> codes, long fromDate, long toDate);
+
+        @Query(value = "SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(time), '+00:00', '+07:00'), '%Y-%m-%d') AS timeDate, "
+                + "COUNT(id) AS totalTrans, "
+                + "SUM(CASE WHEN trans_type = 'C' THEN amount ELSE 0 END) AS totalCashIn, "
+                + "SUM(CASE WHEN trans_type = 'D' THEN amount ELSE 0 END) AS totalCashOut, "
+                + "SUM(CASE WHEN trans_type = 'C' THEN 1 ELSE 0 END) AS totalTransC, "
+                + "SUM(CASE WHEN trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
+                + "FROM transaction_receive "
+                + "WHERE terminal_code = :subTerminalCode AND status = 1 "
+                + "AND time BETWEEN :fromDate AND :toDate "
+                + "GROUP BY timeDate ORDER BY timeDate ASC ", nativeQuery = true)
+        List<TransStatisticByTimeDTO> getTransStatisticSubTerminalByTerminalCodeMonth(String subTerminalCode, long fromDate, long toDate);
 }
 

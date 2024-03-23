@@ -83,7 +83,8 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             + "AND b.terminal_id IS NOT NULL AND b.terminal_id != ''", nativeQuery = true)
     int countNumberOfTerminalShareByUserId(String userId);
 
-    @Query(value = "SELECT a.id as id, a.name as name, a.code as code, a.address as address, a.user_id as userId, a.is_default as isDefault, count(DISTINCT b.user_id) as totalMember "
+    @Query(value = "SELECT a.id as id, a.name as name, a.code as code, a.address as address, a.user_id as userId, " +
+            "a.is_default as isDefault, count(DISTINCT b.user_id) as totalMember "
             + "FROM terminal a "
             + "INNER JOIN account_bank_receive_share b "
             + "ON a.id = b.terminal_id "

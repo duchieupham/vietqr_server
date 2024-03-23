@@ -36,8 +36,8 @@ public class MerchantMemberServiceImpl implements MerchantMemberService {
     }
 
     @Override
-    public List<IMerchantMemberDTO> findMerchantMemberByMerchantId(String merchantId, int page, int size) {
-        return repo.findMerchantMemberMerchantId(merchantId, page, size);
+    public List<IMerchantMemberDTO> findMerchantMemberByMerchantId(String merchantId, String value, int page, int size) {
+        return repo.findMerchantMemberMerchantId(merchantId, value, page, size);
     }
 
     @Override

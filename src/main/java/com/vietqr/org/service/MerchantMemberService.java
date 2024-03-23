@@ -18,7 +18,7 @@ public interface MerchantMemberService {
 
     void insertAll(List<MerchantMemberEntity> entity);
 
-    List<IMerchantMemberDTO> findMerchantMemberByMerchantId(String merchantId, int page, int size);
+    List<IMerchantMemberDTO> findMerchantMemberByMerchantId(String merchantId, String value, int page, int size);
 
     IMerchantMemberDetailDTO getUserExistedFromMerchant(String merchantId, String userId);
 

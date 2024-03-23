@@ -6,7 +6,6 @@ import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.MerchantMemberEntity;
 import com.vietqr.org.entity.MerchantMemberRoleEntity;
 import com.vietqr.org.service.*;
-import com.vietqr.org.util.EnvironmentUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -285,14 +284,26 @@ public class MerchantMemberController {
     // get list merchant member
     @GetMapping("merchant-member/{merchantId}")
     public ResponseEntity<Object> getMerchantMembersByMerchantId(@PathVariable String merchantId,
-                                                                @RequestParam int page,
-                                                                @RequestParam int size) {
+                                                                 @RequestParam int type,
+                                                                 @RequestParam String value,
+                                                                 @RequestParam int page,
+                                                                 @RequestParam int size) {
         PageResultDTO result = null;
         HttpStatus httpStatus = null;
         List<MerchantMemberResponseDTO> merchantMemberResponseDTOs = new ArrayList<>();
         try {
             ObjectMapper mapper = new ObjectMapper();
-            List<IMerchantMemberDTO> dtos = merchantMemberService.findMerchantMemberByMerchantId(merchantId, (page - 1) * size, size);
+            List<IMerchantMemberDTO> dtos = new ArrayList<>();
+            switch (type) {
+                case 0:
+                    dtos = merchantMemberService.findMerchantMemberByMerchantId(merchantId, value, (page - 1) * size, size);
+                    break;
+                case 1:
+                    dtos = merchantMemberService.findMerchantMemberByMerchantId(merchantId, value, (page - 1) * size, size);
+                    break;
+                default:
+                    break;
+            }
             int total = merchantMemberService.countMerchantMemberByMerchantId(merchantId);
             merchantMemberResponseDTOs = dtos.stream().map(dto -> {
                 MerchantMemberResponseDTO responseDTO = new MerchantMemberResponseDTO();
@@ -330,36 +341,5 @@ public class MerchantMemberController {
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
-    }
-
-    private List<String> getTransReceiveRoleByUserId(int type) {
-        List<String> result = new ArrayList<>();
-        switch (type) {
-            case 0:
-                result.add(EnvironmentUtil.getOnlyReadReceiveMerchantRoleId());
-                result.add(EnvironmentUtil.getRequestReceiveMerchantRoleId());
-                break;
-            case 1:
-                result.add(EnvironmentUtil.getOnlyReadReceiveMerchantRoleId());
-                result.add(EnvironmentUtil.getRequestReceiveMerchantRoleId());
-                break;
-            default:
-                break;
-        }
-        return result;
-    }
-
-    private List<String> getTransRefundRoleByUserId(int type) {
-        List<String> result = new ArrayList<>();
-        switch (type) {
-            case 0:
-                result.add("ROLE_USER");
-            case 1:
-                result.add("ROLE_ADMIN");
-                result.add("ROLE_USER");
-            default:
-                break;
-        }
-        return result;
     }
 }

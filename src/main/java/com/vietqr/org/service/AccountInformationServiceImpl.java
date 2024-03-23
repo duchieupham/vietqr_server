@@ -103,4 +103,9 @@ public class AccountInformationServiceImpl implements AccountInformationService 
 	public AccountSearchByPhoneNoDTO findAccountByUserId(String userId) {
 		return accountInformationRepo.findAccountByUserId(userId);
 	}
+
+	@Override
+	public List<IAccountTerminalMemberDTO> getMembersByTerminalId(String terminalId) {
+		return accountInformationRepo.getMembersByTerminalId(terminalId);
+	}
 }

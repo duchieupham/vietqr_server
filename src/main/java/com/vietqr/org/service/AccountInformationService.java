@@ -45,4 +45,6 @@ public interface AccountInformationService {
     AccountSearchByPhoneNoDTO findAccountByPhoneNo(String phoneNo);
 
     AccountSearchByPhoneNoDTO findAccountByUserId(String userId);
+
+	List<IAccountTerminalMemberDTO> getMembersByTerminalId(String terminalId);
 }

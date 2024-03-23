@@ -63,5 +63,10 @@ public interface TransactionTerminalTempRepository extends JpaRepository<Transac
             + "WHERE transaction_id = :transactionId LIMIT 1", nativeQuery = true)
     TransactionTerminalTempEntity findByTransactionId(String transactionId);
 
+    @Query(value = "SELECT COALESCE(SUM(a.amount), 0) " +
+            "FROM transaction_terminal_temp a " +
+            "WHERE a.terminal_code = :terminalCode AND a.time >= :fromDate AND a.time <= :toDate", nativeQuery = true)
+    long getTotalAmountByTerminalCodeAndTime(String terminalCode, long fromDate, long toDate);
+
 //    IStatisticMerchantDTO getStatisticMerchantByMerchantAndUserId(String merchantId, String userId, long fromDate, long toDate);
 }

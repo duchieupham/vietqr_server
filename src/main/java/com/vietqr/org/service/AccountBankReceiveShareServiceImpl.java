@@ -82,6 +82,11 @@ public class AccountBankReceiveShareServiceImpl implements AccountBankReceiveSha
     }
 
     @Override
+    public ITerminalBankResponseDTO getTerminalBanksByTerminalId(String terminalId) {
+        return repo.getTerminalBanksByTerminalId(terminalId);
+    }
+
+    @Override
     public List<AccountBankReceiveShareDTO> getAccountBankReceiveShares(String userId) {
         return repo.getAccountBankReceiveShare(userId);
     }
