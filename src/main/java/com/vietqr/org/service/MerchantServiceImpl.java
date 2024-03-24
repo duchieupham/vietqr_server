@@ -1,7 +1,6 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.dto.MerchantResponseDTO;
-import com.vietqr.org.dto.MerchantWebResponseDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.MerchantEntity;
 import com.vietqr.org.repository.MerchantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +32,21 @@ public class MerchantServiceImpl implements MerchantService {
     @Override
     public MerchantWebResponseDTO getMerchantByUserIdLimit(String userId) {
         return repo.getMerchantByUserIdLimit(userId);
+    }
+
+    @Override
+    public IStatisticMerchantDTO getStatisticMerchantByMerchantAndUserId(String merchantId, String userId, String fromDate, String toDate) {
+        return repo.getStatisticMerchantByMerchantAndUserId(merchantId, userId, fromDate, toDate);
+    }
+
+    @Override
+    public int inactiveMerchantByMerchantId(String merchantId, String userId) {
+        return repo.inactiveMerchantByMerchantId(merchantId, userId);
+    }
+
+    @Override
+    public List<MerchantResponseListDTO> getMerchantsByUserId(String userId) {
+        return repo.getMerchantsByUserId(userId);
     }
 
 

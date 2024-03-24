@@ -1,5 +1,6 @@
 package com.vietqr.org.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.service.*;
@@ -32,6 +33,9 @@ public class TerminalMemberController {
     private NotificationService notificationService;
 
     @Autowired
+    private MerchantMemberService merchantMemberService;
+
+    @Autowired
     private AccountInformationService accountInformationService;
 
     @Autowired
@@ -39,6 +43,12 @@ public class TerminalMemberController {
 
     @Autowired
     private TerminalService terminalService;
+
+    @Autowired
+    private MerchantMemberRoleService merchantMemberRoleService;
+
+    @Autowired
+    private TerminalBankReceiveService terminalBankReceiveService;
 
     @Autowired
     private FcmTokenService fcmTokenService;
@@ -51,36 +61,86 @@ public class TerminalMemberController {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            List<BankQRTerminalDTO> bankIds = accountBankReceiveShareService.getBankIdsFromTerminalId(dto.getTerminalId());
-            List<AccountBankReceiveShareEntity> entities = new ArrayList<>();
-            // add member to group terminal
-            AccountBankReceiveShareEntity entityMember = new AccountBankReceiveShareEntity();
-            entityMember.setId(UUID.randomUUID().toString());
-            entityMember.setBankId("");
-            entityMember.setUserId(dto.getUserId());
-            entityMember.setOwner(false);
-            entityMember.setQrCode("");
-            entityMember.setTraceTransfer("");
-            entityMember.setTerminalId(dto.getTerminalId());
-            entities.add(entityMember);
+            // old
+//            List<BankQRTerminalDTO> bankIds = accountBankReceiveShareService.getBankIdsFromTerminalId(dto.getTerminalId());
+//            List<AccountBankReceiveShareEntity> entities = new ArrayList<>();
+//            // add member to group terminal
+//            AccountBankReceiveShareEntity entityMember = new AccountBankReceiveShareEntity();
+//            entityMember.setId(UUID.randomUUID().toString());
+//            entityMember.setBankId("");
+//            entityMember.setUserId(dto.getUserId());
+//            entityMember.setOwner(false);
+//            entityMember.setQrCode("");
+//            entityMember.setTraceTransfer("");
+//            entityMember.setTerminalId(dto.getTerminalId());
+//            entities.add(entityMember);
 
-            // share bank to member
-            if (!FormatUtil.isListNullOrEmpty(bankIds)) {
-                for (BankQRTerminalDTO bankId : bankIds) {
-                    AccountBankReceiveShareEntity entity = new AccountBankReceiveShareEntity();
-                    entity.setId(UUID.randomUUID().toString());
-                    entity.setBankId(bankId.getBankId());
-                    entity.setUserId(dto.getUserId());
-                    entity.setOwner(false);
-                    entity.setQrCode(bankId.getQrCode() + "");
-                    entity.setTraceTransfer(bankId.getTraceTransfer() + "");
-                    entity.setTerminalId(dto.getTerminalId());
-                    entities.add(entity);
+//            // share bank to member
+//            if (!FormatUtil.isListNullOrEmpty(bankIds)) {
+//                for (BankQRTerminalDTO bankId : bankIds) {
+//                    AccountBankReceiveShareEntity entity = new AccountBankReceiveShareEntity();
+//                    entity.setId(UUID.randomUUID().toString());
+//                    entity.setBankId(bankId.getBankId());
+//                    entity.setUserId(dto.getUserId());
+//                    entity.setOwner(false);
+//                    entity.setQrCode(bankId.getQrCode() + "");
+//                    entity.setTraceTransfer(bankId.getTraceTransfer() + "");
+//                    entity.setTerminalId(dto.getTerminalId());
+//                    entities.add(entity);
+//                }
+//            }
+
+            AccountBankReceiveShareEntity entityMember = accountBankReceiveShareService
+                    .getAccountAlreadyShare(dto.getTerminalId(), dto.getUserId());
+            if (entityMember == null) {
+                TerminalBankReceiveEntity terminalBankReceiveEntity = terminalBankReceiveService
+                        .getTerminalBankByTerminalId(dto.getTerminalId());
+                entityMember = new AccountBankReceiveShareEntity();
+                entityMember.setId(UUID.randomUUID().toString());
+                if (terminalBankReceiveEntity != null) {
+                    entityMember.setBankId(terminalBankReceiveEntity.getBankId());
+                } else {
+                    entityMember.setBankId("");
                 }
+                entityMember.setUserId(dto.getUserId());
+                entityMember.setOwner(false);
+                entityMember.setQrCode("");
+                entityMember.setTraceTransfer("");
+                entityMember.setTerminalId("");
             }
+            accountBankReceiveShareService.insertAccountBankReceiveShare(entityMember);
 
-            accountBankReceiveShareService.insertAccountBankReceiveShare(entities);
+            // new
+            ObjectMapper mapper = new ObjectMapper();
+            MerchantMemberEntity merchantMemberEntity = new MerchantMemberEntity();
+            String merchantMemberId = UUID.randomUUID().toString();
+            merchantMemberEntity.setId(merchantMemberId);
+            if (dto.getMerchantId() == null || dto.getMerchantId().isEmpty()) {
+                TerminalEntity terminalEntity = terminalService.findTerminalById(dto.getTerminalId());
+                merchantMemberEntity.setMerchantId(terminalEntity.getMerchantId());
+            } else {
+                merchantMemberEntity.setMerchantId(dto.getMerchantId());
+            }
+            merchantMemberEntity.setMerchantId(dto.getMerchantId());
+            merchantMemberEntity.setUserId(dto.getUserId());
+            merchantMemberEntity.setTerminalId(dto.getTerminalId());
+            merchantMemberEntity.setActive(true);
+            merchantMemberEntity.setTimeAdded(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
 
+            MerchantMemberRoleEntity merchantMemberRoleEntity = new MerchantMemberRoleEntity();
+            merchantMemberRoleEntity.setId(UUID.randomUUID().toString());
+            List<String> roleReceives = new ArrayList<>();
+            List<String> roleRefunds = new ArrayList<>();
+            // default role
+            roleReceives.add(EnvironmentUtil.getOnlyReadReceiveTerminalRoleId());
+            merchantMemberRoleEntity.setTransReceiveRoleIds(mapper
+                    .writeValueAsString(roleReceives));
+            merchantMemberRoleEntity.setTransRefundRoleIds(mapper
+                    .writeValueAsString(roleRefunds));
+            merchantMemberRoleEntity.setMerchantMemberId(merchantMemberId);
+            merchantMemberRoleEntity.setUserId(dto.getUserId());
+            merchantMemberService.insert(merchantMemberEntity);
+            merchantMemberRoleService.insert(merchantMemberRoleEntity);
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
@@ -124,8 +184,13 @@ public class TerminalMemberController {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            accountBankReceiveShareService
-                    .removeMemberFromTerminal(dto.getTerminalId(), dto.getUserId());
+            // old
+//            accountBankReceiveShareService
+//                    .removeMemberFromTerminal(dto.getTerminalId(), dto.getUserId());
+
+            // new
+            merchantMemberRoleService.deleteMerchantMemberRoleByUserIdAndTerminalId(dto.getTerminalId(), dto.getUserId());
+            merchantMemberService.removeMemberFromTerminal(dto.getTerminalId(), dto.getUserId());
 
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
@@ -162,8 +227,15 @@ public class TerminalMemberController {
                         accountSearchMemberDTO.setMiddleName(dto.getMiddleName());
                         accountSearchMemberDTO.setLastName(dto.getLastName());
                         accountSearchMemberDTO.setImgId(dto.getImgId());
+                        //old
                         // 2. check user existed from account bank receive share
-                        String checkExisted = accountBankReceiveShareService.checkUserExistedFromTerminal(terminalId, dto.getId());
+//                        String checkExisted = accountBankReceiveShareService.checkUserExistedFromTerminal(terminalId, dto.getId());
+
+                        // new
+                        // 2. check user existed from terminal
+                        TerminalEntity terminalEntity = terminalService.findTerminalById(terminalId);
+                        String checkExisted = merchantMemberService
+                                .checkUserExistedFromTerminal(terminalEntity.getMerchantId(), terminalId, dto.getId());
                         if (checkExisted != null && !checkExisted.isEmpty()) {
                             // existed
                             accountSearchMemberDTO.setExisted(1);
@@ -181,9 +253,12 @@ public class TerminalMemberController {
                     List<AccountSearchDTO> dtos = accountInformationService.getAccountSearchByFullname(value);
 
                     if (!FormatUtil.isListNullOrEmpty(dtos)) {
+                        TerminalEntity terminalEntity = terminalService.findTerminalById(terminalId);
                         for (AccountSearchDTO search : dtos) {
-                            String checkExisted = accountBankReceiveShareService.checkUserExistedFromTerminal(terminalId,
-                                    search.getId());
+                            // new
+                            // 2. check user existed from terminal
+                            String checkExisted = merchantMemberService
+                                    .checkUserExistedFromTerminal(terminalEntity.getMerchantId(), terminalId, search.getId());
                             AccountSearchMemberDTO accountSearchMemberDTO = new AccountSearchMemberDTO();
                             accountSearchMemberDTO.setId(search.getId());
                             accountSearchMemberDTO.setPhoneNo(search.getPhoneNo());
@@ -199,7 +274,7 @@ public class TerminalMemberController {
                             searchResult.add(accountSearchMemberDTO);
 
                         }
-                        if (searchResult != null && !searchResult.isEmpty()) {
+                        if (!searchResult.isEmpty()) {
                             result = searchResult;
                             httpStatus = HttpStatus.OK;
                         } else {
@@ -221,6 +296,7 @@ public class TerminalMemberController {
         } catch (Exception e) {
             logger.error("MEMBER: member:checkAndSearchTerminalMember ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<Object>(result, httpStatus);
     }
@@ -232,10 +308,22 @@ public class TerminalMemberController {
         List<AccountMemberDTO> result = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
-            result = accountBankReceiveShareService.getMembersFromTerminalId(terminalId);
+            // old
+//            result = accountBankReceiveShareService.getMembersFromTerminalId(terminalId);
+
+            // new
+            String merchantId = "";
+            TerminalEntity entity = terminalService.findTerminalById(terminalId);
+            if (entity != null) {
+                merchantId = entity.getMerchantId();
+                result = merchantMemberService.getMembersFromTerminalId(merchantId, terminalId);
+            } else {
+                result = new ArrayList<>();
+            }
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            logger.error("MEMBER: member: getMembersFromTerminalId ERROR: " + e.toString());
+            logger.error("MEMBER: member: getMembersFromTerminalId ERROR: " + e.getMessage() +
+                    " at: " + System.currentTimeMillis());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);

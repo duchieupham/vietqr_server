@@ -44,12 +44,23 @@ public class TerminalStatisticController {
             @RequestParam String toDate) {
         StatisticMerchantDTO result = null;
         HttpStatus httpStatus = null;
+        List<String> listTerminalCode = new ArrayList<>();
         try {
-            List<String> listTerminalCode = terminalService.getAllCodeByUserIdOwner(userId);
-            List<String> tempCode = terminalService.getAllCodeByUserId(userId);
-            listTerminalCode.addAll(tempCode);
+            // old code
+//            tempCode = terminalService.getAllCodeByUserId(userId);
+//            listTerminalCode.addAll(tempCode);
+//            Set<String> uniqueCodes = new HashSet<>(listTerminalCode);
+//            listTerminalCode = new ArrayList<>(uniqueCodes);
+
+            // new code
+            if (merchantId != null && !merchantId.isEmpty()) {
+                listTerminalCode = terminalService.getAllCodeByMerchantId(merchantId, userId);
+            } else {
+                listTerminalCode = terminalService.getAllCodeByUserIdOwner(userId);
+            }
             Set<String> uniqueCodes = new HashSet<>(listTerminalCode);
             listTerminalCode = new ArrayList<>(uniqueCodes);
+
 
             if (!listTerminalCode.isEmpty()) {
                 List<String> listCode = terminalBankReceiveService.getTerminalCodeByMainTerminalCodeList(listTerminalCode);
@@ -99,7 +110,6 @@ public class TerminalStatisticController {
                         result.setRatePreviousMonth(0);
                     }
                 }
-
                 httpStatus = HttpStatus.OK;
             } else {
                 httpStatus = HttpStatus.OK;
@@ -122,14 +132,21 @@ public class TerminalStatisticController {
         List<StatisticTerminalOverViewDTO> result = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
-            List<IStatisticTerminalOverViewDTO> dtos = terminalService
-                    .getListTerminalByUserId(userId, offset);
-            if (dtos != null && dtos.size() < 10) {
-                int totalTerminalOwner = terminalService.countNumberOfTerminalByUserIdOwner(userId);
-                List<IStatisticTerminalOverViewDTO> dtos1 = terminalService
-                        .getListTerminalByUserIdNotOwner(userId, Math.abs(offset - totalTerminalOwner) % 10, 10 - dtos.size());
-                dtos.addAll(dtos1);
+            List<IStatisticTerminalOverViewDTO> dtos = new ArrayList<>();
+            if (merchantId != null && !merchantId.isEmpty()) {
+                dtos = terminalService
+                        .getListTerminalByUserId(userId, offset);
+            } else {
+                dtos = terminalService
+                        .getListTerminalByMerchantId(merchantId, userId, offset);
             }
+
+//            if (dtos != null && dtos.size() < 10) {
+//                int totalTerminalOwner = terminalService.countNumberOfTerminalByUserIdOwner(userId);
+//                List<IStatisticTerminalOverViewDTO> dtos1 = terminalService
+//                        .getListTerminalByUserIdNotOwner(userId, Math.abs(offset - totalTerminalOwner) % 10, 10 - dtos.size());
+//                dtos.addAll(dtos1);
+//            }
             if (dtos != null && !dtos.isEmpty()) {
                 result = dtos.stream().map(item -> {
                             StatisticTerminalOverViewDTO dto = new StatisticTerminalOverViewDTO();
@@ -138,7 +155,7 @@ public class TerminalStatisticController {
                             dto.setTerminalCode(item.getTerminalCode());
                             dto.setTerminalAddress(item.getTerminalAddress());
                             List<String> listCode = new ArrayList<>();
-                            listCode = terminalBankReceiveService.getTerminalCodeByMainTerminalCode(item.getTerminalCode());
+                            listCode = terminalBankReceiveService.getSubTerminalCodeByTerminalCode(item.getTerminalCode());
                             listCode.add(item.getTerminalCode());
                             RevenueTerminalDTO revGrowthToday = transactionTerminalTempService.getTotalTranByTerminalCodeAndTimeBetween(
                                     listCode, DateTimeUtil.removeTimeInDateTimeString(fromDate), DateTimeUtil.removeTimeInDateTimeString(toDate));
@@ -161,6 +178,8 @@ public class TerminalStatisticController {
                                         (double) (dto.getTotalAmount() - revGrowthPrevDate.getTotalAmount())
                                                 / revGrowthPrevDate.getTotalAmount();
                                 dto.setRatePreviousDate((int) (revGrowthPrevDateNum * 100));
+                            } else if (revGrowthPrevDate != null && revGrowthPrevDate.getTotalAmount() == 0 && dto.getTotalAmount() != 0) {
+                                dto.setRatePreviousDate(100);
                             } else {
                                 dto.setRatePreviousDate(0);
                             }

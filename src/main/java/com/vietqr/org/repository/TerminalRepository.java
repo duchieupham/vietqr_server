@@ -83,7 +83,8 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             + "AND b.terminal_id IS NOT NULL AND b.terminal_id != ''", nativeQuery = true)
     int countNumberOfTerminalShareByUserId(String userId);
 
-    @Query(value = "SELECT a.id as id, a.name as name, a.code as code, a.address as address, a.user_id as userId, a.is_default as isDefault, count(DISTINCT b.user_id) as totalMember "
+    @Query(value = "SELECT a.id as id, a.name as name, a.code as code, a.address as address, a.user_id as userId, " +
+            "a.is_default as isDefault, count(DISTINCT b.user_id) as totalMember "
             + "FROM terminal a "
             + "INNER JOIN account_bank_receive_share b "
             + "ON a.id = b.terminal_id "
@@ -253,8 +254,10 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             + "WHERE b.user_id = :userId", nativeQuery = true)
     List<String> getAllCodeByUserId(String userId);
 
-    @Query(value = "SELECT a.code FROM terminal a "
-            + "WHERE a.user_id = :userId", nativeQuery = true)
+    @Query(value = " SELECT a.code FROM terminal a "
+            + "INNER JOIN merchant_member b ON b.terminal_id = a.id "
+            + "INNER JOIN merchant c ON c.id = a.merchant_id "
+            + " b.user_id = :userId AND b.terminal_id != '' ", nativeQuery = true)
     List<String> getAllCodeByUserIdOwner(String userId);
 
     @Query(value = "SELECT a.id AS terminalId, a.name AS terminalName, "
@@ -274,4 +277,29 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             + "ORDER BY a.code ASC "
             + "LIMIT :offset, :size", nativeQuery = true)
     List<IStatisticTerminalOverViewDTO> getListTerminalByUserIdNotOwner(String userId, int offset, int size);
+
+    @Query(value = "SELECT a.id AS terminalId, a.name AS terminalName, "
+            + "a.code AS terminalCode "
+            + "FROM terminal a "
+            + "INNER JOIN merchant_member b ON b.terminal_id = a.id "
+            + "WHERE b.merchant_id = :merchantId "
+            + "AND b.user_id = :userId AND b.terminal_id != '' ", nativeQuery = true)
+    List<TerminalMapperDTO> getTerminalsByUserIdAndMerchantId(@Param(value = "userId") String userId,
+                                                              @Param(value = "merchantId") String merchantId);
+
+    @Query(value = "SELECT a.code FROM terminal a "
+            + "INNER JOIN merchant_member b ON b.terminal_id = a.id "
+            + "WHERE b.merchant_id = :merchantId "
+            + "AND b.user_id = :userId AND b.terminal_id != '' ", nativeQuery = true)
+    List<String> getAllCodeByMerchantId(String merchantId, String userId);
+
+    @Query(value = "SELECT a.id AS terminalId, a.name AS terminalName, "
+            + "a.code AS terminalCode, a.address AS terminalAddress "
+            + "FROM terminal a "
+            + "INNER JOIN merchant_member b ON b.merchant_id = a.merchant_id "
+            + "WHERE a.merchant_id = :merchantId "
+            + "AND b.user_id = :userId "
+            + "ORDER BY a.code ASC "
+            + "LIMIT :offset, 10", nativeQuery = true)
+    List<IStatisticTerminalOverViewDTO> getListTerminalByMerchantId(String merchantId, String userId, int offset);
 }

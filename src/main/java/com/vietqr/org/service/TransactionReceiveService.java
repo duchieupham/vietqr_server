@@ -424,4 +424,49 @@ public interface TransactionReceiveService {
         List<TransactionRelatedDTO> getTransactionsByTerminalCodeAllDateListCode(List<String> allTerminalCode, int offset, String bankId);
 
         List<TransactionRelatedDTO> getTransactionsByTerminalCodeAndDateListCode(List<String> allTerminalCode, int offset, String bankId, String from, String to);
+
+        List<TransactionRelatedDTO> getSubTerminalTransactions(List<String> codes,
+                                                                       String fromDate, String toDate, int offset, int size);
+
+        List<TransactionRelatedDTO> getSubTerminalTransactionsByFtCode(List<String> codes, String value,
+                                                                               String fromDate, String toDate, int offset, int size);
+
+        List<TransactionRelatedDTO> getSubTerminalTransactionsByOrderId(List<String> codes, String value,
+                                                                                String fromDate, String toDate, int offset, int size);
+
+        List<TransactionRelatedDTO> getSubTerminalTransactionsByContent(List<String> codes, String value,
+                                                                                String fromDate, String toDate, int offset, int size);
+
+        List<TransactionRelatedDTO> getSubTerminalTransactionsByAmount(List<String> codes, int value, String fromDate, String toDate, int offset, int size);
+
+        int countSubTerminalTransactions(List<String> codes, String fromDate, String toDate);
+
+        int countSubTerminalTransactionsByFtCode(List<String> codes, String value, String fromDate, String toDate);
+
+        int countSubTerminalTransactionsByOrderId(List<String> codes, String value, String fromDate, String toDate);
+
+        int countSubTerminalTransactionsByContent(List<String> codes, String value, String fromDate, String toDate);
+
+        int countSubTerminalTransactionsByAmount(List<String> codes, int value, String fromDate, String toDate);
+
+        TransStatisticDTO getTransactionOverviewBySubTerminalCode(String terminalCode, String fromDate, String toDate);
+
+        TransStatisticDTO getTransactionOverviewBySubTerminalCode(List<String> subTerminalCodes,
+                                                                  String fromDate, String toDate);
+
+        List<TransStatisticByTimeDTO> getTransStatisticSubTerminalByTerminalCodeDate(List<String> codes,
+                                                                                     String fromDate, String toDate);
+
+        List<TransStatisticByTimeDTO> getTransStatisticSubTerminalByTerminalCodeDate(String subTerminalCode,
+                                                                                     String fromDate, String toDate);
+
+        List<TransStatisticByTimeDTO> getTransStatisticSubTerminalByTerminalCodeMonth(List<String> codes,
+                                                                                      String fromDate, String toDate);
+
+        List<TransStatisticByTimeDTO> getTransStatisticSubTerminalByTerminalCodeMonth(String subTerminalCode,
+                                                                                      String fromDate, String toDate);
+
+    List<TransactionRelatedDTO> getSubTerminalTransactionsByStatus(List<String> codes, int value, String fromDate, String toDate, int offset, int size);
+
+        int countSubTerminalTransactionsByStatus(List<String> codes, int value, String fromDate, String toDate);
 }

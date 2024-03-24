@@ -4,16 +4,13 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
-import com.vietqr.org.dto.IAccountTerminalMemberDTO;
+import com.vietqr.org.dto.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.vietqr.org.dto.AccountInformationSyncDTO;
-import com.vietqr.org.dto.AccountSearchDTO;
-import com.vietqr.org.dto.UserInfoWalletDTO;
 import com.vietqr.org.entity.AccountInformationEntity;
 
 @Repository
@@ -124,4 +121,37 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
 			+ "AND a.status = 1 "
 			+ "LIMIT :offset, 20", nativeQuery = true)
 	List<IAccountTerminalMemberDTO> getMembersWebByTerminalIdAndPhoneNo(String terminalId, String value, int offset);
+
+	@Query(value = "SELECT b.id AS userId, b.phone_no as phoneNo, a.img_id as imgId, "
+			+ "CONCAT(a.last_name, ' ', a.middle_name, ' ', a.first_name) AS fullName "
+			+ "FROM account_information a "
+			+ "INNER JOIN account_login b "
+			+ "ON b.id = a.user_id "
+			+ "WHERE b.phone_no = :phoneNo AND b.status = 1", nativeQuery = true)
+	AccountSearchByPhoneNoDTO findAccountByPhoneNo(@Param(value = "phoneNo") String phoneNo);
+
+	@Query(value = "SELECT b.id AS userId, b.phone_no as phoneNo, a.img_id as imgId, "
+			+ "CONCAT(a.last_name, ' ', a.middle_name, ' ', a.first_name) AS fullName "
+			+ "FROM account_information a "
+			+ "INNER JOIN account_login b "
+			+ "ON b.id = a.user_id "
+			+ "WHERE b.id = :userId AND b.status = 1", nativeQuery = true)
+	AccountSearchByPhoneNoDTO findAccountByUserId(@Param(value = "userId") String userId);
+
+	@Query(value = "SELECT DISTINCT a.user_id AS id, c.phone_no AS phoneNo, a.img_id AS imgId, "
+			+ "a.birth_date AS birthDate, a.email AS email, a.national_id AS nationalId, "
+			+ "CONCAT(a.last_name, ' ', a.middle_name, ' ', a.first_name) AS fullName, "
+			+ "a.gender AS gender, "
+			+ "CASE "
+			+ "WHEN terminal_id = '' THEN TRUE "
+			+ "ELSE FALSE "
+			+ "END AS isOwner "
+			+ "FROM account_information a "
+			+ "INNER JOIN account_login c ON c.id = a.user_id "
+			+ "INNER JOIN merchant_member b ON b.user_id = a.user_id "
+			+ "INNER JOIN terminal d ON d.id = b.terminal_id "
+			+ "WHERE (b.terminal_id = :terminalId OR terminal_id = '') "
+			+ "AND a.status = 1 "
+			+ "ORDER BY isOwner DESC ", nativeQuery = true)
+	List<IAccountTerminalMemberDTO> getMembersByTerminalId(String terminalId);
 }

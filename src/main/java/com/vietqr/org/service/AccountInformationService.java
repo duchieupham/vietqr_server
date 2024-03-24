@@ -2,13 +2,10 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
-import com.vietqr.org.dto.IAccountTerminalMemberDTO;
+import com.vietqr.org.dto.*;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.entity.AccountInformationEntity;
-import com.vietqr.org.dto.AccountInformationSyncDTO;
-import com.vietqr.org.dto.AccountSearchDTO;
-import com.vietqr.org.dto.UserInfoWalletDTO;
 
 @Service
 public interface AccountInformationService {
@@ -44,4 +41,10 @@ public interface AccountInformationService {
 	List<IAccountTerminalMemberDTO> getMembersWebByTerminalIdAndPhoneNo(String terminalId, String value, int offset);
 
 	List<IAccountTerminalMemberDTO> getMembersWebByTerminalIdAndFullName(String terminalId, String value, int offset);
+
+    AccountSearchByPhoneNoDTO findAccountByPhoneNo(String phoneNo);
+
+    AccountSearchByPhoneNoDTO findAccountByUserId(String userId);
+
+	List<IAccountTerminalMemberDTO> getMembersByTerminalId(String terminalId);
 }

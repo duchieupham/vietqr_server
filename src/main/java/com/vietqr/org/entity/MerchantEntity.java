@@ -20,8 +20,18 @@ public class MerchantEntity {
     private String name;
     @Column(name = "address")
     private String address;
-    @Column(name = "vsoCode")
-    private String vsoCode;
+    @Column(name = "vso")
+    private String vso;
+
+    //0: cá nhân (default)
+    @Column(name = "businessType")
+    private int businessType;
+
+    @Column(name = "taxId")
+    private String taxId;
+
+    @Column(name = "businessSector")
+    private String businessSector;
 
     //0 : api service
     //1: ecommerce
@@ -52,6 +62,30 @@ public class MerchantEntity {
     private String userId;
 
     public MerchantEntity() {
+    }
+
+    public int getBusinessType() {
+        return businessType;
+    }
+
+    public void setBusinessType(int businessType) {
+        this.businessType = businessType;
+    }
+
+    public String getTaxId() {
+        return taxId;
+    }
+
+    public void setTaxId(String taxId) {
+        this.taxId = taxId;
+    }
+
+    public String getBusinessSector() {
+        return businessSector;
+    }
+
+    public void setBusinessSector(String businessSector) {
+        this.businessSector = businessSector;
     }
 
     public String getId() {
@@ -86,12 +120,12 @@ public class MerchantEntity {
         this.address = address;
     }
 
-    public String getVsoCode() {
-        return vsoCode;
+    public String getVso() {
+        return vso;
     }
 
-    public void setVsoCode(String vsoCode) {
-        this.vsoCode = vsoCode;
+    public void setVso(String vsoCode) {
+        this.vso = vsoCode;
     }
 
     public long getTimePublish() {

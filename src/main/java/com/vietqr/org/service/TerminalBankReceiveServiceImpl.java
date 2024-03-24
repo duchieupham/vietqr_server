@@ -1,5 +1,7 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.dto.ISubTerminalDTO;
+import com.vietqr.org.dto.ISubTerminalResponseDTO;
 import com.vietqr.org.entity.TerminalBankReceiveEntity;
 import com.vietqr.org.repository.TerminalBankReceiveRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +55,7 @@ public class TerminalBankReceiveServiceImpl implements TerminalBankReceiveServic
     }
 
     @Override
-    public List<String> getTerminalCodeByMainTerminalCode(String terminalCodeForSearch) {
+    public List<String> getSubTerminalCodeByTerminalCode(String terminalCodeForSearch) {
         return repo.getTerminalCodeByMainTerminalCode(terminalCodeForSearch);
     }
 
@@ -75,5 +77,31 @@ public class TerminalBankReceiveServiceImpl implements TerminalBankReceiveServic
     @Override
     public TerminalBankReceiveEntity getTerminalBankReceiveByRawTerminalCode(String machineCode) {
         return repo.getTerminalBankReceiveByRawTerminalCode(machineCode);
+    }
+
+    @Override
+    public List<ISubTerminalDTO> getListSubTerminalByTerminalId(String terminalId,
+                                                                int offset, int size, String value) {
+        return repo.getListSubTerminalByTerminalId(terminalId, offset, size, value);
+    }
+
+    @Override
+    public ISubTerminalDTO getSubTerminalDetailBySubTerminalId(String subTerminalId) {
+        return repo.getSubTerminalDetailBySubTerminalId(subTerminalId);
+    }
+
+    @Override
+    public int countSubTerminalByTerminalId(String terminalId, String value) {
+        return repo.countSubTerminalByTerminalId(terminalId, value);
+    }
+
+    @Override
+    public List<ISubTerminalDTO> getListSubTerminalByTerminalId(String terminalId) {
+        return repo.getListSubTerminalByTerminalId(terminalId);
+    }
+
+    @Override
+    public List<ISubTerminalResponseDTO> getListSubTerminalByTerId(String terminalId) {
+        return repo.getListSubTerminalByTerId(terminalId);
     }
 }

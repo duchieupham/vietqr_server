@@ -24,7 +24,8 @@ public interface AccountBankReceiveShareRepository
             + "ON a.bank_id = b.id "
             + "INNER JOIN bank_type c "
             + "ON b.bank_type_id = c.id "
-            + "WHERE a.user_id = :userId", nativeQuery = true)
+            + "WHERE a.user_id = :userId  "
+            + " ORDER BY b.is_authenticated DESC, a.is_owner DESC", nativeQuery = true)
     List<AccountBankReceiveShareDTO> getAccountBankReceiveShare(@Param(value = "userId") String userId);
 
     @Query(value = "SELECT a.id, a.phone_no as phoneNo, b.first_name as firstName, b.middle_name as middleName, b.last_name as lastName, b.img_id as imgId, c.is_owner as isOwner "
@@ -201,4 +202,25 @@ public interface AccountBankReceiveShareRepository
             + "INNER JOIN account_bank_receive b ON b.id = a.bank_id "
             + "WHERE a.user_id = :userId AND b.id = :bankId AND a.is_owner = true LIMIT 1", nativeQuery = true)
     String checkUserExistedFromBankAccountAndIsOwner(String userId, String bankId);
+
+    @Query(value = "SELECT DISTINCT b.terminal_id as terminalId, c.id as bankId, d.bank_name as bankName, " +
+            "d.bank_code as bankCode, c.bank_account as bankAccount, c.bank_account_name as userBankName, " +
+            "d.bank_short_name as bankShortName, d.img_id as imgId, b.qr_code as qrCode "
+            + "FROM terminal a "
+            + "INNER JOIN account_bank_receive_share b "
+            + "ON a.id = b.terminal_id "
+            + "INNER JOIN account_bank_receive c "
+            + "ON c.id = b.bank_id " +
+            "INNER JOIN bank_type d " +
+            "ON d.id = c.bank_type_id "
+            + "WHERE a.id = :terminalId "
+            + "AND b.terminal_id IS NOT NULL AND b.terminal_id != '' "
+            + "AND b.bank_id IS NOT NULL AND b.bank_id != '' "
+            + "LIMIT 1", nativeQuery = true)
+    ITerminalBankResponseDTO getTerminalBanksByTerminalId(String terminalId);
+
+    @Query(value = "SELECT a.* FROM account_bank_receive_share a "
+            + "INNER JOIN terminal_bank_receive b ON b.bank_id = a.bank_id "
+            + "WHERE b.terminal_id = :terminalId AND a.user_id = :userId LIMIT 1", nativeQuery = true)
+    AccountBankReceiveShareEntity getAccountAlreadyShare(String terminalId, String userId);
 }
