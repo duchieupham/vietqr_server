@@ -112,18 +112,17 @@ public interface MerchantMemberRepository extends JpaRepository<MerchantMemberEn
     List<IAccountTerminalMemberDTO> getMembersWebByTerminalIdAndPhoneNo(String terminalId, String value, int offset);
 
     @Query(value = "SELECT DISTINCT a.user_id AS id, c.phone_no AS phoneNo, a.img_id AS imgId, "
-            + " b.first_name as firstName, b.middle_name as middleName, b.last_name as lastName, "
-            + "CASE "
-            + "WHEN terminal_id = '' THEN TRUE "
-            + "ELSE FALSE "
-            + "END AS isOwner "
+            + "a.first_name as firstName, a.middle_name as middleName, a.last_name as lastName "
+//            + ", CASE "
+//            + "WHEN terminal_id = '' THEN TRUE "
+//            + "ELSE FALSE "
+//            + "END AS isOwner "
             + "FROM account_information a "
             + "INNER JOIN account_login c ON c.id = a.user_id "
             + "INNER JOIN merchant_member b ON b.user_id = a.user_id "
             + "INNER JOIN (SELECT * FROM terminal WHERE id = :terminalId) d "
             + "ON d.merchant_id = b.merchant_id "
             + "WHERE (b.terminal_id = :terminalId OR terminal_id = '') "
-            + "AND a.status = 1 "
-            + "ORDER BY isOwner DESC ", nativeQuery = true)
+            + "AND a.status = 1 ", nativeQuery = true)
     List<AccountMemberDTO> getMembersFromTerminalId(String terminalId);
 }

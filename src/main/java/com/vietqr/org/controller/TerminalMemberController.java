@@ -56,39 +56,41 @@ public class TerminalMemberController {
     @Autowired
     private SocketHandler socketHandler;
 
+    // sync
     @PostMapping("terminal-member")
     public ResponseEntity<ResponseMessageDTO> addMemberToTerminal(@Valid @RequestBody TerminalMemberInsertDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
             // old
-//            List<BankQRTerminalDTO> bankIds = accountBankReceiveShareService.getBankIdsFromTerminalId(dto.getTerminalId());
-//            List<AccountBankReceiveShareEntity> entities = new ArrayList<>();
-//            // add member to group terminal
-//            AccountBankReceiveShareEntity entityMember = new AccountBankReceiveShareEntity();
-//            entityMember.setId(UUID.randomUUID().toString());
-//            entityMember.setBankId("");
-//            entityMember.setUserId(dto.getUserId());
-//            entityMember.setOwner(false);
-//            entityMember.setQrCode("");
-//            entityMember.setTraceTransfer("");
-//            entityMember.setTerminalId(dto.getTerminalId());
-//            entities.add(entityMember);
+            List<BankQRTerminalDTO> bankIds = accountBankReceiveShareService.getBankIdsFromTerminalId(dto.getTerminalId());
+            List<AccountBankReceiveShareEntity> entities = new ArrayList<>();
+            // add member to group terminal
+            AccountBankReceiveShareEntity entity1 = new AccountBankReceiveShareEntity();
+            entity1.setId(UUID.randomUUID().toString());
+            entity1.setBankId("");
+            entity1.setUserId(dto.getUserId());
+            entity1.setOwner(false);
+            entity1.setQrCode("");
+            entity1.setTraceTransfer("");
+            entity1.setTerminalId(dto.getTerminalId());
+            entities.add(entity1);
 
-//            // share bank to member
-//            if (!FormatUtil.isListNullOrEmpty(bankIds)) {
-//                for (BankQRTerminalDTO bankId : bankIds) {
-//                    AccountBankReceiveShareEntity entity = new AccountBankReceiveShareEntity();
-//                    entity.setId(UUID.randomUUID().toString());
-//                    entity.setBankId(bankId.getBankId());
-//                    entity.setUserId(dto.getUserId());
-//                    entity.setOwner(false);
-//                    entity.setQrCode(bankId.getQrCode() + "");
-//                    entity.setTraceTransfer(bankId.getTraceTransfer() + "");
-//                    entity.setTerminalId(dto.getTerminalId());
-//                    entities.add(entity);
-//                }
-//            }
+            // share bank to member
+            if (!FormatUtil.isListNullOrEmpty(bankIds)) {
+                for (BankQRTerminalDTO bankId : bankIds) {
+                    AccountBankReceiveShareEntity entity = new AccountBankReceiveShareEntity();
+                    entity.setId(UUID.randomUUID().toString());
+                    entity.setBankId(bankId.getBankId());
+                    entity.setUserId(dto.getUserId());
+                    entity.setOwner(false);
+                    entity.setQrCode(bankId.getQrCode() + "");
+                    entity.setTraceTransfer(bankId.getTraceTransfer() + "");
+                    entity.setTerminalId(dto.getTerminalId());
+                    entities.add(entity);
+                }
+            }
+            accountBankReceiveShareService.insertAccountBankReceiveShare(entities);
 
             AccountBankReceiveShareEntity entityMember = accountBankReceiveShareService
                     .getAccountAlreadyShare(dto.getTerminalId(), dto.getUserId());
@@ -185,8 +187,8 @@ public class TerminalMemberController {
         HttpStatus httpStatus = null;
         try {
             // old
-//            accountBankReceiveShareService
-//                    .removeMemberFromTerminal(dto.getTerminalId(), dto.getUserId());
+            accountBankReceiveShareService
+                    .removeMemberFromTerminal(dto.getTerminalId(), dto.getUserId());
 
             // new
             merchantMemberRoleService.deleteMerchantMemberRoleByUserIdAndTerminalId(dto.getTerminalId(), dto.getUserId());

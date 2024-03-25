@@ -132,6 +132,7 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             "WHERE b.user_id = :userId " +
             "AND b.bank_id = :bankId " +
             "GROUP BY b.terminal_id " +
+            "ORDER BY a.code ASC " +
             "LIMIT :offset, 20" , nativeQuery = true)
     List<TerminalResponseInterfaceDTO> getTerminalsByUserIdAndBankIdOffset(String userId, String bankId,int offset);
 
@@ -144,7 +145,8 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             "INNER JOIN terminal_bank_receive c " +
             "ON c.terminal_id = a.id " +
             "WHERE b.user_id = :userId " +
-            "AND c.bank_id = :bankId ", nativeQuery = true)
+            "AND c.bank_id = :bankId " +
+            "ORDER BY a.code ASC", nativeQuery = true)
     List<TerminalCodeResponseDTO> getTerminalsByUserIdAndBankId(String userId, String bankId);
 
 
@@ -363,6 +365,7 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             "INNER JOIN terminal_bank_receive c " +
             "ON c.terminal_id = a.id " +
             "WHERE a.user_id = :userId " +
-            "AND c.bank_id = :bankId ", nativeQuery = true)
+            "AND c.bank_id = :bankId " +
+            "ORDER BY a.code ASC ", nativeQuery = true)
     List<TerminalCodeResponseDTO> getTerminalsByUserIdAndBankIdOwner(String userId, String bankId);
 }
