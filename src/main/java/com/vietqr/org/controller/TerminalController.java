@@ -764,6 +764,7 @@ public class TerminalController {
                             TerminalBankReceiveEntity terminalBankReceiveEntity = new TerminalBankReceiveEntity();
                             terminalBankReceiveEntity.setId(UUID.randomUUID().toString());
                             terminalBankReceiveEntity.setBankId(bankId);
+                            terminalBankReceiveEntity.setTerminalId(uuid.toString());
                             terminalBankReceiveEntity.setRawTerminalCode("");
                             terminalBankReceiveEntity.setTerminalCode("");
                             terminalBankReceiveEntity.setTypeOfQR(0);
@@ -1131,11 +1132,14 @@ public class TerminalController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // not update done
     @DeleteMapping("terminal/remove")
     public ResponseEntity<ResponseMessageDTO> removeTerminalById(@Valid @RequestBody TerminalRemoveDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
+            merchantMemberService.removeMerchantMemberByTerminalId(dto.getTerminalId());
+            terminalBankReceiveService.removeTerminalBankReceiveByTerminalId(dto.getTerminalId());
             terminalService.removeTerminalById(dto.getTerminalId());
             accountBankReceiveShareService.removeTerminalGroupByTerminalId(dto.getTerminalId());
             result = new ResponseMessageDTO("SUCCESS", "");

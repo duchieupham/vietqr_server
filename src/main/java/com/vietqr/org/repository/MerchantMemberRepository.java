@@ -125,4 +125,9 @@ public interface MerchantMemberRepository extends JpaRepository<MerchantMemberEn
             + "WHERE (b.terminal_id = :terminalId OR terminal_id = '') "
             + "AND a.status = 1 ", nativeQuery = true)
     List<AccountMemberDTO> getMembersFromTerminalId(String terminalId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM merchant_member WHERE terminal_id = :terminalId", nativeQuery = true)
+    void removeMerchantMemberByTerminalId(String terminalId);
 }

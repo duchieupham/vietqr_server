@@ -236,14 +236,18 @@ public class TerminalMemberController {
                         // new
                         // 2. check user existed from terminal
                         TerminalEntity terminalEntity = terminalService.findTerminalById(terminalId);
-                        String checkExisted = merchantMemberService
-                                .checkUserExistedFromTerminal(terminalEntity.getMerchantId(), terminalId, dto.getId());
-                        if (checkExisted != null && !checkExisted.isEmpty()) {
-                            // existed
-                            accountSearchMemberDTO.setExisted(1);
-                        } else {
-                            // not existed
+                        if (terminalEntity == null) {
                             accountSearchMemberDTO.setExisted(0);
+                        } else {
+                            String checkExisted = merchantMemberService
+                                    .checkUserExistedFromTerminal(terminalEntity.getMerchantId(), terminalId, dto.getId());
+                            if (checkExisted != null && !checkExisted.isEmpty()) {
+                                // existed
+                                accountSearchMemberDTO.setExisted(1);
+                            } else {
+                                // not existed
+                                accountSearchMemberDTO.setExisted(0);
+                            }
                         }
                         searchResult.add(accountSearchMemberDTO);
                         result = searchResult;
@@ -259,8 +263,6 @@ public class TerminalMemberController {
                         for (AccountSearchDTO search : dtos) {
                             // new
                             // 2. check user existed from terminal
-                            String checkExisted = merchantMemberService
-                                    .checkUserExistedFromTerminal(terminalEntity.getMerchantId(), terminalId, search.getId());
                             AccountSearchMemberDTO accountSearchMemberDTO = new AccountSearchMemberDTO();
                             accountSearchMemberDTO.setId(search.getId());
                             accountSearchMemberDTO.setPhoneNo(search.getPhoneNo());
@@ -268,10 +270,16 @@ public class TerminalMemberController {
                             accountSearchMemberDTO.setMiddleName(search.getMiddleName());
                             accountSearchMemberDTO.setLastName(search.getLastName());
                             accountSearchMemberDTO.setImgId(search.getImgId());
-                            if (checkExisted != null && !checkExisted.trim().isEmpty()) {
-                                accountSearchMemberDTO.setExisted(1);
-                            } else {
+                            if (terminalEntity == null) {
                                 accountSearchMemberDTO.setExisted(0);
+                            } else {
+                                String checkExisted = merchantMemberService
+                                        .checkUserExistedFromTerminal(terminalEntity.getMerchantId(), terminalId, search.getId());
+                                if (checkExisted != null && !checkExisted.trim().isEmpty()) {
+                                    accountSearchMemberDTO.setExisted(1);
+                                } else {
+                                    accountSearchMemberDTO.setExisted(0);
+                                }
                             }
                             searchResult.add(accountSearchMemberDTO);
 

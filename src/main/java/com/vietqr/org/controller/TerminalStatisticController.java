@@ -161,20 +161,21 @@ public class TerminalStatisticController {
         HttpStatus httpStatus = null;
         try {
             List<IStatisticTerminalOverViewDTO> dtos = new ArrayList<>();
+            List<IStatisticTerminalOverViewDTO> dtosOwner = new ArrayList<>();
             if (merchantId == null || merchantId.isEmpty()) {
                 dtos = terminalService
                         .getListTerminalByUserId(userId, offset);
             } else {
+                // not owner
                 dtos = terminalService
                         .getListTerminalByMerchantId(merchantId, userId, offset);
+                // owner
+                if (dtos == null || dtos.isEmpty()) {
+                    dtos = terminalService
+                            .getListTerminalByMerchantIdOwner(merchantId, userId, offset);
+                }
             }
 
-//            if (dtos != null && dtos.size() < 10) {
-//                int totalTerminalOwner = terminalService.countNumberOfTerminalByUserIdOwner(userId);
-//                List<IStatisticTerminalOverViewDTO> dtos1 = terminalService
-//                        .getListTerminalByUserIdNotOwner(userId, Math.abs(offset - totalTerminalOwner) % 10, 10 - dtos.size());
-//                dtos.addAll(dtos1);
-//            }
             if (dtos != null && !dtos.isEmpty()) {
                 result = dtos.stream().map(item -> {
                             StatisticTerminalOverViewDTO dto = new StatisticTerminalOverViewDTO();

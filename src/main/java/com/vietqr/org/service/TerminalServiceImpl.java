@@ -229,4 +229,9 @@ public class TerminalServiceImpl implements TerminalService {
     public List<TerminalCodeResponseDTO> getTerminalsByUserIdAndBankIdOwner(String userId, String bankId) {
         return repo.getTerminalsByUserIdAndBankIdOwner(userId, bankId);
     }
+
+    @Override
+    public List<IStatisticTerminalOverViewDTO> getListTerminalByMerchantIdOwner(String merchantId, String userId, int offset) {
+        return repo.getListTerminalByMerchantIdOwner(merchantId, userId, offset);
+    }
 }

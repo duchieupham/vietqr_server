@@ -133,4 +133,9 @@ public class TerminalBankReceiveServiceImpl implements TerminalBankReceiveServic
     public List<IBankShareResponseDTO> getTerminalBankShareByUserId(String userId, int offset) {
         return repo.getTerminalBankShareByUserId(userId, offset);
     }
+
+    @Override
+    public void removeTerminalBankReceiveByTerminalId(String terminalId) {
+        repo.removeTerminalBankReceiveByTerminalId(terminalId);
+    }
 }

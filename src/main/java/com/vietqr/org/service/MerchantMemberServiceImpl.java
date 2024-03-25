@@ -86,4 +86,9 @@ public class MerchantMemberServiceImpl implements MerchantMemberService {
     public List<AccountMemberDTO> getMembersFromTerminalId(String terminalId) {
         return repo.getMembersFromTerminalId(terminalId);
     }
+
+    @Override
+    public void removeMerchantMemberByTerminalId(String terminalId) {
+        repo.removeMerchantMemberByTerminalId(terminalId);
+    }
 }

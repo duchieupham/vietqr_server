@@ -39,4 +39,6 @@ public interface MerchantMemberService {
     List<IAccountTerminalMemberDTO> getMembersWebByTerminalIdAndPhoneNo(String terminalId, String value, int offset);
 
     List<AccountMemberDTO> getMembersFromTerminalId(String terminalId);
+
+    void removeMerchantMemberByTerminalId(String terminalId);
 }

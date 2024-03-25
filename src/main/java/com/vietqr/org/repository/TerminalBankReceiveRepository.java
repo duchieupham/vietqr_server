@@ -3,9 +3,11 @@ package com.vietqr.org.repository;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.TerminalBankReceiveEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Repository
@@ -178,4 +180,9 @@ public interface TerminalBankReceiveRepository extends JpaRepository<TerminalBan
             "AND e.user_id = :userId " +
             "LIMIT :offset, 20", nativeQuery = true)
     List<IBankShareResponseDTO> getTerminalBankShareByUserId(String userId, int offset);
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM terminal_bank_receive WHERE terminal_id = :terminalId", nativeQuery = true)
+    void removeTerminalBankReceiveByTerminalId(String terminalId);
 }

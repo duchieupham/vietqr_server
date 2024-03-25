@@ -323,7 +323,7 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
     @Query(value = "SELECT a.id AS terminalId, a.name AS terminalName, "
             + "a.code AS terminalCode, a.address AS terminalAddress "
             + "FROM terminal a "
-            + "INNER JOIN merchant_member b ON b.merchant_id = a.merchant_id "
+            + "INNER JOIN merchant_member b ON (b.merchant_id = a.merchant_id AND b.terminal_id = a.id) "
             + "WHERE a.merchant_id = :merchantId "
             + "AND b.user_id = :userId "
             + "ORDER BY a.code ASC "
@@ -333,7 +333,7 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
     @Query(value = "SELECT a.code FROM terminal a "
             + "INNER JOIN merchant_member b ON b.merchant_id = a.merchant_id "
             + "WHERE b.merchant_id = :merchantId "
-            + "AND b.user_id = :userId ", nativeQuery = true)
+            + "AND b.user_id = :userId AND b.terminal_id = ''", nativeQuery = true)
     List<String> getAllCodeByMerchantIdOwner(String merchantId, String userId);
 
     @Query(value = "SELECT DISTINCT a.code FROM terminal a "
@@ -368,4 +368,14 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             "AND c.bank_id = :bankId " +
             "ORDER BY a.code ASC ", nativeQuery = true)
     List<TerminalCodeResponseDTO> getTerminalsByUserIdAndBankIdOwner(String userId, String bankId);
+
+    @Query(value = "SELECT a.id AS terminalId, a.name AS terminalName, "
+            + "a.code AS terminalCode, a.address AS terminalAddress "
+            + "FROM terminal a "
+            + "INNER JOIN merchant b ON b.id = a.merchant_id "
+            + "WHERE a.merchant_id = :merchantId "
+            + "AND a.user_id = :userId "
+            + "ORDER BY a.code ASC "
+            + "LIMIT :offset, 10", nativeQuery = true)
+    List<IStatisticTerminalOverViewDTO> getListTerminalByMerchantIdOwner(String merchantId, String userId, int offset);
 }

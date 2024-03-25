@@ -55,4 +55,6 @@ public interface TerminalBankReceiveService {
     int countNumberOfBankShareByUserId(String userId);
 
     List<IBankShareResponseDTO> getTerminalBankShareByUserId(String userId, int offset);
+
+    void removeTerminalBankReceiveByTerminalId(String terminalId);
 }

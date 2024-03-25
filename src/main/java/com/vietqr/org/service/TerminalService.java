@@ -92,4 +92,6 @@ public interface TerminalService {
     List<String> getAllCodeByMerchantIdIn(String merchantId, String userId);
 
     List<TerminalCodeResponseDTO> getTerminalsByUserIdAndBankIdOwner(String userId, String bankId);
+
+    List<IStatisticTerminalOverViewDTO> getListTerminalByMerchantIdOwner(String merchantId, String userId, int offset);
 }
