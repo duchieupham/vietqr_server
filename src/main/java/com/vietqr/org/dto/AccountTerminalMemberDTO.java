@@ -15,6 +15,8 @@ public class AccountTerminalMemberDTO {
     private int gender;
     private String role;
 
+    private boolean isOwner;
+
     public AccountTerminalMemberDTO() {
     }
 

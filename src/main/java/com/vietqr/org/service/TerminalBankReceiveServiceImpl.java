@@ -1,7 +1,6 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.dto.ISubTerminalDTO;
-import com.vietqr.org.dto.ISubTerminalResponseDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.TerminalBankReceiveEntity;
 import com.vietqr.org.repository.TerminalBankReceiveRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,7 @@ public class TerminalBankReceiveServiceImpl implements TerminalBankReceiveServic
     @Autowired
     private TerminalBankReceiveRepository repo;
     @Override
-    public void insertAllTerminalBankReceive(List<TerminalBankReceiveEntity> terminalBankReceiveEntities) {
+    public void insertAll(List<TerminalBankReceiveEntity> terminalBankReceiveEntities) {
         repo.saveAll(terminalBankReceiveEntities);
     }
 
@@ -103,5 +102,35 @@ public class TerminalBankReceiveServiceImpl implements TerminalBankReceiveServic
     @Override
     public List<ISubTerminalResponseDTO> getListSubTerminalByTerId(String terminalId) {
         return repo.getListSubTerminalByTerId(terminalId);
+    }
+
+    @Override
+    public List<TerminalBankReceiveDTO> getTerminalBankReceiveResponseByTerminalId(String terminalId) {
+        return repo.getTerminalBankReceiveResponseByTerminalId(terminalId);
+    }
+
+    @Override
+    public ITerminalBankResponseDTO getTerminalBanksByTerminalId(String terminalId) {
+        return repo.getTerminalBanksByTerminalId(terminalId);
+    }
+
+    @Override
+    public List<ITerminalBankResponseDTO> getTerminalBanksByTerminalIds(List<String> terminalIds) {
+        return repo.getTerminalBanksByTerminalIds(terminalIds);
+    }
+
+    @Override
+    public List<IBankShareResponseDTO> getTerminalBankByUserId(String userId, int offset) {
+        return repo.getTerminalBankByUserId(userId, offset);
+    }
+
+    @Override
+    public int countNumberOfBankShareByUserId(String userId) {
+        return repo.countNumberOfBankShareByUserId(userId);
+    }
+
+    @Override
+    public List<IBankShareResponseDTO> getTerminalBankShareByUserId(String userId, int offset) {
+        return repo.getTerminalBankShareByUserId(userId, offset);
     }
 }

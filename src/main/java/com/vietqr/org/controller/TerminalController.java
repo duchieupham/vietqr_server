@@ -1,5 +1,6 @@
 package com.vietqr.org.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.mb.VietQRStaticMMSRequestDTO;
 import com.vietqr.org.entity.*;
@@ -50,6 +51,9 @@ public class TerminalController {
 
     @Autowired
     private TerminalService terminalService;
+
+    @Autowired
+    private MerchantMemberRoleService merchantMemberRoleService;
 
     @Autowired
     private MerchantConnectionService merchantConnectionService;
@@ -496,7 +500,8 @@ public class TerminalController {
             // type = 2: order_id
             // type = 3: content
             // type = 5: status
-            String checkInTerminal = accountBankReceiveShareService.checkUserExistedFromTerminal(terminalId, userId);
+//            String checkInTerminal = accountBankReceiveShareService.checkUserExistedFromTerminal(terminalId, userId);
+            String checkInTerminal = merchantMemberService.checkUserExistedFromTerminal(terminalId, userId);
             if (StringUtil.isNullOrEmpty(checkInTerminal)) {
                 result = new ResponseMessageDTO("FAILED", "E113");
                 httpStatus = HttpStatus.BAD_REQUEST;
@@ -535,6 +540,7 @@ public class TerminalController {
                 }
             }
         } catch (Exception e) {
+            logger.error("getTransactionUser: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -545,14 +551,13 @@ public class TerminalController {
             @PathVariable String terminalId,
             @RequestParam String userId
     ) {
-        Object result = new ArrayList<>();
+        List<AccountTerminalMemberDTO> result = new ArrayList<>();
+        List<AccountTerminalMemberDTO> dtos = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
-            // old
-            // da fix new
             List<IAccountTerminalMemberDTO> response = accountInformationService
                     .getMembersByTerminalId(terminalId);
-            result = response.stream().map(item -> {
+            dtos = response.stream().map(item -> {
                 AccountTerminalMemberDTO dto = new AccountTerminalMemberDTO();
                 dto.setId(item.getId());
                 dto.setPhoneNo(item.getPhoneNo());
@@ -562,12 +567,16 @@ public class TerminalController {
                 dto.setEmail(item.getEmail());
                 dto.setNationalId(item.getNationalId());
                 dto.setGender(item.getGender());
-                dto.setRole(item.getIsOwner() ? "Quản lý" : "Nhân viên");
+                boolean isOwner = item.getRole() == 1;
+                dto.setRole(isOwner ? "Quản lý" : "Nhân viên");
                 if (userId.equals(item.getId())) {
                     dto.setRole("Admin");
                 }
                 return dto;
             }).collect(Collectors.toList());
+            result = dtos.stream()
+                    .sorted(Comparator.comparing(AccountTerminalMemberDTO::getRole))
+                    .collect(Collectors.toList());
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -586,7 +595,9 @@ public class TerminalController {
         Object result = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
-            String checkInTerminal = accountBankReceiveShareService.checkUserExistedFromTerminal(terminalId, userId);
+//            String checkInTerminal = accountBankReceiveShareService.checkUserExistedFromTerminal(terminalId, userId);
+            List<AccountTerminalMemberDTO> dtos = new ArrayList<>();
+            String checkInTerminal = merchantMemberService.checkUserExistedFromTerminal(terminalId, userId);
             if (StringUtil.isNullOrEmpty(checkInTerminal)) {
                 result = new ResponseMessageDTO("FAILED", "E113");
                 httpStatus = HttpStatus.OK;
@@ -594,10 +605,11 @@ public class TerminalController {
                 switch (type) {
                     case 0:
                         List<IAccountTerminalMemberDTO> responsePhoneNo = accountInformationService.getMembersWebByTerminalIdAndPhoneNo(terminalId, value, offset);
+//                        List<IAccountTerminalMemberDTO> responsePhoneNo = merchantMemberService.getMembersWebByTerminalIdAndPhoneNo(terminalId, value, offset);
                         if (FormatUtil.isListNullOrEmpty(responsePhoneNo)) {
-                            result = new ArrayList<>();
+                            dtos = new ArrayList<>();
                         } else {
-                            result = responsePhoneNo.stream().map(item -> {
+                            dtos = responsePhoneNo.stream().map(item -> {
                                 AccountTerminalMemberDTO dto = new AccountTerminalMemberDTO();
                                 dto.setId(item.getId());
                                 dto.setPhoneNo(item.getPhoneNo());
@@ -607,15 +619,23 @@ public class TerminalController {
                                 dto.setEmail(item.getEmail());
                                 dto.setNationalId(item.getNationalId());
                                 dto.setGender(item.getGender());
-                                dto.setRole(item.getIsOwner() ? "Quản lí" : "Nhân viên");
+                                boolean isOwner = false;
+                                if (item.getRole() == 1) {
+                                    isOwner = true;
+                                }
+                                dto.setRole(isOwner ? "Quản lý" : "Nhân viên");
+                                if (userId.equals(item.getId())) {
+                                    dto.setRole("Admin");
+                                }
                                 return dto;
                             }).collect(Collectors.toList());
                         }
                         httpStatus = HttpStatus.OK;
                         break;
                     case 1:
-                        List<IAccountTerminalMemberDTO> responseFullName = accountInformationService.getMembersWebByTerminalIdAndFullName(terminalId, value, offset);
-                        result = responseFullName.stream().map(item -> {
+                        List<IAccountTerminalMemberDTO> responseFullName = accountInformationService
+                                .getMembersWebByTerminalIdAndFullName(terminalId, value, offset);
+                        dtos = responseFullName.stream().map(item -> {
                             AccountTerminalMemberDTO dto = new AccountTerminalMemberDTO();
                             dto.setId(item.getId());
                             dto.setPhoneNo(item.getPhoneNo());
@@ -625,7 +645,11 @@ public class TerminalController {
                             dto.setEmail(item.getEmail());
                             dto.setNationalId(item.getNationalId());
                             dto.setGender(item.getGender());
-                            dto.setRole(item.getIsOwner() ? "Quản lí" : "Nhân viên");
+                            boolean isOwner = item.getRole() == 1;
+                            dto.setRole(isOwner ? "Quản lý" : "Nhân viên");
+                            if (userId.equals(item.getId())) {
+                                dto.setRole("Admin");
+                            }
                             return dto;
                         }).collect(Collectors.toList());
                         httpStatus = HttpStatus.OK;
@@ -635,6 +659,9 @@ public class TerminalController {
                         break;
                 }
             }
+            result = dtos.stream()
+                    .sorted(Comparator.comparing(AccountTerminalMemberDTO::getRole))
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -646,13 +673,13 @@ public class TerminalController {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
+            ObjectMapper mapper = new ObjectMapper();
             if (dto.getBankIds() != null && dto.getBankIds().size() > 1) {
                 result = new ResponseMessageDTO("FAILED", "E111");
                 httpStatus = HttpStatus.BAD_REQUEST;
                 logger.error("TerminalController: insertTerminal: bankIds size > 1");
             } else {
                 UUID uuid = UUID.randomUUID();
-                Map<String, QRStaticCreateDTO> qrMap = new HashMap<>();
                 //return terminal id if the code is existed
                 String checkExistedCode = terminalService.checkExistedTerminal(dto.getCode());
                 if (!StringUtil.isNullOrEmpty(checkExistedCode)) {
@@ -666,7 +693,7 @@ public class TerminalController {
                     entity.setName(dto.getName());
                     entity.setCode(dto.getCode());
                     entity.setAddress(StringUtil.isNullOrEmpty(dto.getAddress()) ? "" : dto.getAddress());
-                    if (dto.getMerchantId() != null && dto.getMerchantId().trim().isEmpty()) {
+                    if (dto.getMerchantId() != null && !dto.getMerchantId().trim().isEmpty()) {
                         entity.setMerchantId(dto.getMerchantId());
                     } else {
                         entity.setMerchantId("");
@@ -675,29 +702,48 @@ public class TerminalController {
                     entity.setDefault(false);
                     entity.setTimeCreated(time);
                     terminalService.insertTerminal(entity);
-                    // insert account-bank-receive-share
-                    List<AccountBankReceiveShareEntity> entities = new ArrayList<>();
+                    // insert merchant member
+                    List<MerchantMemberEntity> entities = new ArrayList<>();
+                    List<MerchantMemberRoleEntity> merchantMemberRoleEntities = new ArrayList<>();
+                    List<TerminalBankReceiveEntity> terminalBankReceiveEntities = new ArrayList<>();
                     if (!FormatUtil.isListNullOrEmpty(dto.getUserIds())) {
                         for (String userId : dto.getUserIds()) {
-                            AccountBankReceiveShareEntity accountBankReceiveShareEntity = new AccountBankReceiveShareEntity();
-                            accountBankReceiveShareEntity.setId(UUID.randomUUID().toString());
-                            accountBankReceiveShareEntity.setBankId("");
-                            accountBankReceiveShareEntity.setUserId(userId);
-                            accountBankReceiveShareEntity.setOwner(false);
-                            accountBankReceiveShareEntity.setTerminalId(uuid.toString());
-                            accountBankReceiveShareEntity.setQrCode("");
-                            accountBankReceiveShareEntity.setTraceTransfer("");
-                            entities.add(accountBankReceiveShareEntity);
+                            MerchantMemberEntity merchantMemberEntity = new MerchantMemberEntity();
+                            String merchantMemberId = UUID.randomUUID().toString();
+                            merchantMemberEntity.setId(merchantMemberId);
+                            merchantMemberEntity.setUserId(userId);
+                            merchantMemberEntity.setTerminalId(uuid.toString());
+                            if (dto.getMerchantId() != null && !dto.getMerchantId().trim().isEmpty()) {
+                                merchantMemberEntity.setMerchantId(dto.getMerchantId());
+                            } else {
+                                merchantMemberEntity.setMerchantId("");
+                            }
+                            merchantMemberEntity.setActive(true);
+                            merchantMemberEntity.setTimeAdded(time);
+
+                            List<String> roleReceives = new ArrayList<>();
+                            List<String> roleRefunds = new ArrayList<>();
+                            roleReceives.add(EnvironmentUtil.getOnlyReadReceiveTerminalRoleId());
+                            MerchantMemberRoleEntity merchantMemberRoleEntity = new MerchantMemberRoleEntity();
+                            merchantMemberRoleEntity.setId(UUID.randomUUID().toString());
+                            merchantMemberRoleEntity.setMerchantMemberId(merchantMemberId);
+                            merchantMemberRoleEntity.setUserId(dto.getUserId());
+                            merchantMemberRoleEntity.setTransReceiveRoleIds(mapper
+                                    .writeValueAsString(roleReceives));
+                            merchantMemberRoleEntity.setTransRefundRoleIds(mapper
+                                    .writeValueAsString(roleRefunds));
+                            merchantMemberRoleEntities.add(merchantMemberRoleEntity);
+                            entities.add(merchantMemberEntity);
                         }
                     }
                     if (!FormatUtil.isListNullOrEmpty(dto.getBankIds())) {
                         for (String bankId : dto.getBankIds()) {
-                            AccountBankReceiveShareEntity accountBankReceiveShareEntity = new AccountBankReceiveShareEntity();
-                            accountBankReceiveShareEntity.setId(UUID.randomUUID().toString());
-                            accountBankReceiveShareEntity.setBankId(bankId);
-                            accountBankReceiveShareEntity.setUserId(dto.getUserId());
-                            accountBankReceiveShareEntity.setOwner(true);
-                            accountBankReceiveShareEntity.setTerminalId(uuid.toString());
+                            TerminalBankReceiveEntity terminalBankReceiveEntity = new TerminalBankReceiveEntity();
+                            terminalBankReceiveEntity.setId(UUID.randomUUID().toString());
+                            terminalBankReceiveEntity.setBankId(bankId);
+                            terminalBankReceiveEntity.setRawTerminalCode("");
+                            terminalBankReceiveEntity.setTerminalCode("");
+                            terminalBankReceiveEntity.setTypeOfQR(0);
                             AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService.getAccountBankById(bankId);
                             if (accountBankReceiveEntity != null) {
                                 // luồng ưu tiên
@@ -708,10 +754,10 @@ public class TerminalController {
                                         String qr = MBVietQRUtil.generateStaticVietQRMMS(
                                                 new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
                                                         terminalBankEntity.getTerminalId(), dto.getCode()));
-                                        accountBankReceiveShareEntity.setQrCode(qr);
+                                        terminalBankReceiveEntity.setData1(qr);
+                                        terminalBankReceiveEntity.setData2(qr);
                                         String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
-                                        accountBankReceiveShareEntity.setTraceTransfer(traceTransfer);
-                                        qrMap.put(bankId, new QRStaticCreateDTO(qr, traceTransfer));
+                                        terminalBankReceiveEntity.setTraceTransfer(traceTransfer);
                                     } else {
                                         logger.error("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
                                     }
@@ -722,36 +768,17 @@ public class TerminalController {
                                     String caiValue = accountBankReceiveService.getCaiValueByBankId(bankId);
                                     VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", qrCodeContent, bankAccount);
                                     String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
-                                    accountBankReceiveShareEntity.setQrCode(qr);
-                                    accountBankReceiveShareEntity.setTraceTransfer("");
-                                    qrMap.put(bankId, new QRStaticCreateDTO(qr, ""));
+                                    terminalBankReceiveEntity.setData1(qr);
+                                    terminalBankReceiveEntity.setData2("");
+                                    terminalBankReceiveEntity.setTraceTransfer("");
                                 }
                             }
-                            entities.add(accountBankReceiveShareEntity);
+                            terminalBankReceiveEntities.add(terminalBankReceiveEntity);
                         }
                     }
-
-                    if (!FormatUtil.isListNullOrEmpty(dto.getUserIds())
-                            && !FormatUtil.isListNullOrEmpty(dto.getBankIds())) {
-                        for (String userId : dto.getUserIds()) {
-                            for (String bankId : dto.getBankIds()) {
-                                AccountBankReceiveShareEntity accountBankReceiveShareEntity = new AccountBankReceiveShareEntity();
-                                accountBankReceiveShareEntity.setId(UUID.randomUUID().toString());
-                                accountBankReceiveShareEntity.setBankId(bankId);
-                                accountBankReceiveShareEntity.setUserId(userId);
-                                accountBankReceiveShareEntity.setOwner(false);
-                                QRStaticCreateDTO qrStaticCreateDTO = qrMap.get(bankId);
-                                if (qrStaticCreateDTO != null) {
-                                    accountBankReceiveShareEntity.setTraceTransfer(qrStaticCreateDTO.getTraceTransfer());
-                                    accountBankReceiveShareEntity.setQrCode(qrStaticCreateDTO.getQrCode());
-                                }
-                                accountBankReceiveShareEntity.setTerminalId(uuid.toString());
-                                entities.add(accountBankReceiveShareEntity);
-                            }
-                        }
-                    }
-
-                    accountBankReceiveShareService.insertAccountBankReceiveShare(entities);
+                    merchantMemberRoleService.insertAll(merchantMemberRoleEntities);
+                    terminalBankReceiveService.insertAll(terminalBankReceiveEntities);
+                    merchantMemberService.insertAll(entities);
                     result = new ResponseMessageDTO("SUCCESS", "");
                     httpStatus = HttpStatus.OK;
                 }
@@ -815,62 +842,62 @@ public class TerminalController {
                 TerminalEntity entity = terminalService.findTerminalById(dto.getId());
                 if (entity != null) {
                     entity.setName(StringUtil.isNullOrEmpty(dto.getName()) ? entity.getName() : dto.getName());
-                    entity.setCode(StringUtil.isNullOrEmpty(dto.getCode()) ? entity.getCode() : dto.getCode());
+//                    entity.setCode(StringUtil.isNullOrEmpty(dto.getCode()) ? entity.getCode() : dto.getCode());
                     entity.setAddress(StringUtil.isNullOrEmpty(dto.getAddress()) ? entity.getAddress() : dto.getAddress());
                     terminalService.insertTerminal(entity);
                 }
 
-                if (StringUtil.isNullOrEmpty(checkExistedCode) &&
-                        StringUtil.isNullOrEmpty(dto.getCode()) == false) {
-                    // update account-bank-receive-share
-                    // get all account-bank-receive-share have bank_id by terminal id
-                    List<AccountBankReceiveShareEntity> entities =
-                            accountBankReceiveShareService.getAccountBankReceiveShareByTerminalId(dto.getId());
-                    Map<String, QRStaticCreateDTO> qrMap = new HashMap<>();
-                    if (!FormatUtil.isListNullOrEmpty(entities)) {
-                        List<String> bankIds = entities.stream().map(AccountBankReceiveShareEntity::getBankId)
-                                .distinct().collect(Collectors.toList());
-
-                        for (String bankId : bankIds) {
-                            AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService.getAccountBankById(bankId);
-                            if (accountBankReceiveEntity != null) {
-                                // luồng ưu tiên
-                                if (accountBankReceiveEntity.isMmsActive()) {
-                                    TerminalBankEntity terminalBankEntity =
-                                            terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
-                                    if (terminalBankEntity != null) {
-                                        String qr = MBVietQRUtil.generateStaticVietQRMMS(
-                                                new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
-                                                        terminalBankEntity.getTerminalId(), dto.getCode()));
-                                        String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
-                                        qrMap.put(bankId, new QRStaticCreateDTO(qr, traceTransfer));
-                                    } else {
-                                        logger.error("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
-                                    }
-                                } else {
-                                    // luồng thuong
-                                    String qrCodeContent = "SQR" + dto.getCode();
-                                    String bankAccount = accountBankReceiveEntity.getBankAccount();
-                                    String caiValue = accountBankReceiveService.getCaiValueByBankId(bankId);
-                                    VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", qrCodeContent, bankAccount);
-                                    String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
-                                    qrMap.put(bankId, new QRStaticCreateDTO(qr, ""));
-                                }
-                            }
-                        }
-
-                        // update qr and trance transfer
-                        for (AccountBankReceiveShareEntity accountBankReceiveShareEntity : entities) {
-                            QRStaticCreateDTO qrStaticCreateDTO = qrMap.get(accountBankReceiveShareEntity.getBankId());
-                            if (qrStaticCreateDTO != null) {
-                                accountBankReceiveShareEntity.setQrCode(qrStaticCreateDTO.getQrCode());
-                                accountBankReceiveShareEntity.setTraceTransfer(qrStaticCreateDTO.getTraceTransfer());
-                            }
-                        }
-                        // update all
-                        accountBankReceiveShareService.insertAccountBankReceiveShare(entities);
-                    }
-                }
+//                if (StringUtil.isNullOrEmpty(checkExistedCode) &&
+//                        !StringUtil.isNullOrEmpty(dto.getCode())) {
+//                    // update account-bank-receive-share
+//                    // get all account-bank-receive-share have bank_id by terminal id
+//                    List<AccountBankReceiveShareEntity> entities =
+//                            accountBankReceiveShareService.getAccountBankReceiveShareByTerminalId(dto.getId());
+//                    Map<String, QRStaticCreateDTO> qrMap = new HashMap<>();
+//                    if (!FormatUtil.isListNullOrEmpty(entities)) {
+//                        List<String> bankIds = entities.stream().map(AccountBankReceiveShareEntity::getBankId)
+//                                .distinct().collect(Collectors.toList());
+//
+//                        for (String bankId : bankIds) {
+//                            AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService.getAccountBankById(bankId);
+//                            if (accountBankReceiveEntity != null) {
+//                                // luồng ưu tiên
+//                                if (accountBankReceiveEntity.isMmsActive()) {
+//                                    TerminalBankEntity terminalBankEntity =
+//                                            terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
+//                                    if (terminalBankEntity != null) {
+//                                        String qr = MBVietQRUtil.generateStaticVietQRMMS(
+//                                                new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
+//                                                        terminalBankEntity.getTerminalId(), dto.getCode()));
+//                                        String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
+//                                        qrMap.put(bankId, new QRStaticCreateDTO(qr, traceTransfer));
+//                                    } else {
+//                                        logger.error("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
+//                                    }
+//                                } else {
+//                                    // luồng thuong
+//                                    String qrCodeContent = "SQR" + dto.getCode();
+//                                    String bankAccount = accountBankReceiveEntity.getBankAccount();
+//                                    String caiValue = accountBankReceiveService.getCaiValueByBankId(bankId);
+//                                    VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", qrCodeContent, bankAccount);
+//                                    String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+//                                    qrMap.put(bankId, new QRStaticCreateDTO(qr, ""));
+//                                }
+//                            }
+//                        }
+//
+//                        // update qr and trance transfer
+//                        for (AccountBankReceiveShareEntity accountBankReceiveShareEntity : entities) {
+//                            QRStaticCreateDTO qrStaticCreateDTO = qrMap.get(accountBankReceiveShareEntity.getBankId());
+//                            if (qrStaticCreateDTO != null) {
+//                                accountBankReceiveShareEntity.setQrCode(qrStaticCreateDTO.getQrCode());
+//                                accountBankReceiveShareEntity.setTraceTransfer(qrStaticCreateDTO.getTraceTransfer());
+//                            }
+//                        }
+//                        // update all
+//                        accountBankReceiveShareService.insertAccountBankReceiveShare(entities);
+//                    }
+//                }
 
                 result = new ResponseMessageDTO("SUCCESS", "");
                 httpStatus = HttpStatus.OK;
@@ -890,15 +917,22 @@ public class TerminalController {
         List<TerminalBankReceiveDTO> result = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
-            result = accountBankReceiveShareService
-                    .getAccountBankReceiveShareByTerminalId(userId, terminalId);
+            if (terminalId == null || terminalId.trim().isEmpty()) {
+                result = accountBankReceiveService
+                        .getAccountBankReceiveByUseId(userId);
+            } else {
+                result = terminalBankReceiveService
+                        .getTerminalBankReceiveResponseByTerminalId(terminalId);
+            }
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
+            logger.error("TerminalController: getBankAccountNotAvailable: " + e.getMessage());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // not update
     @GetMapping("terminal/bank")
     public ResponseEntity<TerminalShareResponseDTO> getTerminalsOfBank(
             @Valid @RequestParam String userId,
@@ -908,7 +942,8 @@ public class TerminalController {
         HttpStatus httpStatus = null;
         try {
             TerminalShareResponseDTO dto = new TerminalShareResponseDTO();
-            List<TerminalResponseInterfaceDTO> terminalInters = terminalService.getTerminalsByUserIdAndBankId(userId, bankId, offset);
+            List<TerminalResponseInterfaceDTO> terminalInters = terminalService
+                    .getTerminalsByUserIdAndBankId(userId, bankId, offset);
             List<TerminalResponseDTO> terminals = mapInterfToTerminalResponse(terminalInters);
             int total = terminalService.countNumberOfTerminalByUserIdAndBankId(userId, bankId);
             dto.setTotalTerminals(total);
@@ -955,7 +990,7 @@ public class TerminalController {
                 if (accountBankReceiveEntity != null) {
                     // luồng thường
                     TerminalEntity terminalEntity = terminalService.findTerminalById(dto.getTerminalId());
-                    if (accountBankReceiveEntity.isMmsActive() == false) {
+                    if (!accountBankReceiveEntity.isMmsActive()) {
                         String qrCodeContent = "SQR" + terminalEntity.getCode();
                         String bankAccount = accountBankReceiveEntity.getBankAccount();
                         String caiValue = accountBankReceiveService.getCaiValueByBankId(dto.getBankId());
@@ -1053,6 +1088,7 @@ public class TerminalController {
         HttpStatus httpStatus = null;
         try {
             TerminalDetailDTO responseDTO = new TerminalDetailDTO();
+//            ITerminalDetailResponseDTO dto = terminalService.getTerminalById(terminalId);
             ITerminalDetailResponseDTO dto = terminalService.getTerminalById(terminalId);
             if (dto!= null) {
                 responseDTO.setTerminalId(dto.getId());
@@ -1061,7 +1097,9 @@ public class TerminalController {
                 responseDTO.setTerminalCode(dto.getCode());
                 responseDTO.setUserId(dto.getUserId());
             }
-            ITerminalBankResponseDTO bank = accountBankReceiveShareService
+//            ITerminalBankResponseDTO bank = accountBankReceiveShareService
+//                    .getTerminalBanksByTerminalId(terminalId);
+            ITerminalBankResponseDTO bank = terminalBankReceiveService
                     .getTerminalBanksByTerminalId(terminalId);
             if (bank!= null) {
                 responseDTO.setBankAccount(bank.getBankAccount());
@@ -1143,7 +1181,8 @@ public class TerminalController {
             result = responseDTO;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            logger.error("TerminalController: getTerminal: ERROR: " + e.getMessage());
+            logger.error("TerminalController: getTerminal: ERROR: " + e.getMessage() +
+                    " at: " + System.currentTimeMillis());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -1155,6 +1194,7 @@ public class TerminalController {
         HttpStatus httpStatus = null;
         try {
             TerminalDetailResponseDTO responseDTO = new TerminalDetailResponseDTO();
+//            ITerminalDetailResponseDTO dto = terminalService.getTerminalById(terminalId);
             ITerminalDetailResponseDTO dto = terminalService.getTerminalById(terminalId);
             responseDTO.setId(dto.getId());
             responseDTO.setName(dto.getName());
@@ -1166,10 +1206,12 @@ public class TerminalController {
 //            responseDTO.setQrCode("");
             List<String> terminalIds = new ArrayList<>();
             terminalIds.add(terminalId);
-            List<ITerminalBankResponseDTO> iTerminalBankResponseDTOS = accountBankReceiveShareService.getTerminalBanksByTerminalIds(terminalIds);
+//            List<ITerminalBankResponseDTO> iTerminalBankResponseDTOS = accountBankReceiveShareService.getTerminalBanksByTerminalIds(terminalIds);
+            List<ITerminalBankResponseDTO> iTerminalBankResponseDTOS = terminalBankReceiveService.getTerminalBanksByTerminalIds(terminalIds);
             List<TerminalBankResponseDTO> banks = mapInterfTerminalBankToDto(iTerminalBankResponseDTOS);
             List<AccountMemberDTO> members = new ArrayList<>();
-            members = accountBankReceiveShareService.getMembersFromTerminalId(terminalId);
+//            members = accountBankReceiveShareService.getMembersFromTerminalId(terminalId);
+            members = merchantMemberService.getMembersFromTerminalId(terminalId);
             responseDTO.setBanks(banks);
             responseDTO.setMembers(members);
             result = responseDTO;
@@ -1197,12 +1239,16 @@ public class TerminalController {
                     TerminalShareResponseDTO dto = new TerminalShareResponseDTO();
                     List<TerminalResponseInterfaceDTO> terminalInters = terminalService.getTerminalsByUserId(userId, offset);
                     List<TerminalResponseDTO> terminals = mapInterfToTerminalResponse(terminalInters);
-                    int total = terminalService.countNumberOfTerminalByUserId(userId);
+//                    int total = terminalService.countNumberOfTerminalByUserId(userId);
+                    int total = terminalService.countNumberOfTerminalByUserIdOwner(userId);
                     dto.setTotalTerminals(total);
                     dto.setUserId(userId);
 
                     // Fetch all banks associated with the terminals in a single database call
-                    List<ITerminalBankResponseDTO> allBankInters = accountBankReceiveShareService.getTerminalBanksByTerminalIds(
+//                    List<ITerminalBankResponseDTO> allBankInters = accountBankReceiveShareService.getTerminalBanksByTerminalIds(
+//                            terminals.stream().map(TerminalResponseInterfaceDTO::getId).collect(Collectors.toList())
+//                    );
+                    List<ITerminalBankResponseDTO> allBankInters = terminalBankReceiveService.getTerminalBanksByTerminalIds(
                             terminals.stream().map(TerminalResponseInterfaceDTO::getId).collect(Collectors.toList())
                     );
                     List<TerminalBankResponseDTO> allBanks = mapInterfTerminalBankToDto(allBankInters);
@@ -1222,14 +1268,20 @@ public class TerminalController {
                 case 1:
                     TerminalBankShareResponseDTO terminalBankShareResponseDTO = new TerminalBankShareResponseDTO();
 
-                    List<IBankShareResponseDTO> iBankShareResponseDTOS = accountBankReceiveShareService
+//                    List<IBankShareResponseDTO> iBankShareResponseDTOS = accountBankReceiveShareService
+//                            .getTerminalBankByUserId(userId, offset);
+                    List<IBankShareResponseDTO> iBankShareResponseDTOS = terminalBankReceiveService
                             .getTerminalBankByUserId(userId, offset);
                     List<BankShareResponseDTO> bankShareResponseDTOs = mapInterfToBankShareResponse(iBankShareResponseDTOS);
-                    int totalBanks = accountBankReceiveShareService.countNumberOfBankShareByUserId(userId);
+//                    int totalBanks = accountBankReceiveShareService.countNumberOfBankShareByUserId(userId);
+                    int totalBanks = terminalBankReceiveService.countNumberOfBankShareByUserId(userId);
                     terminalBankShareResponseDTO.setTotalBankShares(totalBanks);
                     terminalBankShareResponseDTO.setUserId(userId);
 
                     // Fetch all terminals associated with the banks in a single database call
+//                    List<ITerminalShareDTO> iTerminalShareDTOS = terminalService.getTerminalSharesByBankIds(
+//                            bankShareResponseDTOs.stream().map(BankShareResponseDTO::getBankId).collect(Collectors.toList()), userId
+//                    );
                     List<ITerminalShareDTO> iTerminalShareDTOS = terminalService.getTerminalSharesByBankIds(
                             bankShareResponseDTOs.stream().map(BankShareResponseDTO::getBankId).collect(Collectors.toList()), userId
                     );
@@ -1247,15 +1299,19 @@ public class TerminalController {
                     httpStatus = HttpStatus.OK;
                     break;
                 case 2:
+                    // skip các terminal của role đại lý
                     TerminalShareResponseDTO terminalShareResponseDTO = new TerminalShareResponseDTO();
-                    List<TerminalResponseInterfaceDTO> iTerminalResponseDTOs = terminalService.getTerminalSharesByUserId(userId, offset);
+                    //2.2 lấy danh sách detail của terminal đó
+                    List<TerminalResponseInterfaceDTO> iTerminalResponseDTOs = terminalService
+                            .getTerminalSharesByUserId(userId, offset);
                     List<TerminalResponseDTO> terminalResponseDTOs = mapInterfToTerminalResponse(iTerminalResponseDTOs);
                     int totalTerminalShare = terminalService.countNumberOfTerminalShareByUserId(userId);
                     terminalShareResponseDTO.setTotalTerminals(totalTerminalShare);
                     terminalShareResponseDTO.setUserId(userId);
 
-                    // Fetch all banks associated with the terminals in a single database call
-                    List<ITerminalBankResponseDTO> iTerminalBankResponseDTOS = accountBankReceiveShareService.getTerminalBanksByTerminalIds(
+                    //2.3 Fetch all banks associated with the terminals in a single database call
+                    List<ITerminalBankResponseDTO> iTerminalBankResponseDTOS = accountBankReceiveShareService
+                            .getTerminalBanksByTerminalIds(
                             terminalResponseDTOs.stream().map(TerminalResponseDTO::getId).collect(Collectors.toList())
                     );
 
@@ -1276,7 +1332,10 @@ public class TerminalController {
                 case 3:
                     TerminalBankShareResponseDTO responseDTO = new TerminalBankShareResponseDTO();
 
-                    List<IBankShareResponseDTO> iBankShareResponseDTOList = accountBankReceiveShareService
+                    // only get terminal for accept terminal not merchant
+//                    List<IBankShareResponseDTO> iBankShareResponseDTOList = accountBankReceiveShareService
+//                            .getTerminalBankShareByUserId(userId, offset);
+                    List<IBankShareResponseDTO> iBankShareResponseDTOList = terminalBankReceiveService
                             .getTerminalBankShareByUserId(userId, offset);
                     List<BankShareResponseDTO> shareResponseDTOList = mapInterfToBankShareResponse(iBankShareResponseDTOList);
                     int totalBankShares = accountBankReceiveShareService.countNumberOfTerminalBankShareByUserId(userId);
@@ -1284,8 +1343,14 @@ public class TerminalController {
                     responseDTO.setUserId(userId);
 
                     // Fetch all terminals associated with the banks in a single database call
-                    List<ITerminalShareDTO> iTerminalShareDTOList = terminalService.getTerminalSharesByBankIds(
-                            shareResponseDTOList.stream().map(BankShareResponseDTO::getBankId).collect(Collectors.toList()), userId
+                    // not correct
+//                    List<ITerminalShareDTO> iTerminalShareDTOList = terminalService.getTerminalSharesByBankIds(
+//                            shareResponseDTOList.stream().map(BankShareResponseDTO::getBankId)
+//                                    .collect(Collectors.toList()), userId
+//                    );
+                    List<ITerminalShareDTO> iTerminalShareDTOList = terminalService.getTerminalSharesByBankIds2(
+                            shareResponseDTOList.stream().map(BankShareResponseDTO::getBankId)
+                                    .collect(Collectors.toList()), userId
                     );
                     List<TerminalShareDTO> terminalShareDTOS = mapInterfToTerminalShare(iTerminalShareDTOList);
 
@@ -1578,7 +1643,7 @@ public class TerminalController {
                             }
                             terminalService.insertAllTerminal(terminalEntities);
                             merchantBankReceiveService.insertAllMerchantBankReceive(merchantBankReceiveEntities);
-                            terminalBankReceiveService.insertAllTerminalBankReceive(terminalBankReceiveEntities);
+                            terminalBankReceiveService.insertAll(terminalBankReceiveEntities);
                             result = responses;
                             httpStatus = HttpStatus.OK;
                         }
@@ -1768,6 +1833,7 @@ public class TerminalController {
         HttpStatus httpStatus = null;
         try {
             result = new TerminalQrDTO();
+//            ITerminalDetailResponseDTO dto = terminalService.getTerminalById(terminalId);
             ITerminalDetailResponseDTO dto = terminalService.getTerminalById(terminalId);
             if (dto!= null) {
                 result.setTerminalId(dto.getId());
@@ -1776,7 +1842,7 @@ public class TerminalController {
                 result.setTerminalCode(dto.getCode());
                 result.setUserId(dto.getUserId());
             }
-            ITerminalBankResponseDTO bank = accountBankReceiveShareService
+            ITerminalBankResponseDTO bank = terminalBankReceiveService
                     .getTerminalBanksByTerminalId(terminalId);
             if (bank!= null) {
                 result.setBankAccount(bank.getBankAccount());

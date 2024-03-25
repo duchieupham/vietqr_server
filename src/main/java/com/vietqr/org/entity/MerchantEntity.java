@@ -20,8 +20,8 @@ public class MerchantEntity {
     private String name;
     @Column(name = "address")
     private String address;
-    @Column(name = "vso")
-    private String vso;
+    @Column(name = "vsoCode")
+    private String vsoCode;
 
     //0: cá nhân (default)
     @Column(name = "businessType")
@@ -120,12 +120,12 @@ public class MerchantEntity {
         this.address = address;
     }
 
-    public String getVso() {
-        return vso;
+    public String getVsoCode() {
+        return vsoCode;
     }
 
-    public void setVso(String vsoCode) {
-        this.vso = vsoCode;
+    public void setVsoCode(String vsoCode) {
+        this.vsoCode = vsoCode;
     }
 
     public long getTimePublish() {

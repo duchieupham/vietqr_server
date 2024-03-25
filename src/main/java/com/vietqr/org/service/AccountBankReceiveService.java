@@ -87,4 +87,6 @@ public interface AccountBankReceiveService {
 	AccountBankReceiveEntity checkExistedBankAccountAuthenticated(String bankAccount, String bankCode);
 
 	String getBankNameByBankId(String bankTypeId);
+
+    List<TerminalBankReceiveDTO> getAccountBankReceiveByUseId(String userId);
 }

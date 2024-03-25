@@ -1,6 +1,7 @@
 package com.vietqr.org.service;
 
 import com.vietqr.org.dto.AccountMemberDTO;
+import com.vietqr.org.dto.IAccountTerminalMemberDTO;
 import com.vietqr.org.dto.IMerchantMemberDTO;
 import com.vietqr.org.dto.IMerchantMemberDetailDTO;
 import com.vietqr.org.entity.MerchantMemberEntity;
@@ -32,4 +33,10 @@ public interface MerchantMemberService {
     List<AccountMemberDTO> getMembersFromTerminalId(String merchantId, String terminalId);
 
     String checkUserExistedFromTerminal(String merchantId, String terminalId, String userId);
+
+    String checkUserExistedFromTerminal(String terminalId, String userId);
+
+    List<IAccountTerminalMemberDTO> getMembersWebByTerminalIdAndPhoneNo(String terminalId, String value, int offset);
+
+    List<AccountMemberDTO> getMembersFromTerminalId(String terminalId);
 }

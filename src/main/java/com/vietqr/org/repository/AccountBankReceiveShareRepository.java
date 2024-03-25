@@ -95,16 +95,18 @@ public interface AccountBankReceiveShareRepository
             "WHERE terminal_id = :terminalId AND bank_id = :bankId", nativeQuery = true)
     void removeBankAccountFromTerminal(String terminalId, String bankId);
 
-    @Query(value = "SELECT DISTINCT b.terminal_id as terminalId, c.id as bankId, d.bank_name as bankName, d.bank_code as bankCode, c.bank_account as bankAccount, c.bank_account_name as userBankName, " +
-            "d.bank_short_name as bankShortName, d.img_id as imgId, b.qr_code as qrCode "
+    @Query(value = "SELECT DISTINCT b.terminal_id as terminalId, c.id as bankId, d.bank_name as bankName, "
+            + "d.bank_code as bankCode, c.bank_account as bankAccount, c.bank_account_name as userBankName, "
+            + "d.bank_short_name as bankShortName, d.img_id as imgId, "
+            + "CASE b.trace_transfer WHEN b.trace_transfer = '' THEN b.data1 ELSE b.data2 END AS qrCode "
             + "FROM terminal a "
-            + "INNER JOIN account_bank_receive_share b "
+            + "INNER JOIN terminal_bank_receive b "
             + "ON a.id = b.terminal_id "
             + "INNER JOIN account_bank_receive c "
-            + "ON c.id = b.bank_id " +
-            "INNER JOIN bank_type d " +
-            "ON d.id = c.bank_type_id "
-            + "WHERE a.id IN :terminalIds", nativeQuery = true)
+            + "ON c.id = b.bank_id "
+            + "INNER JOIN bank_type d "
+            + "ON d.id = c.bank_type_id "
+            + "WHERE a.id IN :terminalIds AND b.terminal_code = '' ", nativeQuery = true)
     List<ITerminalBankResponseDTO> findByTerminalIdIn(@Param("terminalIds") List<String> terminalIds);
 
     @Query(value = "SELECT DISTINCT a.id as bankId, c.bank_name as bankName, " +
@@ -116,10 +118,10 @@ public interface AccountBankReceiveShareRepository
             "INNER JOIN bank_type c " +
             "ON a.bank_type_id = c.id " +
             "WHERE b.user_id = :userId AND b.is_owner = true " +
-            "AND b.terminal_id IS NOT NULL AND b.terminal_id != '' "
-//            "LIMIT :offset, 20"
+            "AND b.terminal_id IS NOT NULL AND b.terminal_id != '' " +
+            "LIMIT :offset, 20"
             , nativeQuery = true)
-    List<IBankShareResponseDTO> findBankShareByUserId(String userId);
+    List<IBankShareResponseDTO> findBankShareByUserId(String userId, int offset);
 
     @Query(value = "SELECT count(distinct bank_id) FROM account_bank_receive_share " +
             "WHERE user_id = :userId AND is_owner = true " +
@@ -130,11 +132,17 @@ public interface AccountBankReceiveShareRepository
             "WHERE terminal_id = :terminalId", nativeQuery = true)
     List<BankQRTerminalDTO> getBankIdsFromTerminalId(@Param("terminalId") String terminalId);
 
-    @Query(value = "SELECT count(DISTINCT CASE WHEN a.user_id = :userId AND a.bank_id != '' THEN a.bank_id END) FROM account_bank_receive_share a " +
-            "INNER JOIN terminal b " +
-            "ON a.terminal_id = b.id " +
-            "WHERE b.user_id != :userId " +
-            "AND a.terminal_id IS NOT NULL AND a.terminal_id != ''", nativeQuery = true)
+//    SELECT count(DISTINCT CASE WHEN a.user_id = :userId AND a.bank_id != '' THEN a.bank_id END) FROM account_bank_receive_share a " +
+//            "INNER JOIN terminal b " +
+//            "ON a.terminal_id = b.id " +
+//            "WHERE b.user_id != :userId " +
+//            "AND a.terminal_id IS NOT NULL AND a.terminal_id != ''
+    @Query(value = "SELECT COUNT(DISTINCT c.bank_id) " +
+            "FROM merchant_member a " +
+            "INNER JOIN terminal_bank_receive c " +
+            "ON c.terminal_id = a.terminal_id " +
+            "WHERE a.user_id = :userId " +
+            "AND c.terminal_code = '' AND a.terminal_id != ''", nativeQuery = true)
     int countNumberOfTerminalBankShareByUserId(String userId);
 
     @Query(value = "SELECT DISTINCT a.id as bankId, c.bank_name as bankName, " +

@@ -739,9 +739,15 @@ public class AccountBankReceiveController {
 		List<TerminalCodeResponseDTO> result = new ArrayList<>();
 		HttpStatus httpStatus = null;
 		try {
+			//new
+			//owner
+			List<TerminalCodeResponseDTO> terminalInterOwners = terminalService.getTerminalsByUserIdAndBankIdOwner(userId,
+					bankId);
+			// not owner
 			List<TerminalCodeResponseDTO> terminalInters = terminalService.getTerminalsByUserIdAndBankId(userId,
 					bankId);
-			result = terminalInters;
+			terminalInterOwners.addAll(terminalInters);
+			result = terminalInterOwners;
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
 			httpStatus = HttpStatus.BAD_REQUEST;

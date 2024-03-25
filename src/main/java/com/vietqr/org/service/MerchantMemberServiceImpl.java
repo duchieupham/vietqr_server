@@ -1,6 +1,7 @@
 package com.vietqr.org.service;
 
 import com.vietqr.org.dto.AccountMemberDTO;
+import com.vietqr.org.dto.IAccountTerminalMemberDTO;
 import com.vietqr.org.dto.IMerchantMemberDTO;
 import com.vietqr.org.dto.IMerchantMemberDetailDTO;
 import com.vietqr.org.entity.MerchantMemberEntity;
@@ -69,5 +70,20 @@ public class MerchantMemberServiceImpl implements MerchantMemberService {
     @Override
     public String checkUserExistedFromTerminal(String merchantId, String terminalId, String userId) {
         return repo.checkUserExistedFromTerminal(merchantId, terminalId, userId);
+    }
+
+    @Override
+    public String checkUserExistedFromTerminal(String terminalId, String userId) {
+        return repo.checkUserExistedFromTerminal(terminalId, userId);
+    }
+
+    @Override
+    public List<IAccountTerminalMemberDTO> getMembersWebByTerminalIdAndPhoneNo(String terminalId, String value, int offset) {
+        return repo.getMembersWebByTerminalIdAndPhoneNo(terminalId, value, offset);
+    }
+
+    @Override
+    public List<AccountMemberDTO> getMembersFromTerminalId(String terminalId) {
+        return repo.getMembersFromTerminalId(terminalId);
     }
 }

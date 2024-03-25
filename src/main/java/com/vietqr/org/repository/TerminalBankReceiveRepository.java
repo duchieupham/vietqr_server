@@ -1,7 +1,6 @@
 package com.vietqr.org.repository;
 
-import com.vietqr.org.dto.ISubTerminalDTO;
-import com.vietqr.org.dto.ISubTerminalResponseDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.TerminalBankReceiveEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -103,4 +102,80 @@ public interface TerminalBankReceiveRepository extends JpaRepository<TerminalBan
             + "AND terminal_code IS NOT NULL AND terminal_code != '' "
             + "ORDER BY raw_terminal_code ASC ", nativeQuery = true)
     List<ISubTerminalResponseDTO> getListSubTerminalByTerId(String terminalId);
+
+    @Query(value = "SELECT b.id as bankId, b.bank_account as bankAccount, "
+            + "b.bank_account_name as userBankName, "
+            + "c.bank_name as bankName, c.bank_short_name as bankShortName, "
+            + " c.bank_code as bankCode, c.img_id as imgId, "
+            + "b.user_id as userId "
+            + "FROM account_bank_receive b "
+            + "INNER JOIN bank_type c "
+            + "ON b.bank_type_id = c.id "
+            + "INNER JOIN terminal_bank_receive d ON d.bank_id = b.id "
+            + "WHERE d.terminal_id = :terminalId AND b.is_authenticated = true ", nativeQuery = true)
+    List<TerminalBankReceiveDTO> getTerminalBankReceiveResponseByTerminalId(String terminalId);
+
+    @Query(value = "SELECT DISTINCT b.terminal_id as terminalId, c.id as bankId, d.bank_name as bankName, "
+            + "d.bank_code as bankCode, c.bank_account as bankAccount, c.bank_account_name as userBankName, "
+            + "d.bank_short_name as bankShortName, d.img_id as imgId, "
+            + "CASE c.mms_active WHEN c.mms_active = TRUE THEN b.data1 ELSE b.data2 END AS qrCode "
+            + "FROM terminal a "
+            + "INNER JOIN terminal_bank_receive b ON a.id = b.terminal_id "
+            + "INNER JOIN account_bank_receive c "
+            + "ON c.id = b.bank_id "
+            + "INNER JOIN bank_type d "
+            + "ON d.id = c.bank_type_id "
+            + "WHERE a.id = :terminalId "
+            + "AND (b.terminal_code IS NULL OR b.terminal_code = '') "
+            + "LIMIT 1", nativeQuery = true)
+    ITerminalBankResponseDTO getTerminalBanksByTerminalId(String terminalId);
+
+    @Query(value = "SELECT DISTINCT b.terminal_id as terminalId, c.id as bankId, d.bank_name as bankName, "
+            + "d.bank_code as bankCode, c.bank_account as bankAccount, c.bank_account_name as userBankName, "
+            + "d.bank_short_name as bankShortName, d.img_id as imgId, "
+            + "CASE b.trace_transfer WHEN b.trace_transfer = '' THEN b.data1 ELSE b.data2 END AS qrCode "
+            + "FROM terminal a "
+            + "INNER JOIN terminal_bank_receive b "
+            + "ON a.id = b.terminal_id "
+            + "INNER JOIN account_bank_receive c "
+            + "ON c.id = b.bank_id "
+            + "INNER JOIN bank_type d "
+            + "ON d.id = c.bank_type_id "
+            + "WHERE a.id IN :terminalIds AND b.type_of_qr != 1 ", nativeQuery = true)
+    List<ITerminalBankResponseDTO> getTerminalBanksByTerminalIds(List<String> terminalIds);
+
+    @Query(value = "SELECT DISTINCT a.id as bankId, c.bank_name as bankName, " +
+            "a.bank_account as bankAccount, a.bank_account_name as userBankName, " +
+            "c.bank_code as bankCode, c.bank_short_name as bankShortName, c.img_id as imgId " +
+            "FROM account_bank_receive a " +
+            "INNER JOIN terminal_bank_receive b " +
+            "ON a.id = b.bank_id " +
+            "INNER JOIN bank_type c " +
+            "ON a.bank_type_id = c.id " +
+            "WHERE a.user_id = :userId AND b.type_of_qr != 1 " +
+            "LIMIT :offset, 20", nativeQuery = true)
+    List<IBankShareResponseDTO> getTerminalBankByUserId(String userId, int offset);
+
+    @Query(value = "SELECT count(DISTINCT a.bank_id) FROM terminal_bank_receive a "
+            + "INNER JOIN account_bank_receive b ON a.bank_id = b.id "
+            + "WHERE b.user_id = :userId AND a.type_of_qr != 1 ", nativeQuery = true)
+    int countNumberOfBankShareByUserId(String userId);
+
+    @Query(value = "SELECT DISTINCT a.id as bankId, c.bank_name as bankName, " +
+            "a.bank_account as bankAccount, a.bank_account_name as userBankName, " +
+            "c.bank_code as bankCode, c.bank_short_name as bankShortName, c.img_id as imgId " +
+            "FROM account_bank_receive a " +
+            "INNER JOIN terminal_bank_receive b " +
+            "ON a.id = b.bank_id " +
+            "INNER JOIN bank_type c " +
+            "ON a.bank_type_id = c.id " +
+            "INNER JOIN terminal d " +
+            "ON d.id = b.terminal_id " +
+            "INNER JOIN merchant_member e " +
+            "ON e.terminal_id = d.id " +
+            "WHERE d.user_id != :userId " +
+            "AND b.terminal_id IS NOT NULL AND b.terminal_id != '' " +
+            "AND e.user_id = :userId " +
+            "LIMIT :offset, 20", nativeQuery = true)
+    List<IBankShareResponseDTO> getTerminalBankShareByUserId(String userId, int offset);
 }

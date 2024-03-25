@@ -101,25 +101,39 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
 	@Query(value = "SELECT DISTINCT a.user_id AS id, c.phone_no AS phoneNo, a.img_id AS imgId, "
 			+ "a.birth_date AS birthDate, a.email AS email, a.national_id AS nationalId, "
 			+ "CONCAT(a.last_name, ' ', a.middle_name, ' ', a.first_name) AS fullName, "
-			+ "a.gender AS gender, b.is_owner AS isOwner FROM account_information a "
+			+ "a.gender AS gender, "
+			+ "CASE "
+			+ "WHEN terminal_id = '' THEN 1 "
+			+ "ELSE 0 "
+			+ "END AS role "
+			+ "FROM account_information a "
 			+ "INNER JOIN account_login c ON c.id = a.user_id "
-			+ "INNER JOIN account_bank_receive_share b ON b.user_id = a.user_id "
-			+ "WHERE b.terminal_id = :terminalId "
-			+ "AND CONCAT(a.last_name, ' ' ,a.middle_name, ' ' , a.first_name) LIKE %:value% "
-			+ "AND a.status = 1 "
-			+ "LIMIT :offset, 20", nativeQuery = true)
+			+ "INNER JOIN merchant_member b ON b.user_id = a.user_id "
+			+ "INNER JOIN (SELECT * FROM terminal WHERE id = :terminalId) d "
+			+ "ON d.merchant_id = b.merchant_id "
+			+ "WHERE (b.terminal_id = :terminalId OR terminal_id = '') "
+			+ "AND a.status = 1 AND CONCAT(a.last_name, ' ', a.middle_name, ' ', a.first_name) LIKE %:value% "
+			+ "ORDER BY role DESC "
+			+ "LIMIT :offset, 20 ", nativeQuery = true)
 	List<IAccountTerminalMemberDTO> getMembersWebByTerminalIdAndFullName(String terminalId, String value, int offset);
 
 	@Query(value = "SELECT DISTINCT a.user_id AS id, c.phone_no AS phoneNo, a.img_id AS imgId, "
 			+ "a.birth_date AS birthDate, a.email AS email, a.national_id AS nationalId, "
 			+ "CONCAT(a.last_name, ' ', a.middle_name, ' ', a.first_name) AS fullName, "
-			+ "a.gender AS gender, b.is_owner AS isOwner FROM account_information a "
+			+ "a.gender AS gender, "
+			+ "CASE "
+			+ "WHEN terminal_id = '' THEN 1 "
+			+ "ELSE 0 "
+			+ "END AS role "
+			+ "FROM account_information a "
 			+ "INNER JOIN account_login c ON c.id = a.user_id "
-			+ "INNER JOIN account_bank_receive_share b ON b.user_id = a.user_id "
-			+ "WHERE b.terminal_id = :terminalId "
-			+ "AND c.phone_no LIKE %:value% "
-			+ "AND a.status = 1 "
-			+ "LIMIT :offset, 20", nativeQuery = true)
+			+ "INNER JOIN merchant_member b ON b.user_id = a.user_id "
+			+ "INNER JOIN (SELECT * FROM terminal WHERE id = :terminalId) d "
+			+ "ON d.merchant_id = b.merchant_id "
+			+ "WHERE (b.terminal_id = :terminalId OR terminal_id = '') "
+			+ "AND a.status = 1 AND c.phone_no LIKE %:value% "
+			+ "ORDER BY role DESC "
+			+ "LIMIT :offset, 20 ", nativeQuery = true)
 	List<IAccountTerminalMemberDTO> getMembersWebByTerminalIdAndPhoneNo(String terminalId, String value, int offset);
 
 	@Query(value = "SELECT b.id AS userId, b.phone_no as phoneNo, a.img_id as imgId, "
@@ -143,15 +157,16 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
 			+ "CONCAT(a.last_name, ' ', a.middle_name, ' ', a.first_name) AS fullName, "
 			+ "a.gender AS gender, "
 			+ "CASE "
-			+ "WHEN terminal_id = '' THEN TRUE "
-			+ "ELSE FALSE "
-			+ "END AS isOwner "
+			+ "WHEN terminal_id = '' THEN 1 "
+			+ "ELSE 0 "
+			+ "END AS role "
 			+ "FROM account_information a "
 			+ "INNER JOIN account_login c ON c.id = a.user_id "
 			+ "INNER JOIN merchant_member b ON b.user_id = a.user_id "
-			+ "INNER JOIN terminal d ON d.id = b.terminal_id "
+			+ "INNER JOIN (SELECT * FROM terminal WHERE id = :terminalId) d "
+			+ "ON d.merchant_id = b.merchant_id "
 			+ "WHERE (b.terminal_id = :terminalId OR terminal_id = '') "
 			+ "AND a.status = 1 "
-			+ "ORDER BY isOwner DESC ", nativeQuery = true)
+			+ "ORDER BY role DESC ", nativeQuery = true)
 	List<IAccountTerminalMemberDTO> getMembersByTerminalId(String terminalId);
 }

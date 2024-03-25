@@ -18,4 +18,5 @@ public interface IAccountTerminalMemberDTO {
     int getGender();
 
     boolean getIsOwner();
+    int getRole();
 }

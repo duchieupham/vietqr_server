@@ -3,6 +3,7 @@ package com.vietqr.org.service;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.TerminalEntity;
 import org.jvnet.hk2.annotations.Service;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
@@ -21,6 +22,8 @@ public interface TerminalService {
     int countNumberOfTerminalByUserId(String userId);
 
     List<ITerminalShareDTO> getTerminalSharesByBankIds(List<String> bankIds, String userId);
+
+    List<ITerminalShareDTO> getTerminalSharesByBankIds2(List<String> bankIds, String userId);
 
     List<TerminalResponseInterfaceDTO> getTerminalSharesByUserId(String userId, int offset);
 
@@ -83,4 +86,10 @@ public interface TerminalService {
     List<String> getAllCodeByMerchantId(String merchantId, String userId);
 
     List<IStatisticTerminalOverViewDTO> getListTerminalByMerchantId(String merchantId, String userId, int offset);
+
+    List<String> getAllCodeByMerchantIdOwner(String merchantId, String userId);
+
+    List<String> getAllCodeByMerchantIdIn(String merchantId, String userId);
+
+    List<TerminalCodeResponseDTO> getTerminalsByUserIdAndBankIdOwner(String userId, String bankId);
 }

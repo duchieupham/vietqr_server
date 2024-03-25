@@ -1,7 +1,6 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.dto.ISubTerminalDTO;
-import com.vietqr.org.dto.ISubTerminalResponseDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.TerminalBankReceiveEntity;
 import org.springframework.stereotype.Service;
 
@@ -9,7 +8,7 @@ import java.util.List;
 
 @Service
 public interface TerminalBankReceiveService {
-    void insertAllTerminalBankReceive(List<TerminalBankReceiveEntity> terminalBankReceiveEntities);
+    void insertAll(List<TerminalBankReceiveEntity> terminalBankReceiveEntities);
 
     void insert(TerminalBankReceiveEntity terminalBankReceiveEntity);
 
@@ -44,4 +43,16 @@ public interface TerminalBankReceiveService {
     List<ISubTerminalDTO> getListSubTerminalByTerminalId(String terminalId);
 
     List<ISubTerminalResponseDTO> getListSubTerminalByTerId(String terminalId);
+
+    List<TerminalBankReceiveDTO> getTerminalBankReceiveResponseByTerminalId(String terminalId);
+
+    ITerminalBankResponseDTO getTerminalBanksByTerminalId(String terminalId);
+
+    List<ITerminalBankResponseDTO> getTerminalBanksByTerminalIds(List<String> terminalIds);
+
+    List<IBankShareResponseDTO> getTerminalBankByUserId(String userId, int offset);
+
+    int countNumberOfBankShareByUserId(String userId);
+
+    List<IBankShareResponseDTO> getTerminalBankShareByUserId(String userId, int offset);
 }

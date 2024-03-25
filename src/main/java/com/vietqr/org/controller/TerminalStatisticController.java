@@ -45,6 +45,7 @@ public class TerminalStatisticController {
         StatisticMerchantDTO result = null;
         HttpStatus httpStatus = null;
         List<String> listTerminalCode = new ArrayList<>();
+        List<String> tempCode = new ArrayList<>();
         try {
             // old code
 //            tempCode = terminalService.getAllCodeByUserId(userId);
@@ -54,9 +55,15 @@ public class TerminalStatisticController {
 
             // new code
             if (merchantId != null && !merchantId.isEmpty()) {
+                // not owner
                 listTerminalCode = terminalService.getAllCodeByMerchantId(merchantId, userId);
+                // owner
+                tempCode = terminalService.getAllCodeByMerchantIdOwner(merchantId, userId);
+                listTerminalCode.addAll(tempCode);
             } else {
                 listTerminalCode = terminalService.getAllCodeByUserIdOwner(userId);
+                tempCode = terminalService.getAllCodeByMerchantIdIn(merchantId, userId);
+                listTerminalCode.addAll(tempCode);
             }
             Set<String> uniqueCodes = new HashSet<>(listTerminalCode);
             listTerminalCode = new ArrayList<>(uniqueCodes);
@@ -109,9 +116,30 @@ public class TerminalStatisticController {
                     } else {
                         result.setRatePreviousMonth(0);
                     }
+                } else {
+                    result = new StatisticMerchantDTO();
+                    result.setTotalTrans(0);
+                    result.setTotalAmount(0);
+                    result.setMerchantId("");
+                    result.setDate(DateTimeUtil.removeTimeInDateTimeString(fromDate));
+                    result.setMerchantName("");
+                    result.setVsoCode("");
+                    result.setratePreviousDate(0);
+                    result.setRatePreviousMonth(0);
+                    result.setTotalTerminal(0);
                 }
                 httpStatus = HttpStatus.OK;
             } else {
+                result = new StatisticMerchantDTO();
+                result.setTotalTrans(0);
+                result.setTotalAmount(0);
+                result.setMerchantId("");
+                result.setDate(DateTimeUtil.removeTimeInDateTimeString(fromDate));
+                result.setMerchantName("");
+                result.setVsoCode("");
+                result.setratePreviousDate(0);
+                result.setRatePreviousMonth(0);
+                result.setTotalTerminal(0);
                 httpStatus = HttpStatus.OK;
             }
 
@@ -133,7 +161,7 @@ public class TerminalStatisticController {
         HttpStatus httpStatus = null;
         try {
             List<IStatisticTerminalOverViewDTO> dtos = new ArrayList<>();
-            if (merchantId != null && !merchantId.isEmpty()) {
+            if (merchantId == null || merchantId.isEmpty()) {
                 dtos = terminalService
                         .getListTerminalByUserId(userId, offset);
             } else {

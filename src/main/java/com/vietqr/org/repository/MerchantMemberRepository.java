@@ -1,6 +1,7 @@
 package com.vietqr.org.repository;
 
 import com.vietqr.org.dto.AccountMemberDTO;
+import com.vietqr.org.dto.IAccountTerminalMemberDTO;
 import com.vietqr.org.dto.IMerchantMemberDTO;
 import com.vietqr.org.dto.IMerchantMemberDetailDTO;
 import com.vietqr.org.entity.MerchantMemberEntity;
@@ -85,4 +86,44 @@ public interface MerchantMemberRepository extends JpaRepository<MerchantMemberEn
             + "WHERE a.merchant_id = :merchantId AND (a.terminal_id = :terminalId OR a.terminal_id = '') "
             + "AND a.user_id = :userId LIMIT 1", nativeQuery = true)
     String checkUserExistedFromTerminal(String merchantId, String terminalId, String userId);
+
+    @Query(value = "SELECT a.id FROM merchant_member a "
+            + "INNER JOIN (SELECT * FROM terminal WHERE id = :terminalId) d "
+            + "WHERE (a.terminal_id = :terminalId OR a.terminal_id = '') AND a.user_id = :userId LIMIT 1", nativeQuery = true)
+    String checkUserExistedFromTerminal(String terminalId, String userId);
+
+    @Query(value = "SELECT DISTINCT a.user_id AS id, c.phone_no AS phoneNo, a.img_id AS imgId, "
+            + "a.birth_date AS birthDate, a.email AS email, a.national_id AS nationalId, "
+            + "CONCAT(a.last_name, ' ', a.middle_name, ' ', a.first_name) AS fullName, "
+            + "a.gender AS gender, "
+            + "CASE "
+            + "WHEN terminal_id = '' THEN 1 "
+            + "ELSE 0 "
+            + "END AS role "
+            + "FROM account_information a "
+            + "INNER JOIN account_login c ON c.id = a.user_id "
+            + "INNER JOIN merchant_member b ON b.user_id = a.user_id "
+            + "INNER JOIN (SELECT * FROM terminal WHERE id = :terminalId) d "
+            + "ON d.merchant_id = b.merchant_id "
+            + "WHERE (b.terminal_id = :terminalId OR terminal_id = '') "
+            + "AND a.status = 1 AND c.phone_no LIKE %:value% "
+            + "ORDER BY role DESC "
+            + "LIMIT :offset, 20 ", nativeQuery = true)
+    List<IAccountTerminalMemberDTO> getMembersWebByTerminalIdAndPhoneNo(String terminalId, String value, int offset);
+
+    @Query(value = "SELECT DISTINCT a.user_id AS id, c.phone_no AS phoneNo, a.img_id AS imgId, "
+            + " b.first_name as firstName, b.middle_name as middleName, b.last_name as lastName, "
+            + "CASE "
+            + "WHEN terminal_id = '' THEN TRUE "
+            + "ELSE FALSE "
+            + "END AS isOwner "
+            + "FROM account_information a "
+            + "INNER JOIN account_login c ON c.id = a.user_id "
+            + "INNER JOIN merchant_member b ON b.user_id = a.user_id "
+            + "INNER JOIN (SELECT * FROM terminal WHERE id = :terminalId) d "
+            + "ON d.merchant_id = b.merchant_id "
+            + "WHERE (b.terminal_id = :terminalId OR terminal_id = '') "
+            + "AND a.status = 1 "
+            + "ORDER BY isOwner DESC ", nativeQuery = true)
+    List<AccountMemberDTO> getMembersFromTerminalId(String terminalId);
 }

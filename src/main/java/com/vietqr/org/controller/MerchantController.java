@@ -60,7 +60,7 @@ public class MerchantController {
             entity.setTimePublish(time);
             entity.setActive(true);
             entity.setMaster(false);
-            entity.setVso("");
+            entity.setVsoCode("");
             entity.setBusinessSector("");
             entity.setBusinessType(0);
             entity.setTaxId("");
