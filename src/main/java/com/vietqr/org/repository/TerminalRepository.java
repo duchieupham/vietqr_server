@@ -42,8 +42,7 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             + "WHERE a.user_id = :userId "
             + "GROUP BY a.id "
             + "ORDER BY a.code ASC "
-            + "LIMIT :offset, 20"
-            , nativeQuery = true)
+            + "LIMIT :offset, 20", nativeQuery = true)
     List<TerminalResponseInterfaceDTO> getTerminalsByUserId(@Param(value = "userId") String userId,
                                                             @Param(value = "offset") int offset
     );

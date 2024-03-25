@@ -125,4 +125,11 @@ public class TransactionTerminalTempServiceImpl implements TransactionTerminalTe
                 fromDate - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 currentDateTimeAsNumber - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
+
+    @Override
+    public int getTotalTranByTerminalCodeAndTime(String terminalCode, String fromDate, String toDate) {
+        return repo.getTotalTranByTerminalCodeAndTime(terminalCode,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
 }

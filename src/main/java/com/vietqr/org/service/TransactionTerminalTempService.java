@@ -38,4 +38,5 @@ public interface TransactionTerminalTempService {
 
     long getTotalTranByTerminalCodeWithCurrentTime(String terminalCode, long fromDate, long currentDateTimeAsNumber);
 
+    int getTotalTranByTerminalCodeAndTime(String terminalCode, String fromDate, String toDate);
 }

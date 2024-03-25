@@ -1217,7 +1217,9 @@ public class TerminalController {
                 subTerminalDTO.setBankId(item.getBankId());
                 subTerminalDTO.setTraceTransfer(item.getTraceTransfer()
                         == null ? "" : item.getTraceTransfer());
-                subTerminalDTO.setTotalTrans(0);
+                int totalTrans = transactionTerminalTempService
+                        .getTotalTranByTerminalCodeAndTime(item.getTerminalCode(), fromDate, toDate);
+                subTerminalDTO.setTotalTrans(totalTrans);
                 long totalAmount = transactionTerminalTempService
                         .getTotalAmountByTerminalCodeAndTime(item.getTerminalCode(), fromDate, toDate);
                 subTerminalDTO.setTotalAmount(totalAmount);
@@ -1866,7 +1868,8 @@ public class TerminalController {
                 subTerminalDTO.setBankId(item.getBankId());
                 subTerminalDTO.setTraceTransfer(item.getTraceTransfer()
                         == null ? "" : item.getTraceTransfer());
-
+//                int totalTrans = transactionTerminalTempService
+//                        .getTotalTranByTerminalCodeAndTime(item.getTerminalCode(), fromDate, toDate);
                 long totalAmount = transactionTerminalTempService
                         .getTotalAmountByTerminalCodeAndTime(item.getTerminalCode(), fromDate, toDate);
                 LocalDateTime now = LocalDateTime.now();
