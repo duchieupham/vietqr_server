@@ -466,7 +466,12 @@ public interface TransactionReceiveService {
         List<TransStatisticByTimeDTO> getTransStatisticSubTerminalByTerminalCodeMonth(String subTerminalCode,
                                                                                       String fromDate, String toDate);
 
-    List<TransactionRelatedDTO> getSubTerminalTransactionsByStatus(List<String> codes, int value, String fromDate, String toDate, int offset, int size);
+        List<TransactionRelatedDTO> getSubTerminalTransactionsByStatus(List<String> codes, int value, String fromDate, String toDate, int offset, int size);
 
         int countSubTerminalTransactionsByStatus(List<String> codes, int value, String fromDate, String toDate);
+
+        List<ITransactionRelatedDetailDTO> getTransByBankId(String bankId, String fromDate, String toDate);
+
+        List<ITransactionRelatedDetailDTO> getTransByTerminalCode(String terminalCode,
+                                                                 String fromDate, String toDate);
 }

@@ -377,4 +377,16 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             + "ORDER BY a.code ASC "
             + "LIMIT :offset, 10", nativeQuery = true)
     List<IStatisticTerminalOverViewDTO> getListTerminalByMerchantIdOwner(String merchantId, String userId, int offset);
+
+    @Query(value = "SELECT a.name AS terminalName, "
+            + "a.code AS terminalCode, a.address AS terminalAddress "
+            + "FROM terminal a "
+            + "WHERE a.code = :terminalCode ", nativeQuery = true)
+    List<ITerminalExportDTO> getTerminalExportByCode(String terminalCode);
+
+    @Query(value = "SELECT a.name AS terminalName, "
+            + "a.code AS terminalCode, a.address AS terminalAddress "
+            + "FROM terminal a "
+            + "WHERE a.user_id = :userId ", nativeQuery = true)
+    List<ITerminalExportDTO> getTerminalExportByUserId(String userId);
 }

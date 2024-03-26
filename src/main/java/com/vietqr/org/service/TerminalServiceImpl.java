@@ -234,4 +234,14 @@ public class TerminalServiceImpl implements TerminalService {
     public List<IStatisticTerminalOverViewDTO> getListTerminalByMerchantIdOwner(String merchantId, String userId, int offset) {
         return repo.getListTerminalByMerchantIdOwner(merchantId, userId, offset);
     }
+
+    @Override
+    public List<ITerminalExportDTO> getTerminalExportByUserId(String userId) {
+        return repo.getTerminalExportByUserId(userId);
+    }
+
+    @Override
+    public List<ITerminalExportDTO> getTerminalExportByCode(String terminalCode) {
+        return repo.getTerminalExportByCode(terminalCode);
+    }
 }

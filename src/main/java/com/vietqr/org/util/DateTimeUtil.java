@@ -10,6 +10,8 @@ public class DateTimeUtil {
     private static final String GMT_PLUS_7 = "GMT+7";
     private static final String DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
 
+    private static final String DateTimeFormatVN = "HH:mm:ss dd-MM-yyyy";
+
     private static final String DateFormat = "yyyy-MM-dd";
     // 7 * 60 * 60
     public static final long GMT_PLUS_7_OFFSET = 25200;
@@ -122,5 +124,15 @@ public class DateTimeUtil {
 
     public static String removeTimeInDateTimeString(String fromDate) {
         return fromDate.substring(0, 10);
+    }
+
+    public static String getDateStringBaseLong(long time) {
+        String result = "";
+        time = time + GMT_PLUS_7_OFFSET;
+        if (time > 0) {
+            LocalDateTime localDateTime = LocalDateTime.ofEpochSecond(time, 0, ZoneOffset.UTC);
+            result = localDateTime.format(DateTimeFormatter.ofPattern(DateTimeFormatVN));
+        }
+        return result;
     }
 }

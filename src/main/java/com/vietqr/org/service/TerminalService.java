@@ -94,4 +94,8 @@ public interface TerminalService {
     List<TerminalCodeResponseDTO> getTerminalsByUserIdAndBankIdOwner(String userId, String bankId);
 
     List<IStatisticTerminalOverViewDTO> getListTerminalByMerchantIdOwner(String merchantId, String userId, int offset);
+
+    List<ITerminalExportDTO> getTerminalExportByUserId(String userId);
+
+    List<ITerminalExportDTO> getTerminalExportByCode(String terminalCode);
 }

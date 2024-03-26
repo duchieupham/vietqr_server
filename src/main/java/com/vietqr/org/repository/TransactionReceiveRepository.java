@@ -2306,5 +2306,29 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "AND a.status = :value "
                 + "AND a.time BETWEEN :fromDate AND :toDate ", nativeQuery = true)
         int getTotalSubTerminalTransactionsByStatus(List<String> codes, int value, long fromDate, long toDate);
+
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, a.bank_account AS bankAccount, "
+                + "a.content AS content, a.time AS time, a.time_paid AS timePaid, a.status AS status, "
+                + "a.type AS type, d.bank_name AS bankName, d.bank_short_name AS bankShortName, "
+                + "d.bank_code AS bankCode, a.note AS note, a.reference_number AS referenceNumber, "
+                + "a.order_id AS orderId, a.terminal_code AS terminalCode, a.trans_type AS transType "
+                + "FROM transaction_receive a "
+                + "INNER JOIN account_bank_receive c ON a.bank_id = c.id "
+                + "INNER JOIN bank_type d ON d.id = c.bank_type_id "
+                + "WHERE a.time BETWEEN :fromDate AND :toDate AND a.bank_id = :bankId "
+                + "ORDER BY a.time DESC ", nativeQuery = true)
+        List<ITransactionRelatedDetailDTO> getTransByBankId(String bankId, long fromDate, long toDate);
+
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, a.bank_account AS bankAccount "
+                + ", a.content AS content, a.time AS time, a.time_paid AS timePaid, a.status AS status, "
+                + "a.type AS type, d.bank_name AS bankName, d.bank_short_name AS bankShortName, "
+                + "d.bank_code AS bankCode, a.note AS note, a.reference_number AS referenceNumber, "
+                + "a.order_id AS orderId, a.terminal_code AS terminalCode, a.trans_type AS transType "
+                + "FROM transaction_receive a "
+                + "INNER JOIN account_bank_receive c ON a.bank_id = c.id "
+                + "INNER JOIN bank_type d ON d.id = c.bank_type_id "
+                + "WHERE a.time BETWEEN :fromDate AND :toDate AND a.terminal_code = :terminalCode "
+                + "ORDER BY a.time DESC ", nativeQuery = true)
+        List<ITransactionRelatedDetailDTO> getTransByTerminalCode(String terminalCode, long fromDate, long toDate);
 }
 

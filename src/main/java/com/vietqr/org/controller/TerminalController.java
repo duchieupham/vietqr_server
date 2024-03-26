@@ -11,9 +11,11 @@ import com.vietqr.org.util.bank.mb.MBVietQRUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -48,6 +50,9 @@ public class TerminalController {
     private static final Logger logger = Logger.getLogger(TerminalController.class);
     private static final String CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final int CODE_LENGTH = 10;
+    private static final int WINDOW_SIZE = 100;
+
+    private static final int WIDTH_PIXEL = 256;
 
     @Autowired
     private TerminalService terminalService;
@@ -408,54 +413,131 @@ public class TerminalController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @GetMapping("terminal/web/transaction-detail/export/{terminalCode}")
+    @GetMapping("terminal/web/transaction-detail/export")
     public ResponseEntity<byte[]> getTerminalTransactionByTerminalId(
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "bankId") String bankId,
             @RequestParam(value = "terminalCode") String terminalCode,
-            @RequestParam(value = "type") int type,
-            @RequestParam(value = "value") String value,
             @RequestParam(value = "fromDate") String fromDate,
             @RequestParam(value = "toDate") String toDate,
             HttpServletResponse response) throws IOException {
-        List<TransactionRelatedDetailDTO> list = new ArrayList<>();
-        for (int i = 0; i < 20; i++) {
-            TransactionRelatedDetailDTO transactionRelatedDetailDTO = new TransactionRelatedDetailDTO();
-            transactionRelatedDetailDTO.setTransactionId(UUID.randomUUID().toString());
-            transactionRelatedDetailDTO.setAmount(1000000);
-            transactionRelatedDetailDTO.setBankAccount("1234567890");
-            transactionRelatedDetailDTO.setBankName("MBBank - Ngân hàng Quân đội");
-            transactionRelatedDetailDTO.setBankShortName("MBBank");
-            transactionRelatedDetailDTO.setBankCode("MB");
-            transactionRelatedDetailDTO.setContent("SQRTLJ0001, Đoạn text này nhằm mục đich kéo nó dài ra để test chứ cũng không có gì đặc biệt");
-            transactionRelatedDetailDTO.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
-            transactionRelatedDetailDTO.setTimePaid(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
-            transactionRelatedDetailDTO.setStatus(1);
-            transactionRelatedDetailDTO.setType(1);
-            transactionRelatedDetailDTO.setNote("");
-            transactionRelatedDetailDTO.setReferenceNumber("FT1234567890");
-            transactionRelatedDetailDTO.setOrderId(UUID.randomUUID().toString());
-            transactionRelatedDetailDTO.setTerminalCode("TLJ0001");
-            list.add(transactionRelatedDetailDTO);
-        }
+        List<ITransactionRelatedDetailDTO> list = new ArrayList<>();
+        List<ITerminalExportDTO> terminalCodes = new ArrayList<>();
+        try (SXSSFWorkbook workbook = new SXSSFWorkbook()) {
+            workbook.setCompressTempFiles(true);
+            Map<String, TerminalExportDTO> terminalExports = new HashMap<>();
+            SXSSFSheet sheet = workbook.createSheet("VietQRVN-GiaoDich");
+            sheet.setRandomAccessWindowSize(WINDOW_SIZE);
+            String isOwner = accountBankReceiveService.checkIsOwner(bankId, userId);
+            if (isOwner == null || isOwner.trim().isEmpty()) {
+            } else {
+                if (terminalCode == null || terminalCode.trim().isEmpty()) {
+                    list = transactionReceiveService.getTransByBankId(bankId, fromDate, toDate);
+                    terminalCodes = terminalService.getTerminalExportByUserId(userId);
+                } else {
+                    list = transactionReceiveService
+                            .getTransByTerminalCode(terminalCode, fromDate, toDate);
+                    terminalCodes = terminalService.getTerminalExportByCode(terminalCode);
+                }
+            }
+            if (terminalCodes != null && !terminalCodes.isEmpty()) {
+                for (ITerminalExportDTO item : terminalCodes) {
+                    String code = item.getTerminalCode();
+                    if (!terminalExports.containsKey(code)) {
+                        terminalExports.put(code, new
+                                TerminalExportDTO(item.getTerminalName(), item.getTerminalAddress()));
+                    }
+                }
+            }
+            List<TransactionExportTerminalDTO> dtos = list.stream().map(item -> {
+                TransactionExportTerminalDTO dto = new TransactionExportTerminalDTO();
+                dto.setAmount(item.getAmount());
+                dto.setBankAccount(item.getBankAccount());
+                dto.setBankCode(item.getBankCode());
+                dto.setBankName(item.getBankName());
+                dto.setContent(item.getContent() != null ? item.getContent() : "");
+                dto.setReferenceNumber(item.getReferenceNumber() != null ? item.getContent() : "");
+                dto.setOrderId(item.getOrderId() != null ? item.getContent() : "");
+                dto.setTerminalCode(item.getTerminalCode() != null ? item.getContent() : "");
+                dto.setTime(DateTimeUtil.getDateStringBaseLong(item.getTime()));
+                dto.setTimePaid(DateTimeUtil.getDateStringBaseLong(item.getTimePaid()));
+                dto.setTransType(item.getTransType().equals("C") ? "Giao dịch đến" : "Giao dịch đi");
+                dto.setStatus(getStatusTransaction(item.getStatus()));
+                dto.setType(getTypeTransaction(item.getType()));
+                dto.setNote(item.getNote() != null ? item.getContent() : "");
+                dto.setBankShortName(item.getBankShortName());
+                dto.setTerminalCode(item.getTerminalCode());
+                TerminalExportDTO terminalExportDTO = terminalExports.get(item.getTerminalCode());
+                if (terminalExportDTO != null) {
+                    dto.setTerminalAddress(terminalExportDTO.getTerminalAddress());
+                    dto.setTerminalName(terminalExportDTO.getTerminalName());
+                } else {
+                    dto.setTerminalAddress("");
+                    dto.setTerminalName("");
+                }
+                return dto;
+            }).collect(Collectors.toList());
 
-        try (Workbook workbook = new XSSFWorkbook()) {
-            Sheet sheet = workbook.createSheet("VietQRVN-ListMember");
 
             // Tạo hàng tiêu đề
             Row headerRow = sheet.createRow(0);
-            String[] headers = {"STT", "Thời gian tạo", "Mã điểm bán", "Số tiền"};
+            String[] headers = {"STT", "Thời gian thanh toán", "Số tiền (VND)", "Mã giao dịch", "Mã đơn hàng",
+            "Mã cửa hàng", "Tên cửa hàng", "Địa chỉ", "Loại giao dịch", "Thời gian tạo", "Tài khoản nhận", "Nội dung",
+            "Ghi chú", "Trạng thái"};
 
+            XSSFCellStyle style = workbook.getXSSFWorkbook().createCellStyle();
+            XSSFCellStyle styleCommon = workbook.getXSSFWorkbook().createCellStyle();
+            XSSFFont font = workbook.getXSSFWorkbook().createFont();
+            font.setFontName("Times New Roman");
+            font.setFontHeightInPoints((short) 12);
+            styleCommon.setFont(font);
             for (int i = 0; i < headers.length; i++) {
-                headerRow.createCell(i).setCellValue(headers[i]);
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+                style.setAlignment(HorizontalAlignment.CENTER);
+                style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+                style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+                style.setFont(font);
+                cell.setCellStyle(style);
             }
 
             int counter = 1;
-            for (TransactionRelatedDetailDTO item : list) {
+            for (TransactionExportTerminalDTO item : dtos) {
                 Row row = sheet.createRow(counter++);
-                row.createCell(0).setCellValue(String.valueOf(counter));
-                row.createCell(1).setCellValue(item.getTime());
-                row.createCell(2).setCellValue(item.getTerminalCode());
-                row.createCell(3).setCellValue(item.getAmount());
+                row.createCell(0).setCellValue(String.valueOf(counter - 1));
+                row.createCell(1).setCellValue(item.getTimePaid());
+                row.createCell(2).setCellValue(item.getAmount());
+                row.createCell(3).setCellValue(item.getReferenceNumber());
+                row.createCell(4).setCellValue(item.getOrderId());
+                row.createCell(5).setCellValue(item.getTerminalCode());
+                row.createCell(6).setCellValue(item.getTerminalName());
+                row.createCell(7).setCellValue(item.getTerminalAddress());
+                row.createCell(8).setCellValue(item.getType());
+                row.createCell(9).setCellValue(item.getTime());
+                row.createCell(10).setCellValue(item.getBankAccount() + " - " + item.getBankCode());
+                row.createCell(11).setCellValue(item.getContent());
+                row.createCell(12).setCellValue(item.getNote());
+                row.createCell(13).setCellValue(item.getStatus());
+                for (int i = 0; i < 14; i++) {
+                    row.getCell(i).setCellStyle(styleCommon);
+                }
             }
+
+            sheet.setColumnWidth(0, 9 * WIDTH_PIXEL);
+            sheet.setColumnWidth(1, 22 * WIDTH_PIXEL);
+            sheet.setColumnWidth(2, 14 * WIDTH_PIXEL);
+            sheet.setColumnWidth(3, 21 * WIDTH_PIXEL);
+            sheet.setColumnWidth(4, 17 * WIDTH_PIXEL);
+            sheet.setColumnWidth(5, 17 * WIDTH_PIXEL);
+            sheet.setColumnWidth(6, 35 * WIDTH_PIXEL);
+            sheet.setColumnWidth(7, 40 * WIDTH_PIXEL);
+            sheet.setColumnWidth(8, 15 * WIDTH_PIXEL);
+            sheet.setColumnWidth(9, 22 * WIDTH_PIXEL);
+            sheet.setColumnWidth(10, 24 * WIDTH_PIXEL);
+            sheet.setColumnWidth(11, 30 * WIDTH_PIXEL);
+            sheet.setColumnWidth(12, 20 * WIDTH_PIXEL);
+            sheet.setColumnWidth(13, 20 * WIDTH_PIXEL);
+            sheet.setDefaultRowHeightInPoints(17);
 
             // Tạo một mảng byte từ workbook
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -472,6 +554,30 @@ public class TerminalController {
         }
         response.getOutputStream().flush();
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    private String getStatusTransaction(int status) {
+        switch (status) {
+            case 0:
+                return "Chờ thành toán";
+            case 1:
+                return "Thành công";
+            case 2:
+                return "Đã hủy";
+        }
+        return "";
+    }
+
+    private String getTypeTransaction(int type) {
+        switch (type) {
+            case 0:
+                return "Giao dịch khác";
+            case 1:
+                return "QR cửa hàng";
+            case 2:
+                return "QR giao dịch";
+        }
+        return "";
     }
 
     @GetMapping("terminal/export-excel")
