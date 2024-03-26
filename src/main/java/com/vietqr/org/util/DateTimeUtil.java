@@ -10,7 +10,9 @@ public class DateTimeUtil {
     private static final String GMT_PLUS_7 = "GMT+7";
     private static final String DateTimeFormat = "yyyy-MM-dd HH:mm:ss";
 
-    private static final String DateTimeFormatVN = "HH:mm:ss dd-MM-yyyy";
+    private static final String DateTimeFormatVN = "dd-MM-yyyy HH:mm:ss";
+
+    private static final String DateTimeForMatRaw = "yyyyMMdd_HHmmss";
 
     private static final String DateFormat = "yyyy-MM-dd";
     // 7 * 60 * 60
@@ -94,6 +96,11 @@ public class DateTimeUtil {
     public static String getCurrentDateAsString() {
         LocalDateTime localDateTime = LocalDateTime.now().atZone(ZoneId.of(GMT_PLUS_7)).toLocalDateTime();
         return localDateTime.with(LocalTime.MIN).format(DateTimeFormatter.ofPattern(DateFormat));
+    }
+
+    public static String getCurrentDateTimeAsString() {
+        LocalDateTime localDateTime = LocalDateTime.now(ZoneId.of(GMT_PLUS_7));
+        return localDateTime.format(DateTimeFormatter.ofPattern(DateTimeForMatRaw));
     }
 
     public static String getPrevDateAsString() {

@@ -50,6 +50,29 @@ public class StringUtil {
         return result;
     }
 
+    public static String formatBankAccount(String bankAccount) {
+        String result = bankAccount;
+        try {
+            String formattedBankAccount = bankAccount.replaceAll("\\s+", "");
+            if (formattedBankAccount.length() <= 5) {
+                result = formattedBankAccount;
+            } else {
+                int hiddenLength = formattedBankAccount.length() - 5;
+                StringBuilder hiddenString = new StringBuilder();
+                for (int i = 0; i < hiddenLength; i++) {
+                    hiddenString.append('x');
+                }
+                result = formattedBankAccount.substring(0, 2) + hiddenString.toString() +
+                        formattedBankAccount.substring(formattedBankAccount.length() - 3);
+            }
+        } catch (Exception e) {
+            logger.error("formatBankAccount: ERROR: " + e.toString());
+            System.out.println("formatBankAccount: ERROR: " + e.toString());
+        }
+
+        return result;
+    }
+
     public static String formatPhoneNumber(String phoneNumber) {
         String result = phoneNumber;
         try {
