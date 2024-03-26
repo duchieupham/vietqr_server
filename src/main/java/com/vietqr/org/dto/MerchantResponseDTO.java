@@ -10,4 +10,12 @@ public interface MerchantResponseDTO {
     String getVsoCode();
 
     int getTotalTerminals();
+
+    String getBusinessType();
+
+    String getBusinessSector();
+
+    String getTaxId();
+
+    String getUserId();
 }

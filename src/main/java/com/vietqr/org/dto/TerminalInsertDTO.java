@@ -60,6 +60,14 @@ public class TerminalInsertDTO {
         this.address = address;
     }
 
+    public String getMerchantId() {
+        return merchantId;
+    }
+
+    public void setMerchantId(String merchantId) {
+        this.merchantId = merchantId;
+    }
+
     public List<String> getUserIds() {
         return userIds;
     }
@@ -82,13 +90,5 @@ public class TerminalInsertDTO {
 
     public void setUserId(String userId) {
         this.userId = userId;
-    }
-
-    public String getMerchantId() {
-        return merchantId;
-    }
-
-    public void setMerchantId(String merchantId) {
-        this.merchantId = merchantId;
     }
 }

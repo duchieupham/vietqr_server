@@ -36,8 +36,8 @@ public class TerminalServiceImpl implements TerminalService {
 
     @Override
     public List<TerminalResponseInterfaceDTO> getTerminalsByUserId(String userId, int offset) {
-//        return repo.getTerminalsByUserId(userId, offset);
-        return repo.getTerminalsByUserId(userId);
+        return repo.getTerminalsByUserId(userId, offset);
+//        return repo.getTerminalsByUserId(userId);
     }
 
     @Override
@@ -51,9 +51,14 @@ public class TerminalServiceImpl implements TerminalService {
     }
 
     @Override
+    public List<ITerminalShareDTO> getTerminalSharesByBankIds2(List<String> bankIds, String userId) {
+        return repo.getTerminalSharesByBankIds2(bankIds, userId);
+    }
+
+    @Override
     public List<TerminalResponseInterfaceDTO> getTerminalSharesByUserId(String userId, int offset) {
-//        return repo.getTerminalsShareByUserId(userId, offset);
-        return repo.getTerminalsShareByUserId(userId);
+        return repo.getTerminalsShareByUserId(userId, offset);
+//        return repo.getTerminalsShareByUserId(userId);
     }
 
     @Override
@@ -69,7 +74,7 @@ public class TerminalServiceImpl implements TerminalService {
     @Override
     public List<TerminalResponseInterfaceDTO> getTerminalsByUserIdAndBankId(String userId, String bankId, int offset) {
 //        return repo.getTerminalsByUserIdAndBankId(userId, bankId, offset);
-        return repo.getTerminalsByUserIdAndBankIdOffset(userId, bankId);
+        return repo.getTerminalsByUserIdAndBankIdOffset(userId, bankId, offset);
     }
 
     @Override
@@ -193,5 +198,50 @@ public class TerminalServiceImpl implements TerminalService {
     @Override
     public int countNumberOfTerminalByUserIdOwner(String userId) {
         return repo.countNumberOfTerminalByUserIdOwner(userId);
+    }
+
+    @Override
+    public List<TerminalMapperDTO> getTerminalsByUserIdAndMerchantId(String userId, String merchantId) {
+        return repo.getTerminalsByUserIdAndMerchantId(userId, merchantId);
+    }
+
+    @Override
+    public List<String> getAllCodeByMerchantId(String merchantId, String userId) {
+        return repo.getAllCodeByMerchantId(merchantId, userId);
+    }
+
+    @Override
+    public List<IStatisticTerminalOverViewDTO> getListTerminalByMerchantId(String merchantId, String userId, int offset) {
+        return repo.getListTerminalByMerchantId(merchantId, userId, offset);
+    }
+
+    @Override
+    public List<String> getAllCodeByMerchantIdOwner(String merchantId, String userId) {
+        return repo.getAllCodeByMerchantIdOwner(merchantId, userId);
+    }
+
+    @Override
+    public List<String> getAllCodeByMerchantIdIn(String merchantId, String userId) {
+        return repo.getAllCodeByMerchantIdIn(merchantId, userId);
+    }
+
+    @Override
+    public List<TerminalCodeResponseDTO> getTerminalsByUserIdAndBankIdOwner(String userId, String bankId) {
+        return repo.getTerminalsByUserIdAndBankIdOwner(userId, bankId);
+    }
+
+    @Override
+    public List<IStatisticTerminalOverViewDTO> getListTerminalByMerchantIdOwner(String merchantId, String userId, int offset) {
+        return repo.getListTerminalByMerchantIdOwner(merchantId, userId, offset);
+    }
+
+    @Override
+    public List<ITerminalExportDTO> getTerminalExportByUserId(String userId) {
+        return repo.getTerminalExportByUserId(userId);
+    }
+
+    @Override
+    public List<ITerminalExportDTO> getTerminalExportByCode(String terminalCode) {
+        return repo.getTerminalExportByCode(terminalCode);
     }
 }

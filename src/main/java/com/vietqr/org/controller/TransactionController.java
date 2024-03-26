@@ -139,6 +139,7 @@ public class TransactionController {
                         break;
                     case 4:
                         result = transactionReceiveService.getTransByTerminalCodeAllDate(value, offset);
+                        httpStatus = HttpStatus.OK;
                         break;
                     case 9:
                         result = transactionReceiveService.getAllTransAllDate(offset);
@@ -389,6 +390,7 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // not update
     @GetMapping("terminal/transactions")
     public ResponseEntity<List<TransactionRelatedResponseDTO>> getTransactionUser(
             @RequestParam(value = "userId") String userId,
@@ -414,7 +416,7 @@ public class TransactionController {
             List<String> terminalCodeAccess = accountBankReceiveShareService.checkUserExistedFromBankId(userId, bankId);
             if (terminalCodeAccess != null && !terminalCodeAccess.isEmpty()) {
                 if (!checkEmptyTerminal) {
-                    listCode = terminalBankReceiveService.getTerminalCodeByMainTerminalCode(terminalCode);
+                    listCode = terminalBankReceiveService.getSubTerminalCodeByTerminalCode(terminalCode);
                     listCode.add(terminalCode);
                 } else {
                     listCode = terminalBankReceiveService.getTerminalCodeByMainTerminalCodeList(terminalCodeAccess);
@@ -1025,6 +1027,7 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // not update
     @GetMapping("transactions/unsettled")
     public ResponseEntity<List<TransactionReceiveAdminListDTO>> getUnsettledTransactions(
             @RequestParam(value = "bankId") String bankId,
@@ -1079,6 +1082,198 @@ public class TransactionController {
 //            httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("getUnsettledTransactions: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("transactions/sub-terminal/{terminalCode}")
+    public ResponseEntity<Object> getTransactionBySubTerminalCode(
+            @PathVariable("terminalCode") String terminalCode,
+            @RequestParam(value = "subTerminalCode") String subTerminalCode,
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "type") int type,
+            @RequestParam(value = "value") String value,
+            @RequestParam(value = "page") int page,
+            @RequestParam(value = "size") int size,
+            @RequestParam(value = "fromDate") String fromDate,
+            @RequestParam(value = "toDate") String toDate) {
+        PageResultDTO result = new PageResultDTO();
+        List<TransactionRelatedDTO> dtos = new ArrayList<>();
+        double totalPage = 0;
+        int totalElement = 0;
+        HttpStatus httpStatus = null;
+
+        try {
+            // type = 9: all
+            // type = 1: reference_number
+            // type = 2: order_id
+            // type = 3: content
+            // type = 5: status
+            // type = 6: amount
+            List<String> codes = new ArrayList<>();
+            if (subTerminalCode != null && !subTerminalCode.isEmpty()) {
+                codes.add(subTerminalCode);
+            } else {
+                codes = terminalBankReceiveService.getSubTerminalCodeByTerminalCode(terminalCode);
+                codes.add(terminalCode);
+            }
+            switch (type) {
+                case 9:
+                    dtos = transactionReceiveService.getSubTerminalTransactions(codes,
+                            fromDate, toDate, (page - 1) * size, size);
+                    totalElement = transactionReceiveService.countSubTerminalTransactions(codes, fromDate, toDate);
+                    httpStatus = HttpStatus.OK;
+                    break;
+                case 1:
+                    dtos = transactionReceiveService
+                            .getSubTerminalTransactionsByFtCode(codes, value,
+                                    fromDate, toDate, (page - 1) * size, size);
+                    totalElement = transactionReceiveService
+                            .countSubTerminalTransactionsByFtCode(codes, value, fromDate, toDate);
+                    httpStatus = HttpStatus.OK;
+                    break;
+                case 2:
+                    dtos = transactionReceiveService
+                            .getSubTerminalTransactionsByOrderId(codes, value, fromDate, toDate,
+                                    (page - 1) * size, size);
+                    totalElement = transactionReceiveService
+                            .countSubTerminalTransactionsByOrderId(codes, value, fromDate, toDate);
+                    httpStatus = HttpStatus.OK;
+                    break;
+                case 3:
+                    value = value.replace("-", " ").trim();
+                    dtos = transactionReceiveService
+                            .getSubTerminalTransactionsByContent(codes, value, fromDate, toDate,
+                                    (page - 1) * size, size);
+                    totalElement = transactionReceiveService
+                            .countSubTerminalTransactionsByContent(codes, value, fromDate, toDate);
+                    httpStatus = HttpStatus.OK;
+                    break;
+                case 5:
+                    dtos = transactionReceiveService
+                            .getSubTerminalTransactionsByStatus(codes, Integer.parseInt(value), fromDate, toDate,
+                                    (page - 1) * size, size);
+                    totalElement = transactionReceiveService
+                            .countSubTerminalTransactionsByStatus(codes, Integer.parseInt(value), fromDate, toDate);
+                    httpStatus = HttpStatus.OK;
+                    break;
+                case 6:
+                    dtos = transactionReceiveService
+                            .getSubTerminalTransactionsByAmount(codes, Integer.parseInt(value), fromDate, toDate,
+                                    (page - 1) * size, size);
+                    totalElement = transactionReceiveService
+                            .countSubTerminalTransactionsByAmount(codes, Integer.parseInt(value), fromDate, toDate);
+                    httpStatus = HttpStatus.OK;
+                    break;
+                default:
+                    logger.error("getUnsettledTransactions: ERROR: INVALID TYPE");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    break;
+            }
+            totalPage = (double) totalElement / size;
+            result = new PageResultDTO(page, size, (int) Math.ceil(totalPage), totalElement, dtos);
+
+        } catch (Exception e) {
+            logger.error("getTransactionBySubTerminalCode: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("transaction/overview-sub-terminal/{terminalCode}")
+    public ResponseEntity<TransStatisticResponseDTO> getTransactionSubTerminalCodeOverview(
+            @PathVariable("terminalCode") String subTerminalCode,
+            @RequestParam(value = "subTerminalCode") String terminalCode,
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "fromDate") String fromDate,
+            @RequestParam(value = "toDate") String toDate) {
+        TransStatisticResponseDTO result = null;
+        TransStatisticDTO dto = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (StringUtil.isNullOrEmpty(subTerminalCode)) {
+                List<String> codes = terminalBankReceiveService.getSubTerminalCodeByTerminalCode(terminalCode);
+                codes.add(terminalCode);
+                dto = transactionReceiveService
+                        .getTransactionOverviewBySubTerminalCode(codes, fromDate, toDate);
+            } else {
+                dto = transactionReceiveService
+                        .getTransactionOverviewBySubTerminalCode(terminalCode, fromDate, toDate);
+            }
+            if (dto != null && Objects.nonNull(dto.getTotalCashIn()) && Objects.nonNull(dto.getTotalCashOut())) {
+                result = new TransStatisticResponseDTO();
+                result.setTotalCashIn(dto.getTotalCashIn() != null ? dto.getTotalCashIn() : 0);
+                result.setTotalCashOut(dto.getTotalCashOut() != null ? dto.getTotalCashOut() : 0);
+                result.setTotalTransC(dto.getTotalTransC() != null ? dto.getTotalTransC() : 0);
+                result.setTotalTransD(dto.getTotalTransD() != null ? dto.getTotalTransD() : 0);
+                result.setTotalTrans(dto.getTotalTrans() != null ? dto.getTotalTrans() : 0);
+                httpStatus = HttpStatus.OK;
+            } else {
+                result = new TransStatisticResponseDTO();
+                result.setTotalTrans(0L);
+                result.setTotalTransC(0L);
+                result.setTotalTransD(0L);
+                result.setTotalCashIn(0L);
+                result.setTotalCashOut(0L);
+                httpStatus = HttpStatus.OK;
+            }
+        } catch (Exception e) {
+            System.out.println("Error at getTransactionSubTerminalCodeOverview: " + e.toString());
+            logger.error("Error at getTransactionSubTerminalCodeOverview: " + e.getMessage()
+            + " at: " + System.currentTimeMillis());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("transaction/statistic-sub-terminal/{subTerminalCode}")
+    public ResponseEntity<List<TransStatisticByTimeDTO>> getTransactionSubTerminalCodeStatistic(
+            @PathVariable(value = "subTerminalCode") String subTerminalCode,
+            @RequestParam(value = "terminalCode") String terminalCode,
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "type") int type,
+            @RequestParam(value = "fromDate") String fromDate,
+            @RequestParam(value = "toDate") String toDate) {
+        List<TransStatisticByTimeDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            switch (type) {
+                // by date
+                case 0:
+                    if (StringUtil.isNullOrEmpty(subTerminalCode)) {
+                        List<String> codes = terminalBankReceiveService.getSubTerminalCodeByTerminalCode(terminalCode);
+                        codes.add(terminalCode);
+                        result = transactionReceiveService
+                                .getTransStatisticSubTerminalByTerminalCodeDate(codes, fromDate, toDate);
+                    } else {
+                        result = transactionReceiveService
+                                .getTransStatisticSubTerminalByTerminalCodeDate(subTerminalCode, fromDate, toDate);
+                    }
+                    httpStatus = HttpStatus.OK;
+                    break;
+                // by month
+                case 1:
+                    if (StringUtil.isNullOrEmpty(subTerminalCode)) {
+                        List<String> codes = terminalBankReceiveService.getSubTerminalCodeByTerminalCode(terminalCode);
+                        codes.add(terminalCode);
+                        result = transactionReceiveService
+                                .getTransStatisticSubTerminalByTerminalCodeMonth(codes, fromDate, toDate);
+                    } else {
+                        result = transactionReceiveService
+                                .getTransStatisticSubTerminalByTerminalCodeMonth(subTerminalCode, fromDate, toDate);
+                    }
+                    httpStatus = HttpStatus.OK;
+                    break;
+                default:
+                    logger.error("getTransactionSubTerminalCodeStatistic: ERROR: INVALID TYPE");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    break;
+            }
+        } catch (Exception e) {
+            System.out.println("Error at getTransactionSubTerminalCodeOverview: " + e.toString());
+            logger.error("Error at getTransactionSubTerminalCodeOverview: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -1189,6 +1384,7 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // not update
     @GetMapping("transactions/list")
     public ResponseEntity<List<TransactionRelatedResponseDTO>> getTransactionsMobile(
             @RequestParam(value = "bankId") String bankId,
@@ -1233,7 +1429,7 @@ public class TransactionController {
                                 terminalCodeForSearch = value;
                             }
                         } else {
-                            allTerminalCode = terminalBankReceiveService.getTerminalCodeByMainTerminalCode(terminalCodeForSearch);
+                            allTerminalCode = terminalBankReceiveService.getSubTerminalCodeByTerminalCode(terminalCodeForSearch);
                             allTerminalCode.add(terminalCodeForSearch);
                         }
                         if (!allTerminalCode.isEmpty()) {
@@ -1275,7 +1471,7 @@ public class TransactionController {
                                 terminalCodeForSearch = value;
                             }
                         } else {
-                            allTerminalCode = terminalBankReceiveService.getTerminalCodeByMainTerminalCode(terminalCodeForSearch);
+                            allTerminalCode = terminalBankReceiveService.getSubTerminalCodeByTerminalCode(terminalCodeForSearch);
                             allTerminalCode.add(terminalCodeForSearch);
                         }
                         if (!allTerminalCode.isEmpty()) {
@@ -1289,7 +1485,7 @@ public class TransactionController {
                         break;
                     case 5:
                         if (!StringUtil.isNullOrEmpty(value)) {
-                            Integer status = Integer.parseInt(value);
+                            int status = Integer.parseInt(value);
                             dtos = transactionReceiveService.getTransactionsByStatus(status, offset, bankId, from, to);
                         } else {
                             dtos = transactionReceiveService.getTransactions(offset, bankId, from, to);
@@ -1582,6 +1778,7 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // not update
     @GetMapping("transaction/overview/{bankId}")
     public ResponseEntity<TransStatisticResponseDTO> getTransactionOverview(
             @PathVariable("bankId") String bankId,
@@ -1644,6 +1841,7 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // not update
     @GetMapping("transaction/overview-by-day/{bankId}")
     public ResponseEntity<TransStatisticResponseDTO> getTransactionOverview(
             @PathVariable("bankId") String bankId,
@@ -1707,6 +1905,7 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // not update
     @GetMapping("transaction/statistic-by-date")
     public ResponseEntity<List<TransStatisticByTimeDTO>> getTransactionStatisticByDate(
             @RequestParam(value = "terminalCode") String terminalCode,
@@ -1758,6 +1957,7 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // not update
     @GetMapping("transaction/statistic")
     public ResponseEntity<List<TransStatisticByDateDTO>> getTransactionStatistic(
             @RequestParam(value = "terminalCode") String terminalCode,

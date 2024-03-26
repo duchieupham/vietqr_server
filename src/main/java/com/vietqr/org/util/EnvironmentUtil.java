@@ -232,6 +232,22 @@ public class EnvironmentUtil {
     private static final String MB_QR_CODE_STATIC_TYPE = "1";
     private static final String MB_QR_INIT_STATIC_METHOD = "11";
 
+    // Role for member in merchant
+    private static final String ONLY_READ_RECEIVE_MERCHANT_ROLE_ID_UAT = "ce30f63e-e5c4-11ee-abd2-c437724afb36";
+    private static final String ONLY_READ_RECEIVE_ROLE_ID_PROD = "ce30f63e-e5c4-11ee-abd2-c437724afb36";
+
+    private static final String READ_APPROVE_RECEIVE_MERCHANT_ROLE_ID_UAT = "f63ddf03-e5c4-11ee-abd2-c437724afb36";
+    private static final String READ_REQUEST_RECEIVE_ROLE_ID_PROD = "f63ddf03-e5c4-11ee-abd2-c437724afb36";
+
+    private static final String ADMIN_ROLE_ID_UAT = "b9611ed2-e5c4-11ee-abd2-c437724afb36";
+    private static final String ADMIN_ROLE_ID_PROD = "b9611ed2-e5c4-11ee-abd2-c437724afb36";
+
+    //Role for member in terminal
+    private static final String ONLY_READ_RECEIVE_TERMINAL_ROLE_ID_UAT = "0f470d54-63a3-4cce-8691-5ec9380855f3";
+    private static final String ONLY_READ_RECEIVE_TERMINAL_ROLE_ID_PROD = "0f470d54-63a3-4cce-8691-5ec9380855f3";
+    private static final String READ_REQUEST_RECEIVE_TERMINAL_ROLE_ID_UAT = "1bf18675-e063-4070-a5d6-14add8cfb518";
+    private static final String READ_REQUEST_RECEIVE_TERMINAL_ROLE_ID_PROD = "1bf18675-e063-4070-a5d6-14add8cfb518";
+
     public static String getBidvSecretKey() {
         return BIDV_SECRET_KEY;
     }
@@ -516,5 +532,25 @@ public class EnvironmentUtil {
 
     public static String getDefaultCustomerSyncIdIot() {
         return (IS_PRODUCTION == false) ? MERCHANT_ID_QR_BOX_DEFAULT_UAT : MERCHANT_ID_QR_BOX_DEFAULT_PROD;
+    }
+
+    public static String getOnlyReadReceiveMerchantRoleId() {
+        return (IS_PRODUCTION == false) ? ONLY_READ_RECEIVE_MERCHANT_ROLE_ID_UAT : ONLY_READ_RECEIVE_ROLE_ID_PROD;
+    }
+
+    public static String getRequestReceiveMerchantRoleId() {
+        return (IS_PRODUCTION == false) ? READ_APPROVE_RECEIVE_MERCHANT_ROLE_ID_UAT : READ_REQUEST_RECEIVE_ROLE_ID_PROD;
+    }
+
+    public static String getAdminRoleId() {
+        return (IS_PRODUCTION == false) ? ADMIN_ROLE_ID_UAT : ADMIN_ROLE_ID_PROD;
+    }
+
+    public static String getOnlyReadReceiveTerminalRoleId() {
+        return (IS_PRODUCTION == false) ? ONLY_READ_RECEIVE_TERMINAL_ROLE_ID_UAT : ONLY_READ_RECEIVE_TERMINAL_ROLE_ID_PROD;
+    }
+
+    public static String getRequestReceiveTerminalRoleId() {
+        return (IS_PRODUCTION == false) ? READ_REQUEST_RECEIVE_TERMINAL_ROLE_ID_UAT : READ_REQUEST_RECEIVE_TERMINAL_ROLE_ID_PROD;
     }
 }

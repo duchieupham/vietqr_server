@@ -194,6 +194,11 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     }
 
     @Override
+    public List<TerminalBankReceiveDTO> getAccountBankReceiveByUseId(String userId) {
+        return repo.getAccountBankReceiveByUseId(userId);
+    }
+
+    @Override
     public void unRegisterAuthenBank(String bankAccount, String ewalletToken) {
         repo.unRegisterAuthenBank(bankAccount, ewalletToken);
     }

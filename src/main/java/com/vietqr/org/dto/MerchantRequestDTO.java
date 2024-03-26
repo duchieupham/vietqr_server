@@ -1,6 +1,9 @@
 package com.vietqr.org.dto;
 
+import javax.validation.constraints.NotBlank;
+
 public class MerchantRequestDTO {
+    @NotBlank
     private String name;
     private String address;
     private String vsoCode;

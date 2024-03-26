@@ -44,10 +44,27 @@ public class TerminalStatisticController {
             @RequestParam String toDate) {
         StatisticMerchantDTO result = null;
         HttpStatus httpStatus = null;
+        List<String> listTerminalCode = new ArrayList<>();
+        List<String> tempCode = new ArrayList<>();
         try {
-            List<String> listTerminalCode = terminalService.getAllCodeByUserIdOwner(userId);
-            List<String> tempCode = terminalService.getAllCodeByUserId(userId);
-            listTerminalCode.addAll(tempCode);
+            // old code
+//            tempCode = terminalService.getAllCodeByUserId(userId);
+//            listTerminalCode.addAll(tempCode);
+//            Set<String> uniqueCodes = new HashSet<>(listTerminalCode);
+//            listTerminalCode = new ArrayList<>(uniqueCodes);
+
+            // new code
+            if (merchantId != null && !merchantId.isEmpty()) {
+                // not owner
+                listTerminalCode = terminalService.getAllCodeByMerchantId(merchantId, userId);
+                // owner
+                tempCode = terminalService.getAllCodeByMerchantIdOwner(merchantId, userId);
+                listTerminalCode.addAll(tempCode);
+            } else {
+                listTerminalCode = terminalService.getAllCodeByUserIdOwner(userId);
+                tempCode = terminalService.getAllCodeByMerchantIdIn(merchantId, userId);
+                listTerminalCode.addAll(tempCode);
+            }
             Set<String> uniqueCodes = new HashSet<>(listTerminalCode);
             listTerminalCode = new ArrayList<>(uniqueCodes);
 
@@ -98,10 +115,30 @@ public class TerminalStatisticController {
                     } else {
                         result.setRatePreviousMonth(0);
                     }
+                } else {
+                    result = new StatisticMerchantDTO();
+                    result.setTotalTrans(0);
+                    result.setTotalAmount(0);
+                    result.setMerchantId("");
+                    result.setDate(DateTimeUtil.removeTimeInDateTimeString(fromDate));
+                    result.setMerchantName("");
+                    result.setVsoCode("");
+                    result.setratePreviousDate(0);
+                    result.setRatePreviousMonth(0);
+                    result.setTotalTerminal(0);
                 }
-
                 httpStatus = HttpStatus.OK;
             } else {
+                result = new StatisticMerchantDTO();
+                result.setTotalTrans(0);
+                result.setTotalAmount(0);
+                result.setMerchantId("");
+                result.setDate(DateTimeUtil.removeTimeInDateTimeString(fromDate));
+                result.setMerchantName("");
+                result.setVsoCode("");
+                result.setratePreviousDate(0);
+                result.setRatePreviousMonth(0);
+                result.setTotalTerminal(0);
                 httpStatus = HttpStatus.OK;
             }
 
@@ -122,14 +159,22 @@ public class TerminalStatisticController {
         List<StatisticTerminalOverViewDTO> result = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
-            List<IStatisticTerminalOverViewDTO> dtos = terminalService
-                    .getListTerminalByUserId(userId, offset);
-            if (dtos != null && dtos.size() < 10) {
-                int totalTerminalOwner = terminalService.countNumberOfTerminalByUserIdOwner(userId);
-                List<IStatisticTerminalOverViewDTO> dtos1 = terminalService
-                        .getListTerminalByUserIdNotOwner(userId, Math.abs(offset - totalTerminalOwner) % 10, 10 - dtos.size());
-                dtos.addAll(dtos1);
+            List<IStatisticTerminalOverViewDTO> dtos = new ArrayList<>();
+            List<IStatisticTerminalOverViewDTO> dtosOwner = new ArrayList<>();
+            if (merchantId == null || merchantId.isEmpty()) {
+                dtos = terminalService
+                        .getListTerminalByUserId(userId, offset);
+            } else {
+                // not owner
+                dtos = terminalService
+                        .getListTerminalByMerchantId(merchantId, userId, offset);
+                // owner
+                if (dtos == null || dtos.isEmpty()) {
+                    dtos = terminalService
+                            .getListTerminalByMerchantIdOwner(merchantId, userId, offset);
+                }
             }
+
             if (dtos != null && !dtos.isEmpty()) {
                 result = dtos.stream().map(item -> {
                             StatisticTerminalOverViewDTO dto = new StatisticTerminalOverViewDTO();
@@ -138,7 +183,7 @@ public class TerminalStatisticController {
                             dto.setTerminalCode(item.getTerminalCode());
                             dto.setTerminalAddress(item.getTerminalAddress());
                             List<String> listCode = new ArrayList<>();
-                            listCode = terminalBankReceiveService.getTerminalCodeByMainTerminalCode(item.getTerminalCode());
+                            listCode = terminalBankReceiveService.getSubTerminalCodeByTerminalCode(item.getTerminalCode());
                             listCode.add(item.getTerminalCode());
                             RevenueTerminalDTO revGrowthToday = transactionTerminalTempService.getTotalTranByTerminalCodeAndTimeBetween(
                                     listCode, DateTimeUtil.removeTimeInDateTimeString(fromDate), DateTimeUtil.removeTimeInDateTimeString(toDate));
@@ -161,6 +206,8 @@ public class TerminalStatisticController {
                                         (double) (dto.getTotalAmount() - revGrowthPrevDate.getTotalAmount())
                                                 / revGrowthPrevDate.getTotalAmount();
                                 dto.setRatePreviousDate((int) (revGrowthPrevDateNum * 100));
+                            } else if (revGrowthPrevDate != null && revGrowthPrevDate.getTotalAmount() == 0 && dto.getTotalAmount() != 0) {
+                                dto.setRatePreviousDate(100);
                             } else {
                                 dto.setRatePreviousDate(0);
                             }

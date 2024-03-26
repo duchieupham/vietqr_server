@@ -13,12 +13,14 @@ public class TerminalDetailResponseDTO {
 //    private String qrCode;
     private List<TerminalBankResponseDTO> banks;
 
-    private List<AccountMemberDTO> members;
+    private List<AccountMemberResponseDTO> members;
 
     public TerminalDetailResponseDTO() {
     }
 
-    public TerminalDetailResponseDTO(String id, String name, String address, String code, String userId, boolean isDefault, List<TerminalBankResponseDTO> banks, List<AccountMemberDTO> members) {
+    public TerminalDetailResponseDTO(String id, String name, String address, String code,
+                                     String userId, boolean isDefault, List<TerminalBankResponseDTO> banks,
+                                     List<AccountMemberResponseDTO> members) {
         this.id = id;
         this.name = name;
         this.address = address;
@@ -93,11 +95,11 @@ public class TerminalDetailResponseDTO {
         this.banks = banks;
     }
 
-    public List<AccountMemberDTO> getMembers() {
+    public List<AccountMemberResponseDTO> getMembers() {
         return members;
     }
 
-    public void setMembers(List<AccountMemberDTO> members) {
+    public void setMembers(List<AccountMemberResponseDTO> members) {
         this.members = members;
     }
 }

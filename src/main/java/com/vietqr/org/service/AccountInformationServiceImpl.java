@@ -2,15 +2,13 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
-import com.vietqr.org.dto.IAccountTerminalMemberDTO;
+import com.vietqr.org.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.entity.AccountInformationEntity;
 import com.vietqr.org.repository.AccountInformationRepository;
-import com.vietqr.org.dto.AccountInformationSyncDTO;
-import com.vietqr.org.dto.AccountSearchDTO;
-import com.vietqr.org.dto.UserInfoWalletDTO;;
+;
 
 @Service
 public class AccountInformationServiceImpl implements AccountInformationService {
@@ -94,5 +92,20 @@ public class AccountInformationServiceImpl implements AccountInformationService 
 	@Override
 	public List<IAccountTerminalMemberDTO> getMembersWebByTerminalIdAndFullName(String terminalId, String value, int offset) {
 		return accountInformationRepo.getMembersWebByTerminalIdAndFullName(terminalId, value, offset);
+	}
+
+	@Override
+	public AccountSearchByPhoneNoDTO findAccountByPhoneNo(String phoneNo) {
+		return accountInformationRepo.findAccountByPhoneNo(phoneNo);
+	}
+
+	@Override
+	public AccountSearchByPhoneNoDTO findAccountByUserId(String userId) {
+		return accountInformationRepo.findAccountByUserId(userId);
+	}
+
+	@Override
+	public List<IAccountTerminalMemberDTO> getMembersByTerminalId(String terminalId) {
+		return accountInformationRepo.getMembersByTerminalId(terminalId);
 	}
 }

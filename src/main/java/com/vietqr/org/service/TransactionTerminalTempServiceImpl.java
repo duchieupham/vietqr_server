@@ -102,4 +102,34 @@ public class TransactionTerminalTempServiceImpl implements TransactionTerminalTe
     public TransactionTerminalTempEntity getTempByTransactionId(String transactionId) {
         return repo.findByTransactionId(transactionId);
     }
+
+    @Override
+    public IStatisticMerchantDTO getStatisticMerchantByMerchantAndUserId(String merchantId, String userId, String fromDate, String toDate) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndTime(fromDate, fromDate);
+        return null;
+//        return repo.getStatisticMerchantByMerchantAndUserId(merchantId, userId,
+//                startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET,
+//                startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public long getTotalAmountByTerminalCodeAndTime(String terminalCode, String fromDate, String toDate) {
+        return repo.getTotalAmountByTerminalCodeAndTime(terminalCode,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public long getTotalTranByTerminalCodeWithCurrentTime(String terminalCode, long fromDate, long currentDateTimeAsNumber) {
+        return repo.getTotalAmountByTerminalCodeAndTime(terminalCode,
+                fromDate - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                currentDateTimeAsNumber - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public int getTotalTranByTerminalCodeAndTime(String terminalCode, String fromDate, String toDate) {
+        return repo.getTotalTranByTerminalCodeAndTime(terminalCode,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
 }
