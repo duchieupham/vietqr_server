@@ -19,6 +19,7 @@ import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin
@@ -313,9 +314,9 @@ public class TerminalMemberController {
 
     // get list member by terminal id
     @GetMapping("terminal-member/{terminalId}")
-    public ResponseEntity<List<AccountMemberDTO>> getMembersFromTerminalId(
+    public ResponseEntity<List<AccountMemberResponseDTO>> getMembersFromTerminalId(
             @Valid @PathVariable("terminalId") String terminalId) {
-        List<AccountMemberDTO> result = new ArrayList<>();
+        List<AccountMemberResponseDTO> result = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
             // old
@@ -323,10 +324,22 @@ public class TerminalMemberController {
 
             // new
             String merchantId = "";
+            List<AccountMemberDTO> dtos = new ArrayList<>();
             TerminalEntity entity = terminalService.findTerminalById(terminalId);
             if (entity != null) {
                 merchantId = entity.getMerchantId();
-                result = merchantMemberService.getMembersFromTerminalId(merchantId, terminalId);
+                dtos = merchantMemberService.getMembersFromTerminalId(merchantId, terminalId);
+                result = dtos.stream().map(dto -> {
+                    AccountMemberResponseDTO responseDTO = new AccountMemberResponseDTO();
+                    responseDTO.setId(dto.getId());
+                    responseDTO.setPhoneNo(dto.getPhoneNo());
+                    responseDTO.setFirstName(dto.getFirstName());
+                    responseDTO.setMiddleName(dto.getMiddleName());
+                    responseDTO.setLastName(dto.getLastName());
+                    responseDTO.setImgId(dto.getImgId());
+                    responseDTO.setOwner(responseDTO.getId().equals(entity.getUserId()));
+                    return responseDTO;
+                }).collect(Collectors.toList());
             } else {
                 result = new ArrayList<>();
             }

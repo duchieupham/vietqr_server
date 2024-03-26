@@ -68,7 +68,6 @@ public class TerminalStatisticController {
             Set<String> uniqueCodes = new HashSet<>(listTerminalCode);
             listTerminalCode = new ArrayList<>(uniqueCodes);
 
-
             if (!listTerminalCode.isEmpty()) {
                 List<String> listCode = terminalBankReceiveService.getTerminalCodeByMainTerminalCodeList(listTerminalCode);
                 listCode.addAll(listTerminalCode);

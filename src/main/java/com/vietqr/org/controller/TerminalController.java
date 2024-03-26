@@ -408,9 +408,9 @@ public class TerminalController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @GetMapping("terminal/web/transaction-detail/export/{terminalId}")
+    @GetMapping("terminal/web/transaction-detail/export/{terminalCode}")
     public ResponseEntity<byte[]> getTerminalTransactionByTerminalId(
-            @PathVariable String terminalId,
+            @RequestParam(value = "terminalCode") String terminalCode,
             @RequestParam(value = "type") int type,
             @RequestParam(value = "value") String value,
             @RequestParam(value = "fromDate") String fromDate,

@@ -390,6 +390,7 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // not update
     @GetMapping("terminal/transactions")
     public ResponseEntity<List<TransactionRelatedResponseDTO>> getTransactionUser(
             @RequestParam(value = "userId") String userId,
@@ -1026,6 +1027,7 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // not update
     @GetMapping("transactions/unsettled")
     public ResponseEntity<List<TransactionReceiveAdminListDTO>> getUnsettledTransactions(
             @RequestParam(value = "bankId") String bankId,
@@ -1382,6 +1384,7 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // not update
     @GetMapping("transactions/list")
     public ResponseEntity<List<TransactionRelatedResponseDTO>> getTransactionsMobile(
             @RequestParam(value = "bankId") String bankId,
@@ -1482,7 +1485,7 @@ public class TransactionController {
                         break;
                     case 5:
                         if (!StringUtil.isNullOrEmpty(value)) {
-                            Integer status = Integer.parseInt(value);
+                            int status = Integer.parseInt(value);
                             dtos = transactionReceiveService.getTransactionsByStatus(status, offset, bankId, from, to);
                         } else {
                             dtos = transactionReceiveService.getTransactions(offset, bankId, from, to);
@@ -1775,6 +1778,7 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // not update
     @GetMapping("transaction/overview/{bankId}")
     public ResponseEntity<TransStatisticResponseDTO> getTransactionOverview(
             @PathVariable("bankId") String bankId,
@@ -1837,6 +1841,7 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // not update
     @GetMapping("transaction/overview-by-day/{bankId}")
     public ResponseEntity<TransStatisticResponseDTO> getTransactionOverview(
             @PathVariable("bankId") String bankId,
@@ -1900,6 +1905,7 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // not update
     @GetMapping("transaction/statistic-by-date")
     public ResponseEntity<List<TransStatisticByTimeDTO>> getTransactionStatisticByDate(
             @RequestParam(value = "terminalCode") String terminalCode,
@@ -1951,6 +1957,7 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // not update
     @GetMapping("transaction/statistic")
     public ResponseEntity<List<TransStatisticByDateDTO>> getTransactionStatistic(
             @RequestParam(value = "terminalCode") String terminalCode,
