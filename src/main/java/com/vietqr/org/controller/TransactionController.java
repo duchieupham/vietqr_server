@@ -62,6 +62,12 @@ public class TransactionController {
     TransactionBankService transactionBankService;
 
     @Autowired
+    TransReceiveRequestMappingService transReceiveRequestMappingService;
+
+    @Autowired
+    MerchantMemberRoleService merchantMemberRoleService;
+
+    @Autowired
     TransactionReceiveHistoryService transactionReceiveHistoryService;
 
     @Autowired
@@ -517,7 +523,7 @@ public class TransactionController {
                             httpStatus = HttpStatus.BAD_REQUEST;
                             break;
                     }
-                } else if (!listCode.isEmpty() && !checkEmptyDate) {
+                } else if (!listCode.isEmpty()) {
                     switch (type) {
                         case 1:
                             dtos = transactionReceiveService
@@ -1029,7 +1035,7 @@ public class TransactionController {
 
     // not update
     @GetMapping("transactions/unsettled")
-    public ResponseEntity<List<TransactionReceiveAdminListDTO>> getUnsettledTransactions(
+    public ResponseEntity<List<TransactionRelatedRequestDTO>> getUnsettledTransactions(
             @RequestParam(value = "bankId") String bankId,
             @RequestParam(value = "userId") String userId,
             @RequestParam(value = "type") int type,
@@ -1037,7 +1043,7 @@ public class TransactionController {
             @RequestParam(value = "offset") int offset,
             @RequestParam(value = "fromDate") String fromDate,
             @RequestParam(value = "toDate") String toDate) {
-        List<TransactionReceiveAdminListDTO> result = new ArrayList<>();
+        List<TransactionRelatedRequestDTO> result = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
             // type = 9: all
@@ -1045,28 +1051,35 @@ public class TransactionController {
             // type = 2: order_id
             // type = 3: content
             // type = 4: terminal code
-            String isOwner = accountBankReceiveShareService.checkUserExistedFromBankAccountAndIsOwner(userId, bankId);
+            List<TransactionReceiveAdminListDTO> dtos = new ArrayList<>();
+            List<String> roleList = new ArrayList<>();
+            roleList.add(EnvironmentUtil.getRequestReceiveTerminalRoleId());
+            roleList.add(EnvironmentUtil.getRequestReceiveMerchantRoleId());
+            roleList.add(EnvironmentUtil.getAdminRoleId());
+            String roles = String.join("|", roleList);
+            String isOwner = merchantMemberRoleService.checkMemberHaveRole(userId, roles);
+//            String isOwner = accountBankReceiveShareService.checkUserExistedFromBankAccountAndIsOwner(userId, bankId);
             if (isOwner != null && !isOwner.isEmpty()) {
                 switch (type) {
                     case 9:
-                        result = transactionReceiveService.getUnsettledTransactions(bankId, fromDate, toDate, offset);
+                        dtos = transactionReceiveService.getUnsettledTransactions(bankId, fromDate, toDate, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 1:
-                        result = transactionReceiveService.getUnsettledTransactionsByFtCode(bankId, value, fromDate, toDate, offset);
+                        dtos = transactionReceiveService.getUnsettledTransactionsByFtCode(bankId, value, fromDate, toDate, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 2:
-                        result = transactionReceiveService.getUnsettledTransactionsByOrderId(bankId, value, fromDate, toDate, offset);
+                        dtos = transactionReceiveService.getUnsettledTransactionsByOrderId(bankId, value, fromDate, toDate, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 3:
                         value = value.replace("-", " ").trim();
-                        result = transactionReceiveService.getUnsettledTransactionsByContent(bankId, value, fromDate, toDate, offset);
+                        dtos = transactionReceiveService.getUnsettledTransactionsByContent(bankId, value, fromDate, toDate, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     case 4:
-                        result = transactionReceiveService.getUnsettledTransactionsByTerminalCode(bankId, value, fromDate, toDate, offset);
+                        dtos = transactionReceiveService.getUnsettledTransactionsByTerminalCode(bankId, value, fromDate, toDate, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     default:
@@ -1074,12 +1087,42 @@ public class TransactionController {
                         httpStatus = HttpStatus.BAD_REQUEST;
                         break;
                 }
+                if (dtos != null && !dtos.isEmpty()) {
+                    List<String> listTransId = dtos.stream().map(TransactionReceiveAdminListDTO::getId)
+                            .collect(Collectors.toList());
+                    List<TransRequestDTO> listRequests = transReceiveRequestMappingService
+                            .getTransactionReceiveRequest(listTransId);
+                    Map<String, List<TransRequestDTO>> terminalBanksMap = listRequests.stream()
+                            .collect(Collectors.groupingBy(TransRequestDTO::getTransactionId));
+                    result = dtos.stream().map(item -> {
+                        TransactionRelatedRequestDTO trans = new TransactionRelatedRequestDTO();
+                        trans.setId(item.getId());
+                        trans.setBankAccount(item.getBankAccount());
+                        trans.setAmount(item.getAmount());
+                        trans.setBankId(item.getBankId());
+                        trans.setContent(item.getContent());
+                        trans.setOrderId(item.getOrderId());
+                        trans.setReferenceNumber(item.getReferenceNumber());
+                        trans.setStatus(item.getStatus());
+                        trans.setTimeCreated(item.getTimeCreated());
+                        trans.setTimePaid(item.getTimePaid());
+                        trans.setTransType(item.getTransType());
+                        trans.setType(item.getType());
+                        trans.setUserBankName(item.getUserBankName());
+                        trans.setBankShortName(item.getBankShortName());
+                        trans.setTerminalCode(item.getTerminalCode());
+                        trans.setNote(item.getNote());
+                        trans.setRequests(terminalBanksMap
+                                .getOrDefault(item.getId(), new ArrayList<>()));
+                        trans.setTotalRequest(trans.getRequests().size());
+                        return trans;
+                    }).collect(Collectors.toList());
+                }
             } else {
                 result = new ArrayList<>();
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
 
-//            httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("getUnsettledTransactions: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;

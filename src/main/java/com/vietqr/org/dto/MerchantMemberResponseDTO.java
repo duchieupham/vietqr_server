@@ -9,15 +9,15 @@ public class MerchantMemberResponseDTO {
     private String phoneNo;
     private String fullName;
     private List<TerminalMapperDTO> terminals;
-    private List<RoleMemberDTO> transReceiveRoles;
-    private List<RoleMemberDTO> transRefundRoles;
+    private List<IRoleMemberDTO> transReceiveRoles;
+    private List<IRoleMemberDTO> transRefundRoles;
     private String imgId;
 
     public MerchantMemberResponseDTO(String merchantId, String userId,
                                      String level, String phoneNo,
                                      String fullName, List<TerminalMapperDTO> terminals,
-                                     List<RoleMemberDTO> transReceiveRoles,
-                                     List<RoleMemberDTO> transRefundRoles, String imgId) {
+                                     List<IRoleMemberDTO> transReceiveRoles,
+                                     List<IRoleMemberDTO> transRefundRoles, String imgId) {
         this.merchantId = merchantId;
         this.userId = userId;
         this.level = level;
@@ -88,19 +88,19 @@ public class MerchantMemberResponseDTO {
         this.imgId = imgId;
     }
 
-    public List<RoleMemberDTO> getTransReceiveRoles() {
+    public List<IRoleMemberDTO> getTransReceiveRoles() {
         return transReceiveRoles;
     }
 
-    public void setTransReceiveRoles(List<RoleMemberDTO> transReceiveRoles) {
+    public void setTransReceiveRoles(List<IRoleMemberDTO> transReceiveRoles) {
         this.transReceiveRoles = transReceiveRoles;
     }
 
-    public List<RoleMemberDTO> getTransRefundRoles() {
+    public List<IRoleMemberDTO> getTransRefundRoles() {
         return transRefundRoles;
     }
 
-    public void setTransRefundRoles(List<RoleMemberDTO> transRefundRoles) {
+    public void setTransRefundRoles(List<IRoleMemberDTO> transRefundRoles) {
         this.transRefundRoles = transRefundRoles;
     }
 }

@@ -1,5 +1,7 @@
 package com.vietqr.org.repository;
 
+import com.vietqr.org.dto.IMerchantRoleRawDTO;
+import com.vietqr.org.dto.MerchantRoleSettingDTO;
 import com.vietqr.org.entity.MerchantMemberRoleEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -8,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 @Repository
 public interface MerchantMemberRoleRepository extends JpaRepository<MerchantMemberRoleEntity, String> {
@@ -36,4 +39,25 @@ public interface MerchantMemberRoleRepository extends JpaRepository<MerchantMemb
             + "FROM merchant_member "
             + "WHERE terminal_id = :terminalId AND user_id = :userId) ", nativeQuery = true)
     void deleteMerchantMemberRoleByUserIdAndTerminalId(String terminalId, String userId);
+
+    @Query(value = "SELECT a.id "
+            + "FROM merchant_member_role a "
+            + "INNER JOIN merchant_member b ON a.merchant_member_id = b.id "
+            + "WHERE b.user_id = :userId AND a.trans_receive_role_ids RLIKE :rolesAccept "
+            + "LIMIT 1", nativeQuery = true)
+    String checkMemberHaveRole(String userId, String rolesAccept);
+
+    @Query(value = "SELECT DISTINCT merchant_id AS merchantId, "
+            + "category AS category, role AS role "
+            + "FROM merchant_member_role a "
+            + "INNER JOIN merchant_member b ON a.merchant_member_id = b.id "
+            + "WHERE b.user_id = :userId ", nativeQuery = true)
+    List<IMerchantRoleRawDTO> getMerchantIdsByUserId(String userId);
+
+    @Query(value = "SELECT DISTINCT b.user_id "
+            + "FROM merchant_member_role a "
+            + "INNER JOIN merchant_member b ON a.merchant_member_id = b.id "
+            + "INNER JOIN merchant_bank_receive c ON c.merchant_id = b.merchant_id "
+            + "WHERE c.bank_id = :bankId AND a.trans_receive_role_ids RLIKE :roles ", nativeQuery = true)
+    List<String> getListUserIdRoles(String bankId, String roles);
 }

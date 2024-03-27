@@ -1,5 +1,6 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.dto.IMerchantRoleRawDTO;
 import com.vietqr.org.entity.MerchantMemberRoleEntity;
 import org.springframework.stereotype.Service;
 
@@ -16,4 +17,10 @@ public interface MerchantMemberRoleService {
     void deleteMerchantMemberRoleByUserIdAndMerchantId(String merchantId, String userId);
 
     void deleteMerchantMemberRoleByUserIdAndTerminalId(String terminalId, String userId);
+
+    String checkMemberHaveRole(String userId, String rolesAccept);
+
+    List<IMerchantRoleRawDTO> getMerchantIdsByUserId(String userId);
+
+    List<String> getListUserIdRoles(String bankId, String roles);
 }

@@ -5,9 +5,7 @@ import java.util.List;
 
 public class MerchantMemberCreateDTO {
     private String merchantId;
-    private int level;
     private List<String> roleIds;
-
     @NotBlank
     private String userId;
 
@@ -16,16 +14,11 @@ public class MerchantMemberCreateDTO {
     public MerchantMemberCreateDTO() {
     }
 
-    public MerchantMemberCreateDTO(int level, List<String> roleIds,
+    public MerchantMemberCreateDTO(List<String> roleIds,
                                    String userId, List<String> terminalIds) {
-        this.level = level;
         this.roleIds = roleIds;
         this.userId = userId;
         this.terminalIds = terminalIds;
-    }
-
-    public int getLevel() {
-        return level;
     }
 
     public String getMerchantId() {
@@ -34,10 +27,6 @@ public class MerchantMemberCreateDTO {
 
     public void setMerchantId(String merchantId) {
         this.merchantId = merchantId;
-    }
-
-    public void setLevel(int level) {
-        this.level = level;
     }
 
     public List<String> getRoleIds() {

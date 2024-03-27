@@ -10,8 +10,8 @@ public class MerchantMemberDetailDTO {
     private int existed;
     private int level;
     private List<TerminalMapperDTO> terminals;
-    private List<RoleMemberDTO> transReceiveRoles;
-    private List<RoleMemberDTO> transRefundRoles;
+    private List<String> transReceiveRoles;
+    private List<String> transRefundRoles;
 
     public MerchantMemberDetailDTO() {
     }
@@ -64,11 +64,11 @@ public class MerchantMemberDetailDTO {
         this.level = level;
     }
 
-    public List<RoleMemberDTO> getTransReceiveRoles() {
+    public List<String> getTransReceiveRoles() {
         return transReceiveRoles;
     }
 
-    public void setTransReceiveRoles(List<RoleMemberDTO> transReceiveRoles) {
+    public void setTransReceiveRoles(List<String> transReceiveRoles) {
         this.transReceiveRoles = transReceiveRoles;
     }
 
@@ -80,11 +80,11 @@ public class MerchantMemberDetailDTO {
         this.terminals = terminals;
     }
 
-    public List<RoleMemberDTO> getTransRefundRoles() {
+    public List<String> getTransRefundRoles() {
         return transRefundRoles;
     }
 
-    public void setTransRefundRoles(List<RoleMemberDTO> transRefundRoles) {
+    public void setTransRefundRoles(List<String> transRefundRoles) {
         this.transRefundRoles = transRefundRoles;
     }
 }

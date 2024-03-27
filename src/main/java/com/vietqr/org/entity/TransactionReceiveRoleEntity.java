@@ -4,7 +4,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.ws.rs.DefaultValue;
 
 @Entity
 @Table(name = "TransactionReceiveRole")
@@ -22,11 +21,20 @@ public class TransactionReceiveRoleEntity {
     // 0: blue
     // 1: green
     // 2: red
-    @Column(name = "color",  columnDefinition = "int default 0")
+    @Column(name = "color", columnDefinition = "int default 0")
     private int color;
 
     @Column(name = "description")
     private String description;
+
+    @Column(name = "category")
+    private int category;
+
+    @Column(name = "level")
+    private int level;
+
+    @Column(name = "checkDot")
+    private String checkDot;
 
     public void setId(String id) {
         this.id = id;
@@ -58,5 +66,37 @@ public class TransactionReceiveRoleEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public int getColor() {
+        return color;
+    }
+
+    public void setColor(int color) {
+        this.color = color;
+    }
+
+    public int getCategory() {
+        return category;
+    }
+
+    public void setCategory(int category) {
+        this.category = category;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    public String getCheckDot() {
+        return checkDot;
+    }
+
+    public void setCheckDot(String checkDot) {
+        this.checkDot = checkDot;
     }
 }

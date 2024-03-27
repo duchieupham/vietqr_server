@@ -945,6 +945,11 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public TransactionReceiveEntity getTransactionReceiveById(String transactionId) {
+        return repo.getTransactionReceiveById(transactionId);
+    }
+
+    @Override
     public List<TransactionRelatedDTO> getTransactionsByTerminalCodeAllDateListCode(List<String> allTerminalCode, int offset, String bankId) {
         return repo.getTransactionsByTerminalCodeAllDateListCode(allTerminalCode, offset, bankId, DateTimeUtil.get3MonthsPreviousAsLongInt());
     }
@@ -1086,6 +1091,21 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     public List<ITransactionRelatedDetailDTO> getTransByTerminalCode(String terminalCode,
                                                                     String fromDate, String toDate) {
         return repo.getTransByTerminalCode(terminalCode,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransactionReceiveWithRequest(String bankId, String fromDate,
+                                                                                 String toDate, int offset, int size) {
+        return repo.getTransactionReceiveWithRequest(bankId,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET, offset, size);
+    }
+
+    @Override
+    public int countTransactionReceiveWithRequest(String bankId, String fromDate, String toDate) {
+        return repo.countTransactionReceiveWithRequest(bankId,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }

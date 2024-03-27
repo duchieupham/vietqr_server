@@ -421,6 +421,8 @@ public interface TransactionReceiveService {
 
         TransactionReceiveEntity getTransactionReceiveById(String transactionId, String userId);
 
+        TransactionReceiveEntity getTransactionReceiveById(String transactionId);
+
         List<TransactionRelatedDTO> getTransactionsByTerminalCodeAllDateListCode(List<String> allTerminalCode, int offset, String bankId);
 
         List<TransactionRelatedDTO> getTransactionsByTerminalCodeAndDateListCode(List<String> allTerminalCode, int offset, String bankId, String from, String to);
@@ -474,4 +476,9 @@ public interface TransactionReceiveService {
 
         List<ITransactionRelatedDetailDTO> getTransByTerminalCode(String terminalCode,
                                                                  String fromDate, String toDate);
+
+        List<TransactionReceiveAdminListDTO> getTransactionReceiveWithRequest(String bankId,
+                                                                              String fromDate, String toDate, int offset, int size);
+
+        int countTransactionReceiveWithRequest(String bankId, String fromDate, String toDate);
 }
