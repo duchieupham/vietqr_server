@@ -2330,5 +2330,28 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "WHERE a.time BETWEEN :fromDate AND :toDate AND a.terminal_code = :terminalCode "
                 + "ORDER BY a.time DESC ", nativeQuery = true)
         List<ITransactionRelatedDetailDTO> getTransByTerminalCode(String terminalCode, long fromDate, long toDate);
+
+        @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, "
+                + "a.order_id as orderId, a.reference_number as referenceNumber, "
+                + "a.status, a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+                + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName, "
+                + "a.terminal_code as terminalCode, a.note "
+                + "FROM transaction_receive a "
+                + "INNER JOIN account_bank_receive b "
+                + "ON a.bank_id = b.id "
+                + "INNER JOIN bank_type c "
+                + "ON b.bank_type_id = c.id "
+                + "WHERE a.time BETWEEN :fromDate AND :toDate "
+                + "AND a.bank_id = :bankId AND a.type = 2 AND trans_status = 1 "
+                + "ORDER BY a.time DESC "
+                + "LIMIT :offset, :size ", nativeQuery = true)
+        List<TransactionReceiveAdminListDTO> getTransactionReceiveWithRequest(String bankId,
+                                                                              long fromDate, long toDate, int offset, int size);
+
+        @Query(value = "SELECT COUNT(a.id) "
+                + "FROM transaction_receive a "
+                + "WHERE a.time BETWEEN :fromDate AND :toDate "
+                + "AND a.bank_id = :bankId AND a.type = 2 AND trans_status = 1 ", nativeQuery = true)
+        int countTransactionReceiveWithRequest(String bankId, long fromDate, long toDate);
 }
 

@@ -1,15 +1,23 @@
 package com.vietqr.org.dto;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 public class MapRequestDTO {
     @NotBlank
     private String transactionId;
+    // 0: terminal_code
     private int requestType;
     @NotBlank
     private String requestValue;
     @NotBlank
     private String userId;
+
+    @NotNull
+    private String terminalId;
+
+    @NotNull
+    private String merchantId;
 
     public MapRequestDTO() {
     }
@@ -19,6 +27,22 @@ public class MapRequestDTO {
         this.requestType = requestType;
         this.requestValue = requestValue;
         this.userId = userId;
+    }
+
+    public String getTerminalId() {
+        return terminalId;
+    }
+
+    public void setTerminalId(String terminalId) {
+        this.terminalId = terminalId;
+    }
+
+    public String getMerchantId() {
+        return merchantId;
+    }
+
+    public void setMerchantId(String merchantId) {
+        this.merchantId = merchantId;
     }
 
     public String getTransactionId() {

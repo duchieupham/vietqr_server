@@ -113,6 +113,9 @@ public class TransactionBankController {
 	TransactionBankService transactionBankService;
 
 	@Autowired
+	MerchantMemberRoleService merchantMemberRoleService;
+
+	@Autowired
 	TransactionTerminalTempService transactionTerminalTempService;
 
 	@Autowired
@@ -1753,11 +1756,14 @@ public class TransactionBankController {
 
 				// textToSpeechService.delete(requestId);
 			} else {
-				logger.info("transaction-sync - cannot find terminal.");
+				logger.info("transaction-sync - cannot find terminal but already detech code.");
 
 				//
 				//
 				// insert notification
+//				String userIds = merchantMemberRoleService.getListUserIdByMerchantId(accountBankEntity.get);
+//
+
 				TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
 				transactionEntity.setId(transcationUUID);
 				transactionEntity.setBankAccount(accountBankEntity.getBankAccount());

@@ -1,9 +1,16 @@
 package com.vietqr.org.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import com.vietqr.org.dto.*;
+import com.vietqr.org.entity.MerchantMemberRoleEntity;
+import com.vietqr.org.service.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,19 +26,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.vietqr.org.dto.AccountSettingDTO;
-import com.vietqr.org.dto.AccountSettingUpdateDTO;
-import com.vietqr.org.dto.AccountSettingVoiceDTO;
-import com.vietqr.org.dto.ResponseMessageDTO;
-import com.vietqr.org.dto.UserSettingUpdateCheckDTO;
-import com.vietqr.org.dto.UserSettingUpdateDTO;
 import com.vietqr.org.entity.AccountSettingEntity;
 import com.vietqr.org.entity.ImageEntity;
 import com.vietqr.org.entity.SystemSettingEntity;
-import com.vietqr.org.service.AccountSettingService;
-import com.vietqr.org.service.ImageService;
-import com.vietqr.org.service.SystemSettingService;
-import com.vietqr.org.service.ThemeUiService;
 
 @RestController
 @CrossOrigin
@@ -51,6 +48,9 @@ public class AccountSettingController {
     @Autowired
     ImageService imageService;
 
+    @Autowired
+    MerchantMemberRoleService merchantMemberRoleService;
+
     @GetMapping("accounts/setting/{userId}")
     public ResponseEntity<AccountSettingDTO> getAccountSetting(@PathVariable("userId") String userId) {
         AccountSettingDTO result = null;
@@ -58,7 +58,19 @@ public class AccountSettingController {
         try {
             if (userId != null && !userId.trim().isEmpty()) {
                 AccountSettingEntity entity = accountSettingService.getAccountSettingEntity(userId);
-                //
+                List<IMerchantRoleRawDTO> merchantRoleRawDTOS = merchantMemberRoleService
+                        .getMerchantIdsByUserId(userId);
+                List<MerchantRoleSettingDTO> roles = new ArrayList<>();
+                if (merchantRoleRawDTOS != null) {
+                    Map<String, List<IMerchantRoleRawDTO>> roleMaps = merchantRoleRawDTOS.stream()
+                            .collect(Collectors.groupingBy(IMerchantRoleRawDTO::getMerchantId));
+                    roles = roleMaps.entrySet().stream().map(entry -> {
+                        List<RoleSettingDTO> roleSettingDTOS = entry.getValue().stream()
+                                .map(role -> new RoleSettingDTO(role.getCategory(), role.getRole()))
+                                .collect(Collectors.toList());
+                        return new MerchantRoleSettingDTO(entry.getKey(), roleSettingDTOS);
+                    }).collect(Collectors.toList());
+                }
                 if (entity != null) {
                     //
                     result = new AccountSettingDTO();
@@ -72,6 +84,8 @@ public class AccountSettingController {
                     result.setStatus(entity.isStatus());
                     result.setEdgeImgId(entity.getEdgeImgId());
                     result.setFooterImgId(entity.getFooterImgId());
+                    result.setMerchantRoles(roles);
+
                     // theme processing
                     SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
                     String themeImgUrl = "";

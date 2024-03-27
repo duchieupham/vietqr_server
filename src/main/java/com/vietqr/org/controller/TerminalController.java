@@ -424,7 +424,9 @@ public class TerminalController {
             HttpServletResponse response) throws IOException {
         List<ITransactionRelatedDetailDTO> list = new ArrayList<>();
         List<ITerminalExportDTO> terminalCodes = new ArrayList<>();
-        try (SXSSFWorkbook workbook = new SXSSFWorkbook()) {
+        try {
+            try (SXSSFWorkbook workbook = new SXSSFWorkbook()) {
+
             workbook.setCompressTempFiles(true);
             Map<String, TerminalExportDTO> terminalExports = new HashMap<>();
             SXSSFSheet sheet = workbook.createSheet("VietQRVN-GiaoDich");
@@ -454,8 +456,8 @@ public class TerminalController {
                 TransactionExportTerminalDTO dto = new TransactionExportTerminalDTO();
                 dto.setAmount(item.getAmount());
                 dto.setBankAccount(StringUtil.formatBankAccount(item.getBankAccount()));
-                dto.setBankCode(item.getBankCode());
-                dto.setBankName(item.getBankName());
+                dto.setBankCode(item.getBankCode() != null && !item.getBankCode().isEmpty() ? item.getBankCode() : "-" );
+                dto.setBankName(item.getBankName() != null && !item.getBankName().isEmpty() ? item.getBankName() : "-");
                 dto.setContent(item.getContent() != null ? item.getContent() : "-");
                 dto.setReferenceNumber(item.getReferenceNumber() != null && !item.getReferenceNumber().isEmpty() ? item.getReferenceNumber() : "-");
                 dto.setOrderId(item.getOrderId() != null && !item.getOrderId().isEmpty() ? item.getOrderId() : "-");
@@ -466,8 +468,7 @@ public class TerminalController {
                 dto.setStatus(getStatusTransaction(item.getStatus()));
                 dto.setType(getTypeTransaction(item.getType()));
                 dto.setNote(item.getNote() != null && !item.getNote().isEmpty() ? item.getNote() : "-");
-                dto.setBankShortName(item.getBankShortName());
-                dto.setTerminalCode(item.getTerminalCode().isEmpty() ? "-" : item.getTerminalCode());
+                dto.setBankShortName(item.getBankShortName() != null && !item.getBankShortName().isEmpty() ? item.getBankShortName() : "-");
                 TerminalExportDTO terminalExportDTO = terminalExports.get(item.getTerminalCode());
                 if (terminalExportDTO != null) {
                     dto.setTerminalAddress(terminalExportDTO.getTerminalAddress()
@@ -578,6 +579,11 @@ public class TerminalController {
 
             // Ghi dữ liệu vào response
             response.getOutputStream().write(fileContent);
+            }
+        } catch (Exception e) {
+            logger.error("getTerminalTransactionByTerminalId: ERROR: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         response.getOutputStream().flush();
         return new ResponseEntity<>(HttpStatus.OK);
@@ -599,23 +605,13 @@ public class TerminalController {
     private String getTypeTransaction(int type) {
         switch (type) {
             case 0:
-                return "Giao dịch khác";
+                return "QR giao dịch";
             case 1:
                 return "QR cửa hàng";
             case 2:
-                return "QR giao dịch";
+                return "Giao dịch khác";
             default:
                 return "-";
-        }
-    }
-
-    @GetMapping("terminal/export-excel")
-    public void test() {
-        try {
-            ExcelExportService excelExportService = new ExcelExportService();
-            excelExportService.testRowAccessWindowSize();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 

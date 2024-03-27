@@ -87,6 +87,9 @@ public class TransactionReceiveEntity implements Serializable {
 	@Column(name = "note")
 	private String note;
 
+	@Column(name = "transStatus")
+	private Integer transStatus;
+
 	public TransactionReceiveEntity() {
 		super();
 	}
@@ -345,4 +348,11 @@ public class TransactionReceiveEntity implements Serializable {
 		this.note = note;
 	}
 
+	public Integer getTransStatus() {
+		return transStatus;
+	}
+
+	public void setTransStatus(Integer transStatus) {
+		this.transStatus = transStatus;
+	}
 }

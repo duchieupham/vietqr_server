@@ -1,5 +1,7 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.dto.IMerchantRoleRawDTO;
+import com.vietqr.org.dto.MerchantRoleSettingDTO;
 import com.vietqr.org.entity.MerchantMemberRoleEntity;
 import com.vietqr.org.repository.MerchantMemberRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,5 +37,15 @@ public class MerchantMemberRoleServiceImpl implements MerchantMemberRoleService 
     @Override
     public void deleteMerchantMemberRoleByUserIdAndTerminalId(String terminalId, String userId) {
         repo.deleteMerchantMemberRoleByUserIdAndTerminalId(terminalId, userId);
+    }
+
+    @Override
+    public String checkMemberHaveRole(String userId, String rolesAccept) {
+        return repo.checkMemberHaveRole(userId, rolesAccept);
+    }
+
+    @Override
+    public List<IMerchantRoleRawDTO> getMerchantIdsByUserId(String userId) {
+        return repo.getMerchantIdsByUserId(userId);
     }
 }
