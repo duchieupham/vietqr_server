@@ -244,4 +244,9 @@ public class TerminalServiceImpl implements TerminalService {
     public List<ITerminalExportDTO> getTerminalExportByCode(String terminalCode) {
         return repo.getTerminalExportByCode(terminalCode);
     }
+
+    @Override
+    public List<ITerminalExportDTO> getTerminalByUserIdHaveRole(String userId) {
+        return repo.getTerminalByUserIdHaveRole(userId);
+    }
 }

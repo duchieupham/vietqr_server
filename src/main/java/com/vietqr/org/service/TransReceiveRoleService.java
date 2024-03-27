@@ -1,11 +1,11 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.dto.RoleMemberDTO;
+import com.vietqr.org.dto.IRoleMemberDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public interface TransReceiveRoleService {
-    List<RoleMemberDTO> getRoleByIds(List<String> receiveRoles);
+    List<IRoleMemberDTO> getRoleByIds(List<String> receiveRoles);
 }

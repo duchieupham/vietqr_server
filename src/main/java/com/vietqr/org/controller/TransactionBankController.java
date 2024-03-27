@@ -1158,6 +1158,7 @@ public class TransactionBankController {
 
 	private void pushNotification(String title, String message, NotificationEntity notiEntity, Map<String, String> data,
 			String userId) {
+		System.out.println("PUSH NOTIFICATION: " + userId);
 		if (notiEntity != null) {
 			notificationService.insertNotification(notiEntity);
 		}
@@ -1760,9 +1761,6 @@ public class TransactionBankController {
 
 				//
 				//
-				// insert notification
-//				String userIds = merchantMemberRoleService.getListUserIdByMerchantId(accountBankEntity.get);
-//
 
 				TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
 				transactionEntity.setId(transcationUUID);
@@ -1818,6 +1816,58 @@ public class TransactionBankController {
 				notiEntity.setUserId(accountBankEntity.getUserId());
 				notiEntity.setData(transcationUUID.toString());
 				notificationService.insertNotification(notiEntity);
+//				String userIds = merchantMemberRoleService.getListUserIdByMerchantId(accountBankEntity.get);
+				// 1. get all user id belong to merchant
+				List<String> userIds = new ArrayList<>();
+				List<String> list = new ArrayList<>();
+				list.add(EnvironmentUtil.getRequestReceiveTerminalRoleId());
+				list.add(EnvironmentUtil.getRequestReceiveMerchantRoleId());
+				String roles = String.join("|", list);
+				userIds = merchantMemberRoleService.getListUserIdRoles(accountBankEntity.getId(), roles);
+				// pussh notification to all member that have role
+				if (userIds != null && !userIds.isEmpty()) {
+					int numThread = userIds.size();
+					ExecutorService executorService = Executors.newFixedThreadPool(numThread);
+					for (String userId : userIds) {
+						Map<String, String> data = new HashMap<>();
+						// insert notification
+						UUID notiUUID = UUID.randomUUID();
+						NotificationEntity notificationEntity = new NotificationEntity();
+						notificationEntity.setId(notiUUID.toString());
+						notificationEntity.setRead(false);
+						notificationEntity.setMessage(message);
+						notificationEntity.setTime(time);
+						notificationEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
+						notificationEntity.setUserId(userId);
+						notificationEntity.setData(transactionEntity.getId());
+						data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+						data.put("notificationId", notificationUUID.toString());
+						data.put("transactionReceiveId", transactionEntity.getId());
+						data.put("bankAccount", transactionEntity.getBankAccount());
+						data.put("bankName", bankTypeEntity.getBankName());
+						data.put("bankCode", bankTypeEntity.getBankCode());
+						data.put("bankId", transactionEntity.getBankId());
+						data.put("terminalName", "");
+						data.put("terminalCode", "");
+						data.put("content", transactionEntity.getContent());
+						data.put("amount", "" + transactionEntity.getAmount());
+						data.put("time", "" + transactionEntity.getTime());
+						data.put("refId", "" + dto.getTransactionid());
+						data.put("status", "1");
+						data.put("traceId", "" + transactionEntity.getTraceId());
+						data.put("transType", dto.getTransType());
+						executorService.submit(() -> pushNotification(NotificationUtil
+								.getNotiTitleUpdateTransaction(), message, notificationEntity, data, userId));
+						try {
+							// send msg to QR Link
+							String refId = TransactionRefIdUtil.encryptTransactionId(transactionEntity.getId());
+							socketHandler.sendMessageToTransactionRefId(refId, data);
+						} catch (IOException e) {
+							logger.error(
+									"WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
+						}
+					}
+				}
 				List<FcmTokenEntity> fcmTokens = new ArrayList<>();
 				fcmTokens = fcmTokenService.getFcmTokensByUserId(accountBankEntity.getUserId());
 				Map<String, String> data = new HashMap<>();
@@ -1965,6 +2015,58 @@ public class TransactionBankController {
 			notiEntity.setUserId(accountBankEntity.getUserId());
 			notiEntity.setData(transcationUUID.toString());
 			notificationService.insertNotification(notiEntity);
+			//				String userIds = merchantMemberRoleService.getListUserIdByMerchantId(accountBankEntity.get);
+			// 1. get all user id belong to merchant
+			List<String> userIds = new ArrayList<>();
+			List<String> list = new ArrayList<>();
+			list.add(EnvironmentUtil.getRequestReceiveTerminalRoleId());
+			list.add(EnvironmentUtil.getRequestReceiveMerchantRoleId());
+			String roles = String.join("|", list);
+			userIds = merchantMemberRoleService.getListUserIdRoles(accountBankEntity.getId(), roles);
+			// pussh notification to all member that have role
+			if (userIds != null && !userIds.isEmpty()) {
+				int numThread = userIds.size();
+				ExecutorService executorService = Executors.newFixedThreadPool(numThread);
+				for (String userId : userIds) {
+					Map<String, String> data = new HashMap<>();
+					// insert notification
+					UUID notiUUID = UUID.randomUUID();
+					NotificationEntity notificationEntity = new NotificationEntity();
+					notificationEntity.setId(notiUUID.toString());
+					notificationEntity.setRead(false);
+					notificationEntity.setMessage(message);
+					notificationEntity.setTime(time);
+					notificationEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
+					notificationEntity.setUserId(userId);
+					notificationEntity.setData(transactionEntity.getId());
+					data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+					data.put("notificationId", notificationUUID.toString());
+					data.put("transactionReceiveId", transactionEntity.getId());
+					data.put("bankAccount", transactionEntity.getBankAccount());
+					data.put("bankName", bankTypeEntity.getBankName());
+					data.put("bankCode", bankTypeEntity.getBankCode());
+					data.put("bankId", transactionEntity.getBankId());
+					data.put("terminalName", "");
+					data.put("terminalCode", "");
+					data.put("content", transactionEntity.getContent());
+					data.put("amount", "" + transactionEntity.getAmount());
+					data.put("time", "" + transactionEntity.getTime());
+					data.put("refId", "" + dto.getTransactionid());
+					data.put("status", "1");
+					data.put("traceId", "" + transactionEntity.getTraceId());
+					data.put("transType", dto.getTransType());
+					executorService.submit(() -> pushNotification(NotificationUtil
+							.getNotiTitleUpdateTransaction(), message, notificationEntity, data, userId));
+					try {
+						// send msg to QR Link
+						String refId = TransactionRefIdUtil.encryptTransactionId(transactionEntity.getId());
+						socketHandler.sendMessageToTransactionRefId(refId, data);
+					} catch (IOException e) {
+						logger.error(
+								"WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
+					}
+				}
+			}
 			List<FcmTokenEntity> fcmTokens = new ArrayList<>();
 			fcmTokens = fcmTokenService.getFcmTokensByUserId(accountBankEntity.getUserId());
 			Map<String, String> data = new HashMap<>();

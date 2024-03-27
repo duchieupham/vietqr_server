@@ -35,4 +35,6 @@ public interface TransactionReceiveAdminListDTO {
 
     String getNote();
 
+    Integer getStatusResponse();
+
 }

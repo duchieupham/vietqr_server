@@ -65,21 +65,23 @@ public class MerchantMemberController {
                 IMerchantMemberDetailDTO memberDTO = merchantMemberService.getUserExistedFromMerchant(merchantId, dto.getUserId());
                 if (memberDTO != null) {
                     merchantMemberDetailDTO.setExisted(1);
-                    if (memberDTO.getTerminalId() == null || memberDTO.getTerminalId().isEmpty()) {
+                    if (memberDTO.getTerminalId() == null || memberDTO.getTerminalId().trim().isEmpty()) {
                         merchantMemberDetailDTO.setLevel(0);
                     } else {
                         merchantMemberDetailDTO.setLevel(1);
                     }
-                    List<String> receiveRoles = mapper.readValue(memberDTO.getTransRefundRoles(), List.class);
-                    List<RoleMemberDTO> transReceiveRoles = transReceiveRoleService.getRoleByIds(receiveRoles);
-                    merchantMemberDetailDTO.setTransReceiveRoles(transReceiveRoles);
+                    List<String> receiveRoles = mapper.readValue(memberDTO.getTransReceiveRoles(), List.class);
+//                    List<String> transReceiveRoles = transReceiveRoleService.getRoleByIds(receiveRoles);
+                    merchantMemberDetailDTO.setTransReceiveRoles(receiveRoles);
                     merchantMemberDetailDTO.setTransRefundRoles(new ArrayList<>());
-                    merchantMemberDetailDTO.setTerminals(new ArrayList<>());
+                    List<TerminalMapperDTO> terminalMapperDTOS = terminalService.getTerminalsByUserIdAndMerchantId(dto.getUserId(), merchantId);
+                    merchantMemberDetailDTO.setTerminals(terminalMapperDTOS);
                 } else {
                     merchantMemberDetailDTO.setExisted(0);
                     merchantMemberDetailDTO.setLevel(0);
                     merchantMemberDetailDTO.setTransReceiveRoles(new ArrayList<>());
                     merchantMemberDetailDTO.setTransRefundRoles(new ArrayList<>());
+                    merchantMemberDetailDTO.setTerminals(new ArrayList<>());
                 }
                 result = merchantMemberDetailDTO;
                 httpStatus = HttpStatus.OK;
@@ -112,22 +114,17 @@ public class MerchantMemberController {
             entity.setTimeAdded(time);
             String transRole = "";
             String transRefundRole = "";
-            switch (dto.getLevel()) {
-                case 0:
-                    entity.setTerminalId("");
+            if (dto.getTerminalIds() !=null && !dto.getTerminalIds().isEmpty()) {
+                for (String terminalId : dto.getTerminalIds()) {
+                    entity.setId(UUID.randomUUID().toString());
+                    entity.setTerminalId(terminalId);
                     transRole = mapper.writeValueAsString(dto.getRoleIds());
                     merchantMemberEntities.add(entity);
-                    break;
-                case 1:
-                    for (String terminalId : dto.getTerminalIds()) {
-                        entity.setId(UUID.randomUUID().toString());
-                        entity.setTerminalId(terminalId);
-                        transRefundRole = mapper.writeValueAsString(dto.getRoleIds());
-                        merchantMemberEntities.add(entity);
-                    }
-                    break;
-                default:
-                    break;
+                }
+            } else {
+                entity.setTerminalId("");
+                transRole = mapper.writeValueAsString(dto.getRoleIds());
+                merchantMemberEntities.add(entity);
             }
             if (!merchantMemberEntities.isEmpty()) {
                 for (MerchantMemberEntity memberEntity : merchantMemberEntities) {
@@ -176,21 +173,17 @@ public class MerchantMemberController {
             List<String> roles = new ArrayList<>();
             String transRole = "";
             String transRefundRole = "";
-            switch (dto.getLevel()) {
-                case 0:
-                    entity.setTerminalId("");
-                    transRole = mapper.writeValueAsString(dto.getRoleIds());
+            if (dto.getTerminalIds()!=null && !dto.getTerminalIds().isEmpty()) {
+                for (String terminalId : dto.getTerminalIds()) {
+                    entity.setId(UUID.randomUUID().toString());
+                    entity.setTerminalId(terminalId);
+                    transRefundRole = mapper.writeValueAsString(dto.getRoleIds());
                     merchantMemberEntities.add(entity);
-                case 1:
-                    for (String terminalId : dto.getTerminalIds()) {
-                        entity.setId(UUID.randomUUID().toString());
-                        entity.setTerminalId(terminalId);
-                        transRefundRole = mapper.writeValueAsString(dto.getRoleIds());
-                        merchantMemberEntities.add(entity);
-                    }
-                    break;
-                default:
-                    break;
+                }
+            } else {
+                entity.setTerminalId("");
+                transRole = mapper.writeValueAsString(dto.getRoleIds());
+                merchantMemberEntities.add(entity);
             }
             if (!merchantMemberEntities.isEmpty()) {
                 for (MerchantMemberEntity memberEntity : merchantMemberEntities) {
@@ -268,7 +261,7 @@ public class MerchantMemberController {
                     responseDTO.setTerminals(terminalMapperDTOS);
                 }
                 List<String> receiveRoles = mapper.readValue(dto.getTransRefundRoles(), List.class);
-                List<RoleMemberDTO> transReceiveRoles = transReceiveRoleService.getRoleByIds(receiveRoles);
+                List<IRoleMemberDTO> transReceiveRoles = transReceiveRoleService.getRoleByIds(receiveRoles);
                 responseDTO.setTransReceiveRoles(transReceiveRoles);
                 responseDTO.setTransRefundRoles(new ArrayList<>());
                 result = responseDTO;
@@ -321,13 +314,15 @@ public class MerchantMemberController {
                     responseDTO.setLevel(MERCHANT);
                     responseDTO.setTerminals(new ArrayList<>());
                 }
-                List<String> receiveRoles = null;
+                List<String> receiveRoles = new ArrayList<>();
                 try {
-                    receiveRoles = mapper.readValue(dto.getTransReceiveRoles(), List.class);
+                    if (dto.getTransReceiveRoles() != null && !dto.getTransReceiveRoles().isEmpty()) {
+                        receiveRoles = mapper.readValue(dto.getTransReceiveRoles(), List.class);
+                    }
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);
                 }
-                List<RoleMemberDTO> transReceiveRoles = transReceiveRoleService.getRoleByIds(receiveRoles);
+                List<IRoleMemberDTO> transReceiveRoles = transReceiveRoleService.getRoleByIds(receiveRoles);
                 responseDTO.setTransReceiveRoles(transReceiveRoles);
                 responseDTO.setTransRefundRoles(new ArrayList<>());
                 return responseDTO;

@@ -21,7 +21,7 @@ public class TransactionReceiveRoleEntity {
     // 0: blue
     // 1: green
     // 2: red
-    @Column(name = "color",  columnDefinition = "int default 0")
+    @Column(name = "color", columnDefinition = "int default 0")
     private int color;
 
     @Column(name = "description")

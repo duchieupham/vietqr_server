@@ -41,9 +41,9 @@ public interface MerchantMemberRepository extends JpaRepository<MerchantMemberEn
             + "LIMIT :offset, :size ", nativeQuery = true)
     List<IMerchantMemberDTO> findMerchantMemberMerchantId(String merchantId, String value, int offset, int size);
 
-    @Query(value = "SELECT a.terminal_id AS terminalId, b.id AS merchantMemberId, "
+    @Query(value = "SELECT a.terminal_id AS terminalId, a.id AS merchantMemberId, "
             + "b.trans_receive_role_ids AS transReceiveRoles, "
-            + "b.trans_refund_role_ids AS TransRefundRoles "
+            + "b.trans_refund_role_ids AS transRefundRoles "
             + "FROM merchant_member a "
             + "INNER JOIN merchant_member_role b ON b.merchant_member_id = a.id "
             + "WHERE a.merchant_id = :merchantId AND a.merchant_id != '' "

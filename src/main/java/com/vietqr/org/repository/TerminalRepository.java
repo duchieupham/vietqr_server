@@ -384,9 +384,17 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             + "WHERE a.code = :terminalCode ", nativeQuery = true)
     List<ITerminalExportDTO> getTerminalExportByCode(String terminalCode);
 
-    @Query(value = "SELECT a.name AS terminalName, "
+    @Query(value = "SELECT DISTINCT a.name AS terminalName, "
             + "a.code AS terminalCode, a.address AS terminalAddress "
             + "FROM terminal a "
-            + "WHERE a.user_id = :userId ", nativeQuery = true)
+            + "INNER JOIN merchant_member b ON b.merchant_id = a.merchant_id "
+            + "WHERE b.user_id = :userId AND terminal_id = ''", nativeQuery = true)
     List<ITerminalExportDTO> getTerminalExportByUserId(String userId);
+
+    @Query(value = "SELECT DISTINCT a.name AS terminalName, "
+            + "a.code AS terminalCode, a.address AS terminalAddress "
+            + "FROM terminal a "
+            + "INNER JOIN merchant_member b ON b.terminal_id = a.id "
+            + "WHERE b.user_id = :userId AND terminal_id != ''", nativeQuery = true)
+    List<ITerminalExportDTO> getTerminalByUserIdHaveRole(String userId);
 }
