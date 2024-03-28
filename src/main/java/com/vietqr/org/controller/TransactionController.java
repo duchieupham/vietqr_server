@@ -1033,7 +1033,6 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    // not update
     @GetMapping("transactions/unsettled")
     public ResponseEntity<List<TransactionRelatedRequestDTO>> getUnsettledTransactions(
             @RequestParam(value = "bankId") String bankId,

@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import com.vietqr.org.dto.*;
-import com.vietqr.org.entity.MerchantMemberRoleEntity;
 import com.vietqr.org.service.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +50,9 @@ public class AccountSettingController {
     @Autowired
     MerchantMemberRoleService merchantMemberRoleService;
 
+    @Autowired
+    MerchantBankReceiveService merchantBankReceiveService;
+
     @GetMapping("accounts/setting/{userId}")
     public ResponseEntity<AccountSettingDTO> getAccountSetting(@PathVariable("userId") String userId) {
         AccountSettingDTO result = null;
@@ -68,7 +70,11 @@ public class AccountSettingController {
                         List<RoleSettingDTO> roleSettingDTOS = entry.getValue().stream()
                                 .map(role -> new RoleSettingDTO(role.getCategory(), role.getRole()))
                                 .collect(Collectors.toList());
-                        return new MerchantRoleSettingDTO(entry.getKey(), roleSettingDTOS);
+                        String bankId = merchantBankReceiveService.getBankIdReceiveByMerchant(entry.getKey());
+                        if (bankId == null) {
+                            bankId = "";
+                        }
+                        return new MerchantRoleSettingDTO(entry.getKey(), bankId, roleSettingDTOS);
                     }).collect(Collectors.toList());
                 }
                 if (entity != null) {

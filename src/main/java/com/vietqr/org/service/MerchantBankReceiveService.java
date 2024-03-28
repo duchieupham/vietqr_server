@@ -12,4 +12,6 @@ public interface MerchantBankReceiveService {
     MerchantBankReceiveEntity getMerchantBankReceiveByMerchantAndBankId(String merchantId, String id);
 
     void insertAllMerchantBankReceive(List<MerchantBankReceiveEntity> merchantBankReceiveEntities);
+
+    String getBankIdReceiveByMerchant(String key);
 }
