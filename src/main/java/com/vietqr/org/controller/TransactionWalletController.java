@@ -207,6 +207,7 @@ public class TransactionWalletController {
                     transactionReceiveEntity.setTerminalCode("");
                     transactionReceiveEntity.setUserId(userIdHost);
                     transactionReceiveEntity.setNote("");
+                    transactionReceiveEntity.setTransStatus(0);
                     transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
                     // insert transaction branch
 //                    if (businessId != null && branchId != null && !businessId.trim().isEmpty()
