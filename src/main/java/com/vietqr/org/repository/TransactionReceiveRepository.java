@@ -2370,5 +2370,16 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "ORDER BY a.time DESC "
                 + "LIMIT :offset, :size ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransactionReceiveWithRequestById(String bankId, long fromDate, long toDate, int offset, int size, String value);
+
+        @Query(value = "SELECT COUNT(a.id) AS totalTrans, "
+                + "SUM(a.amount) AS totalCashIn, "
+                + "COUNT(CASE WHEN a.type = 1 THEN 1 ELSE NULL END) AS totalSettled, "
+                + "SUM(CASE WHEN a.type = 1 THEN a.amount ELSE 0 END) AS totalCashSettled, "
+                + "COUNT(CASE WHEN a.type = 2 THEN 1 ELSE NULL END) AS totalUnsettled, "
+                + "SUM(CASE WHEN a.type = 2 THEN a.amount ELSE 0 END) AS totalCashUnsettled "
+                + "FROM transaction_receive a "
+                + "WHERE a.time BETWEEN :fromDate AND :toDate "
+                + "AND a.bank_id = :bankId AND a.status = 1 LIMIT 1", nativeQuery = true)
+        ITransStatisticResponseWebDTO getTransactionWebOverview(String bankId, long fromDate, long toDate);
 }
 

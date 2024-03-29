@@ -1118,6 +1118,13 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public ITransStatisticResponseWebDTO getTransactionWebOverview(String bankId, String fromDate, String toDate) {
+        return repo.getTransactionWebOverview(bankId,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
     public TransStatisticDTO getTransactionOverviewBySubTerminalCode(String subTerminalCode, String fromDate, String toDate) {
         return repo.getTransactionOverviewBySubTerminalCode(subTerminalCode,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,

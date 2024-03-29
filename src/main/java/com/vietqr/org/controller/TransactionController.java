@@ -1426,6 +1426,43 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    //
+    @GetMapping("transactions/web/overview")
+    public ResponseEntity<TransStatisticResponseWebDTO> getTransactionOverviewWeb(
+            @RequestParam(value = "bankId") String bankId,
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "fromDate") String fromDate,
+            @RequestParam(value = "toDate") String toDate) {
+        TransStatisticResponseWebDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            ITransStatisticResponseWebDTO dto = transactionReceiveService
+                    .getTransactionWebOverview(bankId, fromDate, toDate);
+            if (dto != null) {
+                result = new TransStatisticResponseWebDTO();
+                result.setTotalTrans(dto.getTotalTrans());
+                result.setTotalCashIn(dto.getTotalCashIn());
+                result.setTotalCashSettled(dto.getTotalCashSettled());
+                result.setTotalSettled(dto.getTotalSettled());
+                result.setTotalUnsettled(dto.getTotalUnsettled());
+                result.setTotalCashUnsettled(dto.getTotalCashUnsettled());
+            } else {
+                result = new TransStatisticResponseWebDTO();
+                result.setTotalTrans(0);
+                result.setTotalCashIn(0L);
+                result.setTotalCashSettled(0L);
+                result.setTotalSettled(0);
+                result.setTotalUnsettled(0);
+                result.setTotalCashUnsettled(0L);
+            }
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getTransactionOverviewWeb: ERROR: " + e.getMessage());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     // not update
     @GetMapping("transactions/list")
     public ResponseEntity<List<TransactionRelatedResponseDTO>> getTransactionsMobile(

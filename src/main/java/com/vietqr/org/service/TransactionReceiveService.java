@@ -483,4 +483,6 @@ public interface TransactionReceiveService {
         int countTransactionReceiveWithRequest(String bankId, String fromDate, String toDate);
 
         List<TransactionReceiveAdminListDTO> getTransactionReceiveWithRequestById(String bankId, String fromDate, String toDate, int offset, int size, String value);
+
+        ITransStatisticResponseWebDTO getTransactionWebOverview(String bankId, String fromDate, String toDate);
 }
