@@ -1,7 +1,6 @@
 package com.vietqr.org.repository;
 
 import com.vietqr.org.dto.IMerchantRoleRawDTO;
-import com.vietqr.org.dto.MerchantRoleSettingDTO;
 import com.vietqr.org.entity.MerchantMemberRoleEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -51,6 +50,7 @@ public interface MerchantMemberRoleRepository extends JpaRepository<MerchantMemb
             + "c.category AS category, c.role AS role "
             + "FROM merchant_member_role a "
             + "INNER JOIN merchant_member b ON a.merchant_member_id = b.id "
+            + "INNER JOIN merchant_bank_receive d ON d.merchant_id = b.merchant_id "
             + "INNER JOIN transaction_receive_role c ON JSON_CONTAINS(a.trans_receive_role_ids, JSON_QUOTE(c.id)) "
             + "WHERE b.user_id = :userId ", nativeQuery = true)
     List<IMerchantRoleRawDTO> getMerchantIdsByUserId(String userId);

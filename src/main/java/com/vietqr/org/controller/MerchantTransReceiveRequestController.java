@@ -114,14 +114,59 @@ public class MerchantTransReceiveRequestController {
             String isExist = merchantMemberRoleService.checkMemberHaveRole(userId,
                     roles);
             if (isExist != null && !isExist.trim().isEmpty()) {
-
-                List<TransactionReceiveAdminListDTO> listTrans = transactionReceiveService
-                        .getTransactionReceiveWithRequest(bankId, fromDate, toDate, (page - 1) * size, size);
-                int total = transactionReceiveService.countTransactionReceiveWithRequest(bankId, fromDate, toDate);
-                if (type == 7) {
-                    listTrans = transactionReceiveService
-                            .getTransactionReceiveWithRequestById(bankId, fromDate, toDate, (page - 1) * size, size, value);
-                    total = 1;
+                // type = 9: all
+                // type = 1: reference_number
+                // type = 2: order_id
+                // type = 3: content
+                // type = 4: terminal code
+                // type = 5: status
+                // type = 7: id
+                List<TransactionReceiveAdminListDTO> listTrans = new ArrayList<>();
+                int total = 0;
+                switch (type) {
+                    case 9:
+                        listTrans = transactionReceiveService
+                                .getTransactionReceiveWithRequest(bankId, fromDate, toDate, (page - 1) * size, size);
+                        total = transactionReceiveService.countTransactionReceiveWithRequest(bankId, fromDate, toDate);
+                        break;
+                    case 1:
+                        listTrans = transactionReceiveService
+                                .getTransactionReceiveWithRequestByFtCode(bankId, fromDate, toDate, (page - 1) * size, size, value);
+                        total = transactionReceiveService.countTransactionReceiveWithRequestByFtCode(bankId, fromDate, toDate, value);
+                        break;
+                    case 2:
+                        listTrans = transactionReceiveService
+                                .getTransactionReceiveWithRequestByOrderId(bankId, fromDate, toDate, (page - 1) * size, size, value);
+                        total = transactionReceiveService.countTransactionReceiveWithRequestByOrderId(bankId, fromDate, toDate, value);
+                        break;
+                    case 3:
+                        value = value.replace("-", " ").trim();
+                        listTrans = transactionReceiveService
+                                .getTransactionReceiveWithRequestByContent(bankId, fromDate, toDate, (page - 1) * size, size, value);
+                        total = transactionReceiveService.countTransactionReceiveWithRequestByContent(bankId, fromDate, toDate, value);
+                        break;
+                    case 4:
+                        listTrans = transactionReceiveService
+                                .getTransactionReceiveWithRequestByTerminalCode(bankId, fromDate, toDate, (page - 1) * size, size, value);
+                        total = transactionReceiveService.countTransactionReceiveWithRequestByTerminalCode(bankId, fromDate, toDate, value);
+                        break;
+                    case 5:
+                        try {
+                            int status = Integer.parseInt(value);
+                            listTrans = transactionReceiveService
+                                    .getTransactionReceiveWithRequestByStatus(bankId, fromDate, toDate, (page - 1) * size, size, status);
+                            total = transactionReceiveService.countTransactionReceiveWithRequestByStatus(bankId, fromDate, toDate, status);
+                        } catch (Exception ignored) {}
+                        break;
+                    case 7:
+                        listTrans = transactionReceiveService
+                                .getTransactionReceiveWithRequestById(bankId, fromDate, toDate, (page - 1) * size, size, value);
+                        if (!listTrans.isEmpty()) {
+                            total = 1;
+                        }
+                        break;
+                    default:
+                        break;
                 }
                 List<String> listTransId = listTrans.stream().map(TransactionReceiveAdminListDTO::getId)
                         .collect(Collectors.toList());
@@ -187,7 +232,31 @@ public class MerchantTransReceiveRequestController {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            int total = transactionReceiveService.countTransactionReceiveWithRequest(bankId, fromDate, toDate);
+            int total = 0;
+            switch (type) {
+                case 9:
+                    total = transactionReceiveService.countTransactionReceiveWithRequest(bankId, fromDate, toDate);
+                    break;
+                case 1:
+                    total = transactionReceiveService.countTransactionReceiveWithRequestByFtCode(bankId, fromDate, toDate, value);
+                    break;
+                case 2:
+                    total = transactionReceiveService.countTransactionReceiveWithRequestByOrderId(bankId, fromDate, toDate, value);
+                    break;
+                case 3:
+                    value = value.replace("-", " ").trim();
+                    total = transactionReceiveService.countTransactionReceiveWithRequestByContent(bankId, fromDate, toDate, value);
+                    break;
+                case 4:
+                    total = transactionReceiveService.countTransactionReceiveWithRequestByTerminalCode(bankId, fromDate, toDate, value);
+                    break;
+                case 5:
+                    int status = Integer.parseInt(value);
+                    total = transactionReceiveService.countTransactionReceiveWithRequestByStatus(bankId, fromDate, toDate, status);
+                    break;
+                default:
+                    break;
+            }
             result = new TotalResquestDTO(total);
             httpStatus = HttpStatus.OK;
 
@@ -290,6 +359,7 @@ public class MerchantTransReceiveRequestController {
                         transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
                         transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTemp);
                         transactionReceiveHistoryService.insertTransactionReceiveHistory(transactionReceiveHistoryEntity);
+                        result = new ResponseMessageDTO("SUCCESS", "");
                         httpStatus = HttpStatus.OK;
                     }
                 } else {

@@ -1,7 +1,6 @@
 package com.vietqr.org.service;
 
 import com.vietqr.org.dto.IMerchantRoleRawDTO;
-import com.vietqr.org.dto.MerchantRoleSettingDTO;
 import com.vietqr.org.entity.MerchantMemberRoleEntity;
 import com.vietqr.org.repository.MerchantMemberRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;

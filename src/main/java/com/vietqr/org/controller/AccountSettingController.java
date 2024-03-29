@@ -60,23 +60,23 @@ public class AccountSettingController {
         try {
             if (userId != null && !userId.trim().isEmpty()) {
                 AccountSettingEntity entity = accountSettingService.getAccountSettingEntity(userId);
-                List<IMerchantRoleRawDTO> merchantRoleRawDTOS = merchantMemberRoleService
-                        .getMerchantIdsByUserId(userId);
                 List<MerchantRoleSettingDTO> roles = new ArrayList<>();
-                if (merchantRoleRawDTOS != null) {
-                    Map<String, List<IMerchantRoleRawDTO>> roleMaps = merchantRoleRawDTOS.stream()
-                            .collect(Collectors.groupingBy(IMerchantRoleRawDTO::getMerchantId));
-                    roles = roleMaps.entrySet().stream().map(entry -> {
-                        List<RoleSettingDTO> roleSettingDTOS = entry.getValue().stream()
-                                .map(role -> new RoleSettingDTO(role.getCategory(), role.getRole()))
+                try {
+                    List<IMerchantRoleRawDTO> merchantRoleRawDTOS = merchantMemberRoleService
+                            .getMerchantIdsByUserId(userId);
+                    if (merchantRoleRawDTOS != null) {
+                        Map<MerchantBankDTO, List<IMerchantRoleRawDTO>> roleMaps = merchantRoleRawDTOS.stream()
+                                .collect(Collectors.groupingBy(item -> new MerchantBankDTO(item.getMerchantId(), item.getBankId())));
+                        roles = roleMaps.entrySet().stream().map(entry -> {
+                                    List<RoleSettingDTO> roleSettingDTOS = entry.getValue().stream()
+                                            .map(role -> new RoleSettingDTO(role.getCategory(), role.getRole()))
+                                            .collect(Collectors.toList());
+                                    MerchantBankDTO merchantBankDTO = entry.getKey();
+                                    return new MerchantRoleSettingDTO(merchantBankDTO.getMerchantId(), merchantBankDTO.getBankId(), roleSettingDTOS);
+                                })
                                 .collect(Collectors.toList());
-                        String bankId = merchantBankReceiveService.getBankIdReceiveByMerchant(entry.getKey());
-                        if (bankId == null) {
-                            bankId = "";
-                        }
-                        return new MerchantRoleSettingDTO(entry.getKey(), bankId, roleSettingDTOS);
-                    }).collect(Collectors.toList());
-                }
+                    }
+                } catch (Exception ignored) {}
                 if (entity != null) {
                     //
                     result = new AccountSettingDTO();

@@ -92,6 +92,9 @@ public class TransactionController {
     AccountBankReceiveShareService accountBankReceiveShareService;
 
     @Autowired
+    MerchantMemberService merchantMemberService;
+
+    @Autowired
     TransactionRPAService transactionRPAService;
 
     @Autowired
@@ -1050,6 +1053,7 @@ public class TransactionController {
             // type = 2: order_id
             // type = 3: content
             // type = 4: terminal code
+            // type = 5: status
             List<TransactionReceiveAdminListDTO> dtos = new ArrayList<>();
             List<String> roleList = new ArrayList<>();
             roleList.add(EnvironmentUtil.getRequestReceiveTerminalRoleId());
@@ -1079,6 +1083,10 @@ public class TransactionController {
                         break;
                     case 4:
                         dtos = transactionReceiveService.getUnsettledTransactionsByTerminalCode(bankId, value, fromDate, toDate, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 5:
+                        dtos = transactionReceiveService.getUnsettledTransactionsByStatus(bankId, Integer.parseInt(value), fromDate, toDate, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     default:
@@ -1426,7 +1434,7 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    //
+    // chua phan quyen
     @GetMapping("transactions/web/overview")
     public ResponseEntity<TransStatisticResponseWebDTO> getTransactionOverviewWeb(
             @RequestParam(value = "bankId") String bankId,
@@ -1436,7 +1444,9 @@ public class TransactionController {
         TransStatisticResponseWebDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            ITransStatisticResponseWebDTO dto = transactionReceiveService
+//            String isOwner = accountBankReceiveService.checkIsOwner(bankId, userId);
+            ITransStatisticResponseWebDTO dto = null;
+            dto = transactionReceiveService
                     .getTransactionWebOverview(bankId, fromDate, toDate);
             if (dto != null) {
                 result = new TransStatisticResponseWebDTO();
