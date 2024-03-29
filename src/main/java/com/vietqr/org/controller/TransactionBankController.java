@@ -1583,6 +1583,7 @@ public class TransactionBankController {
 				transactionEntity.setQrCode("");
 				transactionEntity.setUserId(accountBankEntity.getUserId());
 				transactionEntity.setNote("");
+				transactionEntity.setTransStatus(0);
 				// int check =
 				// transactionReceiveService.insertTransactionReceiveWithCheckDuplicated(transactionEntity);
 				int check = transactionReceiveService.insertTransactionReceive(transactionEntity);
@@ -1786,6 +1787,7 @@ public class TransactionBankController {
 				transactionEntity.setQrCode("");
 				transactionEntity.setUserId(accountBankEntity.getUserId());
 				transactionEntity.setNote("");
+				transactionEntity.setTransStatus(0);
 				// int check =
 				// transactionReceiveService.insertTransactionReceiveWithCheckDuplicated(transactionEntity);
 				int check = transactionReceiveService.insertTransactionReceive(transactionEntity);
@@ -1982,6 +1984,7 @@ public class TransactionBankController {
 			transactionEntity.setQrCode("");
 			transactionEntity.setUserId(accountBankEntity.getUserId());
 			transactionEntity.setNote("");
+			transactionEntity.setTransStatus(0);
 			// int check =
 			// transactionReceiveService.insertTransactionReceiveWithCheckDuplicated(transactionEntity);
 			int check = transactionReceiveService.insertTransactionReceive(transactionEntity);

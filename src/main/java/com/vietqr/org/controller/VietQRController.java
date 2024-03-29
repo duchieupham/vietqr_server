@@ -827,6 +827,7 @@ public class VietQRController {
 			transactionEntity.setQrCode(qrCode);
 			transactionEntity.setUserId(accountBankReceiveEntity.getUserId());
 			transactionEntity.setNote(dto.getNote());
+			transactionEntity.setTransStatus(0);
 			transactionReceiveService.insertTransactionReceive(transactionEntity);
 			LocalDateTime endTime = LocalDateTime.now();
 			long endTimeLong = endTime.toEpochSecond(ZoneOffset.UTC);
@@ -869,6 +870,7 @@ public class VietQRController {
 				transactionEntity.setUserId(accountBankEntity.getUserId());
 				transactionEntity.setOrderId(orderId);
 				transactionEntity.setNote(dto.getNote());
+				transactionEntity.setTransStatus(0);
 				if (dto.getTransType() != null) {
 					transactionEntity.setTransType(dto.getTransType());
 				} else {
@@ -1048,6 +1050,7 @@ public class VietQRController {
 				transactionEntity.setQrCode("");
 				transactionEntity.setUserId(accountBankEntity.getUserId());
 				transactionEntity.setNote("");
+				transactionEntity.setTransStatus(0);
 				transactionReceiveService.insertTransactionReceive(transactionEntity);
 				// insert transaction branch if existing branchId and businessId. Else just do
 				// not map.

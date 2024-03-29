@@ -395,6 +395,7 @@ public class TransactionMMSController {
                                 transactionReceiveEntity1.setTime(time);
                                 transactionReceiveEntity1.setTimePaid(time);
                                 transactionReceiveEntity1.setBankId(accountBankReceiveEntity.getId());
+                                transactionReceiveEntity1.setTransStatus(0);
                                 if (terminalBankReceiveEntity.getTerminalCode() != null
                                         && !terminalBankReceiveEntity.getTerminalCode().trim().isEmpty()) {
                                     transactionReceiveEntity1.setTerminalCode(terminalBankReceiveEntity.getTerminalCode());
@@ -518,6 +519,7 @@ public class TransactionMMSController {
                                 transactionEntity.setQrCode("");
                                 transactionEntity.setUserId(bankDTO.getUserId());
                                 transactionEntity.setNote("");
+                                transactionEntity.setTransStatus(0);
                                 if (!insertTransaction) {
                                     transactionReceiveService.insertTransactionReceive(transactionEntity);
                                     final String tempTerminalCode = terminalEntity.getCode();
