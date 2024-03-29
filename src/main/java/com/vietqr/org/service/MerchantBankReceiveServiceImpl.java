@@ -27,4 +27,9 @@ public class MerchantBankReceiveServiceImpl implements MerchantBankReceiveServic
     public void insertAllMerchantBankReceive(List<MerchantBankReceiveEntity> merchantBankReceiveEntities) {
         repo.saveAll(merchantBankReceiveEntities);
     }
+
+    @Override
+    public String getBankIdReceiveByMerchant(String key) {
+        return repo.getBankIdReceiveByMerchant(key);
+    }
 }

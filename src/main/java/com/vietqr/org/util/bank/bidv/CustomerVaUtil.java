@@ -60,6 +60,7 @@ public class CustomerVaUtil {
             JsonWebEncryption jwe = new JsonWebEncryption();
             String payload = BIDVUtil.generateRequestVaBody(serviceId, channelId, merchantId, merchantName, dto,
                     merchantType);
+            logger.info("requestCustomerVa: Payload: " + payload);
             System.out.println("Payload: " + payload);
             //
             jwe.setPayload(payload);
@@ -86,6 +87,8 @@ public class CustomerVaUtil {
             JweObj j = new JweObj(recipients, protected_, ciphertext, iv, tag);
             String jweString = gson.toJson(j);
             System.out.println("\n\nJWE: " + jweString);
+            //requestCustomerVa
+            logger.info("\n\nrequestCustomerVa: JWE: " + jweString);
             Map<String, Object> body = gson.fromJson(jweString, Map.class);
             // JWS
             JsonWebSignature jws = new JsonWebSignature();
@@ -94,7 +97,8 @@ public class CustomerVaUtil {
             PrivateKey privateKey = JwsUtil.getPrivateKey();
             jws.setKey(privateKey);
             String jwsString = jws.getCompactSerialization();
-            System.out.println("\n\nJWS: " + jwsString);
+            System.out.println("\n\nrequestCustomerVa: JWS: " + jwsString);
+            logger.info("\n\nrequestCustomerVa: JWS: " + jwsString);
             //
             // call API
             UriComponents uriComponents = UriComponentsBuilder
@@ -106,7 +110,9 @@ public class CustomerVaUtil {
             String token = BIDVTokenUtil.getBIDVToken("ewallet").getAccess_token();
             String clientXCertification = JwsUtil.getClientXCertificate();
             System.out.println("\n\nToken BIDV: " + token);
+            logger.info("\n\nrequestCustomerVa: Token BIDV: " + token);
             System.out.println("\n\nclientXCertification BIDV: " + clientXCertification);
+            logger.info("\n\nrequestCustomerVa: clientXCertification BIDV: " + clientXCertification);
             Mono<ClientResponse> responseMono = webClient.post()
                     .uri(uriComponents.toUri())
                     .contentType(MediaType.APPLICATION_JSON)

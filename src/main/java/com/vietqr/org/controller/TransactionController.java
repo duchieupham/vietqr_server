@@ -92,6 +92,9 @@ public class TransactionController {
     AccountBankReceiveShareService accountBankReceiveShareService;
 
     @Autowired
+    MerchantMemberService merchantMemberService;
+
+    @Autowired
     TransactionRPAService transactionRPAService;
 
     @Autowired
@@ -1033,7 +1036,6 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    // not update
     @GetMapping("transactions/unsettled")
     public ResponseEntity<List<TransactionRelatedRequestDTO>> getUnsettledTransactions(
             @RequestParam(value = "bankId") String bankId,
@@ -1051,6 +1053,7 @@ public class TransactionController {
             // type = 2: order_id
             // type = 3: content
             // type = 4: terminal code
+            // type = 5: status
             List<TransactionReceiveAdminListDTO> dtos = new ArrayList<>();
             List<String> roleList = new ArrayList<>();
             roleList.add(EnvironmentUtil.getRequestReceiveTerminalRoleId());
@@ -1080,6 +1083,10 @@ public class TransactionController {
                         break;
                     case 4:
                         dtos = transactionReceiveService.getUnsettledTransactionsByTerminalCode(bankId, value, fromDate, toDate, offset);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 5:
+                        dtos = transactionReceiveService.getUnsettledTransactionsByStatus(bankId, Integer.parseInt(value), fromDate, toDate, offset);
                         httpStatus = HttpStatus.OK;
                         break;
                     default:
@@ -1422,6 +1429,45 @@ public class TransactionController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("getTransactionsFilter: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // chua phan quyen
+    @GetMapping("transactions/web/overview")
+    public ResponseEntity<TransStatisticResponseWebDTO> getTransactionOverviewWeb(
+            @RequestParam(value = "bankId") String bankId,
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "fromDate") String fromDate,
+            @RequestParam(value = "toDate") String toDate) {
+        TransStatisticResponseWebDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+//            String isOwner = accountBankReceiveService.checkIsOwner(bankId, userId);
+            ITransStatisticResponseWebDTO dto = null;
+            dto = transactionReceiveService
+                    .getTransactionWebOverview(bankId, fromDate, toDate);
+            if (dto != null) {
+                result = new TransStatisticResponseWebDTO();
+                result.setTotalTrans(dto.getTotalTrans());
+                result.setTotalCashIn(dto.getTotalCashIn());
+                result.setTotalCashSettled(dto.getTotalCashSettled());
+                result.setTotalSettled(dto.getTotalSettled());
+                result.setTotalUnsettled(dto.getTotalUnsettled());
+                result.setTotalCashUnsettled(dto.getTotalCashUnsettled());
+            } else {
+                result = new TransStatisticResponseWebDTO();
+                result.setTotalTrans(0);
+                result.setTotalCashIn(0L);
+                result.setTotalCashSettled(0L);
+                result.setTotalSettled(0);
+                result.setTotalUnsettled(0);
+                result.setTotalCashUnsettled(0L);
+            }
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getTransactionOverviewWeb: ERROR: " + e.getMessage());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
