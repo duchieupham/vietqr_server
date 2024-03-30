@@ -284,6 +284,10 @@ public class TransactionMMSController {
                             data.put("bankId", accountBankEntity.getId());
                             data.put("branchName", "");
                             data.put("businessName", "");
+                            data.put("terminalName", "");
+                            data.put("terminalCode", tempTransReceive.getTerminalCode() != null ?
+                                    tempTransReceive.getTerminalCode() : "");
+                            data.put("rawTerminalCode", "");
                             data.put("content", tempTransReceive.getContent());
                             data.put("amount", "" + tempTransReceive.getAmount());
                             data.put("time", "" + time);
@@ -458,6 +462,14 @@ public class TransactionMMSController {
                                 data.put("bankId", accountBankReceiveEntity.getId());
                                 data.put("content","" + traceTransfer);
                                 data.put("amount", "" + entity.getDebitAmount());
+                                if (terminalEntity != null) {
+                                    data.put("terminalName", terminalEntity.getName() != null ?
+                                            terminalEntity.getName() : "");
+                                    data.put("terminalCode", terminalEntity.getCode() != null ?
+                                            terminalEntity.getCode() : "");
+                                    data.put("rawTerminalCode", terminalEntity.getRawTerminalCode() != null ?
+                                            terminalEntity.getRawTerminalCode() : "");
+                                }
                                 data.put("time", "" + time);
                                 data.put("refId", "" + uuid.toString());
                                 data.put("status", "1");
@@ -571,6 +583,12 @@ public class TransactionMMSController {
                                     data.put("bankCode", bankDTO.getBankCode());
                                     data.put("bankId", bankDTO.getBankId());
                                     data.put("content","" + traceTransfer);
+                                    data.put("terminalName", terminalEntity.getName() != null ?
+                                            terminalEntity.getName() : "");
+                                    data.put("terminalCode", terminalEntity.getCode() != null ?
+                                            terminalEntity.getCode() : "");
+                                    data.put("rawTerminalCode", terminalEntity.getRawTerminalCode() != null ?
+                                            terminalEntity.getRawTerminalCode() : "");
                                     data.put("amount", "" + entity.getDebitAmount());
                                     data.put("time", "" + time);
                                     data.put("refId", "" + uuid.toString());

@@ -341,6 +341,7 @@ public class TransactionBankController {
 								data.put("terminalId", "");
 								data.put("terminalName", "");
 								data.put("terminalCode", "");
+								data.put("rawTerminalCode", "");
 								data.put("content", dto.getContent());
 								data.put("amount", "" + dto.getAmount());
 								data.put("time", "" + dto.getTransactiontime());
@@ -1240,6 +1241,8 @@ public class TransactionBankController {
 						data.put("bankId", transactionReceiveEntity.getBankId());
 						data.put("terminalName", terminalEntity.getName());
 						data.put("terminalCode", terminalEntity.getCode());
+						data.put("rawTerminalCode", terminalEntity.getRawTerminalCode() != null
+						? terminalEntity.getRawTerminalCode() : "");
 						data.put("content", transactionReceiveEntity.getContent());
 						data.put("amount", "" + transactionReceiveEntity.getAmount());
 						data.put("time", "" + transactionReceiveEntity.getTime());
@@ -1353,6 +1356,7 @@ public class TransactionBankController {
 				data.put("bankId", accountBankEntity.getId());
 				data.put("terminalName", "");
 				data.put("terminalCode", transactionReceiveEntity.getTerminalCode());
+				data.put("rawTerminalCode", "");
 				data.put("content", dto.getContent());
 				data.put("amount", "" + dto.getAmount());
 				data.put("time", "" + time);
@@ -1437,6 +1441,7 @@ public class TransactionBankController {
 			data.put("bankId", accountBankEntity.getId());
 			data.put("terminalName", "");
 			data.put("terminalCode", "");
+			data.put("rawTerminalCode", "");
 			data.put("content", dto.getContent());
 			data.put("amount", "" + dto.getAmount());
 			data.put("time", "" + time);
@@ -1641,8 +1646,12 @@ public class TransactionBankController {
 						data.put("bankName", bankTypeEntity.getBankName());
 						data.put("bankCode", bankTypeEntity.getBankCode());
 						data.put("bankId", transactionEntity.getBankId());
-						data.put("terminalName", terminalEntity.getName());
-						data.put("terminalCode", terminalEntity.getCode());
+						data.put("terminalName", terminalEntity.getName() != null
+								? terminalEntity.getName() : "");
+						data.put("terminalCode", terminalEntity.getCode() != null
+								? terminalEntity.getCode() : "");
+						data.put("rawTerminalCode", terminalEntity.getRawTerminalCode() != null
+								? terminalEntity.getRawTerminalCode() : "");
 						data.put("content", transactionEntity.getContent());
 						data.put("amount", "" + transactionEntity.getAmount());
 						data.put("time", "" + transactionEntity.getTime());
@@ -1690,6 +1699,9 @@ public class TransactionBankController {
 					data.put("bankId", accountBankEntity.getId());
 					data.put("content", transactionEntity.getContent());
 					data.put("amount", "" + transactionEntity.getAmount());
+					data.put("terminalName", "");
+					data.put("terminalCode", terminalCode);
+					data.put("rawTerminalCode", "");
 					data.put("time", "" + time);
 					data.put("refId", "" + uuid.toString());
 					data.put("status", "1");
@@ -1850,7 +1862,8 @@ public class TransactionBankController {
 						data.put("bankCode", bankTypeEntity.getBankCode());
 						data.put("bankId", transactionEntity.getBankId());
 						data.put("terminalName", "");
-						data.put("terminalCode", "");
+						data.put("terminalCode", terminalCode);
+						data.put("rawTerminalCode", "");
 						data.put("content", transactionEntity.getContent());
 						data.put("amount", "" + transactionEntity.getAmount());
 						data.put("time", "" + transactionEntity.getTime());
@@ -1881,6 +1894,9 @@ public class TransactionBankController {
 				data.put("bankCode", bankTypeEntity.getBankCode());
 				data.put("bankId", accountBankEntity.getId());
 				data.put("content", dto.getContent());
+				data.put("terminalName", "");
+				data.put("terminalCode", terminalCode);
+				data.put("rawTerminalCode", "");
 				data.put("amount", "" + dto.getAmount());
 				data.put("time", "" + time);
 				data.put("refId", "" + dto.getTransactionid());
@@ -2050,7 +2066,8 @@ public class TransactionBankController {
 					data.put("bankCode", bankTypeEntity.getBankCode());
 					data.put("bankId", transactionEntity.getBankId());
 					data.put("terminalName", "");
-					data.put("terminalCode", "");
+					data.put("terminalCode", terminalCode);
+					data.put("rawTerminalCode", "");
 					data.put("content", transactionEntity.getContent());
 					data.put("amount", "" + transactionEntity.getAmount());
 					data.put("time", "" + transactionEntity.getTime());
@@ -2084,6 +2101,9 @@ public class TransactionBankController {
 			data.put("amount", "" + dto.getAmount());
 			data.put("time", "" + time);
 			data.put("refId", "" + dto.getTransactionid());
+			data.put("terminalName", "");
+			data.put("terminalCode", terminalCode);
+			data.put("rawTerminalCode", "");
 			data.put("status", "1");
 			data.put("traceId", "");
 			data.put("transType", dto.getTransType());
