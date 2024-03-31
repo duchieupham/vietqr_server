@@ -285,6 +285,7 @@ public class TransactionMMSController {
                             data.put("branchName", "");
                             data.put("businessName", "");
                             data.put("terminalName", "");
+                            data.put("type", "" + tempTransReceive.getType());
                             data.put("terminalCode", tempTransReceive.getTerminalCode() != null ?
                                     tempTransReceive.getTerminalCode() : "");
                             if (tempTransReceive.getTerminalCode() != null &&
@@ -490,6 +491,7 @@ public class TransactionMMSController {
                                 data.put("referenceNumber", entity.getFtCode() != null ?
                                         entity.getFtCode() : "");
                                 data.put("timePaid", "" + time);
+                                data.put("type", "" + transactionReceiveEntity1.getType());
                                 data.put("time", "" + time);
                                 data.put("refId", "" + uuid.toString());
                                 data.put("status", "1");
@@ -614,6 +616,7 @@ public class TransactionMMSController {
                                     data.put("referenceNumber", entity.getFtCode());
                                     data.put("timePaid", "" + time);
                                     data.put("time", "" + time);
+                                    data.put("type", "" + transactionEntity.getType());
                                     data.put("refId", "" + uuid.toString());
                                     data.put("status", "1");
                                     data.put("traceId", "");
