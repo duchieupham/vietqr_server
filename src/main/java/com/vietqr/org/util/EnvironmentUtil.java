@@ -253,6 +253,9 @@ public class EnvironmentUtil {
     private static final String EXPORT_EXCEL_MERCHANT_ROLE_ID_UAT = "dc0163d1-8d7b-4448-8b0c-6d7248335845";
     private static final String EXPORT_EXCEL_MERCHANT_ROLE_ID_PROD = "dc0163d1-8d7b-4448-8b0c-6d7248335845";
 
+    private static final String FCM_NOTIFICATION_ROLE_ID_UAT = "072bb387-959c-4f6d-917a-4dbd74a7bc94";
+    private static final String FCM_NOTIFICATION_ROLE_ID_PROD = "072bb387-959c-4f6d-917a-4dbd74a7bc94";
+
     public static String getBidvSecretKey() {
         return BIDV_SECRET_KEY;
     }
@@ -565,5 +568,9 @@ public class EnvironmentUtil {
 
     public static String getExportExcelForMerchantRoleId() {
         return (IS_PRODUCTION == false) ? EXPORT_EXCEL_MERCHANT_ROLE_ID_UAT : EXPORT_EXCEL_MERCHANT_ROLE_ID_PROD;
+    }
+
+    public static String getFcmNotificationRoleId() {
+        return (IS_PRODUCTION == false) ? FCM_NOTIFICATION_ROLE_ID_UAT : FCM_NOTIFICATION_ROLE_ID_PROD;
     }
 }

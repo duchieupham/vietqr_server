@@ -1696,8 +1696,14 @@ public class TransactionBankController {
 						data.put("status", "1");
 						data.put("traceId", "" + transactionEntity.getTraceId());
 						data.put("transType", dto.getTransType());
-						executorService.submit(() -> pushNotification(NotificationUtil
-								.getNotiTitleUpdateTransaction(), message, notiEntity, data, userId));
+						String roleFCM = merchantMemberRoleService.checkMemberHaveRole(userId, EnvironmentUtil.getFcmNotificationRoleId());
+						if (roleFCM != null && !roleFCM.isEmpty()) {
+							executorService.submit(() -> pushNotification(NotificationUtil
+									.getNotiTitleUpdateTransaction(), message, notiEntity, data, userId));
+						} else {
+							executorService.submit(() -> pushNotificationWithSocket(NotificationUtil
+									.getNotiTitleUpdateTransaction(), message, notiEntity, data, userId));
+						}
 						try {
 							// send msg to QR Link
 							String refId = TransactionRefIdUtil.encryptTransactionId(transactionEntity.getId());
@@ -1920,8 +1926,14 @@ public class TransactionBankController {
 						data.put("status", "1");
 						data.put("traceId", "" + transactionEntity.getTraceId());
 						data.put("transType", dto.getTransType());
-						executorService.submit(() -> pushNotification(NotificationUtil
-								.getNotiTitleUpdateTransaction(), message, notificationEntity, data, userId));
+						String roleFCM = merchantMemberRoleService.checkMemberHaveRole(userId, EnvironmentUtil.getFcmNotificationRoleId());
+						if (roleFCM != null && !roleFCM.isEmpty()) {
+							executorService.submit(() -> pushNotification(NotificationUtil
+									.getNotiTitleUpdateTransaction(), message, notificationEntity, data, userId));
+						} else {
+							executorService.submit(() -> pushNotificationWithSocket(NotificationUtil
+									.getNotiTitleUpdateTransaction(), message, notificationEntity, data, userId));
+						}
 						try {
 							// send msg to QR Link
 							String refId = TransactionRefIdUtil.encryptTransactionId(transactionEntity.getId());
@@ -2136,8 +2148,14 @@ public class TransactionBankController {
 					data.put("status", "1");
 					data.put("traceId", "" + transactionEntity.getTraceId());
 					data.put("transType", dto.getTransType());
-					executorService.submit(() -> pushNotification(NotificationUtil
-							.getNotiTitleUpdateTransaction(), message, notificationEntity, data, userId));
+					String roleFCM = merchantMemberRoleService.checkMemberHaveRole(userId, EnvironmentUtil.getFcmNotificationRoleId());
+					if (roleFCM != null && !roleFCM.isEmpty()) {
+						executorService.submit(() -> pushNotification(NotificationUtil
+								.getNotiTitleUpdateTransaction(), message, notificationEntity, data, userId));
+					} else {
+						executorService.submit(() -> pushNotificationWithSocket(NotificationUtil
+								.getNotiTitleUpdateTransaction(), message, notificationEntity, data, userId));
+					}
 					try {
 						// send msg to QR Link
 						String refId = TransactionRefIdUtil.encryptTransactionId(transactionEntity.getId());
@@ -2245,6 +2263,18 @@ public class TransactionBankController {
 			// }
 		}
 
+	}
+
+	private void pushNotificationWithSocket(String notiTitleUpdateTransaction, String message,
+											NotificationEntity notificationEntity, Map<String, String> data, String userId) {
+		try {
+			socketHandler.sendMessageToUser(userId,
+					data);
+		} catch (IOException e) {
+			logger.error(
+					"transaction-sync: WS: socketHandler.sendMessageToUser - RECHARGE ERROR: "
+							+ e.toString());
+		}
 	}
 
 	public String convertLongToDate(long timestamp) {

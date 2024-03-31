@@ -41,13 +41,12 @@ public interface MerchantMemberRoleRepository extends JpaRepository<MerchantMemb
 
     @Query(value = "SELECT a.id "
             + "FROM merchant_member_role a "
-            + "INNER JOIN merchant_member b ON a.merchant_member_id = b.id "
-            + "WHERE b.user_id = :userId AND a.trans_receive_role_ids RLIKE :rolesAccept "
+            + "WHERE a.user_id = :userId AND a.trans_receive_role_ids RLIKE :rolesAccept "
             + "LIMIT 1", nativeQuery = true)
     String checkMemberHaveRole(String userId, String rolesAccept);
 
     @Query(value = "SELECT DISTINCT b.merchant_id AS merchantId, "
-            + "c.category AS category, c.role AS role "
+            + "c.category AS category, c.role AS role, d.bank_id AS bankId "
             + "FROM merchant_member_role a "
             + "INNER JOIN merchant_member b ON a.merchant_member_id = b.id "
             + "INNER JOIN merchant_bank_receive d ON d.merchant_id = b.merchant_id "
