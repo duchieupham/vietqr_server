@@ -304,6 +304,7 @@ public class TransactionMMSController {
                                     ? tempTransReceive.getReferenceNumber() : "");
                             data.put("content", tempTransReceive.getContent());
                             data.put("amount", "" + tempTransReceive.getAmount());
+                            data.put("timePaid", "" + tempTransReceive.getTimePaid());
                             data.put("time", "" + time);
                             data.put("refId", "" + entity.getId());
                             data.put("status", "1");
@@ -486,7 +487,9 @@ public class TransactionMMSController {
                                 }
                                 data.put("orderId", entity.getReferenceLabelCode() != null ?
                                         entity.getReferenceLabelCode() : "");
-                                data.put("referenceNumber", entity.getFtCode());
+                                data.put("referenceNumber", entity.getFtCode() != null ?
+                                        entity.getFtCode() : "");
+                                data.put("timePaid", "" + time);
                                 data.put("time", "" + time);
                                 data.put("refId", "" + uuid.toString());
                                 data.put("status", "1");
@@ -607,6 +610,9 @@ public class TransactionMMSController {
                                     data.put("rawTerminalCode", terminalEntity.getRawTerminalCode() != null ?
                                             terminalEntity.getRawTerminalCode() : "");
                                     data.put("amount", "" + entity.getDebitAmount());
+                                    data.put("orderId", "");
+                                    data.put("referenceNumber", entity.getFtCode());
+                                    data.put("timePaid", "" + time);
                                     data.put("time", "" + time);
                                     data.put("refId", "" + uuid.toString());
                                     data.put("status", "1");
