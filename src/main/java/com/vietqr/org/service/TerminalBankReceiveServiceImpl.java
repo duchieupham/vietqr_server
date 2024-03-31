@@ -138,4 +138,14 @@ public class TerminalBankReceiveServiceImpl implements TerminalBankReceiveServic
     public void removeTerminalBankReceiveByTerminalId(String terminalId) {
         repo.removeTerminalBankReceiveByTerminalId(terminalId);
     }
+
+    @Override
+    public List<String> getTerminalCodeByUserIdAndBankId(String userId, String bankId) {
+        return repo.getTerminalCodeByUserIdAndBankId(userId, bankId);
+    }
+
+    @Override
+    public List<String> getTerminalCodeByUserIdAndBankIdNoTerminal(String userId, String bankId) {
+        return repo.getTerminalCodeByUserIdAndBankIdNoTerminal(userId, bankId);
+    }
 }

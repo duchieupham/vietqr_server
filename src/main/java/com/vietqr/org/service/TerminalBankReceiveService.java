@@ -57,4 +57,8 @@ public interface TerminalBankReceiveService {
     List<IBankShareResponseDTO> getTerminalBankShareByUserId(String userId, int offset);
 
     void removeTerminalBankReceiveByTerminalId(String terminalId);
+
+    List<String> getTerminalCodeByUserIdAndBankId(String userId, String bankId);
+
+    List<String> getTerminalCodeByUserIdAndBankIdNoTerminal(String userId, String bankId);
 }

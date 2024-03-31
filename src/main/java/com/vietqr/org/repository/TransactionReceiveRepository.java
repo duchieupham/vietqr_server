@@ -2512,6 +2512,76 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "WHERE a.bank_id = :bankId AND a.status = 1 AND a.trans_type = 'C' AND a.type = 2 "
                 + "AND a.time >= :fromDate AND a.time <= :toDate AND a.status = :value "
                 + "LIMIT :offset, 20", nativeQuery = true)
-        List<TransactionReceiveAdminListDTO> getUnsettledTransactionsByStatus(String bankId, int value, long fromDate, long toDate, int offset);
+        List<TransactionReceiveAdminListDTO> getUnsettledTransactionsByStatus(String bankId, int value, long fromDate,
+                                                                              long toDate, int offset);
+
+        @Query(value = "SELECT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+                + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
+                + " a.type as type, a.trans_type as transType, "
+                + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, "
+                + "a.note, a.order_id as orderId "
+                + "FROM transaction_receive a "
+                + "WHERE a.bank_id = :bankId AND (a.terminal_code IN (:listCode) "
+                + "OR (a.terminal_code IS NULL)) AND a.reference_number = :value "
+                + "AND a.time BETWEEN :fromDate AND :toDate AND status = 1 "
+                + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransTerminalWithType2ByFtCode(String bankId,
+                                                                      String value, List<String> listCode,
+                                                                      int offset, long fromDate, long toDate);
+
+        @Query(value = "SELECT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+                + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
+                + " a.type as type, a.trans_type as transType, "
+                + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, "
+                + "a.note, a.order_id as orderId "
+                + "FROM transaction_receive a "
+                + "WHERE a.bank_id = :bankId AND (a.terminal_code IN (:listCode) "
+                + "OR (a.terminal_code IS NULL)) AND a.order_id = :value "
+                + "AND a.time BETWEEN :fromDate AND :toDate AND status = 1 "
+                + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransTerminalWithType2ByOrderId(String bankId,
+                                                                       String value, List<String> listCode,
+                                                                       int offset, long fromDate, long toDate);
+
+        @Query(value = "SELECT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+                + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
+                + " a.type as type, a.trans_type as transType, "
+                + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, "
+                + "a.note, a.order_id as orderId "
+                + "FROM transaction_receive a "
+                + "WHERE a.bank_id = :bankId AND (a.terminal_code IN (:listCode) "
+                + "OR (a.terminal_code IS NULL)) AND a.content LIKE %:value% "
+                + "AND a.time BETWEEN :fromDate AND :toDate AND status = 1 "
+                + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransTerminalWithType2ByContent(String bankId,
+                                                                       String value, List<String> listCode,
+                                                                       int offset, long fromDate, long toDate);
+
+        @Query(value = "SELECT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+                + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
+                + " a.type as type, a.trans_type as transType, "
+                + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, "
+                + "a.note, a.order_id as orderId "
+                + "FROM transaction_receive a "
+                + "WHERE a.bank_id = :bankId AND (a.terminal_code IN (:listCode) "
+                + "OR (a.terminal_code IS NULL)) AND a.status = :value "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedDTO> getTransTerminalWithType2ByStatus(String bankId,
+                                                                      int value, List<String> listCode, int offset,
+                                                                      long fromDate, long toDate);
+
+        @Query(value = "SELECT a.id as transactionId, a.amount as amount, a.bank_account as bankAccount "
+                + ", a.content as content, a.time as time, a.time_paid as timePaid, a.status as status,"
+                + " a.type as type, a.trans_type as transType, "
+                + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, "
+                + "a.note, a.order_id as orderId "
+                + "FROM transaction_receive a "
+                + "WHERE a.bank_id = :bankId AND (a.terminal_code IN (:listCode) "
+                + "OR (a.terminal_code IS NULL)) "
+                + "AND a.time BETWEEN :fromDate AND :toDate AND status = 1 "
+                + "ORDER BY a.time DESC LIMIT :offset, 20 ", nativeQuery = true)
+        List<TransactionRelatedDTO> getAllTransTerminalWithType2(String bankId, List<String> listCode,
+                                                                 int offset, long fromDate, long toDate);
 }
 

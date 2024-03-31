@@ -1262,6 +1262,7 @@ public class TransactionBankController {
 						data.put("content", transactionReceiveEntity.getContent());
 						data.put("amount", "" + transactionReceiveEntity.getAmount());
 						data.put("timeCreated", "" + transactionReceiveEntity.getTimePaid());
+						data.put("type", "" + transactionReceiveEntity.getType());
 						data.put("time", "" + transactionReceiveEntity.getTime());
 						data.put("refId", "" + dto.getTransactionid());
 						data.put("status", "1");
@@ -1382,6 +1383,7 @@ public class TransactionBankController {
 				data.put("content", dto.getContent());
 				data.put("amount", "" + dto.getAmount());
 				data.put("timePaid", "" + time);
+				data.put("type", "" + transactionReceiveEntity.getType());
 				data.put("time", "" + time);
 				data.put("refId", "" + dto.getTransactionid());
 				data.put("status", "1");
@@ -1472,6 +1474,7 @@ public class TransactionBankController {
 			data.put("content", dto.getContent());
 			data.put("amount", "" + dto.getAmount());
 			data.put("timePaid", "" + transactionReceiveEntity.getTimePaid());
+			data.put("type", "" + transactionReceiveEntity.getType());
 			data.put("time", "" + time);
 			data.put("refId", "" + dto.getTransactionid());
 			data.put("status", "1");
@@ -1687,6 +1690,7 @@ public class TransactionBankController {
 								? transactionEntity.getReferenceNumber() : "");
 						data.put("amount", "" + transactionEntity.getAmount());
 						data.put("timePaid", "" + transactionEntity.getTimePaid());
+						data.put("type", "" + transactionEntity.getType());
 						data.put("time", "" + transactionEntity.getTime());
 						data.put("refId", "" + dto.getTransactionid());
 						data.put("status", "1");
@@ -1740,6 +1744,7 @@ public class TransactionBankController {
 					data.put("referenceNumber", transactionEntity.getReferenceNumber() != null
 							? transactionEntity.getReferenceNumber() : "");
 					data.put("timePaid", "" + transactionEntity.getTimePaid());
+					data.put("type", "" + transactionEntity.getType());
 					data.put("time", "" + time);
 					data.put("refId", "" + uuid.toString());
 					data.put("status", "1");
@@ -1909,6 +1914,7 @@ public class TransactionBankController {
 						data.put("content", transactionEntity.getContent());
 						data.put("amount", "" + transactionEntity.getAmount());
 						data.put("timePaid", "" + transactionEntity.getTimePaid());
+						data.put("type", "" + transactionEntity.getType());
 						data.put("time", "" + transactionEntity.getTime());
 						data.put("refId", "" + dto.getTransactionid());
 						data.put("status", "1");
@@ -1946,6 +1952,7 @@ public class TransactionBankController {
 						? transactionEntity.getReferenceNumber() : "");
 				data.put("amount", "" + dto.getAmount());
 				data.put("timePaid", "" + transactionEntity.getTimePaid());
+				data.put("type", "" + transactionEntity.getType());
 				data.put("time", "" + time);
 				data.put("refId", "" + dto.getTransactionid());
 				data.put("status", "1");
@@ -2123,6 +2130,7 @@ public class TransactionBankController {
 					data.put("content", transactionEntity.getContent());
 					data.put("amount", "" + transactionEntity.getAmount());
 					data.put("timePaid", "" + transactionEntity.getTimePaid());
+					data.put("type", "" + transactionEntity.getType());
 					data.put("time", "" + transactionEntity.getTime());
 					data.put("refId", "" + dto.getTransactionid());
 					data.put("status", "1");
@@ -2154,6 +2162,7 @@ public class TransactionBankController {
 			data.put("amount", "" + dto.getAmount());
 			data.put("timePaid", "" + transactionEntity.getTimePaid());
 			data.put("time", "" + time);
+			data.put("type", "" + transactionEntity.getType());
 			data.put("refId", "" + dto.getTransactionid());
 			data.put("terminalName", "");
 			data.put("terminalCode", "");

@@ -775,6 +775,16 @@ public class TerminalController {
                     entity.setUserId(dto.getUserId());
                     entity.setDefault(false);
                     entity.setTimeCreated(time);
+
+                    MerchantBankReceiveEntity merchantBankReceiveEntity = merchantBankReceiveService
+                            .getMerchantBankByMerchantId(dto.getMerchantId(), dto.getBankIds().get(0));
+                    if (merchantBankReceiveEntity == null) {
+                        merchantBankReceiveEntity = new MerchantBankReceiveEntity();
+                        merchantBankReceiveEntity.setId(UUID.randomUUID().toString());
+                        merchantBankReceiveEntity.setMerchantId(dto.getMerchantId());
+                        merchantBankReceiveEntity.setBankId(dto.getBankIds().get(0));
+                        merchantBankReceiveService.save(merchantBankReceiveEntity);
+                    }
                     terminalService.insertTerminal(entity);
 
                     // insert account-bank-receive-share

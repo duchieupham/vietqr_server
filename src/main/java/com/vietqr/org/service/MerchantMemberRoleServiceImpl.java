@@ -52,4 +52,9 @@ public class MerchantMemberRoleServiceImpl implements MerchantMemberRoleService 
     public List<String> getListUserIdRoles(String userId, String roles) {
         return repo.getListUserIdRoles(userId, roles);
     }
+
+    @Override
+    public List<String> getRoleByUserIdAndBankId(String userId, String bankId) {
+        return repo.getRoleByUserIdAndBankId(userId, bankId);
+    }
 }
