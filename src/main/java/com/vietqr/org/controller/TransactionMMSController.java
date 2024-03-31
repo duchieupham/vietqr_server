@@ -287,6 +287,16 @@ public class TransactionMMSController {
                             data.put("terminalName", "");
                             data.put("terminalCode", tempTransReceive.getTerminalCode() != null ?
                                     tempTransReceive.getTerminalCode() : "");
+                            if (tempTransReceive.getTerminalCode() != null &&
+                                    !tempTransReceive.getTerminalCode().trim().isEmpty()) {
+                                TransactionTerminalTempEntity transactionTerminalTempEntity = new TransactionTerminalTempEntity();
+                                transactionTerminalTempEntity.setId(UUID.randomUUID().toString());
+                                transactionTerminalTempEntity.setTransactionId(tempTransReceive.getId());
+                                transactionTerminalTempEntity.setTerminalCode(tempTransReceive.getTerminalCode());
+                                transactionTerminalTempEntity.setTime(time);
+                                transactionTerminalTempEntity.setAmount(Long.parseLong(tempTransReceive.getAmount() + ""));
+                                transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTempEntity);
+                            }
                             data.put("rawTerminalCode", "");
                             data.put("orderId", tempTransReceive.getOrderId() != null
                                     ? tempTransReceive.getOrderId() : "");

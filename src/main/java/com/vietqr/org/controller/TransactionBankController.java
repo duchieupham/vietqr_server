@@ -1209,6 +1209,16 @@ public class TransactionBankController {
 				} else {
 					prefix = "+";
 				}
+				Thread thread = new Thread(() -> {
+					TransactionTerminalTempEntity transactionTerminalTempEntity = new TransactionTerminalTempEntity();
+					transactionTerminalTempEntity.setId(UUID.randomUUID().toString());
+					transactionTerminalTempEntity.setTransactionId(transactionReceiveEntity.getId());
+					transactionTerminalTempEntity.setTerminalCode(terminalEntity.getCode());
+					transactionTerminalTempEntity.setTime(time);
+					transactionTerminalTempEntity.setAmount(Long.parseLong(dto.getAmount() + ""));
+					transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTempEntity);
+				});
+				thread.start();
 				// push notification to member of terminal
 				if (userIds != null && !userIds.isEmpty()) {
 					int numThread = userIds.size();
