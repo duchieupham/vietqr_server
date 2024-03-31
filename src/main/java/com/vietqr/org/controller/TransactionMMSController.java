@@ -288,6 +288,10 @@ public class TransactionMMSController {
                             data.put("terminalCode", tempTransReceive.getTerminalCode() != null ?
                                     tempTransReceive.getTerminalCode() : "");
                             data.put("rawTerminalCode", "");
+                            data.put("orderId", tempTransReceive.getOrderId() != null
+                                    ? tempTransReceive.getOrderId() : "");
+                            data.put("referenceNumber", tempTransReceive.getReferenceNumber() != null
+                                    ? tempTransReceive.getReferenceNumber() : "");
                             data.put("content", tempTransReceive.getContent());
                             data.put("amount", "" + tempTransReceive.getAmount());
                             data.put("time", "" + time);
@@ -470,6 +474,9 @@ public class TransactionMMSController {
                                     data.put("rawTerminalCode", terminalEntity.getRawTerminalCode() != null ?
                                             terminalEntity.getRawTerminalCode() : "");
                                 }
+                                data.put("orderId", entity.getReferenceLabelCode() != null ?
+                                        entity.getReferenceLabelCode() : "");
+                                data.put("referenceNumber", entity.getFtCode());
                                 data.put("time", "" + time);
                                 data.put("refId", "" + uuid.toString());
                                 data.put("status", "1");
