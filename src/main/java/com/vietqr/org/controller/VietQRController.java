@@ -986,11 +986,11 @@ public class VietQRController {
 					data.put("content", result.getContent());
 					data.put("qrCode", result.getQrCode());
 					data.put("imgId", result.getImgId());
-					firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
-							NotificationUtil
-									.getNotiTitleNewTransaction(),
-							message);
-					socketHandler.sendMessageToUser(dto.getUserId(), data);
+//					firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
+//							NotificationUtil
+//									.getNotiTitleNewTransaction(),
+//							message);
+//					socketHandler.sendMessageToUser(dto.getUserId(), data);
 				}
 
 				notiEntity.setId(notificationUUID.toString());
@@ -1213,7 +1213,11 @@ public class VietQRController {
 			httpStatus = HttpStatus.BAD_REQUEST;
 			return new ResponseEntity<>(result, httpStatus);
 		} finally {
-			insertNewTransaction(transcationUUID, traceId, dto, result, "", "", false);
+			if (dto.getOrderId() != null && !dto.getOrderId().isEmpty()) {
+				insertNewTransaction(transcationUUID, traceId, dto, result, dto.getOrderId(), "", false);
+			} else {
+				insertNewTransaction(transcationUUID, traceId, dto, result, "", "", false);
+			}
 		}
 	}
 

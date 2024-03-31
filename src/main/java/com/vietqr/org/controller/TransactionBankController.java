@@ -341,6 +341,7 @@ public class TransactionBankController {
 								data.put("terminalName", "");
 								data.put("terminalCode", "");
 								data.put("rawTerminalCode", "");
+								data.put("oderId", "");
 								data.put("referenceNumber", dto.getReferencenumber());
 								data.put("content", dto.getContent());
 								data.put("amount", "" + dto.getAmount());
@@ -1245,8 +1246,8 @@ public class TransactionBankController {
 						? terminalEntity.getRawTerminalCode() : "");
 						data.put("orderId", transactionReceiveEntity.getOrderId() != null
 								? transactionReceiveEntity.getOrderId() : "");
-						data.put("referenceNumber", transactionReceiveEntity.getReferenceNumber() != null
-								? transactionReceiveEntity.getReferenceNumber() : "");
+						data.put("referenceNumber", dto.getReferencenumber() != null
+								? dto.getReferencenumber() : "");
 						data.put("content", transactionReceiveEntity.getContent());
 						data.put("amount", "" + transactionReceiveEntity.getAmount());
 						data.put("time", "" + transactionReceiveEntity.getTime());
@@ -1364,8 +1365,8 @@ public class TransactionBankController {
 				data.put("rawTerminalCode", "");
 				data.put("orderId", transactionReceiveEntity.getOrderId() != null
 						? transactionReceiveEntity.getOrderId() : "");
-				data.put("referenceNumber", transactionReceiveEntity.getReferenceNumber() != null
-						? transactionReceiveEntity.getReferenceNumber() : "");
+				data.put("referenceNumber", dto.getReferencenumber() != null
+						? dto.getReferencenumber() : "");
 				data.put("content", dto.getContent());
 				data.put("amount", "" + dto.getAmount());
 				data.put("time", "" + time);
@@ -1453,8 +1454,8 @@ public class TransactionBankController {
 			data.put("rawTerminalCode", "");
 			data.put("orderId", transactionReceiveEntity.getOrderId() != null
 					? transactionReceiveEntity.getOrderId() : "");
-			data.put("referenceNumber", transactionReceiveEntity.getReferenceNumber() != null
-					? transactionReceiveEntity.getReferenceNumber() : "");
+			data.put("referenceNumber", dto.getReferencenumber() != null
+					? dto.getReferencenumber() : "");
 			data.put("content", dto.getContent());
 			data.put("amount", "" + dto.getAmount());
 			data.put("time", "" + time);
