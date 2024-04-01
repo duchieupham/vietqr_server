@@ -303,8 +303,8 @@ public class MerchantTransReceiveRequestController {
                     } else {
                         if (transactionReceiveEntity.getType() == 0) {
                             //update terminal code
-                            transactionReceiveService.updateTransactionReceiveTerminal(dto.getTransactionId(),
-                                    transReceiveRequestMappingEntity.getRequestValue(), 0);
+//                            transactionReceiveService.updateTransactionReceiveTerminal(dto.getTransactionId(),
+//                                    transReceiveRequestMappingEntity.getRequestValue(), 0);
                             data1.setTransactionId(dto.getTransactionId());
                             data1.setTerminalCode(transactionReceiveEntity.getTerminalCode());
                             data1.setType(transactionReceiveEntity.getType());
@@ -313,18 +313,22 @@ public class MerchantTransReceiveRequestController {
                             data2.setTerminalCode(transReceiveRequestMappingEntity.getRequestValue());
                             data2.setType(transactionReceiveEntity.getType());
                             data2.setTransStatus(2);
+                            transactionReceiveEntity.setTerminalCode(transReceiveRequestMappingEntity.getRequestValue());
+                            transactionReceiveEntity.setType(0);
                         } else {
                             // update terminal code
-                            transactionReceiveService.updateTransactionReceiveTerminal(dto.getTransactionId(),
-                                    transReceiveRequestMappingEntity.getRequestValue(), 1);
+//                            transactionReceiveService.updateTransactionReceiveTerminal(dto.getTransactionId(),
+//                                    transReceiveRequestMappingEntity.getRequestValue(), 1);
                             data1.setTransactionId(dto.getTransactionId());
-                            data1.setTerminalCode(transactionReceiveEntity.getTerminalCode());
+                            data1.setTerminalCode(transReceiveRequestMappingEntity.getRequestValue());
                             data1.setType(transactionReceiveEntity.getType());
                             data1.setTransStatus(transactionReceiveEntity.getTransStatus());
                             data2.setTransactionId(dto.getTransactionId());
                             data2.setTerminalCode(transReceiveRequestMappingEntity.getRequestValue());
                             data2.setType(1);
                             data2.setTransStatus(2);
+                            transactionReceiveEntity.setTerminalCode(transReceiveRequestMappingEntity.getRequestValue());
+                            transactionReceiveEntity.setType(1);
                         }
 
                         // insert for statistic
@@ -355,6 +359,7 @@ public class MerchantTransReceiveRequestController {
                         transReceiveRequestMappingEntity.setTimeApproved(currentTime);
                         // update transaction
                         transactionReceiveEntity.setTransStatus(2);
+                        transactionReceiveEntity.setTerminalCode(transReceiveRequestMappingEntity.getRequestValue());
 
                         transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
                         transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTemp);

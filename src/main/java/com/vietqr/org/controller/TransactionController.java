@@ -1339,7 +1339,7 @@ public class TransactionController {
             TransactionUpdateTerminalDTO data1 = new TransactionUpdateTerminalDTO();
             TransactionUpdateTerminalDTO data2 = new TransactionUpdateTerminalDTO();
             TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
-                    .getTransactionReceiveById(dto.getTransactionId(), dto.getUserId());
+                    .getTransactionReceiveById(dto.getTransactionId());
             if (transactionReceiveEntity == null) {
                 result = new ResponseMessageDTO("FAILED", "E115");
                 httpStatus = HttpStatus.BAD_REQUEST;

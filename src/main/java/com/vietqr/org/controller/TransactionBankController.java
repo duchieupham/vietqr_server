@@ -1261,7 +1261,7 @@ public class TransactionBankController {
 								? dto.getReferencenumber() : "");
 						data.put("content", transactionReceiveEntity.getContent());
 						data.put("amount", "" + transactionReceiveEntity.getAmount());
-						data.put("timeCreated", "" + transactionReceiveEntity.getTimePaid());
+						data.put("timePaid", "" + time);
 						data.put("type", "" + transactionReceiveEntity.getType());
 						data.put("time", "" + transactionReceiveEntity.getTime());
 						data.put("refId", "" + dto.getTransactionid());
@@ -1473,7 +1473,7 @@ public class TransactionBankController {
 					? dto.getReferencenumber() : "");
 			data.put("content", dto.getContent());
 			data.put("amount", "" + dto.getAmount());
-			data.put("timePaid", "" + transactionReceiveEntity.getTimePaid());
+			data.put("timePaid", "" + time);
 			data.put("type", "" + transactionReceiveEntity.getType());
 			data.put("time", "" + time);
 			data.put("refId", "" + dto.getTransactionid());
@@ -3139,6 +3139,7 @@ public class TransactionBankController {
 			String payload = BIDVUtil.generateRequestLinkedBody(serviceId, merchantId, merchantName, channelId,
 					transDate, payerDebitType, registerSmartBanking, dto);
 			System.out.println("Payload: " + payload);
+			logger.info("requestLinkedBIDVOTP: Payload: " + payload);
 			//
 			jwe.setPayload(payload);
 			jwe.setAlgorithmHeaderValue(KeyManagementAlgorithmIdentifiers.A256KW);
@@ -3164,6 +3165,7 @@ public class TransactionBankController {
 			JweObj j = new JweObj(recipients, protected_, ciphertext, iv, tag);
 			String jweString = gson.toJson(j);
 			System.out.println("\n\nJWE: " + jweString);
+			logger.info("requestLinkedBIDVOTP: JWE: " + jweString);
 			Map<String, Object> body = gson.fromJson(jweString, Map.class);
 
 			// JWS
@@ -3174,6 +3176,7 @@ public class TransactionBankController {
 			jws.setKey(privateKey);
 			String jwsString = jws.getCompactSerialization();
 			System.out.println("\n\nJWS: " + jwsString);
+			logger.info("requestLinkedBIDVOTP: JWS: " + jwsString);
 			///
 			// call API
 			UriComponents uriComponents = UriComponentsBuilder
@@ -3185,7 +3188,9 @@ public class TransactionBankController {
 			String token = getBIDVToken("ewallet").getAccess_token();
 			String clientXCertification = JwsUtil.getClientXCertificate();
 			System.out.println("\n\nToken BIDV: " + token);
+			logger.info("requestLinkedBIDVOTP: Token BIDV: " + token);
 			System.out.println("\n\nclientXCertification BIDV: " + clientXCertification);
+			logger.info("requestLinkedBIDVOTP: clientXCertification BIDV: " + clientXCertification);
 			Mono<ClientResponse> responseMono = webClient.post()
 					.uri(uriComponents.toUri())
 					.contentType(MediaType.APPLICATION_JSON)
@@ -3312,6 +3317,7 @@ public class TransactionBankController {
 			String payload = BIDVUtil.generateConfirmLinkedBody(serviceId, merchantId, merchantName, channelId,
 					transDate, dto);
 			System.out.println("Payload: " + payload);
+			logger.info("confirmLinkedBIDVOTP: Payload: " + payload);
 			//
 			jwe.setPayload(payload);
 			jwe.setAlgorithmHeaderValue(KeyManagementAlgorithmIdentifiers.A256KW);
@@ -3337,6 +3343,7 @@ public class TransactionBankController {
 			JweObj j = new JweObj(recipients, protected_, ciphertext, iv, tag);
 			String jweString = gson.toJson(j);
 			System.out.println("\n\nJWE: " + jweString);
+			logger.info("confirmLinkedBIDVOTP: JWE: " + jweString);
 			Map<String, Object> body = gson.fromJson(jweString, Map.class);
 
 			// JWS
@@ -3347,6 +3354,7 @@ public class TransactionBankController {
 			jws.setKey(privateKey);
 			String jwsString = jws.getCompactSerialization();
 			System.out.println("\n\nJWS: " + jwsString);
+			logger.info("confirmLinkedBIDVOTP: JWS: " + jwsString);
 			///
 			// call API
 			UriComponents uriComponents = UriComponentsBuilder
@@ -3358,7 +3366,9 @@ public class TransactionBankController {
 			String token = getBIDVToken("ewallet").getAccess_token();
 			String clientXCertification = JwsUtil.getClientXCertificate();
 			System.out.println("\n\nToken BIDV: " + token);
+			logger.info("confirmLinkedBIDVOTP: Token BIDV: " + token);
 			System.out.println("\n\nclientXCertification BIDV: " + clientXCertification);
+			logger.info("confirmLinkedBIDVOTP: clientXCertification BIDV: " + clientXCertification);
 			Mono<ClientResponse> responseMono = webClient.post()
 					.uri(uriComponents.toUri())
 					.contentType(MediaType.APPLICATION_JSON)
