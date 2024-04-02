@@ -117,11 +117,11 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
 		String checksum = BankEncryptUtil.generateMD5GetBillForBankChecksum("QklEVkJMVUVDT01BY2Nlc3NLZXk=", "BC0001",
-				"d0d6ba40-6370-4ff9-926e-5e86194f3062");
+				"BCDL00003");
 		System.out.println("Checksum: " + checksum);
 
 		String checksum2 = BankEncryptUtil.generateMD5PayBillForBankChecksum("QklEVkJMVUVDT01BY2Nlc3NLZXk=",
-				"0000000000011", "9VIxZzY6Ub", "93000000");
+				"0000000000012", "KLAMizIb06", "11000000");
 
 		System.out.println("Checksum2: " + checksum2);
 
@@ -162,7 +162,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// "FT23293978692076", "SABAccessKey");
 		// System.out.println("CHECKSUM REFUND: " + checkSum2);
 
-		String bankAccountEncrypted = BankEncryptUtil.encrypt("6035105698389");
+		String bankAccountEncrypted = BankEncryptUtil.encrypt("2303199699999");
 		System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
 
 		/// generate signature to request payment MB
