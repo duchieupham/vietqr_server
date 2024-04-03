@@ -89,7 +89,8 @@ public interface MerchantMemberRepository extends JpaRepository<MerchantMemberEn
 
     @Query(value = "SELECT a.id FROM merchant_member a "
             + "INNER JOIN (SELECT * FROM terminal WHERE id = :terminalId) d "
-            + "WHERE (a.terminal_id = :terminalId OR a.terminal_id = '') AND a.user_id = :userId LIMIT 1", nativeQuery = true)
+            + "WHERE (a.terminal_id = :terminalId OR a.terminal_id = '') "
+            + "AND a.user_id = :userId LIMIT 1", nativeQuery = true)
     String checkUserExistedFromTerminal(String terminalId, String userId);
 
     @Query(value = "SELECT DISTINCT a.user_id AS id, c.phone_no AS phoneNo, a.img_id AS imgId, "
@@ -132,4 +133,52 @@ public interface MerchantMemberRepository extends JpaRepository<MerchantMemberEn
             + "INNER JOIN terminal_bank_receive c ON b.id = c.terminal_id "
             + "WHERE a.user_id = :userId AND c.bank_id = :bankId LIMIT 1", nativeQuery = true)
     String checkUserExistedFromBank(String userId, String bankId);
+
+    @Query(value = "SELECT DISTINCT a.merchant_id AS merchantId, a.user_id AS userId, "
+            + "d.trans_receive_role_ids AS transReceiveRoles, "
+            + "d.trans_refund_role_ids AS transRefundRoles, "
+            + "b.phone_no AS phoneNo, "
+            + "CONCAT(c.last_name, ' ', c.middle_name, ' ', c.first_name) AS fullName, "
+            + "c.img_id AS imgId, e.terminalCount "
+            + "FROM merchant_member a "
+            + "INNER JOIN account_login b ON a.user_id = b.id "
+            + "INNER JOIN account_information c ON a.user_id = c.user_id "
+            + "INNER JOIN merchant_member_role d ON d.merchant_member_id = a.id "
+            + "INNER JOIN (SELECT COALESCE(COUNT(DISTINCT CASE WHEN terminal_id != '' "
+            + "THEN terminal_id END), 0) AS terminalCount, user_id FROM merchant_member "
+            + " WHERE merchant_id = :merchantId GROUP BY merchant_id, user_id) e "
+            + "ON e.user_id = a.user_id "
+            + "WHERE a.merchant_id = :merchantId AND a.is_active = TRUE "
+            + "AND b.phone_no LIKE %:value% "
+            + "ORDER BY CASE "
+            + "WHEN e.terminalCount = 0 THEN 0 "
+            + "ELSE 1 END, "
+            + "terminalCount DESC "
+            + "LIMIT :offset, :size ", nativeQuery = true)
+    List<IMerchantMemberDTO> findMerchantMemberByMerchantIdAndPhoneNo(String merchantId, String value,
+                                                                      int offset, int size);
+
+    @Query(value = "SELECT DISTINCT a.merchant_id AS merchantId, a.user_id AS userId, "
+            + "d.trans_receive_role_ids AS transReceiveRoles, "
+            + "d.trans_refund_role_ids AS transRefundRoles, "
+            + "b.phone_no AS phoneNo, "
+            + "CONCAT(c.last_name, ' ', c.middle_name, ' ', c.first_name) AS fullName, "
+            + "c.img_id AS imgId, e.terminalCount "
+            + "FROM merchant_member a "
+            + "INNER JOIN account_login b ON a.user_id = b.id "
+            + "INNER JOIN account_information c ON a.user_id = c.user_id "
+            + "INNER JOIN merchant_member_role d ON d.merchant_member_id = a.id "
+            + "INNER JOIN (SELECT COALESCE(COUNT(DISTINCT CASE WHEN terminal_id != '' "
+            + "THEN terminal_id END), 0) AS terminalCount, user_id FROM merchant_member "
+            + " WHERE merchant_id = :merchantId GROUP BY merchant_id, user_id) e "
+            + "ON e.user_id = a.user_id "
+            + "WHERE a.merchant_id = :merchantId AND a.is_active = TRUE "
+            + "AND CONCAT(c.last_name, ' ', c.middle_name, ' ', c.first_name) LIKE %:value% "
+            + "ORDER BY CASE "
+            + "WHEN e.terminalCount = 0 THEN 0 "
+            + "ELSE 1 END, "
+            + "terminalCount DESC "
+            + "LIMIT :offset, :size ", nativeQuery = true)
+    List<IMerchantMemberDTO> findMerchantMemberByMerchantIdAndFullName(String merchantId, String value,
+                                                                       int offset, int size);
 }

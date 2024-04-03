@@ -288,11 +288,17 @@ public class MerchantMemberController {
             ObjectMapper mapper = new ObjectMapper();
             List<IMerchantMemberDTO> dtos = new ArrayList<>();
             switch (type) {
+                // phone
                 case 0:
-                    dtos = merchantMemberService.findMerchantMemberByMerchantId(merchantId, value, (page - 1) * size, size);
+                    dtos = merchantMemberService
+                            .findMerchantMemberByMerchantIdAndPhoneNo(merchantId, value,
+                                    (page - 1) * size, size);
                     break;
+                // full name
                 case 1:
-                    dtos = merchantMemberService.findMerchantMemberByMerchantId(merchantId, value, (page - 1) * size, size);
+                    dtos = merchantMemberService
+                            .findMerchantMemberByMerchantIdAndFullName(merchantId, value,
+                                    (page - 1) * size, size);
                     break;
                 default:
                     break;
