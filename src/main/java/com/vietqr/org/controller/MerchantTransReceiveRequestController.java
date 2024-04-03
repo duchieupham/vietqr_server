@@ -332,18 +332,23 @@ public class MerchantTransReceiveRequestController {
                         }
 
                         // insert for statistic
-                        TransactionTerminalTempEntity transactionTerminalTemp = transactionTerminalTempService
-                                .getTempByTransactionId(dto.getTransactionId());
-                        if (transactionTerminalTemp != null) {
-                            transactionTerminalTemp
-                                    .setTerminalCode(transReceiveRequestMappingEntity.getRequestValue());
-                        } else {
-                            transactionTerminalTemp = new TransactionTerminalTempEntity();
-                            transactionTerminalTemp.setId(UUID.randomUUID().toString());
-                            transactionTerminalTemp.setTransactionId(dto.getTransactionId());
-                            transactionTerminalTemp.setTerminalCode(transReceiveRequestMappingEntity.getRequestValue());
-                            transactionTerminalTemp.setTime(transactionReceiveEntity.getTime());
-                            transactionTerminalTemp.setAmount(transactionReceiveEntity.getAmount());
+                        if ("C".equalsIgnoreCase(transactionReceiveEntity.getTransType())
+                                && 1 == transactionReceiveEntity.getStatus()) {
+                            TransactionTerminalTempEntity transactionTerminalTemp = transactionTerminalTempService
+                                    .getTempByTransactionId(dto.getTransactionId());
+                            if (transactionTerminalTemp != null) {
+                                transactionTerminalTemp
+                                        .setTerminalCode(transReceiveRequestMappingEntity.getRequestValue());
+                            } else {
+                                transactionTerminalTemp = new TransactionTerminalTempEntity();
+                                transactionTerminalTemp.setId(UUID.randomUUID().toString());
+                                transactionTerminalTemp.setTransactionId(dto.getTransactionId());
+                                transactionTerminalTemp.setTerminalCode(transReceiveRequestMappingEntity
+                                        .getRequestValue());
+                                transactionTerminalTemp.setTime(transactionReceiveEntity.getTimePaid());
+                                transactionTerminalTemp.setAmount(transactionReceiveEntity.getAmount());
+                            }
+                            transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTemp);
                         }
 
                         TransactionReceiveHistoryEntity transactionReceiveHistoryEntity = new TransactionReceiveHistoryEntity();
@@ -362,7 +367,6 @@ public class MerchantTransReceiveRequestController {
                         transactionReceiveEntity.setTerminalCode(transReceiveRequestMappingEntity.getRequestValue());
 
                         transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
-                        transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTemp);
                         transactionReceiveHistoryService.insertTransactionReceiveHistory(transactionReceiveHistoryEntity);
                         result = new ResponseMessageDTO("SUCCESS", "");
                         httpStatus = HttpStatus.OK;

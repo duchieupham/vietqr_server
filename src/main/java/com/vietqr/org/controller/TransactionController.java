@@ -1369,19 +1369,22 @@ public class TransactionController {
                 }
 
                 // insert for statistic
-                TransactionTerminalTempEntity transactionTerminalTemp = transactionTerminalTempService
-                        .getTempByTransactionId(dto.getTransactionId());
-                if (transactionTerminalTemp != null) {
-                    transactionTerminalTemp.setTerminalCode(dto.getTerminalCode());
-                } else {
-                    transactionTerminalTemp = new TransactionTerminalTempEntity();
-                    transactionTerminalTemp.setId(UUID.randomUUID().toString());
-                    transactionTerminalTemp.setTransactionId(dto.getTransactionId());
-                    transactionTerminalTemp.setTerminalCode(dto.getTerminalCode());
-                    transactionTerminalTemp.setTime(transactionReceiveEntity.getTimePaid());
-                    transactionTerminalTemp.setAmount(transactionReceiveEntity.getAmount());
+                if ("C".equalsIgnoreCase(transactionReceiveEntity.getTransType())
+                        && 1 == transactionReceiveEntity.getStatus()) {
+                    TransactionTerminalTempEntity transactionTerminalTemp = transactionTerminalTempService
+                            .getTempByTransactionId(dto.getTransactionId());
+                    if (transactionTerminalTemp != null) {
+                        transactionTerminalTemp.setTerminalCode(dto.getTerminalCode());
+                    } else {
+                        transactionTerminalTemp = new TransactionTerminalTempEntity();
+                        transactionTerminalTemp.setId(UUID.randomUUID().toString());
+                        transactionTerminalTemp.setTransactionId(dto.getTransactionId());
+                        transactionTerminalTemp.setTerminalCode(dto.getTerminalCode());
+                        transactionTerminalTemp.setTime(transactionReceiveEntity.getTimePaid());
+                        transactionTerminalTemp.setAmount(transactionReceiveEntity.getAmount());
+                    }
+                    transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTemp);
                 }
-                transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTemp);
 
                 // save history
                 TransactionReceiveHistoryEntity transHistory = new TransactionReceiveHistoryEntity();

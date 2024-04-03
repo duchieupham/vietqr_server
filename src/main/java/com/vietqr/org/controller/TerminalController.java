@@ -809,7 +809,6 @@ public class TerminalController {
                             accountBankReceiveShareEntity.setTraceTransfer("");
                             accountBankReceiveShareEntities.add(accountBankReceiveShareEntity);
 
-
                             MerchantMemberEntity merchantMemberEntity = new MerchantMemberEntity();
                             String merchantMemberId = UUID.randomUUID().toString();
                             merchantMemberEntity.setId(merchantMemberId);

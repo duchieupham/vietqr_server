@@ -47,22 +47,12 @@ public class TerminalStatisticController {
         List<String> listTerminalCode = new ArrayList<>();
         List<String> tempCode = new ArrayList<>();
         try {
-            // old code
-//            tempCode = terminalService.getAllCodeByUserId(userId);
-//            listTerminalCode.addAll(tempCode);
-//            Set<String> uniqueCodes = new HashSet<>(listTerminalCode);
-//            listTerminalCode = new ArrayList<>(uniqueCodes);
-
             // new code
             if (merchantId != null && !merchantId.isEmpty()) {
                 // not owner
                 listTerminalCode = terminalService.getAllCodeByMerchantId(merchantId, userId);
                 // owner
                 tempCode = terminalService.getAllCodeByMerchantIdOwner(merchantId, userId);
-                listTerminalCode.addAll(tempCode);
-            } else {
-                listTerminalCode = terminalService.getAllCodeByUserIdOwner(userId);
-                tempCode = terminalService.getAllCodeByMerchantIdIn(merchantId, userId);
                 listTerminalCode.addAll(tempCode);
             }
             Set<String> uniqueCodes = new HashSet<>(listTerminalCode);
@@ -95,25 +85,41 @@ public class TerminalStatisticController {
                             .getTotalTranByUserIdAndTimeBetweenWithCurrentTime(
                                     listCode, startOfDay.toEpochSecond(ZoneOffset.UTC) - DateTimeUtil.A_DAY_TO_SECOND,
                                     localDateTime.toEpochSecond(ZoneOffset.UTC) - DateTimeUtil.A_DAY_TO_SECOND);
-                    if (revenueTerminalDTOPrevDate != null && revenueTerminalDTOPrevDate.getTotalAmount() != 0 && revenueTerminalDTOPrevDate.getTotalTrans() != 0) {
+                    if (revenueTerminalDTOPrevDate != null
+                            && revenueTerminalDTOPrevDate.getTotalAmount() != 0
+                            && revenueTerminalDTOPrevDate.getTotalTrans() != 0) {
                         double revGrowthPrevDate = revenueTerminalDTOPrevDate.getTotalAmount() == 0 ? 0 :
                                 (double) (dto.getTotalAmount() - revenueTerminalDTOPrevDate.getTotalAmount())
                                         / revenueTerminalDTOPrevDate.getTotalAmount();
                         result.setratePreviousDate((int) (revGrowthPrevDate * 100));
                     } else {
-                        result.setratePreviousDate(0);
+                        if ((revenueTerminalDTOPrevDate == null
+                                || revenueTerminalDTOPrevDate.getTotalAmount() == 0)
+                                && dto.getTotalAmount() != 0) {
+                            result.setratePreviousDate(100);
+                        } else {
+                            result.setratePreviousDate(0);
+                        }
                     }
                     RevenueTerminalDTO revenueTerminalDTOPrevMonth = transactionTerminalTempService
                             .getTotalTranByUserIdAndTimeBetween(
                                     listCode, DateTimeUtil.getPrevMonthAsString(), DateTimeUtil.getPrevMonthAsString());
 
-                    if (revenueTerminalDTOPrevMonth != null && revenueTerminalDTOPrevMonth.getTotalTrans() != 0 && revenueTerminalDTOPrevMonth.getTotalAmount() != 0) {
+                    if (revenueTerminalDTOPrevMonth != null
+                            && revenueTerminalDTOPrevMonth.getTotalTrans() != 0
+                            && revenueTerminalDTOPrevMonth.getTotalAmount() != 0) {
                         double revGrowthPrevMonth = revenueTerminalDTOPrevMonth.getTotalAmount() == 0 ? 0 :
                                 (double) ((dto.getTotalAmount() - revenueTerminalDTOPrevMonth.getTotalAmount())
                                         / revenueTerminalDTOPrevMonth.getTotalAmount());
                         result.setRatePreviousMonth((int) (revGrowthPrevMonth * 100));
                     } else {
-                        result.setRatePreviousMonth(0);
+                        if ((revenueTerminalDTOPrevMonth == null
+                                || revenueTerminalDTOPrevMonth.getTotalAmount() == 0)
+                                && dto.getTotalAmount() != 0) {
+                            result.setRatePreviousMonth(100);
+                        } else {
+                            result.setRatePreviousMonth(0);
+                        }
                     }
                 } else {
                     result = new StatisticMerchantDTO();
@@ -160,19 +166,13 @@ public class TerminalStatisticController {
         HttpStatus httpStatus = null;
         try {
             List<IStatisticTerminalOverViewDTO> dtos = new ArrayList<>();
-            List<IStatisticTerminalOverViewDTO> dtosOwner = new ArrayList<>();
-            if (merchantId == null || merchantId.isEmpty()) {
+            // not owner
+            dtos = terminalService
+                    .getListTerminalByMerchantId(merchantId, userId, offset);
+            // owner
+            if (dtos == null || dtos.isEmpty()) {
                 dtos = terminalService
-                        .getListTerminalByUserId(userId, offset);
-            } else {
-                // not owner
-                dtos = terminalService
-                        .getListTerminalByMerchantId(merchantId, userId, offset);
-                // owner
-                if (dtos == null || dtos.isEmpty()) {
-                    dtos = terminalService
-                            .getListTerminalByMerchantIdOwner(merchantId, userId, offset);
-                }
+                        .getListTerminalByMerchantIdOwner(merchantId, userId, offset);
             }
 
             if (dtos != null && !dtos.isEmpty()) {
@@ -185,8 +185,10 @@ public class TerminalStatisticController {
                             List<String> listCode = new ArrayList<>();
                             listCode = terminalBankReceiveService.getSubTerminalCodeByTerminalCode(item.getTerminalCode());
                             listCode.add(item.getTerminalCode());
-                            RevenueTerminalDTO revGrowthToday = transactionTerminalTempService.getTotalTranByTerminalCodeAndTimeBetween(
-                                    listCode, DateTimeUtil.removeTimeInDateTimeString(fromDate), DateTimeUtil.removeTimeInDateTimeString(toDate));
+                            RevenueTerminalDTO revGrowthToday = transactionTerminalTempService
+                                    .getTotalTranByTerminalCodeAndTimeBetween(
+                                    listCode, DateTimeUtil.removeTimeInDateTimeString(fromDate),
+                                            DateTimeUtil.removeTimeInDateTimeString(toDate));
                             dto.setTotalTrans(revGrowthToday.getTotalTrans());
                             dto.setTotalAmount(revGrowthToday.getTotalAmount());
                             LocalDateTime now = LocalDateTime.now();
@@ -195,18 +197,22 @@ public class TerminalStatisticController {
                             time += DateTimeUtil.GMT_PLUS_7_OFFSET;
                             // đổi sang DateTime - đây là thời gian hiện tại
                             LocalDateTime localDateTime = LocalDateTime.ofEpochSecond(time, 0, ZoneOffset.UTC);
-                            // đây là thời gian bắt ầu ngày hiện tại
+                            // đây là thời gian bắt đầu ngày hiện tại
                             LocalDateTime startOfDay = localDateTime.toLocalDate().atStartOfDay();
                             RevenueTerminalDTO revGrowthPrevDate = transactionTerminalTempService
                                     .getTotalTranByTerminalCodeAndTimeBetweenWithCurrentTime(
-                                            listCode, startOfDay.toEpochSecond(ZoneOffset.UTC) - DateTimeUtil.A_DAY_TO_SECOND,
+                                            listCode,
+                                            startOfDay.toEpochSecond(ZoneOffset.UTC) - DateTimeUtil.A_DAY_TO_SECOND,
                                             localDateTime.toEpochSecond(ZoneOffset.UTC) - DateTimeUtil.A_DAY_TO_SECOND);
-                            if (revGrowthPrevDate != null && revGrowthPrevDate.getTotalAmount() != 0 && revGrowthPrevDate.getTotalTrans() != 0) {
+                            if (revGrowthPrevDate != null
+                                    && revGrowthPrevDate.getTotalAmount() != 0
+                                    && revGrowthPrevDate.getTotalTrans() != 0) {
                                 double revGrowthPrevDateNum = revGrowthPrevDate.getTotalAmount() == 0 ? 0 :
                                         (double) (dto.getTotalAmount() - revGrowthPrevDate.getTotalAmount())
                                                 / revGrowthPrevDate.getTotalAmount();
                                 dto.setRatePreviousDate((int) (revGrowthPrevDateNum * 100));
-                            } else if (revGrowthPrevDate != null && revGrowthPrevDate.getTotalAmount() == 0 && dto.getTotalAmount() != 0) {
+                            } else if ((revGrowthPrevDate == null || revGrowthPrevDate.getTotalAmount() == 0)
+                                    && dto.getTotalAmount() != 0) {
                                 dto.setRatePreviousDate(100);
                             } else {
                                 dto.setRatePreviousDate(0);

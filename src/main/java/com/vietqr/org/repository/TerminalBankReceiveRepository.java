@@ -120,7 +120,7 @@ public interface TerminalBankReceiveRepository extends JpaRepository<TerminalBan
     @Query(value = "SELECT DISTINCT b.terminal_id as terminalId, c.id as bankId, d.bank_name as bankName, "
             + "d.bank_code as bankCode, c.bank_account as bankAccount, c.bank_account_name as userBankName, "
             + "d.bank_short_name as bankShortName, d.img_id as imgId, "
-            + "CASE c.mms_active WHEN c.mms_active = TRUE THEN b.data1 ELSE b.data2 END AS qrCode "
+            + "CASE WHEN b.trace_transfer = '' THEN b.data1 ELSE b.data2 END AS qrCode "
             + "FROM terminal a "
             + "INNER JOIN terminal_bank_receive b ON a.id = b.terminal_id "
             + "INNER JOIN account_bank_receive c "
