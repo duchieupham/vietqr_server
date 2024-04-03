@@ -91,4 +91,9 @@ public class MerchantMemberServiceImpl implements MerchantMemberService {
     public void removeMerchantMemberByTerminalId(String terminalId) {
         repo.removeMerchantMemberByTerminalId(terminalId);
     }
+
+    @Override
+    public String checkUserExistedFromBank(String userId, String bankId) {
+        return repo.checkUserExistedFromBank(userId, bankId);
+    }
 }

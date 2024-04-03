@@ -66,6 +66,15 @@
 			<artifactId>grpc-stub</artifactId>
 			<version>1.62.2</version>
 		</dependency>
+
+
+		<!-- https://mvnrepository.com/artifact/net.devh/grpc-server-spring-boot-starter -->
+		<dependency>
+			<groupId>net.devh</groupId>
+			<artifactId>grpc-server-spring-boot-starter</artifactId>
+			<version>3.0.0.RELEASE</version>
+		</dependency>
+
 		<!-- 	-->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>

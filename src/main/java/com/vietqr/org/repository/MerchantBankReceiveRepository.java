@@ -14,4 +14,12 @@ public interface MerchantBankReceiveRepository extends JpaRepository<MerchantBan
     @Query(value = "SELECT * FROM merchant_bank_receive "
             + "WHERE merchant_id = :merchantId AND bank_id = :id LIMIT 1", nativeQuery = true)
     MerchantBankReceiveEntity getMerchantBankReceiveByMerchantAndBankId(String merchantId, String id);
+
+    @Query(value = "SELECT bank_id FROM merchant_bank_receive "
+            + "WHERE merchant_id = :merchantId LIMIT 1", nativeQuery = true)
+    String getBankIdReceiveByMerchant(String merchantId);
+
+    @Query(value = "SELECT * FROM merchant_bank_receive "
+            + "WHERE merchant_id = :merchantId AND bank_id = :bankId LIMIT 1 ", nativeQuery = true)
+    MerchantBankReceiveEntity getMerchantBankByMerchantId(String merchantId, String bankId);
 }

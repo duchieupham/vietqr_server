@@ -86,7 +86,7 @@ public class BankEncryptUtil {
     }
 
     public static String generateMD5SyncTidChecksum(String accessKey, String bankCode,
-                                                           String bankAccount) {
+            String bankAccount) {
         String result = "";
         try {
             String plainText = accessKey + bankCode + bankAccount;

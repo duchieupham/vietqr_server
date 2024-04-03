@@ -39,6 +39,12 @@ public class TransReceiveRequestMappingEntity {
     @Column(name = "timeCreated")
     private long timeCreated;
 
+    //0 : waiting
+    //1: approved
+    //2: rejected
+    @Column(name = "status")
+    private Integer status;
+
     @Column(name = "timeApproved")
     private long timeApproved;
 
@@ -130,5 +136,13 @@ public class TransReceiveRequestMappingEntity {
 
     public void setTimeApproved(long timeApproved) {
         this.timeApproved = timeApproved;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 }

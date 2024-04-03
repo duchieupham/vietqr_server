@@ -5,6 +5,10 @@ public class ApproveTransRequestDTO {
     private String transactionId;
     private String userId;
 
+    //1: approved
+    //2: rejected
+    private Integer status;
+
     public ApproveTransRequestDTO() {
     }
 
@@ -36,5 +40,13 @@ public class ApproveTransRequestDTO {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 }

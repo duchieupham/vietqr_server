@@ -41,4 +41,6 @@ public interface MerchantMemberService {
     List<AccountMemberDTO> getMembersFromTerminalId(String terminalId);
 
     void removeMerchantMemberByTerminalId(String terminalId);
+
+    String checkUserExistedFromBank(String userId, String bankId);
 }

@@ -284,8 +284,28 @@ public class TransactionMMSController {
                             data.put("bankId", accountBankEntity.getId());
                             data.put("branchName", "");
                             data.put("businessName", "");
+                            data.put("terminalName", "");
+                            data.put("type", "" + tempTransReceive.getType());
+                            data.put("terminalCode", tempTransReceive.getTerminalCode() != null ?
+                                    tempTransReceive.getTerminalCode() : "");
+                            if (tempTransReceive.getTerminalCode() != null &&
+                                    !tempTransReceive.getTerminalCode().trim().isEmpty()) {
+                                TransactionTerminalTempEntity transactionTerminalTempEntity = new TransactionTerminalTempEntity();
+                                transactionTerminalTempEntity.setId(UUID.randomUUID().toString());
+                                transactionTerminalTempEntity.setTransactionId(tempTransReceive.getId());
+                                transactionTerminalTempEntity.setTerminalCode(tempTransReceive.getTerminalCode());
+                                transactionTerminalTempEntity.setTime(time);
+                                transactionTerminalTempEntity.setAmount(Long.parseLong(tempTransReceive.getAmount() + ""));
+                                transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTempEntity);
+                            }
+                            data.put("rawTerminalCode", "");
+                            data.put("orderId", tempTransReceive.getOrderId() != null
+                                    ? tempTransReceive.getOrderId() : "");
+                            data.put("referenceNumber", tempTransReceive.getReferenceNumber() != null
+                                    ? tempTransReceive.getReferenceNumber() : "");
                             data.put("content", tempTransReceive.getContent());
                             data.put("amount", "" + tempTransReceive.getAmount());
+                            data.put("timePaid", "" + tempTransReceive.getTimePaid());
                             data.put("time", "" + time);
                             data.put("refId", "" + entity.getId());
                             data.put("status", "1");
@@ -395,6 +415,7 @@ public class TransactionMMSController {
                                 transactionReceiveEntity1.setTime(time);
                                 transactionReceiveEntity1.setTimePaid(time);
                                 transactionReceiveEntity1.setBankId(accountBankReceiveEntity.getId());
+                                transactionReceiveEntity1.setTransStatus(0);
                                 if (terminalBankReceiveEntity.getTerminalCode() != null
                                         && !terminalBankReceiveEntity.getTerminalCode().trim().isEmpty()) {
                                     transactionReceiveEntity1.setTerminalCode(terminalBankReceiveEntity.getTerminalCode());
@@ -457,6 +478,20 @@ public class TransactionMMSController {
                                 data.put("bankId", accountBankReceiveEntity.getId());
                                 data.put("content","" + traceTransfer);
                                 data.put("amount", "" + entity.getDebitAmount());
+                                if (terminalEntity != null) {
+                                    data.put("terminalName", terminalEntity.getName() != null ?
+                                            terminalEntity.getName() : "");
+                                    data.put("terminalCode", terminalEntity.getCode() != null ?
+                                            terminalEntity.getCode() : "");
+                                    data.put("rawTerminalCode", terminalEntity.getRawTerminalCode() != null ?
+                                            terminalEntity.getRawTerminalCode() : "");
+                                }
+                                data.put("orderId", entity.getReferenceLabelCode() != null ?
+                                        entity.getReferenceLabelCode() : "");
+                                data.put("referenceNumber", entity.getFtCode() != null ?
+                                        entity.getFtCode() : "");
+                                data.put("timePaid", "" + time);
+                                data.put("type", "" + transactionReceiveEntity1.getType());
                                 data.put("time", "" + time);
                                 data.put("refId", "" + uuid.toString());
                                 data.put("status", "1");
@@ -518,6 +553,7 @@ public class TransactionMMSController {
                                 transactionEntity.setQrCode("");
                                 transactionEntity.setUserId(bankDTO.getUserId());
                                 transactionEntity.setNote("");
+                                transactionEntity.setTransStatus(0);
                                 if (!insertTransaction) {
                                     transactionReceiveService.insertTransactionReceive(transactionEntity);
                                     final String tempTerminalCode = terminalEntity.getCode();
@@ -569,8 +605,18 @@ public class TransactionMMSController {
                                     data.put("bankCode", bankDTO.getBankCode());
                                     data.put("bankId", bankDTO.getBankId());
                                     data.put("content","" + traceTransfer);
+                                    data.put("terminalName", terminalEntity.getName() != null ?
+                                            terminalEntity.getName() : "");
+                                    data.put("terminalCode", terminalEntity.getCode() != null ?
+                                            terminalEntity.getCode() : "");
+                                    data.put("rawTerminalCode", terminalEntity.getRawTerminalCode() != null ?
+                                            terminalEntity.getRawTerminalCode() : "");
                                     data.put("amount", "" + entity.getDebitAmount());
+                                    data.put("orderId", "");
+                                    data.put("referenceNumber", entity.getFtCode());
+                                    data.put("timePaid", "" + time);
                                     data.put("time", "" + time);
+                                    data.put("type", "" + transactionEntity.getType());
                                     data.put("refId", "" + uuid.toString());
                                     data.put("status", "1");
                                     data.put("traceId", "");

@@ -481,4 +481,40 @@ public interface TransactionReceiveService {
                                                                               String fromDate, String toDate, int offset, int size);
 
         int countTransactionReceiveWithRequest(String bankId, String fromDate, String toDate);
+
+        List<TransactionReceiveAdminListDTO> getTransactionReceiveWithRequestById(String bankId, String fromDate, String toDate, int offset, int size, String value);
+
+        ITransStatisticResponseWebDTO getTransactionWebOverview(String bankId, String fromDate, String toDate);
+
+        List<TransactionReceiveAdminListDTO> getTransactionReceiveWithRequestByFtCode(String bankId, String fromDate, String toDate, int offset, int size, String value);
+
+        List<TransactionReceiveAdminListDTO> getTransactionReceiveWithRequestByOrderId(String bankId, String fromDate, String toDate, int offset, int size, String value);
+
+        List<TransactionReceiveAdminListDTO> getTransactionReceiveWithRequestByTerminalCode(String bankId, String fromDate, String toDate, int offset, int size, String value);
+
+        List<TransactionReceiveAdminListDTO> getTransactionReceiveWithRequestByStatus(String bankId, String fromDate, String toDate, int offset, int size, int value);
+
+        List<TransactionReceiveAdminListDTO> getTransactionReceiveWithRequestByContent(String bankId, String fromDate, String toDate, int offset, int size, String value);
+
+        int countTransactionReceiveWithRequestByStatus(String bankId, String fromDate, String toDate, int value);
+
+        int countTransactionReceiveWithRequestByTerminalCode(String bankId, String fromDate, String toDate, String value);
+
+        int countTransactionReceiveWithRequestByContent(String bankId, String fromDate, String toDate, String value);
+
+        int countTransactionReceiveWithRequestByOrderId(String bankId, String fromDate, String toDate, String value);
+
+        int countTransactionReceiveWithRequestByFtCode(String bankId, String fromDate, String toDate, String value);
+
+        List<TransactionReceiveAdminListDTO> getUnsettledTransactionsByStatus(String bankId, int status, String fromDate, String toDate, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalWithType2ByFtCode(String bankId, String userId, String value, List<String> listCode, String fromDate, String toDate, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalWithType2ByOrderId(String bankId, String userId, String value, List<String> listCode, String fromDate, String toDate, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalWithType2ByContent(String bankId, String userId, String value, List<String> listCode, String fromDate, String toDate, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalWithType2ByStatus(String bankId, String userId, int value, List<String> listCode, String fromDate, String toDate, int offset);
+
+        List<TransactionRelatedDTO> getAllTransTerminalWithType2(String bankId, String userId, List<String> listCode, String fromDate, String toDate, int offset);
 }

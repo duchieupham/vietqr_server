@@ -113,10 +113,6 @@ public interface MerchantMemberRepository extends JpaRepository<MerchantMemberEn
 
     @Query(value = "SELECT DISTINCT a.user_id AS id, c.phone_no AS phoneNo, a.img_id AS imgId, "
             + "a.first_name as firstName, a.middle_name as middleName, a.last_name as lastName "
-//            + ", CASE "
-//            + "WHEN terminal_id = '' THEN TRUE "
-//            + "ELSE FALSE "
-//            + "END AS isOwner "
             + "FROM account_information a "
             + "INNER JOIN account_login c ON c.id = a.user_id "
             + "INNER JOIN merchant_member b ON b.user_id = a.user_id "
@@ -130,4 +126,10 @@ public interface MerchantMemberRepository extends JpaRepository<MerchantMemberEn
     @Modifying
     @Query(value = "DELETE FROM merchant_member WHERE terminal_id = :terminalId", nativeQuery = true)
     void removeMerchantMemberByTerminalId(String terminalId);
+
+    @Query(value = "SELECT IFNULL(a.terminal_id, 1) AS terminal_id  FROM merchant_member a "
+            + "INNER JOIN terminal b ON a.merhant_id = b.merchant_id "
+            + "INNER JOIN terminal_bank_receive c ON b.id = c.terminal_id "
+            + "WHERE a.user_id = :userId AND c.bank_id = :bankId LIMIT 1", nativeQuery = true)
+    String checkUserExistedFromBank(String userId, String bankId);
 }

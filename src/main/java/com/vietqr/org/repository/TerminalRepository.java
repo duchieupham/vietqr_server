@@ -135,7 +135,7 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             "LIMIT :offset, 20" , nativeQuery = true)
     List<TerminalResponseInterfaceDTO> getTerminalsByUserIdAndBankIdOffset(String userId, String bankId,int offset);
 
-    @Query(value = "SELECT a.id as terminalId, " +
+    @Query(value = "SELECT DISTINCT a.id as terminalId, " +
             "a.name as terminalName, a.address as terminalAddress, " +
             "a.code as terminalCode, a.user_id as userId " +
             "FROM terminal a " +

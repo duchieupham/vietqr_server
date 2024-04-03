@@ -31,6 +31,8 @@ public class BIDVTokenUtil {
             formData.add("scope", scope);
             formData.add("client_id", EnvironmentUtil.getBidvGetTokenClientId());
             formData.add("client_secret", EnvironmentUtil.getBidvGetTokenClientSecret());
+            logger.info("BIDVTokenUtil: getBIDVToken: client_id: " + EnvironmentUtil.getBidvGetTokenClientId()
+            + " client_secret: " + EnvironmentUtil.getBidvGetTokenClientSecret());
             // Call POST API
             TokenBankBIDVDTO response = webClient.method(HttpMethod.POST)
                     .uri(uriComponents.toUri())
