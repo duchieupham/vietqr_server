@@ -21,7 +21,7 @@ public interface TerminalBankReceiveRepository extends JpaRepository<TerminalBan
     String getTerminalByTraceTransfer(String traceTransfer);
 
     @Query(value = "SELECT * FROM terminal_bank_receive " +
-            "WHERE terminal_id = :terminalId LIMIT 1", nativeQuery = true)
+            "WHERE terminal_id = :terminalId AND type_of_qr = 0 LIMIT 1", nativeQuery = true)
     TerminalBankReceiveEntity getTerminalBankReceiveByTerminalId(String terminalId);
 
     @Query(value = "SELECT terminal_code FROM terminal_bank_receive " +
