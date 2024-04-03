@@ -1254,11 +1254,14 @@ public class TransactionBankController {
 						data.put("terminalName", terminalEntity.getName() != null ? terminalEntity.getName() : "");
 						data.put("terminalCode", terminalEntity.getCode() != null ? terminalEntity.getCode() : "");
 						data.put("rawTerminalCode", terminalEntity.getRawTerminalCode() != null
-						? terminalEntity.getRawTerminalCode() : "");
+								? terminalEntity.getRawTerminalCode()
+								: "");
 						data.put("orderId", transactionReceiveEntity.getOrderId() != null
-								? transactionReceiveEntity.getOrderId() : "");
+								? transactionReceiveEntity.getOrderId()
+								: "");
 						data.put("referenceNumber", dto.getReferencenumber() != null
-								? dto.getReferencenumber() : "");
+								? dto.getReferencenumber()
+								: "");
 						data.put("content", transactionReceiveEntity.getContent());
 						data.put("amount", "" + transactionReceiveEntity.getAmount());
 						data.put("timePaid", "" + time);
@@ -1374,12 +1377,15 @@ public class TransactionBankController {
 				data.put("bankId", accountBankEntity.getId());
 				data.put("terminalName", "");
 				data.put("terminalCode", transactionReceiveEntity.getTerminalCode() != null
-						? transactionReceiveEntity.getTerminalCode() : "");
+						? transactionReceiveEntity.getTerminalCode()
+						: "");
 				data.put("rawTerminalCode", "");
 				data.put("orderId", transactionReceiveEntity.getOrderId() != null
-						? transactionReceiveEntity.getOrderId() : "");
+						? transactionReceiveEntity.getOrderId()
+						: "");
 				data.put("referenceNumber", dto.getReferencenumber() != null
-						? dto.getReferencenumber() : "");
+						? dto.getReferencenumber()
+						: "");
 				data.put("content", dto.getContent());
 				data.put("amount", "" + dto.getAmount());
 				data.put("timePaid", "" + time);
@@ -1468,9 +1474,11 @@ public class TransactionBankController {
 			data.put("terminalCode", "");
 			data.put("rawTerminalCode", "");
 			data.put("orderId", transactionReceiveEntity.getOrderId() != null
-					? transactionReceiveEntity.getOrderId() : "");
+					? transactionReceiveEntity.getOrderId()
+					: "");
 			data.put("referenceNumber", dto.getReferencenumber() != null
-					? dto.getReferencenumber() : "");
+					? dto.getReferencenumber()
+					: "");
 			data.put("content", dto.getContent());
 			data.put("amount", "" + dto.getAmount());
 			data.put("timePaid", "" + time);
@@ -1678,16 +1686,21 @@ public class TransactionBankController {
 						data.put("bankCode", bankTypeEntity.getBankCode());
 						data.put("bankId", transactionEntity.getBankId());
 						data.put("terminalName", terminalEntity.getName() != null
-								? terminalEntity.getName() : "");
+								? terminalEntity.getName()
+								: "");
 						data.put("terminalCode", terminalEntity.getCode() != null
-								? terminalEntity.getCode() : "");
+								? terminalEntity.getCode()
+								: "");
 						data.put("rawTerminalCode", terminalEntity.getRawTerminalCode() != null
-								? terminalEntity.getRawTerminalCode() : "");
+								? terminalEntity.getRawTerminalCode()
+								: "");
 						data.put("content", transactionEntity.getContent());
 						data.put("orderId", transactionEntity.getOrderId() != null
-								? transactionEntity.getOrderId() : "");
+								? transactionEntity.getOrderId()
+								: "");
 						data.put("referenceNumber", transactionEntity.getReferenceNumber() != null
-								? transactionEntity.getReferenceNumber() : "");
+								? transactionEntity.getReferenceNumber()
+								: "");
 						data.put("amount", "" + transactionEntity.getAmount());
 						data.put("timePaid", "" + transactionEntity.getTimePaid());
 						data.put("type", "" + transactionEntity.getType());
@@ -1696,7 +1709,8 @@ public class TransactionBankController {
 						data.put("status", "1");
 						data.put("traceId", "" + transactionEntity.getTraceId());
 						data.put("transType", dto.getTransType());
-						String roleFCM = merchantMemberRoleService.checkMemberHaveRole(userId, EnvironmentUtil.getFcmNotificationRoleId());
+						String roleFCM = merchantMemberRoleService.checkMemberHaveRole(userId,
+								EnvironmentUtil.getFcmNotificationRoleId());
 						if (roleFCM != null && !roleFCM.isEmpty()) {
 							executorService.submit(() -> pushNotification(NotificationUtil
 									.getNotiTitleUpdateTransaction(), message, notiEntity, data, userId));
@@ -1746,9 +1760,11 @@ public class TransactionBankController {
 					data.put("terminalCode", "");
 					data.put("rawTerminalCode", "");
 					data.put("orderId", transactionEntity.getOrderId() != null
-							? transactionEntity.getOrderId() : "");
+							? transactionEntity.getOrderId()
+							: "");
 					data.put("referenceNumber", transactionEntity.getReferenceNumber() != null
-							? transactionEntity.getReferenceNumber() : "");
+							? transactionEntity.getReferenceNumber()
+							: "");
 					data.put("timePaid", "" + transactionEntity.getTimePaid());
 					data.put("type", "" + transactionEntity.getType());
 					data.put("time", "" + time);
@@ -1879,7 +1895,8 @@ public class TransactionBankController {
 				notiEntity.setUserId(accountBankEntity.getUserId());
 				notiEntity.setData(transcationUUID.toString());
 				notificationService.insertNotification(notiEntity);
-//				String userIds = merchantMemberRoleService.getListUserIdByMerchantId(accountBankEntity.get);
+				// String userIds =
+				// merchantMemberRoleService.getListUserIdByMerchantId(accountBankEntity.get);
 				// 1. get all user id belong to merchant
 				List<String> userIds = new ArrayList<>();
 				List<String> list = new ArrayList<>();
@@ -1913,9 +1930,11 @@ public class TransactionBankController {
 						data.put("terminalName", "");
 						data.put("terminalCode", "");
 						data.put("orderId", transactionEntity.getOrderId() != null
-								? transactionEntity.getOrderId() : "");
+								? transactionEntity.getOrderId()
+								: "");
 						data.put("referenceNumber", transactionEntity.getReferenceNumber() != null
-								? transactionEntity.getReferenceNumber() : "");
+								? transactionEntity.getReferenceNumber()
+								: "");
 						data.put("rawTerminalCode", "");
 						data.put("content", transactionEntity.getContent());
 						data.put("amount", "" + transactionEntity.getAmount());
@@ -1926,7 +1945,8 @@ public class TransactionBankController {
 						data.put("status", "1");
 						data.put("traceId", "" + transactionEntity.getTraceId());
 						data.put("transType", dto.getTransType());
-						String roleFCM = merchantMemberRoleService.checkMemberHaveRole(userId, EnvironmentUtil.getFcmNotificationRoleId());
+						String roleFCM = merchantMemberRoleService.checkMemberHaveRole(userId,
+								EnvironmentUtil.getFcmNotificationRoleId());
 						if (roleFCM != null && !roleFCM.isEmpty()) {
 							executorService.submit(() -> pushNotification(NotificationUtil
 									.getNotiTitleUpdateTransaction(), message, notificationEntity, data, userId));
@@ -1959,9 +1979,11 @@ public class TransactionBankController {
 				data.put("terminalCode", "");
 				data.put("rawTerminalCode", "");
 				data.put("orderId", transactionEntity.getOrderId() != null
-						? transactionEntity.getOrderId() : "");
+						? transactionEntity.getOrderId()
+						: "");
 				data.put("referenceNumber", transactionEntity.getReferenceNumber() != null
-						? transactionEntity.getReferenceNumber() : "");
+						? transactionEntity.getReferenceNumber()
+						: "");
 				data.put("amount", "" + dto.getAmount());
 				data.put("timePaid", "" + transactionEntity.getTimePaid());
 				data.put("type", "" + transactionEntity.getType());
@@ -2101,7 +2123,8 @@ public class TransactionBankController {
 			notiEntity.setUserId(accountBankEntity.getUserId());
 			notiEntity.setData(transcationUUID.toString());
 			notificationService.insertNotification(notiEntity);
-			//				String userIds = merchantMemberRoleService.getListUserIdByMerchantId(accountBankEntity.get);
+			// String userIds =
+			// merchantMemberRoleService.getListUserIdByMerchantId(accountBankEntity.get);
 			// 1. get all user id belong to merchant
 			List<String> userIds = new ArrayList<>();
 			List<String> list = new ArrayList<>();
@@ -2135,9 +2158,11 @@ public class TransactionBankController {
 					data.put("terminalName", "");
 					data.put("terminalCode", "");
 					data.put("orderId", transactionEntity.getOrderId() != null
-							? transactionEntity.getOrderId() : "");
+							? transactionEntity.getOrderId()
+							: "");
 					data.put("referenceNumber", transactionEntity.getReferenceNumber() != null
-							? transactionEntity.getReferenceNumber() : "");
+							? transactionEntity.getReferenceNumber()
+							: "");
 					data.put("rawTerminalCode", "");
 					data.put("content", transactionEntity.getContent());
 					data.put("amount", "" + transactionEntity.getAmount());
@@ -2148,7 +2173,8 @@ public class TransactionBankController {
 					data.put("status", "1");
 					data.put("traceId", "" + transactionEntity.getTraceId());
 					data.put("transType", dto.getTransType());
-					String roleFCM = merchantMemberRoleService.checkMemberHaveRole(userId, EnvironmentUtil.getFcmNotificationRoleId());
+					String roleFCM = merchantMemberRoleService.checkMemberHaveRole(userId,
+							EnvironmentUtil.getFcmNotificationRoleId());
 					if (roleFCM != null && !roleFCM.isEmpty()) {
 						executorService.submit(() -> pushNotification(NotificationUtil
 								.getNotiTitleUpdateTransaction(), message, notificationEntity, data, userId));
@@ -2186,9 +2212,11 @@ public class TransactionBankController {
 			data.put("terminalCode", "");
 			data.put("rawTerminalCode", "");
 			data.put("orderId", transactionEntity.getOrderId() != null
-					? transactionEntity.getOrderId() : "");
+					? transactionEntity.getOrderId()
+					: "");
 			data.put("referenceNumber", transactionEntity.getReferenceNumber() != null
-					? transactionEntity.getReferenceNumber() : "");
+					? transactionEntity.getReferenceNumber()
+					: "");
 			data.put("status", "1");
 			data.put("traceId", "");
 			data.put("transType", dto.getTransType());
@@ -2266,7 +2294,7 @@ public class TransactionBankController {
 	}
 
 	private void pushNotificationWithSocket(String notiTitleUpdateTransaction, String message,
-											NotificationEntity notificationEntity, Map<String, String> data, String userId) {
+			NotificationEntity notificationEntity, Map<String, String> data, String userId) {
 		try {
 			socketHandler.sendMessageToUser(userId,
 					data);
@@ -3219,6 +3247,20 @@ public class TransactionBankController {
 						result = new ResponseMessageDTO("SUCCESS", interactionId.toString());
 					} else if (errCode.trim().equals("110") || errCode.trim().equals("113")) {
 						result = new ResponseMessageDTO("FAILED", "E23");
+					} else if (errCode.trim().equals("021")) {
+						result = new ResponseMessageDTO("FAILED", "E117");
+					} else if (errCode.trim().equals("022")) {
+						result = new ResponseMessageDTO("FAILED", "E118");
+					} else if (errCode.trim().equals("033")) {
+						result = new ResponseMessageDTO("FAILED", "E119");
+					} else if (errCode.trim().equals("034")) {
+						result = new ResponseMessageDTO("FAILED", "E120");
+					} else if (errCode.trim().equals("036")) {
+						result = new ResponseMessageDTO("FAILED", "E121");
+					} else if (errCode.trim().equals("037")) {
+						result = new ResponseMessageDTO("FAILED", "E122");
+					} else if (errCode.trim().equals("041")) {
+						result = new ResponseMessageDTO("FAILED", "E123");
 					} else {
 						result = new ResponseMessageDTO("FAILED", "E05");
 					}
@@ -3399,6 +3441,10 @@ public class TransactionBankController {
 							ewalletToken = rootNode.get("ewalletToken").asText();
 						}
 						result = new ResponseMessageDTO("SUCCESS", ewalletToken);
+					} else if (errCode.trim().equals("061")) {
+						result = new ResponseMessageDTO("FAILED", "E124");
+					} else if (errCode.trim().equals("060")) {
+						result = new ResponseMessageDTO("FAILED", "E125");
 					} else {
 						result = new ResponseMessageDTO("FAILED", "E05");
 					}
