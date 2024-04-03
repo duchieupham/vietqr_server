@@ -627,6 +627,7 @@ public class TerminalController {
         List<AccountTerminalMemberDTO> dtos = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
+            String userIdOwner = terminalService.getUserIdByTerminalId(terminalId);
             List<IAccountTerminalMemberDTO> response = accountInformationService
                     .getMembersByTerminalId(terminalId);
             dtos = response.stream().map(item -> {
@@ -637,17 +638,28 @@ public class TerminalController {
                 dto.setImgId(item.getImgId());
                 dto.setBirthDate(item.getBirthDate());
                 dto.setEmail(item.getEmail());
-                dto.setNationalId(item.getNationalId());
+                dto.setNationalId(item.getNationalId() != null ? item.getNationalId() : "");
                 dto.setGender(item.getGender());
                 boolean isOwner = item.getRole() == 1;
                 dto.setRole(isOwner ? "Quản lý" : "Nhân viên");
-                if (userId.equals(item.getId())) {
-                    dto.setRole("Admin");
+                if (userIdOwner != null) {
+                    if (userIdOwner.equals(item.getId())) {
+                        dto.setRole("Admin");
+                    }
                 }
                 return dto;
             }).collect(Collectors.toList());
             result = dtos.stream()
-                    .sorted(Comparator.comparing(AccountTerminalMemberDTO::getRole))
+                    .sorted(Comparator.comparing(AccountTerminalMemberDTO::getRole,
+                            (role1, role2) -> {
+                                if ("Admin".equalsIgnoreCase(role2)) return 3;
+                                if ("Quản lý".equalsIgnoreCase(role2)) return 2;
+                                if ("Nhân viên".equalsIgnoreCase(role2)) return 1;
+                                if ("Admin".equalsIgnoreCase(role1)) return -3;
+                                if ("Quản lý".equalsIgnoreCase(role1)) return -2;
+                                if ("Nhân viên".equalsIgnoreCase(role1)) return -1;
+                                return 0;
+                            }))
                     .collect(Collectors.toList());
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {

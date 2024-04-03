@@ -397,4 +397,10 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             + "INNER JOIN merchant_member b ON b.terminal_id = a.id "
             + "WHERE b.user_id = :userId AND terminal_id != ''", nativeQuery = true)
     List<ITerminalExportDTO> getTerminalByUserIdHaveRole(String userId);
+
+    @Query(value = "SELECT user_id "
+            + "FROM terminal "
+            + "WHERE id = :terminalId "
+            + "LIMIT 1", nativeQuery = true)
+    String getUserIdByTerminalId(String terminalId);
 }

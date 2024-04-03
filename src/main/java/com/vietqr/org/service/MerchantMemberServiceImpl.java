@@ -96,4 +96,15 @@ public class MerchantMemberServiceImpl implements MerchantMemberService {
     public String checkUserExistedFromBank(String userId, String bankId) {
         return repo.checkUserExistedFromBank(userId, bankId);
     }
+
+    @Override
+    public List<IMerchantMemberDTO> findMerchantMemberByMerchantIdAndPhoneNo(String merchantId, String value,
+                                                                             int offset, int size) {
+        return repo.findMerchantMemberByMerchantIdAndPhoneNo(merchantId, value, offset, size);
+    }
+
+    @Override
+    public List<IMerchantMemberDTO> findMerchantMemberByMerchantIdAndFullName(String merchantId, String value, int offset, int size) {
+        return repo.findMerchantMemberByMerchantIdAndFullName(merchantId, value, offset, size);
+    }
 }

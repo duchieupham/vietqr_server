@@ -100,4 +100,6 @@ public interface TerminalService {
     List<ITerminalExportDTO> getTerminalExportByCode(String terminalCode);
 
     List<ITerminalExportDTO> getTerminalByUserIdHaveRole(String userId);
+
+    String getUserIdByTerminalId(String terminalId);
 }
