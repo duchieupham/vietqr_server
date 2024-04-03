@@ -2371,12 +2371,12 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "LIMIT :offset, :size ", nativeQuery = true)
         List<TransactionReceiveAdminListDTO> getTransactionReceiveWithRequestById(String bankId, long fromDate, long toDate, int offset, int size, String value);
 
-        @Query(value = "SELECT COUNT(a.id) AS totalTrans, "
-                + "SUM(a.amount) AS totalCashIn, "
-                + "COUNT(CASE WHEN a.type != 2 THEN 1 ELSE NULL END) AS totalSettled, "
-                + "SUM(CASE WHEN a.type != 2 THEN a.amount ELSE 0 END) AS totalCashSettled, "
-                + "COUNT(CASE WHEN a.type = 2 THEN 1 ELSE NULL END) AS totalUnsettled, "
-                + "SUM(CASE WHEN a.type = 2 THEN a.amount ELSE 0 END) AS totalCashUnsettled "
+        @Query(value = "SELECT COALESCE(COUNT(a.id)) AS totalTrans, "
+                + "COALESCE(SUM(a.amount), 0) AS totalCashIn, "
+                + "COALESCE(COUNT(CASE WHEN a.type != 2 THEN 1 ELSE NULL END), 0) AS totalSettled, "
+                + "COALESCE(SUM(CASE WHEN a.type != 2 THEN a.amount ELSE 0 END), 0) AS totalCashSettled, "
+                + "COALESCE(COUNT(CASE WHEN a.type = 2 THEN 1 ELSE NULL END), 0) AS totalUnsettled, "
+                + "COALESCE(SUM(CASE WHEN a.type = 2 THEN a.amount ELSE 0 END), 0) AS totalCashUnsettled "
                 + "FROM transaction_receive a "
                 + "WHERE a.time BETWEEN :fromDate AND :toDate AND trans_type = 'C' "
                 + "AND a.bank_id = :bankId AND a.status = 1 LIMIT 1", nativeQuery = true)
