@@ -1041,6 +1041,25 @@ public class TerminalController {
                                     String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
                                     qrMap.put(bankId, new QRStaticCreateDTO(qr, ""));
                                 }
+
+                                // new logic
+                                TerminalBankReceiveEntity terminalBankReceiveEntity = terminalBankReceiveService
+                                        .getTerminalBankReceiveByTerminalId(dto.getId());
+                                if (terminalBankReceiveEntity != null && !qrMap.isEmpty()) {
+                                    for (Map.Entry<String, QRStaticCreateDTO> entry : qrMap.entrySet()) {
+                                        if (entry.getKey().equals(terminalBankReceiveEntity.getBankId())) {
+                                            if (accountBankReceiveEntity.isMmsActive()) {
+                                                terminalBankReceiveEntity.setData2(entry.getValue().getQrCode());
+                                                terminalBankReceiveEntity.setTraceTransfer(entry.getValue().getTraceTransfer());
+                                            } else {
+                                                terminalBankReceiveEntity.setData1(entry.getValue().getQrCode());
+                                                terminalBankReceiveEntity.setTraceTransfer(entry.getValue().getTraceTransfer());
+                                            }
+                                            terminalBankReceiveService.insert(terminalBankReceiveEntity);
+                                            break;
+                                        }
+                                    }
+                                }
                             }
                         }
 
@@ -1054,20 +1073,6 @@ public class TerminalController {
                         }
                         // update all
                         accountBankReceiveShareService.insertAccountBankReceiveShare(entities);
-                    }
-
-                    // new logic
-                    TerminalBankReceiveEntity terminalBankReceiveEntity = terminalBankReceiveService
-                            .getTerminalBankReceiveByTerminalId(dto.getId());
-                    if (terminalBankReceiveEntity != null && !qrMap.isEmpty()) {
-                        for (Map.Entry<String, QRStaticCreateDTO> entry : qrMap.entrySet()) {
-                            if (entry.getKey().equals(terminalBankReceiveEntity.getBankId())) {
-                                terminalBankReceiveEntity.setData1(entry.getValue().getQrCode());
-                                terminalBankReceiveEntity.setTraceTransfer(entry.getValue().getTraceTransfer());
-                                terminalBankReceiveService.insert(terminalBankReceiveEntity);
-                                break;
-                            }
-                        }
                     }
                 }
 
