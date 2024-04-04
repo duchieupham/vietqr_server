@@ -127,6 +127,22 @@ public class TerminalController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("merchant/terminal-list")
+    public ResponseEntity<Object> getListTerminalByUserId(@RequestParam String userId,
+                                                                 @RequestParam String merchantId,
+                                                                 @RequestParam int offset) {
+        Object result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            result = terminalService.getTerminalsByUserIdAndMerchantIdOwner(userId, merchantId);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     // not update
     //
     @GetMapping("terminal/web")
