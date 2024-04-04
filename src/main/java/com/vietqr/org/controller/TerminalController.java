@@ -127,6 +127,22 @@ public class TerminalController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("merchant/terminal-list")
+    public ResponseEntity<Object> getListTerminalByUserId(@RequestParam String userId,
+                                                                 @RequestParam String merchantId,
+                                                                 @RequestParam int offset) {
+        Object result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            result = terminalService.getTerminalsByUserIdAndMerchantIdOwner(userId, merchantId);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     // not update
     //
     @GetMapping("terminal/web")
@@ -1041,6 +1057,25 @@ public class TerminalController {
                                     String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
                                     qrMap.put(bankId, new QRStaticCreateDTO(qr, ""));
                                 }
+
+                                // new logic
+                                TerminalBankReceiveEntity terminalBankReceiveEntity = terminalBankReceiveService
+                                        .getTerminalBankReceiveByTerminalId(dto.getId());
+                                if (terminalBankReceiveEntity != null && !qrMap.isEmpty()) {
+                                    for (Map.Entry<String, QRStaticCreateDTO> entry : qrMap.entrySet()) {
+                                        if (entry.getKey().equals(terminalBankReceiveEntity.getBankId())) {
+                                            if (accountBankReceiveEntity.isMmsActive()) {
+                                                terminalBankReceiveEntity.setData2(entry.getValue().getQrCode());
+                                                terminalBankReceiveEntity.setTraceTransfer(entry.getValue().getTraceTransfer());
+                                            } else {
+                                                terminalBankReceiveEntity.setData1(entry.getValue().getQrCode());
+                                                terminalBankReceiveEntity.setTraceTransfer(entry.getValue().getTraceTransfer());
+                                            }
+                                            terminalBankReceiveService.insert(terminalBankReceiveEntity);
+                                            break;
+                                        }
+                                    }
+                                }
                             }
                         }
 
@@ -1054,20 +1089,6 @@ public class TerminalController {
                         }
                         // update all
                         accountBankReceiveShareService.insertAccountBankReceiveShare(entities);
-                    }
-
-                    // new logic
-                    TerminalBankReceiveEntity terminalBankReceiveEntity = terminalBankReceiveService
-                            .getTerminalBankReceiveByTerminalId(dto.getId());
-                    if (terminalBankReceiveEntity != null && !qrMap.isEmpty()) {
-                        for (Map.Entry<String, QRStaticCreateDTO> entry : qrMap.entrySet()) {
-                            if (entry.getKey().equals(terminalBankReceiveEntity.getBankId())) {
-                                terminalBankReceiveEntity.setData1(entry.getValue().getQrCode());
-                                terminalBankReceiveEntity.setTraceTransfer(entry.getValue().getTraceTransfer());
-                                terminalBankReceiveService.insert(terminalBankReceiveEntity);
-                                break;
-                            }
-                        }
                     }
                 }
 

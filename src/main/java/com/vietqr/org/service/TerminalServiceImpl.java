@@ -73,7 +73,7 @@ public class TerminalServiceImpl implements TerminalService {
 
     @Override
     public List<TerminalResponseInterfaceDTO> getTerminalsByUserIdAndBankId(String userId, String bankId, int offset) {
-        return repo.getTerminalsByUserIdAndBankIdOffset(userId, bankId, offset);
+        return repo.getTerminalsByUserIdAndBankIdOffset(userId, bankId);
     }
 
     @Override
@@ -202,6 +202,11 @@ public class TerminalServiceImpl implements TerminalService {
     @Override
     public List<TerminalMapperDTO> getTerminalsByUserIdAndMerchantId(String userId, String merchantId) {
         return repo.getTerminalsByUserIdAndMerchantId(userId, merchantId);
+    }
+
+    @Override
+    public List<TerminalMapperDTO> getTerminalsByUserIdAndMerchantIdOwner(String userId, String merchantId) {
+        return repo.getTerminalsByUserIdAndMerchantIdOwner(userId, merchantId);
     }
 
     @Override
