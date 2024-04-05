@@ -17,8 +17,8 @@ public interface TerminalAddressRepository extends JpaRepository<TerminalAddress
             @Param(value = "terminalBankId") String terminalBankId);
 
     @Query(value = "SELECT * FROM terminal_address WHERE "
-            + "bank_id = :bankId AND (customer_sync_id = :customerSyncId "
-            + "OR customer_sync_id = 'c45156b9-8756-4c05-9e39-259e7d549918' "
-            + "OR customer_sync_id = 'dbbb30dd-58d0-455b-963c-120d3b19f9bf') LIMIT 1", nativeQuery = true)
+            + "bank_id = :bankId AND (cusomer_sync_id = :customerSyncId "
+            + "OR cusomer_sync_id = 'c45156b9-8756-4c05-9e39-259e7d549918' "
+            + "OR cusomer_sync_id = 'dbbb30dd-58d0-455b-963c-120d3b19f9bf') LIMIT 1", nativeQuery = true)
     TerminalAddressEntity getTerminalAddressByBankIdAndCustomerSyncId(String bankId, String customerSyncId);
 }
