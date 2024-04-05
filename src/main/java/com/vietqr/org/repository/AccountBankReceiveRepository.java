@@ -286,4 +286,18 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "INNER JOIN bank_type b ON a.bank_type_id = b.id "
 			+ "WHERE a.user_id = :userId AND a.is_authenticated = TRUE ", nativeQuery = true)
     List<TerminalBankReceiveDTO> getAccountBankReceiveByUseId(String userId);
+
+	@Query(value = "SELECT id AS bankId, user_id AS userId, "
+			+ "is_authenticated AS authenticated, is_valid_service AS isValidService, "
+			+ "valid_from as validFrom, valid_to as validTo "
+			+ "FROM account_bank_receive "
+			+ "WHERE id = :bankId", nativeQuery = true)
+    BankReceiveCheckDTO checkBankReceiveActive(@Param(value = "bankId") String bankId);
+
+	@Query(value = "SELECT id AS bankId, user_id AS userId, "
+			+ "valid_fee_from AS validFeeFrom, "
+			+ "valid_fee_to AS validFeeTo, is_valid_service AS isValidService "
+			+ "FROM account_bank_receive "
+			+ "WHERE id = :bankId", nativeQuery = true)
+    KeyBankReceiveActiveDTO getAccountBankKeyById(@Param(value = "bankId") String bankId);
 }

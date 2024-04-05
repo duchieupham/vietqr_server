@@ -104,4 +104,8 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
 
 	@Query(value = "SELECT * FROM account_login", nativeQuery = true)
 	List<AccountLoginEntity> getAllAccountLogin();
+
+	@Query(value = "SELECT id FROM account_login WHERE id = :userId AND password = :password ", nativeQuery = true)
+    String checkPassword(@Param(value = "userId") String userId,
+						 @Param(value = "password") String password);
 }

@@ -35,6 +35,12 @@ public class DateTimeUtil {
         return localDateTime.toEpochSecond(ZoneOffset.UTC);
     }
 
+    public static long plusMonthAsLongInt(long time, int month) {
+        LocalDateTime localDateTime = LocalDateTime.ofEpochSecond(time, 0, ZoneOffset.UTC)
+                .plusMonths(month).with(LocalTime.MAX);
+        return localDateTime.toEpochSecond(ZoneOffset.UTC);
+    }
+
     public static StartEndTimeDTO get1MonthsPreviousAsLongInt() {
         StartEndTimeDTO startEndTimeDTO = new StartEndTimeDTO();
         LocalDateTime fromTime = LocalDateTime.now().minusMonths(1).with(LocalTime.MIN).atZone(ZoneId.of(GMT_PLUS_7)).toLocalDateTime();

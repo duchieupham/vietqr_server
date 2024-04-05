@@ -36,6 +36,11 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     }
 
     @Override
+    public KeyBankReceiveActiveDTO getAccountBankKeyById(String bankId) {
+        return repo.getAccountBankKeyById(bankId);
+    }
+
+    @Override
     public String getCaiValueByBankId(String bankId) {
         return repo.getCaiValueByBankId(bankId);
     }
@@ -196,6 +201,11 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     @Override
     public List<TerminalBankReceiveDTO> getAccountBankReceiveByUseId(String userId) {
         return repo.getAccountBankReceiveByUseId(userId);
+    }
+
+    @Override
+    public BankReceiveCheckDTO checkBankReceiveActive(String bankId) {
+        return repo.checkBankReceiveActive(bankId);
     }
 
     @Override

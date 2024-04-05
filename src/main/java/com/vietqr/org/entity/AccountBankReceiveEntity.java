@@ -71,6 +71,15 @@ public class AccountBankReceiveEntity implements Serializable {
 	@Column(name = "terminalLength")
 	private int terminalLength;
 
+	@Column(name = "isValidService")
+	private boolean isValidService;
+
+	@Column(name = "isValidFeeFrom")
+	private long isValidFeeFrom;
+
+	@Column(name = "isValidFeeTo")
+	private long isValidFeeTo;
+
 	public AccountBankReceiveEntity() {
 		super();
 	}
