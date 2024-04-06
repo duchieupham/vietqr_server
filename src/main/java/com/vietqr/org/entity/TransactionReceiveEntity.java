@@ -90,6 +90,9 @@ public class TransactionReceiveEntity implements Serializable {
 	@Column(name = "transStatus")
 	private Integer transStatus;
 
+	@Column(name = "urlLink")
+	private String urlLink;
+
 	public TransactionReceiveEntity() {
 		super();
 	}
@@ -354,5 +357,13 @@ public class TransactionReceiveEntity implements Serializable {
 
 	public void setTransStatus(Integer transStatus) {
 		this.transStatus = transStatus;
+	}
+
+	public String getUrlLink() {
+		return urlLink;
+	}
+
+	public void setUrlLink(String urlLink) {
+		this.urlLink = urlLink;
 	}
 }
