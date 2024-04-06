@@ -543,7 +543,11 @@ public class VietQRController {
 					} else {
 						vietQRCreateDTO.setTransType("C");
 					}
-
+					if (dto.getUrlLink() != null && !dto.getUrlLink().trim().isEmpty()) {
+						vietQRCreateDTO.setUrlLink(dto.getUrlLink());
+					} else {
+						vietQRCreateDTO.setUrlLink("");
+					}
 					insertNewTransaction(transactionUUID, traceId, vietQRCreateDTO, vietQRDTO, dto.getOrderId(),
 							dto.getSign(), true);
 				}
@@ -691,6 +695,11 @@ public class VietQRController {
 					vietQRMMSCreateDTO.setSign(dto.getSign());
 					vietQRMMSCreateDTO.setTerminalCode(dto.getTerminalCode());
 					vietQRMMSCreateDTO.setNote(dto.getNote());
+					if (dto.getUrlLink() != null && !dto.getUrlLink().trim().isEmpty()) {
+						vietQRMMSCreateDTO.setUrlLink(dto.getUrlLink());
+					} else {
+						vietQRMMSCreateDTO.setUrlLink("");
+					}
 					insertNewTransactionFlow2(qrMMS, transactionUUID.toString(), accountBankEntity, vietQRMMSCreateDTO,
 							time);
 				}
@@ -828,6 +837,7 @@ public class VietQRController {
 			transactionEntity.setUserId(accountBankReceiveEntity.getUserId());
 			transactionEntity.setNote(dto.getNote());
 			transactionEntity.setTransStatus(0);
+			transactionEntity.setUrlLink(dto.getUrlLink());
 			transactionReceiveService.insertTransactionReceive(transactionEntity);
 			LocalDateTime endTime = LocalDateTime.now();
 			long endTimeLong = endTime.toEpochSecond(ZoneOffset.UTC);
@@ -871,6 +881,7 @@ public class VietQRController {
 				transactionEntity.setOrderId(orderId);
 				transactionEntity.setNote(dto.getNote());
 				transactionEntity.setTransStatus(0);
+				transactionEntity.setUrlLink(dto.getUrlLink());
 				if (dto.getTransType() != null) {
 					transactionEntity.setTransType(dto.getTransType());
 				} else {
@@ -879,6 +890,7 @@ public class VietQRController {
 				transactionEntity.setReferenceNumber("");
 				transactionEntity.setOrderId(orderId);
 				transactionEntity.setSign(sign);
+				transactionEntity.setUrlLink("");
 				//
 				if (dto.getTransType() != null && dto.getTransType().trim().toUpperCase().equals("D")) {
 					transactionEntity.setCustomerBankAccount(dto.getCustomerBankAccount());
@@ -1051,6 +1063,7 @@ public class VietQRController {
 				transactionEntity.setUserId(accountBankEntity.getUserId());
 				transactionEntity.setNote("");
 				transactionEntity.setTransStatus(0);
+				transactionEntity.setUrlLink("");
 				transactionReceiveService.insertTransactionReceive(transactionEntity);
 				// insert transaction branch if existing branchId and businessId. Else just do
 				// not map.
@@ -1201,6 +1214,9 @@ public class VietQRController {
 				String qrLink = EnvironmentUtil.getQRLink() + refId;
 				vietQRDTO.setTransactionRefId(refId);
 				vietQRDTO.setQrLink(qrLink);
+				if (dto.getUrlLink() == null || dto.getUrlLink().trim().isEmpty()) {
+					dto.setUrlLink("");
+				}
 				//
 				result = vietQRDTO;
 				httpStatus = HttpStatus.OK;

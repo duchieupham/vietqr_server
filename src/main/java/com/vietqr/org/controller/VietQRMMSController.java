@@ -176,6 +176,11 @@ public class VietQRMMSController {
             transactionEntity.setUserId(accountBankReceiveEntity.getUserId());
             transactionEntity.setNote(dto.getNote());
             transactionEntity.setTransStatus(0);
+            if (dto.getUrlLink() == null || dto.getUrlLink().isEmpty()) {
+                dto.setUrlLink("");
+            } else {
+                dto.setUrlLink(dto.getUrlLink());
+            }
             transactionReceiveService.insertTransactionReceive(transactionEntity);
             LocalDateTime endTime = LocalDateTime.now();
             long endTimeLong = endTime.toEpochSecond(ZoneOffset.UTC);
