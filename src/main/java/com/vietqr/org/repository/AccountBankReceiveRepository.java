@@ -289,15 +289,22 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 
 	@Query(value = "SELECT id AS bankId, user_id AS userId, "
 			+ "is_authenticated AS authenticated, is_valid_service AS isValidService, "
-			+ "valid_from as validFrom, valid_to as validTo "
+			+ "valid_fee_from as validFrom, valid_fee_to as validTo "
 			+ "FROM account_bank_receive "
 			+ "WHERE id = :bankId", nativeQuery = true)
     BankReceiveCheckDTO checkBankReceiveActive(@Param(value = "bankId") String bankId);
 
 	@Query(value = "SELECT id AS bankId, user_id AS userId, "
-			+ "valid_fee_from AS validFeeFrom, "
-			+ "valid_fee_to AS validFeeTo, is_valid_service AS isValidService "
+			+ "COALESCE(valid_fee_from, 0) AS validFeeFrom, "
+			+ "COALESCE(valid_fee_to, 0) AS validFeeTo, "
+			+ "is_valid_service AS isValidService "
 			+ "FROM account_bank_receive "
 			+ "WHERE id = :bankId", nativeQuery = true)
     KeyBankReceiveActiveDTO getAccountBankKeyById(@Param(value = "bankId") String bankId);
+
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_bank_receive SET valid_fee_from = :validFeeFrom, "
+			+ "valid_fee_to = :validFeeTo, is_valid_service = TRUE WHERE id = :bankId ", nativeQuery = true)
+	int updateActiveBankReceive(String bankId, long validFeeFrom, long validFeeTo);
 }

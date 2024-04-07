@@ -209,6 +209,11 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     }
 
     @Override
+    public int updateActiveBankReceive(String bankId, long validFeeFrom, long validFeeTo) {
+        return repo.updateActiveBankReceive(bankId, validFeeFrom, validFeeTo);
+    }
+
+    @Override
     public void unRegisterAuthenBank(String bankAccount, String ewalletToken) {
         repo.unRegisterAuthenBank(bankAccount, ewalletToken);
     }

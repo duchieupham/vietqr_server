@@ -72,13 +72,13 @@ public class AccountBankReceiveEntity implements Serializable {
 	private int terminalLength;
 
 	@Column(name = "isValidService")
-	private boolean isValidService;
+	private Boolean isValidService;
 
-	@Column(name = "isValidFeeFrom")
-	private long isValidFeeFrom;
+	@Column(name = "validFeeFrom")
+	private long validFeeFrom;
 
-	@Column(name = "isValidFeeTo")
-	private long isValidFeeTo;
+	@Column(name = "validFeeTo")
+	private long validFeeTo;
 
 	public AccountBankReceiveEntity() {
 		super();
@@ -247,6 +247,30 @@ public class AccountBankReceiveEntity implements Serializable {
 
 	public void setEwalletToken(String ewalletToken) {
 		this.ewalletToken = ewalletToken;
+	}
+
+	public boolean isValidService() {
+		return isValidService;
+	}
+
+	public void setValidService(boolean validService) {
+		isValidService = validService;
+	}
+
+	public long getValidFeeFrom() {
+		return validFeeFrom;
+	}
+
+	public void setValidFeeFrom(long validFeeFrom) {
+		this.validFeeFrom = validFeeFrom;
+	}
+
+	public long getValidFeeTo() {
+		return validFeeTo;
+	}
+
+	public void setValidFeeTo(long validFeeTo) {
+		this.validFeeTo = validFeeTo;
 	}
 
 	@Override

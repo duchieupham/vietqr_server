@@ -37,7 +37,7 @@ public class DateTimeUtil {
 
     public static long plusMonthAsLongInt(long time, int month) {
         LocalDateTime localDateTime = LocalDateTime.ofEpochSecond(time, 0, ZoneOffset.UTC)
-                .plusMonths(month).with(LocalTime.MAX);
+                .plusMonths(month).plusDays(1).with(LocalTime.MAX);
         return localDateTime.toEpochSecond(ZoneOffset.UTC);
     }
 
@@ -147,5 +147,10 @@ public class DateTimeUtil {
             result = localDateTime.format(DateTimeFormatter.ofPattern(DateTimeFormatVN));
         }
         return result;
+    }
+
+    public static long plusMinuteAsLongInt(LocalDateTime time, int minute) {
+        LocalDateTime localDateTime = time.plusMinutes(minute);
+        return localDateTime.toEpochSecond(ZoneOffset.UTC);
     }
 }

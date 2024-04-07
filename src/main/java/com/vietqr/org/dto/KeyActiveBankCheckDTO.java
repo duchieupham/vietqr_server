@@ -1,11 +1,11 @@
 package com.vietqr.org.dto;
 
-public interface KeyActiveBankReceiveDTO {
+public interface KeyActiveBankCheckDTO {
     String getKeyActive();
+    String getSecretKey();
     int getStatus();
     int getDuration();
     String getValueActive();
-    String getSecretKey();
     long getCreateAt();
-    int getVersion();
+    String getId();
 }

@@ -5,5 +5,5 @@ public interface KeyBankReceiveActiveDTO {
     String getUserId();
     long getValidFeeFrom();
     long getValidFeeTo();
-    boolean getIsValidService();
+    Boolean getIsValidService();
 }

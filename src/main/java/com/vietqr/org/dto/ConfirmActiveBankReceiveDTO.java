@@ -4,6 +4,8 @@ public class ConfirmActiveBankReceiveDTO {
     private String otp;
     private String userId;
     private String bankId;
+    private String password;
+    private String key;
 
     public ConfirmActiveBankReceiveDTO() {
     }
@@ -38,8 +40,24 @@ public class ConfirmActiveBankReceiveDTO {
         this.bankId = bankId;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
     @Override
     public String toString() {
-        return "ConfirmActiveBankReceiveDTO [otp=" + otp + ", bankId=" + bankId + ", bankId=" + bankId + "]";
+        return "ConfirmActiveBankReceiveDTO [otp=" + otp + ", bankId=" + bankId + ", userId=" + userId + ", key=" + key + "]";
     }
 }

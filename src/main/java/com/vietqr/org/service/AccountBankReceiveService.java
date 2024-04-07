@@ -93,4 +93,6 @@ public interface AccountBankReceiveService {
     List<TerminalBankReceiveDTO> getAccountBankReceiveByUseId(String userId);
 
     BankReceiveCheckDTO checkBankReceiveActive(String bankId);
+
+	int updateActiveBankReceive(String bankId, long validFeeFrom, long validFeeTo);
 }

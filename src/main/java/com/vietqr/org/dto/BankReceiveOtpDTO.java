@@ -1,7 +1,10 @@
 package com.vietqr.org.dto;
 
 public interface BankReceiveOtpDTO {
+    String getId();
     String getUserId();
     String getBankId();
-    String getOtp();
+    String getOtpToken();
+    String getKeyActive();
+    long getExpiredDate();
 }
