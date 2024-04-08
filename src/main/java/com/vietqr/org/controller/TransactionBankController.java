@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.service.*;
 import com.vietqr.org.util.*;
@@ -67,28 +68,9 @@ import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.keys.AesKey;
 
-import com.vietqr.org.dto.AccountBankNameDTO;
-import com.vietqr.org.dto.AccountLoginDTO;
-import com.vietqr.org.dto.CofirmOTPBankDTO;
-import com.vietqr.org.dto.ConfirmLinkedBankDTO;
-import com.vietqr.org.dto.RefTransactionDTO;
-import com.vietqr.org.dto.TransactionBankDTO;
-import com.vietqr.org.dto.TransactionResponseDTO;
-import com.vietqr.org.dto.TransactionTestCallbackDTO;
-import com.vietqr.org.dto.UnregisterBankConfirmDTO;
-import com.vietqr.org.dto.UnregisterRequestDTO;
 import com.vietqr.org.dto.example.Header;
 import com.vietqr.org.dto.example.JweObj;
 import com.vietqr.org.dto.example.Recipients;
-import com.vietqr.org.dto.TokenProductBankDTO;
-import com.vietqr.org.dto.TransactionBankCustomerDTO;
-import com.vietqr.org.dto.ConfirmRequestFailedBankDTO;
-import com.vietqr.org.dto.RequestBankDTO;
-import com.vietqr.org.dto.RequestLinkedBankDTO;
-import com.vietqr.org.dto.RequestUnlinkedBankDTO;
-import com.vietqr.org.dto.ResponseMessageDTO;
-import com.vietqr.org.dto.TokenBankBIDVDTO;
-import com.vietqr.org.dto.TokenDTO;
 
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -177,6 +159,21 @@ public class TransactionBankController {
 
 	@Autowired
 	private AccountCustomerBankService accountCustomerBankService;
+
+	@Autowired
+	private BankReceiveOtpService bankReceiveOtpService;
+
+	@Autowired
+	private KeyActiveBankReceiveService keyActiveBankReceiveService;
+
+	@Autowired
+	private TrAnnualFeePackageService trAnnualFeePackageService;
+
+	@Autowired
+	private AccountBankReceiveService accountBankReceiveService;
+
+	@Autowired
+	private BankReceiveActiveHistoryService bankReceiveActiveHistoryService;
 
 	private FirebaseMessagingService firebaseMessagingService;
 
@@ -1113,6 +1110,100 @@ public class TransactionBankController {
 									+ entity.getReferenceNumber());
 						}
 					}
+					 else if (parts.length == 6) {
+						Integer paymentType = Integer.parseInt(parts[0]);
+						String feeId = parts[1];
+						String userId = parts[2];
+						String otp = parts[3];
+						String bankId = parts[4];
+						String otpActive = parts[5];
+						if (paymentType != null && userId != null && otp != null) {
+							// check valid transaction by otp & userId
+							// & paymentType & status = 0
+							String check = transactionWalletService
+									.checkExistedTransactionnWallet(otp,
+											userId, 1);
+							if (check != null && !check.trim().isEmpty()) {
+								// find tranMobile by Id
+								TransactionWalletEntity transactionWalletEntity = transactionWalletService
+										.getTransactionWalletById(check);
+								if (transactionWalletEntity != null) {
+									// active key
+									BankReceiveOtpDTO bankReceiveOtpDTO = bankReceiveOtpService
+											.checkBankReceiveOtp(userId, bankId, otpActive, feeId);
+									LocalDateTime dateTime = LocalDateTime.now();
+									long currentTime = dateTime.toEpochSecond(ZoneOffset.UTC);
+									if (bankReceiveOtpDTO == null) {
+										// otp sai hoặc ko tìm thấy key
+										System.out.println("transaction-sync: transactionWalletEntity IS NULL");
+										logger.error("transaction-sync: transactionWalletEntity IS NULL");
+									} else {
+										TrAnnualFeeDTO trAnnualFeeDTO = trAnnualFeePackageService
+												.getFeeById(feeId);
+										if (trAnnualFeeDTO == null) {
+											System.out.println("transaction-sync: transactionWalletEntity IS NULL");
+											logger.error("transaction-sync: transactionWalletEntity IS NULL");
+										} else {
+												long validFeeFrom = 0;
+												long validFeeTo = 0;
+												// update validFeeFrom, validFeeTo
+											BankReceiveCheckDTO bankReceiveCheckDTO = accountBankReceiveService
+													.checkBankReceiveActive(bankId);
+												if (bankReceiveCheckDTO.getIsValidService()) {
+													// update validFeeTo
+													validFeeTo = bankReceiveCheckDTO.getValidTo();
+													validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeTo, trAnnualFeeDTO.getDuration());
+												} else {
+													// update validFeeFrom, validFeeTo
+													validFeeFrom = currentTime;
+													validFeeTo = DateTimeUtil.plusMonthAsLongInt(currentTime, trAnnualFeeDTO.getDuration());
+												}
+												// save history
+												BankReceiveActiveHistoryEntity bankReceiveActiveHistoryEntity = new BankReceiveActiveHistoryEntity();
+												bankReceiveActiveHistoryEntity.setId(UUID.randomUUID().toString());
+												bankReceiveActiveHistoryEntity.setKeyId(bankReceiveOtpDTO.getId());
+												bankReceiveActiveHistoryEntity.setType(1);
+												bankReceiveActiveHistoryEntity.setKeyActive(bankReceiveOtpDTO.getKeyActive());
+												bankReceiveActiveHistoryEntity.setBankId(bankId);
+												bankReceiveActiveHistoryEntity.setUserId(userId);
+												bankReceiveActiveHistoryEntity.setCreateAt(currentTime);
+												bankReceiveActiveHistoryEntity.setValidFeeFrom(validFeeFrom);
+												bankReceiveActiveHistoryEntity.setValidFeeTo(validFeeTo);
+												bankReceiveActiveHistoryEntity.setData("");
+
+												bankReceiveOtpService.updateStatusBankReceiveOtp(bankReceiveOtpDTO.getId(), 1);
+												bankReceiveActiveHistoryService.insert(bankReceiveActiveHistoryEntity);
+												accountBankReceiveService.updateActiveBankReceive(bankId, validFeeFrom, validFeeTo);
+
+												// notification
+
+										}
+									}
+									// update transaction wallet
+									transactionWalletService.updateTransactionWallet(1, time,
+											transactionWalletEntity.getAmount() + "",
+											"",
+											transactionWalletEntity.getUserId(),
+											transactionWalletEntity.getOtp(),
+											2);
+								} else {
+									System.out.println("transaction-sync: transactionWalletEntity IS NULL");
+									logger.error("transaction-sync: transactionWalletEntity IS NULL");
+								}
+
+							} else {
+								System.out.println("transaction-sync: INVALID OTP");
+								logger.error("transaction-sync: INVALID OTP");
+							}
+						} else {
+							System.out.println(
+									"transaction-sync: REFERENCE NUMBER INVALID: "
+											+ entity
+											.getReferenceNumber());
+							logger.error("transaction-sync: REFERENCE NUMBER INVALID: "
+									+ entity.getReferenceNumber());
+						}
+					}
 				} else {
 					// update amount account wallet
 					AccountWalletEntity accountWalletEntity = accountWalletService
@@ -1153,9 +1244,7 @@ public class TransactionBankController {
 					data.put("paymentType", "0");
 					pushNotification(title, message, notiEntity, data, userIdRecharge);
 				}
-
 			}
-
 		}
 	}
 

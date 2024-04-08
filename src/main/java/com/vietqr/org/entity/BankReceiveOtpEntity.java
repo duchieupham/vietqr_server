@@ -38,6 +38,9 @@ public class BankReceiveOtpEntity implements Serializable {
     @Column(name = "keyActive")
     private String keyActive;
 
+    @Column(name = "amount")
+    private long amount;
+
     public void setId(String id) {
         this.id = id;
     }
@@ -92,5 +95,13 @@ public class BankReceiveOtpEntity implements Serializable {
 
     public void setKeyActive(String keyActive) {
         this.keyActive = keyActive;
+    }
+
+    public long getAmount() {
+        return amount;
+    }
+
+    public void setAmount(long amount) {
+        this.amount = amount;
     }
 }

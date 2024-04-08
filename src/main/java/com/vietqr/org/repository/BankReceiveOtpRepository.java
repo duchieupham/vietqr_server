@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface BankReceiveOtpRepository extends JpaRepository<BankReceiveOtpEntity, String> {
-    @Query(value = "SELECT id AS id, user_id AS userId, bank_id AS bankId, "
+    @Query(value = "SELECT id AS id, user_id AS userId, bank_id AS bankId, amount AS amount, "
             + "otp_token AS otpToken, expired_date AS expiredDate, key_active AS keyActive "
             + "FROM bank_receive_otp "
             + "WHERE bank_id = :bankId "
