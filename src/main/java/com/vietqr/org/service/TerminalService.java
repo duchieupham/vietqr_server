@@ -83,6 +83,8 @@ public interface TerminalService {
 
     List<TerminalMapperDTO> getTerminalsByUserIdAndMerchantId(String userId, String merchantId);
 
+    List<TerminalMapperDTO> getTerminalsByUserIdAndMerchantIdOwner(String userId, String merchantId);
+
     List<String> getAllCodeByMerchantId(String merchantId, String userId);
 
     List<IStatisticTerminalOverViewDTO> getListTerminalByMerchantId(String merchantId, String userId, int offset);
@@ -100,4 +102,6 @@ public interface TerminalService {
     List<ITerminalExportDTO> getTerminalExportByCode(String terminalCode);
 
     List<ITerminalExportDTO> getTerminalByUserIdHaveRole(String userId);
+
+    String getUserIdByTerminalId(String terminalId);
 }

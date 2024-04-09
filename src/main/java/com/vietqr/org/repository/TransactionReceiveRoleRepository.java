@@ -14,7 +14,8 @@ import java.util.List;
 @Repository
 public interface TransactionReceiveRoleRepository extends JpaRepository<TransactionReceiveRoleEntity, String> {
     @Query(value = "SELECT id, name, description, color, role "
-            + "FROM transaction_receive_role WHERE id IN :roleIds", nativeQuery = true)
+            + "FROM transaction_receive_role WHERE id IN :roleIds "
+            + "ORDER BY role ASC ", nativeQuery = true)
     List<IRoleMemberDTO> getRoleByIds(@Param(value = "roleIds") List<String> receiveRoles);
 
     @Query(value = "SELECT id, name, description, color, role, "

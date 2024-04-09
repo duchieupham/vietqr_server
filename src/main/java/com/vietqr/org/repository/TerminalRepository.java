@@ -131,9 +131,10 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             "WHERE b.user_id = :userId " +
             "AND b.bank_id = :bankId " +
             "GROUP BY b.terminal_id " +
-            "ORDER BY a.code ASC " +
-            "LIMIT :offset, 20" , nativeQuery = true)
-    List<TerminalResponseInterfaceDTO> getTerminalsByUserIdAndBankIdOffset(String userId, String bankId,int offset);
+            "ORDER BY a.code ASC "
+//            + "LIMIT :offset, 20"
+            , nativeQuery = true)
+    List<TerminalResponseInterfaceDTO> getTerminalsByUserIdAndBankIdOffset(String userId, String bankId);
 
     @Query(value = "SELECT DISTINCT a.id as terminalId, " +
             "a.name as terminalName, a.address as terminalAddress, " +
@@ -313,6 +314,14 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
     List<TerminalMapperDTO> getTerminalsByUserIdAndMerchantId(@Param(value = "userId") String userId,
                                                               @Param(value = "merchantId") String merchantId);
 
+    @Query(value = "SELECT a.id AS terminalId, a.name AS terminalName, "
+            + "a.code AS terminalCode "
+            + "FROM terminal a "
+            + "WHERE a.merchant_id = :merchantId "
+            + "AND a.user_id = :userId ", nativeQuery = true)
+    List<TerminalMapperDTO> getTerminalsByUserIdAndMerchantIdOwner(@Param(value = "userId") String userId,
+                                                              @Param(value = "merchantId") String merchantId);
+
     @Query(value = "SELECT a.code FROM terminal a "
             + "INNER JOIN merchant_member b ON b.terminal_id = a.id "
             + "WHERE b.merchant_id = :merchantId "
@@ -397,4 +406,10 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             + "INNER JOIN merchant_member b ON b.terminal_id = a.id "
             + "WHERE b.user_id = :userId AND terminal_id != ''", nativeQuery = true)
     List<ITerminalExportDTO> getTerminalByUserIdHaveRole(String userId);
+
+    @Query(value = "SELECT user_id "
+            + "FROM terminal "
+            + "WHERE id = :terminalId "
+            + "LIMIT 1", nativeQuery = true)
+    String getUserIdByTerminalId(String terminalId);
 }

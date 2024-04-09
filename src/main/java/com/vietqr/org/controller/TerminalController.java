@@ -127,6 +127,22 @@ public class TerminalController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("merchant/terminal-list")
+    public ResponseEntity<Object> getListTerminalByUserId(@RequestParam String userId,
+                                                                 @RequestParam String merchantId,
+                                                                 @RequestParam int offset) {
+        Object result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            result = terminalService.getTerminalsByUserIdAndMerchantIdOwner(userId, merchantId);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     // not update
     //
     @GetMapping("terminal/web")
@@ -627,6 +643,7 @@ public class TerminalController {
         List<AccountTerminalMemberDTO> dtos = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
+            String userIdOwner = terminalService.getUserIdByTerminalId(terminalId);
             List<IAccountTerminalMemberDTO> response = accountInformationService
                     .getMembersByTerminalId(terminalId);
             dtos = response.stream().map(item -> {
@@ -637,17 +654,28 @@ public class TerminalController {
                 dto.setImgId(item.getImgId());
                 dto.setBirthDate(item.getBirthDate());
                 dto.setEmail(item.getEmail());
-                dto.setNationalId(item.getNationalId());
+                dto.setNationalId(item.getNationalId() != null ? item.getNationalId() : "");
                 dto.setGender(item.getGender());
                 boolean isOwner = item.getRole() == 1;
                 dto.setRole(isOwner ? "Quản lý" : "Nhân viên");
-                if (userId.equals(item.getId())) {
-                    dto.setRole("Admin");
+                if (userIdOwner != null) {
+                    if (userIdOwner.equals(item.getId())) {
+                        dto.setRole("Admin");
+                    }
                 }
                 return dto;
             }).collect(Collectors.toList());
             result = dtos.stream()
-                    .sorted(Comparator.comparing(AccountTerminalMemberDTO::getRole))
+                    .sorted(Comparator.comparing(AccountTerminalMemberDTO::getRole,
+                            (role1, role2) -> {
+                                if ("Admin".equalsIgnoreCase(role2)) return 3;
+                                if ("Quản lý".equalsIgnoreCase(role2)) return 2;
+                                if ("Nhân viên".equalsIgnoreCase(role2)) return 1;
+                                if ("Admin".equalsIgnoreCase(role1)) return -3;
+                                if ("Quản lý".equalsIgnoreCase(role1)) return -2;
+                                if ("Nhân viên".equalsIgnoreCase(role1)) return -1;
+                                return 0;
+                            }))
                     .collect(Collectors.toList());
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
@@ -1029,6 +1057,25 @@ public class TerminalController {
                                     String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
                                     qrMap.put(bankId, new QRStaticCreateDTO(qr, ""));
                                 }
+
+                                // new logic
+                                TerminalBankReceiveEntity terminalBankReceiveEntity = terminalBankReceiveService
+                                        .getTerminalBankReceiveByTerminalId(dto.getId());
+                                if (terminalBankReceiveEntity != null && !qrMap.isEmpty()) {
+                                    for (Map.Entry<String, QRStaticCreateDTO> entry : qrMap.entrySet()) {
+                                        if (entry.getKey().equals(terminalBankReceiveEntity.getBankId())) {
+                                            if (accountBankReceiveEntity.isMmsActive()) {
+                                                terminalBankReceiveEntity.setData2(entry.getValue().getQrCode());
+                                                terminalBankReceiveEntity.setTraceTransfer(entry.getValue().getTraceTransfer());
+                                            } else {
+                                                terminalBankReceiveEntity.setData1(entry.getValue().getQrCode());
+                                                terminalBankReceiveEntity.setTraceTransfer(entry.getValue().getTraceTransfer());
+                                            }
+                                            terminalBankReceiveService.insert(terminalBankReceiveEntity);
+                                            break;
+                                        }
+                                    }
+                                }
                             }
                         }
 
@@ -1042,20 +1089,6 @@ public class TerminalController {
                         }
                         // update all
                         accountBankReceiveShareService.insertAccountBankReceiveShare(entities);
-                    }
-
-                    // new logic
-                    TerminalBankReceiveEntity terminalBankReceiveEntity = terminalBankReceiveService
-                            .getTerminalBankReceiveByTerminalId(dto.getId());
-                    if (terminalBankReceiveEntity != null && !qrMap.isEmpty()) {
-                        for (Map.Entry<String, QRStaticCreateDTO> entry : qrMap.entrySet()) {
-                            if (entry.getKey().equals(terminalBankReceiveEntity.getBankId())) {
-                                terminalBankReceiveEntity.setData1(entry.getValue().getQrCode());
-                                terminalBankReceiveEntity.setTraceTransfer(entry.getValue().getTraceTransfer());
-                                terminalBankReceiveService.insert(terminalBankReceiveEntity);
-                                break;
-                            }
-                        }
                     }
                 }
 

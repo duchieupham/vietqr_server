@@ -1,5 +1,7 @@
 package com.vietqr.org.controller.bidv;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
@@ -19,6 +21,7 @@ import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.ResponseObjectDTO;
 import com.vietqr.org.dto.bidv.ConfirmCustomerVaDTO;
 import com.vietqr.org.dto.bidv.CustomerVaInsertDTO;
+import com.vietqr.org.dto.bidv.CustomerVaItemDTO;
 import com.vietqr.org.dto.bidv.RequestCustomerVaDTO;
 import com.vietqr.org.entity.bidv.CustomerVaEntity;
 import com.vietqr.org.service.AccountBankReceiveService;
@@ -44,19 +47,15 @@ public class CustomerVaController {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            String checkExistedBankAccount = accountBankReceiveService
-                    .checkExistedBankAccountByBankAccountAndBankCode(dto.getBankAccount(), dto.getBankCode());
-            if (checkExistedBankAccount != null && !checkExistedBankAccount.trim().isEmpty()) {
-                Long customerVaLength = customerVaService.getCustomerVaLength() + 1;
-                System.out.println("customerVaLength: " + customerVaLength);
-                result = CustomerVaUtil.requestCustomerVa(dto, "1", customerVaLength);
-                if (result instanceof ResponseObjectDTO) {
-                    httpStatus = HttpStatus.OK;
-                } else if (result instanceof ResponseMessageDTO) {
-                    httpStatus = HttpStatus.BAD_REQUEST;
-                }
-            } else {
-                result = new ResponseMessageDTO("FAILED", "E114");
+            // String checkExistedBankAccount = accountBankReceiveService
+            // .checkExistedBankAccountByBankAccountAndBankCode(dto.getBankAccount(),
+            // dto.getBankCode());
+            Long customerVaLength = customerVaService.getCustomerVaLength() + 1;
+            System.out.println("customerVaLength: " + customerVaLength);
+            result = CustomerVaUtil.requestCustomerVa(dto, "1", customerVaLength);
+            if (result instanceof ResponseObjectDTO) {
+                httpStatus = HttpStatus.OK;
+            } else if (result instanceof ResponseMessageDTO) {
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
@@ -149,11 +148,11 @@ public class CustomerVaController {
     // get customer VA info
     @GetMapping("customer-va/information")
     public ResponseEntity<Object> getCustomerVaInformation(
-            @RequestParam(value = "bankId") String bankId) {
+            @RequestParam(value = "id") String id) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            CustomerVaEntity entity = customerVaService.getCustomerVaInfoByBankId(bankId);
+            CustomerVaEntity entity = customerVaService.getCustomerVaInfoById(id);
             if (entity != null) {
                 result = entity;
                 httpStatus = HttpStatus.OK;
@@ -168,6 +167,48 @@ public class CustomerVaController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
+    // check existed bank account that linked into customer_va
+    @GetMapping("customer-va/check-existed")
+    public ResponseEntity<ResponseMessageDTO> checkExistedBankAccountVa(
+            @RequestParam(value = "bankAccount") String bankAccount,
+            @RequestParam(value = "bankCode") String bankCode) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            String checkExisted = customerVaService.checkExistedLinkedBankAccount(bankAccount);
+            if (checkExisted != null && !checkExisted.trim().isEmpty()) {
+                result = new ResponseMessageDTO("CHECKED", "C12");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            } else {
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            }
+        } catch (Exception e) {
+            logger.error("checkExistedBankAccountVa: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // get list customer_va by user_id
+    @GetMapping("customer-va/list")
+    public ResponseEntity<List<CustomerVaItemDTO>> getCustomerVasByUserId(
+            @RequestParam(value = "userId") String userId) {
+        List<CustomerVaItemDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            result = customerVaService.getCustomerVasByUserId(userId);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getCustomerVasByUserId: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    //
 
     // BIDV Service - create VietQR (Transaction MMS)
 

@@ -1,9 +1,12 @@
 package com.vietqr.org.service.bidv;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
+import com.vietqr.org.dto.bidv.CustomerVaItemDTO;
 import com.vietqr.org.entity.bidv.CustomerVaEntity;
 import com.vietqr.org.repository.CustomerVaRepository;
 
@@ -24,8 +27,8 @@ public class CustomerVaServiceImpl implements CustomerVaService {
     }
 
     @Override
-    public CustomerVaEntity getCustomerVaInfoByBankId(String bankId) {
-        return repo.getCustomerVaInfoByBankId(bankId);
+    public CustomerVaEntity getCustomerVaInfoById(String id) {
+        return repo.getCustomerVaInfoById(id);
     }
 
     @Override
@@ -41,6 +44,16 @@ public class CustomerVaServiceImpl implements CustomerVaService {
     @Override
     public String checkExistedCustomerId(String customerId) {
         return repo.checkExistedCustomerId(customerId);
+    }
+
+    @Override
+    public String checkExistedLinkedBankAccount(String bankAccount) {
+        return repo.checkExistedLinkedBankAccount(bankAccount);
+    }
+
+    @Override
+    public List<CustomerVaItemDTO> getCustomerVasByUserId(String userId) {
+        return repo.getCustomerVasByUserId(userId);
     }
 
 }

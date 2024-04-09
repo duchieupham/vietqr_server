@@ -20,6 +20,7 @@ public class VietQRCreateDTO implements Serializable {
 	private String terminalCode;
 	private String orderId;
 	private String note;
+	private String urlLink;
 
 	public VietQRCreateDTO() {
 		super();
@@ -190,4 +191,11 @@ public class VietQRCreateDTO implements Serializable {
 		this.orderId = orderId;
 	}
 
+	public String getUrlLink() {
+		return urlLink;
+	}
+
+	public void setUrlLink(String urlLink) {
+		this.urlLink = urlLink;
+	}
 }

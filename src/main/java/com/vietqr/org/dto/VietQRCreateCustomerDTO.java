@@ -22,6 +22,7 @@ public class VietQRCreateCustomerDTO implements Serializable {
     private String sign;
     private String terminalCode;
     private String note;
+    private String urlLink;
 
     public VietQRCreateCustomerDTO() {
         super();
@@ -191,12 +192,21 @@ public class VietQRCreateCustomerDTO implements Serializable {
         this.note = note;
     }
 
+    public String getUrlLink() {
+        return urlLink;
+    }
+
+    public void setUrlLink(String urlLink) {
+        this.urlLink = urlLink;
+    }
+
     @Override
     public String toString() {
         return "VietQRCreateCustomerDTO [amount=" + amount + ", content=" + content + ", bankAccount=" + bankAccount
                 + ", bankCode=" + bankCode + ", userBankName=" + userBankName + ", transType=" + transType
                 + ", customerBankAccount=" + customerBankAccount + ", customerBankCode=" + customerBankCode
-                + ", customerName=" + customerName + ", orderId=" + orderId + ", sign=" + sign + "]";
+                + ", customerName=" + customerName + ", orderId=" + orderId + ", sign=" + sign
+                + ", urlLink=" + urlLink + "]";
     }
 
 }
