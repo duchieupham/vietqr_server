@@ -199,4 +199,9 @@ public interface TerminalBankReceiveRepository extends JpaRepository<TerminalBan
             + "WHERE c.user_id = :userId AND a.bank_id = :bankId AND c.terminal_id = '' "
             + "GROUP BY b.code ", nativeQuery = true)
     List<String> getTerminalCodeByUserIdAndBankIdNoTerminal(String userId, String bankId);
+
+    @Query(value = "SELECT a.bank_id FROM terminal_bank_receive a "
+            + "INNER JOIN terminal b ON a.terminal_id = b.id "
+            + "WHERE b.code = :terminalCode LIMIT 1", nativeQuery = true)
+    String getBankIdByTerminalCode(String terminalCode);
 }

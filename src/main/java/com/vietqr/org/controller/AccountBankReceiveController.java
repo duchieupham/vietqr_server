@@ -785,6 +785,9 @@ public class AccountBankReceiveController {
 					dto.setIsOwner(item.getIsOwner());
 					dto.setPhoneAuthenticated(item.getPhoneAuthenticated());
 					dto.setBankTypeStatus(item.getBankTypeStatus());
+					dto.setIsValidService(item.getIsValidService());
+					dto.setValidFeeFrom(item.getValidFeeFrom());
+					dto.setValidFeeTo(item.getValidFeeTo());
 
 					BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(item.getBankTypeId());
 					String caiValue = caiBankService.getCaiValue(bankTypeEntity.getId());

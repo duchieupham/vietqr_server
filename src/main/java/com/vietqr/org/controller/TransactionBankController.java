@@ -1,11 +1,6 @@
 package com.vietqr.org.controller;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
@@ -22,8 +17,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.Locale;
-import java.util.Base64;
 
 import javax.validation.Valid;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -156,6 +149,12 @@ public class TransactionBankController {
 
 	@Autowired
 	BankReceiveBranchService bankReceiveBranchService;
+
+	@Autowired
+	TransReceiveTempService transReceiveTempService;
+
+	@Autowired
+	SystemSettingService systemSettingService;
 
 	@Autowired
 	private AccountCustomerBankService accountCustomerBankService;
@@ -1316,6 +1315,7 @@ public class TransactionBankController {
 			String userId) {
 		System.out.println("PUSH NOTIFICATION: " + userId);
 		System.out.println("PUSH NOTIFICATION: title: " + title);
+		System.out.println("PUSH NOTIFICATION: data: " + data);
 		if (notiEntity != null) {
 			notificationService.insertNotification(notiEntity);
 		}
@@ -1338,6 +1338,43 @@ public class TransactionBankController {
 	@Async
 	public void updateTransaction(TransactionBankDTO dto, TransactionReceiveEntity transactionReceiveEntity,
 			AccountBankReceiveEntity accountBankEntity, long time, NumberFormat nf) {
+
+		String amount = dto.getAmount() != 0 ? dto.getAmount() + "" : transactionReceiveEntity.getAmount() + "";
+		if (accountBankEntity.isValidService()) {
+			amount = dto.getAmount() != 0 ? dto.getAmount() + "" : "0";
+		} else {
+			SystemSettingEntity systemSetting = systemSettingService.getSystemSetting();
+			if (systemSetting.getServiceActive() <= time) {
+				TransReceiveTempEntity entity = transReceiveTempService
+						.getLastTimeByBankId(accountBankEntity.getId());
+				if (entity == null) {
+					entity = new TransReceiveTempEntity();
+					List<String> transIds = new ArrayList<>();
+					transIds.add(transactionReceiveEntity.getId());
+					entity.setId(UUID.randomUUID().toString());
+					entity.setBankId(accountBankEntity.getId());
+					entity.setLastTimes(time);
+					entity.setTransIds(String.join(",", transIds));
+					transReceiveTempService.insert(entity);
+				} else {
+					List<String> transIds = new ArrayList<>();
+					if (entity.getTransIds() != null && !entity.getTransIds().isEmpty()) {
+						transIds = new ArrayList<>(Arrays.asList(entity.getTransIds().split(",")));
+					}
+					if (transIds.size() < 5) {
+						transIds.add(transactionReceiveEntity.getId());
+						entity.setLastTimes(time);
+						entity.setTransIds(String.join(",", transIds));
+
+						transReceiveTempService.insert(entity);
+					} else {
+						if (!accountBankEntity.isValidService()) {
+							amount = "*****";
+						}
+					}
+				}
+			}
+		}
 
 		BankTypeEntity bankTypeEntity = bankTypeService
 				.getBankTypeById(accountBankEntity.getBankTypeId());
@@ -1417,7 +1454,7 @@ public class TransactionBankController {
 								? dto.getReferencenumber()
 								: "");
 						data.put("content", transactionReceiveEntity.getContent());
-						data.put("amount", "" + transactionReceiveEntity.getAmount());
+						data.put("amount", "" + amount);
 						data.put("timePaid", "" + time);
 						data.put("type", "" + transactionReceiveEntity.getType());
 						data.put("time", "" + transactionReceiveEntity.getTime());
@@ -1541,7 +1578,7 @@ public class TransactionBankController {
 						? dto.getReferencenumber()
 						: "");
 				data.put("content", dto.getContent());
-				data.put("amount", "" + dto.getAmount());
+				data.put("amount", "" + amount);
 				data.put("timePaid", "" + time);
 				data.put("type", "" + transactionReceiveEntity.getType());
 				data.put("time", "" + time);
@@ -1634,7 +1671,7 @@ public class TransactionBankController {
 					? dto.getReferencenumber()
 					: "");
 			data.put("content", dto.getContent());
-			data.put("amount", "" + dto.getAmount());
+			data.put("amount", "" + amount);
 			data.put("timePaid", "" + time);
 			data.put("type", "" + transactionReceiveEntity.getType());
 			data.put("time", "" + time);
@@ -1726,6 +1763,45 @@ public class TransactionBankController {
 	public void insertNewTransaction(String transcationUUID, TransactionBankDTO dto,
 			AccountBankReceiveEntity accountBankEntity, long time,
 			String traceId, UUID uuid, NumberFormat nf, String orderId, String sign) {
+		SystemSettingEntity systemSetting = systemSettingService.getSystemSetting();
+		String amount = dto.getAmount() != 0 ? dto.getAmount() + "" : "0";
+		if (accountBankEntity.isValidService()) {
+			amount = dto.getAmount() != 0 ? dto.getAmount() + "" : "0";
+		} else {
+			if (systemSetting.getServiceActive() <= time) {
+				TransReceiveTempEntity entity = transReceiveTempService
+						.getLastTimeByBankId(accountBankEntity.getId());
+				if (entity == null) {
+					entity = new TransReceiveTempEntity();
+					List<String> transIds = new ArrayList<>();
+					transIds.add(transcationUUID);
+					entity.setId(UUID.randomUUID().toString());
+					entity.setBankId(accountBankEntity.getId());
+					entity.setLastTimes(time);
+					entity.setTransIds(String.join(",", transIds));
+					transReceiveTempService.insert(entity);
+				} else {
+					List<String> transIds = new ArrayList<>();
+
+					if (entity.getTransIds() != null && !entity.getTransIds().isEmpty()) {
+						transIds = new ArrayList<>(Arrays.asList(entity.getTransIds().split(",")));
+					}
+
+					if (transIds.size() < 5) {
+						transIds.add(transcationUUID);
+						entity.setLastTimes(time);
+						entity.setTransIds(String.join(",", transIds));
+
+						transReceiveTempService.insert(entity);
+					} else {
+						if (!accountBankEntity.isValidService()) {
+							amount = "*****";
+						}
+					}
+
+				}
+			}
+		}
 
 		BankTypeEntity bankTypeEntity = bankTypeService
 				.getBankTypeById(accountBankEntity.getBankTypeId());
@@ -1855,7 +1931,7 @@ public class TransactionBankController {
 						data.put("referenceNumber", transactionEntity.getReferenceNumber() != null
 								? transactionEntity.getReferenceNumber()
 								: "");
-						data.put("amount", "" + transactionEntity.getAmount());
+						data.put("amount", "" + amount);
 						data.put("timePaid", "" + transactionEntity.getTimePaid());
 						data.put("type", "" + transactionEntity.getType());
 						data.put("time", "" + transactionEntity.getTime());
@@ -1909,7 +1985,7 @@ public class TransactionBankController {
 					data.put("bankCode", bankTypeEntity.getBankCode());
 					data.put("bankId", accountBankEntity.getId());
 					data.put("content", transactionEntity.getContent());
-					data.put("amount", "" + transactionEntity.getAmount());
+					data.put("amount", "" + amount);
 					data.put("terminalName", "");
 					data.put("terminalCode", "");
 					data.put("rawTerminalCode", "");
@@ -2091,7 +2167,7 @@ public class TransactionBankController {
 								: "");
 						data.put("rawTerminalCode", "");
 						data.put("content", transactionEntity.getContent());
-						data.put("amount", "" + transactionEntity.getAmount());
+						data.put("amount", "" + amount);
 						data.put("timePaid", "" + transactionEntity.getTimePaid());
 						data.put("type", "" + transactionEntity.getType());
 						data.put("time", "" + transactionEntity.getTime());
@@ -2138,7 +2214,7 @@ public class TransactionBankController {
 				data.put("referenceNumber", transactionEntity.getReferenceNumber() != null
 						? transactionEntity.getReferenceNumber()
 						: "");
-				data.put("amount", "" + dto.getAmount());
+				data.put("amount", "" + amount);
 				data.put("timePaid", "" + transactionEntity.getTimePaid());
 				data.put("type", "" + transactionEntity.getType());
 				data.put("time", "" + time);
@@ -2319,7 +2395,7 @@ public class TransactionBankController {
 							: "");
 					data.put("rawTerminalCode", "");
 					data.put("content", transactionEntity.getContent());
-					data.put("amount", "" + transactionEntity.getAmount());
+					data.put("amount", "" + amount);
 					data.put("timePaid", "" + transactionEntity.getTimePaid());
 					data.put("type", "" + transactionEntity.getType());
 					data.put("time", "" + transactionEntity.getTime());
@@ -2357,7 +2433,7 @@ public class TransactionBankController {
 			data.put("bankCode", bankTypeEntity.getBankCode());
 			data.put("bankId", accountBankEntity.getId());
 			data.put("content", dto.getContent());
-			data.put("amount", "" + dto.getAmount());
+			data.put("amount", "" + amount);
 			data.put("timePaid", "" + transactionEntity.getTimePaid());
 			data.put("time", "" + time);
 			data.put("type", "" + transactionEntity.getType());
@@ -2449,6 +2525,7 @@ public class TransactionBankController {
 
 	private void pushNotificationWithSocket(String notiTitleUpdateTransaction, String message,
 			NotificationEntity notificationEntity, Map<String, String> data, String userId) {
+		System.out.println("pushNotificationWithSocket: data" + data);
 		try {
 			socketHandler.sendMessageToUser(userId,
 					data);

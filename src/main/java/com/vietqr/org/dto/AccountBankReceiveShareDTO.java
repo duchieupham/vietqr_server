@@ -34,4 +34,7 @@ public interface AccountBankReceiveShareDTO {
     String getCaiValue();
 
     Integer getUnlinkedType();
+    Boolean getIsValidService();
+    Long getValidFeeFrom();
+    Long getValidFeeTo();
 }

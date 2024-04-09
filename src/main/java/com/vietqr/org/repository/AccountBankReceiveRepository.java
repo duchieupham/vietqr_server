@@ -307,4 +307,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Query(value = "UPDATE account_bank_receive SET valid_fee_from = :validFeeFrom, "
 			+ "valid_fee_to = :validFeeTo, is_valid_service = TRUE WHERE id = :bankId ", nativeQuery = true)
 	int updateActiveBankReceive(String bankId, long validFeeFrom, long validFeeTo);
+
+	@Query(value = "SELECT is_valid_service FROM account_bank_receive WHERE id = :bankId", nativeQuery = true)
+    boolean checkIsActiveService(String bankId);
 }

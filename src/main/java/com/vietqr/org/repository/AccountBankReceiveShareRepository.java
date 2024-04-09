@@ -18,7 +18,8 @@ public interface AccountBankReceiveShareRepository
             "c.bank_name as bankName, c.bank_short_name as bankShortName, b.phone_authenticated as phoneAuthenticated, " +
             " c.bank_code as bankCode, c.img_id as imgId, b.type as bankType, b.is_authenticated as authenticated, " +
             "b.user_id as userId, a.is_owner as isOwner , c.status as bankTypeStatus, c.id as bankTypeId, " +
-            "c.unlinked_type as unlinkedType, b.national_id as nationalId "
+            "c.unlinked_type as unlinkedType, b.national_id as nationalId, b.is_valid_service AS isValidService, " +
+            "b.valid_fee_from AS validFeeFrom, b.valid_fee_to AS validFeeTo "
             + "FROM account_bank_receive_share a "
             + "INNER JOIN account_bank_receive b "
             + "ON a.bank_id = b.id "

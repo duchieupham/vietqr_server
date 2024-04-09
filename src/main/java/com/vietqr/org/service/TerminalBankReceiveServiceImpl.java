@@ -148,4 +148,9 @@ public class TerminalBankReceiveServiceImpl implements TerminalBankReceiveServic
     public List<String> getTerminalCodeByUserIdAndBankIdNoTerminal(String userId, String bankId) {
         return repo.getTerminalCodeByUserIdAndBankIdNoTerminal(userId, bankId);
     }
+
+    @Override
+    public String getBankIdByTerminalCode(String terminalCode) {
+        return repo.getBankIdByTerminalCode(terminalCode);
+    }
 }

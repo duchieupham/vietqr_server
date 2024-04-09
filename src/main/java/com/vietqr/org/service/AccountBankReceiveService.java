@@ -95,4 +95,6 @@ public interface AccountBankReceiveService {
     BankReceiveCheckDTO checkBankReceiveActive(String bankId);
 
 	int updateActiveBankReceive(String bankId, long validFeeFrom, long validFeeTo);
+
+    boolean checkIsActiveService(String bankId);
 }

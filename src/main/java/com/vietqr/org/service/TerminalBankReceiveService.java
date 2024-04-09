@@ -61,4 +61,6 @@ public interface TerminalBankReceiveService {
     List<String> getTerminalCodeByUserIdAndBankId(String userId, String bankId);
 
     List<String> getTerminalCodeByUserIdAndBankIdNoTerminal(String userId, String bankId);
+
+    String getBankIdByTerminalCode(String terminalCode);
 }
