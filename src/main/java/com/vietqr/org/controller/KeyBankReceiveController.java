@@ -5,6 +5,8 @@ import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.service.*;
 import com.vietqr.org.util.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -43,9 +45,6 @@ public class KeyBankReceiveController {
 
     @Autowired
     private SystemSettingService systemSettingService;
-
-    @Autowired
-    private AccountWalletService accountWalletService;
 
     @Autowired
     private TransactionWalletService transactionWalletService;
@@ -101,11 +100,21 @@ public class KeyBankReceiveController {
                                 .getAccountBankKeyById(dto.getBankId());
                         long validFeeFrom = entity.getValidFeeFrom();
                         long validFeeTo = entity.getValidFeeTo();
-                        if (entity.getIsValidService()) {
-                            validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeTo, keyActiveEntity.getDuration());
+                        SystemSettingEntity systemSetting = systemSettingService.getSystemSetting();
+                        if (currentTime > systemSetting.getServiceActive()) {
+                            if (bankReceiveCheckDTO.getIsValidService()) {
+                                validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeTo, keyActiveEntity.getDuration());
+                            } else {
+                                validFeeFrom = currentTime;
+                                validFeeTo = DateTimeUtil.plusMonthAsLongInt(currentTime, keyActiveEntity.getDuration());
+                            }
                         } else {
-                            validFeeFrom = currentTime;
-                            validFeeTo = DateTimeUtil.plusMonthAsLongInt(currentTime, keyActiveEntity.getDuration());
+                            if (bankReceiveCheckDTO.getIsValidService()) {
+                                validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeTo, keyActiveEntity.getDuration());
+                            } else {
+                                validFeeFrom = systemSetting.getServiceActive();
+                                validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeFrom, keyActiveEntity.getDuration());
+                            }
                         }
                         // save otp
                         BankReceiveOtpEntity bankReceiveOTPEntity = bankReceiveOtpService
@@ -208,14 +217,21 @@ public class KeyBankReceiveController {
                                 long validFeeFrom = 0;
                                 long validFeeTo = 0;
                                 // update validFeeFrom, validFeeTo
-                                if (bankReceiveCheckDTO.getIsValidService()) {
-                                    // update validFeeTo
-                                    validFeeTo = bankReceiveCheckDTO.getValidTo();
-                                    validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeTo, keyActiveEntity.getDuration());
+                                SystemSettingEntity systemSetting = systemSettingService.getSystemSetting();
+                                if (currentTime > systemSetting.getServiceActive()) {
+                                    if (bankReceiveCheckDTO.getIsValidService()) {
+                                        validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeTo, keyActiveEntity.getDuration());
+                                    } else {
+                                        validFeeFrom = currentTime;
+                                        validFeeTo = DateTimeUtil.plusMonthAsLongInt(currentTime, keyActiveEntity.getDuration());
+                                    }
                                 } else {
-                                    // update validFeeFrom, validFeeTo
-                                    validFeeFrom = currentTime;
-                                    validFeeTo = DateTimeUtil.plusMonthAsLongInt(currentTime, keyActiveEntity.getDuration());
+                                    if (bankReceiveCheckDTO.getIsValidService()) {
+                                        validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeTo, keyActiveEntity.getDuration());
+                                    } else {
+                                        validFeeFrom = systemSetting.getServiceActive();
+                                        validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeFrom, keyActiveEntity.getDuration());
+                                    }
                                 }
                                 // save history
                                 BankReceiveActiveHistoryEntity bankReceiveActiveHistoryEntity = new BankReceiveActiveHistoryEntity();
@@ -345,36 +361,61 @@ public class KeyBankReceiveController {
 
     @PostMapping("key-active-bank/generate-key")
     public ResponseEntity<Object> generateKeyForAdmin(
-        @Valid @RequestBody GenerateKeyBankDTO dto
+            @RequestHeader("Authorization") String token,
+            @Valid @RequestBody GenerateKeyBankDTO dto
     ) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            logger.info("generateKeyForAdmin: request: " + dto.toString() + " at: " + System.currentTimeMillis());
-            //
-            List<String> keyActives = generateKeyActiveWithCheckDuplicated(dto.getNumOfKeys());
-            List<KeyActiveBankReceiveEntity> entities = new ArrayList<>();
-            LocalDateTime time = LocalDateTime.now();
-            long currentTime = time.toEpochSecond(ZoneOffset.UTC);
-            for (String keyActive : keyActives) {
-                KeyActiveBankReceiveEntity entity = new KeyActiveBankReceiveEntity();
-                entity.setId(UUID.randomUUID().toString());
-                entity.setKeyActive(keyActive);
-                entity.setSecretKey(generateSecretKey());
-                entity.setValueActive(generateValueActive(keyActive, entity.getSecretKey(), dto.getDuration()));
-                entity.setDuration(dto.getDuration());
-                entity.setCreateAt(currentTime);
-                entity.setVersion(0);
-                entity.setStatus(0);
-                entities.add(entity);
+            String username = getUsernameFromToken(token);
+            if (username != null && !username.trim().isEmpty() && username.equals(EnvironmentUtil.getAdminUatActiveKey())) {
+                logger.info("generateKeyForAdmin: request: " + dto.toString() + " at: " + System.currentTimeMillis());
+                //
+                List<String> keyActives = generateKeyActiveWithCheckDuplicated(dto.getNumOfKeys());
+                List<KeyActiveBankReceiveEntity> entities = new ArrayList<>();
+                LocalDateTime time = LocalDateTime.now();
+                long currentTime = time.toEpochSecond(ZoneOffset.UTC);
+                for (String keyActive : keyActives) {
+                    KeyActiveBankReceiveEntity entity = new KeyActiveBankReceiveEntity();
+                    entity.setId(UUID.randomUUID().toString());
+                    entity.setKeyActive(keyActive);
+                    entity.setSecretKey(generateSecretKey());
+                    entity.setValueActive(generateValueActive(keyActive, entity.getSecretKey(), dto.getDuration()));
+                    entity.setDuration(dto.getDuration());
+                    entity.setCreateAt(currentTime);
+                    entity.setVersion(0);
+                    entity.setStatus(0);
+                    entities.add(entity);
+                }
+                keyActiveBankReceiveService.insertAll(entities);
+                result = keyActives;
+                httpStatus = HttpStatus.OK;
+            } else {
+                logger.error("generateKeyForAdmin: unknown generated-key: token: " + token + " at: " + System.currentTimeMillis());
+                result = new ResponseMessageDTO("FAILED", "E74");
+                httpStatus = HttpStatus.BAD_REQUEST;
             }
-            keyActiveBankReceiveService.insertAll(entities);
-            result = keyActives;
-            httpStatus = HttpStatus.OK;
+
         } catch (Exception e) {
             System.out.println(e.getMessage());
             logger.error("generateKeyForAdmin: ERROR: " + e.getMessage() + " at " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("key-active-bank/annual-fee")
+    public ResponseEntity<List<TrAnnualFeeDTO>> getAnnualFeePackage() {
+        List<TrAnnualFeeDTO> result = null;
+        HttpStatus httpStatus = null;
+        try {
+            result = trAnnualFeePackageService.getAllFee();
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            logger.error("getAnnualFeePackage: ERROR: " + e.getMessage() + " at " + System.currentTimeMillis());
+            result = new ArrayList<>();
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -452,7 +493,31 @@ public class KeyBankReceiveController {
                                         EnvironmentUtil.getMaximumExpiredMinutesOTP()));
                         bankReceiveOTPEntity.setStatus(0);
                         bankReceiveOTPEntity.setKeyActive(requestId);
+                        bankReceiveOTPEntity.setAmount(feeDTO.getAmount());
                         bankReceiveOtpService.insert(bankReceiveOTPEntity);
+
+                        // create transaction_wallet
+                        TransactionWalletEntity transactionWalletEntity = new TransactionWalletEntity();
+                        UUID transWalletUUID = UUID.randomUUID();
+                        String billNumber = "VAF" + RandomCodeUtil.generateRandomId(10);
+                        String otpPayment = RandomCodeUtil.generateOTP(6);
+                        transactionWalletEntity.setId(transWalletUUID.toString());
+                        transactionWalletEntity.setAmount("0");
+                        transactionWalletEntity.setBillNumber(billNumber);
+                        transactionWalletEntity.setContent("");
+                        transactionWalletEntity.setStatus(0);
+                        transactionWalletEntity.setTimeCreated(currentTime);
+                        transactionWalletEntity.setTimePaid(0);
+                        transactionWalletEntity.setTransType("D");
+                        transactionWalletEntity.setUserId(dto.getUserId());
+                        transactionWalletEntity.setOtp(otpPayment);
+                        transactionWalletEntity.setPaymentType(2);
+                        transactionWalletEntity.setPaymentMethod(0);
+                        transactionWalletEntity.setReferenceNumber("");
+                        transactionWalletEntity.setPhoneNoRC("");
+                        transactionWalletService
+                                .insertTransactionWallet(transactionWalletEntity);
+
                         // return response
                         RequestActiveBankQrResponseDTO responseDTO = new RequestActiveBankQrResponseDTO();
                         responseDTO.setRequest(requestId);
@@ -460,6 +525,8 @@ public class KeyBankReceiveController {
                         responseDTO.setDuration(feeDTO.getDuration());
                         responseDTO.setValidFrom(validFeeFrom);
                         responseDTO.setValidTo(validFeeTo);
+                        responseDTO.setFeeId(dto.getFeeId());
+                        responseDTO.setOtpPayment(otpPayment);
                         result = responseDTO;
                         httpStatus = HttpStatus.OK;
                     }
@@ -475,14 +542,13 @@ public class KeyBankReceiveController {
     }
 
     @PostMapping("qr-active-bank/confirm-active")
-    public ResponseEntity<ResponseMessageDTO> confirmQrActiveBankReceive(
+    public ResponseEntity<Object> confirmQrActiveBankReceive(
             @Valid @RequestBody ConfirmActiveQrBankDTO dto) {
-        ResponseMessageDTO result = null;
+        Object result = null;
         HttpStatus httpStatus = null;
         try {
             logger.info("confirmQrActiveBankReceive: request: " + dto.toString() + " at: " + System.currentTimeMillis());
             //
-            ObjectMapper mapper = new ObjectMapper();
             String checkPassword = accountLoginService.checkPassword(dto.getUserId(), dto.getPassword());
             if (checkPassword == null || checkPassword.isEmpty()) {
                 result = new ResponseMessageDTO("FAILED", "E55");
@@ -504,7 +570,9 @@ public class KeyBankReceiveController {
                     LocalDateTime time = LocalDateTime.now();
                     long currentTime = time.toEpochSecond(ZoneOffset.UTC);
                     BankReceiveOtpDTO bankReceiveOtpDTO = bankReceiveOtpService
-                            .checkBankReceiveOtp(dto.getUserId(), dto.getBankId(), dto.getOtp(), dto.getRequest());
+                            .checkBankReceiveOtp(dto.getUserId(), dto.getBankId(),
+                                    dto.getOtp(), dto.getRequest());
+
                     if (bankReceiveOtpDTO == null) {
                         // otp sai hoặc ko tìm thấy key
                         result = new ResponseMessageDTO("FAILED", "E128");
@@ -514,53 +582,25 @@ public class KeyBankReceiveController {
                         httpStatus = HttpStatus.BAD_REQUEST;
                     } else {
                         // tạo mã QR
-                        if (dto.getPaymentMethod() == null || dto.getPaymentMethod() ==0) {
-                            AccountWalletEntity wallet = accountWalletService
-                                    .getAccountWalletByUserId(dto.getUserId());
-                            if (wallet != null) {
-                                long amount = bankReceiveOtpDTO.getAmount();
-                                if (amount != 0) {
-                                    long balance =Long.parseLong(wallet.getAmount());
-                                    if (balance > amount) {
-                                        String check = "byPass";
-                                        if (check != null && !check.trim().isEmpty()) {
-
-
-
-
-                                        } else {
-                                            logger.error("rechargeMobile: INVALID OTP");
-                                            result = new ResponseMessageDTO("FAILED", "E65");
-                                            httpStatus = HttpStatus.BAD_REQUEST;
-                                        }
-                                    }
-                                } else {
-
-                                }
-                            }
-                            else {
-
-                            }
+                        if (dto.getPaymentMethod() == null || dto.getPaymentMethod() == 0) {
+                            result = new ResponseMessageDTO("FAILED", "E70");
+                            httpStatus = HttpStatus.BAD_REQUEST;
                         } else if (dto.getPaymentMethod() == 1) {
                             String check = transactionWalletService
-                                    .checkExistedTransactionnWallet(dto.getOtp(), dto.getUserId(), 1);
+                                    .checkExistedTransactionnWallet(dto.getOtpPayment(), dto.getUserId(), 2);
                             if (check != null && !check.trim().isEmpty()) {
                                 UUID transReceiveUUID = UUID.randomUUID();
-                                UUID transcationReceiveBranchUUID = UUID.randomUUID();
                                 UUID transWalletVQRUUID = UUID.randomUUID();
-                                LocalDateTime currentDateTime = LocalDateTime.now();
                                 long amount = bankReceiveOtpDTO.getAmount();
                                 //
                                 String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
-                                String billNumberVQR = "VKB" + RandomCodeUtil.generateRandomId(10);
+                                String billNumberVQR = "VAF" + RandomCodeUtil.generateRandomId(10);
                                 String content = traceId + " " + billNumberVQR;
                                 // get bank recharge information
                                 String bankAccount = EnvironmentUtil.getBankAccountRecharge();
                                 String bankId = EnvironmentUtil.getBankIdRecharge();
                                 String bankLogo = EnvironmentUtil.getBankLogoIdRecharge();
                                 String cai = EnvironmentUtil.getCAIRecharge();
-                                String businessId = EnvironmentUtil.getBusinessIdRecharge();
-                                String branchId = EnvironmentUtil.getBranchIdRecharge();
                                 String userIdHost = EnvironmentUtil.getUserIdHostRecharge();
                                 // generate VQR
                                 VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
@@ -593,20 +633,9 @@ public class KeyBankReceiveController {
                                 transactionReceiveEntity.setUserId(userIdHost);
                                 transactionReceiveEntity.setNote("");
                                 transactionReceiveEntity.setTransStatus(0);
+                                transactionReceiveEntity.setQrCode(qr);
+//                                transactionReceiveEntity.setUrlLink("");
                                 transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
-                                // insert transaction branch
-//                                    if (businessId != null && branchId != null && !businessId.trim().isEmpty()
-//                                            && !branchId.trim().isEmpty()) {
-//                                        TransactionReceiveBranchEntity transactionReceiveBranchEntity = new TransactionReceiveBranchEntity();
-//                                        transactionReceiveBranchEntity.setId(transcationReceiveBranchUUID.toString());
-//                                        transactionReceiveBranchEntity.setBusinessId(businessId);
-//                                        transactionReceiveBranchEntity.setBranchId(branchId);
-//                                        transactionReceiveBranchEntity
-//                                                .setTransactionReceiveId(transReceiveUUID.toString());
-//                                        transactionReceiveBranchService
-//                                                .insertTransactionReceiveBranch(transactionReceiveBranchEntity);
-//                                    }
-                                // insert transaction_wallet VQR
                                 TransactionWalletEntity transactionWalletEntity = new TransactionWalletEntity();
                                 transactionWalletEntity.setId(transWalletVQRUUID.toString());
                                 transactionWalletEntity.setAmount(amount + "");
@@ -618,20 +647,27 @@ public class KeyBankReceiveController {
                                 transactionWalletEntity.setTransType("C");
                                 transactionWalletEntity.setUserId(dto.getUserId());
                                 transactionWalletEntity.setOtp("");
-                                transactionWalletEntity.setPaymentType(1);
+                                transactionWalletEntity.setPaymentType(0);
                                 transactionWalletEntity.setPaymentMethod(1);
                                 transactionWalletEntity
-                                        .setReferenceNumber(1 + "*" + dto.getRequest() + "*" + dto.getUserId() + "*"
-                                                + dto.getOtp());
+                                        .setReferenceNumber(2 + "*" + dto.getFeeId() + "*"
+                                                + dto.getUserId() + "*"
+                                                + dto.getOtpPayment() + "*" + dto.getBankId()
+                                                + "*" + dto.getOtp());
+                                transactionWalletEntity.setPhoneNoRC("");
                                 transactionWalletService.insertTransactionWallet(transactionWalletEntity);
                                 // update transaction_wallet mobile recharge
                                 LocalDateTime currentDateTimeMobile = LocalDateTime.now();
                                 long timeMobile = currentDateTimeMobile.toEpochSecond(ZoneOffset.UTC);
                                 transactionWalletService.updateTransactionWalletConfirm(timeMobile, amount + "",
-                                        dto.getUserId(), dto.getOtp(), 1);
+                                        dto.getUserId(), dto.getOtpPayment(), 2);
                                 // response billNumber*imgId*QR
-                                result = new ResponseMessageDTO("SUCCESS",
-                                        billNumberVQR + "*" + bankLogo + "*" + qr);
+                                ConfirmPaymentActiveKeyDTO responseDTO = new ConfirmPaymentActiveKeyDTO();
+                                responseDTO.setBankLogo(bankLogo);
+                                responseDTO.setBillNumber(billNumberVQR);
+                                responseDTO.setQr(qr);
+                                responseDTO.setAmount(amount);
+                                result = responseDTO;
                                 httpStatus = HttpStatus.OK;
                             } else {
                                 logger.error("rechargeMobile: INVALID OTP");
@@ -646,8 +682,9 @@ public class KeyBankReceiveController {
                     }
                 }
                 //
-                logger.info("confirmActiveBankReceive: response: STATUS: " + result.getStatus()
-                        + ", MESSAGE: " + result.getMessage() + " at: " + System.currentTimeMillis());
+                logger.info("confirmActiveBankReceive: response: STATUS: " + httpStatus +
+                        ", MESSAGE: " + result +
+                        " at: " + System.currentTimeMillis());
             }
 
         } catch (Exception e) {
@@ -661,6 +698,23 @@ public class KeyBankReceiveController {
 
     private String randomOtp() {
         return String.valueOf((int) (Math.random() * 9000) + 1000);
+    }
+
+    private String getUsernameFromToken(String token) {
+        String result = "";
+        try {
+            if (token != null && !token.trim().isEmpty()) {
+                String secretKey = "mySecretKey";
+                String jwtToken = token.substring(7); // remove "Bearer " from the beginning
+                Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(jwtToken).getBody();
+                String userId = (String) claims.get("user");
+                if (userId != null) {
+                    result = new String(Base64.getDecoder().decode(userId));
+                }
+            }
+        } catch (Exception e) {
+        }
+        return result;
     }
 
     private String generateSecretKey() {
@@ -712,31 +766,6 @@ public class KeyBankReceiveController {
             sb.append(characters.charAt(index));
         }
         return sb.toString();
-    }
-
-    private long getAmountByType(int type) {
-        long result = 0;
-        try {
-            if (type == 1) {
-                result = 10000;
-            } else if (type == 2) {
-                result = 20000;
-            } else if (type == 3) {
-                result = 50000;
-            } else if (type == 4) {
-                result = 100000;
-            } else if (type == 5) {
-                result = 200000;
-            } else if (type == 6) {
-                result = 500000;
-            } else {
-                result = 0;
-            }
-        } catch (Exception e) {
-            result = 0;
-        }
-
-        return result;
     }
 
     private boolean isKeyActive(String keyActive, String secretKey, int duration, String valueActive) {

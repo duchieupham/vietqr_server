@@ -4,4 +4,5 @@ public interface TrAnnualFeeDTO {
     String getFeeId();
     int getDuration();
     int getAmount();
+    String getDescription();
 }

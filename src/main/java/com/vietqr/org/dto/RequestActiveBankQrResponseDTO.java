@@ -6,6 +6,8 @@ public class RequestActiveBankQrResponseDTO {
     private long validFrom;
     private long validTo;
     private String request;
+    private String otpPayment;
+    private String feeId;
 
     public RequestActiveBankQrResponseDTO() {
     }
@@ -56,5 +58,21 @@ public class RequestActiveBankQrResponseDTO {
 
     public void setRequest(String request) {
         this.request = request;
+    }
+
+    public String getOtpPayment() {
+        return otpPayment;
+    }
+
+    public void setOtpPayment(String otpPayment) {
+        this.otpPayment = otpPayment;
+    }
+
+    public String getFeeId() {
+        return feeId;
+    }
+
+    public void setFeeId(String feeId) {
+        this.feeId = feeId;
     }
 }

@@ -66,7 +66,7 @@ public class TransactionWalletEntity implements Serializable {
     }
 
     public TransactionWalletEntity(String id, String userId, String amount, String content, int status,
-            String transType, String billNumber, long timeCreated, long timePaid, String otp, int paymentType) {
+                                   String transType, String billNumber, long timeCreated, long timePaid, String otp, int paymentType) {
         this.id = id;
         this.userId = userId;
         this.amount = amount;
@@ -81,8 +81,8 @@ public class TransactionWalletEntity implements Serializable {
     }
 
     public TransactionWalletEntity(String id, String userId, String amount, String content, int status,
-            String transType, String billNumber, long timeCreated, long timePaid, String otp, int paymentType,
-            int paymentMethod, String referenceNumber) {
+                                   String transType, String billNumber, long timeCreated, long timePaid, String otp, int paymentType,
+                                   int paymentMethod, String referenceNumber) {
         this.id = id;
         this.userId = userId;
         this.amount = amount;
@@ -99,8 +99,8 @@ public class TransactionWalletEntity implements Serializable {
     }
 
     public TransactionWalletEntity(String id, String userId, String amount, String content, int status,
-            String transType, String billNumber, long timeCreated, long timePaid, String otp, int paymentType,
-            int paymentMethod, String referenceNumber, String phoneNoRC) {
+                                   String transType, String billNumber, long timeCreated, long timePaid, String otp, int paymentType,
+                                   int paymentMethod, String referenceNumber, String phoneNoRC) {
         this.id = id;
         this.userId = userId;
         this.amount = amount;

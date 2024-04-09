@@ -89,7 +89,7 @@ public class TransactionWalletController {
                     } else if (dto.getPaymentType() == 1) {
                         // insert transaction_wallet
                         UUID transWalletUUID = UUID.randomUUID();
-                        String billNumber = "VPM" + RandomCodeUtil.generateRandomId(10);
+                        String billNumber = "VAF" + RandomCodeUtil.generateRandomId(10);
                         String otp = RandomCodeUtil.generateOTP(6);
                         LocalDateTime currentDateTime = LocalDateTime.now();
                         long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);

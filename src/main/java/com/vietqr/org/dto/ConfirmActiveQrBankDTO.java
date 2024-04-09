@@ -7,6 +7,8 @@ public class ConfirmActiveQrBankDTO {
     private String password;
     private String request;
     private Integer paymentMethod;
+    private String otpPayment;
+    private String feeId;
 
     public ConfirmActiveQrBankDTO() {
     }
@@ -65,5 +67,21 @@ public class ConfirmActiveQrBankDTO {
 
     public void setPaymentMethod(Integer paymentMethod) {
         this.paymentMethod = paymentMethod;
+    }
+
+    public String getOtpPayment() {
+        return otpPayment;
+    }
+
+    public void setOtpPayment(String otpPayment) {
+        this.otpPayment = otpPayment;
+    }
+
+    public String getFeeId() {
+        return feeId;
+    }
+
+    public void setFeeId(String feeId) {
+        this.feeId = feeId;
     }
 }

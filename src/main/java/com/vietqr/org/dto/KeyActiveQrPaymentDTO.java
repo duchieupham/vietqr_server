@@ -4,7 +4,6 @@ import javax.validation.constraints.NotBlank;
 
 public class KeyActiveQrPaymentDTO {
 
-    @NotBlank
     private int type;
     @NotBlank
     private String userId;

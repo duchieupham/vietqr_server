@@ -69,7 +69,8 @@ public interface TransactionWalletRepository extends JpaRepository<TransactionWa
 
         @Transactional
         @Modifying
-        @Query(value = "UPDATE transaction_wallet SET time_created = :timeCreated, amount = :amount WHERE user_id = :userId AND otp = :otp AND payment_type = :paymentType AND status = 0", nativeQuery = true)
+        @Query(value = "UPDATE transaction_wallet SET time_created = :timeCreated, amount = :amount "
+                + "WHERE user_id = :userId AND otp = :otp AND payment_type = :paymentType AND status = 0", nativeQuery = true)
         void updateTransactionWalletConfirm(
                         @Param(value = "timeCreated") long timeCreated,
                         @Param(value = "amount") String amount,

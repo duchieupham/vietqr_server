@@ -187,16 +187,16 @@ public class EnvironmentUtil {
     private static final String BANK_LOGO_ID_RECHARGE_UAT = "58b7190b-a294-4b14-968f-cd365593893e";
     private static final String BANK_LOGO_ID_RECHARGE_PROD = "58b7190b-a294-4b14-968f-cd365593893e";
     //
-    private static final String BANK_ID_RECHARGE_UAT = "";
+    private static final String BANK_ID_RECHARGE_UAT = "c085abad-9901-4acd-9c15-2e8d0b63489d";
     private static final String BANK_ID_RECHARGE_PROD = "bb25279e-b7e6-405e-bdce-a697794f465f";
     //
-    private static final String BANK_ACCOUNT_RECHARGE_UAT = "";
+    private static final String BANK_ACCOUNT_RECHARGE_UAT = "29058474275";
     private static final String BANK_ACCOUNT_RECHARGE_PROD = "0020108679008";
     //
     private static final String BANK_TYPE_ID_RECHARGE_UAT = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
     private static final String BANK_TYPE_ID_RECHARGE_PROD = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
 
-    private static final String USER_ID_HOST_RECHARGE_UAT = "";
+    private static final String USER_ID_HOST_RECHARGE_UAT = "648dca06-4f72-4df8-b98f-429f4777fbda";
     private static final String USER_ID_HOST_RECHARGE_PROD = "6e3712ab-48ea-4bfa-a50d-f7dd1f184efb";
 
     // VIET QR ICON ID
@@ -260,6 +260,8 @@ public class EnvironmentUtil {
 
     private static final int LENGTH_KEY_ACTIVE_BANK = 12;
     private static final String CHARACTERS_KEY_ACTIVE_BANK = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+    private static final String ADMIN_UAT_ACTIVE_KEY = "admin-vqr-active-key-2326";
 
     public static String getBidvSecretKey() {
         return BIDV_SECRET_KEY;
@@ -589,5 +591,9 @@ public class EnvironmentUtil {
 
     public static String getCharactersKeyActiveBank() {
         return CHARACTERS_KEY_ACTIVE_BANK;
+    }
+
+    public static String getAdminUatActiveKey() {
+        return ADMIN_UAT_ACTIVE_KEY;
     }
 }
