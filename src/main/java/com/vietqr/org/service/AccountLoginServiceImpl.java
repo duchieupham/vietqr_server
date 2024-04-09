@@ -121,4 +121,9 @@ public class AccountLoginServiceImpl implements AccountLoginService {
 		repo.resetPassword(password, phoneNo);
 	}
 
+	@Override
+	public String checkPassword(String userId, String password) {
+		return repo.checkPassword(userId, password);
+	}
+
 }

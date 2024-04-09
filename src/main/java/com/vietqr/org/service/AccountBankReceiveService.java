@@ -18,6 +18,8 @@ public interface AccountBankReceiveService {
 
 	public AccountBankReceiveEntity getAccountBankById(String bankId);
 
+	public KeyBankReceiveActiveDTO getAccountBankKeyById(String bankId);
+
 	public String getCaiValueByBankId(String bankId);
 
 	public void updateRegisterAuthenticationBank(String nationalId, String phoneAuthenticated, String bankAccountName,
@@ -89,4 +91,10 @@ public interface AccountBankReceiveService {
 	String getBankNameByBankId(String bankTypeId);
 
     List<TerminalBankReceiveDTO> getAccountBankReceiveByUseId(String userId);
+
+    BankReceiveCheckDTO checkBankReceiveActive(String bankId);
+
+	int updateActiveBankReceive(String bankId, long validFeeFrom, long validFeeTo);
+
+    boolean checkIsActiveService(String bankId);
 }

@@ -15,6 +15,7 @@ public class NotificationUtil {
 	private static final String NOTI_RECHARGE = "N10";
 	private static final String NOTI_MOBILE_TOPUP = "N11";
 	private static final String NOTI_TYPE_CANCEL_TRANSACTION = "N12";
+	private static final String NOTI_TYPE_ACTIVE_KEY = "N13";
 
 	// Title
 	private static final String NOTI_TITLE_TRANSACTION = "Thông báo biến động số dư";
@@ -49,6 +50,9 @@ public class NotificationUtil {
 	private static final String NOTI_DESC_MOBILE_TOPUP_1 = "Quý khách đã nạp thành công số tiền ";
 	private static final String NOTI_DESC_MOBILE_TOPUP_2 = " VND cho số điện thoại ";
 	private static final String NOTI_DESC_MOBILE_TOPUP_3 = ". Cảm ơn quý khách đã sử dụng dịch vụ của VietQR VN";
+	private static final String NOTI_DESC_ACTIVE_KEY_1 = "Quý khách đã thanh toán thành công số tiền ";
+	private static final String NOTI_DESC_ACTIVE_KEY_2 = " VND cho dịch vụ nhận BĐSD";
+	private static final String NOTI_DESC_ACTIVE_KEY_3 = ". Cảm ơn quý khách đã sử dụng dịch vụ của VietQR VN";
 	private static final String NOTI_DESC_MOBILE_TOPUP_FAILED = "Có vấn đề xảy ra trong quá trình nạp tiền trong hệ thống VietQR. Chúng tôi sẽ xem xét và xử lý sớm, mong quý khách thông cảm về vấn đề này.";
 
 	public static String getNotiTitleMobileTopupFailed() {
@@ -223,4 +227,18 @@ public class NotificationUtil {
 		return NOTI_TYPE_CANCEL_TRANSACTION;
 	}
 
+	public static String getNotiAnnualFee() {
+		return NOTI_TYPE_ACTIVE_KEY;
+	}
+	public static String getNotiDescActiveKey1() {
+		return NOTI_DESC_ACTIVE_KEY_1;
+	}
+
+	public static String getNotiDescActiveKey2() {
+		return NOTI_DESC_ACTIVE_KEY_2;
+	}
+
+	public static String getNotiDescActiveKey3() {
+		return NOTI_DESC_ACTIVE_KEY_3;
+	}
 }

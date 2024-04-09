@@ -286,4 +286,28 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "INNER JOIN bank_type b ON a.bank_type_id = b.id "
 			+ "WHERE a.user_id = :userId AND a.is_authenticated = TRUE ", nativeQuery = true)
     List<TerminalBankReceiveDTO> getAccountBankReceiveByUseId(String userId);
+
+	@Query(value = "SELECT id AS bankId, user_id AS userId, "
+			+ "is_authenticated AS authenticated, is_valid_service AS isValidService, "
+			+ "valid_fee_from as validFrom, valid_fee_to as validTo "
+			+ "FROM account_bank_receive "
+			+ "WHERE id = :bankId", nativeQuery = true)
+    BankReceiveCheckDTO checkBankReceiveActive(@Param(value = "bankId") String bankId);
+
+	@Query(value = "SELECT id AS bankId, user_id AS userId, "
+			+ "COALESCE(valid_fee_from, 0) AS validFeeFrom, "
+			+ "COALESCE(valid_fee_to, 0) AS validFeeTo, "
+			+ "is_valid_service AS isValidService "
+			+ "FROM account_bank_receive "
+			+ "WHERE id = :bankId", nativeQuery = true)
+    KeyBankReceiveActiveDTO getAccountBankKeyById(@Param(value = "bankId") String bankId);
+
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_bank_receive SET valid_fee_from = :validFeeFrom, "
+			+ "valid_fee_to = :validFeeTo, is_valid_service = TRUE WHERE id = :bankId ", nativeQuery = true)
+	int updateActiveBankReceive(String bankId, long validFeeFrom, long validFeeTo);
+
+	@Query(value = "SELECT is_valid_service FROM account_bank_receive WHERE id = :bankId", nativeQuery = true)
+    boolean checkIsActiveService(String bankId);
 }

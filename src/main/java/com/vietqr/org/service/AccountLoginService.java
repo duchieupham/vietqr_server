@@ -52,4 +52,6 @@ public interface AccountLoginService {
 	public CardVQRInfoDTO getVcardInforByUserId(String userId);
 
 	public void resetPassword(String password, String phoneNo);
+
+	String checkPassword(String userId, String password);
 }
