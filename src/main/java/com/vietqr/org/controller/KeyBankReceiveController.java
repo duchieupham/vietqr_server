@@ -492,7 +492,7 @@ public class KeyBankReceiveController {
                                 .setExpiredDate(DateTimeUtil.plusMinuteAsLongInt(time,
                                         EnvironmentUtil.getMaximumExpiredMinutesOTP()));
                         bankReceiveOTPEntity.setStatus(0);
-                        bankReceiveOTPEntity.setKeyActive(requestId);
+                        bankReceiveOTPEntity.setKeyActive(feeDTO.getFeeId());
                         bankReceiveOTPEntity.setAmount(feeDTO.getAmount());
                         bankReceiveOtpService.insert(bankReceiveOTPEntity);
 
@@ -571,7 +571,7 @@ public class KeyBankReceiveController {
                     long currentTime = time.toEpochSecond(ZoneOffset.UTC);
                     BankReceiveOtpDTO bankReceiveOtpDTO = bankReceiveOtpService
                             .checkBankReceiveOtp(dto.getUserId(), dto.getBankId(),
-                                    dto.getOtp(), dto.getRequest());
+                                    dto.getOtp(), dto.getFeeId());
 
                     if (bankReceiveOtpDTO == null) {
                         // otp sai hoặc ko tìm thấy key
