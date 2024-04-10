@@ -1185,23 +1185,23 @@ public class TransactionBankController {
 											bankReceiveActiveHistoryEntity.setData("");
 
 											// create new transaction wallet for fee
-											TransactionWalletEntity transactionWalletEntityFee = new TransactionWalletEntity();
-											transactionWalletEntityFee.setId(UUID.randomUUID().toString());
-											transactionWalletEntityFee.setAmount(trAnnualFeeDTO.getAmount() + "");
-											transactionWalletEntityFee.setBillNumber(orderId);
-											transactionWalletEntityFee.setUserId(userId);
-											transactionWalletEntityFee.setContent("");
-											transactionWalletEntityFee.setStatus(1);
-											transactionWalletEntityFee.setOtp("");
-											transactionWalletEntityFee.setPaymentType(2);
-											transactionWalletEntityFee.setPaymentMethod(0);
-											transactionWalletEntityFee.setTransType("D");
-											transactionWalletEntityFee.setTimeCreated(currentTime);
-											transactionWalletEntityFee.setTimePaid(currentTime);
-											transactionWalletEntityFee.setReferenceNumber("");
-											transactionWalletEntityFee.setPhoneNoRC("");
+//											TransactionWalletEntity transactionWalletEntityFee = new TransactionWalletEntity();
+//											transactionWalletEntityFee.setId(UUID.randomUUID().toString());
+//											transactionWalletEntityFee.setAmount(trAnnualFeeDTO.getAmount() + "");
+//											transactionWalletEntityFee.setBillNumber(orderId);
+//											transactionWalletEntityFee.setUserId(userId);
+//											transactionWalletEntityFee.setContent("");
+//											transactionWalletEntityFee.setStatus(1);
+//											transactionWalletEntityFee.setOtp("");
+//											transactionWalletEntityFee.setPaymentType(2);
+//											transactionWalletEntityFee.setPaymentMethod(0);
+//											transactionWalletEntityFee.setTransType("D");
+//											transactionWalletEntityFee.setTimeCreated(currentTime);
+//											transactionWalletEntityFee.setTimePaid(currentTime);
+//											transactionWalletEntityFee.setReferenceNumber("");
+//											transactionWalletEntityFee.setPhoneNoRC("");
 
-											transactionWalletService.insertTransactionWallet(transactionWalletEntityFee);
+//											transactionWalletService.insertTransactionWallet(transactionWalletEntityFee);
 											bankReceiveOtpService.updateStatusBankReceiveOtp(bankReceiveOtpDTO.getId(), 1);
 											bankReceiveActiveHistoryService.insert(bankReceiveActiveHistoryEntity);
 											accountBankReceiveService.updateActiveBankReceive(bankId, validFeeFrom, validFeeTo);
@@ -1321,9 +1321,6 @@ public class TransactionBankController {
 
 	private void pushNotification(String title, String message, NotificationEntity notiEntity, Map<String, String> data,
 			String userId) {
-		System.out.println("PUSH NOTIFICATION: " + userId);
-		System.out.println("PUSH NOTIFICATION: title: " + title);
-		System.out.println("PUSH NOTIFICATION: data: " + data);
 		if (notiEntity != null) {
 			notificationService.insertNotification(notiEntity);
 		}
@@ -1354,7 +1351,7 @@ public class TransactionBankController {
 			amount = transactionReceiveEntity.getAmount() + "";
 		}
 		SystemSettingEntity systemSetting = systemSettingService.getSystemSetting();
-		if (accountBankEntity.isValidService() == true) {
+		if (accountBankEntity.isValidService()) {
 			amount = "";
 			if (dto.getAmount() != 0) {
 				amount = dto.getAmount() + "";
@@ -1411,7 +1408,7 @@ public class TransactionBankController {
 
 						transReceiveTempService.insert(entity);
 					} else {
-						if (accountBankEntity.isValidService() == false) {
+						if (!accountBankEntity.isValidService()) {
 							amount = "*****";
 						}
 					}

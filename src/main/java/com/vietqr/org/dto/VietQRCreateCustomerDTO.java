@@ -23,6 +23,7 @@ public class VietQRCreateCustomerDTO implements Serializable {
     private String terminalCode;
     private String note;
     private String urlLink;
+    private Boolean reconciliation;
 
     public VietQRCreateCustomerDTO() {
         super();
@@ -198,6 +199,14 @@ public class VietQRCreateCustomerDTO implements Serializable {
 
     public void setUrlLink(String urlLink) {
         this.urlLink = urlLink;
+    }
+
+    public Boolean getReconciliation() {
+        return reconciliation;
+    }
+
+    public void setReconciliation(Boolean reconciliation) {
+        this.reconciliation = reconciliation;
     }
 
     @Override

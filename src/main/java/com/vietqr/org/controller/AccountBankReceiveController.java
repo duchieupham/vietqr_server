@@ -182,6 +182,9 @@ public class AccountBankReceiveController {
 			entity.setPassword("");
 			entity.setEwalletToken("");
 			entity.setTerminalLength(10);
+			entity.setValidFeeTo(0L);
+			entity.setValidFeeFrom(0L);
+			entity.setValidService(false);
 			accountBankReceiveService.insertAccountBank(entity);
 
 			// insert account-bank-receive-share
@@ -457,6 +460,9 @@ public class AccountBankReceiveController {
 			entity.setUsername("");
 			entity.setPassword("");
 			entity.setTerminalLength(10);
+			entity.setValidFeeTo(0L);
+			entity.setValidFeeFrom(0L);
+			entity.setValidService(false);
 			if (dto.getEwalletToken() != null) {
 				entity.setEwalletToken(dto.getEwalletToken());
 				logger.info("insertAccountBank: EWALLET TOKEN: " + dto.getEwalletToken());
@@ -589,6 +595,9 @@ public class AccountBankReceiveController {
 				result.setEwalletToken(accountBankEntity.getEwalletToken());
 				result.setUnlinkedType(bankTypeEntity.getUnlinkedType());
 				result.setPhoneAuthenticated(accountBankEntity.getPhoneAuthenticated());
+				result.setIsActiveService(accountBankEntity.isValidService());
+				result.setValidFeeFrom(accountBankEntity.getValidFeeFrom());
+				result.setValidFeeTo(accountBankEntity.getValidFeeTo());
 				// List<String> branchIds = new ArrayList<>();
 				// branchIds = branchInformationService.getBranchIdsByBankId(bankId);
 				// // get list branch linked
@@ -684,6 +693,9 @@ public class AccountBankReceiveController {
 				result.setEwalletToken(accountBankEntity.getEwalletToken());
 				result.setUnlinkedType(bankTypeEntity.getUnlinkedType());
 				result.setPhoneAuthenticated(accountBankEntity.getPhoneAuthenticated());
+				result.setIsActiveService(accountBankEntity.isValidService());
+				result.setValidFeeFrom(accountBankEntity.getValidFeeFrom());
+				result.setValidFeeTo(accountBankEntity.getValidFeeTo());
 
 				List<TransactionBankListDTO> transactions = new ArrayList<>();
 				// List<TransactionReceiveEntity> transactionEntities =
@@ -860,6 +872,9 @@ public class AccountBankReceiveController {
 					entity.setPassword(dto.getPassword());
 					entity.setEwalletToken("");
 					entity.setTerminalLength(10);
+					entity.setValidFeeTo(0L);
+					entity.setValidFeeFrom(0L);
+					entity.setValidService(false);
 					accountBankReceiveService.insertAccountBank(entity);
 					// insert account_bank_personal
 					UUID uuidPersonal = UUID.randomUUID();

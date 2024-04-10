@@ -441,11 +441,17 @@ public class VietQRController {
 							// get cai value
 							BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(bankTypeId);
 							String caiValue = caiBankService.getCaiValue(bankTypeId);
+							String content = "";
+							if (dto.getReconciliation() == null || dto.getReconciliation()) {
+								content = traceId + "." + dto.getContent();
+							} else {
+								content = dto.getContent();
+							}
 							// generate VietQRGenerateDTO
 							VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
 							vietQRGenerateDTO.setCaiValue(caiValue);
 							vietQRGenerateDTO.setAmount(dto.getAmount() + "");
-							vietQRGenerateDTO.setContent(traceId + "." + dto.getContent());
+							vietQRGenerateDTO.setContent(content);
 							vietQRGenerateDTO.setBankAccount(accountBankEntity.getBankAccount());
 							String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
 							// generate VietQRDTO
@@ -454,7 +460,7 @@ public class VietQRController {
 							vietQRDTO.setBankAccount(accountBankEntity.getBankAccount());
 							vietQRDTO.setUserBankName(accountBankEntity.getBankAccountName().toUpperCase());
 							vietQRDTO.setAmount(dto.getAmount() + "");
-							vietQRDTO.setContent(traceId + "." + dto.getContent());
+							vietQRDTO.setContent(content);
 							vietQRDTO.setQrCode(qr);
 							vietQRDTO.setImgId(bankTypeEntity.getImgId());
 							vietQRDTO.setExisting(1);
@@ -835,7 +841,7 @@ public class VietQRController {
 			transactionEntity.setTerminalCode(dto.getTerminalCode());
 			transactionEntity.setQrCode(qrCode);
 			transactionEntity.setUserId(accountBankReceiveEntity.getUserId());
-			transactionEntity.setNote(dto.getNote());
+			transactionEntity.setNote(dto.getNote() != null ? dto.getNote() : "");
 			transactionEntity.setTransStatus(0);
 			transactionEntity.setUrlLink(dto.getUrlLink());
 			transactionReceiveService.insertTransactionReceive(transactionEntity);
@@ -879,7 +885,7 @@ public class VietQRController {
 				transactionEntity.setQrCode("");
 				transactionEntity.setUserId(accountBankEntity.getUserId());
 				transactionEntity.setOrderId(orderId);
-				transactionEntity.setNote(dto.getNote());
+				transactionEntity.setNote(dto.getNote() != null ? dto.getNote() : "");
 				transactionEntity.setTransStatus(0);
 				transactionEntity.setUrlLink(dto.getUrlLink());
 				if (dto.getTransType() != null) {

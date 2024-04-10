@@ -174,7 +174,7 @@ public class VietQRMMSController {
             transactionEntity.setTerminalCode(dto.getTerminalCode());
             transactionEntity.setQrCode(qrCode);
             transactionEntity.setUserId(accountBankReceiveEntity.getUserId());
-            transactionEntity.setNote(dto.getNote());
+            transactionEntity.setNote(dto.getNote() != null ? dto.getNote() : "");
             transactionEntity.setTransStatus(0);
             if (dto.getUrlLink() == null || dto.getUrlLink().isEmpty()) {
                 dto.setUrlLink("");

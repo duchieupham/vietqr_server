@@ -29,6 +29,9 @@ public class AccountBankReceiveDetailWT implements Serializable {
     private String phoneAuthenticated;
     private String ewalletToken;
     private Integer unlinkedType;
+    private Boolean isActiveService;
+    private Long validFeeFrom;
+    private Long validFeeTo;
 //    private List<BusinessBankDetailDTO> businessDetails;
 
     public AccountBankReceiveDetailWT() {
@@ -189,7 +192,31 @@ public class AccountBankReceiveDetailWT implements Serializable {
         this.unlinkedType = unlinkedType;
     }
 
-//    public List<BusinessBankDetailDTO> getBusinessDetails() {
+    public Boolean getIsActiveService() {
+        return isActiveService;
+    }
+
+    public void setIsActiveService(Boolean activeService) {
+        isActiveService = activeService;
+    }
+
+    public Long getValidFeeFrom() {
+        return validFeeFrom;
+    }
+
+    public void setValidFeeFrom(Long validFeeFrom) {
+        this.validFeeFrom = validFeeFrom;
+    }
+
+    public Long getValidFeeTo() {
+        return validFeeTo;
+    }
+
+    public void setValidFeeTo(Long validFeeTo) {
+        this.validFeeTo = validFeeTo;
+    }
+
+    //    public List<BusinessBankDetailDTO> getBusinessDetails() {
 //        return businessDetails;
 //    }
 //

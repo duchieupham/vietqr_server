@@ -6,7 +6,7 @@ public class TransactionRelatedRequestDTO {
 
     private String id;
     private String bankAccount;
-    private long amount;
+    private String amount;
     private String bankId;
     private String content;
     private String orderId;
@@ -23,7 +23,7 @@ public class TransactionRelatedRequestDTO {
     private int totalRequest;
     private List<TransRequestDTO> requests;
 
-    public TransactionRelatedRequestDTO(String id, String bankAccount, long amount, String bankId,
+    public TransactionRelatedRequestDTO(String id, String bankAccount, String amount, String bankId,
                                         String content, String orderId, String referenceNumber,
                                         int status, long timeCreated, long timePaid, String transType,
                                         int type, String userBankName, String bankShortName, String terminalCode,
@@ -66,11 +66,11 @@ public class TransactionRelatedRequestDTO {
         this.bankAccount = bankAccount;
     }
 
-    public long getAmount() {
+    public String getAmount() {
         return amount;
     }
 
-    public void setAmount(long amount) {
+    public void setAmount(String amount) {
         this.amount = amount;
     }
 
