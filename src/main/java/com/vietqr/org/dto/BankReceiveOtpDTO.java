@@ -8,4 +8,5 @@ public interface BankReceiveOtpDTO {
     String getKeyActive();
     long getExpiredDate();
     long getAmount();
+    String getRequestId();
 }

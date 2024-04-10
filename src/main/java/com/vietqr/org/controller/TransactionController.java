@@ -1175,7 +1175,9 @@ public class TransactionController {
             roleList.add(EnvironmentUtil.getAdminRoleId());
             String roles = String.join("|", roleList);
             String isOwner = merchantMemberRoleService.checkMemberHaveRole(userId, roles);
-//            String isOwner = accountBankReceiveShareService.checkUserExistedFromBankAccountAndIsOwner(userId, bankId);
+            if (isOwner == null || isOwner.isEmpty()) {
+                isOwner = accountBankReceiveShareService.checkUserExistedFromBankAccountAndIsOwner(userId, bankId);
+            }
             if (isOwner != null && !isOwner.isEmpty()) {
                 switch (type) {
                     case 9:
@@ -1215,33 +1217,157 @@ public class TransactionController {
                             .getTransactionReceiveRequest(listTransId);
                     Map<String, List<TransRequestDTO>> terminalBanksMap = listRequests.stream()
                             .collect(Collectors.groupingBy(TransRequestDTO::getTransactionId));
-                    result = dtos.stream().map(item -> {
-                        TransactionRelatedRequestDTO trans = new TransactionRelatedRequestDTO();
-                        trans.setId(item.getId());
-                        trans.setBankAccount(item.getBankAccount());
-                        trans.setAmount(item.getAmount());
-                        trans.setBankId(item.getBankId());
-                        trans.setContent(item.getContent());
-                        trans.setOrderId(item.getOrderId());
-                        trans.setReferenceNumber(item.getReferenceNumber());
-                        trans.setStatus(item.getStatus());
-                        trans.setTimeCreated(item.getTimeCreated());
-                        trans.setTimePaid(item.getTimePaid());
-                        trans.setTransType(item.getTransType());
-                        trans.setType(item.getType());
-                        trans.setUserBankName(item.getUserBankName());
-                        trans.setBankShortName(item.getBankShortName());
-                        trans.setTerminalCode(item.getTerminalCode());
-                        trans.setNote(item.getNote());
-                        trans.setRequests(terminalBanksMap
-                                .getOrDefault(item.getId(), new ArrayList<>()));
-                        trans.setTotalRequest(trans.getRequests().size());
-                        return trans;
-                    }).collect(Collectors.toList());
+
+                    boolean isActiveService = accountBankReceiveService.checkIsActiveService(bankId);
+                    if (isActiveService) {
+                        result = dtos.stream().map(item -> {
+                            TransactionRelatedRequestDTO trans = new TransactionRelatedRequestDTO();
+                            trans.setId(item.getId());
+                            trans.setBankAccount(item.getBankAccount());
+                            trans.setAmount(item.getAmount() + "");
+                            trans.setBankId(item.getBankId());
+                            trans.setContent(item.getContent());
+                            trans.setOrderId(item.getOrderId());
+                            trans.setReferenceNumber(item.getReferenceNumber());
+                            trans.setStatus(item.getStatus());
+                            trans.setTimeCreated(item.getTimeCreated());
+                            trans.setTimePaid(item.getTimePaid());
+                            trans.setTransType(item.getTransType());
+                            trans.setType(item.getType());
+                            trans.setUserBankName(item.getUserBankName());
+                            trans.setBankShortName(item.getBankShortName());
+                            trans.setTerminalCode(item.getTerminalCode());
+                            trans.setNote(item.getNote());
+                            trans.setRequests(terminalBanksMap
+                                    .getOrDefault(item.getId(), new ArrayList<>()));
+                            trans.setTotalRequest(trans.getRequests().size());
+                            return trans;
+                        }).collect(Collectors.toList());
+                    } else {
+                        LocalDateTime now = LocalDateTime.now();
+                        long time = now.toEpochSecond(ZoneOffset.UTC);
+                        if (!dtos.isEmpty()) {
+                            time = dtos.get(0).getTimeCreated();
+                        }
+                        SystemSettingEntity setting = systemSettingService.getSystemSetting();
+                        if (setting.getServiceActive() > time) {
+                            result = dtos.stream().map(item -> {
+                                TransactionRelatedRequestDTO trans = new TransactionRelatedRequestDTO();
+                                trans.setId(item.getId());
+                                trans.setBankAccount(item.getBankAccount());
+                                trans.setAmount(item.getAmount() + "");
+                                trans.setBankId(item.getBankId());
+                                trans.setContent(item.getContent());
+                                trans.setOrderId(item.getOrderId());
+                                trans.setReferenceNumber(item.getReferenceNumber());
+                                trans.setStatus(item.getStatus());
+                                trans.setTimeCreated(item.getTimeCreated());
+                                trans.setTimePaid(item.getTimePaid());
+                                trans.setTransType(item.getTransType());
+                                trans.setType(item.getType());
+                                trans.setUserBankName(item.getUserBankName());
+                                trans.setBankShortName(item.getBankShortName());
+                                trans.setTerminalCode(item.getTerminalCode());
+                                trans.setNote(item.getNote());
+                                trans.setRequests(terminalBanksMap
+                                        .getOrDefault(item.getId(), new ArrayList<>()));
+                                trans.setTotalRequest(trans.getRequests().size());
+                                return trans;
+                            }).collect(Collectors.toList());
+                        } else {
+                            if (!dtos.isEmpty()) {
+                                int lastIndex = dtos.size() - 1;
+                                long lastTime = dtos.get(lastIndex).getTimeCreated();
+                                TransReceiveTempEntity entity = transReceiveTempService.getLastTimeByBankId(bankId);
+                                if (entity != null) {
+                                    if (entity.getLastTimes() <= lastTime) {
+                                        result = dtos.stream().map(item -> {
+                                            TransactionRelatedRequestDTO trans = new TransactionRelatedRequestDTO();
+                                            trans.setId(item.getId());
+                                            trans.setBankAccount(item.getBankAccount());
+                                            trans.setAmount("*****");
+                                            trans.setBankId(item.getBankId());
+                                            trans.setContent(item.getContent());
+                                            trans.setOrderId(item.getOrderId());
+                                            trans.setReferenceNumber(item.getReferenceNumber());
+                                            trans.setStatus(item.getStatus());
+                                            trans.setTimeCreated(item.getTimeCreated());
+                                            trans.setTimePaid(item.getTimePaid());
+                                            trans.setTransType(item.getTransType());
+                                            trans.setType(item.getType());
+                                            trans.setUserBankName(item.getUserBankName());
+                                            trans.setBankShortName(item.getBankShortName());
+                                            trans.setTerminalCode(item.getTerminalCode());
+                                            trans.setNote(item.getNote());
+                                            trans.setRequests(terminalBanksMap
+                                                    .getOrDefault(item.getId(), new ArrayList<>()));
+                                            trans.setTotalRequest(trans.getRequests().size());
+                                            return trans;
+                                        }).collect(Collectors.toList());
+                                    } else {
+                                        result = dtos.stream().map(item -> {
+                                            TransactionRelatedRequestDTO trans = new TransactionRelatedRequestDTO();
+                                            trans.setId(item.getId());
+                                            trans.setBankAccount(item.getBankAccount());
+                                            if (entity.getTransIds().contains(item.getId())) {
+                                                trans.setAmount(item.getAmount() + "");
+                                            } else if (item.getTimeCreated() < entity.getLastTimes()) {
+                                                trans.setAmount(item.getAmount() + "");
+                                            } else {
+                                                trans.setAmount("*****");
+                                            }
+                                            trans.setBankId(item.getBankId());
+                                            trans.setContent(item.getContent());
+                                            trans.setOrderId(item.getOrderId());
+                                            trans.setReferenceNumber(item.getReferenceNumber());
+                                            trans.setStatus(item.getStatus());
+                                            trans.setTimeCreated(item.getTimeCreated());
+                                            trans.setTimePaid(item.getTimePaid());
+                                            trans.setTransType(item.getTransType());
+                                            trans.setType(item.getType());
+                                            trans.setUserBankName(item.getUserBankName());
+                                            trans.setBankShortName(item.getBankShortName());
+                                            trans.setTerminalCode(item.getTerminalCode());
+                                            trans.setNote(item.getNote());
+                                            trans.setRequests(terminalBanksMap
+                                                    .getOrDefault(item.getId(), new ArrayList<>()));
+                                            trans.setTotalRequest(trans.getRequests().size());
+                                            return trans;
+                                        }).collect(Collectors.toList());
+                                    }
+                                } else {
+                                    result = dtos.stream().map(item -> {
+                                        TransactionRelatedRequestDTO trans = new TransactionRelatedRequestDTO();
+                                        trans.setId(item.getId());
+                                        trans.setBankAccount(item.getBankAccount());
+                                        trans.setAmount("*****");
+                                        trans.setBankId(item.getBankId());
+                                        trans.setContent(item.getContent());
+                                        trans.setOrderId(item.getOrderId());
+                                        trans.setReferenceNumber(item.getReferenceNumber());
+                                        trans.setStatus(item.getStatus());
+                                        trans.setTimeCreated(item.getTimeCreated());
+                                        trans.setTimePaid(item.getTimePaid());
+                                        trans.setTransType(item.getTransType());
+                                        trans.setType(item.getType());
+                                        trans.setUserBankName(item.getUserBankName());
+                                        trans.setBankShortName(item.getBankShortName());
+                                        trans.setTerminalCode(item.getTerminalCode());
+                                        trans.setNote(item.getNote());
+                                        trans.setRequests(terminalBanksMap
+                                                .getOrDefault(item.getId(), new ArrayList<>()));
+                                        trans.setTotalRequest(trans.getRequests().size());
+                                        return trans;
+                                    }).collect(Collectors.toList());
+                                }
+
+                            }
+                        }
+                    }
                 }
             } else {
                 result = new ArrayList<>();
-                httpStatus = HttpStatus.BAD_REQUEST;
+                httpStatus = HttpStatus.OK;
             }
 
         } catch (Exception e) {
@@ -1973,6 +2099,13 @@ public class TransactionController {
             if (isActiveService) {
                 result = new TransactionDetailResDTO();
                 result.setId(dto.getId());
+                result.setBankId(dto.getBankId());
+                result.setRefId(dto.getRefId());
+                result.setTraceId(dto.getTraceId());
+                result.setBankAccountName(dto.getBankAccountName());
+                result.setBankCode(dto.getBankCode());
+                result.setBankName(dto.getBankName());
+                result.setImgId(dto.getImgId());
                 result.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
                 result.setBankAccount(dto.getBankAccount());
                 result.setBankShortName(dto.getBankShortName() != null ? dto.getBankShortName() : "");
@@ -1992,6 +2125,13 @@ public class TransactionController {
                 if (setting.getServiceActive() > time) {
                     result = new TransactionDetailResDTO();
                     result.setId(dto.getId());
+                    result.setBankId(dto.getBankId());
+                    result.setRefId(dto.getRefId());
+                    result.setTraceId(dto.getTraceId());
+                    result.setBankAccountName(dto.getBankAccountName());
+                    result.setBankCode(dto.getBankCode());
+                    result.setBankName(dto.getBankName());
+                    result.setImgId(dto.getImgId());
                     result.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
                     result.setBankAccount(dto.getBankAccount());
                     result.setBankShortName(dto.getBankShortName() != null ? dto.getBankShortName() : "");
@@ -2012,6 +2152,13 @@ public class TransactionController {
                         if (entity.getLastTimes() <= lastTime) {
                             result = new TransactionDetailResDTO();
                             result.setId(dto.getId());
+                            result.setBankId(dto.getBankId());
+                            result.setRefId(dto.getRefId());
+                            result.setTraceId(dto.getTraceId());
+                            result.setBankAccountName(dto.getBankAccountName());
+                            result.setBankCode(dto.getBankCode());
+                            result.setBankName(dto.getBankName());
+                            result.setImgId(dto.getImgId());
                             result.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
                             result.setBankAccount(dto.getBankAccount());
                             result.setBankShortName(dto.getBankShortName() != null ? dto.getBankShortName() : "");
@@ -2028,6 +2175,13 @@ public class TransactionController {
                         } else {
                             result = new TransactionDetailResDTO();
                             result.setId(dto.getId());
+                            result.setBankId(dto.getBankId());
+                            result.setRefId(dto.getRefId());
+                            result.setTraceId(dto.getTraceId());
+                            result.setBankAccountName(dto.getBankAccountName());
+                            result.setBankCode(dto.getBankCode());
+                            result.setBankName(dto.getBankName());
+                            result.setImgId(dto.getImgId());
                             result.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
                             result.setBankAccount(dto.getBankAccount());
                             result.setBankShortName(dto.getBankShortName() != null ? dto.getBankShortName() : "");
@@ -2051,6 +2205,13 @@ public class TransactionController {
                     } else {
                         result = new TransactionDetailResDTO();
                         result.setId(dto.getId());
+                        result.setBankId(dto.getBankId());
+                        result.setRefId(dto.getRefId());
+                        result.setTraceId(dto.getTraceId());
+                        result.setBankAccountName(dto.getBankAccountName());
+                        result.setBankCode(dto.getBankCode());
+                        result.setBankName(dto.getBankName());
+                        result.setImgId(dto.getImgId());
                         result.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
                         result.setBankAccount(dto.getBankAccount());
                         result.setBankShortName(dto.getBankShortName() != null ? dto.getBankShortName() : "");
@@ -2068,11 +2229,9 @@ public class TransactionController {
 
                 }
             }
-            System.out.println(result.toString());
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error(e.toString());
-            System.out.println(e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);

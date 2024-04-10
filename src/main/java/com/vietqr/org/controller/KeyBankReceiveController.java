@@ -214,12 +214,13 @@ public class KeyBankReceiveController {
                             int isSuccess = keyActiveBankReceiveService
                                     .updateActiveKey(bankReceiveOtpDTO.getKeyActive(), keyActiveEntity.getVersion(), newVersion);
                             if (isSuccess == 1) {
-                                long validFeeFrom = 0;
-                                long validFeeTo = 0;
+                                long validFeeFrom = bankReceiveCheckDTO.getValidFrom();
+                                long validFeeTo = bankReceiveCheckDTO.getValidTo();
                                 // update validFeeFrom, validFeeTo
                                 SystemSettingEntity systemSetting = systemSettingService.getSystemSetting();
                                 if (currentTime > systemSetting.getServiceActive()) {
                                     if (bankReceiveCheckDTO.getIsValidService()) {
+                                        validFeeFrom = bankReceiveCheckDTO.getValidFrom();
                                         validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeTo, keyActiveEntity.getDuration());
                                     } else {
                                         validFeeFrom = currentTime;
@@ -227,6 +228,7 @@ public class KeyBankReceiveController {
                                     }
                                 } else {
                                     if (bankReceiveCheckDTO.getIsValidService()) {
+                                        validFeeFrom = bankReceiveCheckDTO.getValidFrom();
                                         validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeTo, keyActiveEntity.getDuration());
                                     } else {
                                         validFeeFrom = systemSetting.getServiceActive();
@@ -462,20 +464,22 @@ public class KeyBankReceiveController {
                     } else {
                         String requestId = UUID.randomUUID().toString();
                         String otp = randomOtp();
-                        KeyBankReceiveActiveDTO entity = accountBankReceiveService
-                                .getAccountBankKeyById(dto.getBankId());
-                        long validFeeFrom = entity.getValidFeeFrom();
-                        long validFeeTo = entity.getValidFeeTo();
+//                        KeyBankReceiveActiveDTO entity = accountBankReceiveService
+//                                .getAccountBankKeyById(dto.getBankId());
+                        long validFeeFrom = 0;
+                        long validFeeTo = bankReceiveCheckDTO.getValidTo();
                         SystemSettingEntity systemSetting = systemSettingService.getSystemSetting();
                         if (currentTime > systemSetting.getServiceActive()) {
-                            if (entity.getIsValidService()) {
+                            if (bankReceiveCheckDTO.getIsValidService()) {
+                                validFeeFrom = bankReceiveCheckDTO.getValidFrom();
                                 validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeTo, feeDTO.getDuration());
                             } else {
                                 validFeeFrom = currentTime;
                                 validFeeTo = DateTimeUtil.plusMonthAsLongInt(currentTime, feeDTO.getDuration());
                             }
                         } else {
-                            if (entity.getIsValidService()) {
+                            if (bankReceiveCheckDTO.getIsValidService()) {
+                                validFeeFrom = bankReceiveCheckDTO.getValidFrom();
                                 validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeTo, feeDTO.getDuration());
                             } else {
                                 validFeeFrom = systemSetting.getServiceActive();
@@ -493,6 +497,7 @@ public class KeyBankReceiveController {
                                         EnvironmentUtil.getMaximumExpiredMinutesOTP()));
                         bankReceiveOTPEntity.setStatus(0);
                         bankReceiveOTPEntity.setKeyActive(feeDTO.getFeeId());
+                        bankReceiveOTPEntity.setRequestId(requestId);
                         bankReceiveOTPEntity.setAmount(feeDTO.getAmount());
                         bankReceiveOtpService.insert(bankReceiveOTPEntity);
 
@@ -581,103 +586,109 @@ public class KeyBankReceiveController {
                         result = new ResponseMessageDTO("FAILED", "E129");
                         httpStatus = HttpStatus.BAD_REQUEST;
                     } else {
-                        // tạo mã QR
-                        if (dto.getPaymentMethod() == null || dto.getPaymentMethod() == 0) {
-                            result = new ResponseMessageDTO("FAILED", "E70");
+                        TrAnnualFeeDTO feeDTO = trAnnualFeePackageService.getFeeById(dto.getFeeId());
+                        if (feeDTO == null) {
+                            result = new ResponseMessageDTO("FAILED", "E132");
                             httpStatus = HttpStatus.BAD_REQUEST;
-                        } else if (dto.getPaymentMethod() == 1) {
-                            String check = transactionWalletService
-                                    .checkExistedTransactionnWallet(dto.getOtpPayment(), dto.getUserId(), 2);
-                            if (check != null && !check.trim().isEmpty()) {
-                                UUID transReceiveUUID = UUID.randomUUID();
-                                UUID transWalletVQRUUID = UUID.randomUUID();
-                                long amount = bankReceiveOtpDTO.getAmount();
-                                //
-                                String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
-                                String billNumberVQR = "VAF" + RandomCodeUtil.generateRandomId(10);
-                                String content = traceId + " " + billNumberVQR;
-                                // get bank recharge information
-                                String bankAccount = EnvironmentUtil.getBankAccountRecharge();
-                                String bankId = EnvironmentUtil.getBankIdRecharge();
-                                String bankLogo = EnvironmentUtil.getBankLogoIdRecharge();
-                                String cai = EnvironmentUtil.getCAIRecharge();
-                                String userIdHost = EnvironmentUtil.getUserIdHostRecharge();
-                                // generate VQR
-                                VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
-                                vietQRGenerateDTO.setCaiValue(cai);
-                                vietQRGenerateDTO.setBankAccount(bankAccount);
-                                vietQRGenerateDTO.setAmount(amount + "");
-                                vietQRGenerateDTO.setContent(content);
-                                String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
-                                // insert transaction_receive
-                                // insert transaction_receive
-                                TransactionReceiveEntity transactionReceiveEntity = new TransactionReceiveEntity();
-                                transactionReceiveEntity.setId(transReceiveUUID.toString());
-                                transactionReceiveEntity.setAmount(amount);
-                                transactionReceiveEntity.setBankAccount(bankAccount);
-                                transactionReceiveEntity.setBankId(bankId);
-                                transactionReceiveEntity.setContent(content);
-                                transactionReceiveEntity.setRefId("");
-                                transactionReceiveEntity.setStatus(0);
-                                transactionReceiveEntity.setTime(currentTime);
-                                transactionReceiveEntity.setType(5);
-                                transactionReceiveEntity.setTraceId(traceId);
-                                transactionReceiveEntity.setTransType("C");
-                                transactionReceiveEntity.setReferenceNumber("");
-                                transactionReceiveEntity.setOrderId(billNumberVQR);
-                                transactionReceiveEntity.setSign("");
-                                transactionReceiveEntity.setCustomerBankAccount("");
-                                transactionReceiveEntity.setCustomerBankCode("");
-                                transactionReceiveEntity.setCustomerName("");
-                                transactionReceiveEntity.setTerminalCode("");
-                                transactionReceiveEntity.setUserId(userIdHost);
-                                transactionReceiveEntity.setNote("");
-                                transactionReceiveEntity.setTransStatus(0);
-                                transactionReceiveEntity.setQrCode(qr);
-//                                transactionReceiveEntity.setUrlLink("");
-                                transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
-                                TransactionWalletEntity transactionWalletEntity = new TransactionWalletEntity();
-                                transactionWalletEntity.setId(transWalletVQRUUID.toString());
-                                transactionWalletEntity.setAmount(amount + "");
-                                transactionWalletEntity.setBillNumber(billNumberVQR);
-                                transactionWalletEntity.setContent(content);
-                                transactionWalletEntity.setStatus(0);
-                                transactionWalletEntity.setTimeCreated(currentTime);
-                                transactionWalletEntity.setTimePaid(0);
-                                transactionWalletEntity.setTransType("C");
-                                transactionWalletEntity.setUserId(dto.getUserId());
-                                transactionWalletEntity.setOtp("");
-                                transactionWalletEntity.setPaymentType(0);
-                                transactionWalletEntity.setPaymentMethod(1);
-                                transactionWalletEntity
-                                        .setReferenceNumber(2 + "*" + dto.getFeeId() + "*"
-                                                + dto.getUserId() + "*"
-                                                + dto.getOtpPayment() + "*" + dto.getBankId()
-                                                + "*" + dto.getOtp());
-                                transactionWalletEntity.setPhoneNoRC("");
-                                transactionWalletService.insertTransactionWallet(transactionWalletEntity);
-                                // update transaction_wallet mobile recharge
-                                LocalDateTime currentDateTimeMobile = LocalDateTime.now();
-                                long timeMobile = currentDateTimeMobile.toEpochSecond(ZoneOffset.UTC);
-                                transactionWalletService.updateTransactionWalletConfirm(timeMobile, amount + "",
-                                        dto.getUserId(), dto.getOtpPayment(), 2);
-                                // response billNumber*imgId*QR
-                                ConfirmPaymentActiveKeyDTO responseDTO = new ConfirmPaymentActiveKeyDTO();
-                                responseDTO.setBankLogo(bankLogo);
-                                responseDTO.setBillNumber(billNumberVQR);
-                                responseDTO.setQr(qr);
-                                responseDTO.setAmount(amount);
-                                result = responseDTO;
-                                httpStatus = HttpStatus.OK;
+                        } else {
+                            // tạo mã QR
+                            if (dto.getPaymentMethod() == null || dto.getPaymentMethod() == 0) {
+                                result = new ResponseMessageDTO("FAILED", "E70");
+                                httpStatus = HttpStatus.BAD_REQUEST;
+                            } else if (dto.getPaymentMethod() == 1) {
+                                String check = transactionWalletService
+                                        .checkExistedTransactionnWallet(dto.getOtpPayment(), dto.getUserId(), 2);
+                                if (check != null && !check.trim().isEmpty()) {
+                                    UUID transReceiveUUID = UUID.randomUUID();
+                                    UUID transWalletVQRUUID = UUID.randomUUID();
+                                    long amount = (long) feeDTO.getAmount() * feeDTO.getDuration();
+                                    //
+                                    String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
+                                    String billNumberVQR = "VAF" + RandomCodeUtil.generateRandomId(10);
+                                    String content = traceId + " " + billNumberVQR;
+                                    // get bank recharge information
+                                    String bankAccount = EnvironmentUtil.getBankAccountRecharge();
+                                    String bankId = EnvironmentUtil.getBankIdRecharge();
+                                    String bankLogo = EnvironmentUtil.getBankLogoIdRecharge();
+                                    String cai = EnvironmentUtil.getCAIRecharge();
+                                    String userIdHost = EnvironmentUtil.getUserIdHostRecharge();
+                                    // generate VQR
+                                    VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+                                    vietQRGenerateDTO.setCaiValue(cai);
+                                    vietQRGenerateDTO.setBankAccount(bankAccount);
+                                    vietQRGenerateDTO.setAmount(amount + "");
+                                    vietQRGenerateDTO.setContent(content);
+                                    String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+                                    // insert transaction_receive
+                                    // insert transaction_receive
+                                    TransactionReceiveEntity transactionReceiveEntity = new TransactionReceiveEntity();
+                                    transactionReceiveEntity.setId(transReceiveUUID.toString());
+                                    transactionReceiveEntity.setAmount(amount);
+                                    transactionReceiveEntity.setBankAccount(bankAccount);
+                                    transactionReceiveEntity.setBankId(bankId);
+                                    transactionReceiveEntity.setContent(content);
+                                    transactionReceiveEntity.setRefId("");
+                                    transactionReceiveEntity.setStatus(0);
+                                    transactionReceiveEntity.setTime(currentTime);
+                                    transactionReceiveEntity.setType(5);
+                                    transactionReceiveEntity.setTraceId(traceId);
+                                    transactionReceiveEntity.setTransType("C");
+                                    transactionReceiveEntity.setReferenceNumber("");
+                                    transactionReceiveEntity.setOrderId(billNumberVQR);
+                                    transactionReceiveEntity.setSign("");
+                                    transactionReceiveEntity.setCustomerBankAccount("");
+                                    transactionReceiveEntity.setCustomerBankCode("");
+                                    transactionReceiveEntity.setCustomerName("");
+                                    transactionReceiveEntity.setTerminalCode("");
+                                    transactionReceiveEntity.setUserId(userIdHost);
+                                    transactionReceiveEntity.setNote("");
+                                    transactionReceiveEntity.setTransStatus(0);
+                                    transactionReceiveEntity.setQrCode(qr);
+                                    transactionReceiveEntity.setUrlLink("");
+                                    transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
+                                    TransactionWalletEntity transactionWalletEntity = new TransactionWalletEntity();
+                                    transactionWalletEntity.setId(transWalletVQRUUID.toString());
+                                    transactionWalletEntity.setAmount(amount + "");
+                                    transactionWalletEntity.setBillNumber(billNumberVQR);
+                                    transactionWalletEntity.setContent(content);
+                                    transactionWalletEntity.setStatus(0);
+                                    transactionWalletEntity.setTimeCreated(currentTime);
+                                    transactionWalletEntity.setTimePaid(0);
+                                    transactionWalletEntity.setTransType("C");
+                                    transactionWalletEntity.setUserId(dto.getUserId());
+                                    transactionWalletEntity.setOtp("");
+                                    transactionWalletEntity.setPaymentType(0);
+                                    transactionWalletEntity.setPaymentMethod(1);
+                                    transactionWalletEntity
+                                            .setReferenceNumber(2 + "*" + dto.getFeeId() + "*"
+                                                    + dto.getUserId() + "*"
+                                                    + dto.getOtpPayment() + "*" + dto.getBankId()
+                                                    + "*" + dto.getOtp());
+                                    transactionWalletEntity.setPhoneNoRC("");
+                                    transactionWalletService.insertTransactionWallet(transactionWalletEntity);
+                                    // update transaction_wallet mobile recharge
+                                    LocalDateTime currentDateTimeMobile = LocalDateTime.now();
+                                    long timeMobile = currentDateTimeMobile.toEpochSecond(ZoneOffset.UTC);
+                                    transactionWalletService.updateTransactionWalletConfirm(timeMobile, amount + "",
+                                            dto.getUserId(), dto.getOtpPayment(), 2);
+                                    // response billNumber*imgId*QR
+                                    ConfirmPaymentActiveKeyDTO responseDTO = new ConfirmPaymentActiveKeyDTO();
+                                    responseDTO.setBankLogo(bankLogo);
+                                    responseDTO.setBillNumber(billNumberVQR);
+                                    responseDTO.setQr(qr);
+                                    responseDTO.setAmount(amount);
+                                    result = responseDTO;
+                                    httpStatus = HttpStatus.OK;
+                                } else {
+                                    logger.error("rechargeMobile: INVALID OTP");
+                                    result = new ResponseMessageDTO("FAILED", "E65");
+                                    httpStatus = HttpStatus.BAD_REQUEST;
+                                }
                             } else {
-                                logger.error("rechargeMobile: INVALID OTP");
-                                result = new ResponseMessageDTO("FAILED", "E65");
+                                logger.error("rechargeMobile: INVALID PAYMENT METHOD");
+                                result = new ResponseMessageDTO("FAILED", "E70");
                                 httpStatus = HttpStatus.BAD_REQUEST;
                             }
-                        } else {
-                            logger.error("rechargeMobile: INVALID PAYMENT METHOD");
-                            result = new ResponseMessageDTO("FAILED", "E70");
-                            httpStatus = HttpStatus.BAD_REQUEST;
                         }
                     }
                 }

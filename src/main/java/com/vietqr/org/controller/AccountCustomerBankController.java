@@ -103,6 +103,9 @@ public class AccountCustomerBankController {
                         accountBankReceiveEntity.setPassword("");
                         accountBankReceiveEntity.setUsername("");
                         accountBankReceiveEntity.setTerminalLength(10);
+                        accountBankReceiveEntity.setValidFeeTo(0L);
+                        accountBankReceiveEntity.setValidFeeFrom(0L);
+                        accountBankReceiveEntity.setValidService(false);
                         accountBankReceiveService.insertAccountBank(accountBankReceiveEntity);
                         //
                         UUID uuid2 = UUID.randomUUID();
