@@ -47,7 +47,7 @@ public class SystemSettingEntity implements Serializable {
     private String logoVersion;
 
     @Column(name = "serviceActive")
-    private long serviceActive;
+    private Long serviceActive;
 
     public SystemSettingEntity() {
         super();
@@ -148,11 +148,11 @@ public class SystemSettingEntity implements Serializable {
         this.logoVersion = logoVersion;
     }
 
-    public long getServiceActive() {
+    public Long getServiceActive() {
         return serviceActive;
     }
 
-    public void setServiceActive(long serviceActive) {
+    public void setServiceActive(Long serviceActive) {
         this.serviceActive = serviceActive;
     }
 }

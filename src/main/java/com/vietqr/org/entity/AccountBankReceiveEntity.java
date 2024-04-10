@@ -75,10 +75,10 @@ public class AccountBankReceiveEntity implements Serializable {
 	private Boolean isValidService;
 
 	@Column(name = "validFeeFrom")
-	private long validFeeFrom;
+	private Long validFeeFrom;
 
 	@Column(name = "validFeeTo")
-	private long validFeeTo;
+	private Long validFeeTo;
 
 	public AccountBankReceiveEntity() {
 		super();
@@ -265,11 +265,11 @@ public class AccountBankReceiveEntity implements Serializable {
 		this.validFeeFrom = validFeeFrom;
 	}
 
-	public long getValidFeeTo() {
+	public Long getValidFeeTo() {
 		return validFeeTo;
 	}
 
-	public void setValidFeeTo(long validFeeTo) {
+	public void setValidFeeTo(Long validFeeTo) {
 		this.validFeeTo = validFeeTo;
 	}
 

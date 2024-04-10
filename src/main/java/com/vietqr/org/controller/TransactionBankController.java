@@ -1347,11 +1347,46 @@ public class TransactionBankController {
 	public void updateTransaction(TransactionBankDTO dto, TransactionReceiveEntity transactionReceiveEntity,
 			AccountBankReceiveEntity accountBankEntity, long time, NumberFormat nf) {
 
-		String amount = dto.getAmount() != 0 ? dto.getAmount() + "" : transactionReceiveEntity.getAmount() + "";
-		if (accountBankEntity.isValidService()) {
-			amount = dto.getAmount() != 0 ? dto.getAmount() + "" : "0";
+		String amount = "";
+		if (dto.getAmount() != 0) {
+			amount = dto.getAmount() + "";
 		} else {
-			SystemSettingEntity systemSetting = systemSettingService.getSystemSetting();
+			amount = transactionReceiveEntity.getAmount() + "";
+		}
+		SystemSettingEntity systemSetting = systemSettingService.getSystemSetting();
+		if (accountBankEntity.isValidService() == true) {
+			amount = "";
+			if (dto.getAmount() != 0) {
+				amount = dto.getAmount() + "";
+			} else {
+				amount = "0";
+			}
+			if (systemSetting.getServiceActive() <= time) {
+				TransReceiveTempEntity entity = transReceiveTempService
+						.getLastTimeByBankId(accountBankEntity.getId());
+				if (entity == null) {
+					entity = new TransReceiveTempEntity();
+					List<String> transIds = new ArrayList<>();
+					transIds.add(transactionReceiveEntity.getId());
+					entity.setId(UUID.randomUUID().toString());
+					entity.setBankId(accountBankEntity.getId());
+					entity.setLastTimes(time);
+					entity.setTransIds(String.join(",", transIds));
+					transReceiveTempService.insert(entity);
+				} else {
+					List<String> transIds = new ArrayList<>();
+					if (entity.getTransIds() != null && !entity.getTransIds().isEmpty()) {
+						transIds = new ArrayList<>(Arrays.asList(entity.getTransIds().split(",")));
+					}
+					if (transIds.size() < 5) {
+						transIds.add(transactionReceiveEntity.getId());
+						entity.setLastTimes(time);
+						entity.setTransIds(String.join(",", transIds));
+						transReceiveTempService.insert(entity);
+					}
+				}
+			}
+		} else {
 			if (systemSetting.getServiceActive() <= time) {
 				TransReceiveTempEntity entity = transReceiveTempService
 						.getLastTimeByBankId(accountBankEntity.getId());
@@ -1376,7 +1411,7 @@ public class TransactionBankController {
 
 						transReceiveTempService.insert(entity);
 					} else {
-						if (!accountBankEntity.isValidService()) {
+						if (accountBankEntity.isValidService() == false) {
 							amount = "*****";
 						}
 					}
@@ -1431,7 +1466,7 @@ public class TransactionBankController {
 						String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
 								+ accountBankEntity.getBankAccount()
 								+ NotificationUtil.getNotiDescUpdateTransSuffix2()
-								+ prefix + nf.format(dto.getAmount())
+								+ prefix + amount
 								+ NotificationUtil.getNotiDescUpdateTransSuffix3()
 								+ terminalEntity.getName()
 								+ NotificationUtil.getNotiDescUpdateTransSuffix4()
@@ -1556,7 +1591,7 @@ public class TransactionBankController {
 				String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
 						+ accountBankEntity.getBankAccount()
 						+ NotificationUtil.getNotiDescUpdateTransSuffix2()
-						+ prefix + nf.format(dto.getAmount())
+						+ prefix + amount
 						+ NotificationUtil.getNotiDescUpdateTransSuffix4()
 						+ dto.getContent();
 				notiEntity.setId(notificationUUID.toString());
@@ -1646,7 +1681,7 @@ public class TransactionBankController {
 			String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
 					+ accountBankEntity.getBankAccount()
 					+ NotificationUtil.getNotiDescUpdateTransSuffix2()
-					+ prefix + nf.format(dto.getAmount())
+					+ prefix + amount
 					+ NotificationUtil.getNotiDescUpdateTransSuffix4()
 					+ dto.getContent();
 			// String title = NotificationUtil.getNotiTitleNewTransaction();
@@ -1767,14 +1802,47 @@ public class TransactionBankController {
 
 	// insert new transaction mean it's not created from business. So DO NOT need to
 	// push to users
-	@Async
 	public void insertNewTransaction(String transcationUUID, TransactionBankDTO dto,
 			AccountBankReceiveEntity accountBankEntity, long time,
 			String traceId, UUID uuid, NumberFormat nf, String orderId, String sign) {
 		SystemSettingEntity systemSetting = systemSettingService.getSystemSetting();
-		String amount = dto.getAmount() != 0 ? dto.getAmount() + "" : "0";
-		if (accountBankEntity.isValidService()) {
-			amount = dto.getAmount() != 0 ? dto.getAmount() + "" : "0";
+		String amount = "";
+		if (dto.getAmount() != 0) {
+			amount = dto.getAmount() + "";
+		} else {
+			amount = "0";
+		}
+		if (accountBankEntity.isValidService() == true) {
+			if (dto.getAmount() != 0) {
+				amount = dto.getAmount() + "";
+			} else {
+				amount = "0";
+			}
+			if (systemSetting.getServiceActive() <= time) {
+				TransReceiveTempEntity entity = transReceiveTempService
+						.getLastTimeByBankId(accountBankEntity.getId());
+				if (entity == null) {
+					entity = new TransReceiveTempEntity();
+					List<String> transIds = new ArrayList<>();
+					transIds.add(transcationUUID);
+					entity.setId(UUID.randomUUID().toString());
+					entity.setBankId(accountBankEntity.getId());
+					entity.setLastTimes(time);
+					entity.setTransIds(String.join(",", transIds));
+					transReceiveTempService.insert(entity);
+				} else {
+					List<String> transIds = new ArrayList<>();
+					if (entity.getTransIds() != null && !entity.getTransIds().isEmpty()) {
+						transIds = new ArrayList<>(Arrays.asList(entity.getTransIds().split(",")));
+					}
+					if (transIds.size() < 5) {
+						transIds.add(transcationUUID);
+						entity.setLastTimes(time);
+						entity.setTransIds(String.join(",", transIds));
+						transReceiveTempService.insert(entity);
+					}
+				}
+			}
 		} else {
 			if (systemSetting.getServiceActive() <= time) {
 				TransReceiveTempEntity entity = transReceiveTempService
@@ -1802,7 +1870,7 @@ public class TransactionBankController {
 
 						transReceiveTempService.insert(entity);
 					} else {
-						if (!accountBankEntity.isValidService()) {
+						if (accountBankEntity.isValidService() == false) {
 							amount = "*****";
 						}
 					}
@@ -1905,7 +1973,7 @@ public class TransactionBankController {
 						String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
 								+ accountBankEntity.getBankAccount()
 								+ NotificationUtil.getNotiDescUpdateTransSuffix2()
-								+ prefix + nf.format(dto.getAmount())
+								+ prefix + amount
 								+ NotificationUtil.getNotiDescUpdateTransSuffix3()
 								+ terminalEntity.getName()
 								+ NotificationUtil.getNotiDescUpdateTransSuffix4()
@@ -1974,7 +2042,7 @@ public class TransactionBankController {
 					String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
 							+ accountBankEntity.getBankAccount()
 							+ NotificationUtil.getNotiDescUpdateTransSuffix2()
-							+ prefix + nf.format(dto.getAmount())
+							+ prefix + amount
 							+ NotificationUtil.getNotiDescUpdateTransSuffix3()
 							+ terminalEntity.getName()
 							+ NotificationUtil.getNotiDescUpdateTransSuffix4()
@@ -2031,7 +2099,7 @@ public class TransactionBankController {
 					// + "| Ma GD: " + dto.getReferencenumber()
 					// + "| ND: " + dto.getContent()
 					// + "| " + convertLongToDate(time);
-					String telegramMsg = prefix + nf.format(dto.getAmount()) + " VND"
+					String telegramMsg = prefix + amount + " VND"
 							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
 							+ accountBankEntity.getBankAccount()
 							+ " | " + convertLongToDate(time)
@@ -2059,7 +2127,7 @@ public class TransactionBankController {
 					// + "| Ma GD: " + dto.getReferencenumber()
 					// + "| ND: " + dto.getContent()
 					// + "| " + convertLongToDate(time);
-					String larkMsg = prefix + nf.format(dto.getAmount()) + " VND"
+					String larkMsg = prefix + amount + " VND"
 							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
 							+ accountBankEntity.getBankAccount()
 							+ " | " + convertLongToDate(time)
@@ -2123,7 +2191,7 @@ public class TransactionBankController {
 				String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
 						+ accountBankEntity.getBankAccount()
 						+ NotificationUtil.getNotiDescUpdateTransSuffix2()
-						+ prefix + nf.format(dto.getAmount())
+						+ prefix + amount
 						+ NotificationUtil.getNotiDescUpdateTransSuffix4()
 						+ dto.getContent();
 				// String title = NotificationUtil.getNotiTitleNewTransaction();
@@ -2262,7 +2330,7 @@ public class TransactionBankController {
 					// + "| Ma GD: " + dto.getReferencenumber()
 					// + "| ND: " + dto.getContent()
 					// + "| " + convertLongToDate(time);
-					String telegramMsg = prefix + nf.format(dto.getAmount()) + " VND"
+					String telegramMsg = prefix + amount + " VND"
 							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
 							+ accountBankEntity.getBankAccount()
 							+ " | " + convertLongToDate(time)
@@ -2290,7 +2358,7 @@ public class TransactionBankController {
 					// + "| Ma GD: " + dto.getReferencenumber()
 					// + "| ND: " + dto.getContent()
 					// + "| " + convertLongToDate(time);
-					String larkMsg = prefix + nf.format(dto.getAmount()) + " VND"
+					String larkMsg = prefix + amount + " VND"
 							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
 							+ accountBankEntity.getBankAccount()
 							+ " | " + convertLongToDate(time)
@@ -2352,7 +2420,7 @@ public class TransactionBankController {
 			String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
 					+ accountBankEntity.getBankAccount()
 					+ NotificationUtil.getNotiDescUpdateTransSuffix2()
-					+ prefix + nf.format(dto.getAmount())
+					+ prefix + amount
 					+ NotificationUtil.getNotiDescUpdateTransSuffix4()
 					+ dto.getContent();
 			// String title = NotificationUtil.getNotiTitleNewTransaction();
@@ -2491,7 +2559,7 @@ public class TransactionBankController {
 				// + "| Ma GD: " + dto.getReferencenumber()
 				// + "| ND: " + dto.getContent()
 				// + "| " + convertLongToDate(time);
-				String telegramMsg = prefix + nf.format(dto.getAmount()) + " VND"
+				String telegramMsg = prefix + amount + " VND"
 						+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
 						+ accountBankEntity.getBankAccount()
 						+ " | " + convertLongToDate(time)
@@ -2519,7 +2587,7 @@ public class TransactionBankController {
 				// + "| Ma GD: " + dto.getReferencenumber()
 				// + "| ND: " + dto.getContent()
 				// + "| " + convertLongToDate(time);
-				String larkMsg = prefix + nf.format(dto.getAmount()) + " VND"
+				String larkMsg = prefix + amount + " VND"
 						+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
 						+ accountBankEntity.getBankAccount()
 						+ " | " + convertLongToDate(time)
@@ -2536,7 +2604,6 @@ public class TransactionBankController {
 
 	private void pushNotificationWithSocket(String notiTitleUpdateTransaction, String message,
 			NotificationEntity notificationEntity, Map<String, String> data, String userId) {
-		System.out.println("pushNotificationWithSocket: data" + data);
 		try {
 			socketHandler.sendMessageToUser(userId,
 					data);
