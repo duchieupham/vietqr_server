@@ -476,6 +476,7 @@ public class VietQRController {
 						} else {
 							String bankAccount = "";
 							String userBankName = "";
+							String content = "";
 							if (dto.getTransType() == null || dto.getTransType().trim().toUpperCase().equals("C")) {
 								bankAccount = dto.getBankAccount();
 								userBankName = dto.getUserBankName().trim().toUpperCase();
@@ -490,7 +491,12 @@ public class VietQRController {
 							VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
 							vietQRGenerateDTO.setCaiValue(caiValue);
 							vietQRGenerateDTO.setAmount(dto.getAmount() + "");
-							vietQRGenerateDTO.setContent(traceId + "." + dto.getContent());
+							if (dto.getReconciliation() == null || dto.getReconciliation()) {
+								content = traceId + "." + dto.getContent();
+							} else {
+								content = dto.getContent();
+							}
+							vietQRGenerateDTO.setContent(content);
 							vietQRGenerateDTO.setBankAccount(bankAccount);
 							String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
 							//
@@ -500,7 +506,7 @@ public class VietQRController {
 							vietQRDTO.setBankAccount(bankAccount);
 							vietQRDTO.setUserBankName(userBankName);
 							vietQRDTO.setAmount(dto.getAmount() + "");
-							vietQRDTO.setContent(traceId + "." + dto.getContent());
+							vietQRDTO.setContent(content);
 							vietQRDTO.setQrCode(qr);
 							vietQRDTO.setImgId(bankTypeEntity.getImgId());
 							vietQRDTO.setExisting(0);
@@ -896,7 +902,6 @@ public class VietQRController {
 				transactionEntity.setReferenceNumber("");
 				transactionEntity.setOrderId(orderId);
 				transactionEntity.setSign(sign);
-				transactionEntity.setUrlLink("");
 				//
 				if (dto.getTransType() != null && dto.getTransType().trim().toUpperCase().equals("D")) {
 					transactionEntity.setCustomerBankAccount(dto.getCustomerBankAccount());
