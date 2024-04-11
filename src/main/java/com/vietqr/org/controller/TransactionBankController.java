@@ -347,6 +347,7 @@ public class TransactionBankController {
 								data.put("status", "1");
 								data.put("traceId", "" + "");
 								data.put("transType", dto.getTransType());
+								data.put("urlLink", "");
 								try {
 									// send msg to QR Link
 									String refId = TransactionRefIdUtil
@@ -1502,6 +1503,7 @@ public class TransactionBankController {
 						data.put("status", "1");
 						data.put("traceId", "" + transactionReceiveEntity.getTraceId());
 						data.put("transType", dto.getTransType());
+						data.put("urlLink", transactionReceiveEntity.getUrlLink() != null ? transactionReceiveEntity.getUrlLink() : "");
 						executorService.submit(() -> pushNotification(NotificationUtil
 								.getNotiTitleUpdateTransaction(), message, notiEntity, data, userId));
 						try {
@@ -1626,6 +1628,7 @@ public class TransactionBankController {
 				data.put("status", "1");
 				data.put("traceId", "");
 				data.put("transType", dto.getTransType());
+				data.put("urlLink", transactionReceiveEntity.getUrlLink() != null ? transactionReceiveEntity.getUrlLink() : "");
 				pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
 						message, notiEntity, data, accountBankEntity.getUserId());
 				try {
@@ -1719,6 +1722,7 @@ public class TransactionBankController {
 			data.put("status", "1");
 			data.put("traceId", "");
 			data.put("transType", dto.getTransType());
+			data.put("urlLink", transactionReceiveEntity.getUrlLink() != null ? transactionReceiveEntity.getUrlLink() : "");
 			// firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
 			// NotificationUtil
 			// .getNotiTitleUpdateTransaction(),
@@ -2013,6 +2017,7 @@ public class TransactionBankController {
 						data.put("status", "1");
 						data.put("traceId", "" + transactionEntity.getTraceId());
 						data.put("transType", dto.getTransType());
+						data.put("urlLink", transactionEntity.getUrlLink() != null ? transactionEntity.getUrlLink() : "");
 						String roleFCM = merchantMemberRoleService.checkMemberHaveRole(userId,
 								EnvironmentUtil.getFcmNotificationRoleId());
 						if (roleFCM != null && !roleFCM.isEmpty()) {
@@ -2250,6 +2255,7 @@ public class TransactionBankController {
 						data.put("status", "1");
 						data.put("traceId", "" + transactionEntity.getTraceId());
 						data.put("transType", dto.getTransType());
+						data.put("urlLink", transactionEntity.getUrlLink() != null ? transactionEntity.getUrlLink() : "");
 						String roleFCM = merchantMemberRoleService.checkMemberHaveRole(userId,
 								EnvironmentUtil.getFcmNotificationRoleId());
 						if (roleFCM != null && !roleFCM.isEmpty()) {
@@ -2297,6 +2303,7 @@ public class TransactionBankController {
 				data.put("status", "1");
 				data.put("traceId", "");
 				data.put("transType", dto.getTransType());
+				data.put("urlLink", transactionEntity.getUrlLink() != null ? transactionEntity.getUrlLink() : "");
 				firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
 						NotificationUtil
 								.getNotiTitleUpdateTransaction(),
@@ -2479,6 +2486,8 @@ public class TransactionBankController {
 					data.put("status", "1");
 					data.put("traceId", "" + transactionEntity.getTraceId());
 					data.put("transType", dto.getTransType());
+					data.put("urlLink", transactionEntity.getUrlLink() != null ? transactionEntity.getUrlLink() : "");
+
 					String roleFCM = merchantMemberRoleService.checkMemberHaveRole(userId,
 							EnvironmentUtil.getFcmNotificationRoleId());
 					if (roleFCM != null && !roleFCM.isEmpty()) {
@@ -2526,6 +2535,7 @@ public class TransactionBankController {
 			data.put("status", "1");
 			data.put("traceId", "");
 			data.put("transType", dto.getTransType());
+			data.put("urlLink", transactionEntity.getUrlLink() != null ? transactionEntity.getUrlLink() : "");
 			firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
 					NotificationUtil
 							.getNotiTitleUpdateTransaction(),

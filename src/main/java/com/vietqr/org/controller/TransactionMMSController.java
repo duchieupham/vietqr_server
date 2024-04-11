@@ -315,6 +315,7 @@ public class TransactionMMSController {
                             data.put("status", "1");
                             data.put("traceId", "");
                             data.put("transType", "C");
+                            data.put("urlLink", tempTransReceive.getUrlLink() != null ? tempTransReceive.getUrlLink() : "");
                             // send msg to QR Link
                             String refId = TransactionRefIdUtil
                                     .encryptTransactionId(tempTransReceive.getId());
@@ -629,6 +630,7 @@ public class TransactionMMSController {
                                     data.put("status", "1");
                                     data.put("traceId", "");
                                     data.put("transType", "C");
+                                    data.put("urlLink", transactionEntity.getUrlLink() != null ? transactionEntity.getUrlLink() : "");
                                     executorService.submit(
                                             () -> pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
                                                     message, notiEntity, data, userId));
