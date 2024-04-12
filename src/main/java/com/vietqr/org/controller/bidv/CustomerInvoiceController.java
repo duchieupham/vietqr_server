@@ -1,9 +1,12 @@
 package com.vietqr.org.controller.bidv;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
@@ -33,11 +36,17 @@ import com.vietqr.org.dto.bidv.CustomerInvoicePaymentRequestDTO;
 import com.vietqr.org.dto.bidv.CustomerItemInvoiceDataDTO;
 import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
 import com.vietqr.org.dto.bidv.ResponseMessageBidvDTO;
+import com.vietqr.org.dto.bidv.VietQRVaRequestDTO;
 import com.vietqr.org.dto.bidv.CustomerInvoiceDTO.InvoiceDTO;
+import com.vietqr.org.entity.FcmTokenEntity;
+import com.vietqr.org.entity.NotificationEntity;
 import com.vietqr.org.entity.bidv.CustomerInvoiceEntity;
 import com.vietqr.org.entity.bidv.CustomerInvoiceTransactionEntity;
 import com.vietqr.org.entity.bidv.CustomerItemInvoiceEntity;
 import com.vietqr.org.service.AccountCustomerService;
+import com.vietqr.org.service.FcmTokenService;
+import com.vietqr.org.service.FirebaseMessagingService;
+import com.vietqr.org.service.NotificationService;
 import com.vietqr.org.service.bidv.CustomerInvoiceService;
 import com.vietqr.org.service.bidv.CustomerInvoiceTransactionService;
 import com.vietqr.org.service.bidv.CustomerItemInvoiceService;
@@ -45,7 +54,11 @@ import com.vietqr.org.service.bidv.CustomerVaService;
 import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.EnvironmentUtil;
 import com.vietqr.org.util.JWTUtil;
+import com.vietqr.org.util.NotificationUtil;
 import com.vietqr.org.util.RandomCodeUtil;
+import com.vietqr.org.util.SocketHandler;
+import com.vietqr.org.util.bank.bidv.BIDVUtil;
+import com.vietqr.org.util.bank.bidv.CustomerVaUtil;
 
 @RestController
 @CrossOrigin
@@ -67,6 +80,18 @@ public class CustomerInvoiceController {
 
     @Autowired
     CustomerInvoiceTransactionService customerInvoiceTransactionService;
+
+    @Autowired
+    NotificationService notificationService;
+
+    @Autowired
+    FcmTokenService fcmTokenService;
+
+    @Autowired
+    FirebaseMessagingService firebaseMessagingService;
+
+    @Autowired
+    SocketHandler socketHandler;
 
     // API get invoice for BIDV
     // CustomerInvoiceDTO
@@ -150,10 +175,10 @@ public class CustomerInvoiceController {
     }
 
     @PostMapping("bidv/paybill")
-    public ResponseEntity<Object> paybill(
+    public ResponseEntity<ResponseMessageBidvDTO> paybill(
             @RequestBody CustomerInvoicePaymentRequestDTO dto,
             @RequestHeader("Authorization") String token) {
-        Object result = null;
+        ResponseMessageBidvDTO result = null;
         HttpStatus httpStatus = null;
         try {
             // for check valid token
@@ -261,14 +286,52 @@ public class CustomerInvoiceController {
                 result = new ResponseMessageBidvDTO("003", "Thông tin đăng nhập không đúng");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
+            return new ResponseEntity<>(result, httpStatus);
         } catch (Exception e) {
             logger.error("paybill: ERROR: " + e.toString());
             result = new ResponseMessageBidvDTO("031", "Có lỗi phát sinh từ hệ thống");
             httpStatus = HttpStatus.BAD_REQUEST;
+            return new ResponseEntity<>(result, httpStatus);
         } finally {
             // push notification
+            final ResponseMessageBidvDTO tempResult = result;
+            Thread thread = new Thread(() -> {
+                //
+                if (tempResult.getResult_code().equals("000")) {
+                    String userId = "";
+                    String userIdResult = customerVaService.getUserIdByCustomerId(dto.getCustomer_id());
+                    if (userIdResult != null && !userIdResult.trim().isEmpty()) {
+                        userId = userIdResult;
+                    }
+                    String notiType = NotificationUtil.getNotiTypePaymentSuccessVaInvoice();
+                    String title = NotificationUtil.getNotiTitlePaymentSuccessVaInvoice();
+                    String desc1 = NotificationUtil.getNotiDescPaymentSuccessVaInvoice1();
+                    String desc2 = NotificationUtil.getNotiDescPaymentSuccessVaInvoice2();
+                    String msg = desc1 + dto.getAmount() + desc2 + dto.getBill_id();
+                    UUID notificationUUID = UUID.randomUUID();
+                    LocalDateTime currentDateTime = LocalDateTime.now();
+                    long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+                    NotificationEntity notiEntity = new NotificationEntity();
+                    notiEntity.setId(notificationUUID.toString());
+                    notiEntity.setRead(false);
+                    notiEntity.setMessage(msg);
+                    notiEntity.setTime(time);
+                    notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
+                    notiEntity.setUserId(userId);
+                    notiEntity.setData(dto.getBill_id());
+                    Map<String, String> data = new HashMap<>();
+                    data.put("notificationType", notiType);
+                    data.put("notificationId", notificationUUID.toString());
+                    data.put("billId", dto.getBill_id());
+                    data.put("customerId", dto.getCustomer_id());
+                    data.put("amount", dto.getAmount());
+                    data.put("timePaid", time + "");
+                    pushNotification(title, msg, notiEntity, data, userId);
+                }
+
+            });
+            thread.start();
         }
-        return new ResponseEntity<>(result, httpStatus);
     }
 
     // API get list invoice for system
@@ -405,6 +468,27 @@ public class CustomerInvoiceController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // API create VietQR VA invoice
+    @PostMapping("customer-va/invoice/vietqr")
+    public ResponseEntity<ResponseMessageDTO> createVietQRVaInvoice(
+            @RequestBody VietQRVaRequestDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            result = CustomerVaUtil.generateVaInvoiceVietQR(dto);
+            if (result.getStatus().equals("SUCCESS")) {
+                httpStatus = HttpStatus.OK;
+            } else {
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("createVietQRVaInvoice: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     private String generateRandomBillId(int length) {
         String result = "";
         try {
@@ -425,4 +509,23 @@ public class CustomerInvoiceController {
         return accountCustomerService.getAccessKey(key);
     }
 
+    private void pushNotification(String title, String msg, NotificationEntity notiEntity, Map<String, String> data,
+            String userId) {
+        if (notiEntity != null) {
+            notificationService.insertNotification(notiEntity);
+        }
+        List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+        fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
+        firebaseMessagingService.sendUsersNotificationWithData(data,
+                fcmTokens,
+                title, msg);
+        try {
+            socketHandler.sendMessageToUser(userId,
+                    data);
+        } catch (IOException e) {
+            logger.error(
+                    "CustomerInvoiceController: pay bill: WS: socketHandler.sendMessageToUser - RECHARGE ERROR: "
+                            + e.toString());
+        }
+    }
 }

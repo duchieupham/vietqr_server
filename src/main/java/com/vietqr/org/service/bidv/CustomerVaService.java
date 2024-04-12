@@ -26,4 +26,6 @@ public interface CustomerVaService {
     public String checkExistedLinkedBankAccount(String bankAccount);
 
     public List<CustomerVaItemDTO> getCustomerVasByUserId(String userId);
+
+    public String getUserIdByCustomerId(String customerId);
 }

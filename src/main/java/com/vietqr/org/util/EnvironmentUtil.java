@@ -47,6 +47,9 @@ public class EnvironmentUtil {
     private static final String BIDV_URL_UNREGISTER_MERCHANT_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/deleteVAQLBH/v1";
     private static final String BIDV_URL_UNREGISTER_MERCHANT_PROD = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/deleteVAQLBH/v1";
 
+    private static final String BIDV_URL_CREATE_VIETQR_VA_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/genVietQR/v1";
+    private static final String BIDV_URL_CREATE_VIETQR_VA_PROD = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/genVietQR/v1";
+
     private static final String BIDV_LINKED_PAYER_DEBIT_TYPE_ACC_UAT = "810";
     private static final String BIDV_LINKED_PAYER_DEBIT_TYPE_ACC_PROD = "810";
     // private static final String BIDV_LINKED_PAYER_DEBIT_TYPE_CARD_PROD = "810";
@@ -242,8 +245,7 @@ public class EnvironmentUtil {
     private static final String ADMIN_ROLE_ID_UAT = "b9611ed2-e5c4-11ee-abd2-c437724afb36";
     private static final String ADMIN_ROLE_ID_PROD = "b9611ed2-e5c4-11ee-abd2-c437724afb36";
 
-
-    //Role for member in terminal
+    // Role for member in terminal
     private static final String ONLY_READ_RECEIVE_TERMINAL_ROLE_ID_UAT = "0f470d54-63a3-4cce-8691-5ec9380855f3";
     private static final String ONLY_READ_RECEIVE_TERMINAL_ROLE_ID_PROD = "0f470d54-63a3-4cce-8691-5ec9380855f3";
     private static final String READ_REQUEST_RECEIVE_TERMINAL_ROLE_ID_UAT = "1bf18675-e063-4070-a5d6-14add8cfb518";
@@ -262,6 +264,10 @@ public class EnvironmentUtil {
 
     public static String getBidvAccessKey() {
         return BIDV_ACCESS_KEY;
+    }
+
+    public static String getBidvUrlCreateVietQRVa() {
+        return (IS_PRODUCTION == false) ? BIDV_URL_CREATE_VIETQR_VA_UAT : BIDV_URL_CREATE_VIETQR_VA_PROD;
     }
 
     public static String getBidvUrlRequestAddMerchant() {
@@ -547,7 +553,8 @@ public class EnvironmentUtil {
     }
 
     public static String getRequestReceiveMerchantRoleId() {
-        return (IS_PRODUCTION == false) ? READ_APPROVE_RECEIVE_MERCHANT_ROLE_ID_UAT : READ_APPROVE_RECEIVE_MERCHANT_ROLE_ID_PROD;
+        return (IS_PRODUCTION == false) ? READ_APPROVE_RECEIVE_MERCHANT_ROLE_ID_UAT
+                : READ_APPROVE_RECEIVE_MERCHANT_ROLE_ID_PROD;
     }
 
     public static String getAdminRoleId() {
@@ -555,11 +562,13 @@ public class EnvironmentUtil {
     }
 
     public static String getOnlyReadReceiveTerminalRoleId() {
-        return (IS_PRODUCTION == false) ? ONLY_READ_RECEIVE_TERMINAL_ROLE_ID_UAT : ONLY_READ_RECEIVE_TERMINAL_ROLE_ID_PROD;
+        return (IS_PRODUCTION == false) ? ONLY_READ_RECEIVE_TERMINAL_ROLE_ID_UAT
+                : ONLY_READ_RECEIVE_TERMINAL_ROLE_ID_PROD;
     }
 
     public static String getRequestReceiveTerminalRoleId() {
-        return (IS_PRODUCTION == false) ? READ_REQUEST_RECEIVE_TERMINAL_ROLE_ID_UAT : READ_REQUEST_RECEIVE_TERMINAL_ROLE_ID_PROD;
+        return (IS_PRODUCTION == false) ? READ_REQUEST_RECEIVE_TERMINAL_ROLE_ID_UAT
+                : READ_REQUEST_RECEIVE_TERMINAL_ROLE_ID_PROD;
     }
 
     public static String getExportExcelForTerminalRoleId() {
