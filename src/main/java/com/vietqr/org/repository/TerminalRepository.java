@@ -132,9 +132,9 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             "AND b.bank_id = :bankId " +
             "GROUP BY b.terminal_id " +
             "ORDER BY a.code ASC "
-            + "LIMIT :offset, 20"
+//            + "LIMIT :offset, 20"
             , nativeQuery = true)
-    List<TerminalResponseInterfaceDTO> getTerminalsByUserIdAndBankIdOffset(String userId, String bankId, int offset);
+    List<TerminalResponseInterfaceDTO> getTerminalsByUserIdAndBankIdOffset(String userId, String bankId);
 
     @Query(value = "SELECT DISTINCT a.id as terminalId, " +
             "a.name as terminalName, a.address as terminalAddress, " +

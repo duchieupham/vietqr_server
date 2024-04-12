@@ -3,12 +3,14 @@ package com.vietqr.org.dto;
 import java.util.Map;
 
 public class MockApiDTO {
+    private String prefix;
     private String url;
     private String method;
     private Map<String, String> requestParams;
     private Object requestBody;
     private Object responseBody;
     private int responseStatus;
+    private Boolean isPaging;
 
     public MockApiDTO() {
     }
@@ -68,5 +70,21 @@ public class MockApiDTO {
 
     public void setResponseStatus(int responseStatus) {
         this.responseStatus = responseStatus;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
+
+    public Boolean getPaging() {
+        return isPaging;
+    }
+
+    public void setPaging(Boolean paging) {
+        isPaging = paging;
     }
 }
