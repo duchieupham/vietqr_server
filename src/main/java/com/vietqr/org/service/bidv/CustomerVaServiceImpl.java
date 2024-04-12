@@ -56,4 +56,9 @@ public class CustomerVaServiceImpl implements CustomerVaService {
         return repo.getCustomerVasByUserId(userId);
     }
 
+    @Override
+    public String getUserIdByCustomerId(String customerId) {
+        return repo.getUserIdByCustomerId(customerId);
+    }
+
 }

@@ -133,4 +133,21 @@ public class BIDVUtil {
         result += "}";
         return result;
     }
+
+    public static String generateVietQRBody(
+            String serviceId,
+            String code,
+            String name,
+            String amount,
+            String description) {
+        String result = "";
+        result = "{";
+        result += "\"serviceId\":" + "\"" + serviceId + "\",";
+        result += "\"code\":" + "\"" + code + "\",";
+        result += "\"name\":" + "\"" + name + "\",";
+        result += "\"amount\":" + "\"" + amount + "\",";
+        result += "\"description\":" + "\"" + description + "\"";
+        result += "}";
+        return result;
+    }
 }

@@ -16,6 +16,7 @@ public class NotificationUtil {
 	private static final String NOTI_MOBILE_TOPUP = "N11";
 	private static final String NOTI_TYPE_CANCEL_TRANSACTION = "N12";
 	private static final String NOTI_TYPE_ACTIVE_KEY = "N13";
+	private static final String NOTI_TYPE_PAYMENT_SUCCESS_VA_INVOICE = "N13";
 
 	// Title
 	private static final String NOTI_TITLE_TRANSACTION = "Thông báo biến động số dư";
@@ -29,6 +30,7 @@ public class NotificationUtil {
 	private static final String NOTI_TITLE_RECHARGE = "Thanh toán thành công";
 	private static final String NOTI_TITLE_MOBILE_TOPUP = "Nạp điện thoại thành công";
 	private static final String NOTI_TITLE_MOBILE_TOPUP_FAILED = "Nạp điện thoại thất bại. Số tiền được hoàn lại vào tài khoản của bạn trên hệ thống VietQR VN.";
+	private static final String NOTI_TITLE_PAYMENT_SUCCESS_VA_INVOICE = "Thanh toán hoá đơn thành công";
 
 	// Description
 	private static final String NOTI_DESC_LOGIN_WARNING_PREFIX = "Chúng tôi nhận thấy có lượt đăng nhập từ thiết bị ";
@@ -54,6 +56,24 @@ public class NotificationUtil {
 	private static final String NOTI_DESC_ACTIVE_KEY_2 = " VND cho dịch vụ nhận BĐSD";
 	private static final String NOTI_DESC_ACTIVE_KEY_3 = ". Cảm ơn quý khách đã sử dụng dịch vụ của VietQR VN";
 	private static final String NOTI_DESC_MOBILE_TOPUP_FAILED = "Có vấn đề xảy ra trong quá trình nạp tiền trong hệ thống VietQR. Chúng tôi sẽ xem xét và xử lý sớm, mong quý khách thông cảm về vấn đề này.";
+	private static final String NOTI_DESC_PAYMENT_SUCCESS_VA_INVOICE_1 = "Quý khách đã thanh toán thành công ";
+	private static final String NOTI_DESC_PAYMENT_SUCCESS_VA_INVOICE_2 = " VND cho hoá đơn ";
+
+	public static String getNotiTypePaymentSuccessVaInvoice() {
+		return NOTI_TYPE_PAYMENT_SUCCESS_VA_INVOICE;
+	}
+
+	public static String getNotiTitlePaymentSuccessVaInvoice() {
+		return NOTI_TITLE_PAYMENT_SUCCESS_VA_INVOICE;
+	}
+
+	public static String getNotiDescPaymentSuccessVaInvoice1() {
+		return NOTI_DESC_PAYMENT_SUCCESS_VA_INVOICE_1;
+	}
+
+	public static String getNotiDescPaymentSuccessVaInvoice2() {
+		return NOTI_DESC_PAYMENT_SUCCESS_VA_INVOICE_2;
+	}
 
 	public static String getNotiTitleMobileTopupFailed() {
 		return NOTI_TITLE_MOBILE_TOPUP_FAILED;
