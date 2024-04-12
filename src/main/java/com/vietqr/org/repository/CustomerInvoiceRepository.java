@@ -20,11 +20,14 @@ public interface CustomerInvoiceRepository extends JpaRepository<CustomerInvoice
         @Query(value = "SELECT bill_id FROM customer_invoice WHERE bill_id = :billId LIMIT 1", nativeQuery = true)
         String checkExistedBillId(@Param(value = "billId") String billId);
 
-        @Query(value = "SELECT bill_id as billId, amount, status, type, name, "
-                        + "time_created as timeCreated, time_paid as timePaid "
-                        + "FROM customer_invoice "
-                        + "WHERE customer_id = :customerId "
-                        + "ORDER BY time_created DESC "
+        @Query(value = "SELECT a.bill_id as billId, a.amount, a.status, a.type, a.name, "
+                        + "a.time_created as timeCreated, a.time_paid as timePaid, "
+                        + "b.user_bank_name as userBankName, b.bank_account as bankAccount, b.customer_id as customerId "
+                        + "FROM customer_invoice a "
+                        + "INNER JOIN customer_va b "
+                        + "ON a.customer_id = b.customer_id "
+                        + "WHERE a.customer_id = :customerId "
+                        + "ORDER BY a.time_created DESC "
                         + "LIMIT :offset, 20", nativeQuery = true)
         List<CustomerInvoiceDataDTO> getCustomerInvoiceAllStatus(
                         @Param(value = "customerId") String customerId,

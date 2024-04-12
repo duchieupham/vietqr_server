@@ -16,4 +16,10 @@ public interface CustomerInvoiceDataDTO {
 
     public Long getTimePaid();
 
+    public String getUserBankName();
+
+    public String getBankAccount();
+
+    public String getCustomerId();
+
 }
