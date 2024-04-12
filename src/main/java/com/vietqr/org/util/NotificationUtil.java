@@ -16,7 +16,7 @@ public class NotificationUtil {
 	private static final String NOTI_MOBILE_TOPUP = "N11";
 	private static final String NOTI_TYPE_CANCEL_TRANSACTION = "N12";
 	private static final String NOTI_TYPE_ACTIVE_KEY = "N13";
-	private static final String NOTI_TYPE_PAYMENT_SUCCESS_VA_INVOICE = "N13";
+	private static final String NOTI_TYPE_PAYMENT_SUCCESS_VA_INVOICE = "N14";
 
 	// Title
 	private static final String NOTI_TITLE_TRANSACTION = "Thông báo biến động số dư";
