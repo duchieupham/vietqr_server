@@ -443,7 +443,7 @@ public class VietQRController {
 							String caiValue = caiBankService.getCaiValue(bankTypeId);
 							String content = "";
 							if (dto.getReconciliation() == null || dto.getReconciliation()) {
-								content = traceId + "." + dto.getContent();
+								content = traceId + " " + dto.getContent();
 							} else {
 								content = dto.getContent();
 							}
@@ -492,7 +492,7 @@ public class VietQRController {
 							vietQRGenerateDTO.setCaiValue(caiValue);
 							vietQRGenerateDTO.setAmount(dto.getAmount() + "");
 							if (dto.getReconciliation() == null || dto.getReconciliation()) {
-								content = traceId + "." + dto.getContent();
+								content = traceId + " " + dto.getContent();
 							} else {
 								content = dto.getContent();
 							}
@@ -879,7 +879,7 @@ public class VietQRController {
 				transactionEntity.setId(transcationUUID.toString());
 				transactionEntity.setBankAccount(accountBankEntity.getBankAccount());
 				transactionEntity.setBankId(dto.getBankId());
-				transactionEntity.setContent(traceId + "." + dto.getContent());
+				transactionEntity.setContent(traceId + " " + dto.getContent());
 				transactionEntity.setAmount(Long.parseLong(dto.getAmount()));
 				transactionEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
 				transactionEntity.setRefId("");
@@ -1203,7 +1203,7 @@ public class VietQRController {
 				VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
 				vietQRGenerateDTO.setCaiValue(caiValue);
 				vietQRGenerateDTO.setAmount(dto.getAmount());
-				vietQRGenerateDTO.setContent(traceId + "." + dto.getContent());
+				vietQRGenerateDTO.setContent(traceId + " " + dto.getContent());
 				vietQRGenerateDTO.setBankAccount(accountBankEntity.getBankAccount());
 				String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
 				// generate VietQRDTO
@@ -1213,7 +1213,7 @@ public class VietQRController {
 				vietQRDTO.setBankAccount(accountBankEntity.getBankAccount());
 				vietQRDTO.setUserBankName(accountBankEntity.getBankAccountName().toUpperCase());
 				vietQRDTO.setAmount(dto.getAmount());
-				vietQRDTO.setContent(traceId + "." + dto.getContent());
+				vietQRDTO.setContent(traceId + " " + dto.getContent());
 				vietQRDTO.setQrCode(qr);
 				vietQRDTO.setImgId(bankTypeEntity.getImgId());
 				// return transactionId to upload bill image
@@ -1398,7 +1398,7 @@ public class VietQRController {
 					String suffixContent = "";
 					String regex = "VQR\\w{10}\\.?";
 					suffixContent = dto.getContent().replaceAll(regex, "");
-					content = traceId + "." + suffixContent;
+					content = traceId + " " + suffixContent;
 				} else {
 					content = dto.getContent();
 				}
