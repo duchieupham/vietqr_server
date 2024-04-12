@@ -530,7 +530,7 @@ public class CustomerVaUtil {
                                         .get("body").get("vietQR") != null) {
                             qrCode = rootNode.get("msg")
                                     .get("body").get("vietQR").asText();
-                            result = new ResponseMessageDTO("SUCESS", qrCode);
+                            result = new ResponseMessageDTO("SUCCESS", qrCode);
                         } else {
                             result = new ResponseMessageDTO("FAILED", "E05");
                         }
