@@ -4,7 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.MockApiDTO;
-import com.vietqr.org.dto.PageResultDTO;
+import com.vietqr.org.dto.PageDTO;
+import com.vietqr.org.dto.PageResponseDTO;
 import com.vietqr.org.util.EnvironmentUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,22 +127,29 @@ public class MockController {
                         int pageSize = 20;
                         int startIndex = (page - 1) * pageSize;
                         int endIndex = startIndex + pageSize;
-                        PageResultDTO pageResult = new PageResultDTO();
-                        pageResult.setPage(page);
-                        pageResult.setSize(pageSize);
+                        PageResponseDTO pageResult = new PageResponseDTO();
+                        PageDTO pageDTO = new PageDTO();
+                        pageDTO.setPage(page);
+                        pageDTO.setSize(pageSize);
                         List<Object> responseList = (List<Object>) mockApi.getResponseBody();
+                        Object extraData = mockApi.getExtraData();
                         int totalElement = responseList.size();
-                        pageResult.setTotalPage(totalElement % pageSize == 0 ? totalElement / pageSize : totalElement / pageSize + 1);
-                        pageResult.setTotalElement(totalElement);
+                        pageDTO.setTotalPage(totalElement % pageSize == 0 ?
+                                totalElement / pageSize : totalElement / pageSize + 1);
+                        pageDTO.setTotalElement(totalElement);
                         if (startIndex >= responseList.size()) {
                             // If the start index exceeds the list size, return an empty response
-                            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+                            return new ResponseEntity<>(new PageResponseDTO(), HttpStatus.OK);
                         }
                         // Ensure endIndex doesn't exceed the list size
                         endIndex = Math.min(endIndex, responseList.size());
 
                         List<Object> paginatedResponse = responseList.subList(startIndex, endIndex);
-                        pageResult.setItems(paginatedResponse);
+                        pageResult.setData(paginatedResponse);
+                        pageResult.setMetadata(pageDTO);
+                        if (extraData != null) {
+                            pageResult.setExtraData(extraData);
+                        }
                         return new ResponseEntity<>(pageResult, HttpStatus.OK);
                     } else {
                         // Return full response if pagination is not enabled or request method is not GET
@@ -175,6 +183,7 @@ public class MockController {
                 if ((mockApi.getUrl().equals(url) || mockApi.getUrl().equals("**"))
                         && ObjectUtils.nullSafeEquals(mockApi.getPrefix(), prefix)
                         && mockApi.getMethod().equalsIgnoreCase(method)) {
+
                     if (mockApi.getRequestParams() != null
                             && !mockApi.getRequestParams().keySet()
                             .equals(requestParams.keySet())) {
@@ -190,26 +199,34 @@ public class MockController {
                     if (mockApi.getPaging() != null
                             && mockApi.getPaging()
                             && "GET".equalsIgnoreCase(method)) {
-                        int page = requestParams.containsKey("page") ? Integer.parseInt(requestParams.get("page")) : 1;
+                        int page = requestParams.containsKey("page") ?
+                                Integer.parseInt(requestParams.get("page")) : 1;
                         int pageSize = 20;
                         int startIndex = (page - 1) * pageSize;
                         int endIndex = startIndex + pageSize;
-                        PageResultDTO pageResult = new PageResultDTO();
-                        pageResult.setPage(page);
-                        pageResult.setSize(pageSize);
+                        PageResponseDTO pageResult = new PageResponseDTO();
+                        PageDTO pageDTO = new PageDTO();
+                        pageDTO.setPage(page);
+                        pageDTO.setSize(pageSize);
                         List<Object> responseList = (List<Object>) mockApi.getResponseBody();
+                        Object extraData = mockApi.getExtraData();
                         int totalElement = responseList.size();
-                        pageResult.setTotalPage(totalElement % pageSize == 0 ? totalElement / pageSize : totalElement / pageSize + 1);
-                        pageResult.setTotalElement(totalElement);
+                        pageDTO.setTotalPage(totalElement % pageSize == 0 ?
+                                totalElement / pageSize : totalElement / pageSize + 1);
+                        pageDTO.setTotalElement(totalElement);
                         if (startIndex >= responseList.size()) {
                             // If the start index exceeds the list size, return an empty response
-                            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+                            return new ResponseEntity<>(new PageResponseDTO(), HttpStatus.OK);
                         }
                         // Ensure endIndex doesn't exceed the list size
                         endIndex = Math.min(endIndex, responseList.size());
 
                         List<Object> paginatedResponse = responseList.subList(startIndex, endIndex);
-                        pageResult.setItems(paginatedResponse);
+                        pageResult.setData(paginatedResponse);
+                        pageResult.setMetadata(pageDTO);
+                        if (extraData != null) {
+                            pageResult.setExtraData(extraData);
+                        }
                         return new ResponseEntity<>(pageResult, HttpStatus.OK);
                     } else {
                         // Return full response if pagination is not enabled or request method is not GET
