@@ -11,6 +11,7 @@ public class MockApiDTO {
     private Object responseBody;
     private int responseStatus;
     private Boolean isPaging;
+    private Object extraData;
 
     public MockApiDTO() {
     }
@@ -86,5 +87,13 @@ public class MockApiDTO {
 
     public void setPaging(Boolean paging) {
         isPaging = paging;
+    }
+
+    public Object getExtraData() {
+        return extraData;
+    }
+
+    public void setExtraData(Object extraData) {
+        this.extraData = extraData;
     }
 }
