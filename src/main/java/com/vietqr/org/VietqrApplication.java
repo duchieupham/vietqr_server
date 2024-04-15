@@ -165,7 +165,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// "FT23293978692076", "SABAccessKey");
 		// System.out.println("CHECKSUM REFUND: " + checkSum2);
 
-		String bankAccountEncrypted = BankEncryptUtil.encrypt("3530105153007");
+		String bankAccountEncrypted = BankEncryptUtil.encrypt("0948595268");
 		System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
 
 		/// generate signature to request payment MB
