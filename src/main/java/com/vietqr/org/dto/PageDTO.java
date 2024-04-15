@@ -4,7 +4,22 @@ public class PageDTO {
     private int page;
     private int size;
     private int totalPage;
-    private long totalElement;
+    private int totalElement;
+
+
+    public PageDTO() {
+        page = 1;
+        size = 20;
+        totalPage = 1;
+        totalElement = 0;
+    }
+
+    public PageDTO(int page, int size, int totalPage, int totalElement) {
+        this.page = page;
+        this.size = size;
+        this.totalPage = totalPage;
+        this.totalElement = totalElement;
+    }
 
     public int getPage() {
         return page;
@@ -34,21 +49,7 @@ public class PageDTO {
         return totalElement;
     }
 
-    public void setTotalElement(long totalElement) {
-        this.totalElement = totalElement;
-    }
-
-    public PageDTO() {
-        page = 1;
-        size = 20;
-        totalPage = 0;
-        totalElement = 0;
-    }
-
-    public PageDTO(int page, int size, int totalPage, long totalElement) {
-        this.page = page;
-        this.size = size;
-        this.totalPage = totalPage;
+    public void setTotalElement(int totalElement) {
         this.totalElement = totalElement;
     }
 }

@@ -1,23 +1,18 @@
 package com.vietqr.org.dto;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class PageResponseDTO {
     private PageDTO metadata;
-    private List<?> data;
-    private Object extraData;
+
+    private DataDTO data;
 
     public PageResponseDTO() {
         metadata = new PageDTO();
-        data = new ArrayList<>();
-        extraData = new Object();
+        data = new DataDTO();
     }
 
-    public PageResponseDTO(PageDTO metadata, List<?> data, Object extraData) {
+    public PageResponseDTO(PageDTO metadata, DataDTO data) {
         this.metadata = metadata;
         this.data = data;
-        this.extraData = extraData;
     }
 
     public PageDTO getMetadata() {
@@ -28,19 +23,11 @@ public class PageResponseDTO {
         this.metadata = metadata;
     }
 
-    public List<?> getData() {
+    public DataDTO getData() {
         return data;
     }
 
-    public void setData(List<?> data) {
+    public void setData(DataDTO data) {
         this.data = data;
-    }
-
-    public Object getExtraData() {
-        return extraData;
-    }
-
-    public void setExtraData(Object extraData) {
-        this.extraData = extraData;
     }
 }

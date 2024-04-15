@@ -3,6 +3,7 @@ package com.vietqr.org.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vietqr.org.dto.DataDTO;
 import com.vietqr.org.dto.MockApiDTO;
 import com.vietqr.org.dto.PageDTO;
 import com.vietqr.org.dto.PageResponseDTO;
@@ -145,11 +146,13 @@ public class MockController {
                         endIndex = Math.min(endIndex, responseList.size());
 
                         List<Object> paginatedResponse = responseList.subList(startIndex, endIndex);
-                        pageResult.setData(paginatedResponse);
-                        pageResult.setMetadata(pageDTO);
+                        DataDTO dataDTO = new DataDTO();
+                        dataDTO.setItems(paginatedResponse);
                         if (extraData != null) {
-                            pageResult.setExtraData(extraData);
+                            dataDTO.setExtraData(extraData);
                         }
+                        pageResult.setData(dataDTO);
+                        pageResult.setMetadata(pageDTO);
                         return new ResponseEntity<>(pageResult, HttpStatus.OK);
                     } else {
                         // Return full response if pagination is not enabled or request method is not GET
@@ -222,11 +225,13 @@ public class MockController {
                         endIndex = Math.min(endIndex, responseList.size());
 
                         List<Object> paginatedResponse = responseList.subList(startIndex, endIndex);
-                        pageResult.setData(paginatedResponse);
-                        pageResult.setMetadata(pageDTO);
+                        DataDTO dataDTO = new DataDTO();
+                        dataDTO.setItems(paginatedResponse);
                         if (extraData != null) {
-                            pageResult.setExtraData(extraData);
+                            dataDTO.setExtraData(extraData);
                         }
+                        pageResult.setMetadata(pageDTO);
+                        pageResult.setData(dataDTO);
                         return new ResponseEntity<>(pageResult, HttpStatus.OK);
                     } else {
                         // Return full response if pagination is not enabled or request method is not GET
