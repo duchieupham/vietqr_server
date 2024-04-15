@@ -17,6 +17,9 @@ public class CustomerInvoiceDetailDTO implements Serializable {
     private String name;
     private Long timeCreated;
     private Long timePaid;
+    private String bankAccount;
+    private String userBankName;
+    private String customerId;
     private List<CustomerInvoiceItemDetailDTO> items;
 
     public CustomerInvoiceDetailDTO() {
@@ -24,7 +27,8 @@ public class CustomerInvoiceDetailDTO implements Serializable {
     }
 
     public CustomerInvoiceDetailDTO(String billId, Long amount, int status, int type, String name, Long timeCreated,
-            Long timePaid, List<CustomerInvoiceItemDetailDTO> items) {
+            Long timePaid, String bankAccount, String userBankName, String customerId,
+            List<CustomerInvoiceItemDetailDTO> items) {
         this.billId = billId;
         this.amount = amount;
         this.status = status;
@@ -32,6 +36,9 @@ public class CustomerInvoiceDetailDTO implements Serializable {
         this.name = name;
         this.timeCreated = timeCreated;
         this.timePaid = timePaid;
+        this.bankAccount = bankAccount;
+        this.userBankName = userBankName;
+        this.customerId = customerId;
         this.items = items;
     }
 
@@ -89,6 +96,30 @@ public class CustomerInvoiceDetailDTO implements Serializable {
 
     public void setTimePaid(Long timePaid) {
         this.timePaid = timePaid;
+    }
+
+    public String getBankAccount() {
+        return bankAccount;
+    }
+
+    public void setBankAccount(String bankAccount) {
+        this.bankAccount = bankAccount;
+    }
+
+    public String getUserBankName() {
+        return userBankName;
+    }
+
+    public void setUserBankName(String userBankName) {
+        this.userBankName = userBankName;
+    }
+
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
     }
 
     public List<CustomerInvoiceItemDetailDTO> getItems() {
