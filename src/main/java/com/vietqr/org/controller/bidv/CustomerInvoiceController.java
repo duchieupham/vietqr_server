@@ -370,6 +370,9 @@ public class CustomerInvoiceController {
             result.setName(invoiceDataDTO.getName());
             result.setTimeCreated(invoiceDataDTO.getTimeCreated());
             result.setTimePaid(invoiceDataDTO.getTimePaid());
+            result.setBankAccount(invoiceDataDTO.getBankAccount());
+            result.setUserBankName(invoiceDataDTO.getUserBankName());
+            result.setCustomerId(invoiceDataDTO.getCustomerId());
             List<CustomerInvoiceItemDetailDTO> items = new ArrayList<>();
             for (CustomerItemInvoiceDataDTO item : itemDTOs) {
                 CustomerInvoiceItemDetailDTO data = new CustomerInvoiceItemDetailDTO();
