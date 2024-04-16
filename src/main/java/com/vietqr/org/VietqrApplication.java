@@ -122,13 +122,12 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// "d0d6ba40-6370-4ff9-926e-5e86194f3062");
 		// System.out.println("Checksum: " + checksum);
 
-		// String checksum2 =
-		// BankEncryptUtil.generateMD5PayBillForBankChecksum("QklEVkJMVUVDT01BY2Nlc3NLZXk=",
-		// "0000000000011", "9VIxZzY6Ub", "93000000");
+		String checksum2 = BankEncryptUtil.generateMD5PayBillForBankChecksum("QklEVkJMVUVDT01BY2Nlc3NLZXk=",
+				"0000000000016", "OoF37pIQw7", "19600000");
 
-		// System.out.println("Checksum2: " + checksum2);
+		System.out.println("Checksum2: " + checksum2);
 
-		test();
+		// test();
 		// CustomerSyncEntity customerSyncEntity = new CustomerSyncEntity("",
 		// "test-viet-qr",
 		// "RCP4#qpqP7(z4qrv@8c@b4%(JaCe9DdD&N5wB$wuBbTWF&apN3aEkVJV4+DrMFvy ", "", "",

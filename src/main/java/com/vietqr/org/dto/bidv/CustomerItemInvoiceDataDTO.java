@@ -15,4 +15,5 @@ public interface CustomerItemInvoiceDataDTO {
     public Long getQuantity();
 
     public Long getTotalAmount();
+
 }
