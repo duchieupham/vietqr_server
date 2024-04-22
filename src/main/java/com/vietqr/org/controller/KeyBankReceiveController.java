@@ -247,6 +247,7 @@ public class KeyBankReceiveController {
                                 bankReceiveActiveHistoryEntity.setValidFeeFrom(validFeeFrom);
                                 bankReceiveActiveHistoryEntity.setValidFeeTo(validFeeTo);
                                 bankReceiveActiveHistoryEntity.setData(mapper.writeValueAsString(dto));
+                                bankReceiveActiveHistoryEntity.setRefId("");
 
                                 bankReceiveOtpService.updateStatusBankReceiveOtp(bankReceiveOtpDTO.getId(), 1);
                                 bankReceiveActiveHistoryService.insert(bankReceiveActiveHistoryEntity);

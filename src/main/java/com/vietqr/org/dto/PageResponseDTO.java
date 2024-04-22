@@ -10,6 +10,11 @@ public class PageResponseDTO {
         data = new DataDTO();
     }
 
+    public PageResponseDTO(DataDTO data) {
+        metadata = new PageDTO();
+        this.data = data;
+    }
+
     public PageResponseDTO(PageDTO metadata, DataDTO data) {
         this.metadata = metadata;
         this.data = data;

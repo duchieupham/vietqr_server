@@ -1127,13 +1127,13 @@ public class TransactionBankController {
 						if (userId != null && otp != null) {
 							// check valid transaction by otp & userId
 							// & paymentType & status = 0
-							String check = transactionWalletService
+							String checkTransWalletId = transactionWalletService
 									.checkExistedTransactionnWallet(otp,
 											userId, 2);
-							if (check != null && !check.trim().isEmpty()) {
+							if (checkTransWalletId != null && !checkTransWalletId.trim().isEmpty()) {
 								// find transactionWalletEntity by Id
 								TransactionWalletEntity transactionWalletEntity = transactionWalletService
-										.getTransactionWalletById(check);
+										.getTransactionWalletById(checkTransWalletId);
 								if (transactionWalletEntity != null) {
 									// active key
 									BankReceiveOtpDTO bankReceiveOtpDTO = bankReceiveOtpService
@@ -1184,6 +1184,7 @@ public class TransactionBankController {
 											bankReceiveActiveHistoryEntity.setValidFeeFrom(validFeeFrom);
 											bankReceiveActiveHistoryEntity.setValidFeeTo(validFeeTo);
 											bankReceiveActiveHistoryEntity.setData("");
+											bankReceiveActiveHistoryEntity.setRefId(transactionWalletEntity.getId());
 
 											// create new transaction wallet for fee
 //											TransactionWalletEntity transactionWalletEntityFee = new TransactionWalletEntity();
@@ -1231,7 +1232,7 @@ public class TransactionBankController {
 											notiEntity.setType(
 													notiType);
 											notiEntity.setUserId(userId);
-											notiEntity.setData(check);
+											notiEntity.setData(checkTransWalletId);
 											Map<String, String> data = new HashMap<>();
 											data.put("notificationType",
 													notiType);
@@ -1239,7 +1240,7 @@ public class TransactionBankController {
                                                     notificationUUID);
 											data.put("amount",
 													transactionWalletEntity.getAmount() + "");
-											data.put("transWalletId", check);
+											data.put("transWalletId", checkTransWalletId);
 											data.put("time", time + "");
 											data.put("bankId", bankId);
 											data.put("billNumber", transactionWalletEntity.getBillNumber());
