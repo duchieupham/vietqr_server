@@ -119,16 +119,16 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// String checksum =
 		// BankEncryptUtil.generateMD5GetBillForBankChecksum("QklEVkJMVUVDT01BY2Nlc3NLZXk=",
 		// "BC0001",
-		// "d0d6ba40-6370-4ff9-926e-5e86194f3062");
+		// "BCHI00003");
 		// System.out.println("Checksum: " + checksum);
 
 		// String checksum2 =
 		// BankEncryptUtil.generateMD5PayBillForBankChecksum("QklEVkJMVUVDT01BY2Nlc3NLZXk=",
-		// "0000000000011", "9VIxZzY6Ub", "93000000");
+		// "0000000000017", "hSyeSrX9fW", "11000000");
 
 		// System.out.println("Checksum2: " + checksum2);
 
-		test();
+		// test();
 		// CustomerSyncEntity customerSyncEntity = new CustomerSyncEntity("",
 		// "test-viet-qr",
 		// "RCP4#qpqP7(z4qrv@8c@b4%(JaCe9DdD&N5wB$wuBbTWF&apN3aEkVJV4+DrMFvy ", "", "",
@@ -165,8 +165,8 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// "FT23293978692076", "SABAccessKey");
 		// System.out.println("CHECKSUM REFUND: " + checkSum2);
 
-		String bankAccountEncrypted = BankEncryptUtil.encrypt("0948595268");
-		System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
+		// String bankAccountEncrypted = BankEncryptUtil.encrypt("1224886686");
+		// System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
 
 		/// generate signature to request payment MB
 		// String valueToEncode = "RSID-eef52137-86b2-4812-bc05-54a522fbf226" + "USER
@@ -309,6 +309,8 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 					.addFilterAfter(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
 					.authorizeRequests()
 					.antMatchers(HttpMethod.POST, "/api/token_generate").permitAll()
+					.antMatchers(HttpMethod.POST, "/api/bidv/token_generate").permitAll()
+					.antMatchers(HttpMethod.POST, "/api/peripheral/token_generate").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/vcard/generate").permitAll()
 					.antMatchers(HttpMethod.POST, "/bank/api/get_token_bank").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/accounts").permitAll()

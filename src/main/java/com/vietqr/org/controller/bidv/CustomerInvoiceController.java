@@ -102,6 +102,7 @@ public class CustomerInvoiceController {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
+
             // for check valid token
             String accessKey = EnvironmentUtil.getBidvAccessKey();
             String keyDecoded = JWTUtil.getKeyFromToken(token);
@@ -115,10 +116,15 @@ public class CustomerInvoiceController {
                 // check valid dto
                 if (dto != null && dto.getCustomer_id() != null && dto.getService_id() != null
                         && dto.getChecksum() != null) {
+                    logger.info("BIDV: getbill: token: " + token);
+                    logger.info("BIDV: getbill: customer_id: " + dto.getCustomer_id());
+                    logger.info("BIDV: getbill: service_id: " + dto.getService_id());
+                    logger.info("BIDV: getbill: getChecksum: " + dto.getChecksum());
                     if (dto.getService_id().equals(serviceId)) {
                         // check valid checksum
                         String checksum = BankEncryptUtil.generateMD5GetBillForBankChecksum(secretKey, serviceId,
                                 dto.getCustomer_id());
+                        logger.info("BIDV: checksum generated from data request body: " + checksum);
                         if (BankEncryptUtil.isMatchChecksum(dto.getChecksum(), checksum)) {
                             // get bill info
                             // get customer va info

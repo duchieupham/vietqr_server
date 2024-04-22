@@ -152,6 +152,14 @@ public class CustomerVaUtil {
                             result = new ResponseMessageDTO("FAILED", "E112");
                         } else if (errorCode.trim().equals("033")) {
                             result = new ResponseMessageDTO("FAILED", "E133");
+                        } else if (errorCode.trim().equals("040")) {
+                            result = new ResponseMessageDTO("FAILED", "E134");
+                        } else if (errorCode.trim().equals("021")) {
+                            result = new ResponseMessageDTO("FAILED", "E136");
+                        } else if (errorCode.trim().equals("022")) {
+                            result = new ResponseMessageDTO("FAILED", "E137");
+                        } else if (!errorCode.trim().isEmpty()) {
+                            result = new ResponseMessageDTO("ERROR", errorCode);
                         } else {
                             result = new ResponseMessageDTO("FAILED", "E05");
                         }
@@ -279,6 +287,8 @@ public class CustomerVaUtil {
                             // result = new ResponseMessageDTO("FAILED", "E112");
                         } else if (errorCode.trim().equals("004") || errorCode.trim().equals("005")) {
                             result = new ResponseMessageDTO("FAILED", "E135");
+                        } else if (!errorCode.trim().isEmpty()) {
+                            result = new ResponseMessageDTO("ERROR", errorCode);
                         } else {
                             result = new ResponseMessageDTO("FAILED", "E05");
                         }
@@ -400,6 +410,8 @@ public class CustomerVaUtil {
                             // result = new ResponseObjectDTO("SUCCESS", data);
                             // } else if (errorCode.trim().equals("182")) {
                             // result = new ResponseMessageDTO("FAILED", "E112");
+                        } else if (!errorCode.trim().isEmpty()) {
+                            result = new ResponseMessageDTO("ERROR", errorCode);
                         } else {
                             result = new ResponseMessageDTO("FAILED", "E05");
                         }
