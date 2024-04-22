@@ -12,6 +12,11 @@ public class DataDTO {
         extraData = new Object();
     }
 
+    public DataDTO(Object extraData) {
+        items = new ArrayList<>();
+        this.extraData = extraData;
+    }
+
     public DataDTO(List<?> items, Object extraData) {
         this.items = items;
         this.extraData = extraData;

@@ -40,6 +40,9 @@ public class BankReceiveActiveHistoryEntity {
     @Column(name = "data")
     private String data;
 
+    @Column(name = "refId")
+    private String refId;
+
     public BankReceiveActiveHistoryEntity() {
     }
 
@@ -133,5 +136,13 @@ public class BankReceiveActiveHistoryEntity {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    public String getRefId() {
+        return refId;
+    }
+
+    public void setRefId(String refId) {
+        this.refId = refId;
     }
 }
