@@ -40,8 +40,8 @@ import reactor.core.publisher.Mono;
 public class CustomerVaUtil {
     private static final Logger logger = Logger.getLogger(CustomerVaUtil.class);
 
-    public static Object requestCustomerVa(RequestCustomerVaDTO dto, String merchantType,
-            Long customerVaLength) {
+    public static Object requestCustomerVa(RequestCustomerVaDTO dto, String merchantId, String merchantType,
+            Long customerVaLength, String checkExistedMerchantId) {
         Object result = null;
         try {
             //
@@ -50,7 +50,7 @@ public class CustomerVaUtil {
             UUID idemKey = UUID.randomUUID();
             String url = EnvironmentUtil.getBidvUrlRequestAddMerchant();
             String serviceId = EnvironmentUtil.getBidvLinkedServiceId();
-            String merchantId = generateMerchantId(dto.getMerchantName(), customerVaLength);
+
             // String merchantName = EnvironmentUtil.getBidvLinkedMerchantName();
             String merchantName = dto.getMerchantName();
             String channelId = EnvironmentUtil.getBidvLinkedChannelId();
@@ -149,7 +149,20 @@ public class CustomerVaUtil {
                                     interactionId.toString());
                             result = new ResponseObjectDTO("SUCCESS", data);
                         } else if (errorCode.trim().equals("182")) {
-                            result = new ResponseMessageDTO("FAILED", "E112");
+                            // check merchantId đã tồn tại trong hệ thống VietQR hay chưa, xong nếu ko tồn
+                            // tại mới gọi unregister
+                            if (checkExistedMerchantId == null || checkExistedMerchantId.trim().isEmpty()) {
+                                ResponseMessageDTO unregisterResult = unregisterCustomerVa(merchantId);
+                                if (unregisterResult.getStatus().trim().equals("SUCCESS")) {
+                                    requestCustomerVa(dto, merchantId, merchantType, customerVaLength,
+                                            checkExistedMerchantId);
+                                } else {
+                                    result = new ResponseMessageDTO("FAILED", "E112");
+                                }
+                            } else {
+                                result = new ResponseMessageDTO("FAILED", "E112");
+                            }
+
                         } else if (errorCode.trim().equals("033")) {
                             result = new ResponseMessageDTO("FAILED", "E133");
                         } else if (errorCode.trim().equals("040")) {
@@ -183,6 +196,22 @@ public class CustomerVaUtil {
         }
         return result;
     }
+
+    // private static Object requestCustomerVaBIDV(RequestCustomerVaDTO dto, String
+    // merchantType,
+    // Long customerVaLength) {
+    // Object result = null;
+    // try {
+    // //
+    // } catch (Exception e) {
+    // logger.error("CustomerVaUtil: requestCustomerVaBIDV: ERROR: " +
+    // e.toString());
+    // System.out.println("CustomerVaUtil: requestCustomerVaBIDV: ERROR: " +
+    // e.toString());
+    // result = new ResponseMessageDTO("FAILED", "E05");
+    // }
+    // return result;
+    // }
 
     public static ResponseMessageDTO confirmCustomerVa(ConfirmCustomerVaDTO dto) {
         ResponseMessageDTO result = null;
@@ -436,7 +465,7 @@ public class CustomerVaUtil {
     }
 
     // create VietQR
-    public static ResponseMessageDTO generateVaInvoiceVietQR(VietQRVaRequestDTO dto) {
+    public static ResponseMessageDTO generateVaInvoiceVietQR(VietQRVaRequestDTO dto, String customerId) {
         ResponseMessageDTO result = null;
         try {
             String url = EnvironmentUtil.getBidvUrlCreateVietQRVa();
@@ -449,9 +478,10 @@ public class CustomerVaUtil {
             String myKey = JwsUtil.getSymmatricKey();
             Key key = new AesKey(JwsUtil.hexStringToBytes(myKey));
             JsonWebEncryption jwe = new JsonWebEncryption();
-            String payload = BIDVUtil.generateVietQRBody(serviceId, dto.getBillId(), dto.getUserBankName(),
+            String payload = BIDVUtil.generateVietQRBody(serviceId, customerId, dto.getUserBankName(),
                     dto.getAmount(), dto.getDescription());
             System.out.println("Payload: " + payload);
+            logger.info("generateVaInvoiceVietQR: payload: " + payload);
             //
             //
             jwe.setPayload(payload);
@@ -566,7 +596,7 @@ public class CustomerVaUtil {
         return result;
     }
 
-    private static String generateMerchantId(String merchantName, Long customerVaLength) {
+    public static String generateMerchantId(String merchantName, Long customerVaLength) {
         String result = "";
         try {
             String prefix = "BC";

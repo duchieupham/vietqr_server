@@ -484,7 +484,8 @@ public class CustomerInvoiceController {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            result = CustomerVaUtil.generateVaInvoiceVietQR(dto);
+            String customerId = customerInvoiceService.getCustomerIdByBillId(dto.getBillId());
+            result = CustomerVaUtil.generateVaInvoiceVietQR(dto, customerId);
             if (result.getStatus().equals("SUCCESS")) {
                 httpStatus = HttpStatus.OK;
             } else {

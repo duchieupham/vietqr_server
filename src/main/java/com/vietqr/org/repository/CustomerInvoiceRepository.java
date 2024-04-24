@@ -65,4 +65,7 @@ public interface CustomerInvoiceRepository extends JpaRepository<CustomerInvoice
                         @Param(value = "status") int status,
                         @Param(value = "timePaid") Long timePaid,
                         @Param(value = "billId") String billId);
+
+        @Query(value = "SELECT customer_id FROM customer_invoice WHERE bill_id = :billId ", nativeQuery = true)
+        String getCustomerIdByBillId(@Param(value = "billId") String billId);
 }

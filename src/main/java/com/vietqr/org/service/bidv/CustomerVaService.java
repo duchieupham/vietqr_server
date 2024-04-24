@@ -28,4 +28,6 @@ public interface CustomerVaService {
     public List<CustomerVaItemDTO> getCustomerVasByUserId(String userId);
 
     public String getUserIdByCustomerId(String customerId);
+
+    public String checkExistedMerchantId(String merchantid);
 }

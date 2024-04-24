@@ -52,7 +52,9 @@ public class CustomerVaController {
             // dto.getBankCode());
             Long customerVaLength = customerVaService.getCustomerVaLength() + 1;
             System.out.println("customerVaLength: " + customerVaLength);
-            result = CustomerVaUtil.requestCustomerVa(dto, "1", customerVaLength);
+            String merchantId = CustomerVaUtil.generateMerchantId(dto.getMerchantName(), customerVaLength);
+            String checkExistedMerchantId = customerVaService.checkExistedMerchantId(merchantId);
+            result = CustomerVaUtil.requestCustomerVa(dto, merchantId, "1", customerVaLength, checkExistedMerchantId);
             if (result instanceof ResponseObjectDTO) {
                 httpStatus = HttpStatus.OK;
             } else if (result instanceof ResponseMessageDTO) {

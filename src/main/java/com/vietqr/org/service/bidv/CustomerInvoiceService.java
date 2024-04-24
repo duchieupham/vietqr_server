@@ -24,4 +24,6 @@ public interface CustomerInvoiceService {
     public CustomerInvoiceInfoDataDTO getCustomerInvoiceInfo(String customerId);
 
     public void updateCustomerVaInvoice(int status, Long timePaid, String billId);
+
+    public String getCustomerIdByBillId(String billId);
 }

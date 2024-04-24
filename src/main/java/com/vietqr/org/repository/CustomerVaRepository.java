@@ -63,4 +63,8 @@ public interface CustomerVaRepository extends JpaRepository<CustomerVaEntity, Lo
 
         @Query(value = "SELECT user_id FROM customer_va WHERE customer_id = :customerId LIMIT 1", nativeQuery = true)
         String getUserIdByCustomerId(@Param(value = "customerId") String customerId);
+
+        @Query(value = "SELECT merchant_id FROM customer_va WHERE merchant_id = :merchantId LIMIT 1", nativeQuery = true)
+        String checkExistedMerchantId(@Param(value = "merchantId") String merchantId);
+
 }

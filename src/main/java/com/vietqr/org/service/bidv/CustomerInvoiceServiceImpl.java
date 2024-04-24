@@ -51,4 +51,9 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
         repo.updateCustomerVaInvoice(status, timePaid, billId);
     }
 
+    @Override
+    public String getCustomerIdByBillId(String billId) {
+        return repo.getCustomerIdByBillId(billId);
+    }
+
 }
