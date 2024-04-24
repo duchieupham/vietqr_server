@@ -29,6 +29,10 @@ public class StringUtil {
         return hashtags;
     }
 
+    public static boolean containsOnlyDigits(String amount) {
+        return amount.matches("\\d+");
+    }
+
     public static boolean isEmptyOrEqualsZero(String input) {
         return input == null || input.trim().isEmpty() || input.trim().equals("0");
     }
