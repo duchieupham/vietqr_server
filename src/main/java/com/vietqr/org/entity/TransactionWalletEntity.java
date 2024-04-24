@@ -61,8 +61,12 @@ public class TransactionWalletEntity implements Serializable {
     @Column(name = "phoneNoRC")
     private String phoneNoRC;
 
+    @Column(name = "data")
+    private String data;
+
     public TransactionWalletEntity() {
         super();
+        this.data = "";
     }
 
     public TransactionWalletEntity(String id, String userId, String amount, String content, int status,
@@ -229,4 +233,11 @@ public class TransactionWalletEntity implements Serializable {
         this.referenceNumber = referenceNumber;
     }
 
+    public String getData() {
+        return data;
+    }
+
+    public void setData(String data) {
+        this.data = data;
+    }
 }

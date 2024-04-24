@@ -1186,24 +1186,6 @@ public class TransactionBankController {
 											bankReceiveActiveHistoryEntity.setData("");
 											bankReceiveActiveHistoryEntity.setRefId(transactionWalletEntity.getId());
 
-											// create new transaction wallet for fee
-//											TransactionWalletEntity transactionWalletEntityFee = new TransactionWalletEntity();
-//											transactionWalletEntityFee.setId(UUID.randomUUID().toString());
-//											transactionWalletEntityFee.setAmount(trAnnualFeeDTO.getAmount() + "");
-//											transactionWalletEntityFee.setBillNumber(orderId);
-//											transactionWalletEntityFee.setUserId(userId);
-//											transactionWalletEntityFee.setContent("");
-//											transactionWalletEntityFee.setStatus(1);
-//											transactionWalletEntityFee.setOtp("");
-//											transactionWalletEntityFee.setPaymentType(2);
-//											transactionWalletEntityFee.setPaymentMethod(0);
-//											transactionWalletEntityFee.setTransType("D");
-//											transactionWalletEntityFee.setTimeCreated(currentTime);
-//											transactionWalletEntityFee.setTimePaid(currentTime);
-//											transactionWalletEntityFee.setReferenceNumber("");
-//											transactionWalletEntityFee.setPhoneNoRC("");
-
-//											transactionWalletService.insertTransactionWallet(transactionWalletEntityFee);
 											bankReceiveOtpService.updateStatusBankReceiveOtp(bankReceiveOtpDTO.getId(), 1);
 											bankReceiveActiveHistoryService.insert(bankReceiveActiveHistoryEntity);
 											accountBankReceiveService.updateActiveBankReceive(bankId, validFeeFrom, validFeeTo);
@@ -1417,6 +1399,7 @@ public class TransactionBankController {
 				}
 			}
 		}
+		amount = formatAmountNumber(amount);
 
 		BankTypeEntity bankTypeEntity = bankTypeService
 				.getBankTypeById(accountBankEntity.getBankTypeId());
@@ -1535,7 +1518,7 @@ public class TransactionBankController {
 					// + "| Ma GD: " + dto.getReferencenumber()
 					// + "| ND: " + dto.getContent()
 					// + "| " + convertLongToDate(time);
-					String telegramMsg = prefix + nf.format(dto.getAmount()) + " VND"
+					String telegramMsg = prefix + amount + " VND"
 							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
 							+ accountBankEntity.getBankAccount()
 							+ " | " + convertLongToDate(time)
@@ -1563,7 +1546,7 @@ public class TransactionBankController {
 					// + "| Ma GD: " + dto.getReferencenumber()
 					// + "| ND: " + dto.getContent()
 					// + "| " + convertLongToDate(time);
-					String larkMsg = prefix + nf.format(dto.getAmount()) + " VND"
+					String larkMsg = prefix + amount + " VND"
 							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
 							+ accountBankEntity.getBankAccount()
 							+ " | " + convertLongToDate(time)
@@ -1642,7 +1625,7 @@ public class TransactionBankController {
 				List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
 				if (chatIds != null && !chatIds.isEmpty()) {
 					TelegramUtil telegramUtil = new TelegramUtil();
-					String telegramMsg = prefix + nf.format(dto.getAmount()) + " VND"
+					String telegramMsg = prefix + amount + " VND"
 							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
 							+ accountBankEntity.getBankAccount()
 							+ " | " + convertLongToDate(time)
@@ -1657,7 +1640,7 @@ public class TransactionBankController {
 				List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
 				if (webhooks != null && !webhooks.isEmpty()) {
 					LarkUtil larkUtil = new LarkUtil();
-					String larkMsg = prefix + nf.format(dto.getAmount()) + " VND"
+					String larkMsg = prefix + amount + " VND"
 							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
 							+ accountBankEntity.getBankAccount()
 							+ " | " + convertLongToDate(time)
@@ -1757,7 +1740,7 @@ public class TransactionBankController {
 				// + "| ND: " + dto.getContent()
 				// + "| " + convertLongToDate(time);
 
-				String telegramMsg = prefix + nf.format(dto.getAmount()) + " VND"
+				String telegramMsg = prefix + amount + " VND"
 						+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
 						+ accountBankEntity.getBankAccount()
 						+ " | " + convertLongToDate(time)
@@ -1785,7 +1768,7 @@ public class TransactionBankController {
 				// + "| Ma GD: " + dto.getReferencenumber()
 				// + "| ND: " + dto.getContent()
 				// + "| " + convertLongToDate(time);
-				String larkMsg = prefix + nf.format(dto.getAmount()) + " VND"
+				String larkMsg = prefix + amount + " VND"
 						+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
 						+ accountBankEntity.getBankAccount()
 						+ " | " + convertLongToDate(time)
@@ -1880,6 +1863,7 @@ public class TransactionBankController {
 				}
 			}
 		}
+		amount = formatAmountNumber(amount);
 
 		BankTypeEntity bankTypeEntity = bankTypeService
 				.getBankTypeById(accountBankEntity.getBankTypeId());
@@ -4356,6 +4340,18 @@ public class TransactionBankController {
 			System.out.println("CustomerSync: Error: " + e.toString());
 			result = new ResponseMessageDTO("FAILED", "E05 - " + e.toString());
 		}
+		return result;
+	}
+
+	private String formatAmountNumber(String amount) {
+		String result = amount;
+		try {
+			if (StringUtil.containsOnlyDigits(amount)) {
+				NumberFormat nf = NumberFormat.getInstance(Locale.US);
+				Long numberAmount = Long.parseLong(amount);
+				result = nf.format(numberAmount);
+			}
+		} catch (Exception ignored) {}
 		return result;
 	}
 

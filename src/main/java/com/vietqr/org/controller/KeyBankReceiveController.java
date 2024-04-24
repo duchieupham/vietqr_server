@@ -521,6 +521,7 @@ public class KeyBankReceiveController {
                         transactionWalletEntity.setPaymentMethod(0);
                         transactionWalletEntity.setReferenceNumber("");
                         transactionWalletEntity.setPhoneNoRC("");
+                        transactionWalletEntity.setData(dto.getBankId());
                         transactionWalletService
                                 .insertTransactionWallet(transactionWalletEntity);
 

@@ -343,43 +343,46 @@ public class TransactionWalletController {
             // VNPT-epay
             switch (filterBy) {
                 case 1:
+                    response = new ArrayList<>();
+                    totalElement = 0;
                     // 0: phone no
                     // 1: bill number
                     // 9: tat ca
-                    switch (type) {
-                        // phone no
-                        case 0:
-                            response = transactionWalletService
-                                    .getTransactionWalletByPhoneNoAndVNPTEpay(value, fromDate,
-                                            toDate, offset, size);
-                            totalElement = transactionWalletService
-                                    .countTransactionWalletByPhoneNoAndVNPTEpay(value, fromDate,
-                                            toDate);
-                            break;
-                        // bill number
-                        case 1:
-                            response = transactionWalletService
-                                    .getTransactionWalletByBillNumberAndVNPTEpay(value, fromDate,
-                                            toDate, offset, size);
-                            totalElement = transactionWalletService
-                                    .countTransactionWalletByBillNumberAndVNPTEpay(value, fromDate,
-                                            toDate);
-                            break;
-                        //9: all
-                        case 9:
-                            response = transactionWalletService
-                                    .getTransactionWalletVNPTEpay(fromDate,
-                                            toDate, offset, size);
-                            totalElement = transactionWalletService
-                                    .countTransactionWalletVNPTEpay(fromDate,
-                                            toDate);
-                            break;
-                        default:
-                            break;
-                    }
+//                    switch (type) {
+//                        // phone no
+//                        case 0:
+//                            response = transactionWalletService
+//                                    .getTransactionWalletByPhoneNoAndVNPTEpay(value, fromDate,
+//                                            toDate, offset, size);
+//                            totalElement = transactionWalletService
+//                                    .countTransactionWalletByPhoneNoAndVNPTEpay(value, fromDate,
+//                                            toDate);
+//                            break;
+//                        // bill number
+//                        case 1:
+//                            response = transactionWalletService
+//                                    .getTransactionWalletByBillNumberAndVNPTEpay(value, fromDate,
+//                                            toDate, offset, size);
+//                            totalElement = transactionWalletService
+//                                    .countTransactionWalletByBillNumberAndVNPTEpay(value, fromDate,
+//                                            toDate);
+//                            break;
+//                        //9: all
+//                        case 9:
+//                            response = transactionWalletService
+//                                    .getTransactionWalletVNPTEpay(fromDate,
+//                                            toDate, offset, size);
+//                            totalElement = transactionWalletService
+//                                    .countTransactionWalletVNPTEpay(fromDate,
+//                                            toDate);
+//                            break;
+//                        default:
+//                            break;
+//                    }
                     break;
                 // 2: Phan mem VietQR (Annual Fee)
                 case 2:
+                case 9:
                     switch (type) {
                         // 0: Phone no
                         case 0:
@@ -413,39 +416,39 @@ public class TransactionWalletController {
                     }
                     break;
                 // all
-                case 9:
-                    switch (type) {
-                        // phone no
-                        case 0:
-                            response = transactionWalletService
-                                    .getTransactionWalletByPhoneNo
-                                            (value, fromDate, toDate, offset, size);
-                            totalElement = transactionWalletService
-                                    .countTransactionWalletByPhoneNo
-                                            (value, fromDate, toDate);
-                            break;
-                        //2: bill number
-                        case 1:
-                            response = transactionWalletService
-                                    .getTransactionWalletByBillNumber(
-                                            value, fromDate, toDate, offset, size);
-                            totalElement = transactionWalletService
-                                    .countTransactionWalletByBillNumber
-                                            (value, fromDate, toDate);
-                            break;
-                        //9: all
-                        case 9:
-                            response = transactionWalletService
-                                    .getTransactionWallet
-                                            (fromDate, toDate, offset, size);
-                            totalElement = transactionWalletService
-                                    .countTransactionWallet
-                                            (fromDate, toDate);
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
+//                case 9:
+//                    switch (type) {
+//                        // phone no
+//                        case 0:
+//                            response = transactionWalletService
+//                                    .getTransactionWalletByPhoneNo
+//                                            (value, fromDate, toDate, offset, size);
+//                            totalElement = transactionWalletService
+//                                    .countTransactionWalletByPhoneNo
+//                                            (value, fromDate, toDate);
+//                            break;
+//                        //2: bill number
+//                        case 1:
+//                            response = transactionWalletService
+//                                    .getTransactionWalletByBillNumber(
+//                                            value, fromDate, toDate, offset, size);
+//                            totalElement = transactionWalletService
+//                                    .countTransactionWalletByBillNumber
+//                                            (value, fromDate, toDate);
+//                            break;
+//                        //9: all
+//                        case 9:
+//                            response = transactionWalletService
+//                                    .getTransactionWallet
+//                                            (fromDate, toDate, offset, size);
+//                            totalElement = transactionWalletService
+//                                    .countTransactionWallet
+//                                            (fromDate, toDate);
+//                            break;
+//                        default:
+//                            break;
+//                    }
+//                    break;
                 default:
                     break;
             }

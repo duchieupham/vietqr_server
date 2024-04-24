@@ -3,6 +3,7 @@ package com.vietqr.org.controller;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -577,7 +578,7 @@ public class TransactionController {
                         responseDTO.setBankShortName(bankShortName != null ? bankShortName : "");
                         responseDTO.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
                         responseDTO.setTransType(dto.getTransType());
-                        responseDTO.setAmount(dto.getAmount());
+                        responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
                         responseDTO.setStatus(dto.getStatus());
                         responseDTO.setTime(dto.getTime());
                         responseDTO.setTimePaid(dto.getTimePaid());
@@ -604,7 +605,7 @@ public class TransactionController {
                             responseDTO.setBankShortName(bankShortName != null ? bankShortName : "");
                             responseDTO.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
                             responseDTO.setTransType(dto.getTransType());
-                            responseDTO.setAmount(dto.getAmount());
+                            responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
                             responseDTO.setStatus(dto.getStatus());
                             responseDTO.setTime(dto.getTime());
                             responseDTO.setTimePaid(dto.getTimePaid());
@@ -653,7 +654,7 @@ public class TransactionController {
                                         if (entity.getTransIds().contains(dto.getTransactionId())) {
                                             responseDTO.setAmount(dto.getAmount());
                                         } else if (dto.getTime() < entity.getLastTimes()) {
-                                            responseDTO.setAmount(dto.getAmount());
+                                            responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
                                         } else {
                                             responseDTO.setAmount("*****");
                                         }
@@ -1224,7 +1225,7 @@ public class TransactionController {
                             TransactionRelatedRequestDTO trans = new TransactionRelatedRequestDTO();
                             trans.setId(item.getId());
                             trans.setBankAccount(item.getBankAccount());
-                            trans.setAmount(item.getAmount() + "");
+                            trans.setAmount(formatAmountNumber(item.getAmount() + ""));
                             trans.setBankId(item.getBankId());
                             trans.setContent(item.getContent());
                             trans.setOrderId(item.getOrderId());
@@ -1255,7 +1256,7 @@ public class TransactionController {
                                 TransactionRelatedRequestDTO trans = new TransactionRelatedRequestDTO();
                                 trans.setId(item.getId());
                                 trans.setBankAccount(item.getBankAccount());
-                                trans.setAmount(item.getAmount() + "");
+                                trans.setAmount(formatAmountNumber(item.getAmount() + ""));
                                 trans.setBankId(item.getBankId());
                                 trans.setContent(item.getContent());
                                 trans.setOrderId(item.getOrderId());
@@ -1310,9 +1311,9 @@ public class TransactionController {
                                             trans.setId(item.getId());
                                             trans.setBankAccount(item.getBankAccount());
                                             if (entity.getTransIds().contains(item.getId())) {
-                                                trans.setAmount(item.getAmount() + "");
+                                                trans.setAmount(formatAmountNumber(item.getAmount() + ""));
                                             } else if (item.getTimeCreated() < entity.getLastTimes()) {
-                                                trans.setAmount(item.getAmount() + "");
+                                                trans.setAmount(formatAmountNumber(item.getAmount() + ""));
                                             } else {
                                                 trans.setAmount("*****");
                                             }
@@ -1473,7 +1474,7 @@ public class TransactionController {
                     responseDTO.setBankAccount(dto.getBankAccount());
                     responseDTO.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
                     responseDTO.setTransType(dto.getTransType());
-                    responseDTO.setAmount(dto.getAmount());
+                    responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
                     responseDTO.setStatus(dto.getStatus());
                     responseDTO.setTime(dto.getTime());
                     responseDTO.setTimePaid(dto.getTimePaid());
@@ -1499,7 +1500,7 @@ public class TransactionController {
                         responseDTO.setBankAccount(dto.getBankAccount());
                         responseDTO.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
                         responseDTO.setTransType(dto.getTransType());
-                        responseDTO.setAmount(dto.getAmount());
+                        responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
                         responseDTO.setStatus(dto.getStatus());
                         responseDTO.setTime(dto.getTime());
                         responseDTO.setTimePaid(dto.getTimePaid());
@@ -1546,7 +1547,7 @@ public class TransactionController {
                                     if (entity.getTransIds().contains(dto.getTransactionId())) {
                                         responseDTO.setAmount(dto.getAmount());
                                     } else if (dto.getTime() < entity.getLastTimes()) {
-                                        responseDTO.setAmount(dto.getAmount());
+                                        responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
                                     } else {
                                         responseDTO.setAmount("*****");
                                     }
@@ -1963,7 +1964,7 @@ public class TransactionController {
                     responseDTO.setBankShortName(bankShortName != null ? bankShortName : "");
                     responseDTO.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
                     responseDTO.setTransType(dto.getTransType());
-                    responseDTO.setAmount(dto.getAmount());
+                    responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
                     responseDTO.setStatus(dto.getStatus());
                     responseDTO.setTime(dto.getTime());
                     responseDTO.setTimePaid(dto.getTimePaid());
@@ -1990,7 +1991,7 @@ public class TransactionController {
                         responseDTO.setBankShortName(bankShortName != null ? bankShortName : "");
                         responseDTO.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
                         responseDTO.setTransType(dto.getTransType());
-                        responseDTO.setAmount(dto.getAmount());
+                        responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
                         responseDTO.setStatus(dto.getStatus());
                         responseDTO.setTime(dto.getTime());
                         responseDTO.setTimePaid(dto.getTimePaid());
@@ -2037,9 +2038,9 @@ public class TransactionController {
                                     responseDTO.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
                                     responseDTO.setTransType(dto.getTransType());
                                     if (entity.getTransIds().contains(dto.getTransactionId())) {
-                                        responseDTO.setAmount(dto.getAmount());
+                                        responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
                                     } else if (dto.getTime() < entity.getLastTimes()) {
-                                        responseDTO.setAmount(dto.getAmount());
+                                        responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
                                     } else {
                                         responseDTO.setAmount("*****");
                                     }
@@ -2111,7 +2112,7 @@ public class TransactionController {
                 result.setBankShortName(dto.getBankShortName() != null ? dto.getBankShortName() : "");
                 result.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
                 result.setTransType(dto.getTransType());
-                result.setAmount(dto.getAmount() + "");
+                result.setAmount(formatAmountNumber(dto.getAmount() + ""));
                 result.setStatus(dto.getStatus());
                 result.setTime(dto.getTime());
                 result.setTimePaid(dto.getTimePaid());
@@ -2137,7 +2138,7 @@ public class TransactionController {
                     result.setBankShortName(dto.getBankShortName() != null ? dto.getBankShortName() : "");
                     result.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
                     result.setTransType(dto.getTransType());
-                    result.setAmount(dto.getAmount() + "");
+                    result.setAmount(formatAmountNumber(dto.getAmount() + ""));
                     result.setStatus(dto.getStatus());
                     result.setTime(dto.getTime());
                     result.setTimePaid(dto.getTimePaid());
@@ -2188,9 +2189,9 @@ public class TransactionController {
                             result.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
                             result.setTransType(dto.getTransType());
                             if (entity.getTransIds().contains(dto.getId())) {
-                                result.setAmount(dto.getAmount() + "");
+                                result.setAmount(formatAmountNumber(dto.getAmount() + ""));
                             } else if (dto.getTime() < entity.getLastTimes()) {
-                                result.setAmount(dto.getAmount() + "");
+                                result.setAmount(formatAmountNumber(dto.getAmount() + ""));
                             } else {
                                 result.setAmount("*****");
                             }
@@ -3103,5 +3104,17 @@ public class TransactionController {
                                 a.getTotalTransD() + b.getTotalTransD()));
 
         return sumObject;
+    }
+
+    private String formatAmountNumber(String amount) {
+        String result = amount;
+        try {
+            if (StringUtil.containsOnlyDigits(amount)) {
+                NumberFormat nf = NumberFormat.getInstance(Locale.US);
+                Long numberAmount = Long.parseLong(amount);
+                result = nf.format(numberAmount);
+            }
+        } catch (Exception ignored) {}
+        return result;
     }
 }
