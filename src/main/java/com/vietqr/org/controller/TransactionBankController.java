@@ -163,9 +163,6 @@ public class TransactionBankController {
 	private BankReceiveOtpService bankReceiveOtpService;
 
 	@Autowired
-	private KeyActiveBankReceiveService keyActiveBankReceiveService;
-
-	@Autowired
 	private TrAnnualFeePackageService trAnnualFeePackageService;
 
 	@Autowired
@@ -176,6 +173,11 @@ public class TransactionBankController {
 
 	private FirebaseMessagingService firebaseMessagingService;
 
+	@Autowired
+	private InvoiceService invoiceService;
+
+	@Autowired
+	private InvoiceItemService invoiceItemService;
 	public TransactionBankController(FirebaseMessagingService firebaseMessagingService) {
 		this.firebaseMessagingService = firebaseMessagingService;
 	}
@@ -1152,25 +1154,26 @@ public class TransactionBankController {
 											logger.error("transaction-sync: accountWalletEntity IS NULL");
 										}
 									} else {
-										TrAnnualFeeDTO trAnnualFeeDTO = trAnnualFeePackageService
+										ITrAnnualFeeDTO ITrAnnualFeeDTO = trAnnualFeePackageService
 												.getFeeById(feeId);
-										if (trAnnualFeeDTO == null) {
+										if (ITrAnnualFeeDTO == null) {
 											System.out.println("transaction-sync: transactionWalletEntity IS NULL");
 											logger.error("transaction-sync: transactionWalletEntity IS NULL");
 										} else {
-											long validFeeFrom = 0;
+											long validFeeFrom;
 											long validFeeTo = 0;
 											// update validFeeFrom, validFeeTo
 											BankReceiveCheckDTO bankReceiveCheckDTO = accountBankReceiveService
 													.checkBankReceiveActive(bankId);
 											if (bankReceiveCheckDTO.getIsValidService()) {
-												// update validFeeTo
+                                                validFeeFrom = 0;
+                                                // update validFeeTo
 												validFeeTo = bankReceiveCheckDTO.getValidTo();
-												validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeTo, trAnnualFeeDTO.getDuration());
+												validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeTo, ITrAnnualFeeDTO.getDuration());
 											} else {
 												// update validFeeFrom, validFeeTo
 												validFeeFrom = currentTime;
-												validFeeTo = DateTimeUtil.plusMonthAsLongInt(currentTime, trAnnualFeeDTO.getDuration());
+												validFeeTo = DateTimeUtil.plusMonthAsLongInt(currentTime, ITrAnnualFeeDTO.getDuration());
 											}
 											// save history
 											BankReceiveActiveHistoryEntity bankReceiveActiveHistoryEntity = new BankReceiveActiveHistoryEntity();
@@ -1185,6 +1188,33 @@ public class TransactionBankController {
 											bankReceiveActiveHistoryEntity.setValidFeeTo(validFeeTo);
 											bankReceiveActiveHistoryEntity.setData("");
 											bankReceiveActiveHistoryEntity.setRefId(transactionWalletEntity.getId());
+											long finalValidFeeTo = validFeeTo;
+											Thread thread = new Thread(() -> {
+												Double vat = systemSettingService.getVatSystemSetting();
+												IBankAccountInfoDTO bankAccountInfoDTO = accountBankReceiveService
+														.getAccountBankInfoById(bankId);
+												Long totalAMount = trAnnualFeePackageService
+														.getTotalAmount(feeId);
+												TrAnnualFeeInvoiceItemDTO itemFee = new TrAnnualFeeInvoiceItemDTO();
+												itemFee.setAmount(totalAMount);
+												long amountAfterVat = Long.parseLong(transactionWalletEntity.getAmount());
+												itemFee.setAmountAfterVat(amountAfterVat);
+												itemFee.setAmountVat(amountAfterVat - totalAMount);
+												itemFee.setBankId(bankId);
+												itemFee.setUserId(userId);
+												itemFee.setTransWalletId(transactionWalletEntity.getId());
+												itemFee.setBankAccount(bankAccountInfoDTO.getBankAccount());
+												itemFee.setBankShortName(bankAccountInfoDTO.getBankShortName());
+												itemFee.setUserBankName(bankAccountInfoDTO.getUserBankName());
+												itemFee.setValidFrom(validFeeFrom);
+												itemFee.setValidTo(finalValidFeeTo);
+												BankAccountInfoDTO bankInfo = new BankAccountInfoDTO();
+												bankInfo.setBankAccount(bankAccountInfoDTO.getBankAccount());
+												bankInfo.setBankShortName(bankAccountInfoDTO.getBankShortName());
+												bankInfo.setUserBankName(bankAccountInfoDTO.getUserBankName());
+												createInvoiceTransWallet(totalAMount, bankInfo, itemFee, vat);
+											});
+											thread.start();
 
 											bankReceiveOtpService.updateStatusBankReceiveOtp(bankReceiveOtpDTO.getId(), 1);
 											bankReceiveActiveHistoryService.insert(bankReceiveActiveHistoryEntity);
@@ -4353,6 +4383,66 @@ public class TransactionBankController {
 			}
 		} catch (Exception ignored) {}
 		return result;
+	}
+
+	private String getInvoiceUnique() {
+		String result = "";
+		boolean checkDuplicated = true;
+		String invoiceId = "";
+		do {
+			result = RandomCodeUtil.generateRandomId(10);
+			invoiceId = invoiceService.checkDuplicatedInvoiceId(result);
+			if (invoiceId == null || invoiceId.isEmpty()) {
+				checkDuplicated = false;
+			}
+		} while (checkDuplicated);
+		return result;
+	}
+
+	private void createInvoiceTransWallet(long totalAmount, BankAccountInfoDTO bankInfo,
+										  TrAnnualFeeInvoiceItemDTO dto, Double vat) {
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			String invoiceUUIDId = UUID.randomUUID().toString();
+			InvoiceEntity invoiceEntity = new InvoiceEntity();
+			invoiceEntity.setId(invoiceUUIDId);
+			invoiceEntity.setInvoiceId(getInvoiceUnique());
+			invoiceEntity.setVat(vat);
+			invoiceEntity.setName(NotificationUtil.getNotiPaymentAnnualFeeVietqrName());
+			invoiceEntity.setMerchantId("");
+			invoiceEntity.setStatus(1);
+			invoiceEntity.setAmount(dto.getAmount());
+			invoiceEntity.setTotalAmount(dto.getAmountAfterVat());
+			invoiceEntity.setVatAmount(dto.getAmountVat());
+			invoiceEntity.setTimeCreated(DateTimeUtil.getCurrentDateTime());
+			invoiceEntity.setTimePaid(DateTimeUtil.getCurrentDateTime());
+			invoiceEntity.setUserId(dto.getUserId());
+			invoiceEntity.setBankId(dto.getBankId());
+			invoiceEntity.setRefId(dto.getTransWalletId());
+			invoiceEntity.setDataType(0);
+			invoiceEntity.setData(mapper.writeValueAsString(bankInfo));
+			InvoiceItemEntity itemEntity = new InvoiceItemEntity();
+			itemEntity.setId(UUID.randomUUID().toString());
+			itemEntity.setInvoiceId(invoiceUUIDId);
+			itemEntity.setQuantity(1);
+			itemEntity.setAmount(totalAmount);
+			itemEntity.setTotalAmount(dto.getAmount());
+			itemEntity.setName(NotificationUtil.getNotiPaymentBdsdVietqr1());
+			itemEntity.setDescription(NotificationUtil.getNotiPaymentBdsdVietqr1() +
+					NotificationUtil.getNotiPaymentBdsdVietqr2() +
+					bankInfo.getBankAccount() + " - "
+					+ bankInfo.getBankShortName());
+			itemEntity.setType(0);
+			itemEntity.setTypeName(NotificationUtil.getNotiPaymentBdsdVietqr1());
+			itemEntity.setData(mapper.writeValueAsString(dto));
+			itemEntity.setDataType(0);
+			invoiceService.insert(invoiceEntity);
+			invoiceItemService.insert(itemEntity);
+
+		} catch (Exception e) {
+			logger.error("TransactionBankController: ERROR: createInvoiceTransWallet: "
+			+ e.getMessage() + " at: " + System.currentTimeMillis());
+		}
 	}
 
 }

@@ -1,13 +1,15 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.dto.TrAnnualFeeDTO;
+import com.vietqr.org.dto.ITrAnnualFeeDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public interface TrAnnualFeePackageService {
-    TrAnnualFeeDTO getFeeById(String id);
+    ITrAnnualFeeDTO getFeeById(String id);
 
-    List<TrAnnualFeeDTO> getAllFee();
+    List<ITrAnnualFeeDTO> getAllFee();
+
+    Long getTotalAmount(String feeId);
 }

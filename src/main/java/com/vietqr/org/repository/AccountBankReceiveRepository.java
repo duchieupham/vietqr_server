@@ -310,4 +310,13 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 
 	@Query(value = "SELECT is_valid_service FROM account_bank_receive WHERE id = :bankId", nativeQuery = true)
     boolean checkIsActiveService(String bankId);
+
+	@Query(value = "SELECT a.id AS bankId, "
+			+ "a.bank_account AS bankAccount, "
+			+ "a.bank_account_name AS userBankName, "
+			+ "b.bank_short_name AS bankShortName "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN bank_type b ON a.bank_type_id = b.id "
+			+ "WHERE a.id = :bankId ", nativeQuery = true)
+    IBankAccountInfoDTO getAccountBankInfoById(String bankId);
 }

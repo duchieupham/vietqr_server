@@ -11,4 +11,7 @@ public interface SystemSettingRepository extends JpaRepository<SystemSettingEnti
 
     @Query(value = "SELECT * FROM system_setting", nativeQuery = true)
     SystemSettingEntity getSystemSetting();
+
+    @Query(value = "SELECT vat FROM system_setting LIMIT 1", nativeQuery = true)
+    Double getVatSystemSetting();
 }

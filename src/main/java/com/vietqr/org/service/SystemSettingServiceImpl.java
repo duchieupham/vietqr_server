@@ -17,4 +17,9 @@ public class SystemSettingServiceImpl implements SystemSettingService {
         return repo.getSystemSetting();
     }
 
+    @Override
+    public Double getVatSystemSetting() {
+        return repo.getVatSystemSetting();
+    }
+
 }

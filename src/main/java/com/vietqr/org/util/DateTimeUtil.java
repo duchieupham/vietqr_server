@@ -24,6 +24,11 @@ public class DateTimeUtil {
         return localDateTime.toEpochSecond(ZoneOffset.UTC);
     }
 
+    public static long getCurrentDateTime() {
+        LocalDateTime localDateTime = LocalDateTime.now();
+        return localDateTime.toEpochSecond(ZoneOffset.UTC);
+    }
+
     public static long getDateTimeAsLongInt(String dateTime) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DateTimeFormat);
         LocalDateTime localDateTime = LocalDateTime.parse(dateTime, formatter);

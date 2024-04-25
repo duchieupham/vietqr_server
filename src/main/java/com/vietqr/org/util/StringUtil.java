@@ -29,6 +29,13 @@ public class StringUtil {
         return hashtags;
     }
 
+    public static int getTotalPage(int totalElement, int size) {
+        int result = 0;
+        result = totalElement % size == 0 ?
+                totalElement / size : totalElement / size + 1;
+        return result;
+    }
+
     public static boolean containsOnlyDigits(String amount) {
         return amount.matches("\\d+");
     }

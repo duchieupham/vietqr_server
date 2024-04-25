@@ -58,6 +58,21 @@ public class NotificationUtil {
 	private static final String NOTI_DESC_MOBILE_TOPUP_FAILED = "Có vấn đề xảy ra trong quá trình nạp tiền trong hệ thống VietQR. Chúng tôi sẽ xem xét và xử lý sớm, mong quý khách thông cảm về vấn đề này.";
 	private static final String NOTI_DESC_PAYMENT_SUCCESS_VA_INVOICE_1 = "Quý khách đã thanh toán thành công ";
 	private static final String NOTI_DESC_PAYMENT_SUCCESS_VA_INVOICE_2 = " VND cho hoá đơn ";
+	private static final String NOTI_PAYMENT_ANNUAL_FEE_VIETQR_NAME = "Thanh toán dịch vụ phần mềm VietQR ";
+	private static final String NOTI_PAYMENT_BDSD_VIETQR_1 = "Thanh toán dịch vụ nhận BĐSD ";
+	private static final String NOTI_PAYMENT_BDSD_VIETQR_2 = "cho số TK: ";
+
+	public static String getNotiPaymentAnnualFeeVietqrName() {
+		return NOTI_PAYMENT_ANNUAL_FEE_VIETQR_NAME;
+	}
+
+	public static String getNotiPaymentBdsdVietqr1() {
+		return NOTI_PAYMENT_BDSD_VIETQR_1;
+	}
+
+	public static String getNotiPaymentBdsdVietqr2() {
+		return NOTI_PAYMENT_BDSD_VIETQR_2;
+	}
 
 	public static String getNotiTypePaymentSuccessVaInvoice() {
 		return NOTI_TYPE_PAYMENT_SUCCESS_VA_INVOICE;
