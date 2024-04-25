@@ -27,6 +27,9 @@ public class TrAnnualFeePackageEntity implements Serializable {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "totalAmount")
+    private double totalAmount;
+
     public TrAnnualFeePackageEntity() {
     }
 
@@ -67,5 +70,13 @@ public class TrAnnualFeePackageEntity implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public double getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(double totalAmount) {
+        this.totalAmount = totalAmount;
     }
 }

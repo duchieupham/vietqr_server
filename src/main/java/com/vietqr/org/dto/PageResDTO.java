@@ -4,14 +4,14 @@ import java.util.List;
 
 public class PageResDTO {
     private PageDTO metadata;
-    private List<?> items;
+    private List<?> data;
 
     public PageResDTO() {
     }
 
-    public PageResDTO(PageDTO metadata, List<?> items) {
+    public PageResDTO(PageDTO metadata, List<?> data) {
         this.metadata = metadata;
-        this.items = items;
+        this.data = data;
     }
 
     public PageDTO getMetadata() {
@@ -22,11 +22,11 @@ public class PageResDTO {
         this.metadata = metadata;
     }
 
-    public List<?> getItems() {
-        return items;
+    public List<?> getData() {
+        return data;
     }
 
-    public void setItems(List<?> items) {
-        this.items = items;
+    public void setData(List<?> data) {
+        this.data = data;
     }
 }

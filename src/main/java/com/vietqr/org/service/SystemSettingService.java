@@ -8,4 +8,6 @@ import com.vietqr.org.entity.SystemSettingEntity;
 public interface SystemSettingService {
 
     public SystemSettingEntity getSystemSetting();
+
+    Double getVatSystemSetting();
 }

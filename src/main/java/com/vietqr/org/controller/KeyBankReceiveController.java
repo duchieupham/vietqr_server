@@ -17,6 +17,7 @@ import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin
@@ -92,7 +93,7 @@ public class KeyBankReceiveController {
                         result = new ResponseMessageDTO("FAILED", "E131");
                         httpStatus = HttpStatus.BAD_REQUEST;
                     } else if (keyActiveEntity.getStatus() != 0) {
-                        result = new ResponseMessageDTO("FAILED", "E127");
+                        result = new ResponseMessageDTO("FAILED", "E130");
                         httpStatus = HttpStatus.BAD_REQUEST;
                     } else {
                         String otp = randomOtp();
@@ -203,7 +204,7 @@ public class KeyBankReceiveController {
                             result = new ResponseMessageDTO("FAILED", "E127");
                             httpStatus = HttpStatus.BAD_REQUEST;
                         } else if (keyActiveEntity.getStatus() != 0) {
-                            result = new ResponseMessageDTO("FAILED", "E127");
+                            result = new ResponseMessageDTO("FAILED", "E130");
                             httpStatus = HttpStatus.BAD_REQUEST;
                         } else if (!isKeyActive(bankReceiveOtpDTO.getKeyActive(), keyActiveEntity.getSecretKey(),
                                 keyActiveEntity.getDuration(), keyActiveEntity.getValueActive())) {
@@ -413,10 +414,29 @@ public class KeyBankReceiveController {
         List<TrAnnualFeeDTO> result = null;
         HttpStatus httpStatus = null;
         try {
-            result = trAnnualFeePackageService.getAllFee();
+            List<ITrAnnualFeeDTO> dtos = new ArrayList<>();
+            Double vat = systemSettingService.getVatSystemSetting();
+            if (vat == null || vat < 0) {
+                vat = 0D;
+            }
+            dtos = trAnnualFeePackageService.getAllFee();
+            double finalVat = vat;
+            result = dtos.stream().map(item -> {
+                TrAnnualFeeDTO dto = new TrAnnualFeeDTO();
+                dto.setFeeId(item.getFeeId());
+                dto.setAmount(item.getAmount());
+                dto.setDuration(item.getDuration());
+                dto.setDescription(item.getDescription());
+                long totalAmountWithVat = Math.round(
+                        item.getTotalAmount() * (1 + finalVat / 100)
+                );
+                dto.setTotalAmount(item.getTotalAmount());
+                dto.setVat(finalVat);
+                dto.setTotalWithVat(totalAmountWithVat);
+                return dto;
+            }).collect(Collectors.toList());
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             logger.error("getAnnualFeePackage: ERROR: " + e.getMessage() + " at " + System.currentTimeMillis());
             result = new ArrayList<>();
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -458,7 +478,7 @@ public class KeyBankReceiveController {
                 } else {
                     LocalDateTime time = LocalDateTime.now();
                     long currentTime = time.toEpochSecond(ZoneOffset.UTC);
-                    TrAnnualFeeDTO feeDTO = trAnnualFeePackageService.getFeeById(dto.getFeeId());
+                    ITrAnnualFeeDTO feeDTO = trAnnualFeePackageService.getFeeById(dto.getFeeId());
                     if (feeDTO == null) {
                         result = new ResponseMessageDTO("FAILED", "E132");
                         httpStatus = HttpStatus.BAD_REQUEST;
@@ -499,7 +519,14 @@ public class KeyBankReceiveController {
                         bankReceiveOTPEntity.setStatus(0);
                         bankReceiveOTPEntity.setKeyActive(feeDTO.getFeeId());
                         bankReceiveOTPEntity.setRequestId(requestId);
-                        bankReceiveOTPEntity.setAmount(feeDTO.getAmount());
+                        Double vat = systemSettingService.getVatSystemSetting();
+                        if (vat == null || vat < 0) {
+                            vat = 0D;
+                        }
+                        long totalAmountWithVat = Math.round(
+                                feeDTO.getTotalAmount() * (1 + vat / 100)
+                        );
+                        bankReceiveOTPEntity.setAmount(totalAmountWithVat);
                         bankReceiveOtpService.insert(bankReceiveOTPEntity);
 
                         // create transaction_wallet
@@ -588,7 +615,7 @@ public class KeyBankReceiveController {
                         result = new ResponseMessageDTO("FAILED", "E129");
                         httpStatus = HttpStatus.BAD_REQUEST;
                     } else {
-                        TrAnnualFeeDTO feeDTO = trAnnualFeePackageService.getFeeById(dto.getFeeId());
+                        ITrAnnualFeeDTO feeDTO = trAnnualFeePackageService.getFeeById(dto.getFeeId());
                         if (feeDTO == null) {
                             result = new ResponseMessageDTO("FAILED", "E132");
                             httpStatus = HttpStatus.BAD_REQUEST;
@@ -603,7 +630,13 @@ public class KeyBankReceiveController {
                                 if (check != null && !check.trim().isEmpty()) {
                                     UUID transReceiveUUID = UUID.randomUUID();
                                     UUID transWalletVQRUUID = UUID.randomUUID();
-                                    long amount = (long) feeDTO.getAmount() * feeDTO.getDuration();
+                                    Double vat = systemSettingService.getVatSystemSetting();
+                                    if (vat == null || vat < 0) {
+                                        vat = 0D;
+                                    }
+                                    long amount = Math.round(
+                                            feeDTO.getTotalAmount() * (1 + vat / 100)
+                                    );
                                     //
                                     String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
                                     String billNumberVQR = "VAF" + RandomCodeUtil.generateRandomId(10);

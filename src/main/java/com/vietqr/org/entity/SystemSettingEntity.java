@@ -49,6 +49,9 @@ public class SystemSettingEntity implements Serializable {
     @Column(name = "serviceActive")
     private Long serviceActive;
 
+    @Column(name = "vat")
+    private Double vat;
+
     public SystemSettingEntity() {
         super();
     }
