@@ -154,7 +154,7 @@ public class CustomerVaUtil {
                             if (checkExistedMerchantId == null || checkExistedMerchantId.trim().isEmpty()) {
                                 ResponseMessageDTO unregisterResult = unregisterCustomerVa(merchantId);
                                 if (unregisterResult.getStatus().trim().equals("SUCCESS")) {
-                                    requestCustomerVa(dto, merchantId, merchantType, customerVaLength,
+                                    result = requestCustomerVa(dto, merchantId, merchantType, customerVaLength,
                                             checkExistedMerchantId);
                                 } else {
                                     result = new ResponseMessageDTO("FAILED", "E112");
@@ -165,6 +165,8 @@ public class CustomerVaUtil {
 
                         } else if (errorCode.trim().equals("033")) {
                             result = new ResponseMessageDTO("FAILED", "E133");
+                        } else if (errorCode.trim().equals("036")) {
+                            result = new ResponseMessageDTO("FAILED", "E139");
                         } else if (errorCode.trim().equals("040")) {
                             result = new ResponseMessageDTO("FAILED", "E134");
                         } else if (errorCode.trim().equals("021")) {
@@ -316,6 +318,8 @@ public class CustomerVaUtil {
                             // result = new ResponseMessageDTO("FAILED", "E112");
                         } else if (errorCode.trim().equals("004") || errorCode.trim().equals("005")) {
                             result = new ResponseMessageDTO("FAILED", "E135");
+                        } else if (errorCode.trim().equals("061")) {
+                            result = new ResponseMessageDTO("FAILED", "E138");
                         } else if (!errorCode.trim().isEmpty()) {
                             result = new ResponseMessageDTO("ERROR", errorCode);
                         } else {
