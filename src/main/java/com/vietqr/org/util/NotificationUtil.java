@@ -17,6 +17,7 @@ public class NotificationUtil {
 	private static final String NOTI_TYPE_CANCEL_TRANSACTION = "N12";
 	private static final String NOTI_TYPE_ACTIVE_KEY = "N13";
 	private static final String NOTI_TYPE_PAYMENT_SUCCESS_VA_INVOICE = "N14";
+	private static final String NOTI_TYPE_PAYMENT_INVOICE_SUCCESS = "N15";
 
 	// Title
 	private static final String NOTI_TITLE_TRANSACTION = "Thông báo biến động số dư";
@@ -275,5 +276,8 @@ public class NotificationUtil {
 
 	public static String getNotiDescActiveKey3() {
 		return NOTI_DESC_ACTIVE_KEY_3;
+	}
+	public static String getNotiTypePaymentInvoiceSuccess() {
+		return NOTI_TYPE_PAYMENT_INVOICE_SUCCESS;
 	}
 }

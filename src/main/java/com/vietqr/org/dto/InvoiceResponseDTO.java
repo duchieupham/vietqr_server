@@ -12,7 +12,11 @@ public class InvoiceResponseDTO {
     private String bankAccount;
     private String bankShortName;
     private String qrCode;
-    private String totalAmount;
+    private long totalAmount;
+    private String bankNameForPayment;
+    private String bankAccountForPayment;
+    private String bankCodeForPayment;
+    private String userBankNameForPayment;
 
     public InvoiceResponseDTO() {
     }
@@ -20,7 +24,7 @@ public class InvoiceResponseDTO {
     public InvoiceResponseDTO(String invoiceId, String billNumber, String invoiceNumber,
                               String invoiceName, long timeCreated, long timePaid, int status,
                               String bankId, String bankAccount, String bankShortName,
-                              String qrCode, String totalAmount) {
+                              String qrCode, long totalAmount) {
         this.invoiceId = invoiceId;
         this.billNumber = billNumber;
         this.invoiceNumber = invoiceNumber;
@@ -123,11 +127,43 @@ public class InvoiceResponseDTO {
         this.qrCode = qrCode;
     }
 
-    public String getTotalAmount() {
+    public long getTotalAmount() {
         return totalAmount;
     }
 
-    public void setTotalAmount(String totalAmount) {
+    public void setTotalAmount(long totalAmount) {
         this.totalAmount = totalAmount;
+    }
+
+    public String getBankNameForPayment() {
+        return bankNameForPayment;
+    }
+
+    public void setBankNameForPayment(String bankNameForPayment) {
+        this.bankNameForPayment = bankNameForPayment;
+    }
+
+    public String getBankAccountForPayment() {
+        return bankAccountForPayment;
+    }
+
+    public void setBankAccountForPayment(String bankAccountForPayment) {
+        this.bankAccountForPayment = bankAccountForPayment;
+    }
+
+    public String getBankCodeForPayment() {
+        return bankCodeForPayment;
+    }
+
+    public void setBankCodeForPayment(String bankCodeForPayment) {
+        this.bankCodeForPayment = bankCodeForPayment;
+    }
+
+    public String getUserBankNameForPayment() {
+        return userBankNameForPayment;
+    }
+
+    public void setUserBankNameForPayment(String userBankNameForPayment) {
+        this.userBankNameForPayment = userBankNameForPayment;
     }
 }
