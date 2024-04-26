@@ -1,5 +1,6 @@
 package com.vietqr.org.controller;
 
+import java.sql.Date;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -1330,6 +1331,47 @@ public class TransactionBankController {
 					pushNotification(title, message, notiEntity, data, userIdRecharge);
 				}
 			}
+		}
+	}
+
+	@PostMapping("notification-data")
+	public ResponseEntity<ResponseMessageDTO> getThemes(@RequestParam String userId) {
+		ResponseMessageDTO result = null;
+		HttpStatus httpStatus = null;
+		try {
+			Map<String, String> data = new HashMap<>();
+			data.put("notificationType",
+					NotificationUtil.getNotiTypePaymentInvoiceSuccess());
+			data.put("notificationId", UUID.randomUUID().toString());
+			data.put("invoiceId", UUID.randomUUID().toString());
+			data.put("amount", "2937000" + "");
+			data.put("billNumber", "VAF19349842");
+			data.put("transactionWalletId", UUID.randomUUID().toString());
+			data.put("timeCreated", DateTimeUtil.getCurrentDateTime() + "");
+			data.put("timePaid", DateTimeUtil.getCurrentDateTime() + "");
+			data.put("userId", userId);
+			result = new ResponseMessageDTO("SUCCESS", "");
+			httpStatus = HttpStatus.OK;
+		} catch (Exception e) {
+			logger.error("getThemes: ERROR: " + e.toString());
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	private void pushFakenotification(String userId, Map<String, String> data) {
+		List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+		fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
+		firebaseMessagingService.sendUsersNotificationWithData(data,
+				fcmTokens,
+				"", "");
+		try {
+			socketHandler.sendMessageToUser(userId,
+					data);
+		} catch (IOException e) {
+			logger.error(
+					"transaction-sync: WS: socketHandler.sendMessageToUser - RECHARGE ERROR: "
+							+ e.toString());
 		}
 	}
 

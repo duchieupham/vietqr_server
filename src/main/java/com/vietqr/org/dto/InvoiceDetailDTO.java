@@ -16,6 +16,11 @@ public class InvoiceDetailDTO {
     private String bankId;
     private String bankShortName;
     private String bankAccount;
+    private String bankNameForPayment;
+    private String bankAccountForPayment;
+    private String bankCodeForPayment;
+    private String userBankNameForPayment;
+
     private String qrCode;
     private long totalAmount;
     private List<InvoiceItemResDTO> items;
@@ -171,5 +176,37 @@ public class InvoiceDetailDTO {
 
     public void setItems(List<InvoiceItemResDTO> items) {
         this.items = items;
+    }
+
+    public String getBankNameForPayment() {
+        return bankNameForPayment;
+    }
+
+    public void setBankNameForPayment(String bankNameForPayment) {
+        this.bankNameForPayment = bankNameForPayment;
+    }
+
+    public String getBankAccountForPayment() {
+        return bankAccountForPayment;
+    }
+
+    public void setBankAccountForPayment(String bankAccountForPayment) {
+        this.bankAccountForPayment = bankAccountForPayment;
+    }
+
+    public String getBankCodeForPayment() {
+        return bankCodeForPayment;
+    }
+
+    public void setBankCodeForPayment(String bankCodeForPayment) {
+        this.bankCodeForPayment = bankCodeForPayment;
+    }
+
+    public String getUserBankNameForPayment() {
+        return userBankNameForPayment;
+    }
+
+    public void setUserBankNameForPayment(String userBankNameForPayment) {
+        this.userBankNameForPayment = userBankNameForPayment;
     }
 }

@@ -196,6 +196,15 @@ public class EnvironmentUtil {
     private static final String BANK_ACCOUNT_RECHARGE_UAT = "29058474275";
     private static final String BANK_ACCOUNT_RECHARGE_PROD = "0020108679008";
     //
+    private static final String BANK_CODE_RECHARGE_UAT = "MB";
+    private static final String BANK_CODE_RECHARGE_PROD = "MB";
+    //
+    private static final String BANK_NAME_RECHARGE_UAT = "Ngân hàng TMCP Quân đội";
+    private static final String BANK_NAME_RECHARGE_PROD = "Ngân hàng TMCP Quân đội";
+    //
+    private static final String USER_BANK_NAME_RECHARGE_UAT = "Nguyen Phuong Nhat Linh";
+    private static final String USER_BANK_NAME_RECHARGE_PROD = "Pham Duc Tuan";
+    //
     private static final String BANK_TYPE_ID_RECHARGE_UAT = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
     private static final String BANK_TYPE_ID_RECHARGE_PROD = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
 
@@ -453,6 +462,19 @@ public class EnvironmentUtil {
 
     public static String getBankAccountRecharge() {
         return (IS_PRODUCTION == false) ? BANK_ACCOUNT_RECHARGE_UAT : BANK_ACCOUNT_RECHARGE_PROD;
+    }
+
+
+    public static String getBankCodeRecharge() {
+        return (IS_PRODUCTION == false) ? BANK_CODE_RECHARGE_UAT : BANK_CODE_RECHARGE_PROD;
+    }
+
+    public static String getBankNameRecharge() {
+        return (IS_PRODUCTION == false) ? BANK_NAME_RECHARGE_UAT : BANK_NAME_RECHARGE_PROD;
+    }
+
+    public static String getUserBankNameRecharge() {
+        return (IS_PRODUCTION == false) ? USER_BANK_NAME_RECHARGE_UAT : USER_BANK_NAME_RECHARGE_PROD;
     }
 
     public static String getBankTypeIdRecharge() {
