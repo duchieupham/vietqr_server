@@ -1350,6 +1350,7 @@ public class TransactionBankController {
 			data.put("timeCreated", DateTimeUtil.getCurrentDateTime() + "");
 			data.put("timePaid", DateTimeUtil.getCurrentDateTime() + "");
 			data.put("userId", userId);
+			pushFakenotification(userId, data);
 			result = new ResponseMessageDTO("SUCCESS", "");
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {

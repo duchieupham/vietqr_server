@@ -410,7 +410,9 @@ public class KeyBankReceiveController {
     }
 
     @GetMapping("key-active-bank/annual-fee")
-    public ResponseEntity<List<TrAnnualFeeDTO>> getAnnualFeePackage() {
+    public ResponseEntity<List<TrAnnualFeeDTO>> getAnnualFeePackage(
+            @RequestParam String bankId
+    ) {
         List<TrAnnualFeeDTO> result = null;
         HttpStatus httpStatus = null;
         try {
@@ -419,6 +421,11 @@ public class KeyBankReceiveController {
             if (vat == null || vat < 0) {
                 vat = 0D;
             }
+            BankReceiveCheckDTO bankReceiveCheckDTO = accountBankReceiveService
+                    .checkBankReceiveActive(bankId);
+            // update validFeeFrom, validFeeTo
+            long currentTime = DateTimeUtil.getCurrentDateTime();
+            SystemSettingEntity systemSetting = systemSettingService.getSystemSetting();
             dtos = trAnnualFeePackageService.getAllFee();
             double finalVat = vat;
             result = dtos.stream().map(item -> {
@@ -433,6 +440,28 @@ public class KeyBankReceiveController {
                 dto.setTotalAmount(item.getTotalAmount());
                 dto.setVat(finalVat);
                 dto.setTotalWithVat(totalAmountWithVat);
+                long validFeeFrom = 0;
+                long validFeeTo = bankReceiveCheckDTO != null ? bankReceiveCheckDTO.getValidTo() :
+                        currentTime;
+                if (currentTime > systemSetting.getServiceActive()) {
+                    if (bankReceiveCheckDTO != null && bankReceiveCheckDTO.getIsValidService()) {
+                        validFeeFrom = bankReceiveCheckDTO.getValidTo();
+                        validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeTo, item.getDuration());
+                    } else {
+                        validFeeFrom = currentTime;
+                        validFeeTo = DateTimeUtil.plusMonthAsLongInt(currentTime, item.getDuration());
+                    }
+                } else {
+                    if (bankReceiveCheckDTO != null && bankReceiveCheckDTO.getIsValidService()) {
+                        validFeeFrom = bankReceiveCheckDTO.getValidTo();
+                        validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeTo, item.getDuration());
+                    } else {
+                        validFeeFrom = systemSetting.getServiceActive();
+                        validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeFrom, item.getDuration());
+                    }
+                }
+                dto.setTimeFrom(validFeeFrom);
+                dto.setTimeTo(validFeeTo);
                 return dto;
             }).collect(Collectors.toList());
             httpStatus = HttpStatus.OK;

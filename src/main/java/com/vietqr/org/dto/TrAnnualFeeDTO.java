@@ -8,6 +8,8 @@ public class TrAnnualFeeDTO {
     private long totalAmount;
     private double vat;
     private long totalWithVat;
+    private long timeFrom;
+    private long timeTo;
 
     public TrAnnualFeeDTO() {
     }
@@ -77,5 +79,21 @@ public class TrAnnualFeeDTO {
 
     public void setTotalWithVat(long totalWithVat) {
         this.totalWithVat = totalWithVat;
+    }
+
+    public long getTimeFrom() {
+        return timeFrom;
+    }
+
+    public void setTimeFrom(long timeFrom) {
+        this.timeFrom = timeFrom;
+    }
+
+    public long getTimeTo() {
+        return timeTo;
+    }
+
+    public void setTimeTo(long timeTo) {
+        this.timeTo = timeTo;
     }
 }
