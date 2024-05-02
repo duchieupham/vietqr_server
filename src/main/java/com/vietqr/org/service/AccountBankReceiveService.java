@@ -99,4 +99,6 @@ public interface AccountBankReceiveService {
     boolean checkIsActiveService(String bankId);
 
     IBankAccountInfoDTO getAccountBankInfoById(String bankId);
+
+	IAccountBankReceiveDTO getAccountBankInfoResById(String bankAccount, String bankCode);
 }

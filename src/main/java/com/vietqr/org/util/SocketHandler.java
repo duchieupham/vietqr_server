@@ -22,6 +22,7 @@ public class SocketHandler extends TextWebSocketHandler {
     private List<WebSocketSession> loginSessions = new ArrayList<>();
     private List<WebSocketSession> ecLoginSessions = new ArrayList<>();
     private List<WebSocketSession> transactionSessions = new ArrayList<>();
+    private List<WebSocketSession> notificationBoxSessions = new ArrayList<>();
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -31,6 +32,7 @@ public class SocketHandler extends TextWebSocketHandler {
             String loginId = (String) session.getAttributes().get("loginId");
             String ecLoginId = (String) session.getAttributes().get("ecLoginId");
             String transactionRefId = (String) session.getAttributes().get("refId");
+            String boxId = (String) session.getAttributes().get("boxId");
 
             if (userId != null && !userId.trim().isEmpty()) {
                 // save userId for this session
@@ -49,6 +51,10 @@ public class SocketHandler extends TextWebSocketHandler {
                 // save transactionRefId for this session
                 session.getAttributes().put("refId", transactionRefId);
                 transactionSessions.add(session);
+            } else if (boxId != null && !boxId.trim().isEmpty()) {
+                // save transactionRefId for this session
+                session.getAttributes().put("boxId", boxId);
+                notificationBoxSessions.add(session);
             } else {
                 logger.error("WS: userId is missing");
                 session.close();
@@ -68,6 +74,7 @@ public class SocketHandler extends TextWebSocketHandler {
         notificationSessions.remove(session);
         loginSessions.remove(session);
         transactionSessions.remove(session);
+        notificationBoxSessions.remove(session);
         //
         logger.info("WS: remove session: " + session.toString());
         logger.info("WS: notificationSessions size: " + notificationSessions.size());
@@ -115,6 +122,21 @@ public class SocketHandler extends TextWebSocketHandler {
             logger.info("WS: session Attributes: " + session.getAttributes());
             Object sessionUserId = session.getAttributes().get("userId");
             if (sessionUserId != null && sessionUserId.equals(userId)) {
+                ObjectMapper mapper = new ObjectMapper();
+                String jsonMessage = mapper.writeValueAsString(message);
+                session.sendMessage(new TextMessage(jsonMessage));
+            }
+        }
+    }
+
+    public void sendMessageToBoxId(String boxId, Map<String, String> message) throws IOException {
+        logger.info("WS: sendMessageToUser");
+        logger.info("WS: notificationSessions: " + notificationBoxSessions.size());
+        for (WebSocketSession session : notificationBoxSessions) {
+            logger.info("WS: session ID: " + session.getId());
+            logger.info("WS: session Attributes: " + session.getAttributes());
+            Object sessionUserId = session.getAttributes().get("boxId");
+            if (sessionUserId != null && sessionUserId.equals(boxId)) {
                 ObjectMapper mapper = new ObjectMapper();
                 String jsonMessage = mapper.writeValueAsString(message);
                 session.sendMessage(new TextMessage(jsonMessage));

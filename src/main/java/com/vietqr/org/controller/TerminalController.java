@@ -1590,6 +1590,140 @@ public class TerminalController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @PostMapping("tid-internal/sync")
+    public ResponseEntity<Object> syncTerminal(@RequestHeader("Authorization") String token,
+                                               @Valid @RequestBody TerminalSyncInterDTO dto) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        TerminalTidResponseDTO responseDTO = new TerminalTidResponseDTO();
+        try {
+            String terminalCode = "";
+            String username = getUsernameFromToken(token);
+            terminalCode = getRandomUniqueCodeInTerminalCode();
+            String accessKey = accountCustomerService.getAccessKeyByUsername(username);
+            String checkSum = BankEncryptUtil.generateMD5SyncTidChecksum(accessKey, dto.getBankCode(),
+                    dto.getBankAccount());
+            if (BankEncryptUtil.isMatchChecksum(dto.getCheckSum(), checkSum)) {
+                IAccountBankReceiveDTO accountBankInfoResById
+                        = accountBankReceiveService.getAccountBankInfoResById(dto.getBankAccount(), dto.getBankCode());
+                if (accountBankInfoResById != null) {
+                    if (accountBankInfoResById.getIsAuthenticated()) {
+                        TerminalBankReceiveEntity terminalBankReceiveEntity = terminalBankReceiveService
+                                .getTerminalBankReceiveByRawTerminalCode(dto.getBoxCode());
+                        if (terminalBankReceiveEntity == null) {
+                            terminalBankReceiveEntity = new TerminalBankReceiveEntity();
+                            terminalBankReceiveEntity.setId(UUID.randomUUID().toString());
+                        }
+                        terminalBankReceiveEntity.setTerminalId("");
+                        terminalBankReceiveEntity.setSubTerminalAddress(dto.getBoxAddress());
+                        terminalBankReceiveEntity.setBankId(accountBankInfoResById.getBankId());
+                        terminalBankReceiveEntity.setRawTerminalCode(dto.getBoxCode());
+                        terminalBankReceiveEntity.setTerminalCode(terminalCode);
+                        terminalBankReceiveEntity.setTypeOfQR(2);
+                        String qrCode = "";
+                        if (accountBankInfoResById.getIsMmsActive()) {
+                            TerminalBankEntity terminalBankEntity =
+                                    terminalBankService.getTerminalBankByBankAccount(accountBankInfoResById.getBankAccount());
+                            if (terminalBankEntity != null) {
+                                String qr = MBVietQRUtil.generateStaticVietQRMMS(
+                                        new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
+                                                terminalBankEntity.getTerminalId(), terminalCode));
+                                terminalBankReceiveEntity.setData2(qr);
+                                qrCode = qr;
+                                String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
+                                terminalBankReceiveEntity.setTraceTransfer(traceTransfer);
+                                terminalBankReceiveEntity.setData1("");
+                            } else {
+                                logger.error("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
+                            }
+                        } else {
+                            // luồng thuong
+                            String qrCodeContent = "SQR" + terminalCode;
+                            String bankAccount = accountBankInfoResById.getBankAccount();
+                            String caiValue = accountBankReceiveService.getCaiValueByBankId(accountBankInfoResById.getBankId());
+                            VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", qrCodeContent, bankAccount);
+                            String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+                            terminalBankReceiveEntity.setData1(qr);
+                            qrCode = qr;
+                            terminalBankReceiveEntity.setData2("");
+                            terminalBankReceiveEntity.setTraceTransfer("");
+                        }
+                        terminalBankReceiveService.insert(terminalBankReceiveEntity);
+                        BoxMachineCreatedDTO response = new BoxMachineCreatedDTO();
+                        response.setBoxId(BoxTerminalRefIdUtil.encryptTransactionId(terminalBankReceiveEntity.getId()));
+                        response.setBankAccount(dto.getBankAccount());
+                        response.setBankCode(dto.getBankCode());
+                        response.setQrCode(qrCode);
+                        response.setBoxCode(dto.getBoxCode());
+                        result = response;
+                        httpStatus = HttpStatus.OK;
+                    } else {
+                        result = new ResponseMessageDTO("FAILED", "E46");
+                        httpStatus = HttpStatus.OK;
+                    }
+                } else {
+                    result = new ResponseMessageDTO("FAILED", "E46");
+                    httpStatus = HttpStatus.OK;
+                }
+            } else {
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.OK;
+            }
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("tid/info/{boxCode}")
+    public ResponseEntity<Object> getTerminalInternalInfo(@RequestHeader("Authorization") String token,
+                                              @PathVariable String boxCode) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            ITerminalInternalDTO dto = terminalBankReceiveService.getTerminalInternalDTOByMachineCode(boxCode);
+            if (dto != null) {
+                MachineDetailResponseDTO responseDTO = new MachineDetailResponseDTO();
+                responseDTO.setBankAccount(dto.getBankAccount());
+                responseDTO.setBankShortName(dto.getBankShortName());
+                responseDTO.setBoxAddress(dto.getMachineAddress());
+                responseDTO.setBoxCode(dto.getMachineCode());
+                responseDTO.setTerminalSubCode(dto.getTerminalCode());
+                responseDTO.setBoxId(BoxTerminalRefIdUtil.encryptTransactionId(dto.getMachineId()));
+                responseDTO.setMachineId(dto.getMachineId());
+                responseDTO.setQrCode(dto.getQrCode());
+                responseDTO.setUserBankName(dto.getUserBankName());
+                responseDTO.setBankCode(dto.getBankCode());
+                result = responseDTO;
+                httpStatus = HttpStatus.OK;
+            } else {
+                result = new ResponseMessageDTO("FAILED", "E46");
+            }
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("tid/socket-test/{boxId}")
+    public ResponseEntity<Object> getTerminalInternalInfo(@PathVariable String boxId) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            Map<String, String> data = new HashMap<>();
+            data.put("machineId", "machineId");
+            socketHandler.sendMessageToBoxId(boxId, data);
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @PostMapping("tid/synchronize")
     public ResponseEntity<Object> syncTerminal(@RequestHeader("Authorization") String token,
                                                @Valid @RequestBody List<TerminalSyncDTO> dtos) {
@@ -2175,6 +2309,9 @@ public class TerminalController {
                     terminalBankReceiveEntity.setData2("");
                     terminalBankReceiveEntity.setTraceTransfer("");
                 }
+                terminalBankReceiveService.insert(terminalBankReceiveEntity);
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
             }
 
             String serviceVhitekActive = EnvironmentUtil.getServiceVhitekActive();
