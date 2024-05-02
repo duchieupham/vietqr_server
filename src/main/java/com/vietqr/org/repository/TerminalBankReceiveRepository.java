@@ -56,6 +56,10 @@ public interface TerminalBankReceiveRepository extends JpaRepository<TerminalBan
             "WHERE terminal_code = :terminalCode LIMIT 1", nativeQuery = true)
     String getTerminalBankReceiveByTerminalCode(String terminalCode);
 
+    @Query(value = "SELECT raw_terminal_code AS rawCode, type_of_qr AS qrType, id AS boxId FROM terminal_bank_receive " +
+            "WHERE terminal_code = :terminalCode LIMIT 1", nativeQuery = true)
+    ISubTerminalCodeDTO getSubTerminalCodeByTerminalCode(String terminalCode);
+
     @Query(value = "SELECT * FROM terminal_bank_receive " +
             "WHERE raw_terminal_code = :machineCode LIMIT 1", nativeQuery = true)
     TerminalBankReceiveEntity getTerminalBankReceiveByRawTerminalCode(String machineCode);
@@ -204,4 +208,15 @@ public interface TerminalBankReceiveRepository extends JpaRepository<TerminalBan
             + "INNER JOIN terminal b ON a.terminal_id = b.id "
             + "WHERE b.code = :terminalCode LIMIT 1", nativeQuery = true)
     String getBankIdByTerminalCode(String terminalCode);
+
+    @Query(value = "SELECT a.id AS machineId, a.raw_terminal_code AS machineCode, "
+            + "a.sub_terminal_address AS machineAddress, a.terminal_code AS terminalCode, "
+            + "CASE WHEN a.trace_transfer = '' THEN a.data1 ELSE a.data2 END AS qrCode, "
+            + "b.id AS bankId, b.bank_account AS bankAccount, b.bank_account_name AS userBankName, "
+            + "c.bank_short_name AS bankShortName, c.bank_code AS bankCode "
+            + "FROM terminal_bank_receive a "
+            + "INNER JOIN account_bank_receive b ON a.bank_id = b.id "
+            + "INNER JOIN bank_type c ON c.id = b.bank_type_id "
+            + "WHERE a.raw_terminal_code = :machineCode", nativeQuery = true)
+    ITerminalInternalDTO getTerminalInternalByMachineCode(String machineCode);
 }

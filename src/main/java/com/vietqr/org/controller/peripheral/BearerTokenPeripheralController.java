@@ -62,7 +62,7 @@ public class BearerTokenPeripheralController {
     }
 
     private String getJWTToken(String username) {
-        String secretKey = "cGVyaXBoZXJhbHZpZXRxcmJucw==";
+        String secretKey = "mySecretKey";
         List<GrantedAuthority> grantedAuthorities = AuthorityUtils
                 .commaSeparatedStringToAuthorityList("ROLE_USER");
 

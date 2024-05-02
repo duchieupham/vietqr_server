@@ -21,7 +21,10 @@ public class TerminalBankReceiveEntity {
     @Column(name = "rawTerminalCode")
     private String rawTerminalCode;
 
-    //0: QR default, 1: QR Box
+    @Column(name = "subTerminalAddress")
+    private String subTerminalAddress;
+
+    //0: QR default, 1: QR Box, 2: QR Box internal
     @Column(name = "typeOfQr")
     private int typeOfQR;
 
@@ -39,6 +42,9 @@ public class TerminalBankReceiveEntity {
     @Column(name = "traceTransfer")
     private String traceTransfer;
 
+    public TerminalBankReceiveEntity() {
+        subTerminalAddress = "";
+    }
 
     public TerminalBankReceiveEntity(String id, String terminalId, String bankId, String data1, String data2) {
         this.id = id;
@@ -112,14 +118,19 @@ public class TerminalBankReceiveEntity {
         this.data2 = data2;
     }
 
-    public TerminalBankReceiveEntity() {
-    }
-
     public void setId(String id) {
         this.id = id;
     }
 
     public String getId() {
         return id;
+    }
+
+    public String getSubTerminalAddress() {
+        return subTerminalAddress;
+    }
+
+    public void setSubTerminalAddress(String subTerminalAddress) {
+        this.subTerminalAddress = subTerminalAddress;
     }
 }

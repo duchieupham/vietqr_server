@@ -23,6 +23,7 @@ public class BankEncryptUtil {
     private static final int ITERATION_COUNT = 1989;
     private static final String SECRET_KEY = "Runsystem!@#2020";
     private static final String ACCESS_KEY_CHECKSUM = "BluecomAccesskey";
+    private static final String VIET_QR_KEY_CHECKSUM = "VietQRAccesskey";
 
     public static boolean isMatchChecksum(String data, String checkSum) {
         return data.equals(checkSum);
@@ -50,6 +51,25 @@ public class BankEncryptUtil {
         String result = "";
         try {
             String plainText = secretCode + serviceId + customerId;
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(plainText.getBytes());
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b & 0xff));
+            }
+            result = sb.toString();
+        } catch (Exception e) {
+            logger.error("generateMD5GetBillForBankChecksum: ERROR: " + e.toString());
+        }
+        return result;
+    }
+
+    public static String generateMD5GetAccountInfoCheckSum(String accountNumber, String bin,
+                                                           String accountType) {
+        String result = "";
+        try {
+            String plainText = bin + accountType + accountNumber + VIET_QR_KEY_CHECKSUM;
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(plainText.getBytes());
             byte[] digest = md.digest();
