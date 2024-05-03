@@ -124,7 +124,6 @@ public class TerminalMemberController {
             } else {
                 merchantMemberEntity.setMerchantId(dto.getMerchantId());
             }
-            merchantMemberEntity.setMerchantId(dto.getMerchantId());
             merchantMemberEntity.setUserId(dto.getUserId());
             merchantMemberEntity.setTerminalId(dto.getTerminalId());
             merchantMemberEntity.setActive(true);
