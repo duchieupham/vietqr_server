@@ -426,6 +426,11 @@ public class TransactionController {
             // type = 2: order_id
             // type = 3: content
             // type = 5: status
+            if (terminalCode != null) {
+                if (terminalCode.contains("Tất cả")) {
+                    terminalCode = "";
+                }
+            }
             List<String> listCode = new ArrayList<>();
             boolean checkEmptyDate = StringUtil.isEmptyOrEqualsZero(fromDate) || StringUtil.isEmptyOrEqualsZero(toDate);
             boolean checkEmptyTerminal = StringUtil.isNullOrEmpty(terminalCode);

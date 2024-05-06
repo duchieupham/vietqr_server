@@ -3,6 +3,7 @@ package com.vietqr.org.util;
 public class NotificationUtil {
 
 	// Type
+	private static final String NOTI_TYPE_CONNECT_SUCCESS = "N00";
 	private static final String NOTI_TYPE_LOGIN = "N02";
 	private static final String NOTI_TYPE_TRANSACTION = "N01";
 	private static final String NOTI_TYPE_NEW_MEMBER = "N03";
@@ -63,6 +64,9 @@ public class NotificationUtil {
 	private static final String NOTI_PAYMENT_BDSD_VIETQR_1 = "Thanh toán dịch vụ nhận BĐSD ";
 	private static final String NOTI_PAYMENT_BDSD_VIETQR_2 = "cho số TK: ";
 
+	public static String getNotiTypeConnectSuccess() {
+		return NOTI_TYPE_CONNECT_SUCCESS;
+	}
 	public static String getNotiPaymentAnnualFeeVietqrName() {
 		return NOTI_PAYMENT_ANNUAL_FEE_VIETQR_NAME;
 	}
