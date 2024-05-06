@@ -146,10 +146,14 @@ public class DateTimeUtil {
 
     public static String getDateStringBaseLong(long time) {
         String result = "";
-        time = time + GMT_PLUS_7_OFFSET;
-        if (time > 0) {
-            LocalDateTime localDateTime = LocalDateTime.ofEpochSecond(time, 0, ZoneOffset.UTC);
-            result = localDateTime.format(DateTimeFormatter.ofPattern(DateTimeFormatVN));
+        if (time == 0) {
+            result = "-";
+        } else {
+            time = time + GMT_PLUS_7_OFFSET;
+            if (time > 0) {
+                LocalDateTime localDateTime = LocalDateTime.ofEpochSecond(time, 0, ZoneOffset.UTC);
+                result = localDateTime.format(DateTimeFormatter.ofPattern(DateTimeFormatVN));
+            }
         }
         return result;
     }

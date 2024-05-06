@@ -24,11 +24,6 @@ public class TerminalBankReceiveServiceImpl implements TerminalBankReceiveServic
     }
 
     @Override
-    public TerminalBankReceiveEntity getTerminalBankReceiveByTerminalIdAndBankId(String terminalId, String bankId) {
-        return repo.getTerminalBankReceiveByTerminalIdAndBankId(terminalId, bankId);
-    }
-
-    @Override
     public String getTerminalByTraceTransfer(String traceTransfer) {
         return repo.getTerminalByTraceTransfer(traceTransfer);
     }
@@ -162,5 +157,10 @@ public class TerminalBankReceiveServiceImpl implements TerminalBankReceiveServic
     @Override
     public ISubTerminalCodeDTO getSubTerminalCodeBySubTerminalCode(String terminalCode) {
         return repo.getSubTerminalCodeByTerminalCode(terminalCode);
+    }
+
+    @Override
+    public String checkExistedRawTerminalCode(String code) {
+        return repo.checkExistedRawTerminalCode(code);
     }
 }

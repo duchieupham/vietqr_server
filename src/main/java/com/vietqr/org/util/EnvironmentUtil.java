@@ -267,7 +267,11 @@ public class EnvironmentUtil {
     private static final String FCM_NOTIFICATION_ROLE_ID_UAT = "072bb387-959c-4f6d-917a-4dbd74a7bc94";
     private static final String FCM_NOTIFICATION_ROLE_ID_PROD = "072bb387-959c-4f6d-917a-4dbd74a7bc94";
 
+    private static final String HIDDEN_AMOUNT_VIET_QR = "xxxxx";
     private static final int MAXIMUM_EXPIRED_MINUTES_OTP = 10;
+
+    private static final String VIET_QR_ACTIVE_KEY_UAT = "";
+    private static final String VIET_QR_ACTIVE_KEY_PROD = "vqsbgDbmkC";
 
     private static final int LENGTH_KEY_ACTIVE_BANK = 12;
     private static final String CHARACTERS_KEY_ACTIVE_BANK = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -284,6 +288,14 @@ public class EnvironmentUtil {
 
     public static String getBidvUrlCreateVietQRVa() {
         return (IS_PRODUCTION == false) ? BIDV_URL_CREATE_VIETQR_VA_UAT : BIDV_URL_CREATE_VIETQR_VA_PROD;
+    }
+
+    public static String getHiddenAmountVietQr() {
+        return HIDDEN_AMOUNT_VIET_QR;
+    }
+
+    public static String getVietQrActiveKey() {
+        return (IS_PRODUCTION == false) ? VIET_QR_ACTIVE_KEY_UAT : VIET_QR_ACTIVE_KEY_PROD;
     }
 
     public static String getBidvUrlRequestAddMerchant() {
