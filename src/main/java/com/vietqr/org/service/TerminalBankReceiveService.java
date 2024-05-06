@@ -12,8 +12,6 @@ public interface TerminalBankReceiveService {
 
     void insert(TerminalBankReceiveEntity terminalBankReceiveEntity);
 
-    TerminalBankReceiveEntity getTerminalBankReceiveByTerminalIdAndBankId(String terminalId, String bankId);
-
     String getTerminalByTraceTransfer(String traceTransfer);
 
     TerminalBankReceiveEntity getTerminalBankReceiveByTerminalId(String terminalId);
@@ -67,4 +65,6 @@ public interface TerminalBankReceiveService {
     ITerminalInternalDTO getTerminalInternalDTOByMachineCode(String machineCode);
 
     ISubTerminalCodeDTO getSubTerminalCodeBySubTerminalCode(String terminalCode);
+
+    String checkExistedRawTerminalCode(String code);
 }

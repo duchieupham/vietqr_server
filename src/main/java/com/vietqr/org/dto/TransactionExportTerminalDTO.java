@@ -19,6 +19,7 @@ public class TransactionExportTerminalDTO {
     private String terminalCode;
     private String terminalName;
     private String terminalAddress;
+    private boolean hiddenAmount;
 
     public TransactionExportTerminalDTO() {
     }
@@ -165,5 +166,13 @@ public class TransactionExportTerminalDTO {
 
     public void setTerminalAddress(String terminalAddress) {
         this.terminalAddress = terminalAddress;
+    }
+
+    public boolean isHiddenAmount() {
+        return hiddenAmount;
+    }
+
+    public void setHiddenAmount(boolean hiddenAmount) {
+        this.hiddenAmount = hiddenAmount;
     }
 }

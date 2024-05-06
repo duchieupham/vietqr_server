@@ -703,7 +703,7 @@ public class KeyBankReceiveController {
                                     transactionReceiveEntity.setCustomerBankAccount("");
                                     transactionReceiveEntity.setCustomerBankCode("");
                                     transactionReceiveEntity.setCustomerName("");
-                                    transactionReceiveEntity.setTerminalCode("");
+                                    transactionReceiveEntity.setTerminalCode(EnvironmentUtil.getVietQrActiveKey());
                                     transactionReceiveEntity.setUserId(userIdHost);
                                     transactionReceiveEntity.setNote("");
                                     transactionReceiveEntity.setTransStatus(0);

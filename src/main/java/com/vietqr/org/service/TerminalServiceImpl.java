@@ -107,21 +107,9 @@ public class TerminalServiceImpl implements TerminalService {
     }
 
     @Override
-    public List<TerminalEntity> getAllTerminalNoQRCode() {
-        return repo.getAllTerminalNoQRCode();
-    }
-
-    @Override
     public List<ITerminalDetailWebDTO> getTerminalByUserId(String userId, int offset, String value) {
         StartEndTimeDTO dto = DateTimeUtil.getStartEndCurrentDate();
         return repo.getTerminalWebByUserId(userId, offset, value);
-    }
-
-    @Override
-    public List<ITerminalDetailWebDTO> getTerminalByUserIdAndMerchantId(String merchantId, String userId, int offset, String value) {
-        StartEndTimeDTO dto = DateTimeUtil.getStartEndCurrentDate();
-        return repo.getTerminalWebByUserIdAndMerchantId(merchantId, userId, offset, value,
-                dto.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
     @Override
@@ -135,23 +123,8 @@ public class TerminalServiceImpl implements TerminalService {
     }
 
     @Override
-    public String checkExistedTerminalIntoMerchant(String terminalId, String merchantId) {
-        return repo.checkExistedTerminalIntoMerchant(terminalId, merchantId);
-    }
-
-    @Override
-    public TerminalEntity findTerminalByPublicId(String terminalId) {
-        return repo.findTerminalByPublicId(terminalId);
-    }
-
-    @Override
     public void insertAllTerminal(List<TerminalEntity> terminalEntities) {
         repo.saveAll(terminalEntities);
-    }
-
-    @Override
-    public List<ITerminalTidResponseDTO> getTerminalByMerchantId(String merchantId, int offset, int size) {
-        return repo.getTerminalByMerchantId(merchantId, offset, size);
     }
 
     @Override
@@ -172,26 +145,6 @@ public class TerminalServiceImpl implements TerminalService {
     @Override
     public TerminalEntity getTerminalByTerminalBankReceiveCode(String terminalCode) {
         return repo.getTerminalByTerminalBankReceiveCode(terminalCode);
-    }
-
-    @Override
-    public List<String> getAllCodeByUserId(String userId) {
-        return repo.getAllCodeByUserId(userId);
-    }
-
-    @Override
-    public List<String> getAllCodeByUserIdOwner(String userId) {
-        return repo.getAllCodeByUserIdOwner(userId);
-    }
-
-    @Override
-    public List<IStatisticTerminalOverViewDTO> getListTerminalByUserId(String userId, int offset) {
-        return repo.getListTerminalByUserId(userId, offset);
-    }
-
-    @Override
-    public List<IStatisticTerminalOverViewDTO> getListTerminalByUserIdNotOwner(String userId, int offset, int size) {
-        return repo.getListTerminalByUserIdNotOwner(userId, offset, size);
     }
 
     @Override
@@ -257,5 +210,10 @@ public class TerminalServiceImpl implements TerminalService {
     @Override
     public String getUserIdByTerminalId(String terminalId) {
         return repo.getUserIdByTerminalId(terminalId);
+    }
+
+    @Override
+    public String checkExistedTerminalRawCode(String code) {
+        return repo.checkExistedRawTerminalCode(code);
     }
 }

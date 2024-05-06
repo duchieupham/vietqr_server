@@ -45,23 +45,13 @@ public interface TerminalService {
 
     String getTerminalByTraceTransfer(String traceTransfer);
 
-    List<TerminalEntity> getAllTerminalNoQRCode();
-
     List<ITerminalDetailWebDTO> getTerminalByUserId(String userId, int offset, String value);
-
-    List<ITerminalDetailWebDTO> getTerminalByUserIdAndMerchantId(String merchantId, String userId, int offset, String value);
 
     ITerminalBankResponseDTO getTerminalResponseById(String terminalId, String userId);
 
     ITerminalWebResponseDTO getTerminalWebById(String terminalId);
 
-    String checkExistedTerminalIntoMerchant(String terminalId, String merchantId);
-
-    TerminalEntity findTerminalByPublicId(String terminalId);
-
     void insertAllTerminal(List<TerminalEntity> terminalEntities);
-
-    List<ITerminalTidResponseDTO> getTerminalByMerchantId(String merchantId, int offset, int size);
 
     String checkExistedRawTerminalCode(String terminalCode);
 
@@ -70,14 +60,6 @@ public interface TerminalService {
     String getTerminalCodeByTerminalCode(String value);
 
     TerminalEntity getTerminalByTerminalBankReceiveCode(String terminalCode);
-
-    List<String> getAllCodeByUserId(String userId);
-
-    List<String> getAllCodeByUserIdOwner(String userId);
-
-    List<IStatisticTerminalOverViewDTO> getListTerminalByUserId(String userId, int offset);
-
-    List<IStatisticTerminalOverViewDTO> getListTerminalByUserIdNotOwner(String userId, int offset, int size);
 
     int countNumberOfTerminalByUserIdOwner(String userId);
 
@@ -104,4 +86,6 @@ public interface TerminalService {
     List<ITerminalExportDTO> getTerminalByUserIdHaveRole(String userId);
 
     String getUserIdByTerminalId(String terminalId);
+
+    String checkExistedTerminalRawCode(String code);
 }

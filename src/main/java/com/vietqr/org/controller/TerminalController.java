@@ -37,6 +37,7 @@ import javax.validation.Valid;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -50,6 +51,7 @@ import java.util.stream.Collectors;
 public class TerminalController {
     private static final Logger logger = Logger.getLogger(TerminalController.class);
     private static final String CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final String NUMBERS = "0123456789";
     private static final int CODE_LENGTH = 10;
     private static final int WINDOW_SIZE = 100;
 
@@ -105,6 +107,12 @@ public class TerminalController {
 
     @Autowired
     private FcmTokenService fcmTokenService;
+
+    @Autowired
+    private SystemSettingService systemSettingService;
+
+    @Autowired
+    private TransReceiveTempService transReceiveTempService;
 
     @Autowired
     private FirebaseMessagingService firebaseMessagingService;
@@ -375,13 +383,15 @@ public class TerminalController {
             roleList.add(EnvironmentUtil.getAdminRoleId());
             String roles = String.join("|", roleList);
             String isOwner = merchantMemberRoleService.checkMemberHaveRole(userId, roles);
+            if (isOwner == null || isOwner.isEmpty()) {
+                isOwner = accountBankReceiveService.checkIsOwner(bankId, userId);
+            }
             try (SXSSFWorkbook workbook = new SXSSFWorkbook()) {
 
                 workbook.setCompressTempFiles(true);
                 Map<String, TerminalExportDTO> terminalExports = new HashMap<>();
                 SXSSFSheet sheet = workbook.createSheet("VietQRVN-GiaoDich");
                 sheet.setRandomAccessWindowSize(WINDOW_SIZE);
-//                    String isOwner = accountBankReceiveService.checkIsOwner(bankId, userId);
                 if (isOwner == null || isOwner.trim().isEmpty()) {
                 } else {
                     if (terminalCode == null || terminalCode.trim().isEmpty()) {
@@ -405,35 +415,194 @@ public class TerminalController {
                         }
                     }
                 }
-                List<TransactionExportTerminalDTO> dtos = list.stream().map(item -> {
-                    TransactionExportTerminalDTO dto = new TransactionExportTerminalDTO();
-                    dto.setAmount(item.getAmount());
-                    dto.setBankAccount(StringUtil.formatBankAccount(item.getBankAccount()));
-                    dto.setBankCode(item.getBankCode() != null && !item.getBankCode().isEmpty() ? item.getBankCode() : "-");
-                    dto.setBankName(item.getBankName() != null && !item.getBankName().isEmpty() ? item.getBankName() : "-");
-                    dto.setContent(item.getContent() != null ? item.getContent() : "-");
-                    dto.setReferenceNumber(item.getReferenceNumber() != null && !item.getReferenceNumber().isEmpty() ? item.getReferenceNumber() : "-");
-                    dto.setOrderId(item.getOrderId() != null && !item.getOrderId().isEmpty() ? item.getOrderId() : "-");
-                    dto.setTerminalCode(item.getTerminalCode() != null && !item.getTerminalCode().isEmpty() ? item.getTerminalCode() : "-");
-                    dto.setTime(DateTimeUtil.getDateStringBaseLong(item.getTime()));
-                    dto.setTimePaid(DateTimeUtil.getDateStringBaseLong(item.getTimePaid()));
-                    dto.setTransType(item.getTransType().equals("C") ? "Giao dịch đến" : "Giao dịch đi");
-                    dto.setStatus(getStatusTransaction(item.getStatus()));
-                    dto.setType(getTypeTransaction(item.getType()));
-                    dto.setNote(item.getNote() != null && !item.getNote().isEmpty() ? item.getNote() : "-");
-                    dto.setBankShortName(item.getBankShortName() != null && !item.getBankShortName().isEmpty() ? item.getBankShortName() : "-");
-                    TerminalExportDTO terminalExportDTO = terminalExports.get(item.getTerminalCode());
-                    if (terminalExportDTO != null) {
-                        dto.setTerminalAddress(terminalExportDTO.getTerminalAddress()
-                                .isEmpty() ? "-" : terminalExportDTO.getTerminalAddress());
-                        dto.setTerminalName(terminalExportDTO.getTerminalName()
-                                .isEmpty() ? "-" : terminalExportDTO.getTerminalName());
-                    } else {
-                        dto.setTerminalAddress("-");
-                        dto.setTerminalName("-");
+                List<TransactionExportTerminalDTO> dtos = new ArrayList<>();
+                boolean isActiveService = accountBankReceiveService.checkIsActiveService(bankId);
+                if (isActiveService) {
+                    dtos = list.stream().map(item -> {
+                        TransactionExportTerminalDTO dto = new TransactionExportTerminalDTO();
+                        dto.setAmount(item.getAmount());
+                        dto.setHiddenAmount(false);
+                        dto.setBankAccount(StringUtil.formatBankAccount(item.getBankAccount()));
+                        dto.setBankCode(item.getBankCode() != null && !item.getBankCode().isEmpty() ? item.getBankCode() : "-");
+                        dto.setBankName(item.getBankName() != null && !item.getBankName().isEmpty() ? item.getBankName() : "-");
+                        dto.setContent(item.getContent() != null ? item.getContent() : "-");
+                        dto.setReferenceNumber(item.getReferenceNumber() != null && !item.getReferenceNumber().isEmpty() ? item.getReferenceNumber() : "-");
+                        dto.setOrderId(item.getOrderId() != null && !item.getOrderId().isEmpty() ? item.getOrderId() : "-");
+                        dto.setTerminalCode(item.getTerminalCode() != null && !item.getTerminalCode().isEmpty() ? item.getTerminalCode() : "-");
+                        dto.setTime(DateTimeUtil.getDateStringBaseLong(item.getTime()));
+                        dto.setTimePaid(DateTimeUtil.getDateStringBaseLong(item.getTimePaid()));
+                        dto.setTransType(item.getTransType().equals("C") ? "Giao dịch đến" : "Giao dịch đi");
+                        dto.setStatus(getStatusTransaction(item.getStatus()));
+                        dto.setType(getTypeTransaction(item.getType()));
+                        dto.setNote(item.getNote() != null && !item.getNote().isEmpty() ? item.getNote() : "-");
+                        dto.setBankShortName(item.getBankShortName() != null && !item.getBankShortName().isEmpty() ? item.getBankShortName() : "-");
+                        TerminalExportDTO terminalExportDTO = terminalExports.get(item.getTerminalCode());
+                        if (terminalExportDTO != null) {
+                            dto.setTerminalAddress(terminalExportDTO.getTerminalAddress()
+                                    .isEmpty() ? "-" : terminalExportDTO.getTerminalAddress());
+                            dto.setTerminalName(terminalExportDTO.getTerminalName()
+                                    .isEmpty() ? "-" : terminalExportDTO.getTerminalName());
+                        } else {
+                            dto.setTerminalAddress("-");
+                            dto.setTerminalName("-");
+                        }
+                        return dto;
+                    }).collect(Collectors.toList());
+                } else {
+                    LocalDateTime now = LocalDateTime.now();
+                    long time = now.toEpochSecond(ZoneOffset.UTC);
+                    if (!list.isEmpty()) {
+                        time = list.get(0).getTime();
                     }
-                    return dto;
-                }).collect(Collectors.toList());
+                    SystemSettingEntity setting = systemSettingService.getSystemSetting();
+                    if (setting.getServiceActive() > time) {
+                        dtos = list.stream().map(item -> {
+                            TransactionExportTerminalDTO dto = new TransactionExportTerminalDTO();
+                            dto.setAmount(item.getAmount());
+                            dto.setHiddenAmount(false);
+                            dto.setBankAccount(StringUtil.formatBankAccount(item.getBankAccount()));
+                            dto.setBankCode(item.getBankCode() != null && !item.getBankCode().isEmpty() ? item.getBankCode() : "-");
+                            dto.setBankName(item.getBankName() != null && !item.getBankName().isEmpty() ? item.getBankName() : "-");
+                            dto.setContent(item.getContent() != null ? item.getContent() : "-");
+                            dto.setReferenceNumber(item.getReferenceNumber() != null && !item.getReferenceNumber().isEmpty() ? item.getReferenceNumber() : "-");
+                            dto.setOrderId(item.getOrderId() != null && !item.getOrderId().isEmpty() ? item.getOrderId() : "-");
+                            dto.setTerminalCode(item.getTerminalCode() != null && !item.getTerminalCode().isEmpty() ? item.getTerminalCode() : "-");
+                            dto.setTime(DateTimeUtil.getDateStringBaseLong(item.getTime()));
+                            dto.setTimePaid(DateTimeUtil.getDateStringBaseLong(item.getTimePaid()));
+                            dto.setTransType(item.getTransType().equals("C") ? "Giao dịch đến" : "Giao dịch đi");
+                            dto.setStatus(getStatusTransaction(item.getStatus()));
+                            dto.setType(getTypeTransaction(item.getType()));
+                            dto.setNote(item.getNote() != null && !item.getNote().isEmpty() ? item.getNote() : "-");
+                            dto.setBankShortName(item.getBankShortName() != null && !item.getBankShortName().isEmpty() ? item.getBankShortName() : "-");
+                            TerminalExportDTO terminalExportDTO = terminalExports.get(item.getTerminalCode());
+                            if (terminalExportDTO != null) {
+                                dto.setTerminalAddress(terminalExportDTO.getTerminalAddress()
+                                        .isEmpty() ? "-" : terminalExportDTO.getTerminalAddress());
+                                dto.setTerminalName(terminalExportDTO.getTerminalName()
+                                        .isEmpty() ? "-" : terminalExportDTO.getTerminalName());
+                            } else {
+                                dto.setTerminalAddress("-");
+                                dto.setTerminalName("-");
+                            }
+                            return dto;
+
+                        }).collect(Collectors.toList());
+                    } else {
+                        if (!list.isEmpty()) {
+                            int lastIndex = list.size() - 1;
+                            long lastTime = list.get(lastIndex).getTime();
+                            TransReceiveTempEntity entity = transReceiveTempService.getLastTimeByBankId(bankId);
+                            if (entity != null) {
+                                if (entity.getLastTimes() <= lastTime) {
+                                    dtos = list.stream().map(item -> {
+                                        TransactionExportTerminalDTO dto = new TransactionExportTerminalDTO();
+                                        dto.setAmount(item.getAmount());
+                                        dto.setHiddenAmount(true);
+                                        dto.setBankAccount(StringUtil.formatBankAccount(item.getBankAccount()));
+                                        dto.setBankCode(item.getBankCode() != null && !item.getBankCode().isEmpty() ? item.getBankCode() : "-");
+                                        dto.setBankName(item.getBankName() != null && !item.getBankName().isEmpty() ? item.getBankName() : "-");
+                                        dto.setContent(item.getContent() != null ? item.getContent() : "-");
+                                        dto.setReferenceNumber(item.getReferenceNumber() != null && !item.getReferenceNumber().isEmpty() ? item.getReferenceNumber() : "-");
+                                        dto.setOrderId(item.getOrderId() != null && !item.getOrderId().isEmpty() ? item.getOrderId() : "-");
+                                        dto.setTerminalCode(item.getTerminalCode() != null && !item.getTerminalCode().isEmpty() ? item.getTerminalCode() : "-");
+                                        dto.setTime(DateTimeUtil.getDateStringBaseLong(item.getTime()));
+                                        dto.setTimePaid(DateTimeUtil.getDateStringBaseLong(item.getTimePaid()));
+                                        dto.setTransType(item.getTransType().equals("C") ? "Giao dịch đến" : "Giao dịch đi");
+                                        dto.setStatus(getStatusTransaction(item.getStatus()));
+                                        dto.setType(getTypeTransaction(item.getType()));
+                                        dto.setNote(item.getNote() != null && !item.getNote().isEmpty() ? item.getNote() : "-");
+                                        dto.setBankShortName(item.getBankShortName() != null && !item.getBankShortName().isEmpty() ? item.getBankShortName() : "-");
+                                        TerminalExportDTO terminalExportDTO = terminalExports.get(item.getTerminalCode());
+                                        if (terminalExportDTO != null) {
+                                            dto.setTerminalAddress(terminalExportDTO.getTerminalAddress()
+                                                    .isEmpty() ? "-" : terminalExportDTO.getTerminalAddress());
+                                            dto.setTerminalName(terminalExportDTO.getTerminalName()
+                                                    .isEmpty() ? "-" : terminalExportDTO.getTerminalName());
+                                        } else {
+                                            dto.setTerminalAddress("-");
+                                            dto.setTerminalName("-");
+                                        }
+                                        return dto;
+
+                                    }).collect(Collectors.toList());
+                                } else {
+                                    dtos = list.stream().map(item -> {
+                                        TransactionExportTerminalDTO dto = new TransactionExportTerminalDTO();
+                                        if (entity.getTransIds().contains(item.getTransactionId())) {
+                                            dto.setAmount(item.getAmount());
+                                            dto.setHiddenAmount(false);
+                                        } else if (item.getTime() < entity.getLastTimes()) {
+                                            dto.setAmount(item.getAmount());
+                                            dto.setHiddenAmount(false);
+                                        } else {
+                                            dto.setAmount(item.getAmount());
+                                            dto.setHiddenAmount(true);
+                                        }
+                                        dto.setBankAccount(StringUtil.formatBankAccount(item.getBankAccount()));
+                                        dto.setBankCode(item.getBankCode() != null && !item.getBankCode().isEmpty() ? item.getBankCode() : "-");
+                                        dto.setBankName(item.getBankName() != null && !item.getBankName().isEmpty() ? item.getBankName() : "-");
+                                        dto.setContent(item.getContent() != null ? item.getContent() : "-");
+                                        dto.setReferenceNumber(item.getReferenceNumber() != null && !item.getReferenceNumber().isEmpty() ? item.getReferenceNumber() : "-");
+                                        dto.setOrderId(item.getOrderId() != null && !item.getOrderId().isEmpty() ? item.getOrderId() : "-");
+                                        dto.setTerminalCode(item.getTerminalCode() != null && !item.getTerminalCode().isEmpty() ? item.getTerminalCode() : "-");
+                                        dto.setTime(DateTimeUtil.getDateStringBaseLong(item.getTime()));
+                                        dto.setTimePaid(DateTimeUtil.getDateStringBaseLong(item.getTimePaid()));
+                                        dto.setTransType(item.getTransType().equals("C") ? "Giao dịch đến" : "Giao dịch đi");
+                                        dto.setStatus(getStatusTransaction(item.getStatus()));
+                                        dto.setType(getTypeTransaction(item.getType()));
+                                        dto.setNote(item.getNote() != null && !item.getNote().isEmpty() ? item.getNote() : "-");
+                                        dto.setBankShortName(item.getBankShortName() != null && !item.getBankShortName().isEmpty() ? item.getBankShortName() : "-");
+                                        TerminalExportDTO terminalExportDTO = terminalExports.get(item.getTerminalCode());
+                                        if (terminalExportDTO != null) {
+                                            dto.setTerminalAddress(terminalExportDTO.getTerminalAddress()
+                                                    .isEmpty() ? "-" : terminalExportDTO.getTerminalAddress());
+                                            dto.setTerminalName(terminalExportDTO.getTerminalName()
+                                                    .isEmpty() ? "-" : terminalExportDTO.getTerminalName());
+                                        } else {
+                                            dto.setTerminalAddress("-");
+                                            dto.setTerminalName("-");
+                                        }
+                                        return dto;
+
+                                    }).collect(Collectors.toList());
+                                }
+                            } else {
+                                dtos = list.stream().map(item -> {
+                                    TransactionExportTerminalDTO dto = new TransactionExportTerminalDTO();
+                                    dto.setAmount(item.getAmount());
+                                    dto.setHiddenAmount(true);
+                                    dto.setBankAccount(StringUtil.formatBankAccount(item.getBankAccount()));
+                                    dto.setBankCode(item.getBankCode() != null && !item.getBankCode().isEmpty() ? item.getBankCode() : "-");
+                                    dto.setBankName(item.getBankName() != null && !item.getBankName().isEmpty() ? item.getBankName() : "-");
+                                    dto.setContent(item.getContent() != null ? item.getContent() : "-");
+                                    dto.setReferenceNumber(item.getReferenceNumber() != null && !item.getReferenceNumber().isEmpty() ? item.getReferenceNumber() : "-");
+                                    dto.setOrderId(item.getOrderId() != null && !item.getOrderId().isEmpty() ? item.getOrderId() : "-");
+                                    dto.setTerminalCode(item.getTerminalCode() != null && !item.getTerminalCode().isEmpty() ? item.getTerminalCode() : "-");
+                                    dto.setTime(DateTimeUtil.getDateStringBaseLong(item.getTime()));
+                                    dto.setTimePaid(DateTimeUtil.getDateStringBaseLong(item.getTimePaid()));
+                                    dto.setTransType(item.getTransType().equals("C") ? "Giao dịch đến" : "Giao dịch đi");
+                                    dto.setStatus(getStatusTransaction(item.getStatus()));
+                                    dto.setType(getTypeTransaction(item.getType()));
+                                    dto.setNote(item.getNote() != null && !item.getNote().isEmpty() ? item.getNote() : "-");
+                                    dto.setBankShortName(item.getBankShortName() != null && !item.getBankShortName().isEmpty() ? item.getBankShortName() : "-");
+                                    TerminalExportDTO terminalExportDTO = terminalExports.get(item.getTerminalCode());
+                                    if (terminalExportDTO != null) {
+                                        dto.setTerminalAddress(terminalExportDTO.getTerminalAddress()
+                                                .isEmpty() ? "-" : terminalExportDTO.getTerminalAddress());
+                                        dto.setTerminalName(terminalExportDTO.getTerminalName()
+                                                .isEmpty() ? "-" : terminalExportDTO.getTerminalName());
+                                    } else {
+                                        dto.setTerminalAddress("-");
+                                        dto.setTerminalName("-");
+                                    }
+                                    return dto;
+
+                                }).collect(Collectors.toList());
+                            }
+
+                        }
+                    }
+                }
 
 
                 // Tạo hàng tiêu đề
@@ -444,6 +613,7 @@ public class TerminalController {
                 XSSFCellStyle style = workbook.getXSSFWorkbook().createCellStyle();
                 XSSFCellStyle styleCommon = workbook.getXSSFWorkbook().createCellStyle();
                 XSSFCellStyle cellNumber = workbook.getXSSFWorkbook().createCellStyle();
+                XSSFCellStyle cellHiddenNumber = workbook.getXSSFWorkbook().createCellStyle();
                 XSSFDataFormat df = workbook.getXSSFWorkbook().createDataFormat();
                 XSSFFont font = workbook.getXSSFWorkbook().createFont();
                 font.setFontName("Times New Roman");
@@ -461,6 +631,13 @@ public class TerminalController {
                 cellNumber.setBorderBottom(BorderStyle.THIN);
                 cellNumber.setBorderLeft(BorderStyle.THIN);
                 cellNumber.setBorderRight(BorderStyle.THIN);
+
+                cellHiddenNumber.setFont(font);
+                cellHiddenNumber.setAlignment(HorizontalAlignment.RIGHT);
+                cellHiddenNumber.setBorderTop(BorderStyle.THIN);
+                cellHiddenNumber.setBorderBottom(BorderStyle.THIN);
+                cellHiddenNumber.setBorderLeft(BorderStyle.THIN);
+                cellHiddenNumber.setBorderRight(BorderStyle.THIN);
 
                 XSSFFont fontHeader = workbook.getXSSFWorkbook().createFont();
                 fontHeader.setFontName("Times New Roman");
@@ -488,7 +665,11 @@ public class TerminalController {
                     Row row = sheet.createRow(counter++);
                     row.createCell(0).setCellValue(String.valueOf(counter - 1));
                     row.createCell(1).setCellValue(item.getTimePaid());
-                    row.createCell(2).setCellValue(item.getAmount());
+                    if (item.isHiddenAmount()) {
+                        row.createCell(2).setCellValue(EnvironmentUtil.getHiddenAmountVietQr());
+                    } else {
+                        row.createCell(2).setCellValue(item.getAmount());
+                    }
                     row.createCell(3).setCellValue(item.getStatus());
                     row.createCell(4).setCellValue(item.getReferenceNumber());
                     row.createCell(5).setCellValue(item.getOrderId());
@@ -501,7 +682,11 @@ public class TerminalController {
                     for (int i = 0; i < 12; i++) {
                         row.getCell(i).setCellStyle(styleCommon);
                         if (i == 2) {
-                            row.getCell(i).setCellStyle(cellNumber);
+                            if (item.isHiddenAmount()) {
+                                row.getCell(i).setCellStyle(cellHiddenNumber);
+                            } else {
+                                row.getCell(i).setCellStyle(cellNumber);
+                            }
                         }
                     }
                 }
@@ -1600,6 +1785,10 @@ public class TerminalController {
             String terminalCode = "";
             String username = getUsernameFromToken(token);
             terminalCode = getRandomUniqueCodeInTerminalCode();
+            if (dto.getBoxCode() == null || dto.getBoxCode().trim().isEmpty()) {
+                String boxCode = getRandomUniqueCodeInRawTerminalCode();
+                dto.setBoxCode(boxCode);
+            }
             String accessKey = accountCustomerService.getAccessKeyByUsername(username);
             String checkSum = BankEncryptUtil.generateMD5SyncTidChecksum(accessKey, dto.getBankCode(),
                     dto.getBankAccount());
@@ -2541,6 +2730,16 @@ public class TerminalController {
         return code.toString();
     }
 
+    private String getRawTerminalCode() {
+        SecureRandom random = new SecureRandom();
+        StringBuilder code = new StringBuilder(CODE_LENGTH);
+        for (int i = 0; i < CODE_LENGTH; i++) {
+            int randomIndex = random.nextInt(NUMBERS.length());
+            code.append(NUMBERS.charAt(randomIndex));
+        }
+        return code.toString();
+    }
+
     private String getRandomUniqueCode() {
         String result = "";
         String checkExistedCode = "";
@@ -2574,6 +2773,24 @@ public class TerminalController {
         return result;
     }
 
+    private String getRandomUniqueCodeInRawTerminalCode() {
+        String result = "";
+        String checkExistedCode = "";
+        String code = "";
+        try {
+            do {
+                code = "VQRI" + getRawTerminalCode();
+                checkExistedCode = terminalBankReceiveService.checkExistedRawTerminalCode(code);
+                if (checkExistedCode == null || checkExistedCode.trim().isEmpty()) {
+                    checkExistedCode = terminalService.checkExistedTerminalRawCode(code);
+                }
+            } while (!StringUtil.isNullOrEmpty(checkExistedCode));
+            result = code;
+        } catch (Exception e) {
+        }
+        return result;
+    }
+
     private void pushNotification(String title, String message, NotificationEntity notiEntity, Map<String, String> data,
                                   String userId) {
         try {
@@ -2592,5 +2809,17 @@ public class TerminalController {
                     "Add member to terminal: WS: push Notification - RECHARGE ERROR: "
                             + e.toString());
         }
+    }
+
+    private String formatAmountNumber(String amount) {
+        String result = amount;
+        try {
+            if (StringUtil.containsOnlyDigits(amount)) {
+                NumberFormat nf = NumberFormat.getInstance(Locale.US);
+                Long numberAmount = Long.parseLong(amount);
+                result = nf.format(numberAmount);
+            }
+        } catch (Exception ignored) {}
+        return result;
     }
 }

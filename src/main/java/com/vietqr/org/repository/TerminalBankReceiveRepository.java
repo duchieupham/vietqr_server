@@ -219,4 +219,8 @@ public interface TerminalBankReceiveRepository extends JpaRepository<TerminalBan
             + "INNER JOIN bank_type c ON c.id = b.bank_type_id "
             + "WHERE a.raw_terminal_code = :machineCode", nativeQuery = true)
     ITerminalInternalDTO getTerminalInternalByMachineCode(String machineCode);
+
+    @Query(value = "SELECT a.raw_terminal_code FROM terminal_bank_receive a "
+            + "WHERE a.raw_terminal_code = :rawTerminalCode LIMIT 1", nativeQuery = true)
+    String checkExistedRawTerminalCode(String rawTerminalCode);
 }
