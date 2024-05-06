@@ -2405,10 +2405,6 @@ public class TransactionBankController {
 						// send msg to QR Link
 						String refId = TransactionRefIdUtil.encryptTransactionId(transactionEntity.getId());
 						socketHandler.sendMessageToTransactionRefId(refId, data1);
-						if (boxIdRef != null && !boxIdRef.isEmpty()) {
-							String idRefBox = BoxTerminalRefIdUtil.encryptTransactionId(boxIdRef);
-							socketHandler.sendMessageToBoxId(idRefBox, data1);
-						}
 					} catch (IOException e) {
 						logger.error(
 								"WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());

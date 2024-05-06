@@ -2,6 +2,7 @@ package com.vietqr.org.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,6 +56,10 @@ public class SocketHandler extends TextWebSocketHandler {
                 // save transactionRefId for this session
                 session.getAttributes().put("boxId", boxId);
                 notificationBoxSessions.add(session);
+                Map<String, String> data = new HashMap<>();
+                data.put("status", "SUCCESS");
+                data.put("notificationType", NotificationUtil.getNotiTypeConnectSuccess());
+                sendMessageToBoxId(boxId, data);
             } else {
                 logger.error("WS: userId is missing");
                 session.close();
