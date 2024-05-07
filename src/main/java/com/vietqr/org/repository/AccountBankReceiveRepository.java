@@ -326,7 +326,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "INNER JOIN bank_type b "
 			+ "ON a.bank_type_id = b.id "
 			+ "WHERE a.bank_account = :bankAccount "
-			+ "AND b.bank_code = :bankCode "
+			+ "AND b.bank_code = :bankCode AND a.is_authenticated = TRUE "
 			+ "LIMIT 1 ", nativeQuery = true)
 	IAccountBankReceiveDTO getAccountBankInfoResById(String bankAccount, String bankCode);
 }

@@ -77,4 +77,9 @@ public class AccountSettingServiceImpl implements AccountSettingService {
         repo.updateQrShowType(value, userId);
     }
 
+    @Override
+    public void updateNotificationMobile(boolean value, String userId) {
+        repo.updateNotificationMobile(value, userId);
+    }
+
 }

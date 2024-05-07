@@ -3,6 +3,7 @@ package com.vietqr.org.controller;
 import java.util.List;
 import java.util.UUID;
 
+import com.vietqr.org.dto.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,17 +17,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vietqr.org.dto.GoogleChatBankDTO;
-import com.vietqr.org.dto.GoogleChatDetailDTO;
-import com.vietqr.org.dto.LarkInsertDTO;
-import com.vietqr.org.dto.ResponseMessageDTO;
-import com.vietqr.org.dto.SocialNetworkBankDTO;
-import com.vietqr.org.dto.SocialNetworkBanksDTO;
 import com.vietqr.org.entity.GoogleChatAccountBankEntity;
 import com.vietqr.org.entity.GoogleChatEntity;
 import com.vietqr.org.service.GoogleChatAccountBankService;
 import com.vietqr.org.service.GoogleChatService;
 import com.vietqr.org.util.GoogleChatUtil;
+
+import javax.validation.Valid;
 
 @RestController
 @CrossOrigin
@@ -41,9 +38,9 @@ public class GoogleChatController {
     GoogleChatService googleChatService;
 
     // send first message
-    @GetMapping("service/google-chat/send-message")
+    @PostMapping("service/google-chat/send-message")
     public ResponseEntity<ResponseMessageDTO> sendFirstMessage(
-            @RequestParam(value = "webhook") String webhook) {
+            @Valid @RequestBody GoogleChatFirstMessDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
@@ -54,7 +51,7 @@ public class GoogleChatController {
                     + "\n📱 Hoặc tải ứng dụng thông qua: https://onelink.to/q7zwpe"
                     + "\n📞 Hotline hỗ trợ: 1900 6234 - 092 233 3636";
             GoogleChatUtil googleChatUtil = new GoogleChatUtil();
-            boolean check = googleChatUtil.sendMessageToGoogleChat(message, webhook);
+            boolean check = googleChatUtil.sendMessageToGoogleChat(message, dto.getWebhook());
             if (check == true) {
                 result = new ResponseMessageDTO("SUCCESS", "");
                 httpStatus = HttpStatus.OK;
@@ -213,12 +210,12 @@ public class GoogleChatController {
     // remove google chat connection
     @DeleteMapping("service/google-chat/remove")
     public ResponseEntity<ResponseMessageDTO> removeGoogleChat(
-            @RequestParam(value = "id") String id) {
+            @RequestBody GoogleChatRemoveDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            googleChatService.removeGoogleChat(id);
-            googleChatAccountBankService.deleteByGoogleChatId(id);
+            googleChatService.removeGoogleChat(dto.getId());
+            googleChatAccountBankService.deleteByGoogleChatId(dto.getId());
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {

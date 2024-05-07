@@ -402,6 +402,7 @@ public class AccountController {
 				// 0: rectangular
 				// 1: square
 				accountSettingEntity.setQrShowType(0);
+				accountSettingEntity.setNotificationMobile(true);
 				//
 				accountSettingService.insertAccountSetting(accountSettingEntity);
 				///

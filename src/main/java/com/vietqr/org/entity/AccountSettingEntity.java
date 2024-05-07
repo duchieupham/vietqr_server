@@ -64,6 +64,9 @@ public class AccountSettingEntity implements Serializable {
     @Column(name = "qrShowType")
     private int qrShowType;
 
+    @Column(name = "notificationMobile")
+    private boolean notificationMobile;
+
     public AccountSettingEntity() {
         super();
     }
@@ -209,4 +212,11 @@ public class AccountSettingEntity implements Serializable {
         this.qrShowType = qrShowType;
     }
 
+    public boolean isNotificationMobile() {
+        return notificationMobile;
+    }
+
+    public void setNotificationMobile(boolean notificationMobile) {
+        this.notificationMobile = notificationMobile;
+    }
 }
