@@ -607,7 +607,7 @@ public class TerminalController {
 
                 // Tạo hàng tiêu đề
                 Row headerRow = sheet.createRow(0);
-                String[] headers = {"STT", "Thời gian TT", "Số tiền (VND)", "Trạng thái", "Mã giao dịch", "Mã đơn hàng",
+                String[] headers = {"STT", "Thời gian TT", "Số tiền (VND)", "Loại", "Trạng thái", "Mã giao dịch", "Mã đơn hàng",
                         "Cửa hàng", "Tài khoản nhận", "Thời gian tạo", "Nội dung TT", "Ghi chú", "Loại giao dịch"};
 
                 XSSFCellStyle style = workbook.getXSSFWorkbook().createCellStyle();
@@ -670,16 +670,17 @@ public class TerminalController {
                     } else {
                         row.createCell(2).setCellValue(item.getAmount());
                     }
-                    row.createCell(3).setCellValue(item.getStatus());
-                    row.createCell(4).setCellValue(item.getReferenceNumber());
-                    row.createCell(5).setCellValue(item.getOrderId());
-                    row.createCell(6).setCellValue(item.getTerminalName());
-                    row.createCell(7).setCellValue(item.getBankAccount() + " - " + item.getBankShortName());
-                    row.createCell(8).setCellValue(item.getTime());
-                    row.createCell(9).setCellValue(item.getContent());
-                    row.createCell(10).setCellValue(item.getNote());
-                    row.createCell(11).setCellValue(item.getType());
-                    for (int i = 0; i < 12; i++) {
+                    row.createCell(3).setCellValue(item.getTransType());
+                    row.createCell(4).setCellValue(item.getStatus());
+                    row.createCell(5).setCellValue(item.getReferenceNumber());
+                    row.createCell(6).setCellValue(item.getOrderId());
+                    row.createCell(7).setCellValue(item.getTerminalName());
+                    row.createCell(8).setCellValue(item.getBankAccount() + " - " + item.getBankShortName());
+                    row.createCell(9).setCellValue(item.getTime());
+                    row.createCell(10).setCellValue(item.getContent());
+                    row.createCell(11).setCellValue(item.getNote());
+                    row.createCell(12).setCellValue(item.getType());
+                    for (int i = 0; i < 13; i++) {
                         row.getCell(i).setCellStyle(styleCommon);
                         if (i == 2) {
                             if (item.isHiddenAmount()) {
@@ -695,14 +696,15 @@ public class TerminalController {
                 sheet.setColumnWidth(1, 22 * WIDTH_PIXEL);
                 sheet.setColumnWidth(2, 14 * WIDTH_PIXEL);
                 sheet.setColumnWidth(3, 20 * WIDTH_PIXEL);
-                sheet.setColumnWidth(4, 21 * WIDTH_PIXEL);
-                sheet.setColumnWidth(5, 17 * WIDTH_PIXEL);
-                sheet.setColumnWidth(6, 35 * WIDTH_PIXEL);
-                sheet.setColumnWidth(7, 24 * WIDTH_PIXEL);
-                sheet.setColumnWidth(8, 22 * WIDTH_PIXEL);
-                sheet.setColumnWidth(9, 40 * WIDTH_PIXEL);
-                sheet.setColumnWidth(10, 20 * WIDTH_PIXEL);
-                sheet.setColumnWidth(11, 15 * WIDTH_PIXEL);
+                sheet.setColumnWidth(4, 20 * WIDTH_PIXEL);
+                sheet.setColumnWidth(5, 21 * WIDTH_PIXEL);
+                sheet.setColumnWidth(6, 17 * WIDTH_PIXEL);
+                sheet.setColumnWidth(7, 35 * WIDTH_PIXEL);
+                sheet.setColumnWidth(8, 24 * WIDTH_PIXEL);
+                sheet.setColumnWidth(9, 22 * WIDTH_PIXEL);
+                sheet.setColumnWidth(10, 40 * WIDTH_PIXEL);
+                sheet.setColumnWidth(11, 20 * WIDTH_PIXEL);
+                sheet.setColumnWidth(12, 15 * WIDTH_PIXEL);
                 sheet.setDefaultRowHeightInPoints(17);
 
                 // Tạo một mảng byte từ workbook
