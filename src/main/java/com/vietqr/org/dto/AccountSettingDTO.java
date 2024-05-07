@@ -33,6 +33,7 @@ public class AccountSettingDTO implements Serializable {
     private boolean keepScreenOn;
     // qr show type (rectangular or square)
     private int qrShowType;
+    private boolean notificationMobile;
     private List<MerchantRoleSettingDTO> merchantRoles;
 
     public AccountSettingDTO() {
@@ -187,4 +188,11 @@ public class AccountSettingDTO implements Serializable {
         this.qrShowType = qrShowType;
     }
 
+    public boolean getNotificationMobile() {
+        return notificationMobile;
+    }
+
+    public void setNotificationMobile(boolean notificationMobile) {
+        this.notificationMobile = notificationMobile;
+    }
 }

@@ -2905,198 +2905,200 @@ public class TransactionBankController {
 		return new ResponseEntity<TokenProductBankDTO>(result, httpStatus);
 	}
 
-	@GetMapping("account/info")
-	private ResponseEntity<Object> searchUserBankName(
-			@RequestParam(value = "bin") String bin,
-			@RequestParam(value = "accountNumber") String accountNumber,
-			@RequestParam(value = "accountType") String accountType,
-			@RequestParam(value = "transferType") String transferType) {
-		Object result = null;
-		HttpStatus httpStatus = null;
-		try {
-			// Get bank token
-			TokenProductBankDTO token = getMBBankToken();
-			if (bin.trim().isEmpty() || accountNumber.trim().isEmpty() || !accountType.trim().equals("ACCOUNT")
-					|| (!transferType.trim().equals("INHOUSE") && !transferType.trim().equals("NAPAS"))) {
-				result = new ResponseMessageDTO("FAILED", "E33");
-				httpStatus = HttpStatus.BAD_REQUEST;
-			} else {
-				if (token != null) {
-					// Build URL with PathVariable
-					UriComponents uriComponents = UriComponentsBuilder
-							.fromHttpUrl(
-									EnvironmentUtil.getBankUrl() + "ms/bank-info/v1.0/account/info")
-							.buildAndExpand(accountNumber);
-
-					// Create WebClient with authorization header
-					WebClient webClient = WebClient.builder()
-							.baseUrl(uriComponents.toUriString())
-							.defaultHeader("Authorization", "Bearer " + token.getAccess_token())
-							.defaultHeader("clientMessageId", UUID.randomUUID().toString())
-							.build();
-					Mono<ClientResponse> responseMono = null;
-					if (transferType.trim().equals("INHOUSE")) {
-						// Send GET request to API
-						responseMono = webClient.get()
-								.uri(uriBuilder -> uriBuilder
-										.queryParam("accountNumber", accountNumber)
-										.queryParam("accountType", accountType)
-										.queryParam("transferType", transferType)
-										.build())
-								.exchange();
-					} else {
-						// Send GET request to API
-						responseMono = webClient.get()
-								.uri(uriBuilder -> uriBuilder
-										.queryParam("accountNumber", accountNumber)
-										.queryParam("accountType", accountType)
-										.queryParam("transferType", transferType)
-										.queryParam("bankCode", bin)
-										.build())
-								.exchange();
-					}
-
-					ClientResponse response = responseMono.block();
-					if (response.statusCode().is2xxSuccessful()) {
-						String json = response.bodyToMono(String.class).block();
-						logger.info("getBankNameInformation: response: " + json);
-						if (json != null && !json.isEmpty()) { // Check if response is not empty
-							// Parse response to extract bank name
-							ObjectMapper objectMapper = new ObjectMapper();
-							JsonNode rootNode = objectMapper.readTree(json);
-							String accountName = "";
-							String customerName = "";
-							String customerShortName = "";
-							if (rootNode.get("data").get("accountName") != null) {
-								accountName = rootNode.get("data").get("accountName").asText();
-							}
-							if (rootNode.get("data").get("customerName") != null) {
-								customerName = rootNode.get("data").get("customerName").asText();
-							}
-							if (rootNode.get("data").get("customerShortName") != null) {
-								customerShortName = rootNode.get("data").get("customerShortName").asText();
-							}
-							result = new AccountBankNameDTO(accountName, customerName, customerShortName);
-							httpStatus = HttpStatus.OK;
-						} else {
-							result = new ResponseMessageDTO("FAILED", "E32");
-							httpStatus = HttpStatus.BAD_REQUEST;
-						}
-					} else {
-						String json = response.bodyToMono(String.class).block();
-						logger.error("Error at getBankNameInformation: status code: " + response.statusCode());
-						logger.error("Error at getBankNameInformation: response: " + json);
-						result = new ResponseMessageDTO("FAILED", "E32");
-						httpStatus = HttpStatus.BAD_REQUEST;
-					}
-				} else {
-					logger.error("Error at getBankNameInformation: TOKEN NULL");
-					result = new ResponseMessageDTO("FAILED", "E05");
-					httpStatus = HttpStatus.BAD_REQUEST;
-				}
-			}
-
-		} catch (Exception e) {
-			logger.error("Error at getBankNameInformation: " + e.toString());
-			result = new ResponseMessageDTO("FAILED", "E05");
-			httpStatus = HttpStatus.BAD_REQUEST;
-		}
-		return new ResponseEntity<>(result, httpStatus);
-	}
-
-	@GetMapping("account/info/{bankCode}/{accountNumber}/{accountType}/{transferType}")
-	private ResponseEntity<AccountBankNameDTO> getBankNameInformation(
-			@PathVariable(value = "bankCode") String bankCode,
-			@PathVariable(value = "accountNumber") String accountNumber,
-			@PathVariable(value = "accountType") String accountType,
-			@PathVariable(value = "transferType") String transferType) {
-		AccountBankNameDTO result = null;
-		HttpStatus httpStatus = null;
-		try {
-			// Get bank token
-			TokenProductBankDTO token = getMBBankToken();
-			if (token != null) {
-				// Build URL with PathVariable
-				UriComponents uriComponents = UriComponentsBuilder
-						.fromHttpUrl(
-								EnvironmentUtil.getBankUrl() + "ms/bank-info/v1.0/account/info")
-						.buildAndExpand(accountNumber);
-
-				// Create WebClient with authorization header
-				WebClient webClient = WebClient.builder()
-						.baseUrl(uriComponents.toUriString())
-						.defaultHeader("Authorization", "Bearer " + token.getAccess_token())
-						.defaultHeader("clientMessageId", UUID.randomUUID().toString())
-						.build();
-				Mono<ClientResponse> responseMono = null;
-				if (transferType.trim().equals("INHOUSE")) {
-					// Send GET request to API
-					responseMono = webClient.get()
-							.uri(uriBuilder -> uriBuilder
-									.queryParam("accountNumber", accountNumber)
-									.queryParam("accountType", accountType)
-									.queryParam("transferType", transferType)
-									.build())
-							.exchange();
-				} else {
-					// Send GET request to API
-					responseMono = webClient.get()
-							.uri(uriBuilder -> uriBuilder
-									.queryParam("accountNumber", accountNumber)
-									.queryParam("accountType", accountType)
-									.queryParam("transferType", transferType)
-									.queryParam("bankCode", bankCode)
-									.build())
-							.exchange();
-				}
-
-				ClientResponse response = responseMono.block();
-				if (response.statusCode().is2xxSuccessful()) {
-					String json = response.bodyToMono(String.class).block();
-					logger.info("getBankNameInformation: response: " + json);
-					if (json != null && !json.isEmpty()) { // Check if response is not empty
-						// Parse response to extract bank name
-						ObjectMapper objectMapper = new ObjectMapper();
-						JsonNode rootNode = objectMapper.readTree(json);
-						String accountName = "";
-						String customerName = "";
-						String customerShortName = "";
-						if (rootNode.get("data").get("accountName") != null) {
-							accountName = rootNode.get("data").get("accountName").asText();
-						}
-						if (rootNode.get("data").get("customerName") != null) {
-							customerName = rootNode.get("data").get("customerName").asText();
-						}
-						if (rootNode.get("data").get("customerShortName") != null) {
-							customerShortName = rootNode.get("data").get("customerShortName").asText();
-						}
-						result = new AccountBankNameDTO(accountName, customerName, customerShortName);
-						httpStatus = HttpStatus.OK;
-					} else {
-						httpStatus = HttpStatus.BAD_REQUEST;
-					}
-				} else {
-					String json = response.bodyToMono(String.class).block();
-					logger.error("Error at getBankNameInformation: status code: " + response.statusCode());
-					logger.error("Error at getBankNameInformation: response: " + json);
-					httpStatus = HttpStatus.BAD_REQUEST;
-				}
-			}
-		} catch (Exception e) {
-			logger.error("Error at getBankNameInformation: " + e.toString());
-			httpStatus = HttpStatus.BAD_REQUEST;
-		}
-
-		return new ResponseEntity<>(result, httpStatus);
-	}
+//	@GetMapping("account/info")
+//	private ResponseEntity<Object> searchUserBankName(
+//			@RequestParam(value = "bin") String bin,
+//			@RequestParam(value = "accountNumber") String accountNumber,
+//			@RequestParam(value = "accountType") String accountType,
+//			@RequestParam(value = "transferType") String transferType) {
+//		Object result = null;
+//		HttpStatus httpStatus = null;
+//		try {
+//			// Get bank token
+//			TokenProductBankDTO token = getMBBankToken();
+//			if (bin.trim().isEmpty() || accountNumber.trim().isEmpty() || !accountType.trim().equals("ACCOUNT")
+//					|| (!transferType.trim().equals("INHOUSE") && !transferType.trim().equals("NAPAS"))) {
+//				result = new ResponseMessageDTO("FAILED", "E33");
+//				httpStatus = HttpStatus.BAD_REQUEST;
+//			} else {
+//				if (token != null) {
+//					// Build URL with PathVariable
+//					UriComponents uriComponents = UriComponentsBuilder
+//							.fromHttpUrl(
+//									EnvironmentUtil.getBankUrl() + "ms/bank-info/v1.0/account/info")
+//							.buildAndExpand(accountNumber);
+//
+//					// Create WebClient with authorization header
+//					WebClient webClient = WebClient.builder()
+//							.baseUrl(uriComponents.toUriString())
+//							.defaultHeader("Authorization", "Bearer " + token.getAccess_token())
+//							.defaultHeader("clientMessageId", UUID.randomUUID().toString())
+//							.build();
+//					Mono<ClientResponse> responseMono = null;
+//					if (transferType.trim().equals("INHOUSE")) {
+//						// Send GET request to API
+//						responseMono = webClient.get()
+//								.uri(uriBuilder -> uriBuilder
+//										.queryParam("accountNumber", accountNumber)
+//										.queryParam("accountType", accountType)
+//										.queryParam("transferType", transferType)
+//										.build())
+//								.exchange();
+//					} else {
+//						// Send GET request to API
+//						responseMono = webClient.get()
+//								.uri(uriBuilder -> uriBuilder
+//										.queryParam("accountNumber", accountNumber)
+//										.queryParam("accountType", accountType)
+//										.queryParam("transferType", transferType)
+//										.queryParam("bankCode", bin)
+//										.build())
+//								.exchange();
+//					}
+//
+//					ClientResponse response = responseMono.block();
+//					if (response.statusCode().is2xxSuccessful()) {
+//						String json = response.bodyToMono(String.class).block();
+//						logger.info("getBankNameInformation: response: " + json);
+//						if (json != null && !json.isEmpty()) { // Check if response is not empty
+//							// Parse response to extract bank name
+//							ObjectMapper objectMapper = new ObjectMapper();
+//							JsonNode rootNode = objectMapper.readTree(json);
+//							String accountName = "";
+//							String customerName = "";
+//							String customerShortName = "";
+//							if (rootNode.get("data").get("accountName") != null) {
+//								accountName = rootNode.get("data").get("accountName").asText();
+//							}
+//							if (rootNode.get("data").get("customerName") != null) {
+//								customerName = rootNode.get("data").get("customerName").asText();
+//							}
+//							if (rootNode.get("data").get("customerShortName") != null) {
+//								customerShortName = rootNode.get("data").get("customerShortName").asText();
+//							}
+//							result = new AccountBankNameDTO(accountName, customerName, customerShortName);
+//							httpStatus = HttpStatus.OK;
+//						} else {
+//							result = new ResponseMessageDTO("FAILED", "E32");
+//							httpStatus = HttpStatus.BAD_REQUEST;
+//						}
+//					} else {
+//						String json = response.bodyToMono(String.class).block();
+//						logger.error("Error at getBankNameInformation: status code: " + response.statusCode());
+//						logger.error("Error at getBankNameInformation: response: " + json);
+//						result = new ResponseMessageDTO("FAILED", "E32");
+//						httpStatus = HttpStatus.BAD_REQUEST;
+//					}
+//				} else {
+//					logger.error("Error at getBankNameInformation: TOKEN NULL");
+//					result = new ResponseMessageDTO("FAILED", "E05");
+//					httpStatus = HttpStatus.BAD_REQUEST;
+//				}
+//			}
+//
+//		} catch (Exception e) {
+//			logger.error("Error at getBankNameInformation: " + e.toString());
+//			result = new ResponseMessageDTO("FAILED", "E05");
+//			httpStatus = HttpStatus.BAD_REQUEST;
+//		}
+//		return new ResponseEntity<>(result, httpStatus);
+//	}
+//
+//	@GetMapping("account/info/{bankCode}/{accountNumber}/{accountType}/{transferType}")
+//	private ResponseEntity<AccountBankNameDTO> getBankNameInformation(
+//			@PathVariable(value = "bankCode") String bankCode,
+//			@PathVariable(value = "accountNumber") String accountNumber,
+//			@PathVariable(value = "accountType") String accountType,
+//			@PathVariable(value = "transferType") String transferType) {
+//		AccountBankNameDTO result = null;
+//		HttpStatus httpStatus = null;
+//		try {
+//			// Get bank token
+//			TokenProductBankDTO token = getMBBankToken();
+//			if (token != null) {
+//				// Build URL with PathVariable
+//				UriComponents uriComponents = UriComponentsBuilder
+//						.fromHttpUrl(
+//								EnvironmentUtil.getBankUrl() + "ms/bank-info/v1.0/account/info")
+//						.buildAndExpand(accountNumber);
+//
+//				// Create WebClient with authorization header
+//				WebClient webClient = WebClient.builder()
+//						.baseUrl(uriComponents.toUriString())
+//						.defaultHeader("Authorization", "Bearer " + token.getAccess_token())
+//						.defaultHeader("clientMessageId", UUID.randomUUID().toString())
+//						.build();
+//				Mono<ClientResponse> responseMono = null;
+//				if (transferType.trim().equals("INHOUSE")) {
+//					// Send GET request to API
+//					responseMono = webClient.get()
+//							.uri(uriBuilder -> uriBuilder
+//									.queryParam("accountNumber", accountNumber)
+//									.queryParam("accountType", accountType)
+//									.queryParam("transferType", transferType)
+//									.build())
+//							.exchange();
+//				} else {
+//					// Send GET request to API
+//					responseMono = webClient.get()
+//							.uri(uriBuilder -> uriBuilder
+//									.queryParam("accountNumber", accountNumber)
+//									.queryParam("accountType", accountType)
+//									.queryParam("transferType", transferType)
+//									.queryParam("bankCode", bankCode)
+//									.build())
+//							.exchange();
+//				}
+//
+//				ClientResponse response = responseMono.block();
+//				if (response.statusCode().is2xxSuccessful()) {
+//					String json = response.bodyToMono(String.class).block();
+//					logger.info("getBankNameInformation: response: " + json);
+//					if (json != null && !json.isEmpty()) { // Check if response is not empty
+//						// Parse response to extract bank name
+//						ObjectMapper objectMapper = new ObjectMapper();
+//						JsonNode rootNode = objectMapper.readTree(json);
+//						String accountName = "";
+//						String customerName = "";
+//						String customerShortName = "";
+//						if (rootNode.get("data").get("accountName") != null) {
+//							accountName = rootNode.get("data").get("accountName").asText();
+//						}
+//						if (rootNode.get("data").get("customerName") != null) {
+//							customerName = rootNode.get("data").get("customerName").asText();
+//						}
+//						if (rootNode.get("data").get("customerShortName") != null) {
+//							customerShortName = rootNode.get("data").get("customerShortName").asText();
+//						}
+//						result = new AccountBankNameDTO(accountName, customerName, customerShortName);
+//						httpStatus = HttpStatus.OK;
+//					} else {
+//						httpStatus = HttpStatus.BAD_REQUEST;
+//					}
+//				} else {
+//					String json = response.bodyToMono(String.class).block();
+//					logger.error("Error at getBankNameInformation: status code: " + response.statusCode());
+//					logger.error("Error at getBankNameInformation: response: " + json);
+//					httpStatus = HttpStatus.BAD_REQUEST;
+//				}
+//			}
+//		} catch (Exception e) {
+//			logger.error("Error at getBankNameInformation: " + e.toString());
+//			httpStatus = HttpStatus.BAD_REQUEST;
+//		}
+//
+//		return new ResponseEntity<>(result, httpStatus);
+//	}
 
 	@PostMapping("account/info")
 	private ResponseEntity<AccountBankNameDTO> getBankNameInformation(
+			@RequestHeader("Authorization") String userToken,
 			@RequestBody AccountInfoRequestDTO dto
 	) {
 		AccountBankNameDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
+			logger.info("Token getBankNameInformation: " + userToken + " at: " + System.currentTimeMillis());
 			String checkSum = BankEncryptUtil.generateMD5GetAccountInfoCheckSum(dto.getAccountNumber(),
 					dto.getBankCode(), dto.getAccountType());
 			// check sum

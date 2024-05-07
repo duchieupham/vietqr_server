@@ -90,6 +90,7 @@ public class AccountSettingController {
                     result.setStatus(entity.isStatus());
                     result.setEdgeImgId(entity.getEdgeImgId());
                     result.setFooterImgId(entity.getFooterImgId());
+                    result.setNotificationMobile(entity.isNotificationMobile());
                     result.setMerchantRoles(roles);
 
                     // theme processing
@@ -162,6 +163,22 @@ public class AccountSettingController {
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("accounts/setting/notification-mobile")
+    public ResponseEntity<ResponseMessageDTO> updateNotificationMobile(@RequestBody AccountSettingNotiDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            accountSettingService.updateNotificationMobile(dto.isNotificationMobile(), dto.getUserId());
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("updateNotificationMobile: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<ResponseMessageDTO>(result, httpStatus);
     }
 
     @PostMapping("accounts/setting")

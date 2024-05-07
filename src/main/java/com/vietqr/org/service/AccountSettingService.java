@@ -32,4 +32,6 @@ public interface AccountSettingService {
     public void updateKeepScreenOn(boolean value, String userId);
 
     public void updateQrShowType(int value, String userId);
+
+    void updateNotificationMobile(boolean notificationMobile, String userId);
 }
