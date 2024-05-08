@@ -11,7 +11,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.vietqr.org.dto.GoogleChatBankDTO;
-import com.vietqr.org.dto.LarkBankDTO;
 import com.vietqr.org.entity.GoogleChatAccountBankEntity;
 
 @Repository
@@ -47,4 +46,6 @@ public interface GoogleChatAccountBankRepository extends JpaRepository<GoogleCha
             + "WHERE a.google_chat_id = :googleChatId ", nativeQuery = true)
     List<GoogleChatBankDTO> getGoogleAccountBanks(@Param(value = "googleChatId") String googleChatId);
 
+    @Query(value = "SELECT webhook FROM google_chat_account_bank WHERE bank_id = :bankId", nativeQuery = true)
+    List<String> getWebhooksByBankId(String bankId);
 }
