@@ -40,4 +40,9 @@ public class GoogleChatAccountBankServiceImpl implements GoogleChatAccountBankSe
         return repo.getGoogleAccountBanks(googleChatId);
     }
 
+    @Override
+    public List<String> getWebhooksByBankId(String bankId) {
+        return repo.getWebhooksByBankId(bankId);
+    }
+
 }

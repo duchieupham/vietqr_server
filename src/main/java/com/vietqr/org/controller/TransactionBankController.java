@@ -1,6 +1,5 @@
 package com.vietqr.org.controller;
 
-import java.sql.Date;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,8 +39,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -87,6 +84,12 @@ public class TransactionBankController {
 
 	@Autowired
 	TransactionBankService transactionBankService;
+
+	@Autowired
+	GoogleChatService googleChatService;
+
+	@Autowired
+	GoogleChatAccountBankService googleChatAccountBankService;
 
 	@Autowired
 	MerchantMemberRoleService merchantMemberRoleService;
@@ -1683,6 +1686,21 @@ public class TransactionBankController {
 						}
 					}
 				}
+
+				/////// DO INSERT GOOGLE CHAT
+				List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+				if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
+					GoogleChatUtil googleChatUtil = new GoogleChatUtil();
+					String googleChatMsg = prefix + amount + " VND"
+							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+							+ accountBankEntity.getBankAccount()
+							+ " | " + convertLongToDate(time)
+							+ " | " + dto.getReferencenumber()
+							+ " | ND: " + dto.getContent();
+					for (String webhook : ggChatWebhooks) {
+						googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
+					}
+				}
 				// textToSpeechService.delete(requestId);
 			} else {
 				logger.info("transaction-sync - userIds empty.");
@@ -1796,6 +1814,21 @@ public class TransactionBankController {
 						for (String webhook : webhooks) {
 							larkUtil.sendMessageToLark(larkMsg, webhook);
 						}
+					}
+				}
+
+				/////// DO INSERT GOOGLE CHAT
+				List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+				if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
+					GoogleChatUtil googleChatUtil = new GoogleChatUtil();
+					String googleChatMsg = prefix + amount + " VND"
+							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+							+ accountBankEntity.getBankAccount()
+							+ " | " + convertLongToDate(time)
+							+ " | " + dto.getReferencenumber()
+							+ " | ND: " + dto.getContent();
+					for (String webhook : ggChatWebhooks) {
+						googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
 					}
 				}
 			}
@@ -1933,6 +1966,21 @@ public class TransactionBankController {
 					for (String webhook : webhooks) {
 						larkUtil.sendMessageToLark(larkMsg, webhook);
 					}
+				}
+			}
+
+			/////// DO INSERT GOOGLE CHAT
+			List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+			if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
+				GoogleChatUtil googleChatUtil = new GoogleChatUtil();
+				String googleChatMsg = prefix + amount + " VND"
+						+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+						+ accountBankEntity.getBankAccount()
+						+ " | " + convertLongToDate(time)
+						+ " | " + dto.getReferencenumber()
+						+ " | ND: " + dto.getContent();
+				for (String webhook : ggChatWebhooks) {
+					googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
 				}
 			}
 			// String requestId = "";
@@ -2304,6 +2352,21 @@ public class TransactionBankController {
 						}
 					}
 				}
+
+				/////// DO INSERT GOOGLE CHAT
+				List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+				if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
+					GoogleChatUtil googleChatUtil = new GoogleChatUtil();
+					String googleChatMsg = prefix + amount + " VND"
+							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+							+ accountBankEntity.getBankAccount()
+							+ " | " + convertLongToDate(time)
+							+ " | " + dto.getReferencenumber()
+							+ " | ND: " + dto.getContent();
+					for (String webhook : ggChatWebhooks) {
+						googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
+					}
+				}
 				// }
 
 				// textToSpeechService.delete(requestId);
@@ -2545,6 +2608,21 @@ public class TransactionBankController {
 						for (String webhook : webhooks) {
 							larkUtil.sendMessageToLark(larkMsg, webhook);
 						}
+					}
+				}
+
+				/////// DO INSERT GOOGLE CHAT
+				List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+				if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
+					GoogleChatUtil googleChatUtil = new GoogleChatUtil();
+					String googleChatMsg = prefix + amount + " VND"
+							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+							+ accountBankEntity.getBankAccount()
+							+ " | " + convertLongToDate(time)
+							+ " | " + dto.getReferencenumber()
+							+ " | ND: " + dto.getContent();
+					for (String webhook : ggChatWebhooks) {
+						googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
 					}
 				}
 				// }
@@ -2793,6 +2871,21 @@ public class TransactionBankController {
 					}
 				}
 			}
+
+			/////// DO INSERT GOOGLE CHAT
+			List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+			if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
+				GoogleChatUtil googleChatUtil = new GoogleChatUtil();
+				String googleChatMsg = prefix + amount + " VND"
+						+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+						+ accountBankEntity.getBankAccount()
+						+ " | " + convertLongToDate(time)
+						+ " | " + dto.getReferencenumber()
+						+ " | ND: " + dto.getContent();
+				for (String webhook : ggChatWebhooks) {
+					googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
+				}
+			}
 			// }
 		}
 
@@ -2945,191 +3038,6 @@ public class TransactionBankController {
 		}
 		return new ResponseEntity<TokenProductBankDTO>(result, httpStatus);
 	}
-
-//	@GetMapping("account/info")
-//	private ResponseEntity<Object> searchUserBankName(
-//			@RequestParam(value = "bin") String bin,
-//			@RequestParam(value = "accountNumber") String accountNumber,
-//			@RequestParam(value = "accountType") String accountType,
-//			@RequestParam(value = "transferType") String transferType) {
-//		Object result = null;
-//		HttpStatus httpStatus = null;
-//		try {
-//			// Get bank token
-//			TokenProductBankDTO token = getMBBankToken();
-//			if (bin.trim().isEmpty() || accountNumber.trim().isEmpty() || !accountType.trim().equals("ACCOUNT")
-//					|| (!transferType.trim().equals("INHOUSE") && !transferType.trim().equals("NAPAS"))) {
-//				result = new ResponseMessageDTO("FAILED", "E33");
-//				httpStatus = HttpStatus.BAD_REQUEST;
-//			} else {
-//				if (token != null) {
-//					// Build URL with PathVariable
-//					UriComponents uriComponents = UriComponentsBuilder
-//							.fromHttpUrl(
-//									EnvironmentUtil.getBankUrl() + "ms/bank-info/v1.0/account/info")
-//							.buildAndExpand(accountNumber);
-//
-//					// Create WebClient with authorization header
-//					WebClient webClient = WebClient.builder()
-//							.baseUrl(uriComponents.toUriString())
-//							.defaultHeader("Authorization", "Bearer " + token.getAccess_token())
-//							.defaultHeader("clientMessageId", UUID.randomUUID().toString())
-//							.build();
-//					Mono<ClientResponse> responseMono = null;
-//					if (transferType.trim().equals("INHOUSE")) {
-//						// Send GET request to API
-//						responseMono = webClient.get()
-//								.uri(uriBuilder -> uriBuilder
-//										.queryParam("accountNumber", accountNumber)
-//										.queryParam("accountType", accountType)
-//										.queryParam("transferType", transferType)
-//										.build())
-//								.exchange();
-//					} else {
-//						// Send GET request to API
-//						responseMono = webClient.get()
-//								.uri(uriBuilder -> uriBuilder
-//										.queryParam("accountNumber", accountNumber)
-//										.queryParam("accountType", accountType)
-//										.queryParam("transferType", transferType)
-//										.queryParam("bankCode", bin)
-//										.build())
-//								.exchange();
-//					}
-//
-//					ClientResponse response = responseMono.block();
-//					if (response.statusCode().is2xxSuccessful()) {
-//						String json = response.bodyToMono(String.class).block();
-//						logger.info("getBankNameInformation: response: " + json);
-//						if (json != null && !json.isEmpty()) { // Check if response is not empty
-//							// Parse response to extract bank name
-//							ObjectMapper objectMapper = new ObjectMapper();
-//							JsonNode rootNode = objectMapper.readTree(json);
-//							String accountName = "";
-//							String customerName = "";
-//							String customerShortName = "";
-//							if (rootNode.get("data").get("accountName") != null) {
-//								accountName = rootNode.get("data").get("accountName").asText();
-//							}
-//							if (rootNode.get("data").get("customerName") != null) {
-//								customerName = rootNode.get("data").get("customerName").asText();
-//							}
-//							if (rootNode.get("data").get("customerShortName") != null) {
-//								customerShortName = rootNode.get("data").get("customerShortName").asText();
-//							}
-//							result = new AccountBankNameDTO(accountName, customerName, customerShortName);
-//							httpStatus = HttpStatus.OK;
-//						} else {
-//							result = new ResponseMessageDTO("FAILED", "E32");
-//							httpStatus = HttpStatus.BAD_REQUEST;
-//						}
-//					} else {
-//						String json = response.bodyToMono(String.class).block();
-//						logger.error("Error at getBankNameInformation: status code: " + response.statusCode());
-//						logger.error("Error at getBankNameInformation: response: " + json);
-//						result = new ResponseMessageDTO("FAILED", "E32");
-//						httpStatus = HttpStatus.BAD_REQUEST;
-//					}
-//				} else {
-//					logger.error("Error at getBankNameInformation: TOKEN NULL");
-//					result = new ResponseMessageDTO("FAILED", "E05");
-//					httpStatus = HttpStatus.BAD_REQUEST;
-//				}
-//			}
-//
-//		} catch (Exception e) {
-//			logger.error("Error at getBankNameInformation: " + e.toString());
-//			result = new ResponseMessageDTO("FAILED", "E05");
-//			httpStatus = HttpStatus.BAD_REQUEST;
-//		}
-//		return new ResponseEntity<>(result, httpStatus);
-//	}
-//
-//	@GetMapping("account/info/{bankCode}/{accountNumber}/{accountType}/{transferType}")
-//	private ResponseEntity<AccountBankNameDTO> getBankNameInformation(
-//			@PathVariable(value = "bankCode") String bankCode,
-//			@PathVariable(value = "accountNumber") String accountNumber,
-//			@PathVariable(value = "accountType") String accountType,
-//			@PathVariable(value = "transferType") String transferType) {
-//		AccountBankNameDTO result = null;
-//		HttpStatus httpStatus = null;
-//		try {
-//			// Get bank token
-//			TokenProductBankDTO token = getMBBankToken();
-//			if (token != null) {
-//				// Build URL with PathVariable
-//				UriComponents uriComponents = UriComponentsBuilder
-//						.fromHttpUrl(
-//								EnvironmentUtil.getBankUrl() + "ms/bank-info/v1.0/account/info")
-//						.buildAndExpand(accountNumber);
-//
-//				// Create WebClient with authorization header
-//				WebClient webClient = WebClient.builder()
-//						.baseUrl(uriComponents.toUriString())
-//						.defaultHeader("Authorization", "Bearer " + token.getAccess_token())
-//						.defaultHeader("clientMessageId", UUID.randomUUID().toString())
-//						.build();
-//				Mono<ClientResponse> responseMono = null;
-//				if (transferType.trim().equals("INHOUSE")) {
-//					// Send GET request to API
-//					responseMono = webClient.get()
-//							.uri(uriBuilder -> uriBuilder
-//									.queryParam("accountNumber", accountNumber)
-//									.queryParam("accountType", accountType)
-//									.queryParam("transferType", transferType)
-//									.build())
-//							.exchange();
-//				} else {
-//					// Send GET request to API
-//					responseMono = webClient.get()
-//							.uri(uriBuilder -> uriBuilder
-//									.queryParam("accountNumber", accountNumber)
-//									.queryParam("accountType", accountType)
-//									.queryParam("transferType", transferType)
-//									.queryParam("bankCode", bankCode)
-//									.build())
-//							.exchange();
-//				}
-//
-//				ClientResponse response = responseMono.block();
-//				if (response.statusCode().is2xxSuccessful()) {
-//					String json = response.bodyToMono(String.class).block();
-//					logger.info("getBankNameInformation: response: " + json);
-//					if (json != null && !json.isEmpty()) { // Check if response is not empty
-//						// Parse response to extract bank name
-//						ObjectMapper objectMapper = new ObjectMapper();
-//						JsonNode rootNode = objectMapper.readTree(json);
-//						String accountName = "";
-//						String customerName = "";
-//						String customerShortName = "";
-//						if (rootNode.get("data").get("accountName") != null) {
-//							accountName = rootNode.get("data").get("accountName").asText();
-//						}
-//						if (rootNode.get("data").get("customerName") != null) {
-//							customerName = rootNode.get("data").get("customerName").asText();
-//						}
-//						if (rootNode.get("data").get("customerShortName") != null) {
-//							customerShortName = rootNode.get("data").get("customerShortName").asText();
-//						}
-//						result = new AccountBankNameDTO(accountName, customerName, customerShortName);
-//						httpStatus = HttpStatus.OK;
-//					} else {
-//						httpStatus = HttpStatus.BAD_REQUEST;
-//					}
-//				} else {
-//					String json = response.bodyToMono(String.class).block();
-//					logger.error("Error at getBankNameInformation: status code: " + response.statusCode());
-//					logger.error("Error at getBankNameInformation: response: " + json);
-//					httpStatus = HttpStatus.BAD_REQUEST;
-//				}
-//			}
-//		} catch (Exception e) {
-//			logger.error("Error at getBankNameInformation: " + e.toString());
-//			httpStatus = HttpStatus.BAD_REQUEST;
-//		}
-//
-//		return new ResponseEntity<>(result, httpStatus);
-//	}
 
 	@PostMapping("account/info")
 	private ResponseEntity<AccountBankNameDTO> getBankNameInformation(

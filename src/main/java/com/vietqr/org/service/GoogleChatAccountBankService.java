@@ -19,4 +19,6 @@ public interface GoogleChatAccountBankService {
     public void deleteByGoogleChatId(String googleChatId);
 
     public List<GoogleChatBankDTO> getGoogleAccountBanks(String googleChatId);
+
+    List<String> getWebhooksByBankId(String bankId);
 }
