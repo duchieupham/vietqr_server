@@ -1652,31 +1652,35 @@ public class TransactionBankController {
 				}
 
 				/////// DO INSERT LARK
-				List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-				if (webhooks != null && !webhooks.isEmpty()) {
-					LarkUtil larkUtil = new LarkUtil();
-					// String larkMsg2 = "Thanh toán thành công 🎉."
-					// + "\\nTài khoản: " + bankTypeEntity.getBankShortName() + " - "
-					// + accountBankEntity.getBankAccount()
-					// + "\\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
-					// + "\\nMã giao dịch: " + dto.getReferencenumber()
-					// + "\\nThời gian: " + convertLongToDate(time)
-					// + "\\nNội dung: " + dto.getContent();
-					// String larkMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
-					// + "| TK: " + bankTypeEntity.getBankShortName() + " - "
-					// + accountBankEntity.getBankAccount()
-					// + "| Ma GD: " + dto.getReferencenumber()
-					// + "| ND: " + dto.getContent()
-					// + "| " + convertLongToDate(time);
-					String larkMsg = prefix + amount + " VND"
-							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-							+ accountBankEntity.getBankAccount()
-							+ " | " + convertLongToDate(time)
-							+ " | " + dto.getReferencenumber()
-							+ " | ND: " + dto.getContent();
-
-					for (String webhook : webhooks) {
-						larkUtil.sendMessageToLark(larkMsg, webhook);
+				if (accountBankEntity.getBankAccount().equals("699699699996")) {
+					if (transactionReceiveEntity.getTransType().equals("C")) {
+						List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+						if (webhooks != null && !webhooks.isEmpty()) {
+							LarkUtil larkUtil = new LarkUtil();
+							String larkMsg = prefix + amount + " VND"
+									+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+									+ accountBankEntity.getBankAccount()
+									+ " | " + convertLongToDate(time)
+									+ " | " + dto.getReferencenumber()
+									+ " | ND: " + dto.getContent();
+							for (String webhook : webhooks) {
+								larkUtil.sendMessageToLark(larkMsg, webhook);
+							}
+						}
+					}
+				} else {
+					List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+					if (webhooks != null && !webhooks.isEmpty()) {
+						LarkUtil larkUtil = new LarkUtil();
+						String larkMsg = prefix + amount + " VND"
+								+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+								+ accountBankEntity.getBankAccount()
+								+ " | " + convertLongToDate(time)
+								+ " | " + dto.getReferencenumber()
+								+ " | ND: " + dto.getContent();
+						for (String webhook : webhooks) {
+							larkUtil.sendMessageToLark(larkMsg, webhook);
+						}
 					}
 				}
 				// textToSpeechService.delete(requestId);
@@ -1763,17 +1767,35 @@ public class TransactionBankController {
 				}
 
 				/////// DO INSERT LARK
-				List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-				if (webhooks != null && !webhooks.isEmpty()) {
-					LarkUtil larkUtil = new LarkUtil();
-					String larkMsg = prefix + amount + " VND"
-							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-							+ accountBankEntity.getBankAccount()
-							+ " | " + convertLongToDate(time)
-							+ " | " + dto.getReferencenumber()
-							+ " | ND: " + dto.getContent();
-					for (String webhook : webhooks) {
-						larkUtil.sendMessageToLark(larkMsg, webhook);
+				if (accountBankEntity.getBankAccount().equals("699699699996")) {
+					if (transactionReceiveEntity.getTransType().equals("C")) {
+						List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+						if (webhooks != null && !webhooks.isEmpty()) {
+							LarkUtil larkUtil = new LarkUtil();
+							String larkMsg = prefix + amount + " VND"
+									+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+									+ accountBankEntity.getBankAccount()
+									+ " | " + convertLongToDate(time)
+									+ " | " + dto.getReferencenumber()
+									+ " | ND: " + dto.getContent();
+							for (String webhook : webhooks) {
+								larkUtil.sendMessageToLark(larkMsg, webhook);
+							}
+						}
+					}
+				} else {
+					List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+					if (webhooks != null && !webhooks.isEmpty()) {
+						LarkUtil larkUtil = new LarkUtil();
+						String larkMsg = prefix + amount + " VND"
+								+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+								+ accountBankEntity.getBankAccount()
+								+ " | " + convertLongToDate(time)
+								+ " | " + dto.getReferencenumber()
+								+ " | ND: " + dto.getContent();
+						for (String webhook : webhooks) {
+							larkUtil.sendMessageToLark(larkMsg, webhook);
+						}
 					}
 				}
 			}
@@ -1882,30 +1904,35 @@ public class TransactionBankController {
 			}
 
 			/////// DO INSERT LARK
-			List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-			if (webhooks != null && !webhooks.isEmpty()) {
-				LarkUtil larkUtil = new LarkUtil();
-				// String larkMsg2 = "Thanh toán thành công 🎉."
-				// + "\\nTài khoản: " + bankTypeEntity.getBankShortName() + " - "
-				// + accountBankEntity.getBankAccount()
-				// + "\\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
-				// + "\\nMã giao dịch: " + dto.getReferencenumber()
-				// + "\\nThời gian: " + convertLongToDate(time)
-				// + "\\nNội dung: " + dto.getContent();
-				// String larkMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
-				// + "| TK: " + bankTypeEntity.getBankShortName() + " - "
-				// + accountBankEntity.getBankAccount()
-				// + "| Ma GD: " + dto.getReferencenumber()
-				// + "| ND: " + dto.getContent()
-				// + "| " + convertLongToDate(time);
-				String larkMsg = prefix + amount + " VND"
-						+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-						+ accountBankEntity.getBankAccount()
-						+ " | " + convertLongToDate(time)
-						+ " | " + dto.getReferencenumber()
-						+ " | ND: " + dto.getContent();
-				for (String webhook : webhooks) {
-					larkUtil.sendMessageToLark(larkMsg, webhook);
+			if (accountBankEntity.getBankAccount().equals("699699699996")) {
+				if (transactionReceiveEntity.getTransType().equals("C")) {
+					List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+					if (webhooks != null && !webhooks.isEmpty()) {
+						LarkUtil larkUtil = new LarkUtil();
+						String larkMsg = prefix + amount + " VND"
+								+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+								+ accountBankEntity.getBankAccount()
+								+ " | " + convertLongToDate(time)
+								+ " | " + dto.getReferencenumber()
+								+ " | ND: " + dto.getContent();
+						for (String webhook : webhooks) {
+							larkUtil.sendMessageToLark(larkMsg, webhook);
+						}
+					}
+				}
+			} else {
+				List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+				if (webhooks != null && !webhooks.isEmpty()) {
+					LarkUtil larkUtil = new LarkUtil();
+					String larkMsg = prefix + amount + " VND"
+							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+							+ accountBankEntity.getBankAccount()
+							+ " | " + convertLongToDate(time)
+							+ " | " + dto.getReferencenumber()
+							+ " | ND: " + dto.getContent();
+					for (String webhook : webhooks) {
+						larkUtil.sendMessageToLark(larkMsg, webhook);
+					}
 				}
 			}
 			// String requestId = "";
@@ -2246,31 +2273,35 @@ public class TransactionBankController {
 				}
 
 				/////// DO INSERT LARK
-				List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-				if (webhooks != null && !webhooks.isEmpty()) {
-					LarkUtil larkUtil = new LarkUtil();
-					// String larkMsg2 = "Thanh toán thành công 🎉."
-					// + "\\nTài khoản: " + bankTypeEntity.getBankShortName() + " - "
-					// + accountBankEntity.getBankAccount()
-					// + "\\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
-					// + "\\nMã giao dịch: " + dto.getReferencenumber()
-					// + "\\nThời gian: " + convertLongToDate(time)
-					// + "\\nNội dung: " + dto.getContent();
-					// String larkMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
-					// + "| TK: " + bankTypeEntity.getBankShortName() + " - "
-					// + accountBankEntity.getBankAccount()
-					// + "| Ma GD: " + dto.getReferencenumber()
-					// + "| ND: " + dto.getContent()
-					// + "| " + convertLongToDate(time);
-					String larkMsg = prefix + amount + " VND"
-							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-							+ accountBankEntity.getBankAccount()
-							+ " | " + convertLongToDate(time)
-							+ " | " + dto.getReferencenumber()
-							+ " | ND: " + dto.getContent();
-
-					for (String webhook : webhooks) {
-						larkUtil.sendMessageToLark(larkMsg, webhook);
+				if (accountBankEntity.getBankAccount().equals("699699699996")) {
+					if (transactionEntity.getTransType().equals("C")) {
+						List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+						if (webhooks != null && !webhooks.isEmpty()) {
+							LarkUtil larkUtil = new LarkUtil();
+							String larkMsg = prefix + amount + " VND"
+									+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+									+ accountBankEntity.getBankAccount()
+									+ " | " + convertLongToDate(time)
+									+ " | " + dto.getReferencenumber()
+									+ " | ND: " + dto.getContent();
+							for (String webhook : webhooks) {
+								larkUtil.sendMessageToLark(larkMsg, webhook);
+							}
+						}
+					}
+				} else {
+					List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+					if (webhooks != null && !webhooks.isEmpty()) {
+						LarkUtil larkUtil = new LarkUtil();
+						String larkMsg = prefix + amount + " VND"
+								+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+								+ accountBankEntity.getBankAccount()
+								+ " | " + convertLongToDate(time)
+								+ " | " + dto.getReferencenumber()
+								+ " | ND: " + dto.getContent();
+						for (String webhook : webhooks) {
+							larkUtil.sendMessageToLark(larkMsg, webhook);
+						}
 					}
 				}
 				// }
@@ -2485,30 +2516,35 @@ public class TransactionBankController {
 				}
 
 				/////// DO INSERT LARK
-				List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-				if (webhooks != null && !webhooks.isEmpty()) {
-					LarkUtil larkUtil = new LarkUtil();
-					// String larkMsg2 = "Thanh toán thành công 🎉."
-					// + "\\nTài khoản: " + bankTypeEntity.getBankShortName() + " - " +
-					// accountBankEntity.getBankAccount()
-					// + "\\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
-					// + "\\nMã giao dịch: " + dto.getReferencenumber()
-					// + "\\nThời gian: " + convertLongToDate(time)
-					// + "\\nNội dung: " + dto.getContent();
-					// String larkMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
-					// + "| TK: " + bankTypeEntity.getBankShortName() + " - "
-					// + accountBankEntity.getBankAccount()
-					// + "| Ma GD: " + dto.getReferencenumber()
-					// + "| ND: " + dto.getContent()
-					// + "| " + convertLongToDate(time);
-					String larkMsg = prefix + amount + " VND"
-							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-							+ accountBankEntity.getBankAccount()
-							+ " | " + convertLongToDate(time)
-							+ " | " + dto.getReferencenumber()
-							+ " | ND: " + dto.getContent();
-					for (String webhook : webhooks) {
-						larkUtil.sendMessageToLark(larkMsg, webhook);
+				if (accountBankEntity.getBankAccount().equals("699699699996")) {
+					if (transactionEntity.getTransType().equals("C")) {
+						List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+						if (webhooks != null && !webhooks.isEmpty()) {
+							LarkUtil larkUtil = new LarkUtil();
+							String larkMsg = prefix + amount + " VND"
+									+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+									+ accountBankEntity.getBankAccount()
+									+ " | " + convertLongToDate(time)
+									+ " | " + dto.getReferencenumber()
+									+ " | ND: " + dto.getContent();
+							for (String webhook : webhooks) {
+								larkUtil.sendMessageToLark(larkMsg, webhook);
+							}
+						}
+					}
+				} else {
+					List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+					if (webhooks != null && !webhooks.isEmpty()) {
+						LarkUtil larkUtil = new LarkUtil();
+						String larkMsg = prefix + amount + " VND"
+								+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+								+ accountBankEntity.getBankAccount()
+								+ " | " + convertLongToDate(time)
+								+ " | " + dto.getReferencenumber()
+								+ " | ND: " + dto.getContent();
+						for (String webhook : webhooks) {
+							larkUtil.sendMessageToLark(larkMsg, webhook);
+						}
 					}
 				}
 				// }
@@ -2726,30 +2762,35 @@ public class TransactionBankController {
 			}
 
 			/////// DO INSERT LARK
-			List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-			if (webhooks != null && !webhooks.isEmpty()) {
-				LarkUtil larkUtil = new LarkUtil();
-				// String larkMsg2 = "Thanh toán thành công 🎉."
-				// + "\\nTài khoản: " + bankTypeEntity.getBankShortName() + " - " +
-				// accountBankEntity.getBankAccount()
-				// + "\\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
-				// + "\\nMã giao dịch: " + dto.getReferencenumber()
-				// + "\\nThời gian: " + convertLongToDate(time)
-				// + "\\nNội dung: " + dto.getContent();
-				// String larkMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
-				// + "| TK: " + bankTypeEntity.getBankShortName() + " - "
-				// + accountBankEntity.getBankAccount()
-				// + "| Ma GD: " + dto.getReferencenumber()
-				// + "| ND: " + dto.getContent()
-				// + "| " + convertLongToDate(time);
-				String larkMsg = prefix + amount + " VND"
-						+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-						+ accountBankEntity.getBankAccount()
-						+ " | " + convertLongToDate(time)
-						+ " | " + dto.getReferencenumber()
-						+ " | ND: " + dto.getContent();
-				for (String webhook : webhooks) {
-					larkUtil.sendMessageToLark(larkMsg, webhook);
+			if (accountBankEntity.getBankAccount().equals("699699699996")) {
+				if (transactionEntity.getTransType().equals("C")) {
+					List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+					if (webhooks != null && !webhooks.isEmpty()) {
+						LarkUtil larkUtil = new LarkUtil();
+						String larkMsg = prefix + amount + " VND"
+								+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+								+ accountBankEntity.getBankAccount()
+								+ " | " + convertLongToDate(time)
+								+ " | " + dto.getReferencenumber()
+								+ " | ND: " + dto.getContent();
+						for (String webhook : webhooks) {
+							larkUtil.sendMessageToLark(larkMsg, webhook);
+						}
+					}
+				}
+			} else {
+				List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+				if (webhooks != null && !webhooks.isEmpty()) {
+					LarkUtil larkUtil = new LarkUtil();
+					String larkMsg = prefix + amount + " VND"
+							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+							+ accountBankEntity.getBankAccount()
+							+ " | " + convertLongToDate(time)
+							+ " | " + dto.getReferencenumber()
+							+ " | ND: " + dto.getContent();
+					for (String webhook : webhooks) {
+						larkUtil.sendMessageToLark(larkMsg, webhook);
+					}
 				}
 			}
 			// }
