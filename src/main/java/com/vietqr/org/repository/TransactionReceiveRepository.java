@@ -316,7 +316,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         + "SUM(CASE WHEN a.trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
                         + "FROM transaction_receive a "
                         + "INNER JOIN terminal b ON b.code = a.terminal_code "
-                        + "INNER JOIN account_bank_receive_share c ON c.terminal_id = b.id "
+                        + "INNER JOIN account_bank_receive_share c ON (c.terminal_id = b.id AND a.bank_id = c.bank_id) "
                         + "WHERE c.bank_id = :bankId AND a.status = 1 "
                         + "AND b.code = :terminalCode "
                         + "AND c.user_id = :userId "
@@ -1770,7 +1770,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "SUM(CASE WHEN a.trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
                 + "FROM transaction_receive a "
                 + "INNER JOIN terminal b ON b.code = a.terminal_code "
-                + "INNER JOIN account_bank_receive_share c ON c.terminal_id = b.id "
+                + "INNER JOIN account_bank_receive_share c ON (c.terminal_id = b.id AND a.bank_id = c.bank_id) "
                 + "WHERE c.bank_id = :bankId AND a.status = 1 "
                 + "AND c.user_id = :userId "
                 + "AND a.time BETWEEN :fromDate AND :toDate "
@@ -1796,7 +1796,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "SUM(CASE WHEN a.trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
                 + "FROM transaction_receive a "
                 + "INNER JOIN terminal b ON b.code = a.terminal_code "
-                + "INNER JOIN account_bank_receive_share c ON c.terminal_id = b.id "
+                + "INNER JOIN account_bank_receive_share c ON (c.terminal_id = b.id AND a.bank_id = c.bank_id) "
                 + "WHERE c.bank_id = :bankId AND a.status = 1 "
                 + "AND c.user_id = :userId "
                 + "AND a.time BETWEEN :fromDate AND :toDate "
@@ -1810,7 +1810,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "SUM(CASE WHEN a.trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
                 + "FROM transaction_receive a "
                 + "INNER JOIN terminal b ON b.code = a.terminal_code "
-                + "INNER JOIN account_bank_receive_share c ON c.terminal_id = b.id "
+                + "INNER JOIN account_bank_receive_share c ON (c.terminal_id = b.id AND a.bank_id = c.bank_id) "
                 + "WHERE c.bank_id = :bankId AND a.status = 1 "
                 + "AND c.user_id = :userId "
                 + "AND a.time BETWEEN :fromDate AND :toDate ", nativeQuery = true)
@@ -1863,12 +1863,13 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "SUM(CASE WHEN a.trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
                 + "FROM transaction_receive a "
                 + "INNER JOIN terminal b ON b.code = a.terminal_code "
-                + "INNER JOIN account_bank_receive_share c ON c.terminal_id = b.id "
+                + "INNER JOIN account_bank_receive_share c ON (c.terminal_id = b.id AND a.bank_id = c.bank_id) "
                 + "WHERE c.bank_id = :bankId AND a.status = 1 "
                 + "AND c.user_id = :userId "
                 + "AND a.time BETWEEN :fromDate AND :toDate "
                 + "GROUP BY timeDate ORDER BY timeDate DESC ", nativeQuery = true)
-        List<TransStatisticByTimeDTO> getTransStatisticByTerminalIdAndDate(String bankId, String userId, long fromDate, long toDate);
+        List<TransStatisticByTimeDTO> getTransStatisticByTerminalIdAndDate(String bankId, String userId,
+                                                                           long fromDate, long toDate);
 
         @Query(value = "SELECT DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME((FLOOR(a.time / 3600))*3600), '+00:00', '+07:00'), '%Y-%m-%d %H:00') AS timeDate, "
                 + "COUNT(a.id) AS totalTrans, "
@@ -1878,7 +1879,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "SUM(CASE WHEN a.trans_type = 'D' THEN 1 ELSE 0 END) AS totalTransD "
                 + "FROM transaction_receive a "
                 + "INNER JOIN terminal b ON b.code = a.terminal_code "
-                + "INNER JOIN account_bank_receive_share c ON c.terminal_id = b.id "
+                + "INNER JOIN account_bank_receive_share c ON (c.terminal_id = b.id AND a.bank_id = c.bank_id) "
                 + "WHERE c.bank_id = :bankId AND a.status = 1 "
                 + "AND b.code = :terminalCode "
                 + "AND c.user_id = :userId "
