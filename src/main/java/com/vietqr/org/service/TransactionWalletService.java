@@ -1,12 +1,9 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.dto.TransactionWalletAdminDTO;
+import com.vietqr.org.dto.*;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
-import com.vietqr.org.dto.TransWalletListDTO;
-import com.vietqr.org.dto.TransactionVNPTItemDTO;
-import com.vietqr.org.dto.VNPTEpayTransCounterDTO;
 import com.vietqr.org.entity.TransactionWalletEntity;
 
 @Service
@@ -43,7 +40,7 @@ public interface TransactionWalletService {
 
         public VNPTEpayTransCounterDTO getVNPTEpayCounter();
 
-        List<TransactionWalletAdminDTO> getTransactionWalletByBillNumberAndVNPTEpay(String value, String fromDate,
+        List<TransactionWalletVNPTEpayDTO> getTransactionWalletByBillNumberAndVNPTEpay(String value, String fromDate,
                                                                                     String toDate, int offset, int size);
 
         List<TransactionWalletAdminDTO> getTransactionWalletByBillNumber(String value, String fromDate,
@@ -53,8 +50,8 @@ public interface TransactionWalletService {
                                                                                      String fromDate, String toDate,
                                                                                      int offset, int size);
 
-        List<TransactionWalletAdminDTO> getTransactionWalletByPhoneNoAndVNPTEpay(String value, String fromDate,
-                                                                                 String toDate, int offset, int size);
+        List<TransactionWalletVNPTEpayDTO> getTransactionWalletByPhoneNoAndVNPTEpay(String value, String fromDate,
+                                                                                    String toDate, int offset, int size);
 
         List<TransactionWalletAdminDTO> getTransactionWalletByPhoneNoAndAnnualFee(String value, String fromDate,
                                                                                   String toDate, int offset, int size);
@@ -74,7 +71,7 @@ public interface TransactionWalletService {
 
         int countTransactionWalletByPhoneNo(String value, String fromDate, String toDate);
 
-        List<TransactionWalletAdminDTO> getTransactionWalletVNPTEpay(String fromDate, String toDate, int offset, int size);
+        List<TransactionWalletVNPTEpayDTO> getTransactionWalletVNPTEpay(String fromDate, String toDate, int offset, int size);
 
         int countTransactionWalletVNPTEpay(String fromDate, String toDate);
 

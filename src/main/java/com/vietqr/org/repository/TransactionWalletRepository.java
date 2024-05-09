@@ -3,16 +3,13 @@ package com.vietqr.org.repository;
 import java.util.List;
 import javax.transaction.Transactional;
 
-import com.vietqr.org.dto.TransactionWalletAdminDTO;
+import com.vietqr.org.dto.*;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.vietqr.org.dto.TransWalletListDTO;
-import com.vietqr.org.dto.TransactionVNPTItemDTO;
-import com.vietqr.org.dto.VNPTEpayTransCounterDTO;
 import com.vietqr.org.entity.TransactionWalletEntity;
 
 @Repository
@@ -121,11 +118,9 @@ public interface TransactionWalletRepository extends JpaRepository<TransactionWa
         @Query(value = "SELECT a.id AS id, a.amount AS amount, "
                 + "a.bill_number AS billNumber, "
                 + "a.status AS status, a.time_created AS timeCreated, "
-                + "a.time_paid AS timePaid, a.trans_type AS transType, "
-                + "a.payment_type AS paymentType, "
+                + "a.time_paid AS timePaid, "
                 + "COALESCE(a.phone_norc, '') AS phoneNorc, "
-                + "b.phone_no AS phoneNo, "
-                + "b.id AS userId, "
+                + "b.phone_no AS phoneNo, b.email AS email, "
                 + "CONCAT(c.last_name, ' ', c.middle_name, ' ', c.first_name) AS fullName "
                 + "FROM transaction_wallet a "
                 + "INNER JOIN account_login b ON b.id = a.user_id "
@@ -135,7 +130,7 @@ public interface TransactionWalletRepository extends JpaRepository<TransactionWa
                 + "ORDER BY a.time_created DESC, "
                 + "a.trans_type ASC "
                 + "LIMIT :offset, :size ", nativeQuery = true)
-        List<TransactionWalletAdminDTO> getTransactionWalletByBillNumberAndVNPTEpay(String value,
+        List<TransactionWalletVNPTEpayDTO> getTransactionWalletByBillNumberAndVNPTEpay(String value,
                                                                                     long fromDate, long toDate,
                                                                                     int offset, int size);
         @Query(value = "SELECT a.id AS id, a.amount AS amount, "
@@ -180,7 +175,6 @@ public interface TransactionWalletRepository extends JpaRepository<TransactionWa
                 + "INNER JOIN account_information c ON c.user_id = a.user_id "
                 + "LEFT JOIN account_bank_receive e ON e.id = a.data "
                 + "LEFT JOIN bank_type f ON f.id = e.bank_type_id "
-//                + "WHERE (a.payment_type = 0 OR a.payment_type = 2) AND a.bill_number = :value "
                 + "WHERE a.payment_type = 2 AND a.bill_number = :value "
                 + "AND a.time_created BETWEEN :fromDate AND :toDate "
                 + "ORDER BY a.time_created DESC, "
@@ -193,23 +187,21 @@ public interface TransactionWalletRepository extends JpaRepository<TransactionWa
         @Query(value = "SELECT a.id AS id, a.amount AS amount, "
                 + "a.bill_number AS billNumber, "
                 + "a.status AS status, a.time_created AS timeCreated, "
-                + "a.time_paid AS timePaid, a.trans_type AS transType, "
-                + "a.payment_type AS paymentType, "
+                + "a.time_paid AS timePaid, "
                 + "COALESCE(a.phone_norc, '') AS phoneNorc, "
-                + "b.phone_no AS phoneNo, "
-                + "b.id AS userId, "
+                + "b.phone_no AS phoneNo, b.email AS email, "
                 + "CONCAT(c.last_name, ' ', c.middle_name, ' ', c.first_name) AS fullName "
                 + "FROM transaction_wallet a "
                 + "INNER JOIN account_login b ON b.id = a.user_id "
                 + "INNER JOIN account_information c ON c.user_id = a.user_id "
-                + "WHERE (a.payment_type = 0 OR a.payment_type = 1) AND b.phone_no = :value "
+                + "WHERE a.payment_type = 1 AND b.phone_no = :value "
                 + "AND a.time_created BETWEEN :fromDate AND :toDate "
                 + "ORDER BY a.time_created DESC, "
                 + "a.trans_type ASC "
                 + "LIMIT :offset, :size ", nativeQuery = true)
-        List<TransactionWalletAdminDTO> getTransactionWalletByPhoneNoAndVNPTEpay(String value,
-                                                                                 long fromDate, long toDate,
-                                                                                 int offset, int size);
+        List<TransactionWalletVNPTEpayDTO> getTransactionWalletByPhoneNoAndVNPTEpay(String value,
+                                                                                    long fromDate, long toDate,
+                                                                                    int offset, int size);
 
         @Query(value = "SELECT a.id AS id, a.amount AS amount, "
                 + "a.bill_number AS billNumber, "
@@ -227,7 +219,6 @@ public interface TransactionWalletRepository extends JpaRepository<TransactionWa
                 + "INNER JOIN account_information c ON c.user_id = a.user_id "
                 + "LEFT JOIN account_bank_receive e ON e.id = a.data "
                 + "LEFT JOIN bank_type f ON f.id = e.bank_type_id "
-//                + "WHERE (a.payment_type = 2 OR a.payment_type = 0) AND b.phone_no = :value "
                 + "WHERE a.payment_type = 2 AND b.phone_no = :value "
                 + "AND a.time_created BETWEEN :fromDate AND :toDate "
                 + "ORDER BY a.time_created DESC, "
@@ -266,7 +257,7 @@ public interface TransactionWalletRepository extends JpaRepository<TransactionWa
                 + "FROM transaction_wallet a "
                 + "INNER JOIN account_login b ON b.id = a.user_id "
                 + "INNER JOIN account_information c ON c.user_id = a.user_id "
-                + "WHERE (a.payment_type = 0 OR a.payment_type = 1) AND a.bill_number = :value "
+                + "WHERE a.payment_type = 1 AND a.bill_number = :value "
                 + "AND a.time_created BETWEEN :fromDate AND :toDate ", nativeQuery = true)
         int countTransactionWalletByBillNumberAndVNPTEpay(String value, long fromDate, long toDate);
 
@@ -276,7 +267,6 @@ public interface TransactionWalletRepository extends JpaRepository<TransactionWa
                 + "INNER JOIN account_information c ON c.user_id = a.user_id "
                 + "LEFT JOIN account_bank_receive e ON e.id = a.data "
                 + "LEFT JOIN bank_type f ON f.id = e.bank_type_id "
-//                + "WHERE (a.payment_type = 0 OR a.payment_type = 2) AND a.bill_number = :value "
                 + "WHERE a.payment_type = 2 AND a.bill_number = :value "
                 + "AND a.time_created BETWEEN :fromDate AND :toDate ", nativeQuery = true)
         int countTransactionWalletByBillNumberAndAnnualFee(String value, long fromDate, long toDate);
@@ -293,7 +283,7 @@ public interface TransactionWalletRepository extends JpaRepository<TransactionWa
                 + "FROM transaction_wallet a "
                 + "INNER JOIN account_login b ON b.id = a.user_id "
                 + "INNER JOIN account_information c ON c.user_id = a.user_id "
-                + "WHERE (a.payment_type = 0 OR a.payment_type = 1) AND b.phone_no = :value "
+                + "WHERE a.payment_type = 1 AND b.phone_no = :value "
                 + "AND a.time_created BETWEEN :fromDate AND :toDate ", nativeQuery = true)
         int countTransactionWalletByPhoneNoAndVNPTEpay(String value, long fromDate, long toDate);
 
@@ -303,7 +293,6 @@ public interface TransactionWalletRepository extends JpaRepository<TransactionWa
                 + "INNER JOIN account_information c ON c.user_id = a.user_id "
                 + "LEFT JOIN account_bank_receive e ON e.id = a.data "
                 + "LEFT JOIN bank_type f ON f.id = e.bank_type_id "
-//                + "WHERE (a.payment_type = 0 OR a.payment_type = 2) AND b.phone_no = :value "
                 + "WHERE a.payment_type = 2 AND b.phone_no = :value "
                 + "AND a.time_created BETWEEN :fromDate AND :toDate ", nativeQuery = true)
         int countTransactionWalletByPhoneNoAndAnnualFee(String value, long fromDate, long toDate);
@@ -323,7 +312,7 @@ public interface TransactionWalletRepository extends JpaRepository<TransactionWa
                 + "FROM transaction_wallet a "
                 + "INNER JOIN account_login b ON b.id = a.user_id "
                 + "INNER JOIN account_information c ON c.user_id = a.user_id "
-                + "WHERE (a.payment_type = 0 OR a.payment_type = 1) "
+                + "WHERE a.payment_type = 1 "
                 + "AND a.time_created BETWEEN :fromDate AND :toDate ", nativeQuery = true)
         int countTransactionWalletVNPTEpay(long fromDate, long toDate);
 
@@ -343,7 +332,6 @@ public interface TransactionWalletRepository extends JpaRepository<TransactionWa
                 + "INNER JOIN account_information c ON c.user_id = a.user_id "
                 + "LEFT JOIN account_bank_receive e ON e.id = a.data "
                 + "LEFT JOIN bank_type f ON f.id = e.bank_type_id "
-//                + "WHERE (a.payment_type = 0 OR a.payment_type = 2) "
                 + "WHERE a.payment_type = 2 "
                 + "AND a.time_created BETWEEN :fromDate AND :toDate "
                 + "ORDER BY a.time_created DESC, "
@@ -357,7 +345,6 @@ public interface TransactionWalletRepository extends JpaRepository<TransactionWa
                 + "INNER JOIN account_information c ON c.user_id = a.user_id "
                 + "LEFT JOIN account_bank_receive e ON e.id = a.data "
                 + "LEFT JOIN bank_type f ON f.id = e.bank_type_id "
-//                + "WHERE (a.payment_type = 0 OR a.payment_type = 2) "
                 + "WHERE a.payment_type = 2 "
                 + "AND a.time_created BETWEEN :fromDate AND :toDate ", nativeQuery = true)
         int countTransactionWalletAnnualFee(long fromDate, long toDate);
@@ -412,6 +399,6 @@ public interface TransactionWalletRepository extends JpaRepository<TransactionWa
                 + "ORDER BY a.time_created DESC, "
                 + "a.trans_type ASC "
                 + "LIMIT :offset, :size ", nativeQuery = true)
-        List<TransactionWalletAdminDTO> getTransactionWalletVNPTEpay(long fromDate, long toDate,
+        List<TransactionWalletVNPTEpayDTO> getTransactionWalletVNPTEpay(long fromDate, long toDate,
                                                                      int offset, int size);
 }

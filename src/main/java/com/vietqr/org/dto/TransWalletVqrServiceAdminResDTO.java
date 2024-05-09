@@ -1,36 +1,38 @@
 package com.vietqr.org.dto;
 
-public class TransactionWalletAdminResDTO {
+public class TransWalletVqrServiceAdminResDTO {
     private String id;
     private long amount;
     private String billNumber;
     private int status;
     private long timeCreated;
     private long timePaid;
-    private String transType;
-    private int paymentType;
     private String additionData;
     private String additionData2;
-    private String userId;
+    private String additionData3;
+    private String additionData4;
+    private String additionData5;
     private String fullName;
     private String phoneNo;
 
-    public TransactionWalletAdminResDTO() {
+    public TransWalletVqrServiceAdminResDTO() {
     }
 
-    public TransactionWalletAdminResDTO(String id, long amount, String billNumber, int status, long timeCreated,
-                                        long timePaid, String transType, int paymentType, String additionData,
-                                        String userId, String fullName, String phoneNo) {
+    public TransWalletVqrServiceAdminResDTO(String id, long amount, String billNumber, int status,
+                                            long timeCreated, long timePaid, String additionData,
+                                            String additionData2, String additionData3, String additionData4,
+                                            String additionData5, String fullName, String phoneNo) {
         this.id = id;
         this.amount = amount;
         this.billNumber = billNumber;
         this.status = status;
         this.timeCreated = timeCreated;
         this.timePaid = timePaid;
-        this.transType = transType;
-        this.paymentType = paymentType;
         this.additionData = additionData;
-        this.userId = userId;
+        this.additionData2 = additionData2;
+        this.additionData3 = additionData3;
+        this.additionData4 = additionData4;
+        this.additionData5 = additionData5;
         this.fullName = fullName;
         this.phoneNo = phoneNo;
     }
@@ -83,28 +85,28 @@ public class TransactionWalletAdminResDTO {
         this.timePaid = timePaid;
     }
 
-    public String getTransType() {
-        return transType;
+    public String getAdditionData3() {
+        return additionData3;
     }
 
-    public void setTransType(String transType) {
-        this.transType = transType;
+    public void setAdditionData3(String additionData3) {
+        this.additionData3 = additionData3;
     }
 
-    public int getPaymentType() {
-        return paymentType;
+    public String getAdditionData4() {
+        return additionData4;
     }
 
-    public void setPaymentType(int paymentType) {
-        this.paymentType = paymentType;
+    public void setAdditionData4(String additionData4) {
+        this.additionData4 = additionData4;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getAdditionData5() {
+        return additionData5;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setAdditionData5(String additionData5) {
+        this.additionData5 = additionData5;
     }
 
     public String getFullName() {

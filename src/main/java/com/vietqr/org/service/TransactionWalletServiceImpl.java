@@ -2,13 +2,10 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
-import com.vietqr.org.dto.TransactionWalletAdminDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.util.DateTimeUtil;
 import org.springframework.stereotype.Service;
 
-import com.vietqr.org.dto.TransWalletListDTO;
-import com.vietqr.org.dto.TransactionVNPTItemDTO;
-import com.vietqr.org.dto.VNPTEpayTransCounterDTO;
 import com.vietqr.org.entity.TransactionWalletEntity;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,7 +91,7 @@ public class TransactionWalletServiceImpl implements TransactionWalletService {
     }
 
     @Override
-    public List<TransactionWalletAdminDTO> getTransactionWalletByBillNumberAndVNPTEpay(String value,
+    public List<TransactionWalletVNPTEpayDTO> getTransactionWalletByBillNumberAndVNPTEpay(String value,
                                                                                        String fromDate, String toDate,
                                                                                        int offset, int size) {
         return repo.getTransactionWalletByBillNumberAndVNPTEpay(
@@ -126,9 +123,9 @@ public class TransactionWalletServiceImpl implements TransactionWalletService {
     }
 
     @Override
-    public List<TransactionWalletAdminDTO> getTransactionWalletByPhoneNoAndVNPTEpay(String value,
-                                                                                    String fromDate, String toDate,
-                                                                                    int offset, int size) {
+    public List<TransactionWalletVNPTEpayDTO> getTransactionWalletByPhoneNoAndVNPTEpay(String value,
+                                                                                       String fromDate, String toDate,
+                                                                                       int offset, int size) {
         return repo.getTransactionWalletByPhoneNoAndVNPTEpay(value,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
@@ -200,7 +197,7 @@ public class TransactionWalletServiceImpl implements TransactionWalletService {
     }
 
     @Override
-    public List<TransactionWalletAdminDTO> getTransactionWalletVNPTEpay(String fromDate, String toDate, int offset, int size) {
+    public List<TransactionWalletVNPTEpayDTO> getTransactionWalletVNPTEpay(String fromDate, String toDate, int offset, int size) {
         return repo.getTransactionWalletVNPTEpay(
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,

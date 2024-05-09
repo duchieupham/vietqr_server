@@ -15,4 +15,9 @@ public interface TransactionWalletAdminDTO {
     String getPhoneNo();
     String getBankAccount();
     String getBankShortName();
+    int getDuration();
+    long getValidFeeFrom();
+    long getValidFeeTo();
+
+
 }
