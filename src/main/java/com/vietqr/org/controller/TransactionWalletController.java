@@ -1,6 +1,7 @@
 package com.vietqr.org.controller;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.util.DateTimeUtil;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
@@ -329,8 +330,6 @@ public class TransactionWalletController {
         DataDTO data = new DataDTO(new TransAdminWalletExtraData());
         PageResponseDTO result = new PageResponseDTO();
         result.setData(data);
-//        List<TransactionWalletAdminDTO> response = new ArrayList<>();
-//        List<TransactionWalletVNPTEpayDTO> vnptEpays = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
             int offset = (page - 1) * size;
@@ -387,7 +386,8 @@ public class TransactionWalletController {
                             dto.setTimePaid(item.getTimePaid());
                             dto.setAmount(item.getAmount());
                             dto.setBillNumber(item.getBillNumber());
-                            dto.setServiceType("Nạp tiền VNPTEpay");
+                            // Nạp tiền điện thoại
+                            dto.setServiceType(1);
                             dto.setFullName(item.getFullName());
                             dto.setPhoneNo(item.getPhoneNo());
                             dto.setPhoneNorc(item.getPhoneNorc());
@@ -440,11 +440,16 @@ public class TransactionWalletController {
                             dto.setAmount(item.getAmount());
                             dto.setBillNumber(item.getBillNumber());
                             dto.setStatus(item.getStatus());
+                            dto.setService(2);
                             dto.setTimeCreated(item.getTimeCreated());
                             dto.setTimePaid(item.getTimePaid());
+                            dto.setAdditionData1(item.getBankAccount());
+                            dto.setAdditionData2(item.getBankShortName());
+                            dto.setAdditionData3(item.getValidFeeFrom());
+                            dto.setAdditionData4(item.getValidFeeTo());
+                            dto.setAdditionData5(DateTimeUtil.minusToMonth(item.getValidFeeFrom(), item.getValidFeeTo()));
                             dto.setFullName(item.getFullName());
                             dto.setPhoneNo(item.getPhoneNo());
-                            
                             return dto;
                         }).collect(Collectors.toList());
                     }

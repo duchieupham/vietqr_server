@@ -5,7 +5,7 @@ public class TransWalletVNPTEpayAdminDTO {
     private long timePaid;
     private long amount;
     private String billNumber;
-    private String serviceType;
+    private int serviceType;
     private String fullName;
     private String phoneNo;
     private String phoneNorc;
@@ -16,9 +16,10 @@ public class TransWalletVNPTEpayAdminDTO {
     public TransWalletVNPTEpayAdminDTO() {
     }
 
-    public TransWalletVNPTEpayAdminDTO(long timePaid, long amount, String billNumber,
-                                       String serviceType, String fullName, String phoneNo,
-                                       String phoneNorc, String email, long timeCreated, int status) {
+    public TransWalletVNPTEpayAdminDTO(String id, long timePaid, long amount, String billNumber, int serviceType,
+                                       String fullName, String phoneNo, String phoneNorc, String email,
+                                       long timeCreated, int status) {
+        this.id = id;
         this.timePaid = timePaid;
         this.amount = amount;
         this.billNumber = billNumber;
@@ -63,11 +64,11 @@ public class TransWalletVNPTEpayAdminDTO {
         this.billNumber = billNumber;
     }
 
-    public String getServiceType() {
+    public int getServiceType() {
         return serviceType;
     }
 
-    public void setServiceType(String serviceType) {
+    public void setServiceType(int serviceType) {
         this.serviceType = serviceType;
     }
 

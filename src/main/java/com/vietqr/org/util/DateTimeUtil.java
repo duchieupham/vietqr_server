@@ -162,4 +162,35 @@ public class DateTimeUtil {
         LocalDateTime localDateTime = time.plusMinutes(minute);
         return localDateTime.toEpochSecond(ZoneOffset.UTC);
     }
+
+    public static int minusToMonth(long fromDateSeconds, long toDateSeconds) {
+        // Convert seconds to milliseconds
+        long fromDateMillis = fromDateSeconds * 1000;
+        long toDateMillis = toDateSeconds * 1000;
+
+        // Create Instant objects
+        Instant fromInstant = Instant.ofEpochMilli(fromDateMillis);
+        Instant toInstant = Instant.ofEpochMilli(toDateMillis);
+
+        // Convert Instant objects to LocalDateTime objects
+        LocalDateTime fromLocalDateTime = LocalDateTime.ofInstant(fromInstant, java.time.ZoneOffset.UTC);
+        LocalDateTime toLocalDateTime = LocalDateTime.ofInstant(toInstant, java.time.ZoneOffset.UTC);
+
+        // Convert LocalDateTime objects to LocalDate objects (ignore time part)
+        LocalDate fromLocalDate = LocalDate.of(fromLocalDateTime.getYear(), fromLocalDateTime.getMonth(), fromLocalDateTime.getDayOfMonth());
+        LocalDate toLocalDate = LocalDate.of(toLocalDateTime.getYear(), toLocalDateTime.getMonth(), toLocalDateTime.getDayOfMonth());
+
+        // Calculate difference between dates
+        Period period = Period.between(fromLocalDate, toLocalDate);
+
+        // Convert years to months and add to total months difference
+        int monthsDifference = period.getYears() * 12 + period.getMonths();
+
+        // Adjust for days difference
+        if (fromLocalDate.getDayOfMonth() > toLocalDate.getDayOfMonth()) {
+            monthsDifference--;
+        }
+
+        return monthsDifference;
+    }
 }
