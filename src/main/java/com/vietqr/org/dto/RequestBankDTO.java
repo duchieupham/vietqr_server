@@ -85,5 +85,9 @@ public class RequestBankDTO implements Serializable {
     // public void setTransType(String transType) {
     // this.transType = transType;
     // }
-
+    @Override
+    public String toString() {
+        return "RequestBankDTO [nationalId=" + nationalId + ", accountNumber=" + accountNumber
+                + ", accountName=" + accountName + ", phoneNumber=" + phoneNumber + ", applicationType=" + applicationType + "]";
+    }
 }

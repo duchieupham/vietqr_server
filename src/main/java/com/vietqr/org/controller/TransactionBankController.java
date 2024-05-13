@@ -473,7 +473,7 @@ public class TransactionBankController {
 												if (rawDTO != null) {
 													rawCode = rawDTO.getRawCode();
 													if (rawDTO.getQrType() == 2) {
-														boxIdRef = rawDTO.getBoxId();
+														boxIdRef = rawDTO.getRawCode();
 													}
 												}
 											}
@@ -511,7 +511,7 @@ public class TransactionBankController {
 											if (rawDTO != null) {
 												rawCode = rawDTO.getRawCode();
 												if (rawDTO.getQrType() == 2) {
-													boxIdRef = rawDTO.getBoxId();
+													boxIdRef = rawDTO.getRawCode();
 												}
 											}
 										}
@@ -669,7 +669,7 @@ public class TransactionBankController {
 													if (rawDTO != null) {
 														rawCode = rawDTO.getRawCode();
 														if (rawDTO.getQrType() == 2) {
-															boxIdRef = rawDTO.getBoxId();
+															boxIdRef = rawDTO.getRawCode();
 														}
 													}
 												}
@@ -745,7 +745,7 @@ public class TransactionBankController {
 													if (rawDTO != null) {
 														rawCode = rawDTO.getRawCode();
 														if (rawDTO.getQrType() == 2) {
-															boxIdRef = rawDTO.getBoxId();
+															boxIdRef = rawDTO.getRawCode();
 														}
 													}
 												}
@@ -798,7 +798,7 @@ public class TransactionBankController {
 													if (rawDTO != null) {
 														rawCode = rawDTO.getRawCode();
 														if (rawDTO.getQrType() == 2) {
-															boxIdRef = rawDTO.getBoxId();
+															boxIdRef = rawDTO.getRawCode();
 														}
 													}
 												}
@@ -837,7 +837,7 @@ public class TransactionBankController {
 												if (rawDTO != null) {
 													rawCode = rawDTO.getRawCode();
 													if (rawDTO.getQrType() == 2) {
-														boxIdRef = rawDTO.getBoxId();
+														boxIdRef = rawDTO.getRawCode();
 													}
 												}
 											}
@@ -1395,8 +1395,8 @@ public class TransactionBankController {
 			data.put("amount", "2937000" + "");
 			data.put("billNumber", "VAF19349842");
 			data.put("transactionWalletId", UUID.randomUUID().toString());
-			data.put("timeCreated", DateTimeUtil.getCurrentDateTime() + "");
-			data.put("timePaid", DateTimeUtil.getCurrentDateTime() + "");
+			data.put("timeCreated", DateTimeUtil.getCurrentDateTimeUTC() + "");
+			data.put("timePaid", DateTimeUtil.getCurrentDateTimeUTC() + "");
 			data.put("userId", userId);
 			pushFakenotification(userId, data);
 			result = new ResponseMessageDTO("SUCCESS", "");
@@ -1616,7 +1616,7 @@ public class TransactionBankController {
 							String refId = TransactionRefIdUtil.encryptTransactionId(transactionReceiveEntity.getId());
 							socketHandler.sendMessageToTransactionRefId(refId, data);
 							if (boxIdRef != null && !boxIdRef.isEmpty()) {
-								String idRefBox = BoxTerminalRefIdUtil.encryptTransactionId(boxIdRef);
+								String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 								socketHandler.sendMessageToBoxId(idRefBox, data);
 							}
 						} catch (IOException e) {
@@ -1763,7 +1763,7 @@ public class TransactionBankController {
 					String refId = TransactionRefIdUtil.encryptTransactionId(transactionReceiveEntity.getId());
 					socketHandler.sendMessageToTransactionRefId(refId, data);
 					if (boxIdRef != null && !boxIdRef.isEmpty()) {
-						String idRefBox = BoxTerminalRefIdUtil.encryptTransactionId(boxIdRef);
+						String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 						socketHandler.sendMessageToBoxId(idRefBox, data);
 					}
 				} catch (IOException e) {
@@ -1901,7 +1901,7 @@ public class TransactionBankController {
 				String refId = TransactionRefIdUtil.encryptTransactionId(transactionReceiveEntity.getId());
 				socketHandler.sendMessageToTransactionRefId(refId, data);
 				if (boxIdRef != null && !boxIdRef.isEmpty()) {
-					String idRefBox = BoxTerminalRefIdUtil.encryptTransactionId(boxIdRef);
+					String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 					socketHandler.sendMessageToBoxId(idRefBox, data);
 				}
 			} catch (IOException e) {
@@ -2226,7 +2226,7 @@ public class TransactionBankController {
 						String refId = TransactionRefIdUtil.encryptTransactionId(transactionEntity.getId());
 						socketHandler.sendMessageToTransactionRefId(refId, data1);
 						if (boxIdRef != null && !boxIdRef.isEmpty()) {
-							String idRefBox = BoxTerminalRefIdUtil.encryptTransactionId(boxIdRef);
+							String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 							socketHandler.sendMessageToBoxId(idRefBox, data1);
 						}
 					} catch (IOException e) {
@@ -2284,7 +2284,7 @@ public class TransactionBankController {
 						String refId = TransactionRefIdUtil.encryptTransactionId(transactionEntity.getId());
 						socketHandler.sendMessageToTransactionRefId(refId, data);
 						if (boxIdRef != null && !boxIdRef.isEmpty()) {
-							String idRefBox = BoxTerminalRefIdUtil.encryptTransactionId(boxIdRef);
+							String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 							socketHandler.sendMessageToBoxId(idRefBox, data);
 						}
 					} catch (IOException e) {
@@ -2544,7 +2544,7 @@ public class TransactionBankController {
 					String refId = TransactionRefIdUtil.encryptTransactionId(transcationUUID.toString());
 					socketHandler.sendMessageToTransactionRefId(refId, data);
 					if (boxIdRef != null && !boxIdRef.isEmpty()) {
-						String idRefBox = BoxTerminalRefIdUtil.encryptTransactionId(boxIdRef);
+						String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 						socketHandler.sendMessageToBoxId(idRefBox, data);
 					}
 				} catch (IOException e) {
@@ -2757,7 +2757,7 @@ public class TransactionBankController {
 					String refId = TransactionRefIdUtil.encryptTransactionId(transactionEntity.getId());
 					socketHandler.sendMessageToTransactionRefId(refId, data1);
 					if (boxIdRef != null && !boxIdRef.isEmpty()) {
-						String idRefBox = BoxTerminalRefIdUtil.encryptTransactionId(boxIdRef);
+						String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 						socketHandler.sendMessageToBoxId(idRefBox, data1);
 					}
 				} catch (IOException e) {
@@ -2805,7 +2805,7 @@ public class TransactionBankController {
 				String refId = TransactionRefIdUtil.encryptTransactionId(transcationUUID.toString());
 				socketHandler.sendMessageToTransactionRefId(refId, data);
 				if (boxIdRef != null && !boxIdRef.isEmpty()) {
-					String idRefBox = BoxTerminalRefIdUtil.encryptTransactionId(boxIdRef);
+					String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 					socketHandler.sendMessageToBoxId(idRefBox, data);
 				}
 			} catch (IOException e) {
@@ -3138,6 +3138,26 @@ public class TransactionBankController {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
+			result = requestLinkedMBOTP(dto);
+			if (result != null && result.getStatus().trim().equals("SUCCESS")) {
+				httpStatus = HttpStatus.OK;
+			} else {
+				httpStatus = HttpStatus.BAD_REQUEST;
+			}
+		} catch (Exception e) {
+			logger.error("Error at requestOTP: " + e.toString());
+			result = new ResponseMessageDTO("FAILED", "E05");
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	@PostMapping("check-log/request_otp_bank")
+	public ResponseEntity<ResponseMessageDTO> requestOTPCheckLog(@Valid @RequestBody RequestBankDTO dto) {
+		ResponseMessageDTO result = null;
+		HttpStatus httpStatus = null;
+		try {
+			logger.info("requestOTPCheckLog: " + dto.toString() + " at: " + System.currentTimeMillis());
 			result = requestLinkedMBOTP(dto);
 			if (result != null && result.getStatus().trim().equals("SUCCESS")) {
 				httpStatus = HttpStatus.OK;
@@ -4330,7 +4350,7 @@ public class TransactionBankController {
 			if (response.statusCode().is2xxSuccessful()) {
 				String json = response.bodyToMono(String.class).block();
 				System.out.println("Response pushNewTransactionToCustomerSync: " + json);
-				logger.info("Response pushNewTransactionToCustomerSync: " + json);
+				logger.info("Response pushNewTransactionToCustomerSync: " + json + " status: " + response.statusCode());
 				ObjectMapper objectMapper = new ObjectMapper();
 				JsonNode rootNode = objectMapper.readTree(json);
 				if (rootNode.get("object") != null) {
@@ -4346,7 +4366,7 @@ public class TransactionBankController {
 			} else {
 				String json = response.bodyToMono(String.class).block();
 				System.out.println("Response pushNewTransactionToCustomerSync: " + json);
-				logger.info("Response pushNewTransactionToCustomerSync: " + json);
+				logger.info("Response pushNewTransactionToCustomerSync: " + json + " status: " + response.statusCode());
 				result = new ResponseMessageDTO("FAILED", "E05 - " + json);
 			}
 			// TransactionResponseDTO res = (TransactionResponseDTO)
@@ -4589,8 +4609,8 @@ public class TransactionBankController {
 			invoiceEntity.setAmount(dto.getAmount());
 			invoiceEntity.setTotalAmount(dto.getAmountAfterVat());
 			invoiceEntity.setVatAmount(dto.getAmountVat());
-			invoiceEntity.setTimeCreated(DateTimeUtil.getCurrentDateTime());
-			invoiceEntity.setTimePaid(DateTimeUtil.getCurrentDateTime());
+			invoiceEntity.setTimeCreated(DateTimeUtil.getCurrentDateTimeUTC());
+			invoiceEntity.setTimePaid(DateTimeUtil.getCurrentDateTimeUTC());
 			invoiceEntity.setUserId(dto.getUserId());
 			invoiceEntity.setBankId(dto.getBankId());
 			invoiceEntity.setRefId(dto.getTransWalletId());

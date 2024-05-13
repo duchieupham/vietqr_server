@@ -52,7 +52,7 @@ public class TerminalController {
     private static final Logger logger = Logger.getLogger(TerminalController.class);
     private static final String CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final String NUMBERS = "0123456789";
-    private static final int CODE_LENGTH = 10;
+    private static final int CODE_LENGTH = 6;
     private static final int WINDOW_SIZE = 100;
 
     private static final int WIDTH_PIXEL = 256;
@@ -97,6 +97,9 @@ public class TerminalController {
     private AccountBankReceiveShareService accountBankReceiveShareService;
 
     @Autowired
+    private QrBoxSyncService qrBoxSyncService;
+
+    @Autowired
     private TerminalBankService terminalBankService;
 
     @Autowired
@@ -113,6 +116,12 @@ public class TerminalController {
 
     @Autowired
     private TransReceiveTempService transReceiveTempService;
+
+    @Autowired
+    private BankTypeService bankTypeService;
+
+    @Autowired
+    private CaiBankService caiBankService;
 
     @Autowired
     private FirebaseMessagingService firebaseMessagingService;
@@ -1777,165 +1786,6 @@ public class TerminalController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @PostMapping("tid-internal/sync")
-    public ResponseEntity<Object> syncTerminal(@RequestHeader("Authorization") String token,
-                                               @Valid @RequestBody TerminalSyncInterDTO dto) {
-        Object result = null;
-        HttpStatus httpStatus = null;
-        TerminalTidResponseDTO responseDTO = new TerminalTidResponseDTO();
-        try {
-            String terminalCode = "";
-            String username = getUsernameFromToken(token);
-            terminalCode = getRandomUniqueCodeInTerminalCode();
-            if (dto.getBoxCode() == null || dto.getBoxCode().trim().isEmpty()) {
-                String boxCode = getRandomUniqueCodeInRawTerminalCode();
-                dto.setBoxCode(boxCode);
-            }
-            String accessKey = accountCustomerService.getAccessKeyByUsername(username);
-            String checkSum = BankEncryptUtil.generateMD5SyncTidChecksum(accessKey, dto.getBankCode(),
-                    dto.getBankAccount());
-            if (BankEncryptUtil.isMatchChecksum(dto.getCheckSum(), checkSum)) {
-                IAccountBankReceiveDTO accountBankInfoResById
-                        = accountBankReceiveService.getAccountBankInfoResById(dto.getBankAccount(), dto.getBankCode());
-                if (accountBankInfoResById != null) {
-                    if (accountBankInfoResById.getIsAuthenticated()) {
-                        TerminalBankReceiveEntity terminalBankReceiveEntity = terminalBankReceiveService
-                                .getTerminalBankReceiveByRawTerminalCode(dto.getBoxCode());
-                        if (terminalBankReceiveEntity == null) {
-                            terminalBankReceiveEntity = new TerminalBankReceiveEntity();
-                            terminalBankReceiveEntity.setId(UUID.randomUUID().toString());
-                        }
-                        terminalBankReceiveEntity.setTerminalId("");
-                        terminalBankReceiveEntity.setSubTerminalAddress(dto.getBoxAddress());
-                        terminalBankReceiveEntity.setBankId(accountBankInfoResById.getBankId());
-                        terminalBankReceiveEntity.setRawTerminalCode(dto.getBoxCode());
-                        terminalBankReceiveEntity.setTerminalCode(terminalCode);
-                        terminalBankReceiveEntity.setTypeOfQR(2);
-                        String qrCode = "";
-                        if (accountBankInfoResById.getIsMmsActive()) {
-                            TerminalBankEntity terminalBankEntity =
-                                    terminalBankService.getTerminalBankByBankAccount(accountBankInfoResById.getBankAccount());
-                            if (terminalBankEntity != null) {
-                                String qr = MBVietQRUtil.generateStaticVietQRMMS(
-                                        new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
-                                                terminalBankEntity.getTerminalId(), terminalCode));
-                                terminalBankReceiveEntity.setData2(qr);
-                                qrCode = qr;
-                                String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
-                                terminalBankReceiveEntity.setTraceTransfer(traceTransfer);
-                                terminalBankReceiveEntity.setData1("");
-                            } else {
-                                logger.error("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
-                            }
-                        } else {
-                            // luồng thuong
-                            String qrCodeContent = "SQR" + terminalCode;
-                            String bankAccount = accountBankInfoResById.getBankAccount();
-                            String caiValue = accountBankReceiveService.getCaiValueByBankId(accountBankInfoResById.getBankId());
-                            VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", qrCodeContent, bankAccount);
-                            String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
-                            terminalBankReceiveEntity.setData1(qr);
-                            qrCode = qr;
-                            terminalBankReceiveEntity.setData2("");
-                            terminalBankReceiveEntity.setTraceTransfer("");
-                        }
-                        terminalBankReceiveService.insert(terminalBankReceiveEntity);
-                        BoxMachineCreatedDTO response = new BoxMachineCreatedDTO();
-                        response.setBoxId(BoxTerminalRefIdUtil.encryptTransactionId(terminalBankReceiveEntity.getId()));
-                        response.setBankAccount(dto.getBankAccount());
-                        response.setBankCode(dto.getBankCode());
-                        response.setQrCode(qrCode);
-                        response.setBoxCode(dto.getBoxCode());
-                        result = response;
-                        httpStatus = HttpStatus.OK;
-                    } else {
-                        result = new ResponseMessageDTO("FAILED", "E46");
-                        httpStatus = HttpStatus.OK;
-                    }
-                } else {
-                    result = new ResponseMessageDTO("FAILED", "E46");
-                    httpStatus = HttpStatus.OK;
-                }
-            } else {
-                result = new ResponseMessageDTO("FAILED", "E46");
-                httpStatus = HttpStatus.OK;
-            }
-        } catch (Exception e) {
-            result = new ResponseMessageDTO("FAILED", "E05");
-            httpStatus = HttpStatus.BAD_REQUEST;
-        }
-        return new ResponseEntity<>(result, httpStatus);
-    }
-
-    @GetMapping("tid/info/{boxCode}")
-    public ResponseEntity<Object> getTerminalInternalInfo(@RequestHeader("Authorization") String token,
-                                              @PathVariable String boxCode) {
-        Object result = null;
-        HttpStatus httpStatus = null;
-        try {
-            ITerminalInternalDTO dto = terminalBankReceiveService.getTerminalInternalDTOByMachineCode(boxCode);
-            if (dto != null) {
-                MachineDetailResponseDTO responseDTO = new MachineDetailResponseDTO();
-                responseDTO.setBankAccount(dto.getBankAccount());
-                responseDTO.setBankShortName(dto.getBankShortName());
-                responseDTO.setBoxAddress(dto.getMachineAddress());
-                responseDTO.setBoxCode(dto.getMachineCode());
-                responseDTO.setTerminalSubCode(dto.getTerminalCode());
-                responseDTO.setBoxId(BoxTerminalRefIdUtil.encryptTransactionId(dto.getMachineId()));
-                responseDTO.setMachineId(dto.getMachineId());
-                responseDTO.setQrCode(dto.getQrCode());
-                responseDTO.setUserBankName(dto.getUserBankName());
-                responseDTO.setBankCode(dto.getBankCode());
-                result = responseDTO;
-                httpStatus = HttpStatus.OK;
-            } else {
-                result = new ResponseMessageDTO("FAILED", "E46");
-            }
-        } catch (Exception e) {
-            result = new ResponseMessageDTO("FAILED", "E05");
-            httpStatus = HttpStatus.BAD_REQUEST;
-        }
-        return new ResponseEntity<>(result, httpStatus);
-    }
-
-    @PostMapping("tid/socket-test/{boxId}")
-    public ResponseEntity<Object> getTerminalInternalInfo(@PathVariable String boxId) {
-        Object result = null;
-        HttpStatus httpStatus = null;
-        try {
-            Map<String, String> data = new HashMap<>();
-            data.put("bankAccount", "0373568944");
-            data.put("traceId", "");
-            data.put("bankCode", "MB");
-            data.put("amount", "20,000");
-            data.put("orderId", "");
-            data.put("bankName", "Ngân hàng TMCP Quân đội");
-            data.put("notificationType", "N05");
-            data.put("type", "2");
-            data.put("content", "SQRSQ6WOh7kpV.test Ma giao dich  Trace444952 Trace 444952");
-            data.put("terminalName", "");
-            data.put("bankId", "9dea5eac-6fc9-4b92-a6ec-22a7f3fa8178");
-            data.put("timePaid", "1714843161");
-            data.put("transType", "C");
-            data.put("rawTerminalCode", "");
-            data.put("referenceNumber", "FT2439624023480075");
-            data.put("notificationId", "0faa8b54-03bb-4d8a-b320-d91965a9dabc");
-            data.put("terminalCode", "");
-            data.put("time", "1714843161");
-            data.put("refId", "FT2439624023480075");
-            data.put("transactionReceiveId", "e509d941-8f67-4e37-9a22-d6ea94ae4a77");
-            data.put("urlLink", "");
-            data.put("status", "1");
-            socketHandler.sendMessageToBoxId(boxId, data);
-            result = new ResponseMessageDTO("SUCCESS", "");
-            httpStatus = HttpStatus.OK;
-        } catch (Exception e) {
-            result = new ResponseMessageDTO("FAILED", "E05");
-            httpStatus = HttpStatus.BAD_REQUEST;
-        }
-        return new ResponseEntity<>(result, httpStatus);
-    }
-
     @PostMapping("tid/synchronize")
     public ResponseEntity<Object> syncTerminal(@RequestHeader("Authorization") String token,
                                                @Valid @RequestBody List<TerminalSyncDTO> dtos) {
@@ -2721,7 +2571,6 @@ public class TerminalController {
         return allBankShares;
     }
 
-
     private String getTerminalCode() {
         SecureRandom random = new SecureRandom();
         StringBuilder code = new StringBuilder(CODE_LENGTH);
@@ -2821,6 +2670,23 @@ public class TerminalController {
                 Long numberAmount = Long.parseLong(amount);
                 result = nf.format(numberAmount);
             }
+        } catch (Exception ignored) {}
+        return result;
+    }
+
+    private String getRandomNumberUniqueQRBox() {
+        String result = "";
+        String checkExistedCode = "";
+        String code = "";
+        try {
+            do {
+                code = "VVB" + getRawTerminalCode();
+                checkExistedCode = qrBoxSyncService.checkExistQRBoxCode(code);
+                if (checkExistedCode == null || checkExistedCode.trim().isEmpty()) {
+                    checkExistedCode = qrBoxSyncService.checkExistQRBoxCode(code);
+                }
+            } while (!StringUtil.isNullOrEmpty(checkExistedCode));
+            result = code;
         } catch (Exception ignored) {}
         return result;
     }

@@ -163,4 +163,9 @@ public class TerminalBankReceiveServiceImpl implements TerminalBankReceiveServic
     public String checkExistedRawTerminalCode(String code) {
         return repo.checkExistedRawTerminalCode(code);
     }
+
+    @Override
+    public TerminalBankReceiveEntity getTerminalBankReceiveEntityByTerminalCode(String terminalCode) {
+        return repo.getTerminalBankReceiveEntityByTerminalCode(terminalCode);
+    }
 }

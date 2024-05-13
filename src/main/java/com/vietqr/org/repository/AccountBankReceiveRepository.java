@@ -321,7 +321,9 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
     IBankAccountInfoDTO getAccountBankInfoById(String bankId);
 
 	@Query(value = "SELECT a.id AS bankId, a.bank_account AS bankAccount, "
-			+"a.is_authenticated AS isAuthenticated, a.mms_active AS isMmsActive "
+			+"a.is_authenticated AS isAuthenticated, a.mms_active AS isMmsActive, "
+			+ "a.bank_account_name AS userBankName, b.bank_short_name AS bankShortName, "
+			+ "b.bank_code AS bankCode "
 			+ "FROM account_bank_receive a "
 			+ "INNER JOIN bank_type b "
 			+ "ON a.bank_type_id = b.id "

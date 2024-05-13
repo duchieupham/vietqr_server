@@ -424,7 +424,7 @@ public class KeyBankReceiveController {
             BankReceiveCheckDTO bankReceiveCheckDTO = accountBankReceiveService
                     .checkBankReceiveActive(bankId);
             // update validFeeFrom, validFeeTo
-            long currentTime = DateTimeUtil.getCurrentDateTime();
+            long currentTime = DateTimeUtil.getCurrentDateTimeUTC();
             SystemSettingEntity systemSetting = systemSettingService.getSystemSetting();
             dtos = trAnnualFeePackageService.getAllFee();
             double finalVat = vat;
