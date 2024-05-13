@@ -19,6 +19,8 @@ public class NotificationUtil {
 	private static final String NOTI_TYPE_ACTIVE_KEY = "N13";
 	private static final String NOTI_TYPE_PAYMENT_SUCCESS_VA_INVOICE = "N14";
 	private static final String NOTI_TYPE_PAYMENT_INVOICE_SUCCESS = "N15";
+	private static final String NOTI_CONNECT_QR_SUCCESS = "N16";
+	private static final String NOTI_SEND_DYNAMIC_QR = "N17";
 
 	// Title
 	private static final String NOTI_TITLE_TRANSACTION = "Thông báo biến động số dư";
@@ -64,6 +66,13 @@ public class NotificationUtil {
 	private static final String NOTI_PAYMENT_BDSD_VIETQR_1 = "Thanh toán dịch vụ nhận BĐSD ";
 	private static final String NOTI_PAYMENT_BDSD_VIETQR_2 = "cho số TK: ";
 
+	public static final String getNotiConnectQrSuccess() {
+		return NOTI_CONNECT_QR_SUCCESS;
+	}
+
+	public static final String getNotiSendDynamicQr() {
+		return NOTI_SEND_DYNAMIC_QR;
+	}
 	public static String getNotiTypeConnectSuccess() {
 		return NOTI_TYPE_CONNECT_SUCCESS;
 	}

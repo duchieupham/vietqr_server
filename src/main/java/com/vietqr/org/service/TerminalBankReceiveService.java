@@ -67,4 +67,6 @@ public interface TerminalBankReceiveService {
     ISubTerminalCodeDTO getSubTerminalCodeBySubTerminalCode(String terminalCode);
 
     String checkExistedRawTerminalCode(String code);
+
+    TerminalBankReceiveEntity getTerminalBankReceiveEntityByTerminalCode(String terminalCode);
 }

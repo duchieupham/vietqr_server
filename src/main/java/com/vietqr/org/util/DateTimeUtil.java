@@ -24,7 +24,7 @@ public class DateTimeUtil {
         return localDateTime.toEpochSecond(ZoneOffset.UTC);
     }
 
-    public static long getCurrentDateTime() {
+    public static long getCurrentDateTimeUTC() {
         LocalDateTime localDateTime = LocalDateTime.now();
         return localDateTime.toEpochSecond(ZoneOffset.UTC);
     }

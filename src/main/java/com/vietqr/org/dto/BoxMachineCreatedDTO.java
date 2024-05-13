@@ -6,6 +6,7 @@ public class BoxMachineCreatedDTO {
     private String boxId;
     private String bankCode;
     private String boxCode;
+    private String terminalCode;
 
     public BoxMachineCreatedDTO() {
     }
@@ -56,5 +57,13 @@ public class BoxMachineCreatedDTO {
 
     public void setBoxCode(String boxCode) {
         this.boxCode = boxCode;
+    }
+
+    public String getTerminalCode() {
+        return terminalCode;
+    }
+
+    public void setTerminalCode(String terminalCode) {
+        this.terminalCode = terminalCode;
     }
 }

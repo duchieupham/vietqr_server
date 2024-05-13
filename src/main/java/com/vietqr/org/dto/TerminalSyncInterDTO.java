@@ -2,21 +2,18 @@ package com.vietqr.org.dto;
 
 public class TerminalSyncInterDTO {
     private String boxAddress;
-    private String boxCode;
+    private String qrCertificate;
     private String bankCode;
     private String bankAccount;
-    private String checkSum;
-
+    private String terminalName;
     public TerminalSyncInterDTO() {
     }
 
-    public TerminalSyncInterDTO(String boxAddress, String boxCode, String bankCode,
-                                String bankAccount, String checkSum) {
+    public TerminalSyncInterDTO(String boxAddress, String bankCode,
+                                String bankAccount) {
         this.boxAddress = boxAddress;
-        this.boxCode = boxCode;
         this.bankCode = bankCode;
         this.bankAccount = bankAccount;
-        this.checkSum = checkSum;
     }
 
     public String getBoxAddress() {
@@ -27,12 +24,12 @@ public class TerminalSyncInterDTO {
         this.boxAddress = boxAddress;
     }
 
-    public String getBoxCode() {
-        return boxCode;
+    public String getQrCertificate() {
+        return qrCertificate;
     }
 
-    public void setBoxCode(String boxCode) {
-        this.boxCode = boxCode;
+    public void setQrCertificate(String qrCertificate) {
+        this.qrCertificate = qrCertificate;
     }
 
     public String getBankCode() {
@@ -51,11 +48,11 @@ public class TerminalSyncInterDTO {
         this.bankAccount = bankAccount;
     }
 
-    public String getCheckSum() {
-        return checkSum;
+    public String getTerminalName() {
+        return terminalName;
     }
 
-    public void setCheckSum(String checkSum) {
-        this.checkSum = checkSum;
+    public void setTerminalName(String terminalName) {
+        this.terminalName = terminalName;
     }
 }

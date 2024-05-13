@@ -5,4 +5,7 @@ public interface IAccountBankReceiveDTO {
     Boolean getIsMmsActive();
     String getBankAccount();
     String getBankId();
+    String getUserBankName();
+    String getBankShortName();
+    String getBankCode();
 }
