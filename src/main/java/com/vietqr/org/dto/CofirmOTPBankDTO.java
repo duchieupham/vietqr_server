@@ -46,4 +46,9 @@ public class CofirmOTPBankDTO implements Serializable {
         this.requestId = requestId;
     }
 
+    @Override
+    public String toString() {
+        return "RequestBankDTO [requestId=" + requestId + ", otpValue=" + otpValue
+                + ", applicationType=" + applicationType + "]";
+    }
 }

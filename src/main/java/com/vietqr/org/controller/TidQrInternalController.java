@@ -31,7 +31,6 @@ public class TidQrInternalController {
     private static final String NUMBERS = "0123456789";
     private static final int CODE_LENGTH = 6;
     private static final int TERMINAL_CODE_LENGTH = 10;
-    private static final int WINDOW_SIZE = 100;
 
     @Autowired
     private TerminalService terminalService;
@@ -64,7 +63,6 @@ public class TidQrInternalController {
     public ResponseEntity<Object> syncQrBoxInternal(@Valid @RequestBody TerminalSyncInterDTO dto) {
         Object result = null;
         HttpStatus httpStatus = null;
-        TerminalTidResponseDTO responseDTO = new TerminalTidResponseDTO();
         try {
             String terminalCode = "";
             terminalCode = getRandomUniqueCodeInTerminalCode();
@@ -272,7 +270,7 @@ public class TidQrInternalController {
 
             if (checkMMS == false) {
                 // Luồng 1
-                 UUID transcationUUID = UUID.randomUUID();
+                UUID transcationUUID = UUID.randomUUID();
                 String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
                 String bankTypeId = "";
                 if (dto.getTransType() == null || dto.getTransType().trim().toUpperCase().equals("C")) {
@@ -341,7 +339,7 @@ public class TidQrInternalController {
                                 VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
                                 vietQRGenerateDTO.setCaiValue(caiValue);
                                 vietQRGenerateDTO.setAmount(dto.getAmount() + "");
-                                    content = traceId + " " + dto.getContent();
+                                content = traceId + " " + dto.getContent();
                                 vietQRGenerateDTO.setContent(content);
                                 vietQRGenerateDTO.setBankAccount(bankAccount);
                                 String qrCode = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
@@ -399,9 +397,9 @@ public class TidQrInternalController {
                         } else {
                             vietQRCreateDTO.setTransType("C");
                         }
-                            vietQRCreateDTO.setUrlLink("");
+                        vietQRCreateDTO.setUrlLink("");
                         insertNewTransaction(transactionUUID, traceId, vietQRCreateDTO, dto.getOrderId(), vietQRDTO.getBankAccount(), vietQRDTO.getUserBankName(), qr,
-                        boxId, dto.getBoxCode(), dto.getTerminalName());
+                                boxId, dto.getBoxCode(), dto.getTerminalName());
                     }
                 }
             }
@@ -455,9 +453,10 @@ public class TidQrInternalController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
     @Async
     protected void insertNewTransaction(UUID transcationUUID, String traceId, VietQRCreateDTO dto,
-                                      String orderId, String bankAccount, String userBankName, String qr, String boxId, String boxCode, String terminalName) {
+                                        String orderId, String bankAccount, String userBankName, String qr, String boxId, String boxCode, String terminalName) {
         LocalDateTime startTime = LocalDateTime.now();
         long startTimeLong = startTime.toEpochSecond(ZoneOffset.UTC);
         try {
@@ -563,7 +562,8 @@ public class TidQrInternalController {
                 }
             } while (!StringUtil.isNullOrEmpty(checkExistedCode));
             result = code;
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return result;
     }
 
@@ -573,7 +573,7 @@ public class TidQrInternalController {
         String code = "";
         try {
             do {
-                code = getTerminalCode(10);
+                code = getTerminalCode(TERMINAL_CODE_LENGTH);
                 checkExistedCode = terminalBankReceiveService.checkExistedTerminalCode(code);
                 if (checkExistedCode == null || checkExistedCode.trim().isEmpty()) {
                     checkExistedCode = terminalService.checkExistedTerminal(code);

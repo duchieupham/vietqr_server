@@ -3851,6 +3851,7 @@ public class TransactionBankController {
 				ConfirmRequestFailedBankDTO confirmRequestBankDTO = response.bodyToMono(
 						ConfirmRequestFailedBankDTO.class)
 						.block();
+				logger.error("Response confirmOTP error: request: " + dto.toString() + " at: " + System.currentTimeMillis());
 				LocalDateTime currentDateTime = LocalDateTime.now();
 				logger.error("Response confirmOTP error: " + confirmRequestBankDTO.getSoaErrorCode() + "-"
 						+ confirmRequestBankDTO.getSoaErrorDesc() + " at "
