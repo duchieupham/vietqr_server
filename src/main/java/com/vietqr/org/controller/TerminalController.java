@@ -52,7 +52,7 @@ public class TerminalController {
     private static final Logger logger = Logger.getLogger(TerminalController.class);
     private static final String CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final String NUMBERS = "0123456789";
-    private static final int CODE_LENGTH = 6;
+    private static final int CODE_LENGTH = 10;
     private static final int WINDOW_SIZE = 100;
 
     private static final int WIDTH_PIXEL = 256;
