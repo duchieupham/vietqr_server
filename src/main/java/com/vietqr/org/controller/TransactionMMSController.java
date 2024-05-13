@@ -231,11 +231,12 @@ public class TransactionMMSController {
                     //
                     // TRANSACTION QR
                     if (tempTransReceive != null) {
+                        String rawCode = "";
+                        boolean isSubTerminal = false;
                         // push data to customerSync
                         if (tempTerminalBank != null) {
                             System.out.println("terminal bank != null");
                             String terminalId = "";
-                            String rawCode = "";
                             String traceTransfer = entity.getTraceTransfer();
                             if (StringUtil.isNullOrEmpty(traceTransfer) == false) {
                                 terminalId = terminalService
@@ -255,6 +256,7 @@ public class TransactionMMSController {
                                     rawCode = terminalEntity.getRawTerminalCode();
                                 } else if (terminalBankReceiveEntity != null) {
                                     rawCode = terminalBankReceiveEntity.getRawTerminalCode();
+                                    isSubTerminal = true;
                                 }
                             }
                             String urlLink = tempTransReceive.getUrlLink() != null
@@ -372,6 +374,10 @@ public class TransactionMMSController {
                                 // System.out.println(
                                 // "transaction-mms-sync: sendMessageToTransactionRefId at:" +
                                 // startRequestTime);
+                                if (isSubTerminal) {
+                                    String boxRefId = BoxTerminalRefIdUtil.encryptQrBoxId(rawCode);
+                                    socketHandler.sendMessageToBoxId(boxRefId, data);
+                                }
                                 socketHandler.sendMessageToTransactionRefId(refId, data);
                             } catch (Exception e) {
                                 logger.error("transaction-mms-sync: ERROR: " + e.toString());
@@ -388,6 +394,8 @@ public class TransactionMMSController {
                                 "transaction-mms-sync: staticQRTime-start at:" + staticQRTime);
                         // STATTIC QR
                         String terminalId = "";
+                        String subRawCode = "";
+                        boolean isSubTerminal = false;
                         boolean insertTransaction = false;
                         // get trace Transfer to find VietQR terminal
                         String traceTransfer = entity.getTraceTransfer();
@@ -446,6 +454,8 @@ public class TransactionMMSController {
                                         && !terminalBankReceiveEntity.getTerminalCode().trim().isEmpty()) {
                                     code = terminalBankReceiveEntity.getTerminalCode();
                                     rawCode = terminalBankReceiveEntity.getRawTerminalCode();
+                                    subRawCode = terminalBankReceiveEntity.getRawTerminalCode();
+                                    isSubTerminal = true;
                                 } else {
                                     code = terminalEntity.getCode();
                                     rawCode = terminalEntity.getRawTerminalCode();
@@ -526,6 +536,14 @@ public class TransactionMMSController {
                                             transactionReceiveEntity1, time, rawCode, urlLink);
                                 } else {
                                     logger.info("transaction-mms-sync: NOT FOUND TerminalBankEntity");
+                                }
+                                try {
+                                    if (isSubTerminal) {
+                                        String boxRefId = BoxTerminalRefIdUtil.encryptQrBoxId(subRawCode);
+                                        socketHandler.sendMessageToBoxId(boxRefId, data);
+                                    }
+                                } catch (Exception e) {
+                                    logger.error("transaction-mms-sync: ERROR: " + e.toString());
                                 }
                             } else {
                                 logger.info("transaction-mms-sync: NOT FOUND terminalBankReceiveEntity");
