@@ -2,7 +2,6 @@ package com.vietqr.org.dto;
 
 public interface IBankAccountInvoiceDTO {
     String getBankId();
-    String getMerchantId();
     String getPhoneNo();
     String getEmail();
     String getData();

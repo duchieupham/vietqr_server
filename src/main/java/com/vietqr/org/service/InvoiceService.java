@@ -60,4 +60,9 @@ public interface InvoiceService {
     IInvoiceQrDetailDTO getInvoiceQrById(String invoiceId);
 
     IInvoiceDTO getInvoiceByInvoiceDetail(String invoiceId);
+
+    InvoiceUpdateItemDTO getInvoiceById(String invoiceId);
+
+    void updateInvoiceById(long vatAmount, long totalAmount,
+                           long totalAmountAfterVat, String invoiceId);
 }

@@ -196,4 +196,15 @@ public class InvoiceServiceImpl implements InvoiceService {
     public IInvoiceDTO getInvoiceByInvoiceDetail(String invoiceId) {
         return repo.getInvoiceByInvoiceDetail(invoiceId);
     }
+
+    @Override
+    public InvoiceUpdateItemDTO getInvoiceById(String invoiceId) {
+        return repo.getInvoiceById(invoiceId);
+    }
+
+    @Override
+    public void updateInvoiceById(long vatAmount, long totalAmount,
+                                  long totalAmountAfterVat, String invoiceId) {
+        repo.updateInvoiceById(vatAmount, totalAmount, totalAmountAfterVat, invoiceId);
+    }
 }

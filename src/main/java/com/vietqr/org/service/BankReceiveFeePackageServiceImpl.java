@@ -2,6 +2,7 @@ package com.vietqr.org.service;
 
 import com.vietqr.org.dto.IBankAccountInvoiceDTO;
 import com.vietqr.org.dto.IFeePackageDetailDTO;
+import com.vietqr.org.dto.IInvoiceItemCreateDTO;
 import com.vietqr.org.repository.BankReceiveFeePackageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,8 +18,7 @@ public class BankReceiveFeePackageServiceImpl implements BankReceiveFeePackageSe
 
     @Override
     public List<IBankAccountInvoiceDTO> getBankInvoiceByBankAccount(String value, int offset, int size) {
-//        return repo.getBankInvoiceByBankAccount(value, offset, size);
-        return new ArrayList<>();
+        return repo.getBankInvoiceByBankAccount(value, offset, size);
     }
 
     @Override
@@ -42,5 +42,10 @@ public class BankReceiveFeePackageServiceImpl implements BankReceiveFeePackageSe
     @Override
     public List<IFeePackageDetailDTO> getFeePackageDetail(String bankId) {
         return repo.getFeePackageDetail(bankId);
+    }
+
+    @Override
+    public IInvoiceItemCreateDTO getFeePackageByBankId(String bankId) {
+        return repo.getFeePackageByBankId(bankId);
     }
 }

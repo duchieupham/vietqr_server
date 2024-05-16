@@ -140,6 +140,13 @@ public class DateTimeUtil {
         return startEndTimeDTO;
     }
 
+    public static String removeFormatTime(String time) {
+        String result = "";
+        result = time.trim().replaceAll("\\-", "");
+        result = result.trim().replaceAll("\\/", "");
+        return result;
+    }
+
     public static String removeTimeInDateTimeString(String fromDate) {
         return fromDate.substring(0, 10);
     }
@@ -161,5 +168,13 @@ public class DateTimeUtil {
     public static long plusMinuteAsLongInt(LocalDateTime time, int minute) {
         LocalDateTime localDateTime = time.plusMinutes(minute);
         return localDateTime.toEpochSecond(ZoneOffset.UTC);
+    }
+
+    public static String getFormatMonthYear(String time) {
+        if (time == null || !time.matches("\\d{4}-\\d{2}")) {
+            return "";
+        }
+        String[] parts = time.split("-");
+        return parts[1] + "/" + parts[0];
     }
 }

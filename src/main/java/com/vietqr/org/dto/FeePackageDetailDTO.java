@@ -6,6 +6,7 @@ public class FeePackageDetailDTO {
     private int fixFee;
     private double percentFee;
     private int recordType;
+    private double vat;
 
     public FeePackageDetailDTO() {
     }
@@ -56,5 +57,13 @@ public class FeePackageDetailDTO {
 
     public void setRecordType(int recordType) {
         this.recordType = recordType;
+    }
+
+    public double getVat() {
+        return vat;
+    }
+
+    public void setVat(double vat) {
+        this.vat = vat;
     }
 }

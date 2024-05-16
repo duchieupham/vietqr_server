@@ -6,4 +6,5 @@ public interface IFeePackageDetailDTO {
     int getFixFee();
     double getPercentFee();
     int getRecordType();
+    double getVat();
 }

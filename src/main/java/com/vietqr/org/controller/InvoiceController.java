@@ -1,16 +1,14 @@
 package com.vietqr.org.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.BankAccountInfoDTO;
 import com.vietqr.org.entity.InvoiceEntity;
 import com.vietqr.org.entity.InvoiceItemEntity;
 import com.vietqr.org.service.*;
-import com.vietqr.org.util.EnvironmentUtil;
-import com.vietqr.org.util.RandomCodeUtil;
-import com.vietqr.org.util.StringUtil;
-import com.vietqr.org.util.VietQRUtil;
+import com.vietqr.org.util.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -43,6 +41,9 @@ public class InvoiceController {
 
     @Autowired
     BankReceiveFeePackageService bankReceiveFeePackageService;
+
+    @Autowired
+    TrMonthService trMonthService;
 
     @Autowired
     TransactionReceiveService transactionReceiveService;
@@ -270,6 +271,20 @@ public class InvoiceController {
             }
             data = dtos.stream().map(item -> {
                 BankAccountInvoiceDTO dto = new BankAccountInvoiceDTO();
+                AccountBankInfoDTO bankAccountInfoDTO = getBankAccountInfoByData(item.getData());
+                dto.setBankId(item.getBankId());
+                dto.setMerchantId(merchantId != null ? merchantId : "");
+                dto.setUserBankName(bankAccountInfoDTO.getUserBankName());
+                dto.setBankShortName(bankAccountInfoDTO.getBankShortName());
+                dto.setBankAccount(bankAccountInfoDTO.getBankAccount());
+                dto.setEmail(item.getEmail());
+                dto.setPhoneNo(item.getPhoneNo());
+                dto.setFeePackage(item.getFeePackage());
+                if (bankAccountInfoDTO.getMmsActive() != null && bankAccountInfoDTO.getMmsActive()) {
+                    dto.setConnectionType(EnvironmentUtil.getVietQrProPackage());
+                } else {
+                    dto.setConnectionType(EnvironmentUtil.getVietQrPlusPackage());
+                }
                 return dto;
             }).collect(Collectors.toList());
             PageDTO pageDTO = new PageDTO();
@@ -381,9 +396,9 @@ public class InvoiceController {
                             customerDetailDTO.setVso(item.getVso());
                             customerDetailDTO.setMerchantName(item.getMerchantName());
                             if (item.getMmsActive()) {
-                                customerDetailDTO.setConnectionType("VietQR Pro");
+                                customerDetailDTO.setConnectionType(EnvironmentUtil.getVietQrProPackage());
                             } else {
-                                customerDetailDTO.setConnectionType("VietQR Plus");
+                                customerDetailDTO.setConnectionType(EnvironmentUtil.getVietQrPlusPackage());
                             }
                             customerDetailDTO.setBankShortName(item.getBankShortName());
                             customerDetailDTO.setUserBankName(item.getUserBankName());
@@ -404,6 +419,7 @@ public class InvoiceController {
                             feePackageDetailDTO.setFixFee(item.getFixFee());
                             feePackageDetailDTO.setRecordType(item.getRecordType());
                             feePackageDetailDTO.setPercentFee(item.getPercentFee());
+                            feePackageDetailDTO.setVat(item.getVat());
                             return feePackageDetailDTO;
                         }).collect(Collectors.toList());
 
@@ -595,6 +611,82 @@ public class InvoiceController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("/invoice/invoice-item")
+    public ResponseEntity<Object> getInvoiceItem(
+            @RequestParam String bankId,
+            @RequestParam String merchantId,
+            @RequestParam int type,
+            @RequestParam String time,
+            @RequestParam double vat
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            String monthYear = DateTimeUtil.getFormatMonthYear(time);
+            InvoiceCreateItemDTO data = null;
+            IInvoiceItemCreateDTO feePackage;
+            switch (type) {
+                // annual fee
+                case 0:
+                    data = new InvoiceCreateItemDTO();
+                    data.setItemId("");
+                    data.setVat(vat);
+                    data.setTime(time);
+                    data.setType(type);
+                    data.setContent(EnvironmentUtil.getVietQrNameAnnualFee() + monthYear);
+                    data.setUnit(EnvironmentUtil.getMonthUnitNameVn());
+                    data.setQuantity(1);
+                    feePackage = bankReceiveFeePackageService.getFeePackageByBankId(bankId);
+                    if (feePackage != null) {
+                        data.setAmount(feePackage.getAnnualFee());
+                        data.setTotalAmount(feePackage.getAnnualFee());
+                        data.setVatAmount(Math.round(feePackage.getVat() / 100 * feePackage.getAnnualFee()));
+                        data.setAmountAfterVat(data.getTotalAmount() + data.getVatAmount());
+                    }
+                    break;
+                // phi giao dich
+                case 1:
+                    data = new InvoiceCreateItemDTO();
+                    data.setVat(vat);
+                    data.setTime(time);
+                    data.setType(type);
+                    data.setContent(EnvironmentUtil.getVietQrNameTransFee() + monthYear);
+                    data.setUnit(EnvironmentUtil.getMonthUnitNameVn());
+                    data.setQuantity(1);
+                    feePackage = bankReceiveFeePackageService.getFeePackageByBankId(bankId);
+                    String timeFormat = DateTimeUtil.removeFormatTime(time);
+                    TrMonthDTO dto = trMonthService.getTrMonthByMonth(timeFormat);
+                    if (dto != null) {
+                        BrStatisticDTO brStatisticDTO = getBrStatisticByBankId(bankId, dto.getData());
+                        if (feePackage != null) {
+                            long totalAmount = getTotalAmount(feePackage, brStatisticDTO);
+                            data.setAmount(totalAmount);
+                            data.setTotalAmount(totalAmount);
+                            data.setVatAmount(Math.round(feePackage.getVat() / 100 * totalAmount));
+                            data.setAmountAfterVat(Math.round((feePackage.getVat() + 1) / 100 * totalAmount));
+                        }
+                    }
+                    break;
+                // phi khac
+                case 9:
+                    data = new InvoiceCreateItemDTO();
+                    data.setVat(vat);
+                    data.setTime(time);
+                    data.setType(type);
+                    data.setContent(EnvironmentUtil.getVietQrNameAnotherFee());
+                    break;
+                default:
+                    break;
+            }
+            result = data;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @PostMapping("/invoice/create")
     public ResponseEntity<Object> getInvoiceByItem(
             @Valid @RequestBody InvoiceCreateDTO dto
@@ -662,15 +754,15 @@ public class InvoiceController {
                 switch (item.getType()) {
                     case 0:
                         invoiceItemEntity.setType(0);
-                        invoiceItemEntity.setTypeName("Phí thường niên / duy trì");
+                        invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameAnnualFee());
                         break;
                     case 1:
                         invoiceItemEntity.setType(1);
-                        invoiceItemEntity.setTypeName("Phí giao dịch");
+                        invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameAnnualFee());
                         break;
                     case 9:
                         invoiceItemEntity.setType(9);
-                        invoiceItemEntity.setTypeName("Phí khác");
+                        invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameAnotherFee());
                         break;
                 }
                 invoiceItemEntity.setUnit(item.getUnit());
@@ -687,6 +779,13 @@ public class InvoiceController {
             entity.setAmount(totalAmount);
             entity.setVatAmount(totalVatAmount);
 
+            entity.setRefId("");
+            String userId = accountBankReceiveService.getUserIdByBankId(dto.getBankId());
+            if (userId != null && !userId.isEmpty()) {
+                entity.setUserId(userId);
+            } else {
+                entity.setUserId("");
+            }
             // create transaction_wallet
 //            TransactionWalletEntity transactionWalletEntity = new TransactionWalletEntity();
 //            UUID transWalletUUID = UUID.randomUUID();
@@ -722,6 +821,101 @@ public class InvoiceController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @PostMapping("invoice/update")
+    public ResponseEntity<Object> updateInvoiceByItem(
+            @Valid @RequestBody InvoiceUpdateDTO dto
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            long vatAmount = 0;
+            long totalAmount = 0;
+            long totalAmountAfterVat = 0;
+            InvoiceUpdateItemDTO invoiceDTO = invoiceService.getInvoiceById(dto.getInvoiceId());
+            InvoiceItemEntity invoiceItemEntity = invoiceItemService.getInvoiceItemById(dto.getItemId());
+            vatAmount = invoiceDTO.getVatAmount() + dto.getVatAmount() - invoiceItemEntity.getVatAmount();
+            totalAmount = invoiceDTO.getTotalAmount() + dto.getTotalAmount() - invoiceItemEntity.getTotalAmount();
+            totalAmountAfterVat = invoiceDTO.getTotalAmountAfterVat() + dto.getAmountAfterVat()
+            - invoiceItemEntity.getTotalAfterVat();
+            invoiceItemEntity.setAmount(dto.getAmount());
+            invoiceItemEntity.setQuantity(dto.getQuantity());
+            invoiceItemEntity.setTotalAmount(dto.getAmount() * dto.getQuantity());
+            invoiceItemEntity.setTotalAfterVat(dto.getAmountAfterVat());
+            invoiceItemEntity.setName(dto.getContent());
+            invoiceItemEntity.setDescription(dto.getContent());
+            switch (dto.getType()) {
+                case 0:
+                    invoiceItemEntity.setType(0);
+                    invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameAnnualFee());
+                    break;
+                case 1:
+                    invoiceItemEntity.setType(1);
+                    invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameAnnualFee());
+                    break;
+                case 9:
+                    invoiceItemEntity.setType(9);
+                    invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameAnotherFee());
+                    break;
+            }
+            invoiceItemEntity.setUnit(dto.getUnit());
+            invoiceItemEntity.setVat(dto.getVat());
+            invoiceItemEntity.setVatAmount(dto.getVatAmount());
+            invoiceItemEntity.setDataType(1);
+
+            //update transaction wallet
+
+            //
+            invoiceItemService.insert(invoiceItemEntity);
+            invoiceService.updateInvoiceById(vatAmount, totalAmount,
+                    totalAmountAfterVat, dto.getInvoiceId());
+
+
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.OK;
+            logger.error("updateInvoiceByItem: ERROR: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("invoice/remove")
+    public ResponseEntity<Object> removeInvoiceByItem(
+            @Valid @RequestBody InvoiceRemoveDTO dto
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            long vatAmount = 0;
+            long totalAmount = 0;
+            long totalAmountAfterVat = 0;
+            InvoiceUpdateItemDTO entity = invoiceService.getInvoiceById(dto.getInvoiceId());
+            IInvoiceItemRemoveDTO invoiceItemRemoveDTO =
+                    invoiceItemService.getInvoiceRemoveByInvoiceId(dto.getItemId());
+            vatAmount = entity.getVatAmount() - invoiceItemRemoveDTO.getVatAmount();
+            totalAmount = entity.getTotalAmount() - invoiceItemRemoveDTO.getTotalAmount();
+            totalAmountAfterVat = entity.getTotalAmount() - invoiceItemRemoveDTO.getTotalAmountAfterVat();
+            //update transaction wallet
+
+            //
+            invoiceItemService.removeById(dto.getInvoiceId());
+            invoiceService.updateInvoiceById(vatAmount, totalAmount,
+                    totalAmountAfterVat, dto.getInvoiceId());
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.OK;
+            logger.error("removeInvoiceByItem: ERROR: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     private AccountBankInfoDTO getBankAccountInfoByData(String data) {
         AccountBankInfoDTO dto = new AccountBankInfoDTO();
         ObjectMapper mapper = new ObjectMapper();
@@ -731,6 +925,23 @@ public class InvoiceController {
             dto = new AccountBankInfoDTO();
         }
         return dto;
+    }
+
+    private BrStatisticDTO getBrStatisticByBankId(String bankId, String data) {
+        BrStatisticDTO brStatisticDTO = new BrStatisticDTO();
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            List<BrStatisticDTO> brStatisticDTOS = new ArrayList<>();
+            brStatisticDTOS = mapper.readValue(data, new TypeReference<List<BrStatisticDTO>>() {});
+            for (BrStatisticDTO dto : brStatisticDTOS) {
+                if (dto.getBrId().equals(bankId)) {
+                    brStatisticDTO = dto;
+                }
+            }
+        } catch (Exception e) {
+            brStatisticDTO.setBrId(bankId);
+        }
+        return brStatisticDTO;
     }
 
     private String generateQrForPayment(long totalAmount, String content) {
@@ -744,5 +955,32 @@ public class InvoiceController {
         vietQRGenerateDTO.setContent(content);
         result = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
         return result;
+    }
+
+
+    private long getTotalAmount(IInvoiceItemCreateDTO feePackage, BrStatisticDTO brStatisticDTO) {
+        long feeCredit = 0;
+        long feeCreCount = 0;
+        switch (feePackage.getRecordType()) {
+            case 0:
+                long recon = brStatisticDTO.getRecon();
+                long reCount = brStatisticDTO.getRecCount();
+                feeCredit = Math
+                        .round(feePackage.getPercentFee() * recon / 100);
+                feeCreCount = reCount * feePackage.getFixFee();
+                break;
+            case 1:
+                long credit = brStatisticDTO.getCredit();
+                int creCount = brStatisticDTO.getCreCount();
+                feeCredit = Math
+                        .round(feePackage.getPercentFee() * credit / 100);
+                feeCreCount = creCount * feePackage.getFixFee();
+                break;
+            default:
+                break;
+        }
+        long totalAmount = Math.round(feeCredit + feeCreCount - feePackage.getAnnualFee());
+        if (totalAmount < 0) totalAmount = 0;
+        return totalAmount;
     }
 }

@@ -3,9 +3,11 @@ package com.vietqr.org.repository;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.InvoiceEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Repository
@@ -266,4 +268,17 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "FROM invoice a "
             + "WHERE a.id = :invoiceId ", nativeQuery = true)
     IInvoiceDTO getInvoiceByInvoiceDetail(String invoiceId);
+
+    @Query(value = "SELECT a.id AS invoiceId, a.amount AS totalAmount, "
+            + "a.vat_amount AS vatAmount, a.total_amount AS totalAmountAfterVat "
+            + "FROM invoice a "
+            + "WHERE a.id = :invoiceId ", nativeQuery = true)
+    InvoiceUpdateItemDTO getInvoiceById(String invoiceId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE invoice SET vat_amount = :vatAmount, amount = :totalAmount, " +
+            "total_amount = :totalAmountAfterVat WHERE id = :invoiceId ", nativeQuery = true)
+    void updateInvoiceById(long vatAmount, long totalAmount,
+                           long totalAmountAfterVat, String invoiceId);
 }

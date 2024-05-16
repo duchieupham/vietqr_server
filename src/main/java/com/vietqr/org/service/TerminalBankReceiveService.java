@@ -69,4 +69,6 @@ public interface TerminalBankReceiveService {
     String checkExistedRawTerminalCode(String code);
 
     TerminalBankReceiveEntity getTerminalBankReceiveEntityByTerminalCode(String terminalCode);
+
+    TerminalSubRawCodeDTO getTerminalSubFlow2ByTraceTransfer(String traceTransfer);
 }

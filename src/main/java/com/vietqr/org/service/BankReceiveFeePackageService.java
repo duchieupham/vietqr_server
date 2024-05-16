@@ -2,6 +2,7 @@ package com.vietqr.org.service;
 
 import com.vietqr.org.dto.IBankAccountInvoiceDTO;
 import com.vietqr.org.dto.IFeePackageDetailDTO;
+import com.vietqr.org.dto.IInvoiceItemCreateDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,4 +19,6 @@ public interface BankReceiveFeePackageService {
     int countBankInvoiceByBankAccountAndMerchantId(String merchantId, String value);
 
     List<IFeePackageDetailDTO> getFeePackageDetail(String bankId);
+
+    IInvoiceItemCreateDTO getFeePackageByBankId(String bankId);
 }
