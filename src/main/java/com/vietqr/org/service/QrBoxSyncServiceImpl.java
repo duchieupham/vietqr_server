@@ -24,4 +24,9 @@ public class QrBoxSyncServiceImpl implements QrBoxSyncService {
     public String getByQrCertificate(String qrCertificate) {
         return repo.getByQrCertificate(qrCertificate);
     }
+
+    @Override
+    public QrBoxSyncEntity getByMacAddress(String macAddr) {
+        return repo.getByMacAddress(macAddr);
+    }
 }

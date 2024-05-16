@@ -101,4 +101,8 @@ public interface AccountBankReceiveService {
     IBankAccountInfoDTO getAccountBankInfoById(String bankId);
 
 	IAccountBankReceiveDTO getAccountBankInfoResById(String bankAccount, String bankCode);
+
+    IMerchantBankMapperDTO getMerchantBankMapper(String bankId);
+
+    List<ICustomerDetailDTO> getCustomerDetailByBankId(String bankId);
 }

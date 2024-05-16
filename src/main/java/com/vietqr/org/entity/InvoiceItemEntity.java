@@ -46,10 +46,23 @@ public class InvoiceItemEntity implements Serializable {
     @Column(name = "typeName")
     private String typeName;
 
+    @Column(name = "unit")
+    private String unit;
+
+    @Column(name = "vat")
+    private double vat;
+
+    @Column(name = "vatAmount")
+    private long vatAmount;
+
+    @Column(name = "totalAfterVat")
+    private long totalAfterVat;
+
     @Column(name = "data")
     private String data;
 
-    //0 : Phần mềm VietQR <Annual Fee>
+    // 0 : Phần mềm VietQR <Annual Fee>
+    // 1 : Merchant Fee
     @Column(name = "dataType")
     private int dataType;
 
@@ -156,5 +169,37 @@ public class InvoiceItemEntity implements Serializable {
 
     public void setTotalAmount(long totalAmount) {
         this.totalAmount = totalAmount;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
+    public double getVat() {
+        return vat;
+    }
+
+    public void setVat(double vat) {
+        this.vat = vat;
+    }
+
+    public long getVatAmount() {
+        return vatAmount;
+    }
+
+    public void setVatAmount(long vatAmount) {
+        this.vatAmount = vatAmount;
+    }
+
+    public long getTotalAfterVat() {
+        return totalAfterVat;
+    }
+
+    public void setTotalAfterVat(long totalAfterVat) {
+        this.totalAfterVat = totalAfterVat;
     }
 }

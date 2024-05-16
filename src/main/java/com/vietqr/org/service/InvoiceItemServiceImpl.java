@@ -1,5 +1,6 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.dto.IInvoiceItemDetailDTO;
 import com.vietqr.org.dto.IInvoiceItemResponseDTO;
 import com.vietqr.org.entity.InvoiceItemEntity;
 import com.vietqr.org.repository.InvoiceItemRepository;
@@ -27,5 +28,10 @@ public class InvoiceItemServiceImpl implements InvoiceItemService {
     @Override
     public List<IInvoiceItemResponseDTO> getInvoiceByInvoiceId(String invoiceId) {
         return repo.getInvoiceByInvoiceId(invoiceId);
+    }
+
+    @Override
+    public List<IInvoiceItemDetailDTO> getInvoiceItemsByInvoiceId(String invoiceId) {
+        return repo.getInvoiceItemsByInvoiceId(invoiceId);
     }
 }

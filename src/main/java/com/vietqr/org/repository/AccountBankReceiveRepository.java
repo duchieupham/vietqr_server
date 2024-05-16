@@ -331,4 +331,24 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "AND b.bank_code = :bankCode AND a.is_authenticated = TRUE "
 			+ "LIMIT 1 ", nativeQuery = true)
 	IAccountBankReceiveDTO getAccountBankInfoResById(String bankAccount, String bankCode);
+
+	@Query(value = "SELECT '' AS vso, '' AS merchantName, "
+			+ "COALESCE(b.email, 0) AS email, b.phone_no AS phoneNo, a.user_id AS userId, "
+			+ "a.bank_account AS bankAccount, a.bank_account_name AS userBankName, "
+			+ "c.bank_short_name AS bankShortName "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN account_login b ON a.user_id = b.id "
+			+ "INNER JOIN bank_type c ON c.id = a.bank_type_id "
+			+ "WHERE a.id = :bankId ", nativeQuery = true)
+    IMerchantBankMapperDTO getMerchantBankMapper(String bankId);
+
+	@Query(value = "SELECT '' AS vso, '' AS merchantName, '' AS platform, "
+			+ "COALESCE(b.email, 0) AS email, b.phone_no AS phoneNo, a.user_id AS userId, "
+			+ "a.bank_account AS bankAccount, a.bank_account_name AS userBankName, "
+			+ "c.bank_short_name AS bankShortName, a.mms_active AS mmsActive "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN account_login b ON a.user_id = b.id "
+			+ "INNER JOIN bank_type c ON c.id = a.bank_type_id "
+			+ "WHERE a.id = :bankId ", nativeQuery = true)
+    List<ICustomerDetailDTO> getCustomerDetailByBankId(String bankId);
 }

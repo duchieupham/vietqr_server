@@ -10,4 +10,6 @@ public interface QrBoxSyncService {
     void insert(QrBoxSyncEntity entity);
 
     String getByQrCertificate(String qrCertificate);
+
+    QrBoxSyncEntity getByMacAddress(String macAddr);
 }

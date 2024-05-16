@@ -14,4 +14,8 @@ public interface QrBoxSyncRepository extends JpaRepository<QrBoxSyncEntity, Stri
     @Query(value = "SELECT qr_box_code FROM qr_box_sync "
             + "WHERE certificate = :qrCertificate LIMIT 1 ", nativeQuery = true)
     String getByQrCertificate(String qrCertificate);
+
+    @Query(value = "SELECT id FROM qr_box_sync "
+            + "WHERE mac_address = :macAddr LIMIT 1", nativeQuery = true)
+    QrBoxSyncEntity getByMacAddress(String macAddr);
 }

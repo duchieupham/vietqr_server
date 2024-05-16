@@ -200,19 +200,26 @@ public class TidQrInternalController {
         HttpStatus httpStatus = null;
         try {
             String macAddr = dto.getMacAddr().replaceAll("\\:", "");
+            dto.setMacAddr(macAddr);
+            macAddr = dto.getMacAddr().replaceAll("\\.", "");
             String qrBoxCode = getRandomNumberUniqueQRBox();
             String certificate = BoxTerminalRefIdUtil.encryptQrBoxId(qrBoxCode + macAddr);
             String boxId = BoxTerminalRefIdUtil.encryptQrBoxId(qrBoxCode);
-            QrBoxSyncEntity entity = new QrBoxSyncEntity();
-            entity.setId(UUID.randomUUID().toString());
-            entity.setTimeCreated(DateTimeUtil.getCurrentDateTimeUTC());
-            entity.setTimeSync(0);
-            entity.setQrBoxCode(qrBoxCode);
-            entity.setCertificate(certificate);
-            entity.setMacAddress(macAddr);
-            entity.setIsActive(false);
+            QrBoxSyncEntity entity = qrBoxSyncService.getByMacAddress(macAddr);
+            if (entity != null) {
+                boxId = BoxTerminalRefIdUtil.encryptQrBoxId(entity.getQrBoxCode());
+            } else {
+                entity = new QrBoxSyncEntity();
+                entity.setId(UUID.randomUUID().toString());
+                entity.setTimeCreated(DateTimeUtil.getCurrentDateTimeUTC());
+                entity.setTimeSync(0);
+                entity.setQrBoxCode(qrBoxCode);
+                entity.setCertificate(certificate);
+                entity.setMacAddress(macAddr);
+                entity.setIsActive(false);
+            }
             qrBoxSyncService.insert(entity);
-            result = new SyncBoxQrDTO(certificate, boxId);
+            result = new SyncBoxQrDTO(entity.getCertificate(), boxId);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             result = new ResponseMessageDTO("FAILED", "E05");
