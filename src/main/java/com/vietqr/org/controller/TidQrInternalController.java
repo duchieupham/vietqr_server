@@ -20,6 +20,7 @@ import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin
@@ -267,12 +268,18 @@ public class TidQrInternalController {
             String boxId = BoxTerminalRefIdUtil.encryptQrBoxId(dto.getBoxCode());
 
             String qr = "";
+            String qrMMS = "";
+
             boolean checkMMS = false;
             String transType = "C";
             if (dto.getTransType() == null) {
                 transType = "C";
             } else {
                 transType = dto.getTransType().trim();
+            }
+            String checkExistedMMSBank = accountBankReceiveService.checkMMSBankAccount(dto.getBankAccount());
+            if (checkExistedMMSBank != null && !checkExistedMMSBank.trim().isEmpty() && transType.equals("C")) {
+                checkMMS = true;
             }
 
             if (checkMMS == false) {
@@ -411,6 +418,75 @@ public class TidQrInternalController {
                 }
             }
             result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("tid-internal/list")
+    public ResponseEntity<Object> getTidInternalList(
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam int type,
+            @RequestParam String value) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            PageResDTO response = new PageResDTO();
+            int offset = (page - 1) * size;
+            int totalElement = 0;
+            List<TidInternalDTO> data = new ArrayList<>();
+            List<ITidInternalDTO> dtos = new ArrayList<>();
+            switch (type) {
+                case 0:
+                    dtos = qrBoxSyncService.getQrBoxSyncByBankAccount(value, offset, size);
+                    totalElement = qrBoxSyncService.countQrBoxSyncByBankAccount(value);
+                    break;
+                case 9:
+                    dtos = qrBoxSyncService.getQrBoxSync(offset, size);
+                    totalElement = qrBoxSyncService.countQrBoxSync();
+                    break;
+            }
+            data = dtos.stream().map(item -> {
+                TidInternalDTO dto = new TidInternalDTO();
+                dto.setBoxId(StringUtil.getValueNotNull(item.getBoxId()));
+                dto.setMacAddr(item.getMacAddr());
+                dto.setBoxCode(item.getBoxCode());
+                dto.setMerchantName(StringUtil.getValueNotNull(item.getMerchantName()));
+                dto.setTerminalName(StringUtil.getValueNotNull(item.getTerminalName()));
+                dto.setTerminalId(StringUtil.getValueNotNull(item.getTerminalId()));
+                dto.setTerminalCode(StringUtil.getValueNotNull(item.getTerminalCode()));
+                dto.setBankAccount(StringUtil.getValueNotNull(item.getBankAccount()));
+                dto.setBankShortName(StringUtil.getValueNotNull(item.getBankShortName()));
+                dto.setUserBankName(StringUtil.getValueNotNull(item.getUserBankName()));
+                if (item.getMmsActive() == 1) {
+                    dto.setFeePackage(EnvironmentUtil.getVietQrProPackage());
+                } else {
+                    dto.setFeePackage(EnvironmentUtil.getVietQrPlusPackage());
+                }
+                if (item.getBankAccount() == null || item.getBankAccount().trim().isEmpty()) {
+                    dto.setFeePackage("");
+                }
+                dto.setBoxAddress(StringUtil.getValueNotNull(item.getBoxAddress()));
+                dto.setCertificate(item.getCertificate());
+                if (item.getStatus()) {
+                    dto.setStatus(1);
+                } else {
+                    dto.setStatus(0);
+                }
+                return dto;
+            }).collect(Collectors.toList());
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setPage(page);
+            pageDTO.setSize(size);
+            pageDTO.setTotalElement(totalElement);
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+            response.setMetadata(pageDTO);
+            response.setData(data);
+            result = response;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             result = new ResponseMessageDTO("FAILED", "E05");

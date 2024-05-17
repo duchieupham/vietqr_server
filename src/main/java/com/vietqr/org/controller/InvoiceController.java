@@ -242,6 +242,45 @@ public class InvoiceController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("admin/bank-detail")
+    public ResponseEntity<Object> getBankAccountDetail(
+            @RequestParam String bankId,
+            @RequestParam String merchantId
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            IBankDetailAdminDTO dto
+                    = bankReceiveFeePackageService.getBankReceiveByBankId(bankId);
+           BankDetailAdminDTO data = new BankDetailAdminDTO();
+           data.setBankId(dto.getBankId());
+           data.setMerchantId(merchantId);
+           data.setBankAccount(dto.getBankAccount());
+           data.setBankShortName(dto.getBankShortName());
+           data.setPhoneNo(dto.getPhoneNo());
+           data.setUserBankName(dto.getUserBankName());
+           data.setEmail(dto.getEmail() != null ? dto.getEmail() : "");
+           if (dto.getMmsActive()) {
+               data.setConnectionType(EnvironmentUtil.getVietQrProPackage());
+           } else {
+               data.setConnectionType(EnvironmentUtil.getVietQrPlusPackage());
+           }
+           data.setFeePackage(dto.getFeePackage());
+           data.setVat(dto.getVat());
+           data.setTransFee1(dto.getTransFee1());
+           data.setTransFee2(dto.getTransFee2());
+           data.setTransRecord(dto.getTransRecord());
+            httpStatus = HttpStatus.OK;
+            result = data;
+        } catch (Exception e) {
+            logger.error("InvoiceController: ERROR: getBankAccountDetail: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @GetMapping("invoice/bank-account-list")
     public ResponseEntity<Object> getBankAccountList(
             @RequestParam int type,

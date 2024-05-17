@@ -29,6 +29,10 @@ public class StringUtil {
         return hashtags;
     }
 
+    public static String getValueNotNull(String value) {
+        return value != null ? value : "";
+    }
+
     public static int getTotalPage(int totalElement, int size) {
         int result = 0;
         result = totalElement % size == 0 ?

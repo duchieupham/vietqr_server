@@ -1,6 +1,7 @@
 package com.vietqr.org.service;
 
 import com.vietqr.org.dto.IBankAccountInvoiceDTO;
+import com.vietqr.org.dto.IBankDetailAdminDTO;
 import com.vietqr.org.dto.IFeePackageDetailDTO;
 import com.vietqr.org.dto.IInvoiceItemCreateDTO;
 import com.vietqr.org.repository.BankReceiveFeePackageRepository;
@@ -23,20 +24,17 @@ public class BankReceiveFeePackageServiceImpl implements BankReceiveFeePackageSe
 
     @Override
     public int countBankInvoiceByBankAccount(String value) {
-//        return repo.countBankInvoiceByBankAccount(value);
-        return 0;
+        return repo.countBankInvoiceByBankAccount(value);
     }
 
     @Override
     public List<IBankAccountInvoiceDTO> getBankInvoiceByBankAccountAndMerchantId(String merchantId, String value, int offset, int size) {
-//        return repo.getBankInvoiceByBankAccountAndMerchantId(merchantId, value, offset, size);
-        return new ArrayList<>();
+        return repo.getBankInvoiceByBankAccountAndMerchantId(merchantId, value, offset, size);
     }
 
     @Override
     public int countBankInvoiceByBankAccountAndMerchantId(String merchantId, String value) {
-//        return repo.countBankInvoiceByBankAccountAndMerchantId(merchantId, value);
-        return 0;
+        return repo.countBankInvoiceByBankAccountAndMerchantId(merchantId, value);
     }
 
     @Override
@@ -47,5 +45,10 @@ public class BankReceiveFeePackageServiceImpl implements BankReceiveFeePackageSe
     @Override
     public IInvoiceItemCreateDTO getFeePackageByBankId(String bankId) {
         return repo.getFeePackageByBankId(bankId);
+    }
+
+    @Override
+    public IBankDetailAdminDTO getBankReceiveByBankId(String bankId) {
+        return repo.getBankReceiveByBankId(bankId);
     }
 }

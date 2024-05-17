@@ -1,9 +1,12 @@
 package com.vietqr.org.repository;
 
+import com.vietqr.org.dto.ITidInternalDTO;
 import com.vietqr.org.entity.QrBoxSyncEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface QrBoxSyncRepository extends JpaRepository<QrBoxSyncEntity, String> {
@@ -18,4 +21,48 @@ public interface QrBoxSyncRepository extends JpaRepository<QrBoxSyncEntity, Stri
     @Query(value = "SELECT * FROM qr_box_sync "
             + "WHERE mac_address = :macAddr LIMIT 1", nativeQuery = true)
     QrBoxSyncEntity getByMacAddress(String macAddr);
+
+    @Query(value = "SELECT a.id AS boxId, a.mac_address AS macAddr, "
+            + "a.qr_box_code AS boxCode, '' AS merchantName, "
+            + "b.terminal_id AS terminalId, b.terminal_code AS terminalCode, "
+            + "c.bank_account AS bankAccount, d.bank_short_name AS bankShortName, "
+            + "c.bank_account_name AS userBankName, COALESCE(c.mms_active, 0) AS mmsActive, "
+            + "b.sub_terminal_address AS boxAddress, a.certificate AS certificate, "
+            + "a.status AS status "
+            + "FROM qr_box_sync a "
+            + "INNER JOIN terminal_bank_receive b ON a.qr_box_code = b.raw_terminal_code "
+            + "INNER JOIN account_bank_receive c ON b.bank_id = c.id "
+            + "INNER JOIN bank_type d ON d.id = c.bank_type_id "
+            + "WHERE c.bank_account = :value "
+            + "LIMIT :offset, :size ", nativeQuery = true)
+    List<ITidInternalDTO> getQrBoxSyncByBankAccount(String value, int offset, int size);
+
+    @Query(value = "SELECT COUNT(a.id) "
+            + "FROM qr_box_sync a "
+            + "INNER JOIN terminal_bank_receive b ON a.qr_box_code = b.raw_terminal_code "
+            + "INNER JOIN account_bank_receive c ON b.bank_id = c.id "
+            + "INNER JOIN bank_type d ON d.id = c.bank_type_id "
+            + "WHERE a.bank_account = :value ", nativeQuery = true)
+    int countQrBoxSyncByBankAccount(String value);
+
+    @Query(value = "SELECT a.id AS boxId, a.mac_address AS macAddr, "
+            + "a.qr_box_code AS boxCode, '' AS merchantName, "
+            + "b.terminal_id AS terminalId, b.terminal_code AS terminalCode, "
+            + "c.bank_account AS bankAccount, d.bank_short_name AS bankShortName, "
+            + "c.bank_account_name AS userBankName, COALESCE(c.mms_active, 0) AS mmsActive, "
+            + "b.sub_terminal_address AS boxAddress, a.certificate AS certificate, "
+            + "a.is_active AS status "
+            + "FROM qr_box_sync a "
+            + "LEFT JOIN terminal_bank_receive b ON a.qr_box_code = b.raw_terminal_code "
+            + "LEFT JOIN account_bank_receive c ON b.bank_id = c.id "
+            + "LEFT JOIN bank_type d ON d.id = c.bank_type_id "
+            + "LIMIT :offset, :size ", nativeQuery = true)
+    List<ITidInternalDTO> getQrBoxSync(int offset, int size);
+
+    @Query(value = "SELECT COUNT(a.id) "
+            + "FROM qr_box_sync a "
+            + "LEFT JOIN terminal_bank_receive b ON a.qr_box_code = b.raw_terminal_code "
+            + "LEFT JOIN account_bank_receive c ON b.bank_id = c.id "
+            + "LEFT JOIN bank_type d ON d.id = c.bank_type_id ", nativeQuery = true)
+    int countQrBoxSync();
 }

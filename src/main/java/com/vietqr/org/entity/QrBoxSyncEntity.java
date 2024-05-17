@@ -37,6 +37,9 @@ public class QrBoxSyncEntity implements Serializable {
     @Column(name = "timeSync")
     private long timeSync;
 
+    @Column(name = "qrName")
+    private String qrName;
+
     public QrBoxSyncEntity(String id, String certificate, long timeCreated, long timeSync) {
         this.id = id;
         this.certificate = certificate;
@@ -101,5 +104,13 @@ public class QrBoxSyncEntity implements Serializable {
 
     public void setQrBoxCode(String qrBoxCode) {
         this.qrBoxCode = qrBoxCode;
+    }
+
+    public String getQrName() {
+        return qrName;
+    }
+
+    public void setQrName(String qrName) {
+        this.qrName = qrName;
     }
 }
