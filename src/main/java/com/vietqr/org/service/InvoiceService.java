@@ -1,7 +1,6 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.dto.IInvoiceDetailDTO;
-import com.vietqr.org.dto.IInvoiceResponseDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.InvoiceEntity;
 import org.springframework.stereotype.Service;
 
@@ -31,4 +30,39 @@ public interface InvoiceService {
     int countInvoiceByUserIdAndBankIdAndMonth(String userId, int status, String bankId, String time);
 
     IInvoiceDetailDTO getInvoiceDetailById(String invoiceId);
+
+    List<IAdminInvoiceDTO> getInvoiceByMerchantId(String value, int offset, int size, String month);
+
+    int countInvoiceByMerchantId(String value, String month);
+
+    List<IAdminInvoiceDTO> getInvoiceByInvoiceNumber(String value, int offset, int size, String month);
+
+    int countInvoiceByInvoiceNumber(String value, String month);
+
+    List<IAdminInvoiceDTO> getInvoiceByBankAccount(String value, int offset, int size, String month);
+
+    int countInvoiceByBankAccount(String value, String month);
+
+    List<IAdminInvoiceDTO> getInvoiceByPhoneNo(String value, int offset, int size, String month);
+
+    int countInvoiceByPhoneNo(String value, String month);
+
+    List<IAdminInvoiceDTO> getInvoiceByStatus(int status, int offset, int size, String month);
+
+    int countInvoiceByStatus(int status, String month);
+
+    List<IAdminInvoiceDTO> getInvoices(int offset, int size, String month);
+
+    int countInvoice(String month);
+
+    IAdminExtraInvoiceDTO getExtraInvoice(String month);
+
+    IInvoiceQrDetailDTO getInvoiceQrById(String invoiceId);
+
+    IInvoiceDTO getInvoiceByInvoiceDetail(String invoiceId);
+
+    InvoiceUpdateItemDTO getInvoiceById(String invoiceId);
+
+    void updateInvoiceById(long vatAmount, long totalAmount,
+                           long totalAmountAfterVat, String invoiceId);
 }

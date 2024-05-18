@@ -1,7 +1,9 @@
 package com.vietqr.org.util;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +29,10 @@ public class StringUtil {
             logger.error("findHashtags: ERROR: " + e.toString());
         }
         return hashtags;
+    }
+
+    public static String getValueNotNull(String value) {
+        return value != null ? value : "";
     }
 
     public static int getTotalPage(int totalElement, int size) {
@@ -106,5 +112,30 @@ public class StringUtil {
 
     public static boolean isNullOrEmpty(String str) {
         return str == null || str.trim().isEmpty();
+    }
+
+    public static String removeFormatNumber(String debitAmount) {
+        String result = "";
+        try {
+            result = debitAmount.replaceAll(".", "");
+            result = debitAmount.replaceAll(",", "");
+        } catch (Exception e) {
+            result = debitAmount;
+        }
+        return result;
+    }
+
+    public static String formatNumberAsString(String amount) {
+        String result = amount;
+        try {
+            if (StringUtil.containsOnlyDigits(amount)) {
+                NumberFormat nf = NumberFormat.getInstance(Locale.US);
+                Long numberAmount = Long.parseLong(amount);
+                result = nf.format(numberAmount);
+            }
+        } catch (Exception e) {
+            result = amount;
+        }
+        return result;
     }
 }

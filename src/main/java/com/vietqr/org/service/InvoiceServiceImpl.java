@@ -1,8 +1,6 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.dto.IInvoiceDetailDTO;
-import com.vietqr.org.dto.IInvoiceResponseDTO;
-import com.vietqr.org.dto.StartEndTimeDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.InvoiceEntity;
 import com.vietqr.org.repository.InvoiceRepository;
 import com.vietqr.org.util.DateTimeUtil;
@@ -83,5 +81,130 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public IInvoiceDetailDTO getInvoiceDetailById(String invoiceId) {
         return repo.getInvoiceDetailById(invoiceId);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getInvoiceByMerchantId(String value, int offset, int size, String month) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(month);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.getInvoiceByMerchantId(value, offset, size, fromDate, toDate);
+    }
+
+    @Override
+    public int countInvoiceByMerchantId(String value, String month) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(month);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.countInvoiceByMerchantId(value, fromDate, toDate);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getInvoiceByInvoiceNumber(String value, int offset, int size, String month) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(month);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.getInvoiceByInvoiceNumber(value, offset, size, fromDate, toDate);
+    }
+
+    @Override
+    public int countInvoiceByInvoiceNumber(String value, String month) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(month);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.countInvoiceByInvoiceNumber(value, fromDate, toDate);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getInvoiceByBankAccount(String value, int offset, int size, String month) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(month);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.getInvoiceByBankAccount(value, offset, size, fromDate, toDate);
+    }
+
+    @Override
+    public int countInvoiceByBankAccount(String value, String month) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(month);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.countInvoiceByBankAccount(value, fromDate, toDate);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getInvoiceByPhoneNo(String value, int offset, int size, String month) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(month);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.getInvoiceByPhoneNo(value, offset, size, fromDate, toDate);
+    }
+
+    @Override
+    public int countInvoiceByPhoneNo(String value, String month) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(month);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.countInvoiceByPhoneNo(value, fromDate, toDate);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getInvoiceByStatus(int status, int offset, int size, String month) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(month);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.getInvoiceByStatus(status, offset, size, fromDate, toDate);
+    }
+
+    @Override
+    public int countInvoiceByStatus(int status, String month) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(month);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.countInvoiceByStatus(status, fromDate, toDate);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getInvoices(int offset, int size, String month) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(month);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.getInvoices(offset, size, fromDate, toDate);
+    }
+
+    @Override
+    public int countInvoice(String month) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(month);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.countInvoice(fromDate, toDate);
+    }
+
+    @Override
+    public IAdminExtraInvoiceDTO getExtraInvoice(String month) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(month);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.getExtraInvoice(fromDate, toDate);
+    }
+
+    @Override
+    public IInvoiceQrDetailDTO getInvoiceQrById(String invoiceId) {
+        return repo.getInvoiceQrById(invoiceId);
+    }
+
+    @Override
+    public IInvoiceDTO getInvoiceByInvoiceDetail(String invoiceId) {
+        return repo.getInvoiceByInvoiceDetail(invoiceId);
+    }
+
+    @Override
+    public InvoiceUpdateItemDTO getInvoiceById(String invoiceId) {
+        return repo.getInvoiceById(invoiceId);
+    }
+
+    @Override
+    public void updateInvoiceById(long vatAmount, long totalAmount,
+                                  long totalAmountAfterVat, String invoiceId) {
+        repo.updateInvoiceById(vatAmount, totalAmount, totalAmountAfterVat, invoiceId);
     }
 }

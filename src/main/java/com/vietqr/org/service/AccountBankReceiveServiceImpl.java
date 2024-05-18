@@ -229,6 +229,16 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     }
 
     @Override
+    public IMerchantBankMapperDTO getMerchantBankMapper(String bankId) {
+        return repo.getMerchantBankMapper(bankId);
+    }
+
+    @Override
+    public List<ICustomerDetailDTO> getCustomerDetailByBankId(String bankId) {
+        return repo.getCustomerDetailByBankId(bankId);
+    }
+
+    @Override
     public void unRegisterAuthenBank(String bankAccount, String ewalletToken) {
         repo.unRegisterAuthenBank(bankAccount, ewalletToken);
     }

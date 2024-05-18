@@ -343,7 +343,6 @@ public interface TransactionWalletRepository extends JpaRepository<TransactionWa
                 + "INNER JOIN account_information c ON c.user_id = a.user_id "
                 + "LEFT JOIN account_bank_receive e ON e.id = a.data "
                 + "LEFT JOIN bank_type f ON f.id = e.bank_type_id "
-//                + "WHERE (a.payment_type = 0 OR a.payment_type = 2) "
                 + "WHERE a.payment_type = 2 "
                 + "AND a.time_created BETWEEN :fromDate AND :toDate "
                 + "ORDER BY a.time_created DESC, "

@@ -91,6 +91,12 @@ public class EnvironmentUtil {
     private static final String VOICE_CODE = "1";
     private static final String SPEED_RATE = "1.1";
     private static final int BIT_RATE = 24;
+    private static final String VIET_QR_PLUS_PACKAGE = "VietQR Plus";
+    private static final String VIET_QR_PRO_PACKAGE = "VietQR Pro";
+    private static final String VIET_QR_NAME_ANNUAL_FEE = "Phí duy trì phần mềm VietQR tháng ";
+    private static final String VIET_QR_NAME_TRANS_FEE = "Phí giao dịch phần mềm VietQR tháng ";
+    private static final String VIET_QR_NAME_ANOTHER_FEE = "Phí khác";
+    private static final String MONTH_UNIT_NAME_VN = "Tháng";
 
     // MB Bank
     private static final String BANK_URL_UAT = "https://api-sandbox.mbbank.com.vn/";
@@ -253,6 +259,8 @@ public class EnvironmentUtil {
 
     private static final String ADMIN_ROLE_ID_UAT = "b9611ed2-e5c4-11ee-abd2-c437724afb36";
     private static final String ADMIN_ROLE_ID_PROD = "b9611ed2-e5c4-11ee-abd2-c437724afb36";
+    private static final String VIET_QR_HOME_PAGE = "vietqr.vn|vietqr.com";
+    private static final String VIET_QR_PAYMENT_SUCCESS_QR_VOICE = "Xin cảm ơn quý khách đã thanh toán thành công %s đồng";
 
     // Role for member in terminal
     private static final String ONLY_READ_RECEIVE_TERMINAL_ROLE_ID_UAT = "0f470d54-63a3-4cce-8691-5ec9380855f3";
@@ -638,5 +646,24 @@ public class EnvironmentUtil {
 
     public static String getAdminUatActiveKey() {
         return ADMIN_UAT_ACTIVE_KEY;
+    }
+    public static String getVietQrPlusPackage() {
+        return VIET_QR_PLUS_PACKAGE;
+    }
+    public static String getVietQrProPackage() {
+        return VIET_QR_PRO_PACKAGE;
+    }
+    public static String getVietQrNameTransFee() {
+        return VIET_QR_NAME_TRANS_FEE;
+    }
+    public static String getVietQrNameAnotherFee() {
+        return VIET_QR_NAME_ANOTHER_FEE;
+    }
+    public static String getVietQrNameAnnualFee() {
+        return VIET_QR_NAME_ANNUAL_FEE;
+    }
+
+    public static String getMonthUnitNameVn() {
+        return MONTH_UNIT_NAME_VN;
     }
 }

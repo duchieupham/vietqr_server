@@ -1520,6 +1520,7 @@ public class TransactionBankController {
 				}
 			}
 		}
+		String amountForVoice = amount;
 		amount = formatAmountNumber(amount);
 
 		BankTypeEntity bankTypeEntity = bankTypeService
@@ -1615,10 +1616,6 @@ public class TransactionBankController {
 							// send msg to QR Link
 							String refId = TransactionRefIdUtil.encryptTransactionId(transactionReceiveEntity.getId());
 							socketHandler.sendMessageToTransactionRefId(refId, data);
-							if (boxIdRef != null && !boxIdRef.isEmpty()) {
-								String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
-								socketHandler.sendMessageToBoxId(idRefBox, data);
-							}
 						} catch (IOException e) {
 							logger.error(
 									"WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
@@ -1701,6 +1698,44 @@ public class TransactionBankController {
 						googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
 					}
 				}
+				Map<String, String> data = new HashMap<>();
+				data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+				data.put("notificationId", UUID.randomUUID().toString());
+				data.put("transactionReceiveId", transactionReceiveEntity.getId());
+				data.put("bankAccount", transactionReceiveEntity.getBankAccount());
+				data.put("bankName", bankTypeEntity.getBankName());
+				data.put("bankCode", bankTypeEntity.getBankCode());
+				data.put("bankId", transactionReceiveEntity.getBankId());
+				data.put("terminalName", terminalEntity.getName() != null ? terminalEntity.getName() : "");
+				data.put("terminalCode", terminalEntity.getCode() != null ? terminalEntity.getCode() : "");
+				data.put("rawTerminalCode", terminalEntity.getRawTerminalCode() != null
+						? terminalEntity.getRawTerminalCode()
+						: "");
+				data.put("orderId", transactionReceiveEntity.getOrderId() != null
+						? transactionReceiveEntity.getOrderId()
+						: "");
+				data.put("referenceNumber", dto.getReferencenumber() != null
+						? dto.getReferencenumber()
+						: "");
+				data.put("content", transactionReceiveEntity.getContent());
+				data.put("amount", "" + amount);
+				data.put("timePaid", "" + time);
+				data.put("type", "" + transactionReceiveEntity.getType());
+				data.put("time", "" + transactionReceiveEntity.getTime());
+				data.put("refId", "" + dto.getTransactionid());
+				data.put("status", "1");
+				data.put("traceId", "" + transactionReceiveEntity.getTraceId());
+				data.put("transType", dto.getTransType());
+				data.put("urlLink", transactionReceiveEntity.getUrlLink() != null ? transactionReceiveEntity.getUrlLink() : "");
+				try {
+					// send msg to QR Link
+					data.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
+					String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
+					socketHandler.sendMessageToBoxId(idRefBox, data);
+				} catch (IOException e) {
+					logger.error(
+							"WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
+				}
 				// textToSpeechService.delete(requestId);
 			} else {
 				logger.info("transaction-sync - userIds empty.");
@@ -1763,6 +1798,7 @@ public class TransactionBankController {
 					String refId = TransactionRefIdUtil.encryptTransactionId(transactionReceiveEntity.getId());
 					socketHandler.sendMessageToTransactionRefId(refId, data);
 					if (boxIdRef != null && !boxIdRef.isEmpty()) {
+						data.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
 						String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 						socketHandler.sendMessageToBoxId(idRefBox, data);
 					}
@@ -1901,6 +1937,7 @@ public class TransactionBankController {
 				String refId = TransactionRefIdUtil.encryptTransactionId(transactionReceiveEntity.getId());
 				socketHandler.sendMessageToTransactionRefId(refId, data);
 				if (boxIdRef != null && !boxIdRef.isEmpty()) {
+					data.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
 					String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 					socketHandler.sendMessageToBoxId(idRefBox, data);
 				}
@@ -2068,6 +2105,7 @@ public class TransactionBankController {
 				}
 			}
 		}
+		String amountForVoice = amount;
 		amount = formatAmountNumber(amount);
 
 		BankTypeEntity bankTypeEntity = bankTypeService
@@ -2226,6 +2264,7 @@ public class TransactionBankController {
 						String refId = TransactionRefIdUtil.encryptTransactionId(transactionEntity.getId());
 						socketHandler.sendMessageToTransactionRefId(refId, data1);
 						if (boxIdRef != null && !boxIdRef.isEmpty()) {
+							data1.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
 							String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 							socketHandler.sendMessageToBoxId(idRefBox, data1);
 						}
@@ -2284,6 +2323,7 @@ public class TransactionBankController {
 						String refId = TransactionRefIdUtil.encryptTransactionId(transactionEntity.getId());
 						socketHandler.sendMessageToTransactionRefId(refId, data);
 						if (boxIdRef != null && !boxIdRef.isEmpty()) {
+							data.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
 							String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 							socketHandler.sendMessageToBoxId(idRefBox, data);
 						}
@@ -2544,6 +2584,7 @@ public class TransactionBankController {
 					String refId = TransactionRefIdUtil.encryptTransactionId(transcationUUID.toString());
 					socketHandler.sendMessageToTransactionRefId(refId, data);
 					if (boxIdRef != null && !boxIdRef.isEmpty()) {
+						data.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
 						String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 						socketHandler.sendMessageToBoxId(idRefBox, data);
 					}
@@ -2757,6 +2798,7 @@ public class TransactionBankController {
 					String refId = TransactionRefIdUtil.encryptTransactionId(transactionEntity.getId());
 					socketHandler.sendMessageToTransactionRefId(refId, data1);
 					if (boxIdRef != null && !boxIdRef.isEmpty()) {
+						data1.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
 						String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 						socketHandler.sendMessageToBoxId(idRefBox, data1);
 					}
@@ -2805,6 +2847,7 @@ public class TransactionBankController {
 				String refId = TransactionRefIdUtil.encryptTransactionId(transcationUUID.toString());
 				socketHandler.sendMessageToTransactionRefId(refId, data);
 				if (boxIdRef != null && !boxIdRef.isEmpty()) {
+					data.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
 					String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 					socketHandler.sendMessageToBoxId(idRefBox, data);
 				}

@@ -25,6 +25,9 @@ public class InvoiceEntity implements Serializable {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "description")
+    private String description;
+
     @Column(name = "timeCreated")
     private long timeCreated;
 
@@ -63,6 +66,7 @@ public class InvoiceEntity implements Serializable {
     private String data;
 
     // 0 : Information of bankaccount
+    // 1 : Information of merchantBankAccount
     // loại dữ liệu của data
     @Column(name = "dataType")
     private int dataType;
@@ -208,5 +212,13 @@ public class InvoiceEntity implements Serializable {
 
     public void setDataType(int dataType) {
         this.dataType = dataType;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
