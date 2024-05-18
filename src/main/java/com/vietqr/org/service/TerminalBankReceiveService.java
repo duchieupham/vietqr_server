@@ -71,4 +71,6 @@ public interface TerminalBankReceiveService {
     TerminalBankReceiveEntity getTerminalBankReceiveEntityByTerminalCode(String terminalCode);
 
     TerminalSubRawCodeDTO getTerminalSubFlow2ByTraceTransfer(String traceTransfer);
+
+    TerminalSubRawCodeDTO getTerminalBankReceiveForRawByTerminalCode(String terminalCode);
 }

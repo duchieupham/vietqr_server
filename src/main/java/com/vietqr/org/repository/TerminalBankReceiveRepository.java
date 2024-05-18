@@ -232,4 +232,9 @@ public interface TerminalBankReceiveRepository extends JpaRepository<TerminalBan
             + "type_of_qr AS typeOfQr, bank_id AS bankId FROM terminal_bank_receive "
             + "WHERE trace_transfer = :traceTransfer LIMIT 1 ", nativeQuery = true)
     TerminalSubRawCodeDTO getTerminalSubFlow2ByTraceTransfer(String traceTransfer);
+
+    @Query(value = "SELECT terminal_id AS terminalId, raw_terminal_code AS rawTerminalCode, terminal_code AS terminalCode, "
+            + "type_of_qr AS typeOfQr, bank_id AS bankId FROM terminal_bank_receive "
+            + "WHERE terminal_code = :terminalCode AND terminal_code != '' LIMIT 1 ", nativeQuery = true)
+    TerminalSubRawCodeDTO getTerminalBankReceiveForRawByTerminalCode(String terminalCode);
 }

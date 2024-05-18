@@ -173,4 +173,9 @@ public class TerminalBankReceiveServiceImpl implements TerminalBankReceiveServic
     public TerminalSubRawCodeDTO getTerminalSubFlow2ByTraceTransfer(String traceTransfer) {
         return repo.getTerminalSubFlow2ByTraceTransfer(traceTransfer);
     }
+
+    @Override
+    public TerminalSubRawCodeDTO getTerminalBankReceiveForRawByTerminalCode(String terminalCode) {
+        return repo.getTerminalBankReceiveForRawByTerminalCode(terminalCode);
+    }
 }

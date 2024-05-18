@@ -6,7 +6,7 @@ public class VietQrDynamicQrDTO {
     private String bankShortName;
     private String userBankName;
     private String note;
-    private long amount;
+    private Long amount;
     private String content;
     private String imgId;
     private String qrCode;
@@ -105,11 +105,11 @@ public class VietQrDynamicQrDTO {
         this.boxCode = boxCode;
     }
 
-    public long getAmount() {
+    public Long getAmount() {
         return amount;
     }
 
-    public void setAmount(long amount) {
+    public void setAmount(Long amount) {
         this.amount = amount;
     }
 

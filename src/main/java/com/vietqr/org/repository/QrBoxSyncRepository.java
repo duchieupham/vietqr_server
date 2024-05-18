@@ -28,7 +28,7 @@ public interface QrBoxSyncRepository extends JpaRepository<QrBoxSyncEntity, Stri
             + "c.bank_account AS bankAccount, d.bank_short_name AS bankShortName, "
             + "c.bank_account_name AS userBankName, COALESCE(c.mms_active, 0) AS mmsActive, "
             + "b.sub_terminal_address AS boxAddress, a.certificate AS certificate, "
-            + "a.status AS status "
+            + "a.is_active AS status "
             + "FROM qr_box_sync a "
             + "INNER JOIN terminal_bank_receive b ON a.qr_box_code = b.raw_terminal_code "
             + "INNER JOIN account_bank_receive c ON b.bank_id = c.id "
@@ -42,7 +42,7 @@ public interface QrBoxSyncRepository extends JpaRepository<QrBoxSyncEntity, Stri
             + "INNER JOIN terminal_bank_receive b ON a.qr_box_code = b.raw_terminal_code "
             + "INNER JOIN account_bank_receive c ON b.bank_id = c.id "
             + "INNER JOIN bank_type d ON d.id = c.bank_type_id "
-            + "WHERE a.bank_account = :value ", nativeQuery = true)
+            + "WHERE c.bank_account = :value ", nativeQuery = true)
     int countQrBoxSyncByBankAccount(String value);
 
     @Query(value = "SELECT a.id AS boxId, a.mac_address AS macAddr, "

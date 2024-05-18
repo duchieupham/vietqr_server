@@ -241,7 +241,7 @@ public class TransactionMMSController {
                             System.out.println("terminal bank != null");
                             String terminalId = "";
                             String traceTransfer = entity.getTraceTransfer();
-                            if (StringUtil.isNullOrEmpty(traceTransfer) == false) {
+                            if (!StringUtil.isNullOrEmpty(traceTransfer)) {
                                 terminalId = terminalService
                                         .getTerminalByTraceTransfer(traceTransfer);
                                 if (terminalId == null || terminalId.trim().isEmpty()) {
@@ -272,6 +272,19 @@ public class TransactionMMSController {
                             // System.out.println("terminal bank = null");
                             logger.info(
                                     "transaction-mms-sync: terminalBankEntity = NULL; CANNOT push data to customerSync");
+                        }
+                        try {
+                            if (tempTerminalBank != null) {
+                                TerminalSubRawCodeDTO rawCodeDTO = terminalBankReceiveService
+                                        .getTerminalBankReceiveForRawByTerminalCode(tempTransReceive.getTerminalCode());
+                                if (rawCodeDTO != null && rawCodeDTO.getTypeOfQr() == 2) {
+                                    rawCode = rawCodeDTO.getRawTerminalCode();
+                                    isSubTerminal = true;
+                                }
+                            }
+                        } catch (Exception e) {
+                            logger.info(
+                                    "transaction-mms-sync: ERROR get rawCode ");
                         }
                         // push notification to qr link
                         // qr link nao push ve qr link đó
@@ -318,7 +331,9 @@ public class TransactionMMSController {
                                     ? tempTransReceive.getReferenceNumber()
                                     : "");
                             data.put("content", tempTransReceive.getContent());
-                            data.put("amount", "" + tempTransReceive.getAmount());
+                            String amountForVoice = StringUtil.removeFormatNumber(tempTransReceive.getAmount() + "");
+                            String amountForShow = StringUtil.formatNumberAsString(tempTransReceive.getAmount() + "");
+                            data.put("amount", "" + amountForShow);
                             data.put("timePaid", "" + tempTransReceive.getTimePaid());
                             data.put("time", "" + time);
                             data.put("refId", "" + entity.getId());
@@ -329,46 +344,6 @@ public class TransactionMMSController {
                             // send msg to QR Link
                             String refId = TransactionRefIdUtil
                                     .encryptTransactionId(tempTransReceive.getId());
-                            // if (!accountBankEntity.isMmsActive() || !accountBankEntity.isSync()) {
-                            // // push notification to user
-                            //// String terminalCode = tempTransReceive.getTerminalCode();
-                            // if (StringUtil.isNullOrEmpty(tempTransReceive.getTerminalCode())) {
-                            // TerminalEntity terminalEntity = terminalService
-                            // .getTerminalByTerminalCode(tempTransReceive.getTerminalCode());
-                            // NumberFormat nf = NumberFormat.getInstance(Locale.US);
-                            // String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
-                            // + accountBankEntity.getBankAccount()
-                            // + NotificationUtil.getNotiDescUpdateTransSuffix2()
-                            // + "+" + nf.format(tempTransReceive.getAmount())
-                            // + NotificationUtil.getNotiDescUpdateTransSuffix3()
-                            // + terminalEntity.getName()
-                            // + NotificationUtil.getNotiDescUpdateTransSuffix4()
-                            // + tempTransReceive.getContent();
-                            // List<String> userIds = terminalService
-                            // .getUserIdsByTerminalCode(tempTransReceive.getTerminalCode());
-                            //
-                            // if (!FormatUtil.isListNullOrEmpty(userIds)) {
-                            // int numThread = userIds.size();
-                            // ExecutorService executorService = Executors.newFixedThreadPool(numThread);
-                            // for (String userId : userIds) {
-                            // UUID notificationUUID = UUID.randomUUID();
-                            // NotificationEntity notiEntity = new NotificationEntity();
-                            // notiEntity.setId(notificationUUID.toString());
-                            // notiEntity.setRead(false);
-                            // notiEntity.setMessage(message);
-                            // notiEntity.setTime(time);
-                            // notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
-                            // notiEntity.setUserId(userId);
-                            // notiEntity.setData(tempTransReceive.getId());
-                            // executorService.submit(() ->
-                            // pushNotification(NotificationUtil
-                            // .getNotiTitleUpdateTransaction(), message, notiEntity, data, userId));
-                            // }
-                            // executorService.shutdown();
-                            // }
-                            // }
-                            //
-                            // }
                             try {
                                 LocalDateTime startRequestDateTime = LocalDateTime.now();
                                 long startRequestTime = startRequestDateTime.toEpochSecond(ZoneOffset.UTC);
@@ -378,8 +353,35 @@ public class TransactionMMSController {
                                 // "transaction-mms-sync: sendMessageToTransactionRefId at:" +
                                 // startRequestTime);
                                 if (isSubTerminal) {
-                                    String boxRefId = BoxTerminalRefIdUtil.encryptQrBoxId(rawCode);
-                                    socketHandler.sendMessageToBoxId(boxRefId, data);
+                                    try {
+                                        Map<String, String> data1 = new HashMap<>();
+                                        data1.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+                                        data1.put("notificationId", UUID.randomUUID().toString());
+                                        data1.put("transactionReceiveId", tempTransReceive.getId());
+                                        data1.put("bankAccount", tempTransReceive.getBankAccount());
+                                        data1.put("bankName", bankTypeEntity.getBankName());
+                                        data1.put("bankCode", bankTypeEntity.getBankCode());
+                                        data1.put("bankId", tempTransReceive.getBankId());
+                                        data1.put("content", tempTransReceive.getContent());
+                                        data1.put("amount", "" + amountForShow);
+                                        data1.put("terminalName", "");
+                                        data1.put("terminalCode", tempTransReceive.getTerminalCode());
+                                        data1.put("rawTerminalCode", "");
+                                        data1.put("orderId",
+                                                entity.getReferenceLabelCode() != null ? entity.getReferenceLabelCode() : "");
+                                        data1.put("referenceNumber", entity.getFtCode() != null ? entity.getFtCode() : "");
+                                        data1.put("timePaid", "" + time);
+                                        data1.put("type", "" + tempTransReceive.getType());
+                                        data1.put("time", "" + time);
+                                        data1.put("refId", "" + uuid.toString());
+                                        data1.put("status", "1");
+                                        data1.put("traceId", "");
+                                        data1.put("transType", "C");
+                                        data1.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
+                                        String boxRefId = BoxTerminalRefIdUtil.encryptQrBoxId(rawCode);
+                                        socketHandler.sendMessageToBoxId(boxRefId, data1);
+                                    } catch (Exception ignored) {
+                                    }
                                 }
                                 socketHandler.sendMessageToTransactionRefId(refId, data);
                             } catch (Exception e) {
@@ -509,7 +511,9 @@ public class TransactionMMSController {
                                 data.put("bankCode", bankTypeEntity.getBankCode());
                                 data.put("bankId", accountBankReceiveEntity.getId());
                                 data.put("content", "" + traceTransfer);
-                                data.put("amount", "" + entity.getDebitAmount());
+                                String amountForVoice = StringUtil.removeFormatNumber(entity.getDebitAmount() + "");
+                                String amountForShow = StringUtil.formatNumberAsString(entity.getDebitAmount() + "");
+                                data.put("amount", "" + amountForShow);
                                 if (terminalEntity != null) {
                                     data.put("terminalName",
                                             terminalEntity.getName() != null ? terminalEntity.getName() : "");
@@ -549,6 +553,7 @@ public class TransactionMMSController {
                                 }
                                 try {
                                     if (isSubTerminal) {
+                                        data.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
                                         String boxRefId = BoxTerminalRefIdUtil.encryptQrBoxId(subRawCode);
                                         socketHandler.sendMessageToBoxId(boxRefId, data);
                                     }
@@ -800,7 +805,8 @@ public class TransactionMMSController {
                                 data.put("bankCode", bankTypeEntity.getBankCode());
                                 data.put("bankId", accountBankReceiveEntity.getId());
                                 data.put("content", "" + traceTransfer);
-                                data.put("amount", "" + entity.getDebitAmount());
+                                String amountForVoice = StringUtil.removeFormatNumber(entity.getDebitAmount());
+                                data.put("amount", "" + StringUtil.formatNumberAsString(entity.getDebitAmount()));
                                 data.put("terminalName", "");
                                 data.put("terminalCode",
                                         terminalSubRawCodeDTO.getTerminalCode() != null ?
@@ -836,6 +842,7 @@ public class TransactionMMSController {
                                     logger.info("transaction-mms-sync: NOT FOUND TerminalBankEntity");
                                 }
                                 try {
+                                    data.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
                                     String boxRefId = BoxTerminalRefIdUtil.encryptQrBoxId(subRawCode);
                                     socketHandler.sendMessageToBoxId(boxRefId, data);
                                 } catch (Exception e) {
