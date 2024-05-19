@@ -171,7 +171,7 @@ public class VietQRMMSController {
             transactionEntity.setOrderId(dto.getOrderId());
             transactionEntity.setSign(dto.getSign());
             transactionEntity.setTimePaid(time);
-            transactionEntity.setTerminalCode(dto.getTerminalCode());
+            transactionEntity.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
             transactionEntity.setQrCode(qrCode);
             transactionEntity.setUserId(accountBankReceiveEntity.getUserId());
             transactionEntity.setNote(dto.getNote() != null ? dto.getNote() : "");

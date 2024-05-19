@@ -451,7 +451,8 @@ public class TransactionMMSController {
                                     transactionReceiveEntity1
                                             .setTerminalCode(terminalBankReceiveEntity.getTerminalCode());
                                 } else {
-                                    transactionReceiveEntity1.setTerminalCode(terminalEntity.getCode());
+                                    transactionReceiveEntity1.setTerminalCode(terminalEntity.getCode()
+                                    != null ? terminalEntity.getCode() : "");
                                 }
                                 transactionReceiveEntity1.setContent(entity.getTraceTransfer());
                                 transactionReceiveEntity1.setBankAccount(accountBankReceiveEntity.getBankAccount());
@@ -597,7 +598,7 @@ public class TransactionMMSController {
                                 transactionEntity.setOrderId("");
                                 transactionEntity.setSign("");
                                 transactionEntity.setTimePaid(time);
-                                transactionEntity.setTerminalCode(terminalEntity.getCode());
+                                transactionEntity.setTerminalCode(terminalEntity != null ? terminalEntity.getCode() : "");
                                 transactionEntity.setQrCode("");
                                 transactionEntity.setUserId(bankDTO.getUserId());
                                 transactionEntity.setNote("");

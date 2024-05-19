@@ -79,7 +79,7 @@ public class TidQrInternalController {
             IAccountBankReceiveDTO accountBankInfoResById
                     = accountBankReceiveService.getAccountBankInfoResById(dto.getBankAccount(), dto.getBankCode());
             String boxCode = qrBoxSyncService.getByQrCertificate(dto.getQrCertificate());
-            if (accountBankInfoResById != null) {
+            if (accountBankInfoResById != null && boxCode != null && !boxCode.isEmpty()) {
                 if (accountBankInfoResById.getIsAuthenticated()) {
                     TerminalBankReceiveEntity terminalBankReceiveEntity = terminalBankReceiveService
                             .getTerminalBankReceiveByRawTerminalCode(boxCode);
@@ -148,6 +148,9 @@ public class TidQrInternalController {
                     data.put("bankCode", accountBankInfoResById.getBankCode());
                     data.put("homePage", EnvironmentUtil.getVietQrHomePage());
                     socketHandler.sendMessageToBoxId(boxId, data);
+
+                    qrBoxSyncService.updateQrBoxSync(dto.getQrCertificate(), DateTimeUtil.getCurrentDateTimeUTC(),
+                            true, dto.getTerminalName());
                     httpStatus = HttpStatus.OK;
                 } else {
                     result = new ResponseMessageDTO("FAILED", "E46");
@@ -228,6 +231,7 @@ public class TidQrInternalController {
                 entity.setCertificate(certificate);
                 entity.setMacAddress(macAddr);
                 entity.setIsActive(false);
+                entity.setQrName("");
             }
             qrBoxSyncService.insert(entity);
             result = new SyncBoxQrDTO(entity.getCertificate(), boxId);
@@ -276,7 +280,7 @@ public class TidQrInternalController {
         try {
             UUID transactionUUID = UUID.randomUUID();
             String boxId = BoxTerminalRefIdUtil.encryptQrBoxId(dto.getBoxCode());
-
+            String orderId = "VVB" + RandomCodeUtil.generateRandomId(8);
             String qr = "";
             String qrMMS = "";
 
@@ -464,7 +468,7 @@ public class TidQrInternalController {
                                     requestDTO.setTerminalId(terminalBankEntity.getTerminalId());
                                     requestDTO.setAmount(dto.getAmount() + "");
                                     requestDTO.setContent(content);
-                                    requestDTO.setOrderId(dto.getOrderId());
+                                    requestDTO.setOrderId(orderId);
                                     qrCode = requestVietQRMMS(requestDTO);
                                     if (qrCode != null) {
                                         // VietQRMMSDTO vietQRMMSDTO = new VietQRMMSDTO(qrCode);
@@ -589,12 +593,12 @@ public class TidQrInternalController {
             transactionEntity.setOrderId(dto.getOrderId());
             transactionEntity.setSign(dto.getSign());
             transactionEntity.setTimePaid(time);
-            transactionEntity.setTerminalCode(dto.getTerminalCode());
+            transactionEntity.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
             transactionEntity.setQrCode(qrCode);
             transactionEntity.setUserId(accountBankReceiveEntity.getUserId());
             transactionEntity.setNote(dto.getNote() != null ? dto.getNote() : "");
             transactionEntity.setTransStatus(0);
-            transactionEntity.setUrlLink(dto.getUrlLink());
+            transactionEntity.setUrlLink(dto.getUrlLink() != null ? dto.getUrlLink() : "");
             transactionReceiveService.insertTransactionReceive(transactionEntity);
             LocalDateTime endTime = LocalDateTime.now();
             long endTimeLong = endTime.toEpochSecond(ZoneOffset.UTC);
@@ -809,13 +813,13 @@ public class TidQrInternalController {
                 transactionEntity.setStatus(0);
                 transactionEntity.setTraceId(traceId);
                 transactionEntity.setTimePaid(0);
-                transactionEntity.setTerminalCode(dto.getTerminalCode());
+                transactionEntity.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
                 transactionEntity.setQrCode(qr);
                 transactionEntity.setUserId(accountBankEntity.getUserId());
                 transactionEntity.setOrderId(orderId);
                 transactionEntity.setNote(dto.getNote() != null ? dto.getNote() : "");
                 transactionEntity.setTransStatus(0);
-                transactionEntity.setUrlLink(dto.getUrlLink());
+                transactionEntity.setUrlLink(dto.getUrlLink() != null ? dto.getUrlLink() : "");
                 if (dto.getTransType() != null) {
                     transactionEntity.setTransType(dto.getTransType());
                 } else {

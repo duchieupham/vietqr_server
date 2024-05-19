@@ -3,9 +3,11 @@ package com.vietqr.org.repository;
 import com.vietqr.org.dto.ITidInternalDTO;
 import com.vietqr.org.entity.QrBoxSyncEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Repository
@@ -65,4 +67,11 @@ public interface QrBoxSyncRepository extends JpaRepository<QrBoxSyncEntity, Stri
             + "LEFT JOIN account_bank_receive c ON b.bank_id = c.id "
             + "LEFT JOIN bank_type d ON d.id = c.bank_type_id ", nativeQuery = true)
     int countQrBoxSync();
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE qr_box_sync SET time_sync = :time, is_active = :active, "
+            + "qr_name = :name "
+            + "WHERE certificate = :qrCertificate LIMIT 1", nativeQuery = true)
+    void updateQrBoxSync(String qrCertificate, long time, boolean active, String name);
 }

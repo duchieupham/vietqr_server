@@ -666,4 +666,12 @@ public class EnvironmentUtil {
     public static String getMonthUnitNameVn() {
         return MONTH_UNIT_NAME_VN;
     }
+
+    public static String getVietQrHomePage() {
+        return VIET_QR_HOME_PAGE;
+    }
+
+    public static String getVietQrPaymentSuccessQrVoice() {
+        return VIET_QR_PAYMENT_SUCCESS_QR_VOICE;
+    }
 }
