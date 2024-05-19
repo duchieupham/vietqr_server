@@ -207,4 +207,9 @@ public class InvoiceServiceImpl implements InvoiceService {
                                   long totalAmountAfterVat, String invoiceId) {
         repo.updateInvoiceById(vatAmount, totalAmount, totalAmountAfterVat, invoiceId);
     }
+
+    @Override
+    public void removeByInvoiceId(String invoiceId) {
+        repo.removeByInvoiceId(invoiceId);
+    }
 }

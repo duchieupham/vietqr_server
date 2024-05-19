@@ -2,19 +2,19 @@ package com.vietqr.org.dto;
 
 public interface IAdminInvoiceDTO {
     String getInvoiceId();
-    long getTimePaid();
+    Long getTimePaid();
     String getVso();
     String getMidName();
     long getAmount();
     String getData();
     String getQrCode();
     double getVat();
-    long vatAmount();
+    long getVatAmount();
     long getAmountNoVat();
     String getBillNumber();
     String getInvoiceName();
     String getPhoneNo();
     String getEmail();
-    long getTimeCreated();
+    Long getTimeCreated();
     int getStatus();
 }

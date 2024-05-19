@@ -65,4 +65,6 @@ public interface InvoiceService {
 
     void updateInvoiceById(long vatAmount, long totalAmount,
                            long totalAmountAfterVat, String invoiceId);
+
+    void removeByInvoiceId(String invoiceId);
 }

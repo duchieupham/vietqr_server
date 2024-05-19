@@ -24,4 +24,6 @@ public interface InvoiceItemService {
     void removeById(String invoiceId);
 
     InvoiceItemEntity getInvoiceItemById(String itemId);
+
+    void removeByInvoiceId(String invoiceId);
 }

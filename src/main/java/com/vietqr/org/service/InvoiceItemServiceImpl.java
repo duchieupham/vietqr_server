@@ -51,4 +51,9 @@ public class InvoiceItemServiceImpl implements InvoiceItemService {
     public InvoiceItemEntity getInvoiceItemById(String itemId) {
         return repo.getInvoiceItemById(itemId);
     }
+
+    @Override
+    public void removeByInvoiceId(String invoiceId) {
+        repo.removeByInvoiceId(invoiceId);
+    }
 }

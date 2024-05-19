@@ -57,51 +57,6 @@ public class InvoiceController {
     @Autowired
     AccountBankReceiveService accountBankReceiveService;
 
-    @PostMapping("/invoice")
-    public ResponseEntity<ResponseMessageDTO> insertInvoice(
-            @Valid @RequestBody InvoiceRequestDTO dto
-            ) {
-        ResponseMessageDTO result = null;
-        HttpStatus httpStatus = null;
-        try {
-            InvoiceEntity entity = new InvoiceEntity();
-            String invoiceId = UUID.randomUUID().toString();
-            entity.setId(invoiceId);
-            entity.setInvoiceId(RandomCodeUtil.generateRandomCode(10));
-            entity.setBankId(dto.getBankId());
-            entity.setName(dto.getName());
-            LocalDateTime current = LocalDateTime.now();
-            long time = current.toEpochSecond(ZoneOffset.UTC);
-            entity.setTimeCreated(time);
-            entity.setTimePaid(0);
-            entity.setStatus(2);
-            entity.setMerchantId(dto.getMerchantId());
-            long total = 0;
-            List<InvoiceItemEntity> itemEntities = new ArrayList<>();
-            for (InvoiceItemDTO item: dto.getItems()) {
-                InvoiceItemEntity itemEntity = new InvoiceItemEntity();
-                itemEntity.setInvoiceId(invoiceId);
-                itemEntity.setId(UUID.randomUUID().toString());
-                itemEntity.setType(item.getType());
-                itemEntity.setTypeName(item.getTypeName());
-                itemEntity.setAmount(item.getAmount());
-                itemEntity.setQuantity(item.getQuantity());
-                itemEntity.setTotalAmount(item.getAmount() * item.getQuantity());
-                itemEntities.add(itemEntity);
-            }
-            invoiceService.insert(entity);
-            invoiceItemService.insertAll(itemEntities);
-            result = new ResponseMessageDTO("SUCCESS", "");
-            httpStatus = HttpStatus.OK;
-        } catch (Exception e) {
-            logger.error("InvoiceController: ERROR: insertInvoice: " + e.getMessage()
-                    + " at: " + System.currentTimeMillis());
-            result = new ResponseMessageDTO("FAILED", "E05");
-            httpStatus = HttpStatus.BAD_REQUEST;
-        }
-        return new ResponseEntity<>(result, httpStatus);
-    }
-
     @GetMapping("invoice/merchant-list")
     public ResponseEntity<Object> getAdminInvoiceLists(
             @RequestParam int type,
@@ -149,7 +104,6 @@ public class InvoiceController {
         AdminExtraInvoiceDTO extraInvoiceDTO = new AdminExtraInvoiceDTO();
         DataDTO dataDTO = new DataDTO(extraInvoiceDTO);
         try {
-            ObjectMapper mapper = new ObjectMapper();
             int totalElement = 0;
             int offset = (page - 1) * size;
             List<AdminInvoiceDTO> data = new ArrayList<>();
@@ -210,9 +164,9 @@ public class InvoiceController {
                 dto.setBankShortName(bankInfoDTO.getBankShortName());
                 dto.setBankAccount(bankInfoDTO.getBankAccount());
                 dto.setQrCode(qrCode);
-                dto.setVat(0);
-                dto.setVatAmount(0);
-                dto.setAmountNoVat(0);
+                dto.setVat(item.getVat());
+                dto.setVatAmount(item.getVatAmount());
+                dto.setAmountNoVat(item.getAmountNoVat());
                 dto.setBillNumber(item.getBillNumber());
                 dto.setInvoiceName(item.getInvoiceName());
                 dto.setFullName(bankInfoDTO.getUserBankName());
@@ -252,26 +206,31 @@ public class InvoiceController {
         try {
             IBankDetailAdminDTO dto
                     = bankReceiveFeePackageService.getBankReceiveByBankId(bankId);
-           BankDetailAdminDTO data = new BankDetailAdminDTO();
-           data.setBankId(dto.getBankId());
-           data.setMerchantId(merchantId);
-           data.setBankAccount(dto.getBankAccount());
-           data.setBankShortName(dto.getBankShortName());
-           data.setPhoneNo(dto.getPhoneNo());
-           data.setUserBankName(dto.getUserBankName());
-           data.setEmail(dto.getEmail() != null ? dto.getEmail() : "");
-           if (dto.getMmsActive()) {
-               data.setConnectionType(EnvironmentUtil.getVietQrProPackage());
-           } else {
-               data.setConnectionType(EnvironmentUtil.getVietQrPlusPackage());
-           }
-           data.setFeePackage(dto.getFeePackage());
-           data.setVat(dto.getVat());
-           data.setTransFee1(dto.getTransFee1());
-           data.setTransFee2(dto.getTransFee2());
-           data.setTransRecord(dto.getTransRecord());
-            httpStatus = HttpStatus.OK;
-            result = data;
+            if (dto != null) {
+                BankDetailAdminDTO data = new BankDetailAdminDTO();
+                data.setBankId(dto.getBankId());
+                data.setMerchantId(merchantId);
+                data.setBankAccount(dto.getBankAccount());
+                data.setBankShortName(dto.getBankShortName());
+                data.setPhoneNo(dto.getPhoneNo());
+                data.setUserBankName(dto.getUserBankName());
+                data.setEmail(dto.getEmail() != null ? dto.getEmail() : "");
+                if (dto.getMmsActive()) {
+                    data.setConnectionType(EnvironmentUtil.getVietQrProPackage());
+                } else {
+                    data.setConnectionType(EnvironmentUtil.getVietQrPlusPackage());
+                }
+                data.setFeePackage(dto.getFeePackage());
+                data.setVat(dto.getVat());
+                data.setTransFee1(dto.getTransFee1());
+                data.setTransFee2(dto.getTransFee2());
+                data.setTransRecord(dto.getTransRecord());
+                httpStatus = HttpStatus.OK;
+                result = data;
+            } else {
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
         } catch (Exception e) {
             logger.error("InvoiceController: ERROR: getBankAccountDetail: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
@@ -922,8 +881,29 @@ public class InvoiceController {
     }
 
     @PostMapping("invoice/remove")
-    public ResponseEntity<Object> removeInvoiceByItem(
+    public ResponseEntity<Object> removeInvoiceById(
             @Valid @RequestBody InvoiceRemoveDTO dto
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            invoiceItemService.removeByInvoiceId(dto.getInvoiceId());
+            invoiceService.removeByInvoiceId(dto.getInvoiceId());
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.OK;
+            logger.error("removeInvoiceByItem: ERROR: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("invoice-item/remove")
+    public ResponseEntity<Object> removeInvoiceByItem(
+            @Valid @RequestBody InvoiceItemRemoveDTO dto
     ) {
         Object result = null;
         HttpStatus httpStatus = null;
@@ -940,7 +920,7 @@ public class InvoiceController {
             //update transaction wallet
 
             //
-            invoiceItemService.removeById(dto.getInvoiceId());
+            invoiceItemService.removeById(dto.getItemId());
             invoiceService.updateInvoiceById(vatAmount, totalAmount,
                     totalAmountAfterVat, dto.getInvoiceId());
             result = new ResponseMessageDTO("SUCCESS", "");
