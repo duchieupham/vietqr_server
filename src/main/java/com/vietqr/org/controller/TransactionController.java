@@ -1482,6 +1482,7 @@ public class TransactionController {
                     responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
                     responseDTO.setStatus(dto.getStatus());
                     responseDTO.setTime(dto.getTime());
+                    responseDTO.setBankShortName(dto.getBankShortName());
                     responseDTO.setTimePaid(dto.getTimePaid());
                     responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
                     responseDTO.setContent(dto.getContent());
@@ -1511,6 +1512,7 @@ public class TransactionController {
                         responseDTO.setTimePaid(dto.getTimePaid());
                         responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
                         responseDTO.setContent(dto.getContent());
+                        responseDTO.setBankShortName(dto.getBankShortName());
                         responseDTO.setType(dto.getType());
                         responseDTO.setNote(dto.getNote() != null ? dto.getNote() : "");
                         return responseDTO;
@@ -1534,6 +1536,7 @@ public class TransactionController {
                                     responseDTO.setStatus(dto.getStatus());
                                     responseDTO.setTime(dto.getTime());
                                     responseDTO.setTimePaid(dto.getTimePaid());
+                                    responseDTO.setBankShortName(dto.getBankShortName());
                                     responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
                                     responseDTO.setContent(dto.getContent());
                                     responseDTO.setType(dto.getType());
@@ -1558,6 +1561,7 @@ public class TransactionController {
                                     }
                                     responseDTO.setStatus(dto.getStatus());
                                     responseDTO.setTime(dto.getTime());
+                                    responseDTO.setBankShortName(dto.getBankShortName());
                                     responseDTO.setTimePaid(dto.getTimePaid());
                                     responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
                                     responseDTO.setContent(dto.getContent());
@@ -1581,6 +1585,7 @@ public class TransactionController {
                                 responseDTO.setTimePaid(dto.getTimePaid());
                                 responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
                                 responseDTO.setContent(dto.getContent());
+                                responseDTO.setBankShortName(dto.getBankShortName());
                                 responseDTO.setType(dto.getType());
                                 responseDTO.setNote(dto.getNote() != null ? dto.getNote() : "");
                                 return responseDTO;

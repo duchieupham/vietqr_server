@@ -844,12 +844,12 @@ public class VietQRController {
 			transactionEntity.setOrderId(dto.getOrderId());
 			transactionEntity.setSign(dto.getSign());
 			transactionEntity.setTimePaid(time);
-			transactionEntity.setTerminalCode(dto.getTerminalCode());
+			transactionEntity.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
 			transactionEntity.setQrCode(qrCode);
 			transactionEntity.setUserId(accountBankReceiveEntity.getUserId());
 			transactionEntity.setNote(dto.getNote() != null ? dto.getNote() : "");
 			transactionEntity.setTransStatus(0);
-			transactionEntity.setUrlLink(dto.getUrlLink());
+			transactionEntity.setUrlLink(dto.getUrlLink() != null ? dto.getUrlLink() : "");
 			transactionReceiveService.insertTransactionReceive(transactionEntity);
 			LocalDateTime endTime = LocalDateTime.now();
 			long endTimeLong = endTime.toEpochSecond(ZoneOffset.UTC);
@@ -887,13 +887,13 @@ public class VietQRController {
 				transactionEntity.setStatus(0);
 				transactionEntity.setTraceId(traceId);
 				transactionEntity.setTimePaid(0);
-				transactionEntity.setTerminalCode(dto.getTerminalCode());
+				transactionEntity.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
 				transactionEntity.setQrCode("");
 				transactionEntity.setUserId(accountBankEntity.getUserId());
 				transactionEntity.setOrderId(orderId);
 				transactionEntity.setNote(dto.getNote() != null ? dto.getNote() : "");
 				transactionEntity.setTransStatus(0);
-				transactionEntity.setUrlLink(dto.getUrlLink());
+				transactionEntity.setUrlLink(dto.getUrlLink() != null ? dto.getUrlLink() : "");
 				if (dto.getTransType() != null) {
 					transactionEntity.setTransType(dto.getTransType());
 				} else {
@@ -1069,7 +1069,7 @@ public class VietQRController {
 				transactionEntity.setOrderId("");
 				transactionEntity.setSign("");
 				transactionEntity.setTimePaid(0);
-				transactionEntity.setTerminalCode(dto.getTerminalCode());
+				transactionEntity.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
 				transactionEntity.setQrCode("");
 				transactionEntity.setUserId(accountBankEntity.getUserId());
 				transactionEntity.setNote("");

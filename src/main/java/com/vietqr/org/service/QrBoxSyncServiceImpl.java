@@ -52,4 +52,9 @@ public class QrBoxSyncServiceImpl implements QrBoxSyncService {
     public int countQrBoxSync() {
         return repo.countQrBoxSync();
     }
+
+    @Override
+    public void updateQrBoxSync(String qrCertificate, long currentDateTimeUTC, boolean active, String name) {
+        repo.updateQrBoxSync(qrCertificate, currentDateTimeUTC, active, name);
+    }
 }

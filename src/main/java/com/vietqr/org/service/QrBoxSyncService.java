@@ -23,4 +23,6 @@ public interface QrBoxSyncService {
     List<ITidInternalDTO> getQrBoxSync(int offset, int size);
 
     int countQrBoxSync();
+
+    void updateQrBoxSync(String qrCertificate, long currentDateTimeUTC, boolean active, String name);
 }

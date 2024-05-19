@@ -2158,7 +2158,7 @@ public class TransactionBankController {
 				transactionEntity.setOrderId(orderId);
 				transactionEntity.setSign(sign);
 				transactionEntity.setTimePaid(time);
-				transactionEntity.setTerminalCode(terminalCode);
+				transactionEntity.setTerminalCode(terminalCode != null ? terminalCode : "");
 				transactionEntity.setQrCode("");
 				transactionEntity.setUserId(accountBankEntity.getUserId());
 				transactionEntity.setNote("");
@@ -2436,7 +2436,7 @@ public class TransactionBankController {
 				transactionEntity.setOrderId(orderId);
 				transactionEntity.setSign(sign);
 				transactionEntity.setTimePaid(time);
-				transactionEntity.setTerminalCode(terminalCode);
+				transactionEntity.setTerminalCode(terminalCode != null ? terminalCode : "");
 				transactionEntity.setQrCode("");
 				transactionEntity.setUserId(accountBankEntity.getUserId());
 				transactionEntity.setNote("");
