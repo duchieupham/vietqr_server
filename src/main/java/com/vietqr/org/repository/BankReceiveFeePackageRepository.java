@@ -19,7 +19,7 @@ public interface BankReceiveFeePackageRepository extends JpaRepository<BankRecei
             + "INNER JOIN account_bank_receive b ON a.bank_id = b.id "
             + "INNER JOIN account_login c ON c.id = b.user_id "
             + "INNER JOIN bank_receive_fee_package d ON d.bank_id = a.bank_id "
-            + "WHERE b.bank_account = :value "
+            + "WHERE b.bank_account LIKE %:value% "
             + "LIMIT :offset, :size ", nativeQuery = true)
     List<IBankAccountInvoiceDTO> getBankInvoiceByBankAccount(String value, int offset, int size);
 
@@ -28,7 +28,7 @@ public interface BankReceiveFeePackageRepository extends JpaRepository<BankRecei
             + "INNER JOIN account_bank_receive b ON a.bank_id = b.id "
             + "INNER JOIN account_login c ON c.id = b.user_id "
             + "INNER JOIN bank_receive_fee_package d ON d.bank_id = a.bank_id "
-            + "WHERE b.bank_account = :value ", nativeQuery = true)
+            + "WHERE b.bank_account LIKE %:value% ", nativeQuery = true)
     int countBankInvoiceByBankAccount(String value);
 
     @Query(value = "SELECT COUNT(a.id) "
@@ -37,7 +37,7 @@ public interface BankReceiveFeePackageRepository extends JpaRepository<BankRecei
             + "INNER JOIN account_login c ON c.id = b.user_id "
             + "INNER JOIN bank_receive_fee_package d ON d.bank_id = a.bank_id "
             + "INNER JOIN merchant_connection e ON e.id = a.mid_connect_id "
-            + "WHERE b.bank_account = :value AND e.mid = :merchantId ", nativeQuery = true)
+            + "WHERE b.bank_account LIKE %:value% AND e.mid = :merchantId ", nativeQuery = true)
     int countBankInvoiceByBankAccountAndMerchantId(String merchantId, String value);
 
     @Query(value = "SELECT a.title AS feePackage, "
@@ -61,7 +61,7 @@ public interface BankReceiveFeePackageRepository extends JpaRepository<BankRecei
             + "INNER JOIN account_login c ON c.id = b.user_id "
             + "INNER JOIN bank_receive_fee_package d ON d.bank_id = a.bank_id "
             + "INNER JOIN merchant_connection e ON e.id = a.mid_connect_id "
-            + "WHERE b.bank_account = :value AND e.mid = :merchantId "
+            + "WHERE b.bank_account LIKE %:value% AND e.mid = :merchantId "
             + "LIMIT :offset, :size ", nativeQuery = true)
     List<IBankAccountInvoiceDTO> getBankInvoiceByBankAccountAndMerchantId(String merchantId, String value,
                                                                           int offset, int size);

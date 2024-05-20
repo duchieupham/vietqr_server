@@ -4,6 +4,6 @@ public interface IMerchantInvoiceDTO {
     String getMerchantId();
     String getMerchantName();
     String getVsoCode();
-    int numberOfBank();
+    Integer getNumberOfBank();
     String getPlatform();
 }
