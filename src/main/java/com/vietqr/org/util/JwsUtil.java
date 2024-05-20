@@ -17,7 +17,8 @@ import org.bouncycastle.util.io.pem.PemReader;
 public class JwsUtil {
 
     // static String path = "keyRSABIDVUAT/";
-    static String path = "/opt/keyRSABIDVUAT/";
+    static String path = "/opt/keyRSABIDVProd/";
+    // static String path = "/opt/keyRSABIDVUAT/";
 
     public static byte[] hexStringToBytes(String s) {
         byte[] ans = new byte[s.length() / 2];
@@ -36,14 +37,17 @@ public class JwsUtil {
     public static PrivateKey getPrivateKey() throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
         KeyFactory factory = KeyFactory.getInstance("RSA");
         // File file = new File("src/main/resources/cert/privatekey.key");
-        File file = new File(path + "key.pem");
+        File file = new File(path + "privatekey.pem");
         try (FileReader keyReader = new FileReader(file); PemReader pemReader = new PemReader(keyReader)) {
             PemObject pemObject = pemReader.readPemObject();
             byte[] content = pemObject.getContent();
             PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(content);
             PrivateKey privateKey = factory.generatePrivate(privateKeySpec);
             return privateKey;
+        } catch (Exception e) {
+            System.out.print("JwsUtil: getPrivateKey: ERROR: " + e.toString());
         }
+        return null;
     }
 
     public static String getClientXCertificate() throws IOException {
@@ -97,9 +101,9 @@ public class JwsUtil {
         StringBuilder sb = new StringBuilder();
 
         try {
-            // File file = new File(path + "/merchant/request-add.txt");
+            File file = new File(path + "/merchant/request-add.txt");
             // File file = new File(path + "/merchant/confirm-add.txt");
-            File file = new File(path + "/merchant/create-vietqr.txt");
+            // File file = new File(path + "/merchant/create-vietqr.txt");
             // File file = new File(path + "/merchant/unregister.txt");
             // File file = new File(path + "/get-info.txt");
 
