@@ -78,7 +78,16 @@ public class InvoiceController {
             pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
             pageDTO.setTotalElement(totalElement);
             response.setMetadata(pageDTO);
-            response.setData(dtos);
+            List<MerchantInvoiceDTO> data = dtos.stream().map(item -> {
+                MerchantInvoiceDTO dto = new MerchantInvoiceDTO();
+                dto.setMerchantId(item.getMerchantId());
+                dto.setMerchantName(item.getMerchantName());
+                dto.setPlatform(item.getPlatform());
+                dto.setVsoCode(item.getVsoCode());
+                dto.setNumberOfBank(item.getNumberOfBank() != null ? item.getNumberOfBank() : 0);
+                return dto;
+            }).collect(Collectors.toList());
+            response.setData(data);
             result = response;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
@@ -275,7 +284,7 @@ public class InvoiceController {
                 dto.setUserBankName(bankAccountInfoDTO.getUserBankName());
                 dto.setBankShortName(bankAccountInfoDTO.getBankShortName());
                 dto.setBankAccount(bankAccountInfoDTO.getBankAccount());
-                dto.setEmail(item.getEmail());
+                dto.setEmail(item.getEmail() != null ? item.getEmail() : "");
                 dto.setPhoneNo(item.getPhoneNo());
                 dto.setFeePackage(item.getFeePackage());
                 if (bankAccountInfoDTO.getMmsActive() != null && bankAccountInfoDTO.getMmsActive()) {
