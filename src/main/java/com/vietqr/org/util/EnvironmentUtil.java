@@ -289,11 +289,11 @@ public class EnvironmentUtil {
     private static final String ADMIN_UAT_ACTIVE_KEY = "admin-vqr-active-key-2326";
 
     public static String getBidvSecretKey() {
-        return (IS_PRODUCTION == false) ? BIDV_SECRET_KEY_PROD : BIDV_SECRET_KEY_UAT;
+        return (IS_PRODUCTION == false) ? BIDV_SECRET_KEY_UAT : BIDV_SECRET_KEY_PROD;
     }
 
     public static String getBidvAccessKey() {
-        return (IS_PRODUCTION == false) ? BIDV_ACCESS_KEY_PROD : BIDV_ACCESS_KEY_UAT;
+        return (IS_PRODUCTION == false) ? BIDV_ACCESS_KEY_UAT : BIDV_ACCESS_KEY_PROD;
     }
 
     public static String getBidvUrlCreateVietQRVa() {
@@ -648,18 +648,23 @@ public class EnvironmentUtil {
     public static String getAdminUatActiveKey() {
         return ADMIN_UAT_ACTIVE_KEY;
     }
+
     public static String getVietQrPlusPackage() {
         return VIET_QR_PLUS_PACKAGE;
     }
+
     public static String getVietQrProPackage() {
         return VIET_QR_PRO_PACKAGE;
     }
+
     public static String getVietQrNameTransFee() {
         return VIET_QR_NAME_TRANS_FEE;
     }
+
     public static String getVietQrNameAnotherFee() {
         return VIET_QR_NAME_ANOTHER_FEE;
     }
+
     public static String getVietQrNameAnnualFee() {
         return VIET_QR_NAME_ANNUAL_FEE;
     }
