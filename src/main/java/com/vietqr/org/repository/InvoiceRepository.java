@@ -281,4 +281,9 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             "total_amount = :totalAmountAfterVat WHERE id = :invoiceId ", nativeQuery = true)
     void updateInvoiceById(long vatAmount, long totalAmount,
                            long totalAmountAfterVat, String invoiceId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM invoice WHERE id = :invoiceId ", nativeQuery = true)
+    void removeByInvoiceId(String invoiceId);
 }

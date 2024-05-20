@@ -552,7 +552,7 @@ public class TidQrInternalController {
                         vietQRMMSCreateDTO.setBankCode(dto.getBankCode());
                         vietQRMMSCreateDTO.setAmount(dto.getAmount() + "");
                         vietQRMMSCreateDTO.setContent(content);
-                        vietQRMMSCreateDTO.setOrderId(dto.getOrderId());
+                        vietQRMMSCreateDTO.setOrderId(orderId);
                         vietQRMMSCreateDTO.setSign("");
                         vietQRMMSCreateDTO.setTerminalCode(dto.getTerminalCode());
                         vietQRMMSCreateDTO.setNote(dto.getNote());

@@ -542,13 +542,10 @@ public class TransactionMMSController {
                                 if (terminalBankEntitySync != null) {
                                     // push data to customerSync
                                     ////////////////////////
-                                    String urlLink = tempTransReceive.getUrlLink() != null
-                                            ? tempTransReceive.getUrlLink()
-                                            : "";
                                     getCustomerSyncEntities(transactionReceiveEntity1.getId(),
                                             terminalBankEntitySync.getId(),
                                             entity.getFtCode(),
-                                            transactionReceiveEntity1, time, rawCode, urlLink);
+                                            transactionReceiveEntity1, time, rawCode, "");
                                 } else {
                                     logger.info("transaction-mms-sync: NOT FOUND TerminalBankEntity");
                                 }
