@@ -20,6 +20,8 @@ public class BIDVTokenUtil {
         TokenBankBIDVDTO result = null;
         try {
             String url = EnvironmentUtil.getBidvUrlGetToken();
+            //
+            System.out.println("URL GET TOKEN BIDV: " + url);
             UriComponents uriComponents = UriComponentsBuilder
                     .fromHttpUrl(url)
                     .buildAndExpand(/* add url parameter here */);
@@ -32,7 +34,7 @@ public class BIDVTokenUtil {
             formData.add("client_id", EnvironmentUtil.getBidvGetTokenClientId());
             formData.add("client_secret", EnvironmentUtil.getBidvGetTokenClientSecret());
             logger.info("BIDVTokenUtil: getBIDVToken: client_id: " + EnvironmentUtil.getBidvGetTokenClientId()
-            + " client_secret: " + EnvironmentUtil.getBidvGetTokenClientSecret());
+                    + " client_secret: " + EnvironmentUtil.getBidvGetTokenClientSecret());
             // Call POST API
             TokenBankBIDVDTO response = webClient.method(HttpMethod.POST)
                     .uri(uriComponents.toUri())

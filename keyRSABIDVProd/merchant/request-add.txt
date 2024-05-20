@@ -1,0 +1,11 @@
+{
+ "serviceId":"BC0001",
+ "channelId":"211701",
+ "merchantId":"BCBL00001",
+ "merchantName":"BLUECOMTEST",
+ "accountNo":"8810243655",
+ "accountName":"Nguyen Dinh Vuong",
+ "identity":"075097013267",
+ "mobile":"0931865469",
+ "merchantType":"1"
+}
