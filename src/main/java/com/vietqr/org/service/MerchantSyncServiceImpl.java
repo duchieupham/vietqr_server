@@ -1,5 +1,6 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.dto.IMerchantEditDetailDTO;
 import com.vietqr.org.dto.IMerchantInvoiceDTO;
 import com.vietqr.org.repository.MerchantSyncRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,5 +27,10 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
     @Override
     public int countMerchantSyncsByName(String value) {
         return repo.countMerchantSyncsByName(value);
+    }
+
+    @Override
+    public IMerchantEditDetailDTO getMerchantEditDetail(String merchantId) {
+        return repo.getMerchantEditDetail(merchantId);
     }
 }

@@ -212,4 +212,9 @@ public class InvoiceServiceImpl implements InvoiceService {
     public void removeByInvoiceId(String invoiceId) {
         repo.removeByInvoiceId(invoiceId);
     }
+
+    @Override
+    public InvoiceEntity getInvoiceEntityById(String invoiceId) {
+        return repo.getInvoiceEntityById(invoiceId);
+    }
 }

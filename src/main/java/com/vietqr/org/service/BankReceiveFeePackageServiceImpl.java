@@ -51,4 +51,9 @@ public class BankReceiveFeePackageServiceImpl implements BankReceiveFeePackageSe
     public IBankDetailAdminDTO getBankReceiveByBankId(String bankId) {
         return repo.getBankReceiveByBankId(bankId);
     }
+
+    @Override
+    public IBankAccountInvoiceDTO getBankInvoiceByBankId(String bankId) {
+        return repo.getBankInvoiceByBankId(bankId);
+    }
 }

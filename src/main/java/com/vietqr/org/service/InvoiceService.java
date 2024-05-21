@@ -67,4 +67,6 @@ public interface InvoiceService {
                            long totalAmountAfterVat, String invoiceId);
 
     void removeByInvoiceId(String invoiceId);
+
+    InvoiceEntity getInvoiceEntityById(String invoiceId);
 }

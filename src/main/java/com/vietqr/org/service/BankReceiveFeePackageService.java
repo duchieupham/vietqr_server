@@ -24,4 +24,6 @@ public interface BankReceiveFeePackageService {
     IInvoiceItemCreateDTO getFeePackageByBankId(String bankId);
 
     IBankDetailAdminDTO getBankReceiveByBankId(String bankId);
+
+    IBankAccountInvoiceDTO getBankInvoiceByBankId(String bankId);
 }

@@ -105,4 +105,8 @@ public interface AccountBankReceiveService {
     IMerchantBankMapperDTO getMerchantBankMapper(String bankId);
 
     List<ICustomerDetailDTO> getCustomerDetailByBankId(String bankId);
+
+    int countBankInvoiceByBankAccount(String value);
+
+	List<IBankAccountInvoiceInfoDTO> getBankInvoiceByBankAccount(String value, int offset, int size);
 }

@@ -13,6 +13,7 @@ import com.vietqr.org.entity.TransactionWalletEntity;
 public interface TransactionWalletService {
 
         public int insertTransactionWallet(TransactionWalletEntity entity);
+        public int insertAll(List<TransactionWalletEntity> entities);
 
         public TransactionWalletEntity getTransactionWalletById(String id);
 

@@ -254,9 +254,10 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
     @Query(value = "SELECT a.id AS invoiceId, a.name AS invoiceName, "
             + "a.invoice_id AS invoiceNumber, b.content AS content, a.data AS data, "
             + "a.amount AS totalAmount, a.vat AS vat, a.vat_amount AS vatAmount, "
-            + "a.total_amount AS totalAmountAfterVat "
+            + "a.bank_id AS bankId, a.merchant_id AS merchantId, "
+            + "a.total_amount AS totalAmountAfterVat, a.description AS description "
             + "FROM invoice a "
-            + "INNER JOIN transaction_wallet b ON a.ref_id = b.id "
+            + "LEFT JOIN transaction_wallet b ON a.ref_id = b.id "
             + "WHERE a.id = :invoiceId LIMIT 1", nativeQuery = true)
     IInvoiceQrDetailDTO getInvoiceQrById(String invoiceId);
 
@@ -286,4 +287,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
     @Modifying
     @Query(value = "DELETE FROM invoice WHERE id = :invoiceId ", nativeQuery = true)
     void removeByInvoiceId(String invoiceId);
+
+    @Query(value = "SELECT * FROM invoice WHERE id = :invoiceId ", nativeQuery = true)
+    InvoiceEntity getInvoiceEntityById(String invoiceId);
 }

@@ -31,6 +31,14 @@ public class StringUtil {
         return hashtags;
     }
 
+    public static String getValueNullChecker(String value) {
+        return value != null ? value : "";
+    }
+
+    public static int getValueNullChecker(Integer value) {
+        return value != null ? value : 0;
+    }
+
     public static String getValueNotNull(String value) {
         return value != null ? value : "";
     }

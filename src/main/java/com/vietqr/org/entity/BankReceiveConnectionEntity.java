@@ -30,6 +30,9 @@ public class BankReceiveConnectionEntity implements Serializable {
     @Column(name = "terminalBankId")
     private String terminalBankId;
 
+    @Column(name = "mid")
+    private String mid;
+
     public BankReceiveConnectionEntity() {
     }
 
@@ -80,5 +83,13 @@ public class BankReceiveConnectionEntity implements Serializable {
 
     public void setTerminalBankId(String terminalBankId) {
         this.terminalBankId = terminalBankId;
+    }
+
+    public String getMid() {
+        return mid;
+    }
+
+    public void setMid(String mid) {
+        this.mid = mid;
     }
 }

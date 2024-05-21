@@ -26,6 +26,11 @@ public class TransactionWalletServiceImpl implements TransactionWalletService {
     }
 
     @Override
+    public int insertAll(List<TransactionWalletEntity> entities) {
+        return repo.saveAll(entities) == null ? 0 : 1;
+    }
+
+    @Override
     public TransactionWalletEntity getTransactionWalletById(String id) {
         return repo.getTransactionWalletById(id);
     }

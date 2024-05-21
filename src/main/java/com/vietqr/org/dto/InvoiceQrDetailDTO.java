@@ -14,6 +14,17 @@ public class InvoiceQrDetailDTO {
     private String invoiceId;
 
     public InvoiceQrDetailDTO() {
+        qrCode = "";
+        totalAmountAfterVat = 0;
+        invoiceName = "";
+        bankAccount = "";
+        bankShortName = "";
+        invoiceNumber = "";
+        userBankName = "";
+        totalAmount = 0;
+        vat = 0;
+        vatAmount = 0;
+        invoiceId = "";
     }
 
     public InvoiceQrDetailDTO(String qrCode, long totalAmountAfterVat, String invoiceName, String bankAccount,

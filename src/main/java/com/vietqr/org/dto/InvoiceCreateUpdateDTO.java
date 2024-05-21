@@ -2,7 +2,7 @@ package com.vietqr.org.dto;
 
 import java.util.List;
 
-public class InvoiceCreateDTO {
+public class InvoiceCreateUpdateDTO {
     private String bankId;
     private String merchantId;
     private String invoiceName;
@@ -10,10 +10,10 @@ public class InvoiceCreateDTO {
     private double vat;
     private List<InvoiceItemCreateDTO> items;
 
-    public InvoiceCreateDTO() {
+    public InvoiceCreateUpdateDTO() {
     }
 
-    public InvoiceCreateDTO(String bankId, String merchantId, List<InvoiceItemCreateDTO> items) {
+    public InvoiceCreateUpdateDTO(String bankId, String merchantId, List<InvoiceItemCreateDTO> items) {
         this.bankId = bankId;
         this.merchantId = merchantId;
         this.items = items;

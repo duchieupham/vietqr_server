@@ -2,6 +2,7 @@ package com.vietqr.org.dto;
 
 public interface IInvoiceQrDetailDTO {
     String getContent();
+    String getDescription();
     String getInvoiceId();
     String getInvoiceNumber();
     String getInvoiceName();
@@ -10,5 +11,7 @@ public interface IInvoiceQrDetailDTO {
     double getVat();
     long getVatAmount();
     long getTotalAmountAfterVat();
+    String getBankId();
+    String getMerchantId();
 
 }
