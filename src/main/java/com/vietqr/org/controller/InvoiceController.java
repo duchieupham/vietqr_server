@@ -469,7 +469,7 @@ public class InvoiceController {
             if (userId != null && !userId.isEmpty()) {
                 entity.setUserId(userId);
             } else {
-                entity.setUserId("");
+                entity.setUserId("648dca06-4f72-4df8-b98f-429f4777fbda");
             }
             invoiceItemService.removeByInvoiceId(invoiceId);
             invoiceItemService.insertAll(invoiceItemEntities);
@@ -961,7 +961,7 @@ public class InvoiceController {
                 userId = merchantMapper.getUserId();
                 entity.setUserId(merchantMapper.getUserId());
             } else {
-                entity.setUserId("");
+                entity.setUserId("648dca06-4f72-4df8-b98f-429f4777fbda");
             }
             try {
                 entity.setData(mapper.writeValueAsString(merchantBankMapperDTO));
@@ -978,7 +978,7 @@ public class InvoiceController {
                 invoiceItemEntity.setInvoiceId(invoiceId.toString());
                 invoiceItemEntity.setAmount(item.getAmount());
                 invoiceItemEntity.setQuantity(item.getQuantity());
-                invoiceItemEntity.setTotalAmount(item.getAmount());
+                invoiceItemEntity.setTotalAmount(item.getTotalAmount());
                 invoiceItemEntity.setTotalAfterVat(item.getAmountAfterVat());
                 invoiceItemEntity.setName(item.getContent());
                 invoiceItemEntity.setDescription(item.getContent());
