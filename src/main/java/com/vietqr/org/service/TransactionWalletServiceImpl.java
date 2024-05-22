@@ -2,13 +2,10 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
-import com.vietqr.org.dto.TransactionWalletAdminDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.util.DateTimeUtil;
 import org.springframework.stereotype.Service;
 
-import com.vietqr.org.dto.TransWalletListDTO;
-import com.vietqr.org.dto.TransactionVNPTItemDTO;
-import com.vietqr.org.dto.VNPTEpayTransCounterDTO;
 import com.vietqr.org.entity.TransactionWalletEntity;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -246,6 +243,26 @@ public class TransactionWalletServiceImpl implements TransactionWalletService {
         return repo.countTransactionWallet(
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public TransactionWalletEntity getTransactionWalletByRefId(String id) {
+        return repo.getTransactionWalletByRefId(id);
+    }
+
+    @Override
+    public String getRefIdDebitByInvoiceRefId(String refId) {
+        return repo.getRefIdDebitByInvoiceRefId(refId);
+    }
+
+    @Override
+    public TransWalletUpdateDTO getBillNumberByRefIdTransWallet(String refIdDebit) {
+        return repo.getBillNumberByRefIdTransWallet(refIdDebit);
+    }
+
+    @Override
+    public void updateAmountTransWallet(String id, String amount) {
+        repo.updateAmountTransWallet(id, amount);
     }
 
 }

@@ -2586,5 +2586,14 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "ORDER BY a.time DESC LIMIT :offset, 20 ", nativeQuery = true)
         List<TransactionRelatedDTO> getAllTransTerminalWithType2(String bankId, List<String> listCode,
                                                                  int offset, long fromDate, long toDate);
+
+        @Query(value = "SELECT a.id AS id, a.amount AS amount, "
+                + "a.content AS content "
+                + "FROM transaction_receive a "
+                + "WHERE a.order_id = :billNumber "
+                + "AND a.bank_id = :bankId "
+                + "AND a.time >= :fromTime AND a.time <= :toTime "
+                + "LIMIT 1", nativeQuery = true)
+        TransactionReceiveUpdateDTO getTransactionUpdateByBillNumber(String billNumber, String bankId, long fromTime, long toTime);
 }
 

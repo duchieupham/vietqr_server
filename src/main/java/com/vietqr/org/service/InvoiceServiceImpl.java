@@ -217,4 +217,14 @@ public class InvoiceServiceImpl implements InvoiceService {
     public InvoiceEntity getInvoiceEntityById(String invoiceId) {
         return repo.getInvoiceEntityById(invoiceId);
     }
+
+    @Override
+    public InvoiceEntity getInvoiceEntityByRefId(String id, long amount) {
+        return repo.getInvoiceEntityByRefId(id, amount);
+    }
+
+    @Override
+    public int updateStatusInvoice(String id, int status) {
+        return repo.updateStatusInvoice(id, status);
+    }
 }

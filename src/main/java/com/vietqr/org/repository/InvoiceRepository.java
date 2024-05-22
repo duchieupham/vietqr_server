@@ -270,7 +270,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "WHERE a.id = :invoiceId ", nativeQuery = true)
     IInvoiceDTO getInvoiceByInvoiceDetail(String invoiceId);
 
-    @Query(value = "SELECT a.id AS invoiceId, a.amount AS totalAmount, "
+    @Query(value = "SELECT a.id AS invoiceId, a.amount AS totalAmount, a.ref_id AS refId, "
             + "a.vat_amount AS vatAmount, a.total_amount AS totalAmountAfterVat "
             + "FROM invoice a "
             + "WHERE a.id = :invoiceId ", nativeQuery = true)
@@ -290,4 +290,12 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
 
     @Query(value = "SELECT * FROM invoice WHERE id = :invoiceId ", nativeQuery = true)
     InvoiceEntity getInvoiceEntityById(String invoiceId);
+
+    @Query(value = "SELECT * FROM invoice WHERE ref_id = :transWalletId AND total_amount = :amount LIMIT 1", nativeQuery = true)
+    InvoiceEntity getInvoiceEntityByRefId(String transWalletId, long amount);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE invoice SET status = :status WHERE id = :id ", nativeQuery = true)
+    int updateStatusInvoice(String id, int status);
 }

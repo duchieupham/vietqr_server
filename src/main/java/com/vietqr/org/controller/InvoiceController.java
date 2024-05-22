@@ -989,7 +989,7 @@ public class InvoiceController {
                         break;
                     case 1:
                         invoiceItemEntity.setType(1);
-                        invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameAnnualFee());
+                        invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameTransFee());
                         break;
                     case 9:
                         invoiceItemEntity.setType(9);
@@ -1010,16 +1010,41 @@ public class InvoiceController {
             entity.setAmount(totalAmount);
             entity.setVatAmount(totalVatAmount);
 
-            entity.setRefId("");
+            String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
+            String billNumberVQR = "VTS" + RandomCodeUtil.generateRandomId(10);
+            String otpPayment = RandomCodeUtil.generateOTP(6);
+            String content = traceId + " " + billNumberVQR;
             List<TransactionWalletEntity> transactionWalletEntities = new ArrayList<>();
+
+            // create transaction_wallet_credit
+            TransactionWalletEntity walletEntityCredit = new TransactionWalletEntity();
+            UUID transWalletCreditUUID = UUID.randomUUID();
+            walletEntityCredit.setId(transWalletCreditUUID.toString());
+            walletEntityCredit.setAmount(totalAmountAfterVat + "");
+            walletEntityCredit.setBillNumber(billNumberVQR);
+            walletEntityCredit.setContent(content);
+            walletEntityCredit.setStatus(0);
+            walletEntityCredit.setTimeCreated(time);
+            walletEntityCredit.setTimePaid(0);
+            walletEntityCredit.setTransType("C");
+            walletEntityCredit.setUserId(entity.getUserId());
+            walletEntityCredit.setOtp("");
+            walletEntityCredit.setPaymentType(0);
+            walletEntityCredit.setPaymentMethod(1);
+            walletEntityCredit.setReferenceNumber(3 + "*" + entity.getUserId() + "*" +
+                    otpPayment + "*" + entity.getBankId());
+            walletEntityCredit.setPhoneNoRC("");
+            walletEntityCredit.setData(dto.getBankId());
+            walletEntityCredit.setRefId("");
+            transactionWalletEntities.add(walletEntityCredit);
+
             // create transaction_wallet_debit
             TransactionWalletEntity walletEntityDebit = new TransactionWalletEntity();
             UUID transWalletUUID = UUID.randomUUID();
-            String otpPayment = RandomCodeUtil.generateOTP(6);
             walletEntityDebit.setId(transWalletUUID.toString());
             walletEntityDebit.setAmount(totalAmountAfterVat + "");
             walletEntityDebit.setBillNumber(invoiceNumber);
-            walletEntityDebit.setContent("");
+            walletEntityDebit.setContent(content);
             walletEntityDebit.setStatus(0);
             walletEntityDebit.setTimeCreated(time);
             walletEntityDebit.setTimePaid(0);
@@ -1031,7 +1056,9 @@ public class InvoiceController {
             walletEntityDebit.setReferenceNumber("");
             walletEntityDebit.setPhoneNoRC("");
             walletEntityDebit.setData(dto.getBankId());
+            walletEntityDebit.setRefId(transWalletCreditUUID.toString());
             transactionWalletEntities.add(walletEntityDebit);
+
             // generate VQR
             String bankAccount = EnvironmentUtil.getBankAccountRecharge();
             String bankId = EnvironmentUtil.getBankIdRecharge();
@@ -1041,10 +1068,6 @@ public class InvoiceController {
             vietQRGenerateDTO.setCaiValue(cai);
             vietQRGenerateDTO.setBankAccount(bankAccount);
             vietQRGenerateDTO.setAmount(totalAmountAfterVat + "");
-
-            String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
-            String billNumberVQR = "VAF" + RandomCodeUtil.generateRandomId(10);
-            String content = traceId + " " + billNumberVQR;
             vietQRGenerateDTO.setContent(content);
             String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
 
@@ -1075,26 +1098,7 @@ public class InvoiceController {
             transactionReceiveEntity.setQrCode(qr);
             transactionReceiveEntity.setUrlLink("");
 
-            // create transaction_wallet_credit
-            TransactionWalletEntity walletEntityCredit = new TransactionWalletEntity();
-            UUID transWalletCreditUUID = UUID.randomUUID();
-            String otpPaymentCredit = RandomCodeUtil.generateOTP(6);
-            walletEntityCredit.setId(transWalletCreditUUID.toString());
-            walletEntityCredit.setAmount(totalAmountAfterVat + "");
-            walletEntityCredit.setBillNumber(invoiceNumber);
-            walletEntityCredit.setContent("");
-            walletEntityCredit.setStatus(0);
-            walletEntityCredit.setTimeCreated(time);
-            walletEntityCredit.setTimePaid(0);
-            walletEntityCredit.setTransType("D");
-            walletEntityCredit.setUserId(entity.getUserId());
-            walletEntityCredit.setOtp(otpPaymentCredit);
-            walletEntityCredit.setPaymentType(0);
-            walletEntityCredit.setPaymentMethod(0);
-            walletEntityCredit.setReferenceNumber("");
-            walletEntityCredit.setPhoneNoRC("");
-            walletEntityCredit.setData(dto.getBankId());
-            transactionWalletEntities.add(walletEntityCredit);
+            entity.setRefId(transWalletUUID.toString());
 
             transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
             transactionWalletService.insertAll(transactionWalletEntities);
@@ -1150,8 +1154,30 @@ public class InvoiceController {
             invoiceItemEntity.setVatAmount(dto.getVatAmount());
             invoiceItemEntity.setDataType(1);
 
-            //update transaction wallet
-
+            //update transaction wallet and transaction_receive
+            // update transaction_wallet_credit and debit
+            String refIdDebit = transactionWalletService.getRefIdDebitByInvoiceRefId(invoiceDTO.getRefId());
+            TransWalletUpdateDTO transWalletUpdateDTO
+                    = transactionWalletService.getBillNumberByRefIdTransWallet(refIdDebit);
+            String bankId = EnvironmentUtil.getBankIdRecharge();
+            TransactionReceiveUpdateDTO transactionReceiveUpdateDTO
+                    = transactionReceiveService
+                    .getTransactionUpdateByBillNumber(transWalletUpdateDTO.getBillNumber(), bankId, transWalletUpdateDTO.getTimeCreated());
+            // update
+            transactionWalletService.updateAmountTransWallet(invoiceDTO.getRefId(), totalAmountAfterVat + "");
+            transactionWalletService.updateAmountTransWallet(refIdDebit, totalAmountAfterVat + "");
+            // update transaction_receive
+            // update qr
+            // generate VQR
+            String bankAccount = EnvironmentUtil.getBankAccountRecharge();
+            String cai = EnvironmentUtil.getCAIRecharge();
+            VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+            vietQRGenerateDTO.setCaiValue(cai);
+            vietQRGenerateDTO.setBankAccount(bankAccount);
+            vietQRGenerateDTO.setAmount(totalAmountAfterVat + "");
+            vietQRGenerateDTO.setContent(transactionReceiveUpdateDTO.getContent());
+            String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+//            transactionReceiveService.upda
             //
             invoiceItemService.insert(invoiceItemEntity);
             invoiceService.updateInvoiceById(vatAmount, totalAmount,

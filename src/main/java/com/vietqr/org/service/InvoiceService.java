@@ -69,4 +69,8 @@ public interface InvoiceService {
     void removeByInvoiceId(String invoiceId);
 
     InvoiceEntity getInvoiceEntityById(String invoiceId);
+
+    InvoiceEntity getInvoiceEntityByRefId(String id, long amount);
+
+    int updateStatusInvoice(String id, int status);
 }

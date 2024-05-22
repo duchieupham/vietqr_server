@@ -1,12 +1,9 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.dto.TransactionWalletAdminDTO;
+import com.vietqr.org.dto.*;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
-import com.vietqr.org.dto.TransWalletListDTO;
-import com.vietqr.org.dto.TransactionVNPTItemDTO;
-import com.vietqr.org.dto.VNPTEpayTransCounterDTO;
 import com.vietqr.org.entity.TransactionWalletEntity;
 
 @Service
@@ -86,4 +83,12 @@ public interface TransactionWalletService {
         List<TransactionWalletAdminDTO> getTransactionWallet(String fromDate, String toDate, int offset, int size);
 
         int countTransactionWallet(String fromDate, String toDate);
+
+        TransactionWalletEntity getTransactionWalletByRefId(String id);
+
+        String getRefIdDebitByInvoiceRefId(String refId);
+
+        TransWalletUpdateDTO getBillNumberByRefIdTransWallet(String refIdDebit);
+
+        void updateAmountTransWallet(String refId, String totalAmountAfterVat);
 }

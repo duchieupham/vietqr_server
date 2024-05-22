@@ -1337,6 +1337,82 @@ public class TransactionBankController {
 							logger.error("transaction-sync: REFERENCE NUMBER INVALID: "
 									+ entity.getReferenceNumber());
 						}
+					} else if (parts.length == 4) {
+						Integer paymentType = Integer.parseInt(parts[0]);
+						String userId = parts[1];
+						String otp = parts[2];
+						String bankId = parts[3];
+						if (userId != null && otp != null && paymentType != null) {
+							String checkTransWalletId = transactionWalletService
+									.checkExistedTransactionnWallet(otp,
+											userId, paymentType);
+							boolean checkSuccessProcess = false;
+							if (!StringUtil.isNullOrEmpty(checkTransWalletId)) {
+								// find transactionWalletEntity by Id
+								TransactionWalletEntity transactionWalletEntity = transactionWalletService
+										.getTransactionWalletById(checkTransWalletId);
+								if (transactionWalletEntity != null) {
+									TransactionWalletEntity transactionWalletDebit = transactionWalletService.getTransactionWalletByRefId(transactionWalletEntity.getId());
+									if (transactionWalletDebit != null) {
+										long amount = Long.parseLong(transactionWalletDebit.getAmount());
+										InvoiceEntity invoiceEntity = invoiceService.getInvoiceEntityByRefId(transactionWalletDebit.getId(), amount);
+										if (invoiceEntity != null && invoiceEntity.getStatus() != 1) {
+											int checkSuccess = invoiceService.updateStatusInvoice(invoiceEntity.getId(), 1);
+											if (checkSuccess > 0) {
+												checkSuccessProcess = true;
+												// update transaction wallet
+												transactionWalletService.updateTransactionWallet(1, time,
+														transactionWalletDebit.getAmount() + "",
+														"",
+														transactionWalletDebit.getUserId(),
+														transactionWalletDebit.getOtp(),
+														paymentType);
+											} else {
+												System.out.println(
+														"transaction-sync: TRAN WALLET INVOICE NULL");
+												logger.error("transaction-sync: TRAN WALLET INVOICE IS ALREADY PAID OR CANCELED ");
+											}
+										} else {
+											System.out.println(
+													"transaction-sync: TRAN WALLET INVOICE NULL");
+											logger.error("transaction-sync: TRAN WALLET INVOICE IS ALREADY PAID OR CANCELED ");
+										}
+									} else {
+										System.out.println(
+												"transaction-sync: TRAN WALLET DEBIT NULL");
+										logger.error("transaction-sync: TRAN WALLET DEBIT NULL ");
+									}
+								} else {
+									System.out.println(
+											"transaction-sync: TRAN WALLET INVOICE NULL");
+									logger.error("transaction-sync: TRAN WALLET INVOICE NULL");
+								}
+							} else {
+								System.out.println("transaction-sync: INVALID OTP");
+								logger.error("transaction-sync: INVALID OTP");
+							}
+							if (!checkSuccessProcess) {
+								// update amount account wallet
+								AccountWalletEntity accountWalletEntity = accountWalletService
+										.getAccountWalletByUserId(userIdRecharge);
+								if (accountWalletEntity != null) {
+									Long currentAmount = Long
+											.parseLong(accountWalletEntity.getAmount());
+									Long updatedAmount = currentAmount + dto.getAmount();
+									accountWalletService.updateAmount(updatedAmount + "",
+											accountWalletEntity.getId());
+									logger.info("transaction-sync: process wallet: refund user: "
+											+ userIdRecharge + " - " + dto.getAmount());
+								}
+							}
+						} else {
+							System.out.println(
+									"transaction-sync: REFERENCE NUMBER INVALID: "
+											+ entity
+											.getReferenceNumber());
+							logger.error("transaction-sync: REFERENCE NUMBER INVALID: "
+									+ entity.getReferenceNumber());
+						}
 					}
 				} else {
 					// update amount account wallet

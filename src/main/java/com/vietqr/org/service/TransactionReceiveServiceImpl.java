@@ -1239,6 +1239,13 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public TransactionReceiveUpdateDTO getTransactionUpdateByBillNumber(String billNumberCre, String bankId, long time) {
+        return repo.getTransactionUpdateByBillNumber(billNumberCre, bankId,
+                time - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                time + DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
     public TransStatisticDTO getTransactionOverviewBySubTerminalCode(String subTerminalCode, String fromDate, String toDate) {
         return repo.getTransactionOverviewBySubTerminalCode(subTerminalCode,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,

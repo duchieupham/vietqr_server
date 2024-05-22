@@ -385,6 +385,7 @@ public class VNPTEpayController {
                                             .setReferenceNumber(paymentMobileRechargeType + "*" + carrier.getCode()
                                                     + "*" + dto.getPhoneNo() + "*" + dto.getUserId() + "*"
                                                     + dto.getOtp());
+                                    transactionWalletEntity.setRefId("");
                                     transactionWalletService.insertTransactionWallet(transactionWalletEntity);
                                     // update transaction_wallet mobile recharge
                                     LocalDateTime currentDateTimeMobile = LocalDateTime.now();

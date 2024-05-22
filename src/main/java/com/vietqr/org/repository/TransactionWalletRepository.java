@@ -3,16 +3,13 @@ package com.vietqr.org.repository;
 import java.util.List;
 import javax.transaction.Transactional;
 
-import com.vietqr.org.dto.TransactionWalletAdminDTO;
+import com.vietqr.org.dto.*;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.vietqr.org.dto.TransWalletListDTO;
-import com.vietqr.org.dto.TransactionVNPTItemDTO;
-import com.vietqr.org.dto.VNPTEpayTransCounterDTO;
 import com.vietqr.org.entity.TransactionWalletEntity;
 
 @Repository
@@ -71,7 +68,8 @@ public interface TransactionWalletRepository extends JpaRepository<TransactionWa
         @Transactional
         @Modifying
         @Query(value = "UPDATE transaction_wallet SET time_created = :timeCreated, amount = :amount "
-                + "WHERE user_id = :userId AND otp = :otp AND payment_type = :paymentType AND status = 0", nativeQuery = true)
+                + "WHERE user_id = :userId AND otp = :otp "
+                + "AND payment_type = :paymentType AND status = 0", nativeQuery = true)
         void updateTransactionWalletConfirm(
                         @Param(value = "timeCreated") long timeCreated,
                         @Param(value = "amount") String amount,
@@ -413,4 +411,20 @@ public interface TransactionWalletRepository extends JpaRepository<TransactionWa
                 + "LIMIT :offset, :size ", nativeQuery = true)
         List<TransactionWalletAdminDTO> getTransactionWalletVNPTEpay(long fromDate, long toDate,
                                                                      int offset, int size);
+
+        @Query(value = "SELECT * FROM transaction_wallet WHERE ref_id = :id LIMIT 1", nativeQuery = true)
+        TransactionWalletEntity getTransactionWalletByRefId(String id);
+
+        @Query(value = "SELECT ref_id FROM transaction_wallet WHERE id = :id LIMIT 1", nativeQuery = true)
+        String getRefIdDebitByInvoiceRefId(String id);
+
+        @Query(value = "SELECT id AS id, bill_number AS billNumber, time_created AS timeCreated "
+                + "FROM transaction_wallet WHERE ref_id = :refId LIMIT 1", nativeQuery = true)
+        TransWalletUpdateDTO getBillNumberByRefIdTransWallet(String refId);
+
+        @Transactional
+        @Modifying
+        @Query(value = "UPDATE transaction_wallet SET amount = :amount "
+                + "WHERE id = :id ", nativeQuery = true)
+        void updateAmountTransWallet(String id, String amount);
 }
