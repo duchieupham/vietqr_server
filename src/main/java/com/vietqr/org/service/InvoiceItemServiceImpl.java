@@ -53,7 +53,7 @@ public class InvoiceItemServiceImpl implements InvoiceItemService {
     }
 
     @Override
-    public void removeByInvoiceId(String invoiceId) {
-        repo.removeByInvoiceId(invoiceId);
+    public void removeByInvoiceIdInorge(String invoiceId, List<String> itemIds) {
+        repo.removeByInvoiceId(invoiceId, itemIds);
     }
 }

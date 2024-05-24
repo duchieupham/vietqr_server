@@ -367,7 +367,7 @@ public class InvoiceController {
             result = data;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            logger.error("InvoiceController: ERROR: getMerchantList: " + e.getMessage()
+            logger.error("InvoiceController: ERROR: getDetailQrCode: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -389,7 +389,7 @@ public class InvoiceController {
             long totalVatAmount = 0;
             ObjectMapper mapper = new ObjectMapper();
             InvoiceEntity entity = invoiceService.getInvoiceEntityById(invoiceId);
-            entity.setId(invoiceId.toString());
+            entity.setId(invoiceId);
             entity.setName(dto.getInvoiceName());
             entity.setDescription(dto.getDescription());
             entity.setTimePaid(0);
@@ -424,12 +424,17 @@ public class InvoiceController {
                 entity.setDataType(9);
             }
             List<InvoiceItemEntity> invoiceItemEntities = new ArrayList<>();
+            List<String> itemIds = new ArrayList<>();
             for (InvoiceItemCreateDTO item : dto.getItems()) {
 
                 InvoiceItemEntity invoiceItemEntity
                         = invoiceItemService.getInvoiceItemById(item.getItemId());
+                if (invoiceItemEntity == null) {
+                    continue;
+                }
+                itemIds.add(item.getItemId());
                 invoiceItemEntity.setId(item.getItemId());
-                invoiceItemEntity.setInvoiceId(invoiceId.toString());
+                invoiceItemEntity.setInvoiceId(invoiceId);
                 invoiceItemEntity.setAmount(item.getAmount());
                 invoiceItemEntity.setQuantity(item.getQuantity());
                 invoiceItemEntity.setTotalAmount(item.getAmount());
@@ -469,9 +474,9 @@ public class InvoiceController {
             if (userId != null && !userId.isEmpty()) {
                 entity.setUserId(userId);
             } else {
-                entity.setUserId("648dca06-4f72-4df8-b98f-429f4777fbda");
+                entity.setUserId("");
             }
-            invoiceItemService.removeByInvoiceId(invoiceId);
+            invoiceItemService.removeByInvoiceIdInorge(invoiceId, itemIds);
             invoiceItemService.insertAll(invoiceItemEntities);
             invoiceService.insert(entity);
             result = new ResponseMessageDTO("SUCCESS", "");
@@ -653,7 +658,7 @@ public class InvoiceController {
             result = dto;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            logger.error("InvoiceController: ERROR: getMerchantList: " + e.getMessage()
+            logger.error("InvoiceController: ERROR: getInvoiceByUser: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -828,7 +833,7 @@ public class InvoiceController {
             result = response;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            logger.error("InvoiceController: ERROR: getInvoiceByUser: " + e.getMessage()
+            logger.error("InvoiceController: ERROR: getInvoiceByItem: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -880,6 +885,9 @@ public class InvoiceController {
                     data.setUnit(EnvironmentUtil.getMonthUnitNameVn());
                     data.setQuantity(1);
                     feePackage = bankReceiveFeePackageService.getFeePackageByBankId(bankId);
+                    List<TransactionReceiveEntity> transactionReceiveEntities =
+                            transactionReceiveService.getTransactionReceiveByBankId(bankId, time);
+
                     String timeFormat = DateTimeUtil.removeFormatTime(time);
                     TrMonthDTO dto = trMonthService.getTrMonthByMonth(timeFormat);
                     if (dto != null) {
@@ -1113,89 +1121,6 @@ public class InvoiceController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @PostMapping("invoice/update")
-    public ResponseEntity<Object> updateInvoiceByItem(
-            @Valid @RequestBody InvoiceUpdateDTO dto
-    ) {
-        Object result = null;
-        HttpStatus httpStatus = null;
-        try {
-            long vatAmount = 0;
-            long totalAmount = 0;
-            long totalAmountAfterVat = 0;
-            InvoiceUpdateItemDTO invoiceDTO = invoiceService.getInvoiceById(dto.getInvoiceId());
-            InvoiceItemEntity invoiceItemEntity = invoiceItemService.getInvoiceItemById(dto.getItemId());
-            vatAmount = invoiceDTO.getVatAmount() + dto.getVatAmount() - invoiceItemEntity.getVatAmount();
-            totalAmount = invoiceDTO.getTotalAmount() + dto.getTotalAmount() - invoiceItemEntity.getTotalAmount();
-            totalAmountAfterVat = invoiceDTO.getTotalAmountAfterVat() + dto.getAmountAfterVat()
-                    - invoiceItemEntity.getTotalAfterVat();
-            invoiceItemEntity.setAmount(dto.getAmount());
-            invoiceItemEntity.setQuantity(dto.getQuantity());
-            invoiceItemEntity.setTotalAmount(dto.getAmount() * dto.getQuantity());
-            invoiceItemEntity.setTotalAfterVat(dto.getAmountAfterVat());
-            invoiceItemEntity.setName(dto.getContent());
-            invoiceItemEntity.setDescription(dto.getContent());
-            switch (dto.getType()) {
-                case 0:
-                    invoiceItemEntity.setType(0);
-                    invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameAnnualFee());
-                    break;
-                case 1:
-                    invoiceItemEntity.setType(1);
-                    invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameAnnualFee());
-                    break;
-                case 9:
-                    invoiceItemEntity.setType(9);
-                    invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameAnotherFee());
-                    break;
-            }
-            invoiceItemEntity.setUnit(dto.getUnit());
-            invoiceItemEntity.setVat(dto.getVat());
-            invoiceItemEntity.setVatAmount(dto.getVatAmount());
-            invoiceItemEntity.setDataType(1);
-
-            //update transaction wallet and transaction_receive
-            // update transaction_wallet_credit and debit
-            String refIdDebit = transactionWalletService.getRefIdDebitByInvoiceRefId(invoiceDTO.getRefId());
-            TransWalletUpdateDTO transWalletUpdateDTO
-                    = transactionWalletService.getBillNumberByRefIdTransWallet(refIdDebit);
-            String bankId = EnvironmentUtil.getBankIdRecharge();
-            TransactionReceiveUpdateDTO transactionReceiveUpdateDTO
-                    = transactionReceiveService
-                    .getTransactionUpdateByBillNumber(transWalletUpdateDTO.getBillNumber(), bankId, transWalletUpdateDTO.getTimeCreated());
-            // update
-            transactionWalletService.updateAmountTransWallet(invoiceDTO.getRefId(), totalAmountAfterVat + "");
-            transactionWalletService.updateAmountTransWallet(refIdDebit, totalAmountAfterVat + "");
-            // update transaction_receive
-            // update qr
-            // generate VQR
-            String bankAccount = EnvironmentUtil.getBankAccountRecharge();
-            String cai = EnvironmentUtil.getCAIRecharge();
-            VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
-            vietQRGenerateDTO.setCaiValue(cai);
-            vietQRGenerateDTO.setBankAccount(bankAccount);
-            vietQRGenerateDTO.setAmount(totalAmountAfterVat + "");
-            vietQRGenerateDTO.setContent(transactionReceiveUpdateDTO.getContent());
-            String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
-//            transactionReceiveService.upda
-            //
-            invoiceItemService.insert(invoiceItemEntity);
-            invoiceService.updateInvoiceById(vatAmount, totalAmount,
-                    totalAmountAfterVat, dto.getInvoiceId());
-
-
-            result = new ResponseMessageDTO("SUCCESS", "");
-            httpStatus = HttpStatus.OK;
-        } catch (Exception e) {
-            result = new ResponseMessageDTO("FAILED", "E05");
-            httpStatus = HttpStatus.OK;
-            logger.error("updateInvoiceByItem: ERROR: " + e.getMessage()
-                    + " at: " + System.currentTimeMillis());
-        }
-
-        return new ResponseEntity<>(result, httpStatus);
-    }
-
     @PostMapping("invoice/remove")
     public ResponseEntity<Object> removeInvoiceById(
             @Valid @RequestBody InvoiceRemoveDTO dto
@@ -1203,42 +1128,11 @@ public class InvoiceController {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            invoiceItemService.removeByInvoiceId(dto.getInvoiceId());
-            invoiceService.removeByInvoiceId(dto.getInvoiceId());
-            result = new ResponseMessageDTO("SUCCESS", "");
-            httpStatus = HttpStatus.OK;
-        } catch (Exception e) {
-            result = new ResponseMessageDTO("FAILED", "E05");
-            httpStatus = HttpStatus.OK;
-            logger.error("removeInvoiceByItem: ERROR: " + e.getMessage()
-                    + " at: " + System.currentTimeMillis());
-        }
-
-        return new ResponseEntity<>(result, httpStatus);
-    }
-
-    @PostMapping("invoice-item/remove")
-    public ResponseEntity<Object> removeInvoiceByItem(
-            @Valid @RequestBody InvoiceItemRemoveDTO dto
-    ) {
-        Object result = null;
-        HttpStatus httpStatus = null;
-        try {
-            long vatAmount = 0;
-            long totalAmount = 0;
-            long totalAmountAfterVat = 0;
-            InvoiceUpdateItemDTO entity = invoiceService.getInvoiceById(dto.getInvoiceId());
-            IInvoiceItemRemoveDTO invoiceItemRemoveDTO =
-                    invoiceItemService.getInvoiceRemoveByInvoiceId(dto.getItemId());
-            vatAmount = entity.getVatAmount() - invoiceItemRemoveDTO.getVatAmount();
-            totalAmount = entity.getTotalAmount() - invoiceItemRemoveDTO.getTotalAmount();
-            totalAmountAfterVat = entity.getTotalAmount() - invoiceItemRemoveDTO.getTotalAmountAfterVat();
-            //update transaction wallet
-
-            //
-            invoiceItemService.removeById(dto.getItemId());
-            invoiceService.updateInvoiceById(vatAmount, totalAmount,
-                    totalAmountAfterVat, dto.getInvoiceId());
+            String check = invoiceService.checkExistedInvoice(dto.getInvoiceId());
+            if (StringUtil.isNullOrEmpty(check)) {
+                invoiceItemService.removeByInvoiceIdInorge(dto.getInvoiceId(), new ArrayList<>());
+                invoiceService.removeByInvoiceId(dto.getInvoiceId());
+            }
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {

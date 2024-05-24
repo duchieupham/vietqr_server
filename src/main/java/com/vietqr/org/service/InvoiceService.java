@@ -73,4 +73,6 @@ public interface InvoiceService {
     InvoiceEntity getInvoiceEntityByRefId(String id, long amount);
 
     int updateStatusInvoice(String id, int status);
+
+    String checkExistedInvoice(String invoiceId);
 }

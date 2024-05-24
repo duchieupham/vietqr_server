@@ -1246,6 +1246,19 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public int updateTransactionReceiveForInvoice(long totalAmountAfterVat, String qr, String id) {
+        return repo.updateTransactionReceiveForInvoice(totalAmountAfterVat, qr, id);
+    }
+
+    @Override
+    public List<TransactionReceiveEntity> getTransactionReceiveByBankId(String bankId, String time) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(time);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.getTransactionReceiveByBankId(bankId);
+    }
+
+    @Override
     public TransStatisticDTO getTransactionOverviewBySubTerminalCode(String subTerminalCode, String fromDate, String toDate) {
         return repo.getTransactionOverviewBySubTerminalCode(subTerminalCode,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,

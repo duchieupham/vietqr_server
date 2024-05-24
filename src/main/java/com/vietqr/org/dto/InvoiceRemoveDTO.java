@@ -1,6 +1,9 @@
 package com.vietqr.org.dto;
 
+import javax.validation.constraints.NotBlank;
+
 public class InvoiceRemoveDTO {
+    @NotBlank
     private String invoiceId;
 
     public InvoiceRemoveDTO() {

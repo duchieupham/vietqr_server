@@ -227,4 +227,9 @@ public class InvoiceServiceImpl implements InvoiceService {
     public int updateStatusInvoice(String id, int status) {
         return repo.updateStatusInvoice(id, status);
     }
+
+    @Override
+    public String checkExistedInvoice(String invoiceId) {
+        return repo.checkExistedInvoice(invoiceId);
+    }
 }

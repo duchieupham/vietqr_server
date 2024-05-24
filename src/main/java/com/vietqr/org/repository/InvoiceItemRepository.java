@@ -51,6 +51,8 @@ public interface InvoiceItemRepository extends JpaRepository<InvoiceItemEntity, 
 
     @Transactional
     @Modifying
-    @Query(value = "DELETE FROM invoice_item WHERE invoice_id = :invoiceId ", nativeQuery = true)
-    void removeByInvoiceId(String invoiceId);
+    @Query(value = "DELETE FROM invoice_item "
+            + "WHERE invoice_id = :invoiceId "
+            + "AND id NOT IN (:itemIds) ", nativeQuery = true)
+    void removeByInvoiceId(String invoiceId, List<String> itemIds);
 }

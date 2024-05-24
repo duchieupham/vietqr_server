@@ -519,4 +519,8 @@ public interface TransactionReceiveService {
         List<TransactionRelatedDTO> getAllTransTerminalWithType2(String bankId, String userId, List<String> listCode, String fromDate, String toDate, int offset);
 
         TransactionReceiveUpdateDTO getTransactionUpdateByBillNumber(String billNumberCre, String bankId, long time);
+
+        int updateTransactionReceiveForInvoice(long totalAmountAfterVat, String qr, String id);
+
+        List<TransactionReceiveEntity> getTransactionReceiveByBankId(String bankId, String time);
 }
