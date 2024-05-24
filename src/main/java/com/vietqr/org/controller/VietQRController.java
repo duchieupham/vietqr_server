@@ -1009,10 +1009,10 @@ public class VietQRController {
 					data.put("content", result.getContent());
 					data.put("qrCode", result.getQrCode());
 					data.put("imgId", result.getImgId());
-					firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
-							NotificationUtil
-									.getNotiTitleNewTransaction(),
-							message);
+//					firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
+//							NotificationUtil
+//									.getNotiTitleNewTransaction(),
+//							message);
 					socketHandler.sendMessageToUser(dto.getUserId(), data);
 				}
 
@@ -1163,10 +1163,10 @@ public class VietQRController {
 				data.put("content", result.getContent());
 				data.put("qrCode", result.getQrCode());
 				data.put("imgId", result.getImgId());
-				firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
-						NotificationUtil
-								.getNotiTitleNewTransaction(),
-						message);
+//				firebaseMessagingService.sendUsersNotificationWithData(data, fcmTokens,
+//						NotificationUtil
+//								.getNotiTitleNewTransaction(),
+//						message);
 				socketHandler.sendMessageToUser(dto.getUserId(), data);
 				notiEntity.setId(notificationUUID.toString());
 				notiEntity.setRead(false);
