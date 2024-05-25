@@ -262,7 +262,7 @@ public class EnvironmentUtil {
     private static final String ADMIN_ROLE_ID_UAT = "b9611ed2-e5c4-11ee-abd2-c437724afb36";
     private static final String ADMIN_ROLE_ID_PROD = "b9611ed2-e5c4-11ee-abd2-c437724afb36";
     private static final String VIET_QR_HOME_PAGE = "vietqr.vn|vietqr.com";
-    private static final String VIET_QR_PAYMENT_SUCCESS_QR_VOICE = "Xin cảm ơn quý khách đã thanh toán thành công %s đồng";
+    private static final String VIET_QR_PAYMENT_SUCCESS_QR_VOICE = "Quý khách đã thanh toán thành công %s đồng, xin cảm ơn";
 
     // Role for member in terminal
     private static final String ONLY_READ_RECEIVE_TERMINAL_ROLE_ID_UAT = "0f470d54-63a3-4cce-8691-5ec9380855f3";

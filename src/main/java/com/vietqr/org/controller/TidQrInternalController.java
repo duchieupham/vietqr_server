@@ -67,7 +67,48 @@ public class TidQrInternalController {
     private CaiBankService caiBankService;
 
     @Autowired
+    private SystemSettingService systemSettingService;
+
+    @Autowired
     private SocketHandler socketHandler;
+
+    @GetMapping("tid-internal/env-setting")
+    public ResponseEntity<Object> getEnvironmentSetting() {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            BoxEnvironmentVarDTO response = new BoxEnvironmentVarDTO();
+            BoxEnvironmentResDTO dto = systemSettingService.getSystemSettingBoxEnv();
+            if (dto != null) {
+                response = getBoxEnv(dto.getBoxEnv());
+            }
+            result = response;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("tid-internal/env-setting")
+    public ResponseEntity<ResponseMessageDTO> updateEnvironmentSetting(
+            @Valid @RequestBody BoxEnvironmentVarDTO dto
+    ) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String data = mapper.writeValueAsString(dto);
+            systemSettingService.updateBoxEnvironment(data);
+            result = new ResponseMessageDTO("SUCCESS", "");;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 
     @PostMapping("tid-internal/sync")
     public ResponseEntity<Object> syncQrBoxInternal(@Valid @RequestBody TerminalSyncInterDTO dto) {
@@ -929,6 +970,17 @@ public class TidQrInternalController {
             code.append(CHARACTERS.charAt(randomIndex));
         }
         return code.toString();
+    }
+
+    private BoxEnvironmentVarDTO getBoxEnv(String data) {
+        BoxEnvironmentVarDTO result = null;
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            result = mapper.readValue(data, BoxEnvironmentVarDTO.class);
+        } catch (Exception e) {
+            result = new BoxEnvironmentVarDTO();
+        }
+        return result;
     }
 
 }

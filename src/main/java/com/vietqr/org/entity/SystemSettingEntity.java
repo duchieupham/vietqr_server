@@ -52,6 +52,9 @@ public class SystemSettingEntity implements Serializable {
     @Column(name = "vat")
     private Double vat;
 
+    @Column(name = "boxEnv", columnDefinition = "JSON")
+    private String boxEnv;
+
     public SystemSettingEntity() {
         super();
     }
@@ -157,5 +160,21 @@ public class SystemSettingEntity implements Serializable {
 
     public void setServiceActive(Long serviceActive) {
         this.serviceActive = serviceActive;
+    }
+
+    public Double getVat() {
+        return vat;
+    }
+
+    public void setVat(Double vat) {
+        this.vat = vat;
+    }
+
+    public String getBoxEnv() {
+        return boxEnv;
+    }
+
+    public void setBoxEnv(String boxEnv) {
+        this.boxEnv = boxEnv;
     }
 }
