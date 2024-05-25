@@ -1,12 +1,15 @@
 package com.vietqr.org.service;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.repository.CustomQueryRepository;
 import com.vietqr.org.util.DateTimeUtil;
+import com.vietqr.org.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.repository.TransactionReceiveRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.vietqr.org.entity.TransactionReceiveEntity;
@@ -14,10 +17,14 @@ import com.vietqr.org.entity.TransactionReceiveEntity;
 @Service
 public class TransactionReceiveServiceImpl implements TransactionReceiveService {
 
+    private static final String TRANSACTION_RECEIVE_NAME = "transaction_receive";
+
     @Autowired
     TransactionReceiveRepository repo;
 
-    @Override
+    @Autowired
+    CustomQueryRepository customQueryRepository;
+
     public int insertTransactionReceive(TransactionReceiveEntity entity) {
         return repo.save(entity) == null ? 0 : 1;
     }
@@ -1255,7 +1262,21 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
         StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(time);
         long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
         long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
-        return repo.getTransactionReceiveByBankId(bankId);
+        long currentTime = DateTimeUtil.getCurrentDateTimeUTC();
+        String year = DateTimeUtil.getYearAsString(toDate);
+        int month = DateTimeUtil.getDifferenceMonthFromTime(currentTime, toDate);
+        List<String> strings = StringUtil.getStartQuarter(month);
+        List<String> suffix = new ArrayList<>();
+        for (String item : strings) {
+            String dto = "";
+            dto = "_" + item + year;
+            suffix.add(dto);
+        }
+        List<>
+        for (String item : suffix) {
+            customQueryRepository
+        }
+        return customQueryRepository.getTransactionReceiveByBankId(bankId);
     }
 
     @Override

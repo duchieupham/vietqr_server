@@ -146,4 +146,54 @@ public class StringUtil {
         }
         return result;
     }
+
+    private static String getQuarter(int month) {
+        String result = "";
+        switch (month) {
+            case 1:
+                result = "01";
+                break;
+            case 2:
+                result = "04";
+                break;
+            case 3:
+                result = "07";
+                break;
+            case 4:
+                result = "10";
+                break;
+            default:
+                if (month > 4) result = "01";
+                else result = "10";
+                break;
+        }
+        return result;
+    }
+
+    public static List<String> getStartQuarter(int month) {
+        List<String> result = new ArrayList<>();
+        int quarter = month / 3;
+        int pre = month % 3;
+        try {
+            switch (pre) {
+                case 0:
+                    result.add(getQuarter(quarter));
+                    result.add(getQuarter(quarter - 1));
+                    break;
+                case 1:
+                    result.add(getQuarter(quarter));
+                    break;
+                case 2:
+                    result.add(getQuarter(quarter));
+                    result.add(getQuarter(quarter + 1));
+                    break;
+                default:
+                    result.add("");
+                    break;
+            }
+        } catch (Exception e) {
+            result = new ArrayList<>();
+        }
+        return result;
+    }
 }
