@@ -1,7 +1,6 @@
 package com.vietqr.org.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.*;
@@ -308,7 +307,7 @@ public class InvoiceController {
             if (dto != null) {
                 BankDetailAdminDTO data = new BankDetailAdminDTO();
                 data.setBankId(dto.getBankId());
-                data.setMerchantId(merchantId);
+                data.setMerchantId(dto.getMerchantId() != null ? dto.getMerchantId() : "");
                 AccountBankInfoDTO bankInfoDTO = getBankAccountInfoByData(dto.getData());
                 data.setBankAccount(bankInfoDTO.getBankAccount());
                 data.setBankShortName(bankInfoDTO.getBankShortName());
@@ -328,8 +327,32 @@ public class InvoiceController {
                 httpStatus = HttpStatus.OK;
                 result = data;
             } else {
-                result = new ResponseMessageDTO("FAILED", "E46");
-                httpStatus = HttpStatus.BAD_REQUEST;
+                AccountBankDetailAdminDTO detailAdmin = accountBankReceiveService.getAccountBankDetailAdmin(bankId);
+                if (detailAdmin != null) {
+                    BankDetailAdminDTO data = new BankDetailAdminDTO();
+                    data.setBankId(detailAdmin.getBankId());
+                    data.setMerchantId("");
+                    data.setBankAccount(detailAdmin.getBankAccount());
+                    data.setBankShortName(detailAdmin.getBankShortName());
+                    data.setPhoneNo(detailAdmin.getPhoneNo());
+                    data.setUserBankName(detailAdmin.getUserBankName());
+                    data.setEmail(StringUtil.getValueNullChecker(detailAdmin.getEmail()));
+                    if (detailAdmin.getMmsActive()) {
+                        data.setConnectionType(EnvironmentUtil.getVietQrProPackage());
+                    } else {
+                        data.setConnectionType(EnvironmentUtil.getVietQrPlusPackage());
+                    }
+                    data.setFeePackage("");
+                    data.setVat(0);
+                    data.setTransFee1(0);
+                    data.setTransFee2(0);
+                    data.setTransRecord(0);
+                    httpStatus = HttpStatus.OK;
+                    result = data;
+                } else {
+                    result = new ResponseMessageDTO("FAILED", "E46");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
             }
         } catch (Exception e) {
             logger.error("InvoiceController: ERROR: getBankAccountDetail: " + e.getMessage()
@@ -476,6 +499,34 @@ public class InvoiceController {
             } else {
                 entity.setUserId("");
             }
+
+            InvoiceUpdateItemDTO invoiceDTO = invoiceService.getInvoiceById(invoiceId);
+            //update transaction wallet and transaction_receive
+            // update transaction_wallet_credit and debit
+            String refIdDebit = transactionWalletService.getRefIdDebitByInvoiceRefId(invoiceDTO.getRefId());
+            TransWalletUpdateDTO transWalletUpdateDTO
+                    = transactionWalletService.getBillNumberByRefIdTransWallet(refIdDebit);
+            String bankId = EnvironmentUtil.getBankIdRecharge();
+            TransactionReceiveUpdateDTO transactionReceiveUpdateDTO
+                    = transactionReceiveService
+                    .getTransactionUpdateByBillNumber(transWalletUpdateDTO.getBillNumber(), bankId, transWalletUpdateDTO.getTimeCreated());
+            // update
+            transactionWalletService.updateAmountTransWallet(invoiceDTO.getRefId(), totalAmountAfterVat + "");
+            transactionWalletService.updateAmountTransWallet(refIdDebit, totalAmountAfterVat + "");
+            // update transaction_receive
+            // update qr
+            // generate VQR
+            String bankAccount = EnvironmentUtil.getBankAccountRecharge();
+            String cai = EnvironmentUtil.getCAIRecharge();
+            VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+            vietQRGenerateDTO.setCaiValue(cai);
+            vietQRGenerateDTO.setBankAccount(bankAccount);
+            vietQRGenerateDTO.setAmount(totalAmountAfterVat + "");
+            vietQRGenerateDTO.setContent(transactionReceiveUpdateDTO.getContent());
+            String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+            transactionReceiveService
+                    .updateTransactionReceiveForInvoice(totalAmountAfterVat, qr, transactionReceiveUpdateDTO.getId());
+
             invoiceItemService.removeByInvoiceIdInorge(invoiceId, itemIds);
             invoiceItemService.insertAll(invoiceItemEntities);
             invoiceService.insert(entity);
@@ -885,21 +936,40 @@ public class InvoiceController {
                     data.setUnit(EnvironmentUtil.getMonthUnitNameVn());
                     data.setQuantity(1);
                     feePackage = bankReceiveFeePackageService.getFeePackageByBankId(bankId);
-                    List<TransactionReceiveEntity> transactionReceiveEntities =
+                    List<TransReceiveInvoicesDTO> transactionReceiveEntities =
                             transactionReceiveService.getTransactionReceiveByBankId(bankId, time);
-
-                    String timeFormat = DateTimeUtil.removeFormatTime(time);
-                    TrMonthDTO dto = trMonthService.getTrMonthByMonth(timeFormat);
-                    if (dto != null) {
-                        BrStatisticDTO brStatisticDTO = getBrStatisticByBankId(bankId, dto.getData());
-                        if (feePackage != null) {
-                            long totalAmount = getTotalAmount(feePackage, brStatisticDTO);
-                            data.setAmount(totalAmount);
-                            data.setTotalAmount(totalAmount);
-                            data.setVatAmount(Math.round(feePackage.getVat() / 100 * totalAmount));
-                            data.setAmountAfterVat(Math.round((feePackage.getVat() + 1) / 100 * totalAmount));
+                    List<TransReceiveInvoicesDTO> transReceiveInvoicesInvoices = new ArrayList<>();
+                    double totalAmountRaw = 0.D;
+                    if (feePackage != null) {
+                        int isTotal = feePackage.getRecordType();
+                        switch (isTotal) {
+                            case 0:
+                                transReceiveInvoicesInvoices = transactionReceiveEntities.stream().filter(item ->
+                                        (item.getType() == 0 || item.getType() == 1) &&
+                                                "C".equalsIgnoreCase(item.getTransType())
+                                ).collect(Collectors.toList());
+                                break;
+                            case 1:
+                                transReceiveInvoicesInvoices = transactionReceiveEntities.stream().filter(item ->
+                                        "C".equalsIgnoreCase(item.getTransType())
+                                ).collect(Collectors.toList());
+                                break;
                         }
+                        totalAmountRaw = transReceiveInvoicesInvoices.stream()
+                                .mapToDouble(item -> {
+                                    double amount = 0;
+                                    amount = feePackage.getFixFee()
+                                            + feePackage.getPercentFee()
+                                            * item.getAmount();
+                                    return amount;
+                                })
+                                .sum();
                     }
+                    long totalAmount = Math.round(totalAmountRaw);
+                    data.setAmount(totalAmount);
+                    data.setTotalAmount(totalAmount);
+                    data.setVatAmount(Math.round(vat / 100 * totalAmount));
+                    data.setAmountAfterVat(Math.round((vat + 100) / 100 * totalAmount));
                     break;
                 // phi khac
                 case 9:
@@ -1156,24 +1226,6 @@ public class InvoiceController {
         return dto;
     }
 
-    private BrStatisticDTO getBrStatisticByBankId(String bankId, String data) {
-        BrStatisticDTO brStatisticDTO = new BrStatisticDTO();
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            List<BrStatisticDTO> brStatisticDTOS = new ArrayList<>();
-            brStatisticDTOS = mapper.readValue(data, new TypeReference<List<BrStatisticDTO>>() {
-            });
-            for (BrStatisticDTO dto : brStatisticDTOS) {
-                if (dto.getBrId().equals(bankId)) {
-                    brStatisticDTO = dto;
-                }
-            }
-        } catch (Exception e) {
-            brStatisticDTO.setBrId(bankId);
-        }
-        return brStatisticDTO;
-    }
-
     private String generateQrForPayment(long totalAmount, String content) {
         String result = "";
         String cai = EnvironmentUtil.getCAIRecharge();
@@ -1187,29 +1239,4 @@ public class InvoiceController {
         return result;
     }
 
-    private long getTotalAmount(IInvoiceItemCreateDTO feePackage, BrStatisticDTO brStatisticDTO) {
-        long feeCredit = 0;
-        long feeCreCount = 0;
-        switch (feePackage.getRecordType()) {
-            case 0:
-                long recon = brStatisticDTO.getRecon();
-                long reCount = brStatisticDTO.getRecCount();
-                feeCredit = Math
-                        .round(feePackage.getPercentFee() * recon / 100);
-                feeCreCount = reCount * feePackage.getFixFee();
-                break;
-            case 1:
-                long credit = brStatisticDTO.getCredit();
-                int creCount = brStatisticDTO.getCreCount();
-                feeCredit = Math
-                        .round(feePackage.getPercentFee() * credit / 100);
-                feeCreCount = creCount * feePackage.getFixFee();
-                break;
-            default:
-                break;
-        }
-        long totalAmount = Math.round(feeCredit + feeCreCount - feePackage.getAnnualFee());
-        if (totalAmount < 0) totalAmount = 0;
-        return totalAmount;
-    }
 }

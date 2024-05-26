@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.vietqr.org.repository.TransactionReceiveRepository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -1258,25 +1259,35 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
-    public List<TransactionReceiveEntity> getTransactionReceiveByBankId(String bankId, String time) {
+    public List<TransReceiveInvoicesDTO> getTransactionReceiveByBankId(String bankId, String time) {
         StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(time);
         long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
         long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
         long currentTime = DateTimeUtil.getCurrentDateTimeUTC();
         String year = DateTimeUtil.getYearAsString(toDate);
-        int month = DateTimeUtil.getDifferenceMonthFromTime(currentTime, toDate);
-        List<String> strings = StringUtil.getStartQuarter(month);
+        int month = DateTimeUtil.getDifferenceMonthFromTime(toDate, currentTime);
         List<String> suffix = new ArrayList<>();
-        for (String item : strings) {
-            String dto = "";
-            dto = "_" + item + year;
-            suffix.add(dto);
+        if (month < 3) {
+            suffix.add("");
+        } else {
+            List<String> strings = StringUtil.getStartQuarter(DateTimeUtil.getMonth(toDate), year);
+            for (String item : strings) {
+                String dto = "";
+                dto = "_" + year + item;
+                suffix.add(dto);
+            }
         }
-        List<>
+
+        List<TransReceiveInvoicesDTO> data = new ArrayList<>();
         for (String item : suffix) {
-            customQueryRepository
+            List<TransReceiveInvoicesDTO> dtos = new ArrayList<>();
+            dtos = customQueryRepository.getTransReceiveInvoice(TRANSACTION_RECEIVE_NAME + item,
+                    bankId,
+                    fromDate,
+                    toDate);
+            data.addAll(dtos);
         }
-        return customQueryRepository.getTransactionReceiveByBankId(bankId);
+        return data;
     }
 
     @Override

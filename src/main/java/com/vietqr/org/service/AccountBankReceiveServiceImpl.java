@@ -249,6 +249,11 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     }
 
     @Override
+    public AccountBankDetailAdminDTO getAccountBankDetailAdmin(String bankId) {
+        return repo.getAccountBankDetailAdmin(bankId);
+    }
+
+    @Override
     public void unRegisterAuthenBank(String bankAccount, String ewalletToken) {
         repo.unRegisterAuthenBank(bankAccount, ewalletToken);
     }

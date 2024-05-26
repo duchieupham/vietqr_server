@@ -109,4 +109,6 @@ public interface AccountBankReceiveService {
     int countBankInvoiceByBankAccount(String value);
 
 	List<IBankAccountInvoiceInfoDTO> getBankInvoiceByBankAccount(String value, int offset, int size);
+
+	AccountBankDetailAdminDTO getAccountBankDetailAdmin(String bankId);
 }

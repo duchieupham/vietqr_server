@@ -170,26 +170,38 @@ public class StringUtil {
         return result;
     }
 
-    public static List<String> getStartQuarter(int month) {
+    public static List<String> getStartQuarter(int month, String yearAsString) {
         List<String> result = new ArrayList<>();
-        int quarter = month / 3;
+        int quarter = (month / 3) + 1;
         int pre = month % 3;
+        int year = Integer.parseInt(yearAsString);
         try {
-            switch (pre) {
-                case 0:
-                    result.add(getQuarter(quarter));
-                    result.add(getQuarter(quarter - 1));
-                    break;
-                case 1:
-                    result.add(getQuarter(quarter));
-                    break;
-                case 2:
-                    result.add(getQuarter(quarter));
-                    result.add(getQuarter(quarter + 1));
-                    break;
-                default:
-                    result.add("");
-                    break;
+            if (year <= 23 && month < 12) {
+                result.add("12");
+            } else if (year == 23 && month == 12) {
+                result.add("12");
+                result.add("01");
+            } else {
+                switch (pre) {
+                    case 0:
+                        result.add(getQuarter(quarter));
+                        if (year > 24) {
+                            result.add(getQuarter(quarter + 1));
+                        }
+                        break;
+                    case 1:
+                        result.add(getQuarter(quarter));
+                        if (year > 24) {
+                            result.add(getQuarter(quarter - 1));
+                        }
+                        break;
+                    case 2:
+                        result.add(getQuarter(quarter));
+                        break;
+                    default:
+                        result.add("");
+                        break;
+                }
             }
         } catch (Exception e) {
             result = new ArrayList<>();

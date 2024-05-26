@@ -2596,7 +2596,9 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "LIMIT 1", nativeQuery = true)
         TransactionReceiveUpdateDTO getTransactionUpdateByBillNumber(String billNumber, String bankId, long fromTime, long toTime);
 
-        @Query(value = "", nativeQuery = true)
+        @Transactional
+        @Modifying
+        @Query(value = "UPDATE transaction_receive SET qr_code = :qr, amount = :totalAmountAfterVat WHERE id = :id LIMIT 1 ", nativeQuery = true)
         int updateTransactionReceiveForInvoice(long totalAmountAfterVat, String qr, String id);
 }
 

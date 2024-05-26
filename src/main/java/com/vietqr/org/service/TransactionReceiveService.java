@@ -522,5 +522,5 @@ public interface TransactionReceiveService {
 
         int updateTransactionReceiveForInvoice(long totalAmountAfterVat, String qr, String id);
 
-        List<TransactionReceiveEntity> getTransactionReceiveByBankId(String bankId, String time);
+        List<TransReceiveInvoicesDTO> getTransactionReceiveByBankId(String bankId, String time);
 }

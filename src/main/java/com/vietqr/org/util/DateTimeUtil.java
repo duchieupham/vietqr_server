@@ -184,7 +184,7 @@ public class DateTimeUtil {
         try {
             LocalDateTime fromDateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(fromDate), ZoneOffset.UTC);
             LocalDateTime toDateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(toDate), ZoneOffset.UTC);
-            result = (int) ChronoUnit.MONTHS.between(fromDateTime, toDateTime);
+            result = (int) (toDateTime.getYear() - fromDateTime.getYear()) * 12 + toDateTime.getMonthValue() - fromDateTime.getMonthValue();
         } catch (Exception ignored) {
         }
         return result;
@@ -195,6 +195,16 @@ public class DateTimeUtil {
         try {
             LocalDateTime toDateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(toDate), ZoneOffset.UTC);
             result = (toDateTime.getYear() + "").substring(2);
+        } catch (Exception ignored) {
+        }
+        return result;
+    }
+
+    public static int getMonth(long toDate) {
+        int result = 0;
+        try {
+            LocalDateTime toDateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(toDate), ZoneOffset.UTC);
+            result = toDateTime.getMonthValue();
         } catch (Exception ignored) {
         }
         return result;
