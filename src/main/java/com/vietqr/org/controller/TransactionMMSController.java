@@ -98,6 +98,9 @@ public class TransactionMMSController {
     TerminalService terminalService;
 
     @Autowired
+    SystemSettingService systemSettingService;
+
+    @Autowired
     SocketHandler socketHandler;
 
     @Autowired
@@ -378,8 +381,18 @@ public class TransactionMMSController {
                                         data1.put("traceId", "");
                                         data1.put("transType", "C");
                                         data1.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
-                                        String boxRefId = BoxTerminalRefIdUtil.encryptQrBoxId(rawCode);
-                                        socketHandler.sendMessageToBoxId(boxRefId, data1);
+                                        if (!StringUtil.isNullOrEmpty(rawCode)) {
+                                            try {
+                                                BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
+                                                String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
+                                                data1.put("message", String.format(messageForBox, amountForVoice));
+                                                String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(rawCode);
+                                                socketHandler.sendMessageToBoxId(idRefBox, data1);
+                                            } catch (IOException e) {
+                                                logger.error(
+                                                        "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
+                                            }
+                                        }
                                     } catch (Exception ignored) {
                                     }
                                 }
@@ -551,9 +564,18 @@ public class TransactionMMSController {
                                 }
                                 try {
                                     if (isSubTerminal) {
-                                        data.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
-                                        String boxRefId = BoxTerminalRefIdUtil.encryptQrBoxId(subRawCode);
-                                        socketHandler.sendMessageToBoxId(boxRefId, data);
+                                        if (!StringUtil.isNullOrEmpty(subRawCode)) {
+                                            try {
+                                                BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
+                                                String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
+                                                data.put("message", String.format(messageForBox, amountForVoice));
+                                                String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(subRawCode);
+                                                socketHandler.sendMessageToBoxId(idRefBox, data);
+                                            } catch (IOException e) {
+                                                logger.error(
+                                                        "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
+                                            }
+                                        }
                                     }
                                 } catch (Exception e) {
                                     logger.error("transaction-mms-sync: ERROR: " + e.toString());
@@ -840,9 +862,18 @@ public class TransactionMMSController {
                                     logger.info("transaction-mms-sync: NOT FOUND TerminalBankEntity");
                                 }
                                 try {
-                                    data.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
-                                    String boxRefId = BoxTerminalRefIdUtil.encryptQrBoxId(subRawCode);
-                                    socketHandler.sendMessageToBoxId(boxRefId, data);
+                                    if (!StringUtil.isNullOrEmpty(subRawCode)) {
+                                        try {
+                                            BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
+                                            String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
+                                            data.put("message", String.format(messageForBox, amountForVoice));
+                                            String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(subRawCode);
+                                            socketHandler.sendMessageToBoxId(idRefBox, data);
+                                        } catch (IOException e) {
+                                            logger.error(
+                                                    "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
+                                        }
+                                    }
                                 } catch (Exception e) {
                                     logger.error("transaction-mms-sync: ERROR: " + e.toString());
                                 }

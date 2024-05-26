@@ -7,6 +7,9 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vietqr.org.dto.BoxEnvironmentResDTO;
+import com.vietqr.org.dto.BoxEnvironmentVarDTO;
 import org.apache.log4j.Logger;
 
 public class StringUtil {
@@ -205,6 +208,18 @@ public class StringUtil {
             }
         } catch (Exception e) {
             result = new ArrayList<>();
+        }
+        return result;
+    }
+
+    public static String getMessageBox(String value) {
+        String result = "%s";
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            BoxEnvironmentVarDTO dto = mapper.readValue(value, BoxEnvironmentVarDTO.class);
+            result = dto.getMessage1() + " %s " + EnvironmentUtil.getVietQrPaymentSuccessQrVoice() + dto.getMessage2();
+        } catch (Exception e) {
+            result = "%s";
         }
         return result;
     }
