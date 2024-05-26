@@ -1770,14 +1770,18 @@ public class TransactionBankController {
 				data.put("traceId", "" + transactionReceiveEntity.getTraceId());
 				data.put("transType", dto.getTransType());
 				data.put("urlLink", transactionReceiveEntity.getUrlLink() != null ? transactionReceiveEntity.getUrlLink() : "");
-				try {
-					// send msg to QR Link
-					data.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
-					String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
-					socketHandler.sendMessageToBoxId(idRefBox, data);
-				} catch (IOException e) {
-					logger.error(
-							"WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
+				if (!StringUtil.isNullOrEmpty(boxIdRef)) {
+					try {
+						// send msg to QR Link
+						BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
+						String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
+						data.put("message", String.format(messageForBox, amountForVoice));
+						String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
+						socketHandler.sendMessageToBoxId(idRefBox, data);
+					} catch (IOException e) {
+						logger.error(
+								"WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
+					}
 				}
 				// textToSpeechService.delete(requestId);
 			} else {
@@ -1840,10 +1844,18 @@ public class TransactionBankController {
 				try {
 					String refId = TransactionRefIdUtil.encryptTransactionId(transactionReceiveEntity.getId());
 					socketHandler.sendMessageToTransactionRefId(refId, data);
-					if (boxIdRef != null && !boxIdRef.isEmpty()) {
-						data.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
-						String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
-						socketHandler.sendMessageToBoxId(idRefBox, data);
+					if (!StringUtil.isNullOrEmpty(boxIdRef)) {
+						try {
+							// send msg to QR Link
+							BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
+							String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
+							data.put("message", String.format(messageForBox, amountForVoice));
+							String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
+							socketHandler.sendMessageToBoxId(idRefBox, data);
+						} catch (IOException e) {
+							logger.error(
+									"WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
+						}
 					}
 				} catch (IOException e) {
 					logger.error("WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
@@ -1979,10 +1991,17 @@ public class TransactionBankController {
 				// send msg to QR Link
 				String refId = TransactionRefIdUtil.encryptTransactionId(transactionReceiveEntity.getId());
 				socketHandler.sendMessageToTransactionRefId(refId, data);
-				if (boxIdRef != null && !boxIdRef.isEmpty()) {
-					data.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
-					String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
-					socketHandler.sendMessageToBoxId(idRefBox, data);
+				if (!StringUtil.isNullOrEmpty(boxIdRef)) {
+					try {
+						BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
+						String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
+						data.put("message", String.format(messageForBox, amountForVoice));
+						String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
+						socketHandler.sendMessageToBoxId(idRefBox, data);
+					} catch (IOException e) {
+						logger.error(
+								"WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
+					}
 				}
 			} catch (IOException e) {
 				logger.error("WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
@@ -2306,10 +2325,17 @@ public class TransactionBankController {
 						// send msg to QR Link
 						String refId = TransactionRefIdUtil.encryptTransactionId(transactionEntity.getId());
 						socketHandler.sendMessageToTransactionRefId(refId, data1);
-						if (boxIdRef != null && !boxIdRef.isEmpty()) {
-							data1.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
-							String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
-							socketHandler.sendMessageToBoxId(idRefBox, data1);
+						if (!StringUtil.isNullOrEmpty(boxIdRef)) {
+							try {
+								BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
+								String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
+								data1.put("message", String.format(messageForBox, amountForVoice));
+								String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
+								socketHandler.sendMessageToBoxId(idRefBox, data1);
+							} catch (IOException e) {
+								logger.error(
+										"WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
+							}
 						}
 					} catch (IOException e) {
 						logger.error(
@@ -2365,10 +2391,17 @@ public class TransactionBankController {
 						// send msg to QR Link
 						String refId = TransactionRefIdUtil.encryptTransactionId(transactionEntity.getId());
 						socketHandler.sendMessageToTransactionRefId(refId, data);
-						if (boxIdRef != null && !boxIdRef.isEmpty()) {
-							data.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
-							String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
-							socketHandler.sendMessageToBoxId(idRefBox, data);
+						if (!StringUtil.isNullOrEmpty(boxIdRef)) {
+							try {
+								BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
+								String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
+								data.put("message", String.format(messageForBox, amountForVoice));
+								String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
+								socketHandler.sendMessageToBoxId(idRefBox, data);
+							} catch (IOException e) {
+								logger.error(
+										"WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
+							}
 						}
 					} catch (IOException e) {
 						logger.error(
@@ -2626,10 +2659,17 @@ public class TransactionBankController {
 					// send msg to QR Link
 					String refId = TransactionRefIdUtil.encryptTransactionId(transcationUUID.toString());
 					socketHandler.sendMessageToTransactionRefId(refId, data);
-					if (boxIdRef != null && !boxIdRef.isEmpty()) {
-						data.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
-						String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
-						socketHandler.sendMessageToBoxId(idRefBox, data);
+					if (!StringUtil.isNullOrEmpty(boxIdRef)) {
+						try {
+							BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
+							String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv()).trim();
+							data.put("message", String.format(messageForBox, amountForVoice));
+							String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
+							socketHandler.sendMessageToBoxId(idRefBox, data);
+						} catch (IOException e) {
+							logger.error(
+									"WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
+						}
 					}
 				} catch (IOException e) {
 					logger.error("WS: socketHandler.sendMessageToUser - insertNewTransaction ERROR: " + e.toString());
@@ -2840,10 +2880,17 @@ public class TransactionBankController {
 					// send msg to QR Link
 					String refId = TransactionRefIdUtil.encryptTransactionId(transactionEntity.getId());
 					socketHandler.sendMessageToTransactionRefId(refId, data1);
-					if (boxIdRef != null && !boxIdRef.isEmpty()) {
-						data1.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
-						String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
-						socketHandler.sendMessageToBoxId(idRefBox, data1);
+					if (!StringUtil.isNullOrEmpty(boxIdRef)) {
+						try {
+							BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
+							String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
+							data1.put("message", String.format(messageForBox, amountForVoice));
+							String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
+							socketHandler.sendMessageToBoxId(idRefBox, data1);
+						} catch (IOException e) {
+							logger.error(
+									"WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
+						}
 					}
 				} catch (IOException e) {
 					logger.error(
@@ -2889,10 +2936,17 @@ public class TransactionBankController {
 				// send msg to QR Link
 				String refId = TransactionRefIdUtil.encryptTransactionId(transcationUUID.toString());
 				socketHandler.sendMessageToTransactionRefId(refId, data);
-				if (boxIdRef != null && !boxIdRef.isEmpty()) {
-					data.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
-					String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
-					socketHandler.sendMessageToBoxId(idRefBox, data);
+				if (!StringUtil.isNullOrEmpty(boxIdRef)) {
+					try {
+						BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
+						String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
+						data.put("message", String.format(messageForBox, amountForVoice));
+						String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
+						socketHandler.sendMessageToBoxId(idRefBox, data);
+					} catch (IOException e) {
+						logger.error(
+								"WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
+					}
 				}
 			} catch (IOException e) {
 				logger.error("WS: socketHandler.sendMessageToUser - insertNewTransaction ERROR: " + e.toString());

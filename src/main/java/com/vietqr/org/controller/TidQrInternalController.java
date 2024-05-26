@@ -187,7 +187,18 @@ public class TidQrInternalController {
                     data.put("boxAddress", dto.getBoxAddress());
                     data.put("boxCode", boxCode);
                     data.put("bankCode", accountBankInfoResById.getBankCode());
-                    data.put("homePage", EnvironmentUtil.getVietQrHomePage());
+                    String homePage = EnvironmentUtil.getVietQrHomePage();
+                    BoxEnvironmentResDTO boxEnvironmentResDTO = systemSettingService.getSystemSettingBoxEnv();
+                    if (boxEnvironmentResDTO != null) {
+                        try {
+                            ObjectMapper mapper = new ObjectMapper();
+                            BoxEnvironmentVarDTO boxEnvironmentVarDTO = mapper.readValue(boxEnvironmentResDTO.getBoxEnv(), BoxEnvironmentVarDTO.class);
+                            homePage = boxEnvironmentVarDTO.getHomePage();
+                        } catch (Exception e) {
+                            homePage = EnvironmentUtil.getVietQrHomePage();
+                        }
+                    }
+                    data.put("homePage", homePage);
                     socketHandler.sendMessageToBoxId(boxId, data);
 
                     qrBoxSyncService.updateQrBoxSync(dto.getQrCertificate(), DateTimeUtil.getCurrentDateTimeUTC(),
