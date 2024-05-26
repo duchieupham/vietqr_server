@@ -1,12 +1,16 @@
 package com.vietqr.org.service;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.repository.CustomQueryRepository;
 import com.vietqr.org.util.DateTimeUtil;
+import com.vietqr.org.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.repository.TransactionReceiveRepository;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.vietqr.org.entity.TransactionReceiveEntity;
@@ -14,10 +18,14 @@ import com.vietqr.org.entity.TransactionReceiveEntity;
 @Service
 public class TransactionReceiveServiceImpl implements TransactionReceiveService {
 
+    private static final String TRANSACTION_RECEIVE_NAME = "transaction_receive";
+
     @Autowired
     TransactionReceiveRepository repo;
 
-    @Override
+    @Autowired
+    CustomQueryRepository customQueryRepository;
+
     public int insertTransactionReceive(TransactionReceiveEntity entity) {
         return repo.save(entity) == null ? 0 : 1;
     }
@@ -1236,6 +1244,63 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
         return repo.getAllTransTerminalWithType2(bankId, listCode, offset,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public TransactionReceiveUpdateDTO getTransactionUpdateByBillNumber(String billNumberCre, String bankId, long time) {
+        return repo.getTransactionUpdateByBillNumber(billNumberCre, bankId,
+                time - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                time + DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public int updateTransactionReceiveForInvoice(long totalAmountAfterVat, String qr, String id) {
+        return repo.updateTransactionReceiveForInvoice(totalAmountAfterVat, qr, id);
+    }
+
+    @Override
+    public List<TransReceiveInvoicesDTO> getTransactionReceiveByBankId(String bankId, String time) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(time);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long currentTime = DateTimeUtil.getCurrentDateTimeUTC();
+        String year = DateTimeUtil.getYearAsString(toDate);
+        int differenceMonthFromTime = DateTimeUtil.getDifferenceMonthFromTime(toDate, currentTime);
+        List<String> suffix = new ArrayList<>();
+        if (differenceMonthFromTime < 3) {
+            suffix.add("");
+            List<String> strings = StringUtil.getStartQuarter(DateTimeUtil.getMonth(toDate), year);
+            for (String item : strings) {
+                String dto = "";
+                dto = "_" + year + item;
+                suffix.add(dto);
+            }
+        } else {
+            List<String> strings = StringUtil.getStartQuarter(DateTimeUtil.getMonth(toDate), year);
+            for (String item : strings) {
+                String dto = "";
+                dto = "_" + year + item;
+                suffix.add(dto);
+            }
+            if (DateTimeUtil.getMonth(toDate) == 1 && "24".equals(year)) {
+                suffix.add("_2312");
+            }
+        }
+
+        List<TransReceiveInvoicesDTO> data = new ArrayList<>();
+        for (String item : suffix) {
+            List<TransReceiveInvoicesDTO> dtos = new ArrayList<>();
+            try {
+                dtos = customQueryRepository.getTransReceiveInvoice(TRANSACTION_RECEIVE_NAME + item,
+                        bankId,
+                        fromDate,
+                        toDate);
+            } catch (Exception e) {
+                dtos = new ArrayList<>();
+            }
+            data.addAll(dtos);
+        }
+        return data;
     }
 
     @Override

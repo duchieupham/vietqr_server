@@ -31,6 +31,14 @@ public class StringUtil {
         return hashtags;
     }
 
+    public static String getValueNullChecker(String value) {
+        return value != null ? value : "";
+    }
+
+    public static int getValueNullChecker(Integer value) {
+        return value != null ? value : 0;
+    }
+
     public static String getValueNotNull(String value) {
         return value != null ? value : "";
     }
@@ -137,5 +145,71 @@ public class StringUtil {
             result = amount;
         }
         return result;
+    }
+
+    private static String getQuarter(int month) {
+        String result = "";
+        switch (month) {
+            case 1:
+                result = "01";
+                break;
+            case 2:
+                result = "04";
+                break;
+            case 3:
+                result = "07";
+                break;
+            case 4:
+                result = "10";
+                break;
+            default:
+                if (month > 4) result = "01";
+                else result = "10";
+                break;
+        }
+        return result;
+    }
+
+    public static List<String> getStartQuarter(int month, String yearAsString) {
+        List<String> result = new ArrayList<>();
+        int quarter = (month / 3) + 1;
+        int pre = month % 3;
+        int year = Integer.parseInt(yearAsString);
+        try {
+            if (year <= 23 && month < 12) {
+                result.add("12");
+            } else if (year == 23 && month == 12) {
+                result.add("12");
+                result.add("01");
+            } else {
+                switch (pre) {
+                    case 0:
+                        result.add(getQuarter(quarter));
+                        if (year >= 24) {
+                            result.add(getQuarter(quarter - 1));
+                        }
+                        break;
+                    case 1:
+                        result.add(getQuarter(quarter));
+                        if (year >= 24) {
+                            result.add(getQuarter(quarter + 1));
+                        }
+                        break;
+                    case 2:
+                        result.add(getQuarter(quarter));
+                        break;
+                    default:
+                        result.add("");
+                        break;
+                }
+            }
+        } catch (Exception e) {
+            result = new ArrayList<>();
+        }
+        return result;
+    }
+
+    public static String removeMarkString(String value) {
+        return value != null ? value.replaceAll("\"", "") : "";
     }
 }

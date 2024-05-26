@@ -578,6 +578,7 @@ public class KeyBankReceiveController {
                         transactionWalletEntity.setReferenceNumber("");
                         transactionWalletEntity.setPhoneNoRC("");
                         transactionWalletEntity.setData(dto.getBankId());
+                        transactionWalletEntity.setRefId("");
                         transactionWalletService
                                 .insertTransactionWallet(transactionWalletEntity);
 
@@ -729,6 +730,7 @@ public class KeyBankReceiveController {
                                                     + dto.getOtpPayment() + "*" + dto.getBankId()
                                                     + "*" + dto.getOtp());
                                     transactionWalletEntity.setPhoneNoRC("");
+                                    transactionWalletEntity.setRefId("");
                                     transactionWalletService.insertTransactionWallet(transactionWalletEntity);
                                     // update transaction_wallet mobile recharge
                                     LocalDateTime currentDateTimeMobile = LocalDateTime.now();

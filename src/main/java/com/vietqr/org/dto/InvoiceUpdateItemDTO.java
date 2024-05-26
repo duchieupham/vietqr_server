@@ -5,4 +5,5 @@ public interface InvoiceUpdateItemDTO {
     Long getTotalAmount();
     Long getVatAmount();
     Long getTotalAmountAfterVat();
+    String getRefId();
 }

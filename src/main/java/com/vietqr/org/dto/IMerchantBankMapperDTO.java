@@ -5,8 +5,6 @@ public interface IMerchantBankMapperDTO {
     String getMerchantName();
     String getEmail();
     String getPhoneNo();
-    String getBankAccount();
-    String getUserBankName();
-    String getBankShortName();
+    String getData();
     String getUserId();
 }

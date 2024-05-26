@@ -8,6 +8,11 @@ public class AdminExtraInvoiceDTO {
     private int completeCount;
 
     public AdminExtraInvoiceDTO() {
+        month = "";
+        pendingFee = 0;
+        pendingCount = 0;
+        completeCount = 0;
+        completeCount = 0;
     }
 
     public AdminExtraInvoiceDTO(String month, long pendingFee, int pendingCount, long completeFee, int completeCount) {

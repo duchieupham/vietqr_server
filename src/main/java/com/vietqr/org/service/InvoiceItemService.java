@@ -3,7 +3,6 @@ package com.vietqr.org.service;
 import com.vietqr.org.dto.IInvoiceItemDetailDTO;
 import com.vietqr.org.dto.IInvoiceItemRemoveDTO;
 import com.vietqr.org.dto.IInvoiceItemResponseDTO;
-import com.vietqr.org.dto.InvoiceUpdateItemDTO;
 import com.vietqr.org.entity.InvoiceItemEntity;
 import org.springframework.stereotype.Service;
 
@@ -19,11 +18,9 @@ public interface InvoiceItemService {
 
     List<IInvoiceItemDetailDTO> getInvoiceItemsByInvoiceId(String invoiceId);
 
-    IInvoiceItemRemoveDTO getInvoiceRemoveByInvoiceId(String itemId);
-
-    void removeById(String invoiceId);
-
     InvoiceItemEntity getInvoiceItemById(String itemId);
+
+    void removeByInvoiceIdInorge(String invoiceId, List<String> itemIds);
 
     void removeByInvoiceId(String invoiceId);
 }

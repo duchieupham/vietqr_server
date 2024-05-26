@@ -103,6 +103,7 @@ public class TransactionWalletController {
                         transactionWalletEntity.setPaymentMethod(0);
                         transactionWalletEntity.setReferenceNumber("");
                         transactionWalletEntity.setPhoneNoRC("");
+                        transactionWalletEntity.setRefId("");
                         transactionWalletService.insertTransactionWallet(transactionWalletEntity);
                         //
                         result = new ResponseMessageDTO("SUCCESS", otp);
@@ -231,6 +232,7 @@ public class TransactionWalletController {
                     transactionWalletEntity.setPaymentMethod(1);
                     transactionWalletEntity.setReferenceNumber("");
                     transactionWalletEntity.setPhoneNoRC("");
+                    transactionWalletEntity.setRefId("");
                     transactionWalletService.insertTransactionWallet(transactionWalletEntity);
                     // final
                     result = vietQRDTO;

@@ -1,5 +1,6 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.dto.IMerchantEditDetailDTO;
 import com.vietqr.org.dto.IMerchantInvoiceDTO;
 import org.springframework.stereotype.Service;
 
@@ -12,4 +13,6 @@ public interface MerchantSyncService {
     List<IMerchantInvoiceDTO> getMerchantSyncsByName(String value, int offset, int size);
 
     int countMerchantSyncsByName(String value);
+
+    IMerchantEditDetailDTO getMerchantEditDetail(String merchantId);
 }

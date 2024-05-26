@@ -6,5 +6,5 @@ public interface IBankAccountInvoiceDTO {
     String getEmail();
     String getData();
     String getFeePackage();
-
+    String getMerchantId();
 }

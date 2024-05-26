@@ -252,9 +252,13 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
     IAdminExtraInvoiceDTO getExtraInvoice(long fromDate, long toDate);
 
     @Query(value = "SELECT a.id AS invoiceId, a.name AS invoiceName, "
-            + "a.invoice_id AS invoiceNumber, b.content AS content, a.data AS data, "
+            + "a.invoice_id AS invoiceNumber, b.content AS content, "
+            + "JSON_EXTRACT(a.data, '$.bankAccount') AS bankAccount, "
+            + "JSON_EXTRACT(a.data, '$.userBankName') AS userBankName, "
+            + "JSON_EXTRACT(a.data, '$.bankShortName') AS bankShortName, "
             + "a.amount AS totalAmount, a.vat AS vat, a.vat_amount AS vatAmount, "
-            + "a.total_amount AS totalAmountAfterVat "
+            + "a.bank_id AS bankId, a.merchant_id AS merchantId, "
+            + "a.total_amount AS totalAmountAfterVat, a.description AS description "
             + "FROM invoice a "
             + "INNER JOIN transaction_wallet b ON a.ref_id = b.id "
             + "WHERE a.id = :invoiceId LIMIT 1", nativeQuery = true)
@@ -269,7 +273,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "WHERE a.id = :invoiceId ", nativeQuery = true)
     IInvoiceDTO getInvoiceByInvoiceDetail(String invoiceId);
 
-    @Query(value = "SELECT a.id AS invoiceId, a.amount AS totalAmount, "
+    @Query(value = "SELECT a.id AS invoiceId, a.amount AS totalAmount, a.ref_id AS refId, "
             + "a.vat_amount AS vatAmount, a.total_amount AS totalAmountAfterVat "
             + "FROM invoice a "
             + "WHERE a.id = :invoiceId ", nativeQuery = true)
@@ -286,4 +290,18 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
     @Modifying
     @Query(value = "DELETE FROM invoice WHERE id = :invoiceId ", nativeQuery = true)
     void removeByInvoiceId(String invoiceId);
+
+    @Query(value = "SELECT * FROM invoice WHERE id = :invoiceId ", nativeQuery = true)
+    InvoiceEntity getInvoiceEntityById(String invoiceId);
+
+    @Query(value = "SELECT * FROM invoice WHERE ref_id = :transWalletId AND total_amount = :amount LIMIT 1", nativeQuery = true)
+    InvoiceEntity getInvoiceEntityByRefId(String transWalletId, long amount);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE invoice SET status = :status WHERE id = :id ", nativeQuery = true)
+    int updateStatusInvoice(String id, int status);
+
+    @Query(value = "SELECT id FROM invoice WHERE id = :invoiceId AND status != 1", nativeQuery = true)
+    String checkExistedInvoice(String invoiceId);
 }

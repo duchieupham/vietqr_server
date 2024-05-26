@@ -2,6 +2,7 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+import com.vietqr.org.dto.BankTypeShortNameDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +38,11 @@ public class BankTypeServiceImpl implements BankTypeService {
 	@Override
 	public Boolean getRpaContainIdByBankCode(String bankCode) {
 		return bankTypeRepository.getRpaContainIdByBankCode(bankCode);
+	}
+
+	@Override
+	public List<BankTypeShortNameDTO> getBankTypeByListId(List<String> ids) {
+		return bankTypeRepository.getBankTypeByListId(ids);
 	}
 
 }

@@ -4,6 +4,7 @@ import com.vietqr.org.dto.StartEndTimeDTO;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 
 public class DateTimeUtil {
     public static final long A_DAY_TO_SECOND = 86400;
@@ -176,5 +177,36 @@ public class DateTimeUtil {
         }
         String[] parts = time.split("-");
         return parts[1] + "/" + parts[0];
+    }
+
+    public static int getDifferenceMonthFromTime(long fromDate, long toDate) {
+        int result = 0;
+        try {
+            LocalDateTime fromDateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(fromDate), ZoneOffset.UTC);
+            LocalDateTime toDateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(toDate), ZoneOffset.UTC);
+            result = (int) (toDateTime.getYear() - fromDateTime.getYear()) * 12 + toDateTime.getMonthValue() - fromDateTime.getMonthValue();
+        } catch (Exception ignored) {
+        }
+        return result;
+    }
+
+    public static String getYearAsString(long toDate) {
+        String result = "";
+        try {
+            LocalDateTime toDateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(toDate), ZoneOffset.UTC);
+            result = (toDateTime.getYear() + "").substring(2);
+        } catch (Exception ignored) {
+        }
+        return result;
+    }
+
+    public static int getMonth(long toDate) {
+        int result = 0;
+        try {
+            LocalDateTime toDateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(toDate), ZoneOffset.UTC);
+            result = toDateTime.getMonthValue();
+        } catch (Exception ignored) {
+        }
+        return result;
     }
 }

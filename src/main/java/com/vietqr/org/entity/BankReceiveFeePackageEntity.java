@@ -48,6 +48,12 @@ public class BankReceiveFeePackageEntity implements Serializable {
     @Column(name = "data", columnDefinition = "JSON")
     private String data;
 
+    @Column(name = "mid")
+    private String mid;
+
+    @Column(name = "userId")
+    private String userId;
+
     public BankReceiveFeePackageEntity() {
     }
 
@@ -153,5 +159,21 @@ public class BankReceiveFeePackageEntity implements Serializable {
 
     public void setData(String data) {
         this.data = data;
+    }
+
+    public String getMid() {
+        return mid;
+    }
+
+    public void setMid(String mid) {
+        this.mid = mid;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

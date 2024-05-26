@@ -1,14 +1,29 @@
 package com.vietqr.org.entity;
 
+import com.vietqr.org.dto.TransReceiveInvoicesDTO;
+
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "TransactionReceive")
+@SqlResultSetMapping(
+		name = "TransReceiveInvoicesDTO",
+		classes = @ConstructorResult(
+				targetClass = TransReceiveInvoicesDTO.class,
+				columns = {
+						@ColumnResult(name = "id", type = String.class),
+						@ColumnResult(name = "amount", type = Long.class),
+						@ColumnResult(name = "content", type = String.class),
+						@ColumnResult(name = "trans_type", type = String.class),
+						@ColumnResult(name = "type", type = Integer.class),
+						@ColumnResult(name = "time", type = Long.class),
+						@ColumnResult(name = "time_paid", type = Long.class),
+						@ColumnResult(name = "status", type = Integer.class)
+				}
+		)
+)
 public class TransactionReceiveEntity implements Serializable {
 
 	/**

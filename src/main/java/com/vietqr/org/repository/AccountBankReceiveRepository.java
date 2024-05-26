@@ -351,4 +351,33 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "INNER JOIN bank_type c ON c.id = a.bank_type_id "
 			+ "WHERE a.id = :bankId ", nativeQuery = true)
     List<ICustomerDetailDTO> getCustomerDetailByBankId(String bankId);
+
+	@Query(value = "SELECT COUNT(a.id) "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN account_login b ON a.user_id = b.id "
+			+ "WHERE a.bank_account LIKE %:value% "
+			+ "AND a.is_authenticated = TRUE ", nativeQuery = true)
+    int countBankInvoiceByBankAccount(String value);
+
+	@Query(value = "SELECT a.id AS bankId, c.mid AS merchantId, "
+			+ "a.bank_account_name AS userBankName, b.phone_no AS phoneNo, "
+			+ "b.email AS email, a.bank_account AS bankAccount, "
+			+ "a.mms_active AS mmsActive, c.title AS feePackage, "
+			+ "a.bank_type_id AS bankTypeId "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN account_login b ON a.user_id = b.id "
+			+ "LEFT JOIN bank_receive_fee_package c ON c.bank_id = a.id "
+			+ "WHERE a.bank_account LIKE %:value% AND a.is_authenticated = TRUE "
+			+ "LIMIT :offset, :size ", nativeQuery = true)
+	List<IBankAccountInvoiceInfoDTO> getBankInvoiceByBankAccount(String value, int offset, int size);
+
+	@Query(value = "SELECT a.id AS bankId, a.bank_account AS bankAccount, "
+			+ "b.bank_short_name AS bankShortName, c.phone_no AS phoneNo, "
+			+ "a.bank_account_name AS userBankName, c.email AS email, "
+			+ "a.mms_active AS mmsActive "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN bank_type b ON a.bank_type_id = b.id "
+			+ "INNER JOIN account_login c ON c.id = a.user_id "
+			+ "WHERE a.id = :bankId ", nativeQuery = true)
+	AccountBankDetailAdminDTO getAccountBankDetailAdmin(String bankId);
 }

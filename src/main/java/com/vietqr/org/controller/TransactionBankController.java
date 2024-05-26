@@ -1337,6 +1337,75 @@ public class TransactionBankController {
 							logger.error("transaction-sync: REFERENCE NUMBER INVALID: "
 									+ entity.getReferenceNumber());
 						}
+					} else if (parts.length == 4) {
+						Integer paymentType = Integer.parseInt(parts[0]);
+						String userId = parts[1];
+						String otp = parts[2];
+						String bankId = parts[3];
+						if (userId != null && otp != null && paymentType != null) {
+							String checkTransWalletId = transactionWalletService
+									.checkExistedTransactionnWallet(otp,
+											userId, paymentType);
+							boolean checkSuccessProcess = false;
+							if (!StringUtil.isNullOrEmpty(checkTransWalletId)) {
+								// find transactionWalletEntity by Id
+								TransactionWalletEntity transactionWalletDebit = transactionWalletService
+										.getTransactionWalletById(checkTransWalletId);
+								if (transactionWalletDebit != null) {
+										long amount = Long.parseLong(transactionWalletDebit.getAmount());
+										InvoiceEntity invoiceEntity = invoiceService.getInvoiceEntityByRefId(transactionWalletDebit.getId(), amount);
+										if (invoiceEntity != null && invoiceEntity.getStatus() != 1) {
+											int checkSuccess = invoiceService.updateStatusInvoice(invoiceEntity.getId(), 1);
+											if (checkSuccess > 0) {
+												checkSuccessProcess = true;
+												// update transaction wallet
+												transactionWalletService.updateTransactionWallet(1, time,
+														transactionWalletDebit.getAmount() + "",
+														"",
+														transactionWalletDebit.getUserId(),
+														transactionWalletDebit.getOtp(),
+														paymentType);
+											} else {
+												System.out.println(
+														"transaction-sync: TRAN WALLET INVOICE NULL");
+												logger.error("transaction-sync: TRAN WALLET INVOICE IS ALREADY PAID OR CANCELED ");
+											}
+										} else {
+											System.out.println(
+													"transaction-sync: TRAN WALLET INVOICE NULL");
+											logger.error("transaction-sync: TRAN WALLET INVOICE IS ALREADY PAID OR CANCELED ");
+										}
+								} else {
+									System.out.println(
+											"transaction-sync: TRAN WALLET INVOICE NULL");
+									logger.error("transaction-sync: TRAN WALLET INVOICE NULL");
+								}
+							} else {
+								System.out.println("transaction-sync: INVALID OTP");
+								logger.error("transaction-sync: INVALID OTP");
+							}
+							if (!checkSuccessProcess) {
+								// update amount account wallet
+								AccountWalletEntity accountWalletEntity = accountWalletService
+										.getAccountWalletByUserId(userIdRecharge);
+								if (accountWalletEntity != null) {
+									Long currentAmount = Long
+											.parseLong(accountWalletEntity.getAmount());
+									Long updatedAmount = currentAmount + dto.getAmount();
+									accountWalletService.updateAmount(updatedAmount + "",
+											accountWalletEntity.getId());
+									logger.info("transaction-sync: process wallet: refund user: "
+											+ userIdRecharge + " - " + dto.getAmount());
+								}
+							}
+						} else {
+							System.out.println(
+									"transaction-sync: REFERENCE NUMBER INVALID: "
+											+ entity
+											.getReferenceNumber());
+							logger.error("transaction-sync: REFERENCE NUMBER INVALID: "
+									+ entity.getReferenceNumber());
+						}
 					}
 				} else {
 					// update amount account wallet
@@ -1380,32 +1449,6 @@ public class TransactionBankController {
 				}
 			}
 		}
-	}
-
-	@PostMapping("notification-data")
-	public ResponseEntity<ResponseMessageDTO> getThemes(@RequestParam String userId) {
-		ResponseMessageDTO result = null;
-		HttpStatus httpStatus = null;
-		try {
-			Map<String, String> data = new HashMap<>();
-			data.put("notificationType",
-					NotificationUtil.getNotiTypePaymentInvoiceSuccess());
-			data.put("notificationId", UUID.randomUUID().toString());
-			data.put("invoiceId", UUID.randomUUID().toString());
-			data.put("amount", "2937000" + "");
-			data.put("billNumber", "VAF19349842");
-			data.put("transactionWalletId", UUID.randomUUID().toString());
-			data.put("timeCreated", DateTimeUtil.getCurrentDateTimeUTC() + "");
-			data.put("timePaid", DateTimeUtil.getCurrentDateTimeUTC() + "");
-			data.put("userId", userId);
-			pushFakenotification(userId, data);
-			result = new ResponseMessageDTO("SUCCESS", "");
-			httpStatus = HttpStatus.OK;
-		} catch (Exception e) {
-			logger.error("getThemes: ERROR: " + e.toString());
-			httpStatus = HttpStatus.BAD_REQUEST;
-		}
-		return new ResponseEntity<>(result, httpStatus);
 	}
 
 	private void pushFakenotification(String userId, Map<String, String> data) {
