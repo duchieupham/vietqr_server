@@ -8,6 +8,7 @@ public class InvoiceItemDetailDTO {
     private long amount;
     private long totalAmount;
     private double vat;
+    private int type;
     private long vatAmount;
     private long totalAmountAfterVat;
 
@@ -97,5 +98,13 @@ public class InvoiceItemDetailDTO {
 
     public void setTotalAmountAfterVat(long totalAmountAfterVat) {
         this.totalAmountAfterVat = totalAmountAfterVat;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 }

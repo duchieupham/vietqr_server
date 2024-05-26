@@ -1,9 +1,6 @@
 package com.vietqr.org.repository;
 
-import com.vietqr.org.dto.IBankAccountInvoiceDTO;
-import com.vietqr.org.dto.IBankDetailAdminDTO;
-import com.vietqr.org.dto.IFeePackageDetailDTO;
-import com.vietqr.org.dto.IInvoiceItemCreateDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.BankReceiveFeePackageEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -73,14 +70,32 @@ public interface BankReceiveFeePackageRepository extends JpaRepository<BankRecei
             + "WHERE a.bank_id = :bankId", nativeQuery = true)
     IBankDetailAdminDTO getBankReceiveByBankId(String bankId);
 
-    @Query(value = "SELECT a.bank_id AS bankId, a.data AS data, d.title AS feePackage, "
-            + "c.phone_no AS phoneNo, c.email AS email "
-            + "FROM bank_receive_connection a "
-            + "INNER JOIN account_bank_receive b ON a.bank_id = b.id "
-            + "INNER JOIN account_login c ON c.id = b.user_id "
-            + "INNER JOIN bank_receive_fee_package d ON d.bank_id = a.bank_id "
-            + "INNER JOIN merchant_connection e ON e.id = a.mid_connect_id "
-            + "WHERE b.id = :bankId "
-            + "LIMIT 1 ", nativeQuery = true)
+    @Query(value = "SELECT a.title AS feePackage, "
+            + "b.email AS email, b.phone_no AS phoneNo, a.user_id AS userId, "
+            + "a.data AS data, a.bank_id AS bankId, a.mid AS merchantId "
+            + "FROM bank_receive_fee_package a "
+            + "INNER JOIN account_login b ON b.id = a.user_id "
+            + "WHERE a.bank_id = :bankId ", nativeQuery = true)
     IBankAccountInvoiceDTO getBankInvoiceByBankId(String bankId);
+
+    @Query(value = "SELECT b.vso AS vso, b.name AS merchantName, "
+            + "c.email AS email, c.phone_no AS phoneNo, a.user_id AS userId, "
+            + "a.data AS data "
+            + "FROM bank_receive_fee_package a "
+            + "INNER JOIN merchant_sync b ON b.id = a.mid "
+            + "INNER JOIN account_login c ON c.id = a.user_id "
+            + "WHERE a.bank_id = :bankId AND a.mid = :merchantId ", nativeQuery = true)
+    IMerchantBankMapperDTO getMerchantBankMapper(String merchantId, String bankId);
+
+    @Query(value = "SELECT b.vso AS vso, b.name AS merchantName, "
+            + "c.email AS email, c.phone_no AS phoneNo, '' AS platform, "
+            + "JSON_EXTRACT(a.data, '$.bankAccount') AS bankAccount, "
+            + "JSON_EXTRACT(a.data, '$.bankShortName') AS bankShortName, "
+            + "JSON_EXTRACT(a.data, '$.userBankName') AS userBankName, "
+            + "JSON_EXTRACT(a.data, '$.mmsActive') AS mmsActive "
+            + "FROM bank_receive_fee_package a "
+            + "INNER JOIN merchant_sync b ON b.id = a.mid "
+            + "INNER JOIN account_login c ON c.id = a.user_id "
+            + "WHERE a.bank_id = :bankId ", nativeQuery = true)
+    List<ICustomerDetailDTO> getCustomerDetailByBankId(String bankId);
 }

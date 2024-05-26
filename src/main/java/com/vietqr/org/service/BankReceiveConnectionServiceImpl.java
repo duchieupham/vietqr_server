@@ -10,9 +10,4 @@ public class BankReceiveConnectionServiceImpl implements BankReceiveConnectionSe
 
     @Autowired
     private BankReceiveConnectionRepository repo;
-
-    @Override
-    public IMerchantBankMapperDTO getMerchantBankMapper(String merchantId, String bankId) {
-        return repo.getMerchantBankMapper(merchantId, bankId);
-    }
 }

@@ -80,10 +80,6 @@ public interface TransactionWalletService {
 
         int countTransactionWalletAnnualFee(String fromDate, String toDate);
 
-        List<TransactionWalletAdminDTO> getTransactionWallet(String fromDate, String toDate, int offset, int size);
-
-        int countTransactionWallet(String fromDate, String toDate);
-
         TransactionWalletEntity getTransactionWalletByRefId(String id);
 
         String getRefIdDebitByInvoiceRefId(String refId);

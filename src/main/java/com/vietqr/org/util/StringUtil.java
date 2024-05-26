@@ -185,14 +185,14 @@ public class StringUtil {
                 switch (pre) {
                     case 0:
                         result.add(getQuarter(quarter));
-                        if (year > 24) {
-                            result.add(getQuarter(quarter + 1));
+                        if (year >= 24) {
+                            result.add(getQuarter(quarter - 1));
                         }
                         break;
                     case 1:
                         result.add(getQuarter(quarter));
-                        if (year > 24) {
-                            result.add(getQuarter(quarter - 1));
+                        if (year >= 24) {
+                            result.add(getQuarter(quarter + 1));
                         }
                         break;
                     case 2:
@@ -207,5 +207,9 @@ public class StringUtil {
             result = new ArrayList<>();
         }
         return result;
+    }
+
+    public static String removeMarkString(String value) {
+        return value != null ? value.replaceAll("\"", "") : "";
     }
 }

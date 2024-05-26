@@ -231,21 +231,6 @@ public class TransactionWalletServiceImpl implements TransactionWalletService {
     }
 
     @Override
-    public List<TransactionWalletAdminDTO> getTransactionWallet(String fromDate, String toDate, int offset, int size) {
-        return repo.getTransactionWallet(
-                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
-                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
-                offset, size);
-    }
-
-    @Override
-    public int countTransactionWallet(String fromDate, String toDate) {
-        return repo.countTransactionWallet(
-                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
-                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
-    }
-
-    @Override
     public TransactionWalletEntity getTransactionWalletByRefId(String id) {
         return repo.getTransactionWalletByRefId(id);
     }

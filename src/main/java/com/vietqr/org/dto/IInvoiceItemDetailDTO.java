@@ -5,6 +5,7 @@ public interface IInvoiceItemDetailDTO {
     String getInvoiceItemName();
     String getUnit();
     Integer getQuantity();
+    Integer getType();
     Long getAmount();
     Long getTotalAmount();
     Double getVat();

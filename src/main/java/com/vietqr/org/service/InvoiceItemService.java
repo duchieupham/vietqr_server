@@ -18,11 +18,9 @@ public interface InvoiceItemService {
 
     List<IInvoiceItemDetailDTO> getInvoiceItemsByInvoiceId(String invoiceId);
 
-    IInvoiceItemRemoveDTO getInvoiceRemoveByInvoiceId(String itemId);
-
-    void removeById(String invoiceId);
-
     InvoiceItemEntity getInvoiceItemById(String itemId);
 
     void removeByInvoiceIdInorge(String invoiceId, List<String> itemIds);
+
+    void removeByInvoiceId(String invoiceId);
 }

@@ -1,9 +1,6 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.dto.IBankAccountInvoiceDTO;
-import com.vietqr.org.dto.IBankDetailAdminDTO;
-import com.vietqr.org.dto.IFeePackageDetailDTO;
-import com.vietqr.org.dto.IInvoiceItemCreateDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.repository.BankReceiveFeePackageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,16 +13,6 @@ public class BankReceiveFeePackageServiceImpl implements BankReceiveFeePackageSe
 
     @Autowired
     private BankReceiveFeePackageRepository repo;
-
-    @Override
-    public List<IBankAccountInvoiceDTO> getBankInvoiceByBankAccount(String value, int offset, int size) {
-        return repo.getBankInvoiceByBankAccount(value, offset, size);
-    }
-
-    @Override
-    public int countBankInvoiceByBankAccount(String value) {
-        return repo.countBankInvoiceByBankAccount(value);
-    }
 
     @Override
     public List<IBankAccountInvoiceDTO> getBankInvoiceByBankAccountAndMerchantId(String merchantId, String value, int offset, int size) {
@@ -55,5 +42,15 @@ public class BankReceiveFeePackageServiceImpl implements BankReceiveFeePackageSe
     @Override
     public IBankAccountInvoiceDTO getBankInvoiceByBankId(String bankId) {
         return repo.getBankInvoiceByBankId(bankId);
+    }
+
+    @Override
+    public IMerchantBankMapperDTO getMerchantBankMapper(String merchantId, String bankId) {
+        return repo.getMerchantBankMapper(merchantId, bankId);
+    }
+
+    @Override
+    public List<ICustomerDetailDTO> getCustomerDetailByBankId(String bankId) {
+        return repo.getCustomerDetailByBankId(bankId);
     }
 }

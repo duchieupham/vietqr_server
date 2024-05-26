@@ -1265,10 +1265,16 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
         long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
         long currentTime = DateTimeUtil.getCurrentDateTimeUTC();
         String year = DateTimeUtil.getYearAsString(toDate);
-        int month = DateTimeUtil.getDifferenceMonthFromTime(toDate, currentTime);
+        int differenceMonthFromTime = DateTimeUtil.getDifferenceMonthFromTime(toDate, currentTime);
         List<String> suffix = new ArrayList<>();
-        if (month < 3) {
+        if (differenceMonthFromTime < 3) {
             suffix.add("");
+            List<String> strings = StringUtil.getStartQuarter(DateTimeUtil.getMonth(toDate), year);
+            for (String item : strings) {
+                String dto = "";
+                dto = "_" + year + item;
+                suffix.add(dto);
+            }
         } else {
             List<String> strings = StringUtil.getStartQuarter(DateTimeUtil.getMonth(toDate), year);
             for (String item : strings) {
@@ -1276,15 +1282,22 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
                 dto = "_" + year + item;
                 suffix.add(dto);
             }
+            if (DateTimeUtil.getMonth(toDate) == 1 && "24".equals(year)) {
+                suffix.add("_2312");
+            }
         }
 
         List<TransReceiveInvoicesDTO> data = new ArrayList<>();
         for (String item : suffix) {
             List<TransReceiveInvoicesDTO> dtos = new ArrayList<>();
-            dtos = customQueryRepository.getTransReceiveInvoice(TRANSACTION_RECEIVE_NAME + item,
-                    bankId,
-                    fromDate,
-                    toDate);
+            try {
+                dtos = customQueryRepository.getTransReceiveInvoice(TRANSACTION_RECEIVE_NAME + item,
+                        bankId,
+                        fromDate,
+                        toDate);
+            } catch (Exception e) {
+                dtos = new ArrayList<>();
+            }
             data.addAll(dtos);
         }
         return data;

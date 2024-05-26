@@ -21,7 +21,7 @@ public class CustomQueryRepositoryImpl implements CustomQueryRepository {
                 "SELECT a.id AS id, a.amount, a.content, a.trans_type, "
                         + "a.type, a.time, a.time_paid, a.status "
                         + "FROM " + tableName + " a "
-                        + "WHERE a.bank_id = :bankId "
+                        + "WHERE a.bank_id = :bankId AND a.status = 1 AND a.content != 'NODATA' "
                         + "AND a.time >= :fromTime AND a.time <= :toTime ";
         Query query = entityManager.createNativeQuery(queryString, "TransReceiveInvoicesDTO");
         query.setParameter("bankId", bankId);

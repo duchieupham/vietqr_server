@@ -1349,11 +1349,9 @@ public class TransactionBankController {
 							boolean checkSuccessProcess = false;
 							if (!StringUtil.isNullOrEmpty(checkTransWalletId)) {
 								// find transactionWalletEntity by Id
-								TransactionWalletEntity transactionWalletEntity = transactionWalletService
+								TransactionWalletEntity transactionWalletDebit = transactionWalletService
 										.getTransactionWalletById(checkTransWalletId);
-								if (transactionWalletEntity != null) {
-									TransactionWalletEntity transactionWalletDebit = transactionWalletService.getTransactionWalletByRefId(transactionWalletEntity.getId());
-									if (transactionWalletDebit != null) {
+								if (transactionWalletDebit != null) {
 										long amount = Long.parseLong(transactionWalletDebit.getAmount());
 										InvoiceEntity invoiceEntity = invoiceService.getInvoiceEntityByRefId(transactionWalletDebit.getId(), amount);
 										if (invoiceEntity != null && invoiceEntity.getStatus() != 1) {
@@ -1377,11 +1375,6 @@ public class TransactionBankController {
 													"transaction-sync: TRAN WALLET INVOICE NULL");
 											logger.error("transaction-sync: TRAN WALLET INVOICE IS ALREADY PAID OR CANCELED ");
 										}
-									} else {
-										System.out.println(
-												"transaction-sync: TRAN WALLET DEBIT NULL");
-										logger.error("transaction-sync: TRAN WALLET DEBIT NULL ");
-									}
 								} else {
 									System.out.println(
 											"transaction-sync: TRAN WALLET INVOICE NULL");
@@ -1456,32 +1449,6 @@ public class TransactionBankController {
 				}
 			}
 		}
-	}
-
-	@PostMapping("notification-data")
-	public ResponseEntity<ResponseMessageDTO> getThemes(@RequestParam String userId) {
-		ResponseMessageDTO result = null;
-		HttpStatus httpStatus = null;
-		try {
-			Map<String, String> data = new HashMap<>();
-			data.put("notificationType",
-					NotificationUtil.getNotiTypePaymentInvoiceSuccess());
-			data.put("notificationId", UUID.randomUUID().toString());
-			data.put("invoiceId", UUID.randomUUID().toString());
-			data.put("amount", "2937000" + "");
-			data.put("billNumber", "VAF19349842");
-			data.put("transactionWalletId", UUID.randomUUID().toString());
-			data.put("timeCreated", DateTimeUtil.getCurrentDateTimeUTC() + "");
-			data.put("timePaid", DateTimeUtil.getCurrentDateTimeUTC() + "");
-			data.put("userId", userId);
-			pushFakenotification(userId, data);
-			result = new ResponseMessageDTO("SUCCESS", "");
-			httpStatus = HttpStatus.OK;
-		} catch (Exception e) {
-			logger.error("getThemes: ERROR: " + e.toString());
-			httpStatus = HttpStatus.BAD_REQUEST;
-		}
-		return new ResponseEntity<>(result, httpStatus);
 	}
 
 	private void pushFakenotification(String userId, Map<String, String> data) {

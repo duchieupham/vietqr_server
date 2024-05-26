@@ -419,7 +419,7 @@ public interface TransactionWalletRepository extends JpaRepository<TransactionWa
         String getRefIdDebitByInvoiceRefId(String id);
 
         @Query(value = "SELECT id AS id, bill_number AS billNumber, time_created AS timeCreated "
-                + "FROM transaction_wallet WHERE ref_id = :refId LIMIT 1", nativeQuery = true)
+                + "FROM transaction_wallet WHERE id = :refId LIMIT 1", nativeQuery = true)
         TransWalletUpdateDTO getBillNumberByRefIdTransWallet(String refId);
 
         @Transactional

@@ -9,6 +9,7 @@ public class InvoiceEditDetailDTO {
     private long totalAmount;
     private long vatAmount;
     private long totalAfterVat;
+    private double vat;
     private InvoiceDetailCustomerDTO userInformation;
     private List<InvoiceItemDetailDTO> invoiceItems;
 
@@ -89,5 +90,13 @@ public class InvoiceEditDetailDTO {
 
     public void setInvoiceItems(List<InvoiceItemDetailDTO> invoiceItems) {
         this.invoiceItems = invoiceItems;
+    }
+
+    public double getVat() {
+        return vat;
+    }
+
+    public void setVat(double vat) {
+        this.vat = vat;
     }
 }

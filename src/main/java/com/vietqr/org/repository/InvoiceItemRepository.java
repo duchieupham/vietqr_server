@@ -25,7 +25,7 @@ public interface InvoiceItemRepository extends JpaRepository<InvoiceItemEntity, 
             @Param(value = "invoiceId") String invoiceId);
 
     @Query(value = "SELECT a.id AS invoiceItemId, a.name AS invoiceItemName, "
-            + "a.unit AS unit, a.quantity AS quantity, a.amount AS amount, "
+            + "a.unit AS unit, a.quantity AS quantity, a.amount AS amount, a.type AS type, "
             + "a.vat AS vat, a.vat_amount AS vatAmount, a.total_after_vat AS amountAfterVat, "
             + "a.total_amount AS totalAmount "
             + "FROM invoice_item a "
@@ -55,4 +55,10 @@ public interface InvoiceItemRepository extends JpaRepository<InvoiceItemEntity, 
             + "WHERE invoice_id = :invoiceId "
             + "AND id NOT IN (:itemIds) ", nativeQuery = true)
     void removeByInvoiceId(String invoiceId, List<String> itemIds);
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM invoice_item "
+            + "WHERE invoice_id = :invoiceId ", nativeQuery = true)
+    void removeByInvoiceId(String invoiceId);
 }

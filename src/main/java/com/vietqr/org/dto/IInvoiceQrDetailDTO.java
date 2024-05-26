@@ -6,7 +6,9 @@ public interface IInvoiceQrDetailDTO {
     String getInvoiceId();
     String getInvoiceNumber();
     String getInvoiceName();
-    String getData();
+    String getBankAccount();
+    String getUserBankName();
+    String getBankShortName();
     long getTotalAmount();
     double getVat();
     long getVatAmount();
