@@ -575,7 +575,7 @@ public class InvoiceController {
                     customerDTO.setMerchantName("");
                 }
 
-                if (dto.getBankId() != null) {
+                if (dto.getBankId() != null && !StringUtil.isNullOrEmpty(dto.getMerchantId())) {
                     IBankAccountInvoiceDTO bankAccountInvoiceDTO =
                             bankReceiveFeePackageService
                                     .getBankInvoiceByBankId(dto.getBankId());
@@ -599,6 +599,25 @@ public class InvoiceController {
                         double vat = systemSettingService.getVatSystemSetting();
                         data.setVat(vat);
                     }
+                } else {
+                    IBankAccountInvoicesDTO dto1 = accountBankReceiveService.getBankAccountInvoices(dto.getBankId());
+                    if (dto1 != null) {
+                        customerDTO.setBankId(dto1.getBankId());
+                        customerDTO.setPhoneNo(dto1.getPhoneNo());
+                        customerDTO.setEmail(dto1.getEmail());
+                        customerDTO.setUserBankName(dto1.getUserBankName());
+                        customerDTO.setBankShortName(dto1.getBankShortName());
+                        customerDTO.setBankAccount(dto1.getBankAccount());
+                        if (dto1.getMmsActive()) {
+                            customerDTO.setConnectionType(EnvironmentUtil.getVietQrProPackage());
+                        } else {
+                            customerDTO.setConnectionType(EnvironmentUtil.getVietQrProPackage());
+                        }
+                        customerDTO.setFeePackage("");
+                        customerDTO.setVat(dto.getVat());
+                        data.setVat(dto.getVat());
+                    }
+
                 }
                 data.setUserInformation(customerDTO);
 
