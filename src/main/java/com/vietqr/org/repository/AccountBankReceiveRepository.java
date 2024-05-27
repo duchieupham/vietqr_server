@@ -380,4 +380,13 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "INNER JOIN account_login c ON c.id = a.user_id "
 			+ "WHERE a.id = :bankId ", nativeQuery = true)
 	AccountBankDetailAdminDTO getAccountBankDetailAdmin(String bankId);
+
+	@Query(value = "SELECT a.id AS bankId, b.phone_no AS phoneNo, a.mms_active AS mmsActive, "
+			+ "COALESCE(b.email, '') AS email, a.bank_account AS bankAccount, "
+			+ "a.bank_account_name AS userBankName, c.bank_short_name AS bankShortName "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN account_login b ON a.user_id = b.id "
+			+ "INNER JOIN bank_type c ON a.bank_type_id = c.id "
+			+ "WHERE a.id = :bankId LIMIT 1 ", nativeQuery = true)
+    IBankAccountInvoicesDTO getBankAccountInvoices(String bankId);
 }
