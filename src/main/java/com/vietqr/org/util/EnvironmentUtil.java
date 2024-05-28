@@ -680,4 +680,8 @@ public class EnvironmentUtil {
     public static String getVietQrPaymentSuccessQrVoice() {
         return VIET_QR_PAYMENT_SUCCESS_QR_VOICE;
     }
+
+    public static String getVietQrBoxInteralPrefix() {
+        return "CERT-VVB-";
+    }
 }

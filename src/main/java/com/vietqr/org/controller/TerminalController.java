@@ -964,6 +964,27 @@ public class TerminalController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("terminal/{merchantId}")
+    public ResponseEntity<Object> getTerminalByMerchantAndBank(
+            @PathVariable String merchantId,
+            @RequestParam String userId,
+            @RequestParam String bankId
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            List<TerminalCodeResponseDTO> dtos = terminalService
+                    .getListTerminalResponseByBankIdAndMerchantId(merchantId, bankId);
+            httpStatus = HttpStatus.OK;
+            result = dtos;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     //sync
     @PostMapping("terminal")
     public ResponseEntity<ResponseMessageDTO> insertTerminal(@Valid @RequestBody TerminalInsertDTO dto) {

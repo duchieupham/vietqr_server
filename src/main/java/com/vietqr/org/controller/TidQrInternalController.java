@@ -67,6 +67,21 @@ public class TidQrInternalController {
     private CaiBankService caiBankService;
 
     @Autowired
+    private AccountBankReceiveShareService accountBankReceiveShareService;
+
+    @Autowired
+    private MerchantService merchantService;
+
+    @Autowired
+    private MerchantBankReceiveService merchantBankReceiveService;
+
+    @Autowired
+    private MerchantMemberRoleService merchantMemberRoleService;
+
+    @Autowired
+    private MerchantMemberService merchantMemberService;
+
+    @Autowired
     private SystemSettingService systemSettingService;
 
     @Autowired
@@ -101,7 +116,7 @@ public class TidQrInternalController {
             ObjectMapper mapper = new ObjectMapper();
             String data = mapper.writeValueAsString(dto);
             systemSettingService.updateBoxEnvironment(data);
-            result = new ResponseMessageDTO("SUCCESS", "");;
+            result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             result = new ResponseMessageDTO("FAILED", "E05");
@@ -269,7 +284,7 @@ public class TidQrInternalController {
             dto.setMacAddr(macAddr);
             macAddr = dto.getMacAddr().replaceAll("\\.", "");
             String qrBoxCode = getRandomNumberUniqueQRBox();
-            String certificate = BoxTerminalRefIdUtil.encryptQrBoxId(qrBoxCode + macAddr);
+            String certificate = EnvironmentUtil.getVietQrBoxInteralPrefix() + BoxTerminalRefIdUtil.encryptQrBoxId(qrBoxCode + macAddr);
             String boxId = BoxTerminalRefIdUtil.encryptQrBoxId(qrBoxCode);
             QrBoxSyncEntity entity = qrBoxSyncService.getByMacAddress(macAddr);
             if (entity != null) {
@@ -319,6 +334,159 @@ public class TidQrInternalController {
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping(value = "tid/box-list/{bankId}")
+    public ResponseEntity<Object> getQrBoxList(@PathVariable String bankId) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            result = terminalBankService.getQrBoxListByBankId(bankId);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping(value = "tid/tid-box/{bankId}")
+    public ResponseEntity<Object> getQrBoxForActive(
+            @PathVariable String bankId,
+            @RequestParam String userId
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            result = terminalBankService.getQrBoxDynamicQrByBankId(bankId);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("tid/active-box")
+    public ResponseEntity<Object> activeQrBoxForUser(@Valid @RequestBody ActiveQrBoxDTO dto) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            String terminalCode = "";
+            terminalCode = getRandomUniqueCodeInTerminalCode();
+            IAccountBankReceiveDTO accountBankInfoResById
+                    = accountBankReceiveService.getAccountBankInfoResById(dto.getBankId());
+            String boxCode = qrBoxSyncService.getByQrCertificate(dto.getQrCertificate());
+            TerminalEntity terminalEntity = terminalService.getTerminalByTerminalId(dto.getTerminalId());
+            if (accountBankInfoResById != null && boxCode != null && !boxCode.isEmpty()) {
+                if (accountBankInfoResById.getIsAuthenticated()) {
+                    TerminalBankReceiveEntity terminalBankReceiveEntity = terminalBankReceiveService
+                            .getTerminalBankReceiveByRawTerminalCode(boxCode);
+                    if (terminalBankReceiveEntity == null) {
+                        terminalBankReceiveEntity = new TerminalBankReceiveEntity();
+                        terminalBankReceiveEntity.setId(UUID.randomUUID().toString());
+                    }
+                    terminalBankReceiveEntity.setTerminalId("");
+                    if (terminalEntity != null) {
+                        terminalBankReceiveEntity.setSubTerminalAddress(terminalEntity.getAddress());
+                    } else {
+                        terminalBankReceiveEntity.setSubTerminalAddress("");
+                    }
+                    terminalBankReceiveEntity.setBankId(accountBankInfoResById.getBankId());
+                    terminalBankReceiveEntity.setRawTerminalCode(boxCode);
+                    terminalBankReceiveEntity.setTerminalCode(terminalCode);
+                    terminalBankReceiveEntity.setTypeOfQR(2);
+                    String qrCode = "";
+                    if (accountBankInfoResById.getIsMmsActive()) {
+                        TerminalBankEntity terminalBankEntity =
+                                terminalBankService.getTerminalBankByBankAccount(accountBankInfoResById.getBankAccount());
+                        if (terminalBankEntity != null) {
+                            String qr = MBVietQRUtil.generateStaticVietQRMMS(
+                                    new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
+                                            terminalBankEntity.getTerminalId(), terminalCode));
+                            terminalBankReceiveEntity.setData2(qr);
+                            qrCode = qr;
+                            String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
+                            terminalBankReceiveEntity.setTraceTransfer(traceTransfer);
+                            terminalBankReceiveEntity.setData1("");
+                        } else {
+                            logger.error("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
+                        }
+                    } else {
+                        // luồng thuong
+                        String qrCodeContent = "SQR" + terminalCode;
+                        String bankAccount = accountBankInfoResById.getBankAccount();
+                        String caiValue = accountBankReceiveService.getCaiValueByBankId(accountBankInfoResById.getBankId());
+                        VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", qrCodeContent, bankAccount);
+                        String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+                        terminalBankReceiveEntity.setData1(qr);
+                        qrCode = qr;
+                        terminalBankReceiveEntity.setData2("");
+                        terminalBankReceiveEntity.setTraceTransfer("");
+                    }
+                    terminalBankReceiveService.insert(terminalBankReceiveEntity);
+                    String terminalName = "";
+                    String boxAddress = "";
+                    if (terminalEntity != null) {
+                        terminalName = terminalEntity.getName() != null ? terminalEntity.getName() : "";
+                        boxAddress = terminalEntity.getAddress() != null ? terminalEntity.getAddress() : "";
+                    }
+                    BoxQrMachineResponseDTO response = new BoxQrMachineResponseDTO();
+                    String boxId = BoxTerminalRefIdUtil
+                            .encryptQrBoxId(terminalBankReceiveEntity.getRawTerminalCode());
+                    response.setBoxId(boxId);
+                    response.setBankAccount(accountBankInfoResById.getBankAccount());
+                    response.setBankCode(accountBankInfoResById.getBankCode());
+                    response.setQrCode(qrCode);
+                    response.setBoxCode(boxCode);
+                    response.setSubTerminalCode(terminalCode);
+                    response.setSubTerminalAddress(boxAddress);
+                    result = response;
+
+                    Map<String, String> data = new HashMap<>();
+                    data.put("notificationType", NotificationUtil.getNotiConnectQrSuccess());
+                    data.put("bankAccount", accountBankInfoResById.getBankAccount());
+                    data.put("bankShortName", accountBankInfoResById.getBankAccount());
+                    data.put("userBankName", accountBankInfoResById.getUserBankName());
+                    data.put("qrCode", response.getQrCode());
+                    data.put("machineId", terminalBankReceiveEntity.getId());
+                    data.put("terminalCode", terminalBankReceiveEntity.getTerminalCode());
+                    data.put("terminalName", terminalName);
+                    data.put("boxId", boxId);
+                    data.put("boxAddress", boxAddress);
+                    data.put("boxCode", boxCode);
+                    data.put("bankCode", accountBankInfoResById.getBankCode());
+                    String homePage = EnvironmentUtil.getVietQrHomePage();
+                    BoxEnvironmentResDTO boxEnvironmentResDTO = systemSettingService.getSystemSettingBoxEnv();
+                    if (boxEnvironmentResDTO != null) {
+                        try {
+                            ObjectMapper mapper = new ObjectMapper();
+                            BoxEnvironmentVarDTO boxEnvironmentVarDTO = mapper.readValue(boxEnvironmentResDTO.getBoxEnv(), BoxEnvironmentVarDTO.class);
+                            homePage = boxEnvironmentVarDTO.getHomePage();
+                        } catch (Exception e) {
+                            homePage = EnvironmentUtil.getVietQrHomePage();
+                        }
+                    }
+                    data.put("homePage", homePage);
+                    socketHandler.sendMessageToBoxId(boxId, data);
+
+                    qrBoxSyncService.updateQrBoxSync(dto.getQrCertificate(), DateTimeUtil.getCurrentDateTimeUTC(),
+                            true, terminalName);
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    result = new ResponseMessageDTO("FAILED", "E46");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("ERROR: activeQrBoxForUser " + e.getMessage() + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -482,8 +650,7 @@ public class TidQrInternalController {
                                 boxId, dto.getBoxCode(), dto.getTerminalName());
                     }
                 }
-            }
-            else {
+            } else {
                 LocalDateTime requestLDT = LocalDateTime.now();
                 long requestTime = requestLDT.toEpochSecond(ZoneOffset.UTC);
                 logger.info("generateDynamicQr: start generate at: " + requestTime);
@@ -608,7 +775,7 @@ public class TidQrInternalController {
                         vietQRMMSCreateDTO.setSign("");
                         vietQRMMSCreateDTO.setTerminalCode(dto.getTerminalCode());
                         vietQRMMSCreateDTO.setNote(dto.getNote());
-                            vietQRMMSCreateDTO.setUrlLink("");
+                        vietQRMMSCreateDTO.setUrlLink("");
                         insertNewTransactionFlow2(qrMMS, transactionUUID.toString(), accountBankEntity, vietQRMMSCreateDTO,
                                 time, dto.getBankAccount(), dto.getUserBankName(), qrMMS, BoxTerminalRefIdUtil.encryptQrBoxId(dto.getBoxCode()),
                                 dto.getBoxCode(), dto.getTerminalName());
@@ -624,10 +791,10 @@ public class TidQrInternalController {
 
     @Async
     protected void insertNewTransactionFlow2(String qrCode, String transcationUUID,
-                                           AccountBankReceiveEntity accountBankReceiveEntity,
-                                           VietQRMMSCreateDTO dto,
-                                           long time, String bankAccount, String userBankName, String qr,
-                                           String boxId, String boxCode, String terminalName) {
+                                             AccountBankReceiveEntity accountBankReceiveEntity,
+                                             VietQRMMSCreateDTO dto,
+                                             long time, String bankAccount, String userBankName, String qr,
+                                             String boxId, String boxCode, String terminalName) {
         try {
             TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
             transactionEntity.setId(transcationUUID);
@@ -665,7 +832,7 @@ public class TidQrInternalController {
             data.put("userBankName", userBankName);
             data.put("note", "");
             data.put("content", dto.getContent());
-            data.put("amount",StringUtil.formatNumberAsString(dto.getAmount()));
+            data.put("amount", StringUtil.formatNumberAsString(dto.getAmount()));
             data.put("imgId", "");
             data.put("qrCode", qr);
             data.put("qrType", "0");
@@ -905,7 +1072,7 @@ public class TidQrInternalController {
                 data.put("userBankName", userBankName);
                 data.put("note", "");
                 data.put("content", dto.getContent());
-                data.put("amount",StringUtil.formatNumberAsString(dto.getAmount()));
+                data.put("amount", StringUtil.formatNumberAsString(dto.getAmount()));
                 data.put("imgId", "");
                 data.put("qrCode", qr);
                 data.put("qrType", "0");
