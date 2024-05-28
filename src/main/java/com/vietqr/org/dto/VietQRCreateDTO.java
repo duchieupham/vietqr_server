@@ -21,6 +21,7 @@ public class VietQRCreateDTO implements Serializable {
 	private String orderId;
 	private String note;
 	private String urlLink;
+	private String subTerminalCode;
 
 	public VietQRCreateDTO() {
 		super();
@@ -197,5 +198,13 @@ public class VietQRCreateDTO implements Serializable {
 
 	public void setUrlLink(String urlLink) {
 		this.urlLink = urlLink;
+	}
+
+	public String getSubTerminalCode() {
+		return subTerminalCode;
+	}
+
+	public void setSubTerminalCode(String subTerminalCode) {
+		this.subTerminalCode = subTerminalCode;
 	}
 }

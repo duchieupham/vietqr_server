@@ -63,4 +63,16 @@ public interface MerchantRepository extends JpaRepository<MerchantEntity, Long> 
             + "INNER JOIN merchant_member c ON a.id = c.merchant_id "
             + "WHERE c.user_id = :userId ", nativeQuery = true)
     List<MerchantResponseListDTO> getMerchantsByUserId(String userId);
+
+    @Query(value = "SELECT a.id AS id, a.name AS name, "
+            + "a.address AS address, COALESCE(a.vso_code, '') AS vsoCode, a.user_id AS userId, "
+            + "COUNT(b.id) AS totalTerminals, COALESCE(a.business_type, '') AS businessType, "
+            + "COALESCE(a.business_sector, '') AS businessSector, "
+            + "COALESCE(a.tax_id, '') AS taxId "
+            + "FROM merchant a "
+            + "LEFT JOIN terminal b ON a.id = b.merchant_id "
+            + "LEFT JOIN terminal_bank_receive c ON c.terminal_id = b.id "
+            + "WHERE a.user_id = :userId AND c.bank_id = :bankId "
+            + "GROUP BY a.id ", nativeQuery = true)
+    List<MerchantResponseDTO> getMerchantsByUserIdNoPaging(String userId, String bankId);
 }

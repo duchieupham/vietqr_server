@@ -88,4 +88,8 @@ public interface TerminalService {
     String getUserIdByTerminalId(String terminalId);
 
     String checkExistedTerminalRawCode(String code);
+
+    TerminalEntity getTerminalByTerminalId(String terminalId);
+
+    List<TerminalCodeResponseDTO> getListTerminalResponseByBankIdAndMerchantId(String terminalId, String bankId);
 }

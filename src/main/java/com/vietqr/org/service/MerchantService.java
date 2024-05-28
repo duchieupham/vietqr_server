@@ -20,5 +20,7 @@ public interface MerchantService {
 
     int inactiveMerchantByMerchantId(String merchantId, String userId);
 
+    List<MerchantResponseDTO> getMerchantsByUserIdNoPaging(String userId, String bankId);
+
     List<MerchantResponseListDTO> getMerchantsByUserId(String userId);
 }

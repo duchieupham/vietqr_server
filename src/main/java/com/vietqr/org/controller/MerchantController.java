@@ -120,6 +120,22 @@ public class MerchantController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("merchant-form/{userId}")
+    public ResponseEntity<List<MerchantResponseDTO>> getMerchantsByUserIdNoPaging(
+            @PathVariable String userId,
+            @RequestParam String bankId) {
+        List<MerchantResponseDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            result = merchantService.getMerchantsByUserIdNoPaging(userId, bankId);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getMerchantsByUserId: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @GetMapping("merchant-list/{userId}")
     public ResponseEntity<List<MerchantResponseListDTO>> getMerchantsByUserId(@PathVariable String userId) {
         List<MerchantResponseListDTO> result = new ArrayList<>();

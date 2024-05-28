@@ -45,6 +45,11 @@ public class MerchantServiceImpl implements MerchantService {
     }
 
     @Override
+    public List<MerchantResponseDTO> getMerchantsByUserIdNoPaging(String userId, String bankId) {
+        return repo.getMerchantsByUserIdNoPaging(userId, bankId);
+    }
+
+    @Override
     public List<MerchantResponseListDTO> getMerchantsByUserId(String userId) {
         return repo.getMerchantsByUserId(userId);
     }

@@ -216,4 +216,14 @@ public class TerminalServiceImpl implements TerminalService {
     public String checkExistedTerminalRawCode(String code) {
         return repo.checkExistedRawTerminalCode(code);
     }
+
+    @Override
+    public List<TerminalCodeResponseDTO> getListTerminalResponseByBankIdAndMerchantId(String merchantId, String bankId) {
+        return repo.getListTerminalResponseByBankIdAndMerchantId(merchantId, bankId);
+    }
+
+    @Override
+    public TerminalEntity getTerminalByTerminalId(String terminalId) {
+        return repo.getTerminalByTerminalId(terminalId);
+    }
 }

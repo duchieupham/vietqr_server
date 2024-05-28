@@ -332,6 +332,17 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "LIMIT 1 ", nativeQuery = true)
 	IAccountBankReceiveDTO getAccountBankInfoResById(String bankAccount, String bankCode);
 
+	@Query(value = "SELECT a.id AS bankId, a.bank_account AS bankAccount, "
+			+"a.is_authenticated AS isAuthenticated, a.mms_active AS isMmsActive, "
+			+ "a.bank_account_name AS userBankName, b.bank_short_name AS bankShortName, "
+			+ "b.bank_code AS bankCode "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN bank_type b "
+			+ "ON a.bank_type_id = b.id "
+			+ "WHERE a.id = :bankId AND a.is_authenticated = TRUE "
+			+ "LIMIT 1 ", nativeQuery = true)
+	IAccountBankReceiveDTO getAccountBankInfoResById(String bankId);
+
 	@Query(value = "SELECT '' AS vso, '' AS merchantName, "
 			+ "COALESCE(b.email, 0) AS email, b.phone_no AS phoneNo, a.user_id AS userId, "
 			+ "a.bank_account AS bankAccount, a.bank_account_name AS userBankName, "

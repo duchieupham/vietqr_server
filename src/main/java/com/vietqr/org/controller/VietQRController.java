@@ -15,6 +15,7 @@ import javax.validation.Valid;
 
 import com.vietqr.org.entity.*;
 import com.vietqr.org.service.*;
+import com.vietqr.org.util.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -51,18 +52,11 @@ import com.vietqr.org.dto.VietQRDTO;
 import com.vietqr.org.dto.VietQRGenerateDTO;
 import com.vietqr.org.dto.VietQRMMSCreateDTO;
 import com.vietqr.org.dto.VietQRMMSRequestDTO;
-import com.vietqr.org.util.VietQRUtil;
 import com.vietqr.org.util.bank.mb.MBTokenUtil;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import reactor.core.publisher.Mono;
-
-import com.vietqr.org.util.EnvironmentUtil;
-import com.vietqr.org.util.NotificationUtil;
-import com.vietqr.org.util.RandomCodeUtil;
-import com.vietqr.org.util.SocketHandler;
-import com.vietqr.org.util.TransactionRefIdUtil;
 
 @RestController
 @CrossOrigin
@@ -78,6 +72,9 @@ public class VietQRController {
 
 	@Autowired
 	AccountBankReceiveService accountBankService;
+
+	@Autowired
+	TerminalBankReceiveService terminalBankReceiveService;
 
 	@Autowired
 	TransactionReceiveService transactionReceiveService;
@@ -720,6 +717,39 @@ public class VietQRController {
 
 	}
 
+	private ResponseMessageDTO sendMessageDynamicQrToQrBox(String transactionUUID, String boxCode, VietQRDTO result,
+														   String terminalName, String qr, String note) {
+		ResponseMessageDTO responseMessageDTO = null;
+		try {
+			String boxId = BoxTerminalRefIdUtil.encryptQrBoxId(boxCode);
+			Map<String, String> data = new HashMap<>();
+			data.put("notificationType", NotificationUtil.getNotiSendDynamicQr());
+			data.put("transactionReceiveId", transactionUUID);
+			data.put("bankAccount", result.getBankAccount());
+			data.put("bankName", result.getBankName());
+			data.put("bankShortName", result.getBankCode());
+			data.put("userBankName", result.getUserBankName());
+			data.put("note", note != null ? note : "");
+			data.put("content", result.getContent());
+			data.put("amount", StringUtil.formatNumberAsString(result.getAmount()));
+			data.put("imgId", "");
+			data.put("qrCode", qr);
+			data.put("qrType", "0");
+			data.put("boxId", boxId);
+			data.put("boxCode", boxCode);
+			data.put("terminalCode", result.getTerminalCode() != null ? result.getTerminalCode() : "");
+			data.put("terminalName", terminalName != null ? terminalName : "");
+			socketHandler.sendMessageToBoxId(boxId, data);
+			responseMessageDTO = new ResponseMessageDTO("SUCCESS", "");
+			return responseMessageDTO;
+		} catch (Exception e) {
+			logger.error("insertNewTransaction - sendMessageDynamicQrToQrBox: ERROR: " + e.toString()
+			+ " at: " + System.currentTimeMillis());
+			responseMessageDTO = new ResponseMessageDTO("FAILED", "E05");
+		}
+		return responseMessageDTO;
+	}
+
 	private String requestVietQRMMS(VietQRMMSRequestDTO dto) {
 		String result = null;
 		LocalDateTime requestLDT = LocalDateTime.now();
@@ -887,7 +917,7 @@ public class VietQRController {
 				transactionEntity.setStatus(0);
 				transactionEntity.setTraceId(traceId);
 				transactionEntity.setTimePaid(0);
-				transactionEntity.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
+				transactionEntity.setTerminalCode(result.getTerminalCode() != null ? result.getTerminalCode() : "");
 				transactionEntity.setQrCode("");
 				transactionEntity.setUserId(accountBankEntity.getUserId());
 				transactionEntity.setOrderId(orderId);
@@ -1190,6 +1220,7 @@ public class VietQRController {
 		HttpStatus httpStatus = null;
 		UUID transcationUUID = UUID.randomUUID();
 		String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
+		String qr = "";
 		try {
 			AccountBankReceiveEntity accountBankEntity = accountBankService.getAccountBankById(dto.getBankId());
 			if (accountBankEntity != null) {
@@ -1205,7 +1236,7 @@ public class VietQRController {
 				vietQRGenerateDTO.setAmount(dto.getAmount());
 				vietQRGenerateDTO.setContent(traceId + " " + dto.getContent());
 				vietQRGenerateDTO.setBankAccount(accountBankEntity.getBankAccount());
-				String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+				qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
 				// generate VietQRDTO
 				VietQRDTO vietQRDTO = new VietQRDTO();
 				vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
@@ -1220,6 +1251,10 @@ public class VietQRController {
 				vietQRDTO.setTransactionId(transcationUUID.toString());
 				// return terminal code of merchant
 				vietQRDTO.setTerminalCode(dto.getTerminalCode());
+				if (StringUtil.isNullOrEmpty(dto.getTerminalCode()) &&
+						!StringUtil.isNullOrEmpty(dto.getSubTerminalCode())) {
+					vietQRDTO.setTerminalCode(dto.getSubTerminalCode());
+				}
 				// return transactionRefId to present url QR Generated
 				String refId = TransactionRefIdUtil.encryptTransactionId(transcationUUID.toString());
 				String qrLink = EnvironmentUtil.getQRLink() + refId;
@@ -1244,6 +1279,16 @@ public class VietQRController {
 				insertNewTransaction(transcationUUID, traceId, dto, result, dto.getOrderId(), "", false);
 			} else {
 				insertNewTransaction(transcationUUID, traceId, dto, result, "", "", false);
+			}
+			if (StringUtil.isNullOrEmpty(dto.getTerminalCode()) &&
+			!StringUtil.isNullOrEmpty(dto.getSubTerminalCode())) {
+				TerminalBankReceiveEntity terminalBankReceiveEntity =
+						terminalBankReceiveService.getTerminalBankReceiveEntityByTerminalCode(result.getTerminalCode());
+				sendMessageDynamicQrToQrBox(transcationUUID.toString(),
+						terminalBankReceiveEntity.getRawTerminalCode() != null ?
+								terminalBankReceiveEntity.getRawTerminalCode() : "",
+						result, "", qr, dto.getNote()
+						);
 			}
 		}
 	}

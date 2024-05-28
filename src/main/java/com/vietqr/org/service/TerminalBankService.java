@@ -1,8 +1,12 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.dto.QrBoxDynamicDTO;
+import com.vietqr.org.dto.QrBoxListDTO;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.entity.TerminalBankEntity;
+
+import java.util.List;
 
 @Service
 public interface TerminalBankService {
@@ -18,4 +22,8 @@ public interface TerminalBankService {
     public Integer getTerminalCounting();
 
     public String getBankAccountByTerminalLabel(String terminalLabel);
+
+    List<QrBoxListDTO> getQrBoxListByBankId(String bankId);
+
+    List<QrBoxDynamicDTO> getQrBoxDynamicQrByBankId(String bankId);
 }
