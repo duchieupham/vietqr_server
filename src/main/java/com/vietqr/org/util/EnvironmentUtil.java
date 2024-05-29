@@ -187,6 +187,8 @@ public class EnvironmentUtil {
 
     ///////////////////////////////////
     // for recharge into VietQR VN
+    private static final String MMS_PREFIX_ORDER_ID = "VQO";
+
     private static final String BUSINESS_ID_RECHARGE_UAT = "";
     private static final String BUSINESS_ID_RECHARGE_PROD = "bb6ca0e0-f085-4f03-9166-18cbfc840d63";
     //
@@ -378,6 +380,9 @@ public class EnvironmentUtil {
     }
 
     ///
+    public static String getMmsPrefixOrderId() {
+        return MMS_PREFIX_ORDER_ID;
+    }
 
     public static String getUrlVietqrVnUat() {
         return URL_VIETQR_VN_UAT;
