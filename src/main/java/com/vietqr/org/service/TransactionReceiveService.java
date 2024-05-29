@@ -72,6 +72,10 @@ public interface TransactionReceiveService {
                         String fromDate, String toDate);
 
         // admin
+        CountTransactionsDTO countTransAccount();
+
+        TransactionReceiveSyncDTO getTransactionReceiveSyncByTime(long time);
+
         List<TransactionReceiveAdminListDTO> getTransByBankAccountAllDate(String value, int offset);
 
         List<TransactionReceiveAdminListDTO> getTransByBankAccountFromDate(

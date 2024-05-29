@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.vietqr.org.dto.AccountCustomerMerchantDTO;
+import com.vietqr.org.service.AccountCustomerService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,22 +46,30 @@ public class BearerTokenController {
 	@Autowired
 	AccountSmsService accountSmsService;
 
+	@Autowired
+	AccountCustomerService accountCustomerService;
+
 	@PostMapping("token_generate")
 	public ResponseEntity<TokenDTO> getToken(HttpServletRequest request) {
 		TokenDTO result = null;
 		HttpStatus httpStatus = null;
+
 		String authHeader = request.getHeader("Authorization");
 		if (authHeader != null && authHeader.toLowerCase().startsWith("basic")) {
 			String base64Credentials = authHeader.substring("Basic".length()).trim();
 			byte[] credDecoded = Base64.getDecoder().decode(base64Credentials);
 			String credentials = new String(credDecoded, StandardCharsets.UTF_8);
 			// credentials = "username:password"
+
 			final String[] values = credentials.split(":", 2);
 			String username = values[0];
+
+			List<AccountCustomerMerchantDTO> merchant = accountCustomerService.getMerchantNameByPassword(username);
+
 			try {
 				// Do something with username and password
 				result = new TokenDTO(getJWTToken(Base64.getEncoder().encodeToString(username.getBytes())), "Bearer",
-						59);
+						59, merchant);
 				httpStatus = HttpStatus.OK;
 			} catch (Exception e) {
 				httpStatus = HttpStatus.BAD_REQUEST;
@@ -171,6 +181,12 @@ public class BearerTokenController {
 		List<GrantedAuthority> grantedAuthorities = AuthorityUtils
 				.commaSeparatedStringToAuthorityList("ROLE_USER");
 
+		List<AccountCustomerMerchantDTO> mechants =
+				accountCustomerService.getMerchantNameByPassword(username);
+
+		List<GrantedAuthority> merchantNames =
+				AuthorityUtils.commaSeparatedStringToAuthorityList(mechants.toString());
+
 		String token = Jwts
 				.builder()
 				// .claim("grantType",grantType)
@@ -179,6 +195,7 @@ public class BearerTokenController {
 								.map(GrantedAuthority::getAuthority)
 								.collect(Collectors.toList()))
 				.claim("user", username)
+				.claim("mechants", merchantNames)
 				.setIssuedAt(new Date(System.currentTimeMillis()))
 				.setExpiration(new Date(System.currentTimeMillis() + 59000))
 				.signWith(SignatureAlgorithm.HS512,

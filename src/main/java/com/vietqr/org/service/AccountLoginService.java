@@ -2,6 +2,7 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+import com.vietqr.org.dto.AccountLoginSyncDTO;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.dto.AccountCheckDTO;
@@ -54,4 +55,6 @@ public interface AccountLoginService {
 	public void resetPassword(String password, String phoneNo);
 
 	String checkPassword(String userId, String password);
+
+	AccountLoginSyncDTO countAccounts();
 }

@@ -15,12 +15,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -56,6 +58,8 @@ import com.vietqr.org.util.bank.bidv.CustomerVaUtil;
 @ComponentScan(basePackages = { "com.vietqr.org" })
 @Import(WebSocketConfig.class)
 @EnableWebMvc
+@EnableScheduling
+//@EnableFeignClients
 public class VietqrApplication extends SpringBootServletInitializer implements WebMvcConfigurer {
 
 	@Bean
@@ -327,6 +331,8 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 					.antMatchers(HttpMethod.POST, "/api/accounts/password/reset").permitAll()
 					.antMatchers(HttpMethod.GET, "/api/bank-type/unauthenticated").permitAll()
 					.antMatchers(HttpMethod.GET, "/api/bank-types").permitAll()
+					//.antMatchers(HttpMethod.GET, "/bank/api/transactions/**").permitAll()
+					.antMatchers(HttpMethod.GET, "/api/accountLoginSync/**").permitAll()
 					.antMatchers(HttpMethod.GET, "/images/**").permitAll()
 					.antMatchers(HttpMethod.GET, "/api/images/**").permitAll()
 					.antMatchers(HttpMethod.GET, "/bank/api/account/**").permitAll()

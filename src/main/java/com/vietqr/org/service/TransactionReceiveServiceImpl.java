@@ -184,6 +184,16 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
+    @Override
+    public CountTransactionsDTO countTransAccount() {
+        return repo.countTransAccount();
+    }
+
+    @Override
+    public TransactionReceiveSyncDTO getTransactionReceiveSyncByTime(long time) {
+        return repo.getTransactionReceiveSyncByTime(time);
+    }
+
     //
     //
     //

@@ -2,6 +2,7 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+import com.vietqr.org.dto.AccountLoginSyncDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -124,6 +125,11 @@ public class AccountLoginServiceImpl implements AccountLoginService {
 	@Override
 	public String checkPassword(String userId, String password) {
 		return repo.checkPassword(userId, password);
+	}
+
+	@Override
+	public AccountLoginSyncDTO countAccounts() {
+		return repo.CountAccounts();
 	}
 
 }

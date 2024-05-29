@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.vietqr.org.dto.AccountCustomerMerchantDTO;
+import com.vietqr.org.service.AccountCustomerService;
 import org.springframework.http.HttpStatus;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,9 @@ public class BearerTokenBIDVController {
     @Autowired
     AccountSettingService accountSettingService;
 
+    @Autowired
+    AccountCustomerService accountCustomerService;
+
     @PostMapping("token_generate")
     public ResponseEntity<TokenDTO> getToken(HttpServletRequest request) {
         TokenDTO result = null;
@@ -46,10 +51,13 @@ public class BearerTokenBIDVController {
             // credentials = "username:password"
             final String[] values = credentials.split(":", 2);
             String username = values[0];
+
+            List<AccountCustomerMerchantDTO> merchant = accountCustomerService.getMerchantNameByPassword(username);
+
             try {
                 // Do something with username and password
                 result = new TokenDTO(getJWTToken(Base64.getEncoder().encodeToString(username.getBytes())), "Bearer",
-                        300);
+                        300, merchant);
                 httpStatus = HttpStatus.OK;
             } catch (Exception e) {
                 httpStatus = HttpStatus.BAD_REQUEST;

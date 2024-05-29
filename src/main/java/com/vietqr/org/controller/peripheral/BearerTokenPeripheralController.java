@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.vietqr.org.dto.AccountCustomerMerchantDTO;
+import com.vietqr.org.service.AccountCustomerService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,6 +37,9 @@ public class BearerTokenPeripheralController {
     @Autowired
     AccountSettingService accountSettingService;
 
+    @Autowired
+    AccountCustomerService accountCustomerService;
+
     @PostMapping("token_generate")
     public ResponseEntity<TokenDTO> getToken(HttpServletRequest request) {
         TokenDTO result = null;
@@ -47,10 +52,13 @@ public class BearerTokenPeripheralController {
             // credentials = "username:password"
             final String[] values = credentials.split(":", 2);
             String username = values[0];
+
+            List<AccountCustomerMerchantDTO> merchant = accountCustomerService.getMerchantNameByPassword(username);
+
             try {
                 // Do something with username and password
                 result = new TokenDTO(getJWTToken(Base64.getEncoder().encodeToString(username.getBytes())), "Bearer",
-                        300);
+                        300, merchant);
                 httpStatus = HttpStatus.OK;
             } catch (Exception e) {
                 httpStatus = HttpStatus.BAD_REQUEST;
@@ -66,6 +74,12 @@ public class BearerTokenPeripheralController {
         List<GrantedAuthority> grantedAuthorities = AuthorityUtils
                 .commaSeparatedStringToAuthorityList("ROLE_USER");
 
+        List<AccountCustomerMerchantDTO> merchant = accountCustomerService.getMerchantNameByPassword(username);
+
+        List<String> merchantNames = merchant.stream()
+                .map(AccountCustomerMerchantDTO::getMerchant)
+                .collect(Collectors.toList());
+
         String token = Jwts
                 .builder()
                 // .claim("grantType",grantType)
@@ -73,6 +87,7 @@ public class BearerTokenPeripheralController {
                         grantedAuthorities.stream()
                                 .map(GrantedAuthority::getAuthority)
                                 .collect(Collectors.toList()))
+                //.claim("merchant", merchant)
                 .claim("user", username)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 300000))

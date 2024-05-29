@@ -115,6 +115,12 @@ public class CustomerSyncServiceImpl implements CustomerSyncService {
         return repo.getCustomerSyncEcList();
     }
 
+    // Get CustomerSync By MerchantName
+    @Override
+    public List<CustomerSyncListDTO> getCustomerSyncByMerchant(String merchant) {
+        return repo.getCustomerSyncByMerchant(merchant);
+    }
+
     @Override
     public String getMerchantNameById(String id) {
         return repo.getMerchantNameById(id);

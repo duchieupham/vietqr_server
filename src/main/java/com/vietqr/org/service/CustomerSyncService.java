@@ -32,6 +32,8 @@ public interface CustomerSyncService {
 
     public List<CustomerSyncListDTO> getCustomerSyncEcList();
 
+    public List<CustomerSyncListDTO> getCustomerSyncByMerchant(String merchantName);
+
     // public List<String> checkExistedCustomerSyncByUsername(String username);
 
     // 0 => API Service

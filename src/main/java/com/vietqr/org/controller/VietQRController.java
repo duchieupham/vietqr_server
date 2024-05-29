@@ -13,6 +13,7 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.service.*;
 import org.apache.log4j.Logger;
@@ -38,19 +39,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vietqr.org.dto.BankDetailInputDTO;
-import com.vietqr.org.dto.CaiBankDTO;
-import com.vietqr.org.dto.ResponseMessageDTO;
-import com.vietqr.org.dto.TokenProductBankDTO;
-import com.vietqr.org.dto.VietQRCreateCustomerDTO;
-import com.vietqr.org.dto.VietQRCreateDTO;
-import com.vietqr.org.dto.VietQRCreateFromTransactionDTO;
-import com.vietqr.org.dto.VietQRCreateListDTO;
-import com.vietqr.org.dto.VietQRCreateUnauthenticatedDTO;
-import com.vietqr.org.dto.VietQRDTO;
-import com.vietqr.org.dto.VietQRGenerateDTO;
-import com.vietqr.org.dto.VietQRMMSCreateDTO;
-import com.vietqr.org.dto.VietQRMMSRequestDTO;
 import com.vietqr.org.util.VietQRUtil;
 import com.vietqr.org.util.bank.mb.MBTokenUtil;
 
@@ -99,6 +87,9 @@ public class VietQRController {
 
 	@Autowired
 	private SocketHandler socketHandler;
+
+	@Autowired
+	AccountCustomerService accountCustomerService;
 
 	@Autowired
 	AccountBankReceivePersonalService accountBankReceivePersonalService;
@@ -396,6 +387,11 @@ public class VietQRController {
 		UUID transactionUUID = UUID.randomUUID();
 		// for saving qr mms flow 2
 		String qrMMS = "";
+
+		//get username by token
+		String username = getUsernameFromToken(token);
+		String accCusId = accountCustomerService.getAccountCustomerIdByUsername(username);
+
 		// find bankAccount đã liên kết và mms = true và check transType = "C -> gọi
 		// luồng 2
 		String checkExistedMMSBank = accountBankService.checkMMSBankAccount(dto.getBankAccount());
@@ -470,6 +466,7 @@ public class VietQRController {
 							String qrLink = EnvironmentUtil.getQRLink() + refId;
 							vietQRDTO.setTransactionRefId(refId);
 							vietQRDTO.setQrLink(qrLink);
+							vietQRDTO.setAccountCustomerId(accCusId);
 							//
 							result = vietQRDTO;
 							httpStatus = HttpStatus.OK;
@@ -560,6 +557,7 @@ public class VietQRController {
 					} else {
 						vietQRCreateDTO.setUrlLink("");
 					}
+					vietQRCreateDTO.setAccountCustomerId(accCusId);
 					insertNewTransaction(transactionUUID, traceId, vietQRCreateDTO, vietQRDTO, dto.getOrderId(),
 							dto.getSign(), true);
 				}
@@ -572,6 +570,9 @@ public class VietQRController {
 				String user = (String) claims.get("user");
 				if (user != null) {
 					String decodedUser = new String(Base64.getDecoder().decode(user));
+
+					//String merchant = (String) claims.get("mechants");
+
 					logger.info("qr/generate-customer - user " + decodedUser + " call at " + time);
 					System.out.println("qr/generate-customer - user " + decodedUser + " call at " + time);
 				} else {
@@ -650,6 +651,7 @@ public class VietQRController {
 										String qrLink = EnvironmentUtil.getQRLink() + refId;
 										vietQRDTO.setTransactionRefId(refId);
 										vietQRDTO.setQrLink(qrLink);
+										vietQRDTO.setAccountCustomerId(accCusId);
 										result = vietQRDTO;
 										httpStatus = HttpStatus.OK;
 										// result = vietQRMMSDTO;
@@ -707,6 +709,7 @@ public class VietQRController {
 					vietQRMMSCreateDTO.setSign(dto.getSign());
 					vietQRMMSCreateDTO.setTerminalCode(dto.getTerminalCode());
 					vietQRMMSCreateDTO.setNote(dto.getNote());
+					vietQRMMSCreateDTO.setAccountCustomerId(accCusId);
 					if (dto.getUrlLink() != null && !dto.getUrlLink().trim().isEmpty()) {
 						vietQRMMSCreateDTO.setUrlLink(dto.getUrlLink());
 					} else {
@@ -827,7 +830,9 @@ public class VietQRController {
 			AccountBankReceiveEntity accountBankReceiveEntity,
 			VietQRMMSCreateDTO dto,
 			long time) {
+
 		try {
+
 			TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
 			transactionEntity.setId(transcationUUID);
 			transactionEntity.setBankAccount(accountBankReceiveEntity.getBankAccount());
@@ -850,6 +855,8 @@ public class VietQRController {
 			transactionEntity.setNote(dto.getNote() != null ? dto.getNote() : "");
 			transactionEntity.setTransStatus(0);
 			transactionEntity.setUrlLink(dto.getUrlLink() != null ? dto.getUrlLink() : "");
+			// add fied AccountCustomerId
+			transactionEntity.setAccountCustomerId(dto.getAccountCustomerId() != null ? dto.getAccountCustomerId() : "");
 			transactionReceiveService.insertTransactionReceive(transactionEntity);
 			LocalDateTime endTime = LocalDateTime.now();
 			long endTimeLong = endTime.toEpochSecond(ZoneOffset.UTC);
@@ -857,6 +864,24 @@ public class VietQRController {
 		} catch (Exception e) {
 			logger.error("insertNewTransaction - generateVietQRMMS: ERROR: " + e.toString());
 		}
+	}
+
+	//Decode username by JWT token
+	private String getUsernameFromToken(String token) {
+		String result = "";
+		try {
+			if (token != null && !token.trim().isEmpty()) {
+				String secretKey = "mySecretKey";
+				String jwtToken = token.substring(7); // remove "Bearer " from the beginning
+				Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(jwtToken).getBody();
+				String userId = (String) claims.get("user");
+				if (userId != null) {
+					result = new String(Base64.getDecoder().decode(userId));
+				}
+			}
+		} catch (Exception e) {
+		}
+		return result;
 	}
 
 	// isFromBusinessSync: From customer with extra flow - customer-sync.
@@ -894,6 +919,8 @@ public class VietQRController {
 				transactionEntity.setNote(dto.getNote() != null ? dto.getNote() : "");
 				transactionEntity.setTransStatus(0);
 				transactionEntity.setUrlLink(dto.getUrlLink() != null ? dto.getUrlLink() : "");
+				transactionEntity.setAccountCustomerId(dto.getAccountCustomerId() != null ? dto.getAccountCustomerId() : "");
+
 				if (dto.getTransType() != null) {
 					transactionEntity.setTransType(dto.getTransType());
 				} else {

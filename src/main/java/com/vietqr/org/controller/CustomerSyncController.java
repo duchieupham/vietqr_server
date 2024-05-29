@@ -14,14 +14,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -62,6 +56,8 @@ import com.vietqr.org.util.EnvironmentUtil;
 
 import reactor.core.publisher.Mono;
 
+import static org.hibernate.tool.schema.SchemaToolingLogging.LOGGER;
+
 @RestController
 @CrossOrigin
 @RequestMapping("/api")
@@ -90,12 +86,31 @@ public class CustomerSyncController {
     AccountCustomerService accountCustomerService;
 
     @GetMapping("admin/customer-sync")
+    @Scheduled(fixedRate = 86400000)
+    @Scheduled(cron = "0 0 0 * * *")
     public ResponseEntity<List<CustomerSyncListDTO>> getCustomerSyncList() {
         List<CustomerSyncListDTO> result = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
             result = customerSyncService.getCustomerSyncList();
             httpStatus = HttpStatus.OK;
+            LOGGER.info("Bắt đầu đồng bộ data từ CustomerSync mỗi ngày vào lúc 00h00");
+        } catch (Exception e) {
+            logger.error("getCustomerSyncList: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // Get information customer-sync by merchant
+    @GetMapping("admin/customer-sync/{merchant}")
+    public ResponseEntity<List<CustomerSyncListDTO>> getCustomerSyncListByMerchant(@PathVariable String merchant) {
+        List<CustomerSyncListDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            result = customerSyncService.getCustomerSyncByMerchant(merchant);
+            httpStatus = HttpStatus.OK;
+            //LOGGER.info("Bắt đầu đồng bộ data từ Merchant mỗi ngày vào lúc 00h00");
         } catch (Exception e) {
             logger.error("getCustomerSyncList: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;

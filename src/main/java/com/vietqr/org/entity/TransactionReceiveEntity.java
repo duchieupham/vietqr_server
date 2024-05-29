@@ -20,7 +20,8 @@ import javax.persistence.*;
 						@ColumnResult(name = "type", type = Integer.class),
 						@ColumnResult(name = "time", type = Long.class),
 						@ColumnResult(name = "time_paid", type = Long.class),
-						@ColumnResult(name = "status", type = Integer.class)
+						@ColumnResult(name = "status", type = Integer.class),
+						@ColumnResult(name = "account_customer_id", type = String.class)
 				}
 		)
 )
@@ -108,13 +109,18 @@ public class TransactionReceiveEntity implements Serializable {
 	@Column(name = "urlLink")
 	private String urlLink;
 
+	// decode form JWT token
+	@Column(name = "accountCustomerId")
+	private String accountCustomerId;
+
 	public TransactionReceiveEntity() {
 		super();
 	}
 
 	public TransactionReceiveEntity(String id, String bankAccount, String bankId, String content, long amount,
 			long time, String refId, int type, int status, String traceId, String transType, String referenceNumber,
-			String sign, String orderId, String terminalCode, String qrCode, String userId, String note) {
+			String sign, String orderId, String terminalCode, String qrCode, String userId,
+									String note, String accountCustomerId) {
 		this.id = id;
 		this.bankAccount = bankAccount;
 		this.bankId = bankId;
@@ -133,12 +139,23 @@ public class TransactionReceiveEntity implements Serializable {
 		this.qrCode = qrCode;
 		this.userId = userId;
 		this.note = note;
+		this.accountCustomerId = accountCustomerId;
+	}
+
+
+
+	public String getAccountCustomerId() {
+		return accountCustomerId;
+	}
+
+	public void setAccountCustomerId(String accountCustomerId) {
+		this.accountCustomerId = accountCustomerId;
 	}
 
 	public TransactionReceiveEntity(String id, String bankAccount, String bankId, String content, long amount,
-			long time, String refId, int type, int status, String traceId, String transType, String referenceNumber,
-			String orderId, String sign, String customerBankAccount, String customerBankCode, String customerName,
-			String terminalCode, String qrCode, String userId, String note) {
+									long time, String refId, int type, int status, String traceId, String transType, String referenceNumber,
+									String orderId, String sign, String customerBankAccount, String customerBankCode, String customerName,
+									String terminalCode, String qrCode, String userId, String note) {
 		this.id = id;
 		this.bankAccount = bankAccount;
 		this.bankId = bankId;

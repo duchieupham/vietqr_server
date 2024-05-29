@@ -26,6 +26,8 @@ public class VietQRDTO implements Serializable {
 	// terminalCode to show what terminal is
 	private String terminalCode;
 
+	private String accountCustomerId;
+
 	public VietQRDTO() {
 		super();
 	}
@@ -47,6 +49,14 @@ public class VietQRDTO implements Serializable {
 		this.transactionRefId = transactionRefId;
 		this.terminalCode = terminalCode;
 		this.qrLink = qrLink;
+	}
+
+	public String getAccountCustomerId() {
+		return accountCustomerId;
+	}
+
+	public void setAccountCustomerId(String accountCustomerId) {
+		this.accountCustomerId = accountCustomerId;
 	}
 
 	public String getBankCode() {
