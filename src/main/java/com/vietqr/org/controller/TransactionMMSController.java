@@ -388,6 +388,8 @@ public class TransactionMMSController {
                                                 data1.put("message", String.format(messageForBox, amountForVoice));
                                                 String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(rawCode);
                                                 socketHandler.sendMessageToBoxId(idRefBox, data1);
+                                                logger.info("WS: socketHandler.sendMessageToQRBox - "
+                                                        + rawCode + " at: " + System.currentTimeMillis());
                                             } catch (IOException e) {
                                                 logger.error(
                                                         "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
@@ -571,6 +573,8 @@ public class TransactionMMSController {
                                                 data.put("message", String.format(messageForBox, amountForVoice));
                                                 String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(subRawCode);
                                                 socketHandler.sendMessageToBoxId(idRefBox, data);
+                                                logger.info("WS: socketHandler.sendMessageToQRBox - "
+                                                        + subRawCode + " at: " + System.currentTimeMillis());
                                             } catch (IOException e) {
                                                 logger.error(
                                                         "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
@@ -869,6 +873,8 @@ public class TransactionMMSController {
                                             data.put("message", String.format(messageForBox, amountForVoice));
                                             String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(subRawCode);
                                             socketHandler.sendMessageToBoxId(idRefBox, data);
+                                            logger.info("WS: socketHandler.sendMessageToQRBox MMS - "
+                                                    + subRawCode + " at: " + System.currentTimeMillis());
                                         } catch (IOException e) {
                                             logger.error(
                                                     "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
