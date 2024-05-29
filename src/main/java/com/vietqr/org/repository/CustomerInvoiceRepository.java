@@ -52,7 +52,7 @@ public interface CustomerInvoiceRepository extends JpaRepository<CustomerInvoice
                         + "FROM customer_invoice "
                         + "WHERE customer_id = :customerId "
                         + "AND status = 0 "
-                        + "AND inquired = 0 "
+                        + "AND inquire = 0 "
                         + "ORDER BY RAND() "
                         + "LIMIT 1", nativeQuery = true)
         CustomerInvoiceInfoDataDTO getCustomerInvoiceInfo(@Param(value = "customerId") String customerId);
@@ -60,7 +60,7 @@ public interface CustomerInvoiceRepository extends JpaRepository<CustomerInvoice
         @Transactional
         @Modifying
         @Query(value = "UPDATE customer_invoice "
-                        + "SET inquired = :inquired "
+                        + "SET inquire = :inquired "
                         + "WHERE bill_id = :billId", nativeQuery = true)
         void updateInquiredInvoiceByBillId(
                         @Param(value = "inquired") int inquired,
