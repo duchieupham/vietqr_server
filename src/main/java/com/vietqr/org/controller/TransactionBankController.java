@@ -1778,6 +1778,8 @@ public class TransactionBankController {
 						data.put("message", String.format(messageForBox, amountForVoice));
 						String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 						socketHandler.sendMessageToBoxId(idRefBox, data);
+						logger.info("WS: socketHandler.sendMessageToQRBox - "
+								+ boxIdRef + " at: " + System.currentTimeMillis());
 					} catch (IOException e) {
 						logger.error(
 								"WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
@@ -1852,6 +1854,8 @@ public class TransactionBankController {
 							data.put("message", String.format(messageForBox, amountForVoice));
 							String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 							socketHandler.sendMessageToBoxId(idRefBox, data);
+							logger.info("WS: socketHandler.sendMessageToQRBox - "
+									+ boxIdRef + " at: " + System.currentTimeMillis());
 						} catch (IOException e) {
 							logger.error(
 									"WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
@@ -1998,6 +2002,8 @@ public class TransactionBankController {
 						data.put("message", String.format(messageForBox, amountForVoice));
 						String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 						socketHandler.sendMessageToBoxId(idRefBox, data);
+						logger.info("WS: socketHandler.sendMessageToQRBox - "
+								+ boxIdRef + " at: " + System.currentTimeMillis());
 					} catch (IOException e) {
 						logger.error(
 								"WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
@@ -2332,6 +2338,8 @@ public class TransactionBankController {
 								data1.put("message", String.format(messageForBox, amountForVoice));
 								String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 								socketHandler.sendMessageToBoxId(idRefBox, data1);
+								logger.info("WS: socketHandler.sendMessageToQRBox - "
+										+ boxIdRef + " at: " + System.currentTimeMillis());
 							} catch (IOException e) {
 								logger.error(
 										"WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
@@ -2398,6 +2406,8 @@ public class TransactionBankController {
 								data.put("message", String.format(messageForBox, amountForVoice));
 								String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 								socketHandler.sendMessageToBoxId(idRefBox, data);
+								logger.info("WS: socketHandler.sendMessageToQRBox - "
+										+ boxIdRef + " at: " + System.currentTimeMillis());
 							} catch (IOException e) {
 								logger.error(
 										"WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
@@ -2666,6 +2676,8 @@ public class TransactionBankController {
 							data.put("message", String.format(messageForBox, amountForVoice));
 							String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 							socketHandler.sendMessageToBoxId(idRefBox, data);
+							logger.info("WS: socketHandler.sendMessageToQRBox - "
+									+ boxIdRef + " at: " + System.currentTimeMillis());
 						} catch (IOException e) {
 							logger.error(
 									"WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
@@ -2887,6 +2899,8 @@ public class TransactionBankController {
 							data1.put("message", String.format(messageForBox, amountForVoice));
 							String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 							socketHandler.sendMessageToBoxId(idRefBox, data1);
+							logger.info("WS: socketHandler.sendMessageToQRBox - "
+									+ boxIdRef + " at: " + System.currentTimeMillis());
 						} catch (IOException e) {
 							logger.error(
 									"WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
@@ -2943,6 +2957,8 @@ public class TransactionBankController {
 						data.put("message", String.format(messageForBox, amountForVoice));
 						String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
 						socketHandler.sendMessageToBoxId(idRefBox, data);
+						logger.info("WS: socketHandler.sendMessageToQRBox - "
+								+ boxIdRef + " at: " + System.currentTimeMillis());
 					} catch (IOException e) {
 						logger.error(
 								"WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());

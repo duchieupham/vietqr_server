@@ -1419,21 +1419,20 @@ public class VietQRController {
 					} else {
 						insertNewTransaction(transcationUUID, traceId, dto, result, "", "", false);
 					}
-					if (StringUtil.isNullOrEmpty(dto.getTerminalCode()) &&
-							!StringUtil.isNullOrEmpty(dto.getSubTerminalCode())) {
-						TerminalBankReceiveEntity terminalBankReceiveEntity =
-								terminalBankReceiveService.getTerminalBankReceiveEntityByTerminalCode(result.getTerminalCode());
-						if (terminalBankReceiveEntity != null) {
-							sendMessageDynamicQrToQrBox(transcationUUID.toString(),
-									terminalBankReceiveEntity.getRawTerminalCode() != null ?
-											terminalBankReceiveEntity.getRawTerminalCode() : "",
-									result, "", qr, dto.getNote()
-							);
-						}
+				}
+				if (StringUtil.isNullOrEmpty(dto.getTerminalCode()) &&
+						!StringUtil.isNullOrEmpty(dto.getSubTerminalCode())) {
+					TerminalBankReceiveEntity terminalBankReceiveEntity =
+							terminalBankReceiveService.getTerminalBankReceiveEntityByTerminalCode(result.getTerminalCode());
+					if (terminalBankReceiveEntity != null) {
+						sendMessageDynamicQrToQrBox(transcationUUID.toString(),
+								terminalBankReceiveEntity.getRawTerminalCode() != null ?
+										terminalBankReceiveEntity.getRawTerminalCode() : "",
+								result, "", qr, dto.getNote()
+						);
 					}
 				}
 			}
-
 		}
 		return new ResponseEntity<>(result, httpStatus);
 	}
