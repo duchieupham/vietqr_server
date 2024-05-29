@@ -19,6 +19,8 @@ public interface CustomerInvoiceService {
 
     public CustomerInvoiceDataDTO getCustomerInvoiceByBillId(String billId);
 
+    public void updateInquiredInvoiceByBillId(int inquired, String billId);
+
     public void removeInvocieByBillId(String billId);
 
     public CustomerInvoiceInfoDataDTO getCustomerInvoiceInfo(String customerId);

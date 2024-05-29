@@ -48,6 +48,11 @@ public class CustomerInvoiceEntity implements Serializable {
     @Column(name = "status")
     private int status;
 
+    // 0: Chưa được vấn tin từ BIDV
+    // 1: Đã vấn tin từ BIDV
+    @Column(name = "inquire")
+    private int inquire;
+
     public CustomerInvoiceEntity() {
         super();
     }
@@ -57,7 +62,7 @@ public class CustomerInvoiceEntity implements Serializable {
             int type,
             Long amount, String billId,
             Long timeCreated, Long timePaid,
-            int status) {
+            int status, int inquire) {
         this.id = id;
         this.customerId = customerId;
         this.name = name;
@@ -67,6 +72,7 @@ public class CustomerInvoiceEntity implements Serializable {
         this.timeCreated = timeCreated;
         this.timePaid = timePaid;
         this.status = status;
+        this.inquire = inquire;
     }
 
     public String getId() {
@@ -139,6 +145,14 @@ public class CustomerInvoiceEntity implements Serializable {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public int getInquire() {
+        return inquire;
+    }
+
+    public void setInquire(int inquire) {
+        this.inquire = inquire;
     }
 
 }

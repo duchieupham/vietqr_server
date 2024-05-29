@@ -118,8 +118,8 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		SpringApplication.run(VietqrApplication.class, args);
 		// String checksum =
 		// BankEncryptUtil.generateMD5GetBillForBankChecksum("QklEVkJMVUVDT01BY2Nlc3NLZXk=",
-		// "BC0001",
-		// "BCBI00004");
+		// "BLC001",
+		// "BCBL00001");
 		// System.out.println("Checksum: " + checksum);
 
 		// String checksum2 =
@@ -165,8 +165,8 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		// "FT23293978692076", "SABAccessKey");
 		// System.out.println("CHECKSUM REFUND: " + checkSum2);
 
-		String bankAccountEncrypted = BankEncryptUtil.encrypt("5553231868888");
-		System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
+		// String bankAccountEncrypted = BankEncryptUtil.encrypt("0983161649");
+		// System.out.println("bankAccountEncrypted: " + bankAccountEncrypted);
 
 		/// generate signature to request payment MB
 		// String valueToEncode = "RSID-eef52137-86b2-4812-bc05-54a522fbf226" + "USER

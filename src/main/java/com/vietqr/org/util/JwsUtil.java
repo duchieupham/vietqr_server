@@ -17,7 +17,8 @@ import org.bouncycastle.util.io.pem.PemReader;
 public class JwsUtil {
 
     // static String path = "keyRSABIDVUAT/";
-    static String path = "/opt/keyRSABIDVProd/";
+    // static String path = "/opt/keyRSABIDVProd/";
+    static String path = "keyRSABIDVProd/";
     // static String path = "/opt/keyRSABIDVUAT/";
 
     public static byte[] hexStringToBytes(String s) {
