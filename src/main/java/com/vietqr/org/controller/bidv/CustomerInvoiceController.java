@@ -120,6 +120,8 @@ public class CustomerInvoiceController {
                     logger.info("BIDV: getbill: customer_id: " + dto.getCustomer_id());
                     logger.info("BIDV: getbill: service_id: " + dto.getService_id());
                     logger.info("BIDV: getbill: getChecksum: " + dto.getChecksum());
+                    System.out.println("dto.getService_id(): " + dto.getService_id());
+                    System.out.println("serviceId: " + serviceId);
                     if (dto.getService_id().equals(serviceId)) {
                         // check valid checksum
                         String checksum = BankEncryptUtil.generateMD5GetBillForBankChecksum(secretKey, serviceId,
@@ -145,6 +147,10 @@ public class CustomerInvoiceController {
                                 invoiceDTO.setAmount(customerInvoiceInfoDataDTO.getAmount());
                                 invoiceDTO.setBill_id(customerInvoiceInfoDataDTO.getBill_id());
                                 customerInvoiceDTO.setData(invoiceDTO);
+                                // update inquired
+                                customerInvoiceService.updateInquiredInvoiceByBillId(1,
+                                        customerInvoiceInfoDataDTO.getBill_id());
+                                // response
                                 result = customerInvoiceDTO;
                                 httpStatus = HttpStatus.OK;
                             } else {
@@ -424,6 +430,7 @@ public class CustomerInvoiceController {
                 customerInvoiceEntity.setTimeCreated(timeCreated);
                 customerInvoiceEntity.setTimePaid(0L);
                 customerInvoiceEntity.setStatus(0);
+                customerInvoiceEntity.setInquire(0);
                 // add item
                 for (InvoiceItemDTO item : dto.getItems()) {
                     UUID itemId = UUID.randomUUID();

@@ -56,4 +56,9 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
         return repo.getCustomerIdByBillId(billId);
     }
 
+    @Override
+    public void updateInquiredInvoiceByBillId(int inquired, String billId) {
+        repo.updateInquiredInvoiceByBillId(inquired, billId);
+    }
+
 }
