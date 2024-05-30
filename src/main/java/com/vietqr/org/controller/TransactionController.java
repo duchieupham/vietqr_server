@@ -427,7 +427,7 @@ public class TransactionController {
             // type = 3: content
             // type = 5: status
             if (terminalCode != null) {
-                if (terminalCode.contains("Tất cả")) {
+                if (terminalCode.contains("Tất cả") || terminalCode.contains("T%E1%BA%A5t%20c%E1%BA%A3%20")) {
                     terminalCode = "";
                 }
             }
