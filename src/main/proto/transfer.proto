@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package com.vietqr.org.service.grpc;
+
+option java_multiple_files = true;
+option java_package = "com.vietqr.grpc";
+option java_outer_classname = "TransferProto";
+
+service TerminalService {
+    rpc TransferTerminals (TerminalList) returns (TransferResponse);
+}
+
+message Terminal {
+    string id = 1;
+    string address = 2;
+    string code = 3;
+    bool isDefault = 4;
+    string merchantId = 5;
+    string name = 6;
+    string publicId = 7;
+    string rawTerminalCode = 8;
+    int64 timeCreated = 9;
+    string userId = 10;
+}
+
+message TerminalList {
+    repeated Terminal terminals = 1;
+}
+
+message TransferResponse {
+    bool success = 1;
+}
