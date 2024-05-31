@@ -1,5 +1,6 @@
 package com.vietqr.org.util;
 
+import java.text.Normalizer;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -222,6 +223,15 @@ public class StringUtil {
             result = "%s";
         }
         return result;
+    }
+
+    public static String removeDiacritics(String input) {
+        // Normalize the input string to decompose diacritics
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+
+        // Use a regular expression to remove all diacritics
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        return pattern.matcher(normalized).replaceAll("");
     }
 
     public static String removeMarkString(String value) {

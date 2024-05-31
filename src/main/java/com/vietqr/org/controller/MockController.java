@@ -3,10 +3,7 @@ package com.vietqr.org.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vietqr.org.dto.DataDTO;
-import com.vietqr.org.dto.MockApiDTO;
-import com.vietqr.org.dto.PageDTO;
-import com.vietqr.org.dto.PageResponseDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.util.EnvironmentUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,9 +120,10 @@ public class MockController {
                     // Check if pagination is enabled
                     if (mockApi.getPaging() != null
                             && mockApi.getPaging()
+                            && mockApi.getExtraData() != null
                             && "GET".equalsIgnoreCase(method)) {
                         int page = requestParams.containsKey("page") ? Integer.parseInt(requestParams.get("page")) : 1;
-                        int pageSize = 20;
+                        int pageSize = requestParams.containsKey("size") ? Integer.parseInt(requestParams.get("size")) : 1;
                         int startIndex = (page - 1) * pageSize;
                         int endIndex = startIndex + pageSize;
                         PageResponseDTO pageResult = new PageResponseDTO();
@@ -154,7 +152,36 @@ public class MockController {
                         pageResult.setData(dataDTO);
                         pageResult.setMetadata(pageDTO);
                         return new ResponseEntity<>(pageResult, HttpStatus.OK);
-                    } else {
+                    } else if (mockApi.getPaging() != null
+                            && mockApi.getPaging()
+                            && mockApi.getExtraData() == null
+                            && "GET".equalsIgnoreCase(method)) {
+                        int page = requestParams.containsKey("page") ? Integer.parseInt(requestParams.get("page")) : 1;
+                        int pageSize = requestParams.containsKey("size") ? Integer.parseInt(requestParams.get("size")) : 1;
+                        int startIndex = (page - 1) * pageSize;
+                        int endIndex = startIndex + pageSize;
+                        PageResDTO pageResult = new PageResDTO();
+                        PageDTO pageDTO = new PageDTO();
+                        pageDTO.setPage(page);
+                        pageDTO.setSize(pageSize);
+                        List<Object> responseList = (List<Object>) mockApi.getResponseBody();
+                        int totalElement = responseList.size();
+                        pageDTO.setTotalPage(totalElement % pageSize == 0 ?
+                                totalElement / pageSize : totalElement / pageSize + 1);
+                        pageDTO.setTotalElement(totalElement);
+                        if (startIndex >= responseList.size()) {
+                            // If the start index exceeds the list size, return an empty response
+                            return new ResponseEntity<>(new PageResponseDTO(), HttpStatus.OK);
+                        }
+                        // Ensure endIndex doesn't exceed the list size
+                        endIndex = Math.min(endIndex, responseList.size());
+
+                        List<Object> paginatedResponse = responseList.subList(startIndex, endIndex);
+                        pageResult.setData(paginatedResponse);
+                        pageResult.setMetadata(pageDTO);
+                        return new ResponseEntity<>(pageResult, HttpStatus.OK);
+                    }
+                    else {
                         // Return full response if pagination is not enabled or request method is not GET
                         return new ResponseEntity<>(mockApi.getResponseBody(), HttpStatus.valueOf(mockApi.getResponseStatus()));
                     }
