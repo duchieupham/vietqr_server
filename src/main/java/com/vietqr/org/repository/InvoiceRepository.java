@@ -12,13 +12,12 @@ import java.util.List;
 
 @Repository
 public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> {
-    @Query(value = "SELECT a.id AS invoiceId, b.bill_number AS billNumber, "
-            + "b.content AS content, a.name AS invoiceName, a.time_created AS timeCreated, "
+    @Query(value = "SELECT a.id AS invoiceId, '' AS billNumber, "
+            + "'' AS content, a.name AS invoiceName, a.time_created AS timeCreated, "
             + "a.status AS status, a.time_paid AS timePaid, a.bank_id AS bankId, "
             + "a.total_amount AS totalAmount, a.invoice_id AS invoiceNumber, "
             + "a.data AS data "
             + "FROM invoice a "
-            + "INNER JOIN transaction_wallet b ON a.ref_id = b.id "
             + "WHERE a.user_id = :userId AND a.status = :status "
             + "ORDER BY a.time_created DESC "
             + "LIMIT :offset, :size ", nativeQuery = true)
@@ -28,13 +27,12 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "WHERE invoice_id = :invoiceId", nativeQuery = true)
     String checkDuplicatedInvoiceId(String invoiceId);
 
-    @Query(value = "SELECT a.id AS invoiceId, b.bill_number AS billNumber, "
-            + "b.content AS content, a.name AS invoiceName, a.time_created AS timeCreated, "
+    @Query(value = "SELECT a.id AS invoiceId, '' AS billNumber, "
+            + "'' AS content, a.name AS invoiceName, a.time_created AS timeCreated, "
             + "a.status AS status, a.time_paid AS timePaid, a.bank_id AS bankId, "
             + "a.total_amount AS totalAmount, a.invoice_id AS invoiceNumber, "
             + "a.data AS data "
             + "FROM invoice a "
-            + "INNER JOIN transaction_wallet b ON a.ref_id = b.id "
             + "WHERE a.user_id = :userId AND a.status = :status "
             + "AND a.time_created BETWEEN :fromDate AND :toDate "
             + "ORDER BY a.time_created DESC "
@@ -42,13 +40,12 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
     List<IInvoiceResponseDTO> getInvoiceByUserIdAndMonth(String userId, int status, long fromDate,
                                                          long toDate, int offset, int size);
 
-    @Query(value = "SELECT a.id AS invoiceId, b.bill_number AS billNumber, "
-            + "b.content AS content, a.name AS invoiceName, a.time_created AS timeCreated, "
+    @Query(value = "SELECT a.id AS invoiceId, '' AS billNumber, "
+            + "'' AS content, a.name AS invoiceName, a.time_created AS timeCreated, "
             + "a.status AS status, a.time_paid AS timePaid, a.bank_id AS bankId, "
             + "a.total_amount AS totalAmount, a.invoice_id AS invoiceNumber, "
             + "a.data AS data "
             + "FROM invoice a "
-            + "INNER JOIN transaction_wallet b ON a.ref_id = b.id "
             + "WHERE a.user_id = :userId AND a.status = :status "
             + "AND a.bank_id = :bankId "
             + "ORDER BY a.time_created DESC "
@@ -56,13 +53,12 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
     List<IInvoiceResponseDTO> getInvoiceByUserIdAndBankId(String userId, int status,
                                                           String bankId, int offset, int size);
 
-    @Query(value = "SELECT a.id AS invoiceId, b.bill_number AS billNumber, "
-            + "b.content AS content, a.name AS invoiceName, a.time_created AS timeCreated, "
+    @Query(value = "SELECT a.id AS invoiceId, '' AS billNumber, "
+            + "a.name AS invoiceName, a.time_created AS timeCreated, "
             + "a.status AS status, a.time_paid AS timePaid, a.bank_id AS bankId, "
             + "a.total_amount AS totalAmount, a.invoice_id AS invoiceNumber, "
             + "a.data AS data "
             + "FROM invoice a "
-            + "INNER JOIN transaction_wallet b ON a.ref_id = b.id "
             + "WHERE a.user_id = :userId AND a.status = :status "
             + "AND a.time_created BETWEEN :fromDate AND :toDate "
             + "AND a.bank_id = :bankId "
@@ -73,13 +69,11 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
 
     @Query(value = "SELECT COUNT(a.id) "
             + "FROM invoice a "
-            + "INNER JOIN transaction_wallet b ON a.ref_id = b.id "
             + "WHERE a.user_id = :userId AND a.status = :status ", nativeQuery = true)
     int countInvoiceByUserId(String userId, int status);
 
     @Query(value = "SELECT COUNT(a.id) "
             + "FROM invoice a "
-            + "INNER JOIN transaction_wallet b ON a.ref_id = b.id "
             + "WHERE a.user_id = :userId AND a.status = :status "
             + "AND a.time_created BETWEEN :fromDate AND :toDate ", nativeQuery = true)
     int countInvoiceByUserIdAndMonth(String userId, int status,
@@ -87,14 +81,12 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
 
     @Query(value = "SELECT COUNT(a.id) "
             + "FROM invoice a "
-            + "INNER JOIN transaction_wallet b ON a.ref_id = b.id "
             + "WHERE a.user_id = :userId AND a.status = :status "
             + "AND a.bank_id = :bankId ", nativeQuery = true)
     int countInvoiceByUserIdAndBankId(String userId, int status, String bankId);
 
     @Query(value = "SELECT COUNT(a.id) "
             + "FROM invoice a "
-            + "INNER JOIN transaction_wallet b ON a.ref_id = b.id "
             + "WHERE a.user_id = :userId AND a.status = :status "
             + "AND a.time_created BETWEEN :fromDate AND :toDate "
             + "AND a.bank_id = :bankId ", nativeQuery = true)
@@ -123,7 +115,8 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "LEFT JOIN merchant_sync b ON a.merchant_id = b.id "
             + "WHERE b.id = :value "
             + "AND a.time_created BETWEEN :fromDate AND :toDate "
-            + "LIMIT :offset, :size", nativeQuery = true)
+            + "ORDER BY a.time_created DESC "
+            + "LIMIT :offset, :size ", nativeQuery = true)
     List<IAdminInvoiceDTO> getInvoiceByMerchantId(String value, int offset,
                                                   int size, long fromDate, long toDate);
 
@@ -145,7 +138,8 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "LEFT JOIN merchant_sync b ON a.merchant_id = b.id "
             + "WHERE a.invoice_id = :value "
             + "AND a.time_created BETWEEN :fromDate AND :toDate "
-            + "LIMIT :offset, :size", nativeQuery = true)
+            + "ORDER BY a.time_created DESC "
+            + "LIMIT :offset, :size ", nativeQuery = true)
     List<IAdminInvoiceDTO> getInvoiceByInvoiceNumber(String value, int offset, int size,
                                                      long fromDate, long toDate);
 
@@ -167,7 +161,8 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "LEFT JOIN merchant_sync b ON a.merchant_id = b.id "
             + "WHERE JSON_EXTRACT(a.data, '$.bankAccount') = :value "
             + "AND a.time_created BETWEEN :fromDate AND :toDate "
-            + "LIMIT :offset, :size", nativeQuery = true)
+            + "ORDER BY a.time_created DESC "
+            + "LIMIT :offset, :size ", nativeQuery = true)
     List<IAdminInvoiceDTO> getInvoiceByBankAccount(String value, int offset, int size,
                                                    long fromDate, long toDate);
 
@@ -189,7 +184,8 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "LEFT JOIN merchant_sync b ON a.merchant_id = b.id "
             + "WHERE c.phone_no = :value "
             + "AND a.time_created BETWEEN :fromDate AND :toDate "
-            + "LIMIT :offset, :size", nativeQuery = true)
+            + "ORDER BY a.time_created DESC "
+            + "LIMIT :offset, :size ", nativeQuery = true)
     List<IAdminInvoiceDTO> getInvoiceByPhoneNo(String value, int offset, int size,
                                                long fromDate, long toDate);
 
@@ -211,6 +207,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "LEFT JOIN merchant_sync b ON a.merchant_id = b.id "
             + "WHERE a.status = :status "
             + "AND a.time_created BETWEEN :fromDate AND :toDate "
+            + "ORDER BY a.time_created DESC "
             + "LIMIT :offset, :size", nativeQuery = true)
     List<IAdminInvoiceDTO> getInvoiceByStatus(int status, int offset, int size,
                                               long fromDate, long toDate);
@@ -232,6 +229,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "INNER JOIN account_login c ON c.id = a.user_id "
             + "LEFT JOIN merchant_sync b ON a.merchant_id = b.id "
             + "WHERE a.time_created BETWEEN :fromDate AND :toDate "
+            + "ORDER BY a.time_created DESC "
             + "LIMIT :offset, :size", nativeQuery = true)
     List<IAdminInvoiceDTO> getInvoices(int offset, int size,
                                        long fromDate, long toDate);
@@ -243,10 +241,10 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "WHERE a.time_created BETWEEN :fromDate AND :toDate ", nativeQuery = true)
     int countInvoice(long fromDate, long toDate);
 
-    @Query(value = "SELECT COALESCE(SUM(CASE WHEN a.status = 1 THEN a.amount ELSE 0 END), 0) AS completeFee, "
-            + "COALESCE(COUNT(CASE WHEN a.status != 1 THEN 1 ELSE NULL END), 0) AS completeCount, "
-            + "COALESCE(SUM(CASE WHEN a.status = 0 THEN a.amount ELSE 0 END), 0) AS pendingFee, "
-            + "COALESCE(COUNT(CASE WHEN a.status != 1 THEN 1 ELSE NULL END), 0) AS pendingCount "
+    @Query(value = "SELECT COALESCE(SUM(CASE WHEN a.status = 1 THEN a.total_amount ELSE 0 END), 0) AS completeFee, "
+            + "COALESCE(COUNT(CASE WHEN a.status = 1 THEN a.id ELSE NULL END), 0) AS completeCount, "
+            + "COALESCE(SUM(CASE WHEN a.status = 0 THEN a.total_amount ELSE 0 END), 0) AS pendingFee, "
+            + "COALESCE(COUNT(CASE WHEN a.status != 1 THEN a.id ELSE NULL END), 0) AS pendingCount "
             + "FROM invoice a "
             + "WHERE a.time_created BETWEEN :fromDate AND :toDate ", nativeQuery = true)
     IAdminExtraInvoiceDTO getExtraInvoice(long fromDate, long toDate);
@@ -268,7 +266,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "a.name AS invoiceName, a.description AS invoiceDescription, "
             + "a.vat AS vat, a.vat_amount AS vatAmount, a.amount AS totalAMount, "
             + "a.total_amount AS totalAmountAfterVat, a.status AS status, a.merchant_id AS merchantId, "
-            + "a.bank_id AS bankId, a.user_id AS userId "
+            + "a.bank_id AS bankId, a.user_id AS userId, a.bank_id_recharge AS bankIdRecharge "
             + "FROM invoice a "
             + "WHERE a.id = :invoiceId ", nativeQuery = true)
     IInvoiceDTO getInvoiceByInvoiceDetail(String invoiceId);
@@ -304,4 +302,20 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
 
     @Query(value = "SELECT id FROM invoice WHERE id = :invoiceId AND status != 1", nativeQuery = true)
     String checkExistedInvoice(String invoiceId);
+
+    @Query(value = "SELECT a.id AS invoiceId, "
+            + "a.name AS invoiceName, "
+            + "a.merchant_id AS merchantId, "
+            + "a.bank_id AS bankId, a.user_id AS userId, a.bank_id_recharge AS bankIdRecharge "
+            + "FROM invoice a "
+            + "WHERE a.id = :invoiceId ", nativeQuery = true)
+    IInvoiceDTO getInvoiceRequestPayment(String invoiceId);
+
+    @Query(value = "SELECT COUNT(a.id) AS totalInvoice, "
+            + "COALESCE(SUM(a.total_amount), 0) AS totalMoney, "
+            + "a.user_id AS userId "
+            + "FROM invoice a "
+            + "WHERE a.user_id = :userId AND a.status = 0 "
+            + "GROUP BY a.user_id ", nativeQuery = true)
+    InvoiceUnpaidStatisticDTO getTotalInvoiceUnpaidByUserId(String userId);
 }

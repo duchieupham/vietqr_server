@@ -4,6 +4,7 @@ import java.util.Map;
 
 public class MockApiDTO {
     private String prefix;
+    private String path;
     private String url;
     private String method;
     private Map<String, String> requestParams;
@@ -95,5 +96,13 @@ public class MockApiDTO {
 
     public void setExtraData(Object extraData) {
         this.extraData = extraData;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 }

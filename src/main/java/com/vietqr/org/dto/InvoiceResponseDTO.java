@@ -11,12 +11,16 @@ public class InvoiceResponseDTO {
     private String bankId;
     private String bankAccount;
     private String bankShortName;
+    private String userBankName;
     private String qrCode;
     private long totalAmount;
     private String bankNameForPayment;
     private String bankAccountForPayment;
     private String bankCodeForPayment;
     private String userBankNameForPayment;
+    private String mid;
+    private String midName;
+    private String vso;
 
     public InvoiceResponseDTO() {
     }
@@ -165,5 +169,37 @@ public class InvoiceResponseDTO {
 
     public void setUserBankNameForPayment(String userBankNameForPayment) {
         this.userBankNameForPayment = userBankNameForPayment;
+    }
+
+    public String getMid() {
+        return mid;
+    }
+
+    public void setMid(String mid) {
+        this.mid = mid;
+    }
+
+    public String getMidName() {
+        return midName;
+    }
+
+    public void setMidName(String midName) {
+        this.midName = midName;
+    }
+
+    public String getVso() {
+        return vso;
+    }
+
+    public void setVso(String vso) {
+        this.vso = vso;
+    }
+
+    public String getUserBankName() {
+        return userBankName;
+    }
+
+    public void setUserBankName(String userBankName) {
+        this.userBankName = userBankName;
     }
 }

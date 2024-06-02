@@ -37,7 +37,15 @@ public class MockController {
     public ResponseEntity<Object> handleGet(@PathVariable String url,
                                             @PathVariable String prefix,
                                             @RequestParam Map<String, String> requestParams) {
-        return handleRequest("GET",prefix, url, requestParams, null);
+        return handleRequest("GET",prefix, url, "", requestParams, null);
+    }
+
+    @RequestMapping(value = "/{prefix}/{url}/{path}", method = RequestMethod.GET)
+    public ResponseEntity<Object> handleGet(@PathVariable String url,
+                                            @PathVariable String path,
+                                            @PathVariable String prefix,
+                                            @RequestParam Map<String, String> requestParams) {
+        return handleRequest("GET",prefix, url, path, requestParams, null);
     }
 
     @RequestMapping(value = "/{prefix}/{url}", method = RequestMethod.POST)
@@ -45,7 +53,7 @@ public class MockController {
                                              @PathVariable String prefix,
                                              @RequestParam Map<String, String> requestParams,
                                              @RequestBody(required = false) Object requestBody) {
-        return handleRequest("POST",prefix, url, requestParams, requestBody);
+        return handleRequest("POST",prefix, url, "", requestParams, requestBody);
     }
 
     @RequestMapping(value = "/{prefix}/{url}", method = RequestMethod.PUT)
@@ -53,14 +61,14 @@ public class MockController {
                                             @PathVariable String prefix,
                                             @RequestParam Map<String, String> requestParams,
                                             @RequestBody(required = false) Object requestBody) {
-        return handleRequest("PUT",prefix, url, requestParams, requestBody);
+        return handleRequest("PUT",prefix, url, "", requestParams, requestBody);
     }
 
     @RequestMapping(value = "/{prefix}/{url}", method = RequestMethod.DELETE)
     public ResponseEntity<Object> handleDelete(@PathVariable String url,
                                                @PathVariable String prefix,
                                                @RequestParam Map<String, String> requestParams) {
-        return handleRequest("DELETE",prefix, url, requestParams, null);
+        return handleRequest("DELETE",prefix, url, "", requestParams, null);
     }
 
     @RequestMapping(value = "/{url}", method = RequestMethod.GET)
@@ -123,7 +131,7 @@ public class MockController {
                             && mockApi.getExtraData() != null
                             && "GET".equalsIgnoreCase(method)) {
                         int page = requestParams.containsKey("page") ? Integer.parseInt(requestParams.get("page")) : 1;
-                        int pageSize = requestParams.containsKey("size") ? Integer.parseInt(requestParams.get("size")) : 1;
+                        int pageSize = requestParams.containsKey("size") ? Integer.parseInt(requestParams.get("size")) : 20;
                         int startIndex = (page - 1) * pageSize;
                         int endIndex = startIndex + pageSize;
                         PageResponseDTO pageResult = new PageResponseDTO();
@@ -157,7 +165,7 @@ public class MockController {
                             && mockApi.getExtraData() == null
                             && "GET".equalsIgnoreCase(method)) {
                         int page = requestParams.containsKey("page") ? Integer.parseInt(requestParams.get("page")) : 1;
-                        int pageSize = requestParams.containsKey("size") ? Integer.parseInt(requestParams.get("size")) : 1;
+                        int pageSize = requestParams.containsKey("size") ? Integer.parseInt(requestParams.get("size")) : 20;
                         int startIndex = (page - 1) * pageSize;
                         int endIndex = startIndex + pageSize;
                         PageResDTO pageResult = new PageResDTO();
@@ -195,7 +203,7 @@ public class MockController {
         }
     }
 
-    private ResponseEntity<Object> handleRequest(String method, String prefix, String url,
+    private ResponseEntity<Object> handleRequest(String method, String prefix, String url, String path,
                                                  Map<String, String> requestParams,
                                                  Object requestBody) {
         try {
@@ -210,7 +218,7 @@ public class MockController {
             mockApis = mapper.readValue(file, new TypeReference<List<MockApiDTO>>() {
             });
             for (MockApiDTO mockApi : mockApis) {
-                if ((mockApi.getUrl().equals(url) || mockApi.getUrl().equals("**"))
+                if ((mockApi.getUrl().equals(url) || mockApi.getUrl().equals("**") || "**".equals(mockApi.getPath()))
                         && ObjectUtils.nullSafeEquals(mockApi.getPrefix(), prefix)
                         && mockApi.getMethod().equalsIgnoreCase(method)) {
 
@@ -227,11 +235,12 @@ public class MockController {
 
                     // Check if pagination is enabled
                     if (mockApi.getPaging() != null
+                            && mockApi.getExtraData() != null
                             && mockApi.getPaging()
                             && "GET".equalsIgnoreCase(method)) {
                         int page = requestParams.containsKey("page") ?
                                 Integer.parseInt(requestParams.get("page")) : 1;
-                        int pageSize = 20;
+                        int pageSize = requestParams.containsKey("size") ? Integer.parseInt(requestParams.get("size")) : 20;
                         int startIndex = (page - 1) * pageSize;
                         int endIndex = startIndex + pageSize;
                         PageResponseDTO pageResult = new PageResponseDTO();
@@ -259,6 +268,34 @@ public class MockController {
                         }
                         pageResult.setMetadata(pageDTO);
                         pageResult.setData(dataDTO);
+                        return new ResponseEntity<>(pageResult, HttpStatus.OK);
+                    } else if (mockApi.getPaging() != null
+                            && mockApi.getPaging()
+                            && mockApi.getExtraData() == null
+                            && "GET".equalsIgnoreCase(method)) {
+                        int page = requestParams.containsKey("page") ? Integer.parseInt(requestParams.get("page")) : 1;
+                        int pageSize = requestParams.containsKey("size") ? Integer.parseInt(requestParams.get("size")) : 20;
+                        int startIndex = (page - 1) * pageSize;
+                        int endIndex = startIndex + pageSize;
+                        PageResDTO pageResult = new PageResDTO();
+                        PageDTO pageDTO = new PageDTO();
+                        pageDTO.setPage(page);
+                        pageDTO.setSize(pageSize);
+                        List<Object> responseList = (List<Object>) mockApi.getResponseBody();
+                        int totalElement = responseList.size();
+                        pageDTO.setTotalPage(totalElement % pageSize == 0 ?
+                                totalElement / pageSize : totalElement / pageSize + 1);
+                        pageDTO.setTotalElement(totalElement);
+                        if (startIndex >= responseList.size()) {
+                            // If the start index exceeds the list size, return an empty response
+                            return new ResponseEntity<>(new PageResponseDTO(), HttpStatus.OK);
+                        }
+                        // Ensure endIndex doesn't exceed the list size
+                        endIndex = Math.min(endIndex, responseList.size());
+
+                        List<Object> paginatedResponse = responseList.subList(startIndex, endIndex);
+                        pageResult.setData(paginatedResponse);
+                        pageResult.setMetadata(pageDTO);
                         return new ResponseEntity<>(pageResult, HttpStatus.OK);
                     } else {
                         // Return full response if pagination is not enabled or request method is not GET

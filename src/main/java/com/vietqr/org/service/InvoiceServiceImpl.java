@@ -232,4 +232,14 @@ public class InvoiceServiceImpl implements InvoiceService {
     public String checkExistedInvoice(String invoiceId) {
         return repo.checkExistedInvoice(invoiceId);
     }
+
+    @Override
+    public IInvoiceDTO getInvoiceRequestPayment(String invoiceId) {
+        return repo.getInvoiceRequestPayment(invoiceId);
+    }
+
+    @Override
+    public InvoiceUnpaidStatisticDTO getTotalInvoiceUnpaidByUserId(String userId) {
+        return repo.getTotalInvoiceUnpaidByUserId(userId);
+    }
 }

@@ -99,6 +99,7 @@ public class EnvironmentUtil {
     private static final String VIET_QR_NAME_TRANS_FEE = "Phí giao dịch phần mềm VietQR tháng ";
     private static final String VIET_QR_NAME_ANOTHER_FEE = "Phí khác";
     private static final String MONTH_UNIT_NAME_VN = "Tháng";
+    private static final String BANK_SHORT_NAME_RECHARGE = "MBBank";
 
     // MB Bank
     private static final String BANK_URL_UAT = "https://api-sandbox.mbbank.com.vn/";
@@ -202,9 +203,11 @@ public class EnvironmentUtil {
     //
     private static final String BANK_ID_RECHARGE_UAT = "c085abad-9901-4acd-9c15-2e8d0b63489d";
     private static final String BANK_ID_RECHARGE_PROD = "bb25279e-b7e6-405e-bdce-a697794f465f";
+    private static final String BANK_ID_RECHARGE_PROD2 = "172ff268-6d2e-4bcf-8aaa-1902badfcc63";
     //
     private static final String BANK_ACCOUNT_RECHARGE_UAT = "29058474275";
     private static final String BANK_ACCOUNT_RECHARGE_PROD = "0020108679008";
+    private static final String BANK_ACCOUNT_RECHARGE_PROD2 = "0801133666888";
     //
     private static final String BANK_CODE_RECHARGE_UAT = "MB";
     private static final String BANK_CODE_RECHARGE_PROD = "MB";
@@ -214,6 +217,7 @@ public class EnvironmentUtil {
     //
     private static final String USER_BANK_NAME_RECHARGE_UAT = "Nguyen Phuong Nhat Linh";
     private static final String USER_BANK_NAME_RECHARGE_PROD = "Pham Duc Tuan";
+    private static final String USER_BANK_NAME_RECHARGE_PROD2 = "Cong Ty Co Phan Bluecom Viet Nam";
     //
     private static final String BANK_TYPE_ID_RECHARGE_UAT = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
     private static final String BANK_TYPE_ID_RECHARGE_PROD = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
@@ -688,5 +692,22 @@ public class EnvironmentUtil {
 
     public static String getVietQrBoxInteralPrefix() {
         return "CERT-VVB-";
+    }
+
+    public static String getBankShortNameRecharge() {
+        return BANK_SHORT_NAME_RECHARGE;
+    }
+
+    public static String getBankIdRecharge2() {
+        return BANK_ID_RECHARGE_PROD2;
+    }
+
+
+    public static String getBankAccountRecharge2() {
+        return BANK_ACCOUNT_RECHARGE_PROD2;
+    }
+
+    public static String getUserBankNameRecharge2() {
+        return USER_BANK_NAME_RECHARGE_PROD2;
     }
 }

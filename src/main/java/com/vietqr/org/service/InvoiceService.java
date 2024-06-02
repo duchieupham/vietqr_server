@@ -75,4 +75,8 @@ public interface InvoiceService {
     int updateStatusInvoice(String id, int status);
 
     String checkExistedInvoice(String invoiceId);
+
+    IInvoiceDTO getInvoiceRequestPayment(String invoiceId);
+
+    InvoiceUnpaidStatisticDTO getTotalInvoiceUnpaidByUserId(String userId);
 }

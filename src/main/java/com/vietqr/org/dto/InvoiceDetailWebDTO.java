@@ -2,11 +2,10 @@ package com.vietqr.org.dto;
 
 import java.util.List;
 
-public class InvoiceDetailAdminDTO {
+public class InvoiceDetailWebDTO {
     private List<CustomerDetailDTO> customerDetailDTOS;
     private List<FeePackageDetailDTO> feePackageDetailDTOS;
     private  List<InvoiceItemDetailDTO> invoiceItemDetailDTOS;
-    private List<BankReceivePaymentRequestDTO> paymentRequestDTOS;
     private String invoiceId;
     private String invoiceName;
     private String invoiceDescription;
@@ -15,14 +14,16 @@ public class InvoiceDetailAdminDTO {
     private long totalAmount;
     private long totalAmountAfterVat;
     private int status;
+    private long pendingAmount;
+    private long completeAmount;
 
-    public InvoiceDetailAdminDTO() {
+    public InvoiceDetailWebDTO() {
     }
 
-    public InvoiceDetailAdminDTO(List<CustomerDetailDTO> customerDetailDTOS, List<FeePackageDetailDTO> feePackageDetailDTOS,
-                                 List<InvoiceItemDetailDTO> invoiceItemDetailDTOS, String invoiceId, String invoiceName,
-                                 String invoiceDescription, double vat, long vatAmount, long totalAmount,
-                                 long totalAmountAfterVat, int status) {
+    public InvoiceDetailWebDTO(List<CustomerDetailDTO> customerDetailDTOS, List<FeePackageDetailDTO> feePackageDetailDTOS,
+                               List<InvoiceItemDetailDTO> invoiceItemDetailDTOS, String invoiceId, String invoiceName,
+                               String invoiceDescription, double vat, long vatAmount, long totalAmount,
+                               long totalAmountAfterVat, int status) {
         this.customerDetailDTOS = customerDetailDTOS;
         this.feePackageDetailDTOS = feePackageDetailDTOS;
         this.invoiceItemDetailDTOS = invoiceItemDetailDTOS;
@@ -124,11 +125,19 @@ public class InvoiceDetailAdminDTO {
         this.status = status;
     }
 
-    public List<BankReceivePaymentRequestDTO> getPaymentRequestDTOS() {
-        return paymentRequestDTOS;
+    public long getPendingAmount() {
+        return pendingAmount;
     }
 
-    public void setPaymentRequestDTOS(List<BankReceivePaymentRequestDTO> paymentRequestDTOS) {
-        this.paymentRequestDTOS = paymentRequestDTOS;
+    public void setPendingAmount(long pendingAmount) {
+        this.pendingAmount = pendingAmount;
+    }
+
+    public long getCompleteAmount() {
+        return completeAmount;
+    }
+
+    public void setCompleteAmount(long completeAmount) {
+        this.completeAmount = completeAmount;
     }
 }

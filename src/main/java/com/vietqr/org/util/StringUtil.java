@@ -43,6 +43,10 @@ public class StringUtil {
         return value != null ? value : 0;
     }
 
+    public static double getValueNullChecker(Double value) {
+        return value != null ? value : 0;
+    }
+
     public static String getValueNotNull(String value) {
         return value != null ? value : "";
     }

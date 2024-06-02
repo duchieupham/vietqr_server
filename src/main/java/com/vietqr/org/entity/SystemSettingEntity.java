@@ -55,6 +55,9 @@ public class SystemSettingEntity implements Serializable {
     @Column(name = "boxEnv", columnDefinition = "JSON")
     private String boxEnv;
 
+    @Column(name = "bankIdDefault")
+    private String bankIdDefault;
+
     public SystemSettingEntity() {
         super();
     }
@@ -176,5 +179,13 @@ public class SystemSettingEntity implements Serializable {
 
     public void setBoxEnv(String boxEnv) {
         this.boxEnv = boxEnv;
+    }
+
+    public String getBankIdDefault() {
+        return bankIdDefault;
+    }
+
+    public void setBankIdDefault(String bankIdDefault) {
+        this.bankIdDefault = bankIdDefault;
     }
 }

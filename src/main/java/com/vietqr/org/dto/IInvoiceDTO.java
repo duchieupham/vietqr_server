@@ -12,4 +12,6 @@ public interface IInvoiceDTO {
     String getBankId();
     String getMerchantId();
     String getUserId();
+    String getBankIdRecharge();
+    String getInvoiceNumber();
 }

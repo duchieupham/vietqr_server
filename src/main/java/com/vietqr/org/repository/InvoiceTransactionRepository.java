@@ -1,0 +1,20 @@
+package com.vietqr.org.repository;
+
+import com.vietqr.org.dto.InvoiceRequestPaymentDTO;
+import com.vietqr.org.entity.InvoiceTransactionEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface InvoiceTransactionRepository extends JpaRepository<InvoiceTransactionEntity, String> {
+    @Query(value = "SELECT a.qr_code AS qrCode, a.id AS id, a.total_amount AS totalAmount, "
+            + "b.name AS invoiceName, b.data AS data, b.invoice_number AS invoiceNumber, "
+            + "a.amount AS amount, a.vat AS vat, a.vat_amount AS vatAmount, a.invoice_id AS invoiceId "
+            + "FROM invoice_transaction a "
+            + "INNER JOIN invoice b WHERE a.invoice_id = b.id "
+            + "WHERE invoice_item_ids = :itemIds AND invoice_id = :invoiceId "
+            + "AND a.bank_id_recharge = :bankIdRecharge "
+            + "LIMIT 1 ", nativeQuery = true)
+    InvoiceRequestPaymentDTO getInvoiceRequestPayment(String invoiceId, String itemIds, String bankIdRecharge);
+}

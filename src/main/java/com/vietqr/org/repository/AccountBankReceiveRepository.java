@@ -351,7 +351,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "INNER JOIN account_login b ON a.user_id = b.id "
 			+ "INNER JOIN bank_type c ON c.id = a.bank_type_id "
 			+ "WHERE a.id = :bankId ", nativeQuery = true)
-    IMerchantBankMapperDTO getMerchantBankMapper(String bankId);
+	IBankReceiveMapperDTO getMerchantBankMapper(String bankId);
 
 	@Query(value = "SELECT '' AS vso, '' AS merchantName, '' AS platform, "
 			+ "COALESCE(b.email, '') AS email, b.phone_no AS phoneNo, a.user_id AS userId, "

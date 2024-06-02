@@ -1,12 +1,23 @@
 package com.vietqr.org.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MerchantBankMapperDTO {
+    @JsonProperty(value = "vso")
     private String vso;
+    @JsonProperty(value = "merchantName")
     private String merchantName;
+    @JsonProperty(value = "email")
     private String email;
+    @JsonProperty(value = "phoneNo")
     private String phoneNo;
+    @JsonProperty(value = "bankAccount")
     private String bankAccount;
+    @JsonProperty(value = "userBankName")
     private String userBankName;
+    @JsonProperty(value = "bankShortName")
     private String bankShortName;
 
     public MerchantBankMapperDTO() {
