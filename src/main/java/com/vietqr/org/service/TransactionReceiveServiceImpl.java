@@ -65,6 +65,11 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
         return repo.getTransactionByTraceId(id, amountParsed, transType, DateTimeUtil.get2LastPartition());
     }
 
+    @Override
+    public TransactionReceiveEntity getTransactionsById(String id) {
+        return repo.getTransactionReceiveById(id);
+    }
+
     // // not use
     // @Override
     // public List<TransactionReceiveEntity> getTransactionByBankId(String bankId) {

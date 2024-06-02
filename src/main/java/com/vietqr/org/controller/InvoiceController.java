@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -60,6 +61,18 @@ public class InvoiceController {
 
     @Autowired
     BankTypeService bankTypeService;
+
+    @Autowired
+    NotificationService notificationService;
+
+    @Autowired
+    FcmTokenService fcmTokenService;
+
+    @Autowired
+    private FirebaseMessagingService firebaseMessagingService;
+
+    @Autowired
+    private SocketHandler socketHandler;
 
     @GetMapping("invoice/merchant-list")
     public ResponseEntity<Object> getAdminInvoiceLists(
@@ -1582,6 +1595,7 @@ public class InvoiceController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // tạo hoá đơn thanh toán
     @PostMapping("/invoice/create")
     public ResponseEntity<Object> getInvoiceByItem(
             @Valid @RequestBody InvoiceCreateUpdateDTO dto
@@ -1649,6 +1663,7 @@ public class InvoiceController {
             }
             List<InvoiceItemEntity> invoiceItemEntities = new ArrayList<>();
             for (InvoiceItemCreateDTO item : dto.getItems()) {
+                // check timeProcess, BankId, type
 
                 InvoiceItemEntity invoiceItemEntity = new InvoiceItemEntity();
                 invoiceItemEntity.setId(UUID.randomUUID().toString());
@@ -1659,6 +1674,7 @@ public class InvoiceController {
                 invoiceItemEntity.setTotalAfterVat(item.getAmountAfterVat());
                 invoiceItemEntity.setName(item.getContent());
                 invoiceItemEntity.setDescription(item.getContent());
+
                 switch (item.getType()) {
                     case 0:
                         invoiceItemEntity.setType(0);
@@ -1673,16 +1689,23 @@ public class InvoiceController {
                         invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameAnotherFee());
                         break;
                 }
+
                 invoiceItemEntity.setUnit(item.getUnit());
                 invoiceItemEntity.setVat(item.getVat());
                 invoiceItemEntity.setVatAmount(item.getVatAmount());
                 invoiceItemEntity.setData(mapper.writeValueAsString(merchantBankMapperDTO));
                 invoiceItemEntity.setDataType(1);
+                //them cai process_date
+                if (item.getTimeProcess() != null) {
+                    String processDate = item.getTimeProcess().replaceAll("-", "");
+                    invoiceItemEntity.setProcessDate(processDate);
+                }
                 invoiceItemEntities.add(invoiceItemEntity);
                 totalAmount += item.getTotalAmount();
                 totalVatAmount += item.getVatAmount();
                 totalAmountAfterVat += item.getAmountAfterVat();
             }
+
             entity.setTotalAmount(totalAmountAfterVat);
             entity.setAmount(totalAmount);
             entity.setVatAmount(totalVatAmount);
@@ -2070,7 +2093,6 @@ public class InvoiceController {
                     String content = traceId + " " + billNumberVQR;
 
 
-
                     // Create TransactionWalletEntity (credit)
                     TransactionWalletEntity walletEntityCredit = new TransactionWalletEntity();
                     UUID transWalletCreditUUID = UUID.randomUUID();
@@ -2185,4 +2207,192 @@ public class InvoiceController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // get list invoice unpaid
+    @GetMapping("invoice/unpaid")
+    public ResponseEntity<Object> getInvoiceUnpaid(
+            @RequestParam int type,
+            @RequestParam String value,
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam String time,
+            @RequestParam String userId) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        PageResponseDTO pageResponseDTO = new PageResponseDTO();
+        AdminExtraInvoiceDTO extraInvoiceDTO = new AdminExtraInvoiceDTO();
+        DataDTO dataDTO = new DataDTO(extraInvoiceDTO);
+        try {
+            int totalElement = 0;
+            int offset = (page - 1) * size;
+            List<AdminInvoiceDTO> data = new ArrayList<>();
+            List<IAdminInvoiceDTO> dtos = new ArrayList<>();
+            IAdminExtraInvoiceDTO extraInvoiceDTO1 = null;
+
+            switch (type) {
+                case 1:
+                    dtos = invoiceService.getInvoiceUnpaid(value, offset, size, time, userId);
+                    totalElement = invoiceService.countInvoiceUnpaid(value, time, userId);
+                    break;
+                default:
+                    dtos = new ArrayList<>();
+                    break;
+            }
+
+            extraInvoiceDTO1 = invoiceService.getExtraInvoice(time);
+            if (extraInvoiceDTO1 != null) {
+                extraInvoiceDTO = new AdminExtraInvoiceDTO();
+                extraInvoiceDTO.setMonth(time);
+                extraInvoiceDTO.setCompleteCount(extraInvoiceDTO1.getCompleteCount());
+                extraInvoiceDTO.setCompleteAmount(extraInvoiceDTO1.getCompleteFee());
+                extraInvoiceDTO.setPendingCount(extraInvoiceDTO1.getPendingCount());
+                extraInvoiceDTO.setPendingAmount(extraInvoiceDTO1.getPendingFee());
+            }
+
+            data = dtos.stream().map(item -> {
+                AdminInvoiceDTO dto = new AdminInvoiceDTO();
+                AccountBankInfoDTO bankInfoDTO = getBankAccountInfoByData(item.getData());
+                String qrCode = "";
+                dto.setInvoiceId(item.getInvoiceId());
+                dto.setTimePaid(item.getTimePaid());
+                dto.setVso(item.getVso() != null ? item.getVso() : "");
+                dto.setMidName(item.getMidName() != null ? item.getMidName() : "");
+                dto.setAmount(item.getAmount());
+                dto.setBankShortName(bankInfoDTO.getBankShortName());
+                dto.setBankAccount(bankInfoDTO.getBankAccount());
+                dto.setQrCode(qrCode);
+                dto.setVat(item.getVat());
+                dto.setVatAmount(item.getVatAmount());
+                dto.setAmountNoVat(item.getAmountNoVat());
+                dto.setBillNumber(item.getBillNumber());
+                dto.setInvoiceName(item.getInvoiceName());
+                dto.setFullName(bankInfoDTO.getUserBankName());
+                dto.setPhoneNo(item.getPhoneNo());
+                dto.setEmail(item.getEmail() != null ? item.getEmail() : "");
+                dto.setTimeCreated(item.getTimeCreated());
+                dto.setStatus(item.getStatus());
+
+
+                // push notification
+                // --call api topup
+                String requestId = VNPTEpayUtil
+                        .createRequestID(EnvironmentUtil
+                                .getVnptEpayPartnerName());
+
+                // --initial notification data
+                LocalDateTime localTimeM = LocalDateTime
+                        .now();
+                long timeM = localTimeM
+                        .toEpochSecond(ZoneOffset.UTC);
+                String msgErrorCode = "Error push notification invoice";
+                UUID notificationUUID = UUID.randomUUID();
+                String notiType = NotificationUtil.getNotiMobileTopup();
+                String title = NotificationUtil.getNOTI_TITLE_INVOICE_UNPAID();
+                String message = "Bạn có hoá đơn "
+                        + dto.getBillNumber()
+                        + " chưa thanh toán. Vui Lòng kiểm tra lại trên hệ thống VietQR VN.";
+
+                NotificationEntity notiEntity = new NotificationEntity();
+                notiEntity.setId(notificationUUID.toString());
+                notiEntity.setRead(false);
+                notiEntity.setMessage(message);
+                notiEntity.setTime(DateTimeUtil.getCurrentDateTimeUTC());
+                notiEntity.setType(notiType);
+                notiEntity.setUserId(userId);
+                notiEntity.setData(userId); // cần lấy userID ở invoicce
+                Map<String, String> datas = new HashMap<>();
+                datas.put("notificationType", notiType); // thuộc loại noti nào
+                datas.put("notificationId", notificationUUID.toString()); // id của bảng notification
+                datas.put("html", dto.getInvoiceName() + ""); // truyền html (any)
+                datas.put("invoiceId", dto.getInvoiceId());  //invoice ID
+                //-- có thể truyền user ID
+                datas.put("time", time + "");
+                datas.put("phoneNo", dto.getPhoneNo()); // phone number của user
+                //datas.put("billNumber", tranMobileEntity.getBillNumber());  // bill number
+                //datas.put("paymentMethod", "1");
+                //datas.put("paymentType", "1");
+                datas.put("status", 1 + ""); // truyền Status của Invoice (1 or 0)
+                datas.put("messageError", msgErrorCode);
+
+                pushNotification(title, message, notiEntity, datas, notiEntity.getUserId());
+                //
+
+                //push form noti
+                //initialize datas check
+                int typeCheck = 0;
+                String statusCheck = datas.put("status", "1");
+                String bankCodeCheck = datas.put("bankCode", "MB");
+                String terminalCodeCheck = datas.put("terminalCode", "");
+                String terminalNameCheck = datas.put("terminalName", "");
+                String getTransType = "C";
+
+                // check conditions to push form notifications
+                if (dto.getStatus() == 0) {
+                    datas.put("html", "Bạn có hoá đơn " + dto.getAmount() + " cần thanh toán.");
+                } // thông báo hoá đơn chưa thanh toán
+
+                if (getTransType == "C" && typeCheck == 2) {
+                    datas.put("html", "+" + dto.getAmount() + " VNĐ đến "
+                            + bankCodeCheck + " - " + dto.getBankAccount());
+                } // Nhận tiền Đến
+
+                if (getTransType == "C" && typeCheck == 1) {
+                    datas.put("html", "+ " + dto.getAmount() + " VNĐ đến MB Bank - "
+                            + dto.getBankAccount() + " - "
+                            + dto.getInvoiceName()
+                            + " - " + terminalCodeCheck);
+                } // Cập nhật tài khoản cửa hàng
+
+                if (getTransType == "D") {
+                    datas.put("html", "+" + dto.getAmount() + " VNĐ từ "
+                            + dto.getBankShortName() + " - " + dto.getBankAccount());
+                } // Chuyển tiền đi
+
+                if (getTransType == "C" && typeCheck == 0) {
+                    datas.put("html", dto.getBankAccount() + "Chưa biết trả gì");
+                }
+                //--
+
+                return dto;
+            }).collect(Collectors.toList());
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+            pageDTO.setTotalElement(totalElement);
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageResponseDTO.setMetadata(pageDTO);
+            dataDTO.setExtraData(extraInvoiceDTO);
+            dataDTO.setItems(data);
+            pageResponseDTO.setData(dataDTO);
+            httpStatus = HttpStatus.OK;
+            result = pageResponseDTO;
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    private void pushNotification(String title, String message, NotificationEntity notiEntity, Map<String, String> data,
+                                  String userId) {
+        if (notiEntity != null) {
+            notificationService.insertNotification(notiEntity);
+        }
+
+        List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+        fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
+        firebaseMessagingService.sendUsersNotificationWithData(data,
+                fcmTokens,
+                title, message);
+        try {
+            socketHandler.sendMessageToUser(userId,
+                    data);
+        } catch (IOException e) {
+            logger.error(
+                    "transaction-sync: WS: socketHandler.sendMessageToUser - RECHARGE ERROR: "
+                            + e.toString());
+        }
+    }
 }

@@ -312,6 +312,7 @@ public class TransactionMMSController {
                             data.put("urlLink",
                                     tempTransReceive.getUrlLink() != null ? tempTransReceive.getUrlLink() : "");
                             data.put("type", "" + tempTransReceive.getType());
+                            data.put("transType", "" + "C");// add transType
                             data.put("terminalCode",
                                     tempTransReceive.getTerminalCode() != null ? tempTransReceive.getTerminalCode()
                                             : "");

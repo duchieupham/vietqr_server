@@ -80,7 +80,6 @@ public class InvoiceItemEntity implements Serializable {
     @Column(name = "processDate")
     private String processDate;
 
-
     public InvoiceItemEntity() {
     }
 
@@ -99,9 +98,13 @@ public class InvoiceItemEntity implements Serializable {
         this.status = status;
     }
 
+    public String getProcessDate() {
+        return processDate;
+    }
 
-
-
+    public void setProcessDate(String processDate) {
+        this.processDate = processDate;
+    }
 
     public String getId() {
         return id;

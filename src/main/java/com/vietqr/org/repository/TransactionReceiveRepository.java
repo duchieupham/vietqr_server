@@ -260,6 +260,11 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
 //                        + "ORDER BY time DESC LIMIT 5", nativeQuery = true)
 //        List<TransactionReceiveEntity> getRelatedTransactionByBankId(@Param(value = "bankId") String bankId);
 
+//        @Query(value = "SELECT * "
+//                        + "FROM transaction_receive a "
+//                        + "WHERE a.id = :id ", nativeQuery = true)
+//        TransactionReceiveEntity getTransactionReceiveById(String id);
+
         @Query(value = "SELECT * FROM transaction_receive WHERE time >= :time AND reference_number = :referenceNumber AND trans_type = 'C'", nativeQuery = true)
         TransactionReceiveEntity findTransactionReceiveByFtCode(
                         @Param(value = "referenceNumber") String referenceNumber,

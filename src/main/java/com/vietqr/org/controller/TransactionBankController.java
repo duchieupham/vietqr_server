@@ -39,15 +39,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -180,6 +175,7 @@ public class TransactionBankController {
 	@Autowired
 	private BankReceiveActiveHistoryService bankReceiveActiveHistoryService;
 
+    @Autowired
 	private FirebaseMessagingService firebaseMessagingService;
 
 	@Autowired
@@ -187,9 +183,6 @@ public class TransactionBankController {
 
 	@Autowired
 	private InvoiceItemService invoiceItemService;
-	public TransactionBankController(FirebaseMessagingService firebaseMessagingService) {
-		this.firebaseMessagingService = firebaseMessagingService;
-	}
 
 	private String getUsernameFromToken(String token) {
 		String result = "";
@@ -205,9 +198,19 @@ public class TransactionBankController {
 		return result;
 	}
 
-	// API test callback transaction for users
-	// 1. Input DTO must be contain:
-	// bạnkAccount, token save username, content, amount, transType,
+    //push form notification
+    @GetMapping(value = "/transaction/notifications/{id}", produces = "text/html")
+    public String pushNotificationFrom(Model model, @PathVariable String id) {
+        TransactionReceiveEntity transaction = transactionReceiveService.getTransactionsById(id);
+        //List<TransactionReceiveEntity> transactions = Arrays.asList(transaction); // Chuyển đổi thành list
+
+        model.addAttribute("transactions", Collections.singletonList(transaction));
+        return "transactions";
+    }
+
+    // API test callback transaction for users
+    // 1. Input DTO must be contain:
+    // bạnkAccount, token save username, content, amount, transType,
 
 	@PostMapping("test/transaction-callback")
 	public ResponseEntity<ResponseMessageDTO> testCallbackForCustomer(
@@ -343,23 +346,62 @@ public class TransactionBankController {
 								data.put("notificationId", "");
 								data.put("transactionReceiveId", "");
 								data.put("bankAccount", "1123355589");
-								data.put("bankName", "Ngan hang TMCP Quan Doi");
-								data.put("bankCode", "MB");
-								data.put("terminalName", "");
-								data.put("terminalCode", "");
-								data.put("rawTerminalCode", "");
-								data.put("oderId", "");
-								data.put("referenceNumber", dto.getReferencenumber());
-								data.put("content", dto.getContent());
-								data.put("amount", "" + dto.getAmount());
-								data.put("time", "" + dto.getTransactiontime());
-								data.put("timePaid", "" + dto.getTransactiontime());
-								data.put("refId", "" + dto.getTransactionid());
-								data.put("status", "1");
-								data.put("traceId", "" + "");
-								data.put("transType", dto.getTransType());
-								data.put("urlLink", "");
-								try {
+                                data.put("bankName", "Ngan hang TMCP Quan Doi"); //
+                                data.put("bankCode", "MB");
+                                data.put("terminalName", ""); //
+                                data.put("terminalCode", ""); //
+                                data.put("rawTerminalCode", "");
+                                data.put("oderId", "");
+                                data.put("referenceNumber", dto.getReferencenumber());
+                                data.put("content", dto.getContent());
+                                data.put("amount", "" + dto.getAmount());
+                                data.put("time", "" + dto.getTransactiontime());
+                                data.put("timePaid", "" + dto.getTransactiontime());
+                                data.put("refId", "" + dto.getTransactionid());
+                                data.put("transType", "" + dto.getTransType()); // thêm transType rồi
+                                // thêm type nữa
+
+                                data.put("status", "1");
+                                data.put("traceId", "" + "");
+                                //data.put("transType", dto.getTransType());
+                                data.put("urlLink", "");
+                                data.put("type", "0");
+
+                                // push form noti
+                                //initialize data check
+                                int typeCheck = 0;
+                                String statusCheck = data.put("status", "1");
+                                String bankCodeCheck = data.put("bankCode", "MB");
+                                String terminalCodeCheck = data.put("terminalCode", "");
+                                String terminalNameCheck = data.put("terminalName", "");
+
+                                // check conditions to push form notifications
+                                if (statusCheck.equals("0") && typeCheck == 0) {
+                                    data.put("html", "Bạn có hoá đơn " + dto.getAmount() + " cần thanh toán.");
+                                } // thông báo hoá đơn chưa thanh toán
+
+                                if (dto.getTransType() == "C" && typeCheck == 2) {
+                                    data.put("html", "+" + dto.getAmount() + " VNĐ đến "
+                                            + bankCodeCheck + " - " + dto.getBankaccount());
+                                } // Nhận tiền Đến
+
+                                if (dto.getTransType() == "C" && typeCheck == 1) {
+                                    data.put("html", "+ " + dto.getAmount() + " VNĐ đến MB Bank - "
+                                            + dto.getBankaccount() + " - "
+                                            + terminalNameCheck + " - "
+                                            + terminalCodeCheck);
+                                } // Cập nhật tài khoản cửa hàng
+
+                                if (dto.getTransType() == "D") {
+                                    data.put("html", "+" + dto.getAmount() + " VNĐ từ "
+                                            + bankCodeCheck + " - " + dto.getBankaccount());
+                                } // Chuyển tiền đi
+
+                                if (dto.getTransType() == "C" && typeCheck == 0) {
+                                    data.put("html", dto.getBankaccount() + "Chưa biết trả gì");
+                                }
+                                //--
+                                try {
 									// send msg to QR Link
 									String refId = TransactionRefIdUtil
 											.encryptTransactionId(dto.getTransactionid());
@@ -1430,7 +1472,46 @@ public class TransactionBankController {
 														transactionWalletDebit.getUserId(),
 														transactionWalletDebit.getOtp(),
 														paymentType);
-											} else {
+
+                                                // notification
+                                                // push notification
+                                                String notificationUUID = UUID.randomUUID().toString();
+                                                String notiType = NotificationUtil.getNotiInvoice();
+                                                String title = NotificationUtil.getNOTI_TITLE_INVOICE_SUCESS_FINAL();
+                                                String message = NotificationUtil.getNotiDescActiveKey1()
+                                                        + invoiceEntity.getInvoiceId()
+                                                        + NotificationUtil.getNotiTitleInvoiceTotalAmount()
+                                                        + invoiceEntity.getTotalAmount() + " VNĐ"
+                                                        //+ NotificationUtil.getNotiDescActiveKey2()
+                                                        + NotificationUtil.getNotiDescActiveKey3();
+
+                                                NotificationEntity notiEntity = new NotificationEntity();
+                                                notiEntity.setId(notificationUUID);
+                                                notiEntity.setRead(false);
+                                                notiEntity.setMessage(message);
+                                                notiEntity.setTime(time);
+                                                notiEntity.setType(
+                                                        notiType);
+                                                notiEntity.setUserId(userId);
+                                                notiEntity.setData(checkTransWalletId);
+                                                Map<String, String> data = new HashMap<>();
+                                                data.put("notificationType",
+                                                        notiType);
+                                                data.put("notificationId",
+                                                        notificationUUID);
+                                                data.put("amount",
+                                                        invoiceEntity.getAmount() + "");
+                                                data.put("transWalletId", checkTransWalletId);
+                                                data.put("time", time + "");
+                                                data.put("bankId", bankId);
+                                                //data.put("billNumber", invoiceEntity.get());
+                                                data.put("paymentMethod", "1");
+                                                data.put("paymentType", "2");
+                                                data.put("status", 1 + "");
+                                                data.put("message", message);
+                                                pushNotification(title, message, notiEntity, data, userId);
+
+                                            } else {
 												System.out.println(
 														"transaction-sync: TRAN WALLET INVOICE NULL");
 												logger.error("transaction-sync: TRAN WALLET INVOICE IS ALREADY PAID OR CANCELED ");
