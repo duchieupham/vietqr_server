@@ -26,4 +26,7 @@ public interface SystemSettingRepository extends JpaRepository<SystemSettingEnti
     @Modifying
     @Query(value = "UPDATE system_setting SET box_env = :data ", nativeQuery = true)
     int updateBoxEnvironment(String data);
+
+    @Query(value = "SELECT bank_id_default FROM system_setting LIMIT 1 ", nativeQuery = true)
+    String getBankIdRechargeDefault();
 }

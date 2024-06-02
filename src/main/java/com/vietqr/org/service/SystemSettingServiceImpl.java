@@ -33,4 +33,9 @@ public class SystemSettingServiceImpl implements SystemSettingService {
         return repo.updateBoxEnvironment(data);
     }
 
+    @Override
+    public String getBankIdRechargeDefault() {
+        return repo.getBankIdRechargeDefault();
+    }
+
 }

@@ -67,21 +67,6 @@ public class TidQrInternalController {
     private CaiBankService caiBankService;
 
     @Autowired
-    private AccountBankReceiveShareService accountBankReceiveShareService;
-
-    @Autowired
-    private MerchantService merchantService;
-
-    @Autowired
-    private MerchantBankReceiveService merchantBankReceiveService;
-
-    @Autowired
-    private MerchantMemberRoleService merchantMemberRoleService;
-
-    @Autowired
-    private MerchantMemberService merchantMemberService;
-
-    @Autowired
     private SystemSettingService systemSettingService;
 
     @Autowired
@@ -196,7 +181,7 @@ public class TidQrInternalController {
                     data.put("userBankName", accountBankInfoResById.getUserBankName());
                     data.put("qrCode", response.getQrCode());
                     data.put("machineId", terminalBankReceiveEntity.getId());
-                    data.put("terminalCode", terminalBankReceiveEntity.getTerminalCode());
+                    data.put("terminalCode", boxCode);
                     data.put("terminalName", dto.getTerminalName() != null ? dto.getTerminalName() : "");
                     data.put("boxId", boxId);
                     data.put("boxAddress", dto.getBoxAddress());

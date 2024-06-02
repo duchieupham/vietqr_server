@@ -34,6 +34,9 @@ public class InvoiceEntity implements Serializable {
     @Column(name = "timePaid")
     private long timePaid;
 
+    // 0: Chưa TT
+    // 1: Đã TT
+    // 3: Chưa TT hết
     @Column(name = "status")
     private int status;
 
@@ -70,6 +73,9 @@ public class InvoiceEntity implements Serializable {
     // loại dữ liệu của data
     @Column(name = "dataType")
     private int dataType;
+
+    @Column(name = "bankIdRecharge")
+    private String bankIdRecharge;
 
     public InvoiceEntity(String id, String invoiceId, String name, long timeCreated,
                          long timePaid, int status, String merchantId, long amount) {
@@ -220,5 +226,13 @@ public class InvoiceEntity implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getBankIdRecharge() {
+        return bankIdRecharge;
+    }
+
+    public void setBankIdRecharge(String bankIdRecharge) {
+        this.bankIdRecharge = bankIdRecharge;
     }
 }

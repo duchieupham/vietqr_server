@@ -11,6 +11,8 @@ public class InvoiceItemDetailDTO {
     private int type;
     private long vatAmount;
     private long totalAmountAfterVat;
+    private int status;
+    private long timePaid;
 
     public InvoiceItemDetailDTO() {
     }
@@ -106,5 +108,21 @@ public class InvoiceItemDetailDTO {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public long getTimePaid() {
+        return timePaid;
+    }
+
+    public void setTimePaid(long timePaid) {
+        this.timePaid = timePaid;
     }
 }

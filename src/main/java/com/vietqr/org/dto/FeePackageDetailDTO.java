@@ -9,6 +9,21 @@ public class FeePackageDetailDTO {
     private double vat;
 
     public FeePackageDetailDTO() {
+        feePackage = "";
+        annualFee = 0;
+        fixFee = 0;
+        percentFee = 0;
+        recordType = 1;
+        vat = 8;
+    }
+
+    public FeePackageDetailDTO(double vat) {
+        feePackage = "";
+        annualFee = 0;
+        fixFee = 0;
+        percentFee = 0;
+        recordType = 1;
+        this.vat = vat;
     }
 
     public FeePackageDetailDTO(String feePackage, long annualFee, int fixFee, double percentFee, int recordType) {

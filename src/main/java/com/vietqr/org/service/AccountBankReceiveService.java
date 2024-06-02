@@ -102,7 +102,7 @@ public interface AccountBankReceiveService {
 
 	IAccountBankReceiveDTO getAccountBankInfoResById(String bankAccount, String bankCode);
 
-    IMerchantBankMapperDTO getMerchantBankMapper(String bankId);
+	IBankReceiveMapperDTO getMerchantBankMapper(String bankId);
 
     List<ICustomerDetailDTO> getCustomerDetailByBankId(String bankId);
 

@@ -66,6 +66,17 @@ public class InvoiceItemEntity implements Serializable {
     @Column(name = "dataType")
     private int dataType;
 
+    // 0: Chưa thanh toán
+    // 1: Đã thanh toán
+    @Column(name = "status")
+    private int status;
+
+    @Column(name = "timePaid")
+    private long timePaid;
+
+    @Column(name = "timeCreated")
+    private long timeCreated;
+
     public InvoiceItemEntity() {
     }
 
@@ -201,5 +212,29 @@ public class InvoiceItemEntity implements Serializable {
 
     public void setTotalAfterVat(long totalAfterVat) {
         this.totalAfterVat = totalAfterVat;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public long getTimePaid() {
+        return timePaid;
+    }
+
+    public void setTimePaid(long timePaid) {
+        this.timePaid = timePaid;
+    }
+
+    public long getTimeCreated() {
+        return timeCreated;
+    }
+
+    public void setTimeCreated(long timeCreated) {
+        this.timeCreated = timeCreated;
     }
 }

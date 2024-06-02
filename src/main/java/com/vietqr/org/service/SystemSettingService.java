@@ -15,4 +15,6 @@ public interface SystemSettingService {
     BoxEnvironmentResDTO getSystemSettingBoxEnv();
 
     int updateBoxEnvironment(String data);
+
+    String getBankIdRechargeDefault();
 }

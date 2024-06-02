@@ -1138,7 +1138,7 @@ public class TransactionMMSController {
             // System.out.println("response status code: " + response.statusCode());
             if (response.statusCode().is2xxSuccessful()) {
                 String json = response.bodyToMono(String.class).block();
-                logger.info("Response pushNewTransactionToCustomerSync: " + json);
+                logger.info("Response pushNewTransactionToCustomerSync: " + json + " status Code: " + response.statusCode());
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode rootNode = objectMapper.readTree(json);
                 if (rootNode.get("object") != null) {
@@ -1153,7 +1153,7 @@ public class TransactionMMSController {
                 }
             } else {
                 String json = response.bodyToMono(String.class).block();
-                logger.info("Response pushNewTransactionToCustomerSync: " + json);
+                logger.info("Response pushNewTransactionToCustomerSync: " + json + " status Code: " + response.statusCode());
                 result = new ResponseMessageDTO("FAILED", "E05 - " + json);
             }
         } catch (Exception e) {

@@ -1,6 +1,6 @@
 package com.vietqr.org.dto;
 
-public class InvoiceQrDetailDTO {
+public class PaymentRequestResponseDTO {
     private String qrCode;
     private long totalAmountAfterVat;
     private String invoiceName;
@@ -15,28 +15,17 @@ public class InvoiceQrDetailDTO {
     private long vatAmount;
     private String invoiceId;
 
-    public InvoiceQrDetailDTO() {
-        qrCode = "";
-        vso = "";
-        midName = "";
-        totalAmountAfterVat = 0;
-        invoiceName = "";
-        bankAccount = "";
-        bankShortName = "";
-        invoiceNumber = "";
-        userBankName = "";
-        totalAmount = 0;
-        vat = 0;
-        vatAmount = 0;
-        invoiceId = "";
+    public PaymentRequestResponseDTO() {
     }
 
-    public InvoiceQrDetailDTO(String qrCode, long totalAmountAfterVat, String invoiceName, String bankAccount,
-                              String bankShortName, String invoiceNumber, String userBankName, long totalAmount,
-                              double vat, long vatAmount, String invoiceId) {
+    public PaymentRequestResponseDTO(String qrCode, long totalAmountAfterVat, String invoiceName, String midName,
+                                     String vso, String bankAccount, String bankShortName, String invoiceNumber,
+                                     String userBankName, long totalAmount, double vat, long vatAmount, String invoiceId) {
         this.qrCode = qrCode;
         this.totalAmountAfterVat = totalAmountAfterVat;
         this.invoiceName = invoiceName;
+        this.midName = midName;
+        this.vso = vso;
         this.bankAccount = bankAccount;
         this.bankShortName = bankShortName;
         this.invoiceNumber = invoiceNumber;
@@ -69,6 +58,22 @@ public class InvoiceQrDetailDTO {
 
     public void setInvoiceName(String invoiceName) {
         this.invoiceName = invoiceName;
+    }
+
+    public String getMidName() {
+        return midName;
+    }
+
+    public void setMidName(String midName) {
+        this.midName = midName;
+    }
+
+    public String getVso() {
+        return vso;
+    }
+
+    public void setVso(String vso) {
+        this.vso = vso;
     }
 
     public String getBankAccount() {
@@ -133,21 +138,5 @@ public class InvoiceQrDetailDTO {
 
     public void setInvoiceId(String invoiceId) {
         this.invoiceId = invoiceId;
-    }
-
-    public String getMidName() {
-        return midName;
-    }
-
-    public void setMidName(String midName) {
-        this.midName = midName;
-    }
-
-    public String getVso() {
-        return vso;
-    }
-
-    public void setVso(String vso) {
-        this.vso = vso;
     }
 }

@@ -16,6 +16,7 @@ import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @RestController
@@ -41,7 +42,10 @@ public class InvoiceController {
     BankReceiveFeePackageService bankReceiveFeePackageService;
 
     @Autowired
-    TrMonthService trMonthService;
+    InvoiceTransactionService invoiceTransactionService;
+
+    @Autowired
+    ProcessedInvoiceService processedInvoiceService;
 
     @Autowired
     TransactionReceiveService transactionReceiveService;
@@ -375,6 +379,13 @@ public class InvoiceController {
             InvoiceQrDetailDTO data = new InvoiceQrDetailDTO();
             IInvoiceQrDetailDTO dto = invoiceService.getInvoiceQrById(invoiceId);
             if (dto != null) {
+                if (!StringUtil.isNullOrEmpty(dto.getMerchantId())) {
+                    IMerchantInfoDTO merchantInfoDTO = merchantSyncService.getMerchantSyncInfo(dto.getMerchantId());
+                    if (merchantInfoDTO != null) {
+                        data.setVso(StringUtil.getValueNullChecker(merchantInfoDTO.getVso()));
+                        data.setMidName(StringUtil.getValueNullChecker(merchantInfoDTO.getMidName()));
+                    }
+                }
                 data.setQrCode(generateQrForPayment(dto.getTotalAmountAfterVat(), dto.getContent()));
                 data.setTotalAmountAfterVat(dto.getTotalAmountAfterVat());
                 data.setInvoiceName(dto.getInvoiceName());
@@ -421,9 +432,10 @@ public class InvoiceController {
             entity.setStatus(0);
             entity.setMerchantId(dto.getMerchantId() != null ? dto.getMerchantId() : "");
             entity.setBankId(dto.getBankId() != null ? dto.getBankId() : "");
-            IMerchantBankMapperDTO merchantMapper;
+            IMerchantBankMapperDTO merchantMapper = null;
+            IBankReceiveMapperDTO bankReceiveMapperDTO = null;
             if (StringUtil.isNullOrEmpty(dto.getMerchantId())) {
-                merchantMapper = accountBankReceiveService
+                bankReceiveMapperDTO = accountBankReceiveService
                         .getMerchantBankMapper(dto.getBankId());
             } else {
                 merchantMapper = bankReceiveFeePackageService
@@ -441,6 +453,17 @@ public class InvoiceController {
                 merchantBankMapperDTO.setPhoneNo(merchantBankMapperDTO.getPhoneNo());
 
                 entity.setUserId(merchantMapper.getUserId());
+            } else if (bankReceiveMapperDTO != null) {
+                merchantBankMapperDTO.setUserBankName(bankReceiveMapperDTO.getUserBankName());
+                merchantBankMapperDTO.setMerchantName("");
+                merchantBankMapperDTO.setVso("");
+                merchantBankMapperDTO.setEmail(bankReceiveMapperDTO.getEmail());
+                merchantBankMapperDTO.setBankAccount(bankReceiveMapperDTO.getBankAccount());
+                merchantBankMapperDTO.setBankShortName(bankReceiveMapperDTO.getBankShortName());
+                merchantBankMapperDTO.setPhoneNo(bankReceiveMapperDTO.getPhoneNo());
+                entity.setUserId(bankReceiveMapperDTO.getUserId());
+            } else {
+                entity.setUserId("");
             }
             try {
                 entity.setData(mapper.writeValueAsString(merchantBankMapperDTO));
@@ -652,8 +675,195 @@ public class InvoiceController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @PostMapping("invoice/request-payment")
+    public ResponseEntity<Object> requestPayment(
+            @Valid @RequestBody PaymentRequestDTO dto
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            PaymentRequestResponseDTO responseDTO = new PaymentRequestResponseDTO();
+            String bankIdRechargeDefault = systemSettingService.getBankIdRechargeDefault();
+            String bankId = bankIdRechargeDefault;
+            if (StringUtil.isNullOrEmpty(dto.getBankIdRecharge())) {
+                bankId = dto.getBankIdRecharge();
+            }
+            ObjectMapper mapper = new ObjectMapper();
+            String itemIds = getSortedListString(dto.getItemItemIds());
+            InvoiceRequestPaymentDTO requestPaymentDTO = invoiceTransactionService.getInvoiceRequestPayment(
+                    dto.getInvoiceId(),
+                    itemIds,
+                    dto.getBankIdRecharge()
+            );
+            if (requestPaymentDTO != null) {
+
+
+
+
+                result = responseDTO;
+                httpStatus = HttpStatus.OK;
+            } else {
+                IInvoiceDTO invoiceDTO = invoiceService.getInvoiceRequestPayment(dto.getInvoiceId());
+                List<IInvoiceItemDetailDTO> iInvoiceItemDetailDTOS = invoiceItemService
+                        .getInvoiceItemsByIds(dto.getItemItemIds());
+                if (invoiceDTO != null && iInvoiceItemDetailDTOS != null &&
+                        iInvoiceItemDetailDTOS.size() == dto.getItemItemIds().size()) {
+                    long totalAmountAfterVat = 0;
+                    long totalAmount = 0;
+                    long vatAmount = 0;
+                    for (IInvoiceItemDetailDTO item : iInvoiceItemDetailDTOS) {
+                        totalAmount += item.getTotalAmount();
+                        vatAmount += item.getVatAmount();
+                        totalAmountAfterVat += item.getAmountAfterVat();
+                    }
+                    MerchantBankMapperDTO merchantBankMapperDTO = new MerchantBankMapperDTO();
+                    String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
+                    String billNumberVQR = "VTS" + RandomCodeUtil.generateRandomId(10);
+                    String otpPayment = RandomCodeUtil.generateOTP(6);
+                    String content = traceId + " " + billNumberVQR;
+                    List<TransactionWalletEntity> transactionWalletEntities = new ArrayList<>();
+
+                    // create transaction_wallet_credit
+                    TransactionWalletEntity walletEntityCredit = new TransactionWalletEntity();
+                    UUID transWalletCreditUUID = UUID.randomUUID();
+                    walletEntityCredit.setId(transWalletCreditUUID.toString());
+                    walletEntityCredit.setAmount(totalAmountAfterVat + "");
+                    walletEntityCredit.setBillNumber(billNumberVQR);
+                    walletEntityCredit.setContent(content);
+                    walletEntityCredit.setStatus(0);
+                    walletEntityCredit.setTimeCreated(DateTimeUtil.getCurrentDateTimeUTC());
+                    walletEntityCredit.setTimePaid(0);
+                    walletEntityCredit.setTransType("C");
+                    walletEntityCredit.setUserId(invoiceDTO.getUserId());
+                    walletEntityCredit.setOtp("");
+                    walletEntityCredit.setPaymentType(0);
+                    walletEntityCredit.setPaymentMethod(1);
+                    walletEntityCredit.setReferenceNumber(3 + "*" + invoiceDTO.getUserId() + "*" +
+                            otpPayment + "*" + invoiceDTO.getBankId());
+                    walletEntityCredit.setPhoneNoRC("");
+                    walletEntityCredit.setData(invoiceDTO.getBankId());
+                    walletEntityCredit.setRefId("");
+                    transactionWalletEntities.add(walletEntityCredit);
+
+                    // create transaction_wallet_debit
+                    TransactionWalletEntity walletEntityDebit = new TransactionWalletEntity();
+                    UUID transWalletUUID = UUID.randomUUID();
+                    walletEntityDebit.setId(transWalletUUID.toString());
+                    walletEntityDebit.setAmount(totalAmountAfterVat + "");
+                    walletEntityDebit.setBillNumber(billNumberVQR);
+                    walletEntityDebit.setContent(content);
+                    walletEntityDebit.setStatus(0);
+                    walletEntityDebit.setTimeCreated(DateTimeUtil.getCurrentDateTimeUTC());
+                    walletEntityDebit.setTimePaid(0);
+                    walletEntityDebit.setTransType("D");
+                    walletEntityDebit.setUserId(invoiceDTO.getUserId());
+                    walletEntityDebit.setOtp(otpPayment);
+                    walletEntityDebit.setPaymentType(3);
+                    walletEntityDebit.setPaymentMethod(0);
+                    walletEntityDebit.setReferenceNumber("");
+                    walletEntityDebit.setPhoneNoRC("");
+                    walletEntityDebit.setData(invoiceDTO.getBankId());
+                    walletEntityDebit.setRefId(transWalletCreditUUID.toString());
+                    transactionWalletEntities.add(walletEntityDebit);
+
+                    // generate VQR
+
+//                    String bankAccount = EnvironmentUtil.getBankAccountRecharge();
+//                    String bankId = EnvironmentUtil.getBankIdRecharge();
+                    IBankAccountInfoDTO bankAccountInfoDTO = accountBankReceiveService
+                            .getAccountBankInfoById(bankId);
+                    String userIdHost = EnvironmentUtil.getUserIdHostRecharge();
+                    String cai = EnvironmentUtil.getCAIRecharge();
+                    VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+                    vietQRGenerateDTO.setCaiValue(cai);
+                    vietQRGenerateDTO.setBankAccount(bankAccountInfoDTO.getBankAccount());
+                    vietQRGenerateDTO.setAmount(totalAmountAfterVat + "");
+                    vietQRGenerateDTO.setContent(content);
+                    String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+
+                    // insert transaction_receive
+                    UUID transReceiveUUID = UUID.randomUUID();
+                    TransactionReceiveEntity transactionReceiveEntity = new TransactionReceiveEntity();
+                    transactionReceiveEntity.setId(transReceiveUUID.toString());
+                    transactionReceiveEntity.setAmount(totalAmountAfterVat);
+                    transactionReceiveEntity.setBankAccount(bankAccountInfoDTO.getBankAccount());
+                    transactionReceiveEntity.setBankId(bankId);
+                    transactionReceiveEntity.setContent(content);
+                    transactionReceiveEntity.setRefId("");
+                    transactionReceiveEntity.setStatus(0);
+                    transactionReceiveEntity.setTime(DateTimeUtil.getCurrentDateTimeUTC());
+                    transactionReceiveEntity.setType(5);
+                    transactionReceiveEntity.setTraceId(traceId);
+                    transactionReceiveEntity.setTransType("C");
+                    transactionReceiveEntity.setReferenceNumber("");
+                    transactionReceiveEntity.setOrderId(billNumberVQR);
+                    transactionReceiveEntity.setSign("");
+                    transactionReceiveEntity.setCustomerBankAccount("");
+                    transactionReceiveEntity.setCustomerBankCode("");
+                    transactionReceiveEntity.setCustomerName("");
+                    transactionReceiveEntity.setTerminalCode("");
+                    transactionReceiveEntity.setUserId(userIdHost);
+                    transactionReceiveEntity.setNote("");
+                    transactionReceiveEntity.setTransStatus(0);
+                    transactionReceiveEntity.setQrCode(qr);
+                    transactionReceiveEntity.setUrlLink("");
+
+                    InvoiceTransactionEntity entity = new InvoiceTransactionEntity();
+                    entity.setId(UUID.randomUUID().toString());
+                    entity.setInvoiceId(dto.getInvoiceId());
+                    entity.setInvoiceItemId(mapper.writeValueAsString(dto.getItemItemIds()));
+                    if (!StringUtil.isNullOrEmpty(dto.getBankIdRecharge())) {
+                        entity.setBankIdRecharge(dto.getBankIdRecharge());
+                    } else {
+                        entity.setBankIdRecharge(bankIdRechargeDefault);
+                    }
+                    entity.setMid(invoiceDTO.getMerchantId());
+                    entity.setBankId(invoiceDTO.getBankId());
+                    entity.setUserId(invoiceDTO.getUserId());
+                    entity.setStatus(0);
+                    entity.setVat(invoiceDTO.getVat());
+                    entity.setRefId(transReceiveUUID.toString());
+                    entity.setInvoiceNumber(billNumberVQR);
+                    entity.setTotalAmount(totalAmountAfterVat);
+                    entity.setTotalAmount(totalAmount);
+                    entity.setVatAmount(vatAmount);
+                    entity.setQrCode(qr);
+
+                    invoiceTransactionService.insert(entity);
+                    transactionWalletService.insertAll(transactionWalletEntities);
+                    transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
+
+                    responseDTO.setQrCode(qr);
+                    responseDTO.setTotalAmountAfterVat(totalAmountAfterVat);
+                    responseDTO.setInvoiceName(invoiceDTO.getInvoiceName());
+                    responseDTO.setMidName(merchantBankMapperDTO.getMerchantName());
+                    responseDTO.setVso(merchantBankMapperDTO.getVso());
+                    responseDTO.setBankAccount(merchantBankMapperDTO.getBankAccount());
+                    responseDTO.setBankShortName(merchantBankMapperDTO.getBankShortName());
+                    responseDTO.setUserBankName(merchantBankMapperDTO.getUserBankName());
+                    responseDTO.setInvoiceNumber(invoiceDTO.getInvoiceNumber());
+                    responseDTO.setTotalAmount(totalAmount);
+                    responseDTO.setVat(invoiceDTO.getVat());
+                    responseDTO.setVatAmount(vatAmount);
+                    responseDTO.setInvoiceId(dto.getInvoiceId());
+                    result = responseDTO;
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    result = new ResponseMessageDTO("FAILED", "E46");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            }
+        } catch (Exception e) {
+            logger.error("InvoiceController: ERROR: requestPayment: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @GetMapping("invoice/detail/{invoiceId}")
-    public ResponseEntity<Object> getInvoiceByUser(
+    public ResponseEntity<Object> getInvoiceDetailById(
             @PathVariable String invoiceId
     ) {
         Object result = null;
@@ -694,6 +904,9 @@ public class InvoiceController {
 
                 dto.setInvoiceItemDetailDTOS(invoiceItemDetailDTOS);
 
+                List<BankReceivePaymentRequestDTO> bankReceivePaymentRequestDTOS = getListPaymentRequest(invoiceDTO.getBankIdRecharge());
+                dto.setPaymentRequestDTOS(bankReceivePaymentRequestDTOS);
+
                 List<ICustomerDetailDTO> iCustomerDetailDTOS = new ArrayList<>();
                 if (StringUtil.isNullOrEmpty(invoiceDTO.getMerchantId())) {
                     iCustomerDetailDTOS =
@@ -706,7 +919,7 @@ public class InvoiceController {
                         iCustomerDetailDTOS.stream().map(item -> {
                             CustomerDetailDTO customerDetailDTO = new CustomerDetailDTO();
                             customerDetailDTO.setBankAccount(StringUtil.removeMarkString(item.getBankAccount()));
-                            customerDetailDTO.setEmail(item.getEmail());
+                            customerDetailDTO.setEmail(StringUtil.getValueNullChecker(item.getEmail()));
                             customerDetailDTO.setPlatform(item.getPlatform());
                             customerDetailDTO.setVso(item.getVso());
                             customerDetailDTO.setMerchantName(item.getMerchantName());
@@ -743,7 +956,7 @@ public class InvoiceController {
             result = dto;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            logger.error("InvoiceController: ERROR: getInvoiceByUser: " + e.getMessage()
+            logger.error("InvoiceController: ERROR: getInvoiceDetailById: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -752,7 +965,7 @@ public class InvoiceController {
     }
 
     @GetMapping("/invoice/{userId}")
-    public ResponseEntity<Object> getInvoiceByUser(
+    public ResponseEntity<Object> getInvoicesByUser(
             @PathVariable String userId,
             @RequestParam int page,
             @RequestParam int size,
@@ -794,43 +1007,23 @@ public class InvoiceController {
                 InvoiceResponseDTO dto = new InvoiceResponseDTO();
                 dto.setInvoiceId(item.getInvoiceId());
                 dto.setInvoiceName(item.getInvoiceName());
-                dto.setBillNumber(item.getBillNumber());
+                dto.setBillNumber(item.getInvoiceNumber());
                 dto.setInvoiceNumber(item.getInvoiceNumber());
-                dto.setInvoiceName(item.getInvoiceName());
                 dto.setTimeCreated(item.getTimeCreated());
                 dto.setTimePaid(item.getTimePaid());
                 dto.setStatus(item.getStatus());
                 dto.setBankId(item.getBankId());
-                try {
-                    BankAccountInfoDTO bankAccountInfoDTO = mapper.readValue(item.getData(), BankAccountInfoDTO.class);
-                    if (bankAccountInfoDTO != null) {
-                        dto.setBankAccount(bankAccountInfoDTO.getBankAccount() != null ?
-                                bankAccountInfoDTO.getBankAccount() : "");
-                        dto.setBankShortName(bankAccountInfoDTO.getBankShortName() != null ?
-                                bankAccountInfoDTO.getBankShortName() : "");
-                    }
-                } catch (JsonProcessingException e) {
-                    dto.setBankAccount("");
-                    dto.setBankShortName("");
-                }
-                String cai = EnvironmentUtil.getCAIRecharge();
-                VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
-                vietQRGenerateDTO.setCaiValue(cai);
-                String bankAccount = EnvironmentUtil.getBankAccountRecharge();
-                vietQRGenerateDTO.setBankAccount(bankAccount);
-                vietQRGenerateDTO.setAmount(item.getTotalAmount() + "");
-                vietQRGenerateDTO.setContent(item.getContent());
-                String bankCode = EnvironmentUtil.getBankCodeRecharge();
-                String bankName = EnvironmentUtil.getBankNameRecharge();
-                String userBankName = EnvironmentUtil.getUserBankNameRecharge();
-                vietQRGenerateDTO.setBankAccount(bankAccount);
-                vietQRGenerateDTO.setAmount(dto.getTotalAmount() + "");
-                dto.setBankAccountForPayment(bankAccount);
-                dto.setUserBankNameForPayment(userBankName);
-                dto.setBankNameForPayment(bankName);
-                dto.setBankCodeForPayment(bankCode);
-                String qrCode = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
-                dto.setQrCode(qrCode);
+                MerchantBankMapperDTO merchantBankMapperDTO = getMerchantBankMapperDTO(item.getData());
+                dto.setVso(StringUtil.getValueNullChecker(merchantBankMapperDTO.getVso()));
+                dto.setMidName(StringUtil.getValueNullChecker(merchantBankMapperDTO.getMerchantName()));
+                dto.setBankShortName(StringUtil.getValueNullChecker(merchantBankMapperDTO.getBankShortName()));
+                dto.setBankAccount(StringUtil.getValueNullChecker(merchantBankMapperDTO.getBankAccount()));
+                dto.setUserBankName(StringUtil.getValueNullChecker(merchantBankMapperDTO.getUserBankName()));
+                dto.setBankAccountForPayment("");
+                dto.setUserBankNameForPayment("");
+                dto.setBankNameForPayment("");
+                dto.setBankCodeForPayment("");
+                dto.setQrCode("");
                 dto.setTotalAmount(item.getTotalAmount());
                 return dto;
             }).collect(Collectors.toList());
@@ -844,7 +1037,7 @@ public class InvoiceController {
             result = response;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            logger.error("InvoiceController: ERROR: getInvoiceByUser: " + e.getMessage()
+            logger.error("InvoiceController: ERROR: getInvoicesByUser: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -853,7 +1046,7 @@ public class InvoiceController {
     }
 
     @GetMapping("/invoice-detail/{invoiceId}")
-    public ResponseEntity<Object> getInvoiceByItem(
+    public ResponseEntity<Object> getInvoiceDetailByInvoiceId(
             @PathVariable String invoiceId
     ) {
         Object result = null;
@@ -875,7 +1068,7 @@ public class InvoiceController {
                 return itemResDTO;
             }).collect(Collectors.toList());
             response.setInvoiceId(dto.getInvoiceId());
-            response.setBillNumber(dto.getBillNumber());
+            response.setBillNumber(dto.getInvoiceNumber());
             response.setInvoiceNumber(dto.getInvoiceNumber());
             response.setInvoiceName(dto.getInvoiceName());
             response.setTimeCreated(dto.getTimeCreated());
@@ -918,7 +1111,323 @@ public class InvoiceController {
             result = response;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            logger.error("InvoiceController: ERROR: getInvoiceByItem: " + e.getMessage()
+            logger.error("InvoiceController: ERROR: getInvoiceDetailByInvoiceId: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("invoice-user/payment")
+    public ResponseEntity<Object> requestPaymentUser(
+            @Valid @RequestBody PaymentRequestDTO dto
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            PaymentRequestResponseDTO responseDTO = new PaymentRequestResponseDTO();
+            String bankIdRechargeDefault = systemSettingService.getBankIdRechargeDefault();
+            ObjectMapper mapper = new ObjectMapper();
+            String itemIds = getSortedListString(dto.getItemItemIds());
+            InvoiceRequestPaymentDTO requestPaymentDTO = invoiceTransactionService.getInvoiceRequestPayment(
+                    dto.getInvoiceId(),
+                    itemIds,
+                    dto.getBankIdRecharge()
+            );
+            if (requestPaymentDTO != null) {
+
+
+
+
+                result = responseDTO;
+                httpStatus = HttpStatus.OK;
+            } else {
+                IInvoiceDTO invoiceDTO = invoiceService.getInvoiceRequestPayment(dto.getInvoiceId());
+                List<IInvoiceItemDetailDTO> iInvoiceItemDetailDTOS = invoiceItemService
+                        .getInvoiceItemsByIds(dto.getItemItemIds());
+                if (invoiceDTO != null && iInvoiceItemDetailDTOS != null &&
+                        iInvoiceItemDetailDTOS.size() == dto.getItemItemIds().size()) {
+                    long totalAmountAfterVat = 0;
+                    long totalAmount = 0;
+                    long vatAmount = 0;
+                    for (IInvoiceItemDetailDTO item : iInvoiceItemDetailDTOS) {
+                        totalAmount += item.getTotalAmount();
+                        vatAmount += item.getVatAmount();
+                        totalAmountAfterVat += item.getAmountAfterVat();
+                    }
+                    MerchantBankMapperDTO merchantBankMapperDTO = new MerchantBankMapperDTO();
+                    String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
+                    String billNumberVQR = "VTS" + RandomCodeUtil.generateRandomId(10);
+                    String otpPayment = RandomCodeUtil.generateOTP(6);
+                    String content = traceId + " " + billNumberVQR;
+                    List<TransactionWalletEntity> transactionWalletEntities = new ArrayList<>();
+
+                    // create transaction_wallet_credit
+                    TransactionWalletEntity walletEntityCredit = new TransactionWalletEntity();
+                    UUID transWalletCreditUUID = UUID.randomUUID();
+                    walletEntityCredit.setId(transWalletCreditUUID.toString());
+                    walletEntityCredit.setAmount(totalAmountAfterVat + "");
+                    walletEntityCredit.setBillNumber(billNumberVQR);
+                    walletEntityCredit.setContent(content);
+                    walletEntityCredit.setStatus(0);
+                    walletEntityCredit.setTimeCreated(DateTimeUtil.getCurrentDateTimeUTC());
+                    walletEntityCredit.setTimePaid(0);
+                    walletEntityCredit.setTransType("C");
+                    walletEntityCredit.setUserId(invoiceDTO.getUserId());
+                    walletEntityCredit.setOtp("");
+                    walletEntityCredit.setPaymentType(0);
+                    walletEntityCredit.setPaymentMethod(1);
+                    walletEntityCredit.setReferenceNumber(3 + "*" + invoiceDTO.getUserId() + "*" +
+                            otpPayment + "*" + invoiceDTO.getBankId());
+                    walletEntityCredit.setPhoneNoRC("");
+                    walletEntityCredit.setData(invoiceDTO.getBankId());
+                    walletEntityCredit.setRefId("");
+                    transactionWalletEntities.add(walletEntityCredit);
+
+                    // create transaction_wallet_debit
+                    TransactionWalletEntity walletEntityDebit = new TransactionWalletEntity();
+                    UUID transWalletUUID = UUID.randomUUID();
+                    walletEntityDebit.setId(transWalletUUID.toString());
+                    walletEntityDebit.setAmount(totalAmountAfterVat + "");
+                    walletEntityDebit.setBillNumber(billNumberVQR);
+                    walletEntityDebit.setContent(content);
+                    walletEntityDebit.setStatus(0);
+                    walletEntityDebit.setTimeCreated(DateTimeUtil.getCurrentDateTimeUTC());
+                    walletEntityDebit.setTimePaid(0);
+                    walletEntityDebit.setTransType("D");
+                    walletEntityDebit.setUserId(invoiceDTO.getUserId());
+                    walletEntityDebit.setOtp(otpPayment);
+                    walletEntityDebit.setPaymentType(3);
+                    walletEntityDebit.setPaymentMethod(0);
+                    walletEntityDebit.setReferenceNumber("");
+                    walletEntityDebit.setPhoneNoRC("");
+                    walletEntityDebit.setData(invoiceDTO.getBankId());
+                    walletEntityDebit.setRefId(transWalletCreditUUID.toString());
+                    transactionWalletEntities.add(walletEntityDebit);
+
+                    // generate VQR
+                    IBankAccountInfoDTO bankAccountInfoDTO = accountBankReceiveService
+                            .getAccountBankInfoById(bankIdRechargeDefault);
+                    String userIdHost = EnvironmentUtil.getUserIdHostRecharge();
+                    String cai = EnvironmentUtil.getCAIRecharge();
+                    VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+                    vietQRGenerateDTO.setCaiValue(cai);
+                    vietQRGenerateDTO.setBankAccount(bankAccountInfoDTO.getBankAccount());
+                    vietQRGenerateDTO.setAmount(totalAmountAfterVat + "");
+                    vietQRGenerateDTO.setContent(content);
+                    String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+
+                    // insert transaction_receive
+                    UUID transReceiveUUID = UUID.randomUUID();
+                    TransactionReceiveEntity transactionReceiveEntity = new TransactionReceiveEntity();
+                    transactionReceiveEntity.setId(transReceiveUUID.toString());
+                    transactionReceiveEntity.setAmount(totalAmountAfterVat);
+                    transactionReceiveEntity.setBankAccount(bankAccountInfoDTO.getBankAccount());
+                    transactionReceiveEntity.setBankId(bankIdRechargeDefault);
+                    transactionReceiveEntity.setContent(content);
+                    transactionReceiveEntity.setRefId("");
+                    transactionReceiveEntity.setStatus(0);
+                    transactionReceiveEntity.setTime(DateTimeUtil.getCurrentDateTimeUTC());
+                    transactionReceiveEntity.setType(5);
+                    transactionReceiveEntity.setTraceId(traceId);
+                    transactionReceiveEntity.setTransType("C");
+                    transactionReceiveEntity.setReferenceNumber("");
+                    transactionReceiveEntity.setOrderId(billNumberVQR);
+                    transactionReceiveEntity.setSign("");
+                    transactionReceiveEntity.setCustomerBankAccount("");
+                    transactionReceiveEntity.setCustomerBankCode("");
+                    transactionReceiveEntity.setCustomerName("");
+                    transactionReceiveEntity.setTerminalCode("");
+                    transactionReceiveEntity.setUserId(userIdHost);
+                    transactionReceiveEntity.setNote("");
+                    transactionReceiveEntity.setTransStatus(0);
+                    transactionReceiveEntity.setQrCode(qr);
+                    transactionReceiveEntity.setUrlLink("");
+
+                    InvoiceTransactionEntity entity = new InvoiceTransactionEntity();
+                    entity.setId(UUID.randomUUID().toString());
+                    entity.setInvoiceId(dto.getInvoiceId());
+                    entity.setInvoiceItemId(mapper.writeValueAsString(dto.getItemItemIds()));
+                    if (!StringUtil.isNullOrEmpty(dto.getBankIdRecharge())) {
+                        entity.setBankIdRecharge(dto.getBankIdRecharge());
+                    } else {
+                        entity.setBankIdRecharge(bankIdRechargeDefault);
+                    }
+                    entity.setMid(invoiceDTO.getMerchantId());
+                    entity.setBankId(invoiceDTO.getBankId());
+                    entity.setUserId(invoiceDTO.getUserId());
+                    entity.setStatus(0);
+                    entity.setVat(invoiceDTO.getVat());
+                    entity.setRefId(transReceiveUUID.toString());
+                    entity.setInvoiceNumber(billNumberVQR);
+                    entity.setTotalAmount(totalAmountAfterVat);
+                    entity.setTotalAmount(totalAmount);
+                    entity.setVatAmount(vatAmount);
+                    entity.setQrCode(qr);
+
+                    invoiceTransactionService.insert(entity);
+                    transactionWalletService.insertAll(transactionWalletEntities);
+                    transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
+
+                    responseDTO.setQrCode(qr);
+                    responseDTO.setTotalAmountAfterVat(totalAmountAfterVat);
+                    responseDTO.setInvoiceName(invoiceDTO.getInvoiceName());
+                    responseDTO.setMidName(merchantBankMapperDTO.getMerchantName());
+                    responseDTO.setVso(merchantBankMapperDTO.getVso());
+                    responseDTO.setBankAccount(merchantBankMapperDTO.getBankAccount());
+                    responseDTO.setBankShortName(merchantBankMapperDTO.getBankShortName());
+                    responseDTO.setUserBankName(merchantBankMapperDTO.getUserBankName());
+                    responseDTO.setInvoiceNumber(invoiceDTO.getInvoiceNumber());
+                    responseDTO.setTotalAmount(totalAmount);
+                    responseDTO.setVat(invoiceDTO.getVat());
+                    responseDTO.setVatAmount(vatAmount);
+                    responseDTO.setInvoiceId(dto.getInvoiceId());
+                    result = responseDTO;
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    result = new ResponseMessageDTO("FAILED", "E46");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            }
+        } catch (Exception e) {
+            logger.error("InvoiceController: ERROR: requestPaymentUser: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("invoice-unpaid/{userId}")
+    public ResponseEntity<InvoiceUnpaidUserStaDTO> getTotalInvoiceUnpaidByUserId(
+            @PathVariable String userId
+    ) {
+        InvoiceUnpaidUserStaDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            result = new InvoiceUnpaidUserStaDTO();
+            InvoiceUnpaidStatisticDTO dto = invoiceService.getTotalInvoiceUnpaidByUserId(userId);
+            if (dto != null) {
+                result.setTotalInvoice(dto.getTotalInvoice());
+                result.setTotalUnpaid(dto.getTotalMoney());
+                result.setUserId(dto.getUserId());
+            } else {
+                result.setTotalInvoice(0);
+                result.setTotalUnpaid(0);
+                result.setUserId(userId);
+            }
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("InvoiceController: ERROR: getTotalInvoiceUnpaidByUserId: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+
+    @GetMapping("/invoice-detail/web/{invoiceId}")
+    public ResponseEntity<Object> getInvoiceDetailWebByInvoiceId(
+            @PathVariable String invoiceId
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            InvoiceDetailWebDTO dto = new InvoiceDetailWebDTO();
+            IInvoiceDTO invoiceDTO = invoiceService.getInvoiceByInvoiceDetail(invoiceId);
+            if (invoiceDTO != null) {
+                dto.setInvoiceId(invoiceDTO.getInvoiceId());
+                dto.setInvoiceName(invoiceDTO.getInvoiceName());
+                dto.setInvoiceDescription(StringUtil.getValueNullChecker(invoiceDTO.getInvoiceDescription()));
+                dto.setVat(invoiceDTO.getVat());
+                dto.setVatAmount(invoiceDTO.getVatAmount());
+                dto.setTotalAmount(invoiceDTO.getTotalAmount());
+                dto.setTotalAmountAfterVat(invoiceDTO.getTotalAmountAfterVat());
+                dto.setStatus(invoiceDTO.getStatus());
+
+                List<IInvoiceItemDetailDTO> iInvoiceItemDetailDTOS = invoiceItemService
+                        .getInvoiceItemsByInvoiceId(invoiceId);
+                List<InvoiceItemDetailDTO> invoiceItemDetailDTOS =
+                        iInvoiceItemDetailDTOS.stream().map(item -> {
+                            InvoiceItemDetailDTO invoiceItemDetailDTO = new InvoiceItemDetailDTO();
+                            invoiceItemDetailDTO.setInvoiceItemId(item.getInvoiceItemId());
+                            invoiceItemDetailDTO.setInvoiceItemName(item.getInvoiceItemName());
+                            invoiceItemDetailDTO.setUnit(item.getUnit() != null ? item.getUnit() : "");
+                            invoiceItemDetailDTO.setQuantity(item.getQuantity());
+                            invoiceItemDetailDTO.setAmount(item.getAmount());
+                            invoiceItemDetailDTO.setTotalAmount(item.getTotalAmount());
+                            invoiceItemDetailDTO.setVat(StringUtil.getValueNullChecker(item.getVat()));
+                            invoiceItemDetailDTO.setVatAmount(item.getVatAmount());
+                            invoiceItemDetailDTO.setTotalAmountAfterVat(item.getAmountAfterVat());
+                            invoiceItemDetailDTO.setStatus(item.getStatus());
+                            invoiceItemDetailDTO.setTimePaid(item.getTimePaid());
+                            return invoiceItemDetailDTO;
+                        }).collect(Collectors.toList());
+                long pendingAmount = invoiceItemDetailDTOS.stream()
+                        .filter(item -> item.getStatus() == 0 && dto.getStatus() != 1)
+                        .mapToLong(InvoiceItemDetailDTO::getTotalAmountAfterVat)
+                        .sum();
+                long completeAmount = invoiceItemDetailDTOS.stream()
+                        .filter(item -> item.getStatus() == 1 || dto.getStatus() == 1)
+                        .mapToLong(InvoiceItemDetailDTO::getTotalAmountAfterVat)
+                        .sum();
+                dto.setPendingAmount(pendingAmount);
+                dto.setCompleteAmount(completeAmount);
+                dto.setInvoiceItemDetailDTOS(invoiceItemDetailDTOS);
+
+                List<ICustomerDetailDTO> iCustomerDetailDTOS = new ArrayList<>();
+                if (StringUtil.isNullOrEmpty(invoiceDTO.getMerchantId())) {
+                    iCustomerDetailDTOS =
+                            accountBankReceiveService.getCustomerDetailByBankId(invoiceDTO.getBankId());
+                } else {
+                    iCustomerDetailDTOS =
+                            bankReceiveFeePackageService.getCustomerDetailByBankId(invoiceDTO.getBankId());
+                }
+                List<CustomerDetailDTO> customerDetailDTOList =
+                        iCustomerDetailDTOS.stream().map(item -> {
+                            CustomerDetailDTO customerDetailDTO = new CustomerDetailDTO();
+                            customerDetailDTO.setBankAccount(StringUtil.removeMarkString(item.getBankAccount()));
+                            customerDetailDTO.setEmail(StringUtil.getValueNullChecker(item.getEmail()));
+                            customerDetailDTO.setPlatform(item.getPlatform());
+                            customerDetailDTO.setVso(item.getVso());
+                            customerDetailDTO.setMerchantName(item.getMerchantName());
+                            if (item.getMmsActive()) {
+                                customerDetailDTO.setConnectionType(EnvironmentUtil.getVietQrProPackage());
+                            } else {
+                                customerDetailDTO.setConnectionType(EnvironmentUtil.getVietQrPlusPackage());
+                            }
+                            customerDetailDTO.setBankShortName(StringUtil.removeMarkString(item.getBankShortName()));
+                            customerDetailDTO.setUserBankName(StringUtil.removeMarkString(item.getUserBankName()));
+                            customerDetailDTO.setPhoneNo(item.getPhoneNo());
+                            return customerDetailDTO;
+                        }).collect(Collectors.toList());
+
+                dto.setCustomerDetailDTOS(customerDetailDTOList);
+
+                List<IFeePackageDetailDTO> iFeePackageDetailDTOS =
+                        bankReceiveFeePackageService.getFeePackageDetail(invoiceDTO.getBankId());
+
+                List<FeePackageDetailDTO> feePackageDetailDTOS =
+                        iFeePackageDetailDTOS.stream().map(item -> {
+                            FeePackageDetailDTO feePackageDetailDTO = new FeePackageDetailDTO();
+                            feePackageDetailDTO.setFeePackage(item.getFeePackage());
+                            feePackageDetailDTO.setAnnualFee(item.getAnnualFee());
+                            feePackageDetailDTO.setFixFee(item.getFixFee());
+                            feePackageDetailDTO.setRecordType(item.getRecordType());
+                            feePackageDetailDTO.setPercentFee(item.getPercentFee());
+                            feePackageDetailDTO.setVat(item.getVat());
+                            return feePackageDetailDTO;
+                        }).collect(Collectors.toList());
+                if (feePackageDetailDTOS.isEmpty()) {
+                    feePackageDetailDTOS.add(new FeePackageDetailDTO(systemSettingService.getVatSystemSetting()));
+                }
+                dto.setFeePackageDetailDTOS(feePackageDetailDTOS);
+            }
+            result = dto;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("InvoiceController: ERROR: getInvoiceDetailWebByInvoiceId: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -1055,9 +1564,10 @@ public class InvoiceController {
             entity.setStatus(0);
             entity.setMerchantId(dto.getMerchantId() != null ? dto.getMerchantId() : "");
             entity.setBankId(dto.getBankId() != null ? dto.getBankId() : "");
-            IMerchantBankMapperDTO merchantMapper;
+            IMerchantBankMapperDTO merchantMapper = null;
+            IBankReceiveMapperDTO bankReceiveMapperDTO = null;
             if (StringUtil.isNullOrEmpty(dto.getMerchantId())) {
-                merchantMapper = accountBankReceiveService
+                bankReceiveMapperDTO = accountBankReceiveService
                         .getMerchantBankMapper(dto.getBankId());
             } else {
                 merchantMapper = bankReceiveFeePackageService
@@ -1075,6 +1585,15 @@ public class InvoiceController {
                 merchantBankMapperDTO.setPhoneNo(merchantBankMapperDTO.getPhoneNo());
 
                 entity.setUserId(merchantMapper.getUserId());
+            } else if (bankReceiveMapperDTO != null) {
+                merchantBankMapperDTO.setUserBankName(bankReceiveMapperDTO.getUserBankName());
+                merchantBankMapperDTO.setMerchantName("");
+                merchantBankMapperDTO.setVso("");
+                merchantBankMapperDTO.setEmail(bankReceiveMapperDTO.getEmail());
+                merchantBankMapperDTO.setBankAccount(bankReceiveMapperDTO.getBankAccount());
+                merchantBankMapperDTO.setBankShortName(bankReceiveMapperDTO.getBankShortName());
+                merchantBankMapperDTO.setPhoneNo(bankReceiveMapperDTO.getPhoneNo());
+                entity.setUserId(bankReceiveMapperDTO.getUserId());
             } else {
                 entity.setUserId("");
             }
@@ -1215,6 +1734,7 @@ public class InvoiceController {
             transactionReceiveEntity.setUrlLink("");
 
             entity.setRefId(transWalletUUID.toString());
+            entity.setBankIdRecharge(bankId);
 
             transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
             transactionWalletService.insertAll(transactionWalletEntities);
@@ -1274,6 +1794,55 @@ public class InvoiceController {
         vietQRGenerateDTO.setAmount(totalAmount + "");
         vietQRGenerateDTO.setContent(content);
         result = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+        return result;
+    }
+
+    private String getSortedListString(List<String> items) {
+        String result = "";
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            Collections.sort(items);
+            result = mapper.writeValueAsString(items);
+        } catch (Exception e) {
+            logger.error("InvoiceController: ERROR: getSortedListString: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+        }
+        return result;
+    }
+
+    private MerchantBankMapperDTO getMerchantBankMapperDTO(String data) {
+        MerchantBankMapperDTO result = new MerchantBankMapperDTO();
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            result = mapper.readValue(data, MerchantBankMapperDTO.class);
+        } catch (Exception e) {
+            result = new MerchantBankMapperDTO();
+        }
+        return result;
+    }
+
+    private List<BankReceivePaymentRequestDTO> getListPaymentRequest(String bankIdRecharge) {
+        List<BankReceivePaymentRequestDTO> result = new ArrayList<>();
+        BankReceivePaymentRequestDTO dto1 = new BankReceivePaymentRequestDTO(
+                EnvironmentUtil.getBankIdRecharge(),
+                EnvironmentUtil.getBankAccountRecharge(),
+                EnvironmentUtil.getBankShortNameRecharge(),
+                EnvironmentUtil.getUserBankNameRecharge()
+        );
+        if (!StringUtil.isNullOrEmpty(bankIdRecharge)) {
+            dto1.setIsChecked(dto1.getBankId().equals(bankIdRecharge));
+        }
+        result.add(dto1);
+        BankReceivePaymentRequestDTO dto2 = new BankReceivePaymentRequestDTO(
+                EnvironmentUtil.getBankIdRecharge2(),
+                EnvironmentUtil.getBankAccountRecharge2(),
+                EnvironmentUtil.getBankShortNameRecharge(),
+                EnvironmentUtil.getUserBankNameRecharge2()
+        );
+        if (!StringUtil.isNullOrEmpty(bankIdRecharge)) {
+            dto1.setIsChecked(dto2.getBankId().equals(bankIdRecharge));
+        }
+        result.add(dto2);
         return result;
     }
 

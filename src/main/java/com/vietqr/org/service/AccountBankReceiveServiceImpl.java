@@ -229,7 +229,7 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     }
 
     @Override
-    public IMerchantBankMapperDTO getMerchantBankMapper(String bankId) {
+    public IBankReceiveMapperDTO getMerchantBankMapper(String bankId) {
         return repo.getMerchantBankMapper(bankId);
     }
 
