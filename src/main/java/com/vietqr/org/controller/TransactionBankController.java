@@ -1371,7 +1371,7 @@ public class TransactionBankController {
 										long amount = Long.parseLong(transactionWalletDebit.getAmount());
 										InvoiceEntity invoiceEntity = invoiceService.getInvoiceEntityByRefId(transactionWalletDebit.getId(), amount);
 										InvoiceTransactionEntity invoiceTransactionEntity = invoiceTransactionService.getInvoiceTransactionByRefId(transactionId);
-										String invoiceItemIds = invoiceTransactionEntity.getInvoiceItemId();
+										String invoiceItemIds = invoiceTransactionEntity.getInvoiceItemIds();
 										List<String> itemIds = mapper.readValue(invoiceItemIds, new TypeReference<List<String>>(){});
 
 										List<InvoiceItemEntity> invoiceItemEntities = new ArrayList<>();

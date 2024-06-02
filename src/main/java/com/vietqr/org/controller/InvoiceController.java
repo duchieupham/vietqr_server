@@ -271,9 +271,9 @@ public class InvoiceController {
                 extraInvoiceDTO = new AdminExtraInvoiceDTO();
                 extraInvoiceDTO.setMonth(time);
                 extraInvoiceDTO.setCompleteCount(extraInvoiceDTO1.getCompleteCount());
-                extraInvoiceDTO.setCompleteFee(extraInvoiceDTO1.getCompleteFee());
+                extraInvoiceDTO.setCompleteAmount(extraInvoiceDTO1.getCompleteFee());
                 extraInvoiceDTO.setPendingCount(extraInvoiceDTO1.getPendingCount());
-                extraInvoiceDTO.setPendingFee(extraInvoiceDTO1.getPendingFee());
+                extraInvoiceDTO.setPendingAmount(extraInvoiceDTO1.getPendingFee());
                 extraInvoiceDTO.setUnFullyPaidCount(extraInvoiceDTO1.getUnfullyPaidCount());
             }
             data = dtos.stream().map(item -> {
