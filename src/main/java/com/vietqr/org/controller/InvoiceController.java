@@ -761,7 +761,7 @@ public class InvoiceController {
                         vatAmount += item.getVatAmount();
                         totalAmountAfterVat += item.getAmountAfterVat();
                     }
-                    MerchantBankMapperDTO merchantBankMapperDTO = new MerchantBankMapperDTO();
+                    MerchantBankMapperDTO merchantBankMapperDTO = getMerchantBankMapperDTO(invoiceDTO.getData());
                     String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
                     String billNumberVQR = "VTS" + RandomCodeUtil.generateRandomId(10);
                     String otpPayment = RandomCodeUtil.generateOTP(6);
@@ -870,7 +870,7 @@ public class InvoiceController {
                     entity.setRefId(transReceiveUUID.toString());
                     entity.setInvoiceNumber(billNumberVQR);
                     entity.setTotalAmount(totalAmountAfterVat);
-                    entity.setTotalAmount(totalAmount);
+                    entity.setAmount(totalAmount);
                     entity.setVatAmount(vatAmount);
                     entity.setQrCode(qr);
 
@@ -948,6 +948,18 @@ public class InvoiceController {
                         }).collect(Collectors.toList());
 
                 dto.setInvoiceItemDetailDTOS(invoiceItemDetailDTOS);
+
+                long totalPaid = invoiceItemDetailDTOS.stream()
+                        .filter(item -> item.getStatus() == 1)
+                        .mapToLong(InvoiceItemDetailDTO::getTotalAmountAfterVat)
+                        .sum();
+                long totalUnpaid = invoiceItemDetailDTOS.stream()
+                        .filter(item -> item.getStatus() == 0)
+                        .mapToLong(InvoiceItemDetailDTO::getTotalAmountAfterVat)
+                        .sum();
+
+                dto.setTotalPaid(totalPaid);
+                dto.setTotalUnpaid(totalUnpaid);
 
                 List<BankReceivePaymentRequestDTO> bankReceivePaymentRequestDTOS = getListPaymentRequest(invoiceDTO.getBankIdRecharge());
                 dto.setPaymentRequestDTOS(bankReceivePaymentRequestDTOS);
@@ -1569,6 +1581,7 @@ public class InvoiceController {
                         annualFee = feePackage.getAnnualFee();
                     }
                     long totalAmount = Math.round(totalAmountRaw) - annualFee;
+                    if (totalAmount < 0) totalAmount = 0;
                     data.setAmount(totalAmount);
                     data.setTotalAmount(totalAmount);
                     data.setVatAmount(Math.round(vat / 100 * totalAmount));
@@ -1646,7 +1659,7 @@ public class InvoiceController {
                 merchantBankMapperDTO.setUserBankName(bankReceiveMapperDTO.getUserBankName());
                 merchantBankMapperDTO.setMerchantName("");
                 merchantBankMapperDTO.setVso("");
-                merchantBankMapperDTO.setEmail(bankReceiveMapperDTO.getEmail());
+                merchantBankMapperDTO.setEmail(StringUtil.getValueNullChecker(bankReceiveMapperDTO.getEmail()));
                 merchantBankMapperDTO.setBankAccount(bankReceiveMapperDTO.getBankAccount());
                 merchantBankMapperDTO.setBankShortName(bankReceiveMapperDTO.getBankShortName());
                 merchantBankMapperDTO.setPhoneNo(bankReceiveMapperDTO.getPhoneNo());
@@ -1907,7 +1920,7 @@ public class InvoiceController {
                 EnvironmentUtil.getUserBankNameRecharge2()
         );
         if (!StringUtil.isNullOrEmpty(bankIdRecharge)) {
-            dto1.setIsChecked(dto2.getBankId().equals(bankIdRecharge));
+            dto2.setIsChecked(dto2.getBankId().equals(bankIdRecharge));
         }
         result.add(dto2);
         return result;
