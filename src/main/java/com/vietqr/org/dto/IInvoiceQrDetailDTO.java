@@ -1,6 +1,6 @@
 package com.vietqr.org.dto;
 
-public interface IInvoiceQrDetailDTO {
+public interface  IInvoiceQrDetailDTO {
     String getContent();
     String getDescription();
     String getInvoiceId();

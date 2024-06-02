@@ -11,4 +11,6 @@ public interface InvoiceTransactionService {
     InvoiceRequestPaymentDTO getInvoiceRequestPayment(String invoiceId, String itemIds);
 
     void insert(InvoiceTransactionEntity entity);
+
+    InvoiceTransactionEntity getInvoiceTransactionByRefId(String refId);
 }

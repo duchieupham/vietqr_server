@@ -28,4 +28,6 @@ public interface InvoiceItemService {
     List<IInvoiceItemDetailDTO> getInvoiceItemsByIds(List<String> itemItemIds);
 
     IAdminExtraInvoiceDTO getExtraInvoice(String time);
+
+    List<InvoiceItemEntity> findByInvoiceId(String invoiceId);
 }

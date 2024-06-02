@@ -78,4 +78,6 @@ public interface InvoiceItemRepository extends JpaRepository<InvoiceItemEntity, 
             + "INNER JOIN invoice b ON a.invoice_id = b.id "
             + "WHERE b.time_created BETWEEN :fromDate AND :toDate ", nativeQuery = true)
     IAdminExtraInvoiceDTO getExtraInvoice(long fromDate, long toDate);
+
+    List<InvoiceItemEntity> findInvoiceItemEntityByInvoiceId(String invoiceId);
 }

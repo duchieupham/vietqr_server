@@ -14,21 +14,7 @@ public class InvoiceItemDetailDTO {
     private int status;
     private long timePaid;
 
-    public InvoiceItemDetailDTO() {
-    }
 
-    public InvoiceItemDetailDTO(String invoiceItemId, String invoiceItemName, String unit, int quantity,
-                                long amount, long totalAmount, double vat, long vatAmount, long totalAmountAfterVat) {
-        this.invoiceItemId = invoiceItemId;
-        this.invoiceItemName = invoiceItemName;
-        this.unit = unit;
-        this.quantity = quantity;
-        this.amount = amount;
-        this.totalAmount = totalAmount;
-        this.vat = vat;
-        this.vatAmount = vatAmount;
-        this.totalAmountAfterVat = totalAmountAfterVat;
-    }
 
     public String getInvoiceItemId() {
         return invoiceItemId;

@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface InvoiceTransactionRepository extends JpaRepository<InvoiceTransactionEntity, String> {
     @Query(value = "SELECT a.qr_code AS qrCode, a.id AS id, a.total_amount AS totalAmount, "
@@ -26,4 +28,6 @@ public interface InvoiceTransactionRepository extends JpaRepository<InvoiceTrans
             + "WHERE JSON_CONTAINS(a.invoice_item_ids, :itemIds) AND a.invoice_id = :invoiceId "
             + "LIMIT 1 ", nativeQuery = true)
     InvoiceRequestPaymentDTO getInvoiceRequestPayment(String invoiceId, String itemIds);
+
+    Optional<InvoiceTransactionEntity> findByRefId(String refId);
 }
