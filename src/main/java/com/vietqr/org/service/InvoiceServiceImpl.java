@@ -92,6 +92,24 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
+    public List<IAdminInvoiceDTO> getInvoiceUnpaid(String value, int offset, int size, String month, String userId) {
+        StartEndTimeDTO startDate = DateTimeUtil.getStartEndMonth(month);
+        long fromDate = startDate.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startDate.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+
+        return repo.getInvoiceUnpaid(value, offset, size, fromDate, toDate, userId);
+    }
+
+    @Override
+    public int countInvoiceUnpaid(String value, String month, String userId) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(month);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.countInvoiceUnpaid(value, fromDate, toDate, userId);
+    }
+
+
+    @Override
     public int countInvoiceByMerchantId(String value, String month) {
         StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(month);
         long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;

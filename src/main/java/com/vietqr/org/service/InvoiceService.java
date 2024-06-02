@@ -37,6 +37,12 @@ public interface InvoiceService {
 
     List<IAdminInvoiceDTO> getInvoiceByMerchantId(String value, int offset, int size, String month);
 
+    List<IAdminInvoiceDTO> getInvoiceUnpaid(String value, int offset, int size, String month, String userId);
+
+    int countInvoiceUnpaid(String value, String month, String userId);
+
+    //List<String> getUserIdsByInvoiceId(String backAccount);
+
     int countInvoiceByMerchantId(String value, String month);
 
     List<IAdminInvoiceDTO> getInvoiceByInvoiceNumber(String value, int offset, int size, String month);

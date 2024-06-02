@@ -21,16 +21,22 @@ public class NotificationUtil {
 	private static final String NOTI_TYPE_PAYMENT_INVOICE_SUCCESS = "N15";
 	private static final String NOTI_CONNECT_QR_SUCCESS = "N16";
 	private static final String NOTI_SEND_DYNAMIC_QR = "N17";
+	private static final String NOTI_SEND_INVOICE = "N18";
 
 	// Title
 	private static final String NOTI_TITLE_TRANSACTION = "Thông báo biến động số dư";
 	private static final String NOTI_TITLE_LOGIN_WARNING = "Đăng nhập vào thiết bị mới";
 	private static final String NOTI_TITLE_NEW_MEMBER = "Thành viên mới";
 	private static final String NOTI_TITLE_NEW_TRANSACTION = "Giao dịch mới";
+	private static final String NOTI_TITLE_INVOICE_UNPAID = "Thông báo hoá đơn chưa thanh toán";
+	private static final String NOTI_TITLE_INVOICE = "Thông báo thanh toán hoá đơn";
+	private static final String NOTI_TITLE_INVOICE_TOTAL_AMOUNT = " với số tiền: ";
 	private static final String NOTI_TITLE_UPDATE_TRANSACTION = "Biến động số dư";
 	private static final String NOTI_TITLE_ADD_MEMBER = "Thông báo chia sẻ giao dịch cho cửa hàng";
 	private static final String NOTI_TITLE_REMOVE_MEMBER = "Thông báo chia sẻ biến động số dư";
 	private static final String NOTI_TITLE_ADD_VIETQR_ID = "Thêm bạn bè";
+	private static final String NOTI_DESC_PAYMENT_INVOICE = "Quý khách đã thanh toán thành công hoá đơn có mã HĐ: ";
+	private static final String NOTI_TITLE_INVOICE_UNFAID = "Thông bán. Vui lòng trên hệ thống VietQR VN.";
 	private static final String NOTI_TITLE_RECHARGE = "Thanh toán thành công";
 	private static final String NOTI_TITLE_MOBILE_TOPUP = "Nạp điện thoại thành công";
 	private static final String NOTI_TITLE_MOBILE_TOPUP_FAILED = "Nạp điện thoại thất bại. Số tiền được hoàn lại vào tài khoản của bạn trên hệ thống VietQR VN.";
@@ -107,9 +113,20 @@ public class NotificationUtil {
 	public static String getNotiTitleMobileTopupFailed() {
 		return NOTI_TITLE_MOBILE_TOPUP_FAILED;
 	}
+	public static String getNOTI_TITLE_INVOICE_UNPAID() {
+		return NOTI_TITLE_INVOICE_UNPAID;
+	}
+
+	public static String getNOTI_TITLE_INVOICE_SUCESS_FINAL() {
+		return NOTI_TITLE_INVOICE;
+	}
 
 	public static String getNotiDescMobileTopupFailed() {
 		return NOTI_DESC_MOBILE_TOPUP_FAILED;
+	}
+
+	public static String getNotiTitleInvoiceTotalAmount() {
+		return NOTI_TITLE_INVOICE_TOTAL_AMOUNT;
 	}
 
 	public static String getNotiMobileTopup() {
@@ -134,6 +151,10 @@ public class NotificationUtil {
 
 	public static String getNotiRecharge() {
 		return NOTI_RECHARGE;
+	}
+
+	public static String getNotiInvoice() {
+		return NOTI_SEND_INVOICE;
 	}
 
 	public static String getNotiTitleRecharge() {
@@ -279,9 +300,17 @@ public class NotificationUtil {
 	public static String getNotiAnnualFee() {
 		return NOTI_TYPE_ACTIVE_KEY;
 	}
-	public static String getNotiDescActiveKey1() {
-		return NOTI_DESC_ACTIVE_KEY_1;
+
+	public static String getNotiInvoiceFinal() {
+		return NOTI_SEND_INVOICE;
 	}
+	public static String getNotiInvoiceSuccess() {
+		return NOTI_TITLE_INVOICE;
+	}
+	public static String getNotiDescActiveKey1() {
+		return NOTI_DESC_PAYMENT_INVOICE;
+	}
+
 
 	public static String getNotiDescActiveKey2() {
 		return NOTI_DESC_ACTIVE_KEY_2;

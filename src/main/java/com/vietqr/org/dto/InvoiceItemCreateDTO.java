@@ -4,9 +4,11 @@ public class InvoiceItemCreateDTO {
     private String itemId;
     private int type;
     private String content;
+    private String timeProcess; // FE truyền
     private String unit;
     private int quantity;
     private long amount;
+
     private long totalAmount;
     private double vat;
     private long vatAmount;
@@ -26,6 +28,14 @@ public class InvoiceItemCreateDTO {
         this.vat = vat;
         this.vatAmount = vatAmount;
         this.amountAfterVat = amountAfterVat;
+    }
+
+    public String getTimeProcess() {
+        return timeProcess;
+    }
+
+    public void setTimeProcess(String timeProcess) {
+        this.timeProcess = timeProcess;
     }
 
     public String getItemId() {
