@@ -18,6 +18,11 @@ public class InvoiceTransactionServiceImpl implements InvoiceTransactionService 
     }
 
     @Override
+    public InvoiceRequestPaymentDTO getInvoiceRequestPayment(String invoiceId, String itemIds) {
+        return repo.getInvoiceRequestPayment(invoiceId, itemIds);
+    }
+
+    @Override
     public void insert(InvoiceTransactionEntity entity) {
         repo.save(entity);
     }

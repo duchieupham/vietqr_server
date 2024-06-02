@@ -10,6 +10,7 @@ public interface IInvoiceDTO {
     long getTotalAmountAfterVat();
     int getStatus();
     String getBankId();
+    String getData();
     String getMerchantId();
     String getUserId();
     String getBankIdRecharge();

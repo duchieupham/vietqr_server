@@ -8,5 +8,7 @@ import org.springframework.stereotype.Service;
 public interface InvoiceTransactionService {
     InvoiceRequestPaymentDTO getInvoiceRequestPayment(String invoiceId, String itemIds, String bankIdRecharge);
 
+    InvoiceRequestPaymentDTO getInvoiceRequestPayment(String invoiceId, String itemIds);
+
     void insert(InvoiceTransactionEntity entity);
 }

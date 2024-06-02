@@ -22,8 +22,8 @@ public class InvoiceTransactionEntity implements Serializable {
     @Column(name = "invoiceId")
     private String invoiceId;
 
-    @Column(name = "invoiceItemId", columnDefinition = "JSON")
-    private String invoiceItemId;
+    @Column(name = "invoiceItemIds", columnDefinition = "JSON")
+    private String invoiceItemIds;
 
     @Column(name = "bankIdRecharge")
     private String bankIdRecharge;
@@ -65,11 +65,11 @@ public class InvoiceTransactionEntity implements Serializable {
     public InvoiceTransactionEntity() {
     }
 
-    public InvoiceTransactionEntity(String id, String invoiceId, String invoiceItemId, String bankIdRecharge,
+    public InvoiceTransactionEntity(String id, String invoiceId, String invoiceItemIds, String bankIdRecharge,
                                     String bankId, String userId, String qrCode, String invoiceNumber, long totalAmount, long amount, long vatAmount, String refId) {
         this.id = id;
         this.invoiceId = invoiceId;
-        this.invoiceItemId = invoiceItemId;
+        this.invoiceItemIds = invoiceItemIds;
         this.bankIdRecharge = bankIdRecharge;
         this.bankId = bankId;
         this.userId = userId;
@@ -97,12 +97,12 @@ public class InvoiceTransactionEntity implements Serializable {
         this.invoiceId = invoiceId;
     }
 
-    public String getInvoiceItemId() {
-        return invoiceItemId;
+    public String getInvoiceItemIds() {
+        return invoiceItemIds;
     }
 
-    public void setInvoiceItemId(String invoiceItemId) {
-        this.invoiceItemId = invoiceItemId;
+    public void setInvoiceItemIds(String invoiceItemId) {
+        this.invoiceItemIds = invoiceItemId;
     }
 
     public String getBankIdRecharge() {

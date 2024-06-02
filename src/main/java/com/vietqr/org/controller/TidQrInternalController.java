@@ -439,7 +439,7 @@ public class TidQrInternalController {
                     data.put("userBankName", accountBankInfoResById.getUserBankName());
                     data.put("qrCode", response.getQrCode());
                     data.put("machineId", terminalBankReceiveEntity.getId());
-                    data.put("terminalCode", terminalBankReceiveEntity.getTerminalCode());
+                    data.put("terminalCode", boxCode);
                     data.put("terminalName", terminalName);
                     data.put("boxId", boxId);
                     data.put("boxAddress", boxAddress);

@@ -5,4 +5,5 @@ public interface IAdminExtraInvoiceDTO {
     int getPendingCount();
     long getCompleteFee();
     int getCompleteCount();
+    int getUnfullyPaidCount();
 }

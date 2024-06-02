@@ -17,4 +17,6 @@ public interface SystemSettingService {
     int updateBoxEnvironment(String data);
 
     String getBankIdRechargeDefault();
+
+    void updateBankRecharge(String bankId);
 }

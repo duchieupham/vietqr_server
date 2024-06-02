@@ -6,13 +6,15 @@ public class AdminExtraInvoiceDTO {
     private int pendingCount;
     private long completeFee;
     private int completeCount;
+    private int unFullyPaidCount;
 
     public AdminExtraInvoiceDTO() {
         month = "";
         pendingFee = 0;
         pendingCount = 0;
+        completeFee = 0;
         completeCount = 0;
-        completeCount = 0;
+        unFullyPaidCount = 0;
     }
 
     public AdminExtraInvoiceDTO(String month, long pendingFee, int pendingCount, long completeFee, int completeCount) {
@@ -61,5 +63,13 @@ public class AdminExtraInvoiceDTO {
 
     public void setCompleteCount(int completeCount) {
         this.completeCount = completeCount;
+    }
+
+    public int getUnFullyPaidCount() {
+        return unFullyPaidCount;
+    }
+
+    public void setUnFullyPaidCount(int unFullyPaidCount) {
+        this.unFullyPaidCount = unFullyPaidCount;
     }
 }

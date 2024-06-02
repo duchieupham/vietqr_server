@@ -16,7 +16,6 @@ import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @RestController
@@ -97,6 +96,25 @@ public class InvoiceController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("InvoiceController: ERROR: getAdminInvoiceLists: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("invoice/update-bank-recharge")
+    public ResponseEntity<Object> updateBankRecharge(
+            @Valid @RequestBody UpdateBankDTO dto
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            systemSettingService.updateBankRecharge(dto.getBankId());
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("InvoiceController: ERROR: updateBankRecharge: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -248,7 +266,7 @@ public class InvoiceController {
                     dtos = new ArrayList<>();
                     break;
             }
-            extraInvoiceDTO1 = invoiceService.getExtraInvoice(time);
+            extraInvoiceDTO1 = invoiceItemService.getExtraInvoice(time);
             if (extraInvoiceDTO1 != null) {
                 extraInvoiceDTO = new AdminExtraInvoiceDTO();
                 extraInvoiceDTO.setMonth(time);
@@ -256,6 +274,7 @@ public class InvoiceController {
                 extraInvoiceDTO.setCompleteFee(extraInvoiceDTO1.getCompleteFee());
                 extraInvoiceDTO.setPendingCount(extraInvoiceDTO1.getPendingCount());
                 extraInvoiceDTO.setPendingFee(extraInvoiceDTO1.getPendingFee());
+                extraInvoiceDTO.setUnFullyPaidCount(extraInvoiceDTO1.getUnfullyPaidCount());
             }
             data = dtos.stream().map(item -> {
                 AdminInvoiceDTO dto = new AdminInvoiceDTO();
@@ -334,6 +353,7 @@ public class InvoiceController {
                 httpStatus = HttpStatus.OK;
                 result = data;
             } else {
+                Double vat = systemSettingService.getVatSystemSetting();
                 AccountBankDetailAdminDTO detailAdmin = accountBankReceiveService.getAccountBankDetailAdmin(bankId);
                 if (detailAdmin != null) {
                     BankDetailAdminDTO data = new BankDetailAdminDTO();
@@ -350,7 +370,7 @@ public class InvoiceController {
                         data.setConnectionType(EnvironmentUtil.getVietQrPlusPackage());
                     }
                     data.setFeePackage("");
-                    data.setVat(0);
+                    data.setVat(vat);
                     data.setTransFee1(0);
                     data.setTransFee2(0);
                     data.setTransRecord(0);
@@ -696,9 +716,21 @@ public class InvoiceController {
                     dto.getBankIdRecharge()
             );
             if (requestPaymentDTO != null) {
-
-
-
+                MerchantBankMapperDTO merchantBankMapperDTO = null;
+                merchantBankMapperDTO = getMerchantBankMapperDTO(requestPaymentDTO.getData());
+                responseDTO.setQrCode(requestPaymentDTO.getQrCode());
+                responseDTO.setTotalAmountAfterVat(requestPaymentDTO.getTotalAMount());
+                responseDTO.setInvoiceName(requestPaymentDTO.getInvoiceName());
+                responseDTO.setMidName(StringUtil.getValueNullChecker(merchantBankMapperDTO.getMerchantName()));
+                responseDTO.setVso(StringUtil.getValueNullChecker(merchantBankMapperDTO.getVso()));
+                responseDTO.setBankAccount(StringUtil.getValueNullChecker(merchantBankMapperDTO.getBankAccount()));
+                responseDTO.setBankShortName(StringUtil.getValueNullChecker(merchantBankMapperDTO.getBankShortName()));
+                responseDTO.setUserBankName(StringUtil.getValueNullChecker(merchantBankMapperDTO.getUserBankName()));
+                responseDTO.setInvoiceNumber(requestPaymentDTO.getInvoiceNumber());
+                responseDTO.setTotalAmount(requestPaymentDTO.getAmount());
+                responseDTO.setVat(requestPaymentDTO.getVat());
+                responseDTO.setVatAmount(requestPaymentDTO.getVatAmount());
+                responseDTO.setInvoiceId(dto.getInvoiceId());
 
                 result = responseDTO;
                 httpStatus = HttpStatus.OK;
@@ -811,7 +843,7 @@ public class InvoiceController {
                     InvoiceTransactionEntity entity = new InvoiceTransactionEntity();
                     entity.setId(UUID.randomUUID().toString());
                     entity.setInvoiceId(dto.getInvoiceId());
-                    entity.setInvoiceItemId(mapper.writeValueAsString(dto.getItemItemIds()));
+                    entity.setInvoiceItemIds(mapper.writeValueAsString(dto.getItemItemIds()));
                     if (!StringUtil.isNullOrEmpty(dto.getBankIdRecharge())) {
                         entity.setBankIdRecharge(dto.getBankIdRecharge());
                     } else {
@@ -1130,16 +1162,28 @@ public class InvoiceController {
             String bankIdRechargeDefault = systemSettingService.getBankIdRechargeDefault();
             ObjectMapper mapper = new ObjectMapper();
             String itemIds = getSortedListString(dto.getItemItemIds());
+            System.out.println(dto.getInvoiceId());
+            System.out.println(itemIds.toString());
             InvoiceRequestPaymentDTO requestPaymentDTO = invoiceTransactionService.getInvoiceRequestPayment(
                     dto.getInvoiceId(),
-                    itemIds,
-                    dto.getBankIdRecharge()
+                    itemIds
             );
             if (requestPaymentDTO != null) {
-
-
-
-
+                MerchantBankMapperDTO merchantBankMapperDTO = null;
+                merchantBankMapperDTO = getMerchantBankMapperDTO(requestPaymentDTO.getData());
+                responseDTO.setQrCode(requestPaymentDTO.getQrCode());
+                responseDTO.setTotalAmountAfterVat(requestPaymentDTO.getTotalAMount());
+                responseDTO.setInvoiceName(requestPaymentDTO.getInvoiceName());
+                responseDTO.setMidName(StringUtil.getValueNullChecker(merchantBankMapperDTO.getMerchantName()));
+                responseDTO.setVso(StringUtil.getValueNullChecker(merchantBankMapperDTO.getVso()));
+                responseDTO.setBankAccount(StringUtil.getValueNullChecker(merchantBankMapperDTO.getBankAccount()));
+                responseDTO.setBankShortName(StringUtil.getValueNullChecker(merchantBankMapperDTO.getBankShortName()));
+                responseDTO.setUserBankName(StringUtil.getValueNullChecker(merchantBankMapperDTO.getUserBankName()));
+                responseDTO.setInvoiceNumber(requestPaymentDTO.getInvoiceNumber());
+                responseDTO.setTotalAmount(requestPaymentDTO.getAmount());
+                responseDTO.setVat(requestPaymentDTO.getVat());
+                responseDTO.setVatAmount(requestPaymentDTO.getVatAmount());
+                responseDTO.setInvoiceId(dto.getInvoiceId());
                 result = responseDTO;
                 httpStatus = HttpStatus.OK;
             } else {
@@ -1156,7 +1200,7 @@ public class InvoiceController {
                         vatAmount += item.getVatAmount();
                         totalAmountAfterVat += item.getAmountAfterVat();
                     }
-                    MerchantBankMapperDTO merchantBankMapperDTO = new MerchantBankMapperDTO();
+                    MerchantBankMapperDTO merchantBankMapperDTO = getMerchantBankMapperDTO(invoiceDTO.getData());
                     String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
                     String billNumberVQR = "VTS" + RandomCodeUtil.generateRandomId(10);
                     String otpPayment = RandomCodeUtil.generateOTP(6);
@@ -1248,7 +1292,7 @@ public class InvoiceController {
                     InvoiceTransactionEntity entity = new InvoiceTransactionEntity();
                     entity.setId(UUID.randomUUID().toString());
                     entity.setInvoiceId(dto.getInvoiceId());
-                    entity.setInvoiceItemId(mapper.writeValueAsString(dto.getItemItemIds()));
+                    entity.setInvoiceItemIds(mapper.writeValueAsString(dto.getItemItemIds()));
                     if (!StringUtil.isNullOrEmpty(dto.getBankIdRecharge())) {
                         entity.setBankIdRecharge(dto.getBankIdRecharge());
                     } else {
@@ -1262,7 +1306,7 @@ public class InvoiceController {
                     entity.setRefId(transReceiveUUID.toString());
                     entity.setInvoiceNumber(billNumberVQR);
                     entity.setTotalAmount(totalAmountAfterVat);
-                    entity.setTotalAmount(totalAmount);
+                    entity.setAmount(totalAmount);
                     entity.setVatAmount(vatAmount);
                     entity.setQrCode(qr);
 
@@ -1325,7 +1369,6 @@ public class InvoiceController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-
 
     @GetMapping("/invoice-detail/web/{invoiceId}")
     public ResponseEntity<Object> getInvoiceDetailWebByInvoiceId(
@@ -1816,6 +1859,7 @@ public class InvoiceController {
         try {
             result = mapper.readValue(data, MerchantBankMapperDTO.class);
         } catch (Exception e) {
+            logger.error("InvoiceController: ERROR: getMerchantBankMapperDTO: " + e.getMessage() + " at: " + System.currentTimeMillis());
             result = new MerchantBankMapperDTO();
         }
         return result;
