@@ -2,26 +2,26 @@ package com.vietqr.org.dto;
 
 public class AdminExtraInvoiceDTO {
     private String month;
-    private long pendingFee;
+    private long pendingAmount;
     private int pendingCount;
-    private long completeFee;
+    private long completeAmount;
     private int completeCount;
     private int unFullyPaidCount;
 
     public AdminExtraInvoiceDTO() {
         month = "";
-        pendingFee = 0;
+        pendingAmount = 0;
         pendingCount = 0;
-        completeFee = 0;
+        completeAmount = 0;
         completeCount = 0;
         unFullyPaidCount = 0;
     }
 
-    public AdminExtraInvoiceDTO(String month, long pendingFee, int pendingCount, long completeFee, int completeCount) {
+    public AdminExtraInvoiceDTO(String month, long pendingAmount, int pendingCount, long completeAmount, int completeCount) {
         this.month = month;
-        this.pendingFee = pendingFee;
+        this.pendingAmount = pendingAmount;
         this.pendingCount = pendingCount;
-        this.completeFee = completeFee;
+        this.completeAmount = completeAmount;
         this.completeCount = completeCount;
     }
 
@@ -33,12 +33,12 @@ public class AdminExtraInvoiceDTO {
         this.month = month;
     }
 
-    public long getPendingFee() {
-        return pendingFee;
+    public long getPendingAmount() {
+        return pendingAmount;
     }
 
-    public void setPendingFee(long pendingFee) {
-        this.pendingFee = pendingFee;
+    public void setPendingAmount(long pendingAmount) {
+        this.pendingAmount = pendingAmount;
     }
 
     public int getPendingCount() {
@@ -49,12 +49,12 @@ public class AdminExtraInvoiceDTO {
         this.pendingCount = pendingCount;
     }
 
-    public long getCompleteFee() {
-        return completeFee;
+    public long getCompleteAmount() {
+        return completeAmount;
     }
 
-    public void setCompleteFee(long completeFee) {
-        this.completeFee = completeFee;
+    public void setCompleteAmount(long completeAmount) {
+        this.completeAmount = completeAmount;
     }
 
     public int getCompleteCount() {
