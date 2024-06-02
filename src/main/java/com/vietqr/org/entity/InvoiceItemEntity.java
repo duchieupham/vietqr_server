@@ -77,11 +77,15 @@ public class InvoiceItemEntity implements Serializable {
     @Column(name = "timeCreated")
     private long timeCreated;
 
+    @Column(name = "processDate")
+    private String processDate;
+
+
     public InvoiceItemEntity() {
     }
 
     public InvoiceItemEntity(String id, String invoiceId, long amount, int quantity, String name,
-                             String description, int type, String typeName, String data, int dataType) {
+                             String description, int type, String typeName, String data, int dataType, int status) {
         this.id = id;
         this.invoiceId = invoiceId;
         this.amount = amount;
@@ -92,7 +96,12 @@ public class InvoiceItemEntity implements Serializable {
         this.typeName = typeName;
         this.data = data;
         this.dataType = dataType;
+        this.status = status;
     }
+
+
+
+
 
     public String getId() {
         return id;

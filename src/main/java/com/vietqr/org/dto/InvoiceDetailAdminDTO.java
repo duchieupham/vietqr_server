@@ -16,6 +16,25 @@ public class InvoiceDetailAdminDTO {
     private long totalAmountAfterVat;
     private int status;
 
+    private long totalPaid;
+    private long totalUnpaid;
+
+    public long getTotalPaid() {
+        return totalPaid;
+    }
+
+    public void setTotalPaid(long totalPaid) {
+        this.totalPaid = totalPaid;
+    }
+
+    public long getTotalUnpaid() {
+        return totalUnpaid;
+    }
+
+    public void setTotalUnpaid(long totalUnpaid) {
+        this.totalUnpaid = totalUnpaid;
+    }
+
     public InvoiceDetailAdminDTO() {
     }
 

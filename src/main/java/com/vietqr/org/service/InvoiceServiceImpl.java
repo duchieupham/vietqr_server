@@ -202,6 +202,10 @@ public class InvoiceServiceImpl implements InvoiceService {
         return repo.getInvoiceById(invoiceId);
     }
 
+    public InvoiceEntity findInvoiceById(String invoiceId) {
+        return repo.findById(invoiceId).orElse(null);
+    }
+
     @Override
     public void updateInvoiceById(long vatAmount, long totalAmount,
                                   long totalAmountAfterVat, String invoiceId) {

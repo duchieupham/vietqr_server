@@ -8,6 +8,10 @@ import java.util.List;
 
 @Service
 public interface InvoiceService {
+
+
+    InvoiceEntity findInvoiceById(String invoiceId);
+
     void insert(InvoiceEntity entity);
 
     List<IInvoiceResponseDTO> getInvoiceByUserId(String userId, int status, int offset, int size);

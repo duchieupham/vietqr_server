@@ -65,4 +65,8 @@ public class InvoiceItemServiceImpl implements InvoiceItemService {
         long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
         return repo.getExtraInvoice(fromDate, toDate);
     }
+    @Override
+    public List<InvoiceItemEntity> findByInvoiceId(String invoiceId) {
+        return repo.findInvoiceItemEntityByInvoiceId(invoiceId);
+    }
 }

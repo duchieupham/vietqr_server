@@ -19,6 +19,9 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 
 import javax.validation.Valid;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -138,6 +141,8 @@ public class TransactionBankController {
 
 	@Autowired
 	private SocketHandler socketHandler;
+	@Autowired
+	private InvoiceTransactionService invoiceTransactionService;
 
 	@Autowired
 	TelegramAccountBankService telegramAccountBankService;
@@ -293,7 +298,7 @@ public class TransactionBankController {
 		return new ResponseEntity<>(result, httpStatus);
 	}
 
-	public ResponseMessageDTO insertTransBank(TransactionBankDTO dto) {
+	public ResponseMessageDTO insertTransBank(TransactionBankDTO dto) throws JsonProcessingException{
 		ResponseMessageDTO result = null;
 		//
 		UUID uuid = UUID.randomUUID();
@@ -444,7 +449,7 @@ public class TransactionBankController {
 											// find transactionWallet by billNumber and status = 0
 											TransactionWalletEntity transactionWalletEntity = transactionWalletService
 													.getTransactionWalletByBillNumber(orderId);
-											processTransactionWallet(nf, time, dto, orderId, transactionWalletEntity);
+											processTransactionWallet(nf, time, dto, orderId, transactionWalletEntity, transactionReceiveEntity.getId());
 										}
 									} else {
 										logger.info(
@@ -540,6 +545,7 @@ public class TransactionBankController {
 	}
 
 	// Receive BDSD from MB Bank, so bankCode = 'MB'
+
 	@PostMapping("transaction-sync")
 	public ResponseEntity<TransactionResponseDTO> insertTransactionBank(@RequestBody TransactionBankDTO dto) {
 		TransactionResponseDTO result = null;
@@ -689,9 +695,13 @@ public class TransactionBankController {
 												// find transactionWallet by billNumber and status = 0
 												TransactionWalletEntity transactionWalletEntity = transactionWalletService
 														.getTransactionWalletByBillNumber(orderId);
-												processTransactionWallet(nf, time, dto, orderId,
-														transactionWalletEntity);
-											}
+                                                try {
+                                                    processTransactionWallet(nf, time, dto, orderId,
+                                                            transactionWalletEntity, transactionReceiveEntity.getId());
+                                                } catch (JsonProcessingException e) {
+                                                    throw new RuntimeException(e);
+                                                }
+                                            }
 										}
 									} else {
 										logger.info(
@@ -768,9 +778,13 @@ public class TransactionBankController {
 												// find transactionWallet by billNumber and status = 0
 												TransactionWalletEntity transactionWalletEntity = transactionWalletService
 														.getTransactionWalletByBillNumber(orderId);
-												processTransactionWallet(nf, time, dto, orderId,
-														transactionWalletEntity);
-											}
+                                                try {
+                                                    processTransactionWallet(nf, time, dto, orderId,
+                                                            transactionWalletEntity, transactionReceiveEntity.getId());
+                                                } catch (JsonProcessingException e) {
+                                                    throw new RuntimeException(e);
+                                                }
+                                            }
 										} else {
 											logger.info(
 													"transaction-sync - cannot find transaction receive. Receive new transaction outside system");
@@ -972,7 +986,7 @@ public class TransactionBankController {
 
 	@Async
 	private void processTransactionWallet(NumberFormat nf, long time, TransactionBankDTO dto, String orderId,
-										  TransactionWalletEntity entity) {
+										  TransactionWalletEntity entity, String transactionId) throws JsonProcessingException {
 		if (entity != null) {
 			// update transaction wallet
 			transactionWalletService.updateTransactionWalletStatus(1, time,
@@ -1352,11 +1366,62 @@ public class TransactionBankController {
 								TransactionWalletEntity transactionWalletDebit = transactionWalletService
 										.getTransactionWalletById(checkTransWalletId);
 								if (transactionWalletDebit != null) {
+
+									    ObjectMapper mapper = new ObjectMapper();
 										long amount = Long.parseLong(transactionWalletDebit.getAmount());
 										InvoiceEntity invoiceEntity = invoiceService.getInvoiceEntityByRefId(transactionWalletDebit.getId(), amount);
+										InvoiceTransactionEntity invoiceTransactionEntity = invoiceTransactionService.getInvoiceTransactionByRefId(transactionId);
+										String invoiceItemIds = invoiceTransactionEntity.getInvoiceItemId();
+										List<String> itemIds = mapper.readValue(invoiceItemIds, new TypeReference<List<String>>(){});
+
+										List<InvoiceItemEntity> invoiceItemEntities = new ArrayList<>();
+
+									    for (String itemId : itemIds) {
+										InvoiceItemEntity item = invoiceItemService.getInvoiceItemById(itemId);
+										if (item.getStatus() == 0) {
+
+											item.setStatus(1);
+											item.setTimePaid(System.currentTimeMillis());
+											invoiceItemService.insert(item);
+										}
+
+										invoiceItemEntities.add(item);
+									   }
+
+									   boolean allItemsPaid = true;
+
+									for (InvoiceItemEntity item : invoiceItemEntities) {
+										InvoiceItemEntity invoiceItem = invoiceItemService.getInvoiceItemById(item.getId());
+
+
+										if (invoiceItem.getStatus() == 0) {
+											invoiceItem.setStatus(1);
+											invoiceItem.setTimePaid(System.currentTimeMillis());
+											invoiceItemService.insert(invoiceItem);
+										}
+
+
+										if (invoiceItem.getStatus() == 0) {
+											allItemsPaid = false;
+										}
+									    }
+
+									    if (allItemsPaid) {
+										      invoiceEntity.setStatus(1);
+										} else {
+										invoiceEntity.setStatus(3);
+									     }
+									    invoiceService.insert(invoiceEntity);
+
+
+
 										if (invoiceEntity != null && invoiceEntity.getStatus() != 1) {
+
+
 											int checkSuccess = invoiceService.updateStatusInvoice(invoiceEntity.getId(), 1);
 											if (checkSuccess > 0) {
+
+
 												checkSuccessProcess = true;
 												// update transaction wallet
 												transactionWalletService.updateTransactionWallet(1, time,

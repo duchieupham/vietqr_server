@@ -1890,4 +1890,299 @@ public class InvoiceController {
         return result;
     }
 
+    @GetMapping("/invoice/detail-new/{invoiceId}")
+    public ResponseEntity<Object> getInvoiceByUsers(@PathVariable String invoiceId) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            InvoiceDetailAdminDTO dto = new InvoiceDetailAdminDTO();
+            IInvoiceDTO invoiceDTO = invoiceService.getInvoiceByInvoiceDetail(invoiceId);
+            if (invoiceDTO != null) {
+                dto.setInvoiceId(invoiceDTO.getInvoiceId());
+                dto.setInvoiceName(invoiceDTO.getInvoiceName());
+                dto.setInvoiceDescription(invoiceDTO.getInvoiceDescription() != null
+                        ? invoiceDTO.getInvoiceDescription() : "");
+                dto.setVat(invoiceDTO.getVat());
+                dto.setVatAmount(invoiceDTO.getVatAmount());
+                dto.setTotalAmount(invoiceDTO.getTotalAmount());
+                dto.setTotalAmountAfterVat(invoiceDTO.getTotalAmountAfterVat());
+
+                // Tính toán tổng số tiền đã thanh toán và chưa thanh toán
+                List<IInvoiceItemDetailDTO> iInvoiceItemDetailDTOS = invoiceItemService
+                        .getInvoiceItemsByInvoiceId(invoiceId);
+                if (iInvoiceItemDetailDTOS == null || iInvoiceItemDetailDTOS.isEmpty()) {
+                    logger.error("InvoiceController: ERROR: No items found for invoice: " + invoiceId);
+                    result = new ResponseMessageDTO("FAILED", "No items found for invoice");
+                    return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
+                }
+
+                List<InvoiceItemDetailDTO> invoiceItemDetailDTOS =
+                        iInvoiceItemDetailDTOS.stream().map(item -> {
+                            InvoiceItemDetailDTO invoiceItemDetailDTO = new InvoiceItemDetailDTO();
+                            invoiceItemDetailDTO.setInvoiceItemId(item.getInvoiceItemId());
+                            invoiceItemDetailDTO.setInvoiceItemName(item.getInvoiceItemName());
+                            invoiceItemDetailDTO.setUnit(item.getUnit() != null ? item.getUnit() : "");
+                            invoiceItemDetailDTO.setQuantity(item.getQuantity());
+                            invoiceItemDetailDTO.setAmount(item.getAmount());
+                            invoiceItemDetailDTO.setTotalAmount(item.getTotalAmount());
+                            invoiceItemDetailDTO.setVat(item.getVat() != null ? item.getVat() : invoiceDTO.getVat());
+                            invoiceItemDetailDTO.setVatAmount(item.getVatAmount() != null ? item.getVatAmount() :
+                                    Math.round(item.getTotalAmount() * invoiceDTO.getVat() / 100));
+                            invoiceItemDetailDTO.setTotalAmountAfterVat(item.getAmountAfterVat() != null ?
+                                    item.getAmountAfterVat() : Math.round(item.getTotalAmount() * (1 +
+                                    invoiceDTO.getVat() / 100)));
+                            invoiceItemDetailDTO.setStatus(item.getStatus()); // Trạng thái thanh toán của mục hóa đơn
+                            return invoiceItemDetailDTO;
+                        }).collect(Collectors.toList());
+
+                dto.setInvoiceItemDetailDTOS(invoiceItemDetailDTOS);
+
+                long totalPaid = invoiceItemDetailDTOS.stream()
+                        .filter(item -> item.getStatus() == 1)
+                        .mapToLong(InvoiceItemDetailDTO::getTotalAmountAfterVat)
+                        .sum();
+                long totalUnpaid = invoiceItemDetailDTOS.stream()
+                        .filter(item -> item.getStatus() == 0)
+                        .mapToLong(InvoiceItemDetailDTO::getTotalAmountAfterVat)
+                        .sum();
+
+                dto.setTotalPaid(totalPaid);
+                dto.setTotalUnpaid(totalUnpaid);
+
+                // Cập nhật trạng thái của hóa đơn
+                if (totalPaid < invoiceDTO.getTotalAmountAfterVat()) {
+                    dto.setStatus(3); // Chưa thanh toán hết
+                } else {
+                    dto.setStatus(1); // Đã thanh toán hết
+                }
+
+                // Lấy thông tin khách hàng
+                List<ICustomerDetailDTO> iCustomerDetailDTOS = new ArrayList<>();
+                if (StringUtil.isNullOrEmpty(invoiceDTO.getMerchantId())) {
+                    iCustomerDetailDTOS = accountBankReceiveService.getCustomerDetailByBankId(invoiceDTO.getBankId());
+                } else {
+                    iCustomerDetailDTOS = bankReceiveFeePackageService.getCustomerDetailByBankId(invoiceDTO.getBankId());
+                }
+                if (iCustomerDetailDTOS == null || iCustomerDetailDTOS.isEmpty()) {
+                    logger.error("InvoiceController: ERROR: No customer details found for invoice: " + invoiceId);
+                    result = new ResponseMessageDTO("FAILED", "No customer details found for invoice");
+                    return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
+                }
+
+                List<CustomerDetailDTO> customerDetailDTOList =
+                        iCustomerDetailDTOS.stream().map(item -> {
+                            CustomerDetailDTO customerDetailDTO = new CustomerDetailDTO();
+                            customerDetailDTO.setBankAccount(StringUtil.removeMarkString(item.getBankAccount()));
+                            customerDetailDTO.setEmail(item.getEmail());
+                            customerDetailDTO.setPlatform(item.getPlatform());
+                            customerDetailDTO.setVso(item.getVso());
+                            customerDetailDTO.setMerchantName(item.getMerchantName());
+                            if (item.getMmsActive()) {
+                                customerDetailDTO.setConnectionType(EnvironmentUtil.getVietQrProPackage());
+                            } else {
+                                customerDetailDTO.setConnectionType(EnvironmentUtil.getVietQrPlusPackage());
+                            }
+                            customerDetailDTO.setBankShortName(StringUtil.removeMarkString(item.getBankShortName()));
+                            customerDetailDTO.setUserBankName(StringUtil.removeMarkString(item.getUserBankName()));
+                            customerDetailDTO.setPhoneNo(item.getPhoneNo());
+                            return customerDetailDTO;
+                        }).collect(Collectors.toList());
+
+                dto.setCustomerDetailDTOS(customerDetailDTOList);
+
+                // Lấy thông tin gói phí
+                List<IFeePackageDetailDTO> iFeePackageDetailDTOS = bankReceiveFeePackageService.getFeePackageDetail(invoiceDTO.getBankId());
+                if (iFeePackageDetailDTOS == null || iFeePackageDetailDTOS.isEmpty()) {
+                    logger.error("InvoiceController: ERROR: No fee package details found for invoice: " + invoiceId);
+                    result = new ResponseMessageDTO("FAILED", "No fee package details found for invoice");
+                    return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
+                }
+
+                List<FeePackageDetailDTO> feePackageDetailDTOS =
+                        iFeePackageDetailDTOS.stream().map(item -> {
+                            FeePackageDetailDTO feePackageDetailDTO = new FeePackageDetailDTO();
+                            feePackageDetailDTO.setFeePackage(item.getFeePackage());
+                            feePackageDetailDTO.setAnnualFee(item.getAnnualFee());
+                            feePackageDetailDTO.setFixFee(item.getFixFee());
+                            feePackageDetailDTO.setRecordType(item.getRecordType());
+                            feePackageDetailDTO.setPercentFee(item.getPercentFee());
+                            feePackageDetailDTO.setVat(item.getVat());
+                            return feePackageDetailDTO;
+                        }).collect(Collectors.toList());
+
+                dto.setFeePackageDetailDTOS(feePackageDetailDTOS);
+            } else {
+                logger.error("InvoiceController: ERROR: Invoice not found: " + invoiceId);
+                result = new ResponseMessageDTO("FAILED", "Invoice not found");
+                httpStatus = HttpStatus.NOT_FOUND;
+                return new ResponseEntity<>(result, httpStatus);
+            }
+            result = dto;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("InvoiceController: ERROR: getInvoiceByUser: " + e.getMessage() + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("/invoice/{invoiceId}/partial-payment")
+    public ResponseEntity<Object> partialPayment(
+            @PathVariable String invoiceId,
+            @Valid @RequestBody PartialPaymentRequestDTO dto
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            InvoiceEntity invoiceEntity = invoiceService.findInvoiceById(invoiceId);
+            if (invoiceEntity == null) {
+                result = new ResponseMessageDTO("FAILED", "Invoice not found");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            } else {
+                long totalAmount = 0;
+                long totalVatAmount = 0;
+                long totalAmountAfterVat = 0;
+                List<InvoiceItemEntity> itemsToPay = new ArrayList<>();
+
+                for (String itemId : dto.getItemIds()) {
+                    InvoiceItemEntity item = invoiceItemService.getInvoiceItemById(itemId);
+                    if (item != null && item.getStatus() == 0) { // Chỉ chọn các item chưa thanh toán
+                        totalAmount += item.getAmount();
+                        totalVatAmount += item.getVatAmount();
+                        totalAmountAfterVat += item.getTotalAfterVat();
+                        itemsToPay.add(item);
+                    }
+                }
+
+                if (itemsToPay.isEmpty()) {
+                    result = new ResponseMessageDTO("FAILED", "No valid items to pay");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                } else {
+                    ObjectMapper mapper = new ObjectMapper();
+                    LocalDateTime current = LocalDateTime.now();
+                    long time = current.toEpochSecond(ZoneOffset.UTC);
+
+                    // Generate unique identifiers and content for the transaction
+                    String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
+                    String billNumberVQR = "VTS" + RandomCodeUtil.generateRandomId(10);
+                    String otpPayment = RandomCodeUtil.generateOTP(6);
+                    String content = traceId + " " + billNumberVQR;
+
+
+
+                    // Create TransactionWalletEntity (credit)
+                    TransactionWalletEntity walletEntityCredit = new TransactionWalletEntity();
+                    UUID transWalletCreditUUID = UUID.randomUUID();
+                    walletEntityCredit.setId(transWalletCreditUUID.toString());
+                    walletEntityCredit.setAmount(totalAmountAfterVat + "");
+                    walletEntityCredit.setBillNumber(billNumberVQR);
+                    walletEntityCredit.setContent(content);
+                    walletEntityCredit.setStatus(0);
+                    walletEntityCredit.setTimeCreated(time);
+                    walletEntityCredit.setTimePaid(0);
+                    walletEntityCredit.setTransType("C");
+                    walletEntityCredit.setUserId(dto.getUserId());
+                    walletEntityCredit.setOtp("");
+                    walletEntityCredit.setPaymentType(0);
+                    walletEntityCredit.setPaymentMethod(1);
+                    walletEntityCredit.setReferenceNumber(3 + "*" + dto.getUserId() + "*" + otpPayment + "*" + dto.getBankId());
+                    walletEntityCredit.setPhoneNoRC("");
+                    walletEntityCredit.setData(dto.getBankId());
+                    walletEntityCredit.setRefId("");
+
+                    // Create TransactionWalletEntity (debit)
+                    TransactionWalletEntity walletEntityDebit = new TransactionWalletEntity();
+                    UUID transWalletUUID = UUID.randomUUID();
+                    walletEntityDebit.setId(transWalletUUID.toString());
+                    walletEntityDebit.setAmount(totalAmountAfterVat + "");
+                    walletEntityDebit.setBillNumber(billNumberVQR);
+                    walletEntityDebit.setContent(content);
+                    walletEntityDebit.setStatus(0);
+                    walletEntityDebit.setTimeCreated(time);
+                    walletEntityDebit.setTimePaid(0);
+                    walletEntityDebit.setTransType("D");
+                    walletEntityDebit.setUserId(dto.getUserId());
+                    walletEntityDebit.setOtp(otpPayment);
+                    walletEntityDebit.setPaymentType(3);
+                    walletEntityDebit.setPaymentMethod(0);
+                    walletEntityDebit.setReferenceNumber("");
+                    walletEntityDebit.setPhoneNoRC("");
+                    walletEntityDebit.setData(dto.getBankId());
+                    walletEntityDebit.setRefId(transWalletCreditUUID.toString());
+
+                    // Create TransactionReceiveEntity
+                    String bankAccount = EnvironmentUtil.getBankAccountRecharge();
+                    String bankId = EnvironmentUtil.getBankIdRecharge();
+                    String userIdHost = EnvironmentUtil.getUserIdHostRecharge();
+                    String cai = EnvironmentUtil.getCAIRecharge();
+                    VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+                    vietQRGenerateDTO.setCaiValue(cai);
+                    vietQRGenerateDTO.setBankAccount(bankAccount);
+                    vietQRGenerateDTO.setAmount(totalAmountAfterVat + "");
+                    vietQRGenerateDTO.setContent(content);
+                    String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+
+                    UUID transReceiveUUID = UUID.randomUUID();
+                    TransactionReceiveEntity transactionReceiveEntity = new TransactionReceiveEntity();
+                    transactionReceiveEntity.setId(transReceiveUUID.toString());
+                    transactionReceiveEntity.setAmount(totalAmountAfterVat);
+                    transactionReceiveEntity.setBankAccount(bankAccount);
+                    transactionReceiveEntity.setBankId(bankId);
+                    transactionReceiveEntity.setContent(content);
+                    transactionReceiveEntity.setRefId("");
+                    transactionReceiveEntity.setStatus(0);
+                    transactionReceiveEntity.setTime(time);
+                    transactionReceiveEntity.setType(5);
+                    transactionReceiveEntity.setTraceId(traceId);
+                    transactionReceiveEntity.setTransType("C");
+                    transactionReceiveEntity.setReferenceNumber("");
+                    transactionReceiveEntity.setOrderId(billNumberVQR);
+                    transactionReceiveEntity.setSign("");
+                    transactionReceiveEntity.setCustomerBankAccount("");
+                    transactionReceiveEntity.setCustomerBankCode("");
+                    transactionReceiveEntity.setCustomerName("");
+                    transactionReceiveEntity.setTerminalCode(EnvironmentUtil.getVietQrActiveKey());
+                    transactionReceiveEntity.setUserId(userIdHost);
+                    transactionReceiveEntity.setNote("");
+                    transactionReceiveEntity.setTransStatus(0);
+                    transactionReceiveEntity.setQrCode(qr);
+                    transactionReceiveEntity.setUrlLink("");
+
+                    // Create InvoiceTransactionEntity
+                    InvoiceTransactionEntity invoiceTransactionEntity = new InvoiceTransactionEntity();
+                    invoiceTransactionEntity.setId(UUID.randomUUID().toString());
+                    invoiceTransactionEntity.setInvoiceId(invoiceEntity.getId());
+                    invoiceTransactionEntity.setInvoiceItemIds(mapper.writeValueAsString(itemsToPay.stream().map(InvoiceItemEntity::getId).collect(Collectors.toList())));
+                    invoiceTransactionEntity.setBankIdRecharge(dto.getBankId());
+                    invoiceTransactionEntity.setBankId(dto.getBankId());
+                    invoiceTransactionEntity.setUserId(dto.getUserId());
+                    invoiceTransactionEntity.setQrCode(qr);
+                    invoiceTransactionEntity.setInvoiceNumber(billNumberVQR);
+                    invoiceTransactionEntity.setTotalAmount(totalAmountAfterVat);
+                    invoiceTransactionEntity.setAmount(totalAmount);
+                    invoiceTransactionEntity.setVatAmount(totalVatAmount);
+                    invoiceTransactionEntity.setVat(totalVatAmount);
+                    invoiceTransactionEntity.setRefId(invoiceEntity.getRefId());
+
+                    invoiceTransactionEntity.setStatus(0);
+
+
+                    // Save entities
+                    transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
+                    transactionWalletService.insertTransactionWallet(walletEntityCredit);
+                    transactionWalletService.insertTransactionWallet(walletEntityDebit);
+                    invoiceTransactionService.insert(invoiceTransactionEntity);
+
+                    result = new ResponseMessageDTO("SUCCESS", qr);
+                    httpStatus = HttpStatus.OK;
+                }
+            }
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
 }

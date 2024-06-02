@@ -11,7 +11,8 @@ public interface IInvoiceItemDetailDTO {
     Double getVat();
     Long getVatAmount();
     Long getAmountAfterVat();
-    Integer getStatus();
+
     Long getTimePaid();
 
+    int getStatus();
 }

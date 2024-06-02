@@ -6,6 +6,8 @@ import com.vietqr.org.repository.InvoiceTransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class InvoiceTransactionServiceImpl implements InvoiceTransactionService {
 
@@ -25,5 +27,11 @@ public class InvoiceTransactionServiceImpl implements InvoiceTransactionService 
     @Override
     public void insert(InvoiceTransactionEntity entity) {
         repo.save(entity);
+    }
+
+    @Override
+    public InvoiceTransactionEntity getInvoiceTransactionByRefId(String refId) {
+        Optional<InvoiceTransactionEntity> transaction = repo.findByRefId(refId);
+        return transaction.orElse(null);
     }
 }
