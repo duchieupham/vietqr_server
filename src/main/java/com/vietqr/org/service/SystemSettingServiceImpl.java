@@ -38,4 +38,9 @@ public class SystemSettingServiceImpl implements SystemSettingService {
         return repo.getBankIdRechargeDefault();
     }
 
+    @Override
+    public void updateBankRecharge(String bankId) {
+        repo.updateBankRecharge(bankId);
+    }
+
 }

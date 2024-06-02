@@ -1,9 +1,6 @@
 package com.vietqr.org.repository;
 
-import com.vietqr.org.dto.IInvoiceItemDetailDTO;
-import com.vietqr.org.dto.IInvoiceItemRemoveDTO;
-import com.vietqr.org.dto.IInvoiceItemResponseDTO;
-import com.vietqr.org.dto.InvoiceUpdateItemDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.InvoiceItemEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -71,4 +68,14 @@ public interface InvoiceItemRepository extends JpaRepository<InvoiceItemEntity, 
             + "FROM invoice_item a "
             + "WHERE a.id IN (:itemItemIds)", nativeQuery = true)
     List<IInvoiceItemDetailDTO> getInvoiceItemsByIds(List<String> itemItemIds);
+
+    @Query(value = "SELECT COALESCE(SUM(CASE WHEN a.status = 1 THEN a.total_after_vat ELSE 0 END), 0) AS completeFee, "
+            + "COALESCE(COUNT(CASE WHEN a.status = 1 && b.status = 1 THEN a.id ELSE NULL END), 0) AS completeCount, "
+            + "COALESCE(SUM(CASE WHEN a.status = 0 THEN a.total_after_vat ELSE 0 END), 0) AS pendingFee, "
+            + "COALESCE(COUNT(CASE WHEN a.status != 1 && b.status = 0 THEN a.id ELSE NULL END), 0) AS pendingCount, "
+            + "COALESCE(COUNT(CASE WHEN a.status != 1 && b.status = 3 THEN a.id ELSE NULL END), 0) AS unfullyPaidCount "
+            + "FROM invoice_item a "
+            + "INNER JOIN invoice b ON a.invoice_id = b.id "
+            + "WHERE b.time_created BETWEEN :fromDate AND :toDate ", nativeQuery = true)
+    IAdminExtraInvoiceDTO getExtraInvoice(long fromDate, long toDate);
 }

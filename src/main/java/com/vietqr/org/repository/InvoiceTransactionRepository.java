@@ -9,12 +9,21 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface InvoiceTransactionRepository extends JpaRepository<InvoiceTransactionEntity, String> {
     @Query(value = "SELECT a.qr_code AS qrCode, a.id AS id, a.total_amount AS totalAmount, "
-            + "b.name AS invoiceName, b.data AS data, b.invoice_number AS invoiceNumber, "
+            + "b.name AS invoiceName, b.data AS data, b.invoice_id AS invoiceNumber, "
             + "a.amount AS amount, a.vat AS vat, a.vat_amount AS vatAmount, a.invoice_id AS invoiceId "
             + "FROM invoice_transaction a "
-            + "INNER JOIN invoice b WHERE a.invoice_id = b.id "
-            + "WHERE invoice_item_ids = :itemIds AND invoice_id = :invoiceId "
+            + "INNER JOIN invoice b ON a.invoice_id = b.id "
+            + "WHERE JSON_CONTAINS(a.invoice_item_ids, :itemIds) AND a.invoice_id = :invoiceId "
             + "AND a.bank_id_recharge = :bankIdRecharge "
             + "LIMIT 1 ", nativeQuery = true)
     InvoiceRequestPaymentDTO getInvoiceRequestPayment(String invoiceId, String itemIds, String bankIdRecharge);
+
+    @Query(value = "SELECT a.qr_code AS qrCode, a.id AS id, a.total_amount AS totalAmount, "
+            + "b.name AS invoiceName, b.data AS data, b.invoice_id AS invoiceNumber, "
+            + "a.amount AS amount, a.vat AS vat, a.vat_amount AS vatAmount, a.invoice_id AS invoiceId "
+            + "FROM invoice_transaction a "
+            + "INNER JOIN invoice b ON a.invoice_id = b.id "
+            + "WHERE JSON_CONTAINS(a.invoice_item_ids, :itemIds) AND a.invoice_id = :invoiceId "
+            + "LIMIT 1 ", nativeQuery = true)
+    InvoiceRequestPaymentDTO getInvoiceRequestPayment(String invoiceId, String itemIds);
 }

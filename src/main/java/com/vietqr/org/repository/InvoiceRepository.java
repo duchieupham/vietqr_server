@@ -303,8 +303,8 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
     @Query(value = "SELECT id FROM invoice WHERE id = :invoiceId AND status != 1", nativeQuery = true)
     String checkExistedInvoice(String invoiceId);
 
-    @Query(value = "SELECT a.id AS invoiceId, "
-            + "a.name AS invoiceName, "
+    @Query(value = "SELECT a.id AS invoiceId, a.data AS data, "
+            + "a.name AS invoiceName, a.vat AS vat, a.invoice_id AS invoiceNumber, "
             + "a.merchant_id AS merchantId, "
             + "a.bank_id AS bankId, a.user_id AS userId, a.bank_id_recharge AS bankIdRecharge "
             + "FROM invoice a "

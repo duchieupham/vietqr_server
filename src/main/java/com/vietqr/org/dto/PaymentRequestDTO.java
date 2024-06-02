@@ -7,7 +7,6 @@ public class PaymentRequestDTO {
     @NotBlank
     private String invoiceId;
     private List<String> itemItemIds;
-    @NotBlank
     private String bankIdRecharge;
 
     public PaymentRequestDTO() {

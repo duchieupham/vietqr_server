@@ -1,5 +1,6 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.dto.IAdminExtraInvoiceDTO;
 import com.vietqr.org.dto.IInvoiceItemDetailDTO;
 import com.vietqr.org.dto.IInvoiceItemRemoveDTO;
 import com.vietqr.org.dto.IInvoiceItemResponseDTO;
@@ -25,4 +26,6 @@ public interface InvoiceItemService {
     void removeByInvoiceId(String invoiceId);
 
     List<IInvoiceItemDetailDTO> getInvoiceItemsByIds(List<String> itemItemIds);
+
+    IAdminExtraInvoiceDTO getExtraInvoice(String time);
 }
