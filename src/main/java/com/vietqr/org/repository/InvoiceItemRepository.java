@@ -80,4 +80,20 @@ public interface InvoiceItemRepository extends JpaRepository<InvoiceItemEntity, 
     IAdminExtraInvoiceDTO getExtraInvoice(long fromDate, long toDate);
 
     List<InvoiceItemEntity> findInvoiceItemEntityByInvoiceId(String invoiceId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE invoice_item SET status = 1, time_paid = :timePaid WHERE id IN (:itemIds) AND status = 0", nativeQuery = true)
+    int updateAllItemIds(List<String> itemIds, long timePaid);
+
+    @Query(value = "SELECT COUNT(a.id) "
+            + "FROM invoice_item a "
+            + "WHERE a.invoice_id = :invoiceId AND a.status = 0", nativeQuery = true)
+    int checkCountUnPaid(String invoiceId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE invoice_item SET status = 1, time_paid = :timePaid " +
+            "WHERE invoice_id = :invoiceId ", nativeQuery = true)
+    void updateStatusInvoiceItem(String invoiceId, long timePaid);
 }

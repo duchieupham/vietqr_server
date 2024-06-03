@@ -69,4 +69,19 @@ public class InvoiceItemServiceImpl implements InvoiceItemService {
     public List<InvoiceItemEntity> findByInvoiceId(String invoiceId) {
         return repo.findInvoiceItemEntityByInvoiceId(invoiceId);
     }
+
+    @Override
+    public int updateAllItemIds(List<String> itemIds, long timePaid) {
+        return repo.updateAllItemIds(itemIds, timePaid);
+    }
+
+    @Override
+    public int checkCountUnPaid(String invoiceId) {
+        return repo.checkCountUnPaid(invoiceId);
+    }
+
+    @Override
+    public void updateStatusInvoiceItem(String invoiceId) {
+        repo.updateStatusInvoiceItem(invoiceId, DateTimeUtil.getCurrentDateTimeUTC());
+    }
 }

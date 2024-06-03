@@ -1757,7 +1757,7 @@ public class InvoiceController {
             UUID transWalletUUID = UUID.randomUUID();
             walletEntityDebit.setId(transWalletUUID.toString());
             walletEntityDebit.setAmount(totalAmountAfterVat + "");
-            walletEntityDebit.setBillNumber(invoiceNumber);
+            walletEntityDebit.setBillNumber("");
             walletEntityDebit.setContent(content);
             walletEntityDebit.setStatus(0);
             walletEntityDebit.setTimeCreated(time);
