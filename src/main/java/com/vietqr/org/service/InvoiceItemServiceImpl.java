@@ -84,4 +84,10 @@ public class InvoiceItemServiceImpl implements InvoiceItemService {
     public void updateStatusInvoiceItem(String invoiceId) {
         repo.updateStatusInvoiceItem(invoiceId, DateTimeUtil.getCurrentDateTimeUTC());
     }
+
+    @Override
+    public int checkInvoiceItemExist(String bankId, String merchantId, int type, String processDate) {
+        return repo.checkInvoiceItemExist(bankId, merchantId,type, processDate);
+    }
+
 }

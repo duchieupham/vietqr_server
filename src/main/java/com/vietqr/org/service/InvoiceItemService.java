@@ -35,4 +35,7 @@ public interface InvoiceItemService {
     int checkCountUnPaid(String id);
 
     void updateStatusInvoiceItem(String invoiceId);
+
+    int checkInvoiceItemExist(String bankId, String merchantId, int type, String processDate);
+
 }

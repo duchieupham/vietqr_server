@@ -933,7 +933,7 @@ public class InvoiceController {
                         iInvoiceItemDetailDTOS.stream().map(item -> {
                             InvoiceItemDetailDTO invoiceItemDetailDTO = new InvoiceItemDetailDTO();
                             invoiceItemDetailDTO.setInvoiceItemId(item.getInvoiceItemId());
-                            invoiceItemDetailDTO.setInvoiceItemName(item.getInvoiceItemName());
+                            invoiceItemDetailDTO.setInvoiceItemName(item.getInvoiceItemName() != null ? item.getInvoiceItemName() : "");
                             invoiceItemDetailDTO.setUnit(item.getUnit() != null ? item.getUnit() : "");
                             invoiceItemDetailDTO.setQuantity(item.getQuantity());
                             invoiceItemDetailDTO.setAmount(item.getAmount());
@@ -978,7 +978,7 @@ public class InvoiceController {
                         iCustomerDetailDTOS.stream().map(item -> {
                             CustomerDetailDTO customerDetailDTO = new CustomerDetailDTO();
                             customerDetailDTO.setBankAccount(StringUtil.removeMarkString(item.getBankAccount()));
-                            customerDetailDTO.setEmail(StringUtil.getValueNullChecker(item.getEmail()));
+                            customerDetailDTO.setEmail(StringUtil.getValueNullChecker(item.getEmail() != null ? item.getEmail() : ""));
                             customerDetailDTO.setPlatform(item.getPlatform());
                             customerDetailDTO.setVso(item.getVso());
                             customerDetailDTO.setMerchantName(item.getMerchantName());
@@ -1527,22 +1527,33 @@ public class InvoiceController {
             switch (type) {
                 // annual fee
                 case 0:
-                    data = new InvoiceCreateItemDTO();
-                    data.setItemId(monthYear + type);
-                    data.setVat(vat);
-                    data.setTime(time);
-                    data.setType(type);
-                    data.setContent(EnvironmentUtil.getVietQrNameAnnualFee() + monthYear);
-                    data.setUnit(EnvironmentUtil.getMonthUnitNameVn());
-                    data.setQuantity(1);
-                    feePackage = bankReceiveFeePackageService.getFeePackageByBankId(bankId);
-                    if (feePackage != null) {
-                        data.setAmount(feePackage.getAnnualFee());
-                        data.setTotalAmount(feePackage.getAnnualFee());
-                        data.setVatAmount(Math.round(feePackage.getVat() / 100 * feePackage.getAnnualFee()));
-                        data.setAmountAfterVat(data.getTotalAmount() + data.getVatAmount());
+                    //String processDate = DateTimeUtil.getFormatMonthYear(time);;
+                    String processDate = time.replaceAll("-", "");
+                    int checkInvoiceItem = invoiceItemService.checkInvoiceItemExist(bankId, merchantId, type, processDate);
+
+                    if(checkInvoiceItem == 0){
+                        data = new InvoiceCreateItemDTO();
+                        data.setItemId(monthYear + type);
+                        data.setVat(vat);
+                        data.setTime(time);
+                        data.setType(type);
+                        data.setContent(EnvironmentUtil.getVietQrNameAnnualFee() + monthYear);
+                        data.setUnit(EnvironmentUtil.getMonthUnitNameVn());
+                        data.setQuantity(1);
+                        feePackage = bankReceiveFeePackageService.getFeePackageByBankId(bankId);
+                        if (feePackage != null) {
+                            data.setAmount(feePackage.getAnnualFee());
+                            data.setTotalAmount(feePackage.getAnnualFee());
+                            data.setVatAmount(Math.round(feePackage.getVat() / 100 * feePackage.getAnnualFee()));
+                            data.setAmountAfterVat(data.getTotalAmount() + data.getVatAmount());
+                        }
+                        break;
+                    }else{
+                        result = new ResponseMessageDTO("FAILED", "E05");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        break;
                     }
-                    break;
+
                 // phi giao dich
                 case 1:
                     data = new InvoiceCreateItemDTO();
@@ -1553,6 +1564,7 @@ public class InvoiceController {
                     data.setContent(EnvironmentUtil.getVietQrNameTransFee() + monthYear);
                     data.setUnit(EnvironmentUtil.getMonthUnitNameVn());
                     data.setQuantity(1);
+
                     feePackage = bankReceiveFeePackageService.getFeePackageByBankId(bankId);
                     List<TransReceiveInvoicesDTO> transactionReceiveEntities =
                             transactionReceiveService.getTransactionReceiveByBankId(bankId, time);
@@ -1641,6 +1653,91 @@ public class InvoiceController {
             entity.setStatus(0);
             entity.setMerchantId(dto.getMerchantId() != null ? dto.getMerchantId() : "");
             entity.setBankId(dto.getBankId() != null ? dto.getBankId() : "");
+            // lấy uerID từ bankID trong account-bank-receive để push notification cho USERID ở đây
+            // bankID lấy từ API bank-account-list
+            String userIdByBankId = accountBankReceiveService.getUserIdByBankId(dto.getBankId());
+
+            // push notification
+            // --call api topup
+            String requestId = VNPTEpayUtil
+                    .createRequestID(EnvironmentUtil
+                            .getVnptEpayPartnerName());
+
+            // --initial notification data
+            LocalDateTime localTimeM = LocalDateTime
+                    .now();
+            long timeM = localTimeM
+                    .toEpochSecond(ZoneOffset.UTC);
+            String msgErrorCode = "Error push notification invoice";
+            UUID notificationUUID = UUID.randomUUID();
+            String notiType = NotificationUtil.getNotiMobileTopup();
+            String title = NotificationUtil.getNOTI_TITLE_INVOICE_UNPAID();
+            String message = "Bạn có hoá đơn "
+                    + dto.getInvoiceName()
+                    + " chưa thanh toán. Vui Lòng kiểm tra lại trên hệ thống VietQR VN.";
+
+            NotificationEntity notiEntity = new NotificationEntity();
+            notiEntity.setId(notificationUUID.toString());
+            notiEntity.setRead(false);
+            notiEntity.setMessage(message);
+            notiEntity.setTime(DateTimeUtil.getCurrentDateTimeUTC());
+            notiEntity.setType(notiType);
+            notiEntity.setUserId(userIdByBankId);
+            notiEntity.setData(userIdByBankId); // cần lấy userID ở invoicce
+            Map<String, String> datas = new HashMap<>();
+            datas.put("notificationType", notiType); // thuộc loại noti nào
+            datas.put("notificationId", notificationUUID.toString()); // id của bảng notification
+            datas.put("html", dto.getInvoiceName() + ""); // truyền html (any)
+            datas.put("invoiceId", entity.getInvoiceId());  //invoice ID
+            //-- có thể truyền user ID
+            datas.put("time", time + "");
+            datas.put("invoiceName", entity.getName()); // phone number của user
+            //datas.put("billNumber", tranMobileEntity.getBillNumber());  // bill number
+            //datas.put("paymentMethod", "1");
+            //datas.put("paymentType", "1");
+            datas.put("status", 1 + ""); // truyền Status của Invoice (1 or 0)
+            datas.put("messageError", msgErrorCode);
+
+            pushNotification(title, message, notiEntity, datas, notiEntity.getUserId());
+            //
+
+            //push form noti
+            //initialize datas check
+            int typeCheck = 0;
+            String statusCheck = datas.put("status", "1");
+            String bankCodeCheck = datas.put("bankCode", "MB");
+            String terminalCodeCheck = datas.put("terminalCode", "");
+            String terminalNameCheck = datas.put("terminalName", "");
+            String getTransType = "C";
+
+            // check conditions to push form notifications
+            if (entity.getStatus() == 0) {
+                datas.put("html", "Bạn có hoá đơn " + entity.getAmount() + " cần thanh toán.");
+            } // thông báo hoá đơn chưa thanh toán
+
+            if (getTransType == "C" && typeCheck == 2) {
+                datas.put("html", "+" + entity.getAmount() + " VNĐ đến "
+                        + bankCodeCheck + " - " + entity.getBankId());
+            } // Nhận tiền Đến
+
+            if (getTransType == "C" && typeCheck == 1) {
+                datas.put("html", "+ " + entity.getAmount() + " VNĐ đến MB Bank - "
+                        + entity.getInvoiceId() + " - "
+                        + dto.getInvoiceName()
+                        + " - " + terminalCodeCheck);
+            } // Cập nhật tài khoản cửa hàng
+
+            if (getTransType == "D") {
+                datas.put("html", "+" + entity.getAmount() + " VNĐ từ "
+                        + entity.getBankId() + " - " + entity.getInvoiceId());
+            } // Chuyển tiền đi
+
+            if (getTransType == "C" && typeCheck == 0) {
+                datas.put("html", entity.getInvoiceId() + "Chưa biết trả gì trả ID invoice");
+            }
+            //--
+
+
             IMerchantBankMapperDTO merchantMapper = null;
             IBankReceiveMapperDTO bankReceiveMapperDTO = null;
             if (StringUtil.isNullOrEmpty(dto.getMerchantId())) {
@@ -1716,14 +1813,26 @@ public class InvoiceController {
                 invoiceItemEntity.setData(mapper.writeValueAsString(merchantBankMapperDTO));
                 invoiceItemEntity.setDataType(1);
                 //them cai process_date
+                String processDate = item.getTimeProcess().replaceAll("-", "");
                 if (item.getTimeProcess() != null) {
-                    String processDate = item.getTimeProcess().replaceAll("-", "");
                     invoiceItemEntity.setProcessDate(processDate);
                 }
-                invoiceItemEntities.add(invoiceItemEntity);
-                totalAmount += item.getTotalAmount();
+                //check condition BankID, type 0 or 1 and processDate is existing
+
+                int checkItem = invoiceItemService.checkInvoiceItemExist(dto.getBankId(), dto.getMerchantId(), 0,processDate);
+                if (checkItem == 0) {
+                    invoiceItemEntities.add(invoiceItemEntity);
+                } else {
+                    result = new ResponseMessageDTO("FAILED", "E140");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    return new ResponseEntity<>(result, httpStatus);
+//                    break;
+                }
+                System.out.println("Response:" + result);
                 totalVatAmount += item.getVatAmount();
                 totalAmountAfterVat += item.getAmountAfterVat();
+
+                // ----------------------------------------------------------------
             }
 
             entity.setTotalAmount(totalAmountAfterVat);
@@ -1778,6 +1887,7 @@ public class InvoiceController {
             walletEntityDebit.setPhoneNoRC("");
             walletEntityDebit.setData(dto.getBankId());
             walletEntityDebit.setRefId(transWalletCreditUUID.toString());
+
             transactionWalletEntities.add(walletEntityDebit);
 
             // generate VQR
@@ -1822,15 +1932,19 @@ public class InvoiceController {
             entity.setRefId(transWalletUUID.toString());
             entity.setBankIdRecharge(bankId);
 
+            // trả lỗi trước khi insert
+            // check (bankId, timeProcess, type = 1 or 0) isExists
+
             transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
             transactionWalletService.insertAll(transactionWalletEntities);
             invoiceItemService.insertAll(invoiceItemEntities);
             invoiceService.insert(entity);
+
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            result = new ResponseMessageDTO("FAILED", "E05");
-            httpStatus = HttpStatus.OK;
+            result = new ResponseMessageDTO("FAILED", "E140");
+            httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
     }
