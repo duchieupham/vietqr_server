@@ -18,7 +18,7 @@ public interface TransactionWalletRepository extends JpaRepository<TransactionWa
         @Query(value = "SELECT * FROM transaction_wallet WHERE id = :id", nativeQuery = true)
         TransactionWalletEntity getTransactionWalletById(@Param(value = "id") String id);
 
-        @Query(value = "SELECT * FROM transaction_wallet WHERE bill_number = :billNumber AND status = 0 LIMIT 1", nativeQuery = true)
+        @Query(value = "SELECT * FROM transaction_wallet WHERE bill_number = :billNumber AND status = 0 LIMIT 1 ", nativeQuery = true)
         TransactionWalletEntity getTransactionWalletByBillNumber(@Param(value = "billNumber") String billNumber);
 
         @Query(value = "SELECT * FROM transaction_wallet WHERE user_id = :userId ORDER BY time_created DESC", nativeQuery = true)
