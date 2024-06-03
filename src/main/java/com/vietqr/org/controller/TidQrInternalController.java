@@ -823,7 +823,7 @@ public class TidQrInternalController {
             data.put("qrType", "0");
             data.put("boxId", boxId);
             data.put("boxCode", boxCode);
-            data.put("terminalCode", dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
+            data.put("terminalCode", boxCode);
             data.put("terminalName", terminalName != null ? terminalName : "");
             socketHandler.sendMessageToBoxId(boxId, data);
         } catch (Exception e) {
@@ -1063,7 +1063,7 @@ public class TidQrInternalController {
                 data.put("qrType", "0");
                 data.put("boxId", boxId);
                 data.put("boxCode", boxCode);
-                data.put("terminalCode", dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
+                data.put("terminalCode", boxCode);
                 data.put("terminalName", terminalName != null ? terminalName : "");
                 socketHandler.sendMessageToBoxId(boxId, data);
             }

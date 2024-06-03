@@ -251,6 +251,11 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
+    public int updateStatusInvoice(String id, int status, long timePaid) {
+        return repo.updateStatusInvoice(id, status, timePaid);
+    }
+
+    @Override
     public String checkExistedInvoice(String invoiceId) {
         return repo.checkExistedInvoice(invoiceId);
     }

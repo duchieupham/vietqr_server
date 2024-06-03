@@ -314,7 +314,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
     @Query(value = "SELECT * FROM invoice WHERE id = :invoiceId ", nativeQuery = true)
     InvoiceEntity getInvoiceEntityById(String invoiceId);
 
-    @Query(value = "SELECT * FROM invoice WHERE ref_id = :transWalletId AND total_amount = :amount LIMIT 1", nativeQuery = true)
+    @Query(value = "SELECT * FROM invoice WHERE ref_id = :transWalletId AND total_amount = :amount LIMIT 1 ", nativeQuery = true)
     InvoiceEntity getInvoiceEntityByRefId(String transWalletId, long amount);
 
     @Transactional
@@ -340,4 +340,9 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "WHERE a.user_id = :userId AND a.status = 0 "
             + "GROUP BY a.user_id ", nativeQuery = true)
     InvoiceUnpaidStatisticDTO getTotalInvoiceUnpaidByUserId(String userId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE invoice SET status = :status, time_paid = :timePaid WHERE id = :id ", nativeQuery = true)
+    int updateStatusInvoice(String id, int status, long timePaid);
 }

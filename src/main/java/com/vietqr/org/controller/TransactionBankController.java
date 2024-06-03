@@ -1398,6 +1398,7 @@ public class TransactionBankController {
 						String userId = parts[1];
 						String otp = parts[2];
 						String bankId = parts[3];
+						int checkSuccess = 0;
 						if (userId != null && otp != null && paymentType != null) {
 							String checkTransWalletId = transactionWalletService
 									.checkExistedTransactionnWallet(otp,
@@ -1409,61 +1410,41 @@ public class TransactionBankController {
 										.getTransactionWalletById(checkTransWalletId);
 								if (transactionWalletDebit != null) {
 
-									    ObjectMapper mapper = new ObjectMapper();
-										long amount = Long.parseLong(transactionWalletDebit.getAmount());
-										InvoiceEntity invoiceEntity = invoiceService.getInvoiceEntityByRefId(transactionWalletDebit.getId(), amount);
-										InvoiceTransactionEntity invoiceTransactionEntity = invoiceTransactionService.getInvoiceTransactionByRefId(transactionId);
+									ObjectMapper mapper = new ObjectMapper();
+									long timePaid = DateTimeUtil.getCurrentDateTimeUTC();
+									long amount = Long.parseLong(transactionWalletDebit.getAmount());
+									InvoiceTransactionEntity invoiceTransactionEntity = invoiceTransactionService.getInvoiceTransactionByRefId(transactionId);
+									InvoiceEntity invoiceEntity = invoiceService.getInvoiceEntityById(invoiceTransactionEntity.getInvoiceId());
+									if (invoiceTransactionEntity != null && invoiceEntity != null) {
 										String invoiceItemIds = invoiceTransactionEntity.getInvoiceItemIds();
-										List<String> itemIds = mapper.readValue(invoiceItemIds, new TypeReference<List<String>>(){});
-
+										List<String> itemIds = mapper.readValue(invoiceItemIds, new TypeReference<List<String>>() {
+										});
 										List<InvoiceItemEntity> invoiceItemEntities = new ArrayList<>();
-
-									    for (String itemId : itemIds) {
-										InvoiceItemEntity item = invoiceItemService.getInvoiceItemById(itemId);
-										if (item.getStatus() == 0) {
-
-											item.setStatus(1);
-											item.setTimePaid(System.currentTimeMillis());
-											invoiceItemService.insert(item);
-										}
-
-										invoiceItemEntities.add(item);
-									   }
-
-									   boolean allItemsPaid = true;
-
-									for (InvoiceItemEntity item : invoiceItemEntities) {
-										InvoiceItemEntity invoiceItem = invoiceItemService.getInvoiceItemById(item.getId());
-
-
-										if (invoiceItem.getStatus() == 0) {
-											invoiceItem.setStatus(1);
-											invoiceItem.setTimePaid(System.currentTimeMillis());
-											invoiceItemService.insert(invoiceItem);
-										}
-
-
-										if (invoiceItem.getStatus() == 0) {
-											allItemsPaid = false;
-										}
-									    }
-
-									    if (allItemsPaid) {
-										      invoiceEntity.setStatus(1);
+										int check = invoiceItemService.updateAllItemIds(itemIds, timePaid);
+										int checkNotPaid = 0;
+										checkNotPaid = invoiceItemService.checkCountUnPaid(invoiceEntity.getId());
+										if (checkNotPaid == 0) {
+											invoiceService.updateStatusInvoice(invoiceEntity.getId(), 1, timePaid);
 										} else {
-										invoiceEntity.setStatus(3);
-									     }
-									    invoiceService.insert(invoiceEntity);
-
-
-
-										if (invoiceEntity != null && invoiceEntity.getStatus() != 1) {
-
-
-											int checkSuccess = invoiceService.updateStatusInvoice(invoiceEntity.getId(), 1);
+											invoiceService.updateStatusInvoice(invoiceEntity.getId(), 3);
+										}
+										checkSuccess = 1;
+										if (checkSuccess > 0) {
+											checkSuccessProcess = true;
+											// update transaction wallet
+											transactionWalletService.updateTransactionWallet(1, time,
+													transactionWalletDebit.getAmount() + "",
+													"",
+													transactionWalletDebit.getUserId(),
+													transactionWalletDebit.getOtp(),
+													paymentType);
+										}
+									} else {
+										InvoiceEntity entityByRefId = invoiceService.getInvoiceEntityByRefId(transactionWalletDebit.getId(), amount);
+										if (entityByRefId != null && entityByRefId.getStatus() != 1) {
+											checkSuccess = invoiceService.updateStatusInvoice(entityByRefId.getId(), 1);
+											invoiceItemService.updateStatusInvoiceItem(entityByRefId.getId());
 											if (checkSuccess > 0) {
-
-
 												checkSuccessProcess = true;
 												// update transaction wallet
 												transactionWalletService.updateTransactionWallet(1, time,
@@ -1472,51 +1453,50 @@ public class TransactionBankController {
 														transactionWalletDebit.getUserId(),
 														transactionWalletDebit.getOtp(),
 														paymentType);
-
-                                                // notification
-                                                // push notification
-                                                String notificationUUID = UUID.randomUUID().toString();
-                                                String notiType = NotificationUtil.getNotiInvoice();
-                                                String title = NotificationUtil.getNOTI_TITLE_INVOICE_SUCESS_FINAL();
-                                                String message = NotificationUtil.getNotiDescActiveKey1()
-                                                        + invoiceEntity.getInvoiceId()
-                                                        + NotificationUtil.getNotiTitleInvoiceTotalAmount()
-                                                        + invoiceEntity.getTotalAmount() + " VNĐ"
-                                                        //+ NotificationUtil.getNotiDescActiveKey2()
-                                                        + NotificationUtil.getNotiDescActiveKey3();
-
-                                                NotificationEntity notiEntity = new NotificationEntity();
-                                                notiEntity.setId(notificationUUID);
-                                                notiEntity.setRead(false);
-                                                notiEntity.setMessage(message);
-                                                notiEntity.setTime(time);
-                                                notiEntity.setType(
-                                                        notiType);
-                                                notiEntity.setUserId(userId);
-                                                notiEntity.setData(checkTransWalletId);
-                                                Map<String, String> data = new HashMap<>();
-                                                data.put("notificationType",
-                                                        notiType);
-                                                data.put("notificationId",
-                                                        notificationUUID);
-                                                data.put("amount",
-                                                        invoiceEntity.getAmount() + "");
-                                                data.put("transWalletId", checkTransWalletId);
-                                                data.put("time", time + "");
-                                                data.put("bankId", bankId);
-                                                //data.put("billNumber", invoiceEntity.get());
-                                                data.put("paymentMethod", "1");
-                                                data.put("paymentType", "2");
-                                                data.put("status", 1 + "");
-                                                data.put("message", message);
-                                                pushNotification(title, message, notiEntity, data, userId);
-
-                                            } else {
-												System.out.println(
-														"transaction-sync: TRAN WALLET INVOICE NULL");
-												logger.error("transaction-sync: TRAN WALLET INVOICE IS ALREADY PAID OR CANCELED ");
 											}
-										} else {
+										}
+									}
+
+									if (checkSuccess > 0) {
+
+										// notification
+										// push notification
+										String notificationUUID = UUID.randomUUID().toString();
+										String notiType = NotificationUtil.getNotiInvoice();
+										String title = NotificationUtil.getNOTI_TITLE_INVOICE_SUCESS_FINAL();
+										String message = NotificationUtil.getNotiDescActiveKey1()
+												+ invoiceEntity.getInvoiceId()
+												+ NotificationUtil.getNotiTitleInvoiceTotalAmount()
+												+ invoiceEntity.getTotalAmount() + " VNĐ"
+												//+ NotificationUtil.getNotiDescActiveKey2()
+												+ NotificationUtil.getNotiDescActiveKey3();
+
+										NotificationEntity notiEntity = new NotificationEntity();
+										notiEntity.setId(notificationUUID);
+										notiEntity.setRead(false);
+										notiEntity.setMessage(message);
+										notiEntity.setTime(time);
+										notiEntity.setType(
+												notiType);
+										notiEntity.setUserId(userId);
+										notiEntity.setData(checkTransWalletId);
+										Map<String, String> data = new HashMap<>();
+										data.put("notificationType",
+												notiType);
+										data.put("notificationId",
+												notificationUUID);
+										data.put("amount",
+												invoiceEntity.getAmount() + "");
+										data.put("transWalletId", checkTransWalletId);
+										data.put("time", time + "");
+										data.put("bankId", bankId);
+										//data.put("billNumber", invoiceEntity.get());
+										data.put("paymentMethod", "1");
+										data.put("paymentType", "2");
+										data.put("status", 1 + "");
+										data.put("message", message);
+										pushNotification(title, message, notiEntity, data, userId);
+									} else {
 											System.out.println(
 													"transaction-sync: TRAN WALLET INVOICE NULL");
 											logger.error("transaction-sync: TRAN WALLET INVOICE IS ALREADY PAID OR CANCELED ");

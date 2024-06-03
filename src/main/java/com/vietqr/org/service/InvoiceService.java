@@ -84,6 +84,8 @@ public interface InvoiceService {
 
     int updateStatusInvoice(String id, int status);
 
+    int updateStatusInvoice(String id, int status, long timePaid);
+
     String checkExistedInvoice(String invoiceId);
 
     IInvoiceDTO getInvoiceRequestPayment(String invoiceId);

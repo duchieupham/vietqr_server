@@ -2,7 +2,6 @@ package com.vietqr.org.service;
 
 import com.vietqr.org.dto.IAdminExtraInvoiceDTO;
 import com.vietqr.org.dto.IInvoiceItemDetailDTO;
-import com.vietqr.org.dto.IInvoiceItemRemoveDTO;
 import com.vietqr.org.dto.IInvoiceItemResponseDTO;
 import com.vietqr.org.entity.InvoiceItemEntity;
 import org.springframework.stereotype.Service;
@@ -30,4 +29,10 @@ public interface InvoiceItemService {
     IAdminExtraInvoiceDTO getExtraInvoice(String time);
 
     List<InvoiceItemEntity> findByInvoiceId(String invoiceId);
+
+    int updateAllItemIds(List<String> itemIds, long timePaid);
+
+    int checkCountUnPaid(String id);
+
+    void updateStatusInvoiceItem(String invoiceId);
 }
