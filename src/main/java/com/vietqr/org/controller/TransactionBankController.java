@@ -1496,6 +1496,43 @@ public class TransactionBankController {
 										data.put("status", 1 + "");
 										data.put("message", message);
 										pushNotification(title, message, notiEntity, data, userId);
+
+										//push form noti
+										//initialize datas check
+										int typeCheck = 0;
+										String statusCheck = data.put("status", "1");
+										String bankCodeCheck = data.put("bankCode", "MB");
+										String terminalCodeCheck = data.put("terminalCode", "");
+										String terminalNameCheck = data.put("terminalName", "");
+										String getTransType = "C";
+
+										// check conditions to push form notifications
+										if (statusCheck.equals("0") && typeCheck == 0) {
+											data.put("html", "<div><span style=\"font-size: 12;\">Bạn có 1 hóa đơn<strong> " + dto.getAmount() +
+													"</strong><br>cần thanh toán!</span></div>");
+										} // thông báo hoá đơn chưa thanh toán
+
+										if (dto.getTransType() == "C" && typeCheck == 2) {
+											data.put("html", "<div><span style=\"font-size: 12;\">" + dto.getAmount() + " VNĐ đến "
+													+ bankCodeCheck + " - " + dto.getBankaccount() + "</span></div>");
+										} // Nhận tiền Đến
+
+										if (dto.getTransType() == "C" && typeCheck == 1) {
+											data.put("html", "<div><span style=\"font-size: 12;\">+" + dto.getAmount() + " VNĐ đến MB Bank - "
+													+ dto.getBankaccount() + " - "
+													+ terminalNameCheck + " - "
+													+ terminalCodeCheck + "</span></div>");
+										} // Cập nhật tài khoản cửa hàng
+
+										if (dto.getTransType() == "D") {
+											data.put("html", "<div><span style=\"font-size: 12;\">" + dto.getAmount() + " VNĐ từ "
+													 + " - " + dto.getBankaccount() + "</span></div>");
+										} // Chuyển tiền đi
+
+										if (dto.getTransType() == "C" && typeCheck == 0) {
+											data.put("html", dto.getBankaccount() + "Chưa biết trả gì");
+										}
+										//--
 									} else {
 											System.out.println(
 													"transaction-sync: TRAN WALLET INVOICE NULL");
