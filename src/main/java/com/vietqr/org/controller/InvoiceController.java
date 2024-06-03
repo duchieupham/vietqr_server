@@ -1658,7 +1658,7 @@ public class InvoiceController {
             String userIdByBankId = accountBankReceiveService.getUserIdByBankId(dto.getBankId());
             String msgErrorCode = "Error push notification invoice";
             UUID notificationUUID = UUID.randomUUID();
-            String notiType = NotificationUtil.getNotiMobileTopup();
+            String notiType = NotificationUtil.getNotiMobileTopupCreate();
             String title = NotificationUtil.getNOTI_TITLE_INVOICE_UNPAID();
             String message = "Bạn có hoá đơn "
                     + dto.getInvoiceName()
@@ -1701,30 +1701,33 @@ public class InvoiceController {
             String getTransType = "C";
 
             // check conditions to push form notifications
-            if (entity.getStatus() == 0) {
-                datas.put("html", "Bạn có hoá đơn " + entity.getAmount() + " cần thanh toán.");
+            if (statusCheck.equals("0") && typeCheck == 0) {
+                datas.put("html", "\"\"<div><span style=\"font-size: 12;\">Bạn có 1 hóa đơn<strong> " + dto.getInvoiceName() +
+                        "</strong><br>cần thanh toán!</span></div>\"\"");
             } // thông báo hoá đơn chưa thanh toán
 
             if (getTransType == "C" && typeCheck == 2) {
-                datas.put("html", "+" + entity.getAmount() + " VNĐ đến "
-                        + bankCodeCheck + " - " + entity.getBankId());
+                datas.put("html", "\"\"<div><span style=\"font-size: 12;\">" + dto.getInvoiceName() + " VNĐ đến "
+                        + bankCodeCheck + " - " + bankCodeCheck + "</span></div>\"\"");
             } // Nhận tiền Đến
 
             if (getTransType == "C" && typeCheck == 1) {
-                datas.put("html", "+ " + entity.getAmount() + " VNĐ đến MB Bank - "
-                        + entity.getInvoiceId() + " - "
-                        + dto.getInvoiceName()
-                        + " - " + terminalCodeCheck);
+                datas.put("html", "\"\"<div><span style=\"font-size: 12;\">+" + "2580000" + " VNĐ đến MB Bank - "
+                        + "0358582251" + " - "
+                        + terminalNameCheck + " - "
+                        + terminalCodeCheck + "</span></div>\"\"");
             } // Cập nhật tài khoản cửa hàng
 
+            String transType = "D";
             if (getTransType == "D") {
-                datas.put("html", "+" + entity.getAmount() + " VNĐ từ "
-                        + entity.getBankId() + " - " + entity.getInvoiceId());
+                datas.put("html", "\"\"<div><span style=\"font-size: 12;\">" + "Giá" + " VNĐ từ "
+                        + " - " + dto.getInvoiceName() + "</span></div>\"\"");
             } // Chuyển tiền đi
 
             if (getTransType == "C" && typeCheck == 0) {
-                datas.put("html", entity.getInvoiceId() + "Chưa biết trả gì trả ID invoice");
+                datas.put("html", dto.getInvoiceName() + "\"\"Chưa biết trả gì\"\"");
             }
+            //--
 
             IMerchantBankMapperDTO merchantMapper = null;
             IBankReceiveMapperDTO bankReceiveMapperDTO = null;

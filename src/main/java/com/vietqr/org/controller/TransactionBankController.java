@@ -1508,29 +1508,29 @@ public class TransactionBankController {
 
 										// check conditions to push form notifications
 										if (statusCheck.equals("0") && typeCheck == 0) {
-											data.put("html", "<div><span style=\"font-size: 12;\">Bạn có 1 hóa đơn<strong> " + dto.getAmount() +
-													"</strong><br>cần thanh toán!</span></div>");
+											data.put("html", "\"\"<div><span style=\"font-size: 12;\">Bạn có 1 hóa đơn<strong> " + dto.getAmount() +
+													"</strong><br>cần thanh toán!</span></div>\"\"");
 										} // thông báo hoá đơn chưa thanh toán
 
 										if (dto.getTransType() == "C" && typeCheck == 2) {
-											data.put("html", "<div><span style=\"font-size: 12;\">" + dto.getAmount() + " VNĐ đến "
-													+ bankCodeCheck + " - " + dto.getBankaccount() + "</span></div>");
+											data.put("html", "\"\"<div><span style=\"font-size: 12;\">" + dto.getAmount() + " VNĐ đến "
+													+ bankCodeCheck + " - " + dto.getBankaccount() + "</span></div>\"\"");
 										} // Nhận tiền Đến
 
 										if (dto.getTransType() == "C" && typeCheck == 1) {
-											data.put("html", "<div><span style=\"font-size: 12;\">+" + dto.getAmount() + " VNĐ đến MB Bank - "
+											data.put("html", "\"\"<div><span style=\"font-size: 12;\">+" + dto.getAmount() + " VNĐ đến MB Bank - "
 													+ dto.getBankaccount() + " - "
 													+ terminalNameCheck + " - "
-													+ terminalCodeCheck + "</span></div>");
+													+ terminalCodeCheck + "</span></div>\"\"");
 										} // Cập nhật tài khoản cửa hàng
 
 										if (dto.getTransType() == "D") {
-											data.put("html", "<div><span style=\"font-size: 12;\">" + dto.getAmount() + " VNĐ từ "
-													 + " - " + dto.getBankaccount() + "</span></div>");
+											data.put("html", "\"\"<div><span style=\"font-size: 12;\">" + dto.getAmount() + " VNĐ từ "
+													 + " - " + dto.getBankaccount() + "</span></div>\"\"");
 										} // Chuyển tiền đi
 
 										if (dto.getTransType() == "C" && typeCheck == 0) {
-											data.put("html", dto.getBankaccount() + "Chưa biết trả gì");
+											data.put("html", "\"\"Ở đây " + dto.getBankaccount() + " hưa biết trả gì\"\"");
 										}
 										//--
 									} else {
