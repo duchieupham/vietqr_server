@@ -203,9 +203,11 @@ public class EnvironmentUtil {
     //
     private static final String BANK_ID_RECHARGE_UAT = "c085abad-9901-4acd-9c15-2e8d0b63489d";
     private static final String BANK_ID_RECHARGE_PROD = "bb25279e-b7e6-405e-bdce-a697794f465f";
+    private static final String BANK_ID_RECHARGE_UAT2 = "d0aa997d-3967-4352-af5b-82c1c47d4b47";
     private static final String BANK_ID_RECHARGE_PROD2 = "172ff268-6d2e-4bcf-8aaa-1902badfcc63";
     //
     private static final String BANK_ACCOUNT_RECHARGE_UAT = "29058474275";
+    private static final String BANK_ACCOUNT_RECHARGE_UAT2 = "699699699996";
     private static final String BANK_ACCOUNT_RECHARGE_PROD = "0020108679008";
     private static final String BANK_ACCOUNT_RECHARGE_PROD2 = "0801133666888";
     //
@@ -216,6 +218,7 @@ public class EnvironmentUtil {
     private static final String BANK_NAME_RECHARGE_PROD = "Ngân hàng TMCP Quân đội";
     //
     private static final String USER_BANK_NAME_RECHARGE_UAT = "Nguyen Phuong Nhat Linh";
+    private static final String USER_BANK_NAME_RECHARGE_UAT2 = "Nguyen Phuong Blue Com 2";
     private static final String USER_BANK_NAME_RECHARGE_PROD = "Pham Duc Tuan";
     private static final String USER_BANK_NAME_RECHARGE_PROD2 = "Cong Ty Co Phan Bluecom Viet Nam";
     //
@@ -699,15 +702,14 @@ public class EnvironmentUtil {
     }
 
     public static String getBankIdRecharge2() {
-        return BANK_ID_RECHARGE_PROD2;
+        return (isProduction() == false) ? BANK_ID_RECHARGE_UAT2 : BANK_ID_RECHARGE_PROD2;
     }
 
-
     public static String getBankAccountRecharge2() {
-        return BANK_ACCOUNT_RECHARGE_PROD2;
+        return (isProduction() == false) ? BANK_ACCOUNT_RECHARGE_UAT2: BANK_ACCOUNT_RECHARGE_PROD2;
     }
 
     public static String getUserBankNameRecharge2() {
-        return USER_BANK_NAME_RECHARGE_PROD2;
+        return (isProduction() == false) ? USER_BANK_NAME_RECHARGE_UAT2 : USER_BANK_NAME_RECHARGE_PROD2;
     }
 }
