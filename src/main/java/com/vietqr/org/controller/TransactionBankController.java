@@ -376,24 +376,25 @@ public class TransactionBankController {
 
                                 // check conditions to push form notifications
                                 if (statusCheck.equals("0") && typeCheck == 0) {
-                                    data.put("html", "<p>Bạn có hoá đơn <strong>" + dto.getAmount() + "</strong> cần thanh toán. </p>");
+                                    data.put("html", "<div><span style=\"font-size: 12;\">Bạn có 1 hóa đơn<strong> " + dto.getAmount() +
+											"</strong><br>cần thanh toán!</span></div>");
                                 } // thông báo hoá đơn chưa thanh toán
 
                                 if (dto.getTransType() == "C" && typeCheck == 2) {
-                                    data.put("html", "<p>+<strong>" + dto.getAmount() + "</strong> VNĐ đến "
-                                            + bankCodeCheck + " - <strong>" + dto.getBankaccount() + "</strong></p>");
+                                    data.put("html", "<div><span style=\"font-size: 12;\">" + dto.getAmount() + " VNĐ đến "
+                                            + bankCodeCheck + " - " + dto.getBankaccount() + "</span></div>");
                                 } // Nhận tiền Đến
 
                                 if (dto.getTransType() == "C" && typeCheck == 1) {
-                                    data.put("html", "<p>+" + dto.getAmount() + " VNĐ đến MB Bank - <strong>"
-                                            + dto.getBankaccount() + "</strong> - "
+                                    data.put("html", "<div><span style=\"font-size: 12;\">+" + dto.getAmount() + " VNĐ đến MB Bank - "
+                                            + dto.getBankaccount() + " - "
                                             + terminalNameCheck + " - "
-                                            + terminalCodeCheck + "</p>");
+                                            + terminalCodeCheck + "</span></div>");
                                 } // Cập nhật tài khoản cửa hàng
 
                                 if (dto.getTransType() == "D") {
-                                    data.put("html", "<p>-<strong>" + dto.getAmount() + "</strong> VNĐ từ "
-                                            + bankCodeCheck + " -<strong> " + dto.getBankaccount() + "</strong></p>");
+                                    data.put("html", "<div><span style=\"font-size: 12;\">" + dto.getAmount() + " VNĐ từ "
+                                            + bankCodeCheck + " - " + dto.getBankaccount() + "</span></div>");
                                 } // Chuyển tiền đi
 
                                 if (dto.getTransType() == "C" && typeCheck == 0) {
@@ -1701,6 +1702,7 @@ public class TransactionBankController {
 				transactionReceiveEntity.getId());
 
 		// push notification
+
 		// find userIds into terminal
 		if (StringUtil.isNullOrEmpty(transactionReceiveEntity.getTerminalCode()) == false) {
 			// find all userIds belong to terminal
