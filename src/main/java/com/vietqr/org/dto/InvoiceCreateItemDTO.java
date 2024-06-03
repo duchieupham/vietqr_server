@@ -4,7 +4,7 @@ public class InvoiceCreateItemDTO {
     private String itemId;
     private String content;
     private String unit;
-    private String time;
+    private String timeProcess;
     private int type;
     private int quantity;
     private long amount;
@@ -17,7 +17,7 @@ public class InvoiceCreateItemDTO {
         this.itemId = "";
         this.content = "";
         this.unit = "";
-        this.time = "";
+        this.timeProcess = "";
         this.type = 9;
         this.quantity = 1;
         this.amount = 0;
@@ -27,13 +27,13 @@ public class InvoiceCreateItemDTO {
         this.amountAfterVat = 0;
     }
 
-    public InvoiceCreateItemDTO(String itemId, String content, String unit, String time, int type,
+    public InvoiceCreateItemDTO(String itemId, String content, String unit, String timeProcess, int type,
                                 int quantity, long amount, long totalAmount, double vat, long vatAmount,
                                 long amountAfterVat) {
         this.itemId = itemId;
         this.content = content;
         this.unit = unit;
-        this.time = time;
+        this.timeProcess = timeProcess;
         this.type = type;
         this.quantity = quantity;
         this.amount = amount;
@@ -67,12 +67,12 @@ public class InvoiceCreateItemDTO {
         this.unit = unit;
     }
 
-    public String getTime() {
-        return time;
+    public String getTimeProcess() {
+        return timeProcess;
     }
 
-    public void setTime(String time) {
-        this.time = time;
+    public void setTimeProcess(String timeProcess) {
+        this.timeProcess = timeProcess;
     }
 
     public int getType() {
