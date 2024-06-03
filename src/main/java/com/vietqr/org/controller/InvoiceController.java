@@ -716,9 +716,9 @@ public class InvoiceController {
         HttpStatus httpStatus = null;
         try {
             PaymentRequestResponseDTO responseDTO = new PaymentRequestResponseDTO();
-            String bankIdRechargeDefault = systemSettingService.getBankIdRechargeDefault();
-            String bankId = bankIdRechargeDefault;
-            if (StringUtil.isNullOrEmpty(dto.getBankIdRecharge())) {
+            String bankIdRechargeDefault = invoiceService.getBankIdRechargeDefault(dto.getInvoiceId());
+            String bankId = StringUtil.getValueNullChecker(bankIdRechargeDefault);
+            if (!StringUtil.isNullOrEmpty(dto.getBankIdRecharge())) {
                 bankId = dto.getBankIdRecharge();
             }
             ObjectMapper mapper = new ObjectMapper();
@@ -726,7 +726,7 @@ public class InvoiceController {
             InvoiceRequestPaymentDTO requestPaymentDTO = invoiceTransactionService.getInvoiceRequestPayment(
                     dto.getInvoiceId(),
                     itemIds,
-                    dto.getBankIdRecharge()
+                    bankId
             );
             if (requestPaymentDTO != null) {
                 MerchantBankMapperDTO merchantBankMapperDTO = null;

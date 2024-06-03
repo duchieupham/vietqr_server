@@ -269,4 +269,9 @@ public class InvoiceServiceImpl implements InvoiceService {
     public InvoiceUnpaidStatisticDTO getTotalInvoiceUnpaidByUserId(String userId) {
         return repo.getTotalInvoiceUnpaidByUserId(userId);
     }
+
+    @Override
+    public String getBankIdRechargeDefault(String id) {
+        return repo.getBankIdRechargeDefault(id);
+    }
 }
