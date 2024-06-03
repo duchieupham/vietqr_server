@@ -333,7 +333,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "WHERE a.id = :invoiceId ", nativeQuery = true)
     IInvoiceDTO getInvoiceRequestPayment(String invoiceId);
 
-    @Query(value = "SELECT COUNT(a.id) AS totalInvoice, "
+    @Query(value = "SELECT COUNT(CASE WHEN a.status != 1 THEN a.id ELSE NULL) AS totalInvoice, "
             + "COALESCE(SUM(a.total_amount), 0) AS totalMoney, "
             + "a.user_id AS userId "
             + "FROM invoice a "

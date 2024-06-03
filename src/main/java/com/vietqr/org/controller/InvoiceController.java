@@ -1609,7 +1609,7 @@ public class InvoiceController {
                 // phi khac
                 case 9:
                     data = new InvoiceCreateItemDTO();
-                    data.setItemId(monthYear + type);
+                    data.setItemId(UUID.randomUUID().toString());
                     data.setVat(vat);
                     data.setTimeProcess(time);
                     data.setType(type);
@@ -1627,7 +1627,6 @@ public class InvoiceController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    // tạo hoá đơn thanh toán
     @PostMapping("/invoice/create")
     public ResponseEntity<Object> getInvoiceByItem(
             @Valid @RequestBody InvoiceCreateUpdateDTO dto
@@ -1648,86 +1647,13 @@ public class InvoiceController {
             entity.setInvoiceId(invoiceNumber);
             entity.setName(dto.getInvoiceName());
             entity.setDescription(dto.getDescription());
-            entity.setTimeCreated(time);
+            entity.setTimeCreated(DateTimeUtil.getCurrentDateTimeUTC());
             entity.setTimePaid(0);
             entity.setStatus(0);
             entity.setMerchantId(dto.getMerchantId() != null ? dto.getMerchantId() : "");
             entity.setBankId(dto.getBankId() != null ? dto.getBankId() : "");
             // lấy uerID từ bankID trong account-bank-receive để push notification cho USERID ở đây
-            // bankID lấy từ API bank-account-list
             String userIdByBankId = accountBankReceiveService.getUserIdByBankId(dto.getBankId());
-            String msgErrorCode = "Error push notification invoice";
-            UUID notificationUUID = UUID.randomUUID();
-            String notiType = NotificationUtil.getNotiMobileTopupCreate();
-            String title = NotificationUtil.getNOTI_TITLE_INVOICE_UNPAID();
-            String message = "Bạn có hoá đơn "
-                    + dto.getInvoiceName()
-                    + " chưa thanh toán. Vui Lòng kiểm tra lại trên hệ thống VietQR VN.";
-
-            NotificationEntity notiEntity = new NotificationEntity();
-            notiEntity.setId(notificationUUID.toString());
-            notiEntity.setRead(false);
-            notiEntity.setMessage(message);
-            notiEntity.setTime(DateTimeUtil.getCurrentDateTimeUTC());
-            notiEntity.setType(notiType);
-            notiEntity.setUserId(userIdByBankId);
-            notiEntity.setData(userIdByBankId); // cần lấy userID ở invoicce
-            Map<String, String> datas = new HashMap<>();
-            datas.put("notificationType", notiType); // thuộc loại noti nào
-            datas.put("notificationId", notificationUUID.toString()); // id của bảng notification
-            datas.put("html", dto.getInvoiceName() + ""); // truyền html (any)
-            datas.put("invoiceId", entity.getInvoiceId());  //invoice ID
-            //-- có thể truyền user ID
-            datas.put("time", time + "");
-            datas.put("invoiceName", entity.getName()); // phone number của user
-            //datas.put("billNumber", tranMobileEntity.getBillNumber());  // bill number
-            //datas.put("paymentMethod", "1");
-            //datas.put("paymentType", "1");
-            datas.put("status", 1 + ""); // truyền Status của Invoice (1 or 0)
-            datas.put("messageError", msgErrorCode);
-            Thread thread = new Thread(() -> {
-                pushNotification(title, message, notiEntity, datas, notiEntity.getUserId());
-            });
-            thread.start();
-            //
-
-            //push form noti
-            //initialize datas check
-            int typeCheck = 0;
-            String statusCheck = datas.put("status", "1");
-            String bankCodeCheck = datas.put("bankCode", "MB");
-            String terminalCodeCheck = datas.put("terminalCode", "");
-            String terminalNameCheck = datas.put("terminalName", "");
-            String getTransType = "C";
-
-            // check conditions to push form notifications
-            if (statusCheck.equals("0") && typeCheck == 0) {
-                datas.put("html", "\"\"<div><span style=\"font-size: 12;\">Bạn có 1 hóa đơn<strong> " + dto.getInvoiceName() +
-                        "</strong><br>cần thanh toán!</span></div>\"\"");
-            } // thông báo hoá đơn chưa thanh toán
-
-            if (getTransType == "C" && typeCheck == 2) {
-                datas.put("html", "\"\"<div><span style=\"font-size: 12;\">" + dto.getInvoiceName() + " VNĐ đến "
-                        + bankCodeCheck + " - " + bankCodeCheck + "</span></div>\"\"");
-            } // Nhận tiền Đến
-
-            if (getTransType == "C" && typeCheck == 1) {
-                datas.put("html", "\"\"<div><span style=\"font-size: 12;\">+" + "2580000" + " VNĐ đến MB Bank - "
-                        + "0358582251" + " - "
-                        + terminalNameCheck + " - "
-                        + terminalCodeCheck + "</span></div>\"\"");
-            } // Cập nhật tài khoản cửa hàng
-
-            String transType = "D";
-            if (getTransType == "D") {
-                datas.put("html", "\"\"<div><span style=\"font-size: 12;\">" + "Giá" + " VNĐ từ "
-                        + " - " + dto.getInvoiceName() + "</span></div>\"\"");
-            } // Chuyển tiền đi
-
-            if (getTransType == "C" && typeCheck == 0) {
-                datas.put("html", dto.getInvoiceName() + "\"\"Chưa biết trả gì\"\"");
-            }
-            //--
 
             IMerchantBankMapperDTO merchantMapper = null;
             IBankReceiveMapperDTO bankReceiveMapperDTO = null;
@@ -1769,12 +1695,13 @@ public class InvoiceController {
                 entity.setData("");
                 entity.setDataType(9);
             }
+            List<String> itemIds = new ArrayList<>();
             List<InvoiceItemEntity> invoiceItemEntities = new ArrayList<>();
             for (InvoiceItemCreateDTO item : dto.getItems()) {
-                // check timeProcess, BankId, type
-
                 InvoiceItemEntity invoiceItemEntity = new InvoiceItemEntity();
-                invoiceItemEntity.setId(UUID.randomUUID().toString());
+                String invoiceItemId = UUID.randomUUID().toString();
+                itemIds.add(invoiceItemId);
+                invoiceItemEntity.setId(invoiceItemId);
                 invoiceItemEntity.setInvoiceId(invoiceId.toString());
                 invoiceItemEntity.setAmount(item.getAmount());
                 invoiceItemEntity.setQuantity(item.getQuantity());
@@ -1789,18 +1716,14 @@ public class InvoiceController {
                         invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameAnnualFee());
                         String processDate = item.getTimeProcess().replaceAll("-", "");
                         int checkItem = invoiceItemService.checkInvoiceItemExist(dto.getBankId(), dto.getMerchantId(),
-                                0,processDate);
+                                0, processDate);
                         if (checkItem == 0) {
                             invoiceItemEntities.add(invoiceItemEntity);
                         } else {
                             result = new ResponseMessageDTO("FAILED", "E140");
                             httpStatus = HttpStatus.BAD_REQUEST;
                             return new ResponseEntity<>(result, httpStatus);
-                            //break;
                         }
-                        System.out.println("Response:" + result);
-                        // --
-
                         break;
                     case 1:
                         invoiceItemEntity.setType(1);
@@ -1809,23 +1732,19 @@ public class InvoiceController {
                         //check condition BankID, type 0 or 1 and processDate is existing
                         String processDate2 = item.getTimeProcess().replaceAll("-", "");
                         int checkItem2 = invoiceItemService.checkInvoiceItemExist(dto.getBankId(), dto.getMerchantId(),
-                                1,processDate2);
+                                1, processDate2);
                         if (checkItem2 == 0) {
                             invoiceItemEntities.add(invoiceItemEntity);
                         } else {
                             result = new ResponseMessageDTO("FAILED", "E140");
                             httpStatus = HttpStatus.BAD_REQUEST;
                             return new ResponseEntity<>(result, httpStatus);
-//                    break;
                         }
-                        System.out.println("Response:" + result);
-                        // --
                         break;
                     case 9:
                         invoiceItemEntity.setType(9);
                         invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameAnotherFee());
                         invoiceItemEntities.add(invoiceItemEntity);
-
                         break;
                 }
 
@@ -1847,106 +1766,162 @@ public class InvoiceController {
             entity.setVatAmount(totalVatAmount);
             entity.setVat(dto.getVat());
 
-            String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
-            String billNumberVQR = "VTS" + RandomCodeUtil.generateRandomId(10);
-            String otpPayment = RandomCodeUtil.generateOTP(6);
-            String content = traceId + " " + billNumberVQR;
-            List<TransactionWalletEntity> transactionWalletEntities = new ArrayList<>();
-
-            // create transaction_wallet_credit
-            TransactionWalletEntity walletEntityCredit = new TransactionWalletEntity();
-            UUID transWalletCreditUUID = UUID.randomUUID();
-            walletEntityCredit.setId(transWalletCreditUUID.toString());
-            walletEntityCredit.setAmount(totalAmountAfterVat + "");
-            walletEntityCredit.setBillNumber(billNumberVQR);
-            walletEntityCredit.setContent(content);
-            walletEntityCredit.setStatus(0);
-            walletEntityCredit.setTimeCreated(time);
-            walletEntityCredit.setTimePaid(0);
-            walletEntityCredit.setTransType("C");
-            walletEntityCredit.setUserId(entity.getUserId());
-            walletEntityCredit.setOtp("");
-            walletEntityCredit.setPaymentType(0);
-            walletEntityCredit.setPaymentMethod(1);
-            walletEntityCredit.setReferenceNumber(3 + "*" + entity.getUserId() + "*" +
-                    otpPayment + "*" + entity.getBankId());
-            walletEntityCredit.setPhoneNoRC("");
-            walletEntityCredit.setData(dto.getBankId());
-            walletEntityCredit.setRefId("");
-            transactionWalletEntities.add(walletEntityCredit);
-
             // create transaction_wallet_debit
-            TransactionWalletEntity walletEntityDebit = new TransactionWalletEntity();
             UUID transWalletUUID = UUID.randomUUID();
-            walletEntityDebit.setId(transWalletUUID.toString());
-            walletEntityDebit.setAmount(totalAmountAfterVat + "");
-            walletEntityDebit.setBillNumber("");
-            walletEntityDebit.setContent(content);
-            walletEntityDebit.setStatus(0);
-            walletEntityDebit.setTimeCreated(time);
-            walletEntityDebit.setTimePaid(0);
-            walletEntityDebit.setTransType("D");
-            walletEntityDebit.setUserId(entity.getUserId());
-            walletEntityDebit.setOtp(otpPayment);
-            walletEntityDebit.setPaymentType(3);
-            walletEntityDebit.setPaymentMethod(0);
-            walletEntityDebit.setReferenceNumber("");
-            walletEntityDebit.setPhoneNoRC("");
-            walletEntityDebit.setData(dto.getBankId());
-            walletEntityDebit.setRefId(transWalletCreditUUID.toString());
-
-            transactionWalletEntities.add(walletEntityDebit);
-
             // generate VQR
             String bankAccount = EnvironmentUtil.getBankAccountRecharge();
             String bankId = EnvironmentUtil.getBankIdRecharge();
             String userIdHost = EnvironmentUtil.getUserIdHostRecharge();
             String cai = EnvironmentUtil.getCAIRecharge();
-            VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
-            vietQRGenerateDTO.setCaiValue(cai);
-            vietQRGenerateDTO.setBankAccount(bankAccount);
-            vietQRGenerateDTO.setAmount(totalAmountAfterVat + "");
-            vietQRGenerateDTO.setContent(content);
-            String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+            long finalTotalAmountAfterVat1 = totalAmountAfterVat;
+            long finalTotalAmount = totalAmount;
+            long finalTotalVatAmount = totalVatAmount;
+            Thread thread = new Thread(() -> {
+                String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
+                String otpPayment = RandomCodeUtil.generateOTP(6);
+                String content = traceId + " " + invoiceNumber;
+                List<TransactionWalletEntity> transactionWalletEntities = new ArrayList<>();
 
-            // insert transaction_receive
-            UUID transReceiveUUID = UUID.randomUUID();
-            TransactionReceiveEntity transactionReceiveEntity = new TransactionReceiveEntity();
-            transactionReceiveEntity.setId(transReceiveUUID.toString());
-            transactionReceiveEntity.setAmount(totalAmountAfterVat);
-            transactionReceiveEntity.setBankAccount(bankAccount);
-            transactionReceiveEntity.setBankId(bankId);
-            transactionReceiveEntity.setContent(content);
-            transactionReceiveEntity.setRefId("");
-            transactionReceiveEntity.setStatus(0);
-            transactionReceiveEntity.setTime(time);
-            transactionReceiveEntity.setType(5);
-            transactionReceiveEntity.setTraceId(traceId);
-            transactionReceiveEntity.setTransType("C");
-            transactionReceiveEntity.setReferenceNumber("");
-            transactionReceiveEntity.setOrderId(billNumberVQR);
-            transactionReceiveEntity.setSign("");
-            transactionReceiveEntity.setCustomerBankAccount("");
-            transactionReceiveEntity.setCustomerBankCode("");
-            transactionReceiveEntity.setCustomerName("");
-            transactionReceiveEntity.setTerminalCode(EnvironmentUtil.getVietQrActiveKey());
-            transactionReceiveEntity.setUserId(userIdHost);
-            transactionReceiveEntity.setNote("");
-            transactionReceiveEntity.setTransStatus(0);
-            transactionReceiveEntity.setQrCode(qr);
-            transactionReceiveEntity.setUrlLink("");
+                // create transaction_wallet_credit
+                TransactionWalletEntity walletEntityCredit = new TransactionWalletEntity();
+                UUID transWalletCreditUUID = UUID.randomUUID();
+                walletEntityCredit.setId(transWalletCreditUUID.toString());
+                walletEntityCredit.setAmount(finalTotalAmountAfterVat1 + "");
+                walletEntityCredit.setBillNumber(invoiceNumber);
+                walletEntityCredit.setContent(content);
+                walletEntityCredit.setStatus(0);
+                walletEntityCredit.setTimeCreated(time);
+                walletEntityCredit.setTimePaid(0);
+                walletEntityCredit.setTransType("C");
+                walletEntityCredit.setUserId(entity.getUserId());
+                walletEntityCredit.setOtp("");
+                walletEntityCredit.setPaymentType(0);
+                walletEntityCredit.setPaymentMethod(1);
+                walletEntityCredit.setReferenceNumber(3 + "*" + entity.getUserId() + "*" +
+                        otpPayment + "*" + entity.getBankId());
+                walletEntityCredit.setPhoneNoRC("");
+                walletEntityCredit.setData(dto.getBankId());
+                walletEntityCredit.setRefId("");
+                transactionWalletEntities.add(walletEntityCredit);
+                TransactionWalletEntity walletEntityDebit = new TransactionWalletEntity();
+                walletEntityDebit.setId(transWalletUUID.toString());
+                walletEntityDebit.setAmount(finalTotalAmountAfterVat1 + "");
+                walletEntityDebit.setBillNumber("");
+                walletEntityDebit.setContent(content);
+                walletEntityDebit.setStatus(0);
+                walletEntityDebit.setTimeCreated(time);
+                walletEntityDebit.setTimePaid(0);
+                walletEntityDebit.setTransType("D");
+                walletEntityDebit.setUserId(entity.getUserId());
+                walletEntityDebit.setOtp(otpPayment);
+                walletEntityDebit.setPaymentType(3);
+                walletEntityDebit.setPaymentMethod(0);
+                walletEntityDebit.setReferenceNumber("");
+                walletEntityDebit.setPhoneNoRC("");
+                walletEntityDebit.setData(dto.getBankId());
+                walletEntityDebit.setRefId(transWalletCreditUUID.toString());
+
+                transactionWalletEntities.add(walletEntityDebit);
+
+                VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+                vietQRGenerateDTO.setCaiValue(cai);
+                vietQRGenerateDTO.setBankAccount(bankAccount);
+                vietQRGenerateDTO.setAmount(finalTotalAmountAfterVat1 + "");
+                vietQRGenerateDTO.setContent(content);
+                String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+
+                // insert transaction_receive
+                UUID transReceiveUUID = UUID.randomUUID();
+                TransactionReceiveEntity transactionReceiveEntity = new TransactionReceiveEntity();
+                transactionReceiveEntity.setId(transReceiveUUID.toString());
+                transactionReceiveEntity.setAmount(finalTotalAmountAfterVat1);
+                transactionReceiveEntity.setBankAccount(bankAccount);
+                transactionReceiveEntity.setBankId(bankId);
+                transactionReceiveEntity.setContent(content);
+                transactionReceiveEntity.setRefId("");
+                transactionReceiveEntity.setStatus(0);
+                transactionReceiveEntity.setTime(time);
+                transactionReceiveEntity.setType(5);
+                transactionReceiveEntity.setTraceId(traceId);
+                transactionReceiveEntity.setTransType("C");
+                transactionReceiveEntity.setReferenceNumber("");
+                transactionReceiveEntity.setOrderId(invoiceNumber);
+                transactionReceiveEntity.setSign("");
+                transactionReceiveEntity.setCustomerBankAccount("");
+                transactionReceiveEntity.setCustomerBankCode("");
+                transactionReceiveEntity.setCustomerName("");
+                transactionReceiveEntity.setTerminalCode(EnvironmentUtil.getVietQrActiveKey());
+                transactionReceiveEntity.setUserId(userIdHost);
+                transactionReceiveEntity.setNote("");
+                transactionReceiveEntity.setTransStatus(0);
+                transactionReceiveEntity.setQrCode("");
+                transactionReceiveEntity.setUrlLink("");
+
+                InvoiceTransactionEntity invoiceTransactionEntity = new InvoiceTransactionEntity();
+                invoiceTransactionEntity.setId(UUID.randomUUID().toString());
+                invoiceTransactionEntity.setInvoiceId(invoiceId.toString());
+                try {
+                    invoiceTransactionEntity.setInvoiceItemIds(mapper.writeValueAsString(itemIds));
+                } catch (JsonProcessingException e) {
+                    invoiceTransactionEntity.setInvoiceItemIds("[]");
+                }
+                String bankIdRechargeDefault = systemSettingService.getBankIdRechargeDefault();
+                invoiceTransactionEntity.setBankIdRecharge(StringUtil.getValueNullChecker(bankIdRechargeDefault));
+                invoiceTransactionEntity.setMid(dto.getMerchantId());
+                invoiceTransactionEntity.setBankId(dto.getBankId());
+                invoiceTransactionEntity.setUserId(userIdByBankId);
+                invoiceTransactionEntity.setStatus(0);
+                invoiceTransactionEntity.setVat(dto.getVat());
+                invoiceTransactionEntity.setRefId(transReceiveUUID.toString());
+                invoiceTransactionEntity.setInvoiceNumber(invoiceNumber);
+                invoiceTransactionEntity.setTotalAmount(finalTotalAmountAfterVat1);
+                invoiceTransactionEntity.setAmount(finalTotalAmount);
+                invoiceTransactionEntity.setVatAmount(finalTotalVatAmount);
+                invoiceTransactionEntity.setQrCode(qr);
+
+                invoiceTransactionService.insert(invoiceTransactionEntity);
+                transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
+                transactionWalletService.insertAll(transactionWalletEntities);
+            });
+            thread.start();
 
             entity.setRefId(transWalletUUID.toString());
             entity.setBankIdRecharge(bankId);
-
-            // trả lỗi trước khi insert
-            // check (bankId, timeProcess, type = 1 or 0) isExists
-
-            transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
-            transactionWalletService.insertAll(transactionWalletEntities);
             invoiceItemService.insertAll(invoiceItemEntities);
             invoiceService.insert(entity);
 
+            Thread thread2 = new Thread(() -> {
+                UUID notificationUUID = UUID.randomUUID();
+            String notiType = NotificationUtil.getNotiInvoiceCreated();
+            String title = NotificationUtil.getNotiTitleInvoiceUnpaid();
+            String message = "Bạn có hoá đơn "
+                    + dto.getInvoiceName()
+                    + " chưa thanh toán. Vui Lòng kiểm tra lại trên hệ thống VietQR VN.";
+
+            NotificationEntity notiEntity = new NotificationEntity();
+            notiEntity.setId(notificationUUID.toString());
+            notiEntity.setRead(false);
+            notiEntity.setMessage(message);
+            notiEntity.setTime(DateTimeUtil.getCurrentDateTimeUTC());
+            notiEntity.setType(notiType);
+            notiEntity.setUserId(userIdByBankId);
+            notiEntity.setData(userIdByBankId);
+            Map<String, String> datas = new HashMap<>();
+            datas.put("notificationType", notiType);
+            datas.put("notificationId", notificationUUID.toString());
+            datas.put("status", "1");
+            datas.put("bankCode", "MB");
+            datas.put("terminalCode", "");
+            datas.put("terminalName", "");
+            datas.put("html", "<div><span style=\"font-size: 12;\">Bạn có 1 hóa đơn<strong> " + StringUtil.formatNumberAsString(finalTotalAmountAfterVat1 + "") + " VND " +
+                    "</strong><br>cần thanh toán!</span></div>");
+            datas.put("invoiceId", entity.getInvoiceId());  //invoice ID
+            datas.put("time", time + "");
+            datas.put("invoiceName", entity.getName());
+            datas.put("status", 1 + "");
+                pushNotification(title, message, notiEntity, datas, notiEntity.getUserId());
+            });
+            thread2.start();
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
@@ -2427,7 +2402,7 @@ public class InvoiceController {
                 String msgErrorCode = "Error push notification invoice";
                 UUID notificationUUID = UUID.randomUUID();
                 String notiType = NotificationUtil.getNotiMobileTopup();
-                String title = NotificationUtil.getNOTI_TITLE_INVOICE_UNPAID();
+                String title = NotificationUtil.getNotiTitleInvoiceUnpaid();
                 String message = "Bạn có hoá đơn "
                         + dto.getBillNumber()
                         + " chưa thanh toán. Vui Lòng kiểm tra lại trên hệ thống VietQR VN.";

@@ -114,11 +114,11 @@ public class NotificationUtil {
 	public static String getNotiTitleMobileTopupFailed() {
 		return NOTI_TITLE_MOBILE_TOPUP_FAILED;
 	}
-	public static String getNOTI_TITLE_INVOICE_UNPAID() {
+	public static String getNotiTitleInvoiceUnpaid() {
 		return NOTI_TITLE_INVOICE_UNPAID;
 	}
 
-	public static String getNOTI_TITLE_INVOICE_SUCESS_FINAL() {
+	public static String getNotiTitleInvoiceSucessFinal() {
 		return NOTI_TITLE_INVOICE;
 	}
 
@@ -134,7 +134,7 @@ public class NotificationUtil {
 		return NOTI_MOBILE_TOPUP;
 	}
 
-	public static String getNotiMobileTopupCreate() {
+	public static String getNotiInvoiceCreated() {
 		return NOTI_SEND_INVOICE_CREATE;
 	}
 
@@ -278,24 +278,12 @@ public class NotificationUtil {
 		return NOTI_TYPE_ADD_MEMBER;
 	}
 
-	public static String getNotiTypeRemoveMember() {
-		return NOTI_TYPE_REMOVE_MEMBER;
-	}
-
 	public static String getNotiTitleAddMember() {
 		return NOTI_TITLE_ADD_MEMBER;
 	}
 
-	public static String getNotiTitleRemoveMember() {
-		return NOTI_TITLE_REMOVE_MEMBER;
-	}
-
 	public static String getNotiDescAddMember() {
 		return NOTI_DESC_ADD_MEMBER;
-	}
-
-	public static String getNotiDescRemoveMember() {
-		return NOTI_DESC_REMOVE_MEMBER;
 	}
 
 	public static String getNotiTypeCancelTransaction() {
@@ -305,17 +293,9 @@ public class NotificationUtil {
 	public static String getNotiAnnualFee() {
 		return NOTI_TYPE_ACTIVE_KEY;
 	}
-
-	public static String getNotiInvoiceFinal() {
-		return NOTI_SEND_INVOICE;
-	}
-	public static String getNotiInvoiceSuccess() {
-		return NOTI_TITLE_INVOICE;
-	}
 	public static String getNotiDescActiveKey1() {
 		return NOTI_DESC_PAYMENT_INVOICE;
 	}
-
 
 	public static String getNotiDescActiveKey2() {
 		return NOTI_DESC_ACTIVE_KEY_2;

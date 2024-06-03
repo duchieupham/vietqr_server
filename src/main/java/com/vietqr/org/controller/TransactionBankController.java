@@ -1399,6 +1399,7 @@ public class TransactionBankController {
 						String otp = parts[2];
 						String bankId = parts[3];
 						int checkSuccess = 0;
+						boolean isTotal = false;
 						if (userId != null && otp != null && paymentType != null) {
 							String checkTransWalletId = transactionWalletService
 									.checkExistedTransactionnWallet(otp,
@@ -1417,13 +1418,13 @@ public class TransactionBankController {
 									InvoiceEntity invoiceEntity = invoiceService.getInvoiceEntityById(invoiceTransactionEntity.getInvoiceId());
 									if (invoiceTransactionEntity != null && invoiceEntity != null) {
 										String invoiceItemIds = invoiceTransactionEntity.getInvoiceItemIds();
-										List<String> itemIds = mapper.readValue(invoiceItemIds, new TypeReference<List<String>>() {
-										});
+										List<String> itemIds = mapper.readValue(invoiceItemIds, new TypeReference<List<String>>() {});
 										List<InvoiceItemEntity> invoiceItemEntities = new ArrayList<>();
 										int check = invoiceItemService.updateAllItemIds(itemIds, timePaid);
 										int checkNotPaid = 0;
 										checkNotPaid = invoiceItemService.checkCountUnPaid(invoiceEntity.getId());
 										if (checkNotPaid == 0) {
+											isTotal = true;
 											invoiceService.updateStatusInvoice(invoiceEntity.getId(), 1, timePaid);
 										} else {
 											invoiceService.updateStatusInvoice(invoiceEntity.getId(), 3);
@@ -1458,12 +1459,11 @@ public class TransactionBankController {
 									}
 
 									if (checkSuccess > 0) {
-
 										// notification
 										// push notification
 										String notificationUUID = UUID.randomUUID().toString();
 										String notiType = NotificationUtil.getNotiInvoice();
-										String title = NotificationUtil.getNOTI_TITLE_INVOICE_SUCESS_FINAL();
+										String title = NotificationUtil.getNotiTitleInvoiceSucessFinal();
 										String message = NotificationUtil.getNotiDescActiveKey1()
 												+ invoiceEntity.getInvoiceId()
 												+ NotificationUtil.getNotiTitleInvoiceTotalAmount()
@@ -1486,53 +1486,25 @@ public class TransactionBankController {
 										data.put("notificationId",
 												notificationUUID);
 										data.put("amount",
-												invoiceEntity.getAmount() + "");
-										data.put("transWalletId", checkTransWalletId);
+												dto.getAmount() + "");
 										data.put("time", time + "");
-										data.put("bankId", bankId);
-										//data.put("billNumber", invoiceEntity.get());
-										data.put("paymentMethod", "1");
-										data.put("paymentType", "2");
 										data.put("status", 1 + "");
 										data.put("message", message);
-										pushNotification(title, message, notiEntity, data, userId);
-
-										//push form noti
-										//initialize datas check
-										int typeCheck = 0;
-										String statusCheck = data.put("status", "1");
-										String bankCodeCheck = data.put("bankCode", "MB");
-										String terminalCodeCheck = data.put("terminalCode", "");
-										String terminalNameCheck = data.put("terminalName", "");
-										String getTransType = "C";
-
-										// check conditions to push form notifications
-										if (statusCheck.equals("0") && typeCheck == 0) {
-											data.put("html", "\"\"<div><span style=\"font-size: 12;\">Bạn có 1 hóa đơn<strong> " + dto.getAmount() +
-													"</strong><br>cần thanh toán!</span></div>\"\"");
-										} // thông báo hoá đơn chưa thanh toán
-
-										if (dto.getTransType() == "C" && typeCheck == 2) {
-											data.put("html", "\"\"<div><span style=\"font-size: 12;\">" + dto.getAmount() + " VNĐ đến "
-													+ bankCodeCheck + " - " + dto.getBankaccount() + "</span></div>\"\"");
-										} // Nhận tiền Đến
-
-										if (dto.getTransType() == "C" && typeCheck == 1) {
-											data.put("html", "\"\"<div><span style=\"font-size: 12;\">+" + dto.getAmount() + " VNĐ đến MB Bank - "
-													+ dto.getBankaccount() + " - "
-													+ terminalNameCheck + " - "
-													+ terminalCodeCheck + "</span></div>\"\"");
-										} // Cập nhật tài khoản cửa hàng
-
-										if (dto.getTransType() == "D") {
-											data.put("html", "\"\"<div><span style=\"font-size: 12;\">" + dto.getAmount() + " VNĐ từ "
-													 + " - " + dto.getBankaccount() + "</span></div>\"\"");
-										} // Chuyển tiền đi
-
-										if (dto.getTransType() == "C" && typeCheck == 0) {
-											data.put("html", "\"\"Ở đây " + dto.getBankaccount() + " hưa biết trả gì\"\"");
+										data.put("status", "1");
+										if (!isTotal) {
+											data.put("html", "<div><span style=\"font-size: 12;\">Bạn đã thanh toán thành công số tiền <strong> "
+													+ StringUtil.formatNumberAsString(dto.getAmount() + "") + " VND " +
+													"</strong><br>cho một phần hóa đơn " + invoiceEntity.getInvoiceId() + " </span></div>");
+										} else {
+											data.put("html", "<div><span style=\"font-size: 12;\">Bạn đã thanh toán thành công số tiền <strong> "
+													+ StringUtil.formatNumberAsString(dto.getAmount() + "") + " VND " +
+													"</strong><br>cho hóa đơn " + invoiceEntity.getInvoiceId() + " </span></div>");
 										}
-										//--
+
+										Thread thread = new Thread(() -> {
+											pushNotification(title, message, notiEntity, data, notiEntity.getUserId());
+										});
+										thread.start();
 									} else {
 											System.out.println(
 													"transaction-sync: TRAN WALLET INVOICE NULL");
@@ -1608,11 +1580,6 @@ public class TransactionBankController {
 					data.put("phoneNo", phoneNo);
 					data.put("paymentMethod", "1");
 					data.put("paymentType", "0");
-
-					Thread thread = new Thread(() -> {
-						pushNotification(title, message, notiEntity, data, notiEntity.getUserId());
-					});
-					thread.start();
 					//pushNotification(title, message, notiEntity, data, userIdRecharge);
 				}
 			}
