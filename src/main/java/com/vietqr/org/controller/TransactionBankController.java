@@ -1608,7 +1608,12 @@ public class TransactionBankController {
 					data.put("phoneNo", phoneNo);
 					data.put("paymentMethod", "1");
 					data.put("paymentType", "0");
-					pushNotification(title, message, notiEntity, data, userIdRecharge);
+
+					Thread thread = new Thread(() -> {
+						pushNotification(title, message, notiEntity, data, notiEntity.getUserId());
+					});
+					thread.start();
+					//pushNotification(title, message, notiEntity, data, userIdRecharge);
 				}
 			}
 		}
