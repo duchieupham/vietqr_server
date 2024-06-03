@@ -345,4 +345,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
     @Modifying
     @Query(value = "UPDATE invoice SET status = :status, time_paid = :timePaid WHERE id = :id ", nativeQuery = true)
     int updateStatusInvoice(String id, int status, long timePaid);
+
+    @Query(value = "SELECT bank_id_recharge FROM invoice WHERE id = :id ", nativeQuery = true)
+    String getBankIdRechargeDefault(String id);
 }

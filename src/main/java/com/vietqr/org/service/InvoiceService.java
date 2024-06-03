@@ -91,4 +91,6 @@ public interface InvoiceService {
     IInvoiceDTO getInvoiceRequestPayment(String invoiceId);
 
     InvoiceUnpaidStatisticDTO getTotalInvoiceUnpaidByUserId(String userId);
+
+    String getBankIdRechargeDefault(String bankIdRecharge);
 }

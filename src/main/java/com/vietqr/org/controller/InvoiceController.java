@@ -716,9 +716,9 @@ public class InvoiceController {
         HttpStatus httpStatus = null;
         try {
             PaymentRequestResponseDTO responseDTO = new PaymentRequestResponseDTO();
-            String bankIdRechargeDefault = systemSettingService.getBankIdRechargeDefault();
-            String bankId = bankIdRechargeDefault;
-            if (StringUtil.isNullOrEmpty(dto.getBankIdRecharge())) {
+            String bankIdRechargeDefault = invoiceService.getBankIdRechargeDefault(dto.getInvoiceId());
+            String bankId = StringUtil.getValueNullChecker(bankIdRechargeDefault);
+            if (!StringUtil.isNullOrEmpty(dto.getBankIdRecharge())) {
                 bankId = dto.getBankIdRecharge();
             }
             ObjectMapper mapper = new ObjectMapper();
@@ -726,7 +726,7 @@ public class InvoiceController {
             InvoiceRequestPaymentDTO requestPaymentDTO = invoiceTransactionService.getInvoiceRequestPayment(
                     dto.getInvoiceId(),
                     itemIds,
-                    dto.getBankIdRecharge()
+                    bankId
             );
             if (requestPaymentDTO != null) {
                 MerchantBankMapperDTO merchantBankMapperDTO = null;
@@ -1796,14 +1796,45 @@ public class InvoiceController {
                     case 0:
                         invoiceItemEntity.setType(0);
                         invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameAnnualFee());
+                        //check condition BankID, type 0 or 1 and processDate is existing
+                        String processDate = item.getTimeProcess().replaceAll("-", "");
+                        int checkItem = invoiceItemService.checkInvoiceItemExist(dto.getBankId(), dto.getMerchantId(),
+                                0,processDate);
+                        if (checkItem == 0) {
+                            invoiceItemEntities.add(invoiceItemEntity);
+                        } else {
+                            result = new ResponseMessageDTO("FAILED", "E140");
+                            httpStatus = HttpStatus.BAD_REQUEST;
+                            return new ResponseEntity<>(result, httpStatus);
+                            //break;
+                        }
+                        System.out.println("Response:" + result);
+                        // --
+
                         break;
                     case 1:
                         invoiceItemEntity.setType(1);
                         invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameTransFee());
+
+                        //check condition BankID, type 0 or 1 and processDate is existing
+                        String processDate2 = item.getTimeProcess().replaceAll("-", "");
+                        int checkItem2 = invoiceItemService.checkInvoiceItemExist(dto.getBankId(), dto.getMerchantId(),
+                                1,processDate2);
+                        if (checkItem2 == 0) {
+                            invoiceItemEntities.add(invoiceItemEntity);
+                        } else {
+                            result = new ResponseMessageDTO("FAILED", "E140");
+                            httpStatus = HttpStatus.BAD_REQUEST;
+                            return new ResponseEntity<>(result, httpStatus);
+//                    break;
+                        }
+                        System.out.println("Response:" + result);
+                        // --
                         break;
                     case 9:
                         invoiceItemEntity.setType(9);
                         invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameAnotherFee());
+
                         break;
                 }
 
@@ -1817,22 +1848,23 @@ public class InvoiceController {
                 if (item.getTimeProcess() != null) {
                     invoiceItemEntity.setProcessDate(processDate);
                 }
-                //check condition BankID, type 0 or 1 and processDate is existing
-
-                int checkItem = invoiceItemService.checkInvoiceItemExist(dto.getBankId(), dto.getMerchantId(), 0,processDate);
-                if (checkItem == 0) {
-                    invoiceItemEntities.add(invoiceItemEntity);
-                } else {
-                    result = new ResponseMessageDTO("FAILED", "E140");
-                    httpStatus = HttpStatus.BAD_REQUEST;
-                    return new ResponseEntity<>(result, httpStatus);
-//                    break;
-                }
-                System.out.println("Response:" + result);
-                totalVatAmount += item.getVatAmount();
-                totalAmountAfterVat += item.getAmountAfterVat();
-
-                // ----------------------------------------------------------------
+//                //check condition BankID, type 0 or 1 and processDate is existing
+//
+//                int checkItem = invoiceItemService.checkInvoiceItemExist(dto.getBankId(), dto.getMerchantId(), 0,processDate);
+//                if (checkItem == 0) {
+//                    invoiceItemEntities.add(invoiceItemEntity);
+//                } else {
+//                    result = new ResponseMessageDTO("FAILED", "E140");
+//                    httpStatus = HttpStatus.BAD_REQUEST;
+//                    return new ResponseEntity<>(result, httpStatus);
+////                    break;
+//                }
+//                System.out.println("Response:" + result);
+//                // --
+//                totalVatAmount += item.getVatAmount();
+//                totalAmountAfterVat += item.getAmountAfterVat();
+//
+//                // ----------------------------------------------------------------
             }
 
             entity.setTotalAmount(totalAmountAfterVat);
