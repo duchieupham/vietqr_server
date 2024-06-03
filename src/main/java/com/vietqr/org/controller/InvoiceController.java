@@ -795,7 +795,7 @@ public class InvoiceController {
                     UUID transWalletUUID = UUID.randomUUID();
                     walletEntityDebit.setId(transWalletUUID.toString());
                     walletEntityDebit.setAmount(totalAmountAfterVat + "");
-                    walletEntityDebit.setBillNumber(billNumberVQR);
+                    walletEntityDebit.setBillNumber("");
                     walletEntityDebit.setContent(content);
                     walletEntityDebit.setStatus(0);
                     walletEntityDebit.setTimeCreated(DateTimeUtil.getCurrentDateTimeUTC());
@@ -937,6 +937,8 @@ public class InvoiceController {
                             invoiceItemDetailDTO.setUnit(item.getUnit() != null ? item.getUnit() : "");
                             invoiceItemDetailDTO.setQuantity(item.getQuantity());
                             invoiceItemDetailDTO.setAmount(item.getAmount());
+                            invoiceItemDetailDTO.setStatus(item.getStatus());
+                            invoiceItemDetailDTO.setTimePaid(item.getTimePaid());
                             invoiceItemDetailDTO.setTotalAmount(item.getTotalAmount());
                             invoiceItemDetailDTO.setVat(item.getVat() != null ? item.getVat() : invoiceDTO.getVat());
                             invoiceItemDetailDTO.setVatAmount(item.getVatAmount() != null ? item.getVatAmount() :
@@ -1043,21 +1045,26 @@ public class InvoiceController {
             List<InvoiceResponseDTO> data = new ArrayList<>();
             List<IInvoiceResponseDTO> dtos = new ArrayList<>();
             int offset = (page - 1) * size;
+            List<Integer> statuses = new ArrayList<>();
+            statuses.add(status);
+            if (status == 0) {
+                statuses.add(3);
+            }
             if (bankId == null || bankId.isEmpty()) {
                 if (time == null || time.isEmpty()) {
-                    dtos = invoiceService.getInvoiceByUserId(userId, status, offset, size);
-                    totalElement = invoiceService.countInvoiceByUserId(userId, status);
+                    dtos = invoiceService.getInvoiceByUserId(userId, statuses, offset, size);
+                    totalElement = invoiceService.countInvoiceByUserId(userId, statuses);
                 } else {
-                    dtos = invoiceService.getInvoiceByUserIdAndMonth(userId, status, time, offset, size);
-                    totalElement = invoiceService.countInvoiceByUserIdAndMonth(userId, status, time);
+                    dtos = invoiceService.getInvoiceByUserIdAndMonth(userId, statuses, time, offset, size);
+                    totalElement = invoiceService.countInvoiceByUserIdAndMonth(userId, statuses, time);
                 }
             } else {
                 if (time == null || time.isEmpty()) {
-                    dtos = invoiceService.getInvoiceByUserIdAndBankId(userId, status, bankId, offset, size);
-                    totalElement = invoiceService.countInvoiceByUserIdAndBankId(userId, status, bankId);
+                    dtos = invoiceService.getInvoiceByUserIdAndBankId(userId, statuses, bankId, offset, size);
+                    totalElement = invoiceService.countInvoiceByUserIdAndBankId(userId, statuses, bankId);
                 } else {
-                    dtos = invoiceService.getInvoiceByUserIdAndBankIdAndMonth(userId, status, bankId, time, offset, size);
-                    totalElement = invoiceService.countInvoiceByUserIdAndBankIdAndMonth(userId, status, bankId, time);
+                    dtos = invoiceService.getInvoiceByUserIdAndBankIdAndMonth(userId, statuses, bankId, time, offset, size);
+                    totalElement = invoiceService.countInvoiceByUserIdAndBankIdAndMonth(userId, statuses, bankId, time);
                 }
             }
             data = dtos.stream().map(item -> {

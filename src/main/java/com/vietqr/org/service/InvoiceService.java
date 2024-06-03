@@ -14,24 +14,24 @@ public interface InvoiceService {
 
     void insert(InvoiceEntity entity);
 
-    List<IInvoiceResponseDTO> getInvoiceByUserId(String userId, int status, int offset, int size);
+    List<IInvoiceResponseDTO> getInvoiceByUserId(String userId, List<Integer> status, int offset, int size);
 
     String checkDuplicatedInvoiceId(String invoiceId);
 
-    List<IInvoiceResponseDTO> getInvoiceByUserIdAndMonth(String userId, int status, String month, int offset, int size);
+    List<IInvoiceResponseDTO> getInvoiceByUserIdAndMonth(String userId, List<Integer> status, String month, int offset, int size);
 
-    List<IInvoiceResponseDTO> getInvoiceByUserIdAndBankId(String userId, int status, String bankId, int offset, int size);
+    List<IInvoiceResponseDTO> getInvoiceByUserIdAndBankId(String userId, List<Integer> status, String bankId, int offset, int size);
 
-    List<IInvoiceResponseDTO> getInvoiceByUserIdAndBankIdAndMonth(String userId, int status, String bankId,
+    List<IInvoiceResponseDTO> getInvoiceByUserIdAndBankIdAndMonth(String userId, List<Integer> status, String bankId,
                                                                   String month, int offset, int size);
 
-    int countInvoiceByUserId(String userId, int status);
+    int countInvoiceByUserId(String userId, List<Integer> status);
 
-    int countInvoiceByUserIdAndMonth(String userId, int status, String time);
+    int countInvoiceByUserIdAndMonth(String userId, List<Integer> status, String time);
 
-    int countInvoiceByUserIdAndBankId(String userId, int status, String bankId);
+    int countInvoiceByUserIdAndBankId(String userId, List<Integer> status, String bankId);
 
-    int countInvoiceByUserIdAndBankIdAndMonth(String userId, int status, String bankId, String time);
+    int countInvoiceByUserIdAndBankIdAndMonth(String userId, List<Integer> status, String bankId, String time);
 
     IInvoiceDetailDTO getInvoiceDetailById(String invoiceId);
 

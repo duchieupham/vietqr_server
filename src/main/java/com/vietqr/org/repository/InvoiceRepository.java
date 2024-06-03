@@ -18,10 +18,10 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "a.total_amount AS totalAmount, a.invoice_id AS invoiceNumber, "
             + "a.data AS data "
             + "FROM invoice a "
-            + "WHERE a.user_id = :userId AND a.status = :status "
+            + "WHERE a.user_id = :userId AND a.status IN (:status) "
             + "ORDER BY a.time_created DESC "
             + "LIMIT :offset, :size ", nativeQuery = true)
-    List<IInvoiceResponseDTO> getInvoiceByUserId(String userId, int status, int offset, int size);
+    List<IInvoiceResponseDTO> getInvoiceByUserId(String userId, List<Integer> status, int offset, int size);
 
     @Query(value = "SELECT invoice_id FROM invoice "
             + "WHERE invoice_id = :invoiceId", nativeQuery = true)
@@ -33,11 +33,11 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "a.total_amount AS totalAmount, a.invoice_id AS invoiceNumber, "
             + "a.data AS data "
             + "FROM invoice a "
-            + "WHERE a.user_id = :userId AND a.status = :status "
+            + "WHERE a.user_id = :userId AND a.status IN (:status) "
             + "AND a.time_created BETWEEN :fromDate AND :toDate "
             + "ORDER BY a.time_created DESC "
             + "LIMIT :offset, :size ", nativeQuery = true)
-    List<IInvoiceResponseDTO> getInvoiceByUserIdAndMonth(String userId, int status, long fromDate,
+    List<IInvoiceResponseDTO> getInvoiceByUserIdAndMonth(String userId, List<Integer> status, long fromDate,
                                                          long toDate, int offset, int size);
 
     @Query(value = "SELECT a.id AS invoiceId, '' AS billNumber, "
@@ -46,11 +46,11 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "a.total_amount AS totalAmount, a.invoice_id AS invoiceNumber, "
             + "a.data AS data "
             + "FROM invoice a "
-            + "WHERE a.user_id = :userId AND a.status = :status "
+            + "WHERE a.user_id = :userId AND a.status IN (:status) "
             + "AND a.bank_id = :bankId "
             + "ORDER BY a.time_created DESC "
             + "LIMIT :offset, :size ", nativeQuery = true)
-    List<IInvoiceResponseDTO> getInvoiceByUserIdAndBankId(String userId, int status,
+    List<IInvoiceResponseDTO> getInvoiceByUserIdAndBankId(String userId, List<Integer> status,
                                                           String bankId, int offset, int size);
 
     @Query(value = "SELECT a.id AS invoiceId, '' AS billNumber, "
@@ -59,38 +59,38 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "a.total_amount AS totalAmount, a.invoice_id AS invoiceNumber, "
             + "a.data AS data "
             + "FROM invoice a "
-            + "WHERE a.user_id = :userId AND a.status = :status "
+            + "WHERE a.user_id = :userId AND a.status IN (:status) "
             + "AND a.time_created BETWEEN :fromDate AND :toDate "
             + "AND a.bank_id = :bankId "
             + "ORDER BY a.time_created DESC "
             + "LIMIT :offset, :size ", nativeQuery = true)
-    List<IInvoiceResponseDTO> getInvoiceByUserIdAndBankIdAndMonth(String userId, int status, String bankId,
+    List<IInvoiceResponseDTO> getInvoiceByUserIdAndBankIdAndMonth(String userId, List<Integer> status, String bankId,
                                                                   long fromDate, long toDate, int offset, int size);
 
     @Query(value = "SELECT COUNT(a.id) "
             + "FROM invoice a "
-            + "WHERE a.user_id = :userId AND a.status = :status ", nativeQuery = true)
-    int countInvoiceByUserId(String userId, int status);
+            + "WHERE a.user_id = :userId AND a.status IN (:status) ", nativeQuery = true)
+    int countInvoiceByUserId(String userId, List<Integer> status);
 
     @Query(value = "SELECT COUNT(a.id) "
             + "FROM invoice a "
-            + "WHERE a.user_id = :userId AND a.status = :status "
+            + "WHERE a.user_id = :userId AND a.status IN (:status) "
             + "AND a.time_created BETWEEN :fromDate AND :toDate ", nativeQuery = true)
-    int countInvoiceByUserIdAndMonth(String userId, int status,
+    int countInvoiceByUserIdAndMonth(String userId, List<Integer> status,
                                      long fromDate, long toDate);
 
     @Query(value = "SELECT COUNT(a.id) "
             + "FROM invoice a "
-            + "WHERE a.user_id = :userId AND a.status = :status "
+            + "WHERE a.user_id = :userId AND a.status IN (:status) "
             + "AND a.bank_id = :bankId ", nativeQuery = true)
-    int countInvoiceByUserIdAndBankId(String userId, int status, String bankId);
+    int countInvoiceByUserIdAndBankId(String userId, List<Integer> status, String bankId);
 
     @Query(value = "SELECT COUNT(a.id) "
             + "FROM invoice a "
-            + "WHERE a.user_id = :userId AND a.status = :status "
+            + "WHERE a.user_id = :userId AND a.status IN (:status) "
             + "AND a.time_created BETWEEN :fromDate AND :toDate "
             + "AND a.bank_id = :bankId ", nativeQuery = true)
-    int countInvoiceByUserIdAndBankIdAndMonth(String userId, int status,
+    int countInvoiceByUserIdAndBankIdAndMonth(String userId, List<Integer> status,
                                               String bankId, long fromDate, long toDate);
 
     @Query(value = "SELECT a.id AS invoiceId, b.bill_number AS billNumber, "

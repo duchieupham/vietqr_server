@@ -21,7 +21,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public List<IInvoiceResponseDTO> getInvoiceByUserId(String userId, int status, int offset, int size) {
+    public List<IInvoiceResponseDTO> getInvoiceByUserId(String userId, List<Integer> status, int offset, int size) {
         return repo.getInvoiceByUserId(userId, status, offset, size);
     }
 
@@ -31,7 +31,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public List<IInvoiceResponseDTO> getInvoiceByUserIdAndMonth(String userId, int status, String month, int offset, int size) {
+    public List<IInvoiceResponseDTO> getInvoiceByUserIdAndMonth(String userId, List<Integer> status, String month, int offset, int size) {
         StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(month);
         long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
         long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
@@ -39,12 +39,12 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public List<IInvoiceResponseDTO> getInvoiceByUserIdAndBankId(String userId, int status, String bankId, int offset, int size) {
+    public List<IInvoiceResponseDTO> getInvoiceByUserIdAndBankId(String userId, List<Integer> status, String bankId, int offset, int size) {
         return repo.getInvoiceByUserIdAndBankId(userId, status, bankId, offset, size);
     }
 
     @Override
-    public List<IInvoiceResponseDTO> getInvoiceByUserIdAndBankIdAndMonth(String userId, int status, String bankId, String month, int offset, int size) {
+    public List<IInvoiceResponseDTO> getInvoiceByUserIdAndBankIdAndMonth(String userId, List<Integer> status, String bankId, String month, int offset, int size) {
         StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(month);
         long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
         long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
@@ -53,12 +53,12 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public int countInvoiceByUserId(String userId, int status) {
+    public int countInvoiceByUserId(String userId, List<Integer> status) {
         return repo.countInvoiceByUserId(userId, status);
     }
 
     @Override
-    public int countInvoiceByUserIdAndMonth(String userId, int status, String time) {
+    public int countInvoiceByUserIdAndMonth(String userId, List<Integer> status, String time) {
         StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(time);
         long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
         long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
@@ -66,12 +66,12 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public int countInvoiceByUserIdAndBankId(String userId, int status, String bankId) {
+    public int countInvoiceByUserIdAndBankId(String userId, List<Integer> status, String bankId) {
         return repo.countInvoiceByUserIdAndBankId(userId, status, bankId);
     }
 
     @Override
-    public int countInvoiceByUserIdAndBankIdAndMonth(String userId, int status, String bankId, String time) {
+    public int countInvoiceByUserIdAndBankIdAndMonth(String userId, List<Integer> status, String bankId, String time) {
         StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(time);
         long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
         long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
