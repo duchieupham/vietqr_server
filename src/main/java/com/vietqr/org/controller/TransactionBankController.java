@@ -360,7 +360,6 @@ public class TransactionBankController {
                                 data.put("refId", "" + dto.getTransactionid());
                                 data.put("transType", "" + dto.getTransType()); // thêm transType rồi
                                 // thêm type nữa
-
                                 data.put("status", "1");
                                 data.put("traceId", "" + "");
                                 //data.put("transType", dto.getTransType());

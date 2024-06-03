@@ -17,6 +17,8 @@ public class InvoiceItemCreateDTO {
     public InvoiceItemCreateDTO() {
     }
 
+
+
     public InvoiceItemCreateDTO(String itemId, int type, String content, String unit, int quantity, long amount, long totalAmount, double vat, long vatAmount, long amountAfterVat) {
         this.itemId = itemId;
         this.type = type;

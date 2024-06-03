@@ -69,4 +69,11 @@ public class InvoiceItemServiceImpl implements InvoiceItemService {
     public List<InvoiceItemEntity> findByInvoiceId(String invoiceId) {
         return repo.findInvoiceItemEntityByInvoiceId(invoiceId);
     }
+
+    @Override
+    public Boolean checkInvoiceItemExist(String processDate) {
+        return repo.checkInvoiceItemExist(processDate);
+    }
+
+
 }

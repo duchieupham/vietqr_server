@@ -30,4 +30,7 @@ public interface InvoiceItemService {
     IAdminExtraInvoiceDTO getExtraInvoice(String time);
 
     List<InvoiceItemEntity> findByInvoiceId(String invoiceId);
+
+    Boolean checkInvoiceItemExist(String processDate);
+
 }
