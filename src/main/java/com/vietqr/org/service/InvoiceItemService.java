@@ -31,6 +31,6 @@ public interface InvoiceItemService {
 
     List<InvoiceItemEntity> findByInvoiceId(String invoiceId);
 
-    Boolean checkInvoiceItemExist(String processDate);
+    int checkInvoiceItemExist(String bankId, String merchantId, int type, String processDate);
 
 }

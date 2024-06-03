@@ -71,8 +71,8 @@ public class InvoiceItemServiceImpl implements InvoiceItemService {
     }
 
     @Override
-    public Boolean checkInvoiceItemExist(String processDate) {
-        return repo.checkInvoiceItemExist(processDate);
+    public int checkInvoiceItemExist(String bankId, String merchantId, int type, String processDate) {
+        return repo.checkInvoiceItemExist(bankId, merchantId,type, processDate);
     }
 
 

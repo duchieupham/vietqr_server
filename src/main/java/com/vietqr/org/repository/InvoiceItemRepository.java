@@ -79,11 +79,14 @@ public interface InvoiceItemRepository extends JpaRepository<InvoiceItemEntity, 
             + "WHERE b.time_created BETWEEN :fromDate AND :toDate ", nativeQuery = true)
     IAdminExtraInvoiceDTO getExtraInvoice(long fromDate, long toDate);
 
-    @Query(value = "SELECT a.merchant_id, a.bank_id "
+    @Query(value = "SELECT COALESCE(COUNT(a.id), 0) "
             + "FROM invoice_item a "
             + "INNER JOIN invoice b ON a.invoice_id = b.id "
-            + "WHERE a.process_date = :processDate ", nativeQuery = true)
-    Boolean checkInvoiceItemExist(String processDate);
+            + "WHERE a.process_date = :processDate "
+            + "AND b.merchant_id = :merchantId "
+            + "AND b.bank_id = :bankId "
+            + "AND a.type = :type ", nativeQuery = true)
+    int checkInvoiceItemExist(String bankId, String merchantId, int type, String processDate);
 
     List<InvoiceItemEntity> findInvoiceItemEntityByInvoiceId(String invoiceId);
 

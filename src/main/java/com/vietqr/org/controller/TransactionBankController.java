@@ -376,24 +376,24 @@ public class TransactionBankController {
 
                                 // check conditions to push form notifications
                                 if (statusCheck.equals("0") && typeCheck == 0) {
-                                    data.put("html", "Bạn có hoá đơn " + dto.getAmount() + " cần thanh toán.");
+                                    data.put("html", "<p>Bạn có hoá đơn <strong>" + dto.getAmount() + "</strong> cần thanh toán. </p>");
                                 } // thông báo hoá đơn chưa thanh toán
 
                                 if (dto.getTransType() == "C" && typeCheck == 2) {
-                                    data.put("html", "+" + dto.getAmount() + " VNĐ đến "
-                                            + bankCodeCheck + " - " + dto.getBankaccount());
+                                    data.put("html", "<p>+<strong>" + dto.getAmount() + "</strong> VNĐ đến "
+                                            + bankCodeCheck + " - <strong>" + dto.getBankaccount() + "</strong></p>");
                                 } // Nhận tiền Đến
 
                                 if (dto.getTransType() == "C" && typeCheck == 1) {
-                                    data.put("html", "+ " + dto.getAmount() + " VNĐ đến MB Bank - "
-                                            + dto.getBankaccount() + " - "
+                                    data.put("html", "<p>+" + dto.getAmount() + " VNĐ đến MB Bank - <strong>"
+                                            + dto.getBankaccount() + "</strong> - "
                                             + terminalNameCheck + " - "
-                                            + terminalCodeCheck);
+                                            + terminalCodeCheck + "</p>");
                                 } // Cập nhật tài khoản cửa hàng
 
                                 if (dto.getTransType() == "D") {
-                                    data.put("html", "+" + dto.getAmount() + " VNĐ từ "
-                                            + bankCodeCheck + " - " + dto.getBankaccount());
+                                    data.put("html", "<p>-<strong>" + dto.getAmount() + "</strong> VNĐ từ "
+                                            + bankCodeCheck + " -<strong> " + dto.getBankaccount() + "</strong></p>");
                                 } // Chuyển tiền đi
 
                                 if (dto.getTransType() == "C" && typeCheck == 0) {
