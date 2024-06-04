@@ -38,7 +38,7 @@ public class AutomationManagementService {
         @Autowired
         private FcmTokenService fcmTokenService;
 
-        @Scheduled(fixedRate = 120000)
+        @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 0 9 * * ?")
         public void scheduleExecuteTaskInvoice() {
                 try {
                         List<UserScheduleInvoiceDTO> dtos = invoiceService.getUserScheduleInvoice();
@@ -48,9 +48,9 @@ public class AutomationManagementService {
                                         UUID notificationUUID = UUID.randomUUID();
                                         String notiType = NotificationUtil.getNotiInvoiceCreated();
                                         String title = NotificationUtil.getNotiTitleInvoiceUnpaid();
-                                        String message = "Bạn có hoá đơn "
+                                        String message = "Bạn có "
                                                 + item.getNumberInvoice()
-                                                + " chưa thanh toán. Vui Lòng kiểm tra lại trên hệ thống VietQR VN.";
+                                                + " hoá đơn  chưa thanh toán. Vui Lòng kiểm tra lại trên hệ thống VietQR VN.";
 
                                         NotificationEntity notiEntity = new NotificationEntity();
                                         notiEntity.setId(notificationUUID.toString());
@@ -66,7 +66,8 @@ public class AutomationManagementService {
                                         datas.put("bankCode", "MB");
                                         datas.put("terminalCode", "");
                                         datas.put("terminalName", "");
-                                        datas.put("html", "<div><span style=\"font-size: 12;\">Bạn có "+ item.getNumberInvoice()
+                                        datas.put("html", "<div><span style=\"font-size: 12;\">Bạn có "
+                                                + item.getNumberInvoice()
                                                 + " hóa đơn <br>cần thanh toán!</span></div>");
                                         datas.put("invoiceId", "");  //invoice ID
                                         datas.put("time", "0");

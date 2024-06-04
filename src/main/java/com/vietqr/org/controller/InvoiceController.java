@@ -1725,7 +1725,14 @@ public class InvoiceController {
                 itemIds.add(invoiceItemId);
                 invoiceItemEntity.setId(invoiceItemId);
                 invoiceItemEntity.setInvoiceId(invoiceId.toString());
-                invoiceItemEntity.setAmount(item.getAmount());
+                long checkAmount = item.getAmount(); // check amount cannot 0
+                if (checkAmount <= 0) {
+                    result = new ResponseMessageDTO("FAILED", "E141");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    return new ResponseEntity<>(result, httpStatus);
+                }else {
+                    invoiceItemEntity.setAmount(item.getAmount());
+                }
                 invoiceItemEntity.setQuantity(item.getQuantity());
                 invoiceItemEntity.setTotalAmount(item.getTotalAmount());
                 invoiceItemEntity.setTotalAfterVat(item.getAmountAfterVat());
