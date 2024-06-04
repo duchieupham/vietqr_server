@@ -1951,7 +1951,7 @@ public class InvoiceController {
             datas.put("bankCode", "MB");
             datas.put("terminalCode", "");
             datas.put("terminalName", "");
-            datas.put("html", "<div><span style=\"font-size: 12;\">Bạn có 1 hóa đơn<strong> " + StringUtil.formatNumberAsString(finalTotalAmountAfterVat1 + "") + " VND " +
+            datas.put("html", "<div><span style=\"font-size: 12;\">Bạn có 1 hóa đơn <br><strong> " + StringUtil.formatNumberAsString(finalTotalAmountAfterVat1 + "") + " VND " +
                     "</strong><br>cần thanh toán!</span></div>");
             datas.put("invoiceId", entity.getId());  //invoice ID
             datas.put("time", time + "");
