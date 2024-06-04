@@ -38,7 +38,7 @@ public class AutomationManagementService {
         @Autowired
         private FcmTokenService fcmTokenService;
 
-        @Scheduled(fixedRate = 180000)
+        @Scheduled(fixedRate = 180000, zone = "Asia/Ho_Chi_Minh", cron = "0 0 9 * * ?")
         public void scheduleExecuteTaskInvoice() {
                 try {
                         List<UserScheduleInvoiceDTO> dtos = invoiceService.getUserScheduleInvoice();
