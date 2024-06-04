@@ -218,7 +218,7 @@ public class EnvironmentUtil {
     private static final String BANK_NAME_RECHARGE_PROD = "Ngân hàng TMCP Quân đội";
     //
     private static final String USER_BANK_NAME_RECHARGE_UAT = "Nguyen Phuong Nhat Linh";
-    private static final String USER_BANK_NAME_RECHARGE_UAT2 = "Nguyen Phuong Blue Com 2";
+    private static final String USER_BANK_NAME_RECHARGE_UAT2 = "Cong Ty Co Phan Bluecom Viet Nam";
     private static final String USER_BANK_NAME_RECHARGE_PROD = "Pham Duc Tuan";
     private static final String USER_BANK_NAME_RECHARGE_PROD2 = "Cong Ty Co Phan Bluecom Viet Nam";
     //

@@ -1,13 +1,16 @@
 package com.vietqr.org.dto;
 
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 public class InvoiceCreateUpdateDTO {
+    @NotBlank
     private String bankId;
     private String merchantId;
     private String invoiceName;
     private String description;
     private double vat;
+    private String bankIdRecharge;
     private List<InvoiceItemCreateDTO> items;
 
     public InvoiceCreateUpdateDTO() {
@@ -65,5 +68,13 @@ public class InvoiceCreateUpdateDTO {
 
     public void setVat(double vat) {
         this.vat = vat;
+    }
+
+    public String getBankIdRecharge() {
+        return bankIdRecharge;
+    }
+
+    public void setBankIdRecharge(String bankIdRecharge) {
+        this.bankIdRecharge = bankIdRecharge;
     }
 }
