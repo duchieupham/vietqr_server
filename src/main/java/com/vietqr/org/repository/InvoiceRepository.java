@@ -348,4 +348,11 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
 
     @Query(value = "SELECT bank_id_recharge FROM invoice WHERE id = :id ", nativeQuery = true)
     String getBankIdRechargeDefault(String id);
+
+    @Query(value = "SELECT COUNT(a.id) AS numberInvoice, a.user_id AS userId "
+            + "FROM invoice a "
+            + "WHERE (a.status = 0 OR a.status = 3) "
+            + "GROUP BY a.user_id "
+            + "HAVING numberInvoice > 0 ", nativeQuery = true)
+    List<UserScheduleInvoiceDTO> getUserScheduleInvoice();
 }

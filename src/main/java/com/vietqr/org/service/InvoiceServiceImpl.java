@@ -274,4 +274,9 @@ public class InvoiceServiceImpl implements InvoiceService {
     public String getBankIdRechargeDefault(String id) {
         return repo.getBankIdRechargeDefault(id);
     }
+
+    @Override
+    public List<UserScheduleInvoiceDTO> getUserScheduleInvoice() {
+        return repo.getUserScheduleInvoice();
+    }
 }

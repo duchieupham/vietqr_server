@@ -1,7 +1,6 @@
 package com.vietqr.org.util;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -9,7 +8,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 @Configuration
 @EnableScheduling
-@Conditional(TestEnvironmentCondition.class)
 public class SchedulingConfig {
 
     // create new thread pool to run scheduled task
