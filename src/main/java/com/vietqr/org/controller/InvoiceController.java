@@ -1802,7 +1802,7 @@ public class InvoiceController {
             String bankId = EnvironmentUtil.getBankIdRecharge();
             String userIdHost = EnvironmentUtil.getUserIdHostRecharge();
             String cai = EnvironmentUtil.getCAIRecharge();
-            BankAccountRechargeDTO bankAccountRechargeDTO = accountBankReceiveService.getBankAccountRecharge(dto.getBankId());
+            BankAccountRechargeDTO bankAccountRechargeDTO = accountBankReceiveService.getBankAccountRecharge(dto.getBankIdRecharge());
             if (bankAccountRechargeDTO != null) {
                 bankAccount = bankAccountRechargeDTO.getBankAccount();
                 bankId = bankAccountRechargeDTO.getBankId();
@@ -1904,8 +1904,7 @@ public class InvoiceController {
                 } catch (JsonProcessingException e) {
                     invoiceTransactionEntity.setInvoiceItemIds("[]");
                 }
-                String bankIdRechargeDefault = systemSettingService.getBankIdRechargeDefault();
-                invoiceTransactionEntity.setBankIdRecharge(StringUtil.getValueNullChecker(bankIdRechargeDefault));
+                invoiceTransactionEntity.setBankIdRecharge(finalBankId);
                 invoiceTransactionEntity.setMid(dto.getMerchantId());
                 invoiceTransactionEntity.setBankId(dto.getBankId());
                 invoiceTransactionEntity.setUserId(userIdByBankId);

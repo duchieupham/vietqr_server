@@ -1492,11 +1492,11 @@ public class TransactionBankController {
 										data.put("message", message);
 										data.put("status", "1");
 										if (!isTotal) {
-											data.put("html", "<div><span style=\"font-size: 12;\">Bạn đã thanh toán thành công số tiền <strong> "
+											data.put("html", "<div><span style=\"font-size: 12;\">Bạn đã thanh toán thành công số tiền <br> <strong> "
 													+ StringUtil.formatNumberAsString(dto.getAmount() + "") + " VND " +
 													"</strong><br>cho một phần hóa đơn " + invoiceEntity.getInvoiceId() + " </span></div>");
 										} else {
-											data.put("html", "<div><span style=\"font-size: 12;\">Bạn đã thanh toán thành công số tiền <strong> "
+											data.put("html", "<div><span style=\"font-size: 12;\">Bạn đã thanh toán thành công số tiền <br> <strong> "
 													+ StringUtil.formatNumberAsString(dto.getAmount() + "") + " VND " +
 													"</strong><br>cho hóa đơn " + invoiceEntity.getInvoiceId() + " </span></div>");
 										}
