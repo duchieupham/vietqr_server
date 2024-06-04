@@ -50,7 +50,7 @@ public class AutomationManagementService {
                                         String title = NotificationUtil.getNotiTitleInvoiceUnpaid();
                                         String message = "Bạn có "
                                                 + item.getNumberInvoice()
-                                                + " hoá đơn  chưa thanh toán. Vui Lòng kiểm tra lại trên hệ thống VietQR VN.";
+                                                + " hoá đơn chưa thanh toán. Vui Lòng kiểm tra lại trên hệ thống VietQR VN.";
 
                                         NotificationEntity notiEntity = new NotificationEntity();
                                         notiEntity.setId(notificationUUID.toString());
@@ -83,6 +83,7 @@ public class AutomationManagementService {
                 }
         }
 
+        @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 30 8 * * MON-FRI")
         public void scheduleExecuteTask() {
                 if (!EnvironmentUtil.isProduction()) {
                         String content = "CHÀO BUỔI SÁNG MỌI NGƯỜI " +
