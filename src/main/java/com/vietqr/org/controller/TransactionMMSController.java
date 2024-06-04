@@ -1019,7 +1019,13 @@ public class TransactionMMSController {
                 transactionBankCustomerDTO.setValueDate(0);
                 transactionBankCustomerDTO.setSign(transactionReceiveEntity.getSign());
                 transactionBankCustomerDTO.setOrderId(transactionReceiveEntity.getOrderId());
-                transactionBankCustomerDTO.setTerminalCode(rawTerminalCode != null ? rawTerminalCode : "");
+                if (!StringUtil.isNullOrEmpty(rawTerminalCode)) {
+                    transactionBankCustomerDTO.setTerminalCode(rawTerminalCode);
+                } else if (!StringUtil.isNullOrEmpty(transactionReceiveEntity.getTerminalCode())) {
+                    transactionBankCustomerDTO.setTerminalCode(transactionReceiveEntity.getTerminalCode());
+                } else {
+                    transactionBankCustomerDTO.setTerminalCode("");
+                }
                 transactionBankCustomerDTO.setUrlLink(urlLink);
                 for (TerminalAddressEntity terminalAddressEntity : terminalAddressEntities) {
                     CustomerSyncEntity customerSyncEntity = customerSyncService
