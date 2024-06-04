@@ -708,6 +708,24 @@ public class InvoiceController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("invoice/setting-recharge")
+    public ResponseEntity<Object> getSettingBankAccountVietQr() {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            String bankIdRecharge = StringUtil
+                    .getValueNullChecker(systemSettingService.getBankIdRechargeDefault());
+            result = getListPaymentRequest(bankIdRecharge);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("InvoiceController: ERROR: getSettingBankAccountVietQr: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @PostMapping("invoice/request-payment")
     public ResponseEntity<Object> requestPayment(
             @Valid @RequestBody PaymentRequestDTO dto
@@ -1524,14 +1542,16 @@ public class InvoiceController {
             String monthYear = DateTimeUtil.getFormatMonthYear(time);
             InvoiceCreateItemDTO data = null;
             IInvoiceItemCreateDTO feePackage;
-            switch (type) {
-                // annual fee
-                case 0:
-                    //String processDate = DateTimeUtil.getFormatMonthYear(time);;
-                    String processDate = time.replaceAll("-", "");
-                    int checkInvoiceItem = invoiceItemService.checkInvoiceItemExist(bankId, merchantId, type, processDate);
+            int checkInvoiceItem = 0;
+            String processDate = time.replaceAll("-", "");
+            if (type == 0 || type == 1) {
+                checkInvoiceItem = invoiceItemService.checkInvoiceItemExist(bankId, merchantId, type, processDate);
+            }
 
-                    if(checkInvoiceItem == 0){
+            if (checkInvoiceItem == 0) {
+                switch (type) {
+                    // annual fee
+                    case 0:
                         data = new InvoiceCreateItemDTO();
                         data.setItemId(monthYear + type);
                         data.setVat(vat);
@@ -1548,78 +1568,77 @@ public class InvoiceController {
                             data.setAmountAfterVat(data.getTotalAmount() + data.getVatAmount());
                         }
                         break;
-                    }else{
-                        result = new ResponseMessageDTO("FAILED", "E05");
-                        httpStatus = HttpStatus.BAD_REQUEST;
-                        break;
-                    }
 
-                // phi giao dich
-                case 1:
-                    data = new InvoiceCreateItemDTO();
-                    data.setItemId(monthYear + type);
-                    data.setVat(vat);
-                    data.setTimeProcess(time);
-                    data.setType(type);
-                    data.setContent(EnvironmentUtil.getVietQrNameTransFee() + monthYear);
-                    data.setUnit(EnvironmentUtil.getMonthUnitNameVn());
-                    data.setQuantity(1);
+                    // phi giao dich
+                    case 1:
+                        data = new InvoiceCreateItemDTO();
+                        data.setItemId(monthYear + type);
+                        data.setVat(vat);
+                        data.setTimeProcess(time);
+                        data.setType(type);
+                        data.setContent(EnvironmentUtil.getVietQrNameTransFee() + monthYear);
+                        data.setUnit(EnvironmentUtil.getMonthUnitNameVn());
+                        data.setQuantity(1);
 
-                    feePackage = bankReceiveFeePackageService.getFeePackageByBankId(bankId);
-                    List<TransReceiveInvoicesDTO> transactionReceiveEntities =
-                            transactionReceiveService.getTransactionReceiveByBankId(bankId, time);
-                    List<TransReceiveInvoicesDTO> transReceiveInvoicesInvoices = new ArrayList<>();
-                    double totalAmountRaw = 0.D;
-                    if (feePackage != null) {
-                        int isTotal = feePackage.getRecordType();
-                        switch (isTotal) {
-                            case 0:
-                                transReceiveInvoicesInvoices = transactionReceiveEntities.stream().filter(item ->
-                                        (item.getType() == 0 || item.getType() == 1) &&
-                                                "C".equalsIgnoreCase(item.getTransType())
-                                ).collect(Collectors.toList());
-                                break;
-                            case 1:
-                                transReceiveInvoicesInvoices = transactionReceiveEntities.stream().filter(item ->
-                                        "C".equalsIgnoreCase(item.getTransType())
-                                ).collect(Collectors.toList());
-                                break;
+                        feePackage = bankReceiveFeePackageService.getFeePackageByBankId(bankId);
+                        List<TransReceiveInvoicesDTO> transactionReceiveEntities =
+                                transactionReceiveService.getTransactionReceiveByBankId(bankId, time);
+                        List<TransReceiveInvoicesDTO> transReceiveInvoicesInvoices = new ArrayList<>();
+                        double totalAmountRaw = 0.D;
+                        if (feePackage != null) {
+                            int isTotal = feePackage.getRecordType();
+                            switch (isTotal) {
+                                case 0:
+                                    transReceiveInvoicesInvoices = transactionReceiveEntities.stream().filter(item ->
+                                            (item.getType() == 0 || item.getType() == 1) &&
+                                                    "C".equalsIgnoreCase(item.getTransType())
+                                    ).collect(Collectors.toList());
+                                    break;
+                                case 1:
+                                    transReceiveInvoicesInvoices = transactionReceiveEntities.stream().filter(item ->
+                                            "C".equalsIgnoreCase(item.getTransType())
+                                    ).collect(Collectors.toList());
+                                    break;
+                            }
+                            totalAmountRaw = transReceiveInvoicesInvoices.stream()
+                                    .mapToDouble(item -> {
+                                        double amount = 0;
+                                        amount = feePackage.getFixFee()
+                                                + (feePackage.getPercentFee() / 100)
+                                                * item.getAmount();
+                                        return amount;
+                                    })
+                                    .sum();
                         }
-                        totalAmountRaw = transReceiveInvoicesInvoices.stream()
-                                .mapToDouble(item -> {
-                                    double amount = 0;
-                                    amount = feePackage.getFixFee()
-                                            + (feePackage.getPercentFee() / 100)
-                                            * item.getAmount();
-                                    return amount;
-                                })
-                                .sum();
-                    }
-                    long annualFee = 0;
-                    if (feePackage != null) {
-                        annualFee = feePackage.getAnnualFee();
-                    }
-                    long totalAmount = Math.round(totalAmountRaw) - annualFee;
-                    if (totalAmount < 0) totalAmount = 0;
-                    data.setAmount(totalAmount);
-                    data.setTotalAmount(totalAmount);
-                    data.setVatAmount(Math.round(vat / 100 * totalAmount));
-                    data.setAmountAfterVat(Math.round((vat + 100) / 100 * totalAmount));
-                    break;
-                // phi khac
-                case 9:
-                    data = new InvoiceCreateItemDTO();
-                    data.setItemId(UUID.randomUUID().toString());
-                    data.setVat(vat);
-                    data.setTimeProcess(time);
-                    data.setType(type);
-                    data.setContent(EnvironmentUtil.getVietQrNameAnotherFee());
-                    break;
-                default:
-                    break;
+                        long annualFee = 0;
+                        if (feePackage != null) {
+                            annualFee = feePackage.getAnnualFee();
+                        }
+                        long totalAmount = Math.round(totalAmountRaw) - annualFee;
+                        if (totalAmount < 0) totalAmount = 0;
+                        data.setAmount(totalAmount);
+                        data.setTotalAmount(totalAmount);
+                        data.setVatAmount(Math.round(vat / 100 * totalAmount));
+                        data.setAmountAfterVat(Math.round((vat + 100) / 100 * totalAmount));
+                        break;
+                    // phi khac
+                    case 9:
+                        data = new InvoiceCreateItemDTO();
+                        data.setItemId(UUID.randomUUID().toString());
+                        data.setVat(vat);
+                        data.setTimeProcess(time);
+                        data.setType(type);
+                        data.setContent(EnvironmentUtil.getVietQrNameAnotherFee());
+                        break;
+                    default:
+                        break;
+                }
+                result = data;
+                httpStatus = HttpStatus.OK;
+            } else {
+                result = new ResponseMessageDTO("FAILED", "E140");
+                httpStatus = HttpStatus.BAD_REQUEST;
             }
-            result = data;
-            httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -1634,6 +1653,9 @@ public class InvoiceController {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
+            if (StringUtil.isNullOrEmpty(dto.getBankIdRecharge())) {
+                dto.setBankIdRecharge(systemSettingService.getBankIdRechargeDefault());
+            }
             long totalAmount = 0;
             long totalAmountAfterVat = 0;
             long totalVatAmount = 0;
@@ -1773,9 +1795,18 @@ public class InvoiceController {
             String bankId = EnvironmentUtil.getBankIdRecharge();
             String userIdHost = EnvironmentUtil.getUserIdHostRecharge();
             String cai = EnvironmentUtil.getCAIRecharge();
+            BankAccountRechargeDTO bankAccountRechargeDTO = accountBankReceiveService.getBankAccountRecharge(dto.getBankId());
+            if (bankAccountRechargeDTO != null) {
+                bankAccount = bankAccountRechargeDTO.getBankAccount();
+                bankId = bankAccountRechargeDTO.getBankId();
+                userIdHost = bankAccountRechargeDTO.getUserId();
+            }
             long finalTotalAmountAfterVat1 = totalAmountAfterVat;
             long finalTotalAmount = totalAmount;
             long finalTotalVatAmount = totalVatAmount;
+            String finalBankAccount = bankAccount;
+            String finalBankId = bankId;
+            String finalUserIdHost = userIdHost;
             Thread thread = new Thread(() -> {
                 String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
                 String otpPayment = RandomCodeUtil.generateOTP(6);
@@ -1803,6 +1834,7 @@ public class InvoiceController {
                 walletEntityCredit.setData(dto.getBankId());
                 walletEntityCredit.setRefId("");
                 transactionWalletEntities.add(walletEntityCredit);
+
                 TransactionWalletEntity walletEntityDebit = new TransactionWalletEntity();
                 walletEntityDebit.setId(transWalletUUID.toString());
                 walletEntityDebit.setAmount(finalTotalAmountAfterVat1 + "");
@@ -1825,7 +1857,7 @@ public class InvoiceController {
 
                 VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
                 vietQRGenerateDTO.setCaiValue(cai);
-                vietQRGenerateDTO.setBankAccount(bankAccount);
+                vietQRGenerateDTO.setBankAccount(finalBankAccount);
                 vietQRGenerateDTO.setAmount(finalTotalAmountAfterVat1 + "");
                 vietQRGenerateDTO.setContent(content);
                 String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
@@ -1835,8 +1867,8 @@ public class InvoiceController {
                 TransactionReceiveEntity transactionReceiveEntity = new TransactionReceiveEntity();
                 transactionReceiveEntity.setId(transReceiveUUID.toString());
                 transactionReceiveEntity.setAmount(finalTotalAmountAfterVat1);
-                transactionReceiveEntity.setBankAccount(bankAccount);
-                transactionReceiveEntity.setBankId(bankId);
+                transactionReceiveEntity.setBankAccount(finalBankAccount);
+                transactionReceiveEntity.setBankId(finalBankId);
                 transactionReceiveEntity.setContent(content);
                 transactionReceiveEntity.setRefId("");
                 transactionReceiveEntity.setStatus(0);
@@ -1851,7 +1883,7 @@ public class InvoiceController {
                 transactionReceiveEntity.setCustomerBankCode("");
                 transactionReceiveEntity.setCustomerName("");
                 transactionReceiveEntity.setTerminalCode(EnvironmentUtil.getVietQrActiveKey());
-                transactionReceiveEntity.setUserId(userIdHost);
+                transactionReceiveEntity.setUserId(finalUserIdHost);
                 transactionReceiveEntity.setNote("");
                 transactionReceiveEntity.setTransStatus(0);
                 transactionReceiveEntity.setQrCode("");
@@ -1886,7 +1918,7 @@ public class InvoiceController {
             thread.start();
 
             entity.setRefId(transWalletUUID.toString());
-            entity.setBankIdRecharge(bankId);
+            entity.setBankIdRecharge(dto.getBankIdRecharge());
             invoiceItemService.insertAll(invoiceItemEntities);
             invoiceService.insert(entity);
 
@@ -1915,7 +1947,7 @@ public class InvoiceController {
             datas.put("terminalName", "");
             datas.put("html", "<div><span style=\"font-size: 12;\">Bạn có 1 hóa đơn<strong> " + StringUtil.formatNumberAsString(finalTotalAmountAfterVat1 + "") + " VND " +
                     "</strong><br>cần thanh toán!</span></div>");
-            datas.put("invoiceId", entity.getInvoiceId());  //invoice ID
+            datas.put("invoiceId", entity.getId());  //invoice ID
             datas.put("time", time + "");
             datas.put("invoiceName", entity.getName());
             datas.put("status", 1 + "");
