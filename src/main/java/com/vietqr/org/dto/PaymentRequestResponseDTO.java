@@ -14,6 +14,7 @@ public class PaymentRequestResponseDTO {
     private double vat;
     private long vatAmount;
     private String invoiceId;
+    private long expiredTime;
 
     public PaymentRequestResponseDTO() {
     }
@@ -138,5 +139,13 @@ public class PaymentRequestResponseDTO {
 
     public void setInvoiceId(String invoiceId) {
         this.invoiceId = invoiceId;
+    }
+
+    public long getExpiredTime() {
+        return expiredTime;
+    }
+
+    public void setExpiredTime(long expiredTime) {
+        this.expiredTime = expiredTime;
     }
 }

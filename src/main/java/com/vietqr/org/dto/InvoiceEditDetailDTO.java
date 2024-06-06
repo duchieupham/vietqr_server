@@ -11,6 +11,9 @@ public class InvoiceEditDetailDTO {
     private long totalAfterVat;
     private double vat;
     private InvoiceDetailCustomerDTO userInformation;
+    private long totalUnpaid;
+    private long totalPaid;
+    List<BankReceivePaymentRequestDTO> paymentRequestDTOS;
     private List<InvoiceItemDetailDTO> invoiceItems;
 
     public InvoiceEditDetailDTO() {
@@ -98,5 +101,29 @@ public class InvoiceEditDetailDTO {
 
     public void setVat(double vat) {
         this.vat = vat;
+    }
+
+    public long getTotalUnpaid() {
+        return totalUnpaid;
+    }
+
+    public void setTotalUnpaid(long totalUnpaid) {
+        this.totalUnpaid = totalUnpaid;
+    }
+
+    public long getTotalPaid() {
+        return totalPaid;
+    }
+
+    public void setTotalPaid(long totalPaid) {
+        this.totalPaid = totalPaid;
+    }
+
+    public List<BankReceivePaymentRequestDTO> getPaymentRequestDTOS() {
+        return paymentRequestDTOS;
+    }
+
+    public void setPaymentRequestDTOS(List<BankReceivePaymentRequestDTO> paymentRequestDTOS) {
+        this.paymentRequestDTOS = paymentRequestDTOS;
     }
 }
