@@ -123,6 +123,9 @@ public class TransactionController {
     @Autowired
     InvoiceService invoiceService;
 
+    @Autowired
+    BankReceiveFeePackageService bankReceiveFeePackageService;
+
     @GetMapping("admin/transactions")
     public ResponseEntity<List<TransactionReceiveAdminListDTO>> getTransactionAdmin(
             @RequestParam(value = "type") int type,
@@ -443,7 +446,10 @@ public class TransactionController {
                 transactionFeePagekageResponseDTO.setTimeProcess(data.getProcessDate());
                 transactionFeePagekageResponseDTO.setAccountBank(bankAccount.getBankAccount());
                 transactionFeePagekageResponseDTO.setBankName(bankAccount.getBankShortName());
-                transactionFeePagekageResponseDTO.setMmsActive(1);
+
+                boolean isMms = bankAccount.isMmsActive();
+                int activeStatus = isMms ? 1 : 0;
+                transactionFeePagekageResponseDTO.setMmsActive(activeStatus);
 
                 List<FeePackageResponseDTO> feePackageResponseDTO =
                         transactionReceiveService.getFeePackageResponse(
@@ -451,7 +457,7 @@ public class TransactionController {
                                 dateString.getEndTime(),
                                 bankIds); // //lấy bankId của user này trong account-bank-receive
 
-
+                // count và sum các giao dịch có đối soát
                 for (FeePackageResponseDTO item: feePackageResponseDTO) {
                     if (item.getBankId() == data.getBankId()){ // xử lý
                         transactionFeePagekageResponseDTO.setTotalCount(item.getTotalCount());
@@ -459,14 +465,21 @@ public class TransactionController {
                     }
                 }
 
-                transactionFeePagekageResponseDTO.setFixFee(100);
-                transactionFeePagekageResponseDTO.setPercentFee(100);
+                // data from bank_receive_fee_package
+                List<PackageFeeResponseDTO> packageFeeResponse = bankReceiveFeePackageService.getFeePackageFeeResponse(userId);
+                for (PackageFeeResponseDTO packageFee: packageFeeResponse) {
+                    transactionFeePagekageResponseDTO.setFixFee(packageFee.getFixFee());
+                    transactionFeePagekageResponseDTO.setPercentFee(packageFee.getFixFee());
+                }
 
+                // add data from table invoice-item
                 transactionFeePagekageResponseDTO.setAmount(100);
                 transactionFeePagekageResponseDTO.setTotalAmount(100);
                 transactionFeePagekageResponseDTO.setVat(100);
                 transactionFeePagekageResponseDTO.setTotalAfterVat(100);
 
+                result.add(transactionFeePagekageResponseDTO);
+                httpStatus = HttpStatus.OK;
 
             }
         }catch (Exception e) {

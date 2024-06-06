@@ -98,4 +98,10 @@ public interface BankReceiveFeePackageRepository extends JpaRepository<BankRecei
             + "INNER JOIN account_login c ON c.id = a.user_id "
             + "WHERE a.bank_id = :bankId ", nativeQuery = true)
     List<ICustomerDetailDTO> getCustomerDetailByBankId(String bankId);
+
+    @Query(value = "SELECT a.fix_fee, a.percent_fee "
+            + "FROM bank_receive_fee_package a "
+            + "WHERE a.user_id = :userId ", nativeQuery = true)
+    List<PackageFeeResponseDTO> getFeePackageByUsersId(String userId);
+
 }
