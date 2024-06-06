@@ -36,11 +36,15 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	String checkExistedBankAccount(@Param(value = "bankAccount") String bankAccount,
 			@Param(value = "bankTypeId") String bankTypeId);
 
-	@Query(value = "SELECT process_date FROM invoice_item a "
-					+ "INNER JOIN invoice b ON a.invoice_id = b.id "
-					+ "WHERE user_id = :userId", nativeQuery = true)
-	List<String> getBankIdsByUserId(@Param(value = "userId") String userId);
+//	@Query(value = "SELECT a.process_date  FROM invoice_item a "
+//					+ "INNER JOIN invoice b ON a.invoice_id = b.id "
+//					+ "WHERE user_id = :userId ", nativeQuery = true)
+//	List<String> getBankIdsByUserId(@Param(value = "userId") String userId);
 
+
+	@Query(value = "SELECT a.bank_id  FROM invoice a "
+			+ "WHERE a.user_id = :userId ", nativeQuery = true)
+	List<String> getBankIdsByUserId(@Param(value = "userId") String userId);
 
 	@Query(value = "SELECT id FROM account_bank_receive WHERE bank_account = :bankAccount AND bank_type_id = :bankTypeId AND user_id = :userId ", nativeQuery = true)
 	List<String> checkExistedBankAccountSameUser(@Param(value = "bankAccount") String bankAccount,

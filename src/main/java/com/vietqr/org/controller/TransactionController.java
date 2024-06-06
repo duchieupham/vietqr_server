@@ -420,6 +420,7 @@ public class TransactionController {
 
         List<TransactionFeePagekageResponseDTO> result = new ArrayList<>();
         HttpStatus httpStatus = null;
+
         ObjectMapper mapper = new ObjectMapper();
         String json = invoiceService.getDataJson(userId); // lấy JSON trong field data ở bảng invoice
         BankAccountDTO bankAccount = mapper.readValue(json, BankAccountDTO.class);
@@ -429,9 +430,9 @@ public class TransactionController {
 
         try {
             List<BankIdProcessDateResponseDTO> processDates = invoiceItemService.getProcessDatesByType(1, bankIds);
-            for (BankIdProcessDateResponseDTO date : processDates) {
+            for (BankIdProcessDateResponseDTO data : processDates) {
 
-                String dateStr = date.getProcessDate().toString();
+                String dateStr = data.getProcessDate().toString();
                 String formattedDate = dateStr.substring(0, 4) + "-" + dateStr.substring(4);
 
                 TransactionFeePagekageResponseDTO transactionFeePagekageResponseDTO = new TransactionFeePagekageResponseDTO();
@@ -439,10 +440,10 @@ public class TransactionController {
                 StartEndTimeDTO dateString = DateTimeUtil.getStartEndMonth(formattedDate);
 
                 //initial data
-                transactionFeePagekageResponseDTO.setTimeProcess(date.getProcessDate());
+                transactionFeePagekageResponseDTO.setTimeProcess(data.getProcessDate());
                 transactionFeePagekageResponseDTO.setAccountBank(bankAccount.getBankAccount());
                 transactionFeePagekageResponseDTO.setBankName(bankAccount.getBankShortName());
-                transactionFeePagekageResponseDTO.setMmsActive("1");
+                transactionFeePagekageResponseDTO.setMmsActive(1);
 
                 List<FeePackageResponseDTO> feePackageResponseDTO =
                         transactionReceiveService.getFeePackageResponse(
@@ -451,22 +452,20 @@ public class TransactionController {
                                 bankIds); // //lấy bankId của user này trong account-bank-receive
 
 
-//                for (FeePackageResponseDTO item: feePackageResponseDTO) {
-//                    if (item.getBankId() == ){ // xử lý
-//
-//                    }
-//                }
+                for (FeePackageResponseDTO item: feePackageResponseDTO) {
+                    if (item.getBankId() == data.getBankId()){ // xử lý
+                        transactionFeePagekageResponseDTO.setTotalCount(item.getTotalCount());
+                        transactionFeePagekageResponseDTO.setTotalAmountReceive(item.getTotalAmountFee());
+                    }
+                }
 
-                transactionFeePagekageResponseDTO.setTotalCount("");
-                transactionFeePagekageResponseDTO.setTotalAmountReceive("");
+                transactionFeePagekageResponseDTO.setFixFee(100);
+                transactionFeePagekageResponseDTO.setPercentFee(100);
 
-                transactionFeePagekageResponseDTO.setFixFee("");
-                transactionFeePagekageResponseDTO.setPercentFee("");
-
-                transactionFeePagekageResponseDTO.setAmount("");
-                transactionFeePagekageResponseDTO.setTotalAmount("");
-                transactionFeePagekageResponseDTO.setVat("");
-                transactionFeePagekageResponseDTO.setTotalAfterVat("");
+                transactionFeePagekageResponseDTO.setAmount(100);
+                transactionFeePagekageResponseDTO.setTotalAmount(100);
+                transactionFeePagekageResponseDTO.setVat(100);
+                transactionFeePagekageResponseDTO.setTotalAfterVat(100);
 
 
             }

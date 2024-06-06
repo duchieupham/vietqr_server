@@ -118,17 +118,17 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		SpringApplication.run(VietqrApplication.class, args);
 
 		// get bill
-		 String checksum =
-		 BankEncryptUtil.generateMD5GetBillForBankChecksum("QklEVkJMVUVDT01BY2Nlc3NLZXk=",
-		 "BC0001", // UAT : "BC0001" - PROD: "BLC001"
-		 "BCSM00005");
-		 System.out.println("Checksum: " + checksum);
-
-		 // pay bill
-		 String checksum2 =
-		 BankEncryptUtil.generateMD5PayBillForBankChecksum("QklEVkJMVUVDT01BY2Nlc3NLZXk=",
-		 "0000000000020", "DUiw5vHa0J", "5000000");
-		 System.out.println("Checksum2: " + checksum2);
+//		 String checksum =
+//		 BankEncryptUtil.generateMD5GetBillForBankChecksum("QklEVkJMVUVDT01BY2Nlc3NLZXk=",
+//		 "BC0001", // UAT : "BC0001" - PROD: "BLC001"
+//		 "BCSM00005");
+//		 System.out.println("Checksum: " + checksum);
+//
+//		 // pay bill
+//		 String checksum2 =
+//		 BankEncryptUtil.generateMD5PayBillForBankChecksum("QklEVkJMVUVDT01BY2Nlc3NLZXk=",
+//		 "0000000000020", "DUiw5vHa0J", "5000000");
+//		 System.out.println("Checksum2: " + checksum2);
 
 		// test();
 		// CustomerSyncEntity customerSyncEntity = new CustomerSyncEntity("",

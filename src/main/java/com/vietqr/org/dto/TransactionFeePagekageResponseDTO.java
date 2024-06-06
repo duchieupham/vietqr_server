@@ -4,18 +4,21 @@ public class TransactionFeePagekageResponseDTO {
     private String timeProcess;
     private String accountBank;
     private String bankName;
-    private String mmsActive;
+    private int mmsActive;
     private String title;
-    private String totalCount;
-    private String totalAmountReceive;
-    private String fixFee;
-    private String percentFee;
-    private String amount;
-    private String totalAmount;
-    private String vat;
-    private String totalAfterVat;
+    private long totalCount;
+    private long totalAmountReceive;
+    private long fixFee;
+    private long percentFee;
+    private long amount;
+    private long totalAmount;
+    private long vat;
+    private long totalAfterVat;
 
-    public TransactionFeePagekageResponseDTO(String timeProcess, String accountBank, String bankName, String mmsActive, String title, String totalCount, String totalAmountReceive, String fixFee, String percentFee, String amount, String totalAmount, String vat, String totalAfterVat) {
+    public TransactionFeePagekageResponseDTO() {
+    }
+
+    public TransactionFeePagekageResponseDTO(String timeProcess, String accountBank, String bankName, int mmsActive, String title, long totalCount, long totalAmountReceive, long fixFee, long percentFee, long amount, long totalAmount, long vat, long totalAfterVat) {
         this.timeProcess = timeProcess;
         this.accountBank = accountBank;
         this.bankName = bankName;
@@ -29,17 +32,6 @@ public class TransactionFeePagekageResponseDTO {
         this.totalAmount = totalAmount;
         this.vat = vat;
         this.totalAfterVat = totalAfterVat;
-    }
-
-    public TransactionFeePagekageResponseDTO() {
-    }
-
-    public String getBankName() {
-        return bankName;
-    }
-
-    public void setBankName(String bankName) {
-        this.bankName = bankName;
     }
 
     public String getTimeProcess() {
@@ -58,11 +50,19 @@ public class TransactionFeePagekageResponseDTO {
         this.accountBank = accountBank;
     }
 
-    public String getMmsActive() {
+    public String getBankName() {
+        return bankName;
+    }
+
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
+    }
+
+    public int getMmsActive() {
         return mmsActive;
     }
 
-    public void setMmsActive(String mmsActive) {
+    public void setMmsActive(int mmsActive) {
         this.mmsActive = mmsActive;
     }
 
@@ -74,67 +74,67 @@ public class TransactionFeePagekageResponseDTO {
         this.title = title;
     }
 
-    public String getTotalCount() {
+    public long getTotalCount() {
         return totalCount;
     }
 
-    public void setTotalCount(String totalCount) {
+    public void setTotalCount(long totalCount) {
         this.totalCount = totalCount;
     }
 
-    public String getTotalAmountReceive() {
+    public long getTotalAmountReceive() {
         return totalAmountReceive;
     }
 
-    public void setTotalAmountReceive(String totalAmountReceive) {
+    public void setTotalAmountReceive(long totalAmountReceive) {
         this.totalAmountReceive = totalAmountReceive;
     }
 
-    public String getFixFee() {
+    public long getFixFee() {
         return fixFee;
     }
 
-    public void setFixFee(String fixFee) {
+    public void setFixFee(long fixFee) {
         this.fixFee = fixFee;
     }
 
-    public String getPercentFee() {
+    public long getPercentFee() {
         return percentFee;
     }
 
-    public void setPercentFee(String percentFee) {
+    public void setPercentFee(long percentFee) {
         this.percentFee = percentFee;
     }
 
-    public String getAmount() {
+    public long getAmount() {
         return amount;
     }
 
-    public void setAmount(String amount) {
+    public void setAmount(long amount) {
         this.amount = amount;
     }
 
-    public String getTotalAmount() {
+    public long getTotalAmount() {
         return totalAmount;
     }
 
-    public void setTotalAmount(String totalAmount) {
+    public void setTotalAmount(long totalAmount) {
         this.totalAmount = totalAmount;
     }
 
-    public String getVat() {
+    public long getVat() {
         return vat;
     }
 
-    public void setVat(String vat) {
+    public void setVat(long vat) {
         this.vat = vat;
     }
 
-    public String getTotalAfterVat() {
+    public long getTotalAfterVat() {
         return totalAfterVat;
     }
 
-    public void setTotalAfterVat(String totalAfterVat) {
+    public void setTotalAfterVat(long totalAfterVat) {
         this.totalAfterVat = totalAfterVat;
     }
 }

@@ -4,12 +4,12 @@ public class FeePackageResponseDTO {
     private String bankId;
     private String month;
     private long totalCount;
-    private String totalAmountFee;
+    private long totalAmountFee;
 
     public FeePackageResponseDTO() {
     }
 
-    public FeePackageResponseDTO(long totalCount, String totalAmountFee) {
+    public FeePackageResponseDTO(long totalCount, long totalAmountFee) {
         this.totalCount = totalCount;
         this.totalAmountFee = totalAmountFee;
     }
@@ -22,11 +22,11 @@ public class FeePackageResponseDTO {
         this.totalCount = totalCount;
     }
 
-    public String getTotalAmountFee() {
+    public long getTotalAmountFee() {
         return totalAmountFee;
     }
 
-    public void setTotalAmountFee(String totalAmountFee) {
+    public void setTotalAmountFee(long totalAmountFee) {
         this.totalAmountFee = totalAmountFee;
     }
 

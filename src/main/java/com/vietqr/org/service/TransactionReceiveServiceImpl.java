@@ -190,8 +190,8 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
-    public List<FeePackageResponseDTO> getFeePackageResponse(long startTime, long endTime, List<String> bankId) {
-        return repo.getFeePackageResponse(startTime, endTime, bankId);
+    public List<FeePackageResponseDTO> getFeePackageResponse(long startTime, long endTime, List<String> bankIds) {
+        return repo.getFeePackageResponse(startTime, endTime, bankIds);
     }
 
 

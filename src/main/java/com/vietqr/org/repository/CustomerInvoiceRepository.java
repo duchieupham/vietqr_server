@@ -58,12 +58,12 @@ public interface CustomerInvoiceRepository extends JpaRepository<CustomerInvoice
 
 
         // bỏ inquire = 0
-        @Query(value = "SELECT type, amount, bill_id "
-                + "FROM customer_invoice "
-                + "WHERE customer_id = :customerId "
-                + "AND status = 0 "
-                + "ORDER BY RAND() ", nativeQuery = true)
-        List<CustomerInvoiceInfoDataDTO> getCustomerInvoiceInfos(@Param(value = "customerId") String customerId);
+//        @Query(value = "SELECT type, amount, bill_id "
+//                + "FROM customer_invoice "
+//                + "WHERE customer_id = :customerId "
+//                + "AND status = 0 "
+//                + "ORDER BY RAND() ", nativeQuery = true)
+//        List<CustomerInvoiceInfoDataDTO> getCustomerInvoiceInfos(@Param(value = "customerId") String customerId);
 
         @Transactional
         @Modifying
