@@ -288,8 +288,8 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
 
         @Query(value = "SELECT COUNT(a.id) AS totalCount, SUM(amount) AS totalAmount, a.bank_id, a.time "
                         + "FROM transaction_receive a "
-                        + "WHERE a.time BETWEEN :time AND a.reference_number = :referenceNumber "
-                        + "AND a.bankId = :bankIds AND a.status = 1 "
+                        + "WHERE a.time BETWEEN :startTime AND :endTime "
+                        + "AND a.bankId IN (:bankIds) AND a.status = 1 "
                         + "AND a.trans_type = 'C' AND (a.type = 0 OR a.type = 1) GROUP BY a.bank_id ", nativeQuery = true)
         List<FeePackageResponseDTO> getFeePackageResponse(@Param(value = "startTime") long startTime,
                                                     @Param(value = "endTime") long endTime,
