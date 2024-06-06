@@ -285,6 +285,16 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
 //                        @Param(value = "referenceNumber") String referenceNumber,
 //                        @Param(value = "partitions") List<String> partitions);
 
+
+        @Query(value = "SELECT COUNT(a.id) AS totalCount, SUM(amount) AS totalAmount, a.bank_id, a.time "
+                        + "FROM transaction_receive a "
+                        + "WHERE a.time BETWEEN :time AND a.reference_number = :referenceNumber "
+                        + "AND a.bankId = :bankIds AND a.status = 1 "
+                        + "AND a.trans_type = 'C' AND (a.type = 0 OR a.type = 1) GROUP BY a.bank_id ", nativeQuery = true)
+        List<FeePackageResponseDTO> getFeePackageResponse(@Param(value = "startTime") long startTime,
+                                                    @Param(value = "endTime") long endTime,
+                                                    @Param(value = "bankIds") List<String> bankIds);
+
         @Query(value = "SELECT * FROM transaction_receive WHERE order_id = :orderId AND time >= :time ", nativeQuery = true)
         TransactionReceiveEntity getTransactionReceiveByOrderId(
                         @Param(value = "orderId") String orderId,

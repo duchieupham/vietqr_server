@@ -211,7 +211,6 @@ public class TransactionBankController {
     // API test callback transaction for users
     // 1. Input DTO must be contain:
     // bạnkAccount, token save username, content, amount, transType,
-
 	@PostMapping("test/transaction-callback")
 	public ResponseEntity<ResponseMessageDTO> testCallbackForCustomer(
 			@RequestHeader("Authorization") String token,
@@ -1505,6 +1504,7 @@ public class TransactionBankController {
 											pushNotification(title, message, notiEntity, data, notiEntity.getUserId());
 										});
 										thread.start();
+
 									} else {
 											System.out.println(
 													"transaction-sync: TRAN WALLET INVOICE NULL");

@@ -73,6 +73,8 @@ public interface TransactionReceiveService {
         public List<TransByCusSyncDTO> getTransactionsByCustomerSync(String bankId, String customerSyncId, int offset,
                         String fromDate, String toDate);
 
+        public List<FeePackageResponseDTO> getFeePackageResponse(long startTime, long endTime, List<String> bankId);
+
         // admin
         List<TransactionReceiveAdminListDTO> getTransByBankAccountAllDate(String value, int offset);
 

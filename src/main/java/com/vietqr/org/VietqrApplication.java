@@ -116,17 +116,19 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
-		// String checksum =
-		// BankEncryptUtil.generateMD5GetBillForBankChecksum("QklEVkJMVUVDT01BY2Nlc3NLZXk=",
-		// "BLC001",
-		// "BCBL00001");
-		// System.out.println("Checksum: " + checksum);
 
-		// String checksum2 =
-		// BankEncryptUtil.generateMD5PayBillForBankChecksum("QklEVkJMVUVDT01BY2Nlc3NLZXk=",
-		// "0000000000017", "hSyeSrX9fW", "11000000");
-
-		// System.out.println("Checksum2: " + checksum2);
+		// get bill
+//		 String checksum =
+//		 BankEncryptUtil.generateMD5GetBillForBankChecksum("QklEVkJMVUVDT01BY2Nlc3NLZXk=",
+//		 "BC0001", // UAT : "BC0001" - PROD: "BLC001"
+//		 "BCSM00005");
+//		 System.out.println("Checksum: " + checksum);
+//
+//		 // pay bill
+//		 String checksum2 =
+//		 BankEncryptUtil.generateMD5PayBillForBankChecksum("QklEVkJMVUVDT01BY2Nlc3NLZXk=",
+//		 "0000000000020", "DUiw5vHa0J", "5000000");
+//		 System.out.println("Checksum2: " + checksum2);
 
 		// test();
 		// CustomerSyncEntity customerSyncEntity = new CustomerSyncEntity("",

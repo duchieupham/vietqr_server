@@ -219,6 +219,9 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "AND a.time_created BETWEEN :fromDate AND :toDate ", nativeQuery = true)
     int countInvoiceByPhoneNo(String value, long fromDate, long toDate);
 
+    @Query(value = "SELECT a.data FROM invoice a WHERE a.user_id :userId ", nativeQuery = true)
+    String getDataJson(String userId);
+
     @Query(value = "SELECT a.id AS invoiceId, "
             + "a.time_paid AS timePaid, b.vso AS vso, b.name AS midName, "
             + "a.data AS data, a.amount AS amountNoVat, a.vat AS vat, a.vat_amount AS vatAmount, "
