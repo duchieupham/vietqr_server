@@ -209,4 +209,12 @@ public class DateTimeUtil {
         }
         return result;
     }
+
+    public static long getEndTimeToDate() {
+        LocalDateTime localDateTime = LocalDateTime.now();
+        LocalDateTime currentGMTPlus7 = localDateTime.plusHours(7);
+        LocalDate current = currentGMTPlus7.toLocalDate();
+        LocalDateTime endOfDate = LocalDateTime.of(current, LocalTime.MAX);
+        return endOfDate.toEpochSecond(ZoneOffset.UTC);
+    }
 }

@@ -15,5 +15,6 @@ public interface  IInvoiceQrDetailDTO {
     long getTotalAmountAfterVat();
     String getBankId();
     String getMerchantId();
+    String getBankIdRecharge();
 
 }
