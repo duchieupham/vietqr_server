@@ -197,7 +197,7 @@ public class CustomerVaController {
     // get list customer_va by user_id
     @GetMapping("customer-va/list")
     public ResponseEntity<List<CustomerVaItemDTO>> getCustomerVasByUserId(
-            @RequestParam(value = "userId") String userId) {
+                @RequestParam(value = "userId") String userId) {
         List<CustomerVaItemDTO> result = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {

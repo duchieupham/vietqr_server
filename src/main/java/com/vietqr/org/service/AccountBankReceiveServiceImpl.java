@@ -16,6 +16,11 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     AccountBankReceiveRepository repo;
 
     @Override
+    public List<String> getBankIdsByUserId(String userId) {
+        return repo.getBankIdsByUserId(userId);
+    }
+
+    @Override
     public int insertAccountBank(AccountBankReceiveEntity entity) {
         return repo.save(entity) == null ? 0 : 1;
     }

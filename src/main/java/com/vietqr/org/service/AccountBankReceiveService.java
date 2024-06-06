@@ -10,6 +10,8 @@ import com.vietqr.org.entity.AccountBankReceiveEntity;
 @Service
 public interface AccountBankReceiveService {
 
+	public List<String> getBankIdsByUserId(String userId);
+
 	public int insertAccountBank(AccountBankReceiveEntity entity);
 
 	public void deleteAccountBank(String id);

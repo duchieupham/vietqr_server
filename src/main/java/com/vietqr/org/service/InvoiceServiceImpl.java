@@ -174,6 +174,11 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
+    public String getDataJson(String userId) {
+        return repo.getDataJson(userId);
+    }
+
+    @Override
     public int countInvoiceByStatus(int status, String month) {
         StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(month);
         long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;

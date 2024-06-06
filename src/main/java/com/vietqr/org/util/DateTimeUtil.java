@@ -61,6 +61,7 @@ public class DateTimeUtil {
         return localDateTime.toEpochSecond(ZoneOffset.UTC);
     }
 
+    //202405 => 2024-05
     public static StartEndTimeDTO getStartEndMonth(String month) {
         String dateTime = month + "-01 00:00:00";
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DateTimeFormat);

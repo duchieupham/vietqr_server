@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.*;
@@ -115,6 +116,12 @@ public class TransactionController {
 
     @Autowired
     TransReceiveTempService transReceiveTempService;
+
+    @Autowired
+    InvoiceItemService invoiceItemService;
+
+    @Autowired
+    InvoiceService invoiceService;
 
     @GetMapping("admin/transactions")
     public ResponseEntity<List<TransactionReceiveAdminListDTO>> getTransactionAdmin(
@@ -405,6 +412,71 @@ public class TransactionController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
+    // API thu phí dịch vụ
+    @GetMapping("transaction/feepackages")
+    public ResponseEntity<List<TransactionFeePagekageResponseDTO>> getFeePackages(
+            @RequestParam String userId) throws JsonProcessingException {
+
+        List<TransactionFeePagekageResponseDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        ObjectMapper mapper = new ObjectMapper();
+        String json = invoiceService.getDataJson(userId); // lấy JSON trong field data ở bảng invoice
+        BankAccountDTO bankAccount = mapper.readValue(json, BankAccountDTO.class);
+
+        //lấy bankId của user nnày
+        List<String> bankIds = accountBankReceiveService.getBankIdsByUserId(userId);
+
+        try {
+            List<BankIdProcessDateResponseDTO> processDates = invoiceItemService.getProcessDatesByType(1, bankIds);
+            for (BankIdProcessDateResponseDTO date : processDates) {
+
+                String dateStr = date.getProcessDate().toString();
+                String formattedDate = dateStr.substring(0, 4) + "-" + dateStr.substring(4);
+
+                TransactionFeePagekageResponseDTO transactionFeePagekageResponseDTO = new TransactionFeePagekageResponseDTO();
+
+                StartEndTimeDTO dateString = DateTimeUtil.getStartEndMonth(formattedDate);
+
+                //initial data
+                transactionFeePagekageResponseDTO.setTimeProcess(date.getProcessDate());
+                transactionFeePagekageResponseDTO.setAccountBank(bankAccount.getBankAccount());
+                transactionFeePagekageResponseDTO.setBankName(bankAccount.getBankShortName());
+                transactionFeePagekageResponseDTO.setMmsActive("1");
+
+                List<FeePackageResponseDTO> feePackageResponseDTO =
+                        transactionReceiveService.getFeePackageResponse(
+                                dateString.getStartTime(),
+                                dateString.getEndTime(),
+                                bankIds); // //lấy bankId của user này trong account-bank-receive
+
+
+//                for (FeePackageResponseDTO item: feePackageResponseDTO) {
+//                    if (item.getBankId() == ){ // xử lý
+//
+//                    }
+//                }
+
+                transactionFeePagekageResponseDTO.setTotalCount("");
+                transactionFeePagekageResponseDTO.setTotalAmountReceive("");
+
+                transactionFeePagekageResponseDTO.setFixFee("");
+                transactionFeePagekageResponseDTO.setPercentFee("");
+
+                transactionFeePagekageResponseDTO.setAmount("");
+                transactionFeePagekageResponseDTO.setTotalAmount("");
+                transactionFeePagekageResponseDTO.setVat("");
+                transactionFeePagekageResponseDTO.setTotalAfterVat("");
+
+
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
 
     // sync
     @GetMapping("terminal/transactions")
@@ -1646,7 +1718,7 @@ public class TransactionController {
         } catch (Exception e) {
             System.out.println("Error at getTransactionSubTerminalCodeOverview: " + e.toString());
             logger.error("Error at getTransactionSubTerminalCodeOverview: " + e.getMessage()
-            + " at: " + System.currentTimeMillis());
+                    + " at: " + System.currentTimeMillis());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -2508,36 +2580,35 @@ public class TransactionController {
             }
             if (dto != null && Objects.nonNull(dto.getTotalCashIn()) && Objects.nonNull(dto.getTotalCashOut())) {
                 result = new TransStatisticResponseDTO();
-                result.setTotalCashIn(dto.getTotalCashIn()!= null ? dto.getTotalCashIn() : 0);
-                result.setTotalCashOut(dto.getTotalCashOut()!= null ? dto.getTotalCashOut() : 0);
-                result.setTotalTransC(dto.getTotalTransC()!= null ? dto.getTotalTransC() : 0);
-                result.setTotalTransD(dto.getTotalTransD()!= null ? dto.getTotalTransD() : 0);
-                result.setTotalTrans(dto.getTotalTrans()!= null ? dto.getTotalTrans() : 0);
+                result.setTotalCashIn(dto.getTotalCashIn() != null ? dto.getTotalCashIn() : 0);
+                result.setTotalCashOut(dto.getTotalCashOut() != null ? dto.getTotalCashOut() : 0);
+                result.setTotalTransC(dto.getTotalTransC() != null ? dto.getTotalTransC() : 0);
+                result.setTotalTransD(dto.getTotalTransD() != null ? dto.getTotalTransD() : 0);
+                result.setTotalTrans(dto.getTotalTrans() != null ? dto.getTotalTrans() : 0);
                 httpStatus = HttpStatus.OK;
 
             } else if (!StringUtil.isNullOrEmpty(checkIsOwner) && !StringUtil.isNullOrEmpty(terminalCode)) {
                 dto = transactionReceiveService.getTransactionOverviewNotSync(bankId, terminalCode, month);
                 if (dto != null) {
                     result = new TransStatisticResponseDTO();
-                    result.setTotalCashIn(dto.getTotalCashIn()!= null ? dto.getTotalCashIn() : 0);
-                    result.setTotalCashOut(dto.getTotalCashOut()!= null ? dto.getTotalCashOut() : 0);
-                    result.setTotalTransC(dto.getTotalTransC()!= null ? dto.getTotalTransC() : 0);
-                    result.setTotalTransD(dto.getTotalTransD()!= null ? dto.getTotalTransD() : 0);
-                    result.setTotalTrans(dto.getTotalTrans()!= null ? dto.getTotalTrans() : 0);
+                    result.setTotalCashIn(dto.getTotalCashIn() != null ? dto.getTotalCashIn() : 0);
+                    result.setTotalCashOut(dto.getTotalCashOut() != null ? dto.getTotalCashOut() : 0);
+                    result.setTotalTransC(dto.getTotalTransC() != null ? dto.getTotalTransC() : 0);
+                    result.setTotalTransD(dto.getTotalTransD() != null ? dto.getTotalTransD() : 0);
+                    result.setTotalTrans(dto.getTotalTrans() != null ? dto.getTotalTrans() : 0);
                     httpStatus = HttpStatus.OK;
                 } else {
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else if (dto != null) {
                 result = new TransStatisticResponseDTO();
-                result.setTotalCashIn(dto.getTotalCashIn()!= null ? dto.getTotalCashIn() : 0);
-                result.setTotalCashOut(dto.getTotalCashOut()!= null ? dto.getTotalCashOut() : 0);
-                result.setTotalTransC(dto.getTotalTransC()!= null ? dto.getTotalTransC() : 0);
-                result.setTotalTransD(dto.getTotalTransD()!= null ? dto.getTotalTransD() : 0);
-                result.setTotalTrans(dto.getTotalTrans()!= null ? dto.getTotalTrans() : 0);
+                result.setTotalCashIn(dto.getTotalCashIn() != null ? dto.getTotalCashIn() : 0);
+                result.setTotalCashOut(dto.getTotalCashOut() != null ? dto.getTotalCashOut() : 0);
+                result.setTotalTransC(dto.getTotalTransC() != null ? dto.getTotalTransC() : 0);
+                result.setTotalTransD(dto.getTotalTransD() != null ? dto.getTotalTransD() : 0);
+                result.setTotalTrans(dto.getTotalTrans() != null ? dto.getTotalTrans() : 0);
                 httpStatus = HttpStatus.OK;
-            }
-            else {
+            } else {
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
@@ -2572,36 +2643,35 @@ public class TransactionController {
             }
             if (dto != null && Objects.nonNull(dto.getTotalCashIn()) && Objects.nonNull(dto.getTotalCashOut())) {
                 result = new TransStatisticResponseDTO();
-                result.setTotalCashIn(dto.getTotalCashIn()!= null ? dto.getTotalCashIn() : 0);
-                result.setTotalCashOut(dto.getTotalCashOut()!= null ? dto.getTotalCashOut() : 0);
-                result.setTotalTransC(dto.getTotalTransC()!= null ? dto.getTotalTransC() : 0);
-                result.setTotalTransD(dto.getTotalTransD()!= null ? dto.getTotalTransD() : 0);
-                result.setTotalTrans(dto.getTotalTrans()!= null ? dto.getTotalTrans() : 0);
+                result.setTotalCashIn(dto.getTotalCashIn() != null ? dto.getTotalCashIn() : 0);
+                result.setTotalCashOut(dto.getTotalCashOut() != null ? dto.getTotalCashOut() : 0);
+                result.setTotalTransC(dto.getTotalTransC() != null ? dto.getTotalTransC() : 0);
+                result.setTotalTransD(dto.getTotalTransD() != null ? dto.getTotalTransD() : 0);
+                result.setTotalTrans(dto.getTotalTrans() != null ? dto.getTotalTrans() : 0);
                 httpStatus = HttpStatus.OK;
 
             } else if (!StringUtil.isNullOrEmpty(checkIsOwner) && !StringUtil.isNullOrEmpty(terminalCode)) {
                 dto = transactionReceiveService.getTransactionOverviewNotSync(bankId, terminalCode, fromDate, toDate);
                 if (dto != null) {
                     result = new TransStatisticResponseDTO();
-                    result.setTotalCashIn(dto.getTotalCashIn()!= null ? dto.getTotalCashIn() : 0);
-                    result.setTotalCashOut(dto.getTotalCashOut()!= null ? dto.getTotalCashOut() : 0);
-                    result.setTotalTransC(dto.getTotalTransC()!= null ? dto.getTotalTransC() : 0);
-                    result.setTotalTransD(dto.getTotalTransD()!= null ? dto.getTotalTransD() : 0);
-                    result.setTotalTrans(dto.getTotalTrans()!= null ? dto.getTotalTrans() : 0);
+                    result.setTotalCashIn(dto.getTotalCashIn() != null ? dto.getTotalCashIn() : 0);
+                    result.setTotalCashOut(dto.getTotalCashOut() != null ? dto.getTotalCashOut() : 0);
+                    result.setTotalTransC(dto.getTotalTransC() != null ? dto.getTotalTransC() : 0);
+                    result.setTotalTransD(dto.getTotalTransD() != null ? dto.getTotalTransD() : 0);
+                    result.setTotalTrans(dto.getTotalTrans() != null ? dto.getTotalTrans() : 0);
                     httpStatus = HttpStatus.OK;
                 } else {
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else if (dto != null) {
                 result = new TransStatisticResponseDTO();
-                result.setTotalCashIn(dto.getTotalCashIn()!= null ? dto.getTotalCashIn() : 0);
-                result.setTotalCashOut(dto.getTotalCashOut()!= null ? dto.getTotalCashOut() : 0);
-                result.setTotalTransC(dto.getTotalTransC()!= null ? dto.getTotalTransC() : 0);
-                result.setTotalTransD(dto.getTotalTransD()!= null ? dto.getTotalTransD() : 0);
-                result.setTotalTrans(dto.getTotalTrans()!= null ? dto.getTotalTrans() : 0);
+                result.setTotalCashIn(dto.getTotalCashIn() != null ? dto.getTotalCashIn() : 0);
+                result.setTotalCashOut(dto.getTotalCashOut() != null ? dto.getTotalCashOut() : 0);
+                result.setTotalTransC(dto.getTotalTransC() != null ? dto.getTotalTransC() : 0);
+                result.setTotalTransD(dto.getTotalTransD() != null ? dto.getTotalTransD() : 0);
+                result.setTotalTrans(dto.getTotalTrans() != null ? dto.getTotalTrans() : 0);
                 httpStatus = HttpStatus.OK;
-            }
-            else {
+            } else {
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
@@ -2650,7 +2720,7 @@ public class TransactionController {
                             = transactionReceiveService.getTransStatisticByTerminalIdNotSync(bankId, terminalCode, fromDate, toDate);
                     result = transactions;
                     httpStatus = HttpStatus.OK;
-                }  else {
+                } else {
                     result = new ArrayList<>();
                     httpStatus = HttpStatus.OK;
                 }
@@ -3124,7 +3194,8 @@ public class TransactionController {
                 Long numberAmount = Long.parseLong(amount);
                 result = nf.format(numberAmount);
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return result;
     }
 }

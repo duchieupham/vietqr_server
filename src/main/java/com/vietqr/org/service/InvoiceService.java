@@ -59,6 +59,8 @@ public interface InvoiceService {
 
     List<IAdminInvoiceDTO> getInvoiceByStatus(int status, int offset, int size, String month);
 
+    String getDataJson(String userId);
+
     int countInvoiceByStatus(int status, String month);
 
     List<IAdminInvoiceDTO> getInvoices(int offset, int size, String month);

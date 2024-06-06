@@ -189,6 +189,12 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
+    @Override
+    public List<FeePackageResponseDTO> getFeePackageResponse(long startTime, long endTime, List<String> bankId) {
+        return repo.getFeePackageResponse(startTime, endTime, bankId);
+    }
+
+
     //
     //
     //
