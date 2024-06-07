@@ -4904,6 +4904,7 @@ public class TransactionBankController {
 			invoiceEntity.setInvoiceId(getInvoiceUnique());
 			invoiceEntity.setVat(vat);
 			invoiceEntity.setName(NotificationUtil.getNotiPaymentAnnualFeeVietqrName());
+			invoiceEntity.setDescription(NotificationUtil.getNotiPaymentAnnualFeeVietqrName());
 			invoiceEntity.setMerchantId("");
 			invoiceEntity.setStatus(1);
 			invoiceEntity.setAmount(dto.getAmount());
@@ -4916,21 +4917,30 @@ public class TransactionBankController {
 			invoiceEntity.setRefId(dto.getTransWalletId());
 			invoiceEntity.setDataType(0);
 			invoiceEntity.setData(mapper.writeValueAsString(bankInfo));
+			invoiceEntity.setBankIdRecharge(EnvironmentUtil.getBankIdRecharge());
 			InvoiceItemEntity itemEntity = new InvoiceItemEntity();
 			itemEntity.setId(UUID.randomUUID().toString());
 			itemEntity.setInvoiceId(invoiceUUIDId);
 			itemEntity.setQuantity(1);
 			itemEntity.setAmount(totalAmount);
 			itemEntity.setTotalAmount(dto.getAmount());
+			itemEntity.setTotalAfterVat(dto.getAmountAfterVat());
+			itemEntity.setVatAmount(dto.getAmountVat());
+			itemEntity.setTimeCreated(DateTimeUtil.getCurrentDateTimeUTC());
+			itemEntity.setTimePaid(DateTimeUtil.getCurrentDateTimeUTC()); //
 			itemEntity.setName(NotificationUtil.getNotiPaymentBdsdVietqr1());
 			itemEntity.setDescription(NotificationUtil.getNotiPaymentBdsdVietqr1() +
 					NotificationUtil.getNotiPaymentBdsdVietqr2() +
 					bankInfo.getBankAccount() + " - "
 					+ bankInfo.getBankShortName());
 			itemEntity.setType(0);
+			itemEntity.setUnit("");
+			itemEntity.setVat(vat);
+			itemEntity.setStatus(1);
 			itemEntity.setTypeName(NotificationUtil.getNotiPaymentBdsdVietqr1());
 			itemEntity.setData(mapper.writeValueAsString(dto));
 			itemEntity.setDataType(0);
+			itemEntity.setProcessDate("");
 			invoiceService.insert(invoiceEntity);
 			invoiceItemService.insert(itemEntity);
 
