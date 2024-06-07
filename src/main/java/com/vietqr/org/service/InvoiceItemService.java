@@ -1,9 +1,6 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.dto.BankIdProcessDateResponseDTO;
-import com.vietqr.org.dto.IAdminExtraInvoiceDTO;
-import com.vietqr.org.dto.IInvoiceItemDetailDTO;
-import com.vietqr.org.dto.IInvoiceItemResponseDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.InvoiceItemEntity;
 import org.springframework.stereotype.Service;
 
@@ -40,4 +37,6 @@ public interface InvoiceItemService {
     int checkInvoiceItemExist(String bankId, String merchantId, int type, String processDate);
 
     List<BankIdProcessDateResponseDTO> getProcessDatesByType(int type, List<String> bankId);
+
+    List<InvoiceItemProcessDateDTO> getInvoiceItemByInvoiceId(String invoiceId);
 }

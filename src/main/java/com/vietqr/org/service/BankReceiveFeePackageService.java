@@ -24,4 +24,6 @@ public interface BankReceiveFeePackageService {
     IMerchantBankMapperDTO getMerchantBankMapper(String merchantId, String bankId);
 
     List<ICustomerDetailDTO> getCustomerDetailByBankId(String bankId);
+
+    IBankReceiveFeePackageDTO getCustomerInfoByBankId(String bankId);
 }

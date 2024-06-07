@@ -275,7 +275,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
     IAdminExtraInvoiceDTO getExtraInvoice(long fromDate, long toDate);
 
     @Query(value = "SELECT a.id AS invoiceId, a.name AS invoiceName, "
-            + "a.invoice_id AS invoiceNumber, b.content AS content, "
+            + "a.invoice_id AS invoiceNumber, a.bank_id_recharge AS bankIdRecharge, "
             + "JSON_EXTRACT(a.data, '$.bankAccount') AS bankAccount, "
             + "JSON_EXTRACT(a.data, '$.userBankName') AS userBankName, "
             + "JSON_EXTRACT(a.data, '$.bankShortName') AS bankShortName, "
@@ -283,7 +283,6 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "a.bank_id AS bankId, a.merchant_id AS merchantId, "
             + "a.total_amount AS totalAmountAfterVat, a.description AS description "
             + "FROM invoice a "
-            + "INNER JOIN transaction_wallet b ON a.ref_id = b.id "
             + "WHERE a.id = :invoiceId LIMIT 1", nativeQuery = true)
     IInvoiceQrDetailDTO getInvoiceQrById(String invoiceId);
 
@@ -358,4 +357,8 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "GROUP BY a.user_id "
             + "HAVING numberInvoice > 0 ", nativeQuery = true)
     List<UserScheduleInvoiceDTO> getUserScheduleInvoice();
+
+    @Query("SELECT i FROM InvoiceEntity i JOIN InvoiceItemEntity ii ON i.id = ii.invoiceId " +
+            "WHERE ii.id = :invoiceItemId")
+    InvoiceEntity findInvoiceByInvoiceItemId(String invoiceItemId);
 }

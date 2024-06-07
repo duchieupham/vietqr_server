@@ -62,6 +62,7 @@ public class InvoiceItemServiceImpl implements InvoiceItemService {
         long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
         return repo.getExtraInvoice(fromDate, toDate);
     }
+
     @Override
     public List<InvoiceItemEntity> findByInvoiceId(String invoiceId) {
         return repo.findInvoiceItemEntityByInvoiceId(invoiceId);
@@ -84,12 +85,17 @@ public class InvoiceItemServiceImpl implements InvoiceItemService {
 
     @Override
     public int checkInvoiceItemExist(String bankId, String merchantId, int type, String processDate) {
-        return repo.checkInvoiceItemExist(bankId, merchantId,type, processDate);
+        return repo.checkInvoiceItemExist(bankId, merchantId, type, processDate);
     }
 
     @Override
     public List<BankIdProcessDateResponseDTO> getProcessDatesByType(int type, List<String> bankId) {
         return repo.getProcessDateByType(type, bankId);
+    }
+
+    @Override
+    public List<InvoiceItemProcessDateDTO> getInvoiceItemByInvoiceId(String invoiceId) {
+        return repo.findInvoiceItemEntitiesByInvoiceId(invoiceId);
     }
 
 }

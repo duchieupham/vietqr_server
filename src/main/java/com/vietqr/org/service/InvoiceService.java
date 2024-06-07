@@ -97,4 +97,6 @@ public interface InvoiceService {
     String getBankIdRechargeDefault(String bankIdRecharge);
 
     List<UserScheduleInvoiceDTO> getUserScheduleInvoice();
+
+    InvoiceEntity findInvoiceByInvoiceItemIds(String invoiceItemId);
 }

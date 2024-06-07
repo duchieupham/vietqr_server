@@ -284,4 +284,9 @@ public class InvoiceServiceImpl implements InvoiceService {
     public List<UserScheduleInvoiceDTO> getUserScheduleInvoice() {
         return repo.getUserScheduleInvoice();
     }
+
+    @Override
+    public InvoiceEntity findInvoiceByInvoiceItemIds(String invoiceItemId) {
+        return repo.findInvoiceByInvoiceItemId(invoiceItemId);
+    }
 }

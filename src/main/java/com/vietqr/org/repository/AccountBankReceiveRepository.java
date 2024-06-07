@@ -416,4 +416,11 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "FROM account_bank_receive a "
 			+ "WHERE a.id = :bankId ", nativeQuery = true)
     BankAccountRechargeDTO getBankAccountRecharge(String bankId);
+
+	@Query(value = "SELECT a.bank_account AS bankAccount, b.bank_short_name AS bankShortName, "
+			+ "a.bank_account_name AS userBankName, a.mms_active AS mmsActive "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN bank_type b ON a.bank_type_id = b.id "
+			+ "WHERE a.id = :bankId", nativeQuery = true)
+    IBankReceiveFeePackageDTO getCustomerBankDetailByBankId(String bankId);
 }

@@ -1347,4 +1347,94 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
                 endDate - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
 
+    @Override
+    public List<FeeTransactionInfoDTO> getTransactionInfoDataByBankId(String bankId, String time) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(time);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long currentTime = DateTimeUtil.getCurrentDateTimeUTC();
+        String year = DateTimeUtil.getYearAsString(toDate);
+        int differenceMonthFromTime = DateTimeUtil.getDifferenceMonthFromTime(toDate, currentTime);
+        List<String> suffix = new ArrayList<>();
+        if (differenceMonthFromTime < 3) {
+            suffix.add("");
+            List<String> strings = StringUtil.getStartQuarter(DateTimeUtil.getMonth(toDate), year);
+            for (String item : strings) {
+                String dto = "";
+                dto = "_" + year + item;
+                suffix.add(dto);
+            }
+        } else {
+            List<String> strings = StringUtil.getStartQuarter(DateTimeUtil.getMonth(toDate), year);
+            for (String item : strings) {
+                String dto = "";
+                dto = "_" + year + item;
+                suffix.add(dto);
+            }
+            if (DateTimeUtil.getMonth(toDate) == 1 && "24".equals(year)) {
+                suffix.add("_2312");
+            }
+        }
+
+        List<FeeTransactionInfoDTO> data = new ArrayList<>();
+        for (String item : suffix) {
+            List<FeeTransactionInfoDTO> dtos = new ArrayList<>();
+            try {
+                dtos = customQueryRepository.getTransactionInfoDataByBankId(TRANSACTION_RECEIVE_NAME + item,
+                        bankId,
+                        fromDate,
+                        toDate);
+            } catch (Exception e) {
+                dtos = new ArrayList<>();
+            }
+            data.addAll(dtos);
+        }
+        return data;
+    }
+
+    @Override
+    public List<DataTransactionDTO> getTransactionInfo(String bankId, String time, int recordType) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(time);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long currentTime = DateTimeUtil.getCurrentDateTimeUTC();
+        String year = DateTimeUtil.getYearAsString(toDate);
+        int differenceMonthFromTime = DateTimeUtil.getDifferenceMonthFromTime(toDate, currentTime);
+        List<String> suffix = new ArrayList<>();
+        if (differenceMonthFromTime < 3) {
+            suffix.add("");
+            List<String> strings = StringUtil.getStartQuarter(DateTimeUtil.getMonth(toDate), year);
+            for (String item : strings) {
+                String dto = "";
+                dto = "_" + year + item;
+                suffix.add(dto);
+            }
+        } else {
+            List<String> strings = StringUtil.getStartQuarter(DateTimeUtil.getMonth(toDate), year);
+            for (String item : strings) {
+                String dto = "";
+                dto = "_" + year + item;
+                suffix.add(dto);
+            }
+            if (DateTimeUtil.getMonth(toDate) == 1 && "24".equals(year)) {
+                suffix.add("_2312");
+            }
+        }
+
+        List<DataTransactionDTO> data = new ArrayList<>();
+        for (String item : suffix) {
+            List<DataTransactionDTO> dtos = new ArrayList<>();
+            try {
+                dtos = customQueryRepository.findTransactionsByBankIdAndTimeRange(TRANSACTION_RECEIVE_NAME + item,
+                        bankId,
+                        fromDate,
+                        toDate,
+                        recordType);
+            } catch (Exception e) {
+                dtos = new ArrayList<>();
+            }
+            data.addAll(dtos);
+        }
+        return data;
+    }
 }
