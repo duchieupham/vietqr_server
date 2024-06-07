@@ -133,9 +133,6 @@ public class CustomerInvoiceController {
                             CustomerInvoiceInfoDataDTO customerInvoiceInfoDataDTO = customerInvoiceService
                                     .getCustomerInvoiceInfo(dto.getCustomer_id());
 
-//                            List<CustomerInvoiceInfoDataDTO> customerInvoiceInfoDatas = customerInvoiceService
-//                                    .getCustomerInvoiceInfos(dto.getCustomer_id());
-
                             if (customerInvoiceInfoDataDTO != null) {
                                 CustomerVaInfoDataDTO customerVaInfoDataDTO = customerVaService
                                         .getCustomerVaInfo(dto.getCustomer_id());

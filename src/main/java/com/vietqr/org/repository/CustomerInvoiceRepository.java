@@ -45,25 +45,17 @@ public interface CustomerInvoiceRepository extends JpaRepository<CustomerInvoice
 
         @Transactional
         @Modifying
-        @Query(value = "DELETE FROM customer_invoice WHERE bill_id = :billId", nativeQuery = true)
+        @Query(value = "DELETE FROM customer_invoice WHERE bill_id = :billId ", nativeQuery = true)
         void removeInvocieByBillId(@Param(value = "billId") String billId);
 
+        // bỏ inquire = 0
         @Query(value = "SELECT type, amount, bill_id "
                         + "FROM customer_invoice "
                         + "WHERE customer_id = :customerId "
                         + "AND status = 0 "
                         + "ORDER BY RAND() "
-                        + "LIMIT 1", nativeQuery = true)
+                        + "LIMIT 1 ", nativeQuery = true)
         CustomerInvoiceInfoDataDTO getCustomerInvoiceInfo(@Param(value = "customerId") String customerId);
-
-
-        // bỏ inquire = 0
-//        @Query(value = "SELECT type, amount, bill_id "
-//                + "FROM customer_invoice "
-//                + "WHERE customer_id = :customerId "
-//                + "AND status = 0 "
-//                + "ORDER BY RAND() ", nativeQuery = true)
-//        List<CustomerInvoiceInfoDataDTO> getCustomerInvoiceInfos(@Param(value = "customerId") String customerId);
 
         @Transactional
         @Modifying

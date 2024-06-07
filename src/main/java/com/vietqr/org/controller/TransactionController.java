@@ -426,6 +426,7 @@ public class TransactionController {
 
         ObjectMapper mapper = new ObjectMapper();
         String json = invoiceService.getDataJson(userId); // lấy JSON trong field data ở bảng invoice
+
         BankAccountDTO bankAccount = mapper.readValue(json, BankAccountDTO.class);
 
         //lấy bankId của user nnày
@@ -479,6 +480,7 @@ public class TransactionController {
                 transactionFeePagekageResponseDTO.setTotalAfterVat(100);
 
                 result.add(transactionFeePagekageResponseDTO);
+                System.out.println(result);
                 httpStatus = HttpStatus.OK;
 
             }

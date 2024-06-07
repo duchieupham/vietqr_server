@@ -46,11 +46,6 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
         return repo.getCustomerInvoiceInfo(customerId);
     }
 
-//    @Override
-//    public List<CustomerInvoiceInfoDataDTO> getCustomerInvoiceInfos(String customerId) {
-//        return repo.getCustomerInvoiceInfos(customerId);
-//    }
-
     @Override
     public void updateCustomerVaInvoice(int status, Long timePaid, String billId) {
         repo.updateCustomerVaInvoice(status, timePaid, billId);
