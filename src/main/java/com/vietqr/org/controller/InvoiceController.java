@@ -7,15 +7,24 @@ import com.vietqr.org.entity.*;
 import com.vietqr.org.service.*;
 import com.vietqr.org.util.*;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -73,6 +82,263 @@ public class InvoiceController {
 
     @Autowired
     private SocketHandler socketHandler;
+
+    @GetMapping("invoice/transaction-list")
+    public ResponseEntity<Object> getDataTransaction(
+            @RequestParam String invoiceId
+
+    ) {
+        DataFeeTransactionDTO result = new DataFeeTransactionDTO();
+        HttpStatus httpStatus = null;
+        try {
+
+            IInvoiceDTO invoice = invoiceService.getInvoiceByInvoiceDetail(invoiceId);
+            if (Objects.nonNull(invoice)) {
+                IBankReceiveFeePackageDTO customerInfo = bankReceiveFeePackageService.getCustomerInfoByBankId(invoice.getBankId());
+                BankReceiveFeePackageDTO bankReceiveFeePackageDTO = null;
+                if (Objects.nonNull(customerInfo)) {
+                    bankReceiveFeePackageDTO = new BankReceiveFeePackageDTO();
+                    bankReceiveFeePackageDTO.setBankAccount(customerInfo.getBankAccount());
+                    bankReceiveFeePackageDTO.setBankShortName(customerInfo.getBankShortName());
+                    bankReceiveFeePackageDTO.setUserBankName(customerInfo.getUserBankName());
+                    bankReceiveFeePackageDTO.setTitle(customerInfo.getTitle());
+                    bankReceiveFeePackageDTO.setMmsActive(customerInfo.getMmsActive());
+                    bankReceiveFeePackageDTO.setVat(customerInfo.getVat());
+                    bankReceiveFeePackageDTO.setRecordType(customerInfo.getRecordType());
+                    bankReceiveFeePackageDTO.setPercentFee(customerInfo.getPercentFee());
+                    bankReceiveFeePackageDTO.setFixFee(customerInfo.getFixFee());
+                } else {
+                    customerInfo = accountBankReceiveService.getCustomerBankDetailByBankId(invoice.getBankId());
+                    if (Objects.nonNull(customerInfo)) {
+                        bankReceiveFeePackageDTO = new BankReceiveFeePackageDTO();
+                        bankReceiveFeePackageDTO.setBankAccount(customerInfo.getBankAccount());
+                        bankReceiveFeePackageDTO.setBankShortName(customerInfo.getBankShortName());
+                        bankReceiveFeePackageDTO.setUserBankName(customerInfo.getUserBankName());
+                        bankReceiveFeePackageDTO.setTitle("");
+                        bankReceiveFeePackageDTO.setMmsActive(customerInfo.getMmsActive());
+                        bankReceiveFeePackageDTO.setVat(invoice.getVat());
+                        bankReceiveFeePackageDTO.setRecordType(0);
+                        bankReceiveFeePackageDTO.setPercentFee(0);
+                        bankReceiveFeePackageDTO.setFixFee(0);
+                    } else {
+                        bankReceiveFeePackageDTO = new BankReceiveFeePackageDTO();
+                    }
+                }
+                result.setCustomerDetails(bankReceiveFeePackageDTO);
+
+                List<InvoiceItemProcessDateDTO> invoiceItems = invoiceItemService.getInvoiceItemByInvoiceId(invoice.getInvoiceId());
+                List<FeeTransactionInfoDTOs> allFeeTransactions = new ArrayList<>();
+                for (InvoiceItemProcessDateDTO item : invoiceItems) {
+
+                    int year = Integer.parseInt(item.getProcessDate().substring(0, 4));
+                    int month = Integer.parseInt(item.getProcessDate().substring(4, 6));
+
+                    // Tạo chuỗi ngày tháng năm
+                    String dateString = String.format("%04d-%02d", year, month);
+                    List<FeeTransactionInfoDTO> transactionInfoData = transactionReceiveService.getTransactionInfoDataByBankId(invoice.getBankId(), dateString);
+                    List<FeeTransactionInfoDTOs> feeTransactions = transactionInfoData.stream()
+                            .map(t -> {
+                                FeeTransactionInfoDTOs dto = new FeeTransactionInfoDTOs();
+                                dto.setInvoiceItemId(item.getInvoiceItemId());
+                                dto.setTime(dateString);
+                                dto.setTotalCount(t.getTotalCount());
+                                dto.setTotalAmount(t.getTotalAmount());
+                                dto.setCreditCount(t.getCreditCount());
+                                dto.setCreditAmount(t.getCreditAmount());
+                                dto.setDebitCount(t.getDebitCount());
+                                dto.setDebitAmount(t.getDebitAmount());
+                                dto.setControlCount(t.getControlCount());
+                                dto.setControlAmount(t.getControlAmount());
+                                return dto;
+                            }).collect(Collectors.toList());
+                    allFeeTransactions.addAll(feeTransactions);
+                }
+
+                result.setTransactions(allFeeTransactions);
+                httpStatus = HttpStatus.OK;
+            } else {
+                result = new DataFeeTransactionDTO();
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+
+        } catch (Exception e) {
+            logger.error("InvoiceController: ERROR: getDataTransaction: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new DataFeeTransactionDTO();
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("invoice/export-excel")
+    public ResponseEntity<byte[]> getFeeTransactionInfoByRecordType(
+            @RequestParam(value = "invoiceItemId") String invoiceItemId,
+            HttpServletResponse response) {
+
+        List<DataTransactionDTO> aggregatedTransactions = new ArrayList<>();
+        try {
+            InvoiceItemEntity invoiceItem = invoiceItemService.getInvoiceItemById(invoiceItemId);
+            InvoiceEntity invoice = invoiceService.findInvoiceByInvoiceItemIds(invoiceItem.getId());
+            IBankReceiveFeePackageDTO customerInfo = bankReceiveFeePackageService.getCustomerInfoByBankId(invoice.getBankId());
+            if (customerInfo == null) {
+                throw new IllegalArgumentException("No customer information found for the given bank ID.");
+            }
+
+            int year = Integer.parseInt(invoiceItem.getProcessDate().substring(0, 4));
+            int month = Integer.parseInt(invoiceItem.getProcessDate().substring(4, 6));
+
+            String dateString = String.format("%04d-%02d", year, month);
+            List<DataTransactionDTO> transactionData = transactionReceiveService.getTransactionInfo(invoice.getBankId(), dateString, customerInfo.getRecordType());
+
+            aggregatedTransactions.addAll(transactionData);
+
+            // Generate Excel file
+            byte[] excelBytes = generateExcelFile(aggregatedTransactions, customerInfo.getBankShortName());
+
+            // Prepare response
+            HttpHeaders headers = new HttpHeaders();
+            String fileName = "DanhSachGiaoDich_" + dateString + ".xlsx";
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+            headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
+
+            return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+
+        } catch (Exception e) {
+            logger.error("getFeeTransactionInfoByRecordType: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+    private byte[] generateExcelFile(List<DataTransactionDTO> transactions, String bankShortName) throws Exception {
+        try (SXSSFWorkbook workbook = new SXSSFWorkbook()) {
+            workbook.setCompressTempFiles(true);
+            SXSSFSheet sheet = workbook.createSheet("Transactions");
+            sheet.setRandomAccessWindowSize(100);
+            Row headerRow = sheet.createRow(0);
+            String[] headers = {
+                    "STT", "Thời gian TT", "Số tiền (VND)", "Loại", "Trạng thái", "Mã giao dịch",
+                    "Mã đơn hàng", "Mã cửa hàng", "Tài khoản nhận", "Thời gian tạo", "Nội dung TT", "Ghi chú", "Loại giao dịch"
+            };
+            XSSFCellStyle headerStyle = (XSSFCellStyle) workbook.createCellStyle();
+            XSSFFont headerFont = (XSSFFont) workbook.createFont();
+            headerFont.setFontName("Times New Roman");
+            headerFont.setFontHeightInPoints((short) 12);
+            headerFont.setBold(true);
+            headerStyle.setFont(headerFont);
+            headerStyle.setAlignment(HorizontalAlignment.CENTER);
+            headerStyle.setFillForegroundColor(IndexedColors.SKY_BLUE.getIndex());
+            headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            headerStyle.setBorderTop(BorderStyle.THIN);
+            headerStyle.setBorderBottom(BorderStyle.THIN);
+            headerStyle.setBorderLeft(BorderStyle.THIN);
+            headerStyle.setBorderRight(BorderStyle.THIN);
+
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+                cell.setCellStyle(headerStyle);
+            }
+            XSSFCellStyle commonStyle = (XSSFCellStyle) workbook.createCellStyle();
+            XSSFFont commonFont = (XSSFFont) workbook.createFont();
+            commonFont.setFontName("Times New Roman");
+            commonFont.setFontHeightInPoints((short) 12);
+            commonStyle.setFont(commonFont);
+            commonStyle.setBorderTop(BorderStyle.THIN);
+            commonStyle.setBorderBottom(BorderStyle.THIN);
+            commonStyle.setBorderLeft(BorderStyle.THIN);
+            commonStyle.setBorderRight(BorderStyle.THIN);
+
+            XSSFCellStyle numberStyle = (XSSFCellStyle) workbook.createCellStyle();
+            numberStyle.setDataFormat(workbook.createDataFormat().getFormat("#,##0"));
+            numberStyle.setFont(commonFont);
+            numberStyle.setBorderTop(BorderStyle.THIN);
+            numberStyle.setBorderBottom(BorderStyle.THIN);
+            numberStyle.setBorderLeft(BorderStyle.THIN);
+            numberStyle.setBorderRight(BorderStyle.THIN);
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
+                    .withZone(ZoneId.of("Asia/Ho_Chi_Minh"));
+
+            int rowIndex = 1;
+            for (DataTransactionDTO transaction : transactions) {
+                Row row = sheet.createRow(rowIndex++);
+                row.createCell(0).setCellValue(rowIndex - 1);
+                row.createCell(1).setCellValue(formatDate(transaction.getTimePaid(), formatter));
+                row.createCell(2).setCellValue(transaction.getAmount());
+                row.createCell(3).setCellValue(getTypeText(transaction.getType()));
+                row.createCell(4).setCellValue(getStatusText(transaction.getStatus()));
+                row.createCell(5).setCellValue(safeGetValue(transaction.getReferenceNumber()));
+                row.createCell(6).setCellValue(safeGetValue(transaction.getOrderId()));
+                row.createCell(7).setCellValue(safeGetValue(transaction.getTerminalCode()));
+                row.createCell(8).setCellValue(maskBankAccount(transaction.getBankAccount(), bankShortName));
+                row.createCell(9).setCellValue(formatDate(transaction.getTime(), formatter));
+                row.createCell(10).setCellValue(safeGetValue(transaction.getContent()));
+                row.createCell(11).setCellValue(safeGetValue(transaction.getNote()));
+                row.createCell(12).setCellValue(getTransTypeText(transaction.getTransType()));
+
+                for (int i = 0; i < headers.length; i++) {
+                    row.getCell(i).setCellStyle(i == 2 ? numberStyle : commonStyle);
+                }
+            }
+            int[] columnWidths = {2560, 5120, 5120, 5120, 5120, 7680, 5120, 7680, 7680, 5120, 10240, 7680, 5120};
+            for (int i = 0; i < columnWidths.length; i++) {
+                sheet.setColumnWidth(i, columnWidths[i]);
+            }
+            try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+                workbook.write(bos);
+                return bos.toByteArray();
+            }
+        }
+    }
+
+    private String formatDate(long timestamp, DateTimeFormatter formatter) {
+        try {
+            Instant instant = Instant.ofEpochSecond(timestamp);
+            return formatter.format(instant);
+        } catch (DateTimeException e) {
+            return "-";
+        }
+    }
+
+    private String getStatusText(int status) {
+        switch (status) {
+            case 0:
+                return "Chờ thành toán";
+            case 1:
+                return "Thành công";
+            case 2:
+                return "Đã hủy";
+            default:
+                return "-";
+        }
+    }
+
+    private String getTypeText(int type) {
+        switch (type) {
+            case 0:
+                return "QR giao dịch";
+            case 1:
+                return "QR cửa hàng";
+            case 2:
+                return "Giao dịch khác";
+            default:
+                return "-";
+        }
+    }
+    private String getTransTypeText(String transType) {
+        return "C".equals(transType) ? "Giao dịch đến" : "Giao dịch đi";
+    }
+    private String maskBankAccount(String bankAccount, String bankShortName) {
+        if (bankAccount == null || bankAccount.length() < 5) {
+            return "-";
+        }
+        int len = bankAccount.length();
+        String visibleStart = bankAccount.substring(0, 2);
+        String visibleEnd = bankAccount.substring(len - 3);
+        return visibleStart + "xxxxx" + visibleEnd + " - " + bankShortName;
+    }
+    private String safeGetValue(String value) {
+        return (value == null || value.trim().isEmpty()) ? "-" : value;
+    }
 
     @GetMapping("invoice/merchant-list")
     public ResponseEntity<Object> getAdminInvoiceLists(
@@ -1352,7 +1618,7 @@ public class InvoiceController {
                     result = new ResponseMessageDTO("FAILED", "E141");
                     httpStatus = HttpStatus.BAD_REQUEST;
                     return new ResponseEntity<>(result, httpStatus);
-                }else {
+                } else {
                     invoiceItemEntity.setAmount(item.getAmount());
                 }
                 invoiceItemEntity.setQuantity(item.getQuantity());
@@ -1425,33 +1691,33 @@ public class InvoiceController {
             long finalTotalAmountAfterVat1 = totalAmountAfterVat;
             Thread thread2 = new Thread(() -> {
                 UUID notificationUUID = UUID.randomUUID();
-            String notiType = NotificationUtil.getNotiInvoiceCreated();
-            String title = NotificationUtil.getNotiTitleInvoiceUnpaid();
-            String message = "Bạn có hoá đơn "
-                    + dto.getInvoiceName()
-                    + " chưa thanh toán. Vui Lòng kiểm tra lại trên hệ thống VietQR VN.";
+                String notiType = NotificationUtil.getNotiInvoiceCreated();
+                String title = NotificationUtil.getNotiTitleInvoiceUnpaid();
+                String message = "Bạn có hoá đơn "
+                        + dto.getInvoiceName()
+                        + " chưa thanh toán. Vui Lòng kiểm tra lại trên hệ thống VietQR VN.";
 
-            NotificationEntity notiEntity = new NotificationEntity();
-            notiEntity.setId(notificationUUID.toString());
-            notiEntity.setRead(false);
-            notiEntity.setMessage(message);
-            notiEntity.setTime(DateTimeUtil.getCurrentDateTimeUTC());
-            notiEntity.setType(notiType);
-            notiEntity.setUserId(userIdByBankId);
-            notiEntity.setData(userIdByBankId);
-            Map<String, String> datas = new HashMap<>();
-            datas.put("notificationType", notiType);
-            datas.put("notificationId", notificationUUID.toString());
-            datas.put("status", "1");
-            datas.put("bankCode", "MB");
-            datas.put("terminalCode", "");
-            datas.put("terminalName", "");
-            datas.put("html", "<div><span style=\"font-size: 12;\">Bạn có 1 hóa đơn <br><strong> " + StringUtil.formatNumberAsString(finalTotalAmountAfterVat1 + "") + " VND " +
-                    "</strong><br>cần thanh toán!</span></div>");
-            datas.put("invoiceId", entity.getId());  //invoice ID
-            datas.put("time", time + "");
-            datas.put("invoiceName", entity.getName());
-            datas.put("status", 1 + "");
+                NotificationEntity notiEntity = new NotificationEntity();
+                notiEntity.setId(notificationUUID.toString());
+                notiEntity.setRead(false);
+                notiEntity.setMessage(message);
+                notiEntity.setTime(DateTimeUtil.getCurrentDateTimeUTC());
+                notiEntity.setType(notiType);
+                notiEntity.setUserId(userIdByBankId);
+                notiEntity.setData(userIdByBankId);
+                Map<String, String> datas = new HashMap<>();
+                datas.put("notificationType", notiType);
+                datas.put("notificationId", notificationUUID.toString());
+                datas.put("status", "1");
+                datas.put("bankCode", "MB");
+                datas.put("terminalCode", "");
+                datas.put("terminalName", "");
+                datas.put("html", "<div><span style=\"font-size: 12;\">Bạn có 1 hóa đơn <br><strong> " + StringUtil.formatNumberAsString(finalTotalAmountAfterVat1 + "") + " VND " +
+                        "</strong><br>cần thanh toán!</span></div>");
+                datas.put("invoiceId", entity.getId());  //invoice ID
+                datas.put("time", time + "");
+                datas.put("invoiceName", entity.getName());
+                datas.put("status", 1 + "");
                 pushNotification(title, message, notiEntity, datas, notiEntity.getUserId());
             });
             thread2.start();

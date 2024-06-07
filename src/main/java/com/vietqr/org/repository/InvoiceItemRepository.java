@@ -110,4 +110,9 @@ public interface InvoiceItemRepository extends JpaRepository<InvoiceItemEntity, 
     @Query(value = "UPDATE invoice_item SET status = 1, time_paid = :timePaid " +
             "WHERE invoice_id = :invoiceId ", nativeQuery = true)
     void updateStatusInvoiceItem(String invoiceId, long timePaid);
+
+    @Query(value = "SELECT id AS invoiceItemId, process_date AS processDate "
+            + "FROM invoice_item "
+            + "WHERE invoice_id = :invoiceId AND type = 1 ", nativeQuery = true)
+    List<InvoiceItemProcessDateDTO> findInvoiceItemEntitiesByInvoiceId(String invoiceId);
 }

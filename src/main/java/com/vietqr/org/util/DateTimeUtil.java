@@ -4,6 +4,7 @@ import com.vietqr.org.dto.StartEndTimeDTO;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 
 public class DateTimeUtil {
@@ -178,6 +179,23 @@ public class DateTimeUtil {
         }
         String[] parts = time.split("-");
         return parts[1] + "/" + parts[0];
+    }
+
+    public static StartEndTimeDTO getStartEndMonthV(String month) {
+        try {
+            String dateTime = month + "-01 00:00:00";
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            LocalDateTime localDateTime = LocalDateTime.parse(dateTime, formatter);
+            LocalDateTime fromDate = localDateTime.withDayOfMonth(1).with(LocalTime.MIN);
+            YearMonth yearMonth = YearMonth.of(fromDate.getYear(), fromDate.getMonth());
+            LocalDateTime toDate = localDateTime.withDayOfMonth(yearMonth.lengthOfMonth()).with(LocalTime.MAX);
+            return new StartEndTimeDTO(fromDate.toEpochSecond(ZoneOffset.UTC),
+                    toDate.toEpochSecond(ZoneOffset.UTC));
+        } catch (DateTimeParseException e) {
+            System.err.println("DateTimeParseException: Error parsing date: " + month);
+            // Handle the error appropriately, perhaps logging it and returning null or a default value
+            return null;
+        }
     }
 
     public static int getDifferenceMonthFromTime(long fromDate, long toDate) {
