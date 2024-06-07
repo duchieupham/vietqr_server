@@ -74,6 +74,85 @@ public class InvoiceController {
     @Autowired
     private SocketHandler socketHandler;
 
+    // API thu phí dịch vụ
+    @GetMapping("invoice/fee-package/{userId}")
+    public ResponseEntity<List<TransactionFeePackageResponseDTO>> getFeePackages(
+            @PathVariable String userId,
+            // format yyyy-MM
+            @RequestParam String bankId,
+            @RequestParam String time) {
+
+        List<TransactionFeePackageResponseDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            List<String> bankIds = new ArrayList<>();
+            if (StringUtil.isNullOrEmpty(bankId)) {
+                bankIds = accountBankReceiveService.getBankIdsByUserId(userId);
+            } else {
+                bankIds.add(bankId);
+            }
+            List<>
+            List<BankIdProcessDateResponseDTO> processDates = invoiceItemService.getProcessDatesByType(1, bankIds, time.replaceAll("-", ""));
+
+            BankAccountStatisticDTO bankAccount = mapper.readValue(json, BankAccountStatisticDTO.class);
+            //lấy bankId của user nnày
+            for (BankIdProcessDateResponseDTO data : processDates) {
+
+                String dateStr = data.getProcessDate().toString();
+                String formattedDate = dateStr.substring(0, 4) + "-" + dateStr.substring(4);
+
+                TransactionFeePackageResponseDTO transactionFeePackageResponseDTO = new TransactionFeePackageResponseDTO();
+
+                StartEndTimeDTO dateString = DateTimeUtil.getStartEndMonth(formattedDate);
+
+                //initial data
+                transactionFeePackageResponseDTO.setTimeProcess(data.getProcessDate());
+                transactionFeePackageResponseDTO.setBankAccount(bankAccount.getBankAccount());
+                transactionFeePackageResponseDTO.setBankShortName(bankAccount.getBankShortName());
+
+                boolean isMms = bankAccount.isMmsActive();
+                int activeStatus = isMms ? 1 : 0;
+                transactionFeePackageResponseDTO.setMmsActive(activeStatus);
+
+                List<FeePackageResponseDTO> feePackageResponseDTO =
+                        transactionReceiveService.getFeePackageResponse(
+                                dateString.getStartTime(),
+                                dateString.getEndTime(),
+                                bankIds); // //lấy bankId của user này trong account-bank-receive
+
+                // count và sum các giao dịch có đối soát
+                for (FeePackageResponseDTO item : feePackageResponseDTO) {
+                    if (item.getBankId() == data.getBankId()) { // xử lý
+                        transactionFeePackageResponseDTO.setTotalCount(item.getTotalCount());
+                        transactionFeePackageResponseDTO.setTotalAmountReceive(item.getTotalAmountFee());
+                    }
+                }
+
+                // data from bank_receive_fee_package
+                List<PackageFeeResponseDTO> packageFeeResponse = bankReceiveFeePackageService.getFeePackageFeeResponse(userId);
+                for (PackageFeeResponseDTO packageFee : packageFeeResponse) {
+                    transactionFeePackageResponseDTO.setFixFee(packageFee.getFixFee());
+                    transactionFeePackageResponseDTO.setPercentFee(packageFee.getFixFee());
+                }
+
+                // add data from table invoice-item
+                transactionFeePackageResponseDTO.setAmount(100);
+                transactionFeePackageResponseDTO.setTotalAmountReceive(100);
+                transactionFeePackageResponseDTO.setVat(100);
+                transactionFeePackageResponseDTO.setTotalAfterVat(100);
+
+                result.add(transactionFeePackageResponseDTO);
+                httpStatus = HttpStatus.OK;
+            }
+        } catch (Exception e) {
+            logger.error("InvoiceController: ERROR: getFeePackages: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @GetMapping("invoice/merchant-list")
     public ResponseEntity<Object> getAdminInvoiceLists(
             @RequestParam int type,

@@ -39,5 +39,5 @@ public interface InvoiceItemService {
 
     int checkInvoiceItemExist(String bankId, String merchantId, int type, String processDate);
 
-    List<BankIdProcessDateResponseDTO> getProcessDatesByType(int type, List<String> bankId);
+    List<BankIdProcessDateResponseDTO> getProcessDatesByType(int type, List<String> bankIds, String processDate);
 }

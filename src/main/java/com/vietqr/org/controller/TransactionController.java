@@ -123,9 +123,6 @@ public class TransactionController {
     @Autowired
     InvoiceService invoiceService;
 
-    @Autowired
-    BankReceiveFeePackageService bankReceiveFeePackageService;
-
     @GetMapping("admin/transactions")
     public ResponseEntity<List<TransactionReceiveAdminListDTO>> getTransactionAdmin(
             @RequestParam(value = "type") int type,
@@ -415,80 +412,6 @@ public class TransactionController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-
-    // API thu phí dịch vụ
-    @GetMapping("transaction/feepackages")
-    public ResponseEntity<List<TransactionFeePagekageResponseDTO>> getFeePackages(
-            @RequestParam String userId) throws JsonProcessingException {
-
-        List<TransactionFeePagekageResponseDTO> result = new ArrayList<>();
-        HttpStatus httpStatus = null;
-
-        ObjectMapper mapper = new ObjectMapper();
-        String json = invoiceService.getDataJson(userId); // lấy JSON trong field data ở bảng invoice
-        BankAccountDTO bankAccount = mapper.readValue(json, BankAccountDTO.class);
-
-        //lấy bankId của user nnày
-        List<String> bankIds = accountBankReceiveService.getBankIdsByUserId(userId);
-
-        try {
-            List<BankIdProcessDateResponseDTO> processDates = invoiceItemService.getProcessDatesByType(1, bankIds);
-            for (BankIdProcessDateResponseDTO data : processDates) {
-
-                String dateStr = data.getProcessDate().toString();
-                String formattedDate = dateStr.substring(0, 4) + "-" + dateStr.substring(4);
-
-                TransactionFeePagekageResponseDTO transactionFeePagekageResponseDTO = new TransactionFeePagekageResponseDTO();
-
-                StartEndTimeDTO dateString = DateTimeUtil.getStartEndMonth(formattedDate);
-
-                //initial data
-                transactionFeePagekageResponseDTO.setTimeProcess(data.getProcessDate());
-                transactionFeePagekageResponseDTO.setAccountBank(bankAccount.getBankAccount());
-                transactionFeePagekageResponseDTO.setBankName(bankAccount.getBankShortName());
-
-                boolean isMms = bankAccount.isMmsActive();
-                int activeStatus = isMms ? 1 : 0;
-                transactionFeePagekageResponseDTO.setMmsActive(activeStatus);
-
-                List<FeePackageResponseDTO> feePackageResponseDTO =
-                        transactionReceiveService.getFeePackageResponse(
-                                dateString.getStartTime(),
-                                dateString.getEndTime(),
-                                bankIds); // //lấy bankId của user này trong account-bank-receive
-
-                // count và sum các giao dịch có đối soát
-                for (FeePackageResponseDTO item: feePackageResponseDTO) {
-                    if (item.getBankId() == data.getBankId()){ // xử lý
-                        transactionFeePagekageResponseDTO.setTotalCount(item.getTotalCount());
-                        transactionFeePagekageResponseDTO.setTotalAmountReceive(item.getTotalAmountFee());
-                    }
-                }
-
-                // data from bank_receive_fee_package
-                List<PackageFeeResponseDTO> packageFeeResponse = bankReceiveFeePackageService.getFeePackageFeeResponse(userId);
-                for (PackageFeeResponseDTO packageFee: packageFeeResponse) {
-                    transactionFeePagekageResponseDTO.setFixFee(packageFee.getFixFee());
-                    transactionFeePagekageResponseDTO.setPercentFee(packageFee.getFixFee());
-                }
-
-                // add data from table invoice-item
-                transactionFeePagekageResponseDTO.setAmount(100);
-                transactionFeePagekageResponseDTO.setTotalAmount(100);
-                transactionFeePagekageResponseDTO.setVat(100);
-                transactionFeePagekageResponseDTO.setTotalAfterVat(100);
-
-                result.add(transactionFeePagekageResponseDTO);
-                httpStatus = HttpStatus.OK;
-
-            }
-        }catch (Exception e) {
-            e.printStackTrace();
-            httpStatus = HttpStatus.BAD_REQUEST;
-        }
-        return new ResponseEntity<>(result, httpStatus);
-    }
-
 
     // sync
     @GetMapping("terminal/transactions")
