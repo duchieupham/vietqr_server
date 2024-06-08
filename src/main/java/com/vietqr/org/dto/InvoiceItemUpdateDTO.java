@@ -1,6 +1,6 @@
 package com.vietqr.org.dto;
 
-public class InvoiceItemDetailDTO {
+public class InvoiceItemUpdateDTO {
     private String invoiceItemId;
     private String invoiceItemName;
     private String unit;
@@ -11,15 +11,47 @@ public class InvoiceItemDetailDTO {
     private int type;
     private long vatAmount;
     private long totalAmountAfterVat;
-    private int status;
-    private long timePaid;
     private String timeProcess;
+
+    public InvoiceItemUpdateDTO() {
+    }
+
+    public InvoiceItemUpdateDTO(String invoiceItemId, int type, String invoiceItemName, String unit, int quantity, long amount,
+                                long totalAmount, double vat, long vatAmount, long totalAmountAfterVat) {
+        this.invoiceItemId = invoiceItemId;
+        this.type = type;
+        this.invoiceItemName = invoiceItemName;
+        this.unit = unit;
+        this.quantity = quantity;
+        this.amount = amount;
+        this.totalAmount = totalAmount;
+        this.vat = vat;
+        this.vatAmount = vatAmount;
+        this.totalAmountAfterVat = totalAmountAfterVat;
+    }
+
+    public String getTimeProcess() {
+        return timeProcess;
+    }
+
+    public void setTimeProcess(String timeProcess) {
+        this.timeProcess = timeProcess;
+    }
+
     public String getInvoiceItemId() {
         return invoiceItemId;
     }
 
     public void setInvoiceItemId(String invoiceItemId) {
         this.invoiceItemId = invoiceItemId;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 
     public String getInvoiceItemName() {
@@ -84,37 +116,5 @@ public class InvoiceItemDetailDTO {
 
     public void setTotalAmountAfterVat(long totalAmountAfterVat) {
         this.totalAmountAfterVat = totalAmountAfterVat;
-    }
-
-    public int getType() {
-        return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
-    }
-
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
-    }
-
-    public long getTimePaid() {
-        return timePaid;
-    }
-
-    public void setTimePaid(long timePaid) {
-        this.timePaid = timePaid;
-    }
-
-    public String getTimeProcess() {
-        return timeProcess;
-    }
-
-    public void setTimeProcess(String timeProcess) {
-        this.timeProcess = timeProcess;
     }
 }
