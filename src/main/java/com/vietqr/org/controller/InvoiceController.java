@@ -672,7 +672,7 @@ public class InvoiceController {
     @PostMapping("invoice/update/{invoiceId}")
     public ResponseEntity<Object> updateInvoiceItem(
             @PathVariable String invoiceId,
-            @Valid @RequestBody InvoiceCreateUpdateDTO dto
+            @Valid @RequestBody InvoiceUpdateDTO dto
 
     ) {
         Object result = null;
@@ -735,45 +735,49 @@ public class InvoiceController {
             }
             List<InvoiceItemEntity> invoiceItemEntities = new ArrayList<>();
             List<String> itemIds = new ArrayList<>();
-            for (InvoiceItemCreateDTO item : dto.getItems()) {
-
+            for (InvoiceItemUpdateDTO item : dto.getItems()) {
+                String processDate = item.getTimeProcess().replaceAll("-", "");
                 InvoiceItemEntity invoiceItemEntity
-                        = invoiceItemService.getInvoiceItemById(item.getItemId());
+                        = invoiceItemService.getInvoiceItemById(item.getInvoiceItemId());
                 if (invoiceItemEntity == null) {
-                    continue;
+                    invoiceItemEntity = new InvoiceItemEntity();
+                    UUID invoiceItemId = UUID.randomUUID();
+                    invoiceItemEntity.setId(invoiceItemId.toString());
+                    int checkItem = invoiceItemService.checkInvoiceItemExist(dto.getBankId(), dto.getMerchantId(),
+                            0, processDate);
+                    switch (item.getType()) {
+                        case 0:
+                            if (checkItem == 0) {
+                                invoiceItemEntities.add(invoiceItemEntity);
+                            } else {
+                                result = new ResponseMessageDTO("FAILED", "E140");
+                                httpStatus = HttpStatus.BAD_REQUEST;
+                                return new ResponseEntity<>(result, httpStatus);
+                            }
+                            break;
+                        case 1:
+                            checkItem = invoiceItemService.checkInvoiceItemExist(dto.getBankId(), dto.getMerchantId(),
+                                    1, processDate);
+                            if (checkItem == 0) {
+                                invoiceItemEntities.add(invoiceItemEntity);
+                            } else {
+                                result = new ResponseMessageDTO("FAILED", "E140");
+                                httpStatus = HttpStatus.BAD_REQUEST;
+                                return new ResponseEntity<>(result, httpStatus);
+                            }
+                            break;
+                    }
+                    autoSetInvoiceItemEntity(invoiceId, mapper, merchantBankMapperDTO, item, invoiceItemEntity);
+                    itemIds.add(item.getInvoiceItemId());
+                } else {
+                    invoiceItemEntity.setId(item.getInvoiceItemId());
+                    autoSetInvoiceItemEntity(invoiceId, mapper, merchantBankMapperDTO, item, invoiceItemEntity);
                 }
-                itemIds.add(item.getItemId());
-                invoiceItemEntity.setId(item.getItemId());
-                invoiceItemEntity.setInvoiceId(invoiceId);
-                invoiceItemEntity.setAmount(item.getAmount());
-                invoiceItemEntity.setQuantity(item.getQuantity());
-                invoiceItemEntity.setTotalAmount(item.getAmount());
-                invoiceItemEntity.setTotalAfterVat(item.getAmountAfterVat());
-                invoiceItemEntity.setName(item.getContent());
-                invoiceItemEntity.setDescription(item.getContent());
-                switch (item.getType()) {
-                    case 0:
-                        invoiceItemEntity.setType(0);
-                        invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameAnnualFee());
-                        break;
-                    case 1:
-                        invoiceItemEntity.setType(1);
-                        invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameAnnualFee());
-                        break;
-                    case 9:
-                        invoiceItemEntity.setType(9);
-                        invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameAnotherFee());
-                        break;
-                }
-                invoiceItemEntity.setUnit(item.getUnit());
-                invoiceItemEntity.setVat(item.getVat());
-                invoiceItemEntity.setVatAmount(item.getVatAmount());
-                invoiceItemEntity.setData(mapper.writeValueAsString(merchantBankMapperDTO));
-                invoiceItemEntity.setDataType(1);
+                itemIds.add(item.getInvoiceItemId());
                 invoiceItemEntities.add(invoiceItemEntity);
                 totalAmount += item.getTotalAmount();
                 totalVatAmount += item.getVatAmount();
-                totalAmountAfterVat += item.getAmountAfterVat();
+                totalAmountAfterVat += item.getTotalAmountAfterVat();
             }
             entity.setTotalAmount(totalAmountAfterVat);
             entity.setAmount(totalAmount);
@@ -798,6 +802,44 @@ public class InvoiceController {
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
+    }
+
+    private void autoSetInvoiceItemEntity(@PathVariable String invoiceId, ObjectMapper mapper, MerchantBankMapperDTO merchantBankMapperDTO,
+                                          InvoiceItemUpdateDTO item, InvoiceItemEntity invoiceItemEntity) {
+        invoiceItemEntity.setInvoiceId(invoiceId);
+        invoiceItemEntity.setAmount(item.getAmount());
+        invoiceItemEntity.setQuantity(item.getQuantity());
+        invoiceItemEntity.setTotalAmount(item.getAmount());
+        invoiceItemEntity.setTotalAfterVat(item.getTotalAmountAfterVat());
+        invoiceItemEntity.setName(item.getInvoiceItemName());
+        invoiceItemEntity.setDescription(item.getInvoiceItemName());
+        switch (item.getType()) {
+            case 0:
+                invoiceItemEntity.setType(0);
+                invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameAnnualFee());
+                break;
+            case 1:
+                invoiceItemEntity.setType(1);
+                invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameAnnualFee());
+                break;
+            case 9:
+                invoiceItemEntity.setType(9);
+                invoiceItemEntity.setTypeName(EnvironmentUtil.getVietQrNameAnotherFee());
+                break;
+        }
+        invoiceItemEntity.setUnit(item.getUnit());
+        invoiceItemEntity.setVat(item.getVat());
+        invoiceItemEntity.setVatAmount(item.getVatAmount());
+        invoiceItemEntity.setStatus(0);
+        invoiceItemEntity.setTimeCreated(DateTimeUtil.getCurrentDateTimeUTC());
+        invoiceItemEntity.setTimePaid(0);
+        try {
+            invoiceItemEntity.setData(mapper.writeValueAsString(merchantBankMapperDTO));
+        } catch (Exception e) {
+            logger.error("Invoice Controller: ERROR: autoSetInvoiceItemEntity: " + e.getMessage() + " at: " + System.currentTimeMillis());
+        }
+        invoiceItemEntity.setDataType(1);
+        invoiceItemEntity.setProcessDate(StringUtil.getValueNullChecker(item.getTimeProcess().replaceAll("-", "")));
     }
 
     @GetMapping("invoice/edit-detail/{invoiceId}")
@@ -839,7 +881,7 @@ public class InvoiceController {
                     if (bankAccountInvoiceDTO != null) {
                         customerDTO.setBankId(bankAccountInvoiceDTO.getBankId());
                         customerDTO.setPhoneNo(bankAccountInvoiceDTO.getPhoneNo());
-                        customerDTO.setEmail(bankAccountInvoiceDTO.getEmail());
+                        customerDTO.setEmail(StringUtil.getValueNullChecker(bankAccountInvoiceDTO.getEmail()));
                         customerDTO.setFeePackage(bankAccountInvoiceDTO.getFeePackage());
                         AccountBankInfoDTO bankAccountInfoDTO = getBankAccountInfoByData(bankAccountInvoiceDTO.getData());
                         customerDTO.setBankAccount(bankAccountInfoDTO.getBankAccount());
@@ -892,6 +934,7 @@ public class InvoiceController {
                     detailDTO.setVat(item.getVat());
                     detailDTO.setVatAmount(item.getVatAmount());
                     detailDTO.setTotalAmountAfterVat(item.getAmountAfterVat());
+                    detailDTO.setTimeProcess(DateTimeUtil.getDateStringFormat(item.getTimeProcess()));
                     return detailDTO;
                 }).collect(Collectors.toList());
                 data.setInvoiceItems(invoiceItems);
@@ -1717,7 +1760,6 @@ public class InvoiceController {
                 datas.put("invoiceId", entity.getId());  //invoice ID
                 datas.put("time", time + "");
                 datas.put("invoiceName", entity.getName());
-                datas.put("status", 1 + "");
                 pushNotification(title, message, notiEntity, datas, notiEntity.getUserId());
             });
             thread2.start();

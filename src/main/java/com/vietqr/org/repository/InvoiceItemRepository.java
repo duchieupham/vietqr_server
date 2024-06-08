@@ -24,7 +24,7 @@ public interface InvoiceItemRepository extends JpaRepository<InvoiceItemEntity, 
     @Query(value = "SELECT a.id AS invoiceItemId, a.name AS invoiceItemName, "
             + "a.unit AS unit, a.quantity AS quantity, a.amount AS amount, a.type AS type, "
             + "a.vat AS vat, a.vat_amount AS vatAmount, a.total_after_vat AS amountAfterVat, "
-            + "a.total_amount AS totalAmount, a.status AS status, a.time_paid AS timePaid "
+            + "a.total_amount AS totalAmount, a.status AS status, a.time_paid AS timePaid, a.process_date AS timeProcess "
             + "FROM invoice_item a "
             + "WHERE a.invoice_id = :invoiceId ", nativeQuery = true)
     List<IInvoiceItemDetailDTO> getInvoiceItemsByInvoiceId(String invoiceId);

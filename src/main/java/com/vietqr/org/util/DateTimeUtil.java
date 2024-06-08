@@ -236,4 +236,18 @@ public class DateTimeUtil {
         LocalDateTime endOfDate = LocalDateTime.of(current, LocalTime.MAX);
         return endOfDate.toEpochSecond(ZoneOffset.UTC);
     }
+
+    public static String getDateStringFormat(String value) {
+        String result = "";
+        try {
+            int year = Integer.parseInt(value.substring(0, 4));
+            int month = Integer.parseInt(value.substring(4, 6));
+
+            // Tạo chuỗi ngày tháng năm
+            result = String.format("%04d-%02d", year, month);
+        } catch (Exception e) {
+            result = "";
+        }
+        return result;
+    }
 }
