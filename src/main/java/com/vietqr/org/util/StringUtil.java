@@ -241,4 +241,8 @@ public class StringUtil {
     public static String removeMarkString(String value) {
         return value != null ? value.replaceAll("\"", "") : "";
     }
+
+    public static boolean getValueNullChecker(Boolean value) {
+        return value != null ? value : false;
+    }
 }

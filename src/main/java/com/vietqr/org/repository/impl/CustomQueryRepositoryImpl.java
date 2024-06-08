@@ -6,6 +6,7 @@ import com.vietqr.org.dto.TransReceiveInvoicesDTO;
 import com.vietqr.org.repository.CustomQueryRepository;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.ColumnResult;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -42,7 +43,8 @@ public class CustomQueryRepositoryImpl implements CustomQueryRepository {
                 + "count(case when trans_type='D' then id else null end) as debitCount, "
                 + "sum(case when trans_type='D' then amount else 0 end) as debitAmount, "
                 + "count(case when trans_type='C' and (type = 0 or type = 1) then id else null end) as controlCount, "
-                + "sum(case when trans_type ='C' and (type = 0 or type = 1) then amount else 0 end) as controlAmount "
+                + "sum(case when trans_type ='C' and (type = 0 or type = 1) then amount else 0 end) as controlAmount, "
+                + "bank_id AS bankId "
                 + "FROM " + tableName + " "
                 + "WHERE bank_id = :bank_id "
                 + "AND status = 1 "
@@ -73,6 +75,53 @@ public class CustomQueryRepositoryImpl implements CustomQueryRepository {
         query.setParameter("bank_id", bankId);
         query.setParameter("fromDate", fromDate);
         query.setParameter("toDate", toDate);
+        return query.getResultList();
+    }
+
+    @Override
+    public List<FeeTransactionInfoDTO> getTransactionInfoDataByBankIds(String tableName, List<String> bankIds, long fromDate, long toDate) {
+        String queryString = "SELECT "
+                + "COUNT(id) as totalCount, "
+                + "COALESCE(SUM(amount), 0) as totalAmount, "
+                + "0 AS creditCount, 0 AS creditAmount, "
+                + "0 AS debitCount, 0 AS debitAmount, "
+                + "0 AS controlCount, 0 AS controlAmount, "
+                + "bank_id AS bankId "
+                + "FROM " + tableName + " "
+                + "WHERE bank_id IN (:bankIds) "
+                + "AND status = 1 "
+                + "AND `time` BETWEEN :fromDate AND :toDate "
+                + "AND content != 'NODATA' "
+                + "GROUP BY bank_id";
+
+        Query query = entityManager.createNativeQuery(queryString, "FeeTransactionInfoDTO");
+        query.setParameter("bankIds", bankIds);
+        query.setParameter("fromDate", fromDate + "");
+        query.setParameter("toDate", toDate + "");
+        return query.getResultList();
+    }
+
+    @Override
+    public List<FeeTransactionInfoDTO> getTransactionInfoDataByBankIdRecords(String tableName, List<String> bankIds, long fromDate, long toDate) {
+        String queryString = "SELECT "
+                + "COUNT(id) as totalCount, "
+                + "SUM(amount) as totalAmount, "
+                + "0 AS creditCount, 0 AS creditAmount, "
+                + "0 AS debitCount, 0 AS debitAmount, "
+                + "0 AS controlCount, 0 AS controlAmount, "
+                + "bank_id AS bankId "
+                + "FROM " + tableName + " "
+                + "WHERE bank_id IN (:bankIds) "
+                + "AND status = 1 "
+                + "AND `time` BETWEEN :fromDate AND :toDate "
+                + "AND trans_type ='C' AND (type = 0 or type = 1) "
+                + "AND content != 'NODATA' "
+                + "GROUP BY bank_id ";
+
+        Query query = entityManager.createNativeQuery(queryString, "FeeTransactionInfoDTO");
+        query.setParameter("bankIds", bankIds);
+        query.setParameter("fromDate", fromDate + "");
+        query.setParameter("toDate", toDate + "");
         return query.getResultList();
     }
 }

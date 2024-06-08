@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 
 import com.vietqr.org.repository.TransactionReceiveRepository;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.vietqr.org.entity.TransactionReceiveEntity;
 
@@ -31,28 +31,10 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
-    public int insertTransactionReceiveWithCheckDuplicated(TransactionReceiveEntity entity) {
-//        return repo.save(entity) == null ? 0 : 1;
-        long timeCheck = DateTimeUtil.getCurrentDateTimeAsNumber() - 120 - DateTimeUtil.GMT_PLUS_7_OFFSET;
-        return repo.insertWithCheckDuplicated(entity.getId(), entity.getAmount(), entity.getBankAccount(),
-                entity.getBankId(), entity.getContent(), entity.getCustomerBankAccount(), entity.getCustomerBankCode(),
-                entity.getCustomerName(), entity.getOrderId(), entity.getRefId(), entity.getReferenceNumber(),
-                entity.getSign(), entity.getStatus(), entity.getTime(), entity.getTimePaid(), entity.getTraceId(),
-                entity.getTransType(), entity.getType(), entity.getTerminalCode(), entity.getQrCode(), entity.getUserId(),
-                entity.getNote(), timeCheck);
-    }
-
-    @Override
     public void updateTransactionReceiveStatus(int status, String refId, String referenceNumber, long timePaid,
                                                String id) {
         repo.updateTransactionReceiveStatus(status, refId, referenceNumber, timePaid, id);
     }
-
-    // @Override
-    // public List<TransactionRelatedDTO> getRelatedTransactionReceives(String
-    // businessId) {
-    // return repo.getRelatedTransactionReceives(businessId);
-    // }
 
     @Override
     public TransactionDetailDTO getTransactionById(String id) {
@@ -70,12 +52,6 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
         return repo.getTransactionReceiveById(id);
     }
 
-    // // not use
-    // @Override
-    // public List<TransactionReceiveEntity> getTransactionByBankId(String bankId) {
-    // return repo.getRelatedTransactionByBankId(bankId);
-    // }
-
     @Override
     public List<TransactionRelatedDTO> getTransactions(int offset, String bankId) {
         long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
@@ -88,11 +64,6 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
-
-    // @Override
-    // public TransactionReceiveEntity getTransactionReceiveById(String id) {
-    // return repo.getTransactionReceiveById(id);
-    // }
 
     @Override
     public TransactionReceiveEntity getTransactionByOrderId(String orderId, String amount) {
@@ -123,11 +94,6 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     @Override
     public TransactionCheckStatusDTO getTransactionCheckStatus(String transactionId) {
         return repo.getTransactionCheckStatus(transactionId);
-    }
-
-    @Override
-    public int insertAllTransactionReceive(List<TransactionReceiveEntity> entities) {
-        return repo.saveAll(entities) == null ? 0 : 1;
     }
 
     @Override
@@ -190,8 +156,127 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
-    public List<FeePackageResponseDTO> getFeePackageResponse(long startTime, long endTime, List<String> bankIds) {
-        return repo.getFeePackageResponse(startTime, endTime, bankIds);
+    public List<FeeTransactionInfoDTO> getFeePackageResponse(String time, List<String> bankIds) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(time);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long currentTime = DateTimeUtil.getCurrentDateTimeUTC();
+        String year = DateTimeUtil.getYearAsString(toDate);
+        int differenceMonthFromTime = DateTimeUtil.getDifferenceMonthFromTime(toDate, currentTime);
+        List<String> suffix = new ArrayList<>();
+        if (differenceMonthFromTime < 3) {
+            suffix.add("");
+            List<String> strings = StringUtil.getStartQuarter(DateTimeUtil.getMonth(toDate), year);
+            for (String item : strings) {
+                String dto = "";
+                dto = "_" + year + item;
+                suffix.add(dto);
+            }
+        } else {
+            List<String> strings = StringUtil.getStartQuarter(DateTimeUtil.getMonth(toDate), year);
+            for (String item : strings) {
+                String dto = "";
+                dto = "_" + year + item;
+                suffix.add(dto);
+            }
+            if (DateTimeUtil.getMonth(toDate) == 1 && "24".equals(year)) {
+                suffix.add("_2312");
+            }
+        }
+
+        List<FeeTransactionInfoDTO> data = new ArrayList<>();
+        for (String item : suffix) {
+            List<FeeTransactionInfoDTO> dtos = new ArrayList<>();
+            try {
+                dtos = customQueryRepository.getTransactionInfoDataByBankIds(TRANSACTION_RECEIVE_NAME + item,
+                        bankIds,
+                        fromDate,
+                        toDate);
+            } catch (Exception e) {
+                dtos = new ArrayList<>();
+            }
+            data.addAll(dtos);
+
+        }
+        return new ArrayList<>(data.stream()
+                .collect(Collectors.toMap(
+                        FeeTransactionInfoDTO::getBankId,
+                        dto -> dto,
+                        (dto1, dto2) -> {
+                            dto1.setTotalCount(dto1.getTotalCount() + dto2.getTotalCount());
+                            dto1.setTotalAmount(dto1.getTotalAmount() + dto2.getTotalAmount());
+                            dto1.setCreditCount(dto1.getCreditCount() + dto2.getCreditCount());
+                            dto1.setCreditAmount(dto1.getCreditAmount() + dto2.getCreditAmount());
+                            dto1.setDebitCount(dto1.getDebitCount() + dto2.getDebitCount());
+                            dto1.setDebitAmount(dto1.getDebitAmount() + dto2.getDebitAmount());
+                            dto1.setControlCount(dto1.getControlCount() + dto2.getControlCount());
+                            dto1.setControlAmount(dto1.getControlAmount() + dto2.getControlAmount());
+                            return dto1;
+                        }
+                ))
+                .values());
+    }
+
+    @Override
+    public List<FeeTransactionInfoDTO> getFeePackageResponseRecordType(String time, List<String> bankIds) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(time);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long currentTime = DateTimeUtil.getCurrentDateTimeUTC();
+        String year = DateTimeUtil.getYearAsString(toDate);
+        int differenceMonthFromTime = DateTimeUtil.getDifferenceMonthFromTime(toDate, currentTime);
+        List<String> suffix = new ArrayList<>();
+        if (differenceMonthFromTime < 3) {
+            suffix.add("");
+            List<String> strings = StringUtil.getStartQuarter(DateTimeUtil.getMonth(toDate), year);
+            for (String item : strings) {
+                String dto = "";
+                dto = "_" + year + item;
+                suffix.add(dto);
+            }
+        } else {
+            List<String> strings = StringUtil.getStartQuarter(DateTimeUtil.getMonth(toDate), year);
+            for (String item : strings) {
+                String dto = "";
+                dto = "_" + year + item;
+                suffix.add(dto);
+            }
+            if (DateTimeUtil.getMonth(toDate) == 1 && "24".equals(year)) {
+                suffix.add("_2312");
+            }
+        }
+
+        List<FeeTransactionInfoDTO> data = new ArrayList<>();
+        for (String item : suffix) {
+            List<FeeTransactionInfoDTO> dtos = new ArrayList<>();
+            try {
+                dtos = customQueryRepository.getTransactionInfoDataByBankIdRecords(TRANSACTION_RECEIVE_NAME + item,
+                        bankIds,
+                        fromDate,
+                        toDate);
+            } catch (Exception e) {
+                dtos = new ArrayList<>();
+            }
+            data.addAll(dtos);
+
+        }
+        return new ArrayList<>(data.stream()
+                .collect(Collectors.toMap(
+                        FeeTransactionInfoDTO::getBankId,
+                        dto -> dto,
+                        (dto1, dto2) -> {
+                            dto1.setTotalCount(dto1.getTotalCount() + dto2.getTotalCount());
+                            dto1.setTotalAmount(dto1.getTotalAmount() + dto2.getTotalAmount());
+                            dto1.setCreditCount(dto1.getCreditCount() + dto2.getCreditCount());
+                            dto1.setCreditAmount(dto1.getCreditAmount() + dto2.getCreditAmount());
+                            dto1.setDebitCount(dto1.getDebitCount() + dto2.getDebitCount());
+                            dto1.setDebitAmount(dto1.getDebitAmount() + dto2.getDebitAmount());
+                            dto1.setControlCount(dto1.getControlCount() + dto2.getControlCount());
+                            dto1.setControlAmount(dto1.getControlAmount() + dto2.getControlAmount());
+                            return dto1;
+                        }
+                ))
+                .values());
     }
 
 
@@ -1389,7 +1474,23 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
             }
             data.addAll(dtos);
         }
-        return data;
+        return new ArrayList<>(data.stream()
+                .collect(Collectors.toMap(
+                        FeeTransactionInfoDTO::getBankId,
+                        dto -> dto,
+                        (dto1, dto2) -> {
+                            dto1.setTotalCount(dto1.getTotalCount() + dto2.getTotalCount());
+                            dto1.setTotalAmount(dto1.getTotalAmount() + dto2.getTotalAmount());
+                            dto1.setCreditCount(dto1.getCreditCount() + dto2.getCreditCount());
+                            dto1.setCreditAmount(dto1.getCreditAmount() + dto2.getCreditAmount());
+                            dto1.setDebitCount(dto1.getDebitCount() + dto2.getDebitCount());
+                            dto1.setDebitAmount(dto1.getDebitAmount() + dto2.getDebitAmount());
+                            dto1.setControlCount(dto1.getControlCount() + dto2.getControlCount());
+                            dto1.setControlAmount(dto1.getControlAmount() + dto2.getControlAmount());
+                            return dto1;
+                        }
+                ))
+                .values());
     }
 
     @Override

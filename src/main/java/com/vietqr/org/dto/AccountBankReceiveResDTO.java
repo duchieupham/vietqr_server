@@ -1,18 +1,18 @@
 package com.vietqr.org.dto;
 
-public class BankAccountDTO {
-    private boolean mmsActive;
-    private String bankAccount;
-    private String userBankName;
-    private String bankShortName;
+public class AccountBankReceiveResDTO {
+    boolean isMmsActive;
+    String bankAccount;
+    String bankId;
+    String userBankName;
+    String bankShortName;
 
-    // Getters và setters
-    public boolean isMmsActive() {
-        return mmsActive;
+    public boolean getIsMmsActive() {
+        return isMmsActive;
     }
 
-    public void setMmsActive(boolean mmsActive) {
-        this.mmsActive = mmsActive;
+    public void setIsMmsActive(boolean mmsActive) {
+        isMmsActive = mmsActive;
     }
 
     public String getBankAccount() {
@@ -21,6 +21,14 @@ public class BankAccountDTO {
 
     public void setBankAccount(String bankAccount) {
         this.bankAccount = bankAccount;
+    }
+
+    public String getBankId() {
+        return bankId;
+    }
+
+    public void setBankId(String bankId) {
+        this.bankId = bankId;
     }
 
     public String getUserBankName() {

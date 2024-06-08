@@ -58,4 +58,9 @@ public class BankReceiveFeePackageServiceImpl implements BankReceiveFeePackageSe
     public IBankReceiveFeePackageDTO getCustomerInfoByBankId(String bankId) {
         return repo.getCustomerInfoById(bankId);
     }
+
+    @Override
+    public List<PackageFeeResponseDTO> getFeePackageFeeResponse(String userId) {
+        return repo.getFeePackageByUsersId(userId);
+    }
 }

@@ -281,12 +281,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 @Param(value = "referenceNumber") String referenceNumber,
                 @Param(value = "time") long time);
 
-//        TransactionReceiveEntity getTransactionReceiveByRefNumber(
-//                        @Param(value = "referenceNumber") String referenceNumber,
-//                        @Param(value = "partitions") List<String> partitions);
-
-
-        @Query(value = "SELECT COUNT(a.id) AS totalCount, SUM(amount) AS totalAmount, a.bank_id, a.time "
+        @Query(value = "SELECT COUNT(a.id) AS totalCount, SUM(a.amount) AS totalAmount, a.bank_id, a.time "
                         + "FROM transaction_receive a "
                         + "WHERE a.time BETWEEN :startTime AND :endTime "
                         + "AND a.bankId IN (:bankIds) AND a.status = 1 "
@@ -300,7 +295,8 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                         @Param(value = "orderId") String orderId,
                         @Param(value = "time") long time);
 
-        @Query(value = "SELECT a.amount, a.bank_account as bankAccount, c.bank_name as bankName, a.time, a.content, a.reference_number as referenceNumber, a.trans_type as transType, a.status, "
+        @Query(value = "SELECT a.amount, a.bank_account as bankAccount, c.bank_name as bankName, a.time, a.content, "
+                        + "a.reference_number as referenceNumber, a.trans_type as transType, a.status, "
                         + "a.terminal_code as terminalCode, a.note "
                         + "FROM transaction_receive a "
                         + "INNER JOIN account_bank_receive b "

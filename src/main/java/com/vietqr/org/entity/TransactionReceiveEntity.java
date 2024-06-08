@@ -38,7 +38,8 @@ import javax.persistence.*;
 						@ColumnResult(name = "debitCount", type = Integer.class),
 						@ColumnResult(name = "debitAmount", type = Long.class),
 						@ColumnResult(name = "controlCount", type = Integer.class),
-						@ColumnResult(name = "controlAmount", type = Long.class)
+						@ColumnResult(name = "controlAmount", type = Long.class),
+						@ColumnResult(name = "bankId", type = String.class)
 				}
 		)
 )
