@@ -78,8 +78,8 @@ public class InvoiceController {
     @GetMapping("invoice/fee-package/{userId}")
     public ResponseEntity<List<TransactionFeePackageResponseDTO>> getFeePackages(
             @PathVariable String userId,
-            // format yyyy-MM
             @RequestParam String bankId,
+            // format yyyy-MM
             @RequestParam String time) {
 
         List<TransactionFeePackageResponseDTO> result = new ArrayList<>();
@@ -92,10 +92,12 @@ public class InvoiceController {
             } else {
                 bankIds.add(bankId);
             }
-            List<>
-            List<BankIdProcessDateResponseDTO> processDates = invoiceItemService.getProcessDatesByType(1, bankIds, time.replaceAll("-", ""));
+            //List<>
+            List<BankIdProcessDateResponseDTO> processDates =
+                    invoiceItemService.getProcessDatesByType(1, bankIds, time.replaceAll("-", ""));
 
-            BankAccountStatisticDTO bankAccount = mapper.readValue(json, BankAccountStatisticDTO.class);
+            //BankAccountStatisticDTO bankAccount = mapper.readValue(json, BankAccountStatisticDTO.class);
+
             //lấy bankId của user nnày
             for (BankIdProcessDateResponseDTO data : processDates) {
 
@@ -108,12 +110,12 @@ public class InvoiceController {
 
                 //initial data
                 transactionFeePackageResponseDTO.setTimeProcess(data.getProcessDate());
-                transactionFeePackageResponseDTO.setBankAccount(bankAccount.getBankAccount());
-                transactionFeePackageResponseDTO.setBankShortName(bankAccount.getBankShortName());
+                transactionFeePackageResponseDTO.setBankAccount(data.getBankId()); // lấy bank account
+                transactionFeePackageResponseDTO.setBankShortName(data.getTitle());// lây short name bank
 
-                boolean isMms = bankAccount.isMmsActive();
-                int activeStatus = isMms ? 1 : 0;
-                transactionFeePackageResponseDTO.setMmsActive(activeStatus);
+//                boolean isMms = data.get.isMmsActive();
+//                int activeStatus = isMms ? 1 : 0;
+                transactionFeePackageResponseDTO.setConnectionType("VietQR PRO");
 
                 List<FeePackageResponseDTO> feePackageResponseDTO =
                         transactionReceiveService.getFeePackageResponse(
@@ -137,10 +139,10 @@ public class InvoiceController {
                 }
 
                 // add data from table invoice-item
-                transactionFeePackageResponseDTO.setAmount(100);
-                transactionFeePackageResponseDTO.setTotalAmountReceive(100);
-                transactionFeePackageResponseDTO.setVat(100);
-                transactionFeePackageResponseDTO.setTotalAfterVat(100);
+                transactionFeePackageResponseDTO.setTotalAmount(data.getTotalAmount());
+                transactionFeePackageResponseDTO.setTotalAmountReceive(data.getVatAmount());
+                transactionFeePackageResponseDTO.setVat(data.getVat());
+                transactionFeePackageResponseDTO.setTotalAfterVat(data.getTotalAfterVat());
 
                 result.add(transactionFeePackageResponseDTO);
                 httpStatus = HttpStatus.OK;

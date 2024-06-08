@@ -6,7 +6,7 @@ public class TransactionFeePackageResponseDTO {
     private String bankShortName;
     private String connectionType;
     private String title;
-    private int totalCount;
+    private long totalCount;
     private long totalAmountReceive;
     private long fixFee;
     private double percentFee;
@@ -14,12 +14,13 @@ public class TransactionFeePackageResponseDTO {
     private long totalAmount;
     private double vat;
     private long totalAfterVat;
+    private String invoiceItemId;
 
     public TransactionFeePackageResponseDTO() {
     }
 
     public TransactionFeePackageResponseDTO(String timeProcess, String bankAccount, String bankShortName, String connectionType,
-                                            String title, int totalCount, long totalAmountReceive, long fixFee, double percentFee,
+                                            String title, long totalCount, long totalAmountReceive, long fixFee, double percentFee,
                                             long vatAmount, long totalAmount, double vat, long totalAfterVat) {
         this.timeProcess = timeProcess;
         this.bankAccount = bankAccount;
@@ -36,6 +37,14 @@ public class TransactionFeePackageResponseDTO {
         this.totalAfterVat = totalAfterVat;
     }
 
+    public String getInvoiceItemId() {
+        return invoiceItemId;
+    }
+
+    public void setInvoiceItemId(String invoiceItemId) {
+        this.invoiceItemId = invoiceItemId;
+    }
+
     public String getConnectionType() {
         return connectionType;
     }
@@ -44,7 +53,7 @@ public class TransactionFeePackageResponseDTO {
         this.connectionType = connectionType;
     }
 
-    public void setTotalCount(int totalCount) {
+    public void setTotalCount(long totalCount) {
         this.totalCount = totalCount;
     }
 

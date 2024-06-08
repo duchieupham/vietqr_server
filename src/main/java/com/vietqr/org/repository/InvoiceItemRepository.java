@@ -88,15 +88,15 @@ public interface InvoiceItemRepository extends JpaRepository<InvoiceItemEntity, 
             + "AND a.type = :type ", nativeQuery = true)
     int checkInvoiceItemExist(String bankId, String merchantId, int type, String processDate);
 
-    @Query(value = "SELECT a.process_date AS bankId, b.bank_id AS bankId, "
+    @Query(value = "SELECT a.process_date AS timeProcess, b.bank_id AS bankId, "
             + "a.data AS data, a.vat_amount AS vatAmount, a.total_amount AS totalAmount, "
             + "a.vat AS vat, a.total_after_vat AS totalAfterVat, COALESCE(c.fix_fee, 0) AS fixFee, "
-            + "COALESCE(c.percent_fee, 0) AS percentFee, COALESCE(c.title, '') AS title, "
+            + "COALESCE(c.percent_fee, 0) AS percentFee, COALESCE(c.title, '') AS title "
             + "FROM invoice_item a "
             + "INNER JOIN invoice b ON a.invoice_id = b.id "
             + "LEFT JOIN bank_receive_fee_package c ON b.bank_id = c.bank_id "
             + "WHERE a.type = :type AND b.bank_id IN (:bankIds) "
-            + "a.process_date = :processDate ", nativeQuery = true)
+            + "AND a.process_date = :processDate ", nativeQuery = true)
     List<BankIdProcessDateResponseDTO> getProcessDateByType(int type, List<String> bankIds, String processDate);
 
     List<InvoiceItemEntity> findInvoiceItemEntityByInvoiceId(String invoiceId);
