@@ -9,12 +9,13 @@ public class FeeTransactionInfoDTO {
     private long debitAmount;
     private int controlCount;
     private long controlAmount;
+    private String bankId;
 
     public FeeTransactionInfoDTO() {
     }
 
     public FeeTransactionInfoDTO(int totalCount, long totalAmount, int creditCount, long creditAmount, int debitCount,
-                                 long debitAmount, int controlCount, long controlAmount) {
+                                 long debitAmount, int controlCount, long controlAmount, String bankId) {
         this.totalCount = totalCount;
         this.totalAmount = totalAmount;
         this.creditCount = creditCount;
@@ -23,6 +24,7 @@ public class FeeTransactionInfoDTO {
         this.debitAmount = debitAmount;
         this.controlCount = controlCount;
         this.controlAmount = controlAmount;
+        this.bankId = bankId;
     }
 
     public int getTotalCount() {
@@ -87,5 +89,13 @@ public class FeeTransactionInfoDTO {
 
     public void setControlAmount(long controlAmount) {
         this.controlAmount = controlAmount;
+    }
+
+    public String getBankId() {
+        return bankId;
+    }
+
+    public void setBankId(String bankId) {
+        this.bankId = bankId;
     }
 }

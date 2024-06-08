@@ -26,8 +26,6 @@ public interface InvoiceItemService {
 
     IAdminExtraInvoiceDTO getExtraInvoice(String time);
 
-    List<InvoiceItemEntity> findByInvoiceId(String invoiceId);
-
     int updateAllItemIds(List<String> itemIds, long timePaid);
 
     int checkCountUnPaid(String id);
@@ -36,7 +34,7 @@ public interface InvoiceItemService {
 
     int checkInvoiceItemExist(String bankId, String merchantId, int type, String processDate);
 
-    List<BankIdProcessDateResponseDTO> getProcessDatesByType(int type, List<String> bankId);
-
     List<InvoiceItemProcessDateDTO> getInvoiceItemByInvoiceId(String invoiceId);
+
+    List<BankIdProcessDateResponseDTO> getProcessDatesByType(int type, List<String> bankIds, String processDate);
 }

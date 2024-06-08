@@ -64,11 +64,6 @@ public class InvoiceItemServiceImpl implements InvoiceItemService {
     }
 
     @Override
-    public List<InvoiceItemEntity> findByInvoiceId(String invoiceId) {
-        return repo.findInvoiceItemEntityByInvoiceId(invoiceId);
-    }
-
-    @Override
     public int updateAllItemIds(List<String> itemIds, long timePaid) {
         return repo.updateAllItemIds(itemIds, timePaid);
     }
@@ -89,8 +84,8 @@ public class InvoiceItemServiceImpl implements InvoiceItemService {
     }
 
     @Override
-    public List<BankIdProcessDateResponseDTO> getProcessDatesByType(int type, List<String> bankId) {
-        return repo.getProcessDateByType(type, bankId);
+    public List<BankIdProcessDateResponseDTO> getProcessDatesByType(int type, List<String> bankIds, String processDate) {
+        return repo.getProcessDateByType(type, bankIds, processDate);
     }
 
     @Override

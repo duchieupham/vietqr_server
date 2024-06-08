@@ -153,7 +153,6 @@ public class InvoiceController {
                             }).collect(Collectors.toList());
                     allFeeTransactions.addAll(feeTransactions);
                 }
-
                 result.setTransactions(allFeeTransactions);
                 httpStatus = HttpStatus.OK;
             } else {
@@ -208,6 +207,7 @@ public class InvoiceController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
     private byte[] generateExcelFile(List<DataTransactionDTO> transactions, String bankShortName) throws Exception {
         try (SXSSFWorkbook workbook = new SXSSFWorkbook()) {
             workbook.setCompressTempFiles(true);
@@ -324,9 +324,11 @@ public class InvoiceController {
                 return "-";
         }
     }
+
     private String getTransTypeText(String transType) {
         return "C".equals(transType) ? "Giao dịch đến" : "Giao dịch đi";
     }
+
     private String maskBankAccount(String bankAccount, String bankShortName) {
         if (bankAccount == null || bankAccount.length() < 5) {
             return "-";
@@ -336,8 +338,113 @@ public class InvoiceController {
         String visibleEnd = bankAccount.substring(len - 3);
         return visibleStart + "xxxxx" + visibleEnd + " - " + bankShortName;
     }
+
     private String safeGetValue(String value) {
         return (value == null || value.trim().isEmpty()) ? "-" : value;
+    }
+
+    // API thu phí dịch vụ
+    @GetMapping("invoice/fee-package/{userId}")
+    public ResponseEntity<List<TransactionFeePackageResponseDTO>> getFeePackages(
+            @PathVariable String userId,
+            @RequestParam String bankId,
+            @RequestParam String time) {
+        List<TransactionFeePackageResponseDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            List<IAccountBankReceiveDTO> bankReceiveDTOS = new ArrayList<>();
+            List<String> bankIds = new ArrayList<>();
+            if (StringUtil.isNullOrEmpty(bankId)) {
+                bankReceiveDTOS = accountBankReceiveService.getBankIdsByUserId(userId);
+                bankIds = bankReceiveDTOS.stream().map(IAccountBankReceiveDTO::getBankId).collect(Collectors.toList());
+            } else {
+                bankReceiveDTOS = accountBankReceiveService.getBankIdsByBankId(bankId);
+                bankIds.add(bankId);
+            }
+            List<AccountBankReceiveResDTO> bankReceiveResDTOS = bankReceiveDTOS.stream().map(item -> {
+                AccountBankReceiveResDTO dto = new AccountBankReceiveResDTO();
+                dto.setBankId(item.getBankId());
+                dto.setIsMmsActive(StringUtil.getValueNullChecker(item.getIsMmsActive()));
+                dto.setBankAccount(item.getBankAccount());
+                dto.setBankShortName(item.getBankShortName());
+                dto.setUserBankName(item.getUserBankName());
+                return dto;
+            }).collect(Collectors.toList());
+            Map<String, AccountBankReceiveResDTO> bankReceiveDTOMap = bankReceiveResDTOS.stream().collect(Collectors.toMap(
+                    AccountBankReceiveResDTO::getBankId,
+                    dto -> dto
+            ));
+            List<BankIdProcessDateResponseDTO> responseDTOs =
+                    invoiceItemService.getProcessDatesByType(1, bankIds, time.replaceAll("-", ""));
+
+            List<String> finalBankIds = bankIds;
+            result = responseDTOs.stream()
+                    .filter(item -> {
+                        String dateStr = StringUtil.getValueNullChecker(item.getProcessDate());
+                        return dateStr.length() == 6;
+                    })
+                    .map(item -> {
+
+                        TransactionFeePackageResponseDTO dto = new TransactionFeePackageResponseDTO();
+                        String dateStr = StringUtil.getValueNullChecker(item.getProcessDate());
+                        String formattedDate = dateStr.substring(0, 4) + "-" + dateStr.substring(4);
+                        dto.setTimeProcess(formattedDate);
+
+                        List<FeeTransactionInfoDTO> feePackageResponseDTO = new ArrayList<>();
+                        if (item.getRecordType() == 1) {
+                            feePackageResponseDTO =
+                                    transactionReceiveService.getFeePackageResponse(
+                                            formattedDate,
+                                            finalBankIds);
+                        } else {
+                            feePackageResponseDTO =
+                                    transactionReceiveService.getFeePackageResponseRecordType(
+                                            formattedDate,
+                                            finalBankIds);
+                        }
+                        Map<String, FeeTransactionInfoDTO> feeTransactionInfoDTOMap = feePackageResponseDTO.stream().collect(Collectors.toMap(
+                                FeeTransactionInfoDTO::getBankId,
+                                data -> data
+                        ));
+                        FeeTransactionInfoDTO feeTransactionInfoDTO = feeTransactionInfoDTOMap.get(item.getBankId());
+                        AccountBankReceiveResDTO bankReceiveDTO = bankReceiveDTOMap.get(item.getBankId());
+                        if (Objects.nonNull(bankReceiveDTO)) {
+                            dto.setBankAccount(bankReceiveDTO.getBankAccount());
+                            dto.setBankShortName(bankReceiveDTO.getBankShortName());
+                            if (bankReceiveDTO.getIsMmsActive()) {
+                                dto.setConnectionType(EnvironmentUtil.getVietQrProPackage());
+                            } else {
+                                dto.setConnectionType(EnvironmentUtil.getVietQrPlusPackage());
+                            }
+                        } else {
+                            dto.setBankAccount("");
+                            dto.setBankShortName("");
+                            dto.setConnectionType(EnvironmentUtil.getVietQrPlusPackage());
+                        }
+                        if (Objects.nonNull(feeTransactionInfoDTO)) {
+                            dto.setTotalCount(feeTransactionInfoDTO.getTotalCount());
+                            dto.setTotalAmountReceive(feeTransactionInfoDTO.getTotalAmount());
+                        } else {
+                            dto.setTotalCount(0);
+                            dto.setTotalAmountReceive(0);
+                        }
+                        dto.setFixFee(item.getFixFee());
+                        dto.setPercentFee(item.getPercentFee());
+                        dto.setTitle(item.getTitle());
+                        dto.setTotalAmount(item.getTotalAmount());
+                        dto.setVatAmount(item.getVatAmount());
+                        dto.setVat(item.getVat());
+                        dto.setTotalAfterVat(item.getTotalAfterVat());
+                        dto.setInvoiceItemId(item.getInvoiceItemId());
+                        return dto;
+                    }).collect(Collectors.toList());
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("InvoiceController: ERROR: getFeePackages: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
     }
 
     @GetMapping("invoice/merchant-list")

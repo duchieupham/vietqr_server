@@ -11,19 +11,12 @@ public interface TransactionReceiveService {
 
         public int insertTransactionReceive(TransactionReceiveEntity entity);
 
-        public int insertTransactionReceiveWithCheckDuplicated(TransactionReceiveEntity entity);
-
-        public int insertAllTransactionReceive(List<TransactionReceiveEntity> entities);
-
         public void updateTransactionReceiveStatus(int status, String refId, String referenceNumber, long timePaid,
                         String id);
 
         public void updateTransactionReceiveNote(String note, String id);
 
         public void updateTransactionStatusById(int status, String id);
-
-        // public List<TransactionRelatedDTO> getRelatedTransactionReceives(String
-        // businessId);
 
         public TransactionDetailDTO getTransactionById(String id);
 
@@ -73,7 +66,9 @@ public interface TransactionReceiveService {
         public List<TransByCusSyncDTO> getTransactionsByCustomerSync(String bankId, String customerSyncId, int offset,
                         String fromDate, String toDate);
 
-        public List<FeePackageResponseDTO> getFeePackageResponse(long startTime, long endTime, List<String> bankId);
+        public List<FeeTransactionInfoDTO> getFeePackageResponse(String time, List<String> bankId);
+
+        public List<FeeTransactionInfoDTO> getFeePackageResponseRecordType(String time, List<String> bankId);
 
         // admin
         List<TransactionReceiveAdminListDTO> getTransByBankAccountAllDate(String value, int offset);

@@ -36,15 +36,13 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	String checkExistedBankAccount(@Param(value = "bankAccount") String bankAccount,
 			@Param(value = "bankTypeId") String bankTypeId);
 
-//	@Query(value = "SELECT a.process_date  FROM invoice_item a "
-//					+ "INNER JOIN invoice b ON a.invoice_id = b.id "
-//					+ "WHERE user_id = :userId ", nativeQuery = true)
-//	List<String> getBankIdsByUserId(@Param(value = "userId") String userId);
-
-
-	@Query(value = "SELECT a.bank_id  FROM invoice a "
+	@Query(value = "SELECT a.mms_active AS mmsActive, a.bank_account AS bankAccount, "
+			+ "a.id AS bankId, a.bank_account_name AS userbankName, "
+			+ "b.bank_short_name AS bankShortName "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN bank_type b ON a.bank_type_id = b.id "
 			+ "WHERE a.user_id = :userId ", nativeQuery = true)
-	List<String> getBankIdsByUserId(@Param(value = "userId") String userId);
+	List<IAccountBankReceiveDTO> getBankIdsByUserId(@Param(value = "userId") String userId);
 
 	@Query(value = "SELECT id FROM account_bank_receive WHERE bank_account = :bankAccount AND bank_type_id = :bankTypeId AND user_id = :userId ", nativeQuery = true)
 	List<String> checkExistedBankAccountSameUser(@Param(value = "bankAccount") String bankAccount,
@@ -423,4 +421,12 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "INNER JOIN bank_type b ON a.bank_type_id = b.id "
 			+ "WHERE a.id = :bankId", nativeQuery = true)
     IBankReceiveFeePackageDTO getCustomerBankDetailByBankId(String bankId);
+
+	@Query(value = "SELECT COALESCE(a.mms_active, false) AS mmsActive, a.bank_account AS bankAccount, "
+			+ "a.id AS bankId, a.bank_account_name AS userbankName, "
+			+ "b.bank_short_name AS bankShortName "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN bank_type b ON a.bank_type_id = b.id "
+			+ "WHERE a.id = :bankId ", nativeQuery = true)
+	List<IAccountBankReceiveDTO> getBankIdsByBankId(String bankId);
 }

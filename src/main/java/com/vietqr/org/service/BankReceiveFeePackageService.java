@@ -26,4 +26,6 @@ public interface BankReceiveFeePackageService {
     List<ICustomerDetailDTO> getCustomerDetailByBankId(String bankId);
 
     IBankReceiveFeePackageDTO getCustomerInfoByBankId(String bankId);
+
+    List<PackageFeeResponseDTO> getFeePackageFeeResponse(String userId);
 }

@@ -10,7 +10,7 @@ import com.vietqr.org.entity.AccountBankReceiveEntity;
 @Service
 public interface AccountBankReceiveService {
 
-	public List<String> getBankIdsByUserId(String userId);
+	public List<IAccountBankReceiveDTO> getBankIdsByUserId(String userId);
 
 	public int insertAccountBank(AccountBankReceiveEntity entity);
 
@@ -121,4 +121,6 @@ public interface AccountBankReceiveService {
     BankAccountRechargeDTO getBankAccountRecharge(String bankId);
 
     IBankReceiveFeePackageDTO getCustomerBankDetailByBankId(String bankId);
+
+    List<IAccountBankReceiveDTO> getBankIdsByBankId(String bankId);
 }

@@ -16,7 +16,7 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     AccountBankReceiveRepository repo;
 
     @Override
-    public List<String> getBankIdsByUserId(String userId) {
+    public List<IAccountBankReceiveDTO> getBankIdsByUserId(String userId) {
         return repo.getBankIdsByUserId(userId);
     }
 
@@ -276,6 +276,11 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     @Override
     public IBankReceiveFeePackageDTO getCustomerBankDetailByBankId(String bankId) {
         return repo.getCustomerBankDetailByBankId(bankId);
+    }
+
+    @Override
+    public List<IAccountBankReceiveDTO> getBankIdsByBankId(String bankId) {
+        return repo.getBankIdsByBankId(bankId);
     }
 
     @Override

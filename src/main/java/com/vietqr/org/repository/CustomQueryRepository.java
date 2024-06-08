@@ -21,4 +21,8 @@ public interface CustomQueryRepository {
                                                                long toDate);
 
     List<DataTransactionDTO> findTransactionsByBankIdAndTimeRange(String tableName, String bankId, long fromDate, long toDate, int recordType);
+
+    List<FeeTransactionInfoDTO> getTransactionInfoDataByBankIds(String tableName, List<String> bankIds, long fromDate, long toDate);
+
+    List<FeeTransactionInfoDTO> getTransactionInfoDataByBankIdRecords(String tableName, List<String> bankIds, long fromDate, long toDate);
 }
