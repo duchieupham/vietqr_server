@@ -61,44 +61,6 @@ public class AccountSystemController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-//    @PostMapping("/password-reset")
-//    public ResponseEntity<String> resetPassword(@RequestBody PasswordResetDTO passwordResetDTO, @RequestHeader("Authorization") String token) {
-//        String result = "";
-//        HttpStatus httpStatus = null;
-//        try {
-//            if (passwordResetDTO != null && passwordResetDTO.getNewPassword().equals(passwordResetDTO.getConfirmPassword())) {
-//                // Validate admin token
-//                IAccountSystemDTO adminDto = validateAdminToken(token);
-//                if (adminDto != null) {
-//                    // Check if phoneNo exists
-//                    if (isPhoneNoValid(passwordResetDTO.getPhoneNo())) {
-//                        boolean isReset = accountSystemService.resetUserPassword(passwordResetDTO.getPhoneNo(), passwordResetDTO.getNewPassword());
-//                        if (isReset) {
-//                            result = "Password reset successfully";
-//                            httpStatus = HttpStatus.OK;
-//                        } else {
-//                            result = "Failed to reset password";
-//                            httpStatus = HttpStatus.BAD_REQUEST;
-//                        }
-//                    } else {
-//                        result = "Invalid phone number";
-//                        httpStatus = HttpStatus.BAD_REQUEST;
-//                    }
-//                } else {
-//                    result = "Unauthorized";
-//                    httpStatus = HttpStatus.UNAUTHORIZED;
-//                }
-//            } else {
-//                result = "Passwords do not match";
-//                httpStatus = HttpStatus.BAD_REQUEST;
-//            }
-//        } catch (Exception e) {
-//            logger.error("Error at resetPassword: " + e.toString());
-//            result = "Error occurred";
-//            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-//        }
-//        return new ResponseEntity<>(result, httpStatus);
-//    }
     @PostMapping("/password-reset")
     public ResponseEntity<ResponseMessageDTO> resetPassword(@RequestBody PasswordResetDTO passwordResetDTO, @RequestHeader("Authorization") String token) {
         ResponseMessageDTO result = null;
