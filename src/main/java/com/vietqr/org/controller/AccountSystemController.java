@@ -4,17 +4,19 @@ import java.sql.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.vietqr.org.dto.IAccountSystemDTO;
+import com.vietqr.org.dto.PasswordResetDTO;
+import com.vietqr.org.dto.ResponseMessageDTO;
+import com.vietqr.org.security.JWTAuthorizationFilter;
+import com.vietqr.org.service.AccountLoginService;
+import io.jsonwebtoken.Claims;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.vietqr.org.dto.AccountSystemDTO;
 import com.vietqr.org.entity.AccountSystemEntity;
@@ -31,6 +33,11 @@ public class AccountSystemController {
 
     @Autowired
     AccountSystemService accountSystemService;
+
+    @Autowired
+    AccountLoginService accountLoginService;
+    @Autowired
+    private JWTAuthorizationFilter jwtAuthorizationFilter;
 
     @PostMapping("accounts-admin")
     public ResponseEntity<String> loginAdmin(@RequestBody AccountSystemDTO dto) {
@@ -53,6 +60,101 @@ public class AccountSystemController {
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
+    }
+//    @PostMapping("/password-reset")
+//    public ResponseEntity<String> resetPassword(@RequestBody PasswordResetDTO passwordResetDTO, @RequestHeader("Authorization") String token) {
+//        String result = "";
+//        HttpStatus httpStatus = null;
+//        try {
+//            if (passwordResetDTO != null && passwordResetDTO.getNewPassword().equals(passwordResetDTO.getConfirmPassword())) {
+//                // Validate admin token
+//                IAccountSystemDTO adminDto = validateAdminToken(token);
+//                if (adminDto != null) {
+//                    // Check if phoneNo exists
+//                    if (isPhoneNoValid(passwordResetDTO.getPhoneNo())) {
+//                        boolean isReset = accountSystemService.resetUserPassword(passwordResetDTO.getPhoneNo(), passwordResetDTO.getNewPassword());
+//                        if (isReset) {
+//                            result = "Password reset successfully";
+//                            httpStatus = HttpStatus.OK;
+//                        } else {
+//                            result = "Failed to reset password";
+//                            httpStatus = HttpStatus.BAD_REQUEST;
+//                        }
+//                    } else {
+//                        result = "Invalid phone number";
+//                        httpStatus = HttpStatus.BAD_REQUEST;
+//                    }
+//                } else {
+//                    result = "Unauthorized";
+//                    httpStatus = HttpStatus.UNAUTHORIZED;
+//                }
+//            } else {
+//                result = "Passwords do not match";
+//                httpStatus = HttpStatus.BAD_REQUEST;
+//            }
+//        } catch (Exception e) {
+//            logger.error("Error at resetPassword: " + e.toString());
+//            result = "Error occurred";
+//            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+//        }
+//        return new ResponseEntity<>(result, httpStatus);
+//    }
+    @PostMapping("/password-reset")
+    public ResponseEntity<ResponseMessageDTO> resetPassword(@RequestBody PasswordResetDTO passwordResetDTO, @RequestHeader("Authorization") String token) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (passwordResetDTO != null && passwordResetDTO.getNewPassword().equals(passwordResetDTO.getConfirmPassword())) {
+                IAccountSystemDTO adminDto = validateAdminToken(token);
+                if (adminDto != null) {
+                    if (isPhoneNoValid(passwordResetDTO.getPhoneNo())) {
+                        boolean isReset = accountSystemService.resetUserPassword(passwordResetDTO.getPhoneNo(), passwordResetDTO.getNewPassword());
+                        if (isReset) {
+                            result = new ResponseMessageDTO("SUCCESS", "");
+                            httpStatus = HttpStatus.OK;
+                        } else {
+                            logger.error("Failed to reset password");
+                            result = new ResponseMessageDTO("FAILED", "E142");
+                            httpStatus = HttpStatus.BAD_REQUEST;
+                        }
+                    } else {
+                        logger.error("Invalid phone number");
+                        result = new ResponseMessageDTO("FAILED", "E143");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    }
+                } else {
+                    result = new ResponseMessageDTO("FAILED", "Unauthorized");
+                    httpStatus = HttpStatus.UNAUTHORIZED;
+                }
+            } else {
+                logger.error("Passwords do not match");
+                result = new ResponseMessageDTO("FAILED", "E144");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("Error at resetPassword: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "Error occurred");
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+    private IAccountSystemDTO validateAdminToken(String token) {
+        try {
+            Claims claims = jwtAuthorizationFilter.validateToken(token.replace("Bearer ", ""));
+            String adminId = claims.get("adminId", String.class);
+            Integer role = claims.get("role", Integer.class);
+            if (role != null && role == 1) {
+                return accountSystemService.findAdminById(adminId);
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            logger.error("Invalid token: " + e.toString());
+            return null;
+        }
+    }
+    private boolean isPhoneNoValid(String phoneNo) {
+        return accountLoginService.isPhoneNoExists(phoneNo);
     }
 
     private String getJWTToken(AccountSystemEntity entity) {

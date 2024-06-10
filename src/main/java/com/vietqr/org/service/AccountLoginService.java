@@ -2,6 +2,8 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+import com.vietqr.org.dto.IAccountSystemDTO;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.dto.AccountCheckDTO;
@@ -54,4 +56,6 @@ public interface AccountLoginService {
 	public void resetPassword(String password, String phoneNo);
 
 	String checkPassword(String userId, String password);
+
+	boolean isPhoneNoExists(String phoneNo);
 }

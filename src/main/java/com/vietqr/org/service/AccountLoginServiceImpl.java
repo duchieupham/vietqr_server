@@ -2,6 +2,7 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+import com.vietqr.org.dto.IAccountSystemDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -125,5 +126,8 @@ public class AccountLoginServiceImpl implements AccountLoginService {
 	public String checkPassword(String userId, String password) {
 		return repo.checkPassword(userId, password);
 	}
-
+	@Override
+	public boolean isPhoneNoExists(String phoneNo) {
+		return repo.existsByPhoneNo(phoneNo);
+	}
 }
