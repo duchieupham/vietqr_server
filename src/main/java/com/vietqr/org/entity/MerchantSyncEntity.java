@@ -110,12 +110,12 @@ public class MerchantSyncEntity implements Serializable {
         this.nationalId = nationalId;
     }
 
-    public boolean isActive() {
+    public boolean getIsActive() {
         return isActive;
     }
 
-    public void setActive(boolean active) {
-        isActive = active;
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
     }
 
     public String getUserId() {
