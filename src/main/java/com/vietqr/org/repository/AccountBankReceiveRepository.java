@@ -374,7 +374,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Query(value = "SELECT COUNT(a.id) "
 			+ "FROM account_bank_receive a "
 			+ "INNER JOIN account_login b ON a.user_id = b.id "
-			+ "WHERE a.bank_account LIKE %:value% "
+			+ "WHERE (a.bank_account LIKE %:value% OR a.bank_account_name LIKE %:value%) "
 			+ "AND a.is_authenticated = TRUE ", nativeQuery = true)
     int countBankInvoiceByBankAccount(String value);
 
@@ -386,7 +386,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "FROM account_bank_receive a "
 			+ "INNER JOIN account_login b ON a.user_id = b.id "
 			+ "LEFT JOIN bank_receive_fee_package c ON c.bank_id = a.id "
-			+ "WHERE a.bank_account LIKE %:value% AND a.is_authenticated = TRUE "
+			+ "WHERE (a.bank_account LIKE %:value% OR a.bank_account_name LIKE %:value%) AND a.is_authenticated = TRUE "
 			+ "LIMIT :offset, :size ", nativeQuery = true)
 	List<IBankAccountInvoiceInfoDTO> getBankInvoiceByBankAccount(String value, int offset, int size);
 
