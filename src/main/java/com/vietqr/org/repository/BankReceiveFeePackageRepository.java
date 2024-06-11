@@ -31,7 +31,7 @@ public interface BankReceiveFeePackageRepository extends JpaRepository<BankRecei
     @Query(value = "SELECT COUNT(a.bank_id) "
             + "FROM bank_receive_fee_package a "
             + "INNER JOIN account_login b ON b.id = a.user_id "
-            + "WHERE JSON_EXTRACT(a.data, '$.bankAccount') LIKE %:value% "
+            + "WHERE JSON_EXTRACT(a.data, '$.bankAccount') LIKE %:value%  OR JSON_EXTRACT(a.data, '$.userBankName') LIKE %:value%   "
             + "AND a.mid = :merchantId ", nativeQuery = true)
     int countBankInvoiceByBankAccountAndMerchantId(String merchantId, String value);
 
@@ -53,7 +53,7 @@ public interface BankReceiveFeePackageRepository extends JpaRepository<BankRecei
             + "b.phone_no AS phoneNo, b.email AS email "
             + "FROM bank_receive_fee_package a "
             + "INNER JOIN account_login b ON b.id = a.user_id "
-            + "WHERE JSON_EXTRACT(a.data, '$.bankAccount') LIKE %:value% "
+            + "WHERE JSON_EXTRACT(a.data, '$.bankAccount') LIKE %:value%  OR JSON_EXTRACT(a.data, '$.userBankName') LIKE %:value%  "
             + "AND a.mid = :merchantId "
             + "LIMIT :offset, :size ", nativeQuery = true)
     List<IBankAccountInvoiceDTO> getBankInvoiceByBankAccountAndMerchantId(String merchantId, String value,

@@ -3,6 +3,7 @@ package com.vietqr.org.repository;
 import com.vietqr.org.dto.IMerchantEditDetailDTO;
 import com.vietqr.org.dto.IMerchantInfoDTO;
 import com.vietqr.org.dto.IMerchantInvoiceDTO;
+import com.vietqr.org.dto.IMerchantSyncDTO;
 import com.vietqr.org.entity.MerchantSyncEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -44,4 +45,11 @@ public interface MerchantSyncRepository extends JpaRepository<MerchantSyncEntity
             + "FROM merchant_sync a "
             + "WHERE a.id = :merchantId ", nativeQuery = true)
     IMerchantInfoDTO getMerchantSyncInfo(String merchantId);
+
+
+//    @Query(value="SELECT id, name, vso, business_type AS bussinessType,"
+//             + " address , national_id AS nationalId, is_active AS isActive, "
+//             + " user_id as userId , account_customer_id AS accountCustomerId "
+//             + " FROM merchant_sync ", nativeQuery = true)
+//    List<IMerchantSyncDTO> getAllMerchants();
 }
