@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import com.vietqr.org.dto.IAccountSystemDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -108,4 +109,6 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
 	@Query(value = "SELECT id FROM account_login WHERE id = :userId AND password = :password ", nativeQuery = true)
     String checkPassword(@Param(value = "userId") String userId,
 						 @Param(value = "password") String password);
+
+	boolean existsByPhoneNo(String phoneNo);
 }

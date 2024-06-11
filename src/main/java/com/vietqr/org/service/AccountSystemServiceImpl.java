@@ -1,5 +1,6 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.dto.IAccountSystemDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,4 +28,13 @@ public class AccountSystemServiceImpl implements AccountSystemService {
         return repo.checkExistedAdmin(id);
     }
 
+    @Override
+    public IAccountSystemDTO findAdminById(String adminId) {
+        return repo.findAdminById(adminId);
+    }
+    @Override
+    public boolean resetUserPassword(String phoneNo, String newPassword) {
+        int updateRows = repo.updateUserPassword(phoneNo, newPassword);
+        return updateRows > 0;
+    }
 }
