@@ -27,11 +27,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.dto.bidv.ConfirmCustomerVaDTO;
+import com.vietqr.org.dto.bidv.RequestCustomerVaDTO;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.service.*;
+import com.vietqr.org.service.bidv.CustomerVaService;
 import com.vietqr.org.util.*;
 import com.vietqr.org.util.bank.bidv.BIDVUtil;
 
+import com.vietqr.org.util.bank.bidv.CustomerVaUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -183,6 +187,9 @@ public class TransactionBankController {
 
 	@Autowired
 	private InvoiceItemService invoiceItemService;
+
+	@Autowired
+	private CustomerVaService customerVaService;
 
 	private String getUsernameFromToken(String token) {
 		String result = "";
@@ -3618,8 +3625,8 @@ public class TransactionBankController {
 	///
 	// LINKED ACCOUNT BANKS (MB, BIDV)
 	@PostMapping("account-bank/linked/request_otp")
-	public ResponseEntity<ResponseMessageDTO> requestLinkedBankOTP(@RequestBody RequestLinkedBankDTO dto) {
-		ResponseMessageDTO result = null;
+	public ResponseEntity<Object> requestLinkedBankOTP(@RequestBody RequestLinkedBankDTO dto) {
+		Object result = null;
 		HttpStatus httpStatus = null;
 		try {
 			if (dto != null) {
@@ -3630,16 +3637,39 @@ public class TransactionBankController {
 					requestBankDTO.setAccountName(dto.getAccountName());
 					requestBankDTO.setPhoneNumber(dto.getPhoneNumber());
 					requestBankDTO.setApplicationType(dto.getApplicationType());
-					result = requestLinkedMBOTP(requestBankDTO);
-					if (result != null && result.getStatus().trim().equals("SUCCESS")) {
+					ResponseMessageDTO responseMessageDTO = requestLinkedMBOTP(requestBankDTO);
+					if (responseMessageDTO != null && responseMessageDTO.getStatus().trim().equals("SUCCESS")) {
+						result = responseMessageDTO;
 						httpStatus = HttpStatus.OK;
 					} else {
 						httpStatus = HttpStatus.BAD_REQUEST;
 					}
 				} else if (dto.getBankCode().trim().equals("BIDV")) {
-					result = requestLinkedBIDVOTP(dto);
-					if (result != null && result.getStatus().trim().equals("SUCCESS")) {
+					Long customerVaLength = customerVaService.getCustomerVaLength() + 1;
+					String merchantName = "";
+					if (StringUtil.isNullOrEmpty(dto.getMerchantName())) {
+						// GENERATE MERCHANT NAME
+						int size = (dto.getAccountName().length() / 3) * 2;
+						merchantName = (dto.getAccountName().substring(size) + RandomCodeUtil.generateOTP(3)).toUpperCase();
+					} else {
+						merchantName = dto.getMerchantName().toUpperCase();
+					}
+					String merchantId = CustomerVaUtil.generateMerchantId(merchantName, customerVaLength);
+					String checkExistedMerchantId = customerVaService.checkExistedMerchantId(merchantId);
+					RequestCustomerVaDTO requestCustomerVaDTO = new RequestCustomerVaDTO();
+					requestCustomerVaDTO.setBankCode(dto.getBankCode());
+					requestCustomerVaDTO.setBankAccount(dto.getAccountNumber());
+					requestCustomerVaDTO.setMerchantName(merchantName);
+					requestCustomerVaDTO.setUserBankName(dto.getAccountName());
+					requestCustomerVaDTO.setNationalId(dto.getNationalId());
+					requestCustomerVaDTO.setPhoneAuthenticated(dto.getPhoneNumber());
+					result = CustomerVaUtil.requestCustomerVa(requestCustomerVaDTO, merchantId, "1",
+							customerVaLength, checkExistedMerchantId);
+//					result = requestLinkedBIDVOTP(dto);
+					if (result instanceof ResponseObjectDTO) {
 						httpStatus = HttpStatus.OK;
+					} else if (result instanceof ResponseMessageDTO) {
+						httpStatus = HttpStatus.BAD_REQUEST;
 					} else {
 						httpStatus = HttpStatus.BAD_REQUEST;
 					}
@@ -3683,7 +3713,13 @@ public class TransactionBankController {
 						httpStatus = HttpStatus.BAD_REQUEST;
 					}
 				} else if (dto.getBankCode().trim().equals("BIDV")) {
-					result = confirmLinkedBIDVOTP(dto);
+//					result = confirmLinkedBIDVOTP(dto);
+					ConfirmCustomerVaDTO customerVaDTO = new ConfirmCustomerVaDTO();
+					customerVaDTO.setMerchantId(dto.getMerchantId());
+					customerVaDTO.setConfirmId(dto.getConfirmId());
+					customerVaDTO.setOtpNumber(dto.getOtpNumber());
+					customerVaDTO.setMerchantName(dto.getMerchantName());
+					result = CustomerVaUtil.confirmCustomerVa(customerVaDTO);
 					if (result != null && result.getStatus().trim().equals("SUCCESS")) {
 						httpStatus = HttpStatus.OK;
 					} else {
@@ -3716,167 +3752,177 @@ public class TransactionBankController {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
-			if (dto != null) {
-				UUID interactionId = UUID.randomUUID();
-				UUID idemKey = UUID.randomUUID();
-				String url = EnvironmentUtil.getBidvUrlUnlinked();
-				String serviceId = EnvironmentUtil.getBidvLinkedServiceId();
-				String merchantId = EnvironmentUtil.getBidvLinkedMerchantId();
-				String merchantName = EnvironmentUtil.getBidvLinkedMerchantName();
-				String channelId = EnvironmentUtil.getBidvLinkedChannelId();
-				String transDate = getTransDate();
-				//
-				// jws and jwe request body
-				String myKey = JwsUtil.getSymmatricKey();
-				Key key = new AesKey(JwsUtil.hexStringToBytes(myKey));
-				JsonWebEncryption jwe = new JsonWebEncryption();
-				String payload = BIDVUtil.generateUnlinkedBody(serviceId, merchantId, merchantName, channelId,
-						transDate, dto.getEwalletToken(), dto.getBankAccount(), "Y");
-				System.out.println("Payload: " + payload);
-				//
-				jwe.setPayload(payload);
-				jwe.setAlgorithmHeaderValue(KeyManagementAlgorithmIdentifiers.A256KW);
-				jwe.setEncryptionMethodHeaderParameter(ContentEncryptionAlgorithmIdentifiers.AES_128_CBC_HMAC_SHA_256);
-				jwe.setKey(key);
-				String serializedJwe = jwe.getCompactSerialization();
-				String[] split = serializedJwe.split("\\.");
-				Gson gson = new Gson();
-				String protected_ = split[0];
-				byte[] decodedBytes = Base64.getDecoder().decode(protected_);
-				String decodedString = new String(decodedBytes);
-				Header h = gson.fromJson(decodedString, Header.class);
-				String encryptedKey = split[1];
-				String iv = split[2];
-				String ciphertext = split[3];
-				String tag = split[4];
-				Recipients recipient = new Recipients();
-				recipient.setHeader(h);
-				recipient.setEncrypted_key(encryptedKey);
-				Recipients[] recipients = new Recipients[1];
-				recipients[0] = recipient;
-				// JWE
-				JweObj j = new JweObj(recipients, protected_, ciphertext, iv, tag);
-				String jweString = gson.toJson(j);
-				System.out.println("\n\nJWE: " + jweString);
-				Map<String, Object> body = gson.fromJson(jweString, Map.class);
-
-				// JWS
-				JsonWebSignature jws = new JsonWebSignature();
-				jws.setPayload(jweString);
-				jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.RSA_USING_SHA256);
-				PrivateKey privateKey = JwsUtil.getPrivateKey();
-				jws.setKey(privateKey);
-				String jwsString = jws.getCompactSerialization();
-				System.out.println("\n\nJWS: " + jwsString);
-				///
-				// call API
-				UriComponents uriComponents = UriComponentsBuilder
-						.fromHttpUrl(url)
-						.buildAndExpand(/* add url parameter here */);
-				WebClient webClient = WebClient.builder()
-						.baseUrl(url)
-						.build();
-				String token = getBIDVToken("ewallet").getAccess_token();
-				String clientXCertification = JwsUtil.getClientXCertificate();
-				System.out.println("\n\nToken BIDV: " + token);
-				System.out.println("\n\nclientXCertification BIDV: " + clientXCertification);
-				// System.out.println("\n\nTime: " + "2020-01-31T09:59:34.000+10:12");
-				Mono<ClientResponse> responseMono = webClient.post()
-						.uri(uriComponents.toUri())
-						.contentType(MediaType.APPLICATION_JSON)
-						.header("Channel", EnvironmentUtil.getBidvLinkedChannelId())
-						.header("User-Agent", EnvironmentUtil.getBidvLinkedMerchantName())
-						.header("X-Client-Certificate", clientXCertification)
-						.header("X-API-Interaction-ID", interactionId.toString())
-						.header("X-Idempotency-Key", idemKey.toString())
-						.header("Timestamp", "2020-01-31T09:59:34.000+10:12")
-						.header("X-Customer-IP-Address", EnvironmentUtil.getIpVietQRVN())
-						.header("Authorization", "Bearer " + token)
-						.header("X-JWS-Signature", jwsString)
-						.body(BodyInserters.fromValue(body))
-						.exchange();
-				System.out.println("\n\n");
-				ClientResponse response = responseMono.block();
-				if (response.statusCode().is2xxSuccessful()) {
-					String json = response.bodyToMono(String.class).block();
-					logger.info("Response unlinkedBankOTP: " + json);
-					System.out.println("Response unlinkedBankOTP: " + json);
-					ObjectMapper objectMapper = new ObjectMapper();
-					JsonNode rootNode = objectMapper.readTree(json);
-					// if (rootNode.get("errorCode") != null) {
-					// String errCode = rootNode.get("errorCode").asText();
-					// if (errCode.trim().equals("000")) {
-					// result = new ResponseMessageDTO("SUCCESS", "");
-					// // do update status bank_account from authen => unauthen
-					// accountBankService.unRegisterAuthenticationBank(dto.getBankAccount());
-					// httpStatus = HttpStatus.OK;
-					// } else {
-					// result = new ResponseMessageDTO("FAILED", "E05");
-					// httpStatus = HttpStatus.BAD_REQUEST;
-					// }
-					// } else {
-					// result = new ResponseMessageDTO("FAILED", "E05");
-					// httpStatus = HttpStatus.BAD_REQUEST;
-					// }
-					if (rootNode.get("body") != null) {
-						if (rootNode.get("body").get("additionalInfo") != null) {
-							if (rootNode.get("body").get("additionalInfo").get("detailedError") != null) {
-								if (rootNode.get("body").get("additionalInfo").get("detailedError")
-										.get("errorCode") != null) {
-									String errorCode = rootNode.get("body").get("additionalInfo").get("detailedError")
-											.get("errorCode").asText();
-									if (errorCode != null && errorCode.trim().equals("000")) {
-										// do update status bank_account from authen => unauthen
-										accountBankService.unRegisterAuthenBank(dto.getBankAccount(),
-												dto.getEwalletToken());
-										result = new ResponseMessageDTO("SUCCESS", "");
-										httpStatus = HttpStatus.OK;
-									} else {
-										result = new ResponseMessageDTO("FAILED", "E05");
-										httpStatus = HttpStatus.BAD_REQUEST;
-									}
-								} else {
-									result = new ResponseMessageDTO("FAILED", "E05");
-									httpStatus = HttpStatus.BAD_REQUEST;
-								}
-							} else {
-								result = new ResponseMessageDTO("FAILED", "E05");
-								httpStatus = HttpStatus.BAD_REQUEST;
-							}
-						} else {
-							result = new ResponseMessageDTO("FAILED", "E05");
-							httpStatus = HttpStatus.BAD_REQUEST;
-						}
-					} else {
-						if (rootNode.get("errorCode") != null) {
-							String errorCode = rootNode.get("errorCode").asText();
-							if (errorCode != null && errorCode.trim().equals("000")) {
-								accountBankService.unRegisterAuthenBank(dto.getBankAccount(), dto.getEwalletToken());
-								result = new ResponseMessageDTO("SUCCESS", "");
-								httpStatus = HttpStatus.OK;
-							} else {
-								result = new ResponseMessageDTO("FAILED", "E05");
-								httpStatus = HttpStatus.BAD_REQUEST;
-							}
-						} else {
-							result = new ResponseMessageDTO("FAILED", "E05");
-							httpStatus = HttpStatus.BAD_REQUEST;
-						}
-
-					}
-				} else {
-					String json = response.bodyToMono(String.class).block();
-					logger.info("Response unlinkedBankOTP: " + json);
-					System.out.println("Response unlinkedBankOTP: " + json);
-					result = new ResponseMessageDTO("FAILED", "E05");
-					httpStatus = HttpStatus.BAD_REQUEST;
+			if (Objects.nonNull(dto)) {
+				BidvUnlinkedDTO bidvUnlinkedDTO = accountBankReceiveService
+						.getMerchantIdByBankAccountBidvAuthen(dto.getBankAccount(), dto.getBankCode());
+				result = CustomerVaUtil.unregisterCustomerVa(bidvUnlinkedDTO.getMerchantId());
+				if (result.getStatus().equals("SUCCESS")) {
+					accountBankReceiveService.updateRegisterUnlinkBidv(bidvUnlinkedDTO.getUserId(),
+							bidvUnlinkedDTO.getBankId());
+					customerVaService.removeCustomerVa(bidvUnlinkedDTO.getUserId(), bidvUnlinkedDTO.getMerchantId());
 				}
-			} else {
-				logger.error("unlinkedBankOTP: INVALID REQUEST BODY");
-				System.out.println("unlinkedBankOTP: INVALID REQUEST BODY");
-				result = new ResponseMessageDTO("FAILED", "E46");
-				httpStatus = HttpStatus.BAD_REQUEST;
 			}
+//			if (dto != null) {
+//				UUID interactionId = UUID.randomUUID();
+//				UUID idemKey = UUID.randomUUID();
+//				String url = EnvironmentUtil.getBidvUrlUnlinked();
+//				String serviceId = EnvironmentUtil.getBidvLinkedServiceId();
+//				String merchantId = EnvironmentUtil.getBidvLinkedMerchantId();
+//				String merchantName = EnvironmentUtil.getBidvLinkedMerchantName();
+//				String channelId = EnvironmentUtil.getBidvLinkedChannelId();
+//				String transDate = getTransDate();
+//				//
+//				// jws and jwe request body
+//				String myKey = JwsUtil.getSymmatricKey();
+//				Key key = new AesKey(JwsUtil.hexStringToBytes(myKey));
+//				JsonWebEncryption jwe = new JsonWebEncryption();
+//				String payload = BIDVUtil.generateUnlinkedBody(serviceId, merchantId, merchantName, channelId,
+//						transDate, dto.getEwalletToken(), dto.getBankAccount(), "Y");
+//				System.out.println("Payload: " + payload);
+//				//
+//				jwe.setPayload(payload);
+//				jwe.setAlgorithmHeaderValue(KeyManagementAlgorithmIdentifiers.A256KW);
+//				jwe.setEncryptionMethodHeaderParameter(ContentEncryptionAlgorithmIdentifiers.AES_128_CBC_HMAC_SHA_256);
+//				jwe.setKey(key);
+//				String serializedJwe = jwe.getCompactSerialization();
+//				String[] split = serializedJwe.split("\\.");
+//				Gson gson = new Gson();
+//				String protected_ = split[0];
+//				byte[] decodedBytes = Base64.getDecoder().decode(protected_);
+//				String decodedString = new String(decodedBytes);
+//				Header h = gson.fromJson(decodedString, Header.class);
+//				String encryptedKey = split[1];
+//				String iv = split[2];
+//				String ciphertext = split[3];
+//				String tag = split[4];
+//				Recipients recipient = new Recipients();
+//				recipient.setHeader(h);
+//				recipient.setEncrypted_key(encryptedKey);
+//				Recipients[] recipients = new Recipients[1];
+//				recipients[0] = recipient;
+//				// JWE
+//				JweObj j = new JweObj(recipients, protected_, ciphertext, iv, tag);
+//				String jweString = gson.toJson(j);
+//				System.out.println("\n\nJWE: " + jweString);
+//				Map<String, Object> body = gson.fromJson(jweString, Map.class);
+//
+//				// JWS
+//				JsonWebSignature jws = new JsonWebSignature();
+//				jws.setPayload(jweString);
+//				jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.RSA_USING_SHA256);
+//				PrivateKey privateKey = JwsUtil.getPrivateKey();
+//				jws.setKey(privateKey);
+//				String jwsString = jws.getCompactSerialization();
+//				System.out.println("\n\nJWS: " + jwsString);
+//				///
+//				// call API
+//				UriComponents uriComponents = UriComponentsBuilder
+//						.fromHttpUrl(url)
+//						.buildAndExpand(/* add url parameter here */);
+//				WebClient webClient = WebClient.builder()
+//						.baseUrl(url)
+//						.build();
+//				String token = getBIDVToken("ewallet").getAccess_token();
+//				String clientXCertification = JwsUtil.getClientXCertificate();
+//				System.out.println("\n\nToken BIDV: " + token);
+//				System.out.println("\n\nclientXCertification BIDV: " + clientXCertification);
+//				// System.out.println("\n\nTime: " + "2020-01-31T09:59:34.000+10:12");
+//				Mono<ClientResponse> responseMono = webClient.post()
+//						.uri(uriComponents.toUri())
+//						.contentType(MediaType.APPLICATION_JSON)
+//						.header("Channel", EnvironmentUtil.getBidvLinkedChannelId())
+//						.header("User-Agent", EnvironmentUtil.getBidvLinkedMerchantName())
+//						.header("X-Client-Certificate", clientXCertification)
+//						.header("X-API-Interaction-ID", interactionId.toString())
+//						.header("X-Idempotency-Key", idemKey.toString())
+//						.header("Timestamp", "2020-01-31T09:59:34.000+10:12")
+//						.header("X-Customer-IP-Address", EnvironmentUtil.getIpVietQRVN())
+//						.header("Authorization", "Bearer " + token)
+//						.header("X-JWS-Signature", jwsString)
+//						.body(BodyInserters.fromValue(body))
+//						.exchange();
+//				System.out.println("\n\n");
+//				ClientResponse response = responseMono.block();
+//				if (response.statusCode().is2xxSuccessful()) {
+//					String json = response.bodyToMono(String.class).block();
+//					logger.info("Response unlinkedBankOTP: " + json);
+//					System.out.println("Response unlinkedBankOTP: " + json);
+//					ObjectMapper objectMapper = new ObjectMapper();
+//					JsonNode rootNode = objectMapper.readTree(json);
+//					// if (rootNode.get("errorCode") != null) {
+//					// String errCode = rootNode.get("errorCode").asText();
+//					// if (errCode.trim().equals("000")) {
+//					// result = new ResponseMessageDTO("SUCCESS", "");
+//					// // do update status bank_account from authen => unauthen
+//					// accountBankService.unRegisterAuthenticationBank(dto.getBankAccount());
+//					// httpStatus = HttpStatus.OK;
+//					// } else {
+//					// result = new ResponseMessageDTO("FAILED", "E05");
+//					// httpStatus = HttpStatus.BAD_REQUEST;
+//					// }
+//					// } else {
+//					// result = new ResponseMessageDTO("FAILED", "E05");
+//					// httpStatus = HttpStatus.BAD_REQUEST;
+//					// }
+//					if (rootNode.get("body") != null) {
+//						if (rootNode.get("body").get("additionalInfo") != null) {
+//							if (rootNode.get("body").get("additionalInfo").get("detailedError") != null) {
+//								if (rootNode.get("body").get("additionalInfo").get("detailedError")
+//										.get("errorCode") != null) {
+//									String errorCode = rootNode.get("body").get("additionalInfo").get("detailedError")
+//											.get("errorCode").asText();
+//									if (errorCode != null && errorCode.trim().equals("000")) {
+//										// do update status bank_account from authen => unauthen
+//										accountBankService.unRegisterAuthenBank(dto.getBankAccount(),
+//												dto.getEwalletToken());
+//										result = new ResponseMessageDTO("SUCCESS", "");
+//										httpStatus = HttpStatus.OK;
+//									} else {
+//										result = new ResponseMessageDTO("FAILED", "E05");
+//										httpStatus = HttpStatus.BAD_REQUEST;
+//									}
+//								} else {
+//									result = new ResponseMessageDTO("FAILED", "E05");
+//									httpStatus = HttpStatus.BAD_REQUEST;
+//								}
+//							} else {
+//								result = new ResponseMessageDTO("FAILED", "E05");
+//								httpStatus = HttpStatus.BAD_REQUEST;
+//							}
+//						} else {
+//							result = new ResponseMessageDTO("FAILED", "E05");
+//							httpStatus = HttpStatus.BAD_REQUEST;
+//						}
+//					} else {
+//						if (rootNode.get("errorCode") != null) {
+//							String errorCode = rootNode.get("errorCode").asText();
+//							if (errorCode != null && errorCode.trim().equals("000")) {
+//								accountBankService.unRegisterAuthenBank(dto.getBankAccount(), dto.getEwalletToken());
+//								result = new ResponseMessageDTO("SUCCESS", "");
+//								httpStatus = HttpStatus.OK;
+//							} else {
+//								result = new ResponseMessageDTO("FAILED", "E05");
+//								httpStatus = HttpStatus.BAD_REQUEST;
+//							}
+//						} else {
+//							result = new ResponseMessageDTO("FAILED", "E05");
+//							httpStatus = HttpStatus.BAD_REQUEST;
+//						}
+//
+//					}
+//				} else {
+//					String json = response.bodyToMono(String.class).block();
+//					logger.info("Response unlinkedBankOTP: " + json);
+//					System.out.println("Response unlinkedBankOTP: " + json);
+//					result = new ResponseMessageDTO("FAILED", "E05");
+//					httpStatus = HttpStatus.BAD_REQUEST;
+//				}
+//			} else {
+//				logger.error("unlinkedBankOTP: INVALID REQUEST BODY");
+//				System.out.println("unlinkedBankOTP: INVALID REQUEST BODY");
+//				result = new ResponseMessageDTO("FAILED", "E46");
+//				httpStatus = HttpStatus.BAD_REQUEST;
+//			}
 		} catch (Exception e) {
 			logger.error("Error at unlinkedBankOTP: " + e.toString());
 			System.out.println("Error at unlinkedBankOTP: " + e.toString());

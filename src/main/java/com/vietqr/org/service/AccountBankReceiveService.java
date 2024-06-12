@@ -3,6 +3,7 @@ package com.vietqr.org.service;
 import java.util.List;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.entity.AccountBankReceiveEntity;
@@ -123,4 +124,20 @@ public interface AccountBankReceiveService {
     IBankReceiveFeePackageDTO getCustomerBankDetailByBankId(String bankId);
 
     List<IAccountBankReceiveDTO> getBankIdsByBankId(String bankId);
+
+    AccountBankReceiveEntity getAccountBankByCustomerIdAndByServiceId(String customerId);
+
+    CustomerVaInfoDataDTO getAccountCustomerInfo(String customerId);
+
+	void updateRegisterAuthentication(String userId, String merchantId);
+
+	String getBankIdByUserIdAndMerchantId(String userId, String merchantId);
+
+	BidvUnlinkedDTO getMerchantIdByBankAccountBidvAuthen(String bankAccount, String bankCode);
+
+	void updateRegisterUnlinkBidv(String userId, String bankId);
+
+    String getBankCodeByBankId(String bankId);
+
+	void updateRegisterAuthenticationBankBIDV(String nationalId, String phoneAuthenticated, String bankAccountName, String bankAccount, String customerId, String ewalletToken, String bankId);
 }

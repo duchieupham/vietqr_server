@@ -10,6 +10,7 @@ public class ResponseReqCustomerVaDTO implements Serializable {
 
     private String merchantId;
     private String confirmId;
+    private String merchantName;
 
     public ResponseReqCustomerVaDTO() {
         super();
@@ -21,6 +22,12 @@ public class ResponseReqCustomerVaDTO implements Serializable {
         super();
         this.merchantId = merchantId;
         this.confirmId = confirmId;
+    }
+
+    public ResponseReqCustomerVaDTO(String merchantId, String confirmId, String merchantName) {
+        this.merchantId = merchantId;
+        this.confirmId = confirmId;
+        this.merchantName = merchantName;
     }
 
     public String getMerchantId() {
@@ -39,4 +46,11 @@ public class ResponseReqCustomerVaDTO implements Serializable {
         this.confirmId = confirmId;
     }
 
+    public String getMerchantName() {
+        return merchantName;
+    }
+
+    public void setMerchantName(String merchantName) {
+        this.merchantName = merchantName;
+    }
 }

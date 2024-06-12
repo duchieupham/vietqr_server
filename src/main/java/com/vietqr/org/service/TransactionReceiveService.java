@@ -3,6 +3,7 @@ package com.vietqr.org.service;
 import java.util.List;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.dto.bidv.CustomerInvoiceInfoDataDTO;
 import org.springframework.stereotype.Service;
 import com.vietqr.org.entity.TransactionReceiveEntity;
 
@@ -526,4 +527,10 @@ public interface TransactionReceiveService {
         List<DataTransactionDTO> getTransactionInfo(String bankId, String time, int recordType);
 
         List<TransReceiveInvoicesDTO> getTransactionReceiveByBankId(String bankId, String time);
+
+        String checkExistedBillId(String billId);
+
+        CustomerInvoiceInfoDataDTO getTransactionReceiveCusInfo(String customerId);
+
+        TransactionReceiveEntity getTransactionReceiveByBillId(String billId);
 }

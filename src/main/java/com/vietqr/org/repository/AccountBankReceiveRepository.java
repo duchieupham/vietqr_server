@@ -5,6 +5,7 @@ import java.util.List;
 import javax.transaction.Transactional;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -429,4 +430,59 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "INNER JOIN bank_type b ON a.bank_type_id = b.id "
 			+ "WHERE a.id = :bankId ", nativeQuery = true)
 	List<IAccountBankReceiveDTO> getBankIdsByBankId(String bankId);
+
+	@Query(value = "SELECT a.* FROM account_bank_receive a "
+			+ "WHERE a.customer_id = :customerId ", nativeQuery = true)
+    AccountBankReceiveEntity getAccountBankByCustomerIdAndByServiceId(String customerId);
+
+	@Query(value = "SELECT customer_id AS customer_id, id AS bankId, "
+			+ "bank_account_name AS customer_name "
+			+ "FROM account_bank_receive "
+			+ "WHERE customer_id = :customerId "
+			+ "LIMIT 1", nativeQuery = true)
+    CustomerVaInfoDataDTO getAccountCustomerInfo(String customerId);
+
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_bank_receive SET national_id = '', phone_authenticated = '', "
+			+ "customer_id = '', is_authenticated = FALSE WHERE id = :bankId AND user_id = :userId", nativeQuery = true)
+	void updateRegisterAuthentication(String userId, String bankId);
+
+	@Query(value = "SELECT a.id FROM account_bank_receive a "
+			+ "INNER JOIN customer_va b ON a.id = b.bank_id "
+			+ "WHERE a.user_id = :userId AND b.merchant_id = :merchantId ", nativeQuery = true)
+	String getBankIdByUserIdAndMerchantId(String userId, String merchantId);
+
+	@Query(value = "SELECT a.id AS bankId, b.merchant_id AS merchantId, "
+			+ "a.user_id AS userId FROM account_bank_receive a "
+			+ "INNER JOIN customer_va b ON a.id = b.bank_id "
+			+ "INNER JOIN bank_type c ON c.id = a.bank_type_id "
+			+ "WHERE a.bank_account = :bankAccount AND c.bank_code = :bankCode "
+			+ "a.is_authenticated = TRUE LIMIT 1", nativeQuery = true)
+	BidvUnlinkedDTO getMerchantIdByBankAccountBidvAuthen(String bankAccount, String bankCode);
+
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_bank_receive SET national_id = '', phone_authenticated = '', "
+			+ "customer_id = '', is_authenticated = FALSE WHERE id = :bankId AND user_id = :userId "
+			+ "AND is_authenticated = TRUE ", nativeQuery = true)
+	void updateRegisterUnlinkBidv(String userId, String bankId);
+
+	@Query(value = "SELECT b.bank_code "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN bank_type b ON a.bank_type_id = b.id "
+			+ "WHERE a.id = :bankId LIMIT 1", nativeQuery = true)
+	String getBankCodeByBankId(String bankId);
+
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_bank_receive "
+			+ "SET national_id = :nationalId, phone_authenticated = :phoneAuthenticated, "
+			+ "bank_account_name = :bankAccountName, bank_account = :bankAccount, "
+			+ "customer_id = :customerId, "
+			+ "ewallet_token = :ewalletToken, is_authenticated = true "
+			+ "WHERE id = :bankId", nativeQuery = true)
+	void updateRegisterAuthenticationBankBIDV(String nationalId, String phoneAuthenticated,
+											  String bankAccountName, String bankAccount,
+											  String customerId, String ewalletToken, String bankId);
 }

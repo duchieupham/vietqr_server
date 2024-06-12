@@ -80,6 +80,9 @@ public class AccountBankReceiveEntity implements Serializable {
 	@Column(name = "validFeeTo")
 	private Long validFeeTo;
 
+	@Column(name = "customerId")
+	private String customerId = "";
+
 	public AccountBankReceiveEntity() {
 		super();
 	}
@@ -271,6 +274,18 @@ public class AccountBankReceiveEntity implements Serializable {
 
 	public void setValidFeeTo(Long validFeeTo) {
 		this.validFeeTo = validFeeTo;
+	}
+
+	public void setValidFeeFrom(Long validFeeFrom) {
+		this.validFeeFrom = validFeeFrom;
+	}
+
+	public String getCustomerId() {
+		return customerId;
+	}
+
+	public void setCustomerId(String customerId) {
+		this.customerId = customerId;
 	}
 
 	@Override

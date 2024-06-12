@@ -11,8 +11,11 @@ import javax.validation.Valid;
 
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.*;
+import com.vietqr.org.entity.bidv.CustomerVaEntity;
 import com.vietqr.org.service.*;
+import com.vietqr.org.service.bidv.CustomerVaService;
 import com.vietqr.org.util.FormatUtil;
+import com.vietqr.org.util.StringUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -83,6 +86,9 @@ public class AccountBankReceiveController {
 
 	@Autowired
 	ContactService contactService;
+
+	@Autowired
+	CustomerVaService customerVaService;
 
 	// @GetMapping("account-bank/check/{bankAccount}/{bankTypeId}/{userId}")
 	@GetMapping("account-bank/check/{bankAccount}/{bankTypeId}")
@@ -383,10 +389,39 @@ public class AccountBankReceiveController {
 			if (dto.getEwalletToken() != null) {
 				ewalletToken = dto.getEwalletToken();
 			}
-			accountBankReceiveService.updateRegisterAuthenticationBank(dto.getNationalId(), dto.getPhoneAuthenticated(),
-					dto.getBankAccountName(), dto.getBankAccount(),
-					ewalletToken,
-					dto.getBankId());
+			String bankCode = accountBankReceiveService.getBankCodeByBankId(dto.getBankId());
+			switch (bankCode) {
+				case "MB":
+					accountBankReceiveService.updateRegisterAuthenticationBank(dto.getNationalId(), dto.getPhoneAuthenticated(),
+							dto.getBankAccountName(), dto.getBankAccount(),
+							ewalletToken,
+							dto.getBankId());
+					break;
+				case "BIDV":
+					accountBankReceiveService.updateRegisterAuthenticationBankBIDV(dto.getNationalId(), dto.getPhoneAuthenticated(),
+							dto.getBankAccountName(), dto.getBankAccount(),dto.getVaNumber().substring(4),
+							ewalletToken,
+							dto.getBankId());
+					AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService
+							.getAccountBankById(dto.getBankId());
+					// customer va enable
+					UUID customerVaId = UUID.randomUUID();
+					CustomerVaEntity customerVaEntity = new CustomerVaEntity();
+					customerVaEntity.setId(customerVaId.toString());
+					customerVaEntity.setMerchantId(dto.getMerchantId());
+					customerVaEntity.setMerchantName(dto.getMerchantName());
+					customerVaEntity.setBankId(dto.getBankId());
+					customerVaEntity.setUserId(accountBankReceiveEntity.getUserId());
+					customerVaEntity.setCustomerId(dto.getVaNumber().substring(4));
+					customerVaEntity.setBankAccount(dto.getBankAccount());
+					customerVaEntity.setUserBankName(accountBankReceiveEntity.getBankAccountName());
+					customerVaEntity.setNationalId(dto.getNationalId());
+					customerVaEntity.setPhoneAuthenticated(dto.getPhoneAuthenticated());
+					customerVaEntity.setMerchantType("1");
+					customerVaEntity.setVaNumber(dto.getVaNumber());
+					customerVaService.insert(customerVaEntity);
+					break;
+			}
 			//
 			LarkUtil larkUtil = new LarkUtil();
 			AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService
@@ -440,37 +475,93 @@ public class AccountBankReceiveController {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
-			UUID uuid = UUID.randomUUID();
-			String qr = getStaticQR(dto.getBankAccount(), dto.getBankTypeId());
-			AccountBankReceiveEntity entity = new AccountBankReceiveEntity();
-			entity.setId(uuid.toString());
-			entity.setBankTypeId(dto.getBankTypeId());
-			entity.setBankAccount(dto.getBankAccount());
-			entity.setBankAccountName(dto.getUserBankName());
-			entity.setType(0);
-			entity.setUserId(dto.getUserId());
-			entity.setNationalId(dto.getNationalId());
-			entity.setPhoneAuthenticated(dto.getPhoneAuthenticated());
-			entity.setAuthenticated(true);
-			entity.setSync(false);
-			entity.setWpSync(false);
-			entity.setStatus(true);
-			entity.setMmsActive(false);
-			entity.setRpaSync(false);
-			entity.setUsername("");
-			entity.setPassword("");
-			entity.setTerminalLength(10);
-			entity.setValidFeeTo(0L);
-			entity.setValidFeeFrom(0L);
-			entity.setValidService(false);
-			if (dto.getEwalletToken() != null) {
-				entity.setEwalletToken(dto.getEwalletToken());
-				logger.info("insertAccountBank: EWALLET TOKEN: " + dto.getEwalletToken());
-			} else {
-				entity.setEwalletToken("");
-				logger.info("insertAccountBank: EWALLET TOKEN: EMPTY");
+			if (StringUtil.isNullOrEmpty(dto.getBankCode())) {
+				dto.setBankCode("MB");
 			}
+			UUID uuid = UUID.randomUUID();
+			String qr = "";
+			AccountBankReceiveEntity entity = new AccountBankReceiveEntity();
+			switch (dto.getBankCode()) {
+				case "MB":
+					qr = getStaticQR(dto.getBankAccount(), dto.getBankTypeId());
+					entity.setId(uuid.toString());
+					entity.setBankTypeId(dto.getBankTypeId());
+					entity.setBankAccount(dto.getBankAccount());
+					entity.setBankAccountName(dto.getUserBankName());
+					entity.setType(0);
+					entity.setUserId(dto.getUserId());
+					entity.setNationalId(dto.getNationalId());
+					entity.setPhoneAuthenticated(dto.getPhoneAuthenticated());
+					entity.setAuthenticated(true);
+					entity.setSync(false);
+					entity.setWpSync(false);
+					entity.setStatus(true);
+					entity.setMmsActive(false);
+					entity.setRpaSync(false);
+					entity.setUsername("");
+					entity.setPassword("");
+					entity.setTerminalLength(10);
+					entity.setValidFeeTo(0L);
+					entity.setValidFeeFrom(0L);
+					entity.setValidService(false);
+					if (dto.getEwalletToken() != null) {
+						entity.setEwalletToken(dto.getEwalletToken());
+						logger.info("insertAccountBank: EWALLET TOKEN: " + dto.getEwalletToken());
+					} else {
+						entity.setEwalletToken("");
+						logger.info("insertAccountBank: EWALLET TOKEN: EMPTY");
+					}
+					accountBankReceiveService.insertAccountBank(entity);
+					break;
+				case "BIDV":
+					qr = getStaticQR(dto.getBankAccount(), dto.getBankTypeId());
+					entity.setId(uuid.toString());
+					entity.setBankTypeId(dto.getBankTypeId());
+					entity.setBankAccount(dto.getBankAccount());
+					entity.setBankAccountName(dto.getUserBankName());
+					entity.setType(0);
+					entity.setUserId(dto.getUserId());
+					entity.setNationalId(dto.getNationalId());
+					entity.setPhoneAuthenticated(dto.getPhoneAuthenticated());
+					entity.setAuthenticated(true);
+					entity.setSync(false);
+					entity.setWpSync(false);
+					entity.setStatus(true);
+					entity.setMmsActive(false);
+					entity.setRpaSync(false);
+					entity.setUsername("");
+					entity.setPassword("");
+					entity.setTerminalLength(10);
+					entity.setValidFeeTo(0L);
+					entity.setValidFeeFrom(0L);
+					entity.setValidService(false);
+					entity.setCustomerId(dto.getVaNumber().substring(4));
+					if (dto.getEwalletToken() != null) {
+						entity.setEwalletToken(dto.getEwalletToken());
+						logger.info("insertAccountBank: EWALLET TOKEN: " + dto.getEwalletToken());
+					} else {
+						entity.setEwalletToken("");
+						logger.info("insertAccountBank: EWALLET TOKEN: EMPTY");
+					}
 
+					// customer va enable
+					UUID customerVaId = UUID.randomUUID();
+					CustomerVaEntity customerVaEntity = new CustomerVaEntity();
+					customerVaEntity.setId(customerVaId.toString());
+					customerVaEntity.setMerchantId(dto.getMerchantId());
+					customerVaEntity.setMerchantName(dto.getMerchantName());
+					customerVaEntity.setBankId(uuid.toString());
+					customerVaEntity.setUserId(dto.getUserId());
+					customerVaEntity.setCustomerId(dto.getVaNumber().substring(4));
+					customerVaEntity.setBankAccount(dto.getBankAccount());
+					customerVaEntity.setUserBankName(dto.getUserBankName());
+					customerVaEntity.setNationalId(dto.getNationalId());
+					customerVaEntity.setPhoneAuthenticated(dto.getPhoneAuthenticated());
+					customerVaEntity.setMerchantType("1");
+					customerVaEntity.setVaNumber(dto.getVaNumber());
+					customerVaService.insert(customerVaEntity);
+					break;
+			}
 			accountBankReceiveService.insertAccountBank(entity);
 			// insert account-bank-receive-share
 			UUID uuidShare = UUID.randomUUID();
@@ -549,7 +640,7 @@ public class AccountBankReceiveController {
 	}
 
 	@Async
-	private String getStaticQR(String bankAccount, String bankTypeId) {
+	protected String getStaticQR(String bankAccount, String bankTypeId) {
 		String result = "";
 		String caiValue = caiBankService.getCaiValue(bankTypeId);
 		VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();

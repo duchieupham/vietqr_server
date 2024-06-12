@@ -53,6 +53,11 @@ public class CustomerInvoiceEntity implements Serializable {
     @Column(name = "inquire")
     private int inquire;
 
+    // 0: Default là hóa đơn BIDV
+    // 1: Transaction_receive
+    @Column(name = "qrType")
+    private int qrType = 0;
+
     public CustomerInvoiceEntity() {
         super();
     }
@@ -155,4 +160,11 @@ public class CustomerInvoiceEntity implements Serializable {
         this.inquire = inquire;
     }
 
+    public int getQrType() {
+        return qrType;
+    }
+
+    public void setQrType(int qrType) {
+        this.qrType = qrType;
+    }
 }
