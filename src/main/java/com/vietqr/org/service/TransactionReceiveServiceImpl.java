@@ -1,6 +1,7 @@
 package com.vietqr.org.service;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.dto.bidv.CustomerInvoiceInfoDataDTO;
 import com.vietqr.org.repository.CustomQueryRepository;
 import com.vietqr.org.util.DateTimeUtil;
 import com.vietqr.org.util.StringUtil;
@@ -1397,6 +1398,21 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
             data.addAll(dtos);
         }
         return data;
+    }
+
+    @Override
+    public String checkExistedBillId(String billId) {
+        return repo.checkExistedBillId(billId);
+    }
+
+    @Override
+    public CustomerInvoiceInfoDataDTO getTransactionReceiveCusInfo(String customerId) {
+        return repo.getTransactionReceiveCusInfo(customerId);
+    }
+
+    @Override
+    public TransactionReceiveEntity getTransactionReceiveByBillId(String billId) {
+        return repo.getTransactionReceiveByBillId(billId, DateTimeUtil.get2LastPartition());
     }
 
     @Override

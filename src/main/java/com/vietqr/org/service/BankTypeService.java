@@ -24,4 +24,6 @@ public interface BankTypeService {
 	public Boolean getRpaContainIdByBankCode(String bankCode);
 
     List<BankTypeShortNameDTO> getBankTypeByListId(List<String> ids);
+
+    BankTypeEntity getBankTypeByBankCode(String bankCode);
 }

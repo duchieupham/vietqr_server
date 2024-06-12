@@ -45,4 +45,9 @@ public class BankTypeServiceImpl implements BankTypeService {
 		return bankTypeRepository.getBankTypeByListId(ids);
 	}
 
+	@Override
+	public BankTypeEntity getBankTypeByBankCode(String bankCode) {
+		return bankTypeRepository.getBankTypeByBankCode(bankCode);
+	}
+
 }

@@ -14,6 +14,7 @@ public class RequestLinkedBankDTO implements Serializable {
     private String phoneNumber;
     private String applicationType;
     private String bankCode;
+    private String merchantName;
 
     public RequestLinkedBankDTO() {
         super();
@@ -77,4 +78,11 @@ public class RequestLinkedBankDTO implements Serializable {
         this.bankCode = bankCode;
     }
 
+    public String getMerchantName() {
+        return merchantName;
+    }
+
+    public void setMerchantName(String merchantName) {
+        this.merchantName = merchantName;
+    }
 }

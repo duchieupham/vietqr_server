@@ -27,6 +27,7 @@ public interface CustomerInvoiceRepository extends JpaRepository<CustomerInvoice
                         + "INNER JOIN customer_va b "
                         + "ON a.customer_id = b.customer_id "
                         + "WHERE a.customer_id = :customerId "
+                        + "AND qr_type != 1 "
                         + "ORDER BY a.time_created DESC "
                         + "LIMIT :offset, 20", nativeQuery = true)
         List<CustomerInvoiceDataDTO> getCustomerInvoiceAllStatus(

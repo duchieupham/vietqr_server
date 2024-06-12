@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.vietqr.org.entity.AccountBankReceiveEntity;
+import com.vietqr.org.entity.AccountBankReceiveShareEntity;
+import com.vietqr.org.service.AccountBankReceiveShareService;
+import com.vietqr.org.service.CaiBankService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,6 +42,12 @@ public class CustomerVaController {
     CustomerVaService customerVaService;
 
     @Autowired
+    CaiBankService caiBankService;
+
+    @Autowired
+    AccountBankReceiveShareService accountBankReceiveShareService;
+
+    @Autowired
     AccountBankReceiveService accountBankReceiveService;
 
     // BIDV Service - create merchant BIDV
@@ -58,6 +68,8 @@ public class CustomerVaController {
             if (result instanceof ResponseObjectDTO) {
                 httpStatus = HttpStatus.OK;
             } else if (result instanceof ResponseMessageDTO) {
+                httpStatus = HttpStatus.BAD_REQUEST;
+            } else {
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
@@ -100,6 +112,8 @@ public class CustomerVaController {
             result = CustomerVaUtil.unregisterCustomerVa(merchantId);
             if (result.getStatus().equals("SUCCESS")) {
                 // remove record from database
+                String bankId = accountBankReceiveService.getBankIdByUserIdAndMerchantId(userId, merchantId);
+                accountBankReceiveService.updateRegisterAuthentication(userId, bankId);
                 customerVaService.removeCustomerVa(userId, merchantId);
                 httpStatus = HttpStatus.OK;
             } else {
@@ -120,12 +134,13 @@ public class CustomerVaController {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
+            UUID bankId = UUID.randomUUID();
             UUID uuid = UUID.randomUUID();
             CustomerVaEntity entity = new CustomerVaEntity();
             entity.setId(uuid.toString());
             entity.setMerchantId(dto.getMerchantId());
             entity.setMerchantName(dto.getMerchantName());
-            entity.setBankId(dto.getBankId());
+            entity.setBankId(bankId.toString());
             entity.setUserId(dto.getUserId());
             entity.setCustomerId(dto.getVaNumber().substring(4));
             entity.setBankAccount(dto.getBankAccount());
@@ -136,6 +151,45 @@ public class CustomerVaController {
             entity.setVaNumber(dto.getVaNumber());
             customerVaService.insert(entity);
             //
+
+            AccountBankReceiveEntity accountBankReceiveEntity = new AccountBankReceiveEntity();
+            // also insert account_bank_receive and account_bank_receive_share
+            // Bank type BIDV
+            String bankTypeId = "f44cbe47-cb2b-427e-98b5-10afa0375690";
+            accountBankReceiveEntity.setId(bankId.toString());
+            accountBankReceiveEntity.setBankTypeId(bankTypeId);
+            accountBankReceiveEntity.setBankAccount(dto.getBankAccount());
+            accountBankReceiveEntity.setBankAccountName(dto.getUserBankName());
+            accountBankReceiveEntity.setType(0);
+            accountBankReceiveEntity.setUserId(dto.getUserId());
+            accountBankReceiveEntity.setNationalId(dto.getNationalId());
+            accountBankReceiveEntity.setPhoneAuthenticated(dto.getPhoneAuthenticated());
+            accountBankReceiveEntity.setAuthenticated(true);
+            accountBankReceiveEntity.setSync(false);
+            accountBankReceiveEntity.setWpSync(false);
+            accountBankReceiveEntity.setStatus(true);
+            accountBankReceiveEntity.setMmsActive(false);
+            accountBankReceiveEntity.setRpaSync(false);
+            accountBankReceiveEntity.setUsername("");
+            accountBankReceiveEntity.setPassword("");
+            accountBankReceiveEntity.setTerminalLength(10);
+            accountBankReceiveEntity.setValidFeeTo(0L);
+            accountBankReceiveEntity.setValidFeeFrom(0L);
+            accountBankReceiveEntity.setValidService(false);
+            accountBankReceiveEntity.setEwalletToken("");
+            accountBankReceiveEntity.setCustomerId(dto.getVaNumber().substring(4));
+
+            UUID uuidShare = UUID.randomUUID();
+            AccountBankReceiveShareEntity accountBankReceiveShareEntity = new AccountBankReceiveShareEntity();
+            accountBankReceiveShareEntity.setId(uuidShare.toString());
+            accountBankReceiveShareEntity.setBankId(bankId.toString());
+            accountBankReceiveShareEntity.setUserId(dto.getUserId());
+            accountBankReceiveShareEntity.setOwner(true);
+            accountBankReceiveShareEntity.setTraceTransfer("");
+            accountBankReceiveShareEntity.setQrCode("");
+            accountBankReceiveShareEntity.setTerminalId("");
+            accountBankReceiveService.insertAccountBank(accountBankReceiveEntity);
+            accountBankReceiveShareService.insertAccountBankReceiveShare(accountBankReceiveShareEntity);
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
 

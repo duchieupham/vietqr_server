@@ -4,6 +4,7 @@ import java.util.List;
 import javax.transaction.Transactional;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.dto.bidv.CustomerInvoiceInfoDataDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,7 +21,8 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
 
         @Transactional
         @Modifying
-        @Query(value = "UPDATE transaction_receive SET status = :status, ref_id = :refId, reference_number = :referenceNumber, time_paid = :timePaid WHERE id = :id", nativeQuery = true)
+        @Query(value = "UPDATE transaction_receive SET status = :status, ref_id = :refId, " +
+                "reference_number = :referenceNumber, time_paid = :timePaid WHERE id = :id", nativeQuery = true)
         void updateTransactionReceiveStatus(@Param(value = "status") int status,
                         @Param(value = "refId") String refId,
                         @Param(value = "referenceNumber") String referenceNumber,
@@ -294,6 +296,12 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
         TransactionReceiveEntity getTransactionReceiveByOrderId(
                         @Param(value = "orderId") String orderId,
                         @Param(value = "time") long time);
+
+        @Query(value = "SELECT * FROM transaction_receive WHERE "
+                + "bill_id = :billId AND time >= :time ", nativeQuery = true)
+        TransactionReceiveEntity getTransactionReceiveByBillId(
+                @Param(value = "billId") String billId,
+                @Param(value = "time") long time);
 
         @Query(value = "SELECT a.amount, a.bank_account as bankAccount, c.bank_name as bankName, a.time, a.content, "
                         + "a.reference_number as referenceNumber, a.trans_type as transType, a.status, "
@@ -2611,5 +2619,16 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
         @Modifying
         @Query(value = "UPDATE transaction_receive SET qr_code = :qr, amount = :totalAmountAfterVat WHERE id = :id LIMIT 1 ", nativeQuery = true)
         int updateTransactionReceiveForInvoice(long totalAmountAfterVat, String qr, String id);
+
+        @Query(value = "SELECT reference_number FROM transaction_receive "
+                + "WHERE reference_number = :billId LIMIT 1", nativeQuery = true)
+        String checkExistedBillId(String billId);
+
+        @Query(value = "SELECT 1 AS type, a.amount AS amount, a.bill_id AS bill_id "
+                + "FROM transaction_receive a "
+                + "WHERE a.status = 0 AND a.bill_id IS NOT NULL AND a.bill_id != '' "
+                + "ORDER BY RAND() "
+                + "LIMIT 1", nativeQuery = true)
+        CustomerInvoiceInfoDataDTO getTransactionReceiveCusInfo(String customerId);
 }
 

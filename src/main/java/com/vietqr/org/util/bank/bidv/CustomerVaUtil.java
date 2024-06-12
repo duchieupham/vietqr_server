@@ -146,7 +146,7 @@ public class CustomerVaUtil {
                     if (errorCode != null) {
                         if (errorCode.trim().equals("000")) {
                             ResponseReqCustomerVaDTO data = new ResponseReqCustomerVaDTO(merchantId,
-                                    interactionId.toString());
+                                    interactionId.toString(), merchantName);
                             result = new ResponseObjectDTO("SUCCESS", data);
                         } else if (errorCode.trim().equals("182")) {
                             // check merchantId đã tồn tại trong hệ thống VietQR hay chưa, xong nếu ko tồn

@@ -28,4 +28,7 @@ public interface BankTypeRepository extends JpaRepository<BankTypeEntity, Long> 
 	@Query(value = "SELECT id AS bankTypeId, bank_short_name AS bankShortName "
 			+ "FROM bank_type WHERE id IN (:ids)", nativeQuery = true)
     List<BankTypeShortNameDTO> getBankTypeByListId(List<String> ids);
+
+	@Query(value = "SELECT * FROM bank_type WHERE bank_code = :bankCode LIMIT 1", nativeQuery = true)
+    BankTypeEntity getBankTypeByBankCode(String bankCode);
 }

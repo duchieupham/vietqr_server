@@ -148,8 +148,8 @@ public class TransactionReceiveEntity implements Serializable {
 	@Column(name = "urlLink")
 	private String urlLink;
 
-	@Column(name = "invoiceItem", columnDefinition = "JSON")
-	private String invoiceItem;
+	@Column(name = "billId")
+	private String billId = "";
 
 	public TransactionReceiveEntity() {
 		super();
@@ -231,43 +231,6 @@ public class TransactionReceiveEntity implements Serializable {
 		this.qrCode = qrCode;
 		this.userId = userId;
 		this.note = note;
-	}
-
-	public TransactionReceiveEntity(String id, String bankAccount, String bankId, String content, long amount,
-									long time, long timePaid, String refId, int type, int status, String traceId, String transType,
-									String referenceNumber, String orderId, String sign, String customerBankAccount, String customerBankCode,
-									String customerName, String terminalCode, String qrCode, String userId, String note, String invoiceItem) {
-		this.id = id;
-		this.bankAccount = bankAccount;
-		this.bankId = bankId;
-		this.content = content;
-		this.amount = amount;
-		this.time = time;
-		this.timePaid = timePaid;
-		this.refId = refId;
-		this.type = type;
-		this.status = status;
-		this.traceId = traceId;
-		this.transType = transType;
-		this.referenceNumber = referenceNumber;
-		this.orderId = orderId;
-		this.sign = sign;
-		this.customerBankAccount = customerBankAccount;
-		this.customerBankCode = customerBankCode;
-		this.customerName = customerName;
-		this.terminalCode = terminalCode;
-		this.qrCode = qrCode;
-		this.userId = userId;
-		this.note = note;
-		this.invoiceItem = invoiceItem;
-	}
-
-	public String getInvoiceItem() {
-		return invoiceItem;
-	}
-
-	public void setInvoiceItem(String invoiceItem) {
-		this.invoiceItem = invoiceItem;
 	}
 
 	public String getId() {
@@ -460,5 +423,13 @@ public class TransactionReceiveEntity implements Serializable {
 
 	public void setUrlLink(String urlLink) {
 		this.urlLink = urlLink;
+	}
+
+	public String getBillId() {
+		return billId;
+	}
+
+	public void setBillId(String billId) {
+		this.billId = billId;
 	}
 }

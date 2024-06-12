@@ -36,6 +36,9 @@ public class EnvironmentUtil {
     private static final String BIDV_LINKED_CHANNEL_ID_UAT = "211701";
     private static final String BIDV_LINKED_CHANNEL_ID_PROD = "211701";
 
+    private static final String BIDV_TRANSACTION_PREFIX = "TRV";
+    private static final String BIDV_INVOICE_TRANSACTION_PREFIX = "ITV";
+
     // BIDV
     // request - confirm add merchant va
     private static final String BIDV_URL_REQUEST_ADD_MERCHANT_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/createVAQLBH/v1";
@@ -93,6 +96,7 @@ public class EnvironmentUtil {
     private static final String VOICE_CODE = "1";
     private static final String SPEED_RATE = "1.1";
     private static final int BIT_RATE = 24;
+    private static final long TIME_OUT_BIDV_GET_BILL = 3000;
     private static final String VIET_QR_PLUS_PACKAGE = "VietQR Plus";
     private static final String VIET_QR_PRO_PACKAGE = "VietQR Pro";
     private static final String VIET_QR_NAME_ANNUAL_FEE = "Phí duy trì phần mềm VietQR tháng ";
@@ -711,5 +715,17 @@ public class EnvironmentUtil {
 
     public static String getUserBankNameRecharge2() {
         return (isProduction() == false) ? USER_BANK_NAME_RECHARGE_UAT2 : USER_BANK_NAME_RECHARGE_PROD2;
+    }
+
+    public static String getBidvTransactionPrefix() {
+        return BIDV_TRANSACTION_PREFIX;
+    }
+
+    public static String getBidvInvoiceTransactionPrefix() {
+        return BIDV_INVOICE_TRANSACTION_PREFIX;
+    }
+
+    public static long getTimeOutBidvGetBill() {
+        return TIME_OUT_BIDV_GET_BILL;
     }
 }

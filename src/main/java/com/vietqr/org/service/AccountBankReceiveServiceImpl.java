@@ -3,6 +3,7 @@ package com.vietqr.org.service;
 import java.util.List;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -281,6 +282,49 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     @Override
     public List<IAccountBankReceiveDTO> getBankIdsByBankId(String bankId) {
         return repo.getBankIdsByBankId(bankId);
+    }
+
+    @Override
+    public AccountBankReceiveEntity getAccountBankByCustomerIdAndByServiceId(String customerId) {
+        return repo.getAccountBankByCustomerIdAndByServiceId(customerId);
+    }
+
+    @Override
+    public CustomerVaInfoDataDTO getAccountCustomerInfo(String customerId) {
+        return repo.getAccountCustomerInfo(customerId);
+    }
+
+    @Override
+    public void updateRegisterAuthentication(String userId, String bankId) {
+        repo.updateRegisterAuthentication(userId, bankId);
+    }
+
+    @Override
+    public String getBankIdByUserIdAndMerchantId(String userId, String merchantId) {
+        return repo.getBankIdByUserIdAndMerchantId(userId, merchantId);
+    }
+
+    @Override
+    public BidvUnlinkedDTO getMerchantIdByBankAccountBidvAuthen(String bankAccount, String bankCode) {
+        return repo.getMerchantIdByBankAccountBidvAuthen(bankAccount, bankCode);
+    }
+
+    @Override
+    public void updateRegisterUnlinkBidv(String userId, String bankId) {
+        repo.updateRegisterUnlinkBidv(userId, bankId);
+    }
+
+    @Override
+    public String getBankCodeByBankId(String bankId) {
+        return repo.getBankCodeByBankId(bankId);
+    }
+
+    @Override
+    public void updateRegisterAuthenticationBankBIDV(String nationalId, String phoneAuthenticated,
+                                                     String bankAccountName, String bankAccount, String customerId,
+                                                     String ewalletToken, String bankId) {
+        repo.updateRegisterAuthenticationBankBIDV(nationalId, phoneAuthenticated, bankAccountName, bankAccount,
+                customerId, ewalletToken, bankId);
     }
 
     @Override
