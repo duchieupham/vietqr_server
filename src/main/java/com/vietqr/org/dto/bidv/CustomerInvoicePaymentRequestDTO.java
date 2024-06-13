@@ -88,5 +88,10 @@ public class CustomerInvoicePaymentRequestDTO implements Serializable {
     public void setChecksum(String checksum) {
         this.checksum = checksum;
     }
-
+    @Override
+    public String toString() {
+        return "CustomerInvoicePaymentRequestDTO [trans_id=" + trans_id + ", trans_date=" + trans_date
+                + ", customer_id=" + customer_id + ", service_id=" + service_id + ", bill_id=" + bill_id
+                + ", amount=" + amount + ", checksum=" + checksum + "]";
+    }
 }
