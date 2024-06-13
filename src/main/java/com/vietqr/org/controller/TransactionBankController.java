@@ -4194,8 +4194,8 @@ public class TransactionBankController {
 						.block();
 				logger.error("Response confirmOTP error: request: " + dto.toString() + " at: " + System.currentTimeMillis());
 				LocalDateTime currentDateTime = LocalDateTime.now();
-				logger.error("Response confirmOTP error: " + confirmRequestBankDTO.getSoaErrorCode() + "-"
-						+ confirmRequestBankDTO.getSoaErrorDesc() + " at "
+				logger.error("Response confirmOTP error: " + confirmRequestBankDTO.getSoaErrorCode() + " - "
+						+ confirmRequestBankDTO.getSoaErrorDesc() + " at: "
 						+ currentDateTime.toEpochSecond(ZoneOffset.UTC));
 				String status = "FAILED";
 				String message = getMessageBankCode(confirmRequestBankDTO.getSoaErrorCode().trim());

@@ -248,6 +248,8 @@ public class CustomerInvoiceController {
         HttpStatus httpStatus = null;
         AccountBankReceiveEntity accountBankReceiveEntity = null;
         try {
+            logger.info("CustomerInvoiceController: INFO : receive paybill from BIDV: " + dto.toString()
+            + " at: " + System.currentTimeMillis());
             // for check valid token
             String accessKey = EnvironmentUtil.getBidvAccessKey();
             String keyDecoded = JWTUtil.getKeyFromToken(token);
