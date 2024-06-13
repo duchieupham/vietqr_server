@@ -92,7 +92,8 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	void unRegisterAuthenBank(@Param(value = "bankAccount") String bankAccount,
 			@Param(value = "ewalletToken") String ewalletToken);
 
-	@Query(value = "SELECT * FROM account_bank_receive WHERE bank_account = :bankAccount AND bank_type_id = :bankTypeId AND is_authenticated = true AND status = 1", nativeQuery = true)
+	@Query(value = "SELECT * FROM account_bank_receive WHERE bank_account = :bankAccount AND " +
+			"bank_type_id = :bankTypeId AND is_authenticated = true AND status = 1", nativeQuery = true)
 	AccountBankReceiveEntity getAccountBankByBankAccountAndBankTypeId(@Param(value = "bankAccount") String bankAccount,
 			@Param(value = "bankTypeId") String bankTypeId);
 
@@ -458,7 +459,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "INNER JOIN customer_va b ON a.id = b.bank_id "
 			+ "INNER JOIN bank_type c ON c.id = a.bank_type_id "
 			+ "WHERE a.bank_account = :bankAccount AND c.bank_code = :bankCode "
-			+ "a.is_authenticated = TRUE LIMIT 1", nativeQuery = true)
+			+ "AND a.is_authenticated = TRUE LIMIT 1", nativeQuery = true)
 	BidvUnlinkedDTO getMerchantIdByBankAccountBidvAuthen(String bankAccount, String bankCode);
 
 	@Transactional

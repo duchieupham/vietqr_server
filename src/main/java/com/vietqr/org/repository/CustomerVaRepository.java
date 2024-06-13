@@ -54,7 +54,7 @@ public interface CustomerVaRepository extends JpaRepository<CustomerVaEntity, Lo
                         + "LEFT JOIN ( "
                         + "SELECT customer_id, amount "
                         + "FROM customer_invoice "
-                        + "WHERE status = 0 "
+                        + "WHERE status = 0 AND qr_type != 1 "
                         + ") b "
                         + "ON a.customer_id = b.customer_id "
                         + "WHERE a.user_id = :userId ", nativeQuery = true)
