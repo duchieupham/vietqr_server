@@ -873,8 +873,62 @@ public class VietQRController {
 				}
 				break;
 			default:
-				result = new ResponseMessageDTO("FAILED", "E24");
-				httpStatus = HttpStatus.BAD_REQUEST;
+				String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
+				String bankTypeId = "";
+				if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
+					bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
+				} else {
+					bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getCustomerBankCode());
+				}
+				try {
+					String bankAccount = "";
+					String userBankName = "";
+					String content = "";
+					if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
+						bankAccount = dto.getBankAccount();
+						userBankName = dto.getUserBankName().trim().toUpperCase();
+					} else {
+						bankAccount = dto.getCustomerBankAccount();
+						userBankName = dto.getCustomerName().trim().toUpperCase();
+					}
+					if (dto.getContent().length() <= 50) {
+						bankTypeEntity = bankTypeService.getBankTypeById(bankTypeId);
+						String caiValue = caiBankService.getCaiValue(bankTypeId);
+						// generate VietQRGenerateDTO
+						VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+						vietQRGenerateDTO.setCaiValue(caiValue);
+						vietQRGenerateDTO.setAmount(dto.getAmount() + "");
+						if (dto.getReconciliation() == null || dto.getReconciliation()) {
+							content = traceId + " " + dto.getContent();
+						} else {
+							content = dto.getContent();
+						}
+						vietQRGenerateDTO.setContent(content);
+						vietQRGenerateDTO.setBankAccount(bankAccount);
+						qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+						//
+						vietQRDTO = new VietQRDTO();
+						// generate VietQRDTO
+						vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
+						vietQRDTO.setBankName(bankTypeEntity.getBankName());
+						vietQRDTO.setBankAccount(bankAccount);
+						vietQRDTO.setUserBankName(userBankName);
+						vietQRDTO.setAmount(dto.getAmount() + "");
+						vietQRDTO.setContent(content);
+						vietQRDTO.setQrCode(qr);
+						vietQRDTO.setImgId(bankTypeEntity.getImgId());
+						vietQRDTO.setExisting(0);
+						result = vietQRDTO;
+						httpStatus = HttpStatus.OK;
+					} else {
+						result = new ResponseMessageDTO("FAILED", "E26");
+						httpStatus = HttpStatus.BAD_REQUEST;
+					}
+				} catch (Exception e) {
+					httpStatus = HttpStatus.BAD_REQUEST;
+					logger.error("VietQRController: ERROR: generateQRCustomer: " + e.getMessage() + " at: " + System.currentTimeMillis());
+				}
+
 				break;
 		}
 		return new ResponseEntity<>(result, httpStatus);
@@ -1552,7 +1606,7 @@ public class VietQRController {
 							vietQRDTO.setBankAccount(accountBankEntity.getBankAccount());
 							vietQRDTO.setUserBankName(accountBankEntity.getBankAccountName().toUpperCase());
 							vietQRDTO.setAmount(dto.getAmount());
-							vietQRDTO.setContent(traceId + " " + dto.getContent());
+							vietQRDTO.setContent(dto.getContent());
 							vietQRDTO.setQrCode(qr);
 							vietQRDTO.setImgId(bankTypeEntity.getImgId());
 							// return transactionId to upload bill image
@@ -1628,7 +1682,7 @@ public class VietQRController {
 			httpStatus = HttpStatus.BAD_REQUEST;
 			return new ResponseEntity<>(result, httpStatus);
 		} finally {
-			if (result != null) {
+			if (result != null && !result.getBankCode().equals("BIDV")) {
 				if (!checkFlow2) {
 					if (dto.getOrderId() != null && !dto.getOrderId().isEmpty()) {
 						insertNewTransaction(transcationUUID, traceId, dto, result, dto.getOrderId(), "", false);
@@ -1636,6 +1690,8 @@ public class VietQRController {
 						insertNewTransaction(transcationUUID, traceId, dto, result, "", "", false);
 					}
 				}
+			}
+			if (result != null) {
 				if (!StringUtil.isNullOrEmpty(subRawCode)) {
 					TerminalBankReceiveEntity terminalBankReceiveEntity =
 							terminalBankReceiveService.getTerminalBankReceiveEntityByTerminalCode(subRawCode);
@@ -1883,11 +1939,7 @@ public class VietQRController {
 				transactionEntity.setNote(dto.getNote());
 				transactionEntity.setTransStatus(0);
 				transactionEntity.setUrlLink(dto.getUrlLink());
-				if (dto.getTransType() != null) {
-					transactionEntity.setTransType(dto.getTransType());
-				} else {
-					transactionEntity.setTransType("C");
-				}
+				transactionEntity.setTransType("C");
 				transactionEntity.setReferenceNumber("");
 				transactionEntity.setSign(dto.getSign());
 				transactionEntity.setBillId(dto.getBillId());

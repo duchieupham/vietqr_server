@@ -3647,12 +3647,13 @@ public class TransactionBankController {
 				} else if (dto.getBankCode().trim().equals("BIDV")) {
 					Long customerVaLength = customerVaService.getCustomerVaLength() + 1;
 					String merchantName = "";
-					if (StringUtil.isNullOrEmpty(dto.getMerchantName())) {
+					String rawMerchantName = dto.getAccountName().replaceAll(" ", "");
+					if (!StringUtil.isNullOrEmpty(rawMerchantName)) {
 						// GENERATE MERCHANT NAME
-						int size = (dto.getAccountName().length() / 3) * 2;
-						merchantName = (dto.getAccountName().substring(size) + RandomCodeUtil.generateOTP(3)).toUpperCase();
+						int size = (rawMerchantName.length() / 3) * 2;
+						merchantName = (rawMerchantName.substring(size) + RandomCodeUtil.generateOTP(3)).toUpperCase();
 					} else {
-						merchantName = dto.getMerchantName().toUpperCase();
+						merchantName = rawMerchantName.toUpperCase();
 					}
 					String merchantId = CustomerVaUtil.generateMerchantId(merchantName, customerVaLength);
 					String checkExistedMerchantId = customerVaService.checkExistedMerchantId(merchantId);
@@ -3760,6 +3761,8 @@ public class TransactionBankController {
 					accountBankReceiveService.updateRegisterUnlinkBidv(bidvUnlinkedDTO.getUserId(),
 							bidvUnlinkedDTO.getBankId());
 					customerVaService.removeCustomerVa(bidvUnlinkedDTO.getUserId(), bidvUnlinkedDTO.getMerchantId());
+					result = new ResponseMessageDTO("SUCCESS", "");
+					httpStatus = HttpStatus.OK;
 				}
 			}
 //			if (dto != null) {

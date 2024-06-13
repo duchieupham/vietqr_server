@@ -270,8 +270,10 @@ public class CustomerInvoiceController {
                             // check customer_id tồn tại
                             String checkExistedCustomerId = customerVaService
                                     .checkExistedCustomerId(dto.getCustomer_id());
+                            logger.info("BILL ID: " + dto.getBill_id() + " at: " + System.currentTimeMillis());
                             if (checkExistedCustomerId != null && !checkExistedCustomerId.trim().isEmpty()) {
                                 // check bill_id tồn tại
+                                logger.info("BILL ID: " + dto.getBill_id());
                                 if (dto.getBill_id().startsWith(EnvironmentUtil.getBidvTransactionPrefix())) {
                                     CustomerInvoiceDataDTO customerInvoiceDataDTO = customerInvoiceService
                                             .getCustomerInvoiceByBillId(dto.getBill_id());
