@@ -45,6 +45,19 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "WHERE a.user_id = :userId ", nativeQuery = true)
 	List<IAccountBankReceiveDTO> getBankIdsByUserId(@Param(value = "userId") String userId);
 
+	@Query(value = "SELECT a.id AS bankId, a.bank_account AS bankAccount, a.bank_account_name AS bankAccountName, "
+			+ "a.bank_type_id AS bankTypeId, a.is_authenticated AS isAuthenticated, "
+			+ "a.is_sync AS isSync, a.is_wp_sync AS isWpSync, a.mms_active AS mmsActive, a.national_id AS nationalId, "
+			+ "a.phone_authenticated AS phoneAuthenticated, a.status AS status, a.type AS type, "
+			+ "a.user_id AS userId, a.is_rpa_sync AS isRpaSync "
+			+ "FROM account_bank_receive a "
+			+ "WHERE (a.bank_account LIKE %:value% OR a.bank_account_name LIKE %:value%) LIMIT :offset, :size ", nativeQuery = true)
+	List<IListAccountBankDTO> getListBankAccounts(String value, int offset, int size);
+
+	@Query(value = "SELECT COUNT(a.id) FROM account_bank_receive a", nativeQuery = true)
+	int countListBankAccounts();
+
+
 	@Query(value = "SELECT id FROM account_bank_receive WHERE bank_account = :bankAccount AND bank_type_id = :bankTypeId AND user_id = :userId ", nativeQuery = true)
 	List<String> checkExistedBankAccountSameUser(@Param(value = "bankAccount") String bankAccount,
 			@Param(value = "bankTypeId") String bankTypeId, @Param(value = "userId") String userId);

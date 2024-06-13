@@ -11,6 +11,10 @@ import com.vietqr.org.entity.AccountBankReceiveEntity;
 @Service
 public interface AccountBankReceiveService {
 
+	public List<IListAccountBankDTO> getListBankAccounts(String value, int offset, int size);
+
+	public int countListBankAccounts();
+
 	public List<IAccountBankReceiveDTO> getBankIdsByUserId(String userId);
 
 	public int insertAccountBank(AccountBankReceiveEntity entity);

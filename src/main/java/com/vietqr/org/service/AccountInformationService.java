@@ -10,6 +10,9 @@ import com.vietqr.org.entity.AccountInformationEntity;
 @Service
 public interface AccountInformationService {
 
+	public List<IAdminListUserAccountResponseDTO> getAdminListUsersAccount(String value, int offset, int size);
+	public int countAdminListUsersAccount();
+
 	public AccountInformationEntity getAccountInformation(String userId);
 
 	public void updateAccountInformation(String firstName, String middleName, String lastName, String birthDate,
