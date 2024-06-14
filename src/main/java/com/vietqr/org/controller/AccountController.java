@@ -144,10 +144,8 @@ public class AccountController {
                 dto.setFirstName(item.getFirstName());
                 dto.setMiddleName(item.getMiddleName());
                 dto.setLastName(item.getLastName());
-
-                String fullname = item.getFirstName() + item.getMiddleName() + item.getLastName();
-                dto.setFullName(fullname);
-
+                // set full name
+                dto.setFullName(item.getLastName() + " " + item.getMiddleName() + " " + item.getFirstName());
                 dto.setGender(item.getGender());
                 dto.setStatus(item.getStatus() != true ? item.getStatus() : false);
                 dto.setUserIp(item.getUserIp());

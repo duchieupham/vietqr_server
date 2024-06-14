@@ -22,7 +22,7 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
             + "a.register_platform AS registerPlatform, a.user_ip AS userIp "
             + "FROM account_information a "
             + "INNER JOIN account_login b ON a.user_id = b.id "
-            + "WHERE (a.email LIKE %:value%) LIMIT :offset, :size ", nativeQuery = true)
+            + "WHERE (a.first_name LIKE %:value%) LIMIT :offset, :size ", nativeQuery = true)
     List<IAdminListUserAccountResponseDTO> getAdminListUsersAccount(String value, int offset, int size);
 
     @Query(value = "SELECT COUNT(a.id) AS totalElement FROM account_information a ", nativeQuery = true)
