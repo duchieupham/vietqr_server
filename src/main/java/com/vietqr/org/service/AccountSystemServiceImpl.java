@@ -1,8 +1,6 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.dto.IAccountSystemDTO;
-import com.vietqr.org.dto.UserRequestDTO;
-import com.vietqr.org.dto.UserResponseDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.repository.*;
 import com.vietqr.org.util.RandomCodeUtil;
@@ -188,6 +186,38 @@ public class AccountSystemServiceImpl implements AccountSystemService {
     public boolean updateUserStatus(String id, boolean status) {
         int updatedRows = accountInformationRepository.updateUserStatus(id, status);
         return updatedRows > 0;
+    }
+
+    @Override
+    public UserUpdateResponseDTO updateUser(String userId, UserUpdateRequestDTO userUpdateRequestDTO) {
+        int updatedRows = accountInformationRepository.updateUserByUserId(
+                userId,
+                userUpdateRequestDTO.getFirstName(),
+                userUpdateRequestDTO.getMiddleName(),
+                userUpdateRequestDTO.getLastName(),
+                userUpdateRequestDTO.getAddress(),
+                userUpdateRequestDTO.getGender(),
+                userUpdateRequestDTO.getEmail(),
+                userUpdateRequestDTO.getNationalId(),
+                userUpdateRequestDTO.getOldNationalId(),
+                userUpdateRequestDTO.getNationalDate()
+        );
+
+        if (updatedRows > 0) {
+            IUserUpdateDTO updatedEntity = accountInformationRepository.findByUserId(userId);
+            return new UserUpdateResponseDTO(
+                    updatedEntity.getEmail(),
+                    updatedEntity.getFirstName(),
+                    updatedEntity.getMiddleName(),
+                    updatedEntity.getLastName(),
+                    updatedEntity.getAddress(),
+                    updatedEntity.getGender(),
+                    updatedEntity.getNationalId(),
+                    updatedEntity.getOldNationalId(),
+                    updatedEntity.getNationalDate()
+            );
+        }
+        return null;
     }
 
 }

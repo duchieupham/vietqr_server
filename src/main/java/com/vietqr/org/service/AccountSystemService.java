@@ -1,8 +1,6 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.dto.IAccountSystemDTO;
-import com.vietqr.org.dto.UserRequestDTO;
-import com.vietqr.org.dto.UserResponseDTO;
+import com.vietqr.org.dto.*;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.entity.AccountSystemEntity;
@@ -22,5 +20,6 @@ public interface AccountSystemService {
     UserResponseDTO createUser(UserRequestDTO userRequestDTO);
     boolean updateUserStatus(String id, boolean status);
 
+    UserUpdateResponseDTO updateUser(String userId, UserUpdateRequestDTO userRequestDTO);
 
 }
