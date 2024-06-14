@@ -1,10 +1,12 @@
 package com.vietqr.org.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.transaction.Transactional;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.entity.AccountLoginEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -173,6 +175,7 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
 
 	@Modifying
 	@Transactional
-	@Query(value = "UPDATE account_information a SET a.status = :status WHERE a.user_id = :userId AND a.status != :status", nativeQuery = true)
-	int updateUserStatus(@Param("userId") String userId, @Param("status") boolean status);
+	@Query(value = "UPDATE account_information a SET a.status = :status WHERE a.id = :id AND a.status != :status", nativeQuery = true)
+	int updateUserStatus(@Param("id") String id, @Param("status") boolean status);
+
 }

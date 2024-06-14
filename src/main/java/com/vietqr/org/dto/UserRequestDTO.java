@@ -4,40 +4,47 @@ import com.google.firebase.database.annotations.NotNull;
 import org.hibernate.validator.constraints.UniqueElements;
 
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 public class UserRequestDTO {
     @NotNull
-    @Size(min = 10, max = 10, message = "Phone number must be 10 digits")
     private String phoneNo;
 
     @NotNull
-    @Size(min = 6, max = 6, message = "Password must be 6 digits")
+    @NotBlank
     private String password;
 
     @Email
     private String email;
 
     @NotNull
+    @NotBlank
     private String firstName;
-
+    @NotBlank
+    @NotNull
     private String middleName;
 
     @NotNull
+    @NotBlank
     private String lastName;
 
 
-
+    @NotBlank
+    @NotNull
     private String address;
 
     @NotNull
     private Integer gender;
-    @Pattern(regexp = "\\d{12}", message = "CCCD must be 12 digits")
+    @NotNull
+    @NotBlank
     private String nationalId;
-    @Pattern(regexp = "\\d{9}", message = "CMND must be 9 digits")
+    @NotNull
+    @NotBlank
     private String oldNationalId;
-
+    @NotNull
+    @NotBlank
     private String nationalDate;
 
 

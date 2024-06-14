@@ -7,12 +7,10 @@ import com.vietqr.org.entity.*;
 import com.vietqr.org.repository.*;
 import com.vietqr.org.util.RandomCodeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -22,28 +20,20 @@ public class AccountSystemServiceImpl implements AccountSystemService {
 
     @Autowired
     AccountSystemRepository repo;
-
-    @Autowired
-    private AccountInformationRepository accountInformationRepository;
-
-    @Autowired
-    private AccountLoginRepository accountLoginRepository;
-
     @Autowired
     AccountSettingService accountSettingService;
-
     @Autowired
     MobileCarrierService mobileCarrierService;
-
     @Autowired
     AccountWalletService accountWalletService;
-
     @Autowired
     AccountWalletRepository accountWalletRepository;
-
     @Autowired
     AccountSettingRepository accountSettingRepository;
-
+    @Autowired
+    private AccountInformationRepository accountInformationRepository;
+    @Autowired
+    private AccountLoginRepository accountLoginRepository;
 
     @Override
     public int insertNewAdmin(AccountSystemEntity entity) {
@@ -64,6 +54,7 @@ public class AccountSystemServiceImpl implements AccountSystemService {
     public IAccountSystemDTO findAdminById(String adminId) {
         return repo.findAdminById(adminId);
     }
+
     @Override
     public boolean resetUserPassword(String phoneNo, String newPassword) {
         int updateRows = repo.updateUserPassword(phoneNo, newPassword);
@@ -175,7 +166,6 @@ public class AccountSystemServiceImpl implements AccountSystemService {
         accountWalletRepository.save(accountWalletEntity);
 
 
-
         // Create and return UserResponseDTO
         UserResponseDTO userResponseDTO = new UserResponseDTO();
         userResponseDTO.setId(userId);
@@ -194,10 +184,10 @@ public class AccountSystemServiceImpl implements AccountSystemService {
 
         return userResponseDTO;
     }
-
     @Override
-    public boolean updateUserStatus(String userId, boolean status) {
-        int updatedRows = accountInformationRepository.updateUserStatus(userId, status);
+    public boolean updateUserStatus(String id, boolean status) {
+        int updatedRows = accountInformationRepository.updateUserStatus(id, status);
         return updatedRows > 0;
     }
+
 }

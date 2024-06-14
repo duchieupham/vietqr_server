@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.entity.AccountInformationEntity;
 import com.vietqr.org.security.JWTAuthorizationFilter;
 import com.vietqr.org.service.AccountLoginService;
 import io.jsonwebtoken.Claims;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import com.vietqr.org.entity.AccountSystemEntity;
@@ -62,17 +64,17 @@ public class AccountSystemController {
         return new ResponseEntity<>(result, httpStatus);
     }
     @PostMapping("/password-reset")
-    public ResponseEntity<ResponseMessageDTO> resetPassword(@RequestBody PasswordResetDTO passwordResetDTO, @RequestHeader("Authorization") String token) {
+    public ResponseEntity<ResponseMessageDTO> resetPassword(@RequestParam("phoneNo") String phoneNo, @RequestBody PasswordResetDTO passwordResetDTO, @RequestHeader("Authorization") String token) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
             if (passwordResetDTO != null && isPasswordValid(passwordResetDTO.getNewPassword())) {
                 IAccountSystemDTO adminDto = validateAdminToken(token);
                 if (adminDto != null) {
-                    if (isPhoneNoValid(passwordResetDTO.getPhoneNo())) {
+                    if (isPhoneNoValid(phoneNo)) {
                         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
                         String hashedPassword = passwordEncoder.encode(passwordResetDTO.getNewPassword());
-                        boolean isReset = accountSystemService.resetUserPassword(passwordResetDTO.getPhoneNo(), hashedPassword);
+                        boolean isReset = accountSystemService.resetUserPassword(phoneNo, hashedPassword);
                         if (isReset) {
                             result = new ResponseMessageDTO("SUCCESS", "");
                             httpStatus = HttpStatus.OK;
@@ -102,6 +104,7 @@ public class AccountSystemController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
 
     private boolean isPasswordValid(String password) {
         return password != null && password.matches("\\d{6}");
@@ -172,12 +175,12 @@ public class AccountSystemController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @PutMapping("admin/{userId}/status")
-    public ResponseEntity<ResponseMessageDTO> updateUserStatus(@PathVariable String userId, @RequestParam boolean status) {
+    @PutMapping("admin/{id}/status")
+    public ResponseEntity<ResponseMessageDTO> updateUserStatus(@PathVariable String id, @RequestParam boolean status) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            boolean isUpdated = accountSystemService.updateUserStatus(userId, status);
+            boolean isUpdated = accountSystemService.updateUserStatus(id, status);
             if (isUpdated) {
                 result = new ResponseMessageDTO("SUCCESS", "");
                 httpStatus = HttpStatus.OK;
@@ -193,4 +196,8 @@ public class AccountSystemController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
+
+
+
 }

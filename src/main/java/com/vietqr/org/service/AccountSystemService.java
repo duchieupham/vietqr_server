@@ -20,6 +20,7 @@ public interface AccountSystemService {
     boolean resetUserPassword(String phoneNo, String newPassword);
 
     UserResponseDTO createUser(UserRequestDTO userRequestDTO);
-    boolean updateUserStatus(String userId, boolean status);
+    boolean updateUserStatus(String id, boolean status);
+
 
 }
