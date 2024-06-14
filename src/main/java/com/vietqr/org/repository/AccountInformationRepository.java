@@ -19,7 +19,7 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
             + "COALESCE(a.first_name, '') AS firstName, COALESCE(a.middle_name, '') AS middleName, "
             + "COALESCE(a.last_name, '') AS lastName, a.gender AS gender, a.status AS status, a.national_date AS nationalDate, "
             + "a.national_id AS nationalId, a.old_national_id AS oldNationalId, b.phone_no AS phoneNo, "
-            + "a.register_platform AS registerPlatform, a.user_ip AS userIp "
+            + "a.register_platform AS registerPlatform, a.user_ip AS userIp, a.user_id AS userIdDetail "
             + "FROM account_information a "
             + "INNER JOIN account_login b ON a.user_id = b.id "
             + "WHERE (a.first_name LIKE %:value%) LIMIT :offset, :size ", nativeQuery = true)

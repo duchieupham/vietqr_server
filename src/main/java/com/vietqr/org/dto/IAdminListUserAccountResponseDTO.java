@@ -16,4 +16,5 @@ public interface IAdminListUserAccountResponseDTO {
     String getNationalDate();
     String getNationalId();
     String getOldNationalId();
+    String getUserIdDetail();
 }

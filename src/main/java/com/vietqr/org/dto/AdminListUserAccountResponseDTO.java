@@ -17,6 +17,19 @@ public class AdminListUserAccountResponseDTO {
     private String nationalDate;
     private String nationalId;
     private String oldNationalId;
+    private String userIdDetail;
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public String getUserIdDetail() {
+        return userIdDetail;
+    }
+
+    public void setUserIdDetail(String userIdDetail) {
+        this.userIdDetail = userIdDetail;
+    }
 
     public String getFullName() {
         return fullName;

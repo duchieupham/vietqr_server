@@ -154,6 +154,7 @@ public class AccountController {
                 dto.setNationalDate(item.getNationalDate());
                 dto.setNationalId(item.getNationalId());
                 dto.setOldNationalId(item.getOldNationalId());
+                dto.setUserIdDetail(item.getUserIdDetail());
                 return dto;
             }).collect(Collectors.toList());
 
