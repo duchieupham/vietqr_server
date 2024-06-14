@@ -8,6 +8,7 @@ import com.vietqr.org.entity.MerchantSyncEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public interface MerchantSyncService {
@@ -28,8 +29,10 @@ public interface MerchantSyncService {
     MerchantSyncEntity createMerchant(MerchantSyncEntity entity);
 
     MerchantSyncEntity updateMerchant(String id, MerchantSyncEntity entity);
+    Optional<MerchantSyncEntity> findById(String id);
 
     void deleteMerchant(String id);
 
     int countMerchantsByName(String value);
+    void savePlatformDetails(String platform, String userId, String details);
 }

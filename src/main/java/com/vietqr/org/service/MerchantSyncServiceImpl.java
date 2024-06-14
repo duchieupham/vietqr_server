@@ -4,18 +4,33 @@ import com.vietqr.org.dto.IMerchantEditDetailDTO;
 import com.vietqr.org.dto.IMerchantInfoDTO;
 import com.vietqr.org.dto.IMerchantInvoiceDTO;
 import com.vietqr.org.dto.IMerchantSyncDTO;
+import com.vietqr.org.entity.GoogleChatEntity;
+import com.vietqr.org.entity.LarkEntity;
 import com.vietqr.org.entity.MerchantSyncEntity;
+import com.vietqr.org.entity.TelegramEntity;
+import com.vietqr.org.repository.GoogleChatRepository;
+import com.vietqr.org.repository.LarkRepository;
 import com.vietqr.org.repository.MerchantSyncRepository;
+import com.vietqr.org.repository.TelegramRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class MerchantSyncServiceImpl implements MerchantSyncService {
 
     @Autowired
     private MerchantSyncRepository repo;
+
+    @Autowired
+    private LarkRepository larkRepository;
+    @Autowired
+    private TelegramRepository telegramRepository;
+    @Autowired
+    private GoogleChatRepository googleChatRepository;
 
     @Override
     public List<IMerchantInvoiceDTO> getMerchantSyncs(int offset, int size) {
@@ -59,12 +74,36 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
 
     @Override
     public MerchantSyncEntity updateMerchant(String id, MerchantSyncEntity entity) {
-        if (repo.existsById(id)) {
-            entity.setId(id);
-            return repo.save(entity);
-        } else {
+//        if (repo.existsById(id)) {
+//            entity.setId(id);
+//            return repo.save(entity);
+//        } else {
+//            return null;
+//        }
+        // Assuming a findById method exists in your repository or service
+        Optional<MerchantSyncEntity> existingEntityOptional = repo.findById(id);
+        if (!existingEntityOptional.isPresent()) {
             return null;
         }
+
+        MerchantSyncEntity existingEntity = existingEntityOptional.get();
+        existingEntity.setName(entity.getName());
+        existingEntity.setVso(entity.getVso());
+        existingEntity.setBusinessType(entity.getBusinessType());
+        existingEntity.setCareer(entity.getCareer());
+        existingEntity.setAddress(entity.getAddress());
+        existingEntity.setNationalId(entity.getNationalId());
+        existingEntity.setUserId(entity.getUserId());
+        existingEntity.setEmail(entity.getEmail());
+        existingEntity.setIsActive(entity.getIsActive());
+        existingEntity.setAccountCustomerId(entity.getAccountCustomerId());
+
+        return repo.save(existingEntity);
+    }
+
+    @Override
+    public Optional<MerchantSyncEntity> findById(String id) {
+        return Optional.empty();
     }
 
     @Override
@@ -75,5 +114,35 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
     @Override
     public int countMerchantsByName(String value) {
         return repo.countMerchantsByName(value);
+    }
+    @Override
+    public void savePlatformDetails(String platform, String userId, String details) {
+        if (platform == null || details == null) {
+            return;
+        }
+        switch (platform) {
+            case "Telegram":
+                TelegramEntity telegramEntity = new TelegramEntity();
+                telegramEntity.setId(UUID.randomUUID().toString());
+                telegramEntity.setUserId(userId);
+                telegramEntity.setChatId(details);
+                telegramRepository.save(telegramEntity);
+                break;
+            case "Google Chat":
+                GoogleChatEntity googleChatEntity = new GoogleChatEntity();
+                googleChatEntity.setId(UUID.randomUUID().toString());
+                googleChatEntity.setUserId(userId);
+                googleChatEntity.setWebhook(details);
+                googleChatRepository.save(googleChatEntity);
+                break;
+            case "Lark":
+                LarkEntity larkEntity = new LarkEntity();
+                larkEntity.setId(UUID.randomUUID().toString());
+                larkEntity.setUserId(userId);
+                larkEntity.setWebhook(details);
+                larkRepository.save(larkEntity);
+                break;
+
+        }
     }
 }

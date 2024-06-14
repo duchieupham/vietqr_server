@@ -4,9 +4,7 @@ import java.sql.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vietqr.org.dto.IAccountSystemDTO;
-import com.vietqr.org.dto.PasswordResetDTO;
-import com.vietqr.org.dto.ResponseMessageDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.security.JWTAuthorizationFilter;
 import com.vietqr.org.service.AccountLoginService;
 import io.jsonwebtoken.Claims;
@@ -16,14 +14,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import com.vietqr.org.dto.AccountSystemDTO;
 import com.vietqr.org.entity.AccountSystemEntity;
 import com.vietqr.org.service.AccountSystemService;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+
+import javax.validation.Valid;
 
 @RestController
 @CrossOrigin
@@ -66,11 +66,13 @@ public class AccountSystemController {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            if (passwordResetDTO != null && passwordResetDTO.getNewPassword().equals(passwordResetDTO.getConfirmPassword())) {
+            if (passwordResetDTO != null && isPasswordValid(passwordResetDTO.getNewPassword())) {
                 IAccountSystemDTO adminDto = validateAdminToken(token);
                 if (adminDto != null) {
                     if (isPhoneNoValid(passwordResetDTO.getPhoneNo())) {
-                        boolean isReset = accountSystemService.resetUserPassword(passwordResetDTO.getPhoneNo(), passwordResetDTO.getNewPassword());
+                        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+                        String hashedPassword = passwordEncoder.encode(passwordResetDTO.getNewPassword());
+                        boolean isReset = accountSystemService.resetUserPassword(passwordResetDTO.getPhoneNo(), hashedPassword);
                         if (isReset) {
                             result = new ResponseMessageDTO("SUCCESS", "");
                             httpStatus = HttpStatus.OK;
@@ -89,7 +91,7 @@ public class AccountSystemController {
                     httpStatus = HttpStatus.UNAUTHORIZED;
                 }
             } else {
-                logger.error("Passwords do not match");
+                logger.error("Invalid password format");
                 result = new ResponseMessageDTO("FAILED", "E144");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
@@ -100,6 +102,11 @@ public class AccountSystemController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
+    private boolean isPasswordValid(String password) {
+        return password != null && password.matches("\\d{6}");
+    }
+
     private IAccountSystemDTO validateAdminToken(String token) {
         try {
             Claims claims = jwtAuthorizationFilter.validateToken(token.replace("Bearer ", ""));
@@ -139,5 +146,51 @@ public class AccountSystemController {
                         secretKey.getBytes())
                 .compact();
         return result;
+    }
+
+
+    @PostMapping("admin/create")
+    public ResponseEntity<Object> createUser(@Valid @RequestBody UserRequestDTO userRequestDTO) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            // Check if the phone number already exists
+            boolean phoneExists = isPhoneNoValid(userRequestDTO.getPhoneNo());
+            if (phoneExists) {
+                result = new ResponseMessageDTO("FAILED", "Phone number already exists");
+                httpStatus = HttpStatus.CONFLICT;
+            } else {
+                // Proceed with user creation
+                result = accountSystemService.createUser(userRequestDTO);
+                httpStatus = HttpStatus.OK;
+            }
+        } catch (Exception e) {
+            logger.error("Error at createUser: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E04");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PutMapping("admin/{userId}/status")
+    public ResponseEntity<ResponseMessageDTO> updateUserStatus(@PathVariable String userId, @RequestParam boolean status) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            boolean isUpdated = accountSystemService.updateUserStatus(userId, status);
+            if (isUpdated) {
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            } else {
+                logger.error("User not found or status is already " + status);
+                result = new ResponseMessageDTO("FAILED", "User not found or status is already " + status);
+                httpStatus = HttpStatus.NOT_FOUND;
+            }
+        } catch (Exception e) {
+            logger.error("Error at updateUserStatus: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "Error occurred");
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+        return new ResponseEntity<>(result, httpStatus);
     }
 }

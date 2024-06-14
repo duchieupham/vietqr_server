@@ -169,4 +169,10 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
 			+ "AND a.status = 1 "
 			+ "ORDER BY role DESC ", nativeQuery = true)
 	List<IAccountTerminalMemberDTO> getMembersByTerminalId(String terminalId);
+
+
+	@Modifying
+	@Transactional
+	@Query(value = "UPDATE account_information a SET a.status = :status WHERE a.user_id = :userId AND a.status != :status", nativeQuery = true)
+	int updateUserStatus(@Param("userId") String userId, @Param("status") boolean status);
 }

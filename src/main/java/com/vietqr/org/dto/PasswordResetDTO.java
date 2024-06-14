@@ -3,15 +3,15 @@ package com.vietqr.org.dto;
 public class PasswordResetDTO {
     private String phoneNo;
     private String newPassword;
-    private String confirmPassword;
+
 
     public PasswordResetDTO() {
     }
 
-    public PasswordResetDTO(String phoneNo, String newPassword, String confirmPassword) {
+    public PasswordResetDTO(String phoneNo, String newPassword) {
         this.phoneNo = phoneNo;
         this.newPassword = newPassword;
-        this.confirmPassword = confirmPassword;
+
     }
 
     public String getPhoneNo() {
@@ -30,11 +30,4 @@ public class PasswordResetDTO {
         this.newPassword = newPassword;
     }
 
-    public String getConfirmPassword() {
-        return confirmPassword;
-    }
-
-    public void setConfirmPassword(String confirmPassword) {
-        this.confirmPassword = confirmPassword;
-    }
 }
