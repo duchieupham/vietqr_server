@@ -2,12 +2,10 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
-import com.vietqr.org.dto.IAccountSystemDTO;
+import com.vietqr.org.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.vietqr.org.dto.AccountCheckDTO;
-import com.vietqr.org.dto.CardVQRInfoDTO;
 import com.vietqr.org.entity.AccountLoginEntity;
 import com.vietqr.org.repository.AccountLoginRepository;
 
@@ -16,6 +14,11 @@ public class AccountLoginServiceImpl implements AccountLoginService {
 
 	@Autowired
 	AccountLoginRepository repo;
+
+	@Override
+	public List<IUserInfoDTO> getUserInfoDetailsByUserId(String userId) {
+		return repo.getUserInfoDetailsByUserId(userId);
+	}
 
 	@Override
 	public String login(String phoneNo, String password) {

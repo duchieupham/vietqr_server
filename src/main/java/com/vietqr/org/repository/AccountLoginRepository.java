@@ -4,20 +4,29 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
-import com.vietqr.org.dto.IAccountSystemDTO;
+import com.vietqr.org.dto.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.vietqr.org.dto.AccountCheckDTO;
-import com.vietqr.org.dto.CardVQRInfoDTO;
 import com.vietqr.org.entity.AccountLoginEntity;
 
 @Repository
 public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity, Long> {
 
+	@Query(value = "SELECT b.phone_no AS phoneNo, " +
+			"COALESCE(a.first_name, '') as firstName, COALESCE(a.middle_name, '') as middleName, " +
+			"COALESCE(a.last_name, '') as lastName, " +
+			"COALESCE(a.email, '') AS email, a.gender AS gender, a.status AS status, a.national_date AS nationalDate, " +
+			"a.national_id AS nationalId, a.old_national_id AS oldNationalId, " +
+			"a.address AS address, c.amount AS balance, c.point AS score " +
+			"FROM viet_qr.account_login b " +
+			"INNER JOIN account_information a ON b.id = a.user_id " +
+			"INNER JOIN account_wallet c ON b.id = c.user_id " +
+			"WHERE a.user_id = :userId", nativeQuery = true)
+	List<IUserInfoDTO> getUserInfoDetailsByUserId(String userId);
 	@Query(value = "SELECT id FROM account_login WHERE phone_no = :phoneNo AND password = :password AND status = 1", nativeQuery = true)
 	String login(@Param(value = "phoneNo") String phoneNo, @Param(value = "password") String password);
 

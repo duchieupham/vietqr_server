@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.service.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -46,19 +47,6 @@ import com.vietqr.org.entity.ImageEntity;
 import com.vietqr.org.entity.LarkWebhookPartnerEntity;
 import com.vietqr.org.entity.NotificationEntity;
 import com.vietqr.org.entity.SystemSettingEntity;
-import com.vietqr.org.service.AccountBankReceiveService;
-import com.vietqr.org.service.AccountInformationService;
-import com.vietqr.org.service.AccountLoginService;
-import com.vietqr.org.service.AccountSettingService;
-import com.vietqr.org.service.AccountShareService;
-import com.vietqr.org.service.AccountWalletService;
-import com.vietqr.org.service.CustomerSyncService;
-import com.vietqr.org.service.FcmTokenService;
-import com.vietqr.org.service.ImageService;
-import com.vietqr.org.service.LarkWebhookPartnerService;
-import com.vietqr.org.service.MobileCarrierService;
-import com.vietqr.org.service.NotificationService;
-import com.vietqr.org.service.SystemSettingService;
 import com.vietqr.org.util.LarkUtil;
 import com.vietqr.org.util.NotificationUtil;
 import com.vietqr.org.util.RandomCodeUtil;
@@ -116,6 +104,169 @@ public class AccountController {
 
     @Autowired
     LarkWebhookPartnerService larkWebhookPartnerService;
+
+    @Autowired
+    TelegramService telegramService;
+
+    //get user details
+    @GetMapping("account/users-details")
+    public ResponseEntity<Object> getUserDetails(@RequestParam String userId) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        UserDetailResponseDTO data = new UserDetailResponseDTO();
+        try {
+            // initialize data
+            List<UserInfoDTO> userInfoData = new ArrayList<>();        // fix IUserInfoDTO
+            List<IUserInfoDTO> userInfos = new ArrayList<>();
+            List<BankInfoDTO> bankInfoData = new ArrayList<>();        // fix IBankInfoDTO
+            List<IBankInfoDTO> bankInfo = new ArrayList<>();
+            List<BankShareDTO> bankShareData = new ArrayList<>();      // fix IBankShareDTO
+            List<IBankShareDTO> bankShareInfo = new ArrayList<>();
+            List<SocialMediaDTO> socialMediaData = new ArrayList<>();  // fix ISocialMediaDTO
+            List<ISocialMediaDTO> socialMediaInfo = new ArrayList<>();
+            String balance = "";
+            String score = "";
+
+            // call service
+            userInfos = accountLoginService.getUserInfoDetailsByUserId(userId);
+            userInfoData = userInfos.stream().map(item -> {
+                UserInfoDTO dto = new UserInfoDTO();
+                // set data
+                dto.setPhoneNo(item.getPhoneNo());
+                dto.setFirstName(item.getFirstName());
+                dto.setMiddleName(item.getFirstName());
+                dto.setLastName(item.getFirstName());
+                dto.setFullName(item.getLastName() + " " + item.getMiddleName() + " " + item.getFirstName());
+                dto.setEmail(item.getEmail());
+                dto.setGender(item.getGender());
+                dto.setStatus(item.getStatus());
+                dto.setNationalDate(item.getNationalDate());
+                dto.setNationalId(item.getNationalId());
+                dto.setOldNationalId(item.getOldNationalId());
+                dto.setAddress(item.getAddress());
+                return dto;
+            }).collect(Collectors.toList());
+//            for (IUserInfoDTO item : userInfos) {
+//                UserInfoDTO dto = new UserInfoDTO();
+//                // set data
+//                dto.setPhoneNo(item.getPhoneNo());
+//                dto.setFirstName(item.getFirstName());
+//                dto.setMiddleName(item.getFirstName());
+//                dto.setLastName(item.getFirstName());
+//                dto.setFullName(item.getLastName() + " " + item.getMiddleName() + " " + item.getFirstName());
+//                dto.setEmail(item.getEmail());
+//                dto.setGender(item.getGender());
+//                dto.setStatus(item.getStatus());
+//                dto.setNationalDate(item.getNationalDate());
+//                dto.setNationalId(item.getNationalId());
+//                dto.setOldNationalId(item.getOldNationalId());
+//                dto.setAddress(item.getAddress());
+//                userInfoData.add(dto);
+//            }
+
+            bankInfo = accountBankReceiveService.getBankInfoByUserId(userId);
+            bankInfoData = bankInfo.stream().map(item -> {
+                BankInfoDTO dto = new BankInfoDTO();
+                dto.setBankAccount(item.getBankAccount());
+                dto.setBankAccountName(item.getBankAccountName());
+                dto.setStatus(item.getStatus());
+                dto.setMmsActive(item.getMmsActive());
+                dto.setPhoneAuthenticated(item.getPhoneAuthenticated());
+                dto.setActiveService(item.getActiveService());
+                dto.setBankShortName(item.getBankShortName());
+                dto.setFromDate(item.getFromDate());
+                dto.setToDate(item.getToDate());
+                dto.setActiveService(item.getToDate() - item.getFromDate());
+                return dto;
+            }).collect(Collectors.toList());
+
+//            for (IBankInfoDTO item : bankInfo) {
+//                BankInfoDTO dto = new BankInfoDTO();
+//                dto.setBankAccount(item.getBankAccount());
+//                dto.setBankAccountName(item.getBankAccountName());
+//                dto.setStatus(item.getStatus());
+//                dto.setMmsActive(item.getMmsActive());
+//                dto.setPhoneAuthenticated(item.getPhoneAuthenticated());
+//                dto.setActiveService(item.getActiveService());
+//                dto.setBankShortName(item.getBankShortName());
+//                dto.setFromDate(item.getFromDate());
+//                dto.setToDate(item.getToDate());
+//                dto.setActiveService(item.getToDate() - item.getFromDate());
+//                bankInfoData.add(dto);
+//            }
+
+            bankShareInfo = accountBankReceiveService.getBankShareInfoByUserId(userId);
+            bankShareData = bankShareInfo.stream().map(items -> {
+                BankShareDTO dto2 = new BankShareDTO();
+                dto2.setBankAccount(items.getBankAccount());
+                dto2.setBankAccountName(items.getBankAccountName());
+                dto2.setStatus(items.getStatus());
+                dto2.setMmsActive(items.getMmsActive());
+                dto2.setPhoneAuthenticated(items.getPhoneAuthenticated());
+                dto2.setActiveService(items.getActiveService());
+                dto2.setBankShortName(items.getBankShortName());
+                dto2.setFromDate(items.getFromDate());
+                dto2.setToDate(items.getToDate());
+                dto2.setActiveService(items.getToDate() - items.getFromDate());
+                return dto2;
+            }).collect(Collectors.toList());
+
+//            for (IBankShareDTO items : bankShareInfo) {
+//                BankShareDTO dto2 = new BankShareDTO();
+//                dto2.setBankAccount(items.getBankAccount());
+//                dto2.setBankAccountName(items.getBankAccountName());
+//                dto2.setStatus(items.getStatus());
+//                dto2.setMmsActive(items.getMmsActive());
+//                dto2.setPhoneAuthenticated(items.getPhoneAuthenticated());
+//                dto2.setActiveService(items.getActiveService());
+//                dto2.setBankShortName(items.getBankShortName());
+//                dto2.setFromDate(items.getFromDate());
+//                dto2.setToDate(items.getToDate());
+//                dto2.setActiveService(items.getToDate() - items.getFromDate());
+//                bankShareData.add(dto2);
+//            }
+
+            socialMediaInfo = telegramService.getSocialInfoByUserId(userId);
+            socialMediaData = socialMediaInfo.stream().map(item -> {
+                SocialMediaDTO dto3 = new SocialMediaDTO();
+                dto3.setPlatform(item.getPlatform());
+                dto3.setChatId(item.getChatId());
+                dto3.setAccountConnected(item.getAccountConnected());
+//                dto3.setPlatform("tele");
+//                dto3.setChatId("linkdogy123");
+//                dto3.setAccountConnected(3);
+                return dto3;
+            }).collect(Collectors.toList());
+
+//            for (ISocialMediaDTO dto : socialMediaInfo) {
+//                SocialMediaDTO dto3 = new SocialMediaDTO();
+////                dto3.setPlatform(item.getPlatform());
+////                dto3.setChatId(item.getChatId());
+////                dto3.setAccountConnected(3);
+//                dto3.setPlatform("tele");
+//                dto3.setChatId("linkdogy123");
+//                dto3.setAccountConnected(3);
+//                socialMediaData.add(dto3);
+//            }
+
+            data.setUserInfo(userInfoData);
+            data.setBankInfo(bankInfoData);
+            data.setBankShareInfo(bankShareData);
+            data.setSocalMedia(socialMediaData);
+            data.setBalance(100);
+            data.setScore(50);
+
+            result = data;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("AccountController: ERROR: getUserDetail:  " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAIL", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
 
     // get list user account
     @GetMapping("account/admin-list-account-user")

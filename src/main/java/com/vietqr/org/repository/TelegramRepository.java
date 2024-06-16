@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import com.vietqr.org.dto.ISocialMediaDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +15,9 @@ import com.vietqr.org.entity.TelegramEntity;
 
 @Repository
 public interface TelegramRepository extends JpaRepository<TelegramEntity, Long> {
+
+    @Query(value = "SELECT * FROM telegram WHERE user_id = :userId", nativeQuery = true)
+    List<ISocialMediaDTO> getSocialInfoByUserId(String userId);
 
     @Query(value = "SELECT * FROM telegram WHERE user_id = :userId", nativeQuery = true)
     List<TelegramEntity> getTelegramsByUserId(@Param(value = "userId") String userId);

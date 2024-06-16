@@ -2,16 +2,15 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
-import com.vietqr.org.dto.IAccountSystemDTO;
+import com.vietqr.org.dto.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
-import com.vietqr.org.dto.AccountCheckDTO;
-import com.vietqr.org.dto.CardVQRInfoDTO;
 import com.vietqr.org.entity.AccountLoginEntity;
 
 @Service
 public interface AccountLoginService {
+	public List<IUserInfoDTO> getUserInfoDetailsByUserId(String userId);
 
 	public String login(String phoneNo, String password);
 
