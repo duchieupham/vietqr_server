@@ -124,10 +124,12 @@ public class AccountController {
             List<IBankShareDTO> bankShareInfo = new ArrayList<>();
             List<SocialMediaDTO> socialMediaData = new ArrayList<>();  // fix ISocialMediaDTO
             List<ISocialMediaDTO> socialMediaInfo = new ArrayList<>();
+            IBalanceAndScoreDTO balanceAndScoreDTO = null;
             String balance = "";
             String score = "";
 
             // call service
+            // user info
             userInfos = accountLoginService.getUserInfoDetailsByUserId(userId);
             userInfoData = userInfos.stream().map(item -> {
                 UserInfoDTO dto = new UserInfoDTO();
@@ -146,24 +148,8 @@ public class AccountController {
                 dto.setAddress(item.getAddress());
                 return dto;
             }).collect(Collectors.toList());
-//            for (IUserInfoDTO item : userInfos) {
-//                UserInfoDTO dto = new UserInfoDTO();
-//                // set data
-//                dto.setPhoneNo(item.getPhoneNo());
-//                dto.setFirstName(item.getFirstName());
-//                dto.setMiddleName(item.getFirstName());
-//                dto.setLastName(item.getFirstName());
-//                dto.setFullName(item.getLastName() + " " + item.getMiddleName() + " " + item.getFirstName());
-//                dto.setEmail(item.getEmail());
-//                dto.setGender(item.getGender());
-//                dto.setStatus(item.getStatus());
-//                dto.setNationalDate(item.getNationalDate());
-//                dto.setNationalId(item.getNationalId());
-//                dto.setOldNationalId(item.getOldNationalId());
-//                dto.setAddress(item.getAddress());
-//                userInfoData.add(dto);
-//            }
 
+            // bank info
             bankInfo = accountBankReceiveService.getBankInfoByUserId(userId);
             bankInfoData = bankInfo.stream().map(item -> {
                 BankInfoDTO dto = new BankInfoDTO();
@@ -174,27 +160,14 @@ public class AccountController {
                 dto.setPhoneAuthenticated(item.getPhoneAuthenticated());
                 dto.setActiveService(item.getActiveService());
                 dto.setBankShortName(item.getBankShortName());
+                dto.setNationalId(item.getNationalId());
                 dto.setFromDate(item.getFromDate());
                 dto.setToDate(item.getToDate());
                 dto.setActiveService(item.getToDate() - item.getFromDate());
                 return dto;
             }).collect(Collectors.toList());
 
-//            for (IBankInfoDTO item : bankInfo) {
-//                BankInfoDTO dto = new BankInfoDTO();
-//                dto.setBankAccount(item.getBankAccount());
-//                dto.setBankAccountName(item.getBankAccountName());
-//                dto.setStatus(item.getStatus());
-//                dto.setMmsActive(item.getMmsActive());
-//                dto.setPhoneAuthenticated(item.getPhoneAuthenticated());
-//                dto.setActiveService(item.getActiveService());
-//                dto.setBankShortName(item.getBankShortName());
-//                dto.setFromDate(item.getFromDate());
-//                dto.setToDate(item.getToDate());
-//                dto.setActiveService(item.getToDate() - item.getFromDate());
-//                bankInfoData.add(dto);
-//            }
-
+            // bank share info
             bankShareInfo = accountBankReceiveService.getBankShareInfoByUserId(userId);
             bankShareData = bankShareInfo.stream().map(items -> {
                 BankShareDTO dto2 = new BankShareDTO();
@@ -205,26 +178,12 @@ public class AccountController {
                 dto2.setPhoneAuthenticated(items.getPhoneAuthenticated());
                 dto2.setActiveService(items.getActiveService());
                 dto2.setBankShortName(items.getBankShortName());
+                dto2.setNationalId(items.getNationalId());
                 dto2.setFromDate(items.getFromDate());
                 dto2.setToDate(items.getToDate());
                 dto2.setActiveService(items.getToDate() - items.getFromDate());
                 return dto2;
             }).collect(Collectors.toList());
-
-//            for (IBankShareDTO items : bankShareInfo) {
-//                BankShareDTO dto2 = new BankShareDTO();
-//                dto2.setBankAccount(items.getBankAccount());
-//                dto2.setBankAccountName(items.getBankAccountName());
-//                dto2.setStatus(items.getStatus());
-//                dto2.setMmsActive(items.getMmsActive());
-//                dto2.setPhoneAuthenticated(items.getPhoneAuthenticated());
-//                dto2.setActiveService(items.getActiveService());
-//                dto2.setBankShortName(items.getBankShortName());
-//                dto2.setFromDate(items.getFromDate());
-//                dto2.setToDate(items.getToDate());
-//                dto2.setActiveService(items.getToDate() - items.getFromDate());
-//                bankShareData.add(dto2);
-//            }
 
             socialMediaInfo = telegramService.getSocialInfoByUserId(userId);
             socialMediaData = socialMediaInfo.stream().map(item -> {
@@ -232,29 +191,18 @@ public class AccountController {
                 dto3.setPlatform(item.getPlatform());
                 dto3.setChatId(item.getChatId());
                 dto3.setAccountConnected(item.getAccountConnected());
-//                dto3.setPlatform("tele");
-//                dto3.setChatId("linkdogy123");
-//                dto3.setAccountConnected(3);
                 return dto3;
             }).collect(Collectors.toList());
 
-//            for (ISocialMediaDTO dto : socialMediaInfo) {
-//                SocialMediaDTO dto3 = new SocialMediaDTO();
-////                dto3.setPlatform(item.getPlatform());
-////                dto3.setChatId(item.getChatId());
-////                dto3.setAccountConnected(3);
-//                dto3.setPlatform("tele");
-//                dto3.setChatId("linkdogy123");
-//                dto3.setAccountConnected(3);
-//                socialMediaData.add(dto3);
-//            }
+            //set balance and score
+            balanceAndScoreDTO = accountWalletService.getBalanceAndScore(userId);
 
             data.setUserInfo(userInfoData);
             data.setBankInfo(bankInfoData);
             data.setBankShareInfo(bankShareData);
             data.setSocalMedia(socialMediaData);
-            data.setBalance(100);
-            data.setScore(50);
+            data.setBalance(balanceAndScoreDTO.getBalance());
+            data.setScore(balanceAndScoreDTO.getScore());
 
             result = data;
             httpStatus = HttpStatus.OK;

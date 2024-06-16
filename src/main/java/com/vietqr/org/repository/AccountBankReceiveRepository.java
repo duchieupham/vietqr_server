@@ -19,7 +19,8 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 
 	@Query(value = "SELECT a.bank_account AS bankAccount, a.bank_account_name AS bankAccountName, " +
 			"a.status AS status, a.mms_active AS mmsActive, " +
-            "a.phone_authenticated AS phoneAuthenticated, a.national_id AS nationalId, c.bank_short_name AS bankShortName, " +
+            "COALESCE(a.phone_authenticated, '') AS phoneAuthenticated, " +
+			"COALESCE(a.national_id, '') AS nationalId, c.bank_short_name AS bankShortName, " +
             "a.valid_fee_from AS fromDate, a.valid_fee_to AS toDate, " +
 			"COALESCE((a.valid_fee_to - a.valid_fee_from), 0) as activeService " +
             "FROM account_bank_receive a " +
@@ -29,14 +30,15 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	public List<IBankInfoDTO> getBankInfoByUserId(String userId);
 
 	@Query(value = "SELECT a.bank_account AS bankAccount, a.bank_account_name AS bankAccountName, " +
-			"a.status AS status, a.mms_active AS mmsActive, " +
-			"a.phone_authenticated AS phoneAuthenticated, a.national_id AS nationalId, c.bank_short_name AS bankShortName, " +
-			"a.valid_fee_to AS fromDate, a.valid_fee_from AS toDate, " +
-			"COALESCE((a.valid_fee_to - a.valid_fee_from), 0) as activeService " +
-			"FROM account_bank_receive a " +
-			"INNER JOIN account_bank_receive_share b ON b.bank_id = a.id " +
-			"INNER JOIN bank_type c ON a.bank_type_id = c.id " +
-			"WHERE a.user_id = :userId AND b.is_owner = true ", nativeQuery = true)
+            "a.status AS status, a.mms_active AS mmsActive, " +
+            "COALESCE(a.phone_authenticated, '') AS phoneAuthenticated, " +
+            "COALESCE(a.national_id, '') AS nationalId, c.bank_short_name AS bankShortName, " +
+            "a.valid_fee_from AS fromDate, a.valid_fee_to AS toDate, " +
+            "COALESCE((a.valid_fee_to - a.valid_fee_from), 0) as activeService " +
+            "FROM account_bank_receive a " +
+            "INNER JOIN account_bank_receive_share b ON b.bank_id = a.id " +
+            "INNER JOIN bank_type c ON a.bank_type_id = c.id " +
+            "WHERE a.user_id = :userId AND b.is_owner = true ", nativeQuery = true)
 	public List<IBankShareDTO> getBankShareInfoByUserId(String userId);
 
 	@Query(value = "SELECT a.id, b.bank_code as bankCode, b.bank_name as bankName, a.bank_account_name as userBankName, a.bank_account as bankAccount, a.username, a.password "

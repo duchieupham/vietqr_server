@@ -1,11 +1,14 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.dto.IBalanceAndScoreDTO;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.entity.AccountWalletEntity;
 
 @Service
 public interface AccountWalletService {
+
+    public IBalanceAndScoreDTO getBalanceAndScore(String userId);
 
     public int insertAccountWallet(AccountWalletEntity entity);
 

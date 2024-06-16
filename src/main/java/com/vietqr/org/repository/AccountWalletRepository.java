@@ -2,6 +2,7 @@ package com.vietqr.org.repository;
 
 import javax.transaction.Transactional;
 
+import com.vietqr.org.dto.IBalanceAndScoreDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +13,10 @@ import com.vietqr.org.entity.AccountWalletEntity;
 
 @Repository
 public interface AccountWalletRepository extends JpaRepository<AccountWalletEntity, Long> {
+
+    @Query(value = "SELECT a.amount AS balance, a.point AS score FROM account_wallet a " +
+            "WHERE a.user_id = :userId ", nativeQuery = true)
+    IBalanceAndScoreDTO getBalanceAndScore(@Param(value = "userId") String userId);
 
     @Query(value = "SELECT * FROM account_wallet WHERE user_id = :userId", nativeQuery = true)
     AccountWalletEntity getAccountWallet(@Param(value = "userId") String userId);
@@ -29,7 +34,7 @@ public interface AccountWalletRepository extends JpaRepository<AccountWalletEnti
     @Modifying
     @Query(value = "UPDATE account_wallet SET point = point + :amount WHERE sharing_code = :sharingCode", nativeQuery = true)
     void updatePointBySharingCode(@Param(value = "amount") long amount,
-            @Param(value = "sharingCode") String sharingCode);
+                                  @Param(value = "sharingCode") String sharingCode);
 
     @Transactional
     @Modifying
