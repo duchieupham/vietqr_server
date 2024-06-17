@@ -132,6 +132,7 @@ public class AccountController {
             userInfoData = userInfos.stream().map(item -> {
                 UserInfoDTO dto = new UserInfoDTO();
                 // set data
+                dto.setId(item.getId());
                 dto.setPhoneNo(item.getPhoneNo());
                 dto.setFirstName(item.getFirstName());
                 dto.setMiddleName(item.getFirstName());
@@ -208,7 +209,7 @@ public class AccountController {
         } catch (Exception e) {
             logger.error("AccountController: ERROR: getUserDetail:  " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
-            result = new ResponseMessageDTO("FAIL", "E05");
+            result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -229,8 +230,19 @@ public class AccountController {
             int offset = (page - 1) * size;
             List<AdminListUserAccountResponseDTO> data = new ArrayList<>();
             List<IAdminListUserAccountResponseDTO> infos = new ArrayList<>();
-            infos = accountInformationService.getAdminListUsersAccount(value, offset, size);
-            totalElement = accountInformationService.countAdminListUsersAccount();
+
+            switch (type){
+                case 1:
+                    infos = accountInformationService.getAdminListUsersAccount(value, offset, size);
+                    totalElement = accountInformationService.countAdminListUsersAccount();
+                    break;
+                case 2:
+                    infos = accountInformationService.getAdminListUsersAccountByPhone(value, offset, size);
+                    totalElement = accountInformationService.countAdminListUsersAccount();
+                default:
+                    new ArrayList<>();
+                    break;
+            }
 
             data = infos.stream().map(item -> {
                 AdminListUserAccountResponseDTO dto = new AdminListUserAccountResponseDTO();
@@ -252,6 +264,8 @@ public class AccountController {
                 dto.setNationalId(item.getNationalId());
                 dto.setOldNationalId(item.getOldNationalId());
                 dto.setUserIdDetail(item.getUserIdDetail());
+                dto.setBalance(item.getBalance());
+                dto.setScore(item.getScore());
                 return dto;
             }).collect(Collectors.toList());
 

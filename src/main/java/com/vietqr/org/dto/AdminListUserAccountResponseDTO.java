@@ -18,6 +18,24 @@ public class AdminListUserAccountResponseDTO {
     private String nationalId;
     private String oldNationalId;
     private String userIdDetail;
+    private long balance;
+    private long score;
+
+    public long getBalance() {
+        return balance;
+    }
+
+    public void setBalance(long balance) {
+        this.balance = balance;
+    }
+
+    public long getScore() {
+        return score;
+    }
+
+    public void setScore(long score) {
+        this.score = score;
+    }
 
     public boolean isStatus() {
         return status;

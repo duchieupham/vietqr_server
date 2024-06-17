@@ -1,6 +1,7 @@
 package com.vietqr.org.dto;
 
 public interface IUserInfoDTO {
+     String getId();
      String getPhoneNo();
      String getFirstName();
      String getMiddleName();
