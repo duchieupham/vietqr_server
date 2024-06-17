@@ -2,6 +2,7 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+import com.vietqr.org.dto.ISocialMediaDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,11 @@ public class TelegramServiceImpl implements TelegramService {
 
     @Autowired
     TelegramRepository repo;
+
+    @Override
+    public List<ISocialMediaDTO> getSocialInfoByUserId(String userId) {
+        return repo.getSocialInfoByUserId(userId);
+    }
 
     @Override
     public int insertTelegram(TelegramEntity entity) {

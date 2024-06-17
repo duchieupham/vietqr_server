@@ -17,6 +17,16 @@ public class AccountInformationServiceImpl implements AccountInformationService 
 	AccountInformationRepository accountInformationRepo;
 
 	@Override
+	public List<IAdminListUserAccountResponseDTO> getAdminListUsersAccount(String value, int offset, int size) {
+		return accountInformationRepo.getAdminListUsersAccount(value, offset, size);
+	}
+
+	@Override
+	public int countAdminListUsersAccount() {
+		return accountInformationRepo.countAdminListUsersAccount();
+	}
+
+	@Override
 	public AccountInformationEntity getAccountInformation(String userId) {
 		return accountInformationRepo.getAccountInformation(userId);
 	}

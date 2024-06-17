@@ -17,6 +17,30 @@ import com.vietqr.org.entity.AccountBankReceiveEntity;
 @Repository
 public interface AccountBankReceiveRepository extends JpaRepository<AccountBankReceiveEntity, Long> {
 
+	@Query(value = "SELECT a.bank_account AS bankAccount, a.bank_account_name AS bankAccountName, " +
+			"a.status AS status, a.mms_active AS mmsActive, " +
+            "COALESCE(a.phone_authenticated, '') AS phoneAuthenticated, " +
+			"COALESCE(a.national_id, '') AS nationalId, c.bank_short_name AS bankShortName, " +
+            "a.valid_fee_from AS fromDate, a.valid_fee_to AS toDate, " +
+			"COALESCE((a.valid_fee_to - a.valid_fee_from), 0) as activeService " +
+            "FROM account_bank_receive a " +
+            "INNER JOIN account_bank_receive_share b ON b.bank_id = a.id " +
+            "INNER JOIN bank_type c ON a.bank_type_id = c.id " +
+            "WHERE a.user_id = :userId ", nativeQuery = true)
+	public List<IBankInfoDTO> getBankInfoByUserId(String userId);
+
+	@Query(value = "SELECT a.bank_account AS bankAccount, a.bank_account_name AS bankAccountName, " +
+            "a.status AS status, a.mms_active AS mmsActive, " +
+            "COALESCE(a.phone_authenticated, '') AS phoneAuthenticated, " +
+            "COALESCE(a.national_id, '') AS nationalId, c.bank_short_name AS bankShortName, " +
+            "a.valid_fee_from AS fromDate, a.valid_fee_to AS toDate, " +
+            "COALESCE((a.valid_fee_to - a.valid_fee_from), 0) as activeService " +
+            "FROM account_bank_receive a " +
+            "INNER JOIN account_bank_receive_share b ON b.bank_id = a.id " +
+            "INNER JOIN bank_type c ON a.bank_type_id = c.id " +
+            "WHERE a.user_id = :userId AND b.is_owner = true ", nativeQuery = true)
+	public List<IBankShareDTO> getBankShareInfoByUserId(String userId);
+
 	@Query(value = "SELECT a.id, b.bank_code as bankCode, b.bank_name as bankName, a.bank_account_name as userBankName, a.bank_account as bankAccount, a.username, a.password "
 			+ "FROM account_bank_receive a "
 			+ "INNER JOIN bank_type b "
@@ -44,6 +68,19 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "INNER JOIN bank_type b ON a.bank_type_id = b.id "
 			+ "WHERE a.user_id = :userId ", nativeQuery = true)
 	List<IAccountBankReceiveDTO> getBankIdsByUserId(@Param(value = "userId") String userId);
+
+	@Query(value = "SELECT a.id AS bankId, a.bank_account AS bankAccount, a.bank_account_name AS bankAccountName, "
+			+ "a.bank_type_id AS bankTypeId, a.is_authenticated AS isAuthenticated, "
+			+ "a.is_sync AS isSync, a.is_wp_sync AS isWpSync, a.mms_active AS mmsActive, a.national_id AS nationalId, "
+			+ "a.phone_authenticated AS phoneAuthenticated, a.status AS status, a.type AS type, "
+			+ "a.user_id AS userId, a.is_rpa_sync AS isRpaSync "
+			+ "FROM account_bank_receive a "
+			+ "WHERE (a.bank_account LIKE %:value% OR a.bank_account_name LIKE %:value%) LIMIT :offset, :size ", nativeQuery = true)
+	List<IListAccountBankDTO> getListBankAccounts(String value, int offset, int size);
+
+	@Query(value = "SELECT COUNT(a.id) FROM account_bank_receive a", nativeQuery = true)
+	int countListBankAccounts();
+
 
 	@Query(value = "SELECT id FROM account_bank_receive WHERE bank_account = :bankAccount AND bank_type_id = :bankTypeId AND user_id = :userId ", nativeQuery = true)
 	List<String> checkExistedBankAccountSameUser(@Param(value = "bankAccount") String bankAccount,

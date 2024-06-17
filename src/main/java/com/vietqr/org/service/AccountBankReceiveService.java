@@ -11,6 +11,13 @@ import com.vietqr.org.entity.AccountBankReceiveEntity;
 @Service
 public interface AccountBankReceiveService {
 
+	public List<IBankShareDTO> getBankShareInfoByUserId(String userId);
+	public List<IBankInfoDTO> getBankInfoByUserId(String userId);
+
+	public List<IListAccountBankDTO> getListBankAccounts(String value, int offset, int size);
+
+	public int countListBankAccounts();
+
 	public List<IAccountBankReceiveDTO> getBankIdsByUserId(String userId);
 
 	public int insertAccountBank(AccountBankReceiveEntity entity);

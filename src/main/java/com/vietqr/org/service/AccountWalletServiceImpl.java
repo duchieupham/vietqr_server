@@ -1,5 +1,6 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.dto.IBalanceAndScoreDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,11 @@ public class AccountWalletServiceImpl implements AccountWalletService {
     @Override
     public AccountWalletEntity getAccountWalletByUserId(String userId) {
         return repo.getAccountWallet(userId);
+    }
+
+    @Override
+    public IBalanceAndScoreDTO getBalanceAndScore(String userId) {
+        return repo.getBalanceAndScore(userId);
     }
 
     @Override

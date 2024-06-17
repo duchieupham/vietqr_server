@@ -17,6 +17,26 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     AccountBankReceiveRepository repo;
 
     @Override
+    public List<IBankShareDTO> getBankShareInfoByUserId(String userId) {
+        return repo.getBankShareInfoByUserId(userId);
+    }
+
+    @Override
+    public List<IBankInfoDTO> getBankInfoByUserId(String userId) {
+        return repo.getBankInfoByUserId(userId);
+    }
+
+    @Override
+    public List<IListAccountBankDTO> getListBankAccounts(String value, int offset, int size) {
+        return repo.getListBankAccounts(value, offset, size);
+    }
+
+    @Override
+    public int countListBankAccounts() {
+        return repo.countListBankAccounts();
+    }
+
+    @Override
     public List<IAccountBankReceiveDTO> getBankIdsByUserId(String userId) {
         return repo.getBankIdsByUserId(userId);
     }
