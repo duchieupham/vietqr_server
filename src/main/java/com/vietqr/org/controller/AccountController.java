@@ -132,6 +132,7 @@ public class AccountController {
             userInfoData = userInfos.stream().map(item -> {
                 UserInfoDTO dto = new UserInfoDTO();
                 // set data
+                dto.setId(item.getId());
                 dto.setPhoneNo(item.getPhoneNo());
                 dto.setFirstName(item.getFirstName());
                 dto.setMiddleName(item.getFirstName());

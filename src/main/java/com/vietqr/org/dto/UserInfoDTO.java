@@ -1,6 +1,7 @@
 package com.vietqr.org.dto;
 
 public class UserInfoDTO {
+    private String id;
     private String phoneNo;
     private String firstName;
     private String middleName;
@@ -17,7 +18,16 @@ public class UserInfoDTO {
     public UserInfoDTO() {
     }
 
-    public UserInfoDTO(String phoneNo, String firstName, String middleName, String lastName, String fullName, String email, int gender, boolean status, String nationalDate, String nationalId, String oldNationalId, String address) {
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public UserInfoDTO(String id, String phoneNo, String firstName, String middleName, String lastName, String fullName, String email, int gender, boolean status, String nationalDate, String nationalId, String oldNationalId, String address) {
+        this.id = id;
         this.phoneNo = phoneNo;
         this.firstName = firstName;
         this.middleName = middleName;
