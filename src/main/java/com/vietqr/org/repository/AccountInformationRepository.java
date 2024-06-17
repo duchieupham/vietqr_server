@@ -1,17 +1,15 @@
 package com.vietqr.org.repository;
 
-import java.util.List;
-
-import javax.transaction.Transactional;
-
 import com.vietqr.org.dto.*;
+import com.vietqr.org.entity.AccountInformationEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.vietqr.org.entity.AccountInformationEntity;
+import javax.transaction.Transactional;
+import java.util.List;
 
 @Repository
 public interface AccountInformationRepository extends JpaRepository<AccountInformationEntity, Long> {
@@ -169,4 +167,32 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
 			+ "AND a.status = 1 "
 			+ "ORDER BY role DESC ", nativeQuery = true)
 	List<IAccountTerminalMemberDTO> getMembersByTerminalId(String terminalId);
+
+
+	@Modifying
+	@Transactional
+	@Query(value = "UPDATE account_information a SET a.status = :status WHERE a.user_id = :id AND a.status != :status", nativeQuery = true)
+	int updateUserStatus(@Param("id") String id, @Param("status") boolean status);
+
+	@Modifying
+	@Transactional
+	@Query(value = "UPDATE account_information SET first_name = :firstName, middle_name = :middleName, last_name = :lastName, " +
+			"address = :address, gender = :gender, email = :email, national_id = :nationalId, old_national_id = :oldNationalId, " +
+			"national_date = :nationalDate WHERE user_id = :userId", nativeQuery = true)
+	int updateUserByUserId(@Param("userId") String userId,
+						   @Param("firstName") String firstName,
+						   @Param("middleName") String middleName,
+						   @Param("lastName") String lastName,
+						   @Param("address") String address,
+						   @Param("gender") Integer gender,
+						   @Param("email") String email,
+						   @Param("nationalId") String nationalId,
+						   @Param("oldNationalId") String oldNationalId,
+						   @Param("nationalDate") String nationalDate);
+
+	@Query(value = "SELECT first_name AS firstName, middle_name AS middleName, last_name AS lastName, address, gender," +
+			" email, national_id AS nationalId, old_national_id AS oldNationalId, national_date AS nationalDate " +
+			"FROM account_information a WHERE a.user_id = :userId", nativeQuery = true)
+	IUserUpdateDTO findByUserId(@Param("userId") String userId);
+
 }

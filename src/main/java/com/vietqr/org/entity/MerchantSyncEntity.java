@@ -37,11 +37,13 @@ public class MerchantSyncEntity implements Serializable {
     @Column(name = "accountCustomerId")
     private String accountCustomerId;
 
+    @Column(name = "email")
+    private String email;
     public MerchantSyncEntity() {
     }
 
     public MerchantSyncEntity(String id, String name, String vso, String businessType,
-                              String career, String address, String nationalId, boolean isActive, String userId, String accountCustomerId) {
+                              String career, String address, String nationalId, boolean isActive, String userId, String accountCustomerId, String email) {
         this.id = id;
         this.name = name;
         this.vso = vso;
@@ -52,6 +54,14 @@ public class MerchantSyncEntity implements Serializable {
         this.isActive = isActive;
         this.userId = userId;
         this.accountCustomerId = accountCustomerId;
+        this.email = email;
+    }
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getId() {
@@ -110,12 +120,12 @@ public class MerchantSyncEntity implements Serializable {
         this.nationalId = nationalId;
     }
 
-    public boolean isActive() {
+    public boolean getIsActive() {
         return isActive;
     }
 
-    public void setActive(boolean active) {
-        isActive = active;
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
     }
 
     public String getUserId() {

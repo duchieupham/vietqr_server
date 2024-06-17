@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
+import com.vietqr.org.dto.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -30,21 +30,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vietqr.org.dto.AccountBankReceiveServiceItemDTO;
-import com.vietqr.org.dto.AccountCustomerGenerateDTO;
-import com.vietqr.org.dto.AccountCustomerInputDTO;
-import com.vietqr.org.dto.CusSyncApiInfoDTO;
-import com.vietqr.org.dto.CusSyncEcInfoDTO;
-import com.vietqr.org.dto.CustomerSyncInsertDTO;
-import com.vietqr.org.dto.CustomerSyncListDTO;
-import com.vietqr.org.dto.CustomerSyncMappingInsertDTO;
-import com.vietqr.org.dto.CustomerSyncStatusDTO;
-import com.vietqr.org.dto.CustomerSyncTokenTestDTO;
-import com.vietqr.org.dto.CustomerSyncUpdateDTO;
-import com.vietqr.org.dto.MerchantInformationCheckDTO;
-import com.vietqr.org.dto.MerchantServiceDTO;
-import com.vietqr.org.dto.MerchantServiceItemDTO;
-import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.entity.AccountCustomerBankEntity;
 import com.vietqr.org.entity.AccountCustomerEntity;
@@ -322,7 +307,6 @@ public class CustomerSyncController {
         }
         return result;
     }
-
     // get systemPassword for customer
     @GetMapping("admin/customer-sync/system-password")
     public ResponseEntity<ResponseMessageDTO> getSystemPasswordForCustomer(

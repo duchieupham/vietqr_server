@@ -18,4 +18,7 @@ public interface MerchantConnectionRepository extends JpaRepository<MerchantConn
             + "ON d.id = c.account_customer_id "
             + "WHERE d.username  = :username ", nativeQuery = true)
     List<String> checkExistedCustomerSyncByUsername(String username);
+
+    @Query(value="SELECT COUNT(id) FROM merchant_connection", nativeQuery = true)
+    Integer getCountingMerchantConnection();
 }

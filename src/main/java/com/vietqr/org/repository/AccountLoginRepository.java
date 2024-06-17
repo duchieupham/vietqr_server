@@ -111,4 +111,7 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
 						 @Param(value = "password") String password);
 
 	boolean existsByPhoneNo(String phoneNo);
+
+	@Query(value = "SELECT COUNT(*) > 0 FROM account_login WHERE phone_no = :phoneNo", nativeQuery = true)
+	boolean existsPhoneNo(@Param("phoneNo") String phoneNo);
 }
