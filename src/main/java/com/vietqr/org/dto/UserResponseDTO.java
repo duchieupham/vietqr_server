@@ -13,7 +13,6 @@ public class UserResponseDTO {
     private String nationalId;
     private String oldNationalId;
     private String nationalDate;
-    private String carrierTypeId;
     private boolean status;
 
     public String getId() {
@@ -103,14 +102,6 @@ public class UserResponseDTO {
 
     public void setNationalDate(String nationalDate) {
         this.nationalDate = nationalDate;
-    }
-
-    public String getCarrierTypeId() {
-        return carrierTypeId;
-    }
-
-    public void setCarrierTypeId(String carrierTypeId) {
-        this.carrierTypeId = carrierTypeId;
     }
 
     public boolean isStatus() {

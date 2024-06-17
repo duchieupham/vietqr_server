@@ -90,7 +90,7 @@ public class AccountSystemController {
         } catch (Exception e) {
             logger.error("Fail at AccountSystemController : Error at resetPassword: " + e.getMessage() + "at " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "Error occurred");
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+            httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
     }
@@ -151,10 +151,11 @@ public class AccountSystemController {
             boolean phoneExists = isPhoneNoValid(userRequestDTO.getPhoneNo());
             if (phoneExists) {
                 result = new ResponseMessageDTO("FAILED", "E144");
-                httpStatus = HttpStatus.CONFLICT;
+                httpStatus = HttpStatus.BAD_REQUEST;
             } else {
                 // Proceed with user creation
-                result = accountSystemService.createUser(userRequestDTO);
+                accountSystemService.createUser(userRequestDTO);
+                result = new ResponseMessageDTO("SUCCESS", "");
                 httpStatus = HttpStatus.OK;
             }
         } catch (Exception e) {
@@ -176,7 +177,7 @@ public class AccountSystemController {
                 httpStatus = HttpStatus.OK;
             } else {
                 result = new ResponseMessageDTO("FAILED", "E145");
-                httpStatus = HttpStatus.NOT_FOUND;
+                httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("Failed at AccountSystemController : Error at updateUserStatus: " + e.getMessage() + System.currentTimeMillis());

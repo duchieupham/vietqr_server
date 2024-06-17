@@ -177,7 +177,6 @@ public class AccountSystemServiceImpl implements AccountSystemService {
         userResponseDTO.setNationalId(userRequestDTO.getNationalId());
         userResponseDTO.setOldNationalId(userRequestDTO.getOldNationalId());
         userResponseDTO.setNationalDate(userRequestDTO.getNationalDate());
-        userResponseDTO.setCarrierTypeId(accountInformationEntity.getCarrierTypeId());
         userResponseDTO.setStatus(true);
 
         return userResponseDTO;
