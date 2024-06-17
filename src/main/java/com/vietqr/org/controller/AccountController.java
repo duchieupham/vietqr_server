@@ -252,6 +252,8 @@ public class AccountController {
                 dto.setNationalId(item.getNationalId());
                 dto.setOldNationalId(item.getOldNationalId());
                 dto.setUserIdDetail(item.getUserIdDetail());
+                dto.setBalance(item.getBalance());
+                dto.setScore(item.getScore());
                 return dto;
             }).collect(Collectors.toList());
 
