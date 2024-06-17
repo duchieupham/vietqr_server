@@ -256,7 +256,7 @@ public class AccountController {
                 // set full name
                 dto.setFullName(item.getLastName() + " " + item.getMiddleName() + " " + item.getFirstName());
                 dto.setGender(item.getGender());
-                dto.setStatus(item.getStatus() != true ? item.getStatus() : false);
+                dto.setStatus(item.getStatus());
                 dto.setUserIp(item.getUserIp());
                 dto.setPhoneNo(item.getPhoneNo());
                 dto.setRegisterPlatform(item.getRegisterPlatform());
