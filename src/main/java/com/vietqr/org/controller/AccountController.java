@@ -125,8 +125,6 @@ public class AccountController {
             List<SocialMediaDTO> socialMediaData = new ArrayList<>();  // fix ISocialMediaDTO
             List<ISocialMediaDTO> socialMediaInfo = new ArrayList<>();
             IBalanceAndScoreDTO balanceAndScoreDTO = null;
-            String balance = "";
-            String score = "";
 
             // call service
             // user info
@@ -185,6 +183,7 @@ public class AccountController {
                 return dto2;
             }).collect(Collectors.toList());
 
+            // social media info
             socialMediaInfo = telegramService.getSocialInfoByUserId(userId);
             socialMediaData = socialMediaInfo.stream().map(item -> {
                 SocialMediaDTO dto3 = new SocialMediaDTO();
@@ -214,7 +213,6 @@ public class AccountController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-
 
     // get list user account
     @GetMapping("account/admin-list-account-user")
@@ -275,7 +273,6 @@ public class AccountController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-
 
     @PostMapping("accounts")
     public ResponseEntity<String> login(@RequestBody AccountLoginDTO dto) {

@@ -10,51 +10,51 @@ import com.vietqr.org.entity.AccountLoginEntity;
 
 @Service
 public interface AccountLoginService {
-	public List<IUserInfoDTO> getUserInfoDetailsByUserId(String userId);
+    public List<IUserInfoDTO> getUserInfoDetailsByUserId(String userId);
 
-	public String login(String phoneNo, String password);
+    public String login(String phoneNo, String password);
 
-	public String checkOldPassword(String userId, String password);
+    public String checkOldPassword(String userId, String password);
 
-	public void updatePassword(String password, String userId);
+    public void updatePassword(String password, String userId);
 
-	public int insertAccountLogin(AccountLoginEntity entity);
+    public int insertAccountLogin(AccountLoginEntity entity);
 
-	public AccountCheckDTO checkExistedPhoneNo(String phoneNo);
+    public AccountCheckDTO checkExistedPhoneNo(String phoneNo);
 
-	public void updateStatus(int status, String userId);
+    public void updateStatus(int status, String userId);
 
-	public String loginByEmail(String email, String password);
+    public String loginByEmail(String email, String password);
 
-	public String getPhoneNoById(String userId);
+    public String getPhoneNoById(String userId);
 
-	public void updateCardNumber(String cardNumber, String userId);
+    public void updateCardNumber(String cardNumber, String userId);
 
-	public String checkExistedCardNumber(String cardNumber);
+    public String checkExistedCardNumber(String cardNumber);
 
-	public String loginByCardNumber(String cardNumber);
+    public String loginByCardNumber(String cardNumber);
 
-	public String getCardNumberByUserId(String userId);
+    public String getCardNumberByUserId(String userId);
 
-	public List<String> getAllUserIds();
+    public List<String> getAllUserIds();
 
-	public String getUserIdByPhoneNo(String phoneNo);
+    public String getUserIdByPhoneNo(String phoneNo);
 
-	public List<AccountLoginEntity> getAllAccountLogin();
+    public List<AccountLoginEntity> getAllAccountLogin();
 
-	public String checkExistedUserByIdAndPassword(String userId, String password);
+    public String checkExistedUserByIdAndPassword(String userId, String password);
 
-	public void updateCardNfcNumber(String cardNumber, String userId);
+    public void updateCardNfcNumber(String cardNumber, String userId);
 
-	public String checkExistedCardNfcNumber(String cardNumber);
+    public String checkExistedCardNfcNumber(String cardNumber);
 
-	public String loginByCardNfcNumber(String cardNumber);
+    public String loginByCardNfcNumber(String cardNumber);
 
-	public CardVQRInfoDTO getVcardInforByUserId(String userId);
+    public CardVQRInfoDTO getVcardInforByUserId(String userId);
 
-	public void resetPassword(String password, String phoneNo);
+    public void resetPassword(String password, String phoneNo);
 
-	String checkPassword(String userId, String password);
+    String checkPassword(String userId, String password);
 
-	boolean isPhoneNoExists(String phoneNo);
+    boolean isPhoneNoExists(String phoneNo);
 }
