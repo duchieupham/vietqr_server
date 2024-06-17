@@ -22,6 +22,11 @@ public class AccountInformationServiceImpl implements AccountInformationService 
 	}
 
 	@Override
+	public List<IAdminListUserAccountResponseDTO> getAdminListUsersAccountByPhone(String value, int offset, int size) {
+		return accountInformationRepo.getAdminListUsersAccountByPhone(value, offset, size);
+	}
+
+	@Override
 	public int countAdminListUsersAccount() {
 		return accountInformationRepo.countAdminListUsersAccount();
 	}

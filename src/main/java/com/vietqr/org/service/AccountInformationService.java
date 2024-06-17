@@ -11,6 +11,8 @@ import com.vietqr.org.entity.AccountInformationEntity;
 public interface AccountInformationService {
 
 	public List<IAdminListUserAccountResponseDTO> getAdminListUsersAccount(String value, int offset, int size);
+	public List<IAdminListUserAccountResponseDTO> getAdminListUsersAccountByPhone(String value, int offset, int size);
+
 	public int countAdminListUsersAccount();
 
 	public AccountInformationEntity getAccountInformation(String userId);
