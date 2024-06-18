@@ -176,6 +176,8 @@ public class AccountSystemController {
                 accountLoginEntity.setSyncBitrix(false);
                 accountLoginEntity.setPassword(userRequestDTO.getPassword());
                 accountLoginEntity.setStatus(true);
+                accountLoginEntity.setCardNumber("");
+                accountLoginEntity.setCardNfcNumber("");
                 accountLoginEntity.setEmail(StringUtil.getValueNullChecker(userRequestDTO.getEmail()));
 
                 // Create AccountInformationEntity
@@ -186,6 +188,9 @@ public class AccountSystemController {
                 accountInformationEntity.setMiddleName(StringUtil.getValueNullChecker(userRequestDTO.getMiddleName()));
                 accountInformationEntity.setLastName(StringUtil.getValueNullChecker(userRequestDTO.getLastName()));
                 accountInformationEntity.setBirthDate("");
+                accountInformationEntity.setImgId("");
+                accountInformationEntity.setRegisterPlatform("");
+                accountInformationEntity.setUserIp("");
                 accountInformationEntity.setAddress(StringUtil.getValueNullChecker(userRequestDTO.getAddress()));
                 accountInformationEntity.setGender(StringUtil.getValueNullChecker(userRequestDTO.getGender()));
                 accountInformationEntity.setEmail(StringUtil.getValueNullChecker(userRequestDTO.getEmail()));
