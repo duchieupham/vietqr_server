@@ -10,7 +10,7 @@ import com.vietqr.org.entity.AccountLoginEntity;
 
 @Service
 public interface AccountLoginService {
-    public List<IUserInfoDTO> getUserInfoDetailsByUserId(String userId);
+    public IUserInfoDTO getUserInfoDetailsByUserId(String userId);
 
     public String login(String phoneNo, String password);
 

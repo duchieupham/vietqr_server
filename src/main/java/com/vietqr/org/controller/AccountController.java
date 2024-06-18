@@ -117,7 +117,7 @@ public class AccountController {
         try {
             // initialize data
             List<UserInfoDTO> userInfoData = new ArrayList<>();        // fix IUserInfoDTO
-            List<IUserInfoDTO> userInfos = new ArrayList<>();
+            IUserInfoDTO userInfos = null;
             List<BankInfoDTO> bankInfoData = new ArrayList<>();        // fix IBankInfoDTO
             List<IBankInfoDTO> bankInfo = new ArrayList<>();
             List<BankShareDTO> bankShareData = new ArrayList<>();      // fix IBankShareDTO
@@ -129,24 +129,7 @@ public class AccountController {
             // call service
             // user info
             userInfos = accountLoginService.getUserInfoDetailsByUserId(userId);
-            userInfoData = userInfos.stream().map(item -> {
-                UserInfoDTO dto = new UserInfoDTO();
-                // set data
-                dto.setId(item.getId());
-                dto.setPhoneNo(item.getPhoneNo());
-                dto.setFirstName(item.getFirstName());
-                dto.setMiddleName(item.getMiddleName());
-                dto.setLastName(item.getLastName());
-                dto.setFullName(item.getLastName() + " " + item.getMiddleName() + " " + item.getFirstName());
-                dto.setEmail(item.getEmail());
-                dto.setGender(item.getGender());
-                dto.setStatus(item.getStatus());
-                dto.setNationalDate(item.getNationalDate());
-                dto.setNationalId(item.getNationalId());
-                dto.setOldNationalId(item.getOldNationalId());
-                dto.setAddress(item.getAddress());
-                return dto;
-            }).collect(Collectors.toList());
+
 
             // bank info
             bankInfo = accountBankReceiveService.getBankInfoByUserId(userId);
@@ -162,7 +145,7 @@ public class AccountController {
                 dto.setNationalId(item.getNationalId());
                 dto.setFromDate(item.getFromDate());
                 dto.setToDate(item.getToDate());
-                dto.setActiveService(item.getToDate() - item.getFromDate());
+                dto.setActiveService(item.getActiveService());
                 return dto;
             }).collect(Collectors.toList());
 
@@ -197,7 +180,7 @@ public class AccountController {
             //set balance and score
             balanceAndScoreDTO = accountWalletService.getBalanceAndScore(userId);
 
-            data.setUserInfo(userInfoData);
+            data.setUserInfo(userInfos);
             data.setBankInfo(bankInfoData);
             data.setBankShareInfo(bankShareData);
             data.setSocalMedia(socialMediaData);

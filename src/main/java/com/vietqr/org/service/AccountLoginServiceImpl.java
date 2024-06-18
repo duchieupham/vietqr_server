@@ -16,7 +16,7 @@ public class AccountLoginServiceImpl implements AccountLoginService {
     AccountLoginRepository repo;
 
     @Override
-    public List<IUserInfoDTO> getUserInfoDetailsByUserId(String userId) {
+    public IUserInfoDTO getUserInfoDetailsByUserId(String userId) {
         return repo.getUserInfoDetailsByUserId(userId);
     }
 
