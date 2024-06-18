@@ -22,7 +22,7 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
             + "FROM account_information a "
             + "INNER JOIN account_login b ON a.user_id = b.id "
             + "INNER JOIN account_wallet c ON a.user_id = c.user_id "
-            + "WHERE (a.first_name LIKE %:value%) LIMIT :offset, :size ", nativeQuery = true)
+            + "WHERE (a.first_name LIKE %:value%) OR (a.middle_name LIKE %:value%) OR (a.last_name LIKE %:value%) LIMIT :offset, :size ", nativeQuery = true)
     List<IAdminListUserAccountResponseDTO> getAdminListUsersAccount(String value, int offset, int size);
 
     @Query(value = "SELECT a.id AS userId, a.address AS address, a.birth_date AS birthDate, COALESCE(a.email, '') AS email, "
@@ -37,8 +37,17 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
             + "WHERE (b.phone_no LIKE %:value%) LIMIT :offset, :size ", nativeQuery = true)
     List<IAdminListUserAccountResponseDTO> getAdminListUsersAccountByPhone(String value, int offset, int size);
 
-    @Query(value = "SELECT COUNT(a.id) AS totalElement FROM account_information a ", nativeQuery = true)
-    int countAdminListUsersAccount();
+    @Query(value = "SELECT COUNT(b.id) AS totalElement "
+            + "FROM account_information a "
+            + "INNER JOIN account_login b ON a.user_id = b.id "
+            + "INNER JOIN account_wallet c ON a.user_id = c.user_id "
+            + "WHERE (b.phone_no LIKE %:value%) ", nativeQuery = true)
+    int countAdminListUsersAccountByPhone(String value);
+    @Query(value = "SELECT COUNT(a.id) AS totalElement FROM account_information a "
+            + "INNER JOIN account_login b ON a.user_id = b.id "
+            + "INNER JOIN account_wallet c ON a.user_id = c.user_id "
+            + "WHERE (a.first_name LIKE %:value%) OR (a.middle_name LIKE %:value%) OR (a.last_name LIKE %:value%) ", nativeQuery = true)
+    int countAdminListUsersAccountByName(String value);
 
     @Query(value = "SELECT * FROM account_information WHERE user_id = :userId AND status = 1", nativeQuery = true)
     AccountInformationEntity getAccountInformation(@Param(value = "userId") String userId);
