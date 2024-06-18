@@ -230,23 +230,23 @@ public class AccountController {
             data = infos.stream().map(item -> {
                 AdminListUserAccountResponseDTO dto = new AdminListUserAccountResponseDTO();
                 dto.setId(item.getUserId());
-                dto.setAddress(item.getAddress());
-                dto.setBirthDate(item.getBirthDate());
-                dto.setEmail(item.getEmail());
-                dto.setFirstName(item.getFirstName());
-                dto.setMiddleName(item.getMiddleName());
+                dto.setAddress(StringUtil.getValueNullChecker(item.getAddress()));
+                dto.setBirthDate(StringUtil.getValueNullChecker(item.getBirthDate()));
+                dto.setEmail(StringUtil.getValueNullChecker(item.getEmail()));
+                dto.setFirstName(StringUtil.getValueNullChecker(item.getFirstName()));
+                dto.setMiddleName(StringUtil.getValueNullChecker(item.getMiddleName()));
                 dto.setLastName(item.getLastName());
                 // set full name
                 dto.setFullName(item.getLastName() + " " + item.getMiddleName() + " " + item.getFirstName());
                 dto.setGender(item.getGender());
                 dto.setStatus(item.getStatus());
-                dto.setUserIp(item.getUserIp());
-                dto.setPhoneNo(item.getPhoneNo());
-                dto.setRegisterPlatform(item.getRegisterPlatform());
-                dto.setNationalDate(item.getNationalDate());
-                dto.setNationalId(item.getNationalId());
-                dto.setOldNationalId(item.getOldNationalId());
-                dto.setUserIdDetail(item.getUserIdDetail());
+                dto.setUserIp(StringUtil.getValueNullChecker(item.getUserIp()));
+                dto.setPhoneNo(StringUtil.getValueNullChecker(item.getPhoneNo()));
+                dto.setRegisterPlatform(StringUtil.getValueNullChecker(item.getRegisterPlatform()));
+                dto.setNationalDate(StringUtil.getValueNullChecker(item.getNationalDate()));
+                dto.setNationalId(StringUtil.getValueNullChecker(item.getNationalId()));
+                dto.setOldNationalId(StringUtil.getValueNullChecker(item.getOldNationalId()));
+                dto.setUserIdDetail(StringUtil.getValueNullChecker(item.getUserIdDetail()));
                 dto.setBalance(item.getBalance());
                 dto.setScore(item.getScore());
                 return dto;
