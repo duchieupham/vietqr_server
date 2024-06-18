@@ -181,7 +181,7 @@ public class AccountSystemController {
                 // Create AccountInformationEntity
                 AccountInformationEntity accountInformationEntity = new AccountInformationEntity();
                 accountInformationEntity.setId(id);
-                accountInformationEntity.setUserId(userId);
+                accountInformationEntity.setUserId(accountLoginEntity.getId());
                 accountInformationEntity.setFirstName(StringUtil.getValueNullChecker(userRequestDTO.getFirstName()));
                 accountInformationEntity.setMiddleName(StringUtil.getValueNullChecker(userRequestDTO.getMiddleName()));
                 accountInformationEntity.setLastName(StringUtil.getValueNullChecker(userRequestDTO.getLastName()));
@@ -216,7 +216,7 @@ public class AccountSystemController {
                 accountSettingEntity.setVoiceMobile(true);
                 accountSettingEntity.setVoiceMobileKiot(true);
                 accountSettingEntity.setVoiceWeb(true);
-                accountSettingEntity.setUserId(userId);
+                accountSettingEntity.setUserId(accountLoginEntity.getId());
                 accountSettingEntity.setLastLogin(DateTimeUtil.getCurrentDateTimeUTC());
                 accountSettingEntity.setAccessCount(1);
                 accountSettingEntity.setEdgeImgId("");
@@ -231,7 +231,7 @@ public class AccountSystemController {
                 // Create AccountWalletEntity
                 AccountWalletEntity accountWalletEntity = new AccountWalletEntity();
                 accountWalletEntity.setId(accountWalletUUID);
-                accountWalletEntity.setUserId(userId);
+                accountWalletEntity.setUserId(accountLoginEntity.getId());
                 accountWalletEntity.setAmount("0");
                 accountWalletEntity.setEnableService(true);
                 accountWalletEntity.setActive(true);
