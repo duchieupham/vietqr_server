@@ -4,6 +4,7 @@ import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.repository.*;
 import com.vietqr.org.util.RandomCodeUtil;
+import com.vietqr.org.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -66,35 +67,18 @@ public class AccountSystemServiceImpl implements AccountSystemService {
     }
 
     @Override
-    public UserUpdateResponseDTO updateUser(String userId, UserUpdateRequestDTO userUpdateRequestDTO) {
-        int updatedRows = accountInformationRepository.updateUserByUserId(
+    public void updateUser(String userId, UserUpdateRequestDTO userUpdateRequestDTO) {
+        accountInformationRepository.updateUserByUserId(
                 userId,
-                userUpdateRequestDTO.getFirstName(),
-                userUpdateRequestDTO.getMiddleName(),
-                userUpdateRequestDTO.getLastName(),
-                userUpdateRequestDTO.getAddress(),
-                userUpdateRequestDTO.getGender(),
-                userUpdateRequestDTO.getEmail(),
-                userUpdateRequestDTO.getNationalId(),
-                userUpdateRequestDTO.getOldNationalId(),
-                userUpdateRequestDTO.getNationalDate()
+                StringUtil.getValueNullChecker(userUpdateRequestDTO.getFirstName()),
+                StringUtil.getValueNullChecker(userUpdateRequestDTO.getMiddleName()),
+                StringUtil.getValueNullChecker(userUpdateRequestDTO.getLastName()),
+                StringUtil.getValueNullChecker(userUpdateRequestDTO.getAddress()),
+                StringUtil.getValueNullChecker(userUpdateRequestDTO.getGender()),
+                StringUtil.getValueNullChecker(userUpdateRequestDTO.getEmail()),
+                StringUtil.getValueNullChecker(userUpdateRequestDTO.getNationalId()),
+                StringUtil.getValueNullChecker(userUpdateRequestDTO.getOldNationalId()),
+                StringUtil.getValueNullChecker(userUpdateRequestDTO.getNationalDate())
         );
-
-        if (updatedRows > 0) {
-            IUserUpdateDTO updatedEntity = accountInformationRepository.findByUserId(userId);
-            return new UserUpdateResponseDTO(
-                    updatedEntity.getEmail(),
-                    updatedEntity.getFirstName(),
-                    updatedEntity.getMiddleName(),
-                    updatedEntity.getLastName(),
-                    updatedEntity.getAddress(),
-                    updatedEntity.getGender(),
-                    updatedEntity.getNationalId(),
-                    updatedEntity.getOldNationalId(),
-                    updatedEntity.getNationalDate()
-            );
-        }
-        return null;
     }
-
 }

@@ -283,20 +283,15 @@ public class AccountSystemController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-
-    @PutMapping("admin/update/{userId}")
-    public ResponseEntity<Object> updateUser(@PathVariable String userId, @Valid @RequestBody UserUpdateRequestDTO userUpdateRequestDTO) {
-        Object result;
+    @PutMapping("admin/account-update/{userId}")
+    public ResponseEntity<ResponseMessageDTO> updateUser(@PathVariable String userId, @Valid @RequestBody UserUpdateRequestDTO userUpdateRequestDTO) {
+        ResponseMessageDTO result = null;
         HttpStatus httpStatus;
         try {
-            UserUpdateResponseDTO updatedUser = accountSystemService.updateUser(userId, userUpdateRequestDTO);
-            if (updatedUser != null) {
-                result = updatedUser;
-                httpStatus = HttpStatus.OK;
-            } else {
-                result = new ResponseMessageDTO("FAILED", "E146");
-                httpStatus = HttpStatus.BAD_REQUEST;
-            }
+            accountSystemService.updateUser(userId, userUpdateRequestDTO);
+
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("Failed at AccountSystemController:  Error at updateUser: " + e.getMessage() + "at" + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
@@ -304,6 +299,4 @@ public class AccountSystemController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-
-
 }

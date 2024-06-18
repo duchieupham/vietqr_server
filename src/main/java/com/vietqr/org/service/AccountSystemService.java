@@ -19,6 +19,6 @@ public interface AccountSystemService {
 
     boolean updateUserStatus(String id, boolean status);
 
-    UserUpdateResponseDTO updateUser(String userId, UserUpdateRequestDTO userRequestDTO);
+    void updateUser(String userId, UserUpdateRequestDTO userRequestDTO);
 
 }
