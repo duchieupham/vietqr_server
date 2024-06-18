@@ -24,7 +24,6 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
             "a.valid_fee_from AS fromDate, a.valid_fee_to AS toDate, " +
 			"COALESCE((a.valid_fee_to - a.valid_fee_from), 0) as activeService " +
             "FROM account_bank_receive a " +
-            "INNER JOIN account_bank_receive_share b ON b.bank_id = a.id " +
             "INNER JOIN bank_type c ON a.bank_type_id = c.id " +
             "WHERE a.user_id = :userId ", nativeQuery = true)
 	public List<IBankInfoDTO> getBankInfoByUserId(String userId);
@@ -38,7 +37,8 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
             "FROM account_bank_receive a " +
             "INNER JOIN account_bank_receive_share b ON b.bank_id = a.id " +
             "INNER JOIN bank_type c ON a.bank_type_id = c.id " +
-            "WHERE a.user_id = :userId AND b.is_owner = true ", nativeQuery = true)
+            "WHERE b.user_id = :userId AND b.is_owner = false " +
+			"GROUP BY a.id, b.user_id ", nativeQuery = true)
 	public List<IBankShareDTO> getBankShareInfoByUserId(String userId);
 
 	@Query(value = "SELECT a.id, b.bank_code as bankCode, b.bank_name as bankName, a.bank_account_name as userBankName, a.bank_account as bankAccount, a.username, a.password "

@@ -179,7 +179,7 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
 
 	@Modifying
 	@Transactional
-	@Query(value = "UPDATE account_information a SET a.status = :status WHERE a.user_id = :id AND a.status != :status", nativeQuery = true)
+	@Query(value = "UPDATE account_information a SET a.status = :status WHERE a.user_id = :id ", nativeQuery = true)
 	int updateUserStatus(@Param("id") String id, @Param("status") boolean status);
 
 	@Modifying

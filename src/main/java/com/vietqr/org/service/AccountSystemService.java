@@ -17,7 +17,6 @@ public interface AccountSystemService {
 
     boolean resetUserPassword(String phoneNo, String newPassword);
 
-    UserResponseDTO createUser(UserRequestDTO userRequestDTO);
     boolean updateUserStatus(String id, boolean status);
 
     UserUpdateResponseDTO updateUser(String userId, UserUpdateRequestDTO userRequestDTO);

@@ -27,6 +27,6 @@ public interface AccountSystemRepository extends JpaRepository<AccountSystemEnti
     //reset pass word
     @Modifying
     @Transactional
-    @Query(value = "UPDATE account_login SET password = :newPassword WHERE phone_no = :phoneNo", nativeQuery = true)
+    @Query(value = "UPDATE account_login SET password = :newPassword WHERE phone_no = :phoneNo ", nativeQuery = true)
     int updateUserPassword(@Param("phoneNo") String phoneNo,@Param("newPassword") String newPassword);
 }

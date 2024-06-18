@@ -1,50 +1,31 @@
 package com.vietqr.org.dto;
 
-import com.google.firebase.database.annotations.NotNull;
-import org.hibernate.validator.constraints.UniqueElements;
-
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
 public class UserRequestDTO {
-    @NotNull
+    @NotBlank
     private String phoneNo;
 
-    @NotNull
     @NotBlank
     private String password;
 
-    @Email
     private String email;
 
-    @NotNull
-    @NotBlank
     private String firstName;
-    @NotBlank
-    @NotNull
     private String middleName;
 
-    @NotNull
-    @NotBlank
+
     private String lastName;
 
 
-    @NotBlank
-    @NotNull
     private String address;
 
-    @NotNull
     private Integer gender;
-    @NotNull
-    @NotBlank
+
     private String nationalId;
-    @NotNull
-    @NotBlank
+
     private String oldNationalId;
-    @NotNull
-    @NotBlank
+
     private String nationalDate;
 
 
