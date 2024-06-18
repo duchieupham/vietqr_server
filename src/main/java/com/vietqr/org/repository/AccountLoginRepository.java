@@ -26,8 +26,8 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
             "FROM viet_qr.account_login b " +
             "INNER JOIN account_information a ON b.id = a.user_id " +
             "INNER JOIN account_wallet c ON b.id = c.user_id " +
-            "WHERE a.user_id = :userId ", nativeQuery = true)
-    List<IUserInfoDTO> getUserInfoDetailsByUserId(@Param(value = "userId") String userId);
+            "WHERE a.user_id = :userId LIMIT 1 ", nativeQuery = true)
+    IUserInfoDTO getUserInfoDetailsByUserId(@Param(value = "userId") String userId);
 
     @Query(value = "SELECT id FROM account_login WHERE phone_no = :phoneNo AND password = :password AND status = 1", nativeQuery = true)
     String login(@Param(value = "phoneNo") String phoneNo, @Param(value = "password") String password);

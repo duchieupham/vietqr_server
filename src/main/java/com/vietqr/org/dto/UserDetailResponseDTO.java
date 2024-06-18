@@ -3,7 +3,7 @@ package com.vietqr.org.dto;
 import java.util.List;
 
 public class UserDetailResponseDTO {
-    private List<UserInfoDTO> userInfo;
+    private IUserInfoDTO userInfo;
     private List<BankInfoDTO> bankInfo;
     private List<BankShareDTO> bankShareInfo;
     private List<SocialMediaDTO> socalMedia;
@@ -13,7 +13,7 @@ public class UserDetailResponseDTO {
     public UserDetailResponseDTO() {
     }
 
-    public UserDetailResponseDTO(List<UserInfoDTO> userInfo, List<BankInfoDTO> bankInfo, List<BankShareDTO> bankShareInfo, List<SocialMediaDTO> socalMedia, long balance, long score) {
+    public UserDetailResponseDTO(IUserInfoDTO userInfo, List<BankInfoDTO> bankInfo, List<BankShareDTO> bankShareInfo, List<SocialMediaDTO> socalMedia, long balance, long score) {
         this.userInfo = userInfo;
         this.bankInfo = bankInfo;
         this.bankShareInfo = bankShareInfo;
@@ -38,11 +38,11 @@ public class UserDetailResponseDTO {
         this.score = score;
     }
 
-    public List<UserInfoDTO> getUserInfo() {
+    public IUserInfoDTO getUserInfo() {
         return userInfo;
     }
 
-    public void setUserInfo(List<UserInfoDTO> userInfo) {
+    public void setUserInfo(IUserInfoDTO userInfo) {
         this.userInfo = userInfo;
     }
 
