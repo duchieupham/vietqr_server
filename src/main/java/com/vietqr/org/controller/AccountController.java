@@ -135,8 +135,8 @@ public class AccountController {
                 dto.setId(item.getId());
                 dto.setPhoneNo(item.getPhoneNo());
                 dto.setFirstName(item.getFirstName());
-                dto.setMiddleName(item.getFirstName());
-                dto.setLastName(item.getFirstName());
+                dto.setMiddleName(item.getMiddleName());
+                dto.setLastName(item.getLastName());
                 dto.setFullName(item.getLastName() + " " + item.getMiddleName() + " " + item.getFirstName());
                 dto.setEmail(item.getEmail());
                 dto.setGender(item.getGender());
