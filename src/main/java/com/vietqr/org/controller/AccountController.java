@@ -130,7 +130,6 @@ public class AccountController {
             // user info
             userInfos = accountLoginService.getUserInfoDetailsByUserId(userId);
 
-
             // bank info
             bankInfo = accountBankReceiveService.getBankInfoByUserId(userId);
             bankInfoData = bankInfo.stream().map(item -> {
@@ -217,11 +216,11 @@ public class AccountController {
             switch (type){
                 case 1:
                     infos = accountInformationService.getAdminListUsersAccount(value, offset, size);
-                    totalElement = accountInformationService.countAdminListUsersAccount();
+                    totalElement = accountInformationService.countAdminListUsersAccountByName(value);
                     break;
                 case 2:
                     infos = accountInformationService.getAdminListUsersAccountByPhone(value, offset, size);
-                    totalElement = accountInformationService.countAdminListUsersAccount();
+                    totalElement = accountInformationService.countAdminListUsersAccountByPhone(value);
                 default:
                     new ArrayList<>();
                     break;

@@ -13,7 +13,8 @@ public interface AccountInformationService {
 	public List<IAdminListUserAccountResponseDTO> getAdminListUsersAccount(String value, int offset, int size);
 	public List<IAdminListUserAccountResponseDTO> getAdminListUsersAccountByPhone(String value, int offset, int size);
 
-	public int countAdminListUsersAccount();
+	public int countAdminListUsersAccountByName(String value);
+	public int countAdminListUsersAccountByPhone(String value);
 
 	public AccountInformationEntity getAccountInformation(String userId);
 
