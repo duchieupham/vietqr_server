@@ -21,24 +21,6 @@ public class AdminListUserAccountResponseDTO {
     private long balance;
     private long score;
 
-    private long totalUsers;
-    private long totalUsersToday;
-
-    public long getTotalUsers() {
-        return totalUsers;
-    }
-
-    public void setTotalUsers(long totalUsers) {
-        this.totalUsers = totalUsers;
-    }
-
-    public long getTotalUsersToday() {
-        return totalUsersToday;
-    }
-
-    public void setTotalUsersToday(long totalUsersToday) {
-        this.totalUsersToday = totalUsersToday;
-    }
 
     public long getBalance() {
         return balance;
