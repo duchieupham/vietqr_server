@@ -231,7 +231,7 @@ public class AccountController {
         HttpStatus httpStatus = null;
         AdminListUserDTO userListData = new AdminListUserDTO();
         PageResDTO pageResDTO = new PageResDTO();
-        PageResListUserDTO pageResListUserDTO = new PageResListUserDTO();
+        //PageResListUserDTO pageResListUserDTO = new PageResListUserDTO();
         try {
             int totalElement = 0;
             int offset = (page - 1) * size;
