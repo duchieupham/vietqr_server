@@ -236,7 +236,7 @@ public class AccountController {
                 dto.setMiddleName(StringUtil.getValueNullChecker(item.getMiddleName()));
                 dto.setLastName(item.getLastName());
                 // set full name
-                dto.setFullName(item.getLastName() + " " + item.getMiddleName() + " " + item.getFirstName());
+                dto.setFullName(item.getFirstName() + " " + item.getMiddleName() + " " + item.getLastName());
                 dto.setGender(item.getGender());
                 dto.setStatus(item.getStatus());
                 dto.setUserIp(StringUtil.getValueNullChecker(item.getUserIp()));
