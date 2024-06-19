@@ -139,4 +139,9 @@ public class AccountLoginServiceImpl implements AccountLoginService {
     public long countAccountsRegisteredInDay(long startTime, long endTime) {
         return repo.countAccountsRegisteredInDay(startTime, endTime);
     }
+
+    @Override
+    public long getTotalUsers() {
+        return repo.getTotalUsers();
+    }
 }

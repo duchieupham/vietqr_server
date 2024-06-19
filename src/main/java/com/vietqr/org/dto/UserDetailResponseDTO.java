@@ -22,22 +22,6 @@ public class UserDetailResponseDTO {
         this.score = score;
     }
 
-    public long getBalance() {
-        return balance;
-    }
-
-    public void setBalance(long balance) {
-        this.balance = balance;
-    }
-
-    public long getScore() {
-        return score;
-    }
-
-    public void setScore(long score) {
-        this.score = score;
-    }
-
     public IUserInfoDTO getUserInfo() {
         return userInfo;
     }
@@ -69,4 +53,21 @@ public class UserDetailResponseDTO {
     public void setSocalMedia(List<SocialMediaDTO> socalMedia) {
         this.socalMedia = socalMedia;
     }
+
+    public long getBalance() {
+        return balance;
+    }
+
+    public void setBalance(long balance) {
+        this.balance = balance;
+    }
+
+    public long getScore() {
+        return score;
+    }
+
+    public void setScore(long score) {
+        this.score = score;
+    }
+
 }
