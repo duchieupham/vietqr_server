@@ -125,4 +125,7 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
 
 	@Query(value = "SELECT COUNT(*) > 0 FROM account_login WHERE phone_no = :phoneNo", nativeQuery = true)
 	boolean existsPhoneNo(@Param("phoneNo") String phoneNo);
+
+    @Query(value = "SELECT COUNT(b.id) FROM account_login b WHERE b.time BETWEEN :startTime AND :endTime", nativeQuery = true)
+    long countAccountsRegisteredInDay(@Param("startTime") long startTime, @Param("endTime") long endTime);
 }

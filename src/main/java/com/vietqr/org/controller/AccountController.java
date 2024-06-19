@@ -14,6 +14,7 @@ import javax.validation.Valid;
 
 import com.vietqr.org.dto.*;
 import com.vietqr.org.service.*;
+import com.vietqr.org.util.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -47,11 +48,6 @@ import com.vietqr.org.entity.ImageEntity;
 import com.vietqr.org.entity.LarkWebhookPartnerEntity;
 import com.vietqr.org.entity.NotificationEntity;
 import com.vietqr.org.entity.SystemSettingEntity;
-import com.vietqr.org.util.LarkUtil;
-import com.vietqr.org.util.NotificationUtil;
-import com.vietqr.org.util.RandomCodeUtil;
-import com.vietqr.org.util.SocketHandler;
-import com.vietqr.org.util.StringUtil;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -1260,5 +1256,23 @@ public class AccountController {
                 .compact();
 
         return token;
+    }
+
+    @GetMapping("account/count-registered-today")
+    public ResponseEntity<Object> countAccountsRegisteredInDay() {
+        Object result;
+        HttpStatus httpStatus;
+        try {
+            StartEndTimeDTO startEndTime = DateTimeUtil.getStartEndCurrentDate();
+            long count = accountLoginService.countAccountsRegisteredInDay(startEndTime.getStartTime(), startEndTime.getEndTime());
+            result = new AccountCountDTO(count);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("AccountLoginController: ERROR: countAccountsRegisteredInDay: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
     }
 }

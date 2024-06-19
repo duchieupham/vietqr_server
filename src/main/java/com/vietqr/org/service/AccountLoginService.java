@@ -57,4 +57,5 @@ public interface AccountLoginService {
     String checkPassword(String userId, String password);
 
     boolean isPhoneNoExists(String phoneNo);
+    long countAccountsRegisteredInDay(long startTime, long endTime);
 }
