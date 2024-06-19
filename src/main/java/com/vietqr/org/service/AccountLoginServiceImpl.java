@@ -134,4 +134,9 @@ public class AccountLoginServiceImpl implements AccountLoginService {
     public boolean isPhoneNoExists(String phoneNo) {
         return repo.existsByPhoneNo(phoneNo);
     }
+
+    @Override
+    public long countAccountsRegisteredInDay(long startTime, long endTime) {
+        return repo.countAccountsRegisteredInDay(startTime, endTime);
+    }
 }
