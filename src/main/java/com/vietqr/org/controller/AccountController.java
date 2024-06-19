@@ -104,6 +104,24 @@ public class AccountController {
     @Autowired
     TelegramService telegramService;
 
+    @GetMapping("account/count-registered-today")
+    public ResponseEntity<Object> countAccountsRegisteredInDay() {
+        Object result;
+        HttpStatus httpStatus;
+        try {
+            StartEndTimeDTO startEndTime = DateTimeUtil.getStartEndCurrentDate();
+            long count = accountLoginService.countAccountsRegisteredInDay(startEndTime.getStartTime(), startEndTime.getEndTime());
+            result = new AccountCountDTO(count);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("AccountLoginController: ERROR: countAccountsRegisteredInDay: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     //get user details
     @GetMapping("account/users-details")
     public ResponseEntity<Object> getUserDetails(@RequestParam String userId) {
@@ -202,10 +220,13 @@ public class AccountController {
             @RequestParam int size) {
         Object result = null;
         HttpStatus httpStatus = null;
+        AdminListUserDTO userListData = new AdminListUserDTO();
         PageResDTO pageResDTO = new PageResDTO();
+        PageResListUserDTO pageResListUserDTO = new PageResListUserDTO();
         try {
             int totalElement = 0;
             int offset = (page - 1) * size;
+
             List<AdminListUserAccountResponseDTO> data = new ArrayList<>();
             List<IAdminListUserAccountResponseDTO> infos = new ArrayList<>();
 
@@ -232,7 +253,7 @@ public class AccountController {
                 dto.setMiddleName(StringUtil.getValueNullChecker(item.getMiddleName()));
                 dto.setLastName(item.getLastName());
                 // set full name
-                dto.setFullName(item.getFirstName() + " " + item.getMiddleName() + " " + item.getLastName());
+                dto.setFullName(item.getLastName() + " " + item.getMiddleName() + " " + item.getFirstName());
                 dto.setGender(item.getGender());
                 dto.setStatus(item.getStatus());
                 dto.setUserIp(StringUtil.getValueNullChecker(item.getUserIp()));
@@ -247,16 +268,25 @@ public class AccountController {
                 return dto;
             }).collect(Collectors.toList());
 
+            //set total user today
+            long countTotalUsers = accountLoginService.getTotalUsers();
+
+            //set total user today
+            StartEndTimeDTO startEndTime = DateTimeUtil.getStartEndCurrentDate();
+            long countUseToday = accountLoginService.countAccountsRegisteredInDay(startEndTime.getStartTime(), startEndTime.getEndTime());
+
             PageDTO pageDTO = new PageDTO();
             pageDTO.setSize(size);
             pageDTO.setPage(page);
             pageDTO.setTotalElement(totalElement);
             pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
-            pageResDTO.setMetadata(pageDTO);
-            pageResDTO.setData(data);
+            pageResListUserDTO.setMetadata(pageDTO);
+            pageResListUserDTO.setData(data);
+            pageResListUserDTO.setTotalUsers(countTotalUsers);
+            pageResListUserDTO.setTotalUsersToday(countUseToday);
 
             httpStatus = HttpStatus.OK;
-            result = pageResDTO;
+            result = pageResListUserDTO;
         } catch (Exception e) {
             logger.error("AccountController: ERROR: getUserListAdmin: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
@@ -1258,21 +1288,4 @@ public class AccountController {
         return token;
     }
 
-    @GetMapping("account/count-registered-today")
-    public ResponseEntity<Object> countAccountsRegisteredInDay() {
-        Object result;
-        HttpStatus httpStatus;
-        try {
-            StartEndTimeDTO startEndTime = DateTimeUtil.getStartEndCurrentDate();
-            long count = accountLoginService.countAccountsRegisteredInDay(startEndTime.getStartTime(), startEndTime.getEndTime());
-            result = new AccountCountDTO(count);
-            httpStatus = HttpStatus.OK;
-        } catch (Exception e) {
-            logger.error("AccountLoginController: ERROR: countAccountsRegisteredInDay: " + e.getMessage()
-                    + " at: " + System.currentTimeMillis());
-            result = new ResponseMessageDTO("FAILED", "E05");
-            httpStatus = HttpStatus.BAD_REQUEST;
-        }
-        return new ResponseEntity<>(result, httpStatus);
-    }
 }

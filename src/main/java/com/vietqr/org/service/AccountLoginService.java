@@ -58,4 +58,5 @@ public interface AccountLoginService {
 
     boolean isPhoneNoExists(String phoneNo);
     long countAccountsRegisteredInDay(long startTime, long endTime);
+    long getTotalUsers();
 }
