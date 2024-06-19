@@ -229,9 +229,7 @@ public class AccountController {
             @RequestParam int size) {
         Object result = null;
         HttpStatus httpStatus = null;
-        AdminListUserDTO userListData = new AdminListUserDTO();
         PageResDTO pageResDTO = new PageResDTO();
-        PageResListUserDTO pageResListUserDTO = new PageResListUserDTO();
         try {
             int totalElement = 0;
             int offset = (page - 1) * size;
@@ -289,11 +287,6 @@ public class AccountController {
             pageDTO.setPage(page);
             pageDTO.setTotalElement(totalElement);
             pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
-
-//            pageResListUserDTO.setMetadata(pageDTO);
-//            pageResListUserDTO.setData(data);
-//            pageResListUserDTO.setTotalUsers(countTotalUsers);
-//            pageResListUserDTO.setTotalUsersToday(countUseToday);
 
             pageResDTO.setMetadata(pageDTO);
             pageResDTO.setData(data);
