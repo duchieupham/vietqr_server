@@ -1,17 +1,30 @@
 package com.vietqr.org.dto;
 
 public class AccountCountDTO {
-    private long count;
+    private long totalUsers;
+    private long totalUserRegisterToday;
 
-    public AccountCountDTO(long count) {
-        this.count = count;
+    public AccountCountDTO(long totalUsers, long totalUserRegisterToday) {
+        this.totalUsers = totalUsers;
+        this.totalUserRegisterToday = totalUserRegisterToday;
     }
 
-    public long getCount() {
-        return count;
+    public AccountCountDTO() {
     }
 
-    public void setCount(long count) {
-        this.count = count;
+    public long getTotalUsers() {
+        return totalUsers;
+    }
+
+    public void setTotalUsers(long totalUsers) {
+        this.totalUsers = totalUsers;
+    }
+
+    public long getTotalUserRegisterToday() {
+        return totalUserRegisterToday;
+    }
+
+    public void setTotalUserRegisterToday(long totalUserRegisterToday) {
+        this.totalUserRegisterToday = totalUserRegisterToday;
     }
 }

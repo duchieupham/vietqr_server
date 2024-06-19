@@ -106,15 +106,24 @@ public class AccountController {
 
     @GetMapping("account/count-registered-today")
     public ResponseEntity<Object> countAccountsRegisteredInDay() {
-        Object result;
-        HttpStatus httpStatus;
+        Object result = null;
+        HttpStatus httpStatus = null;
+        AccountCountDTO accountCountDTO = new AccountCountDTO();
         try {
+            //set total user today
+            long countTotalUsers = accountLoginService.getTotalUsers();
+
+            //set total user today
             StartEndTimeDTO startEndTime = DateTimeUtil.getStartEndCurrentDate();
-            long count = accountLoginService.countAccountsRegisteredInDay(startEndTime.getStartTime(), startEndTime.getEndTime());
-            result = new AccountCountDTO(count);
+            long countUseToday = accountLoginService.countAccountsRegisteredInDay(startEndTime.getStartTime(), startEndTime.getEndTime());
+
+            accountCountDTO.setTotalUsers(countTotalUsers);
+            accountCountDTO.setTotalUserRegisterToday(countUseToday);
+
+            result = accountCountDTO;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            logger.error("AccountLoginController: ERROR: countAccountsRegisteredInDay: " + e.getMessage()
+            logger.error("AccountLoginController: ERROR: countAccounts: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -230,7 +239,7 @@ public class AccountController {
             List<AdminListUserAccountResponseDTO> data = new ArrayList<>();
             List<IAdminListUserAccountResponseDTO> infos = new ArrayList<>();
 
-            switch (type){
+            switch (type) {
                 case 1:
                     infos = accountInformationService.getAdminListUsersAccount(value, offset, size);
                     totalElement = accountInformationService.countAdminListUsersAccountByName(value);
@@ -280,13 +289,17 @@ public class AccountController {
             pageDTO.setPage(page);
             pageDTO.setTotalElement(totalElement);
             pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
-            pageResListUserDTO.setMetadata(pageDTO);
-            pageResListUserDTO.setData(data);
-            pageResListUserDTO.setTotalUsers(countTotalUsers);
-            pageResListUserDTO.setTotalUsersToday(countUseToday);
+
+//            pageResListUserDTO.setMetadata(pageDTO);
+//            pageResListUserDTO.setData(data);
+//            pageResListUserDTO.setTotalUsers(countTotalUsers);
+//            pageResListUserDTO.setTotalUsersToday(countUseToday);
+
+            pageResDTO.setMetadata(pageDTO);
+            pageResDTO.setData(data);
 
             httpStatus = HttpStatus.OK;
-            result = pageResListUserDTO;
+            result = pageResDTO;
         } catch (Exception e) {
             logger.error("AccountController: ERROR: getUserListAdmin: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
