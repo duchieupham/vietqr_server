@@ -523,4 +523,12 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	void updateRegisterAuthenticationBankBIDV(String nationalId, String phoneAuthenticated,
 											  String bankAccountName, String bankAccount,
 											  String customerId, String ewalletToken, String bankId);
+
+
+	@Query(value = "SELECT a.id, a.user_id as userId, a.bank_account as bankAccount, a.bank_account_name as bankAccountName, " +
+			"a.mms_active as mmsActive, b.bank_short_name as bankShortName " +
+			"FROM account_bank_receive a " +
+			"INNER JOIN bank_type b ON a.bank_type_id = b.id " +
+			"WHERE a.id = :bankId", nativeQuery = true)
+	IAccountBankInfoCustomDTO getAccountBankByBankId(@Param("bankId") String bankId);
 }

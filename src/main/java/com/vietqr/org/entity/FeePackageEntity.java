@@ -19,7 +19,7 @@ public class FeePackageEntity implements Serializable {
     private String id;
 
     @Column(name = "serviceType")
-    private int serviceType;
+    private Integer serviceType;
 
     @Column(name = "title")
     private String title;
@@ -56,7 +56,7 @@ public class FeePackageEntity implements Serializable {
 
     public FeePackageEntity(String id, String title, String shortName, String description,
                             long activeFee, long annualFee, long fixFee, double percentFee,
-                            double vat, int recordType, String refId) {
+                            double vat, int recordType, String refId, Integer serviceType) {
         this.id = id;
         this.title = title;
         this.shortName = shortName;
@@ -68,6 +68,11 @@ public class FeePackageEntity implements Serializable {
         this.vat = vat;
         this.recordType = recordType;
         this.refId = refId;
+        this.serviceType = serviceType;
+    }
+
+    public void setServiceType(Integer serviceType) {
+        this.serviceType = serviceType;
     }
 
     public String getId() {
@@ -165,4 +170,5 @@ public class FeePackageEntity implements Serializable {
     public void setRefId(String refId) {
         this.refId = refId;
     }
+
 }

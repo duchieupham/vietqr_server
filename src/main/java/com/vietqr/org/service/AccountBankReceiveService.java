@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.entity.AccountBankReceiveEntity;
@@ -147,4 +148,5 @@ public interface AccountBankReceiveService {
     String getBankCodeByBankId(String bankId);
 
 	void updateRegisterAuthenticationBankBIDV(String nationalId, String phoneAuthenticated, String bankAccountName, String bankAccount, String customerId, String ewalletToken, String bankId);
+	IAccountBankInfoCustomDTO getAccountBankByBankId(String bankId);
 }

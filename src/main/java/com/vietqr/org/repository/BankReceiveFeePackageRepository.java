@@ -3,9 +3,12 @@ package com.vietqr.org.repository;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.BankReceiveFeePackageEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Repository
@@ -116,5 +119,22 @@ public interface BankReceiveFeePackageRepository extends JpaRepository<BankRecei
             + "FROM bank_receive_fee_package a "
             + "WHERE a.user_id = :userId ", nativeQuery = true)
     List<PackageFeeResponseDTO> getFeePackageByUsersId(String userId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE bank_receive_fee_package SET title = :title," +
+            " active_fee = :activeFee, annual_fee = :annualFee, fix_fee = :fixFee," +
+            " percent_fee = :percentFee, vat = :vat, record_type = :recordType, fee_package_id = :feePackageId" +
+            " WHERE id = :id", nativeQuery = true)
+    void updateBankReceiveFeePackageById(
+            @Param("id") String id,
+            @Param("title") String title,
+            @Param("activeFee") long activeFee,
+            @Param("annualFee") long annualFee,
+            @Param("fixFee") long fixFee,
+            @Param("percentFee") double percentFee,
+            @Param("vat") double vat,
+            @Param("recordType") int recordType,
+            @Param("feePackageId") String feePackageId);
 
 }

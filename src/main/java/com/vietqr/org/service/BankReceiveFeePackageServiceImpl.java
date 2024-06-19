@@ -1,10 +1,13 @@
 package com.vietqr.org.service;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.entity.BankReceiveFeePackageEntity;
 import com.vietqr.org.repository.BankReceiveFeePackageRepository;
+import com.vietqr.org.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,5 +65,24 @@ public class BankReceiveFeePackageServiceImpl implements BankReceiveFeePackageSe
     @Override
     public List<PackageFeeResponseDTO> getFeePackageFeeResponse(String userId) {
         return repo.getFeePackageByUsersId(userId);
+    }
+
+    @Override
+    public void saveBankReceiveFeePackage(BankReceiveFeePackageEntity bankReceiveFeePackage) {
+        repo.save(bankReceiveFeePackage);
+    }
+    @Override
+    public void updateBankReceiveFeePackage(String id, BankReceiveFeePackageUpdateRequestDTO updateRequestDTO) {
+        repo.updateBankReceiveFeePackageById(
+                id,
+                StringUtil.getValueNullChecker(updateRequestDTO.getTitle()),
+                updateRequestDTO.getActiveFee(),
+                updateRequestDTO.getAnnualFee(),
+                updateRequestDTO.getFixFee(),
+                updateRequestDTO.getPercentFee(),
+                updateRequestDTO.getVat(),
+                updateRequestDTO.getRecordType(),
+                StringUtil.getValueNullChecker(updateRequestDTO.getFeePackageId())
+        );
     }
 }
