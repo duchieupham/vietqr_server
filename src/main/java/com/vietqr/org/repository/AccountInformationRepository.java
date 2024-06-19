@@ -22,8 +22,7 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
             + "FROM account_information a "
             + "INNER JOIN account_login b ON a.user_id = b.id "
             + "INNER JOIN account_wallet c ON a.user_id = c.user_id "
-            + "WHERE CONCAT(COALESCE(a.first_name, ''), ' ', COALESCE(a.middle_name, ''), ' ', "
-            + "COALESCE(a.last_name, '')) LIKE %:value% "
+            + "WHERE CONCAT(a.last_name, ' ', a.middle_name, ' ', a.first_name) LIKE %:value% "
             + "LIMIT :offset, :size ", nativeQuery = true)
     List<IAdminListUserAccountResponseDTO> getAdminListUsersAccount(String value, int offset, int size);
 
