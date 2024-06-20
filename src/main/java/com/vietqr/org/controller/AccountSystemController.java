@@ -75,7 +75,9 @@ public class AccountSystemController {
     }
 
     @PostMapping("/password-reset")
-    public ResponseEntity<ResponseMessageDTO> resetPassword(@RequestParam("phoneNo") String phoneNo, @RequestBody PasswordResetDTO passwordResetDTO, @RequestHeader("Authorization") String token) {
+    public ResponseEntity<ResponseMessageDTO> resetPassword(@RequestParam("phoneNo") String phoneNo,
+                                                            @RequestBody PasswordResetDTO passwordResetDTO,
+                                                            @RequestHeader("Authorization") String token) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {

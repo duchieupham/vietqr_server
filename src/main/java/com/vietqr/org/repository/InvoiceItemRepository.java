@@ -14,8 +14,8 @@ import java.util.List;
 @Repository
 public interface InvoiceItemRepository extends JpaRepository<InvoiceItemEntity, String> {
     @Query(value = "SELECT a.id AS invoiceItemId, a.name AS invoiceItemName, "
-            + "a.quantity AS quantity, a.amount AS itemAmount, "
-            + "a.total_amount AS totalItemAmount "
+            + "a.quantity AS quantity, a.amount AS itemAmount, a.status AS status, "
+            + "a.total_amount AS totalItemAmount, a.total_after_vat AS totalItemAmountAfterVat "
             + "FROM invoice_item a "
             + "WHERE a.invoice_id = :invoiceId", nativeQuery = true)
     List<IInvoiceItemResponseDTO> getInvoiceByInvoiceId(
