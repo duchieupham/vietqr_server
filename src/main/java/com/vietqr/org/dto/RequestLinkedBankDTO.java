@@ -85,4 +85,10 @@ public class RequestLinkedBankDTO implements Serializable {
     public void setMerchantName(String merchantName) {
         this.merchantName = merchantName;
     }
+    @Override
+    public String toString() {
+        return "RequestLinkedBankDTO [nationalId=" + nationalId + ", accountNumber=" + accountNumber
+                + ", accountName=" + accountName + ", phoneNumber=" + phoneNumber + ", applicationType=" + applicationType
+                + ", bankCode=" + bankCode + ", merchantName=" + merchantName + "]";
+    }
 }

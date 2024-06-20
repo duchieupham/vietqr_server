@@ -6,4 +6,6 @@ public interface IInvoiceItemResponseDTO {
     int getQuantity();
     long getItemAmount();
     long getTotalItemAmount();
+    long getTotalItemAmountAfterVat();
+    int getStatus();
 }

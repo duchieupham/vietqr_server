@@ -93,15 +93,15 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
     int countInvoiceByUserIdAndBankIdAndMonth(String userId, List<Integer> status,
                                               String bankId, long fromDate, long toDate);
 
-    @Query(value = "SELECT a.id AS invoiceId, b.bill_number AS billNumber, "
+    @Query(value = "SELECT a.id AS invoiceId, a.invoice_id AS billNumber, "
             + "a.invoice_id AS invoiceNumber, a.name AS invoiceName, "
             + "a.time_created AS timeCreated, a.time_paid AS timePaid, "
             + "a.status AS status, a.vat_amount AS vatAmount, "
-            + "a.vat AS vat, a.bank_id AS bankId, b.content AS content, "
+            + "a.vat AS vat, a.bank_id AS bankId, "
             + "a.amount AS amount, a.total_amount AS totalAmount, "
-            + "a.data AS data "
+            + "a.user_id AS userId, a.merchant_id AS merchantId, "
+            + "a.data AS data, COALESCE(a.bank_id_recharge, '') AS bankIdRecharge "
             + "FROM invoice a "
-            + "INNER JOIN transaction_wallet b ON a.ref_id = b.id "
             + "WHERE a.id = :invoiceId ", nativeQuery = true)
     IInvoiceDetailDTO getInvoiceDetailById(String invoiceId);
 

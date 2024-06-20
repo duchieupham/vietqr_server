@@ -15,4 +15,7 @@ public interface IInvoiceDetailDTO {
     String getData();
     String getContent();
     long getTotalAmount();
+    String getBankIdRecharge();
+    String getUserId();
+    String getMerchantId();
 }

@@ -30,6 +30,7 @@ import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.bidv.ConfirmCustomerVaDTO;
 import com.vietqr.org.dto.bidv.RequestCustomerVaDTO;
 import com.vietqr.org.entity.*;
+import com.vietqr.org.security.JWTAuthorizationFilter;
 import com.vietqr.org.service.*;
 import com.vietqr.org.service.bidv.CustomerVaService;
 import com.vietqr.org.util.*;
@@ -190,6 +191,9 @@ public class TransactionBankController {
 
 	@Autowired
 	private CustomerVaService customerVaService;
+
+	@Autowired
+	private JWTAuthorizationFilter jwtAuthorizationFilter;
 
 	private String getUsernameFromToken(String token) {
 		String result = "";
@@ -3625,7 +3629,8 @@ public class TransactionBankController {
 	///
 	// LINKED ACCOUNT BANKS (MB, BIDV)
 	@PostMapping("account-bank/linked/request_otp")
-	public ResponseEntity<Object> requestLinkedBankOTP(@RequestBody RequestLinkedBankDTO dto) {
+	public ResponseEntity<Object> requestLinkedBankOTP(@RequestBody RequestLinkedBankDTO dto,
+													   @RequestHeader("Authorization") String token) {
 		Object result = null;
 		HttpStatus httpStatus = null;
 		try {
@@ -3642,6 +3647,11 @@ public class TransactionBankController {
 						result = responseMessageDTO;
 						httpStatus = HttpStatus.OK;
 					} else {
+						if ("Record existed".equals(StringUtil.getValueNullChecker(responseMessageDTO.getMessage()))) {
+							logger.error("Already linked VietQR: Resquest Body: " + dto.toString()
+									+ " at: " + System.currentTimeMillis() + " Phone no: "
+									+ validatePhoneNoToken(token));
+						}
 						httpStatus = HttpStatus.BAD_REQUEST;
 					}
 				} else if (dto.getBankCode().trim().equals("BIDV")) {
@@ -3996,6 +4006,7 @@ public class TransactionBankController {
 						ConfirmRequestFailedBankDTO.class)
 						.block();
 				LocalDateTime currentDateTime = LocalDateTime.now();
+				logger.info("Response requestOTP error: Request Body: " + dto.toString() + " at: " + System.currentTimeMillis());
 				logger.error("Response requestOTP error: client msg id: " + clientMessageId.toString() + " - "
 						+ confirmRequestBankDTO.getSoaErrorCode() + "-"
 						+ confirmRequestBankDTO.getSoaErrorDesc() + " at "
@@ -4999,4 +5010,16 @@ public class TransactionBankController {
 		}
 	}
 
+	private String validatePhoneNoToken(String token) {
+		String result = "";
+		try {
+			Claims claims = jwtAuthorizationFilter.validateToken(token.replace("Bearer ", ""));
+			String phoneNo = claims.get("phoneNo", String.class);
+			result = phoneNo;
+		} catch (Exception e) {
+			logger.error("Invalid token: " + e.toString());
+			result = "";
+		}
+		return result;
+	}
 }
