@@ -137,4 +137,36 @@ public interface BankReceiveFeePackageRepository extends JpaRepository<BankRecei
             @Param("recordType") int recordType,
             @Param("feePackageId") String feePackageId);
 
+    @Query(value = "SELECT a.id, a.title, a.active_fee AS activeFee, a.annual_fee AS annualFee, " +
+            "a.fix_fee AS fixFee, a.percent_fee AS percentFee, a.vat, a.record_type AS recordType, " +
+            "a.bank_id AS bankId, a.fee_package_id AS feePackageId, " +
+            "COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.mmsActive')), '') AS mmsActive, " +
+            "COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.bankAccount')), '') AS bankAccount, " +
+            "COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.userBankName')), '') AS userBankName, " +
+            "COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.bankShortName')), '') AS bankShortName " +
+            "FROM bank_receive_fee_package a " +
+            "WHERE JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.bankAccount')) LIKE %:value% " +
+            "OR JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.userBankName')) LIKE %:value% " +
+            "LIMIT :offset, :size", nativeQuery = true)
+    List<IListBankReceiveFeePackageDTO> getAllBankReceiveFeePackages(@Param("value") String value, @Param("offset") int offset, @Param("size") int size);
+
+     @Query(value = "SELECT COUNT(a.id) FROM bank_receive_fee_package a " +
+            "WHERE JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.bankAccount')) LIKE %:value% OR (JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.userBankName'))) LIKE %:value%", nativeQuery = true)
+    int countBankReceiveFeePackagesByName(@Param("value") String value);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM bank_receive_fee_package WHERE id = :id", nativeQuery = true)
+    void deleteById(@Param("id") String id);
+
+    @Query(value = "SELECT a.id, a.title, a.active_fee AS activeFee, a.annual_fee AS annualFee, " +
+            "a.fix_fee AS fixFee, a.percent_fee AS percentFee, a.vat, a.record_type AS recordType, " +
+            "a.bank_id AS bankId, a.fee_package_id AS feePackageId, " +
+            "COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.mmsActive')), '') AS mmsActive, " +
+            "COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.bankAccount')), '') AS bankAccount, " +
+            "COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.userBankName')), '') AS userBankName, " +
+            "COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.bankShortName')), '') AS bankShortName " +
+            "FROM bank_receive_fee_package a " +
+            "WHERE a.id = :id", nativeQuery = true)
+    IListBankReceiveFeePackageDTO getBankReceiveFeePackageById(@Param("id") String id);
 }

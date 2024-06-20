@@ -85,4 +85,25 @@ public class BankReceiveFeePackageServiceImpl implements BankReceiveFeePackageSe
                 StringUtil.getValueNullChecker(updateRequestDTO.getFeePackageId())
         );
     }
+
+    @Override
+    public List<IListBankReceiveFeePackageDTO> getAllBankReceiveFeePackages(String value, int offset, int size) {
+        return repo.getAllBankReceiveFeePackages(value, offset, size);
+    }
+
+    @Override
+    public int countBankReceiveFeePackagesByName(String value) {
+        return repo.countBankReceiveFeePackagesByName(value);
+    }
+
+    @Override
+    public void deleteBankReceiveFeePackageById(String id) {
+        repo.deleteById(id);
+    }
+
+    @Override
+    public IListBankReceiveFeePackageDTO getBankReceiveFeePackageById(String id) {
+        return repo.getBankReceiveFeePackageById(id);
+    }
+
 }

@@ -1,14 +1,13 @@
 package com.vietqr.org.controller;
 
-import com.vietqr.org.dto.BankReceiveFeePackageUpdateRequestDTO;
-import com.vietqr.org.dto.IAccountBankInfoCustomDTO;
-import com.vietqr.org.dto.ResponseMessageDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.entity.BankReceiveFeePackageEntity;
 import com.vietqr.org.entity.FeePackageEntity;
 import com.vietqr.org.service.AccountBankReceiveService;
 import com.vietqr.org.service.BankReceiveFeePackageService;
 import com.vietqr.org.service.FeePackageService;
+import com.vietqr.org.util.StringUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -99,5 +99,74 @@ public class BankReceivePackageController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+    @GetMapping("/bank-receive-fee-package-list")
+    public ResponseEntity<Object> getAllBankReceiveFeePackages(
+            @RequestParam(value = "value", defaultValue = "") String value,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        PageResDTO pageResDTO = new PageResDTO();
 
+        try {
+            int totalElement = bankReceiveFeePackageService.countBankReceiveFeePackagesByName(value);
+            int offset = (page - 1) * size;
+            List<IListBankReceiveFeePackageDTO> data = bankReceiveFeePackageService.getAllBankReceiveFeePackages(value, offset, size);
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageDTO.setTotalElement(totalElement);
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+            pageResDTO.setMetadata(pageDTO);
+            pageResDTO.setData(data);
+
+            httpStatus = HttpStatus.OK;
+            result = pageResDTO;
+        } catch (Exception e) {
+            logger.error("Failed at BankReceiveFeePackageController: Error at getAllBankReceiveFeePackages: "
+                    + e.getMessage() + " at " + System.currentTimeMillis());
+            httpStatus = HttpStatus.BAD_REQUEST;
+            result = new ResponseMessageDTO("FAILED", "E05");
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @DeleteMapping("/bank-receive-fee-package/delete/{id}")
+    public ResponseEntity<ResponseMessageDTO> deleteBankReceiveFeePackage(@PathVariable String id) {
+        HttpStatus httpStatus;
+        ResponseMessageDTO result;
+
+        try {
+            bankReceiveFeePackageService.deleteBankReceiveFeePackageById(id);
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("Failed at BankReceiveFeePackageController: Error at deleteBankReceiveFeePackage: "
+                    + e.getMessage() + " at " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
+    @GetMapping("/bank-receive-fee-package/{id}")
+    public ResponseEntity<Object> getBankReceiveFeePackageDetail(@PathVariable String id) {
+        HttpStatus httpStatus;
+        Object result;
+
+        try {
+            IListBankReceiveFeePackageDTO data = bankReceiveFeePackageService.getBankReceiveFeePackageById(id);
+            httpStatus = HttpStatus.OK;
+            result = data;
+        } catch (Exception e) {
+            logger.error("Failed at BankReceiveFeePackageController: Error at getBankReceiveFeePackageDetail: "
+                    + e.getMessage() + " at " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
 }
