@@ -6,6 +6,7 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.WeekFields;
 
 public class DateTimeUtil {
     public static final long A_DAY_TO_SECOND = 86400;
@@ -249,5 +250,39 @@ public class DateTimeUtil {
             result = "";
         }
         return result;
+    }
+
+    public static String getCurrentWeekYear() {
+        String result = "";
+        try {
+            LocalDate currentDate = LocalDate.now(ZoneId.of("UTC+7"));
+            WeekFields weekFields = WeekFields.ISO;
+            int weekYear = currentDate.get(weekFields.weekBasedYear());
+            int weekNumber = currentDate.get(weekFields.weekOfWeekBasedYear());
+            String weekYearTwoDigits = String.format("%02d", weekYear % 100);
+            result = String.format("%s%02d", weekYearTwoDigits, weekNumber);
+        } catch (Exception e) {
+            result = "";
+        }
+        return result;
+    }
+
+    public static long getMinusCurrentDate() {
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC+7"));
+        System.out.println(now.toEpochSecond(ZoneOffset.UTC));
+        LocalDate currentDate = now.toLocalDate();
+        WeekFields weekFields = WeekFields.ISO;
+        DayOfWeek firstDayOfWeek = weekFields.getFirstDayOfWeek();
+
+        // Tính ngày bắt đầu của tuần hiện tại
+        LocalDate startOfWeek = currentDate.with(firstDayOfWeek);
+        if (currentDate.getDayOfWeek().getValue() < firstDayOfWeek.getValue()) {
+            startOfWeek = startOfWeek.minusWeeks(1);
+        }
+        LocalDateTime startOfWeekDateTime = startOfWeek.atStartOfDay();
+
+        // Tính chênh lệch thời gian theo giây
+        Duration duration = Duration.between(startOfWeekDateTime, now);
+        return duration.getSeconds();
     }
 }

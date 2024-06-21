@@ -301,6 +301,8 @@ public class EnvironmentUtil {
 
     private static final String ADMIN_UAT_ACTIVE_KEY = "admin-vqr-active-key-2326";
 
+    private static final String PREFIX_BIDV_BILL_ID_COMMON = "VQR";
+
     public static String getBidvSecretKey() {
         return (IS_PRODUCTION == false) ? BIDV_SECRET_KEY_UAT : BIDV_SECRET_KEY_PROD;
     }
@@ -727,5 +729,9 @@ public class EnvironmentUtil {
 
     public static long getTimeOutBidvGetBill() {
         return TIME_OUT_BIDV_GET_BILL;
+    }
+
+    public static String getPrefixBidvBillIdCommon() {
+        return PREFIX_BIDV_BILL_ID_COMMON;
     }
 }
