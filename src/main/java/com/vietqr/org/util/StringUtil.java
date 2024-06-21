@@ -17,6 +17,18 @@ public class StringUtil {
 
     private static final Logger logger = Logger.getLogger(StringUtil.class);
 
+    public static String convertToHexadecimal(long value) {
+        String result = "";
+        try {
+            result = Long.toHexString(value);
+            result = String.format("%5s", result).replace(' ', '0').toUpperCase();
+        } catch (Exception e) {
+            logger.error("StringUtil: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis()
+            + " value: " + value);
+        }
+        return result;
+    }
+
     public static List<String> findHashtags(String input) {
         List<String> hashtags = new ArrayList<>();
         try {

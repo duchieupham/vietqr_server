@@ -596,7 +596,7 @@ public class CustomerInvoiceController {
             if (dto != null && dto.getItems() != null && !dto.getItems().isEmpty()) {
                 // initial data
                 UUID invoiceId = UUID.randomUUID();
-                String billId = generateRandomBillId(10);
+                String billId = getRandomBillId();
                 long billAmount = 0L;
                 LocalDateTime currentDateTime = LocalDateTime.now();
                 long timeCreated = currentDateTime.toEpochSecond(ZoneOffset.UTC);
@@ -1472,5 +1472,16 @@ public class CustomerInvoiceController {
                         "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
             }
         }
+    }
+
+    private String getRandomBillId() {
+        String result = "";
+        try {
+            result = EnvironmentUtil.getPrefixBidvBillIdCommon() + DateTimeUtil.getCurrentWeekYear() +
+            DateTimeUtil.getMinusCurrentDate() + RandomCodeUtil.generateRandomId(3);
+        } catch (Exception e) {
+            logger.error("getRandomBillId: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
+        }
+        return result;
     }
 }
