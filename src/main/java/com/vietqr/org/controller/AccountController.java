@@ -1,8 +1,11 @@
 package com.vietqr.org.controller;
 
 import java.sql.Date;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -167,7 +170,11 @@ public class AccountController {
                 dto.setNationalId(item.getNationalId());
                 dto.setFromDate(item.getFromDate());
                 dto.setToDate(item.getToDate());
-                dto.setActiveService(item.getActiveService());
+                // Tính toán số tháng giữa hai LocalDateTime
+                LocalDateTime fromDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(item.getFromDate() * 1000L), ZoneId.systemDefault());
+                LocalDateTime toDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(item.getToDate() * 1000L), ZoneId.systemDefault());
+                int changeMonth = (int) ChronoUnit.MONTHS.between(fromDateTime, toDateTime);
+                dto.setActiveService(changeMonth);
                 return dto;
             }).collect(Collectors.toList());
 
