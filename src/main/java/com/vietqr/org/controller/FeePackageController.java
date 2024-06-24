@@ -10,8 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -23,7 +25,61 @@ public class FeePackageController {
     @Autowired
     private FeePackageService feePackageService;
 
-    @GetMapping("fee-package")
+    @PutMapping("fee-package")
+    public ResponseEntity<Object> updateFeePackage(@RequestBody FeePackageDTO requestDTO){
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+
+        } catch (Exception e) {
+        logger.error("AccountController: ERROR: update FeePackage: " + e.getMessage()
+                + " at: " + System.currentTimeMillis());
+        result = new ResponseMessageDTO("FAILED", "E05");
+        httpStatus = HttpStatus.BAD_REQUEST;
+    }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("fee-package")
+    public ResponseEntity<Object> createFeePackage(@RequestBody FeePackageDTO requestDTO) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (checkFeePackageExist(requestDTO.getId())){
+
+            }
+            // insert data to fee_package
+            FeePackageEntity feePackageEntity = new FeePackageEntity();
+            UUID uuid = UUID.randomUUID();
+            feePackageEntity.setId(uuid.toString());
+            feePackageEntity.setActiveFee(requestDTO.getActiveFee());
+            feePackageEntity.setAnnualFee(requestDTO.getAnnualFee());
+            feePackageEntity.setPercentFee(requestDTO.getPercentFee());
+            feePackageEntity.setDescription(requestDTO.getDescription());
+            feePackageEntity.setFixFee(requestDTO.getFixFee());
+            feePackageEntity.setPercentFee(requestDTO.getPercentFee());
+            feePackageEntity.setRecordType(requestDTO.getRecordType());
+            feePackageEntity.setRefId(requestDTO.getRefId());
+            feePackageEntity.setServiceType(requestDTO.getServiceType());
+            feePackageEntity.setShortName(requestDTO.getShortName());
+            feePackageEntity.setTitle(requestDTO.getTitle());
+            feePackageEntity.setVat(requestDTO.getVat());
+            feePackageService.insertFeePackage(feePackageEntity);
+
+            // Success
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+
+        } catch (Exception e) {
+            logger.error("AccountController: ERROR: create FeePackage: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("fee-packages")
     public ResponseEntity<Object> getListFeePackage(
             @RequestParam int type,
             @RequestParam String value,
@@ -55,16 +111,17 @@ public class FeePackageController {
             data = info.stream().map(item -> {
                 FeePackageDTO dto = new FeePackageDTO();
                 dto.setId(item.getId());
-                dto.setServiceType(StringUtil.getValueNullChecker(item.getServiceType()));
-                dto.setTitle(StringUtil.getValueNullChecker(item.getTitle()));
-                dto.setShortName(StringUtil.getValueNullChecker(item.getShortName()));
-                dto.setDescription(StringUtil.getValueNullChecker(item.getDescription()));
+                dto.setActiveFee(item.getActiveFee());
                 dto.setAnnualFee(item.getAnnualFee());
+                dto.setDescription(StringUtil.getValueNullChecker(item.getDescription()));
                 dto.setFixFee(item.getFixFee());
                 dto.setPercentFee(item.getPercentFee());
-                dto.setVat(item.getVat());
                 dto.setRecordType(item.getRecordType());
                 dto.setRefId(StringUtil.getValueNullChecker(item.getRefId()));
+                dto.setServiceType(item.getServiceType());
+                dto.setShortName(StringUtil.getValueNullChecker(item.getShortName()));
+                dto.setTitle(StringUtil.getValueNullChecker(item.getTitle()));
+                dto.setVat(item.getVat());
                 return dto;
             }).collect(Collectors.toList());
 
@@ -80,11 +137,39 @@ public class FeePackageController {
             httpStatus = HttpStatus.OK;
             result = pageResDTO;
         } catch (Exception e) {
-            logger.error("AccountController: ERROR: getListFeePackage: " + e.getMessage()
+            logger.error("AccountController: ERROR: getListFeePackages: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
+    @GetMapping("fee-package")
+    public ResponseEntity<Object> getFeePackage(@Valid @RequestParam String id) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        IFeePackageDTO data = null;
+        try {
+            data = feePackageService.getFeePackageById(id);
+
+            result = data;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("AccountController: ERROR: getFeePackage: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    private boolean checkFeePackageExist(String id) {
+        int data = feePackageService.checkFeePackageExist(id);
+        if (data == 0) {
+            return false;
+        }
+        return true;
+    }
+
 }
