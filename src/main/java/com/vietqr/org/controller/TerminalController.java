@@ -1070,6 +1070,7 @@ public class TerminalController {
                             List<String> roleReceives = new ArrayList<>();
                             List<String> roleRefunds = new ArrayList<>();
                             roleReceives.add(EnvironmentUtil.getOnlyReadReceiveTerminalRoleId());
+                            roleReceives.add(EnvironmentUtil.getFcmNotificationRoleId());
                             MerchantMemberRoleEntity merchantMemberRoleEntity = new MerchantMemberRoleEntity();
                             merchantMemberRoleEntity.setId(UUID.randomUUID().toString());
                             merchantMemberRoleEntity.setMerchantMemberId(merchantMemberId);

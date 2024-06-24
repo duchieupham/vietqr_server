@@ -135,6 +135,7 @@ public class TerminalMemberController {
             List<String> roleRefunds = new ArrayList<>();
             // default role
             roleReceives.add(EnvironmentUtil.getOnlyReadReceiveTerminalRoleId());
+            roleReceives.add(EnvironmentUtil.getFcmNotificationRoleId());
             merchantMemberRoleEntity.setTransReceiveRoleIds(mapper
                     .writeValueAsString(roleReceives));
             merchantMemberRoleEntity.setTransRefundRoleIds(mapper

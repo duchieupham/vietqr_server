@@ -99,4 +99,8 @@ public interface InvoiceService {
     List<UserScheduleInvoiceDTO> getUserScheduleInvoice();
 
     InvoiceEntity findInvoiceByInvoiceItemIds(String invoiceItemId);
+
+    InvoiceUpdateVsoDTO getInvoicesByBankId(String bankId);
+
+    void updateDataInvoiceByBankId(String data, String bankId);
 }

@@ -4,11 +4,13 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.entity.bidv.CustomerVaEntity;
@@ -89,6 +91,62 @@ public class AccountBankReceiveController {
 
     @Autowired
     CustomerVaService customerVaService;
+
+    @Autowired
+    MerchantSyncService merchantSyncService;
+
+    @Autowired
+    InvoiceService invoiceService;
+
+    @PostMapping("account/admin-update")
+    public ResponseEntity<ResponseMessageDTO> updateBankAccountByAdmin(@RequestBody BankAccountAdminUpdateDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            String bankId = "";
+            if (StringUtil.isNullOrEmpty(dto.getBankId())) {
+                bankId = accountBankReceiveService.getBankIdByBankAccount(dto.getBankAccount(), dto.getBankShortName());
+            } else {
+                bankId = dto.getBankId();
+            }
+            BankAccountAdminDTO bankAccountAdminDTO = accountBankReceiveService.getUserIdAndMidByBankId(bankId);
+            if (Objects.nonNull(bankAccountAdminDTO)) {
+                if (!StringUtil.isNullOrEmpty(dto.getEmail())) {
+                    accountLoginService.updateEmailByUserId(dto.getEmail(), bankAccountAdminDTO.getUserId());
+                }
+                if (!StringUtil.isNullOrEmpty(dto.getVso())) {
+                    accountBankReceiveService.updateVsoBankAccount(dto.getVso(), bankId);
+                }
+                if (!StringUtil.isNullOrEmpty(dto.getMidName()) && !StringUtil.isNullOrEmpty(bankAccountAdminDTO.getMid())) {
+                    merchantSyncService.updateMerchantName(dto.getMidName(), bankAccountAdminDTO.getMid());
+                }
+
+                // Update invoice
+                InvoiceUpdateVsoDTO invoicesByBankId = invoiceService.getInvoicesByBankId(bankId);
+                if (invoicesByBankId != null) {
+                    MerchantBankMapperDTO merchantBankMapperDTO = getMerchantBankMapperDTO(invoicesByBankId.getData());
+                    merchantBankMapperDTO.setVso(StringUtil.isNullOrEmpty(dto.getVso()) ? merchantBankMapperDTO.getVso() : dto.getVso());
+                    merchantBankMapperDTO.setMerchantName(StringUtil.isNullOrEmpty(dto.getMidName()) ? merchantBankMapperDTO.getMerchantName() : dto.getMidName());
+                    merchantBankMapperDTO.setVso(StringUtil.isNullOrEmpty(dto.getEmail()) ? merchantBankMapperDTO.getEmail() : dto.getEmail());
+                    ObjectMapper mapper = new ObjectMapper();
+                    String data = mapper.writeValueAsString(merchantBankMapperDTO);
+                    invoiceService.updateDataInvoiceByBankId(data, bankId);
+                }
+                httpStatus = HttpStatus.OK;
+                result = new ResponseMessageDTO("SUCCESS", "");
+            } else {
+                httpStatus = HttpStatus.BAD_REQUEST;
+                result = new ResponseMessageDTO("FAILED", "");
+            }
+
+        } catch (Exception e) {
+            logger.error("AccountBankReceiveController: ERROR: updateBankAccountByAdmin: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 
     @GetMapping("account/admin-list-bank-account")
     public ResponseEntity<Object> getListBankAccounts(
@@ -1135,5 +1193,17 @@ public class AccountBankReceiveController {
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
+    }
+
+    private MerchantBankMapperDTO getMerchantBankMapperDTO(String data) {
+        MerchantBankMapperDTO result = new MerchantBankMapperDTO();
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            result = mapper.readValue(data, MerchantBankMapperDTO.class);
+        } catch (Exception e) {
+            logger.error("InvoiceController: ERROR: getMerchantBankMapperDTO: " + e.getMessage() + " at: " + System.currentTimeMillis());
+            result = new MerchantBankMapperDTO();
+        }
+        return result;
     }
 }

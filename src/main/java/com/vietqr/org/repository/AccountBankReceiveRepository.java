@@ -393,7 +393,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Query(value = "SELECT '' AS vso, '' AS merchantName, "
 			+ "COALESCE(b.email, 0) AS email, b.phone_no AS phoneNo, a.user_id AS userId, "
 			+ "a.bank_account AS bankAccount, a.bank_account_name AS userBankName, "
-			+ "c.bank_short_name AS bankShortName "
+			+ "c.bank_short_name AS bankShortName, a.vso AS vso "
 			+ "FROM account_bank_receive a "
 			+ "INNER JOIN account_login b ON a.user_id = b.id "
 			+ "INNER JOIN bank_type c ON c.id = a.bank_type_id "
@@ -523,4 +523,24 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	void updateRegisterAuthenticationBankBIDV(String nationalId, String phoneAuthenticated,
 											  String bankAccountName, String bankAccount,
 											  String customerId, String ewalletToken, String bankId);
+
+	@Query(value = "SELECT a.id FROM account_bank_receive a "
+			+ "INNER JOIN bank_type b ON a.bank_type_id = b.id "
+			+ "WHERE a.bank_account = :bankAccount "
+			+ "AND b.bank_short_name = :bankShortName "
+			+ "AND a.is_authenticated = TRUE LIMIT 1 ", nativeQuery = true)
+    String getBankIdByBankAccount(String bankAccount, String bankShortName);
+
+	@Query(value = "SELECT a.user_id AS userId, b.mid AS mid "
+			+ "FROM account_bank_receive a "
+			+ "LEFT JOIN bank_receive_connection b ON a.id = b.bank_id "
+			+ "WHERE a.id = :bankId ", nativeQuery = true)
+	BankAccountAdminDTO getUserIdAndMidByBankId(String bankId);
+
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_bank_receive "
+			+ "SET vso = :vso "
+			+ "WHERE id = :bankId", nativeQuery = true)
+	void updateVsoBankAccount(String vso, String bankId);
 }

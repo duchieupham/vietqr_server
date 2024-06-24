@@ -289,4 +289,14 @@ public class InvoiceServiceImpl implements InvoiceService {
     public InvoiceEntity findInvoiceByInvoiceItemIds(String invoiceItemId) {
         return repo.findInvoiceByInvoiceItemId(invoiceItemId);
     }
+
+    @Override
+    public InvoiceUpdateVsoDTO getInvoicesByBankId(String bankId) {
+        return repo.getInvoicesByBankId(bankId);
+    }
+
+    @Override
+    public void updateDataInvoiceByBankId(String data, String bankId) {
+        repo.updateDataInvoiceByBankId(data, bankId);
+    }
 }

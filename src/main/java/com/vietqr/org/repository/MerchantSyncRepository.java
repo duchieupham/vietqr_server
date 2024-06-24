@@ -77,4 +77,9 @@ public interface MerchantSyncRepository extends JpaRepository<MerchantSyncEntity
     @Transactional
     @Query(value = "DELETE FROM merchant_sync WHERE id = :id", nativeQuery = true)
     void deleteMerchantById(@Param("id") String id);
+
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE merchant_sync SET name = :midName WHERE id = :mid", nativeQuery = true)
+    void updateMerchantName(String midName, String mid);
 }
