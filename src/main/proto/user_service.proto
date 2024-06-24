@@ -21,4 +21,5 @@ message User {
 
 message GetUsersResponse {
   repeated User users = 1;
+  string sumUser = 2;
 }
