@@ -132,4 +132,8 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
     @Query(value = "SELECT COUNT(b.id) FROM account_login b", nativeQuery = true)
     long getTotalUsers();
 
+
+    @Query(value ="SELECT a.id, a.phone_no, a.email, a.time FROM account_login as a WHERE a.time BETWEEN :startTime AND :endTime", nativeQuery = true)
+    List<IAccountLogin> findUsersRegisteredInDay(@Param("startTime") long startTime, @Param("endTime") long endTime);
+
 }

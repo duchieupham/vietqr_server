@@ -144,4 +144,9 @@ public class AccountLoginServiceImpl implements AccountLoginService {
     public long getTotalUsers() {
         return repo.getTotalUsers();
     }
+
+    @Override
+    public List<IAccountLogin> findUsersRegisteredInDay(long startTime, long endTime) {
+        return repo.findUsersRegisteredInDay(startTime, endTime);
+    }
 }
