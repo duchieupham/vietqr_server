@@ -132,4 +132,8 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
     @Query(value = "SELECT COUNT(b.id) FROM account_login b", nativeQuery = true)
     long getTotalUsers();
 
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE account_login SET email = :email WHERE id = :userId", nativeQuery = true)
+    void updateEmailByUserId(String email, String userId);
 }

@@ -81,10 +81,11 @@ public interface BankReceiveFeePackageRepository extends JpaRepository<BankRecei
             + "WHERE a.bank_id = :bankId ", nativeQuery = true)
     IBankAccountInvoiceDTO getBankInvoiceByBankId(String bankId);
 
-    @Query(value = "SELECT b.vso AS vso, b.name AS merchantName, "
+    @Query(value = "SELECT d.vso AS vso, b.name AS merchantName, "
             + "c.email AS email, c.phone_no AS phoneNo, a.user_id AS userId, "
             + "a.data AS data "
             + "FROM bank_receive_fee_package a "
+            + "INNER JOIN account_bank_receive d ON a.bank_id = d.id "
             + "INNER JOIN merchant_sync b ON b.id = a.mid "
             + "INNER JOIN account_login c ON c.id = a.user_id "
             + "WHERE a.bank_id = :bankId AND a.mid = :merchantId ", nativeQuery = true)

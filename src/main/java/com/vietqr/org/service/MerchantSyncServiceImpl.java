@@ -145,4 +145,9 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
 
         }
     }
+
+    @Override
+    public void updateMerchantName(String midName, String mid) {
+        repo.updateMerchantName(midName, mid);
+    }
 }

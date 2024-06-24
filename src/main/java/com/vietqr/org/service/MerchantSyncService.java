@@ -35,4 +35,6 @@ public interface MerchantSyncService {
 
     int countMerchantsByName(String value);
     void savePlatformDetails(String platform, String userId, String details);
+
+    void updateMerchantName(String midName, String mid);
 }

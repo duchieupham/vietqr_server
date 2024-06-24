@@ -144,4 +144,9 @@ public class AccountLoginServiceImpl implements AccountLoginService {
     public long getTotalUsers() {
         return repo.getTotalUsers();
     }
+
+    @Override
+    public void updateEmailByUserId(String email, String userId) {
+        repo.updateEmailByUserId(email, userId);
+    }
 }

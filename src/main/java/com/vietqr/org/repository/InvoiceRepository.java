@@ -361,4 +361,14 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
     @Query("SELECT i FROM InvoiceEntity i JOIN InvoiceItemEntity ii ON i.id = ii.invoiceId " +
             "WHERE ii.id = :invoiceItemId")
     InvoiceEntity findInvoiceByInvoiceItemId(String invoiceItemId);
+
+    @Query(value = "SELECT a.id AS invoiceId, a.data AS data "
+            + "FROM invoice a "
+            + "WHERE a.bank_id = :bankId LIMIT 1", nativeQuery = true)
+    InvoiceUpdateVsoDTO getInvoicesByBankId(String bankId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE invoice SET data = :data WHERE bank_id = :bankId ", nativeQuery = true)
+    void updateDataInvoiceByBankId(String data, String bankId);
 }

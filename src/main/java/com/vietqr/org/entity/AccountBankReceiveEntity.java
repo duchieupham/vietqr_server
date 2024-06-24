@@ -83,6 +83,9 @@ public class AccountBankReceiveEntity implements Serializable {
 	@Column(name = "customerId")
 	private String customerId = "";
 
+	@Column(name = "vso")
+	private String vso = "";
+
 	public AccountBankReceiveEntity() {
 		super();
 	}
@@ -286,6 +289,14 @@ public class AccountBankReceiveEntity implements Serializable {
 
 	public void setCustomerId(String customerId) {
 		this.customerId = customerId;
+	}
+
+	public String getVso() {
+		return vso;
+	}
+
+	public void setVso(String vso) {
+		this.vso = vso;
 	}
 
 	@Override

@@ -824,7 +824,7 @@ public class InvoiceController {
             } else if (bankReceiveMapperDTO != null) {
                 merchantBankMapperDTO.setUserBankName(bankReceiveMapperDTO.getUserBankName());
                 merchantBankMapperDTO.setMerchantName("");
-                merchantBankMapperDTO.setVso("");
+                merchantBankMapperDTO.setVso(bankReceiveMapperDTO.getVso());
                 merchantBankMapperDTO.setEmail(StringUtil.getValueNullChecker(bankReceiveMapperDTO.getEmail()));
                 merchantBankMapperDTO.setBankAccount(bankReceiveMapperDTO.getBankAccount());
                 merchantBankMapperDTO.setBankShortName(bankReceiveMapperDTO.getBankShortName());
