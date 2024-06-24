@@ -2,17 +2,17 @@ package com.vietqr.org.dto;
 
 public class FeePackageDTO {
     private String id;
-    private int serviceType;
-    private String title;
-    private String shortName;
-    private String description;
     private long activeFee;
     private long annualFee;
+    private String description;
     private long fixFee;
     private double percentFee;
-    private double vat;
     private int recordType;
     private String refId;
+    private int serviceType;
+    private String shortName;
+    private String title;
+    private double vat;
 
     public FeePackageDTO() {
     }

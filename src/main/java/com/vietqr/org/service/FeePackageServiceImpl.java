@@ -1,6 +1,7 @@
 package com.vietqr.org.service;
 
 import com.vietqr.org.dto.IFeePackageDTO;
+import com.vietqr.org.entity.FeePackageEntity;
 import com.vietqr.org.repository.FeePackageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,11 @@ public class FeePackageServiceImpl implements FeePackageService {
     }
 
     @Override
+    public IFeePackageDTO getFeePackageById(String id) {
+        return repo.getFeePackageById(id);
+    }
+
+    @Override
     public int countFeePackageByName(String value) {
         return repo.countFeePackageByName(value);
     }
@@ -31,5 +37,15 @@ public class FeePackageServiceImpl implements FeePackageService {
     @Override
     public int countFeePackageByFee(String value) {
         return repo.countFeePackageByFee(value);
+    }
+
+    @Override
+    public int insertFeePackage(FeePackageEntity entity) {
+        return repo.save(entity) == null ? 0 : 1;
+    }
+
+    @Override
+    public int checkFeePackageExist(String id) {
+        return repo.checkFeePackageExist(id);
     }
 }
