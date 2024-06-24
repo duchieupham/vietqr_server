@@ -196,7 +196,7 @@ public class InvoiceController {
 
             // Prepare response
             HttpHeaders headers = new HttpHeaders();
-            String fileName = "DanhSachGiaoDich_" + dateString + ".xlsx";
+            String fileName = "VietQR_DanhSachGiaoDich_" + dateString + "_" + invoice.getInvoiceId() + ".xlsx";
             headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
             headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE);
 
