@@ -149,4 +149,13 @@ public class AccountLoginServiceImpl implements AccountLoginService {
     public List<IAccountLogin> findUsersRegisteredInDay(long startTime, long endTime) {
         return repo.findUsersRegisteredInDay(startTime, endTime);
     }
+
+    @Override
+    public long getTotalUsersUntilDate(long endTime) {
+        return repo.getTotalUsersUntilDate(endTime);
+    }
+    @Override
+    public List<IAccountLogin> findUsersRegisteredInMonth(long startTime, long endTime) {
+        return repo.findUsersRegisteredInMonth(startTime, endTime);
+    }
 }

@@ -1,17 +1,20 @@
 package com.vietqr.org.repository;
 
-import java.util.List;
-
-import javax.transaction.Transactional;
-
-import com.vietqr.org.dto.*;
+import com.vietqr.org.dto.AccountCheckDTO;
+import com.vietqr.org.dto.CardVQRInfoDTO;
+import com.vietqr.org.dto.IAccountLogin;
+import com.vietqr.org.dto.IUserInfoDTO;
+import com.vietqr.org.entity.AccountLoginEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.vietqr.org.entity.AccountLoginEntity;
+import javax.transaction.Transactional;
+import java.util.List;
+
+//import com.vietqr.org.entity.AccountLoginEntity;
 
 @Repository
 public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity, Long> {
@@ -121,10 +124,10 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
     String checkPassword(@Param(value = "userId") String userId,
                          @Param(value = "password") String password);
 
-	boolean existsByPhoneNo(String phoneNo);
+    boolean existsByPhoneNo(String phoneNo);
 
-	@Query(value = "SELECT COUNT(*) > 0 FROM account_login WHERE phone_no = :phoneNo", nativeQuery = true)
-	boolean existsPhoneNo(@Param("phoneNo") String phoneNo);
+    @Query(value = "SELECT COUNT(*) > 0 FROM account_login WHERE phone_no = :phoneNo", nativeQuery = true)
+    boolean existsPhoneNo(@Param("phoneNo") String phoneNo);
 
     @Query(value = "SELECT COUNT(b.id) FROM account_login b WHERE b.time BETWEEN :startTime AND :endTime", nativeQuery = true)
     long countAccountsRegisteredInDay(@Param("startTime") long startTime, @Param("endTime") long endTime);
@@ -133,7 +136,13 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
     long getTotalUsers();
 
 
-    @Query(value ="SELECT a.id, a.phone_no, a.email, a.time FROM account_login as a WHERE a.time BETWEEN :startTime AND :endTime", nativeQuery = true)
+    @Query(value = "SELECT a.id, a.phone_no, a.email, a.time FROM account_login as a WHERE a.time BETWEEN :startTime AND :endTime", nativeQuery = true)
     List<IAccountLogin> findUsersRegisteredInDay(@Param("startTime") long startTime, @Param("endTime") long endTime);
 
+
+    @Query(value = "SELECT COUNT(b.id) FROM account_login b WHERE b.time <= :endTime", nativeQuery = true)
+    long getTotalUsersUntilDate(@Param("endTime") long endTime);
+
+    @Query(value = "SELECT a.id, a.phone_no, a.email, a.time FROM account_login as a WHERE a.time BETWEEN :startTime AND :endTime", nativeQuery = true)
+    List<IAccountLogin> findUsersRegisteredInMonth(@Param("startTime") long startTime, @Param("endTime") long endTime);
 }

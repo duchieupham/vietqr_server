@@ -1,25 +1,23 @@
-syntax = "proto3";
+  syntax = "proto3";
 
-option java_multiple_files = true;
-option java_package = "com.example.grpc";
-option java_outer_classname = "UserServiceProto";
+  option java_multiple_files = true;
+  option java_package = "com.example.grpc";
+  option java_outer_classname = "UserServiceProto";
 
-service UserService {
-  rpc GetRegisteredUsers (GetUsersRequest) returns (GetUsersResponse);
-}
+  service UserService {
+    rpc GetRegisteredUsers (GetUsersRequest) returns (stream User);
+    rpc GetRegisteredUsersInMonth (GetUsersRequest) returns (stream User);
+  }
 
-message GetUsersRequest {
-  string date = 1;
-}
+  message GetUsersRequest {
+    string date = 1;
+  }
 
-message User {
-  string id = 1;
-  string phoneNo = 2;
-  string email = 3;
-  int64 time = 4;
-}
+  message User {
+    string id = 1;
+    string phoneNo = 2;
+    string email = 3;
+    int64 time = 4;
+    string sumUserJson = 5;
+  }
 
-message GetUsersResponse {
-  repeated User users = 1;
-  string sumUser = 2;
-}
