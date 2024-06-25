@@ -10,6 +10,7 @@ public class BankAccountInvoiceDTO {
     private String bankAccount;
     private String connectionType;
     private String feePackage;
+    private String vso;
 
     public BankAccountInvoiceDTO() {
     }
@@ -97,5 +98,13 @@ public class BankAccountInvoiceDTO {
 
     public void setFeePackage(String feePackage) {
         this.feePackage = feePackage;
+    }
+
+    public String getVso() {
+        return vso;
+    }
+
+    public void setVso(String vso) {
+        this.vso = vso;
     }
 }

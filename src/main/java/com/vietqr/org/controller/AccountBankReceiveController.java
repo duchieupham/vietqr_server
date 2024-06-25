@@ -127,7 +127,7 @@ public class AccountBankReceiveController {
                     MerchantBankMapperDTO merchantBankMapperDTO = getMerchantBankMapperDTO(invoicesByBankId.getData());
                     merchantBankMapperDTO.setVso(StringUtil.isNullOrEmpty(dto.getVso()) ? merchantBankMapperDTO.getVso() : dto.getVso());
                     merchantBankMapperDTO.setMerchantName(StringUtil.isNullOrEmpty(dto.getMidName()) ? merchantBankMapperDTO.getMerchantName() : dto.getMidName());
-                    merchantBankMapperDTO.setVso(StringUtil.isNullOrEmpty(dto.getEmail()) ? merchantBankMapperDTO.getEmail() : dto.getEmail());
+                    merchantBankMapperDTO.setEmail(StringUtil.isNullOrEmpty(dto.getEmail()) ? merchantBankMapperDTO.getEmail() : dto.getEmail());
                     ObjectMapper mapper = new ObjectMapper();
                     String data = mapper.writeValueAsString(merchantBankMapperDTO);
                     invoiceService.updateDataInvoiceByBankId(data, bankId);

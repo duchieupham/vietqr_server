@@ -542,6 +542,7 @@ public class InvoiceController {
                     dto.setBankId(item.getBankId());
                     dto.setMerchantId(StringUtil.getValueNullChecker(item.getMerchantId()));
                     dto.setUserBankName(item.getUserBankName());
+                    dto.setVso(StringUtil.getValueNullChecker(item.getVso()));
                     dto.setBankShortName(bankShortNameMap.getOrDefault(item.getBankTypeId(), ""));
                     dto.setPhoneNo(item.getPhoneNo());
                     dto.setEmail(StringUtil.getValueNullChecker(item.getEmail()));
@@ -566,6 +567,7 @@ public class InvoiceController {
                     BankAccountInvoiceDTO dto = new BankAccountInvoiceDTO();
                     AccountBankInfoDTO bankAccountInfoDTO = getBankAccountInfoByData(item.getData());
                     dto.setBankId(item.getBankId());
+                    dto.setVso(StringUtil.getValueNullChecker(item.getVso()));
                     dto.setMerchantId(StringUtil.getValueNullChecker(merchantId));
                     dto.setUserBankName(bankAccountInfoDTO.getUserBankName());
                     dto.setBankShortName(bankAccountInfoDTO.getBankShortName());
@@ -1435,6 +1437,7 @@ public class InvoiceController {
                             invoiceItemDetailDTO.setTotalAmountAfterVat(item.getAmountAfterVat() != null ?
                                     item.getAmountAfterVat() : Math.round(item.getTotalAmount() * (1 +
                                     invoiceDTO.getVat() / 100)));
+                            invoiceItemDetailDTO.setTimeProcess(StringUtil.getValueNullChecker(item.getTimeProcess()));
                             return invoiceItemDetailDTO;
                         }).collect(Collectors.toList());
 
