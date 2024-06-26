@@ -13,6 +13,7 @@ public class AdminListUserAccountResponseDTO {
     private String fullName;
     private String userIp;
     private String phoneNo;
+    private int getTimeRegister;
     private String registerPlatform;
     private String nationalDate;
     private String nationalId;
@@ -21,6 +22,13 @@ public class AdminListUserAccountResponseDTO {
     private long balance;
     private long score;
 
+    public int getGetTimeRegister() {
+        return getTimeRegister;
+    }
+
+    public void setGetTimeRegister(int getTimeRegister) {
+        this.getTimeRegister = getTimeRegister;
+    }
 
     public long getBalance() {
         return balance;
