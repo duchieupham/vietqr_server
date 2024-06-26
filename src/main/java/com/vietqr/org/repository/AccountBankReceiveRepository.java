@@ -400,7 +400,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "WHERE a.id = :bankId ", nativeQuery = true)
 	IBankReceiveMapperDTO getMerchantBankMapper(String bankId);
 
-	@Query(value = "SELECT '' AS vso, '' AS merchantName, '' AS platform, "
+	@Query(value = "SELECT a.vso AS vso, '' AS merchantName, '' AS platform, "
 			+ "COALESCE(b.email, '') AS email, b.phone_no AS phoneNo, a.user_id AS userId, "
 			+ "a.bank_account AS bankAccount, a.bank_account_name AS userBankName, "
 			+ "c.bank_short_name AS bankShortName, a.mms_active AS mmsActive "
@@ -417,7 +417,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "AND a.is_authenticated = TRUE ", nativeQuery = true)
     int countBankInvoiceByBankAccount(String value);
 
-	@Query(value = "SELECT a.id AS bankId, c.mid AS merchantId, "
+	@Query(value = "SELECT a.id AS bankId, c.mid AS merchantId, a.vso AS vso, "
 			+ "a.bank_account_name AS userBankName, b.phone_no AS phoneNo, "
 			+ "b.email AS email, a.bank_account AS bankAccount, "
 			+ "a.mms_active AS mmsActive, c.title AS feePackage, "
@@ -533,7 +533,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 
 	@Query(value = "SELECT a.user_id AS userId, b.mid AS mid "
 			+ "FROM account_bank_receive a "
-			+ "LEFT JOIN bank_receive_connection b ON a.id = b.bank_id "
+			+ "LEFT JOIN bank_receive_fee_package b ON a.id = b.bank_id "
 			+ "WHERE a.id = :bankId ", nativeQuery = true)
 	BankAccountAdminDTO getUserIdAndMidByBankId(String bankId);
 

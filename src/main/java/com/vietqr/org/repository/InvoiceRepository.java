@@ -106,7 +106,9 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
     IInvoiceDetailDTO getInvoiceDetailById(String invoiceId);
 
     @Query(value = "SELECT a.id AS invoiceId, "
-            + "a.time_paid AS timePaid, b.vso AS vso, b.name AS midName, "
+            + "a.time_paid AS timePaid, " +
+            "COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.vso')), '') AS vso, " +
+            "b.name AS midName, "
             + "a.data AS data, a.amount AS amountNoVat, a.vat AS vat, a.vat_amount AS vatAmount, "
             + "a.total_amount AS amount, a.invoice_id AS billNumber, a.name AS invoiceName, "
             + "c.phone_no AS phoneNo, c.email AS email, a.time_created AS timeCreated, a.status AS status "
@@ -151,7 +153,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
     int countInvoiceByMerchantId(String value, long fromDate, long toDate);
 
     @Query(value = "SELECT a.id AS invoiceId, "
-            + "a.time_paid AS timePaid, b.vso AS vso, b.name AS midName, "
+            + "a.time_paid AS timePaid, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.vso')), '') AS vso, b.name AS midName, "
             + "a.data AS data, a.amount AS amountNoVat, a.vat AS vat, a.vat_amount AS vatAmount, "
             + "a.total_amount AS amount, a.invoice_id AS billNumber, a.name AS invoiceName, "
             + "c.phone_no AS phoneNo, c.email AS email, a.time_created AS timeCreated, a.status AS status "
@@ -174,7 +176,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
     int countInvoiceByInvoiceNumber(String value, long fromDate, long toDate);
 
     @Query(value = "SELECT a.id AS invoiceId, "
-            + "a.time_paid AS timePaid, b.vso AS vso, b.name AS midName, "
+            + "a.time_paid AS timePaid, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.vso')), '') AS vso, b.name AS midName, "
             + "a.data AS data, a.amount AS amountNoVat, a.vat AS vat, a.vat_amount AS vatAmount, "
             + "a.total_amount AS amount, a.invoice_id AS billNumber, a.name AS invoiceName, "
             + "c.phone_no AS phoneNo, c.email AS email, a.time_created AS timeCreated, a.status AS status "
@@ -197,7 +199,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
     int countInvoiceByBankAccount(String value, long fromDate, long toDate);
 
     @Query(value = "SELECT a.id AS invoiceId, "
-            + "a.time_paid AS timePaid, b.vso AS vso, b.name AS midName, "
+            + "a.time_paid AS timePaid, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.vso')), '') AS vso, b.name AS midName, "
             + "a.data AS data, a.amount AS amountNoVat, a.vat AS vat, a.vat_amount AS vatAmount, "
             + "a.total_amount AS amount, a.invoice_id AS billNumber, a.name AS invoiceName, "
             + "c.phone_no AS phoneNo, c.email AS email, a.time_created AS timeCreated, a.status AS status "
@@ -223,7 +225,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
     String getDataJson(String userId);
 
     @Query(value = "SELECT a.id AS invoiceId, "
-            + "a.time_paid AS timePaid, b.vso AS vso, b.name AS midName, "
+            + "a.time_paid AS timePaid, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.vso')), '') AS vso, b.name AS midName, "
             + "a.data AS data, a.amount AS amountNoVat, a.vat AS vat, a.vat_amount AS vatAmount, "
             + "a.total_amount AS amount, a.invoice_id AS billNumber, a.name AS invoiceName, "
             + "c.phone_no AS phoneNo, c.email AS email, a.time_created AS timeCreated, a.status AS status "
@@ -246,7 +248,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
     int countInvoiceByStatus(int status, long fromDate, long toDate);
 
     @Query(value = "SELECT a.id AS invoiceId, "
-            + "a.time_paid AS timePaid, b.vso AS vso, b.name AS midName, "
+            + "a.time_paid AS timePaid, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.vso')), '') AS vso, b.name AS midName, "
             + "a.data AS data, a.amount AS amountNoVat, a.vat AS vat, a.vat_amount AS vatAmount, "
             + "a.total_amount AS amount, a.invoice_id AS billNumber, a.name AS invoiceName, "
             + "c.phone_no AS phoneNo, c.email AS email, a.time_created AS timeCreated, a.status AS status "

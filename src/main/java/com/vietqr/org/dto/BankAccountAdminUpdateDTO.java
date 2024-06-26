@@ -8,6 +8,9 @@ public class BankAccountAdminUpdateDTO {
     private String midName;
     private String vso;
 
+    public BankAccountAdminUpdateDTO() {
+    }
+
     public BankAccountAdminUpdateDTO(String bankId, String bankAccount, String bankShortName, String email, String midName, String vso) {
         this.bankId = bankId;
         this.bankAccount = bankAccount;
