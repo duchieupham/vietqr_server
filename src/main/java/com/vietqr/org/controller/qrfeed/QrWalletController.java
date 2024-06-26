@@ -232,6 +232,46 @@ public class QrWalletController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // update information QrLink or QrText
+    @PutMapping("qr-wallet/update-qr-link")
+    public ResponseEntity<Object> updateQrLink(
+            @RequestParam String type,
+            @RequestParam String qrId,
+            @RequestBody QrLinkOrTextUpdateRequestDTO dto) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            ListQrWalletDTO request = null;
+            QrWalletEntity qrWalletEntity = qrWalletService.getQrLinkOrQrTextById(qrId);
+
+            if (qrWalletEntity == null) {
+                result = new ResponseMessageDTO("FAILED", "E05");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            } else {
+                if (type.equals("QR Link")) {
+                    //update qr link (Description, title, link)
+                    qrWalletService.updateQrWallet(qrId, dto.getQrDescription(), dto.getIsPublic(), "QR Link",
+                            dto.getTitle(), dto.getText());
+                } else if (type.equals("QR Text")) {
+                    //update qr text (Description, title, text)
+                    qrWalletService.updateQrWallet(qrId, dto.getQrDescription(), dto.getIsPublic(), "QR Text",
+                            dto.getTitle(), dto.getText());
+                }
+                // update thêm data_qr và data_user (JSON)
+
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            }
+
+        } catch (Exception e) {
+            logger.error("QrWalletController: ERROR: create QR: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
 
     @PostMapping("qr-wallet/generate-qr-link")
     public ResponseEntity<Object> createQrLink(
@@ -371,6 +411,24 @@ public class QrWalletController {
             pageResDTO.setData(data);
 
             result = pageResDTO;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("QrWalletController: ERROR: get QrWallet: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @DeleteMapping("qr-wallet/delete-qr")
+    public ResponseEntity<Object> deleteQrWallets(@RequestBody List<String> ids) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            qrWalletService.deleteQrWalletsByIds(ids);
+
+            result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("QrWalletController: ERROR: get QrWallet: " + e.getMessage()
