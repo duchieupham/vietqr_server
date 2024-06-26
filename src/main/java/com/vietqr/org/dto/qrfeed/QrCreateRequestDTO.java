@@ -10,17 +10,27 @@ public class QrCreateRequestDTO implements Serializable {
     private String qrDescription;
     private String text;
     private String pin;
+    private int isPublic;
 
     public QrCreateRequestDTO() {
         super();
     }
 
-    public QrCreateRequestDTO(String userId, String qrName, String qrDescription, String text, String pin) {
+    public QrCreateRequestDTO(String userId, String qrName, String qrDescription, String text, String pin, int isPublic) {
         this.userId = userId;
         this.qrName = qrName;
         this.qrDescription = qrDescription;
         this.text = text;
         this.pin = pin;
+        this.isPublic = isPublic;
+    }
+
+    public int getIsPublic() {
+        return isPublic;
+    }
+
+    public void setIsPublic(int isPublic) {
+        this.isPublic = isPublic;
     }
 
     public String getPin() {

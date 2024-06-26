@@ -6,7 +6,7 @@ public class QrWalletResponseDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String qrName;
-    private String qrCode;
+    private String value;
     private String qrContent;
     private String imgId;
     private int existing;
@@ -17,9 +17,9 @@ public class QrWalletResponseDTO implements Serializable {
         super();
     }
 
-    public QrWalletResponseDTO(String qrName, String qrCode, String qrContent, String imgId, int existing, String publicRefId, String qrLink) {
+    public QrWalletResponseDTO(String qrName, String value, String qrContent, String imgId, int existing, String publicRefId, String qrLink) {
         this.qrName = qrName;
-        this.qrCode = qrCode;
+        this.value = value;
         this.qrContent = qrContent;
         this.imgId = imgId;
         this.existing = existing;
@@ -43,12 +43,12 @@ public class QrWalletResponseDTO implements Serializable {
         this.qrContent = qrContent;
     }
 
-    public String getQrCode() {
-        return qrCode;
+    public String getValue() {
+        return value;
     }
 
-    public void setQrCode(String qrCode) {
-        this.qrCode = qrCode;
+    public void setValue(String value) {
+        this.value = value;
     }
 
     public String getImgId() {
