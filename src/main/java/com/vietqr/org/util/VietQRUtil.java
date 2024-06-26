@@ -9,6 +9,7 @@ import com.vietqr.org.dto.VietQRGenerateDTO;
 
 import javax.imageio.ImageIO;
 
+import com.vietqr.org.dto.qrfeed.QrLinkDTO;
 import org.apache.log4j.Logger;
 
 import java.awt.*;

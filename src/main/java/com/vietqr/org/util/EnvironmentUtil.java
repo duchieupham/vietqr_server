@@ -89,6 +89,9 @@ public class EnvironmentUtil {
     private static final String QR_LINK_UAT = "https://vietqr.vn/test/qr-generated?token=";
     private static final String QR_LINK_PROD = "https://vietqr.vn/qr-generated?token=";
 
+    // QR Link new feed
+    private static final String QR_LINK = "https://vietqr.vn/qr/security?publicRefId=";
+
     // DINO SOFT - VOICE
     private static final String VOICE_REQUEST_URL = "http://103.141.140.202:8009/tts/v1/speak";
     private static final String APP_ID_VOICE = "4a5vyvn37z4C5MNGYGsKw3dNo3Vdw4PG";
@@ -419,6 +422,10 @@ public class EnvironmentUtil {
 
     public static String getQRLink() {
         return (IS_PRODUCTION == false) ? QR_LINK_UAT : QR_LINK_PROD;
+    }
+
+    public static String getQRLinkNewFeed() {
+        return QR_LINK;
     }
 
     public static String getVNPTEpayRequestPaymentBankUsername() {
