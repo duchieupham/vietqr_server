@@ -12,6 +12,7 @@ public interface IAdminListUserAccountResponseDTO {
     String getLastName();
     String getUserIp();
     String getPhoneNo();
+    int getTimeRegister();
     String getRegisterPlatform();
     String getNationalDate();
     String getNationalId();
