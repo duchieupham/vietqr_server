@@ -1136,4 +1136,9 @@ public class AccountBankReceiveController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
+    @GetMapping("account-bank/statistics")
+    public List<IAccountBankMonthDTO> getBankAccountStatistics() {
+        return accountBankReceiveService.getBankAccountStatistics();
+    }
 }

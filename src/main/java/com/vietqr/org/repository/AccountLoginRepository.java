@@ -1,9 +1,6 @@
 package com.vietqr.org.repository;
 
-import com.vietqr.org.dto.AccountCheckDTO;
-import com.vietqr.org.dto.CardVQRInfoDTO;
-import com.vietqr.org.dto.IAccountLogin;
-import com.vietqr.org.dto.IUserInfoDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.AccountLoginEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

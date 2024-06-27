@@ -147,4 +147,7 @@ public interface AccountBankReceiveService {
     String getBankCodeByBankId(String bankId);
 
 	void updateRegisterAuthenticationBankBIDV(String nationalId, String phoneAuthenticated, String bankAccountName, String bankAccount, String customerId, String ewalletToken, String bankId);
+
+
+	List<IAccountBankMonthDTO> getBankAccountStatistics();
 }
