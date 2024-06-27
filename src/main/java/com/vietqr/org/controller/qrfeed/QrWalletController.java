@@ -386,6 +386,7 @@ public class QrWalletController {
 
             List<ListQrWalletDTO> data = new ArrayList<>();
             List<IListQrWalletDTO> infos = new ArrayList<>();
+            // từ folder ID sẽ có list userID sẽ lấy được user_data -> xử lý JSON là show user_data
 
             totalElement = qrWalletService.countQrWallet(value);
             infos = qrWalletService.getQrWallets(value, offset, size);
