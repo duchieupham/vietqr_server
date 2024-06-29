@@ -1,5 +1,7 @@
 package com.vietqr.org.repository;
 
+import com.vietqr.org.dto.qrfeed.FolderInformationDTO;
+import com.vietqr.org.dto.qrfeed.IFolderInformationDTO;
 import com.vietqr.org.dto.qrfeed.IListQrFolderDTO;
 import com.vietqr.org.dto.qrfeed.IListQrWalletDTO;
 import com.vietqr.org.entity.qrfeed.QrFolderEntity;
@@ -34,4 +36,9 @@ public interface QrFolderRepository extends JpaRepository<QrFolderEntity, String
 
     @Query(value = "SELECT a.* FROM viet_qr.qr_folder a WHERE a.id = :id ", nativeQuery = true)
     QrFolderEntity getFolderById(String id);
+
+    @Query(value = "SELECT user_id as userId, id AS folderId, title AS titleFolder, description AS descriptionFolder " +
+            "FROM viet_qr.qr_folder " +
+            "WHERE id = :folderId ", nativeQuery = true)
+    IFolderInformationDTO getFolderInfo(String folderId);
 }

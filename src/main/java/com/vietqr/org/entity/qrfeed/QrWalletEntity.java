@@ -21,7 +21,7 @@ public class QrWalletEntity implements Serializable {
     @Column(name = "value", columnDefinition = "LONGTEXT")
     private String value;
     @Column(name = "qrType")
-    private String qrType;
+    private int qrType;
     @Column(name = "qrData", columnDefinition = "JSON")
     private String qrData;
     @Column(name = "userData", columnDefinition = "JSON")
@@ -40,7 +40,7 @@ public class QrWalletEntity implements Serializable {
     public QrWalletEntity() {
     }
 
-    public QrWalletEntity(String id, String title, String description, String value, String qrType, String qrData, String userData, int isPublic, long timeCreated, String userId, String pin, String publicId) {
+    public QrWalletEntity(String id, String title, String description, String value, int qrType, String qrData, String userData, int isPublic, long timeCreated, String userId, String pin, String publicId) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -87,11 +87,11 @@ public class QrWalletEntity implements Serializable {
         this.value = value;
     }
 
-    public String getQrType() {
+    public int getQrType() {
         return qrType;
     }
 
-    public void setQrType(String qrType) {
+    public void setQrType(int qrType) {
         this.qrType = qrType;
     }
 

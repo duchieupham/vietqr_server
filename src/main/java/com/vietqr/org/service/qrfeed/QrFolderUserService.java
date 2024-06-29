@@ -1,5 +1,6 @@
 package com.vietqr.org.service.qrfeed;
 
+import com.vietqr.org.dto.qrfeed.IUserInFolderDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -8,5 +9,7 @@ import java.util.List;
 public interface QrFolderUserService {
 
     public void addUserIds(String qrFolderId, List<String> userIds);
+    public List<IUserInFolderDTO> getUserInFolder(String qrFolderId);
+
 
 }

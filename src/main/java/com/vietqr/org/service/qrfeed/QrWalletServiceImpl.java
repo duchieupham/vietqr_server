@@ -1,12 +1,16 @@
 package com.vietqr.org.service.qrfeed;
 
 import com.vietqr.org.dto.qrfeed.IListQrWalletDTO;
+import com.vietqr.org.dto.qrfeed.UserInfoLinkOrTextDTO;
+import com.vietqr.org.dto.qrfeed.UserInfoVcardDTO;
+import com.vietqr.org.dto.qrfeed.UserInfoVietQRDTO;
 import com.vietqr.org.entity.qrfeed.QrWalletEntity;
 import com.vietqr.org.repository.QrWalletRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
@@ -62,5 +66,35 @@ public class QrWalletServiceImpl implements QrWalletService {
     @Override
     public List<String> findExistingIds(List<String> ids) {
         return repo.findExistingIds(ids);
+    }
+
+    @Override
+    public List<String> getUserLinkOrTextData(String folderId, int type) {
+        return repo.getUserLinkOrTextData(folderId, type);
+    }
+
+    @Override
+    public List<String> getUserVCardData(String folderId, int type) {
+        return repo.getUserVCardData(folderId, type);
+    }
+
+    @Override
+    public List<String> getUserVietQrData(String folderId, int type) {
+        return repo.getUserVietQrData(folderId, type);
+    }
+
+    @Override
+    public int countUserLinkOrTextInfo(String folderId, int type) {
+        return repo.countUserLinkOrTextInfo(folderId, type);
+    }
+
+    @Override
+    public int countUserVCardInfo(String folderId, int type) {
+        return repo.countUserVCardInfo(folderId, type);
+    }
+
+    @Override
+    public int countUserVietQrInfo(String folderId, int type) {
+        return repo.countUserVietQrInfo(folderId, type);
     }
 }

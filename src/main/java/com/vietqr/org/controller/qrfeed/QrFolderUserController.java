@@ -1,21 +1,20 @@
 package com.vietqr.org.controller.qrfeed;
 
-import com.vietqr.org.dto.PageResDTO;
+import com.google.gson.Gson;
 import com.vietqr.org.dto.ResponseMessageDTO;
-import com.vietqr.org.dto.qrfeed.IUserInFolderDTO;
-import com.vietqr.org.dto.qrfeed.UserInFolderDTO;
+import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.qrfeed.QrFolderEntity;
 import com.vietqr.org.service.qrfeed.QrFolderService;
 import com.vietqr.org.service.qrfeed.QrFolderUserService;
+import com.vietqr.org.service.qrfeed.QrWalletService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin
@@ -28,6 +27,9 @@ public class QrFolderUserController {
 
     @Autowired
     QrFolderUserService qrFolderUserService;
+
+    @Autowired
+    QrWalletService qrWalletService;
 
     @PostMapping("qr-feed/add-user-folder")
     public ResponseEntity<Object> updateUserToFolder(
@@ -56,24 +58,109 @@ public class QrFolderUserController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // lấy ra thông tin những user trong folder
+    @GetMapping("qr-feed/folder-users")
     public ResponseEntity<Object> getUserInFolder(
             @RequestParam int type,
-            @RequestParam String value, // folder ID
-            @RequestParam int page,
-            @RequestParam int size
+            @RequestParam String folderId
     ) {
         Object result = null;
         HttpStatus httpStatus = null;
-        PageResDTO pageResDTO = new PageResDTO();
         try {
-            int totalElement = 0;
-            int offset = (page - 1) * size;
+            UserInFolderResponseDTO data = new UserInFolderResponseDTO();
 
-            List<UserInFolderDTO> data = new ArrayList<>();
-            List<IUserInFolderDTO> info = new ArrayList<>();
+            IFolderInformationDTO folderInfo = null;
+            folderInfo = qrFolderService.getFolderInfo(folderId);
 
-            result = new ResponseMessageDTO("SUCCESS", "");
+            if (Objects.nonNull(folderInfo)) {
+                // tạo object chứa user_data
+                // (type = 0 : QR Link & QR Other )
+                // (type = 1: QR VCard)
+                // (type = 2: VietQR)
+                List<UserInfoLinkOrTextDTO> userInfoLinkOrText = new ArrayList<>();
+                List<UserInfoVcardDTO> userInfoVcard = new ArrayList<>();
+                List<UserInfoVietQRDTO> userInfoVietQr = new ArrayList<>();
+                List<String> userDataJson = new ArrayList<>();
+                Gson gson = new Gson();
+                data.setUserId(folderInfo.getUserId());
+                switch (type) {
+                    case 0:
+                    case 1:
+                        userDataJson = qrWalletService.getUserLinkOrTextData(folderId, type);
+                        userInfoLinkOrText = userDataJson.stream().map(userInfo -> {
+                            UserInfoLinkOrTextDTO dto = gson.fromJson(userInfo, UserInfoLinkOrTextDTO.class);
+                            return dto;
+                        }).collect(Collectors.toList());
+                        data.setUserData(userInfoLinkOrText);
+                        break;
+                    case 2:
+                        userDataJson = qrWalletService.getUserVCardData(folderId, type);
+                        userInfoVcard = userDataJson.stream().map(userInfo -> {
+                            UserInfoVcardDTO dto = gson.fromJson(userInfo, UserInfoVcardDTO.class);
+                            return dto;
+                        }).collect(Collectors.toList());
+                        data.setUserData(userInfoVcard);
+                        break;
+                    case 3:
+                        userDataJson = qrWalletService.getUserVietQrData(folderId, type);
+                        userInfoVietQr = userDataJson.stream().map(userInfo -> {
+                            UserInfoVietQRDTO dto = gson.fromJson(userInfo, UserInfoVietQRDTO.class);
+                            return dto;
+                        }).collect(Collectors.toList());
+                        data.setUserData(userInfoVietQr);
+                        break;
+                }
+                data.setFolderId(folderInfo.getFolderId());
+                data.setTitleFolder(folderInfo.getTitleFolder());
+                data.setDescriptionFolder(folderInfo.getDescriptionFolder());
+
+                result = data;
+                httpStatus = HttpStatus.OK;
+            } else {
+                result = new ResponseMessageDTO("FAILED", "E151");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("add users to folder: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED" + e.getMessage(), "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    public ResponseEntity<Object> getQrInFolder(
+            @RequestParam int type,
+            @RequestParam String folderId
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        Gson gson = new Gson();
+        try {
+            QrInFolderResponseDTO data = new QrInFolderResponseDTO();
+
+            // get information about folder
+            IFolderInformationDTO folderInfo = null;
+            folderInfo = qrFolderService.getFolderInfo(folderId);
+
+            // chứa qr_data và qr_info
+            QRInfo qrInfo = new QRInfo();
+
+            // xử lý chuỗi JSON thành object
+            QrData qrData = new QrData();
+
+
+            // tạo object chứa qr_data
+            List<QrInfoLinkOrTextDTO> qrInfoLinks = new ArrayList<>();
+            List<QrInfoVCardDTO> qrInfoVCard = new ArrayList<>();
+            List<QrData> qrInfoVietQr = new ArrayList<>();
+
+            // (type = 0 : QR Link & QR Other )
+            // (type = 1: QR VCard)
+            // (type = 2: VietQR)
+
+
+            result = "";
+            httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("add users to folder: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");

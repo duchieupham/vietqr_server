@@ -1,6 +1,9 @@
 package com.vietqr.org.service.qrfeed;
 
 import com.vietqr.org.dto.qrfeed.IListQrWalletDTO;
+import com.vietqr.org.dto.qrfeed.UserInfoLinkOrTextDTO;
+import com.vietqr.org.dto.qrfeed.UserInfoVcardDTO;
+import com.vietqr.org.dto.qrfeed.UserInfoVietQRDTO;
 import com.vietqr.org.entity.qrfeed.QrWalletEntity;
 import org.springframework.stereotype.Service;
 
@@ -25,4 +28,12 @@ public interface QrWalletService {
     public void deleteQrWalletsByIds(List<String> ids);
 
     public List<String> findExistingIds(List<String> ids);
+    public List<String> getUserLinkOrTextData(String folderId, int type);
+    public List<String> getUserVCardData(String folderId, int type);
+    public List<String> getUserVietQrData(String folderId, int type);
+
+    public int countUserLinkOrTextInfo(String folderId, int type);
+    public int countUserVCardInfo(String folderId, int type);
+    public int countUserVietQrInfo(String folderId, int type);
+
 }

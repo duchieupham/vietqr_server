@@ -1,5 +1,6 @@
 package com.vietqr.org.service.qrfeed;
 
+import com.vietqr.org.dto.qrfeed.IUserInFolderDTO;
 import com.vietqr.org.repository.QrFolderUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,5 +21,10 @@ public class QrFolderUserServiceImpl implements QrFolderUserService {
             String id = UUID.randomUUID().toString();
             repo.insertQrWalletFolder(id, qrFolderId, userId);
         }
+    }
+
+    @Override
+    public List<IUserInFolderDTO> getUserInFolder(String qrFolderId) {
+        return repo.getUserInFolder(qrFolderId);
     }
 }

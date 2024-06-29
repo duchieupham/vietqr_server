@@ -101,7 +101,7 @@ public class QrWalletController {
                 entity.setTitle("QR VietQR");
                 entity.setDescription("Mã VietQR của: " + dto.getUserBankName());
                 entity.setValue(qr);
-                entity.setQrType("QR VietQR");
+                entity.setQrType(3);
                 entity.setQrData("{"
                         + "\"bankAccount\": \"" + dto.getBankAccount() + "\", "
                         + "\"userBankName\": \"" + dto.getUserBankName() + "\", "
@@ -181,7 +181,7 @@ public class QrWalletController {
                 entity.setTitle("Qr Vcard");
                 entity.setDescription("Qr Vcard: " + dto.getFullname());
                 entity.setValue(qr);
-                entity.setQrType("QR Vcard");
+                entity.setQrType(2);
                 entity.setQrData("{"
                         + "\"fullName\": \"" + dto.getFullname() + "\", "
                         + "\"phoneNo\": \"" + dto.getPhoneNo() + "\", "
@@ -203,7 +203,6 @@ public class QrWalletController {
                 } else if (isPublic == 0) {
                     entity.setIsPublic(0);
                 }
-                entity.setIsPublic(0);
                 entity.setTimeCreated(currentDateTime.toEpochSecond(ZoneOffset.UTC));
                 entity.setUserId(dto.getUserId());
                 entity.setPin("");
@@ -275,15 +274,18 @@ public class QrWalletController {
 
     @PostMapping("qr-wallet/generate-qr-link")
     public ResponseEntity<Object> createQrLink(
-            @RequestParam String type,
+            @RequestParam int type,
             @RequestBody QrCreateRequestDTO dto) {
         Object result = null;
         HttpStatus httpStatus = null;
         UUID generateUUID = UUID.randomUUID();
         try {
-            if (type.equals("QR Link") || type.equals("QR Text")) {
+            if (type == 1 || type == 0) {
                 // generate QR Code
                 QrWalletResponseDTO qrWalletResponseDTO = new QrWalletResponseDTO();
+                qrWalletResponseDTO.setFullName(dto.getFullName());
+                qrWalletResponseDTO.setEmail(dto.getPhoneNo());
+                qrWalletResponseDTO.setPhoneNo(dto.getPhoneNo());
                 qrWalletResponseDTO.setQrName(dto.getQrName());
                 qrWalletResponseDTO.setValue(dto.getText()); // cho hiển thị ra chuỗi giá trị
                 qrWalletResponseDTO.setQrContent(dto.getQrDescription());
@@ -301,14 +303,24 @@ public class QrWalletController {
                 QrUserEntity qrUserEntity = new QrUserEntity();
                 UUID idQrUser = UUID.randomUUID();
                 switch (type) {
-                    case "QR Link":
+                    case 1:
                         entity.setId(idQrWallet.toString());
                         entity.setTitle(dto.getQrName());
                         entity.setDescription(dto.getQrDescription());
                         entity.setValue(dto.getText());
-                        entity.setQrType("QR Link");
-                        entity.setQrData("{\"link\": \"" + dto.getText() + "\"}");
-                        entity.setUserData("{}");
+                        entity.setQrType(1);
+                        entity.setQrData("{"
+                                + "\"fullName\": \"" + dto.getFullName() + "\", "
+                                + "\"phoneNo\": \"" + dto.getPhoneNo() + "\", "
+                                + "\"email\": \"" + dto.getEmail() + "\", "
+                                + "\"content\": \"" + dto.getText() + "\""
+                                + "}");
+                        entity.setUserData("{"
+                                + "\"fullName\": \"" + dto.getFullName() + "\", "
+                                + "\"phoneNo\": \"" + dto.getPhoneNo() + "\", "
+                                + "\"email\": \"" + dto.getEmail() + "\", "
+                                + "\"content\": \"" + dto.getText() + "\""
+                                + "}");
                         if (dto.getIsPublic() == 1) {
                             entity.setIsPublic(1);
                         } else if (dto.getIsPublic() == 0) {
@@ -328,14 +340,24 @@ public class QrWalletController {
                         qrUserService.insertQrUser(qrUserEntity);
 
                         break;
-                    case "QR Text":
+                    case 0:
                         entity.setId(idQrWallet.toString());
                         entity.setTitle(dto.getQrName());
                         entity.setDescription(dto.getQrDescription());
                         entity.setValue(dto.getText());
-                        entity.setQrType("QR Text");
-                        entity.setQrData("{\"text\": \"" + dto.getText() + "\"}");
-                        entity.setUserData("{}");
+                        entity.setQrType(0);
+                        entity.setQrData("{"
+                                + "\"fullName\": \"" + dto.getFullName() + "\", "
+                                + "\"phoneNo\": \"" + dto.getPhoneNo() + "\", "
+                                + "\"email\": \"" + dto.getEmail() + "\", "
+                                + "\"content\": \"" + dto.getText() + "\""
+                                + "}");
+                        entity.setUserData("{"
+                                + "\"fullName\": \"" + dto.getFullName() + "\", "
+                                + "\"phoneNo\": \"" + dto.getPhoneNo() + "\", "
+                                + "\"email\": \"" + dto.getEmail() + "\", "
+                                + "\"content\": \"" + dto.getText() + "\""
+                                + "}");
                         if (dto.getIsPublic() == 1) {
                             entity.setIsPublic(1);
                         } else if (dto.getIsPublic() == 0) {

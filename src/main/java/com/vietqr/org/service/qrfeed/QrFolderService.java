@@ -1,5 +1,7 @@
 package com.vietqr.org.service.qrfeed;
 
+import com.vietqr.org.dto.qrfeed.FolderInformationDTO;
+import com.vietqr.org.dto.qrfeed.IFolderInformationDTO;
 import com.vietqr.org.dto.qrfeed.IListQrFolderDTO;
 import com.vietqr.org.dto.qrfeed.IListQrWalletDTO;
 import com.vietqr.org.entity.qrfeed.QrFolderEntity;
@@ -20,5 +22,6 @@ public interface QrFolderService {
     public void updateQrFolder(String id, String description, String title);
 
     public QrFolderEntity getFolderById(String id);
+    public IFolderInformationDTO getFolderInfo(String folderId);
 
 }
