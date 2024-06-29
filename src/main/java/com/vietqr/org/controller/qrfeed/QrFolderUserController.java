@@ -1,6 +1,7 @@
 package com.vietqr.org.controller.qrfeed;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.qrfeed.QrFolderEntity;
@@ -61,7 +62,7 @@ public class QrFolderUserController {
     // lấy ra thông tin những user trong folder
     @GetMapping("qr-feed/folder-users")
     public ResponseEntity<Object> getUserInFolder(
-            @RequestParam int type,
+            @RequestParam(name = "type", defaultValue = "-1") int type,
             @RequestParam String folderId
     ) {
         Object result = null;
@@ -73,43 +74,17 @@ public class QrFolderUserController {
             folderInfo = qrFolderService.getFolderInfo(folderId);
 
             if (Objects.nonNull(folderInfo)) {
-                // tạo object chứa user_data
-                // (type = 0 : QR Link & QR Other )
-                // (type = 1: QR VCard)
-                // (type = 2: VietQR)
-                List<UserInfoLinkOrTextDTO> userInfoLinkOrText = new ArrayList<>();
-                List<UserInfoVcardDTO> userInfoVcard = new ArrayList<>();
-                List<UserInfoVietQRDTO> userInfoVietQr = new ArrayList<>();
-                List<String> userDataJson = new ArrayList<>();
+                List<DataUserDTO> userInfoLinkOrText = new ArrayList<>();
+
                 Gson gson = new Gson();
                 data.setUserId(folderInfo.getUserId());
-                switch (type) {
-                    case 0:
-                    case 1:
-                        userDataJson = qrWalletService.getUserLinkOrTextData(folderId, type);
-                        userInfoLinkOrText = userDataJson.stream().map(userInfo -> {
-                            UserInfoLinkOrTextDTO dto = gson.fromJson(userInfo, UserInfoLinkOrTextDTO.class);
-                            return dto;
-                        }).collect(Collectors.toList());
-                        data.setUserData(userInfoLinkOrText);
-                        break;
-                    case 2:
-                        userDataJson = qrWalletService.getUserVCardData(folderId, type);
-                        userInfoVcard = userDataJson.stream().map(userInfo -> {
-                            UserInfoVcardDTO dto = gson.fromJson(userInfo, UserInfoVcardDTO.class);
-                            return dto;
-                        }).collect(Collectors.toList());
-                        data.setUserData(userInfoVcard);
-                        break;
-                    case 3:
-                        userDataJson = qrWalletService.getUserVietQrData(folderId, type);
-                        userInfoVietQr = userDataJson.stream().map(userInfo -> {
-                            UserInfoVietQRDTO dto = gson.fromJson(userInfo, UserInfoVietQRDTO.class);
-                            return dto;
-                        }).collect(Collectors.toList());
-                        data.setUserData(userInfoVietQr);
-                        break;
-                }
+
+                List<String> userDataJson = qrWalletService.getUserLinkOrTextData(folderId, type);
+                userInfoLinkOrText = userDataJson.stream().map(userInfo -> {
+                    DataUserDTO dto = gson.fromJson(userInfo, DataUserDTO.class);
+                    return dto;
+                }).collect(Collectors.toList());
+                data.setUserData(userInfoLinkOrText);
                 data.setFolderId(folderInfo.getFolderId());
                 data.setTitleFolder(folderInfo.getTitleFolder());
                 data.setDescriptionFolder(folderInfo.getDescriptionFolder());
@@ -122,7 +97,7 @@ public class QrFolderUserController {
             }
         } catch (Exception e) {
             logger.error("add users to folder: ERROR: " + e.toString());
-            result = new ResponseMessageDTO("FAILED" + e.getMessage(), "E05");
+            result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);

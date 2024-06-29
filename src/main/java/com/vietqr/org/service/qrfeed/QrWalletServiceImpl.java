@@ -70,7 +70,10 @@ public class QrWalletServiceImpl implements QrWalletService {
 
     @Override
     public List<String> getUserLinkOrTextData(String folderId, int type) {
-        return repo.getUserLinkOrTextData(folderId, type);
+        if (type == -1) {
+            return repo.getUserDataWithoutType(folderId, "");
+        }
+        return repo.getUserDataWithType(folderId, type);
     }
 
     @Override

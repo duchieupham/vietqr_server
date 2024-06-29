@@ -1,7 +1,14 @@
 package com.vietqr.org.dto.qrfeed;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.Expose;
+
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserInFolderResponseDTO {
     private String userId;
     private Object userData;
