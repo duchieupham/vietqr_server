@@ -25,4 +25,7 @@ public interface QrWalletService {
     public void deleteQrWalletsByIds(List<String> ids);
 
     public List<String> findExistingIds(List<String> ids);
+
+    List<String> getQrWalletIdsByFolderId(String folderId);
+    void deleteQrItemsByIds(List<String> ids);
 }

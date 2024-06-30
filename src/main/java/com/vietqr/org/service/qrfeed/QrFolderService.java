@@ -21,4 +21,8 @@ public interface QrFolderService {
 
     public QrFolderEntity getFolderById(String id);
 
+
+
+    void deleteFolderById(String folderId);
+
 }

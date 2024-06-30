@@ -56,13 +56,16 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
     List<String> findExistingIds(@Param("ids") List<String> ids);
 
 
-//    @Query(value = "SELECT COUNT(a.id) " +
+    //    @Query(value = "SELECT COUNT(a.id) " +
 //            "FROM viet_qr.qr_wallet a " +
 //            "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
 //            "WHERE (a.description LIKE %:value%) OR (a.title LIKE %:value%) " +
 //            "GROUP BY a.id, b.role " +
 //            "ORDER BY time_created DESC ", nativeQuery = true)
 //    int countQrWallet(String value);
-
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM qr_wallet WHERE id IN :qrWalletIds", nativeQuery = true)
+    void deleteByQrWalletIds(@Param("qrWalletIds") List<String> qrWalletIds);
 
 }
