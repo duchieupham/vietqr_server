@@ -49,4 +49,11 @@ public class QrFolderServiceImpl implements QrFolderService {
     public IFolderInformationDTO getQrInFolder(String folderId) {
         return repo.getQrInFolder(folderId);
     }
+
+    @Override
+    public void deleteFolderById(String folderId) {
+        repo.deleteByQrFolderId(folderId);
+    }
+
+
 }

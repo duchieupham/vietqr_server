@@ -25,4 +25,8 @@ public interface QrFolderService {
     public IFolderInformationDTO getFolderInfo(String folderId);
     public IFolderInformationDTO getQrInFolder(String folderId);
 
+
+
+    void deleteFolderById(String folderId);
+
 }

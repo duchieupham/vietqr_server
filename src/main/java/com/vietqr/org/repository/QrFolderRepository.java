@@ -8,6 +8,7 @@ import com.vietqr.org.entity.qrfeed.QrFolderEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
@@ -48,4 +49,13 @@ public interface QrFolderRepository extends JpaRepository<QrFolderEntity, String
             "WHERE id = :folderId ", nativeQuery = true)
     IFolderInformationDTO getQrInFolder(String folderId);
 
+
+
+    @Query(value = "SELECT * FROM qr_folder WHERE id = :qrFolderId", nativeQuery = true)
+    QrFolderEntity findByQrFolderId(@Param("qrFolderId") String qrFolderId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM qr_folder WHERE id = :qrFolderId", nativeQuery = true)
+    void deleteByQrFolderId(@Param("qrFolderId") String qrFolderId);
 }

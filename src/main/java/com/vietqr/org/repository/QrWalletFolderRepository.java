@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 @Repository
 public interface QrWalletFolderRepository extends JpaRepository<QrWalletFolderEntity, String> {
@@ -21,5 +22,14 @@ public interface QrWalletFolderRepository extends JpaRepository<QrWalletFolderEn
             @Param("qrFolderId") String qrFolderId,
             @Param("qrWalletId") String qrWalletId);
 
+
+
+    @Query(value = "SELECT qr_wallet_id FROM qr_wallet_folder WHERE qr_folder_id = :qrFolderId", nativeQuery = true)
+    List<String> findQrWalletIdsByQrFolderId(@Param("qrFolderId") String qrFolderId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM qr_wallet_folder WHERE qr_folder_id = :qrFolderId", nativeQuery = true)
+    void deleteByQrFolderId(@Param("qrFolderId") String qrFolderId);
 
 }

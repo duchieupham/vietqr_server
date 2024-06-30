@@ -37,4 +37,7 @@ public interface QrWalletService {
     public int countUserVCardInfo(String folderId, int type);
     public int countUserVietQrInfo(String folderId, int type);
 
+
+    List<String> getQrWalletIdsByFolderId(String folderId);
+    void deleteQrItemsByIds(List<String> ids);
 }

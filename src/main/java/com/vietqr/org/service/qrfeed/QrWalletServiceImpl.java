@@ -5,6 +5,7 @@ import com.vietqr.org.dto.qrfeed.UserInfoLinkOrTextDTO;
 import com.vietqr.org.dto.qrfeed.UserInfoVcardDTO;
 import com.vietqr.org.dto.qrfeed.UserInfoVietQRDTO;
 import com.vietqr.org.entity.qrfeed.QrWalletEntity;
+import com.vietqr.org.repository.QrWalletFolderRepository;
 import com.vietqr.org.repository.QrWalletRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,9 @@ import java.util.stream.Collectors;
 public class QrWalletServiceImpl implements QrWalletService {
     @Autowired
     QrWalletRepository repo;
+
+    @Autowired
+    QrWalletFolderRepository qrWalletFolderRepository;
 
     @Override
     public int insertQrWallet(QrWalletEntity entity) {
@@ -107,5 +111,15 @@ public class QrWalletServiceImpl implements QrWalletService {
     @Override
     public int countUserVietQrInfo(String folderId, int type) {
         return repo.countUserVietQrInfo(folderId, type);
+    }
+
+    @Override
+    public List<String> getQrWalletIdsByFolderId(String folderId) {
+        return  qrWalletFolderRepository.findQrWalletIdsByQrFolderId(folderId);
+    }
+
+    @Override
+    public void deleteQrItemsByIds(List<String> ids) {
+        repo.deleteByQrWalletIds(ids);
     }
 }
