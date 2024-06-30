@@ -47,6 +47,9 @@ public class MerchantSyncEntity implements Serializable {
     @Column(name = "refId")
     private String refId = "";
 
+    @Column(name = "isMaster")
+    private boolean isMaster = false;
+
     public MerchantSyncEntity() {
     }
 
@@ -182,5 +185,13 @@ public class MerchantSyncEntity implements Serializable {
 
     public void setPhoneNo(String phoneNo) {
         this.phoneNo = phoneNo;
+    }
+
+    public boolean getIsMaster() {
+        return isMaster;
+    }
+
+    public void setIsMaster(boolean master) {
+        isMaster = master;
     }
 }

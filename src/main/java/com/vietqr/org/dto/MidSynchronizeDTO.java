@@ -7,6 +7,7 @@ public class MidSynchronizeDTO {
     private String merchantIdentity;
     private String contactEmail;
     private String contactPhone;
+    private String checkSum;
 
     public MidSynchronizeDTO(String merchantFullName, String merchantName, String merchantAddress,
                              String merchantIdentity, String contactEmail, String contactPhone) {
@@ -67,5 +68,13 @@ public class MidSynchronizeDTO {
 
     public void setContactPhone(String contactPhone) {
         this.contactPhone = contactPhone;
+    }
+
+    public String getCheckSum() {
+        return checkSum;
+    }
+
+    public void setCheckSum(String checkSum) {
+        this.checkSum = checkSum;
     }
 }

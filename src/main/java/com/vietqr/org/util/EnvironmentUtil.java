@@ -738,4 +738,8 @@ public class EnvironmentUtil {
     public static String getPrefixTerminalExternal() {
         return "TER";
     }
+
+    public static String getMerchantPrefixPublic() {
+        return "MER";
+    }
 }

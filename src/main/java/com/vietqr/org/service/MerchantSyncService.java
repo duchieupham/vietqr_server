@@ -46,4 +46,10 @@ public interface MerchantSyncService {
     List<IMerchantSyncPublicDTO> getMerchantByMidSync(String refId, int offset, int size);
 
     String getIdByPublicId(String publicId, String refId);
+
+    String getMerchantIdSyncByName(String merchantName);
+
+    String checkExistedPublishId(String code);
+
+    void insertAll(List<MerchantSyncEntity> merchantSyncEntities);
 }

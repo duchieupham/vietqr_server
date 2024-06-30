@@ -177,4 +177,19 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
     public String getIdByPublicId(String publicId, String refId) {
         return repo.getIdByPublicId(publicId, refId);
     }
+
+    @Override
+    public String getMerchantIdSyncByName(String merchantName) {
+        return repo.getMerchantIdSyncByName(merchantName);
+    }
+
+    @Override
+    public String checkExistedPublishId(String code) {
+        return repo.checkExistedPublishId(code);
+    }
+
+    @Override
+    public void insertAll(List<MerchantSyncEntity> entities) {
+        repo.saveAll(entities);
+    }
 }
