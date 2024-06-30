@@ -339,4 +339,13 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             + "INNER JOIN account_bank_receive c ON c.id = b.bank_id "
             + "WHERE a.merchant_id = :mid ", nativeQuery = true)
     int countTerminalByMidSync(String mid);
+
+    @Query(value = "SELECT raw_terminal_code "
+            + "FROM terminal "
+            + "WHERE raw_terminal_code IN (:rawCodes) "
+            + "UNION "
+            + "SELECT raw_terminal_code "
+            + "FROM terminal_bank_receive "
+            + "WHERE raw_terminal_code IN (:rawCodes) ", nativeQuery = true)
+    List<String> checkExistedTerminalRawCodes(List<String> rawCodes);
 }

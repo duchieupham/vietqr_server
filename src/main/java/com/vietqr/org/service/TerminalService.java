@@ -96,4 +96,6 @@ public interface TerminalService {
     List<ITerminalSyncDTO> getTerminalByMidSync(String mid, int offset, int size);
 
     int countTerminalByMidSync(String midForSearch);
+
+    List<String> checkExistedTerminalRawCodes(List<String> terminalCodes);
 }

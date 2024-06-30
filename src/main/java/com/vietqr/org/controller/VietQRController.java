@@ -948,71 +948,93 @@ public class VietQRController {
 				AccountBankReceiveEntity accountBankEntity = null;
 				String content = "";
 				String qr = "";
-				if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
-					bankTypeEntity = bankTypeService.getBankTypeByBankCode(dto.getBankCode());
-				} else {
-					bankTypeEntity = bankTypeService.getBankTypeByBankCode(dto.getCustomerBankCode());
-				}
-                if (dto.getBankCode().equals("MB")) {
-                    AccountBankReceiveEntity accountBankReceiveEntity =
-                            accountBankReceiveService
-                                    .checkExistedBankAccountAuthenticated(dto.getBankAccount(),
-											dto.getBankCode());
+				try {
+					if (dto.getContent() == null) {
+						dto.setContent("");
+					}
+					if (dto.getContent().length() <= 30) {
+						if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
+							bankTypeEntity = bankTypeService.getBankTypeByBankCode(dto.getBankCode());
+						} else {
+							bankTypeEntity = bankTypeService.getBankTypeByBankCode(dto.getCustomerBankCode());
+						}
+						if (dto.getBankCode().equals("MB")) {
+							AccountBankReceiveEntity accountBankReceiveEntity =
+									accountBankReceiveService
+											.checkExistedBankAccountAuthenticated(dto.getBankAccount(),
+													dto.getBankCode());
 
-                    TerminalBankSyncDTO terminalBankSyncDTO = terminalBankReceiveService
-                            .getTerminalBankReceive(dto.getTerminalCode(), dto.getBankAccount(),
-									dto.getBankCode());
-                    if (Objects.nonNull(terminalBankSyncDTO)) {
-                        if (accountBankReceiveEntity.isMmsActive()) {
-                            TerminalBankEntity terminalBankEntity =
-                                    terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
-                            if (terminalBankEntity != null) {
-                                content = terminalBankSyncDTO.getRawTerminalCode() + dto.getContent();
-                                qr = MBVietQRUtil.generateStaticVietQRMMS(
-                                        new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
-                                                terminalBankEntity.getTerminalId(), content));
-                                String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
-                                terminalBankReceiveService.updateQrCodeTerminalSync("", qr, traceTransfer,
-                                        terminalBankSyncDTO.getTerminalBankReceiveId());
-                            } else {
-                                System.out.println("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
-                            }
-                        } else {
-                            // luồng thuong
-                            content = "SQR" + terminalBankSyncDTO.getTerminalCode() + dto.getContent();
-                            String bankAccount = accountBankReceiveEntity.getBankAccount();
-                            String caiValue = accountBankReceiveService.getCaiValueByBankId(accountBankReceiveEntity.getId());
-                            VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", content, bankAccount);
-                            qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
-                            terminalBankReceiveService.updateQrCodeTerminalSync(qr, "", "",
-                                    terminalBankSyncDTO.getTerminalBankReceiveId());
-                        }
-						VietQRDTO vietQRDTO = new VietQRDTO();
-						vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
-						vietQRDTO.setBankName(bankTypeEntity.getBankName());
-						vietQRDTO.setBankAccount(accountBankReceiveEntity.getBankAccount());
-						vietQRDTO.setUserBankName(accountBankReceiveEntity.getBankAccountName());
-						vietQRDTO.setAmount(dto.getAmount() + "");
-						vietQRDTO.setContent(content);
-						vietQRDTO.setQrCode(qr);
-						vietQRDTO.setImgId(bankTypeEntity.getImgId());
-						vietQRDTO.setExisting(0);
-						vietQRDTO.setTransactionId("");
-						vietQRDTO.setTerminalCode(dto.getTerminalCode());
-						String qrLink = "";
-						vietQRDTO.setTransactionRefId("");
-						vietQRDTO.setQrLink(qrLink);
-						result = vietQRDTO;
-						httpStatus = HttpStatus.OK;
-                    } else {
-                        // TK ngân hàng không khớp với cửa hàng
-                        result = new ResponseMessageDTO("FAILED", "E152");
-                        httpStatus = HttpStatus.BAD_REQUEST;
-                    }
-                } else {
-					// Ngan hang khong phai MB Bank
-					result = new ResponseMessageDTO("FAILED", "E151");
+							TerminalBankSyncDTO terminalBankSyncDTO = terminalBankReceiveService
+									.getTerminalBankReceive(dto.getTerminalCode(), dto.getBankAccount(),
+											dto.getBankCode());
+							if (Objects.nonNull(terminalBankSyncDTO)) {
+								if (accountBankReceiveEntity.isMmsActive()) {
+									TerminalBankEntity terminalBankEntity =
+											terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
+									if (terminalBankEntity != null) {
+										// luồng uu tien
+										if (StringUtil.isNullOrEmpty(dto.getContent())) {
+											content = terminalBankSyncDTO.getRawTerminalCode();
+										} else {
+											content = dto.getContent();
+										}
+										qr = MBVietQRUtil.generateStaticVietQRMMS(
+												new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
+														terminalBankEntity.getTerminalId(), content));
+										String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
+										terminalBankReceiveService.updateQrCodeTerminalSync("", qr, traceTransfer,
+												terminalBankSyncDTO.getTerminalBankReceiveId());
+									} else {
+										System.out.println("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
+									}
+								} else {
+									// luồng thuong
+									if (StringUtil.isNullOrEmpty(dto.getContent())) {
+										content = "SQR" + terminalBankSyncDTO.getTerminalCode();
+									} else {
+										content = "SQR" + terminalBankSyncDTO.getTerminalCode() + " " + dto.getContent();
+									}
+									String bankAccount = accountBankReceiveEntity.getBankAccount();
+									String caiValue = accountBankReceiveService.getCaiValueByBankId(accountBankReceiveEntity.getId());
+									VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", content, bankAccount);
+									qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+									terminalBankReceiveService.updateQrCodeTerminalSync(qr, "", "",
+											terminalBankSyncDTO.getTerminalBankReceiveId());
+								}
+								VietQRDTO vietQRDTO = new VietQRDTO();
+								vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
+								vietQRDTO.setBankName(bankTypeEntity.getBankName());
+								vietQRDTO.setBankAccount(accountBankReceiveEntity.getBankAccount());
+								vietQRDTO.setUserBankName(accountBankReceiveEntity.getBankAccountName());
+								vietQRDTO.setAmount(StringUtil.getValueNullChecker(dto.getAmount()) + "");
+								vietQRDTO.setContent(content);
+								vietQRDTO.setQrCode(qr);
+								vietQRDTO.setImgId(bankTypeEntity.getImgId());
+								vietQRDTO.setExisting(0);
+								vietQRDTO.setTransactionId("");
+								vietQRDTO.setTerminalCode(dto.getTerminalCode());
+								String qrLink = "";
+								vietQRDTO.setTransactionRefId("");
+								vietQRDTO.setQrLink(qrLink);
+								result = vietQRDTO;
+								httpStatus = HttpStatus.OK;
+							} else {
+								// TK ngân hàng không khớp với cửa hàng
+								result = new ResponseMessageDTO("FAILED", "E152");
+								httpStatus = HttpStatus.BAD_REQUEST;
+							}
+						} else {
+							// Ngan hang khong phai MB Bank
+							result = new ResponseMessageDTO("FAILED", "E151");
+							httpStatus = HttpStatus.BAD_REQUEST;
+						}
+					} else {
+						result = new ResponseMessageDTO("FAILED", "E26");
+						httpStatus = HttpStatus.BAD_REQUEST;
+					}
+				} catch (Exception e) {
 					httpStatus = HttpStatus.BAD_REQUEST;
+					logger.error("VietQRController: ERROR: generateQRCustomer: " + e.getMessage() + " at: " + System.currentTimeMillis());
 				}
 				break;
 			default:

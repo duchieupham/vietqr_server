@@ -233,6 +233,11 @@ public class TerminalServiceImpl implements TerminalService {
     }
 
     @Override
+    public List<String> checkExistedTerminalRawCodes(List<String> rawCodes) {
+        return repo.checkExistedTerminalRawCodes(rawCodes);
+    }
+
+    @Override
     public TerminalEntity getTerminalByTerminalId(String terminalId) {
         return repo.getTerminalByTerminalId(terminalId);
     }

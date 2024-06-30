@@ -172,4 +172,9 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
     public List<IMerchantSyncPublicDTO> getMerchantByMidSync(String refId, int offset, int size) {
         return repo.getMerchantByMidSync(refId, offset, size);
     }
+
+    @Override
+    public String getIdByPublicId(String publicId, String refId) {
+        return repo.getIdByPublicId(publicId, refId);
+    }
 }

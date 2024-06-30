@@ -44,4 +44,6 @@ public interface MerchantSyncService {
     int countMerchantByMidSync(String mid);
 
     List<IMerchantSyncPublicDTO> getMerchantByMidSync(String refId, int offset, int size);
+
+    String getIdByPublicId(String publicId, String refId);
 }

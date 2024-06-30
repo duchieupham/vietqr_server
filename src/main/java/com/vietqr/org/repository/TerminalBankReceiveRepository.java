@@ -246,7 +246,7 @@ public interface TerminalBankReceiveRepository extends JpaRepository<TerminalBan
             + "INNER JOIN terminal b ON a.terminal_id = b.id "
             + "INNER JOIN account_bank_receive c ON c.id = a.bank_id "
             + "INNER JOIN bank_type d ON c.bank_type_id = d.id "
-            + "WHERE raw_terminal_code = :rawCode AND c.bank_account = :bankAccount "
+            + "WHERE b.raw_terminal_code = :rawCode AND c.bank_account = :bankAccount "
             + "AND d.bank_code = :bankCode AND c.is_authenticated = TRUE "
             + "LIMIT 1 ", nativeQuery = true)
     TerminalBankSyncDTO getTerminalBankReceive(String rawCode, String bankAccount, String bankCode);
