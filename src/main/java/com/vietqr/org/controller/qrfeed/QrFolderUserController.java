@@ -135,11 +135,11 @@ public class QrFolderUserController {
                     return qrData;
                 }).collect(Collectors.toList());
                 // chứa qr_data và qr_info
-                QRInfo qrInfo = new QRInfo();
-                qrInfo.setData(listQrDataDTOs);
-                qrInfo.setValue("Lấy value ở bảng QR bỏ vào");
+//                QRInfo qrInfo = new QRInfo();
+//                qrInfo.setData(listQrDataDTOs);
+//                qrInfo.setValue("Lấy value ở bảng QR bỏ vào");
 
-                data.setQrData(qrInfo);
+                data.setQrData(listQrDataDTOs);
                 data.setFolderId(qrInFolderDTO.getFolderId());
                 data.setTitleFolder(qrInFolderDTO.getTitleFolder());
                 data.setDescriptionFolder(qrInFolderDTO.getDescriptionFolder());
