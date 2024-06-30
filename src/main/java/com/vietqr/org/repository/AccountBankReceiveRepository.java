@@ -525,17 +525,6 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 											  String customerId, String ewalletToken, String bankId);
 
 
-//	@Query(value = "SELECT b.bank_short_name, " +
-//			"COALESCE(COUNT(a.id), 0) AS total_accounts, " +
-//			"COALESCE(SUM(CASE WHEN a.is_authenticated = true THEN 1 ELSE 0 END), 0) AS linked_accounts, " +
-//			"COALESCE(SUM(CASE WHEN a.is_authenticated = false THEN 1 ELSE 0 END), 0) AS unlinked_accounts " +
-//			"FROM bank_type b " +
-//			"LEFT JOIN account_bank_receive a ON b.id = a.bank_type_id " +
-//			"GROUP BY b.bank_short_name " +
-//			"ORDER BY b.bank_short_name", nativeQuery = true)
-//	List<Object[]> getBankAccountStatistics();
-
-
 	@Query(value = "SELECT b.bank_short_name AS bankShortName, " +
 			"COALESCE(COUNT(a.id), 0) AS totalAccounts, " +
 			"COALESCE(SUM(CASE WHEN a.is_authenticated = true THEN 1 ELSE 0 END), 0) AS linkedAccounts, " +
