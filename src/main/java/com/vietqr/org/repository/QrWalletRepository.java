@@ -24,14 +24,14 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
             "WHERE (a.description LIKE %:value%) OR (a.title LIKE %:value%) " +
             "GROUP BY a.id, b.role " +
-            "ORDER BY time_created DESC " +
+            "ORDER BY a.time_created DESC " +
             "LIMIT :offset, :size  ", nativeQuery = true)
     List<IListQrWalletDTO> getQrWallets(String value, int offset, int size);
 
     @Query(value = "SELECT COUNT(a.id) " +
             "FROM viet_qr.qr_wallet a " +
             "WHERE (a.description LIKE %:value%) OR (a.title LIKE %:value%) " +
-            "ORDER BY time_created DESC ", nativeQuery = true)
+            "ORDER BY a.time_created DESC ", nativeQuery = true)
     int countQrWallet(String value);
 
     @Query(value = "SELECT a.id AS id, a.description AS description, a.is_public AS isPublic, a.qr_type as QrType, " +

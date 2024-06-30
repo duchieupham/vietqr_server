@@ -22,7 +22,7 @@ public class QrWalletEntity implements Serializable {
     private String value;
     @Column(name = "qrType")
     private int qrType;
-    @Column(name = "qrData", columnDefinition = "JSON")
+    @Column(name = "qrData", columnDefinition = "LONGTEXT")
     private String qrData;
     @Column(name = "userData", columnDefinition = "JSON")
     private String userData;

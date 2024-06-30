@@ -1,6 +1,7 @@
 package com.vietqr.org.dto.qrfeed;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 
 public class QrCreateRequestDTO implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -11,7 +12,7 @@ public class QrCreateRequestDTO implements Serializable {
     private String userId;
     private String qrName;
     private String qrDescription;
-    private String text;
+    private String value;
     private String pin;
     private int isPublic;
 
@@ -19,14 +20,14 @@ public class QrCreateRequestDTO implements Serializable {
         super();
     }
 
-    public QrCreateRequestDTO(String fullName, String phoneNo, String email, String userId, String qrName, String qrDescription, String text, String pin, int isPublic) {
+    public QrCreateRequestDTO(String fullName, String phoneNo, String email, String userId, String qrName, String qrDescription, String value, String pin, int isPublic) {
         this.fullName = fullName;
         this.phoneNo = phoneNo;
         this.email = email;
         this.userId = userId;
         this.qrName = qrName;
         this.qrDescription = qrDescription;
-        this.text = text;
+        this.value = value;
         this.pin = pin;
         this.isPublic = isPublic;
     }
@@ -95,11 +96,30 @@ public class QrCreateRequestDTO implements Serializable {
         this.qrDescription = qrDescription;
     }
 
-    public String getText() {
-        return text;
+    public String getValue() {
+        return value;
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public boolean isNull() {
+        Field fields[] = this.getClass().getDeclaredFields();
+        for (Field f : fields) {
+            try {
+                Object value = f.get(this);
+                if (value == null) {
+                    return true;
+                }
+            }
+            catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            }
+            catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
     }
 }

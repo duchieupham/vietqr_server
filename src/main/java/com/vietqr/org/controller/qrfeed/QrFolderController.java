@@ -158,7 +158,7 @@ public class QrFolderController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @DeleteMapping("/delete-folder-and-items")
+    @DeleteMapping("qr-feed/delete-folder-and-items")
     public ResponseEntity<Object> deleteFolderAndItems(@RequestParam String folderId) {
         Object result = null;
         HttpStatus httpStatus = null;
@@ -183,7 +183,7 @@ public class QrFolderController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @DeleteMapping("/delete-folder-keep-items")
+    @DeleteMapping("qr-feed/delete-folder-keep-items")
     public ResponseEntity<Object> deleteFolderKeepItems(@RequestParam String folderId) {
         Object result = null;
         HttpStatus httpStatus = null;
