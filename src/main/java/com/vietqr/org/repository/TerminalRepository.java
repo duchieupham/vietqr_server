@@ -321,4 +321,22 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
 
     @Query(value = "SELECT * FROM terminal WHERE id = :terminalId LIMIT 1 ", nativeQuery = true)
     TerminalEntity getTerminalByTerminalId(String terminalId);
+
+    @Query(value = "SELECT a.public_id AS tid, a.name AS terminalName, "
+            + "a.raw_terminal_code AS terminalCode, a.address AS terminalAddress, "
+            + "c.bank_account AS bankAccount, d.bank_code AS bankCode "
+            + "FROM terminal a "
+            + "INNER JOIN terminal_bank_receive b ON a.id = b.terminal_id "
+            + "INNER JOIN account_bank_receive c ON c.id = b.bank_id "
+            + "INNER JOIN bank_type d ON d.id = c.bank_type_id "
+            + "WHERE a.merchant_id = :mid "
+            + "LIMIT :offset, :size ", nativeQuery = true)
+    List<ITerminalSyncDTO> getTerminalByMidSync(String mid, int offset, int size);
+
+    @Query(value = "SELECT COUNT(a.id) "
+            + "FROM terminal a "
+            + "INNER JOIN terminal_bank_receive b ON a.id = b.terminal_id "
+            + "INNER JOIN account_bank_receive c ON c.id = b.bank_id "
+            + "WHERE a.merchant_id = :mid ", nativeQuery = true)
+    int countTerminalByMidSync(String mid);
 }

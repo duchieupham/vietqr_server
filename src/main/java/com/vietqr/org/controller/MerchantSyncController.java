@@ -19,6 +19,7 @@ import java.util.UUID;
 @CrossOrigin
 @RequestMapping("/api/merchant-sync")
 public class MerchantSyncController {
+
     @Autowired
     public MerchantSyncService merchantSyncService;
 

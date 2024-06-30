@@ -92,4 +92,8 @@ public interface TerminalService {
     TerminalEntity getTerminalByTerminalId(String terminalId);
 
     List<TerminalCodeResponseDTO> getListTerminalResponseByBankIdAndMerchantId(String terminalId, String bankId);
+
+    List<ITerminalSyncDTO> getTerminalByMidSync(String mid, int offset, int size);
+
+    int countTerminalByMidSync(String midForSearch);
 }

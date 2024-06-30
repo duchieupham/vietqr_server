@@ -1,9 +1,6 @@
 package com.vietqr.org.repository;
 
-import com.vietqr.org.dto.IMerchantEditDetailDTO;
-import com.vietqr.org.dto.IMerchantInfoDTO;
-import com.vietqr.org.dto.IMerchantInvoiceDTO;
-import com.vietqr.org.dto.IMerchantSyncDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.MerchantSyncEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -82,4 +79,26 @@ public interface MerchantSyncRepository extends JpaRepository<MerchantSyncEntity
     @Transactional
     @Query(value = "UPDATE merchant_sync SET name = :midName WHERE id = :mid", nativeQuery = true)
     void updateMerchantName(String midName, String mid);
+
+    @Query(value = "SELECT * FROM merchant_sync "
+            + "WHERE publish_id = :mid AND (ref_id = :refId OR ref_id = '') LIMIT 1", nativeQuery = true)
+    MerchantSyncEntity getMerchantSyncByPublicId(String mid, String refId);
+
+    @Query(value = "SELECT * FROM merchant_sync WHERE name = :merchantName "
+            + "AND (ref_id = :refId OR ref_id = '') LIMIT 1", nativeQuery = true)
+    MerchantSyncEntity getMerchantSyncsByMerchantName(String merchantName, String refId);
+
+    @Query(value = "SELECT * FROM merchant_sync WHERE id = :mid LIMIT 1", nativeQuery = true)
+    MerchantSyncEntity getMerchantSyncById(String mid);
+
+    @Query(value = "SELECT COUNT(id) FROM merchant_sync WHERE ref_id = :mid LIMIT 1", nativeQuery = true)
+    int countMerchantByMidSync(String mid);
+
+    @Query(value = "SELECT publish_id AS mid, full_name AS merchantFullName, "
+            + "name AS merchantName, address AS merchantAddress, national_id AS merchantIdentify, "
+            + "email AS contactEmail, phone_no AS contactPhone "
+            + " FROM merchant_sync WHERE ref_id = :refId "
+            + "ORDER BY id "
+            + "LIMIT :offset, :size", nativeQuery = true)
+    List<IMerchantSyncPublicDTO> getMerchantByMidSync(String refId, int offset, int size);
 }

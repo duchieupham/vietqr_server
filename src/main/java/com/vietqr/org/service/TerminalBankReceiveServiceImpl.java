@@ -178,4 +178,14 @@ public class TerminalBankReceiveServiceImpl implements TerminalBankReceiveServic
     public TerminalSubRawCodeDTO getTerminalBankReceiveForRawByTerminalCode(String terminalCode) {
         return repo.getTerminalBankReceiveForRawByTerminalCode(terminalCode);
     }
+
+    @Override
+    public TerminalBankSyncDTO getTerminalBankReceive(String rawCode, String bankAccount, String bankCode) {
+        return repo.getTerminalBankReceive(rawCode, bankAccount, bankCode);
+    }
+
+    @Override
+    public void updateQrCodeTerminalSync(String data1, String data2, String traceTransfer, String id) {
+        repo.updateQrCodeTerminalSync(data1, data2, traceTransfer, id);
+    }
 }

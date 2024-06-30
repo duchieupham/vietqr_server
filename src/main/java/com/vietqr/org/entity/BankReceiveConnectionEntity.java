@@ -33,6 +33,9 @@ public class BankReceiveConnectionEntity implements Serializable {
     @Column(name = "mid")
     private String mid;
 
+    @Column(name = "isActive")
+    private boolean isActive = false;
+
     public BankReceiveConnectionEntity() {
     }
 
@@ -91,5 +94,13 @@ public class BankReceiveConnectionEntity implements Serializable {
 
     public void setMid(String mid) {
         this.mid = mid;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 }

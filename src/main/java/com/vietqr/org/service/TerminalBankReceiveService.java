@@ -73,4 +73,8 @@ public interface TerminalBankReceiveService {
     TerminalSubRawCodeDTO getTerminalSubFlow2ByTraceTransfer(String traceTransfer);
 
     TerminalSubRawCodeDTO getTerminalBankReceiveForRawByTerminalCode(String terminalCode);
+
+    TerminalBankSyncDTO getTerminalBankReceive(String rawCode, String bankAccount, String bankCode);
+
+    void updateQrCodeTerminalSync(String data1, String data2, String traceTransfer, String id);
 }

@@ -12,4 +12,8 @@ public interface MerchantConnectionService {
     Integer getCountingMerchantConnection();
 
     MerchantConnectionEntity createMerchantConnection(MerchantConnectionEntity entity);
+
+    List<String> getIdMerchantConnectionByMid(String mid);
+
+    MerchantConnectionEntity getMerchanConnectionById(String id);
 }
