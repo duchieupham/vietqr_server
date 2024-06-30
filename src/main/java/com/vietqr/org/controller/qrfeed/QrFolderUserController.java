@@ -1,7 +1,6 @@
 package com.vietqr.org.controller.qrfeed;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.qrfeed.QrFolderEntity;
@@ -62,12 +61,15 @@ public class QrFolderUserController {
     // lấy ra thông tin những user trong folder
     @GetMapping("qr-feed/folder-users")
     public ResponseEntity<Object> getUserInFolder(
-            @RequestParam(name = "type", defaultValue = "-1") int type,
+            @RequestParam(name = "type", required = true) Integer type,
             @RequestParam String folderId
     ) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
+            if (type == null) {
+                type = -1;
+            }
             UserInFolderResponseDTO data = new UserInFolderResponseDTO();
 
             IFolderInformationDTO folderInfo = null;
@@ -103,39 +105,51 @@ public class QrFolderUserController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("qr-feed/folder-qrs")
     public ResponseEntity<Object> getQrInFolder(
-            @RequestParam int type,
+            @RequestParam Integer type,
             @RequestParam String folderId
     ) {
         Object result = null;
         HttpStatus httpStatus = null;
         Gson gson = new Gson();
         try {
+            if (type == null) {
+                type = -1;
+            }
+
             QrInFolderResponseDTO data = new QrInFolderResponseDTO();
 
             // get information about folder
-            IFolderInformationDTO folderInfo = null;
-            folderInfo = qrFolderService.getFolderInfo(folderId);
+            IFolderInformationDTO qrInFolderDTO = null;
+            qrInFolderDTO = qrFolderService.getQrInFolder(folderId);
 
-            // chứa qr_data và qr_info
-            QRInfo qrInfo = new QRInfo();
+            if (Objects.nonNull(qrInFolderDTO)) {
+                // xử lý chuỗi JSON thành object
+                List<DataQrDTO> listQrDataDTOs = new ArrayList<>();
+                data.setUserId(qrInFolderDTO.getUserId());
 
-            // xử lý chuỗi JSON thành object
-            QrData qrData = new QrData();
+                List<String> userDataJson = qrWalletService.getQrData(folderId, type);
+                listQrDataDTOs = userDataJson.stream().map(userInfo -> {
+                    DataQrDTO qrData = gson.fromJson(userInfo, DataQrDTO.class);
+                    return qrData;
+                }).collect(Collectors.toList());
+                // chứa qr_data và qr_info
+                QRInfo qrInfo = new QRInfo();
+                qrInfo.setData(listQrDataDTOs);
+                qrInfo.setValue("Lấy value ở bảng QR bỏ vào");
 
+                data.setQrData(qrInfo);
+                data.setFolderId(qrInFolderDTO.getFolderId());
+                data.setTitleFolder(qrInFolderDTO.getTitleFolder());
+                data.setDescriptionFolder(qrInFolderDTO.getDescriptionFolder());
 
-            // tạo object chứa qr_data
-            List<QrInfoLinkOrTextDTO> qrInfoLinks = new ArrayList<>();
-            List<QrInfoVCardDTO> qrInfoVCard = new ArrayList<>();
-            List<QrData> qrInfoVietQr = new ArrayList<>();
-
-            // (type = 0 : QR Link & QR Other )
-            // (type = 1: QR VCard)
-            // (type = 2: VietQR)
-
-
-            result = "";
-            httpStatus = HttpStatus.OK;
+                result = data;
+                httpStatus = HttpStatus.OK;
+            } else {
+                result = new ResponseMessageDTO("FAILED", "E05");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
         } catch (Exception e) {
             logger.error("add users to folder: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");

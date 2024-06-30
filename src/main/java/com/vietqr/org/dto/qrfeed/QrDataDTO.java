@@ -1,6 +1,6 @@
 package com.vietqr.org.dto.qrfeed;
 
-public class QrData {
+public class QrDataDTO {
     private String amount;
     private String content;
     private String bankCode;

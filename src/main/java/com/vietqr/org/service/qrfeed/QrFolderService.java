@@ -23,5 +23,6 @@ public interface QrFolderService {
 
     public QrFolderEntity getFolderById(String id);
     public IFolderInformationDTO getFolderInfo(String folderId);
+    public IFolderInformationDTO getQrInFolder(String folderId);
 
 }

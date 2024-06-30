@@ -107,6 +107,7 @@ public class QrWalletController {
                         + "\"userBankName\": \"" + dto.getUserBankName() + "\", "
                         + "\"bankCode\": \"" + dto.getBankCode() + "\", "
                         + "\"amount\": \"" + dto.getAmount() + "\", "
+                        + "\"value\": \"" + qr + "\", "
                         + "\"content\": \"" + dto.getContent() + "\""
                         + "}");
                 entity.setUserData("{"
@@ -188,6 +189,7 @@ public class QrWalletController {
                         + "\"email\": \"" + dto.getEmail() + "\", "
                         + "\"companyName\": \"" + dto.getCompanyName() + "\", "
                         + "\"website\": \"" + dto.getWebsite() + "\", "
+                        + "\"value\": \"" + qr + "\", "
                         + "\"address\": \"" + dto.getAddress() + "\""
                         + "}");
                 entity.setUserData("{"
@@ -313,6 +315,7 @@ public class QrWalletController {
                                 + "\"fullName\": \"" + dto.getFullName() + "\", "
                                 + "\"phoneNo\": \"" + dto.getPhoneNo() + "\", "
                                 + "\"email\": \"" + dto.getEmail() + "\", "
+                                + "\"value\": \"" + dto.getText() + "\", "
                                 + "\"content\": \"" + dto.getText() + "\""
                                 + "}");
                         entity.setUserData("{"
@@ -350,6 +353,7 @@ public class QrWalletController {
                                 + "\"fullName\": \"" + dto.getFullName() + "\", "
                                 + "\"phoneNo\": \"" + dto.getPhoneNo() + "\", "
                                 + "\"email\": \"" + dto.getEmail() + "\", "
+                                + "\"value\": \"" + dto.getText() + "\", "
                                 + "\"content\": \"" + dto.getText() + "\""
                                 + "}");
                         entity.setUserData("{"

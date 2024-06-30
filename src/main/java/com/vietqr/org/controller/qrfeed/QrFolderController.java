@@ -53,7 +53,7 @@ public class QrFolderController {
                 // insert
                 qrFolderService.insertQrFolder(entity);
 
-                result = new ResponseMessageDTO("SUCCESS", "E05");
+                result = new ResponseMessageDTO("SUCCESS", "");
                 httpStatus = HttpStatus.OK;
             } else {
                 result = new ResponseMessageDTO("FAILED", "E05");

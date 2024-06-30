@@ -44,4 +44,9 @@ public class QrFolderServiceImpl implements QrFolderService {
     public IFolderInformationDTO getFolderInfo(String folderId) {
         return repo.getFolderInfo(folderId);
     }
+
+    @Override
+    public IFolderInformationDTO getQrInFolder(String folderId) {
+        return repo.getQrInFolder(folderId);
+    }
 }

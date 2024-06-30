@@ -1,14 +1,14 @@
 package com.vietqr.org.dto.qrfeed;
 
 public class QRInfo {
-    private QrData data;
+    private Object data;
     private String value;
 
-    public QrData getData() {
+    public Object getData() {
         return data;
     }
 
-    public void setData(QrData data) {
+    public void setData(Object data) {
         this.data = data;
     }
 

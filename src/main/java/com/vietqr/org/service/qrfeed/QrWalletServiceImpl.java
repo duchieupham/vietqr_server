@@ -77,6 +77,14 @@ public class QrWalletServiceImpl implements QrWalletService {
     }
 
     @Override
+    public List<String> getQrData(String folderId, int type) {
+        if (type == -1) {
+            return repo.getQrDataWithoutType(folderId, "");
+        }
+        return repo.getQrDataWithType(folderId, type);
+    }
+
+    @Override
     public List<String> getUserVCardData(String folderId, int type) {
         return repo.getUserVCardData(folderId, type);
     }

@@ -29,6 +29,7 @@ public interface QrWalletService {
 
     public List<String> findExistingIds(List<String> ids);
     public List<String> getUserLinkOrTextData(String folderId, int type);
+    public List<String> getQrData(String folderId, int type);
     public List<String> getUserVCardData(String folderId, int type);
     public List<String> getUserVietQrData(String folderId, int type);
 
