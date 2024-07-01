@@ -1,5 +1,7 @@
 package com.vietqr.org.controller.qrfeed;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.BankTypeEntity;
@@ -8,6 +10,7 @@ import com.vietqr.org.entity.qrfeed.QrWalletEntity;
 import com.vietqr.org.service.BankTypeService;
 import com.vietqr.org.service.CaiBankService;
 import com.vietqr.org.service.ImageService;
+import com.vietqr.org.service.qrfeed.QrCommentService;
 import com.vietqr.org.service.qrfeed.QrUserService;
 import com.vietqr.org.service.qrfeed.QrWalletService;
 import com.vietqr.org.util.*;
@@ -20,7 +23,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -43,6 +48,9 @@ public class QrWalletController {
 
     @Autowired
     private ImageService imageService;
+
+    @Autowired
+    private QrCommentService qrCommentService;
 
     @PostMapping("qr-wallet/generate-qr-vietqr")
     public ResponseEntity<Object> generateQRUnauthenticated(
@@ -439,4 +447,56 @@ public class QrWalletController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
+    @GetMapping("/qr-wallets/public")
+    public ResponseEntity<Object> getAllPublicQrWallets() {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            List<IQrWalletDTO> qrWallets = qrWalletService.getAllPublicQrWallets();
+            result = qrWallets;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getAllPublicQrWallet Error at " + e.getMessage() + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("/qr-wallets/public/details/{id}")
+    public ResponseEntity<Object> getQrWalletDetails(@PathVariable String id) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            IQrWalletDTO qrWalletDTO = qrWalletService.getQrWalletDetailsById(id);
+            if (qrWalletDTO == null) {
+                result = new ResponseMessageDTO("FAILED", "QrWallet not found");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            } else {
+                List<QrCommentDTO> comments = qrCommentService.findCommentsByQrWalletId(id);
+
+                QrWalletDetailDTO detailDTO = new QrWalletDetailDTO();
+                detailDTO.setId(qrWalletDTO.getId());
+                detailDTO.setTitle(qrWalletDTO.getTitle());
+                detailDTO.setDescription(qrWalletDTO.getDescription());
+                detailDTO.setValue(qrWalletDTO.getValue());
+                detailDTO.setQrType(qrWalletDTO.getQrType());
+                detailDTO.setTimeCreated(qrWalletDTO.getTimeCreated());
+                detailDTO.setUserId(qrWalletDTO.getUserId());
+                detailDTO.setLikeCount(qrWalletDTO.getLikeCount());
+                detailDTO.setCommentCount(qrWalletDTO.getCommentCount());
+                detailDTO.setComments(comments);
+
+                result = detailDTO;
+                httpStatus = HttpStatus.OK;
+            }
+        } catch (Exception e) {
+            logger.error("getQrWalletDetails: ERROR: " + e.getMessage() + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
 }
