@@ -299,4 +299,9 @@ public class InvoiceServiceImpl implements InvoiceService {
     public void updateDataInvoiceByBankId(String data, String bankId) {
         repo.updateDataInvoiceByBankId(data, bankId);
     }
+
+    @Override
+    public void updateFileInvoiceById(String id, String invoiceId) {
+        repo.updateFileInvoiceById(id, invoiceId);
+    }
 }

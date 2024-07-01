@@ -10,6 +10,7 @@ import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -65,6 +66,39 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
             logger.info("Error at uploadFile: " + ignored.toString());
         }
         return result;
+    }
+
+    @Override
+    public byte[] downloadImage(String key) throws IOException {
+        try {
+            // Tạo yêu cầu để tải xuống tệp từ Amazon S3
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                    .bucket("your-bucket-name")
+                    .key(key)
+                    .build();
+
+            // Tải xuống tệp và ghi vào ByteArrayOutputStream
+            ResponseInputStream<?> responseInputStream = s3Client.getObject(getObjectRequest);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = responseInputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            // Lấy dữ liệu từ ByteArrayOutputStream
+            byte[] fileBytes = outputStream.toByteArray();
+
+            // Đóng ResponseInputStream và ByteArrayOutputStream sau khi đã sử dụng
+            responseInputStream.close();
+            outputStream.close();
+
+            return fileBytes;
+        } catch (Exception e) {
+            // Xử lý exception nếu có lỗi xảy ra
+            e.printStackTrace();
+            return new byte[0]; // Trả về mảng byte rỗng nếu không tải được tệp
+        }
     }
 
     public ResponseInputStream<?> downloadFile(String id) {

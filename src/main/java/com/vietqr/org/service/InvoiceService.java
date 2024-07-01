@@ -103,4 +103,6 @@ public interface InvoiceService {
     InvoiceUpdateVsoDTO getInvoicesByBankId(String bankId);
 
     void updateDataInvoiceByBankId(String data, String bankId);
+
+    void updateFileInvoiceById(String id, String invoiceId);
 }

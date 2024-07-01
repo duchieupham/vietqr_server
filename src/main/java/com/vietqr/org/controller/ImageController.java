@@ -72,7 +72,7 @@ public class ImageController {
 
 			});
 			thread.start();
-//			amazonS3Service.uploadFile(uuid.toString(), image);
+			amazonS3Service.uploadFile(uuid.toString(), image);
 			result = new ResponseMessageDTO("SUCCESS", uuid.toString());
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {

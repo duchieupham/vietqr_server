@@ -3,6 +3,7 @@ package com.vietqr.org.controller;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.entity.qrfeed.FileAttachmentEntity;
 import com.vietqr.org.service.FileAttachService;
+import com.vietqr.org.service.InvoiceService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,22 +14,32 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.UUID;
 
 @RestController
 @CrossOrigin
 @RequestMapping("/api")
-public class ImageInvoiceController {
-    private static final Logger logger = Logger.getLogger(ImageInvoiceController.class);
+public class FileAttachController {
+    private static final Logger logger = Logger.getLogger(FileAttachController.class);
 
     @Autowired
     FileAttachService imageInvoiceService;
 
+    @Autowired
+    InvoiceService invoiceService;
+
     @PostMapping("images-invoice")
-    public ResponseEntity<Object> getImageInvoice(@RequestPart("file") MultipartFile file) {
+    public ResponseEntity<Object> getImageInvoice(
+            @RequestPart String invoiceId,
+            @RequestPart("file") MultipartFile file) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            imageInvoiceService.saveFile(file);
+            UUID id = UUID.randomUUID();
+            imageInvoiceService.saveFile(file, id.toString());
+
+            // update file to invoice
+            invoiceService.updateFileInvoiceById(id.toString(), invoiceId);
 
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
@@ -38,6 +49,7 @@ public class ImageInvoiceController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
 
     @GetMapping("images-invoice/{id}")
     public ResponseEntity<Object> downloadFileInMachine(@PathVariable String id) {

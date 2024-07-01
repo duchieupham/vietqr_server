@@ -348,6 +348,9 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 					.antMatchers(HttpMethod.GET, "/api/terminal/export-excel").permitAll()
 					.antMatchers(HttpMethod.GET, "/api/invoice/export-excel").permitAll()
 					.antMatchers(HttpMethod.GET, "/api/van").permitAll()
+					.antMatchers(HttpMethod.GET, "/api/amazon-s3/**").permitAll()
+					.antMatchers(HttpMethod.GET, "/api/amazon-s3/**").permitAll()
+					.antMatchers(HttpMethod.GET, "/api/images-invoice/**").permitAll()
 
 					.anyRequest().authenticated();
 		}

@@ -1,5 +1,6 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.entity.InvoiceEntity;
 import com.vietqr.org.entity.qrfeed.FileAttachmentEntity;
 import com.vietqr.org.repository.FileAttachRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,15 +32,16 @@ public class FileAttachServiceImpl implements FileAttachService {
     }
 
     @Override
-    public void saveFile(MultipartFile file) throws IOException {
+    public void saveFile(MultipartFile file, String id) throws IOException {
         FileAttachmentEntity imageInvoice = new FileAttachmentEntity();
-        imageInvoice.setId(UUID.randomUUID().toString());
+        imageInvoice.setId(id);
         imageInvoice.setFileName(file.getOriginalFilename());
         imageInvoice.setFileData(file.getBytes());
         imageInvoice.setFileType(file.getContentType());
         imageInvoice.setDisplayFileType(getDisplayFileType(file.getContentType()));
         repo.save(imageInvoice);
     }
+
 
     @Override
     public FileAttachmentEntity getFile(String id) {
