@@ -16,10 +16,10 @@ public class QrFolderUserServiceImpl implements QrFolderUserService {
     QrFolderUserRepository repo;
 
     @Transactional
-    public void addUserIds(String qrFolderId, List<String> userIds) {
-        for (String userId : userIds) {
+    public void addUserIds(String qrFolderId, List<String> userIds, String userId) {
+        for (String userIdDto : userIds) {
             String id = UUID.randomUUID().toString();
-            repo.insertQrWalletFolder(id, qrFolderId, userId);
+            repo.insertUserToFolder(id, qrFolderId, userIdDto, userId);
         }
     }
 

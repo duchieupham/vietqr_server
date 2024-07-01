@@ -19,6 +19,15 @@ public class DataQrDTO {
     public String bankAccount;
     public String userBankName;
     public String value;
+    public String qrType;
+
+    public String getQrType() {
+        return qrType;
+    }
+
+    public void setQrType(String qrType) {
+        this.qrType = qrType;
+    }
 
     public String getValue() {
         return value;

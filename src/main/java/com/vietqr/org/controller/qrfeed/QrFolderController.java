@@ -76,7 +76,8 @@ public class QrFolderController {
             @RequestParam int type,
             @RequestParam int page,
             @RequestParam int size,
-            @RequestParam String value
+            @RequestParam String value,
+            @RequestBody FolderInfoByUserDTO folderInfoByUserDTO
     ) {
         Object result = null;
         HttpStatus httpStatus = null;
@@ -87,9 +88,9 @@ public class QrFolderController {
 
             List<ListQrFolderDTO> data = new ArrayList<>();
             List<IListQrFolderDTO> info = new ArrayList<>();
-
-            totalElement = qrFolderService.countQrFolder(value);
-            info = qrFolderService.getListFolders(value, offset, size);
+            String userId = folderInfoByUserDTO.getUserId();
+            totalElement = qrFolderService.countQrFolder(value,userId);
+            info = qrFolderService.getListFolders(value, offset, size, userId);
             data = info.stream().map(item -> {
                 ListQrFolderDTO dto = new ListQrFolderDTO();
                 dto.setId(item.getId());

@@ -7,6 +7,7 @@ import com.google.gson.annotations.Expose;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DataUserDTO {
+    public String userId;
     public String email;
     public String content;
     public String phoneNo;
@@ -18,8 +19,25 @@ public class DataUserDTO {
     public String bankCode;
     public String bankAccount;
     public String userBankName;
+    public String qrType;
 
     public DataUserDTO() {
+    }
+
+    public String getQrType() {
+        return qrType;
+    }
+
+    public void setQrType(String qrType) {
+        this.qrType = qrType;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getEmail() {

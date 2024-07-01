@@ -6,6 +6,7 @@ import java.util.List;
 
 @Service
 public interface QrWalletFolderService {
-    public void addQrWalletIds(String qrFolderId, List<String> qrWalletIds);
+    public void addQrWalletIds(String qrFolderId, List<String> qrWalletIds, String userId);
 
+    public void addQrWalletsToFolder(String folderId, String userId, List<String> qrIds);
 }

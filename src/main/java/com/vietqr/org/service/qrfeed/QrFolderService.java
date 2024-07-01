@@ -15,17 +15,15 @@ public interface QrFolderService {
 
     public int insertQrFolder(QrFolderEntity entity);
 
-    public List<IListQrFolderDTO> getListFolders(String value, int offset, int size);
+    public List<IListQrFolderDTO> getListFolders(String value, int offset, int size, String userId);
 
-    public int countQrFolder(String value);
+    public int countQrFolder(String value,String userId);
 
     public void updateQrFolder(String id, String description, String title);
 
     public QrFolderEntity getFolderById(String id);
     public IFolderInformationDTO getFolderInfo(String folderId);
     public IFolderInformationDTO getQrInFolder(String folderId);
-
-
 
     void deleteFolderById(String folderId);
 

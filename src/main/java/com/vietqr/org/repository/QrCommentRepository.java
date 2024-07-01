@@ -22,7 +22,6 @@ public interface QrCommentRepository extends JpaRepository<QrCommentEntity, Stri
             "WHERE wc.qr_wallet_id = :qrWalletId", nativeQuery = true)
     List<QrCommentDTO> findCommentsByQrWalletId(@Param("qrWalletId") String qrWalletId);
 
-
     @Modifying
     @Transactional
     @Query(value = "INSERT INTO qr_comment (id, message, user_id, user_data, time_created) VALUES(:id, :message, :userId, :userData, :timeCreated)", nativeQuery = true)
@@ -52,4 +51,5 @@ public interface QrCommentRepository extends JpaRepository<QrCommentEntity, Stri
             "INNER JOIN qr_wallet_comment wc ON wc.qr_comment_id = c.id " +
             "WHERE wc.qr_wallet_id = :qrWalletId", nativeQuery = true)
     List<String> findUserNamesWhoCommented(@Param("qrWalletId") String qrWalletId);
+
 }

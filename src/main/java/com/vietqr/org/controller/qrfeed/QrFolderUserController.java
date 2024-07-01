@@ -33,19 +33,19 @@ public class QrFolderUserController {
 
     @PostMapping("qr-feed/add-user-folder")
     public ResponseEntity<Object> updateUserToFolder(
-            @RequestParam String qrFolderId,
-            @RequestBody List<String> userIds
+            @RequestBody AddUserToFolderRequestDTO dto
     ) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            QrFolderEntity entity = qrFolderService.getFolderById(qrFolderId);
+            QrFolderEntity entity = qrFolderService.getFolderById(dto.getFolderId());
 
             if (Objects.isNull(entity)) {
-                result = new ResponseMessageDTO("FAILED", "E149");
+                result = new ResponseMessageDTO("FAILED", "E05");
                 httpStatus = HttpStatus.BAD_REQUEST;
             } else {
-                qrFolderUserService.addUserIds(qrFolderId, userIds);
+                qrFolderUserService.addUserIds(dto.getFolderId(), dto.getUserIds(), dto.getUserId());
+
 
                 result = new ResponseMessageDTO("SUCCESS", "");
                 httpStatus = HttpStatus.BAD_REQUEST;
@@ -117,7 +117,7 @@ public class QrFolderUserController {
             if (type == null) {
                 type = -1;
             }
-
+`
             QrInFolderResponseDTO data = new QrInFolderResponseDTO();
 
             // get information about folder
@@ -157,5 +157,7 @@ public class QrFolderUserController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
+
 
 }

@@ -23,6 +23,19 @@ public interface QrFolderUserRepository extends JpaRepository<QrFolderUserEntity
             @Param("qrFolderId") String qrFolderId,
             @Param("userId") String userId);
 
+
+    @Transactional
+    @Modifying
+    @Query(value = "INSERT INTO qr_folder_user (id, qr_folder_id, user_id) " +
+            "SELECT :id, :qrFolderId, :userIds " +
+            "FROM DUAL " +
+            "WHERE EXISTS (SELECT 1 FROM qr_wallet u WHERE u.id = :userId)", nativeQuery = true)
+    void insertUserToFolder(@Param("id") String id,
+                            @Param("qrFolderId") String qrFolderId,
+                            @Param("userIds") String userIds,
+                            @Param("userId") String userId);
+
+
     @Query(value = "SELECT a.id AS id, a.user_id AS userId, a.user_data AS userData, b.qr_folder_id " +
             "FROM qr_wallet a " +
             "INNER JOIN qr_folder_user b ON a.user_id = b.user_id " +

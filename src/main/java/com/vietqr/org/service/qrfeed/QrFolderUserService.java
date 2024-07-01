@@ -8,7 +8,7 @@ import java.util.List;
 @Service
 public interface QrFolderUserService {
 
-    public void addUserIds(String qrFolderId, List<String> userIds);
+    public void addUserIds(String qrFolderId, List<String> userIds, String userId);
     public List<IUserInFolderDTO> getUserInFolder(String qrFolderId);
 
 
