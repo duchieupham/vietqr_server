@@ -2133,7 +2133,7 @@ public class InvoiceController {
                 pushNotification(title, message, notiEntity, datas, notiEntity.getUserId());
             });
             thread2.start();
-            result = new ResponseMessageDTO("SUCCESS", "invoiceId: " + entity.getId());
+            result = new ResponseMessageDTO("SUCCESS", entity.getId());
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             result = new ResponseMessageDTO("FAILED", "E140");
@@ -2234,6 +2234,4 @@ public class InvoiceController {
                             + e.toString());
         }
     }
-
-
 }
