@@ -1,7 +1,9 @@
 package com.vietqr.org.controller;
 
+import java.io.ByteArrayOutputStream;
 import java.util.UUID;
 
+import com.vietqr.org.service.AmazonS3Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.entity.ImageEntity;
 import com.vietqr.org.service.ImageService;
+import software.amazon.awssdk.core.ResponseInputStream;
 
 @RestController
 @CrossOrigin
@@ -28,12 +31,25 @@ public class ImageController {
 	@Autowired
 	ImageService imageService;
 
+	@Autowired
+	AmazonS3Service amazonS3Service;
+
 	@GetMapping(value = "/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
 	public ResponseEntity<byte[]> getImage(@PathVariable("id") String id) {
 		byte[] result = new byte[0];
 		HttpStatus httpStatus = null;
 		try {
-			result = imageService.getImageById(id);
+			ResponseInputStream<?> responseInputStream = amazonS3Service.downloadFile(id);
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			byte[] buffer = new byte[1024];
+			int bytesRead;
+			while ((bytesRead = responseInputStream.read(buffer)) != -1) {
+				outputStream.write(buffer, 0, bytesRead);
+			}
+			result = outputStream.toByteArray();
+			if (!(result.length > 0)) {
+				result = imageService.getImageById(id);
+			}
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
 			System.out.println("Error at getImage: " + e.toString());
@@ -51,7 +67,12 @@ public class ImageController {
 			UUID uuid = UUID.randomUUID();
 			String fileName = StringUtils.cleanPath(image.getOriginalFilename());
 			ImageEntity entity = new ImageEntity(uuid.toString(), fileName, image.getBytes());
-			imageService.insertImage(entity);
+			// Amazon S3
+			Thread thread = new Thread(() -> {
+
+			});
+			thread.start();
+//			amazonS3Service.uploadFile(uuid.toString(), image);
 			result = new ResponseMessageDTO("SUCCESS", uuid.toString());
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {

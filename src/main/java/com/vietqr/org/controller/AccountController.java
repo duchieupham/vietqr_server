@@ -272,6 +272,7 @@ public class AccountController {
                 dto.setStatus(item.getStatus());
                 dto.setUserIp(StringUtil.getValueNullChecker(item.getUserIp()));
                 dto.setPhoneNo(StringUtil.getValueNullChecker(item.getPhoneNo()));
+                dto.setGetTimeRegister(item.getTimeRegister());
                 dto.setRegisterPlatform(StringUtil.getValueNullChecker(item.getRegisterPlatform()));
                 dto.setNationalDate(StringUtil.getValueNullChecker(item.getNationalDate()));
                 dto.setNationalId(StringUtil.getValueNullChecker(item.getNationalId()));

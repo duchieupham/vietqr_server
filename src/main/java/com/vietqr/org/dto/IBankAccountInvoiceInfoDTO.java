@@ -10,4 +10,5 @@ public interface IBankAccountInvoiceInfoDTO {
     String getBankAccount();
     Boolean getMmsActive();
     String getFeePackage();
+    String getVso();
 }

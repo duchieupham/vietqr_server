@@ -16,7 +16,7 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
     @Query(value = "SELECT a.id AS userId, a.address AS address, a.birth_date AS birthDate, COALESCE(a.email, '') AS email, "
             + "COALESCE(a.first_name, '') AS firstName, COALESCE(a.middle_name, '') AS middleName, "
             + "COALESCE(a.last_name, '') AS lastName, a.gender AS gender, a.status AS status, a.national_date AS nationalDate, "
-            + "a.national_id AS nationalId, a.old_national_id AS oldNationalId, b.phone_no AS phoneNo, "
+            + "a.national_id AS nationalId, a.old_national_id AS oldNationalId, b.phone_no AS phoneNo, b.time AS timeRegister, "
             + "a.register_platform AS registerPlatform, a.user_ip AS userIp, a.user_id AS userIdDetail, "
             + "c.amount AS balance, c.point AS score "
             + "FROM account_information a "
@@ -24,19 +24,22 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
             + "INNER JOIN account_wallet c ON a.user_id = c.user_id "
             + "WHERE (CONCAT(a.last_name, ' ', a.middle_name, ' ', a.first_name) LIKE %:value%) "
             + "OR (a.last_name LIKE %:value%) OR (a.middle_name LIKE %:value%) OR (a.first_name LIKE %:value%) "
+            + "ORDER BY b.time DESC "
             + "LIMIT :offset, :size ", nativeQuery = true)
     List<IAdminListUserAccountResponseDTO> getAdminListUsersAccount(String value, int offset, int size);
 
     @Query(value = "SELECT a.id AS userId, a.address AS address, a.birth_date AS birthDate, COALESCE(a.email, '') AS email, "
             + "COALESCE(a.first_name, '') AS firstName, COALESCE(a.middle_name, '') AS middleName, "
             + "COALESCE(a.last_name, '') AS lastName, a.gender AS gender, a.status AS status, a.national_date AS nationalDate, "
-            + "a.national_id AS nationalId, a.old_national_id AS oldNationalId, b.phone_no AS phoneNo, "
+            + "a.national_id AS nationalId, a.old_national_id AS oldNationalId, b.phone_no AS phoneNo, b.time AS timeRegister, "
             + "a.register_platform AS registerPlatform, a.user_ip AS userIp, a.user_id AS userIdDetail, "
             + "c.amount AS balance, c.point AS score "
             + "FROM account_information a "
             + "INNER JOIN account_login b ON a.user_id = b.id "
             + "INNER JOIN account_wallet c ON a.user_id = c.user_id "
-            + "WHERE (b.phone_no LIKE %:value%) LIMIT :offset, :size ", nativeQuery = true)
+            + "WHERE (b.phone_no LIKE %:value%) "
+            + "ORDER BY b.time DESC "
+            + "LIMIT :offset, :size ", nativeQuery = true)
     List<IAdminListUserAccountResponseDTO> getAdminListUsersAccountByPhone(String value, int offset, int size);
 
     @Query(value = "SELECT COUNT(b.id) AS totalElement "
@@ -190,31 +193,31 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
     AccountSearchByPhoneNoDTO findAccountByUserId(@Param(value = "userId") String userId);
 
 
-	@Modifying
-	@Transactional
-	@Query(value = "UPDATE account_information a SET a.status = :status WHERE a.user_id = :id ", nativeQuery = true)
-	int updateUserStatus(@Param("id") String id, @Param("status") boolean status);
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE account_information a SET a.status = :status WHERE a.user_id = :id ", nativeQuery = true)
+    int updateUserStatus(@Param("id") String id, @Param("status") boolean status);
 
-	@Modifying
-	@Transactional
-	@Query(value = "UPDATE account_information SET first_name = :firstName, middle_name = :middleName, last_name = :lastName, " +
-			"address = :address, gender = :gender, email = :email, national_id = :nationalId, old_national_id = :oldNationalId, " +
-			"national_date = :nationalDate WHERE user_id = :userId", nativeQuery = true)
-	int updateUserByUserId(@Param("userId") String userId,
-						   @Param("firstName") String firstName,
-						   @Param("middleName") String middleName,
-						   @Param("lastName") String lastName,
-						   @Param("address") String address,
-						   @Param("gender") Integer gender,
-						   @Param("email") String email,
-						   @Param("nationalId") String nationalId,
-						   @Param("oldNationalId") String oldNationalId,
-						   @Param("nationalDate") String nationalDate);
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE account_information SET first_name = :firstName, middle_name = :middleName, last_name = :lastName, " +
+            "address = :address, gender = :gender, email = :email, national_id = :nationalId, old_national_id = :oldNationalId, " +
+            "national_date = :nationalDate WHERE user_id = :userId", nativeQuery = true)
+    int updateUserByUserId(@Param("userId") String userId,
+                           @Param("firstName") String firstName,
+                           @Param("middleName") String middleName,
+                           @Param("lastName") String lastName,
+                           @Param("address") String address,
+                           @Param("gender") Integer gender,
+                           @Param("email") String email,
+                           @Param("nationalId") String nationalId,
+                           @Param("oldNationalId") String oldNationalId,
+                           @Param("nationalDate") String nationalDate);
 
-	@Query(value = "SELECT first_name AS firstName, middle_name AS middleName, last_name AS lastName, address, gender," +
-			" email, national_id AS nationalId, old_national_id AS oldNationalId, national_date AS nationalDate " +
-			"FROM account_information a WHERE a.user_id = :userId", nativeQuery = true)
-	IUserUpdateDTO findByUserId(@Param("userId") String userId);
+    @Query(value = "SELECT first_name AS firstName, middle_name AS middleName, last_name AS lastName, address, gender," +
+            " email, national_id AS nationalId, old_national_id AS oldNationalId, national_date AS nationalDate " +
+            "FROM account_information a WHERE a.user_id = :userId", nativeQuery = true)
+    IUserUpdateDTO findByUserId(@Param("userId") String userId);
 
     @Query(value = "SELECT DISTINCT a.user_id AS id, c.phone_no AS phoneNo, a.img_id AS imgId, "
             + "a.birth_date AS birthDate, a.email AS email, a.national_id AS nationalId, "
