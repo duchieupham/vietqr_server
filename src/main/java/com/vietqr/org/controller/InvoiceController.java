@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.*;
+import com.vietqr.org.entity.qrfeed.FileAttachmentEntity;
 import com.vietqr.org.service.*;
 import com.vietqr.org.util.*;
 import org.apache.log4j.Logger;
@@ -18,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -40,6 +42,9 @@ public class InvoiceController {
 
     @Autowired
     InvoiceItemService invoiceItemService;
+
+    @Autowired
+    FileAttachService imageInvoiceService;
 
     @Autowired
     SystemSettingService systemSettingService;
@@ -1948,7 +1953,7 @@ public class InvoiceController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @PostMapping("/invoice/create")
+    @PostMapping("invoice/create")
     public ResponseEntity<Object> getInvoiceByItem(
             @Valid @RequestBody InvoiceCreateUpdateDTO dto
     ) {
@@ -2091,6 +2096,8 @@ public class InvoiceController {
 
             entity.setRefId("");
             entity.setBankIdRecharge(dto.getBankIdRecharge());
+            entity.setFileAttachmentId("");
+
             invoiceItemService.insertAll(invoiceItemEntities);
             invoiceService.insert(entity);
 
@@ -2126,7 +2133,7 @@ public class InvoiceController {
                 pushNotification(title, message, notiEntity, datas, notiEntity.getUserId());
             });
             thread2.start();
-            result = new ResponseMessageDTO("SUCCESS", "");
+            result = new ResponseMessageDTO("SUCCESS", "invoiceId: " + entity.getId());
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             result = new ResponseMessageDTO("FAILED", "E140");
@@ -2227,4 +2234,6 @@ public class InvoiceController {
                             + e.toString());
         }
     }
+
+
 }
