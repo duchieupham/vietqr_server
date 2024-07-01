@@ -41,4 +41,7 @@ public interface QrFolderUserRepository extends JpaRepository<QrFolderUserEntity
             "INNER JOIN qr_folder_user b ON a.user_id = b.user_id " +
             "WHERE a.user_id = :qrFolderId ", nativeQuery = true)
     List<IUserInFolderDTO> getUserInFolder(String qrFolderId);
+
+
+
 }

@@ -2,18 +2,18 @@ package com.vietqr.org.dto.qrfeed;
 
 import java.util.List;
 
-public class AddUserToFolderRequestDTO {
+public class UpdateUserRoleRequestDTO {
     public String folderId;
     public String userId;
     public List<UserRoleDTO> userRoles;
 
-    public AddUserToFolderRequestDTO(String folderId, String userId, List<UserRoleDTO> userRoles) {
+    public UpdateUserRoleRequestDTO(String folderId, String userId, List<UserRoleDTO> userRoles) {
         this.folderId = folderId;
         this.userId = userId;
         this.userRoles = userRoles;
     }
 
-    public AddUserToFolderRequestDTO() {
+    public UpdateUserRoleRequestDTO() {
     }
 
     public String getFolderId() {

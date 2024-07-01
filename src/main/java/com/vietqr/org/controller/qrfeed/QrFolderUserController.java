@@ -31,33 +31,46 @@ public class QrFolderUserController {
     @Autowired
     QrWalletService qrWalletService;
 
-    @PostMapping("qr-feed/add-user-folder")
-    public ResponseEntity<Object> updateUserToFolder(
-            @RequestBody AddUserToFolderRequestDTO dto
-    ) {
+@PostMapping("/qr-feed/add-user-folder")
+public ResponseEntity<Object> updateUserToFolder(@RequestBody AddUserToFolderRequestDTO dto) {
+    Object result = null;
+    HttpStatus httpStatus = null;
+    try {
+        QrFolderEntity entity = qrFolderService.getFolderById(dto.getFolderId());
+
+        if (Objects.isNull(entity)) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        } else {
+            qrFolderUserService.addUserIds(dto.getFolderId(), dto.getUserRoles(), dto.getUserId());
+
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        }
+    } catch (Exception e) {
+        logger.error("add users to folder: ERROR: " + e.toString());
+        result = new ResponseMessageDTO("FAILED", "E05");
+        httpStatus = HttpStatus.BAD_REQUEST;
+    }
+    return new ResponseEntity<>(result, httpStatus);
+}
+
+    @PutMapping("/qr-feed/update-user-roles")
+    public ResponseEntity<Object> updateUserRoles(@RequestBody UpdateUserRoleRequestDTO dto) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            QrFolderEntity entity = qrFolderService.getFolderById(dto.getFolderId());
+            qrFolderUserService.updateUserRoles(dto.getFolderId(), dto.getUserRoles());
 
-            if (Objects.isNull(entity)) {
-                result = new ResponseMessageDTO("FAILED", "E05");
-                httpStatus = HttpStatus.BAD_REQUEST;
-            } else {
-                qrFolderUserService.addUserIds(dto.getFolderId(), dto.getUserIds(), dto.getUserId());
-
-
-                result = new ResponseMessageDTO("SUCCESS", "");
-                httpStatus = HttpStatus.BAD_REQUEST;
-            }
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            logger.error("add users to folder: ERROR: " + e.toString());
+            logger.error("updateUserRoles: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-
     // lấy ra thông tin những user trong folder
     @GetMapping("qr-feed/folder-users")
     public ResponseEntity<Object> getUserInFolder(
@@ -117,7 +130,7 @@ public class QrFolderUserController {
             if (type == null) {
                 type = -1;
             }
-`
+
             QrInFolderResponseDTO data = new QrInFolderResponseDTO();
 
             // get information about folder
