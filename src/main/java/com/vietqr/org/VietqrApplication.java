@@ -46,11 +46,9 @@ import com.vietqr.org.dto.example.JweObj;
 import com.vietqr.org.dto.example.Recipients;
 // import com.vietqr.org.entity.CustomerSyncEntity;
 import com.vietqr.org.security.JWTAuthorizationFilter;
-import com.vietqr.org.util.BankEncryptUtil;
 // import com.vietqr.org.util.BankEncryptUtil;
 import com.vietqr.org.util.JwsUtil;
 import com.vietqr.org.util.WebSocketConfig;
-import com.vietqr.org.util.bank.bidv.CustomerVaUtil;
 
 @SpringBootApplication
 @ComponentScan(basePackages = { "com.vietqr.org" })

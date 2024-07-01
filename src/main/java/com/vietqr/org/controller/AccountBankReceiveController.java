@@ -1195,6 +1195,11 @@ public class AccountBankReceiveController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("account-bank/statistics")
+    public List<IAccountBankMonthDTO> getBankAccountStatistics() {
+        return accountBankReceiveService.getBankAccountStatistics();
+    }
+
     private MerchantBankMapperDTO getMerchantBankMapperDTO(String data) {
         MerchantBankMapperDTO result = new MerchantBankMapperDTO();
         ObjectMapper mapper = new ObjectMapper();
