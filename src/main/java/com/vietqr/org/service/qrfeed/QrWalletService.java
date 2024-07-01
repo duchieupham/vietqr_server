@@ -17,7 +17,7 @@ public interface QrWalletService {
 
     public int countQrWallet(String value);
 
-    public void updateQrWallet(String id, String description, int isPublic, String qrType, String title, String content);
+    public void updateQrWallet(String id, String description, int isPublic, int qrType, String title, String content, int style, int theme);
 
     public IListQrWalletDTO getQrLinkOrQrTextByUserId(String userId);
 

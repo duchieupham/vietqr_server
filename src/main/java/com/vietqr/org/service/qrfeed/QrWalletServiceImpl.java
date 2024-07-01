@@ -33,8 +33,8 @@ public class QrWalletServiceImpl implements QrWalletService {
     }
 
     @Override
-    public void updateQrWallet(String id, String description, int isPublic, String qrType, String title, String content) {
-        repo.updateQrWallet(id, description, isPublic, qrType, title, content);
+    public void updateQrWallet(String id, String description, int isPublic, int qrType, String title, String content, int style, int theme) {
+        repo.updateQrWallet(id, description, isPublic, qrType, title, content, style, theme);
     }
 
     @Override
