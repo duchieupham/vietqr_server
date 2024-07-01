@@ -8,4 +8,6 @@ public interface TerminalBankSyncDTO {
     String getBankId();
     String getBankAccount();
     String getBankCode();
+    String getData1();
+    String getData2();
 }

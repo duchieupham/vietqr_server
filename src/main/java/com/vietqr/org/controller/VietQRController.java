@@ -968,56 +968,127 @@ public class VietQRController {
 									.getTerminalBankReceive(dto.getTerminalCode(), dto.getBankAccount(),
 											dto.getBankCode());
 							if (Objects.nonNull(terminalBankSyncDTO)) {
-								if (accountBankReceiveEntity.isMmsActive()) {
-									TerminalBankEntity terminalBankEntity =
-											terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
-									if (terminalBankEntity != null) {
-										// luồng uu tien
-										if (StringUtil.isNullOrEmpty(dto.getContent())) {
-											content = terminalBankSyncDTO.getRawTerminalCode();
+								if (StringUtil.isNullOrEmpty(terminalBankSyncDTO.getData1())
+										&& StringUtil.isNullOrEmpty(terminalBankSyncDTO.getData2())) {
+									if (accountBankReceiveEntity.isMmsActive()) {
+										TerminalBankEntity terminalBankEntity =
+												terminalBankService
+														.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
+										if (terminalBankEntity != null) {
+											// luồng uu tien
+											if (StringUtil.isNullOrEmpty(dto.getContent())) {
+												content = terminalBankSyncDTO.getRawTerminalCode();
+											} else {
+												content = dto.getContent();
+											}
+											qr = MBVietQRUtil.generateStaticVietQRMMS(
+													new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
+															terminalBankEntity.getTerminalId(), content));
+											String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
+											terminalBankReceiveService.updateQrCodeTerminalSync("", qr, traceTransfer,
+													terminalBankSyncDTO.getTerminalBankReceiveId());
 										} else {
-											content = dto.getContent();
+											System.out.println("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
 										}
-										qr = MBVietQRUtil.generateStaticVietQRMMS(
-												new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
-														terminalBankEntity.getTerminalId(), content));
-										String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
-										terminalBankReceiveService.updateQrCodeTerminalSync("", qr, traceTransfer,
+									} else {
+										// luồng thuong
+										if (StringUtil.isNullOrEmpty(dto.getContent())) {
+											content = "SQR" + terminalBankSyncDTO.getTerminalCode();
+										} else {
+											content = "SQR" + terminalBankSyncDTO.getTerminalCode() + " " + dto.getContent();
+										}
+										String bankAccount = accountBankReceiveEntity.getBankAccount();
+										String caiValue = accountBankReceiveService.getCaiValueByBankId(accountBankReceiveEntity.getId());
+										VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", content, bankAccount);
+										qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+										terminalBankReceiveService.updateQrCodeTerminalSync(qr, "", "",
 												terminalBankSyncDTO.getTerminalBankReceiveId());
-									} else {
-										System.out.println("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
 									}
+									VietQRDTO vietQRDTO = new VietQRDTO();
+									vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
+									vietQRDTO.setBankName(bankTypeEntity.getBankName());
+									vietQRDTO.setBankAccount(accountBankReceiveEntity.getBankAccount());
+									vietQRDTO.setUserBankName(accountBankReceiveEntity.getBankAccountName());
+									vietQRDTO.setAmount(StringUtil.getValueNullChecker(dto.getAmount()) + "");
+									vietQRDTO.setContent(content);
+									vietQRDTO.setQrCode(qr);
+									vietQRDTO.setImgId(bankTypeEntity.getImgId());
+									vietQRDTO.setExisting(0);
+									vietQRDTO.setTransactionId("");
+									vietQRDTO.setTerminalCode(dto.getTerminalCode());
+									String qrLink = "";
+									vietQRDTO.setTransactionRefId("");
+									vietQRDTO.setQrLink(qrLink);
+									result = vietQRDTO;
+									httpStatus = HttpStatus.OK;
 								} else {
-									// luồng thuong
-									if (StringUtil.isNullOrEmpty(dto.getContent())) {
-										content = "SQR" + terminalBankSyncDTO.getTerminalCode();
+									String terminalCode = getRandomUniqueCodeInTerminalCode();
+									TerminalBankReceiveEntity terminalBankReceiveEntity =
+											new TerminalBankReceiveEntity();
+									terminalBankReceiveEntity.setId(UUID.randomUUID().toString());
+									terminalBankReceiveEntity.setRawTerminalCode(terminalBankSyncDTO.getRawTerminalCode());
+									terminalBankReceiveEntity.setTerminalCode(terminalCode);
+									terminalBankReceiveEntity.setSubTerminalAddress("");
+									terminalBankReceiveEntity.setBankId(terminalBankSyncDTO.getBankId());
+									terminalBankReceiveEntity.setTerminalId(terminalBankSyncDTO.getTerminalId());
+									terminalBankReceiveEntity.setTypeOfQR(1);
+									if (accountBankReceiveEntity.isMmsActive()) {
+										TerminalBankEntity terminalBankEntity =
+												terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
+										if (terminalBankEntity != null) {
+											// luồng uu tien
+											if (StringUtil.isNullOrEmpty(dto.getContent())) {
+												content = terminalBankSyncDTO.getRawTerminalCode();
+											} else {
+												content = dto.getContent();
+											}
+											qr = MBVietQRUtil.generateStaticVietQRMMS(
+													new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
+															terminalBankEntity.getTerminalId(), content));
+											String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
+
+											terminalBankReceiveEntity.setData2(qr);
+											terminalBankReceiveEntity.setData1("");
+											terminalBankReceiveEntity.setTraceTransfer(traceTransfer);
+										} else {
+											System.out.println("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
+										}
 									} else {
-										content = "SQR" + terminalBankSyncDTO.getTerminalCode() + " " + dto.getContent();
+										// luồng thuong
+										if (StringUtil.isNullOrEmpty(dto.getContent())) {
+											content = "SQR" + terminalBankSyncDTO.getTerminalCode();
+										} else {
+											content = "SQR" + terminalBankSyncDTO.getTerminalCode() + " " + dto.getContent();
+										}
+										String bankAccount = accountBankReceiveEntity.getBankAccount();
+										String caiValue = accountBankReceiveService.getCaiValueByBankId(accountBankReceiveEntity.getId());
+										VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", content, bankAccount);
+										qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+
+										terminalBankReceiveEntity.setData2("");
+										terminalBankReceiveEntity.setData1(qr);
+										terminalBankReceiveEntity.setTraceTransfer("");
 									}
-									String bankAccount = accountBankReceiveEntity.getBankAccount();
-									String caiValue = accountBankReceiveService.getCaiValueByBankId(accountBankReceiveEntity.getId());
-									VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", content, bankAccount);
-									qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
-									terminalBankReceiveService.updateQrCodeTerminalSync(qr, "", "",
-											terminalBankSyncDTO.getTerminalBankReceiveId());
+
+									terminalBankReceiveService.insert(terminalBankReceiveEntity);
+									VietQRDTO vietQRDTO = new VietQRDTO();
+									vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
+									vietQRDTO.setBankName(bankTypeEntity.getBankName());
+									vietQRDTO.setBankAccount(accountBankReceiveEntity.getBankAccount());
+									vietQRDTO.setUserBankName(accountBankReceiveEntity.getBankAccountName());
+									vietQRDTO.setAmount(StringUtil.getValueNullChecker(dto.getAmount()) + "");
+									vietQRDTO.setContent(content);
+									vietQRDTO.setQrCode(qr);
+									vietQRDTO.setImgId(bankTypeEntity.getImgId());
+									vietQRDTO.setExisting(0);
+									vietQRDTO.setTransactionId("");
+									vietQRDTO.setTerminalCode(dto.getTerminalCode());
+									String qrLink = "";
+									vietQRDTO.setTransactionRefId("");
+									vietQRDTO.setQrLink(qrLink);
+									result = vietQRDTO;
+									httpStatus = HttpStatus.OK;
 								}
-								VietQRDTO vietQRDTO = new VietQRDTO();
-								vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
-								vietQRDTO.setBankName(bankTypeEntity.getBankName());
-								vietQRDTO.setBankAccount(accountBankReceiveEntity.getBankAccount());
-								vietQRDTO.setUserBankName(accountBankReceiveEntity.getBankAccountName());
-								vietQRDTO.setAmount(StringUtil.getValueNullChecker(dto.getAmount()) + "");
-								vietQRDTO.setContent(content);
-								vietQRDTO.setQrCode(qr);
-								vietQRDTO.setImgId(bankTypeEntity.getImgId());
-								vietQRDTO.setExisting(0);
-								vietQRDTO.setTransactionId("");
-								vietQRDTO.setTerminalCode(dto.getTerminalCode());
-								String qrLink = "";
-								vietQRDTO.setTransactionRefId("");
-								vietQRDTO.setQrLink(qrLink);
-								result = vietQRDTO;
-								httpStatus = HttpStatus.OK;
 							} else {
 								// TK ngân hàng không khớp với cửa hàng
 								result = new ResponseMessageDTO("FAILED", "E152");
@@ -2134,4 +2205,30 @@ public class VietQRController {
 		}
 		return result;
 	}
+
+	private String getRandomUniqueCodeInTerminalCode() {
+		String result = "";
+		String checkExistedCode = "";
+		String code = "";
+		try {
+			do {
+				code = getTerminalCode();
+				checkExistedCode = terminalBankReceiveService
+						.checkExistedTerminalCode(code);
+				if (checkExistedCode == null || checkExistedCode.trim().isEmpty()) {
+					checkExistedCode = terminalService.checkExistedTerminal(code);
+				}
+			} while (!StringUtil.isNullOrEmpty(checkExistedCode));
+			result = code;
+		} catch (Exception e) {
+			logger.error("getRandomUniqueCodeInTerminalCode: ERROR: " + e.getMessage()
+					+ " at: " + System.currentTimeMillis());
+		}
+		return result;
+	}
+
+	private String getTerminalCode() {
+		return RandomCodeUtil.generateRandomId(10);
+	}
+
 }
