@@ -27,4 +27,9 @@ public class BankReceiveConnectionServiceImpl implements BankReceiveConnectionSe
     public List<BankReceiveConnectionEntity> getBankReceiveConnectionByBankId(String bankId) {
         return repo.getBankReceiveConnectionByBankId(bankId);
     }
+
+    @Override
+    public String checkBankAccountByBankIdAndMid(String bankId, String mid) {
+        return repo.checkBankAccountByBankIdAndMid(bankId, mid);
+    }
 }
