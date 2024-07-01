@@ -61,8 +61,8 @@ public class QrWalletEntity implements Serializable {
         this.theme = theme;
     }
 
-    public int getStyle() {
-        return style;
+    public int getStyle(int style) {
+        return this.style;
     }
 
     public void setStyle(int style) {

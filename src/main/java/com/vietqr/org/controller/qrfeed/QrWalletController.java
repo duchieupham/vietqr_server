@@ -131,8 +131,9 @@ public class QrWalletController {
                     entity.setUserId(dto.getUserId());
                     entity.setPin("");
                     entity.setPublicId("");
-                    int a = qrWalletService.insertQrWallet(entity);
-                    System.out.println("insert" + a);
+                    entity.setTheme(dto.getTheme());
+                    entity.setStyle(dto.getStyle());
+                    qrWalletService.insertQrWallet(entity);
 
                     //add qr vào qr_user (ch implements)
                     QrUserEntity qrUserEntity = new QrUserEntity();
@@ -254,27 +255,26 @@ public class QrWalletController {
     // update information QrLink or QrText
     @PutMapping("qr-wallet/update-qr-link")
     public ResponseEntity<Object> updateQrLink(
-            @RequestParam String type,
-            @RequestParam String qrId,
+            @RequestParam int type,
             @RequestBody QrLinkOrTextUpdateRequestDTO dto) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
             ListQrWalletDTO request = null;
-            QrWalletEntity qrWalletEntity = qrWalletService.getQrLinkOrQrTextById(qrId);
+            QrWalletEntity qrWalletEntity = qrWalletService.getQrLinkOrQrTextById(dto.getQrId());
 
             if (qrWalletEntity == null) {
                 result = new ResponseMessageDTO("FAILED", "E05");
                 httpStatus = HttpStatus.BAD_REQUEST;
             } else {
-                if (type.equals("QR Link")) {
+                if (type == 1) {
                     //update qr link (Description, title, link)
-                    qrWalletService.updateQrWallet(qrId, dto.getQrDescription(), dto.getIsPublic(), "QR Link",
-                            dto.getTitle(), dto.getText());
-                } else if (type.equals("QR Text")) {
+                    qrWalletService.updateQrWallet(dto.getQrId(), dto.getQrDescription(), dto.getIsPublic(), 1,
+                            dto.getTitle(), dto.getValue(), dto.getStyle(), dto.getTheme());
+                } else if (type == 0) {
                     //update qr text (Description, title, text)
-                    qrWalletService.updateQrWallet(qrId, dto.getQrDescription(), dto.getIsPublic(), "QR Text",
-                            dto.getTitle(), dto.getText());
+                    qrWalletService.updateQrWallet(dto.getQrId(), dto.getQrDescription(), dto.getIsPublic(), 0,
+                            dto.getTitle(), dto.getValue(), dto.getStyle(), dto.getTheme());
                 }
                 // update thêm data_qr và data_user (JSON)
 
@@ -350,6 +350,8 @@ public class QrWalletController {
                             entity.setUserId(dto.getUserId());
                             entity.setPin(dto.getPin());
                             entity.setPublicId(qrLink);
+                            entity.setStyle(dto.getStyle());
+                            entity.setTheme(dto.getTheme());
                             qrWalletService.insertQrWallet(entity);
 
                             //add qr vào qr_user (ch implements)
@@ -387,6 +389,8 @@ public class QrWalletController {
                             entity.setUserId(dto.getUserId());
                             entity.setPin(dto.getPin());
                             entity.setPublicId(qrLink);
+                            entity.setStyle(dto.getStyle());
+                            entity.setTheme(dto.getTheme());
                             qrWalletService.insertQrWallet(entity);
 
                             //add qr vào qr_user (ch implements)

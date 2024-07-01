@@ -6,12 +6,27 @@ import java.lang.reflect.Field;
 
 public class VietQRCreateUnauthenticatedExtendDTO extends VietQRCreateUnauthenticatedDTO {
     private String userId;
+    private int style;
+    private int theme;
 
     public VietQRCreateUnauthenticatedExtendDTO() {
     }
 
-    public VietQRCreateUnauthenticatedExtendDTO(String bankAccount, String bankCode, String userBankName, String amount, String content) {
-        super(bankAccount, bankCode, userBankName, amount, content);
+
+    public int getStyle() {
+        return style;
+    }
+
+    public void setStyle(int style) {
+        this.style = style;
+    }
+
+    public int getTheme() {
+        return theme;
+    }
+
+    public void setTheme(int theme) {
+        this.theme = theme;
     }
 
     public String getUserId() {
