@@ -3,24 +3,40 @@ package com.vietqr.org.dto.qrfeed;
 import com.vietqr.org.dto.VCardInputDTO;
 
 public class VCardInputExtendDTO extends VCardInputDTO {
-    private String userId;
+    private int style;
+    private int theme;
 
-    public VCardInputExtendDTO(String userId) {
-        this.userId = userId;
+    public VCardInputExtendDTO() {
     }
 
-    public VCardInputExtendDTO(String fullname, String phoneNo, String email, String companyName, String website, String address, String userId, String additionalData, String userId1) {
+    public VCardInputExtendDTO(int style, int theme) {
+        this.style = style;
+        this.theme = theme;
+    }
+
+    public VCardInputExtendDTO(String fullname, String phoneNo, String email, String companyName, String website, String address, String userId, String additionalData, int style, int theme) {
         super(fullname, phoneNo, email, companyName, website, address, userId, additionalData);
-        this.userId = userId1;
+        this.style = style;
+        this.theme = theme;
     }
 
-    @Override
-    public String getUserId() {
-        return userId;
+    public VCardInputExtendDTO(String fullname, String phoneNo, String email, String companyName, String website, String address, String userId, String additionalData) {
+        super(fullname, phoneNo, email, companyName, website, address, userId, additionalData);
     }
 
-    @Override
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public int getStyle() {
+        return style;
+    }
+
+    public void setStyle(int style) {
+        this.style = style;
+    }
+
+    public int getTheme() {
+        return theme;
+    }
+
+    public void setTheme(int theme) {
+        this.theme = theme;
     }
 }

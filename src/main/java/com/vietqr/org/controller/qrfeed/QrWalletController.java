@@ -161,7 +161,7 @@ public class QrWalletController {
     //    @PostMapping("qr-wallet/generate-qr-vcard")
     ResponseEntity<Object> createQrVcard(
             int isPublic,
-            VCardInputDTO dto) {
+            VCardInputExtendDTO dto) {
         Object result = null;
         QrVcardRequestDTO qrVcardRequestDTO = null;
         HttpStatus httpStatus = null;
@@ -184,6 +184,8 @@ public class QrWalletController {
                 } else if (isPublic == 0) {
                     qrVcardRequestDTO.setIsPublic(0);
                 }
+                qrVcardRequestDTO.setStyle(dto.getStyle());
+                qrVcardRequestDTO.setTheme(dto.getTheme());
 
                 // add data qr vào qr_wallet
                 QrWalletEntity entity = new QrWalletEntity();
@@ -223,6 +225,8 @@ public class QrWalletController {
                 entity.setUserId(dto.getUserId());
                 entity.setPin("");
                 entity.setPublicId("");
+                entity.setStyle(dto.getStyle());
+                entity.setTheme(dto.getTheme());
                 qrWalletService.insertQrWallet(entity);
 
                 //add qr vào qr_user (ch implements)
@@ -496,7 +500,7 @@ public class QrWalletController {
                     QrCreateRequestDTO qrCreateRequestDTO = objectMapper.readValue(json, QrCreateRequestDTO.class);
                     return createQrLink(type, qrCreateRequestDTO);
                 case 2://vcard
-                    VCardInputDTO vCardInputDTO = objectMapper.readValue(json, VCardInputDTO.class);
+                    VCardInputExtendDTO vCardInputDTO = objectMapper.readValue(json, VCardInputExtendDTO.class);
                     return createQrVcard(isPublic, vCardInputDTO);
                 case 3://viet qr
                     VietQRCreateUnauthenticatedExtendDTO value = objectMapper.readValue(json, VietQRCreateUnauthenticatedExtendDTO.class);

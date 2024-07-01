@@ -13,8 +13,10 @@ public class QrVcardRequestDTO implements Serializable {
     private String website;
     private String address;
     private int isPublic;
+    private int style;
+    private int theme;
 
-    public QrVcardRequestDTO(String qr, String fullname, String phoneNo, String email, String companyName, String website, String address, int isPublic) {
+    public QrVcardRequestDTO(String qr, String fullname, String phoneNo, String email, String companyName, String website, String address, int isPublic, int style, int theme) {
         this.qr = qr;
         this.fullname = fullname;
         this.phoneNo = phoneNo;
@@ -23,10 +25,28 @@ public class QrVcardRequestDTO implements Serializable {
         this.website = website;
         this.address = address;
         this.isPublic = isPublic;
+        this.style = style;
+        this.theme = theme;
     }
 
     public QrVcardRequestDTO() {
         super();
+    }
+
+    public int getStyle() {
+        return style;
+    }
+
+    public void setStyle(int style) {
+        this.style = style;
+    }
+
+    public int getTheme() {
+        return theme;
+    }
+
+    public void setTheme(int theme) {
+        this.theme = theme;
     }
 
     public int getIsPublic() {
