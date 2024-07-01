@@ -6,54 +6,44 @@ import java.lang.reflect.Field;
 public class QrCreateRequestDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private String fullName;
-    private String phoneNo;
-    private String email;
     private String userId;
     private String qrName;
     private String qrDescription;
     private String value;
     private String pin;
     private int isPublic;
+    private int style;
+    private int theme;
 
     public QrCreateRequestDTO() {
         super();
     }
 
-    public QrCreateRequestDTO(String fullName, String phoneNo, String email, String userId, String qrName, String qrDescription, String value, String pin, int isPublic) {
-        this.fullName = fullName;
-        this.phoneNo = phoneNo;
-        this.email = email;
+    public QrCreateRequestDTO(String userId, String qrName, String qrDescription, String value, String pin, int isPublic, int style, int theme) {
         this.userId = userId;
         this.qrName = qrName;
         this.qrDescription = qrDescription;
         this.value = value;
         this.pin = pin;
         this.isPublic = isPublic;
+        this.style = style;
+        this.theme = theme;
     }
 
-    public String getFullName() {
-        return fullName;
+    public int getStyle() {
+        return style;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setStyle(int style) {
+        this.style = style;
     }
 
-    public String getPhoneNo() {
-        return phoneNo;
+    public int getTheme() {
+        return theme;
     }
 
-    public void setPhoneNo(String phoneNo) {
-        this.phoneNo = phoneNo;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
+    public void setTheme(int theme) {
+        this.theme = theme;
     }
 
     public int getIsPublic() {
@@ -112,11 +102,9 @@ public class QrCreateRequestDTO implements Serializable {
                 if (value == null) {
                     return true;
                 }
-            }
-            catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 e.printStackTrace();
-            }
-            catch (IllegalAccessException e) {
+            } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
         }

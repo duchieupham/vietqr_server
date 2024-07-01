@@ -5,9 +5,6 @@ import java.io.Serializable;
 public class QrWalletResponseDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private String fullName;
-    private String phoneNo;
-    private String email;
     private String qrName;
     private String value;
     private String qrContent;
@@ -20,10 +17,7 @@ public class QrWalletResponseDTO implements Serializable {
         super();
     }
 
-    public QrWalletResponseDTO(String fullName, String phoneNo, String email, String qrName, String value, String qrContent, String imgId, int existing, String publicRefId, String qrLink) {
-        this.fullName = fullName;
-        this.phoneNo = phoneNo;
-        this.email = email;
+    public QrWalletResponseDTO(String qrName, String value, String qrContent, String imgId, int existing, String publicRefId, String qrLink) {
         this.qrName = qrName;
         this.value = value;
         this.qrContent = qrContent;
@@ -33,29 +27,6 @@ public class QrWalletResponseDTO implements Serializable {
         this.qrLink = qrLink;
     }
 
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public String getPhoneNo() {
-        return phoneNo;
-    }
-
-    public void setPhoneNo(String phoneNo) {
-        this.phoneNo = phoneNo;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
 
     public String getQrName() {
         return qrName;

@@ -292,7 +292,6 @@ public class QrWalletController {
     public ResponseEntity<Object> createQrLink(int type, QrCreateRequestDTO dto) {
         Object result = null;
         HttpStatus httpStatus = null;
-        UUID generateUUID = UUID.randomUUID();
         try {
             if (dto.isNull()) {
                 result = new ResponseMessageDTO("FAILED", "E05");
@@ -301,14 +300,13 @@ public class QrWalletController {
                 if (type == 1 || type == 0) {
                     // generate QR Code
                     QrWalletResponseDTO qrWalletResponseDTO = new QrWalletResponseDTO();
-                    qrWalletResponseDTO.setFullName(dto.getFullName());
-                    qrWalletResponseDTO.setEmail(dto.getPhoneNo());
-                    qrWalletResponseDTO.setPhoneNo(dto.getPhoneNo());
                     qrWalletResponseDTO.setQrName(dto.getQrName());
                     qrWalletResponseDTO.setValue(dto.getValue()); // cho hiển thị ra chuỗi giá trị
                     qrWalletResponseDTO.setQrContent(dto.getQrDescription());
-                    qrWalletResponseDTO.setImgId(generateUUID.toString());
-                    String refId = TransactionRefIdUtil.encryptTransactionId(generateUUID.toString());
+                    UUID genImgId = UUID.randomUUID();
+                    qrWalletResponseDTO.setImgId(genImgId.toString());
+                    UUID genRefId = UUID.randomUUID();
+                    String refId = TransactionRefIdUtil.encryptTransactionId(genRefId.toString());
                     String qrLink = EnvironmentUtil.getQRLinkNewFeed() + refId;
                     qrWalletResponseDTO.setPublicRefId(refId);
                     qrWalletResponseDTO.setQrLink(qrLink);
@@ -328,16 +326,15 @@ public class QrWalletController {
                             entity.setValue(dto.getValue());
                             entity.setQrType(1);
                             entity.setQrData("{"
-                                    + "\"fullName\": \"" + dto.getFullName() + "\", "
-                                    + "\"phoneNo\": \"" + dto.getPhoneNo() + "\", "
-                                    + "\"email\": \"" + dto.getEmail() + "\", "
-                                    + "\"value\": \"" + dto.getValue() + "\", "
-                                    + "\"content\": \"" + dto.getValue() + "\""
+                                    + "\"title\": \"" + dto.getQrName() + "\", "
+                                    + "\"description\": \"" + dto.getQrDescription() + "\", "
+                                    + "\"isPublic\": \"" + dto.getQrDescription() + "\", "
+                                    + "\"style\": \"" + dto.getQrDescription() + "\", "
+                                    + "\"theme\": \"" + dto.getQrDescription() + "\", "
+                                    + "\"value\": \"" + dto.getValue() + "\""
                                     + "}");
                             entity.setUserData("{"
-                                    + "\"fullName\": \"" + dto.getFullName() + "\", "
-                                    + "\"phoneNo\": \"" + dto.getPhoneNo() + "\", "
-                                    + "\"email\": \"" + dto.getEmail() + "\", "
+                                    + "\"userId\": \"" + dto.getUserId() + "\", "
                                     + "\"content\": \"" + dto.getValue() + "\""
                                     + "}");
                             if (dto.getIsPublic() == 1) {
@@ -366,16 +363,15 @@ public class QrWalletController {
                             entity.setValue(dto.getValue());
                             entity.setQrType(0);
                             entity.setQrData("{"
-                                    + "\"fullName\": \"" + dto.getFullName() + "\", "
-                                    + "\"phoneNo\": \"" + dto.getPhoneNo() + "\", "
-                                    + "\"email\": \"" + dto.getEmail() + "\", "
-                                    + "\"value\": \"" + dto.getValue() + "\", "
-                                    + "\"content\": \"" + dto.getValue() + "\""
+                                    + "\"title\": \"" + dto.getQrName() + "\", "
+                                    + "\"description\": \"" + dto.getQrDescription() + "\", "
+                                    + "\"isPublic\": \"" + dto.getQrDescription() + "\", "
+                                    + "\"style\": \"" + dto.getQrDescription() + "\", "
+                                    + "\"theme\": \"" + dto.getQrDescription() + "\", "
+                                    + "\"value\": \"" + dto.getValue() + "\""
                                     + "}");
                             entity.setUserData("{"
-                                    + "\"fullName\": \"" + dto.getFullName() + "\", "
-                                    + "\"phoneNo\": \"" + dto.getPhoneNo() + "\", "
-                                    + "\"email\": \"" + dto.getEmail() + "\", "
+                                    + "\"userId\": \"" + dto.getUserId() + "\", "
                                     + "\"content\": \"" + dto.getValue() + "\""
                                     + "}");
                             if (dto.getIsPublic() == 1) {
