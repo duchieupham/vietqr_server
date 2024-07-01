@@ -61,6 +61,9 @@ public class InvoiceEntity implements Serializable {
     @Column(name = "userId")
     private String userId;
 
+    @Column(name = "fileAttachmentId")
+    private String fileAttachmentId;
+
     // transaction wallet id (dùng để đối soát)
     @Column(name = "refId")
     private String refId;
@@ -87,6 +90,14 @@ public class InvoiceEntity implements Serializable {
         this.status = status;
         this.merchantId = merchantId;
         this.amount = amount;
+    }
+
+    public String getFileAttachmentId() {
+        return fileAttachmentId;
+    }
+
+    public void setFileAttachmentId(String fileAttachmentId) {
+        this.fileAttachmentId = fileAttachmentId;
     }
 
     public InvoiceEntity() {

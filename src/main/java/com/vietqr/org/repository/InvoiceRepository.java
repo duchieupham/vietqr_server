@@ -373,4 +373,9 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
     @Modifying
     @Query(value = "UPDATE invoice SET data = :data WHERE bank_id = :bankId ", nativeQuery = true)
     void updateDataInvoiceByBankId(String data, String bankId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE invoice SET file_attachment_id = :id WHERE id = :invoiceId ", nativeQuery = true)
+    void updateFileInvoiceById(String id, String invoiceId);
 }
