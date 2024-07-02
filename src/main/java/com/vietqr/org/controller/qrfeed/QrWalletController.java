@@ -1,7 +1,5 @@
 package com.vietqr.org.controller.qrfeed;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.qrfeed.*;
@@ -27,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -572,12 +569,27 @@ public class QrWalletController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    //    @GetMapping("/qr-wallets/public")
+//    public ResponseEntity<Object> getAllPublicQrWallets() {
+//        Object result = null;
+//        HttpStatus httpStatus = null;
+//        try {
+//            List<IQrWalletDTO> qrWallets = qrWalletService.getAllPublicQrWallets();
+//            result = qrWallets;
+//            httpStatus = HttpStatus.OK;
+//        } catch (Exception e) {
+//            logger.error("getAllPublicQrWallet Error at " + e.getMessage() + System.currentTimeMillis());
+//            result = new ResponseMessageDTO("FAILED", "E05");
+//            httpStatus = HttpStatus.BAD_REQUEST;
+//        }
+//        return new ResponseEntity<>(result, httpStatus);
+//    }
     @GetMapping("/qr-wallets/public")
-    public ResponseEntity<Object> getAllPublicQrWallets() {
+    public ResponseEntity<Object> getAllPublicQrWallets(@RequestParam String userId) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            List<IQrWalletDTO> qrWallets = qrWalletService.getAllPublicQrWallets();
+            List<IQrWalletDTO> qrWallets = qrWalletService.getAllPublicQrWallets(userId);
             result = qrWallets;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {

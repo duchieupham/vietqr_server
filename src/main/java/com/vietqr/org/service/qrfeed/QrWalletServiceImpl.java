@@ -124,10 +124,15 @@ public class QrWalletServiceImpl implements QrWalletService {
         repo.deleteByQrWalletIds(ids);
     }
 
+//    @Override
+//    public List<IQrWalletDTO> getAllPublicQrWallets() {
+//        return repo.findAllPublicQrWallets();
+//    }
     @Override
-    public List<IQrWalletDTO> getAllPublicQrWallets() {
-        return repo.findAllPublicQrWallets();
+    public List<IQrWalletDTO> getAllPublicQrWallets(String userId) {
+        return repo.findAllPublicQrWallets(userId);
     }
+
 
     @Override
     public IQrWalletDTO getQrWalletDetailsById(String qrWalletId) {

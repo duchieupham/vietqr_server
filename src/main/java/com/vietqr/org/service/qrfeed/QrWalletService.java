@@ -42,6 +42,7 @@ public interface QrWalletService {
     List<String> getQrWalletIdsByFolderId(String folderId);
     void deleteQrItemsByIds(List<String> ids);
 
-    List<IQrWalletDTO> getAllPublicQrWallets();
+//    List<IQrWalletDTO> getAllPublicQrWallets();
+    List<IQrWalletDTO> getAllPublicQrWallets(String userId);
     IQrWalletDTO getQrWalletDetailsById(String qrWalletId);
 }

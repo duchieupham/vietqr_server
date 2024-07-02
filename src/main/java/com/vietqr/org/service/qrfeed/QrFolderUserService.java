@@ -1,6 +1,7 @@
 package com.vietqr.org.service.qrfeed;
 
 import com.vietqr.org.dto.qrfeed.IUserInFolderDTO;
+import com.vietqr.org.dto.qrfeed.IUserRoleDTO;
 import com.vietqr.org.dto.qrfeed.UserRoleDTO;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +14,7 @@ public interface QrFolderUserService {
     public List<IUserInFolderDTO> getUserInFolder(String qrFolderId);
 
     void updateUserRoles(String qrFolderId, List<UserRoleDTO> userRoles);
-    List<UserRoleDTO> getUserRolesByFolderId(String folderId);
+    List<IUserRoleDTO> getUserRolesByFolderId(String folderId);
 
 
 

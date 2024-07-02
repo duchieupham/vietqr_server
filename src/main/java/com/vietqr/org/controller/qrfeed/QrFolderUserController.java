@@ -71,12 +71,17 @@ public ResponseEntity<Object> updateUserToFolder(@RequestBody AddUserToFolderReq
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-    @GetMapping("/folder/{folderId}/user-roles")
+    @GetMapping("qr-folder/user-roles/{folderId}")
     public ResponseEntity<Object> getUserRolesByFolderId(@PathVariable String folderId) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            List<UserRoleDTO> userRoles = qrFolderUserService.getUserRolesByFolderId(folderId);
+            logger.info("Fetching user roles for folderId: " + folderId);
+            List<IUserRoleDTO> userRoles = qrFolderUserService.getUserRolesByFolderId(folderId);
+            logger.info("Fetched user roles: " + userRoles.size());
+            for (IUserRoleDTO userRole : userRoles) {
+                logger.info("User ID: " + userRole.getUserId() + ", Role: " + userRole.getRole());
+            }
             result = userRoles;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {

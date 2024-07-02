@@ -127,14 +127,21 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
     @Query(value = "DELETE FROM qr_wallet WHERE id IN :qrWalletIds", nativeQuery = true)
     void deleteByQrWalletIds(@Param("qrWalletIds") List<String> qrWalletIds);
 
+//    @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
+//            " w.value AS value, w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
+//            "(SELECT COUNT(id) FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.interaction_type =1) AS likeCount, " +
+//            "(SELECT COUNT(id) FROM qr_wallet_comment wc WHERE wc.qr_wallet_id =w.id) AS commentCount" +
+//            " FROM qr_wallet w WHERE w.is_public = 1" +
+//            " ORDER BY w.time_created DESC", nativeQuery = true)
+//    List<IQrWalletDTO> findAllPublicQrWallets();
     @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
-            " w.value AS value, w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
-            "(SELECT COUNT(id) FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.interaction_type =1) AS likeCount, " +
-            "(SELECT COUNT(id) FROM qr_wallet_comment wc WHERE wc.qr_wallet_id =w.id) AS commentCount" +
-            " FROM qr_wallet w WHERE w.is_public = 1" +
-            " ORDER BY w.time_created DESC", nativeQuery = true)
-    List<IQrWalletDTO> findAllPublicQrWallets();
-
+            "w.value AS value, w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
+            "(SELECT COUNT(id) FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.interaction_type = 1) AS likeCount, " +
+            "(SELECT COUNT(id) FROM qr_wallet_comment wc WHERE wc.qr_wallet_id = w.id) AS commentCount, " +
+            "(SELECT COUNT(id) > 0 FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.user_id = :userId AND i.interaction_type = 1) AS hasLiked " +
+            "FROM qr_wallet w WHERE w.is_public = 1 " +
+            "ORDER BY w.time_created DESC", nativeQuery = true)
+    List<IQrWalletDTO> findAllPublicQrWallets(@Param("userId") String userId);
     @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, w.value AS value, " +
             "w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
             "(SELECT COUNT(id) FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.interaction_type =1) AS likeCount, " +
