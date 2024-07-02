@@ -18,6 +18,7 @@ public interface QrWalletService {
     public int insertQrWallet(QrWalletEntity entity);
 
     public int countQrWallet(String value);
+    public int countQrWalletPublic(String value);
 
     public void updateQrWallet(String id, String description, int isPublic, int qrType, String title, String content, int style, int theme);
     public void updateQrVCard(String id, String description, int isPublic, int qrType,
@@ -30,6 +31,7 @@ public interface QrWalletService {
     public QrWalletEntity getQrLinkOrQrTextById(String qrId);
 
     public List<IListQrWalletDTO> getQrWallets(String value, int offset, int size);
+    public List<IListQrWalletDTO> getQrWalletPublic(String value, int offset, int size);
 
     public void deleteQrWalletsByIds(List<String> ids);
 

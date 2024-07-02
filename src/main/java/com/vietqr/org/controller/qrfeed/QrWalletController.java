@@ -671,13 +671,19 @@ public class QrWalletController {
             // từ folder ID sẽ có list userID sẽ lấy được user_data -> xử lý JSON là show user_data
 
             switch (type) {
-                case 0:
+                case 0: // ds qr cá nhân
+                    totalElement = qrWalletService.countQrWallet(value);
+                    infos = qrWalletService.getQrWallets(value, offset, size);
                     break;
-                case 1:
+                case 1: // ds qr cộng đồng
+                    totalElement = qrWalletService.countQrWalletPublic(value);
+                    infos = qrWalletService.getQrWalletPublic(value, offset, size);
+                    break;
 
             }
-            totalElement = qrWalletService.countQrWallet(value);
-            infos = qrWalletService.getQrWallets(value, offset, size);
+//            totalElement = qrWalletService.countQrWallet(value);
+//            infos = qrWalletService.getQrWallets(value, offset, size);
+
             data = infos.stream().map(item -> {
                 ListQrWalletDTO listQrWalletDTO = new ListQrWalletDTO();
                 listQrWalletDTO.setId(item.getId());

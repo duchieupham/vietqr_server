@@ -24,17 +24,34 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "a.title AS title, a.value as content, b.role AS role " +
             "FROM viet_qr.qr_wallet a " +
             "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
-            "WHERE (a.description LIKE %:value%) OR (a.title LIKE %:value%) " +
+            "WHERE ((a.description LIKE %:value%) OR (a.title LIKE %:value%)) AND a.is_public = 0 " +
             "GROUP BY a.id, b.role " +
             "ORDER BY a.time_created DESC " +
             "LIMIT :offset, :size  ", nativeQuery = true)
     List<IListQrWalletDTO> getQrWallets(String value, int offset, int size);
 
+    @Query(value = "SELECT a.id AS id, a.description AS description, a.is_public AS isPublic, a.qr_type as QrType, " +
+            "a.time_created as timeCreate, " +
+            "a.title AS title, a.value as content, b.role AS role " +
+            "FROM viet_qr.qr_wallet a " +
+            "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
+            "WHERE ((a.description LIKE %:value%) OR (a.title LIKE %:value%)) AND a.is_public = 1 " +
+            "GROUP BY a.id, b.role " +
+            "ORDER BY a.time_created DESC " +
+            "LIMIT :offset, :size  ", nativeQuery = true)
+    List<IListQrWalletDTO> getQrWalletPublic(String value, int offset, int size);
+
     @Query(value = "SELECT COUNT(a.id) " +
             "FROM viet_qr.qr_wallet a " +
-            "WHERE (a.description LIKE %:value%) OR (a.title LIKE %:value%) " +
+            "WHERE ((a.description LIKE %:value%) OR (a.title LIKE %:value%)) AND a.is_public = 0 " +
             "ORDER BY a.time_created DESC ", nativeQuery = true)
     int countQrWallet(String value);
+
+    @Query(value = "SELECT COUNT(a.id) " +
+            "FROM viet_qr.qr_wallet a " +
+            "WHERE ((a.description LIKE %:value%) OR (a.title LIKE %:value%)) AND a.is_public = 1 " +
+            "ORDER BY a.time_created DESC ", nativeQuery = true)
+    int countQrWalletPublic(String value);
 
     @Query(value = "SELECT a.id AS id, a.description AS description, a.is_public AS isPublic, a.qr_type as QrType, " +
             "a.time_created as timeCreate, a.title AS title, a.value as content, b.role AS role " +

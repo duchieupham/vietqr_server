@@ -34,6 +34,11 @@ public class QrWalletServiceImpl implements QrWalletService {
     }
 
     @Override
+    public int countQrWalletPublic(String value) {
+        return repo.countQrWalletPublic(value);
+    }
+
+    @Override
     public void updateQrWallet(String id, String description, int isPublic, int qrType, String title, String content, int style, int theme) {
         repo.updateQrWallet(id, description, isPublic, qrType, title, content, style, theme);
     }
@@ -61,6 +66,10 @@ public class QrWalletServiceImpl implements QrWalletService {
     @Override
     public List<IListQrWalletDTO> getQrWallets(String value, int offset, int size) {
         return repo.getQrWallets(value, offset, size);
+    }
+    @Override
+    public List<IListQrWalletDTO> getQrWalletPublic(String value, int offset, int size) {
+        return repo.getQrWalletPublic(value, offset, size);
     }
 
     @Override
