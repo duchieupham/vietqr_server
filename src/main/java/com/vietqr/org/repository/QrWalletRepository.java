@@ -88,13 +88,15 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
     @Query(value = "SELECT a.user_data AS userData " +
             "FROM qr_wallet a " +
             "INNER JOIN qr_wallet_folder b ON a.id = b.qr_wallet_id " +
-            "WHERE b.qr_folder_id = :folderId AND a.qr_type LIKE %:type% ", nativeQuery = true)
+            "WHERE (b.qr_folder_id = :folderId) AND (a.qr_type LIKE %:type%) " +
+            "ORDER BY a.time_created DESC ", nativeQuery = true)
     List<String> getUserDataWithoutType(@Param("folderId") String folderId, @Param("type") String type);
 
     @Query(value = "SELECT a.user_data AS userData " +
             "FROM qr_wallet a " +
             "INNER JOIN qr_wallet_folder b ON a.id = b.qr_wallet_id " +
-            "WHERE b.qr_folder_id = :folderId AND a.qr_type = :type ", nativeQuery = true)
+            "WHERE b.qr_folder_id = :folderId AND a.qr_type = :type " +
+            "ORDER BY a.time_created DESC ", nativeQuery = true)
     List<String> getQrDataWithType(@Param("folderId") String folderId, @Param("type") int type);
 
     @Query(value = "SELECT a.qr_data AS qrData " +

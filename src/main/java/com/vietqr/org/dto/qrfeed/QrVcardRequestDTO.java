@@ -6,6 +6,8 @@ public class QrVcardRequestDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String qr;
+    private String qrName;
+    private String qrDescription;
     private String fullname;
     private String phoneNo;
     private String email;
@@ -16,8 +18,10 @@ public class QrVcardRequestDTO implements Serializable {
     private int style;
     private int theme;
 
-    public QrVcardRequestDTO(String qr, String fullname, String phoneNo, String email, String companyName, String website, String address, int isPublic, int style, int theme) {
+    public QrVcardRequestDTO(String qr, String qrName, String qrDescription, String fullname, String phoneNo, String email, String companyName, String website, String address, int isPublic, int style, int theme) {
         this.qr = qr;
+        this.qrName = qrName;
+        this.qrDescription = qrDescription;
         this.fullname = fullname;
         this.phoneNo = phoneNo;
         this.email = email;
@@ -27,6 +31,22 @@ public class QrVcardRequestDTO implements Serializable {
         this.isPublic = isPublic;
         this.style = style;
         this.theme = theme;
+    }
+
+    public String getQrName() {
+        return qrName;
+    }
+
+    public void setQrName(String qrName) {
+        this.qrName = qrName;
+    }
+
+    public String getQrDescription() {
+        return qrDescription;
+    }
+
+    public void setQrDescription(String qrDescription) {
+        this.qrDescription = qrDescription;
     }
 
     public QrVcardRequestDTO() {

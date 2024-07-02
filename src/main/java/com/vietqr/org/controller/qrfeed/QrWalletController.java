@@ -23,14 +23,20 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.ResponseInputStream;
 
+import javax.imageio.ImageIO;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -115,7 +121,7 @@ public class QrWalletController {
                     vietQRDTO.setAmount(amount);
                     vietQRDTO.setContent(content);
                     vietQRDTO.setQrCode(qr);
-                    vietQRDTO.setImgId("");
+                    vietQRDTO.setImgId(""); // get image logo
                     vietQRDTO.setExisting(0);
                     vietQRDTO.setTransactionId("");
                     vietQRDTO.setTransactionRefId("");
@@ -127,8 +133,8 @@ public class QrWalletController {
                     LocalDateTime currentDateTime = LocalDateTime.now();
                     UUID idQrWallet = UUID.randomUUID();
                     entity.setId(idQrWallet.toString());
-                    entity.setTitle("QR VietQR");
-                    entity.setDescription("Mã VietQR của: " + dto.getUserBankName());
+                    entity.setTitle(dto.getQrName());
+                    entity.setDescription(dto.getQrDescription());
                     entity.setValue(qr);
                     entity.setQrType(3);
 
@@ -200,6 +206,8 @@ public class QrWalletController {
                 String qr = VCardUtil.getVcardQR(dto);
                 qrVcardRequestDTO = new QrVcardRequestDTO();
                 qrVcardRequestDTO.setQr(qr);
+                qrVcardRequestDTO.setQrName(dto.getQrName());
+                qrVcardRequestDTO.setQrDescription(dto.getQrDescription());
                 qrVcardRequestDTO.setFullname(dto.getFullname());
                 qrVcardRequestDTO.setPhoneNo(dto.getPhoneNo());
                 qrVcardRequestDTO.setEmail(dto.getEmail());
@@ -219,8 +227,8 @@ public class QrWalletController {
                 LocalDateTime currentDateTime = LocalDateTime.now();
                 UUID idQrWallet = UUID.randomUUID();
                 entity.setId(idQrWallet.toString());
-                entity.setTitle("Qr Vcard");
-                entity.setDescription("Qr Vcard: " + dto.getFullname());
+                entity.setTitle(dto.getQrName());
+                entity.setDescription(dto.getQrDescription());
                 entity.setValue(qr);
                 entity.setQrType(2);
 
@@ -283,6 +291,103 @@ public class QrWalletController {
     //update QR Vcard
     @PutMapping("qr-wallet/update-qr-vcard")
     public ResponseEntity<Object> updateQrVcard(@RequestBody QrVCardUpdateDTO dto) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            QrWalletEntity qrWalletEntity = qrWalletService.getQrVCardUpdate(dto.getId());
+
+            if (dto.isNull()) {
+                result = new ResponseMessageDTO("FAILED", "E100");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            } else {
+                String qr = VCardUtil.getVcardQR(dto);
+                QrVcardRequestDTO qrVcardRequestDTO = new QrVcardRequestDTO();
+                qrVcardRequestDTO.setQr(qr);
+                qrVcardRequestDTO.setFullname(dto.getFullname());
+                qrVcardRequestDTO.setPhoneNo(dto.getPhoneNo());
+                qrVcardRequestDTO.setEmail(dto.getEmail());
+                qrVcardRequestDTO.setCompanyName(dto.getCompanyName());
+                qrVcardRequestDTO.setWebsite(dto.getWebsite());
+                qrVcardRequestDTO.setAddress(dto.getAddress());
+                if (dto.getIsPublic() == 1) {
+                    qrVcardRequestDTO.setIsPublic(1);
+                } else if (dto.getIsPublic() == 0) {
+                    qrVcardRequestDTO.setIsPublic(0);
+                }
+                qrVcardRequestDTO.setStyle(dto.getStyle());
+                qrVcardRequestDTO.setTheme(dto.getTheme());
+
+                // add data qr vào qr_wallet
+//                QrWalletEntity entity = new QrWalletEntity();
+                LocalDateTime currentDateTime = LocalDateTime.now();
+//                UUID idQrWallet = UUID.randomUUID();
+//                qrWalletEntity.setId(qrWalletEntity.getId());
+//                qrWalletEntity.setTitle(dto.getQrTitle());
+//                qrWalletEntity.setDescription(dto.getQrDescription());
+//                qrWalletEntity.setValue(qr);
+//                qrWalletEntity.setQrType(2);
+
+                TempVCardDTO temp = new TempVCardDTO();
+                temp.setFullName(dto.getFullname());
+                temp.setPhoneNo(dto.getPhoneNo());
+                temp.setEmail(dto.getEmail());
+                temp.setCompanyName(dto.getCompanyName());
+                temp.setWebsite(dto.getWebsite());
+                temp.setValue(qr);
+                temp.setAddress(dto.getAddress());
+
+                qrWalletEntity.setQrData(temp.toString());
+                qrWalletEntity.setUserData("{"
+                        + "\"userId\": \"" + dto.getUserId() + "\", "
+                        + "\"fullName\": \"" + dto.getFullname() + "\", "
+                        + "\"phoneNo\": \"" + dto.getPhoneNo() + "\", "
+                        + "\"email\": \"" + dto.getEmail() + "\", "
+                        + "\"companyName\": \"" + dto.getCompanyName() + "\", "
+                        + "\"website\": \"" + dto.getWebsite() + "\", "
+                        + "\"website\": \"" + dto.getWebsite() + "\", "
+                        + "\"qrType\": \"" + 2 + "\", "
+                        + "\"additionalData\": \"" + dto.getAddress() + "\""
+                        + "}");
+//                if (dto.getIsPublic() == 1) {
+//                    qrWalletEntity.setIsPublic(1);
+//                } else if (dto.getIsPublic() == 0) {
+//                    qrWalletEntity.setIsPublic(0);
+//                }
+//                qrWalletEntity.setTimeCreated(currentDateTime.toEpochSecond(ZoneOffset.UTC));
+//                qrWalletEntity.setUserId(dto.getUserId());
+//                qrWalletEntity.setPin("");
+//                qrWalletEntity.setPublicId("");
+//                qrWalletEntity.setStyle(dto.getStyle());
+//                qrWalletEntity.setTheme(dto.getTheme());
+
+                qrWalletService.updateQrVCard(dto.getId(), dto.getQrDescription(), dto.getIsPublic(), 2,
+                        dto.getQrTitle(), qr, dto.getStyle(), dto.getTheme());
+
+//                qrWalletService.insertQrWallet(entity);
+
+                //add qr vào qr_user (ch implements)
+//                QrUserEntity qrUserEntity = new QrUserEntity();
+//                UUID idQrUser = UUID.randomUUID();
+//                qrUserEntity.setId(idQrUser.toString());
+//                qrUserEntity.setQrWalletId(idQrWallet.toString());
+//                qrUserEntity.setUserId(dto.getUserId());
+//                qrUserEntity.setRole("ADMIN");
+//                qrUserService.insertQrUser(qrUserEntity);
+
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            }
+        } catch (Exception e) {
+            logger.error("QrWalletController: ERROR: create QR: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED: " + e.getMessage(), "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PutMapping("qr-wallet/update-qr-vietqr")
+    public ResponseEntity<Object> updateQrVietQr(@RequestBody QrVCardUpdateDTO dto) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
@@ -565,6 +670,12 @@ public class QrWalletController {
             List<IListQrWalletDTO> infos = new ArrayList<>();
             // từ folder ID sẽ có list userID sẽ lấy được user_data -> xử lý JSON là show user_data
 
+            switch (type) {
+                case 0:
+                    break;
+                case 1:
+
+            }
             totalElement = qrWalletService.countQrWallet(value);
             infos = qrWalletService.getQrWallets(value, offset, size);
             data = infos.stream().map(item -> {
@@ -748,6 +859,33 @@ public class QrWalletController {
         } catch (WriterException | IOException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping(value = "qr-wallet/logo-load/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<byte[]> downloadFile(@PathVariable String id) {
+        try {
+//            id = "logo-vietqr-official-transparent.png";
+            ResponseInputStream<?> responseInputStream = amazonS3Service.downloadFile(id);
+
+            BufferedImage originalImage = ImageIO.read(responseInputStream);
+            BufferedImage resizedImage = resizeImage(originalImage, 300, 300);
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            ImageIO.write(resizedImage, "png", outputStream);
+            byte[] bytes = outputStream.toByteArray();
+            return ResponseEntity.ok().body(bytes);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    private BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) {
+        Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
+        BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2d = outputImage.createGraphics();
+        g2d.drawImage(resultingImage, 0, 0, null);
+        g2d.dispose();
+        return outputImage;
     }
 
 }

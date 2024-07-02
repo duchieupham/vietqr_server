@@ -50,7 +50,7 @@ public interface QrFolderUserRepository extends JpaRepository<QrFolderUserEntity
             "UNION " +
             "SELECT DISTINCT qf.user_id AS userId, 'ADMIN' AS role " +
             "FROM qr_folder qf " +
-            "WHERE qf.id = :folderId", nativeQuery = true)
+            "WHERE qf.id = :folderId ", nativeQuery = true)
     List<UserRoleDTO> findUserRolesByFolderId(@Param("folderId") String folderId);
 
 }

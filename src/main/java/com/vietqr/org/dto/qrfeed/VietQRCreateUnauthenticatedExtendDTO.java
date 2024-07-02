@@ -6,12 +6,29 @@ import java.lang.reflect.Field;
 
 public class VietQRCreateUnauthenticatedExtendDTO extends VietQRCreateUnauthenticatedDTO {
     private String userId;
+    private String qrName;
+    private String qrDescription;
     private int style;
     private int theme;
 
     public VietQRCreateUnauthenticatedExtendDTO() {
     }
 
+    public String getQrName() {
+        return qrName;
+    }
+
+    public void setQrName(String qrName) {
+        this.qrName = qrName;
+    }
+
+    public String getQrDescription() {
+        return qrDescription;
+    }
+
+    public void setQrDescription(String qrDescription) {
+        this.qrDescription = qrDescription;
+    }
 
     public int getStyle() {
         return style;
