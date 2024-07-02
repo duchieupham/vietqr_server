@@ -42,14 +42,19 @@ public class ImageController {
 		byte[] result = new byte[0];
 		HttpStatus httpStatus = null;
 		try {
-			ResponseInputStream<?> responseInputStream = amazonS3Service.downloadFile(id);
-			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-			byte[] buffer = new byte[1024];
-			int bytesRead;
-			while ((bytesRead = responseInputStream.read(buffer)) != -1) {
-				outputStream.write(buffer, 0, bytesRead);
+			try {
+				ResponseInputStream<?> responseInputStream = amazonS3Service.downloadFile(id);
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+				byte[] buffer = new byte[1024];
+				int bytesRead;
+				while ((bytesRead = responseInputStream.read(buffer)) != -1) {
+					outputStream.write(buffer, 0, bytesRead);
+				}
+				result = outputStream.toByteArray();
+			} catch (Exception e) {
+				logger.error("getImage: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
 			}
-			result = outputStream.toByteArray();
+
 			if (!(result.length > 0)) {
 				result = imageService.getImageById(id);
 			}
