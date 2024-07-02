@@ -20,6 +20,8 @@ public class QrFolderUserServiceImpl implements QrFolderUserService {
     @Autowired
     QrUserRepository qrUserRepository;
 
+
+
 //    @Transactional
 //    public void addUserIds(String qrFolderId, List<String> userIds, String userId) {
 //        for (String userIdDto : userIds) {
@@ -55,4 +57,10 @@ public class QrFolderUserServiceImpl implements QrFolderUserService {
             qrUserRepository.updateUserRole(userRole.getUserId(), qrFolderId, userRole.getRole());
         }
     }
+
+    @Override
+    public List<UserRoleDTO> getUserRolesByFolderId(String folderId) {
+        return repo.findUserRolesByFolderId(folderId);
+    }
+
 }

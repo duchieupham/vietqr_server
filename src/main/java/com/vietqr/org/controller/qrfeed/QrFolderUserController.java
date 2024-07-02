@@ -71,6 +71,21 @@ public ResponseEntity<Object> updateUserToFolder(@RequestBody AddUserToFolderReq
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+    @GetMapping("/folder/{folderId}/user-roles")
+    public ResponseEntity<Object> getUserRolesByFolderId(@PathVariable String folderId) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            List<UserRoleDTO> userRoles = qrFolderUserService.getUserRolesByFolderId(folderId);
+            result = userRoles;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getUserRolesByFolderId: ERROR: " + e.getMessage() + " at " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
     // lấy ra thông tin những user trong folder
     @GetMapping("qr-feed/folder-users")
     public ResponseEntity<Object> getUserInFolder(

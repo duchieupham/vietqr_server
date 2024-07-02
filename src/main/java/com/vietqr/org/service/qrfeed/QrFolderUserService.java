@@ -13,6 +13,8 @@ public interface QrFolderUserService {
     public List<IUserInFolderDTO> getUserInFolder(String qrFolderId);
 
     void updateUserRoles(String qrFolderId, List<UserRoleDTO> userRoles);
+    List<UserRoleDTO> getUserRolesByFolderId(String folderId);
+
 
 
 }
