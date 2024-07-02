@@ -53,6 +53,24 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "WHERE id = :id ", nativeQuery = true)
     void updateQrWallet(String id, String description, int isPublic, int qrType, String title, String content, int style, int theme);
 
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE qr_wallet SET description = :description, is_public = :isPublic, " +
+            "qr_type = :qrType, title = :title, value = :value, style = :style, theme = :theme " +
+            "WHERE id = :id ", nativeQuery = true)
+    void updateQrVCard(@Param("id") String id,
+                       @Param("description") String description,
+                       @Param("isPublic") int isPublic,
+                       @Param("qrType") int qrType,
+                       @Param("title") String title,
+                       @Param("value") String value,
+                       @Param("style") int style,
+                       @Param("theme") int theme);
+
+    @Query(value = "SELECT * FROM qr_wallet WHERE id = :qrId AND qr_type = 2 ", nativeQuery = true)
+    QrWalletEntity getQrVCardUpdate(String qrId);
+
+
     @Modifying
     @Transactional
     @Query(value = "DELETE FROM qr_wallet WHERE id IN :ids", nativeQuery = true)

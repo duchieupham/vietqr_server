@@ -14,11 +14,16 @@ import java.util.List;
 @Service
 public interface QrWalletService {
 
+
     public int insertQrWallet(QrWalletEntity entity);
 
     public int countQrWallet(String value);
 
     public void updateQrWallet(String id, String description, int isPublic, int qrType, String title, String content, int style, int theme);
+    public void updateQrVCard(String id, String description, int isPublic, int qrType,
+                              String title, String value, int style, int theme);
+
+    public QrWalletEntity getQrVCardUpdate(String qrId);
 
     public IListQrWalletDTO getQrLinkOrQrTextByUserId(String userId);
 

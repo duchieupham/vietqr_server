@@ -39,6 +39,16 @@ public class QrWalletServiceImpl implements QrWalletService {
     }
 
     @Override
+    public void updateQrVCard(String id, String description, int isPublic, int qrType, String title, String value, int style, int theme) {
+        repo.updateQrVCard(id, description, isPublic, qrType, title, value, style, theme);
+    }
+
+    @Override
+    public QrWalletEntity getQrVCardUpdate(String qrId) {
+        return repo.getQrVCardUpdate(qrId);
+    }
+
+    @Override
     public IListQrWalletDTO getQrLinkOrQrTextByUserId(String userId) {
         return repo.getQrLinkOrQrTextByUserId(userId);
     }

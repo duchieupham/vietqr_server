@@ -280,6 +280,104 @@ public class QrWalletController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    //update QR Vcard
+    @PutMapping("qr-wallet/update-qr-vcard")
+    public ResponseEntity<Object> updateQrVcard(@RequestBody QrVCardUpdateDTO dto) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            QrWalletEntity qrWalletEntity = qrWalletService.getQrVCardUpdate(dto.getId());
+
+            if (dto.isNull()) {
+                result = new ResponseMessageDTO("FAILED", "E100");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            } else {
+                String qr = VCardUtil.getVcardQR(dto);
+                QrVcardRequestDTO qrVcardRequestDTO = new QrVcardRequestDTO();
+                qrVcardRequestDTO.setQr(qr);
+                qrVcardRequestDTO.setFullname(dto.getFullname());
+                qrVcardRequestDTO.setPhoneNo(dto.getPhoneNo());
+                qrVcardRequestDTO.setEmail(dto.getEmail());
+                qrVcardRequestDTO.setCompanyName(dto.getCompanyName());
+                qrVcardRequestDTO.setWebsite(dto.getWebsite());
+                qrVcardRequestDTO.setAddress(dto.getAddress());
+                if (dto.getIsPublic() == 1) {
+                    qrVcardRequestDTO.setIsPublic(1);
+                } else if (dto.getIsPublic() == 0) {
+                    qrVcardRequestDTO.setIsPublic(0);
+                }
+                qrVcardRequestDTO.setStyle(dto.getStyle());
+                qrVcardRequestDTO.setTheme(dto.getTheme());
+
+                // add data qr vào qr_wallet
+//                QrWalletEntity entity = new QrWalletEntity();
+                LocalDateTime currentDateTime = LocalDateTime.now();
+//                UUID idQrWallet = UUID.randomUUID();
+//                qrWalletEntity.setId(qrWalletEntity.getId());
+//                qrWalletEntity.setTitle(dto.getQrTitle());
+//                qrWalletEntity.setDescription(dto.getQrDescription());
+//                qrWalletEntity.setValue(qr);
+//                qrWalletEntity.setQrType(2);
+
+                TempVCardDTO temp = new TempVCardDTO();
+                temp.setFullName(dto.getFullname());
+                temp.setPhoneNo(dto.getPhoneNo());
+                temp.setEmail(dto.getEmail());
+                temp.setCompanyName(dto.getCompanyName());
+                temp.setWebsite(dto.getWebsite());
+                temp.setValue(qr);
+                temp.setAddress(dto.getAddress());
+
+                qrWalletEntity.setQrData(temp.toString());
+                qrWalletEntity.setUserData("{"
+                        + "\"userId\": \"" + dto.getUserId() + "\", "
+                        + "\"fullName\": \"" + dto.getFullname() + "\", "
+                        + "\"phoneNo\": \"" + dto.getPhoneNo() + "\", "
+                        + "\"email\": \"" + dto.getEmail() + "\", "
+                        + "\"companyName\": \"" + dto.getCompanyName() + "\", "
+                        + "\"website\": \"" + dto.getWebsite() + "\", "
+                        + "\"website\": \"" + dto.getWebsite() + "\", "
+                        + "\"qrType\": \"" + 2 + "\", "
+                        + "\"additionalData\": \"" + dto.getAddress() + "\""
+                        + "}");
+//                if (dto.getIsPublic() == 1) {
+//                    qrWalletEntity.setIsPublic(1);
+//                } else if (dto.getIsPublic() == 0) {
+//                    qrWalletEntity.setIsPublic(0);
+//                }
+//                qrWalletEntity.setTimeCreated(currentDateTime.toEpochSecond(ZoneOffset.UTC));
+//                qrWalletEntity.setUserId(dto.getUserId());
+//                qrWalletEntity.setPin("");
+//                qrWalletEntity.setPublicId("");
+//                qrWalletEntity.setStyle(dto.getStyle());
+//                qrWalletEntity.setTheme(dto.getTheme());
+
+                qrWalletService.updateQrVCard(dto.getId(), dto.getQrDescription(), dto.getIsPublic(), 2,
+                        dto.getQrTitle(), qr, dto.getStyle(), dto.getTheme());
+
+//                qrWalletService.insertQrWallet(entity);
+
+                //add qr vào qr_user (ch implements)
+//                QrUserEntity qrUserEntity = new QrUserEntity();
+//                UUID idQrUser = UUID.randomUUID();
+//                qrUserEntity.setId(idQrUser.toString());
+//                qrUserEntity.setQrWalletId(idQrWallet.toString());
+//                qrUserEntity.setUserId(dto.getUserId());
+//                qrUserEntity.setRole("ADMIN");
+//                qrUserService.insertQrUser(qrUserEntity);
+
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            }
+        } catch (Exception e) {
+            logger.error("QrWalletController: ERROR: create QR: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED: " + e.getMessage(), "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     // update information QrLink or QrText
     @PutMapping("qr-wallet/update-qr-link")
     public ResponseEntity<Object> updateQrLink(
