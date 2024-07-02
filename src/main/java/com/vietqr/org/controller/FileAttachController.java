@@ -6,6 +6,7 @@ import com.vietqr.org.service.FileAttachService;
 import com.vietqr.org.service.InvoiceService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,9 +29,9 @@ public class FileAttachController {
     @Autowired
     InvoiceService invoiceService;
 
-    @PostMapping("images-invoice")
+    @PostMapping("images-invoice/upload")
     public ResponseEntity<Object> getImageInvoice(
-            @RequestPart String invoiceId,
+            @RequestParam String invoiceId,
             @RequestPart("file") MultipartFile file) {
         Object result = null;
         HttpStatus httpStatus = null;

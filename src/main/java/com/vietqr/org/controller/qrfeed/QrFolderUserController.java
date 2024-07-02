@@ -117,7 +117,7 @@ public class QrFolderUserController {
             if (type == null) {
                 type = -1;
             }
-`
+
             QrInFolderResponseDTO data = new QrInFolderResponseDTO();
 
             // get information about folder
