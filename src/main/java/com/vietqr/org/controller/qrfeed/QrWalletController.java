@@ -3,6 +3,7 @@ package com.vietqr.org.controller.qrfeed;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.zxing.WriterException;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.BankTypeEntity;
@@ -13,12 +14,14 @@ import com.vietqr.org.service.AmazonS3Service;
 import com.vietqr.org.service.BankTypeService;
 import com.vietqr.org.service.CaiBankService;
 import com.vietqr.org.service.ImageService;
+import com.vietqr.org.service.qrfeed.QRCodeService;
 import com.vietqr.org.service.qrfeed.QrCommentService;
 import com.vietqr.org.service.qrfeed.QrUserService;
 import com.vietqr.org.service.qrfeed.QrWalletService;
 import com.vietqr.org.util.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -28,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -41,6 +45,9 @@ import java.util.stream.Collectors;
 @Validated
 public class QrWalletController {
     private static final Logger logger = Logger.getLogger(QrWalletController.class);
+
+    @Autowired
+    private QRCodeService qrCodeService;
 
     @Autowired
     ImageService imageService;
@@ -621,6 +628,28 @@ public class QrWalletController {
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("qr-wallets/generate/test")
+    public ResponseEntity<byte[]> generateQRCode(@RequestBody QrCreateRequestDTO qr) {
+        try {
+            byte[] qrImage = qrCodeService.generateQRCodeImage(qr.getValue(), 250, 250);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Content-Type", "image/png");
+            return new ResponseEntity<>(qrImage, headers, HttpStatus.OK);
+        } catch (WriterException | IOException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("qr-wallets/generate/test/parsecode")
+    public ResponseEntity<String> generateQRCodeParseCode(@RequestBody QrCreateRequestDTO qrRequest) {
+        try {
+            String qrImageBase64 = qrCodeService.generateQRCodeImageBase64(qrRequest.getValue(), 250, 250);
+            return new ResponseEntity<>(qrImageBase64, HttpStatus.OK);
+        } catch (WriterException | IOException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
 }
