@@ -953,7 +953,7 @@ public class QrWalletController {
                             entity.setTitle(dto.getQrName());
                             entity.setDescription(dto.getQrDescription());
                             entity.setValue(dto.getValue());
-                            entity.setQrType(1);
+                            entity.setQrType(type);
                             entity.setQrData("{"
                                     + "\"title\": \"" + dto.getQrName() + "\", "
                                     + "\"description\": \"" + dto.getQrDescription() + "\", "
