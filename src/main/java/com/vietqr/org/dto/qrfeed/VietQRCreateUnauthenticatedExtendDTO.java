@@ -8,19 +8,38 @@ public class VietQRCreateUnauthenticatedExtendDTO extends VietQRCreateUnauthenti
     private String userId;
     private String qrName;
     private String qrDescription;
-    private int isPublic;
-    private int style;
-    private int theme;
+    private String isPublic;
+    private String style;
+    private String theme;
 
     public VietQRCreateUnauthenticatedExtendDTO() {
     }
 
-    public int getIsPublic() {
-        return isPublic;
+    public VietQRCreateUnauthenticatedExtendDTO(String userId, String qrName, String qrDescription, String isPublic, String style, String theme) {
+        this.userId = userId;
+        this.qrName = qrName;
+        this.qrDescription = qrDescription;
+        this.isPublic = isPublic;
+        this.style = style;
+        this.theme = theme;
     }
 
-    public void setIsPublic(int isPublic) {
+    public VietQRCreateUnauthenticatedExtendDTO(String bankAccount, String bankCode, String userBankName, String amount, String content, String userId, String qrName, String qrDescription, String isPublic, String style, String theme) {
+        super(bankAccount, bankCode, userBankName, amount, content);
+        this.userId = userId;
+        this.qrName = qrName;
+        this.qrDescription = qrDescription;
         this.isPublic = isPublic;
+        this.style = style;
+        this.theme = theme;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getQrName() {
@@ -39,28 +58,28 @@ public class VietQRCreateUnauthenticatedExtendDTO extends VietQRCreateUnauthenti
         this.qrDescription = qrDescription;
     }
 
-    public int getStyle() {
+    public String getIsPublic() {
+        return isPublic;
+    }
+
+    public void setIsPublic(String isPublic) {
+        this.isPublic = isPublic;
+    }
+
+    public String getStyle() {
         return style;
     }
 
-    public void setStyle(int style) {
+    public void setStyle(String style) {
         this.style = style;
     }
 
-    public int getTheme() {
+    public String getTheme() {
         return theme;
     }
 
-    public void setTheme(int theme) {
+    public void setTheme(String theme) {
         this.theme = theme;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
     }
 
     public boolean isNull() {

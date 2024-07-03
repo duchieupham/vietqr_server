@@ -13,15 +13,15 @@ public class QrCreateRequestDTO implements Serializable {
     private String qrDescription;
     private String value;
     private String pin;
-    private int isPublic;
-    private int style;
-    private int theme;
+    private String isPublic;
+    private String style;
+    private String theme;
 
     public QrCreateRequestDTO() {
         super();
     }
 
-    public QrCreateRequestDTO(String userId, String qrName, String qrDescription, String value, String pin, int isPublic, int style, int theme) {
+    public QrCreateRequestDTO(String userId, String qrName, String qrDescription, String value, String pin, String isPublic, String style, String theme) {
         this.userId = userId;
         this.qrName = qrName;
         this.qrDescription = qrDescription;
@@ -34,27 +34,27 @@ public class QrCreateRequestDTO implements Serializable {
 
 
 
-    public int getStyle() {
+    public String getStyle() {
         return style;
     }
 
-    public void setStyle(int style) {
+    public void setStyle(String style) {
         this.style = style;
     }
 
-    public int getTheme() {
+    public String getTheme() {
         return theme;
     }
 
-    public void setTheme(int theme) {
+    public void setTheme(String theme) {
         this.theme = theme;
     }
 
-    public int getIsPublic() {
+    public String getIsPublic() {
         return isPublic;
     }
 
-    public void setIsPublic(int isPublic) {
+    public void setIsPublic(String isPublic) {
         this.isPublic = isPublic;
     }
 

@@ -6,33 +6,35 @@ public class VCardInputExtendDTO extends VCardInputDTO {
 
     private String qrName;
     private String qrDescription;
-    private int isPublic;
-    private int style;
-    private int theme;
+    private String isPublic;
+    private String style;
+    private String theme;
 
     public VCardInputExtendDTO() {
     }
 
-    public VCardInputExtendDTO(int style, int theme) {
+    public VCardInputExtendDTO(String qrName, String qrDescription, String isPublic, String style, String theme) {
+        this.qrName = qrName;
+        this.qrDescription = qrDescription;
+        this.isPublic = isPublic;
         this.style = style;
         this.theme = theme;
     }
 
-    public VCardInputExtendDTO(String fullname, String phoneNo, String email, String companyName, String website, String address, String userId, String additionalData, int style, int theme) {
+    public VCardInputExtendDTO(String fullname, String phoneNo, String email, String companyName, String website, String address, String userId, String additionalData, String qrName, String qrDescription, String isPublic, String style, String theme) {
         super(fullname, phoneNo, email, companyName, website, address, userId, additionalData);
+        this.qrName = qrName;
+        this.qrDescription = qrDescription;
+        this.isPublic = isPublic;
         this.style = style;
         this.theme = theme;
     }
 
-    public VCardInputExtendDTO(String fullname, String phoneNo, String email, String companyName, String website, String address, String userId, String additionalData) {
-        super(fullname, phoneNo, email, companyName, website, address, userId, additionalData);
-    }
-
-    public int getIsPublic() {
+    public String getIsPublic() {
         return isPublic;
     }
 
-    public void setIsPublic(int isPublic) {
+    public void setIsPublic(String isPublic) {
         this.isPublic = isPublic;
     }
 
@@ -52,19 +54,19 @@ public class VCardInputExtendDTO extends VCardInputDTO {
         this.qrDescription = qrDescription;
     }
 
-    public int getStyle() {
+    public String getStyle() {
         return style;
     }
 
-    public void setStyle(int style) {
+    public void setStyle(String style) {
         this.style = style;
     }
 
-    public int getTheme() {
+    public String getTheme() {
         return theme;
     }
 
-    public void setTheme(int theme) {
+    public void setTheme(String theme) {
         this.theme = theme;
     }
 }

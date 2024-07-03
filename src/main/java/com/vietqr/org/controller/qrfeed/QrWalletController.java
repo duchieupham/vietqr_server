@@ -15,6 +15,7 @@ import com.vietqr.org.service.qrfeed.QRCodeService;
 import com.vietqr.org.service.qrfeed.QrCommentService;
 import com.vietqr.org.service.qrfeed.QrUserService;
 import com.vietqr.org.service.qrfeed.QrWalletService;
+import com.vietqr.org.service.vnpt.services.Interfaces;
 import com.vietqr.org.util.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,8 +80,8 @@ public class QrWalletController {
 
     //    @PostMapping("qr-wallet/generate-qr-vietqr")
     public ResponseEntity<Object> generateQRUnauthenticated(
-            int isPublic,
-            int type,
+            String isPublic,
+            String type,
             VietQRCreateUnauthenticatedExtendDTO dto,
             MultipartFile file) {
         Object result = null;
@@ -155,17 +156,17 @@ public class QrWalletController {
                             + "\"qrType\": \"" + type + "\", "
                             + "\"bankCode\": \"" + dto.getBankCode() + "\""
                             + "}");
-                    if (isPublic == 1) {
+                    if (Integer.parseInt(isPublic) == 1) {
                         entity.setIsPublic(1);
-                    } else if (isPublic == 0) {
+                    } else if (Integer.parseInt(isPublic) == 0) {
                         entity.setIsPublic(0);
                     }
                     entity.setTimeCreated(currentDateTime.toEpochSecond(ZoneOffset.UTC));
                     entity.setUserId(dto.getUserId());
                     entity.setPin("");
                     entity.setPublicId("");
-                    entity.setTheme(dto.getTheme());
-                    entity.setStyle(dto.getStyle());
+                    entity.setTheme(Integer.parseInt(dto.getTheme()));
+                    entity.setStyle(Integer.parseInt(dto.getStyle()));
 
                     UUID uuid = UUID.randomUUID();
                     String fileName = StringUtils.cleanPath(file.getOriginalFilename());
@@ -201,7 +202,7 @@ public class QrWalletController {
     }
 
     //    @PostMapping("qr-wallet/generate-qr-vcard")
-    ResponseEntity<Object> createQrVcard(int isPublic, int type, VCardInputExtendDTO dto, MultipartFile file) {
+    ResponseEntity<Object> createQrVcard(String isPublic, String type, VCardInputExtendDTO dto, MultipartFile file) {
         Object result = null;
         QrVcardRequestDTO qrVcardRequestDTO = null;
         HttpStatus httpStatus = null;
@@ -221,13 +222,13 @@ public class QrWalletController {
                 qrVcardRequestDTO.setCompanyName(dto.getCompanyName());
                 qrVcardRequestDTO.setWebsite(dto.getWebsite());
                 qrVcardRequestDTO.setAddress(dto.getAddress());
-                if (isPublic == 1) {
+                if (Integer.parseInt(isPublic) == 1) {
                     qrVcardRequestDTO.setIsPublic(1);
-                } else if (isPublic == 0) {
+                } else if (Integer.parseInt(isPublic) == 0) {
                     qrVcardRequestDTO.setIsPublic(0);
                 }
-                qrVcardRequestDTO.setStyle(dto.getStyle());
-                qrVcardRequestDTO.setTheme(dto.getTheme());
+                qrVcardRequestDTO.setStyle(Integer.parseInt(dto.getStyle()));
+                qrVcardRequestDTO.setTheme(Integer.parseInt(dto.getTheme()));
 
                 // add data qr vào qr_wallet
                 QrWalletEntity entity = new QrWalletEntity();
@@ -260,17 +261,18 @@ public class QrWalletController {
                         + "\"qrType\": \"" + type + "\", "
                         + "\"additionalData\": \"" + dto.getAddress() + "\""
                         + "}");
-                if (isPublic == 1) {
-                    entity.setIsPublic(1);
-                } else if (isPublic == 0) {
-                    entity.setIsPublic(0);
+                if (Integer.parseInt(isPublic) == 1) {
+                    qrVcardRequestDTO.setIsPublic(1);
+                } else if (Integer.parseInt(isPublic) == 0) {
+                    qrVcardRequestDTO.setIsPublic(0);
                 }
                 entity.setTimeCreated(currentDateTime.toEpochSecond(ZoneOffset.UTC));
                 entity.setUserId(dto.getUserId());
                 entity.setPin("");
                 entity.setPublicId("");
-                entity.setStyle(dto.getStyle());
-                entity.setTheme(dto.getTheme());
+                entity.setStyle(Integer.parseInt(dto.getStyle()));
+                entity.setTheme(Integer.parseInt(dto.getTheme()));
+                entity.setIsPublic(Integer.parseInt(dto.getIsPublic()));
 
                 // save image
                 UUID uuid = UUID.randomUUID();
@@ -590,17 +592,17 @@ public class QrWalletController {
                                     + "\"qrType\": \"" + type + "\", "
                                     + "\"content\": \"" + dto.getValue() + "\""
                                     + "}");
-                            if (dto.getIsPublic() == 1) {
+                            if (dto.getIsPublic().equals("1")) {
                                 entity.setIsPublic(1);
-                            } else if (dto.getIsPublic() == 0) {
+                            } else if (dto.getIsPublic().equals("0")) {
                                 entity.setIsPublic(0);
                             }
                             entity.setTimeCreated(currentDateTime.toEpochSecond(ZoneOffset.UTC));
                             entity.setUserId(dto.getUserId());
                             entity.setPin(dto.getPin());
                             entity.setPublicId(qrLink);
-                            entity.setStyle(dto.getStyle());
-                            entity.setTheme(dto.getTheme());
+                            entity.setStyle(Integer.parseInt(dto.getStyle()));
+                            entity.setTheme(Integer.parseInt(dto.getTheme()));
 
                             // save image
                             UUID uuid = UUID.randomUUID();
@@ -641,17 +643,17 @@ public class QrWalletController {
                                     + "\"qrType\": \"" + type + "\", "
                                     + "\"content\": \"" + dto.getValue() + "\""
                                     + "}");
-                            if (dto.getIsPublic() == 1) {
+                            if (dto.getIsPublic().equals("1")) {
                                 entity.setIsPublic(1);
-                            } else if (dto.getIsPublic() == 0) {
+                            } else if (dto.getIsPublic().equals("0")) {
                                 entity.setIsPublic(0);
                             }
                             entity.setTimeCreated(currentDateTime.toEpochSecond(ZoneOffset.UTC));
                             entity.setUserId(dto.getUserId());
                             entity.setPin(dto.getPin());
                             entity.setPublicId(qrLink);
-                            entity.setStyle(dto.getStyle());
-                            entity.setTheme(dto.getTheme());
+                            entity.setStyle(Integer.parseInt(dto.getStyle()));
+                            entity.setTheme(Integer.parseInt(dto.getTheme()));
 
                             // save image
                             UUID ids = UUID.randomUUID();
@@ -821,7 +823,7 @@ public class QrWalletController {
 
     @PostMapping(value = "qr-wallet/generate-qr", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> createQRFinal(
-            @RequestParam int type,
+            @RequestParam("type") String type,
             @RequestParam("json") String json,
             @RequestPart("file") MultipartFile file
     ) {
@@ -829,11 +831,11 @@ public class QrWalletController {
         HttpStatus httpStatus = null;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            switch (type) {
+            switch (Integer.parseInt(type)) {
                 case 0: //link
                 case 1: //text
                     QrCreateRequestDTO qrCreateRequestDTO = objectMapper.readValue(json, QrCreateRequestDTO.class);
-                    return createQrLink(type, qrCreateRequestDTO, file);
+                    return createQrLink(Integer.parseInt(type), qrCreateRequestDTO, file);
                 case 2: //vcard
                     VCardInputExtendDTO vCardInputDTO = objectMapper.readValue(json, VCardInputExtendDTO.class);
                     return createQrVcard(vCardInputDTO.getIsPublic(), type, vCardInputDTO, file);
