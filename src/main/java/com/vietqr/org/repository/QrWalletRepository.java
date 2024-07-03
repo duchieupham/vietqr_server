@@ -162,7 +162,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
         "w.value AS value, w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
         "(SELECT COUNT(id) FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.interaction_type = 1) AS likeCount, " +
         "(SELECT COUNT(id) FROM qr_wallet_comment wc WHERE wc.qr_wallet_id = w.id) AS commentCount, " +
-        "CASE WHEN (SELECT COUNT(id) FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.user_id = :userId AND i.interaction_type = 1) > 0 THEN TRUE ELSE FALSE END AS hasLiked, " +
+        "CASE WHEN (SELECT COUNT(id) FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.user_id = :userId AND i.interaction_type = 1) > 0 THEN 1 ELSE 0 END AS hasLiked, " +
         "CASE " +
         "WHEN w.qr_type = '0' THEN w.public_id " +
         "WHEN w.qr_type = '1' THEN w.value " +
@@ -174,6 +174,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
         "ORDER BY w.time_created DESC " +
         "LIMIT :offset, :size", nativeQuery = true)
 List<IQrWalletDTO> findAllPublicQrWallets(@Param("userId") String userId, @Param("offset") int offset, @Param("size") int size);
+
 
 
     @Query(value = "SELECT COUNT(id) FROM qr_wallet WHERE is_public = 1", nativeQuery = true)
@@ -188,6 +189,21 @@ List<IQrWalletDTO> findAllPublicQrWallets(@Param("userId") String userId, @Param
     IQrWalletDTO findQRWalletDetailsById(@Param("qrWalletId") String qrWalletId);
 
 
+    @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, w.value AS value, " +
+            "w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
+            "(SELECT COUNT(id) FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.interaction_type = 1) AS likeCount, " +
+            "(SELECT COUNT(id) FROM qr_comment wc WHERE wc.qr_wallet_id = w.id) AS commentCount, " +
+            "CASE WHEN (SELECT COUNT(id) FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.user_id = :userId AND i.interaction_type = 1) > 0 THEN 1 ELSE 0 END AS hasLiked, " +
+            "CASE " +
+            "WHEN w.qr_type = '0' THEN w.public_id " +
+            "WHEN w.qr_type = '1' THEN w.value " +
+            "WHEN w.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.phoneNo'))) " +
+            "WHEN w.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.user_data, '$.bankCode')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.user_data, '$.userBankName'))) " +
+            "ELSE NULL " +
+            "END AS data " +
+            "FROM qr_wallet w WHERE w.id = :qrWalletId", nativeQuery = true)
+    IQrWalletDTO findQRWalletDetailsById(@Param("qrWalletId") String qrWalletId, @Param("userId") String userId);
+
     @Query(value = "SELECT c.id AS id, c.message AS message, " +
             "JSON_UNQUOTE(JSON_EXTRACT(c.user_data, '$.userBankName')) AS userBankName, " +
             "c.time_created AS timeCreated " +
@@ -195,4 +211,7 @@ List<IQrWalletDTO> findAllPublicQrWallets(@Param("userId") String userId, @Param
             "INNER JOIN qr_wallet_comment wc ON wc.qr_comment_id = c.id " +
             "WHERE wc.qr_wallet_id = :qrWalletId", nativeQuery = true)
     List<QrCommentDTO> findCommentsByQrWalletId(@Param("qrWalletId") String qrWalletId);
+
+    @Query(value = "SELECT COUNT(id) FROM qr_comment WHERE qr_wallet_id = :qrWalletId", nativeQuery = true)
+    int countCommentsByQrWalletId(@Param("qrWalletId") String qrWalletId);
 }

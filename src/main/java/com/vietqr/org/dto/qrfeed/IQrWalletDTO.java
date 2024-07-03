@@ -10,6 +10,6 @@ public interface IQrWalletDTO {
     String getUserId();
     int getLikeCount();
     int getCommentCount();
-    boolean getHasLiked();
+    int getHasLiked();
     String getData();
 }

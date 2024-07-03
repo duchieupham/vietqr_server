@@ -52,4 +52,10 @@ public interface QrCommentRepository extends JpaRepository<QrCommentEntity, Stri
             "WHERE wc.qr_wallet_id = :qrWalletId", nativeQuery = true)
     List<String> findUserNamesWhoCommented(@Param("qrWalletId") String qrWalletId);
 
+    @Query(value = "SELECT c.id AS id, c.message AS message, c.user_id AS userId, c.user_data AS userData, c.time_created AS timeCreated " +
+            "FROM qr_comment c WHERE c.qr_wallet_id = :qrWalletId ORDER BY c.time_created DESC LIMIT :offset, :size", nativeQuery = true)
+    List<QrCommentDTO> findCommentsByQrWalletId(@Param("qrWalletId") String qrWalletId, @Param("offset") int offset, @Param("size") int size);
+
+
+
 }
