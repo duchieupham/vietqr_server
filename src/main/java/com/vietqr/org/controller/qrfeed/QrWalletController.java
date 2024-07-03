@@ -831,6 +831,9 @@ public class QrWalletController {
         HttpStatus httpStatus = null;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
+            if (json.startsWith("\"") && json.endsWith("\"")) {
+                json = json.substring(1, json.length() - 1);
+            }
             switch (Integer.parseInt(type)) {
                 case 0: //link
                 case 1: //text
