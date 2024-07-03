@@ -2,6 +2,7 @@ package com.vietqr.org.service.qrfeed;
 
 import com.vietqr.org.dto.qrfeed.IListQrWalletDTO;
 import com.vietqr.org.dto.qrfeed.IQrWalletDTO;
+import com.vietqr.org.dto.qrfeed.QrCommentDTO;
 import com.vietqr.org.entity.qrfeed.QrWalletEntity;
 import com.vietqr.org.repository.QrCommentRepository;
 import com.vietqr.org.repository.QrWalletFolderRepository;
