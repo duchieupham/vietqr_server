@@ -31,6 +31,11 @@ public class QrWalletServiceImpl implements QrWalletService {
     }
 
     @Override
+    public void updateLogoQrWallet(String qrId) {
+        repo.updateLogoQrWallet(qrId);
+    }
+
+    @Override
     public int insertQrWallet(QrWalletEntity entity) {
         return repo.save(entity) == null ? 0 : 1;
     }

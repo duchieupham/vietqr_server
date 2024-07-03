@@ -821,18 +821,26 @@ public class QrWalletController {
     }
 
     @PostMapping("qr-wallet/logo-without")
-    public ResponseEntity<Object> pushLogoWithout(@RequestPart MultipartFile file) {
+    public ResponseEntity<Object> pushLogoWithout(@RequestPart(required = false) MultipartFile file) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            // save image
-            UUID uuid = UUID.randomUUID();
-            String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-            ImageEntity IE = new ImageEntity(uuid.toString(), fileName, file.getBytes());
-            imageService.insertImage(IE);
+            if (file != null && !file.isEmpty()) {
+                // save image
+                UUID uuid = UUID.randomUUID();
+                String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+                ImageEntity IE = new ImageEntity(uuid.toString(), fileName, file.getBytes());
+                imageService.insertImage(IE);
 
-            result = new ResponseMessageDTO("SUCCESS", "");
-            httpStatus = HttpStatus.BAD_REQUEST;
+                // update image into QR
+                //qrWalletService.updateLogoQrWallet(uuid.toString());
+
+                result = new ResponseMessageDTO("SUCCESS", uuid.toString());
+                httpStatus = HttpStatus.OK;
+            } else {
+                result = new ResponseMessageDTO("SUCCESS", "Not find image");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
         } catch (Exception e) {
             logger.error("QrWalletController: ERROR: get QrWallet: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());

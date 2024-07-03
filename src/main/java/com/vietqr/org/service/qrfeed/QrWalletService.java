@@ -11,12 +11,16 @@ import java.util.List;
 public interface QrWalletService {
     void updateFileQrById(String id, String qrId);
 
+    void updateLogoQrWallet(String qrId);
+
     public int insertQrWallet(QrWalletEntity entity);
 
     public int countQrWallet(String value);
+
     public int countQrWalletPublic(String value);
 
     public void updateQrWallet(String id, String description, int isPublic, int qrType, String title, String content, int style, int theme);
+
     public void updateQrVCard(String id, String description, int isPublic, int qrType,
                               String title, String value, int style, int theme);
 
@@ -27,27 +31,37 @@ public interface QrWalletService {
     public QrWalletEntity getQrLinkOrQrTextById(String qrId);
 
     public List<IListQrWalletDTO> getQrWallets(String value, int offset, int size);
+
     public List<IListQrWalletDTO> getQrWalletPublic(String value, int offset, int size);
 
     public void deleteQrWalletsByIds(List<String> ids);
 
     public List<String> findExistingIds(List<String> ids);
+
     public List<String> getUserLinkOrTextData(String folderId, int type);
+
     public List<String> getQrData(String folderId, int type);
+
     public List<String> getUserVCardData(String folderId, int type);
+
     public List<String> getUserVietQrData(String folderId, int type);
 
     public int countUserLinkOrTextInfo(String folderId, int type);
+
     public int countUserVCardInfo(String folderId, int type);
+
     public int countUserVietQrInfo(String folderId, int type);
 
 
     List<String> getQrWalletIdsByFolderId(String folderId);
+
     void deleteQrItemsByIds(List<String> ids);
 
     // List<IQrWalletDTO> getAllPublicQrWallets();
-     List<IQrWalletDTO> getAllPublicQrWallets(String userId, int offset, int size);
+    List<IQrWalletDTO> getAllPublicQrWallets(String userId, int offset, int size);
+
     int countPublicQrWallets();
+
     IQrWalletDTO getQrWalletDetailsById(String qrWalletId);
 //    IQrWalletDTO getQrWalletDetailsById(String qrWalletId, String userId);
 //
