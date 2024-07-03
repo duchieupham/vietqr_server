@@ -569,7 +569,7 @@ public class QrWalletController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    //    @GetMapping("/qr-wallets/public")
+//        @GetMapping("/qr-wallets/publics")
 //    public ResponseEntity<Object> getAllPublicQrWallets() {
 //        Object result = null;
 //        HttpStatus httpStatus = null;
@@ -584,13 +584,79 @@ public class QrWalletController {
 //        }
 //        return new ResponseEntity<>(result, httpStatus);
 //    }
+
+    //    @GetMapping("/qr-wallets/public")
+//    public ResponseEntity<Object> getAllPublicQrWallets(@RequestParam String userId) {
+//        Object result = null;
+//        HttpStatus httpStatus = null;
+//        try {
+//            List<IQrWalletDTO> qrWallets = qrWalletService. getAllPublicQrWallets(userId);
+//            result = qrWallets;
+//            httpStatus = HttpStatus.OK;
+//        } catch (Exception e) {
+//            logger.error("getAllPublicQrWallet Error at " + e.getMessage() + System.currentTimeMillis());
+//            result = new ResponseMessageDTO("FAILED", "E05");
+//            httpStatus = HttpStatus.BAD_REQUEST;
+//        }
+//        return new ResponseEntity<>(result, httpStatus);
+//    }
+//    @GetMapping("/qr-wallets/public")
+//    public ResponseEntity<Object> getAllPublicQrWallets(
+//            @RequestParam String userId,
+//            @RequestParam int page,
+//            @RequestParam int size) {
+//        Object result = null;
+//        HttpStatus httpStatus = null;
+//        try {
+//            int totalElements = qrWalletService.countPublicQrWallets();
+//            int offset = (page - 1) * size;
+//            List<IQrWalletDTO> qrWallets = qrWalletService.getAllPublicQrWallets(userId, offset, size);
+//
+//            PageDTO pageDTO = new PageDTO();
+//            pageDTO.setSize(size);
+//            pageDTO.setPage(page);
+//            pageDTO.setTotalElement(totalElements);
+//            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElements, size));
+//
+//            PageResDTO pageResDTO = new PageResDTO();
+//            pageResDTO.setMetadata(pageDTO);
+//            pageResDTO.setData(qrWallets);
+//
+//            result = pageResDTO;
+//            httpStatus = HttpStatus.OK;
+//        } catch (Exception e) {
+//            logger.error("getAllPublicQrWallet Error at " + e.getMessage() + System.currentTimeMillis());
+//            result = new ResponseMessageDTO("FAILED", "E05");
+//            httpStatus = HttpStatus.BAD_REQUEST;
+//        }
+//        return new ResponseEntity<>(result, httpStatus);
+//    }
+
+
     @GetMapping("/qr-wallets/public")
-    public ResponseEntity<Object> getAllPublicQrWallets(@RequestParam String userId) {
+    public ResponseEntity<Object> getAllPublicQrWallets(
+            @RequestParam String userId,
+            @RequestParam int page,
+            @RequestParam int size) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            List<IQrWalletDTO> qrWallets = qrWalletService.getAllPublicQrWallets(userId);
-            result = qrWallets;
+            int totalElements = qrWalletService.countPublicQrWallets();
+            int offset = (page - 1) * size;
+            List<QrWalletDTO> qrWallets = qrWalletService.getAllPublicQrWallets(userId, offset, size);
+
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageDTO.setTotalElement(totalElements);
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElements, size));
+
+            PageResDTO pageResDTO = new PageResDTO();
+            pageResDTO.setMetadata(pageDTO);
+            pageResDTO.setData(qrWallets);
+
+            result = pageResDTO;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("getAllPublicQrWallet Error at " + e.getMessage() + System.currentTimeMillis());
@@ -599,6 +665,7 @@ public class QrWalletController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
 
     @GetMapping("/qr-wallets/public/details/{id}")
     public ResponseEntity<Object> getQrWalletDetails(@PathVariable String id) {
@@ -625,9 +692,9 @@ public class QrWalletController {
                 detailDTO.setComments(comments);
 
                 result = detailDTO;
-                httpStatus = HttpStatus.OK;
             }
         } catch (Exception e) {
+                httpStatus = HttpStatus.OK;
             logger.error("getQrWalletDetails: ERROR: " + e.getMessage() + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;

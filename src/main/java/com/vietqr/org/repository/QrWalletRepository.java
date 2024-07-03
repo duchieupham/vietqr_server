@@ -1,11 +1,6 @@
 package com.vietqr.org.repository;
 
-import com.vietqr.org.dto.qrfeed.IListQrWalletDTO;
-import com.vietqr.org.dto.qrfeed.IQrWalletDTO;
-import com.vietqr.org.dto.qrfeed.QrCommentDTO;
-import com.vietqr.org.dto.qrfeed.UserInfoLinkOrTextDTO;
-import com.vietqr.org.dto.qrfeed.UserInfoVcardDTO;
-import com.vietqr.org.dto.qrfeed.UserInfoVietQRDTO;
+import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.qrfeed.QrWalletEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -134,14 +129,24 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
 //            " FROM qr_wallet w WHERE w.is_public = 1" +
 //            " ORDER BY w.time_created DESC", nativeQuery = true)
 //    List<IQrWalletDTO> findAllPublicQrWallets();
+
+
     @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
             "w.value AS value, w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
             "(SELECT COUNT(id) FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.interaction_type = 1) AS likeCount, " +
             "(SELECT COUNT(id) FROM qr_wallet_comment wc WHERE wc.qr_wallet_id = w.id) AS commentCount, " +
-            "(SELECT COUNT(id) > 0 FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.user_id = :userId AND i.interaction_type = 1) AS hasLiked " +
+            "CASE WHEN (SELECT COUNT(id) FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.user_id = :userId AND i.interaction_type = 1) > 0 THEN TRUE ELSE FALSE END AS hasLiked " +
             "FROM qr_wallet w WHERE w.is_public = 1 " +
-            "ORDER BY w.time_created DESC", nativeQuery = true)
-    List<IQrWalletDTO> findAllPublicQrWallets(@Param("userId") String userId);
+            "ORDER BY w.time_created DESC " +
+            "LIMIT :offset, :size", nativeQuery = true)
+    List<QrWalletDTO> findAllPublicQrWallets(@Param("userId") String userId, @Param("offset") int offset, @Param("size") int size);
+
+
+
+    @Query(value = "SELECT COUNT(id) FROM qr_wallet WHERE is_public = 1", nativeQuery = true)
+    int countPublicQrWallets();
+
+
     @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, w.value AS value, " +
             "w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
             "(SELECT COUNT(id) FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.interaction_type =1) AS likeCount, " +

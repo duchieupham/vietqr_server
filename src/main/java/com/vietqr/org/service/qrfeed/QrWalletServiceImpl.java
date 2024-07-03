@@ -1,10 +1,6 @@
 package com.vietqr.org.service.qrfeed;
 
-import com.vietqr.org.dto.qrfeed.IListQrWalletDTO;
-import com.vietqr.org.dto.qrfeed.IQrWalletDTO;
-import com.vietqr.org.dto.qrfeed.UserInfoLinkOrTextDTO;
-import com.vietqr.org.dto.qrfeed.UserInfoVcardDTO;
-import com.vietqr.org.dto.qrfeed.UserInfoVietQRDTO;
+import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.qrfeed.QrWalletEntity;
 import com.vietqr.org.repository.QrWalletFolderRepository;
 import com.vietqr.org.repository.QrWalletRepository;
@@ -128,9 +124,15 @@ public class QrWalletServiceImpl implements QrWalletService {
 //    public List<IQrWalletDTO> getAllPublicQrWallets() {
 //        return repo.findAllPublicQrWallets();
 //    }
+
     @Override
-    public List<IQrWalletDTO> getAllPublicQrWallets(String userId) {
-        return repo.findAllPublicQrWallets(userId);
+    public List<QrWalletDTO> getAllPublicQrWallets(String userId, int offset, int size) {
+        return repo.findAllPublicQrWallets(userId, offset, size);
+    }
+
+    @Override
+    public int countPublicQrWallets() {
+        return repo.countPublicQrWallets();
     }
 
 
