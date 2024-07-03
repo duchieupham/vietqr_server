@@ -3,6 +3,7 @@ package com.vietqr.org.service.qrfeed;
 import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.qrfeed.QrWalletEntity;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -48,4 +49,9 @@ public interface QrWalletService {
 //    int countCommentsByQrWalletId(String qrWalletId);
 
 //    List<QrCommentDTO> findCommentsByQrWalletId(String qrWalletId, int offset, int size);
+
+    Page<QrCommentDTO> findCommentsByQrWalletId(String qrWalletId, Pageable pageable);
+    int countCommentsByQrWalletId(String qrWalletId);
+
+
 }

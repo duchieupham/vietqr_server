@@ -14,10 +14,7 @@ import java.util.UUID;
 public class QrCommentServiceImpl implements QrCommentService{
     @Autowired
     private QrCommentRepository qrCommentRepository;
-    @Override
-    public List<QrCommentDTO> findCommentsByQrWalletId(String qrWalletId) {
-        return qrCommentRepository.findCommentsByQrWalletId(qrWalletId);
-    }
+
 
     @Override
     public void addComment(QrCommentRequestDTO request) {

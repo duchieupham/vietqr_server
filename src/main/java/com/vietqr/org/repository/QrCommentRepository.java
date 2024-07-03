@@ -3,6 +3,7 @@ package com.vietqr.org.repository;
 import com.vietqr.org.dto.qrfeed.QrCommentDTO;
 import com.vietqr.org.dto.qrfeed.UserCommentDTO;
 import com.vietqr.org.entity.qrfeed.QrCommentEntity;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -15,21 +16,7 @@ import java.util.List;
 @Repository
 public interface QrCommentRepository extends JpaRepository<QrCommentEntity, String> {
 
-//    @Query(value = "SELECT c.id AS id, c.message AS message, " +
-//            "JSON_UNQUOTE(JSON_EXTRACT(c.user_data, '$.fullName')) AS fullName, " +
-//            "c.time_created AS timeCreated " +
-//            "FROM qr_comment c " +
-//            "INNER JOIN qr_wallet_comment wc ON wc.qr_comment_id = c.id " +
-//            "WHERE wc.qr_wallet_id = :qrWalletId", nativeQuery = true)
-//    List<QrCommentDTO> findCommentsByQrWalletId(@Param("qrWalletId") String qrWalletId);
-    @Query(value = "SELECT c.id AS id, c.message AS message, " +
-            "abr.bankAccountName AS fullName, " +
-            "c.time_created AS timeCreated " +
-            "FROM qr_comment c " +
-            "INNER JOIN qr_wallet_comment wc ON wc.qr_comment_id = c.id " +
-            "INNER JOIN account_bank_receive abr ON abr.user_id = c.user_id " +
-            "WHERE wc.qr_wallet_id = :qrWalletId", nativeQuery = true)
-    List<QrCommentDTO> findCommentsByQrWalletId(@Param("qrWalletId") String qrWalletId);
+
 
     @Modifying
     @Transactional

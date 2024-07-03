@@ -18,6 +18,8 @@ import com.vietqr.org.util.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -670,60 +672,17 @@ public class QrWalletController {
     }
 
 
-    @GetMapping("/qr-wallets/public/details/{id}")
-    public ResponseEntity<Object> getQrWalletDetails(@PathVariable String id) {
-        Object result = null;
-        HttpStatus httpStatus = null;
-        try {
-            IQrWalletDTO qrWalletDTO = qrWalletService.getQrWalletDetailsById(id);
-            if (qrWalletDTO == null) {
-                result = new ResponseMessageDTO("FAILED", "QrWallet not found");
-                httpStatus = HttpStatus.BAD_REQUEST;
-            } else {
-                List<QrCommentDTO> comments = qrCommentService.findCommentsByQrWalletId(id);
-
-                QrWalletDetailDTO detailDTO = new QrWalletDetailDTO();
-                detailDTO.setId(qrWalletDTO.getId());
-                detailDTO.setTitle(qrWalletDTO.getTitle());
-                detailDTO.setDescription(qrWalletDTO.getDescription());
-                detailDTO.setValue(qrWalletDTO.getValue());
-                detailDTO.setQrType(qrWalletDTO.getQrType());
-                detailDTO.setTimeCreated(qrWalletDTO.getTimeCreated());
-                detailDTO.setUserId(qrWalletDTO.getUserId());
-                detailDTO.setLikeCount(qrWalletDTO.getLikeCount());
-                detailDTO.setCommentCount(qrWalletDTO.getCommentCount());
-                detailDTO.setComments(comments);
-
-                result = detailDTO;
-                httpStatus = HttpStatus.OK;
-            }
-        } catch (Exception e) {
-
-            logger.error("getQrWalletDetails: ERROR: " + e.getMessage() + System.currentTimeMillis());
-            result = new ResponseMessageDTO("FAILED", "E05");
-            httpStatus = HttpStatus.BAD_REQUEST;
-        }
-        return new ResponseEntity<>(result, httpStatus);
-    }
-
-
-
-//    @GetMapping("/public/details/{id}")
-//    public ResponseEntity<Object> getQrWalletDetails(@PathVariable String id,
-//                                                     @RequestParam String userId,
-//                                                     @RequestParam int page,
-//                                                     @RequestParam int size) {
+//    @GetMapping("/qr-wallets/public/details/{id}")
+//    public ResponseEntity<Object> getQrWalletDetails(@PathVariable String id) {
 //        Object result = null;
 //        HttpStatus httpStatus = null;
 //        try {
-//            IQrWalletDTO qrWalletDTO = qrWalletService.getQrWalletDetailsById(id, userId);
+//            IQrWalletDTO qrWalletDTO = qrWalletService.getQrWalletDetailsById(id);
 //            if (qrWalletDTO == null) {
 //                result = new ResponseMessageDTO("FAILED", "QrWallet not found");
 //                httpStatus = HttpStatus.BAD_REQUEST;
 //            } else {
-//                int totalElements = qrWalletService.countCommentsByQrWalletId(id);
-//                int offset = (page - 1) * size;
-//                List<QrCommentDTO> comments = qrWalletService.findCommentsByQrWalletId(id, offset, size);
+//                List<QrCommentDTO> comments = qrCommentService.findCommentsByQrWalletId(id);
 //
 //                QrWalletDetailDTO detailDTO = new QrWalletDetailDTO();
 //                detailDTO.setId(qrWalletDTO.getId());
@@ -735,28 +694,76 @@ public class QrWalletController {
 //                detailDTO.setUserId(qrWalletDTO.getUserId());
 //                detailDTO.setLikeCount(qrWalletDTO.getLikeCount());
 //                detailDTO.setCommentCount(qrWalletDTO.getCommentCount());
-//                detailDTO.setHasLiked(qrWalletDTO.getHasLiked());
-//                detailDTO.setData(qrWalletDTO.getData());
 //                detailDTO.setComments(comments);
 //
-//                PageDTO pageDTO = new PageDTO();
-//                pageDTO.setSize(size);
-//                pageDTO.setPage(page);
-//                pageDTO.setTotalElement(totalElements);
-//                pageDTO.setTotalPage(StringUtil.getTotalPage(totalElements, size));
-//
-//                PageResDTO pageResDTO = new PageResDTO();
-//                pageResDTO.setMetadata(pageDTO);
-//                pageResDTO.setData(Collections.singletonList(detailDTO)); // Sử dụng Collections.singletonList để tạo danh sách với một phần tử
-//
-//                result = pageResDTO;
+//                result = detailDTO;
 //                httpStatus = HttpStatus.OK;
 //            }
 //        } catch (Exception e) {
+//
 //            logger.error("getQrWalletDetails: ERROR: " + e.getMessage() + System.currentTimeMillis());
 //            result = new ResponseMessageDTO("FAILED", "E05");
 //            httpStatus = HttpStatus.BAD_REQUEST;
 //        }
 //        return new ResponseEntity<>(result, httpStatus);
 //    }
+
+
+    @GetMapping("/qr-wallets/public/details/{id}")
+    public ResponseEntity<Object> getQrWalletDetails(@PathVariable String id,
+                                                     @RequestParam int page,
+                                                     @RequestParam int size) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            IQrWalletDTO qrWalletDTO = qrWalletService.getQrWalletDetailsById(id);
+            if (qrWalletDTO == null) {
+                result = new ResponseMessageDTO("FAILED", "QrWallet not found");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            } else {
+                int totalCommentElements = qrWalletService.countCommentsByQrWalletId(id);
+                Pageable pageable = PageRequest.of(page - 1, size);
+                Page<QrCommentDTO> commentsPage = qrWalletService.findCommentsByQrWalletId(id, pageable);
+
+                QrWalletDetailDTO detailDTO = new QrWalletDetailDTO();
+                detailDTO.setId(qrWalletDTO.getId());
+                detailDTO.setTitle(qrWalletDTO.getTitle());
+                detailDTO.setDescription(qrWalletDTO.getDescription());
+                detailDTO.setValue(qrWalletDTO.getValue());
+                detailDTO.setQrType(qrWalletDTO.getQrType());
+                detailDTO.setTimeCreated(qrWalletDTO.getTimeCreated());
+                detailDTO.setUserId(qrWalletDTO.getUserId());
+                detailDTO.setLikeCount(qrWalletDTO.getLikeCount());
+                detailDTO.setCommentCount(qrWalletDTO.getCommentCount());
+                detailDTO.setHasLiked(qrWalletDTO.getHasLiked());
+                detailDTO.setData(qrWalletDTO.getData());
+                detailDTO.setFullName(qrWalletDTO.getFullName());
+                detailDTO.setImageId(qrWalletDTO.getImageId());
+                detailDTO.setStyle(qrWalletDTO.getStyle());
+                detailDTO.setTheme(qrWalletDTO.getTheme());
+
+                PageDTO pageDTO = new PageDTO();
+                pageDTO.setSize(size);
+                pageDTO.setPage(page);
+                pageDTO.setTotalElement(totalCommentElements);
+                pageDTO.setTotalPage(StringUtil.getTotalPage(totalCommentElements, size));
+
+                PageResDTO pageResDTO = new PageResDTO();
+                pageResDTO.setMetadata(pageDTO);
+                pageResDTO.setData(commentsPage.getContent());
+
+                detailDTO.setComments(pageResDTO);
+
+                result = detailDTO;
+                httpStatus = HttpStatus.OK;
+            }
+        } catch (Exception e) {
+            logger.error("getQrWalletDetails: ERROR: " + e.getMessage() + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+
 }

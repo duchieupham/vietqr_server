@@ -1,5 +1,7 @@
 package com.vietqr.org.dto.qrfeed;
 
+import com.vietqr.org.dto.PageResDTO;
+
 import java.util.List;
 
 public class QrWalletDetailDTO {
@@ -14,8 +16,20 @@ public class QrWalletDetailDTO {
     private int commentCount; // Số lượt bình luận
     private int hasLiked; // Người dùng đã thích chưa
     private String data; // Dữ liệu thêm vào
-    private List<QrCommentDTO> comments; // Danh sách các bình luận
+    private String fullName;
+    private String imageId;
+    private String style;
+    private String theme;
+   //private List<QrCommentDTO> comments; // Danh sách các bình luận
+    private PageResDTO comments;
 
+    public PageResDTO getComments() {
+        return comments;
+    }
+
+    public void setComments(PageResDTO comments) {
+        this.comments = comments;
+    }
 
     public String getId() {
         return id;
@@ -89,13 +103,6 @@ public class QrWalletDetailDTO {
         this.commentCount = commentCount;
     }
 
-    public List<QrCommentDTO> getComments() {
-        return comments;
-    }
-
-    public void setComments(List<QrCommentDTO> comments) {
-        this.comments = comments;
-    }
 
     public int getHasLiked() {
         return hasLiked;
@@ -111,5 +118,39 @@ public class QrWalletDetailDTO {
 
     public void setData(String data) {
         this.data = data;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getImageId() {
+        return imageId;
+    }
+
+    public void setImageId(String imageId) {
+        this.imageId = imageId;
+    }
+
+    public String getStyle() {
+        return style;
+    }
+
+    public void setStyle(String style) {
+        this.style = style;
+    }
+
+    public String getTheme() {
+        return theme;
+    }
+
+
+
+    public void setTheme(String theme) {
+        this.theme = theme;
     }
 }

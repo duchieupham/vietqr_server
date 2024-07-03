@@ -6,5 +6,6 @@ public interface QrCommentDTO {
     String getFullName();
     long getTimeCreated();
     String getUserId();
+    String getImageId();
 
 }

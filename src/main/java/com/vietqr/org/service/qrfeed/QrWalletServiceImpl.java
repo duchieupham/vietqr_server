@@ -152,19 +152,15 @@ public class QrWalletServiceImpl implements QrWalletService {
         return repo.findQRWalletDetailsById(qrWalletId);
     }
 
-//    @Override
-//    public IQrWalletDTO getQrWalletDetailsById(String qrWalletId, String userId) {
-//        return repo.findQRWalletDetailsById(qrWalletId, userId);
-//
-//    }
+    @Override
+    public Page<QrCommentDTO> findCommentsByQrWalletId(String qrWalletId, Pageable pageable) {
+        return repo.findCommentsByQrWalletId(qrWalletId, pageable);
+    }
 
-//    @Override
-//    public int countCommentsByQrWalletId(String qrWalletId) {
-//        return repo.countCommentsByQrWalletId(qrWalletId);
-//    }
+    @Override
+    public int countCommentsByQrWalletId(String qrWalletId) {
+        return repo.countCommentsByQrWalletId(qrWalletId);
+    }
 
-//    @Override
-//    public List<QrCommentDTO> findCommentsByQrWalletId(String qrWalletId, int offset, int size) {
-//        return qrCommentRepository.findCommentsByQrWalletId(qrWalletId, offset, size);
-//    }
+
 }

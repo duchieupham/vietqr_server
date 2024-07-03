@@ -10,13 +10,11 @@ import java.util.List;
 
 @Service
 public interface QrCommentService {
-    List<QrCommentDTO> findCommentsByQrWalletId(String qrWalletId);
+
 
     void addComment(QrCommentRequestDTO request);
 
     void deleteComment(String commentId);
-
-
 
 
     List<UserCommentDTO> findCommentersByQrWalletId(String qrWalletId, int offset, int size);
