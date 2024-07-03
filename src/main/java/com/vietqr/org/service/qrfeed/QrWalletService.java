@@ -39,7 +39,7 @@ public interface QrWalletService {
     void deleteQrItemsByIds(List<String> ids);
 
     // List<IQrWalletDTO> getAllPublicQrWallets();
-     List<QrWalletDTO> getAllPublicQrWallets(String userId, int offset, int size);
+     List<IQrWalletDTO> getAllPublicQrWallets(String userId, int offset, int size);
     int countPublicQrWallets();
     IQrWalletDTO getQrWalletDetailsById(String qrWalletId);
 }

@@ -11,4 +11,5 @@ public interface IQrWalletDTO {
     int getLikeCount();
     int getCommentCount();
     boolean getHasLiked();
+    String getData();
 }

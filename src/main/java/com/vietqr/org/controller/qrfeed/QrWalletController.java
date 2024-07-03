@@ -643,7 +643,7 @@ public class QrWalletController {
         try {
             int totalElements = qrWalletService.countPublicQrWallets();
             int offset = (page - 1) * size;
-            List<QrWalletDTO> qrWallets = qrWalletService.getAllPublicQrWallets(userId, offset, size);
+            List<IQrWalletDTO> qrWallets = qrWalletService.getAllPublicQrWallets(userId, offset, size);
 
 
             PageDTO pageDTO = new PageDTO();
