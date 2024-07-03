@@ -126,10 +126,6 @@ public class QrWalletServiceImpl implements QrWalletService {
         repo.deleteByQrWalletIds(ids);
     }
 
-//    @Override
-//    public List<IQrWalletDTO> getAllPublicQrWallets() {
-//        return repo.findAllPublicQrWallets();
-//    }
 
     @Override
     public List<IQrWalletDTO> getAllPublicQrWallets(String userId, int offset, int size) {
@@ -151,19 +147,19 @@ public class QrWalletServiceImpl implements QrWalletService {
         return repo.findQRWalletDetailsById(qrWalletId);
     }
 
-    @Override
-    public IQrWalletDTO getQrWalletDetailsById(String qrWalletId, String userId) {
-        return repo.findQRWalletDetailsById(qrWalletId, userId);
+//    @Override
+//    public IQrWalletDTO getQrWalletDetailsById(String qrWalletId, String userId) {
+//        return repo.findQRWalletDetailsById(qrWalletId, userId);
+//
+//    }
 
-    }
+//    @Override
+//    public int countCommentsByQrWalletId(String qrWalletId) {
+//        return repo.countCommentsByQrWalletId(qrWalletId);
+//    }
 
-    @Override
-    public int countCommentsByQrWalletId(String qrWalletId) {
-        return repo.countCommentsByQrWalletId(qrWalletId);
-    }
-
-    @Override
-    public List<QrCommentDTO> findCommentsByQrWalletId(String qrWalletId, int offset, int size) {
-        return qrCommentRepository.findCommentsByQrWalletId(qrWalletId, offset, size);
-    }
+//    @Override
+//    public List<QrCommentDTO> findCommentsByQrWalletId(String qrWalletId, int offset, int size) {
+//        return qrCommentRepository.findCommentsByQrWalletId(qrWalletId, offset, size);
+//    }
 }

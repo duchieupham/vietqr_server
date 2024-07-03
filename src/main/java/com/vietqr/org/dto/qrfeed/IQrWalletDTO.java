@@ -12,4 +12,7 @@ public interface IQrWalletDTO {
     int getCommentCount();
     int getHasLiked();
     String getData();
+
+    String getFullName();
+    String getImageId();
 }

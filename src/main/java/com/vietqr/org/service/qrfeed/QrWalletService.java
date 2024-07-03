@@ -42,9 +42,9 @@ public interface QrWalletService {
      List<IQrWalletDTO> getAllPublicQrWallets(String userId, int offset, int size);
     int countPublicQrWallets();
     IQrWalletDTO getQrWalletDetailsById(String qrWalletId);
-    IQrWalletDTO getQrWalletDetailsById(String qrWalletId, String userId);
+//    IQrWalletDTO getQrWalletDetailsById(String qrWalletId, String userId);
+//
+//    int countCommentsByQrWalletId(String qrWalletId);
 
-    int countCommentsByQrWalletId(String qrWalletId);
-
-    List<QrCommentDTO> findCommentsByQrWalletId(String qrWalletId, int offset, int size);
+//    List<QrCommentDTO> findCommentsByQrWalletId(String qrWalletId, int offset, int size);
 }
