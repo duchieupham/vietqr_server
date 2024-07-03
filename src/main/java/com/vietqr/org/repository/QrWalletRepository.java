@@ -19,6 +19,11 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
     @Query(value = "UPDATE qr_wallet SET file_attachment_id = :id WHERE id = :qrId ", nativeQuery = true)
     void updateFileQrById(String id, String qrId);
 
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE qr_wallet SET file_attachment_id = :id WHERE id = :qrId ", nativeQuery = true)
+    void updateLogoQrWallet(String qrId);
+
     @Query(value = "SELECT a.id AS id, a.description AS description, a.is_public AS isPublic, a.qr_type as QrType, " +
             "a.time_created as timeCreate, " +
             "a.title AS title, a.value as content, b.role AS role " +
