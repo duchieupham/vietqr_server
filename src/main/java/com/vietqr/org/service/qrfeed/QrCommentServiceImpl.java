@@ -2,6 +2,7 @@ package com.vietqr.org.service.qrfeed;
 
 import com.vietqr.org.dto.qrfeed.QrCommentDTO;
 import com.vietqr.org.dto.qrfeed.QrCommentRequestDTO;
+import com.vietqr.org.dto.qrfeed.UserCommentDTO;
 import com.vietqr.org.repository.QrCommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,7 +40,12 @@ public class QrCommentServiceImpl implements QrCommentService{
     }
 
     @Override
-    public List<String> getUserNamesWhoCommented(String qrWalletId) {
-        return qrCommentRepository.findUserNamesWhoCommented(qrWalletId);
+    public List<UserCommentDTO> findCommentersByQrWalletId(String qrWalletId, int offset, int size) {
+        return qrCommentRepository.findCommentersByQrWalletId(qrWalletId, offset, size);
+    }
+
+    @Override
+    public int countCommentersByQrWalletId(String qrWalletId) {
+        return qrCommentRepository.countCommentersByQrWalletId(qrWalletId);
     }
 }

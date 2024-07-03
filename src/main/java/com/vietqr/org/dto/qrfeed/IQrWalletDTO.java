@@ -15,4 +15,6 @@ public interface IQrWalletDTO {
 
     String getFullName();
     String getImageId();
+    String getStyle();
+    String getTheme();
 }

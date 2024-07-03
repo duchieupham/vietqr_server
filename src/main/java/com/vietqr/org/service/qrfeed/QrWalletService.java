@@ -2,6 +2,7 @@ package com.vietqr.org.service.qrfeed;
 
 import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.qrfeed.QrWalletEntity;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -38,7 +39,7 @@ public interface QrWalletService {
     List<String> getQrWalletIdsByFolderId(String folderId);
     void deleteQrItemsByIds(List<String> ids);
 
-    // List<IQrWalletDTO> getAllPublicQrWallets();
+
      List<IQrWalletDTO> getAllPublicQrWallets(String userId, int offset, int size);
     int countPublicQrWallets();
     IQrWalletDTO getQrWalletDetailsById(String qrWalletId);
