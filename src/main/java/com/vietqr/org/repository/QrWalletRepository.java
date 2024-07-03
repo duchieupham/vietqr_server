@@ -1,7 +1,11 @@
 package com.vietqr.org.repository;
 
-import com.vietqr.org.dto.qrfeed.*;
+import com.vietqr.org.dto.qrfeed.IListQrWalletDTO;
+import com.vietqr.org.dto.qrfeed.IQrWalletDTO;
+import com.vietqr.org.dto.qrfeed.QrCommentDTO;
 import com.vietqr.org.entity.qrfeed.QrWalletEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -170,6 +174,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
     void deleteByQrWalletIds(@Param("qrWalletIds") List<String> qrWalletIds);
 
 
+
     @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
             "w.value AS value, w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
             "(SELECT COUNT(i.id) FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.interaction_type = 1) AS likeCount, " +
@@ -183,7 +188,9 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "ELSE NULL " +
             "END AS data, " +
             "IFNULL(TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))), 'Undefined') AS fullName, " +
-            "IFNULL(ai.img_id, '') AS imageId " +
+            "IFNULL(ai.img_id, '') AS imageId, " +
+            "IFNULL(w.style, '') AS style, " +
+            "IFNULL(w.theme, '') AS theme " +
             "FROM qr_wallet w " +
             "LEFT JOIN account_information ai ON ai.user_id = w.user_id " +
             "WHERE w.is_public = 1 " +

@@ -1,5 +1,6 @@
 package com.vietqr.org.service.qrfeed;
 
+import com.vietqr.org.dto.qrfeed.UserLikeDTO;
 import com.vietqr.org.repository.QrInteractionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,5 +26,15 @@ public class QrInteractionServiceImpl implements QrInteractionService{
     @Override
     public List<String> getUserNamesWhoLiked(String qrWalletId) {
         return qrInteractionRepository.findUserNamesWhoLiked(qrWalletId);
+    }
+
+    @Override
+    public List<UserLikeDTO> findLikersByQrWalletId(String qrWalletId, int offset, int size) {
+        return qrInteractionRepository.findLikersByQrWalletId(qrWalletId, offset, size);
+    }
+
+    @Override
+    public int countLikersByQrWalletId(String qrWalletId) {
+        return qrInteractionRepository.countLikersByQrWalletId(qrWalletId);
     }
 }
