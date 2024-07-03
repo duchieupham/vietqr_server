@@ -1,9 +1,6 @@
 package com.vietqr.org.service.qrfeed;
 
-import com.vietqr.org.dto.qrfeed.IListQrWalletDTO;
-import com.vietqr.org.dto.qrfeed.UserInfoLinkOrTextDTO;
-import com.vietqr.org.dto.qrfeed.UserInfoVcardDTO;
-import com.vietqr.org.dto.qrfeed.UserInfoVietQRDTO;
+import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.qrfeed.QrWalletEntity;
 import org.springframework.stereotype.Service;
 
@@ -12,18 +9,25 @@ import java.util.List;
 
 @Service
 public interface QrWalletService {
+    void updateFileQrById(String id, String qrId);
 
     public int insertQrWallet(QrWalletEntity entity);
 
     public int countQrWallet(String value);
+    public int countQrWalletPublic(String value);
 
     public void updateQrWallet(String id, String description, int isPublic, int qrType, String title, String content, int style, int theme);
+    public void updateQrVCard(String id, String description, int isPublic, int qrType,
+                              String title, String value, int style, int theme);
+
+    public QrWalletEntity getQrVCardUpdate(String qrId);
 
     public IListQrWalletDTO getQrLinkOrQrTextByUserId(String userId);
 
     public QrWalletEntity getQrLinkOrQrTextById(String qrId);
 
     public List<IListQrWalletDTO> getQrWallets(String value, int offset, int size);
+    public List<IListQrWalletDTO> getQrWalletPublic(String value, int offset, int size);
 
     public void deleteQrWalletsByIds(List<String> ids);
 
@@ -40,4 +44,14 @@ public interface QrWalletService {
 
     List<String> getQrWalletIdsByFolderId(String folderId);
     void deleteQrItemsByIds(List<String> ids);
+
+    // List<IQrWalletDTO> getAllPublicQrWallets();
+     List<IQrWalletDTO> getAllPublicQrWallets(String userId, int offset, int size);
+    int countPublicQrWallets();
+    IQrWalletDTO getQrWalletDetailsById(String qrWalletId);
+//    IQrWalletDTO getQrWalletDetailsById(String qrWalletId, String userId);
+//
+//    int countCommentsByQrWalletId(String qrWalletId);
+
+//    List<QrCommentDTO> findCommentsByQrWalletId(String qrWalletId, int offset, int size);
 }

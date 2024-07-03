@@ -6,26 +6,31 @@ import java.lang.reflect.Field;
 
 public class VietQRCreateUnauthenticatedExtendDTO extends VietQRCreateUnauthenticatedDTO {
     private String userId;
-    private int style;
-    private int theme;
+    private String qrName;
+    private String qrDescription;
+    private String isPublic;
+    private String style;
+    private String theme;
 
     public VietQRCreateUnauthenticatedExtendDTO() {
     }
 
-
-    public int getStyle() {
-        return style;
-    }
-
-    public void setStyle(int style) {
+    public VietQRCreateUnauthenticatedExtendDTO(String userId, String qrName, String qrDescription, String isPublic, String style, String theme) {
+        this.userId = userId;
+        this.qrName = qrName;
+        this.qrDescription = qrDescription;
+        this.isPublic = isPublic;
         this.style = style;
+        this.theme = theme;
     }
 
-    public int getTheme() {
-        return theme;
-    }
-
-    public void setTheme(int theme) {
+    public VietQRCreateUnauthenticatedExtendDTO(String bankAccount, String bankCode, String userBankName, String amount, String content, String userId, String qrName, String qrDescription, String isPublic, String style, String theme) {
+        super(bankAccount, bankCode, userBankName, amount, content);
+        this.userId = userId;
+        this.qrName = qrName;
+        this.qrDescription = qrDescription;
+        this.isPublic = isPublic;
+        this.style = style;
         this.theme = theme;
     }
 
@@ -35,6 +40,46 @@ public class VietQRCreateUnauthenticatedExtendDTO extends VietQRCreateUnauthenti
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getQrName() {
+        return qrName;
+    }
+
+    public void setQrName(String qrName) {
+        this.qrName = qrName;
+    }
+
+    public String getQrDescription() {
+        return qrDescription;
+    }
+
+    public void setQrDescription(String qrDescription) {
+        this.qrDescription = qrDescription;
+    }
+
+    public String getIsPublic() {
+        return isPublic;
+    }
+
+    public void setIsPublic(String isPublic) {
+        this.isPublic = isPublic;
+    }
+
+    public String getStyle() {
+        return style;
+    }
+
+    public void setStyle(String style) {
+        this.style = style;
+    }
+
+    public String getTheme() {
+        return theme;
+    }
+
+    public void setTheme(String theme) {
+        this.theme = theme;
     }
 
     public boolean isNull() {

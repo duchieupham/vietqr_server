@@ -20,15 +20,15 @@ public interface QrFolderRepository extends JpaRepository<QrFolderEntity, String
     @Query(value = "SELECT a.id AS id, a.description AS description, a.time_created AS timeCreate, " +
             "a.title AS title, a.user_id AS userId " +
             "FROM qr_folder a " +
-            "WHERE (a.description LIKE %:value%) OR (a.title LIKE %:value%) " +
+            "WHERE ((a.description LIKE %:value%) OR (a.title LIKE %:value%)) AND (a.user_id = :userId) " +
             "ORDER BY a.time_created DESC " +
             "LIMIT :offset, :size  ", nativeQuery = true)
-    List<IListQrFolderDTO> getListFolders(String value, int offset, int size);
+    List<IListQrFolderDTO> getListFolders(String value, int offset, int size, String userId);
 
     @Query(value = "SELECT COUNT(a.id) " +
-            "FROM viet_qr.qr_folder a " +
-            "WHERE (a.description LIKE %:value%) OR (a.title LIKE %:value%) ", nativeQuery = true)
-    int countQrFolder(String value);
+            "FROM qr_folder a " +
+            "WHERE ((a.description LIKE %:value%) OR (a.title LIKE %:value%)) AND (a.user_id = :userId) ", nativeQuery = true)
+    int countQrFolder(String value,String userId );
 
     @Transactional
     @Modifying

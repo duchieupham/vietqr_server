@@ -1,26 +1,34 @@
 package com.vietqr.org.service.qrfeed;
 
-import com.vietqr.org.dto.qrfeed.IListQrWalletDTO;
-import com.vietqr.org.dto.qrfeed.UserInfoLinkOrTextDTO;
-import com.vietqr.org.dto.qrfeed.UserInfoVcardDTO;
-import com.vietqr.org.dto.qrfeed.UserInfoVietQRDTO;
+import com.vietqr.org.controller.qrfeed.QrWalletController;
+import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.qrfeed.QrWalletEntity;
+import com.vietqr.org.repository.QrCommentRepository;
 import com.vietqr.org.repository.QrWalletFolderRepository;
 import com.vietqr.org.repository.QrWalletRepository;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
 public class QrWalletServiceImpl implements QrWalletService {
+    private static final org.apache.log4j.Logger logger = Logger.getLogger(QrWalletServiceImpl.class);
     @Autowired
     QrWalletRepository repo;
 
     @Autowired
     QrWalletFolderRepository qrWalletFolderRepository;
+
+    @Autowired
+    QrCommentRepository qrCommentRepository;
+
+    @Override
+    public void updateFileQrById(String id, String qrId) {
+        repo.updateFileQrById(id, qrId);
+    }
 
     @Override
     public int insertQrWallet(QrWalletEntity entity) {
@@ -33,8 +41,23 @@ public class QrWalletServiceImpl implements QrWalletService {
     }
 
     @Override
+    public int countQrWalletPublic(String value) {
+        return repo.countQrWalletPublic(value);
+    }
+
+    @Override
     public void updateQrWallet(String id, String description, int isPublic, int qrType, String title, String content, int style, int theme) {
         repo.updateQrWallet(id, description, isPublic, qrType, title, content, style, theme);
+    }
+
+    @Override
+    public void updateQrVCard(String id, String description, int isPublic, int qrType, String title, String value, int style, int theme) {
+        repo.updateQrVCard(id, description, isPublic, qrType, title, value, style, theme);
+    }
+
+    @Override
+    public QrWalletEntity getQrVCardUpdate(String qrId) {
+        return repo.getQrVCardUpdate(qrId);
     }
 
     @Override
@@ -50,6 +73,10 @@ public class QrWalletServiceImpl implements QrWalletService {
     @Override
     public List<IListQrWalletDTO> getQrWallets(String value, int offset, int size) {
         return repo.getQrWallets(value, offset, size);
+    }
+    @Override
+    public List<IListQrWalletDTO> getQrWalletPublic(String value, int offset, int size) {
+        return repo.getQrWalletPublic(value, offset, size);
     }
 
     @Override
@@ -122,4 +149,41 @@ public class QrWalletServiceImpl implements QrWalletService {
     public void deleteQrItemsByIds(List<String> ids) {
         repo.deleteByQrWalletIds(ids);
     }
+
+
+    @Override
+    public List<IQrWalletDTO> getAllPublicQrWallets(String userId, int offset, int size) {
+        List<IQrWalletDTO> qrWallets = repo.findAllPublicQrWallets(userId, offset, size);
+        for (IQrWalletDTO wallet : qrWallets) {
+            logger.info("QR Wallet ID: " + wallet.getId() + ", hasLiked: " + wallet.getHasLiked());
+        }
+        return qrWallets;
+    }
+
+    @Override
+    public int countPublicQrWallets() {
+        return repo.countPublicQrWallets();
+    }
+
+
+    @Override
+    public IQrWalletDTO getQrWalletDetailsById(String qrWalletId) {
+        return repo.findQRWalletDetailsById(qrWalletId);
+    }
+
+//    @Override
+//    public IQrWalletDTO getQrWalletDetailsById(String qrWalletId, String userId) {
+//        return repo.findQRWalletDetailsById(qrWalletId, userId);
+//
+//    }
+
+//    @Override
+//    public int countCommentsByQrWalletId(String qrWalletId) {
+//        return repo.countCommentsByQrWalletId(qrWalletId);
+//    }
+
+//    @Override
+//    public List<QrCommentDTO> findCommentsByQrWalletId(String qrWalletId, int offset, int size) {
+//        return qrCommentRepository.findCommentsByQrWalletId(qrWalletId, offset, size);
+//    }
 }

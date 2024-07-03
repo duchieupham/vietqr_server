@@ -13,14 +13,24 @@ import java.util.List;
 @Repository
 public interface QrWalletFolderRepository extends JpaRepository<QrWalletFolderEntity, String> {
 
+//    @Transactional
+//    @Modifying
+//    @Query(value = "INSERT INTO qr_wallet_folder (id, qr_folder_id, qr_wallet_id) " +
+//            "VALUES (:id, :qrFolderId, :qrWalletId) " +
+//            "INNER JOIN qr_wallet b ON a.qr_wallet_id = b.id " +
+//            "WHERE b.user_id = :userId ", nativeQuery = true)
+
     @Transactional
     @Modifying
     @Query(value = "INSERT INTO qr_wallet_folder (id, qr_folder_id, qr_wallet_id) " +
-            "VALUES (:id, :qrFolderId, :qrWalletId)", nativeQuery = true)
+            "SELECT :id, :qrFolderId, b.id " +
+            "FROM qr_wallet b " +
+            "WHERE b.id = :qrWalletId AND b.user_id = :userId", nativeQuery = true)
     void insertQrWalletFolder(
             @Param("id") String id,
             @Param("qrFolderId") String qrFolderId,
-            @Param("qrWalletId") String qrWalletId);
+            @Param("qrWalletId") String qrWalletId,
+            @Param("userId") String userId);
 
 
 

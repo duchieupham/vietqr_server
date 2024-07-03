@@ -1,9 +1,8 @@
 package com.vietqr.org.entity.qrfeed;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import com.vietqr.org.dto.qrfeed.UserRoleDTOs;
+
+import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity

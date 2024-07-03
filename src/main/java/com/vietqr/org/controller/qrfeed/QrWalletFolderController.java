@@ -1,6 +1,7 @@
 package com.vietqr.org.controller.qrfeed;
 
 import com.vietqr.org.dto.ResponseMessageDTO;
+import com.vietqr.org.dto.qrfeed.AddQrToFolderRequestDTO;
 import com.vietqr.org.entity.qrfeed.QrFolderEntity;
 import com.vietqr.org.service.qrfeed.QrFolderService;
 import com.vietqr.org.service.qrfeed.QrUserService;
@@ -36,19 +37,18 @@ public class QrWalletFolderController {
 
     @PostMapping("qr-feed/add-qr-folder")
     public ResponseEntity<Object> addQrWalletsToFolder(
-            @RequestParam String qrFolderId,
-            @RequestBody List<String> qrWalletIds
+            @RequestBody AddQrToFolderRequestDTO dto
     ) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
 
-            QrFolderEntity entity = qrFolderService.getFolderById(qrFolderId);
+            QrFolderEntity entity = qrFolderService.getFolderById(dto.getFolderId());
             if (Objects.isNull(entity)) {
                 result = new ResponseMessageDTO("FAILED", "E149");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }else {
-                qrWalletFolderService.addQrWalletIds(qrFolderId, qrWalletIds);
+                qrWalletFolderService.addQrWalletsToFolder(dto.getFolderId(), dto.getUserId(), dto.getQrIds());
 
                 result = new ResponseMessageDTO("SUCCESS", "");
                 httpStatus = HttpStatus.BAD_REQUEST;

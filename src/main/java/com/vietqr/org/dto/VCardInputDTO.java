@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public class VCardInputDTO implements Serializable {
+public class    VCardInputDTO implements Serializable {
 
     /**
      *
