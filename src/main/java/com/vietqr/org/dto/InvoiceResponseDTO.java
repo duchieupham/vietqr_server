@@ -21,14 +21,12 @@ public class InvoiceResponseDTO {
     private String mid;
     private String midName;
     private String vso;
+    private String fileAttachmentId;
 
     public InvoiceResponseDTO() {
     }
 
-    public InvoiceResponseDTO(String invoiceId, String billNumber, String invoiceNumber,
-                              String invoiceName, long timeCreated, long timePaid, int status,
-                              String bankId, String bankAccount, String bankShortName,
-                              String qrCode, long totalAmount) {
+    public InvoiceResponseDTO(String invoiceId, String billNumber, String invoiceNumber, String invoiceName, long timeCreated, long timePaid, int status, String bankId, String bankAccount, String bankShortName, String userBankName, String qrCode, long totalAmount, String bankNameForPayment, String bankAccountForPayment, String bankCodeForPayment, String userBankNameForPayment, String mid, String midName, String vso, String fileAttachmentId) {
         this.invoiceId = invoiceId;
         this.billNumber = billNumber;
         this.invoiceNumber = invoiceNumber;
@@ -39,8 +37,25 @@ public class InvoiceResponseDTO {
         this.bankId = bankId;
         this.bankAccount = bankAccount;
         this.bankShortName = bankShortName;
+        this.userBankName = userBankName;
         this.qrCode = qrCode;
         this.totalAmount = totalAmount;
+        this.bankNameForPayment = bankNameForPayment;
+        this.bankAccountForPayment = bankAccountForPayment;
+        this.bankCodeForPayment = bankCodeForPayment;
+        this.userBankNameForPayment = userBankNameForPayment;
+        this.mid = mid;
+        this.midName = midName;
+        this.vso = vso;
+        this.fileAttachmentId = fileAttachmentId;
+    }
+
+    public String getFileAttachmentId() {
+        return fileAttachmentId;
+    }
+
+    public void setFileAttachmentId(String fileAttachmentId) {
+        this.fileAttachmentId = fileAttachmentId;
     }
 
     public String getInvoiceId() {

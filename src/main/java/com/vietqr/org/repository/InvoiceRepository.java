@@ -12,11 +12,16 @@ import java.util.List;
 
 @Repository
 public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> {
+
+    @Query(value = "SELECT a.file_attachment_id AS fileAttachmentId FROM invoice a " +
+            "WHERE a.id = :invoiceId ", nativeQuery = true)
+    String getFileAttachmentId(String invoiceId);
+
     @Query(value = "SELECT a.id AS invoiceId, '' AS billNumber, "
             + "'' AS content, a.name AS invoiceName, a.time_created AS timeCreated, "
             + "a.status AS status, a.time_paid AS timePaid, a.bank_id AS bankId, "
             + "a.total_amount AS totalAmount, a.invoice_id AS invoiceNumber, "
-            + "a.data AS data "
+            + "a.data AS data, a.file_attachment_id AS fileAttachmentId "
             + "FROM invoice a "
             + "WHERE a.user_id = :userId AND a.status IN (:status) "
             + "ORDER BY a.time_created DESC "
@@ -31,7 +36,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "'' AS content, a.name AS invoiceName, a.time_created AS timeCreated, "
             + "a.status AS status, a.time_paid AS timePaid, a.bank_id AS bankId, "
             + "a.total_amount AS totalAmount, a.invoice_id AS invoiceNumber, "
-            + "a.data AS data "
+            + "a.data AS data, a.file_attachment_id AS fileAttachmentId "
             + "FROM invoice a "
             + "WHERE a.user_id = :userId AND a.status IN (:status) "
             + "AND a.time_created BETWEEN :fromDate AND :toDate "
@@ -44,7 +49,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "'' AS content, a.name AS invoiceName, a.time_created AS timeCreated, "
             + "a.status AS status, a.time_paid AS timePaid, a.bank_id AS bankId, "
             + "a.total_amount AS totalAmount, a.invoice_id AS invoiceNumber, "
-            + "a.data AS data "
+            + "a.data AS data, a.file_attachment_id AS fileAttachmentId "
             + "FROM invoice a "
             + "WHERE a.user_id = :userId AND a.status IN (:status) "
             + "AND a.bank_id = :bankId "
@@ -57,7 +62,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "a.name AS invoiceName, a.time_created AS timeCreated, "
             + "a.status AS status, a.time_paid AS timePaid, a.bank_id AS bankId, "
             + "a.total_amount AS totalAmount, a.invoice_id AS invoiceNumber, "
-            + "a.data AS data "
+            + "a.data AS data, a.file_attachment_id AS fileAttachmentId "
             + "FROM invoice a "
             + "WHERE a.user_id = :userId AND a.status IN (:status) "
             + "AND a.time_created BETWEEN :fromDate AND :toDate "
@@ -100,7 +105,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "a.vat AS vat, a.bank_id AS bankId, "
             + "a.amount AS amount, a.total_amount AS totalAmount, "
             + "a.user_id AS userId, a.merchant_id AS merchantId, "
-            + "a.data AS data, COALESCE(a.bank_id_recharge, '') AS bankIdRecharge "
+            + "a.data AS data, COALESCE(a.bank_id_recharge, '') AS bankIdRecharge, a.file_attachment_id AS fileAttachmentId "
             + "FROM invoice a "
             + "WHERE a.id = :invoiceId ", nativeQuery = true)
     IInvoiceDetailDTO getInvoiceDetailById(String invoiceId);

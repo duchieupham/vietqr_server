@@ -20,7 +20,7 @@ public class InvoiceDetailDTO {
     private String bankAccountForPayment;
     private String bankCodeForPayment;
     private String userBankNameForPayment;
-
+    private String fileAttachmentId;
     private String qrCode;
     private long totalAmount;
     private List<InvoiceItemResDTO> items;
@@ -28,10 +28,7 @@ public class InvoiceDetailDTO {
     public InvoiceDetailDTO() {
     }
 
-    public InvoiceDetailDTO(String invoiceId, String billNumber, String invoiceNumber, String invoiceName,
-                            long timeCreated, long timePaid, int status, long vatAmount, long amount,
-                            double vat, String bankId, String bankShortName, String bankAccount, String qrCode,
-                            long totalAmount, List<InvoiceItemResDTO> items) {
+    public InvoiceDetailDTO(String invoiceId, String billNumber, String invoiceNumber, String invoiceName, long timeCreated, long timePaid, int status, long vatAmount, long amount, double vat, String bankId, String bankShortName, String bankAccount, String bankNameForPayment, String bankAccountForPayment, String bankCodeForPayment, String userBankNameForPayment, String fileAttachmentId, String qrCode, long totalAmount, List<InvoiceItemResDTO> items) {
         this.invoiceId = invoiceId;
         this.billNumber = billNumber;
         this.invoiceNumber = invoiceNumber;
@@ -45,9 +42,22 @@ public class InvoiceDetailDTO {
         this.bankId = bankId;
         this.bankShortName = bankShortName;
         this.bankAccount = bankAccount;
+        this.bankNameForPayment = bankNameForPayment;
+        this.bankAccountForPayment = bankAccountForPayment;
+        this.bankCodeForPayment = bankCodeForPayment;
+        this.userBankNameForPayment = userBankNameForPayment;
+        this.fileAttachmentId = fileAttachmentId;
         this.qrCode = qrCode;
         this.totalAmount = totalAmount;
         this.items = items;
+    }
+
+    public String getFileAttachmentId() {
+        return fileAttachmentId;
+    }
+
+    public void setFileAttachmentId(String fileAttachmentId) {
+        this.fileAttachmentId = fileAttachmentId;
     }
 
     public String getInvoiceId() {

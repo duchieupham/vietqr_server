@@ -1586,6 +1586,8 @@ public class InvoiceController {
                 dto.setBankCodeForPayment("");
                 dto.setQrCode("");
                 dto.setTotalAmount(item.getTotalAmount());
+                String fileAttachmentId = invoiceService.getFileAttachmentId(item.getInvoiceId());
+                dto.setFileAttachmentId(fileAttachmentId);
                 return dto;
             }).collect(Collectors.toList());
             PageDTO pageDTO = new PageDTO();
@@ -1797,6 +1799,8 @@ public class InvoiceController {
             }
             response.setTotalAmount(dto.getTotalAmount());
             response.setItems(data);
+            String fileAttachmentId = invoiceService.getFileAttachmentId(invoiceId);
+            response.setFileAttachmentId(fileAttachmentId);
             result = response;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
