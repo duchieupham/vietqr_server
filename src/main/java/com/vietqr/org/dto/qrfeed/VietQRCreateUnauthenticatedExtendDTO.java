@@ -8,10 +8,19 @@ public class VietQRCreateUnauthenticatedExtendDTO extends VietQRCreateUnauthenti
     private String userId;
     private String qrName;
     private String qrDescription;
+    private int isPublic;
     private int style;
     private int theme;
 
     public VietQRCreateUnauthenticatedExtendDTO() {
+    }
+
+    public int getIsPublic() {
+        return isPublic;
+    }
+
+    public void setIsPublic(int isPublic) {
+        this.isPublic = isPublic;
     }
 
     public String getQrName() {

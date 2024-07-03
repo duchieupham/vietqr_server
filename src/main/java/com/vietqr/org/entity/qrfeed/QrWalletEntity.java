@@ -41,10 +41,13 @@ public class QrWalletEntity implements Serializable {
     @Column(name = "theme")
     private int theme;
 
+    @Column(name = "fileAttachmentId")
+    private String fileAttachmentId;
+
     public QrWalletEntity() {
     }
 
-    public QrWalletEntity(String id, String title, String description, String value, int qrType, String qrData, String userData, int isPublic, long timeCreated, String userId, String pin, String publicId, int style, int theme) {
+    public QrWalletEntity(String id, String title, String description, String value, int qrType, String qrData, String userData, int isPublic, long timeCreated, String userId, String pin, String publicId, int style, int theme, String fileAttachmentId) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -59,6 +62,19 @@ public class QrWalletEntity implements Serializable {
         this.publicId = publicId;
         this.style = style;
         this.theme = theme;
+        this.fileAttachmentId = fileAttachmentId;
+    }
+
+    public int getStyle() {
+        return style;
+    }
+
+    public String getFileAttachmentId() {
+        return fileAttachmentId;
+    }
+
+    public void setFileAttachmentId(String fileAttachmentId) {
+        this.fileAttachmentId = fileAttachmentId;
     }
 
     public int getStyle(int style) {

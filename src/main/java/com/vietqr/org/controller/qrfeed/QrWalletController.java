@@ -10,10 +10,7 @@ import com.vietqr.org.entity.BankTypeEntity;
 import com.vietqr.org.entity.ImageEntity;
 import com.vietqr.org.entity.qrfeed.QrUserEntity;
 import com.vietqr.org.entity.qrfeed.QrWalletEntity;
-import com.vietqr.org.service.AmazonS3Service;
-import com.vietqr.org.service.BankTypeService;
-import com.vietqr.org.service.CaiBankService;
-import com.vietqr.org.service.ImageService;
+import com.vietqr.org.service.*;
 import com.vietqr.org.service.qrfeed.QRCodeService;
 import com.vietqr.org.service.qrfeed.QrCommentService;
 import com.vietqr.org.service.qrfeed.QrUserService;
@@ -52,6 +49,10 @@ import java.util.stream.Collectors;
 public class QrWalletController {
     private static final Logger logger = Logger.getLogger(QrWalletController.class);
 
+
+    @Autowired
+    FileAttachService imageInvoiceService;
+
     @Autowired
     private QRCodeService qrCodeService;
 
@@ -80,7 +81,8 @@ public class QrWalletController {
     public ResponseEntity<Object> generateQRUnauthenticated(
             int isPublic,
             int type,
-            VietQRCreateUnauthenticatedExtendDTO dto) {
+            VietQRCreateUnauthenticatedExtendDTO dto,
+            MultipartFile file) {
         Object result = null;
         HttpStatus httpStatus = null;
         VietQRDTO vietQRDTO = new VietQRDTO();
@@ -164,6 +166,13 @@ public class QrWalletController {
                     entity.setPublicId("");
                     entity.setTheme(dto.getTheme());
                     entity.setStyle(dto.getStyle());
+
+                    UUID uuid = UUID.randomUUID();
+                    String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+                    ImageEntity IE = new ImageEntity(uuid.toString(), fileName, file.getBytes());
+                    imageService.insertImage(IE);
+                    entity.setFileAttachmentId(uuid.toString());
+
                     qrWalletService.insertQrWallet(entity);
 
                     //add qr vào qr_user (ch implements)
@@ -175,7 +184,8 @@ public class QrWalletController {
                     qrUserEntity.setRole("ADMIN");
                     qrUserService.insertQrUser(qrUserEntity);
 
-                    result = vietQRDTO;
+//                    result = vietQRDTO;
+                    result = new ResponseMessageDTO("SUCCESS", "");
                     httpStatus = HttpStatus.OK;
                 } else {
                     result = new ResponseMessageDTO("FAILED", "E05");
@@ -191,16 +201,13 @@ public class QrWalletController {
     }
 
     //    @PostMapping("qr-wallet/generate-qr-vcard")
-    ResponseEntity<Object> createQrVcard(
-            int isPublic,
-            int type,
-            VCardInputExtendDTO dto) {
+    ResponseEntity<Object> createQrVcard(int isPublic, int type, VCardInputExtendDTO dto, MultipartFile file) {
         Object result = null;
         QrVcardRequestDTO qrVcardRequestDTO = null;
         HttpStatus httpStatus = null;
         try {
             if (dto.isNull()) {
-                result = new ResponseMessageDTO("FAILED", "E100");
+                result = new ResponseMessageDTO("FAILED", "E05");
                 httpStatus = HttpStatus.BAD_REQUEST;
             } else {
                 String qr = VCardUtil.getVcardQR(dto);
@@ -264,6 +271,14 @@ public class QrWalletController {
                 entity.setPublicId("");
                 entity.setStyle(dto.getStyle());
                 entity.setTheme(dto.getTheme());
+
+                // save image
+                UUID uuid = UUID.randomUUID();
+                String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+                ImageEntity IE = new ImageEntity(uuid.toString(), fileName, file.getBytes());
+                imageService.insertImage(IE);
+
+                entity.setFileAttachmentId(uuid.toString());
                 qrWalletService.insertQrWallet(entity);
 
                 //add qr vào qr_user (ch implements)
@@ -275,7 +290,8 @@ public class QrWalletController {
                 qrUserEntity.setRole("ADMIN");
                 qrUserService.insertQrUser(qrUserEntity);
 
-                result = qrVcardRequestDTO;
+//                result = qrVcardRequestDTO;
+                result = new ResponseMessageDTO("SUCCESS", "");
                 httpStatus = HttpStatus.OK;
             }
 
@@ -524,7 +540,7 @@ public class QrWalletController {
 
 
     //    @PostMapping("qr-wallet/generate-qr-link")
-    public ResponseEntity<Object> createQrLink(int type, QrCreateRequestDTO dto) {
+    public ResponseEntity<Object> createQrLink(int type, QrCreateRequestDTO dto, MultipartFile file) throws IOException {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
@@ -554,7 +570,7 @@ public class QrWalletController {
                     QrUserEntity qrUserEntity = new QrUserEntity();
                     UUID idQrUser = UUID.randomUUID();
                     switch (type) {
-                        case 1: // link
+                        case 0: // link
                             entity.setId(idQrWallet.toString());
                             entity.setTitle(dto.getQrName());
                             entity.setDescription(dto.getQrDescription());
@@ -569,7 +585,7 @@ public class QrWalletController {
                                     + "\"theme\": \"" + dto.getQrDescription() + "\", "
                                     + "\"value\": \"" + dto.getValue() + "\""
                                     + "}");
-                            entity.setUserData("{"
+                            entity.setUserData("{" // lấy fullName, phoneNo, email
                                     + "\"userId\": \"" + dto.getUserId() + "\", "
                                     + "\"qrType\": \"" + type + "\", "
                                     + "\"content\": \"" + dto.getValue() + "\""
@@ -585,6 +601,13 @@ public class QrWalletController {
                             entity.setPublicId(qrLink);
                             entity.setStyle(dto.getStyle());
                             entity.setTheme(dto.getTheme());
+
+                            // save image
+                            UUID uuid = UUID.randomUUID();
+                            String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+                            ImageEntity IE = new ImageEntity(uuid.toString(), fileName, file.getBytes());
+                            imageService.insertImage(IE);
+                            entity.setFileAttachmentId(uuid.toString());
                             qrWalletService.insertQrWallet(entity);
 
                             //add qr vào qr_user (ch implements)
@@ -594,8 +617,11 @@ public class QrWalletController {
                             qrUserEntity.setRole("ADMIN");
                             qrUserService.insertQrUser(qrUserEntity);
 
+                            // update file log to qr
+                            qrWalletService.updateFileQrById(uuid.toString(), idQrWallet.toString());
+
                             break;
-                        case 0: // text
+                        case 1: // text
                             entity.setId(idQrWallet.toString());
                             entity.setTitle(dto.getQrName());
                             entity.setDescription(dto.getQrDescription());
@@ -626,6 +652,11 @@ public class QrWalletController {
                             entity.setPublicId(qrLink);
                             entity.setStyle(dto.getStyle());
                             entity.setTheme(dto.getTheme());
+
+                            // save image
+                            UUID ids = UUID.randomUUID();
+                            imageInvoiceService.saveFile(file, ids.toString());
+                            entity.setFileAttachmentId(ids.toString());
                             qrWalletService.insertQrWallet(entity);
 
                             //add qr vào qr_user (ch implements)
@@ -635,9 +666,12 @@ public class QrWalletController {
                             qrUserEntity.setRole("ADMIN");
                             qrUserService.insertQrUser(qrUserEntity);
 
+                            // update file log to qr
+                            qrWalletService.updateFileQrById(ids.toString(), idQrWallet.toString());
                             break;
                     }
-                    result = qrWalletResponseDTO;
+//                    result = qrWalletResponseDTO;
+                    result = new ResponseMessageDTO("SUCCESS", "");
                     httpStatus = HttpStatus.OK;
                 } else {
                     result = new ResponseMessageDTO("FAILED", "E148");
@@ -647,11 +681,13 @@ public class QrWalletController {
         } catch (Exception e) {
             logger.error("QrWalletController: ERROR: create QR: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
-            result = new ResponseMessageDTO("FAILED", "E05");
+            result = new ResponseMessageDTO("FAILED" + e.getMessage(), "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
+    //
 
     @GetMapping("qr-wallet")
     public ResponseEntity<Object> getQrWallet(
@@ -761,30 +797,50 @@ public class QrWalletController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @PostMapping("qr-wallet/generate-qr")
+    @PostMapping("qr-wallet/image-qr-logo")
+    public ResponseEntity<Object> uploadLogoQr(
+            @RequestPart String qrId,
+            @RequestPart("file") MultipartFile file) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            UUID id = UUID.randomUUID();
+            imageInvoiceService.saveFile(file, id.toString());
+
+            // update file log to qr
+            qrWalletService.updateFileQrById(id.toString(), qrId);
+
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED" + e.getMessage(), "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping(value = "qr-wallet/generate-qr", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> createQRFinal(
-            @Valid
-            @RequestParam int isPublic,
             @RequestParam int type,
-            @RequestBody String json
+            @RequestParam("json") String json,
+            @RequestPart("file") MultipartFile file
     ) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             switch (type) {
-                case 0://link
+                case 0: //link
                 case 1: //text
                     QrCreateRequestDTO qrCreateRequestDTO = objectMapper.readValue(json, QrCreateRequestDTO.class);
-                    return createQrLink(type, qrCreateRequestDTO);
-                case 2://vcard
+                    return createQrLink(type, qrCreateRequestDTO, file);
+                case 2: //vcard
                     VCardInputExtendDTO vCardInputDTO = objectMapper.readValue(json, VCardInputExtendDTO.class);
-                    return createQrVcard(isPublic, type, vCardInputDTO);
-                case 3://viet qr
+                    return createQrVcard(vCardInputDTO.getIsPublic(), type, vCardInputDTO, file);
+                case 3: //viet qr
                     VietQRCreateUnauthenticatedExtendDTO value = objectMapper.readValue(json, VietQRCreateUnauthenticatedExtendDTO.class);
-                    return generateQRUnauthenticated(isPublic, type, value);
+                    return generateQRUnauthenticated(value.getIsPublic(), type, value, file);
             }
-
         } catch (Exception e) {
             logger.error("QrWalletController: ERROR: get QrWallet: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());

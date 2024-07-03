@@ -1,5 +1,7 @@
 package com.vietqr.org.dto.qrfeed;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.Serializable;
 import java.lang.reflect.Field;
 
@@ -29,6 +31,8 @@ public class QrCreateRequestDTO implements Serializable {
         this.style = style;
         this.theme = theme;
     }
+
+
 
     public int getStyle() {
         return style;

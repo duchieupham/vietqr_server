@@ -13,7 +13,7 @@ import java.util.List;
 
 @Service
 public interface QrWalletService {
-
+    void updateFileQrById(String id, String qrId);
 
     public int insertQrWallet(QrWalletEntity entity);
 

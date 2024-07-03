@@ -6,6 +6,7 @@ public class VCardInputExtendDTO extends VCardInputDTO {
 
     private String qrName;
     private String qrDescription;
+    private int isPublic;
     private int style;
     private int theme;
 
@@ -25,6 +26,14 @@ public class VCardInputExtendDTO extends VCardInputDTO {
 
     public VCardInputExtendDTO(String fullname, String phoneNo, String email, String companyName, String website, String address, String userId, String additionalData) {
         super(fullname, phoneNo, email, companyName, website, address, userId, additionalData);
+    }
+
+    public int getIsPublic() {
+        return isPublic;
+    }
+
+    public void setIsPublic(int isPublic) {
+        this.isPublic = isPublic;
     }
 
     public String getQrName() {

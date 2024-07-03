@@ -24,6 +24,11 @@ public class QrWalletServiceImpl implements QrWalletService {
     QrWalletFolderRepository qrWalletFolderRepository;
 
     @Override
+    public void updateFileQrById(String id, String qrId) {
+        repo.updateFileQrById(id, qrId);
+    }
+
+    @Override
     public int insertQrWallet(QrWalletEntity entity) {
         return repo.save(entity) == null ? 0 : 1;
     }
