@@ -1,27 +1,29 @@
 package com.vietqr.org.service.qrfeed;
 
-import com.vietqr.org.dto.qrfeed.IListQrWalletDTO;
-import com.vietqr.org.dto.qrfeed.IQrWalletDTO;
-import com.vietqr.org.dto.qrfeed.UserInfoLinkOrTextDTO;
-import com.vietqr.org.dto.qrfeed.UserInfoVcardDTO;
-import com.vietqr.org.dto.qrfeed.UserInfoVietQRDTO;
+import com.vietqr.org.controller.qrfeed.QrWalletController;
+import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.qrfeed.QrWalletEntity;
+import com.vietqr.org.repository.QrCommentRepository;
 import com.vietqr.org.repository.QrWalletFolderRepository;
 import com.vietqr.org.repository.QrWalletRepository;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
 public class QrWalletServiceImpl implements QrWalletService {
+    private static final org.apache.log4j.Logger logger = Logger.getLogger(QrWalletServiceImpl.class);
     @Autowired
     QrWalletRepository repo;
 
     @Autowired
     QrWalletFolderRepository qrWalletFolderRepository;
+
+    @Autowired
+    QrCommentRepository qrCommentRepository;
 
     @Override
     public void updateFileQrById(String id, String qrId) {
@@ -148,13 +150,40 @@ public class QrWalletServiceImpl implements QrWalletService {
         repo.deleteByQrWalletIds(ids);
     }
 
+
     @Override
-    public List<IQrWalletDTO> getAllPublicQrWallets() {
-        return repo.findAllPublicQrWallets();
+    public List<IQrWalletDTO> getAllPublicQrWallets(String userId, int offset, int size) {
+        List<IQrWalletDTO> qrWallets = repo.findAllPublicQrWallets(userId, offset, size);
+        for (IQrWalletDTO wallet : qrWallets) {
+            logger.info("QR Wallet ID: " + wallet.getId() + ", hasLiked: " + wallet.getHasLiked());
+        }
+        return qrWallets;
     }
+
+    @Override
+    public int countPublicQrWallets() {
+        return repo.countPublicQrWallets();
+    }
+
 
     @Override
     public IQrWalletDTO getQrWalletDetailsById(String qrWalletId) {
         return repo.findQRWalletDetailsById(qrWalletId);
     }
+
+//    @Override
+//    public IQrWalletDTO getQrWalletDetailsById(String qrWalletId, String userId) {
+//        return repo.findQRWalletDetailsById(qrWalletId, userId);
+//
+//    }
+
+//    @Override
+//    public int countCommentsByQrWalletId(String qrWalletId) {
+//        return repo.countCommentsByQrWalletId(qrWalletId);
+//    }
+
+//    @Override
+//    public List<QrCommentDTO> findCommentsByQrWalletId(String qrWalletId, int offset, int size) {
+//        return qrCommentRepository.findCommentsByQrWalletId(qrWalletId, offset, size);
+//    }
 }

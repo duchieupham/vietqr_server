@@ -12,6 +12,8 @@ public class QrWalletDetailDTO {
     private String userId; // ID người dùng tạo QR
     private int likeCount; // Số lượt thích
     private int commentCount; // Số lượt bình luận
+    private int hasLiked; // Người dùng đã thích chưa
+    private String data; // Dữ liệu thêm vào
     private List<QrCommentDTO> comments; // Danh sách các bình luận
 
 
@@ -93,5 +95,21 @@ public class QrWalletDetailDTO {
 
     public void setComments(List<QrCommentDTO> comments) {
         this.comments = comments;
+    }
+
+    public int getHasLiked() {
+        return hasLiked;
+    }
+
+    public void setHasLiked(int hasLiked) {
+        this.hasLiked = hasLiked;
+    }
+
+    public String getData() {
+        return data;
+    }
+
+    public void setData(String data) {
+        this.data = data;
     }
 }

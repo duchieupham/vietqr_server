@@ -1,7 +1,8 @@
 package com.vietqr.org.repository;
 
 import com.vietqr.org.dto.qrfeed.IUserInFolderDTO;
-import com.vietqr.org.dto.qrfeed.UserRoleDTO;
+import com.vietqr.org.dto.qrfeed.IUserRoleDTO;
+
 import com.vietqr.org.entity.qrfeed.QrFolderUserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -50,7 +51,9 @@ public interface QrFolderUserRepository extends JpaRepository<QrFolderUserEntity
             "UNION " +
             "SELECT DISTINCT qf.user_id AS userId, 'ADMIN' AS role " +
             "FROM qr_folder qf " +
-            "WHERE qf.id = :folderId ", nativeQuery = true)
-    List<UserRoleDTO> findUserRolesByFolderId(@Param("folderId") String folderId);
+            "WHERE qf.id = :folderId", nativeQuery = true)
+    List<IUserRoleDTO> findUserRolesByFolderId(@Param("folderId") String folderId);
 
+//    @Query(nativeQuery = true, name = "QrFolderUser.findUserRolesByFolderId")
+//    List<IUserRoleDTO> findUserRolesByFolderId(@Param("folderId") String folderId);
 }

@@ -14,11 +14,19 @@ import java.util.List;
 @Repository
 public interface QrCommentRepository extends JpaRepository<QrCommentEntity, String> {
 
+//    @Query(value = "SELECT c.id AS id, c.message AS message, " +
+//            "JSON_UNQUOTE(JSON_EXTRACT(c.user_data, '$.fullName')) AS fullName, " +
+//            "c.time_created AS timeCreated " +
+//            "FROM qr_comment c " +
+//            "INNER JOIN qr_wallet_comment wc ON wc.qr_comment_id = c.id " +
+//            "WHERE wc.qr_wallet_id = :qrWalletId", nativeQuery = true)
+//    List<QrCommentDTO> findCommentsByQrWalletId(@Param("qrWalletId") String qrWalletId);
     @Query(value = "SELECT c.id AS id, c.message AS message, " +
-            "JSON_UNQUOTE(JSON_EXTRACT(c.user_data, '$.fullName')) AS fullName, " +
+            "abr.bankAccountName AS fullName, " +
             "c.time_created AS timeCreated " +
             "FROM qr_comment c " +
             "INNER JOIN qr_wallet_comment wc ON wc.qr_comment_id = c.id " +
+            "INNER JOIN account_bank_receive abr ON abr.user_id = c.user_id " +
             "WHERE wc.qr_wallet_id = :qrWalletId", nativeQuery = true)
     List<QrCommentDTO> findCommentsByQrWalletId(@Param("qrWalletId") String qrWalletId);
 
@@ -51,5 +59,11 @@ public interface QrCommentRepository extends JpaRepository<QrCommentEntity, Stri
             "INNER JOIN qr_wallet_comment wc ON wc.qr_comment_id = c.id " +
             "WHERE wc.qr_wallet_id = :qrWalletId", nativeQuery = true)
     List<String> findUserNamesWhoCommented(@Param("qrWalletId") String qrWalletId);
+
+    @Query(value = "SELECT c.id AS id, c.message AS message, c.user_id AS userId, c.user_data AS userData, c.time_created AS timeCreated " +
+            "FROM qr_comment c WHERE c.qr_wallet_id = :qrWalletId ORDER BY c.time_created DESC LIMIT :offset, :size", nativeQuery = true)
+    List<QrCommentDTO> findCommentsByQrWalletId(@Param("qrWalletId") String qrWalletId, @Param("offset") int offset, @Param("size") int size);
+
+
 
 }

@@ -1,10 +1,6 @@
 package com.vietqr.org.service.qrfeed;
 
-import com.vietqr.org.dto.qrfeed.IListQrWalletDTO;
-import com.vietqr.org.dto.qrfeed.UserInfoLinkOrTextDTO;
-import com.vietqr.org.dto.qrfeed.UserInfoVcardDTO;
-import com.vietqr.org.dto.qrfeed.UserInfoVietQRDTO;
-import com.vietqr.org.dto.qrfeed.IQrWalletDTO;
+import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.qrfeed.QrWalletEntity;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +45,13 @@ public interface QrWalletService {
     List<String> getQrWalletIdsByFolderId(String folderId);
     void deleteQrItemsByIds(List<String> ids);
 
-    List<IQrWalletDTO> getAllPublicQrWallets();
+    // List<IQrWalletDTO> getAllPublicQrWallets();
+     List<IQrWalletDTO> getAllPublicQrWallets(String userId, int offset, int size);
+    int countPublicQrWallets();
     IQrWalletDTO getQrWalletDetailsById(String qrWalletId);
+//    IQrWalletDTO getQrWalletDetailsById(String qrWalletId, String userId);
+//
+//    int countCommentsByQrWalletId(String qrWalletId);
+
+//    List<QrCommentDTO> findCommentsByQrWalletId(String qrWalletId, int offset, int size);
 }

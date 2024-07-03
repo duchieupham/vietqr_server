@@ -1,6 +1,7 @@
 package com.vietqr.org.service.qrfeed;
 
 import com.vietqr.org.dto.qrfeed.IUserInFolderDTO;
+import com.vietqr.org.dto.qrfeed.IUserRoleDTO;
 import com.vietqr.org.dto.qrfeed.UserRoleDTO;
 import com.vietqr.org.entity.qrfeed.QrUserEntity;
 import com.vietqr.org.repository.QrFolderUserRepository;
@@ -59,7 +60,7 @@ public class QrFolderUserServiceImpl implements QrFolderUserService {
     }
 
     @Override
-    public List<UserRoleDTO> getUserRolesByFolderId(String folderId) {
+    public List<IUserRoleDTO> getUserRolesByFolderId(String folderId) {
         return repo.findUserRolesByFolderId(folderId);
     }
 
