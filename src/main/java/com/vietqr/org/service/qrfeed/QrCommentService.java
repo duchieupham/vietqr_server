@@ -2,6 +2,7 @@ package com.vietqr.org.service.qrfeed;
 
 import com.vietqr.org.dto.qrfeed.QrCommentDTO;
 import com.vietqr.org.dto.qrfeed.QrCommentRequestDTO;
+import com.vietqr.org.dto.qrfeed.UserCommentDTO;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
@@ -15,5 +16,9 @@ public interface QrCommentService {
 
     void deleteComment(String commentId);
 
-    List<String> getUserNamesWhoCommented(String qrWalletId);
+
+
+
+    List<UserCommentDTO> findCommentersByQrWalletId(String qrWalletId, int offset, int size);
+    int countCommentersByQrWalletId(String qrWalletId);
 }

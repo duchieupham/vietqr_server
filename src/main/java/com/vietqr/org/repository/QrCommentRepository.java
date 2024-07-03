@@ -1,6 +1,7 @@
 package com.vietqr.org.repository;
 
 import com.vietqr.org.dto.qrfeed.QrCommentDTO;
+import com.vietqr.org.dto.qrfeed.UserCommentDTO;
 import com.vietqr.org.entity.qrfeed.QrCommentEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -54,15 +55,29 @@ public interface QrCommentRepository extends JpaRepository<QrCommentEntity, Stri
     @Query(value="DELETE FROM qr_wallet_comment WHERE qr_comment_id = :commentId",nativeQuery=true)
     void unlinkCommentFromQrWallet(@Param("commentId")String commentId);
 
-    @Query(value = "SELECT DISTINCT JSON_UNQUOTE(JSON_EXTRACT(c.user_data, '$.fullName')) AS fullName " +
-            "FROM qr_comment c " +
-            "INNER JOIN qr_wallet_comment wc ON wc.qr_comment_id = c.id " +
-            "WHERE wc.qr_wallet_id = :qrWalletId", nativeQuery = true)
-    List<String> findUserNamesWhoCommented(@Param("qrWalletId") String qrWalletId);
+
 
     @Query(value = "SELECT c.id AS id, c.message AS message, c.user_id AS userId, c.user_data AS userData, c.time_created AS timeCreated " +
             "FROM qr_comment c WHERE c.qr_wallet_id = :qrWalletId ORDER BY c.time_created DESC LIMIT :offset, :size", nativeQuery = true)
     List<QrCommentDTO> findCommentsByQrWalletId(@Param("qrWalletId") String qrWalletId, @Param("offset") int offset, @Param("size") int size);
+
+
+    @Query(value = "SELECT c.user_id AS userId, " +
+            "IFNULL(TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))), 'Undefined') AS fullName " +
+            "FROM qr_comment c " +
+            "LEFT JOIN account_information ai ON ai.user_id = c.user_id " +
+            "INNER JOIN qr_wallet_comment wc ON wc.qr_comment_id = c.id " +
+            "WHERE wc.qr_wallet_id = :qrWalletId " +
+            "GROUP BY c.user_id, ai.last_name, ai.middle_name, ai.first_name " +
+            "ORDER BY c.user_id " +
+            "LIMIT :offset, :size", nativeQuery = true)
+    List<UserCommentDTO> findCommentersByQrWalletId(@Param("qrWalletId") String qrWalletId, @Param("offset") int offset, @Param("size") int size);
+
+    @Query(value = "SELECT COUNT(DISTINCT c.user_id) " +
+            "FROM qr_comment c " +
+            "INNER JOIN qr_wallet_comment wc ON wc.qr_comment_id = c.id " +
+            "WHERE wc.qr_wallet_id = :qrWalletId", nativeQuery = true)
+    int countCommentersByQrWalletId(@Param("qrWalletId") String qrWalletId);
 
 
 

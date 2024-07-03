@@ -1,13 +1,17 @@
 package com.vietqr.org.service.qrfeed;
 
-import com.vietqr.org.controller.qrfeed.QrWalletController;
-import com.vietqr.org.dto.qrfeed.*;
+import com.vietqr.org.dto.qrfeed.IListQrWalletDTO;
+import com.vietqr.org.dto.qrfeed.IQrWalletDTO;
 import com.vietqr.org.entity.qrfeed.QrWalletEntity;
 import com.vietqr.org.repository.QrCommentRepository;
 import com.vietqr.org.repository.QrWalletFolderRepository;
 import com.vietqr.org.repository.QrWalletRepository;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -147,7 +151,7 @@ public class QrWalletServiceImpl implements QrWalletService {
 
     @Override
     public List<String> getQrWalletIdsByFolderId(String folderId) {
-        return  qrWalletFolderRepository.findQrWalletIdsByQrFolderId(folderId);
+        return qrWalletFolderRepository.findQrWalletIdsByQrFolderId(folderId);
     }
 
     @Override
@@ -156,7 +160,7 @@ public class QrWalletServiceImpl implements QrWalletService {
     }
 
 
-    @Override
+        @Override
     public List<IQrWalletDTO> getAllPublicQrWallets(String userId, int offset, int size) {
         List<IQrWalletDTO> qrWallets = repo.findAllPublicQrWallets(userId, offset, size);
         for (IQrWalletDTO wallet : qrWallets) {
