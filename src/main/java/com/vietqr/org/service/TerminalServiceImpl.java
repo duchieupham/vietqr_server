@@ -238,6 +238,11 @@ public class TerminalServiceImpl implements TerminalService {
     }
 
     @Override
+    public String checkExistedPublishId(String publishId) {
+        return repo.checkExistedPublishId(publishId);
+    }
+
+    @Override
     public TerminalEntity getTerminalByTerminalId(String terminalId) {
         return repo.getTerminalByTerminalId(terminalId);
     }

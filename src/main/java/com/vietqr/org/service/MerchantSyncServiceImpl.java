@@ -149,13 +149,13 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
     }
 
     @Override
-    public MerchantSyncEntity getMerchantSyncByName(String merchantName, String refId) {
-        return repo.getMerchantSyncsByMerchantName(merchantName, refId);
+    public MerchantSyncEntity getMerchantSyncByName(String merchantName) {
+        return repo.getMerchantSyncsByMerchantName(merchantName);
     }
 
     @Override
-    public MerchantSyncEntity getMerchantSyncByPublishId(String mid, String refId) {
-        return repo.getMerchantSyncByPublicId(mid, refId);
+    public MerchantSyncEntity getMerchantSyncByPublishId(String mid) {
+        return repo.getMerchantSyncByPublicId(mid);
     }
 
     @Override
@@ -174,8 +174,8 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
     }
 
     @Override
-    public String getIdByPublicId(String publicId, String refId) {
-        return repo.getIdByPublicId(publicId, refId);
+    public String getIdByPublicId(String publicId) {
+        return repo.getIdByPublicId(publicId);
     }
 
     @Override

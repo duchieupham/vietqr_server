@@ -348,4 +348,9 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             + "FROM terminal_bank_receive "
             + "WHERE raw_terminal_code IN (:rawCodes) ", nativeQuery = true)
     List<String> checkExistedTerminalRawCodes(List<String> rawCodes);
+
+    @Query(value = "SELECT public_id "
+            + "FROM terminal "
+            + "WHERE public_id = :publishId LIMIT 1 ", nativeQuery = true)
+    String checkExistedPublishId(String publishId);
 }

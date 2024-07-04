@@ -76,11 +76,6 @@ public class TerminalSyncController {
                                 Map<String, MidBankAccountSyncDTO> midBankAccountSyncDTOMap = new HashMap<>();
                                 Map<String, MerchantSyncEntity> merchantSyncEntityMapByMid = new HashMap<>();
                                 Map<String, MerchantSyncEntity> merchantSyncEntityMapByName = new HashMap<>();
-                                MerchantSyncEntity merchantSyncEntityAdmin = merchantSyncService.getMerchantSyncById(checkExistMerchantSync);
-                                if (Objects.nonNull(merchantSyncEntityAdmin)) {
-                                    merchantSyncEntityMapByMid.put(merchantSyncEntityAdmin.getPublishId(), merchantSyncEntityAdmin);
-                                    merchantSyncEntityMapByName.put(merchantSyncEntityAdmin.getName(), merchantSyncEntityAdmin);
-                                }
                                 boolean validateMerchant = true;
                                 // validate MERCHANT
                                 for (TidSynchronizeDTO item : dto.getTerminals()) {
@@ -95,8 +90,8 @@ public class TerminalSyncController {
                                     }
                                     // Neu chua lay ra truoc do moi connect database de lay du lieu
                                     if (Objects.isNull(merchantSyncEntity)) {
-                                        merchantSyncEntity = isNameOrMid ? merchantSyncService.getMerchantSyncByName(item.getMerchantName(), checkExistMerchantSync) :
-                                                merchantSyncService.getMerchantSyncByPublishId(item.getMid(), checkExistMerchantSync);
+                                        merchantSyncEntity = isNameOrMid ? merchantSyncService.getMerchantSyncByName(item.getMerchantName()) :
+                                                merchantSyncService.getMerchantSyncByPublishId(item.getMid());
                                         if (Objects.nonNull(merchantSyncEntity)) {
                                             AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveMap
                                                     .get(new BankAccountSyncDTO(item.getBankAccount(), item.getBankCode()));
@@ -132,11 +127,9 @@ public class TerminalSyncController {
                                             terminalEntity.setDefault(false);
                                             terminalEntity.setTimeCreated(DateTimeUtil.getCurrentDateTimeUTC());
                                             MerchantSyncEntity merchantSyncEntity = !StringUtil.isNullOrEmpty(item.getMid()) ?
-                                                    merchantSyncEntityMapByMid.get(item.getMid()) :
-                                                    (!StringUtil.isNullOrEmpty(item.getMerchantName()) ? merchantSyncEntityMapByName.get(item.getMerchantName()) :
-                                                            merchantSyncEntityAdmin);
+                                                    merchantSyncEntityMapByMid.get(item.getMid()) : merchantSyncEntityMapByName.get(item.getMerchantName());
                                             terminalEntity.setMerchantId(merchantSyncEntity.getId());
-                                            String publicId = EnvironmentUtil.getPrefixTerminalExternal() + RandomCodeUtil.generateOTP(5);
+                                            String publicId = generateRandomTerPublishId();
                                             terminalEntity.setPublicId(publicId);
 
                                             AccountBankReceiveEntity accountBankReceiveEntity =
@@ -259,7 +252,7 @@ public class TerminalSyncController {
     public ResponseEntity<Object> getListTid(@RequestHeader("Authorization") String token,
                                              @RequestParam int page,
                                              @RequestParam int size,
-                                             @RequestParam(required = false) String mid) {
+                                             @RequestParam String mid) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
@@ -268,11 +261,7 @@ public class TerminalSyncController {
             if (!StringUtil.isNullOrEmpty(username)) {
                 String checkExistMerchantSync = accountCustomerService.checkExistMerchantSyncByUsername(username);
                 if (!StringUtil.isNullOrEmpty(checkExistMerchantSync)) {
-                    if (StringUtil.isNullOrEmpty(mid)) {
-                        midForSearch = checkExistMerchantSync;
-                    } else {
-                        midForSearch = merchantSyncService.getIdByPublicId(mid, checkExistMerchantSync);
-                    }
+                    midForSearch = merchantSyncService.getIdByPublicId(mid);
                     int offset = (page - 1) * size;
                     int totalElement = 0;
                     PageResDTO response = new PageResDTO();
@@ -476,7 +465,14 @@ public class TerminalSyncController {
                 if (BankEncryptUtil.isMatchChecksum(checkSum, item.getCheckSum())) {
                     if (ObjectUtils.allNotNull(item.getBankAccount(), item.getBankCode(), item.getTerminalCode(),
                             item.getTerminalAddress(), item.getTerminalName())) {
-                        result = new ResponseMessageDTO("SUCCESS", "");
+                        if (!StringUtil.isNullOrEmpty(item.getMid()) || !StringUtil.isNullOrEmpty(item.getMerchantName())) {
+                            result = new ResponseMessageDTO("SUCCESS", "");
+                        } else {
+                            logger.error(
+                                    "validateTidSync: ERROR: INVALID Tid Sync DTO: " + item.toString()
+                                            + " at: " + System.currentTimeMillis());
+                            result = new ResponseMessageDTO("FAILED", "E46");
+                        }
                     } else {
                         logger.error(
                                 "validateTidSync: ERROR: INVALID Tid Sync DTO: " + item.toString()
@@ -537,6 +533,28 @@ public class TerminalSyncController {
             result = code;
         } catch (Exception e) {
             logger.error("getRandomUniqueCodeInTerminalCode: ERROR: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+        }
+        return result;
+    }
+
+    private String generateRandomTerPublishId() {
+        String result = "";
+        String checkExistedCode = "";
+        String code = "";
+        try {
+            do {
+                code = EnvironmentUtil.getPrefixTerminalExternal() +
+                        RandomCodeUtil.generateOTP(8);
+                checkExistedCode = terminalService
+                        .checkExistedPublishId(code);
+                if (checkExistedCode == null || checkExistedCode.trim().isEmpty()) {
+                    checkExistedCode = terminalService.checkExistedPublishId(code);
+                }
+            } while (!StringUtil.isNullOrEmpty(checkExistedCode));
+            result = code;
+        } catch (Exception e) {
+            logger.error("generateRandomTerPublishId: ERROR: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
         }
         return result;

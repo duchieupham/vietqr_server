@@ -2518,9 +2518,18 @@ public class TransactionBankController {
 					data.put("bankId", accountBankEntity.getId());
 					data.put("content", transactionEntity.getContent());
 					data.put("amount", "" + amount);
-					data.put("terminalName", "");
-					data.put("terminalCode", "");
-					data.put("rawTerminalCode", "");
+					if (Objects.nonNull(terminalEntity)) {
+						data.put("terminalName", terminalEntity.getName() != null ? terminalEntity.getName()
+								: "");
+						data.put("terminalCode", terminalEntity.getCode() != null ? terminalEntity.getCode()
+								: "");
+						data.put("rawTerminalCode", terminalEntity.getRawTerminalCode() != null ? terminalEntity.getRawTerminalCode()
+								: "");
+					} else {
+						data.put("terminalName", "");
+						data.put("terminalCode", "");
+						data.put("rawTerminalCode", "");
+					}
 					data.put("orderId", transactionEntity.getOrderId() != null
 							? transactionEntity.getOrderId()
 							: "");
@@ -4907,6 +4916,7 @@ public class TransactionBankController {
 			data.put("sign", dto.getSign());
 			data.put("terminalCode", dto.getTerminalCode());
 			data.put("urlLink", dto.getUrlLink());
+			System.out.println("Push data V2: Request: " + data);
 			String suffixUrl = "";
 			WebClient.Builder webClientBuilder = WebClient.builder()
 					.baseUrl(entity.getUrlCallback());

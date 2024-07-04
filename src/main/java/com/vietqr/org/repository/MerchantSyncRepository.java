@@ -81,30 +81,29 @@ public interface MerchantSyncRepository extends JpaRepository<MerchantSyncEntity
     void updateMerchantName(String midName, String mid);
 
     @Query(value = "SELECT * FROM merchant_sync "
-            + "WHERE publish_id = :mid AND (ref_id = :refId OR ref_id = '') LIMIT 1", nativeQuery = true)
-    MerchantSyncEntity getMerchantSyncByPublicId(String mid, String refId);
+            + "WHERE publish_id = :mid LIMIT 1", nativeQuery = true)
+    MerchantSyncEntity getMerchantSyncByPublicId(String mid);
 
-    @Query(value = "SELECT * FROM merchant_sync WHERE name = :merchantName "
-            + "AND (ref_id = :refId OR ref_id = '') LIMIT 1", nativeQuery = true)
-    MerchantSyncEntity getMerchantSyncsByMerchantName(String merchantName, String refId);
+    @Query(value = "SELECT * FROM merchant_sync WHERE name = :merchantName LIMIT 1", nativeQuery = true)
+    MerchantSyncEntity getMerchantSyncsByMerchantName(String merchantName);
 
     @Query(value = "SELECT * FROM merchant_sync WHERE id = :mid LIMIT 1", nativeQuery = true)
     MerchantSyncEntity getMerchantSyncById(String mid);
 
-    @Query(value = "SELECT COUNT(id) FROM merchant_sync WHERE ref_id = :mid LIMIT 1", nativeQuery = true)
+    @Query(value = "SELECT COUNT(id) FROM merchant_sync WHERE (ref_id = :mid OR id = :mid) LIMIT 1", nativeQuery = true)
     int countMerchantByMidSync(String mid);
 
     @Query(value = "SELECT publish_id AS mid, full_name AS merchantFullName, "
             + "name AS merchantName, address AS merchantAddress, national_id AS merchantIdentify, "
             + "email AS contactEmail, phone_no AS contactPhone "
-            + " FROM merchant_sync WHERE ref_id = :refId "
+            + " FROM merchant_sync WHERE (ref_id = :mid OR id = :mid) "
             + "ORDER BY id "
             + "LIMIT :offset, :size", nativeQuery = true)
-    List<IMerchantSyncPublicDTO> getMerchantByMidSync(String refId, int offset, int size);
+    List<IMerchantSyncPublicDTO> getMerchantByMidSync(String mid, int offset, int size);
 
     @Query(value = "SELECT id FROM merchant_sync "
-            + "WHERE publish_id = :publicId AND ref_id = :refId ", nativeQuery = true)
-    String getIdByPublicId(String publicId, String refId);
+            + "WHERE publish_id = :publicId LIMIT 1", nativeQuery = true)
+    String getIdByPublicId(String publicId);
 
     @Query(value = "SELECT id FROM merchant_sync "
             + "WHERE name = :merchantName LIMIT 1", nativeQuery = true)

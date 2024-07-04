@@ -35,9 +35,9 @@ public interface MerchantSyncService {
 
     void updateMerchantName(String midName, String mid);
 
-    MerchantSyncEntity getMerchantSyncByName(String merchantName, String refId);
+    MerchantSyncEntity getMerchantSyncByName(String merchantName);
 
-    MerchantSyncEntity getMerchantSyncByPublishId(String mid, String refId);
+    MerchantSyncEntity getMerchantSyncByPublishId(String mid);
 
     MerchantSyncEntity getMerchantSyncById(String mid);
 
@@ -45,7 +45,7 @@ public interface MerchantSyncService {
 
     List<IMerchantSyncPublicDTO> getMerchantByMidSync(String refId, int offset, int size);
 
-    String getIdByPublicId(String publicId, String refId);
+    String getIdByPublicId(String publicId);
 
     String getMerchantIdSyncByName(String merchantName);
 

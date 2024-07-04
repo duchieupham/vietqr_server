@@ -98,4 +98,6 @@ public interface TerminalService {
     int countTerminalByMidSync(String midForSearch);
 
     List<String> checkExistedTerminalRawCodes(List<String> terminalCodes);
+
+    String checkExistedPublishId(String publishId);
 }
