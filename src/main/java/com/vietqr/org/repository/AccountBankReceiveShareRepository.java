@@ -14,17 +14,15 @@ import java.util.List;
 @Repository
 public interface AccountBankReceiveShareRepository
         extends JpaRepository<AccountBankReceiveShareEntity, Long> {
-    @Query(value = "SELECT DISTINCT a.bank_id as bankId, b.bank_account as bankAccount, b.bank_account_name as userBankName, " +
-            "c.bank_name as bankName, c.bank_short_name as bankShortName, b.phone_authenticated as phoneAuthenticated, " +
-            " c.bank_code as bankCode, c.img_id as imgId, b.type as bankType, b.is_authenticated as authenticated, " +
-            "b.user_id as userId, a.is_owner as isOwner , c.status as bankTypeStatus, c.id as bankTypeId, " +
-            "c.unlinked_type as unlinkedType, b.national_id as nationalId, b.is_valid_service AS isValidService, " +
-            "b.valid_fee_from AS validFeeFrom, b.valid_fee_to AS validFeeTo "
+    @Query(value = "SELECT DISTINCT a.bank_id as bankId, b.bank_account as bankAccount, "
+            + "b.bank_account_name as userBankName, b.phone_authenticated as phoneAuthenticated, "
+            + "b.type as bankType, b.is_authenticated as authenticated, "
+            + "b.user_id as userId, a.is_owner as isOwner, b.bank_type_id as bankTypeId, "
+            + "b.national_id as nationalId, b.is_valid_service AS isValidService, "
+            + "b.valid_fee_from AS validFeeFrom, b.valid_fee_to AS validFeeTo "
             + "FROM account_bank_receive_share a "
             + "INNER JOIN account_bank_receive b "
             + "ON a.bank_id = b.id "
-            + "INNER JOIN bank_type c "
-            + "ON b.bank_type_id = c.id "
             + "WHERE a.user_id = :userId  "
             + " ORDER BY b.is_authenticated DESC, a.is_owner DESC", nativeQuery = true)
     List<AccountBankReceiveShareDTO> getAccountBankReceiveShare(@Param(value = "userId") String userId);
