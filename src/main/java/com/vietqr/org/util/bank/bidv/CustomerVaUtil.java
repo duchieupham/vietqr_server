@@ -57,7 +57,9 @@ public class CustomerVaUtil {
             //
             // jws and jwe request body
             String myKey = JwsUtil.getSymmatricKey();
+            logger.info("myKey: " + myKey);
             Key key = new AesKey(JwsUtil.hexStringToBytes(myKey));
+            logger.info("new AesKey(JwsUtil.hexStringToBytes(myKey): " + key);
             JsonWebEncryption jwe = new JsonWebEncryption();
             String payload = BIDVUtil.generateRequestVaBody(serviceId, channelId, merchantId, merchantName, dto,
                     merchantType);
