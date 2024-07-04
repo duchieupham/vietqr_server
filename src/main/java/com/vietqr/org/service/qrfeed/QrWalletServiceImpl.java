@@ -148,8 +148,8 @@ public class QrWalletServiceImpl implements QrWalletService {
 
 
     @Override
-    public IQrWalletDTO getQrWalletDetailsById(String qrWalletId) {
-        return repo.findQRWalletDetailsById(qrWalletId);
+    public IQrWalletDTO getQrWalletDetailsById(String userId,String qrWalletId) {
+        return repo.findQRWalletDetailsById(userId,qrWalletId);
     }
 
     @Override

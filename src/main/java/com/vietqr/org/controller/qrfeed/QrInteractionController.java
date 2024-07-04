@@ -43,20 +43,6 @@ public class QrInteractionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-//    @GetMapping("qr-interaction/users-like/{qrWalletId}")
-//    public ResponseEntity<Object> getUsersWhoLiked(@PathVariable String qrWalletId) {
-//        Object result = null;
-//        HttpStatus httpStatus = null;
-//        try {
-//            List<String> userNames = qrInteractionService.getUserNamesWhoLiked(qrWalletId);
-//            result = userNames;
-//            httpStatus = HttpStatus.OK;
-//        } catch (Exception e) {
-//            result = new ResponseMessageDTO("FAILED", "E05");
-//            httpStatus = HttpStatus.BAD_REQUEST;
-//        }
-//        return new ResponseEntity<>(result, httpStatus);
-//    }
 
     @GetMapping("qr-interaction/users-like/{qrWalletId}")
     public ResponseEntity<Object> getLikersByQrWalletId(@PathVariable String qrWalletId,

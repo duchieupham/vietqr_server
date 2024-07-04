@@ -40,15 +40,9 @@ public interface QrWalletService {
     List<String> getQrWalletIdsByFolderId(String folderId);
     void deleteQrItemsByIds(List<String> ids);
 
-
-     List<IQrWalletDTO> getAllPublicQrWallets(String userId, int offset, int size);
+    List<IQrWalletDTO> getAllPublicQrWallets(String userId, int offset, int size);
     int countPublicQrWallets();
-    IQrWalletDTO getQrWalletDetailsById(String qrWalletId);
-//    IQrWalletDTO getQrWalletDetailsById(String qrWalletId, String userId);
-//
-//    int countCommentsByQrWalletId(String qrWalletId);
-
-//    List<QrCommentDTO> findCommentsByQrWalletId(String qrWalletId, int offset, int size);
+    IQrWalletDTO getQrWalletDetailsById(String userId,String qrWalletId);
 
     Page<QrCommentDTO> findCommentsByQrWalletId(String qrWalletId, Pageable pageable);
     int countCommentsByQrWalletId(String qrWalletId);

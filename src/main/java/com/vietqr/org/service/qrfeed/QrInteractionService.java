@@ -9,8 +9,6 @@ import java.util.List;
 public interface QrInteractionService {
 
     void likeOrUnlikeQrWallet(String qrWalletId, String userId, int interactionType, long currentTime);
-    List<String> getUserNamesWhoLiked(String qrWalletId);
-
 
     List<UserLikeDTO> findLikersByQrWalletId(String qrWalletId, int offset, int size);
     int countLikersByQrWalletId(String qrWalletId);

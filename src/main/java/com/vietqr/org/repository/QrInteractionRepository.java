@@ -13,9 +13,6 @@ import java.util.List;
 
 @Repository
 public interface QrInteractionRepository extends JpaRepository<QrInteractionEntity, String> {
-    @Query(value = "SELECT COUNT(*) FROM qr_interaction WHERE qr_wallet_id = :qrWalletId AND user_id = :userId AND interaction_type = 1", nativeQuery = true)
-    int countLike(@Param("qrWalletId") String qrWalletId, @Param("userId") String userId);
-
     @Query(value = "SELECT COUNT(*) FROM qr_interaction WHERE qr_wallet_id = :qrWalletId AND user_id = :userId", nativeQuery = true)
     int countInteraction(@Param("qrWalletId") String qrWalletId, @Param("userId") String userId);
 
@@ -29,18 +26,13 @@ public interface QrInteractionRepository extends JpaRepository<QrInteractionEnti
     @Query(value = "UPDATE qr_interaction SET interaction_type = :interactionType, time_created = :timeCreated WHERE qr_wallet_id = :qrWalletId AND user_id = :userId", nativeQuery = true)
     void updateInteraction(@Param("qrWalletId") String qrWalletId, @Param("userId") String userId, @Param("interactionType") int interactionType, @Param("timeCreated") long timeCreated);
 
-    @Query(value = "SELECT  JSON_UNQUOTE(JSON_EXTRACT(u.user_data, '$.fullName')) AS fullName " +
-            "FROM qr_interaction i " +
-            "INNER JOIN qr_wallet u ON i.qr_wallet_id = u.id " +
-            "WHERE i.qr_wallet_id = :qrWalletId AND i.interaction_type = 1", nativeQuery = true)
-    List<String> findUserNamesWhoLiked(@Param("qrWalletId") String qrWalletId);
 
     @Query(value = "SELECT DISTINCT i.user_id AS userId, " +
-            "IFNULL(TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))), 'Undefined') AS fullName " +
+            "IFNULL(TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))), 'Undefined') AS fullName, " +
+            "IFNULL(ai.img_id, '') AS imageId " +
             "FROM qr_interaction i " +
             "LEFT JOIN account_information ai ON ai.user_id = i.user_id " +
             "WHERE i.qr_wallet_id = :qrWalletId AND i.interaction_type = 1 " +
-            "GROUP BY i.user_id, ai.last_name, ai.middle_name, ai.first_name " +
             "ORDER BY i.user_id " +
             "LIMIT :offset, :size", nativeQuery = true)
     List<UserLikeDTO> findLikersByQrWalletId(@Param("qrWalletId") String qrWalletId, @Param("offset") int offset, @Param("size") int size);

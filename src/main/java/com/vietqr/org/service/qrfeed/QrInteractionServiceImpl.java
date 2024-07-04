@@ -24,11 +24,6 @@ public class QrInteractionServiceImpl implements QrInteractionService{
     }
 
     @Override
-    public List<String> getUserNamesWhoLiked(String qrWalletId) {
-        return qrInteractionRepository.findUserNamesWhoLiked(qrWalletId);
-    }
-
-    @Override
     public List<UserLikeDTO> findLikersByQrWalletId(String qrWalletId, int offset, int size) {
         return qrInteractionRepository.findLikersByQrWalletId(qrWalletId, offset, size);
     }
