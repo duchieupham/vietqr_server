@@ -1387,9 +1387,13 @@ public class QrWalletController {
                             // save image
                             UUID uuid = UUID.randomUUID();
                             String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-                            ImageEntity IE = new ImageEntity(uuid.toString(), fileName, file.getBytes());
-                            imageService.insertImage(IE);
-                            entity.setFileAttachmentId(uuid.toString());
+                            if (!file.getOriginalFilename().isEmpty()) {
+                                ImageEntity IE = new ImageEntity(uuid.toString(), fileName, file.getBytes());
+                                imageService.insertImage(IE);
+                                entity.setFileAttachmentId(uuid.toString());
+                            } else {
+                                entity.setFileAttachmentId("");
+                            }
                             qrWalletService.insertQrWallet(entity);
 
                             //add qr vào qr_user (ch implements)
@@ -1441,8 +1445,15 @@ public class QrWalletController {
 
                             // save image
                             UUID ids = UUID.randomUUID();
-                            imageInvoiceService.saveFile(file, ids.toString());
-                            entity.setFileAttachmentId(ids.toString());
+                            String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+                            if (!file.getOriginalFilename().isEmpty()) {
+                                ImageEntity IE = new ImageEntity(ids.toString(), fileName, file.getBytes());
+                                imageService.insertImage(IE);
+                                entity.setFileAttachmentId(ids.toString());
+                            } else {
+                                entity.setFileAttachmentId("");
+                            }
+
                             qrWalletService.insertQrWallet(entity);
 
                             //add qr vào qr_user (ch implements)
@@ -1534,10 +1545,14 @@ public class QrWalletController {
                     // save image
                     UUID uuid = UUID.randomUUID();
                     String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-                    ImageEntity IE = new ImageEntity(uuid.toString(), fileName, file.getBytes());
-                    imageService.insertImage(IE);
+                    if (!file.getOriginalFilename().isEmpty()) {
+                        ImageEntity IE = new ImageEntity(uuid.toString(), fileName, file.getBytes());
+                        imageService.insertImage(IE);
+                        entity.setFileAttachmentId(uuid.toString());
+                    } else {
+                        entity.setFileAttachmentId("");
+                    }
 
-                    entity.setFileAttachmentId(uuid.toString());
                     qrWalletService.insertQrWallet(entity);
 
                     //add qr vào qr_user (ch implements)
@@ -1632,7 +1647,7 @@ public class QrWalletController {
                     entity1.setTheme(Integer.parseInt(themeDTO));
                     entity1.setStyle(Integer.parseInt(styleDTO));
 
-                    if (file != null) {
+                    if (!file.getOriginalFilename().isEmpty()) {
                         UUID ids = UUID.randomUUID();
                         String files = StringUtils.cleanPath(file.getOriginalFilename());
                         ImageEntity ies = new ImageEntity(ids.toString(), files, file.getBytes());
