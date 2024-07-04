@@ -18,10 +18,12 @@ public class EnvironmentUtil {
     private static final String BIDV_UNLINKED_URL_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/remove-ewallet-link-collection/v1";
     private static final String BIDV_UNLINKED_URL_PROD = "https://www.bidv.net:9303/bidvorg/service/open-banking/remove-ewallet-link-collection/v1";
 
-    private static final String BIDV_GET_TOKEN_CLIENT_ID_UAT = "c87962d6c3bf521c4f0911589863ff06";
+//    private static final String BIDV_GET_TOKEN_CLIENT_ID_UAT = "c87962d6c3bf521c4f0911589863ff06";
+    private static final String BIDV_GET_TOKEN_CLIENT_ID_UAT = "e17e8e38263a1248668bf9b96dabe0ad";
     private static final String BIDV_GET_TOKEN_CLIENT_ID_PROD = "811f14b4acfcfa6647af36a1549a263d";
 
-    private static final String BIDV_GET_TOKEN_CLIENT_SECRET_UAT = "ee2d23a34ce3cdc2a4c3d6d5b794fd3c";
+//    private static final String BIDV_GET_TOKEN_CLIENT_SECRET_UAT = "ee2d23a34ce3cdc2a4c3d6d5b794fd3c";
+    private static final String BIDV_GET_TOKEN_CLIENT_SECRET_UAT = "28a360eab9c52df7fb0257e27b760568";
     private static final String BIDV_GET_TOKEN_CLIENT_SECRET_PROD = "f0add8cda01ae40db66f2fcbdc63692c";
 
     private static final String BIDV_LINKED_SERVICE_ID_UAT = "BC0001";
@@ -41,7 +43,7 @@ public class EnvironmentUtil {
 
     // BIDV
     // request - confirm add merchant va
-    private static final String BIDV_URL_REQUEST_ADD_MERCHANT_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/createVAQLBH/v1";
+    private static final String BIDV_URL_REQUEST_ADD_MERCHANT_UAT = "https://bidv.net:9303/bidvorg/service/open-banking/paygate/virtualAccount/createVAQLBH/v1";
     private static final String BIDV_URL_REQUEST_ADD_MERCHANT_PROD = "https://openapi.bidv.com.vn/bidv/service/open-banking/paygate/createVAQLBH/v1";
 
     private static final String BIDV_URL_CONFIRM_ADD_MERCHANT_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/confirmVAQLBH/v1";

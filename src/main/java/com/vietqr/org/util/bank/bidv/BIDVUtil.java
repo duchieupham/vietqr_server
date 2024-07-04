@@ -88,7 +88,8 @@ public class BIDVUtil {
             String merchantId,
             String merchantName,
             RequestCustomerVaDTO dto,
-            String merchantType) {
+            String merchantType,
+            String tranDate) {
         String result = "";
         result = "{";
         result += "\"serviceId\":" + "\"" + serviceId + "\",";
@@ -99,7 +100,8 @@ public class BIDVUtil {
         result += "\"accountName\":" + "\"" + dto.getUserBankName() + "\",";
         result += "\"identity\":" + "\"" + dto.getNationalId() + "\",";
         result += "\"mobile\":" + "\"" + dto.getPhoneAuthenticated() + "\",";
-        result += "\"merchantType\":" + "\"" + merchantType + "\"";
+        result += "\"merchantType\":" + "\"" + merchantType + "\",";
+        result += "\"tranDate\":" + "\"" + tranDate + "\"";
         result += "}";
         return result;
     }
