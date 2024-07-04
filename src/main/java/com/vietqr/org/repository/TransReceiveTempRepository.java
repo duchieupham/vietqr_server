@@ -15,14 +15,15 @@ public interface TransReceiveTempRepository extends JpaRepository<TransReceiveTe
     TransReceiveTempEntity getLastTimeByBankId(String bankId);
 
     @Query(value = "SELECT bank_id AS bankId, "
-            + "last_times AS lastTimes, nums AS nums "
+            + "MAX(last_times) AS lastTimes, MAX(nums) AS nums "
             + "FROM trans_receive_temp "
-            + "WHERE bank_id IN (:bankIds)", nativeQuery = true)
+            + "WHERE bank_id IN (:bankIds) "
+            + "GROUP BY bankId", nativeQuery = true)
     List<TransTempCountDTO> getTransTempCounts(List<String> bankIds);
 
     @Query(value = "SELECT bank_id AS bankId, "
-            + "last_times AS lastTimes, nums AS nums "
+            + "MAX(last_times) AS lastTimes, MAX(nums) AS nums "
             + "FROM trans_receive_temp "
-            + "WHERE bank_id = :bankId LIMIT 1", nativeQuery = true)
+            + "WHERE bank_id = :bankId GROUP BY bankId LIMIT 1", nativeQuery = true)
     TransTempCountDTO getTransTempCount(String bankId);
 }
