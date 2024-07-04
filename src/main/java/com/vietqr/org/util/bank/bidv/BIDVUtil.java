@@ -100,7 +100,7 @@ public class BIDVUtil {
         result += "\"accountName\":" + "\"" + dto.getUserBankName() + "\",";
         result += "\"identity\":" + "\"" + dto.getNationalId() + "\",";
         result += "\"mobile\":" + "\"" + dto.getPhoneAuthenticated() + "\",";
-        result += "\"merchantType\":" + "\"" + merchantType + "\"";
+        result += "\"merchantType\":" + "\"" + merchantType + "\",";
         result += "\"tranDate\":" + "\"" + tranDate + "\"";
         result += "}";
         return result;
