@@ -390,7 +390,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "LIMIT 1 ", nativeQuery = true)
 	IAccountBankReceiveDTO getAccountBankInfoResById(String bankId);
 
-	@Query(value = "SELECT '' AS vso, '' AS merchantName, "
+	@Query(value = "SELECT '' AS merchantName, "
 			+ "COALESCE(b.email, 0) AS email, b.phone_no AS phoneNo, a.user_id AS userId, "
 			+ "a.bank_account AS bankAccount, a.bank_account_name AS userBankName, "
 			+ "c.bank_short_name AS bankShortName, a.vso AS vso "
