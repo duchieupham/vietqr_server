@@ -1,5 +1,6 @@
 package com.vietqr.org.repository;
 
+import com.vietqr.org.dto.qrfeed.IUserInteractionDTO;
 import com.vietqr.org.dto.qrfeed.UserLikeDTO;
 import com.vietqr.org.entity.qrfeed.QrInteractionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -41,4 +42,11 @@ public interface QrInteractionRepository extends JpaRepository<QrInteractionEnti
             "FROM qr_interaction i " +
             "WHERE i.qr_wallet_id = :qrWalletId AND i.interaction_type = 1", nativeQuery = true)
     int countLikersByQrWalletId(@Param("qrWalletId") String qrWalletId);
+
+    @Query(value = "SELECT ai.user_id AS userId, " +
+            "IFNULL(TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))), 'Undefined') AS fullName, " +
+            "IFNULL(ai.img_id, '') AS imageId " +
+            "FROM account_information ai " +
+            "WHERE ai.user_id = :userId", nativeQuery = true)
+    IUserInteractionDTO findUserInteractionById(@Param("userId") String userId);
 }

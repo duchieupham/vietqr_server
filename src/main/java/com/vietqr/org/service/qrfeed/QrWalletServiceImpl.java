@@ -10,9 +10,7 @@ import com.vietqr.org.repository.QrWalletRepository;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -132,7 +130,7 @@ public class QrWalletServiceImpl implements QrWalletService {
     }
 
 
-        @Override
+    @Override
     public List<IQrWalletDTO> getAllPublicQrWallets(String userId, int offset, int size) {
         List<IQrWalletDTO> qrWallets = repo.findAllPublicQrWallets(userId, offset, size);
         for (IQrWalletDTO wallet : qrWallets) {
@@ -148,8 +146,8 @@ public class QrWalletServiceImpl implements QrWalletService {
 
 
     @Override
-    public IQrWalletDTO getQrWalletDetailsById(String userId,String qrWalletId) {
-        return repo.findQRWalletDetailsById(userId,qrWalletId);
+    public IQrWalletDTO getQrWalletDetailsById(String userId, String qrWalletId) {
+        return repo.findQRWalletDetailsById(userId, qrWalletId);
     }
 
     @Override

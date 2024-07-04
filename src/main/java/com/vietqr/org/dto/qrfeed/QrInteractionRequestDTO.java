@@ -5,6 +5,7 @@ public class QrInteractionRequestDTO {
     private String userId;
     private int interactionType;
 
+
     // Getters and Setters
     public String getQrWalletId() {
         return qrWalletId;

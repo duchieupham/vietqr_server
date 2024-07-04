@@ -20,7 +20,7 @@ public class QrWalletDetailDTO {
     private String imageId;
     private String style;
     private String theme;
-   //private List<QrCommentDTO> comments; // Danh sách các bình luận
+
     private PageResDTO comments;
 
     public PageResDTO getComments() {

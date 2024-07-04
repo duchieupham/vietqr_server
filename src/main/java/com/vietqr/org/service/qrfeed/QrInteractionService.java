@@ -1,5 +1,6 @@
 package com.vietqr.org.service.qrfeed;
 
+import com.vietqr.org.dto.qrfeed.IUserInteractionDTO;
 import com.vietqr.org.dto.qrfeed.UserLikeDTO;
 import org.springframework.stereotype.Service;
 
@@ -12,4 +13,6 @@ public interface QrInteractionService {
 
     List<UserLikeDTO> findLikersByQrWalletId(String qrWalletId, int offset, int size);
     int countLikersByQrWalletId(String qrWalletId);
+
+   // IUserInteractionDTO likeOrUnlikeQrWallet(String qrWalletId, String userId, int interactionType, long currentTime);
 }
