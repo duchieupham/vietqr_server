@@ -18,6 +18,8 @@ public class DateTimeUtil {
     private static final String DateTimeForMatRaw = "yyyyMMdd_HHmmss";
 
     private static final String DateFormat = "yyyy-MM-dd";
+
+    private static final String DateBIDVFormat = "yyMMdd";
     // 7 * 60 * 60
     public static final long GMT_PLUS_7_OFFSET = 25200;
 
@@ -284,5 +286,17 @@ public class DateTimeUtil {
         // Tính chênh lệch thời gian theo giây
         Duration duration = Duration.between(startOfWeekDateTime, now);
         return duration.getSeconds();
+    }
+
+    public static String getBidvTranDate() {
+        String result = "";
+        try {
+            LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC+7"));
+            LocalDate currentDate = now.toLocalDate();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DateBIDVFormat);
+            result = currentDate.format(formatter);
+        } catch (Exception e) {
+        }
+        return result;
     }
 }
