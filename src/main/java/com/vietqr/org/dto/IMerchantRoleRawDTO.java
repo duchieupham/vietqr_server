@@ -1,8 +1,7 @@
 package com.vietqr.org.dto;
 
 public interface IMerchantRoleRawDTO {
-    String getMerchantId();
-    String getBankId();
+    String getMerchantMemberId();
     int getCategory();
     int getRole();
 }

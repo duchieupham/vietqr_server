@@ -1,9 +1,6 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.dto.AccountMemberDTO;
-import com.vietqr.org.dto.IAccountTerminalMemberDTO;
-import com.vietqr.org.dto.IMerchantMemberDTO;
-import com.vietqr.org.dto.IMerchantMemberDetailDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.MerchantMemberEntity;
 import com.vietqr.org.repository.MerchantMemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,5 +103,10 @@ public class MerchantMemberServiceImpl implements MerchantMemberService {
     @Override
     public List<IMerchantMemberDTO> findMerchantMemberByMerchantIdAndFullName(String merchantId, String value, int offset, int size) {
         return repo.findMerchantMemberByMerchantIdAndFullName(merchantId, value, offset, size);
+    }
+
+    @Override
+    public List<IMerchantBankMemberDTO> getIMerchantBankMemberByUserId(String userId) {
+        return repo.getIMerchantBankMemberByUserId(userId);
     }
 }

@@ -1,9 +1,6 @@
 package com.vietqr.org.repository;
 
-import com.vietqr.org.dto.AccountMemberDTO;
-import com.vietqr.org.dto.IAccountTerminalMemberDTO;
-import com.vietqr.org.dto.IMerchantMemberDTO;
-import com.vietqr.org.dto.IMerchantMemberDetailDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.MerchantMemberEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -181,4 +178,12 @@ public interface MerchantMemberRepository extends JpaRepository<MerchantMemberEn
             + "LIMIT :offset, :size ", nativeQuery = true)
     List<IMerchantMemberDTO> findMerchantMemberByMerchantIdAndFullName(String merchantId, String value,
                                                                        int offset, int size);
+
+    @Query(value = "SELECT a.merchant_id AS merchantId, b.bank_id AS bankId, "
+            + "MAX(a.id) AS merchantMemberId "
+            + "FROM merchant_member a "
+            + "INNER JOIN merchant_bank_receive b ON a.merchant_id = b.merchant_id "
+            + "WHERE a.user_id = :userId "
+            + "GROUP BY a.merchant_id, b.bank_id ", nativeQuery = true)
+    List<IMerchantBankMemberDTO> getIMerchantBankMemberByUserId(String userId);
 }

@@ -1,9 +1,6 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.dto.AccountMemberDTO;
-import com.vietqr.org.dto.IAccountTerminalMemberDTO;
-import com.vietqr.org.dto.IMerchantMemberDTO;
-import com.vietqr.org.dto.IMerchantMemberDetailDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.MerchantMemberEntity;
 import org.springframework.stereotype.Service;
 
@@ -49,4 +46,6 @@ public interface MerchantMemberService {
 
     List<IMerchantMemberDTO> findMerchantMemberByMerchantIdAndFullName(String merchantId, String value,
                                                                        int offset, int size);
+
+    List<IMerchantBankMemberDTO> getIMerchantBankMemberByUserId(String userId);
 }
