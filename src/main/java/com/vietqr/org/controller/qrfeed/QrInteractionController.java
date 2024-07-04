@@ -37,9 +37,7 @@ public class QrInteractionController {
 
 
     @PostMapping("/qr-interaction/interact")
-    public ResponseEntity<Object> likeOrUnlikeQrWallet(@RequestBody QrInteractionRequestDTO request,
-                                                       @RequestParam int page,
-                                                       @RequestParam int size) {
+    public ResponseEntity<Object> likeOrUnlikeQrWallet(@RequestBody QrInteractionRequestDTO request) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
@@ -49,43 +47,10 @@ public class QrInteractionController {
             // Fetch the updated QR Wallet details
             IQrWalletDTO qrWalletDTO = qrWalletService.getQrWalletDetailsById(request.getUserId(), request.getQrWalletId());
             if (qrWalletDTO == null) {
-                result = new ResponseMessageDTO("FAILED", "QrWallet not found");
+                result = new ResponseMessageDTO("FAILED", "E05");
                 httpStatus = HttpStatus.BAD_REQUEST;
             } else {
-                int totalCommentElements = qrWalletService.countCommentsByQrWalletId(request.getQrWalletId());
-                Pageable pageable = PageRequest.of(page - 1, size);
-                Page<QrCommentDTO> commentsPage = qrWalletService.findCommentsByQrWalletId(request.getQrWalletId(), pageable);
-
-                QrWalletDetailDTO detailDTO = new QrWalletDetailDTO();
-                detailDTO.setId(qrWalletDTO.getId());
-                detailDTO.setTitle(qrWalletDTO.getTitle());
-                detailDTO.setDescription(qrWalletDTO.getDescription());
-                detailDTO.setValue(qrWalletDTO.getValue());
-                detailDTO.setQrType(qrWalletDTO.getQrType());
-                detailDTO.setTimeCreated(qrWalletDTO.getTimeCreated());
-                detailDTO.setUserId(qrWalletDTO.getUserId());
-                detailDTO.setLikeCount(qrWalletDTO.getLikeCount());
-                detailDTO.setCommentCount(qrWalletDTO.getCommentCount());
-                detailDTO.setHasLiked(qrWalletDTO.getHasLiked());
-                detailDTO.setData(qrWalletDTO.getData());
-                detailDTO.setFullName(qrWalletDTO.getFullName());
-                detailDTO.setImageId(qrWalletDTO.getImageId());
-                detailDTO.setStyle(qrWalletDTO.getStyle());
-                detailDTO.setTheme(qrWalletDTO.getTheme());
-
-                PageDTO pageDTO = new PageDTO();
-                pageDTO.setSize(size);
-                pageDTO.setPage(page);
-                pageDTO.setTotalElement(totalCommentElements);
-                pageDTO.setTotalPage(StringUtil.getTotalPage(totalCommentElements, size));
-
-                PageResDTO pageResDTO = new PageResDTO();
-                pageResDTO.setMetadata(pageDTO);
-                pageResDTO.setData(commentsPage.getContent());
-
-                detailDTO.setComments(pageResDTO);
-
-                result = detailDTO;
+                result = qrWalletDTO;
                 httpStatus = HttpStatus.OK;
             }
         } catch (Exception e) {
