@@ -2434,9 +2434,11 @@ public class TransactionBankController {
 						data.put("terminalName", terminalEntity.getName() != null
 								? terminalEntity.getName()
 								: "");
-						data.put("terminalCode", terminalEntity.getCode() != null
-								? terminalEntity.getCode()
-								: "");
+						if (StringUtil.isNullOrEmpty(terminalCode)) {
+							data.put("terminalCode", terminalCode != null
+									? terminalCode
+									: "");
+						}
 						data.put("rawTerminalCode", terminalEntity.getRawTerminalCode() != null
 								? terminalEntity.getRawTerminalCode()
 								: "");
@@ -2521,8 +2523,11 @@ public class TransactionBankController {
 					if (Objects.nonNull(terminalEntity)) {
 						data.put("terminalName", terminalEntity.getName() != null ? terminalEntity.getName()
 								: "");
-						data.put("terminalCode", terminalEntity.getCode() != null ? terminalEntity.getCode()
-								: "");
+						if (StringUtil.isNullOrEmpty(terminalCode)) {
+							data.put("terminalCode", terminalCode != null
+									? terminalCode
+									: "");
+						}
 						data.put("rawTerminalCode", terminalEntity.getRawTerminalCode() != null ? terminalEntity.getRawTerminalCode()
 								: "");
 					} else {
