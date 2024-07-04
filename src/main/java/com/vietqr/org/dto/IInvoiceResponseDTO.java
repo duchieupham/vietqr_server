@@ -13,5 +13,6 @@ public interface IInvoiceResponseDTO {
     String getBankId();
     String getData();
     String getQrCode();
+    String getFileAttachmentId();
     long getTotalAmount();
 }

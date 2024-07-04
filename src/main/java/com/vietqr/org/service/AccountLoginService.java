@@ -61,4 +61,8 @@ public interface AccountLoginService {
     long getTotalUsers();
 
     void updateEmailByUserId(String email, String userId);
+
+    List<IAccountLogin> findUsersRegisteredInDay(long startTime, long endTime);
+    long getTotalUsersUntilDate(long endTime);
+    List<IAccountLogin> findUsersRegisteredInMonth(long startTime, long endTime);
 }

@@ -25,6 +25,16 @@ public class FileAttachServiceImpl implements FileAttachService {
         FILE_TYPE_MAP.put("application/vnd.openxmlformats-officedocument.wordprocessingml.document", "Word");
         FILE_TYPE_MAP.put("application/vnd.ms-excel", "Excel");
         FILE_TYPE_MAP.put("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Excel");
+        FILE_TYPE_MAP.put("image/jpeg", "JPEG Image");
+        FILE_TYPE_MAP.put("image/png", "PNG Image");
+        FILE_TYPE_MAP.put("image/gif", "GIF Image");
+        FILE_TYPE_MAP.put("image/bmp", "BMP Image");
+        FILE_TYPE_MAP.put("image/webp", "WEBP Image");
+        FILE_TYPE_MAP.put("image/svg+xml", "SVG Image");
+        FILE_TYPE_MAP.put("image/tiff", "TIFF Image");
+        FILE_TYPE_MAP.put("image/x-icon", "ICO Image");
+        FILE_TYPE_MAP.put("image/heif", "HEIF Image");
+        FILE_TYPE_MAP.put("image/heic", "HEIC Image");
     }
 
     private String getDisplayFileType(String contentType) {
@@ -44,12 +54,17 @@ public class FileAttachServiceImpl implements FileAttachService {
 
 
     @Override
-    public FileAttachmentEntity getFile(String id) {
-        return repo.findImageById(id);
+    public FileAttachmentEntity getFile(String invoiceId) {
+        return repo.findImageById(invoiceId);
     }
 
     @Override
     public FileAttachmentEntity getFileById(String id) {
         return repo.findImgById(id);
+    }
+
+    @Override
+    public String getFileInInvoice(String invoiceId) {
+        return repo.getFileInInvoice(invoiceId);
     }
 }

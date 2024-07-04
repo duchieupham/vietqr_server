@@ -10,6 +10,7 @@ import java.io.IOException;
 @Service
 public interface FileAttachService {
     public void saveFile(MultipartFile file, String id) throws IOException;
-    public FileAttachmentEntity getFile(String id);
+    public FileAttachmentEntity getFile(String invoiceId);
     public FileAttachmentEntity getFileById(String id);
+    public String getFileInInvoice(String invoiceId);
 }

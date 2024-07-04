@@ -154,4 +154,6 @@ public interface AccountBankReceiveService {
 	BankAccountAdminDTO getUserIdAndMidByBankId(String bankId);
 
 	void updateVsoBankAccount(String vso, String bankId);
+
+	List<IAccountBankMonthDTO> getBankAccountStatistics();
 }

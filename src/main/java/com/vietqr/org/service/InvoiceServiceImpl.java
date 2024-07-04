@@ -21,6 +21,11 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
+    public String getFileAttachmentId(String invoiceId) {
+        return repo.getFileAttachmentId(invoiceId);
+    }
+
+    @Override
     public List<IInvoiceResponseDTO> getInvoiceByUserId(String userId, List<Integer> status, int offset, int size) {
         return repo.getInvoiceByUserId(userId, status, offset, size);
     }

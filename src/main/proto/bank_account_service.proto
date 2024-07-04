@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.example.grpc";
+option java_outer_classname = "BankAccountServiceProto";
+
+service BankAccountService {
+  rpc GetBankAccountStatistics (GetBankAccountStatisticsRequest) returns (stream BankAccountStatisticsResponse);
+}
+
+message GetBankAccountStatisticsRequest {
+  string month = 1; // YYYY-MM
+}
+
+message BankAccountStatisticsResponse {
+  string bankShortName = 1;
+  int64 totalAccounts = 2;
+  int64 linkedAccounts = 3;
+  int64 unlinkedAccounts = 4;
+}

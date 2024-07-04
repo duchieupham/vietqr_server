@@ -14,6 +14,8 @@ public interface InvoiceService {
 
     void insert(InvoiceEntity entity);
 
+    String getFileAttachmentId(String invoiceId);
+
     List<IInvoiceResponseDTO> getInvoiceByUserId(String userId, List<Integer> status, int offset, int size);
 
     String checkDuplicatedInvoiceId(String invoiceId);

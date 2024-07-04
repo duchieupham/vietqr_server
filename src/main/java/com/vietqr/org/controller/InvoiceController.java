@@ -1586,6 +1586,8 @@ public class InvoiceController {
                 dto.setBankCodeForPayment("");
                 dto.setQrCode("");
                 dto.setTotalAmount(item.getTotalAmount());
+                String fileAttachmentId = invoiceService.getFileAttachmentId(item.getInvoiceId());
+                dto.setFileAttachmentId(StringUtil.getValueNullChecker(fileAttachmentId));
                 return dto;
             }).collect(Collectors.toList());
             PageDTO pageDTO = new PageDTO();
@@ -1797,6 +1799,8 @@ public class InvoiceController {
             }
             response.setTotalAmount(dto.getTotalAmount());
             response.setItems(data);
+            String fileAttachmentId = invoiceService.getFileAttachmentId(invoiceId);
+            response.setFileAttachmentId(StringUtil.getValueNullChecker(fileAttachmentId));
             result = response;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
@@ -2133,7 +2137,7 @@ public class InvoiceController {
                 pushNotification(title, message, notiEntity, datas, notiEntity.getUserId());
             });
             thread2.start();
-            result = new ResponseMessageDTO("SUCCESS", "invoiceId: " + entity.getId());
+            result = new ResponseMessageDTO("SUCCESS", entity.getId());
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             result = new ResponseMessageDTO("FAILED", "E140");
