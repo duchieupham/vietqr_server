@@ -14,5 +14,5 @@ public interface QrInteractionService {
     List<UserLikeDTO> findLikersByQrWalletId(String qrWalletId, int offset, int size);
     int countLikersByQrWalletId(String qrWalletId);
 
-   // IUserInteractionDTO likeOrUnlikeQrWallet(String qrWalletId, String userId, int interactionType, long currentTime);
+
 }
