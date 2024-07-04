@@ -53,7 +53,7 @@ public class QrWalletEntity implements Serializable {
     private String id;
     @Column(name = "title")
     private String title;
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "LONGTEXT")
     private String description;
     @Column(name = "value", columnDefinition = "LONGTEXT")
     private String value;
