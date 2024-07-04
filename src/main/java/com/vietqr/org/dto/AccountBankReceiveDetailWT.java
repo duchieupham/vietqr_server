@@ -32,6 +32,7 @@ public class AccountBankReceiveDetailWT implements Serializable {
     private Boolean isActiveService;
     private Long validFeeFrom;
     private Long validFeeTo;
+    private int transCount;
 //    private List<BusinessBankDetailDTO> businessDetails;
 
     public AccountBankReceiveDetailWT() {
@@ -216,12 +217,12 @@ public class AccountBankReceiveDetailWT implements Serializable {
         this.validFeeTo = validFeeTo;
     }
 
-    //    public List<BusinessBankDetailDTO> getBusinessDetails() {
-//        return businessDetails;
-//    }
-//
-//    public void setBusinessDetails(List<BusinessBankDetailDTO> businessDetails) {
-//        this.businessDetails = businessDetails;
-//    }
+    public int getTransCount() {
+        return transCount;
+    }
+
+    public void setTransCount(int transCount) {
+        this.transCount = transCount;
+    }
 
 }
