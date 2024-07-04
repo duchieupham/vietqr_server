@@ -5,6 +5,7 @@ import com.vietqr.org.dto.PageResDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.qrfeed.QrCommentRequestDTO;
 import com.vietqr.org.dto.qrfeed.UserCommentDTO;
+import com.vietqr.org.entity.qrfeed.QrCommentEntity;
 import com.vietqr.org.service.qrfeed.QrCommentService;
 import com.vietqr.org.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,14 +42,19 @@ public class QrCommentController {
     }
 
     @DeleteMapping("/qr-comment/delete/{commentId}")
-    public ResponseEntity<Object> deleteComment(@PathVariable String commentId){
+    public ResponseEntity<Object> deleteComment(@PathVariable String commentId, @RequestParam String userId) {
         Object result = null;
         HttpStatus httpStatus = null;
-        try{
-            qrCommentService.deleteComment(commentId);
-            result = new ResponseMessageDTO("SUCCESS", "");
-            httpStatus = HttpStatus.OK;
-        }catch (Exception e){
+        try {
+            boolean isDeleted = qrCommentService.deleteComment(commentId, userId);
+            if (isDeleted) {
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            } else {
+                result = new ResponseMessageDTO("FAILED", "You do not have permission to delete this comment");
+                httpStatus = HttpStatus.FORBIDDEN;
+            }
+        } catch (Exception e) {
             logger.error("deleteComment: Error: " + e.getMessage() + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
