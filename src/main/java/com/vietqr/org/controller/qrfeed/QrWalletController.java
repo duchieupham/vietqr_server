@@ -1286,7 +1286,6 @@ public class QrWalletController {
     @PostMapping(value = "qr-wallet/generate-qr", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Object> createQRFinal(
             @RequestParam(required = false) String typeDto, // 0: Link, 1: Text, 2: VCard, 3: VietQR
-//            @RequestParam("json") String json,
             @RequestPart(required = false) MultipartFile file,
             @RequestParam(required = false) String userIdDTO,
             @RequestParam(required = false) String qrNameDTO,
@@ -1315,9 +1314,6 @@ public class QrWalletController {
 
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-//            if (json.startsWith("\"") && json.endsWith("\"")) {
-//                json = json.substring(1, json.length() - 1);
-//            }
             if (typeDto == null || typeDto.isEmpty()) {
                 throw new IllegalArgumentException("Type is required");
             }
@@ -1468,6 +1464,7 @@ public class QrWalletController {
                         result = new ResponseMessageDTO("FAILED" + e.getMessage(), "E05");
                         httpStatus = HttpStatus.BAD_REQUEST;
                     }
+                    break;
                 case 2: //vcard
 //                    VCardInputExtendDTO vCardInputDTO = objectMapper.readValue(json, VCardInputExtendDTO.class);
                     VCardInputExtendDTO input = new VCardInputExtendDTO();
@@ -1554,6 +1551,7 @@ public class QrWalletController {
 
                     result = new ResponseMessageDTO("SUCCESS", "");
                     httpStatus = HttpStatus.OK;
+                    break;
                 case 3: //viet qr
 //                    VietQRCreateUnauthenticatedExtendDTO values = objectMapper.readValue(json, VietQRCreateUnauthenticatedExtendDTO.class);
                     String bankTypeId = bankTypeService.getBankTypeIdByBankCode(bankCodeDTO);
@@ -1657,6 +1655,7 @@ public class QrWalletController {
 
                     result = new ResponseMessageDTO("SUCCESS", "");
                     httpStatus = HttpStatus.OK;
+                    break;
             }
         } catch (Exception e) {
             logger.error("QrWalletController: ERROR: get QrWallet: " + e.getMessage()
