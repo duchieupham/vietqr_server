@@ -2012,7 +2012,7 @@ public class InvoiceController {
             } else if (bankReceiveMapperDTO != null) {
                 merchantBankMapperDTO.setUserBankName(bankReceiveMapperDTO.getUserBankName());
                 merchantBankMapperDTO.setMerchantName("");
-                merchantBankMapperDTO.setVso("");
+                merchantBankMapperDTO.setVso(bankReceiveMapperDTO.getVso());
                 merchantBankMapperDTO.setEmail(StringUtil.getValueNullChecker(bankReceiveMapperDTO.getEmail()));
                 merchantBankMapperDTO.setBankAccount(bankReceiveMapperDTO.getBankAccount());
                 merchantBankMapperDTO.setBankShortName(bankReceiveMapperDTO.getBankShortName());
@@ -2140,7 +2140,7 @@ public class InvoiceController {
             result = new ResponseMessageDTO("SUCCESS", entity.getId());
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            result = new ResponseMessageDTO("FAILED", "E140");
+            result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
