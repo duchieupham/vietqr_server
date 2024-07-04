@@ -6,6 +6,7 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
 
+import com.vietqr.org.util.DateTimeUtil;
 import org.apache.log4j.Logger;
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.JsonWebEncryption;
@@ -54,13 +55,16 @@ public class CustomerVaUtil {
             // String merchantName = EnvironmentUtil.getBidvLinkedMerchantName();
             String merchantName = dto.getMerchantName();
             String channelId = EnvironmentUtil.getBidvLinkedChannelId();
+            String tranDate = DateTimeUtil.getBidvTranDate();
             //
             // jws and jwe request body
             String myKey = JwsUtil.getSymmatricKey();
+            logger.info("myKey: " + myKey);
             Key key = new AesKey(JwsUtil.hexStringToBytes(myKey));
+            logger.info("new AesKey(JwsUtil.hexStringToBytes(myKey): " + key);
             JsonWebEncryption jwe = new JsonWebEncryption();
             String payload = BIDVUtil.generateRequestVaBody(serviceId, channelId, merchantId, merchantName, dto,
-                    merchantType);
+                    merchantType, tranDate);
             logger.info("requestCustomerVa: Payload: " + payload);
             System.out.println("Payload: " + payload);
             //

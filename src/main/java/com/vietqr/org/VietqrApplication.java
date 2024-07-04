@@ -5,6 +5,7 @@ import java.security.Key;
 import java.security.PrivateKey;
 import java.util.Base64;
 
+import com.vietqr.org.util.DateTimeUtil;
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.JsonWebEncryption;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
@@ -114,7 +115,8 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
-
+		String tranDate = DateTimeUtil.getBidvTranDate();
+		System.out.println(tranDate);
 		// get bill
 //		 String checksum =
 //		 BankEncryptUtil.generateMD5GetBillForBankChecksum("QklEVkJMVUVDT01BY2Nlc3NLZXk=",
