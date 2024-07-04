@@ -21,6 +21,11 @@ public class AccountLoginServiceImpl implements AccountLoginService {
     }
 
     @Override
+    public IUserInfoDTO getUserInfoByUserId(String userId) {
+        return repo.getUserInfoByUserId(userId);
+    }
+
+    @Override
     public String login(String phoneNo, String password) {
         return repo.login(phoneNo, password);
     }

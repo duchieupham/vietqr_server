@@ -38,10 +38,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -51,6 +49,8 @@ import java.util.stream.Collectors;
 public class QrWalletController {
     private static final Logger logger = Logger.getLogger(QrWalletController.class);
 
+    @Autowired
+    AccountLoginService accountLoginService;
 
     @Autowired
     FileAttachService imageInvoiceService;
@@ -271,8 +271,12 @@ public class QrWalletController {
                     tempVietQRDTO.setContent(dto.getContent());
                     tempVietQRDTO.setValue(qr);
                     entity.setQrData(tempVietQRDTO.toString());
+                    IUserInfoDTO userInfoDTO = accountLoginService.getUserInfoDetailsByUserId(dto.getUserId());
                     entity.setUserData("{"
                             + "\"userId\": \"" + dto.getUserId() + "\", "
+                            + "\"fullName\": \"" + userInfoDTO.getFullName() + "\", "
+                            + "\"phoneNo\": \"" + userInfoDTO.getPhoneNo() + "\", "
+                            + "\"email\": \"" + userInfoDTO.getEmail() + "\", "
                             + "\"bankAccount\": \"" + dto.getBankAccount() + "\", "
                             + "\"userBankName\": \"" + dto.getUserBankName() + "\", "
                             + "\"qrType\": \"" + type + "\", "
@@ -478,6 +482,7 @@ public class QrWalletController {
                 temp.setAddress(dto.getAddress());
 
                 entity.setQrData(temp.toString());
+
                 entity.setUserData("{"
                         + "\"userId\": \"" + dto.getUserId() + "\", "
                         + "\"fullName\": \"" + dto.getFullname() + "\", "
@@ -485,9 +490,8 @@ public class QrWalletController {
                         + "\"email\": \"" + dto.getEmail() + "\", "
                         + "\"companyName\": \"" + dto.getCompanyName() + "\", "
                         + "\"website\": \"" + dto.getWebsite() + "\", "
-                        + "\"website\": \"" + dto.getWebsite() + "\", "
                         + "\"qrType\": \"" + type + "\", "
-                        + "\"additionalData\": \"" + dto.getAddress() + "\""
+                        + "\"additionalData\": \"" + dto.getAdditionalData() + "\""
                         + "}");
                 if (Integer.parseInt(isPublic) == 1) {
                     qrVcardRequestDTO.setIsPublic(1);
@@ -963,8 +967,13 @@ public class QrWalletController {
                                     + "\"theme\": \"" + dto.getQrDescription() + "\", "
                                     + "\"value\": \"" + dto.getValue() + "\""
                                     + "}");
-                            entity.setUserData("{" // lấy fullName, phoneNo, email
+                            IUserInfoDTO userDataInfo = accountLoginService.getUserInfoDetailsByUserId(dto.getUserId());
+                            entity.setUserData("{"
                                     + "\"userId\": \"" + dto.getUserId() + "\", "
+                                    + "\"fullName\": \"" + userDataInfo.getFullName() + "\", "
+                                    + "\"email\": \"" + userDataInfo.getEmail() + "\", "
+                                    + "\"phoneNo\": \"" + userDataInfo.getPhoneNo() + "\", "
+                                    + "\"address\": \"" + userDataInfo.getAddress() + "\", "
                                     + "\"qrType\": \"" + type + "\", "
                                     + "\"content\": \"" + dto.getValue() + "\""
                                     + "}");
@@ -1015,8 +1024,15 @@ public class QrWalletController {
                                     + "\"qrType\": \"" + type + "\", "
                                     + "\"value\": \"" + dto.getValue() + "\""
                                     + "}");
+
+                            IUserInfoDTO userDataInfos = accountLoginService.getUserInfoByUserId(dto.getUserId());
+
                             entity.setUserData("{"
                                     + "\"userId\": \"" + dto.getUserId() + "\", "
+                                    + "\"fullName\": \"" + userDataInfos.getFullName() + "\", "
+                                    + "\"email\": \"" + userDataInfos.getEmail() + "\", "
+                                    + "\"phoneNo\": \"" + userDataInfos.getPhoneNo() + "\", "
+                                    + "\"address\": \"" + userDataInfos.getAddress() + "\", "
                                     + "\"qrType\": \"" + type + "\", "
                                     + "\"content\": \"" + dto.getValue() + "\""
                                     + "}");
@@ -1066,7 +1082,6 @@ public class QrWalletController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-
 
     @GetMapping("qr-wallet")
     public ResponseEntity<Object> getQrWallet(
@@ -1269,6 +1284,7 @@ public class QrWalletController {
     ) {
         Object result = null;
         HttpStatus httpStatus = null;
+
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             if (json.startsWith("\"") && json.endsWith("\"")) {

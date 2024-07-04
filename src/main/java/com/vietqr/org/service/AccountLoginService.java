@@ -12,6 +12,8 @@ import com.vietqr.org.entity.AccountLoginEntity;
 public interface AccountLoginService {
     public IUserInfoDTO getUserInfoDetailsByUserId(String userId);
 
+    public IUserInfoDTO getUserInfoByUserId(String userId);
+
     public String login(String phoneNo, String password);
 
     public String checkOldPassword(String userId, String password);
