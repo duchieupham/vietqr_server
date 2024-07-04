@@ -10,9 +10,7 @@ import com.vietqr.org.repository.QrWalletRepository;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -161,7 +159,7 @@ public class QrWalletServiceImpl implements QrWalletService {
     }
 
 
-        @Override
+    @Override
     public List<IQrWalletDTO> getAllPublicQrWallets(String userId, int offset, int size) {
         List<IQrWalletDTO> qrWallets = repo.findAllPublicQrWallets(userId, offset, size);
         for (IQrWalletDTO wallet : qrWallets) {
@@ -177,23 +175,19 @@ public class QrWalletServiceImpl implements QrWalletService {
 
 
     @Override
-    public IQrWalletDTO getQrWalletDetailsById(String qrWalletId) {
-        return repo.findQRWalletDetailsById(qrWalletId);
+    public IQrWalletDTO getQrWalletDetailsById(String userId, String qrWalletId) {
+        return repo.findQRWalletDetailsById(userId, qrWalletId);
     }
 
-//    @Override
-//    public IQrWalletDTO getQrWalletDetailsById(String qrWalletId, String userId) {
-//        return repo.findQRWalletDetailsById(qrWalletId, userId);
-//
-//    }
+    @Override
+    public Page<QrCommentDTO> findCommentsByQrWalletId(String qrWalletId, Pageable pageable) {
+        return repo.findCommentsByQrWalletId(qrWalletId, pageable);
+    }
 
-//    @Override
-//    public int countCommentsByQrWalletId(String qrWalletId) {
-//        return repo.countCommentsByQrWalletId(qrWalletId);
-//    }
+    @Override
+    public int countCommentsByQrWalletId(String qrWalletId) {
+        return repo.countCommentsByQrWalletId(qrWalletId);
+    }
 
-//    @Override
-//    public List<QrCommentDTO> findCommentsByQrWalletId(String qrWalletId, int offset, int size) {
-//        return qrCommentRepository.findCommentsByQrWalletId(qrWalletId, offset, size);
-//    }
+
 }
