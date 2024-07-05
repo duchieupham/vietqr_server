@@ -22,6 +22,6 @@ public interface BankReceiveConnectionRepository extends JpaRepository<BankRecei
     @Query(value = "SELECT a.id FROM bank_receive_connection a "
             + "LEFT JOIN merchant_sync b ON a.mid = b.id "
             + "WHERE a.bank_id = :bankId "
-            + "AND (a.mid != :mid OR b.ref_id != :mid) LIMIT 1 ", nativeQuery = true)
+            + "AND a.mid != :mid AND b.ref_id != :mid LIMIT 1 ", nativeQuery = true)
     String checkBankAccountByBankIdAndMid(String bankId, String mid);
 }

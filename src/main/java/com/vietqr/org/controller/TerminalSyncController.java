@@ -68,7 +68,12 @@ public class TerminalSyncController {
                         ResponseObjectDTO responseCheckCode = checkRawTerminalCodeUnique(dto.getTerminals().stream()
                                 .map(TidSynchronizeDTO::getTerminalCode)
                         .collect(Collectors.toList()));
-                        if ("SUCCESS".equals(responseCheckCode.getStatus())) {
+                        if ("SUCCESS".equals(responseCheckCode.getStatus()) ||
+                        "CHECK".equals(responseCheckCode.getStatus())) {
+                            Set<String> terminalCodeDup = new HashSet<>();
+                            if ("CHECK".equals(responseCheckCode.getStatus())) {
+                                terminalCodeDup = (Set<String>) responseCheckCode.getData();
+                            }
                             ResponseObjectDTO validateBankAccount = validateBankAccountAuthenticated(bankDto);
                             if ("SUCCESS".equals(validateBankAccount.getStatus())) {
                                 Map<BankAccountSyncDTO, AccountBankReceiveEntity> accountBankReceiveMap
@@ -507,9 +512,13 @@ public class TerminalSyncController {
         ResponseObjectDTO result = null;
         Set<String> terminalCodes = new HashSet<>(dtoList);
         List<String> checkDuplicated = terminalService.checkExistedTerminalRawCodes(dtoList);
-        if (terminalCodes.size() == dtoList.size() &&
-                (Objects.isNull(checkDuplicated) || checkDuplicated.isEmpty())) {
-            result = new ResponseObjectDTO("SUCCESS", "");
+        if (terminalCodes.size() == dtoList.size()) {
+            if (Objects.isNull(checkDuplicated) || checkDuplicated.isEmpty()) {
+                result = new ResponseObjectDTO("SUCCESS", "");
+            } else {
+                Set<String> codes = new HashSet<>(checkDuplicated);
+                result = new ResponseObjectDTO("CHECK", codes);
+            }
         } else {
             result = new ResponseObjectDTO("FAILED", "E153");
         }

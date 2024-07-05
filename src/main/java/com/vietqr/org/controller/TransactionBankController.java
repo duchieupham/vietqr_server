@@ -2523,10 +2523,18 @@ public class TransactionBankController {
 					if (Objects.nonNull(terminalEntity)) {
 						data.put("terminalName", terminalEntity.getName() != null ? terminalEntity.getName()
 								: "");
-						if (StringUtil.isNullOrEmpty(terminalCode)) {
+						if (!StringUtil.isNullOrEmpty(terminalCode)) {
 							data.put("terminalCode", terminalCode != null
 									? terminalCode
-									: "");
+									: !StringUtil.isNullOrEmpty(terminalEntity.getCode()) ?
+									terminalEntity.getCode() :
+									""
+							);
+						} else {
+							data.put("terminalCode", !StringUtil.isNullOrEmpty(terminalEntity.getCode()) ?
+									terminalEntity.getCode() :
+									""
+							);
 						}
 						data.put("rawTerminalCode", terminalEntity.getRawTerminalCode() != null ? terminalEntity.getRawTerminalCode()
 								: "");
