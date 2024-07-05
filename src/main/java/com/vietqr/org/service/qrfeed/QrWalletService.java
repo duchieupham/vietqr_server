@@ -27,9 +27,10 @@ public interface QrWalletService {
                               String title, String value, int style, int theme);
 
     public void updateQrVietQR(String id, String description, int isPublic, int qrType,
-                              String title, String value, int style, int theme);
+                               String title, String value, int style, int theme);
 
     public QrWalletEntity getQrVCardUpdate(String qrId);
+
     public QrWalletEntity getQrVietQR(String qrId);
 
     public IListQrWalletDTO getQrLinkOrQrTextByUserId(String userId);
@@ -64,16 +65,34 @@ public interface QrWalletService {
     void deleteQrItemsByIds(List<String> ids);
 
     List<IQrWalletDTO> getAllPublicQrWallets(String userId, int offset, int size);
+
     int countPublicQrWallets();
-    IQrWalletDTO getQrWalletDetailsById(String userId,String qrWalletId);
+
+    IQrWalletDTO getQrWalletDetailsById(String userId, String qrWalletId);
 
     Page<QrCommentDTO> findCommentsByQrWalletId(String qrWalletId, Pageable pageable);
+
     int countCommentsByQrWalletId(String qrWalletId);
 
-    List<IQrWalletPrivateDTO> getAllPrivateQrWallets(String userId, int offset, int size);
+    List<IQrWalletPrivateDTO> getAllPrivateQrWallets(String userId, int offset, int size, String value);
 
-    int countPrivateQrWallets();
+    List<IQrWalletPrivateDTO> getQrTextPrivate(String userId, int offset, int size, String value);
 
+    List<IQrWalletPrivateDTO> getQrVCardPrivate(String userId, int offset, int size, String value);
+
+    List<IQrWalletPrivateDTO> getQrVietQrPrivate(String userId, int offset, int size, String value);
+
+    List<IQrWalletPrivateDTO> getQrLinkPrivate(String userId, int offset, int size, String value);
+
+    int countPrivateQrWallets(String userId, String value);
+
+    int countQrLinkPrivate(String userId, String value);
+
+    int countQrTextPrivate(String userId, String value);
+
+    int countQrVCardPrivate(String userId, String value);
+
+    int countQrVietQrPrivate(String userId, String value);
 
     List<IQrWalletDTO> getQrWalletsByPublicStatus(String userId, int isPublic, int offset, int size);
 
