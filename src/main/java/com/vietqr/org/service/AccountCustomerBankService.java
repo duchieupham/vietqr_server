@@ -18,7 +18,7 @@ public interface AccountCustomerBankService {
 
     public String checkExistedAccountCustomerBank(String bankId, String customerSyncId);
 
-    public List<String> checkExistedCustomerSyncByUsername(String username);
+    public List<String>         checkExistedCustomerSyncByUsername(String username);
 
     public List<String> checkExistedAccountCustomerBankByBankAccount(String bankAccount, String customerSyncId);
 

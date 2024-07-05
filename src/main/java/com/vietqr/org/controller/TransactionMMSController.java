@@ -1654,6 +1654,114 @@ public class TransactionMMSController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // Refund Service
+    @PostMapping("transaction-sync/refund")
+    public ResponseEntity<ResponseMessageDTO> refundService(
+            @RequestHeader("Authorization") String token,
+            @RequestBody RefundRequestDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null) {
+                logger.info("refundForMerchant: Bank Account: " + dto.getBankAccount());
+                logger.info("refundForMerchant: FT Code: " + dto.getReferenceNumber());
+                logger.info("refundForMerchant: Amount: " + dto.getAmount());
+                // String accessKey = "SABAccessKey";
+                String username = getUsernameFromToken(token);
+                if (username != null && !username.trim().isEmpty()) {
+                    List<String> checkExistedCustomerSync = accountCustomerBankService
+                            .checkExistedCustomerSyncByUsername(username);
+                    if (checkExistedCustomerSync != null && !checkExistedCustomerSync.isEmpty()) {
+                        // check bankAccount belong to merchant
+                        String checkValidBankAccount = accountCustomerBankService.checkExistedBankAccountIntoMerchant(
+                                dto.getBankAccount(), checkExistedCustomerSync.get(0));
+                        if (checkValidBankAccount != null && !checkValidBankAccount.trim().isEmpty()) {
+                            // process refund
+                            String checkSum = BankEncryptUtil.generateMD5RefundCustomerChecksum(dto.getBankAccount(),
+                                    dto.getReferenceNumber(), username);
+//                            String checkSumRefund = "c68ee42e728b9dbb13dcb2a3d509b877";
+                            if (BankEncryptUtil.isMatchChecksum(dto.getCheckSum(), checkSum)) {
+                                // find terminal ID by bankAccount
+                                TerminalBankEntity terminalBankEntity = terminalBankService
+                                        .getTerminalBankByBankAccount(dto.getBankAccount());
+                                if (terminalBankEntity != null) {
+                                    String refundResult = refundFromMB(terminalBankEntity.getTerminalId(),
+                                            dto.getReferenceNumber(),
+                                            dto.getAmount(), dto.getContent());
+//                                    String refundResult = "FT23293978692076";
+                                    if (refundResult != null) {
+                                        if (refundResult.trim().equals("4863")) {
+                                            logger.error(
+                                                    "refundForMerchant: ERROR: " + dto.getBankAccount()
+                                                            + " FT CODE IS NOT EXISTED");
+                                            httpStatus = HttpStatus.BAD_REQUEST;
+                                            result = new ResponseMessageDTO("FAILED", "E44");
+                                        } else if (refundResult.trim().equals("4857")) {
+                                            logger.error(
+                                                    "refundForMerchant: ERROR: " + dto.getBankAccount()
+                                                            + " INVALID AMOUNT");
+                                            httpStatus = HttpStatus.BAD_REQUEST;
+                                            result = new ResponseMessageDTO("FAILED", "E45");
+                                        } else if (refundResult.trim().contains("FT")) {
+                                            httpStatus = HttpStatus.OK;
+                                            result = new ResponseMessageDTO("SUCCESS", refundResult);
+                                        } else {
+                                            logger.error("refundForMerchant: ERROR: UNEXPECTED ERROR");
+                                            httpStatus = HttpStatus.BAD_REQUEST;
+                                            result = new ResponseMessageDTO("FAILED", "E05");
+                                        }
+                                    } else {
+                                        logger.error(
+                                                "refundForMerchant: ERROR: " + dto.getBankAccount() + " REFUND FAILED");
+                                        httpStatus = HttpStatus.BAD_REQUEST;
+                                        result = new ResponseMessageDTO("FAILED", "E43");
+                                    }
+                                } else {
+                                    logger.error(
+                                            "refundForMerchant: ERROR: " + dto.getBankAccount() + " INVALID TERMINAL");
+                                    httpStatus = HttpStatus.BAD_REQUEST;
+                                    result = new ResponseMessageDTO("FAILED", "E42");
+                                }
+                            } else {
+                                logger.error(
+                                        "refundForMerchant: ERROR: " + dto.getReferenceNumber() + " INVALID CHECKSUM");
+                                httpStatus = HttpStatus.BAD_REQUEST;
+                                result = new ResponseMessageDTO("FAILED", "E41");
+                            }
+                        } else {
+                            // bank account is not matched
+                            System.out.println("refundForMerchant: BANK ACCOUNT IS NOT MATCH WITH MERCHANT INFO");
+                            logger.error("refundForMerchant: BANK ACCOUNT IS NOT MATCH WITH MERCHANT INFO");
+                            result = new ResponseMessageDTO("FAILED", "E77");
+                            httpStatus = HttpStatus.BAD_REQUEST;
+                        }
+                    } else {
+                        // merchant is not existed
+                        System.out.println("refundForMerchant: MERCHANT IS NOT EXISTED");
+                        logger.error("refundForMerchant: MERCHANT IS NOT EXISTED");
+                        result = new ResponseMessageDTO("FAILED", "E104");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    }
+                } else {
+                    System.out.println("refundForMerchant: INVALID TOKEN");
+                    logger.error("refundForMerchant: INVALID TOKEN");
+                    result = new ResponseMessageDTO("FAILED", "E74");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                System.out.println("refundForMerchant: INVALID REQUEST BODY");
+                logger.error("refundForMerchant: INVALID REQUEST BODY");
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("refundForMerchant: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+            result = new ResponseMessageDTO("FAILED", "E05");
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     private String refundFromMB(String terminalId, String ftCode, String amount, String content) {
         String result = null;
         try {
