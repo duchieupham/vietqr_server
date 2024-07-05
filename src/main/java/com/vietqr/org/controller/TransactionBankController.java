@@ -1874,6 +1874,39 @@ public class TransactionBankController {
                 }
 
 				/////// DO INSERT LARK
+//				if (accountBankEntity.getBankAccount().equals("699699699996")) {
+//					if (transactionReceiveEntity.getTransType().equals("C")) {
+//						List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+//						if (webhooks != null && !webhooks.isEmpty()) {
+//							LarkUtil larkUtil = new LarkUtil();
+//							String larkMsg = prefix + amount + " VND"
+//									+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+//									+ accountBankEntity.getBankAccount()
+//									+ " | " + convertLongToDate(time)
+//									+ " | " + dto.getReferencenumber()
+//									+ " | ND: " + dto.getContent();
+//							for (String webhook : webhooks) {
+//								larkUtil.sendMessageToLark(larkMsg, webhook);
+//							}
+//						}
+//					}
+//				} else {
+//					List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+//					if (webhooks != null && !webhooks.isEmpty()) {
+//						LarkUtil larkUtil = new LarkUtil();
+//						String larkMsg = prefix + amount + " VND"
+//								+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+//								+ accountBankEntity.getBankAccount()
+//								+ " | " + convertLongToDate(time)
+//								+ " | " + dto.getReferencenumber()
+//								+ " | ND: " + dto.getContent();
+//						for (String webhook : webhooks) {
+//							larkUtil.sendMessageToLark(larkMsg, webhook);
+//						}
+//					}
+//				}
+
+				/////// DO INSERT LARK BY QVAN
 				if (accountBankEntity.getBankAccount().equals("699699699996")) {
 					if (transactionReceiveEntity.getTransType().equals("C")) {
 						List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
@@ -1894,14 +1927,17 @@ public class TransactionBankController {
 					List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
 					if (webhooks != null && !webhooks.isEmpty()) {
 						LarkUtil larkUtil = new LarkUtil();
-						String larkMsg = prefix + amount + " VND"
-								+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-								+ accountBankEntity.getBankAccount()
-								+ " | " + convertLongToDate(time)
-								+ " | " + dto.getReferencenumber()
-								+ " | ND: " + dto.getContent();
 						for (String webhook : webhooks) {
-							larkUtil.sendMessageToLark(larkMsg, webhook);
+							LarkEntity larkEntity = larkService.getLarkById(webhook);
+							if (larkEntity != null) {
+								List<String> notificationTypes = new ObjectMapper().readValue(larkEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+								List<String> notificationContents = new ObjectMapper().readValue(larkEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionReceiveEntity);
+								if (sendNotification) {
+									String larkMsg = createLarkMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+									larkUtil.sendMessageToLark(larkMsg, webhook);
+								}
+							}
 						}
 					}
 				}
@@ -2098,6 +2134,40 @@ public class TransactionBankController {
 				}
 
 				/////// DO INSERT LARK
+//				if (accountBankEntity.getBankAccount().equals("699699699996")) {
+//					if (transactionReceiveEntity.getTransType().equals("C")) {
+//						List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+//						if (webhooks != null && !webhooks.isEmpty()) {
+//							LarkUtil larkUtil = new LarkUtil();
+//							String larkMsg = prefix + amount + " VND"
+//									+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+//									+ accountBankEntity.getBankAccount()
+//									+ " | " + convertLongToDate(time)
+//									+ " | " + dto.getReferencenumber()
+//									+ " | ND: " + dto.getContent();
+//							for (String webhook : webhooks) {
+//								larkUtil.sendMessageToLark(larkMsg, webhook);
+//							}
+//						}
+//					}
+//				} else {
+//					List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+//					if (webhooks != null && !webhooks.isEmpty()) {
+//						LarkUtil larkUtil = new LarkUtil();
+//						String larkMsg = prefix + amount + " VND"
+//								+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+//								+ accountBankEntity.getBankAccount()
+//								+ " | " + convertLongToDate(time)
+//								+ " | " + dto.getReferencenumber()
+//								+ " | ND: " + dto.getContent();
+//						for (String webhook : webhooks) {
+//							larkUtil.sendMessageToLark(larkMsg, webhook);
+//						}
+//					}
+//				}
+
+
+				/////// DO INSERT LARK BY QVAN
 				if (accountBankEntity.getBankAccount().equals("699699699996")) {
 					if (transactionReceiveEntity.getTransType().equals("C")) {
 						List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
@@ -2118,17 +2188,21 @@ public class TransactionBankController {
 					List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
 					if (webhooks != null && !webhooks.isEmpty()) {
 						LarkUtil larkUtil = new LarkUtil();
-						String larkMsg = prefix + amount + " VND"
-								+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-								+ accountBankEntity.getBankAccount()
-								+ " | " + convertLongToDate(time)
-								+ " | " + dto.getReferencenumber()
-								+ " | ND: " + dto.getContent();
 						for (String webhook : webhooks) {
-							larkUtil.sendMessageToLark(larkMsg, webhook);
+							LarkEntity larkEntity = larkService.getLarkById(webhook);
+							if (larkEntity != null) {
+								List<String> notificationTypes = new ObjectMapper().readValue(larkEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+								List<String> notificationContents = new ObjectMapper().readValue(larkEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionReceiveEntity);
+								if (sendNotification) {
+									String larkMsg = createLarkMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+									larkUtil.sendMessageToLark(larkMsg, webhook);
+								}
+							}
 						}
 					}
 				}
+
 
 				/////// DO INSERT GOOGLE CHAT
 //				List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
@@ -2295,41 +2369,42 @@ public class TransactionBankController {
 					}
 				}
 			}
-			/////// DO INSERT LARK
-			if (accountBankEntity.getBankAccount().equals("699699699996")) {
-				if (transactionReceiveEntity.getTransType().equals("C")) {
-					List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-					if (webhooks != null && !webhooks.isEmpty()) {
-						LarkUtil larkUtil = new LarkUtil();
-						String larkMsg = prefix + amount + " VND"
-								+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-								+ accountBankEntity.getBankAccount()
-								+ " | " + convertLongToDate(time)
-								+ " | " + dto.getReferencenumber()
-								+ " | ND: " + dto.getContent();
-						for (String webhook : webhooks) {
-							larkUtil.sendMessageToLark(larkMsg, webhook);
-						}
-					}
-				}
-			} else {
-				List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-				if (webhooks != null && !webhooks.isEmpty()) {
-					LarkUtil larkUtil = new LarkUtil();
-					String larkMsg = prefix + amount + " VND"
-							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-							+ accountBankEntity.getBankAccount()
-							+ " | " + convertLongToDate(time)
-							+ " | " + dto.getReferencenumber()
-							+ " | ND: " + dto.getContent();
-					for (String webhook : webhooks) {
-						larkUtil.sendMessageToLark(larkMsg, webhook);
-					}
-				}
-			}
-
 
 			/////// DO INSERT LARK
+//			if (accountBankEntity.getBankAccount().equals("699699699996")) {
+//				if (transactionReceiveEntity.getTransType().equals("C")) {
+//					List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+//					if (webhooks != null && !webhooks.isEmpty()) {
+//						LarkUtil larkUtil = new LarkUtil();
+//						String larkMsg = prefix + amount + " VND"
+//								+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+//								+ accountBankEntity.getBankAccount()
+//								+ " | " + convertLongToDate(time)
+//								+ " | " + dto.getReferencenumber()
+//								+ " | ND: " + dto.getContent();
+//						for (String webhook : webhooks) {
+//							larkUtil.sendMessageToLark(larkMsg, webhook);
+//						}
+//					}
+//				}
+//			} else {
+//				List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+//				if (webhooks != null && !webhooks.isEmpty()) {
+//					LarkUtil larkUtil = new LarkUtil();
+//					String larkMsg = prefix + amount + " VND"
+//							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+//							+ accountBankEntity.getBankAccount()
+//							+ " | " + convertLongToDate(time)
+//							+ " | " + dto.getReferencenumber()
+//							+ " | ND: " + dto.getContent();
+//					for (String webhook : webhooks) {
+//						larkUtil.sendMessageToLark(larkMsg, webhook);
+//					}
+//				}
+//			}
+
+
+			/////// DO INSERT LARK BY QVAN
 			if (accountBankEntity.getBankAccount().equals("699699699996")) {
 				if (transactionReceiveEntity.getTransType().equals("C")) {
 					List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
