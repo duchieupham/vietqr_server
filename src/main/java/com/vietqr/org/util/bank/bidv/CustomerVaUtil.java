@@ -346,6 +346,7 @@ public class CustomerVaUtil {
             String url = EnvironmentUtil.getBidvUrlUnregisterMerchant();
             String serviceId = EnvironmentUtil.getBidvLinkedServiceId();
             String channelId = EnvironmentUtil.getBidvLinkedChannelId();
+            String tranDate = DateTimeUtil.getBidvTranDate();
             //
             UUID interactionId = UUID.randomUUID();
             UUID idemKey = UUID.randomUUID();
@@ -354,7 +355,7 @@ public class CustomerVaUtil {
             String myKey = JwsUtil.getSymmatricKey();
             Key key = new AesKey(JwsUtil.hexStringToBytes(myKey));
             JsonWebEncryption jwe = new JsonWebEncryption();
-            String payload = BIDVUtil.generateUnregisterVaBody(serviceId, channelId, merchantId);
+            String payload = BIDVUtil.generateUnregisterVaBody(serviceId, channelId, merchantId, tranDate);
             System.out.println("Payload: " + payload);
             //
             jwe.setPayload(payload);
@@ -425,12 +426,8 @@ public class CustomerVaUtil {
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode rootNode = objectMapper.readTree(json);
                 //
-                if (rootNode.get("msg") != null
-                        && rootNode.get("msg").get("header") != null
-                        && rootNode.get("msg")
-                                .get("header").get("errorCode") != null) {
-                    String errorCode = rootNode.get("msg")
-                            .get("header").get("errorCode").asText();
+                if (rootNode.get("errorCode") != null) {
+                    String errorCode = rootNode.get("errorCode").asText();
                     if (errorCode != null) {
                         if (errorCode.trim().equals("000")) {
                             result = new ResponseMessageDTO("SUCCESS", "");
@@ -557,21 +554,13 @@ public class CustomerVaUtil {
                 JsonNode rootNode = objectMapper.readTree(json);
                 //
 
-                if (rootNode.get("msg") != null
-                        && rootNode.get("msg").get("header") != null
-                        && rootNode.get("msg")
-                                .get("header").get("errorCode") != null) {
-                    String errorCode = rootNode.get("msg")
-                            .get("header").get("errorCode").asText();
+                if (rootNode.get("errorCode") != null) {
+                    String errorCode = rootNode.get("errorCode").asText();
                     if (errorCode != null) {
                         String qrCode = "";
 
-                        if (rootNode.get("msg") != null
-                                && rootNode.get("msg").get("body") != null
-                                && rootNode.get("msg")
-                                        .get("body").get("vietQR") != null) {
-                            qrCode = rootNode.get("msg")
-                                    .get("body").get("vietQR").asText();
+                        if (rootNode.get("vietQR") != null) {
+                            qrCode = rootNode.get("vietQR").asText();
                             result = new ResponseMessageDTO("SUCCESS", qrCode);
                         } else {
                             result = new ResponseMessageDTO("FAILED", "E05");

@@ -7,10 +7,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -183,27 +182,41 @@ public class CustomerInvoiceController {
                         if (BankEncryptUtil.isMatchChecksum(dto.getChecksum(), checksum)) {
                             // get bill info
                             // get customer va info
-                            CustomerInvoiceInfoDataDTO customerInvoiceInfoDataDTO = customerInvoiceService
+                            List<CustomerInvoiceInfoDataDTO> customerInvoiceInfoDataDTOs = customerInvoiceService
                                     .getCustomerInvoiceInfo(dto.getCustomer_id());
 
-                            if (customerInvoiceInfoDataDTO != null) {
+                            if (customerInvoiceInfoDataDTOs != null) {
                                 CustomerVaInfoDataDTO customerVaInfoDataDTO = customerVaService
                                         .getCustomerVaInfo(dto.getCustomer_id());
                                 CustomerInvoiceDTO customerInvoiceDTO = new CustomerInvoiceDTO();
                                 customerInvoiceDTO.setResult_code("000");
                                 customerInvoiceDTO.setResult_desc("success");
-                                customerInvoiceDTO.setService_id(dto.getService_id());
+//                                customerInvoiceDTO.setService_id(dto.getService_id());
                                 customerInvoiceDTO.setCustomer_id(customerVaInfoDataDTO.getCustomer_id());
                                 customerInvoiceDTO.setCustomer_name(customerVaInfoDataDTO.getCustomer_name());
                                 customerInvoiceDTO.setCustomer_addr("");
-                                InvoiceDTO invoiceDTO = new InvoiceDTO();
-                                invoiceDTO.setType(customerInvoiceInfoDataDTO.getType());
-                                invoiceDTO.setAmount(customerInvoiceInfoDataDTO.getAmount());
-                                invoiceDTO.setBill_id(customerInvoiceInfoDataDTO.getBill_id());
-                                customerInvoiceDTO.setData(invoiceDTO);
+                                List<InvoiceDTO> invoiceDTOs = new ArrayList<>();
+                                invoiceDTOs = customerInvoiceInfoDataDTOs.stream()
+                                                .map(item -> {
+                                                    InvoiceDTO invoiceDTO = new InvoiceDTO();
+                                                    invoiceDTO.setType(item.getType());
+                                                    invoiceDTO.setAmount(item.getAmount());
+                                                    invoiceDTO.setBill_id(item.getBill_id());
+                                                    return invoiceDTO;
+                                                })
+                                                        .collect(Collectors.toList());
+//                                invoiceDTO.setType(customerInvoiceInfoDataDTO.getType());
+//                                invoiceDTO.setAmount(customerInvoiceInfoDataDTO.getAmount());
+//                                invoiceDTO.setBill_id(customerInvoiceInfoDataDTO.getBill_id());
+                                customerInvoiceDTO.setData(invoiceDTOs);
                                 // update inquired
-                                customerInvoiceService.updateInquiredInvoiceByBillId(1,
-                                        customerInvoiceInfoDataDTO.getBill_id());
+//                                customerInvoiceService.updateInquiredInvoiceByBillId(1,
+//                                        customerInvoiceInfoDataDTO.getBill_id());
+                                List<String> billIds = customerInvoiceInfoDataDTOs.stream()
+                                        .map(CustomerInvoiceInfoDataDTO::getBill_id)
+                                        .collect(Collectors.toList());
+                                customerInvoiceService.updateInquiredInvoiceByBillIds(1,
+                                        billIds);
                                 // response
                                 result = customerInvoiceDTO;
                                 httpStatus = HttpStatus.OK;
@@ -1478,7 +1491,7 @@ public class CustomerInvoiceController {
         String result = "";
         try {
             result = EnvironmentUtil.getPrefixBidvBillIdCommon() + DateTimeUtil.getCurrentWeekYear() +
-            DateTimeUtil.getMinusCurrentDate() + RandomCodeUtil.generateRandomId(3);
+            StringUtil.convertToHexadecimal(DateTimeUtil.getMinusCurrentDate()) + RandomCodeUtil.generateRandomId(4);
         } catch (Exception e) {
             logger.error("getRandomBillId: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
         }

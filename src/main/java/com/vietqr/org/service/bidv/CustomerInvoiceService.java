@@ -23,10 +23,12 @@ public interface CustomerInvoiceService {
 
     public void removeInvocieByBillId(String billId);
 
-    public CustomerInvoiceInfoDataDTO getCustomerInvoiceInfo(String customerId);
+    public List<CustomerInvoiceInfoDataDTO> getCustomerInvoiceInfo(String customerId);
 //    public List<CustomerInvoiceInfoDataDTO> getCustomerInvoiceInfos(String customerId);
 
     public void updateCustomerVaInvoice(int status, Long timePaid, String billId);
 
     public String getCustomerIdByBillId(String billId);
+
+    void updateInquiredInvoiceByBillIds(int inquired, List<String> billIds);
 }
