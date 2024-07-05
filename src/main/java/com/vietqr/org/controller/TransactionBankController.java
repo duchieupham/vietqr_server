@@ -886,10 +886,14 @@ public class TransactionBankController {
 											getCustomerSyncEntities(transcationUUID.toString(), dto, accountBankEntity,
 													time, orderId, sign, rawCode, "", terminalCode);
 											// push notification
-											insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity,
-													time,
-													traceId, uuid, nf, "", "", boxIdRef);
-										}
+                                            try {
+                                                insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity,
+                                                        time,
+                                                        traceId, uuid, nf, "", "", boxIdRef);
+                                            } catch (JsonProcessingException e) {
+                                                throw new RuntimeException(e);
+                                            }
+                                        }
 										// }
 									} else {
 										logger.info(
@@ -925,9 +929,13 @@ public class TransactionBankController {
 										getCustomerSyncEntities(transcationUUID.toString(), dto, accountBankEntity,
 												time,
 												orderId, sign, rawCode, "", terminalCode);
-										insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity, time,
-												traceId, uuid, nf, "", "", boxIdRef);
-									}
+                                        try {
+                                            insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity, time,
+                                                    traceId, uuid, nf, "", "", boxIdRef);
+                                        } catch (JsonProcessingException e) {
+                                            throw new RuntimeException(e);
+                                        }
+                                    }
 								}
 							} else {
 								logger.error("Transaction-sync: Duplicate Reference number");
@@ -1860,7 +1868,7 @@ public class TransactionBankController {
                 if (chatIds != null && !chatIds.isEmpty()) {
                     TelegramUtil telegramUtil = new TelegramUtil();
                     for (String chatId : chatIds) {
-                        TelegramEntity telegramEntity = telegramService.getTelegramById(chatId);
+                        TelegramEntity telegramEntity = telegramService.getTelegramByChatId(chatId);
                         if (telegramEntity != null) {
                             List<String> notificationTypes = new ObjectMapper().readValue(telegramEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
                             List<String> notificationContents = new ObjectMapper().readValue(telegramEntity.getNotificationContents(), new TypeReference<List<String>>() {});
@@ -1907,28 +1915,12 @@ public class TransactionBankController {
 //				}
 
 				/////// DO INSERT LARK BY QVAN
-				if (accountBankEntity.getBankAccount().equals("699699699996")) {
-					if (transactionReceiveEntity.getTransType().equals("C")) {
-						List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-						if (webhooks != null && !webhooks.isEmpty()) {
-							LarkUtil larkUtil = new LarkUtil();
-							String larkMsg = prefix + amount + " VND"
-									+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-									+ accountBankEntity.getBankAccount()
-									+ " | " + convertLongToDate(time)
-									+ " | " + dto.getReferencenumber()
-									+ " | ND: " + dto.getContent();
-							for (String webhook : webhooks) {
-								larkUtil.sendMessageToLark(larkMsg, webhook);
-							}
-						}
-					}
-				} else {
+
 					List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
 					if (webhooks != null && !webhooks.isEmpty()) {
 						LarkUtil larkUtil = new LarkUtil();
 						for (String webhook : webhooks) {
-							LarkEntity larkEntity = larkService.getLarkById(webhook);
+							LarkEntity larkEntity = larkService.getLarkByWebhook(webhook);
 							if (larkEntity != null) {
 								List<String> notificationTypes = new ObjectMapper().readValue(larkEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
 								List<String> notificationContents = new ObjectMapper().readValue(larkEntity.getNotificationContents(), new TypeReference<List<String>>() {});
@@ -1940,7 +1932,7 @@ public class TransactionBankController {
 							}
 						}
 					}
-				}
+
 
 				/////// DO INSERT GOOGLE CHAT
 //				List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
@@ -1963,7 +1955,7 @@ public class TransactionBankController {
 				if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
 					GoogleChatUtil googleChatUtil = new GoogleChatUtil();
 					for (String webhook : ggChatWebhooks) {
-						GoogleChatEntity googleChatEntity = googleChatService.getGoogleChatById(webhook);
+						GoogleChatEntity googleChatEntity = googleChatService.getGoogleChatByWebhook(webhook);
 						if (googleChatEntity != null) {
 							List<String> notificationTypes = new ObjectMapper().readValue(googleChatEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
 							List<String> notificationContents = new ObjectMapper().readValue(googleChatEntity.getNotificationContents(), new TypeReference<List<String>>() {});
@@ -2120,7 +2112,7 @@ public class TransactionBankController {
 				if (chatIds != null && !chatIds.isEmpty()) {
 					TelegramUtil telegramUtil = new TelegramUtil();
 					for (String chatId : chatIds) {
-						TelegramEntity telegramEntity = telegramService.getTelegramById(chatId);
+						TelegramEntity telegramEntity = telegramService.getTelegramByChatId(chatId);
 						if (telegramEntity != null) {
 							List<String> notificationTypes = new ObjectMapper().readValue(telegramEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
 							List<String> notificationContents = new ObjectMapper().readValue(telegramEntity.getNotificationContents(), new TypeReference<List<String>>() {});
@@ -2168,28 +2160,12 @@ public class TransactionBankController {
 
 
 				/////// DO INSERT LARK BY QVAN
-				if (accountBankEntity.getBankAccount().equals("699699699996")) {
-					if (transactionReceiveEntity.getTransType().equals("C")) {
-						List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-						if (webhooks != null && !webhooks.isEmpty()) {
-							LarkUtil larkUtil = new LarkUtil();
-							String larkMsg = prefix + amount + " VND"
-									+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-									+ accountBankEntity.getBankAccount()
-									+ " | " + convertLongToDate(time)
-									+ " | " + dto.getReferencenumber()
-									+ " | ND: " + dto.getContent();
-							for (String webhook : webhooks) {
-								larkUtil.sendMessageToLark(larkMsg, webhook);
-							}
-						}
-					}
-				} else {
+
 					List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
 					if (webhooks != null && !webhooks.isEmpty()) {
 						LarkUtil larkUtil = new LarkUtil();
 						for (String webhook : webhooks) {
-							LarkEntity larkEntity = larkService.getLarkById(webhook);
+							LarkEntity larkEntity = larkService.getLarkByWebhook(webhook);
 							if (larkEntity != null) {
 								List<String> notificationTypes = new ObjectMapper().readValue(larkEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
 								List<String> notificationContents = new ObjectMapper().readValue(larkEntity.getNotificationContents(), new TypeReference<List<String>>() {});
@@ -2201,7 +2177,7 @@ public class TransactionBankController {
 							}
 						}
 					}
-				}
+
 
 
 				/////// DO INSERT GOOGLE CHAT
@@ -2224,7 +2200,7 @@ public class TransactionBankController {
 				if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
 					GoogleChatUtil googleChatUtil = new GoogleChatUtil();
 					for (String webhook : ggChatWebhooks) {
-						GoogleChatEntity googleChatEntity = googleChatService.getGoogleChatById(webhook);
+						GoogleChatEntity googleChatEntity = googleChatService.getGoogleChatByWebhook(webhook);
 						if (googleChatEntity != null) {
 							List<String> notificationTypes = new ObjectMapper().readValue(googleChatEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
 							List<String> notificationContents = new ObjectMapper().readValue(googleChatEntity.getNotificationContents(), new TypeReference<List<String>>() {});
@@ -2357,7 +2333,7 @@ public class TransactionBankController {
 			if (chatIds != null && !chatIds.isEmpty()) {
 				TelegramUtil telegramUtil = new TelegramUtil();
 				for (String chatId : chatIds) {
-					TelegramEntity telegramEntity = telegramService.getTelegramById(chatId);
+					TelegramEntity telegramEntity = telegramService.getTelegramByChatId(chatId);
 					if (telegramEntity != null) {
 						List<String> notificationTypes = new ObjectMapper().readValue(telegramEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
 						List<String> notificationContents = new ObjectMapper().readValue(telegramEntity.getNotificationContents(), new TypeReference<List<String>>() {});
@@ -2405,28 +2381,12 @@ public class TransactionBankController {
 
 
 			/////// DO INSERT LARK BY QVAN
-			if (accountBankEntity.getBankAccount().equals("699699699996")) {
-				if (transactionReceiveEntity.getTransType().equals("C")) {
-					List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-					if (webhooks != null && !webhooks.isEmpty()) {
-						LarkUtil larkUtil = new LarkUtil();
-						String larkMsg = prefix + amount + " VND"
-								+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-								+ accountBankEntity.getBankAccount()
-								+ " | " + convertLongToDate(time)
-								+ " | " + dto.getReferencenumber()
-								+ " | ND: " + dto.getContent();
-						for (String webhook : webhooks) {
-							larkUtil.sendMessageToLark(larkMsg, webhook);
-						}
-					}
-				}
-			} else {
-				List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+
+			List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
 				if (webhooks != null && !webhooks.isEmpty()) {
 					LarkUtil larkUtil = new LarkUtil();
 					for (String webhook : webhooks) {
-						LarkEntity larkEntity = larkService.getLarkById(webhook);
+						LarkEntity larkEntity = larkService.getLarkByWebhook(webhook);
 						if (larkEntity != null) {
 							List<String> notificationTypes = new ObjectMapper().readValue(larkEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
 							List<String> notificationContents = new ObjectMapper().readValue(larkEntity.getNotificationContents(), new TypeReference<List<String>>() {});
@@ -2438,7 +2398,7 @@ public class TransactionBankController {
 						}
 					}
 				}
-			}
+
 
 			/////// DO INSERT GOOGLE CHAT
 //			List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
@@ -2460,7 +2420,7 @@ public class TransactionBankController {
 			if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
 				GoogleChatUtil googleChatUtil = new GoogleChatUtil();
 				for (String webhook : ggChatWebhooks) {
-					GoogleChatEntity googleChatEntity = googleChatService.getGoogleChatById(webhook);
+					GoogleChatEntity googleChatEntity = googleChatService.getGoogleChatByWebhook(webhook);
 					if (googleChatEntity != null) {
 						List<String> notificationTypes = new ObjectMapper().readValue(googleChatEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
 						List<String> notificationContents = new ObjectMapper().readValue(googleChatEntity.getNotificationContents(), new TypeReference<List<String>>() {});
@@ -2491,12 +2451,14 @@ public class TransactionBankController {
 		}
 		return notificationTypes.contains("RECON") && dto.getTransType().equals("C") && (transactionReceiveEntity.getType() == 0 || transactionReceiveEntity.getType() == 1);
 	}
+
+
 	private String createMessage(List<String> notificationContents, String transType, String amount, BankTypeEntity bankTypeEntity, String bankAccount, long time, String referenceNumber, String content) {
-		String prefix = transType.toUpperCase().equals("D") ? "-" : "+";
-		StringBuilder msgBuilder = new StringBuilder(prefix);
+		StringBuilder msgBuilder = new StringBuilder();
 
 		if (notificationContents.contains("AMOUNT")) {
-			msgBuilder.append(amount).append(" VND ");
+			String prefix = transType.toUpperCase().equals("D") ? "-" : "+";
+			msgBuilder.append(prefix).append(amount).append(" VND ");
 		}
 
 		msgBuilder.append("| TK: ").append(bankTypeEntity.getBankShortName()).append(" - ").append(bankAccount)
@@ -2509,61 +2471,20 @@ public class TransactionBankController {
 			msgBuilder.append(" | ND: ").append(content);
 		}
 
-		return msgBuilder.toString();
+		// Loại bỏ ký tự "|" thừa ở đầu nếu không có "AMOUNT"
+		String message = msgBuilder.toString();
+		if (!notificationContents.contains("AMOUNT")) {
+			message = message.replaceFirst("^\\| ", "");
+		}
+
+		return message;
 	}
 
-	private String createTelegramMessage(List<String> notificationContents, String transType, String amount, BankTypeEntity bankTypeEntity, String bankAccount, long time, String referenceNumber, String content) {
-		String prefix = transType.toUpperCase().equals("D") ? "-" : "+";
-		StringBuilder msgBuilder = new StringBuilder(prefix);
-
-		if (notificationContents.contains("AMOUNT")) {
-			msgBuilder.append(amount).append(" VND ");
-		}
-
-		msgBuilder.append("| TK: ").append(bankTypeEntity.getBankShortName()).append(" - ").append(bankAccount)
-				.append(" | ").append(convertLongToDate(time));
-
-		if (notificationContents.contains("REFERENCE_NUMBER")) {
-			msgBuilder.append(" | ").append(referenceNumber);
-		}
-		if (notificationContents.contains("CONTENT")) {
-			msgBuilder.append(" | ND: ").append(content);
-		}
-
-		return msgBuilder.toString();
-	}
-
-	private String createGoogleChatMessage(List<String> notificationContents, String transType, String amount, BankTypeEntity bankTypeEntity, String bankAccount, long time, String referenceNumber, String content) {
-		String prefix = transType.toUpperCase().equals("D") ? "-" : "+";
-		StringBuilder msgBuilder = new StringBuilder(prefix).append(amount).append(" VND")
-				.append(" | TK: ").append(bankTypeEntity.getBankShortName()).append(" - ").append(bankAccount)
-				.append(" | ").append(convertLongToDate(time));
-		if (notificationContents.contains("REFERENCE_NUMBER")) {
-			msgBuilder.append(" | ").append(referenceNumber);
-		}
-		if (notificationContents.contains("CONTENT")) {
-			msgBuilder.append(" | ND: ").append(content);
-		}
-		return msgBuilder.toString();
-	}
-	private String createLarkMessage(List<String> notificationContents, String transType, String amount, BankTypeEntity bankTypeEntity, String bankAccount, long time, String referenceNumber, String content) {
-		String prefix = transType.toUpperCase().equals("D") ? "-" : "+";
-		StringBuilder msgBuilder = new StringBuilder(prefix).append(amount).append(" VND")
-				.append(" | TK: ").append(bankTypeEntity.getBankShortName()).append(" - ").append(bankAccount)
-				.append(" | ").append(convertLongToDate(time));
-		if (notificationContents.contains("REFERENCE_NUMBER")) {
-			msgBuilder.append(" | ").append(referenceNumber);
-		}
-		if (notificationContents.contains("CONTENT")) {
-			msgBuilder.append(" | ND: ").append(content);
-		}
-		return msgBuilder.toString();
-	}
 	// insert new transaction mean it's not created from business. So DO NOT need to
 	// push to users
 	public void insertNewTransaction(String transcationUUID, TransactionBankDTO dto,
 			AccountBankReceiveEntity accountBankEntity, long time,
-			String traceId, UUID uuid, NumberFormat nf, String orderId, String sign, String boxIdRef) {
+			String traceId, UUID uuid, NumberFormat nf, String orderId, String sign, String boxIdRef) throws JsonProcessingException {
 		SystemSettingEntity systemSetting = systemSettingService.getSystemSetting();
 		String amount = "";
 		if (dto.getAmount() != 0) {
@@ -2944,19 +2865,38 @@ public class TransactionBankController {
 				}
 
 				/////// DO INSERT GOOGLE CHAT
+//				List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+//				if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
+//					GoogleChatUtil googleChatUtil = new GoogleChatUtil();
+//					String googleChatMsg = prefix + amount + " VND"
+//							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+//							+ accountBankEntity.getBankAccount()
+//							+ " | " + convertLongToDate(time)
+//							+ " | " + dto.getReferencenumber()
+//							+ " | ND: " + dto.getContent();
+//					for (String webhook : ggChatWebhooks) {
+//						googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
+//					}
+//				}
+
+				// DO INSERT GOOGLE CHAT BY QVAN
 				List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
 				if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
 					GoogleChatUtil googleChatUtil = new GoogleChatUtil();
-					String googleChatMsg = prefix + amount + " VND"
-							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-							+ accountBankEntity.getBankAccount()
-							+ " | " + convertLongToDate(time)
-							+ " | " + dto.getReferencenumber()
-							+ " | ND: " + dto.getContent();
 					for (String webhook : ggChatWebhooks) {
-						googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
+						GoogleChatEntity googleChatEntity = googleChatService.getGoogleChatByWebhook(webhook);
+						if (googleChatEntity != null) {
+							List<String> notificationTypes = new ObjectMapper().readValue(googleChatEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+							List<String> notificationContents = new ObjectMapper().readValue(googleChatEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+							boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
+							if (sendNotification) {
+								String googleChatMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+								googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
+							}
+						}
 					}
 				}
+
 				// }
 
 				// textToSpeechService.delete(requestId);
@@ -3212,19 +3152,39 @@ public class TransactionBankController {
 				}
 
 				/////// DO INSERT GOOGLE CHAT
+//				List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+//				if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
+//					GoogleChatUtil googleChatUtil = new GoogleChatUtil();
+//					String googleChatMsg = prefix + amount + " VND"
+//							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+//							+ accountBankEntity.getBankAccount()
+//							+ " | " + convertLongToDate(time)
+//							+ " | " + dto.getReferencenumber()
+//							+ " | ND: " + dto.getContent();
+//					for (String webhook : ggChatWebhooks) {
+//						googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
+//					}
+//				}
+
+				// DO INSERT GOOGLE CHAT BY QVAN
 				List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
 				if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
 					GoogleChatUtil googleChatUtil = new GoogleChatUtil();
-					String googleChatMsg = prefix + amount + " VND"
-							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-							+ accountBankEntity.getBankAccount()
-							+ " | " + convertLongToDate(time)
-							+ " | " + dto.getReferencenumber()
-							+ " | ND: " + dto.getContent();
 					for (String webhook : ggChatWebhooks) {
-						googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
+						GoogleChatEntity googleChatEntity = googleChatService.getGoogleChatByWebhook(webhook);
+						if (googleChatEntity != null) {
+							List<String> notificationTypes = new ObjectMapper().readValue(googleChatEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+							List<String> notificationContents = new ObjectMapper().readValue(googleChatEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+							boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
+							if (sendNotification) {
+								String googleChatMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+								googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
+							}
+						}
 					}
 				}
+
+
 				// }
 			}
 		} else {
@@ -3493,17 +3453,34 @@ public class TransactionBankController {
 			}
 
 			/////// DO INSERT GOOGLE CHAT
+//			List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+//			if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
+//				GoogleChatUtil googleChatUtil = new GoogleChatUtil();
+//				String googleChatMsg = prefix + amount + " VND"
+//						+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
+//						+ accountBankEntity.getBankAccount()
+//						+ " | " + convertLongToDate(time)
+//						+ " | " + dto.getReferencenumber()
+//						+ " | ND: " + dto.getContent();
+//				for (String webhook : ggChatWebhooks) {
+//					googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
+//				}
+//			}
+			// DO INSERT GOOGLE CHAT BY QVAN
 			List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
 			if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
 				GoogleChatUtil googleChatUtil = new GoogleChatUtil();
-				String googleChatMsg = prefix + amount + " VND"
-						+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-						+ accountBankEntity.getBankAccount()
-						+ " | " + convertLongToDate(time)
-						+ " | " + dto.getReferencenumber()
-						+ " | ND: " + dto.getContent();
 				for (String webhook : ggChatWebhooks) {
-					googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
+					GoogleChatEntity googleChatEntity = googleChatService.getGoogleChatByWebhook(webhook);
+					if (googleChatEntity != null) {
+						List<String> notificationTypes = new ObjectMapper().readValue(googleChatEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+						List<String> notificationContents = new ObjectMapper().readValue(googleChatEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+						boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
+						if (sendNotification) {
+							String googleChatMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+							googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
+						}
+					}
 				}
 			}
 			// }

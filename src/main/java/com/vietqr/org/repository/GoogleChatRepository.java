@@ -25,4 +25,8 @@ public interface GoogleChatRepository extends JpaRepository<GoogleChatEntity, Lo
     @Modifying
     @Query(value = "DELETE FROM google_chat WHERE id = :id", nativeQuery = true)
     void removeGoogleChat(@Param(value = "id") String id);
+
+
+    @Query(value ="SELECT * FROM google_chat WHERE webhook = :webhook", nativeQuery = true)
+    GoogleChatEntity getGoogleChatsByWebhook(@Param("webhook") String webhook);
 }
