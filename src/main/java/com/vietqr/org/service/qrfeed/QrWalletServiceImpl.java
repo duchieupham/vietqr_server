@@ -73,6 +73,7 @@ public class QrWalletServiceImpl implements QrWalletService {
     public QrWalletEntity getQrVCardUpdate(String qrId) {
         return repo.getQrVCardUpdate(qrId);
     }
+
     @Override
     public QrWalletEntity getQrVietQR(String qrId) {
         return repo.getQrVietQR(qrId);
@@ -92,6 +93,7 @@ public class QrWalletServiceImpl implements QrWalletService {
     public List<IListQrWalletDTO> getQrWallets(String value, int offset, int size) {
         return repo.getQrWallets(value, offset, size);
     }
+
     @Override
     public List<IListQrWalletDTO> getQrWalletPublic(String value, int offset, int size) {
         return repo.getQrWalletPublic(value, offset, size);
@@ -200,13 +202,53 @@ public class QrWalletServiceImpl implements QrWalletService {
     }
 
     @Override
-    public List<IQrWalletPrivateDTO> getAllPrivateQrWallets(String userId, int offset, int size) {
-        return repo.findAllPrivateQrWallets(userId, offset, size);
+    public List<IQrWalletPrivateDTO> getAllPrivateQrWallets(String userId, int offset, int size, String value) {
+        return repo.findAllPrivateQrWallets(userId, offset, size, value);
     }
 
     @Override
-    public int countPrivateQrWallets() {
-        return repo.countPrivateQrWallets();
+    public List<IQrWalletPrivateDTO> getQrTextPrivate(String userId, int offset, int size, String value) {
+        return repo.getQrTextPrivate(userId, offset, size, value);
+    }
+
+    @Override
+    public List<IQrWalletPrivateDTO> getQrVCardPrivate(String userId, int offset, int size, String value) {
+        return repo.getQrVCardPrivate(userId, offset, size, value);
+    }
+
+    @Override
+    public List<IQrWalletPrivateDTO> getQrVietQrPrivate(String userId, int offset, int size, String value) {
+        return repo.getQrVietQrPrivate(userId, offset, size, value);
+    }
+
+    @Override
+    public List<IQrWalletPrivateDTO> getQrLinkPrivate(String userId, int offset, int size, String value) {
+        return repo.getQrLinkPrivate(userId, offset, size, value);
+    }
+
+    @Override
+    public int countPrivateQrWallets(String userId, String value) {
+        return repo.countPrivateQrWallets(userId, value);
+    }
+
+    @Override
+    public int countQrLinkPrivate(String userId, String value) {
+        return repo.countQrLinkPrivate(userId, value);
+    }
+
+    @Override
+    public int countQrTextPrivate(String userId, String value) {
+        return repo.countQrTextPrivate(userId, value);
+    }
+
+    @Override
+    public int countQrVCardPrivate(String userId, String value) {
+        return repo.countQrVCardPrivate(userId, value);
+    }
+
+    @Override
+    public int countQrVietQrPrivate(String userId, String value) {
+        return repo.countQrVietQrPrivate(userId, value);
     }
 
     @Override
