@@ -5,6 +5,7 @@ import com.vietqr.org.dto.VietQRCreateUnauthenticatedDTO;
 import java.lang.reflect.Field;
 
 public class VietQRCreateUnauthenticatedExtendDTO extends VietQRCreateUnauthenticatedDTO {
+    private String id;
     private String userId;
     private String qrName;
     private String qrDescription;
@@ -15,7 +16,8 @@ public class VietQRCreateUnauthenticatedExtendDTO extends VietQRCreateUnauthenti
     public VietQRCreateUnauthenticatedExtendDTO() {
     }
 
-    public VietQRCreateUnauthenticatedExtendDTO(String userId, String qrName, String qrDescription, String isPublic, String style, String theme) {
+    public VietQRCreateUnauthenticatedExtendDTO(String qrId, String userId, String qrName, String qrDescription, String isPublic, String style, String theme) {
+        this.id = qrId;
         this.userId = userId;
         this.qrName = qrName;
         this.qrDescription = qrDescription;
@@ -24,14 +26,12 @@ public class VietQRCreateUnauthenticatedExtendDTO extends VietQRCreateUnauthenti
         this.theme = theme;
     }
 
-    public VietQRCreateUnauthenticatedExtendDTO(String bankAccount, String bankCode, String userBankName, String amount, String content, String userId, String qrName, String qrDescription, String isPublic, String style, String theme) {
-        super(bankAccount, bankCode, userBankName, amount, content);
-        this.userId = userId;
-        this.qrName = qrName;
-        this.qrDescription = qrDescription;
-        this.isPublic = isPublic;
-        this.style = style;
-        this.theme = theme;
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getUserId() {
