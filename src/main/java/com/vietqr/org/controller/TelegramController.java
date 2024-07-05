@@ -1,32 +1,21 @@
 package com.vietqr.org.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.vietqr.org.dto.ResponseMessageDTO;
-import com.vietqr.org.dto.SocialNetworkBankDTO;
-import com.vietqr.org.dto.TelBankDTO;
-import com.vietqr.org.dto.TelegramDetailDTO;
-import com.vietqr.org.dto.TelegramInsertDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.TelegramAccountBankEntity;
 import com.vietqr.org.entity.TelegramEntity;
 import com.vietqr.org.service.TelegramAccountBankService;
 import com.vietqr.org.service.TelegramService;
 import com.vietqr.org.util.TelegramUtil;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @CrossOrigin
@@ -156,6 +145,47 @@ public class TelegramController {
                 telegramEntity.setId(uuid.toString());
                 telegramEntity.setUserId(dto.getUserId());
                 telegramEntity.setChatId(dto.getChatId());
+                telegramService.insertTelegram(telegramEntity);
+                for (String bankId : dto.getBankIds()) {
+                    UUID uuid2 = UUID.randomUUID();
+                    TelegramAccountBankEntity telAccBankEntity = new TelegramAccountBankEntity();
+                    telAccBankEntity.setId(uuid2.toString());
+                    telAccBankEntity.setBankId(bankId);
+                    telAccBankEntity.setTelegramId(uuid.toString());
+                    telAccBankEntity.setUserId(dto.getUserId());
+                    telAccBankEntity.setChatId(dto.getChatId());
+                    telegramAccountBankService.insert(telAccBankEntity);
+                }
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            } else {
+                logger.error("insertTelegramChatId: INVALID REQUEST BODY");
+                System.out.println("insertTelegramChatId: INVALID REQUEST BODY");
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("Error at insertTelegramChatId: " + e.toString());
+            System.out.println("Error at insertTelegramChatId: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("service/telegrams")
+    public ResponseEntity<ResponseMessageDTO> insertTelegramChatIds(@RequestBody TelegramInsertDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null && dto.getBankIds() != null && !dto.getBankIds().isEmpty() && dto.getNotificationTypes() != null && !dto.getNotificationTypes().isEmpty() && dto.getNotificationContents() != null && !dto.getNotificationContents().isEmpty()) {
+                UUID uuid = UUID.randomUUID();
+                TelegramEntity telegramEntity = new TelegramEntity();
+                telegramEntity.setId(uuid.toString());
+                telegramEntity.setUserId(dto.getUserId());
+                telegramEntity.setChatId(dto.getChatId());
+                telegramEntity.setNotificationTypes(new ObjectMapper().writeValueAsString(dto.getNotificationTypes()));
+                telegramEntity.setNotificationContents(new ObjectMapper().writeValueAsString(dto.getNotificationContents()));
                 telegramService.insertTelegram(telegramEntity);
                 for (String bankId : dto.getBankIds()) {
                     UUID uuid2 = UUID.randomUUID();
