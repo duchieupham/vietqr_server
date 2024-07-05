@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -183,6 +184,47 @@ public class LarkController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+    @PostMapping("service/larks")
+    public ResponseEntity<ResponseMessageDTO> insertLarkChatIds(@RequestBody LarkInsertDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null && dto.getBankIds() != null && !dto.getBankIds().isEmpty() && dto.getNotificationTypes() != null && !dto.getNotificationTypes().isEmpty() && dto.getNotificationContents() != null && !dto.getNotificationContents().isEmpty()) {
+                UUID uuid = UUID.randomUUID();
+                LarkEntity larkEntity = new LarkEntity();
+                larkEntity.setId(uuid.toString());
+                larkEntity.setUserId(dto.getUserId());
+                larkEntity.setWebhook(dto.getWebhook());
+                larkEntity.setNotificationTypes(new ObjectMapper().writeValueAsString(dto.getNotificationTypes()));
+                larkEntity.setNotificationContents(new ObjectMapper().writeValueAsString(dto.getNotificationContents()));
+                larkService.insertLark(larkEntity);
+                for (String bankId : dto.getBankIds()) {
+                    UUID uuid2 = UUID.randomUUID();
+                    LarkAccountBankEntity larkAccBankEntity = new LarkAccountBankEntity();
+                    larkAccBankEntity.setId(uuid2.toString());
+                    larkAccBankEntity.setBankId(bankId);
+                    larkAccBankEntity.setLarkId(uuid.toString());
+                    larkAccBankEntity.setUserId(dto.getUserId());
+                    larkAccBankEntity.setWebhook(dto.getWebhook());
+                    larkAccountBankService.insert(larkAccBankEntity);
+                }
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            } else {
+                logger.error("insertLarkChatId: INVALID REQUEST BODY");
+                System.out.println("insertLarkChatId: INVALID REQUEST BODY");
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("Error at insertLarkChatId: " + e.toString());
+            System.out.println("Error at insertLarkChatId: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
 
     // get lark account information
     @GetMapping("service/lark/information")

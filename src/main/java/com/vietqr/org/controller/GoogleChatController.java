@@ -3,6 +3,7 @@ package com.vietqr.org.controller;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,7 +173,48 @@ public class GoogleChatController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-
+    @PostMapping("service/google-chats")
+    public ResponseEntity<ResponseMessageDTO> insertGoogleChats(@RequestBody LarkInsertDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null && dto.getBankIds() != null && !dto.getBankIds().isEmpty() && dto.getNotificationTypes() != null && !dto.getNotificationTypes().isEmpty() && dto.getNotificationContents() != null && !dto.getNotificationContents().isEmpty()) {
+                UUID ggChatUUID = UUID.randomUUID();
+                GoogleChatEntity googleChatEntity = new GoogleChatEntity();
+                googleChatEntity.setId(ggChatUUID.toString());
+                googleChatEntity.setUserId(dto.getUserId());
+                googleChatEntity.setWebhook(dto.getWebhook());
+                googleChatEntity.setNotificationTypes(new ObjectMapper().writeValueAsString(dto.getNotificationTypes()));
+                googleChatEntity.setNotificationContents(new ObjectMapper().writeValueAsString(dto.getNotificationContents()));
+                googleChatService.insert(googleChatEntity);
+                if (dto.getBankIds() != null && !dto.getBankIds().isEmpty()) {
+                    for (String bankId : dto.getBankIds()) {
+                        UUID ggChatBankUUID = UUID.randomUUID();
+                        GoogleChatAccountBankEntity googleChatAccountBankEntity = new GoogleChatAccountBankEntity();
+                        googleChatAccountBankEntity.setId(ggChatBankUUID.toString());
+                        googleChatAccountBankEntity.setGoogleChatId(ggChatUUID.toString());
+                        googleChatAccountBankEntity.setBankId(bankId);
+                        googleChatAccountBankEntity.setUserId(dto.getUserId());
+                        googleChatAccountBankEntity.setWebhook(dto.getWebhook());
+                        googleChatAccountBankService.insert(googleChatAccountBankEntity);
+                    }
+                }
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            } else {
+                logger.error("insertGoogleChat: INVALID REQUEST BODY");
+                System.out.println("insertGoogleChat: INVALID REQUEST BODY");
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("GoogleChatController: insertGoogleChat: ERROR: " + e.toString());
+            System.out.println("GoogleChatController: insertGoogleChat: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
     // get google chat connection information
     // GoogleChatDetailDTO
     @GetMapping("service/google-chat/information")
