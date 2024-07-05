@@ -1415,7 +1415,7 @@ public class QrWalletController {
 
                             // update file log to qr
                             qrWalletService.updateFileQrById(uuid.toString(), idQrWallet.toString());
-                        } else if (Integer.parseInt(typeDto) == 0) {
+                        } else if (Integer.parseInt(typeDto) == 1) {
                             entity.setId(idQrWallet.toString());
                             entity.setTitle(qrNameDTO);
                             entity.setDescription(qrDescriptionDTO);
@@ -1447,7 +1447,7 @@ public class QrWalletController {
                                 entity.setIsPublic(0);
                             }
                             entity.setTimeCreated(currentDateTime.toEpochSecond(ZoneOffset.UTC));
-                            entity.setUserId(isPublicDTO);
+                            entity.setUserId(userIdDTO);
                             entity.setPin(pinDTO);
                             entity.setPublicId(qrLink);
                             entity.setStyle(Integer.parseInt(styleDTO));
