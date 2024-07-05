@@ -30,6 +30,10 @@ public interface AccountCustomerBankRepository extends JpaRepository<AccountCust
         @Query(value = "SELECT * FROM account_customer_bank WHERE bank_id = :bankId", nativeQuery = true)
         List<AccountCustomerBankEntity> getAccountCustomerBankByBankId(@Param(value = "bankId") String bankId);
 
+        @Query(value = "SELECT secret_key FROM account_customer_bank WHERE bank_account = :bankAccount ", nativeQuery = true)
+        String getSecretKey(String bankAccount);
+
+
         @Query(value = "SELECT id FROM account_customer_bank WHERE bank_id = :bankId AND customer_sync_id = :customerSyncId", nativeQuery = true)
         String checkExistedAccountCustomerBank(@Param(value = "bankId") String bankId,
                         @Param(value = "customerSyncId") String customerSyncId);
