@@ -47,5 +47,14 @@ public interface QrWalletService {
     Page<QrCommentDTO> findCommentsByQrWalletId(String qrWalletId, Pageable pageable);
     int countCommentsByQrWalletId(String qrWalletId);
 
+    List<IQrWalletPrivateDTO> getAllPrivateQrWallets(String userId, int offset, int size);
+
+    int countPrivateQrWallets();
+
+
+    List<IQrWalletDTO> getQrWalletsByPublicStatus(String userId, int isPublic, int offset, int size);
+
+    int countQrWalletsByPublicStatus(int isPublic);
+
 
 }

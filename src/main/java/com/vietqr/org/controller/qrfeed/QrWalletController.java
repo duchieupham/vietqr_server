@@ -607,7 +607,7 @@ public class QrWalletController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @GetMapping("/qr-wallets/public/details/{qrWalletId}")
+    @GetMapping("/qr-wallets/details/{qrWalletId}")
     public ResponseEntity<Object> getQrWalletDetails(@PathVariable String qrWalletId,
                                                      @RequestParam String userId,
                                                      @RequestParam int page,
@@ -640,6 +640,7 @@ public class QrWalletController {
                 detailDTO.setImageId(qrWalletDTO.getImageId());
                 detailDTO.setStyle(qrWalletDTO.getStyle());
                 detailDTO.setTheme(qrWalletDTO.getTheme());
+                detailDTO.setFileAttachmentId(qrWalletDTO.getFileAttachmentId());
 
                 PageDTO pageDTO = new PageDTO();
                 pageDTO.setSize(size);
@@ -664,4 +665,73 @@ public class QrWalletController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("/qr-wallets/private")
+    public ResponseEntity<Object> getAllPrivateQrWallets(
+            @RequestParam String userId,
+            @RequestParam int page,
+            @RequestParam int size) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            logger.info("Fetching Private QR Wallets for userId: " + userId + ", page: " + page + ", size: " + size);
+            int totalElements = qrWalletService.countPrivateQrWallets();
+            int offset = (page - 1) * size;
+            List<IQrWalletPrivateDTO> qrWallets = qrWalletService.getAllPrivateQrWallets(userId, offset, size);
+            logger.info("QR Wallets Retrieved: " + qrWallets);
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageDTO.setTotalElement(totalElements);
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElements, size));
+
+            PageResDTO pageResDTO = new PageResDTO();
+            pageResDTO.setMetadata(pageDTO);
+            pageResDTO.setData(qrWallets);
+
+            result = pageResDTO;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getAllPrivateQrWallets Error at " + e.getMessage() + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+
+    @GetMapping("/qr-wallets")
+    public ResponseEntity<Object> getQrWallets(
+            @RequestParam String userId,
+            @RequestParam int isPublic,
+            @RequestParam int page,
+            @RequestParam int size) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            logger.info("Fetching QR Wallets for userId: " + userId + ", isPublic: " + isPublic + ", page: " + page + ", size: " + size);
+            int totalElements = qrWalletService.countQrWalletsByPublicStatus(isPublic);
+            int offset = (page - 1) * size;
+            List<IQrWalletDTO> qrWallets = qrWalletService.getQrWalletsByPublicStatus(userId, isPublic, offset, size);
+            logger.info("QR Wallets Retrieved: " + qrWallets);
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageDTO.setTotalElement(totalElements);
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElements, size));
+
+            PageResDTO pageResDTO = new PageResDTO();
+            pageResDTO.setMetadata(pageDTO);
+            pageResDTO.setData(qrWallets);
+
+            result = pageResDTO;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getQrWallets Error at " + e.getMessage() + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 }

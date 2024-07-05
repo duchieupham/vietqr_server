@@ -21,6 +21,8 @@ public class QrWalletDetailDTO {
     private String style;
     private String theme;
 
+    private String fileAttachmentId;
+
     private PageResDTO comments;
 
     public PageResDTO getComments() {
@@ -152,5 +154,14 @@ public class QrWalletDetailDTO {
 
     public void setTheme(String theme) {
         this.theme = theme;
+    }
+
+
+    public String getFileAttachmentId() {
+        return fileAttachmentId;
+    }
+
+    public void setFileAttachmentId(String fileAttachmentId) {
+        this.fileAttachmentId = fileAttachmentId;
     }
 }

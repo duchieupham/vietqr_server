@@ -1,6 +1,6 @@
 package com.vietqr.org.dto.qrfeed;
 
-public interface IQrWalletDTO {
+public interface IQrWalletPrivateDTO {
     String getId();
     String getTitle();
     String getDescription();
@@ -8,15 +8,13 @@ public interface IQrWalletDTO {
     String getQrType();
     long getTimeCreated();
     String getUserId();
-    int getLikeCount();
-    int getCommentCount();
-    int getHasLiked();
+
     String getData();
 
     String getFullName();
     String getImageId();
     String getStyle();
     String getTheme();
-    String getFileAttachmentId();
 
+    String getFileAttachmentId();
 }
