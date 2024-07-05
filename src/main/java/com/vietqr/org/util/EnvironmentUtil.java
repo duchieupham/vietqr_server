@@ -46,7 +46,7 @@ public class EnvironmentUtil {
     private static final String BIDV_URL_REQUEST_ADD_MERCHANT_UAT = "https://bidv.net:9303/bidvorg/service/open-banking/paygate/virtualAccount/createVAQLBH/v1";
     private static final String BIDV_URL_REQUEST_ADD_MERCHANT_PROD = "https://openapi.bidv.com.vn/bidv/service/open-banking/paygate/createVAQLBH/v1";
 
-    private static final String BIDV_URL_CONFIRM_ADD_MERCHANT_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/confirmVAQLBH/v1";
+    private static final String BIDV_URL_CONFIRM_ADD_MERCHANT_UAT = "https://bidv.net:9303/bidvorg/service/open-banking/paygate/virtualAccount/confirmVAQLBH/v1";
     private static final String BIDV_URL_CONFIRM_ADD_MERCHANT_PROD = "https://openapi.bidv.com.vn/bidv/service/open-banking/paygate/confirmVAQLBH/v1";
 
     private static final String BIDV_URL_UNREGISTER_MERCHANT_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/deleteVAQLBH/v1";

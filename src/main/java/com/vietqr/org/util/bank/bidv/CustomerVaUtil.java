@@ -141,12 +141,8 @@ public class CustomerVaUtil {
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode rootNode = objectMapper.readTree(json);
                 //
-                if (rootNode.get("msg") != null
-                        && rootNode.get("msg").get("header") != null
-                        && rootNode.get("msg")
-                                .get("header").get("errorCode") != null) {
-                    String errorCode = rootNode.get("msg")
-                            .get("header").get("errorCode").asText();
+                if (rootNode.get("errorCode") != null) {
+                    String errorCode = rootNode.get("errorCode").asText();
                     if (errorCode != null) {
                         if (errorCode.trim().equals("000")) {
                             ResponseReqCustomerVaDTO data = new ResponseReqCustomerVaDTO(merchantId,
@@ -305,15 +301,11 @@ public class CustomerVaUtil {
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode rootNode = objectMapper.readTree(json);
                 //
-                if (rootNode.get("msg") != null
-                        && rootNode.get("msg").get("header") != null
-                        && rootNode.get("msg")
-                                .get("header").get("errorCode") != null) {
-                    String errorCode = rootNode.get("msg")
-                            .get("header").get("errorCode").asText();
+                if (rootNode.get("errorCode") != null) {
+                    String errorCode = rootNode.get("errorCode").asText();
                     if (errorCode != null) {
                         if (errorCode.trim().equals("000")) {
-                            String vaNumber = rootNode.get("msg").get("body").get("vaNumber").asText();
+                            String vaNumber = rootNode.get("vaNumber").asText();
                             result = new ResponseMessageDTO("SUCCESS", vaNumber);
                             // ResponseReqCustomerVaDTO data = new ResponseReqCustomerVaDTO(merchantId,
                             // interactionId.toString());
