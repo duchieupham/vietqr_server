@@ -23,6 +23,11 @@ public class AccountCustomerBankServiceImpl implements AccountCustomerBankServic
     }
 
     @Override
+    public String checkSecretKey(String bankAccount) {
+        return repo.getSecretKey(bankAccount);
+    }
+
+    @Override
     public int insert(AccountCustomerBankEntity entity) {
         return repo.save(entity) == null ? 0 : 1;
     }

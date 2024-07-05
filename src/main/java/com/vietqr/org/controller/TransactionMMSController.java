@@ -468,7 +468,7 @@ public class TransactionMMSController {
                                             .setTerminalCode(terminalBankReceiveEntity.getTerminalCode());
                                 } else {
                                     transactionReceiveEntity1.setTerminalCode(terminalEntity.getCode()
-                                    != null ? terminalEntity.getCode() : "");
+                                            != null ? terminalEntity.getCode() : "");
                                 }
                                 transactionReceiveEntity1.setContent(entity.getTraceTransfer());
                                 transactionReceiveEntity1.setBankAccount(accountBankReceiveEntity.getBankAccount());
@@ -950,7 +950,7 @@ public class TransactionMMSController {
     }
 
     private void pushNotification(String title, String message, NotificationEntity notiEntity, Map<String, String> data,
-            String userId) {
+                                  String userId) {
 
         if (notiEntity != null) {
             notificationService.insertNotification(notiEntity);
@@ -996,7 +996,7 @@ public class TransactionMMSController {
     }
 
     private void getCustomerSyncEntities(String transReceiveId, String terminalBankId, String ftCode,
-            TransactionReceiveEntity transactionReceiveEntity, long time, String rawTerminalCode, String urlLink) {
+                                         TransactionReceiveEntity transactionReceiveEntity, long time, String rawTerminalCode, String urlLink) {
         try {
             // find customerSyncEntities by terminal_bank_id
             List<TerminalAddressEntity> terminalAddressEntities = new ArrayList<>();
@@ -1047,8 +1047,8 @@ public class TransactionMMSController {
     }
 
     private ResponseMessageDTO pushNewTransactionToCustomerSync(String transReceiveId, CustomerSyncEntity entity,
-            TransactionBankCustomerDTO dto,
-            long time) {
+                                                                TransactionBankCustomerDTO dto,
+                                                                long time) {
         ResponseMessageDTO result = null;
         // final ResponseMessageDTO[] results = new ResponseMessageDTO[1];
         // final List<ResponseMessageDTO> results = new ArrayList<>();
@@ -1327,7 +1327,7 @@ public class TransactionMMSController {
 
     // get result - TransactionMMSResponseDTO
     private TransactionMMSResponseDTO validateTransactionBank(TransactionMMSEntity entity,
-            TerminalBankEntity terminalBankEntity) {
+                                                              TerminalBankEntity terminalBankEntity) {
         TransactionMMSResponseDTO result = null;
         try {
             if (entity != null) {
@@ -1676,10 +1676,14 @@ public class TransactionMMSController {
                         String checkValidBankAccount = accountCustomerBankService.checkExistedBankAccountIntoMerchant(
                                 dto.getBankAccount(), checkExistedCustomerSync.get(0));
                         if (checkValidBankAccount != null && !checkValidBankAccount.trim().isEmpty()) {
+                            // check secretKey
+//                            String secretKey = "secretKey";
+                            // get secretKey by bankAccount
+                            String secretKey = accountCustomerBankService.checkSecretKey(dto.getBankAccount());
                             // process refund
-                            String checkSum = BankEncryptUtil.generateMD5RefundCustomerChecksum(dto.getBankAccount(),
-                                    dto.getReferenceNumber(), username);
-//                            String checkSumRefund = "c68ee42e728b9dbb13dcb2a3d509b877";
+                            String checkSum = BankEncryptUtil.generateRefundMD5Checksum(secretKey, dto.getReferenceNumber()
+                                    , dto.getAmount(), dto.getBankAccount());
+//                            String checkSum = "c68ee42e728b9dbb13dcb2a3d509b877";
                             if (BankEncryptUtil.isMatchChecksum(dto.getCheckSum(), checkSum)) {
                                 // find terminal ID by bankAccount
                                 TerminalBankEntity terminalBankEntity = terminalBankService
@@ -1688,7 +1692,7 @@ public class TransactionMMSController {
                                     String refundResult = refundFromMB(terminalBankEntity.getTerminalId(),
                                             dto.getReferenceNumber(),
                                             dto.getAmount(), dto.getContent());
-//                                    String refundResult = "FT23293978692076";
+//                                        String refundResult = "FT23293978692076";
                                     if (refundResult != null) {
                                         if (refundResult.trim().equals("4863")) {
                                             logger.error(
@@ -1757,7 +1761,7 @@ public class TransactionMMSController {
         } catch (Exception e) {
             logger.error("refundForMerchant: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
-            result = new ResponseMessageDTO("FAILED", "E05");
+            result = new ResponseMessageDTO("FAILED" + e.getMessage(), "E05");
         }
         return new ResponseEntity<>(result, httpStatus);
     }
