@@ -174,6 +174,8 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
     @Query(value = "SELECT COUNT(id) FROM qr_wallet WHERE is_public = 0", nativeQuery = true)
     int countPrivateQrWallets();
 
+    ///
+
     @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
             "w.value AS value, w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
             "(SELECT COUNT(id) FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.interaction_type =1) AS likeCount, " +
