@@ -26,7 +26,11 @@ public interface QrWalletService {
     public void updateQrVCard(String id, String description, int isPublic, int qrType,
                               String title, String value, int style, int theme);
 
+    public void updateQrVietQR(String id, String description, int isPublic, int qrType,
+                              String title, String value, int style, int theme);
+
     public QrWalletEntity getQrVCardUpdate(String qrId);
+    public QrWalletEntity getQrVietQR(String qrId);
 
     public IListQrWalletDTO getQrLinkOrQrTextByUserId(String userId);
 
