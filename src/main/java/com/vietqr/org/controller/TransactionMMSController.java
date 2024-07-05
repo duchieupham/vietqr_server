@@ -1761,7 +1761,7 @@ public class TransactionMMSController {
         } catch (Exception e) {
             logger.error("refundForMerchant: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
-            result = new ResponseMessageDTO("FAILED" + e.getMessage(), "E05");
+            result = new ResponseMessageDTO("FAILED", "E05");
         }
         return new ResponseEntity<>(result, httpStatus);
     }
