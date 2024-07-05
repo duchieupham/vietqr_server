@@ -1,5 +1,6 @@
 package com.vietqr.org.dto;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 public class RefundRequestDTO implements Serializable {
@@ -8,10 +9,19 @@ public class RefundRequestDTO implements Serializable {
      */
     private static final long serialVersionUID = 1L;
 
+    @NotBlank
     private String bankAccount;
+
+    @NotBlank
     private String referenceNumber;
+
+    @NotBlank
     private String amount;
+
+    @NotBlank
     private String content;
+
+    @NotBlank
     private String checkSum;
 
     public RefundRequestDTO() {
