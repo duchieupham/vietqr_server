@@ -9,14 +9,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.vietqr.org.entity.GoogleChatAccountBankEntity;
 import com.vietqr.org.entity.GoogleChatEntity;
@@ -215,6 +208,50 @@ public class GoogleChatController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
+    // update configure
+    @PutMapping("/service/google-chats/update-configure")
+    public ResponseEntity<ResponseMessageDTO> updateGoogleChatConfigure(@RequestBody GoogleChatUpdateDTO dto){
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null && dto.getGoogleChatId() != null && !dto.getGoogleChatId().isEmpty()) {
+                GoogleChatEntity googleChatEntity = googleChatService.getGoogleChatById(dto.getGoogleChatId());
+                if (googleChatEntity != null) {
+                    // Cập nhật các thông tin cấu hình
+                    if (dto.getNotificationTypes() != null && !dto.getNotificationTypes().isEmpty()) {
+                        googleChatEntity.setNotificationTypes(new ObjectMapper().writeValueAsString(dto.getNotificationTypes()));
+                    }
+                    if (dto.getNotificationContents() != null && !dto.getNotificationContents().isEmpty()) {
+                        googleChatEntity.setNotificationContents(new ObjectMapper().writeValueAsString(dto.getNotificationContents()));
+                    }
+                    googleChatService.updateGoogleChat(googleChatEntity);
+
+                    result = new ResponseMessageDTO("SUCCESS", "");
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    logger.error("updateGoogleChatConfigure: GOOGLE CHAT ID NOT FOUND");
+                    System.out.println("updateGoogleChatConfigure: GOOGLE CHAT ID NOT FOUND");
+                    result = new ResponseMessageDTO("FAILED", "E47");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                logger.error("updateGoogleChatConfigure: INVALID REQUEST BODY");
+                System.out.println("updateGoogleChatConfigure: INVALID REQUEST BODY");
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("Error at updateGoogleChatConfigure: " + e.toString());
+            System.out.println("Error at updateGoogleChatConfigure: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+
+
     // get google chat connection information
     // GoogleChatDetailDTO
     @GetMapping("service/google-chat/information")

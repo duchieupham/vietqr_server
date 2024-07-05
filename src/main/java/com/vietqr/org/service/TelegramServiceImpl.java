@@ -36,6 +36,11 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     @Override
+    public void updateTelegram(TelegramEntity telegramEntity) {
+        repo.save(telegramEntity);
+    }
+
+    @Override
     public TelegramEntity getTelegramById(String id) {
         return repo.getTelegramById(id);
     }

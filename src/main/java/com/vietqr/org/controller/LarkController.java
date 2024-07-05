@@ -5,24 +5,13 @@ import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vietqr.org.dto.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.vietqr.org.dto.ResponseMessageDTO;
-import com.vietqr.org.dto.SocialNetworkBankDTO;
-import com.vietqr.org.dto.LarkBankDTO;
-import com.vietqr.org.dto.LarkDetailDTO;
-import com.vietqr.org.dto.LarkInsertDTO;
 import com.vietqr.org.entity.LarkAccountBankEntity;
 import com.vietqr.org.entity.LarkEntity;
 import com.vietqr.org.service.LarkAccountBankService;
@@ -224,7 +213,46 @@ public class LarkController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+    // update configure
+    @PutMapping("service/larks/update-configure")
+    public ResponseEntity<ResponseMessageDTO> updateLarkConfigure(@RequestBody LarkUpdateDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null && dto.getLarkId() != null && !dto.getLarkId().isEmpty()) {
+                LarkEntity larkEntity = larkService.getLarkById(dto.getLarkId());
+                if (larkEntity != null) {
+                    // Cập nhật các thông tin cấu hình
+                    if (dto.getNotificationTypes() != null && !dto.getNotificationTypes().isEmpty()) {
+                        larkEntity.setNotificationTypes(new ObjectMapper().writeValueAsString(dto.getNotificationTypes()));
+                    }
+                    if (dto.getNotificationContents() != null && !dto.getNotificationContents().isEmpty()) {
+                        larkEntity.setNotificationContents(new ObjectMapper().writeValueAsString(dto.getNotificationContents()));
+                    }
+                    larkService.updateLark(larkEntity);
 
+                    result = new ResponseMessageDTO("SUCCESS", "");
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    logger.error("updateLarkChatIds: LARK ID NOT FOUND");
+                    System.out.println("updateLarkChatIds: LARK ID NOT FOUND");
+                    result = new ResponseMessageDTO("FAILED", "E47");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                logger.error("updateLarkConfigure: INVALID REQUEST BODY");
+                System.out.println("updateLarkConfigure: INVALID REQUEST BODY");
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("Error at updateLarkConfigure: " + e.toString());
+            System.out.println("Error at updateLarkConfigure: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 
     // get lark account information
     @GetMapping("service/lark/information")

@@ -15,4 +15,6 @@ public interface GoogleChatService {
     public void removeGoogleChat(String id);
 
     GoogleChatEntity getGoogleChatsByUserId(String userId);
+
+    void updateGoogleChat(GoogleChatEntity googleChatEntity);
 }

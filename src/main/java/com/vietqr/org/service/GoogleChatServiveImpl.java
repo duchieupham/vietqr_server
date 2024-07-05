@@ -34,4 +34,9 @@ public class GoogleChatServiveImpl implements GoogleChatService {
         return repo.getGoogleChatsByUserId(userId);
     }
 
+    @Override
+    public void updateGoogleChat(GoogleChatEntity googleChatEntity) {
+        repo.save(googleChatEntity);
+    }
+
 }

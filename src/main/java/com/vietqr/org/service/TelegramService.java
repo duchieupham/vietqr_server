@@ -20,4 +20,6 @@ public interface TelegramService {
 
     public void removeTelegramById(String id);
 
+    void updateTelegram(TelegramEntity telegramEntity);
+
 }

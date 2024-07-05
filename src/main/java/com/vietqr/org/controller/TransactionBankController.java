@@ -1866,7 +1866,7 @@ public class TransactionBankController {
                             List<String> notificationContents = new ObjectMapper().readValue(telegramEntity.getNotificationContents(), new TypeReference<List<String>>() {});
                             boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionReceiveEntity);
                             if (sendNotification) {
-                                String telegramMsg = createTelegramMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+                                String telegramMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
                                 telegramUtil.sendMsg(chatId, telegramMsg);
                             }
                         }
@@ -1934,7 +1934,7 @@ public class TransactionBankController {
 								List<String> notificationContents = new ObjectMapper().readValue(larkEntity.getNotificationContents(), new TypeReference<List<String>>() {});
 								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionReceiveEntity);
 								if (sendNotification) {
-									String larkMsg = createLarkMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+									String larkMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
 									larkUtil.sendMessageToLark(larkMsg, webhook);
 								}
 							}
@@ -1969,7 +1969,7 @@ public class TransactionBankController {
 							List<String> notificationContents = new ObjectMapper().readValue(googleChatEntity.getNotificationContents(), new TypeReference<List<String>>() {});
 							boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionReceiveEntity);
 							if (sendNotification) {
-								String googleChatMsg = createGoogleChatMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+								String googleChatMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
 								googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
 							}
 						}
@@ -2126,7 +2126,7 @@ public class TransactionBankController {
 							List<String> notificationContents = new ObjectMapper().readValue(telegramEntity.getNotificationContents(), new TypeReference<List<String>>() {});
 							boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionReceiveEntity);
 							if (sendNotification) {
-								String telegramMsg = createTelegramMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+								String telegramMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
 								telegramUtil.sendMsg(chatId, telegramMsg);
 							}
 						}
@@ -2195,7 +2195,7 @@ public class TransactionBankController {
 								List<String> notificationContents = new ObjectMapper().readValue(larkEntity.getNotificationContents(), new TypeReference<List<String>>() {});
 								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionReceiveEntity);
 								if (sendNotification) {
-									String larkMsg = createLarkMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+									String larkMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
 									larkUtil.sendMessageToLark(larkMsg, webhook);
 								}
 							}
@@ -2230,7 +2230,7 @@ public class TransactionBankController {
 							List<String> notificationContents = new ObjectMapper().readValue(googleChatEntity.getNotificationContents(), new TypeReference<List<String>>() {});
 							boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionReceiveEntity);
 							if (sendNotification) {
-								String googleChatMsg = createGoogleChatMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+								String googleChatMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
 								googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
 							}
 						}
@@ -2363,7 +2363,7 @@ public class TransactionBankController {
 						List<String> notificationContents = new ObjectMapper().readValue(telegramEntity.getNotificationContents(), new TypeReference<List<String>>() {});
 						boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionReceiveEntity);
 						if (sendNotification) {
-							String telegramMsg = createTelegramMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+							String telegramMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
 							telegramUtil.sendMsg(chatId, telegramMsg);
 						}
 					}
@@ -2432,7 +2432,7 @@ public class TransactionBankController {
 							List<String> notificationContents = new ObjectMapper().readValue(larkEntity.getNotificationContents(), new TypeReference<List<String>>() {});
 							boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionReceiveEntity);
 							if (sendNotification) {
-								String larkMsg = createLarkMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+								String larkMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
 								larkUtil.sendMessageToLark(larkMsg, webhook);
 							}
 						}
@@ -2466,7 +2466,7 @@ public class TransactionBankController {
 						List<String> notificationContents = new ObjectMapper().readValue(googleChatEntity.getNotificationContents(), new TypeReference<List<String>>() {});
 						boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionReceiveEntity);
 						if (sendNotification) {
-							String googleChatMsg = createGoogleChatMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+							String googleChatMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
 							googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
 						}
 					}
@@ -2491,7 +2491,26 @@ public class TransactionBankController {
 		}
 		return notificationTypes.contains("RECON") && dto.getTransType().equals("C") && (transactionReceiveEntity.getType() == 0 || transactionReceiveEntity.getType() == 1);
 	}
+	private String createMessage(List<String> notificationContents, String transType, String amount, BankTypeEntity bankTypeEntity, String bankAccount, long time, String referenceNumber, String content) {
+		String prefix = transType.toUpperCase().equals("D") ? "-" : "+";
+		StringBuilder msgBuilder = new StringBuilder(prefix);
 
+		if (notificationContents.contains("AMOUNT")) {
+			msgBuilder.append(amount).append(" VND ");
+		}
+
+		msgBuilder.append("| TK: ").append(bankTypeEntity.getBankShortName()).append(" - ").append(bankAccount)
+				.append(" | ").append(convertLongToDate(time));
+
+		if (notificationContents.contains("REFERENCE_NUMBER")) {
+			msgBuilder.append(" | ").append(referenceNumber);
+		}
+		if (notificationContents.contains("CONTENT")) {
+			msgBuilder.append(" | ND: ").append(content);
+		}
+
+		return msgBuilder.toString();
+	}
 
 	private String createTelegramMessage(List<String> notificationContents, String transType, String amount, BankTypeEntity bankTypeEntity, String bankAccount, long time, String referenceNumber, String content) {
 		String prefix = transType.toUpperCase().equals("D") ? "-" : "+";

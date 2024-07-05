@@ -17,4 +17,6 @@ public interface LarkService {
 
     public void removeLarkById(String id);
 
+    void updateLark(LarkEntity larkEntity);
+
 }
