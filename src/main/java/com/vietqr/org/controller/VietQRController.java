@@ -1089,6 +1089,7 @@ public class VietQRController {
 										String qrLink = "";
 										vietQRDTO.setTransactionRefId("");
 										vietQRDTO.setQrLink(qrLink);
+										checkValidSyncTid = true;
 										result = vietQRDTO;
 										httpStatus = HttpStatus.OK;
 									}

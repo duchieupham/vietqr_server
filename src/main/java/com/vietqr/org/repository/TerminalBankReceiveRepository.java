@@ -238,8 +238,8 @@ public interface TerminalBankReceiveRepository extends JpaRepository<TerminalBan
             + "WHERE terminal_code = :terminalCode AND terminal_code != '' LIMIT 1 ", nativeQuery = true)
     TerminalSubRawCodeDTO getTerminalBankReceiveForRawByTerminalCode(String terminalCode);
 
-    @Query(value = "SELECT a.id AS terminalBankReceiveId, "
-            + "a.terminal_id AS terminal_id, b.code AS terminalCode, "
+    @Query(value = "SELECT a.id AS terminalBankReceiveId, a.data1 AS data1, a.data2 AS data2, "
+            + "a.terminal_id AS terminalId, b.code AS terminalCode, "
             + "b.raw_terminal_code AS rawTerminalCode, a.bank_id AS bankId, "
             + "c.bank_account AS bankAccount, d.bank_code AS bankCode "
             + "FROM terminal_bank_receive a "
