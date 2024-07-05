@@ -2,6 +2,7 @@ package com.vietqr.org.service.qrfeed;
 
 import com.vietqr.org.dto.qrfeed.IListQrWalletDTO;
 import com.vietqr.org.dto.qrfeed.IQrWalletDTO;
+import com.vietqr.org.dto.qrfeed.IQrWalletPrivateDTO;
 import com.vietqr.org.dto.qrfeed.QrCommentDTO;
 import com.vietqr.org.entity.qrfeed.QrWalletEntity;
 import com.vietqr.org.repository.QrCommentRepository;
@@ -187,6 +188,26 @@ public class QrWalletServiceImpl implements QrWalletService {
     @Override
     public int countCommentsByQrWalletId(String qrWalletId) {
         return repo.countCommentsByQrWalletId(qrWalletId);
+    }
+
+    @Override
+    public List<IQrWalletPrivateDTO> getAllPrivateQrWallets(String userId, int offset, int size) {
+        return repo.findAllPrivateQrWallets(userId, offset, size);
+    }
+
+    @Override
+    public int countPrivateQrWallets() {
+        return repo.countPrivateQrWallets();
+    }
+
+    @Override
+    public List<IQrWalletDTO> getQrWalletsByPublicStatus(String userId, int isPublic, int offset, int size) {
+        return repo.findQrWalletsByPublicStatus(userId, isPublic, offset, size);
+    }
+
+    @Override
+    public int countQrWalletsByPublicStatus(int isPublic) {
+        return repo.countQrWalletsByPublicStatus(isPublic);
     }
 
 
