@@ -99,4 +99,7 @@ public interface QrWalletService {
     int countQrWalletsByPublicStatus(int isPublic);
 
 
+    QrWalletEntity getQrWalletById(String qrWalletId);
+
+
 }
