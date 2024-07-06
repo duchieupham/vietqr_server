@@ -261,5 +261,10 @@ public class QrWalletServiceImpl implements QrWalletService {
         return repo.countQrWalletsByPublicStatus(isPublic);
     }
 
+    @Override
+    public QrWalletEntity getQrWalletById(String qrWalletId) {
+        return repo.getQrWalletById(qrWalletId);
+    }
+
 
 }
