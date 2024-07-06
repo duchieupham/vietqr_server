@@ -207,7 +207,8 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "FROM qr_comment c " +
             "INNER JOIN qr_wallet_comment wc ON wc.qr_comment_id = c.id " +
             "LEFT JOIN account_information ai ON ai.user_id = c.user_id " +
-            "WHERE wc.qr_wallet_id = :qrWalletId",
+            "WHERE wc.qr_wallet_id = :qrWalletId " +
+            "ORDER BY c.time_created DESC",
             countQuery = "SELECT COUNT(c.id) FROM qr_comment c INNER JOIN qr_wallet_comment wc ON wc.qr_comment_id = c.id WHERE wc.qr_wallet_id = :qrWalletId",
             nativeQuery = true)
     Page<QrCommentDTO> findCommentsByQrWalletId(@Param("qrWalletId") String qrWalletId, Pageable pageable);
@@ -244,5 +245,6 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
     int countQrWalletsByPublicStatus(@Param("isPublic") int isPublic);
 
 
-
+   @Query(value = "SELECT * FROM qr_wallet WHERE id = :qrWalletId", nativeQuery = true)
+    QrWalletEntity getQrWalletById(@Param("qrWalletId") String qrWalletId);
 }

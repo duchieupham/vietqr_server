@@ -1,5 +1,6 @@
 package com.vietqr.org.controller.qrfeed;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.qrfeed.*;
@@ -572,7 +573,67 @@ public class QrWalletController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+    @GetMapping("/qr-wallet/{qrWalletId}/data")
+    public ResponseEntity<Object> getQrWalletData(@PathVariable String qrWalletId) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            QrWalletEntity qrWallet = qrWalletService.getQrWalletById(qrWalletId);
+            if (qrWallet == null) {
+                result = new ResponseMessageDTO("FAILED", "QrWallet not found");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            } else {
+                String qrData = qrWallet.getQrData();
+                int qrType = qrWallet.getQrType();
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode jsonNode = objectMapper.readTree(qrData);
 
+                switch (qrType) {
+                    case 0:
+                        QRLinkDataDTO type0DTO = new QRLinkDataDTO();
+                        type0DTO.setValue(jsonNode.get("value").asText());
+                        result = type0DTO;
+                        break;
+                    case 1:
+                        QRTextDataDTO type1DTO = new QRTextDataDTO();
+                        type1DTO.setTitle(jsonNode.get("title").asText());
+                        type1DTO.setDescription(jsonNode.get("description").asText());
+                        result = type1DTO;
+                        break;
+                    case 2:
+                        QRVCardDTO type2DTO = new QRVCardDTO();
+                        type2DTO.setFullName(jsonNode.get("fullName").asText());
+                        type2DTO.setPhoneNo(jsonNode.get("phoneNo").asText());
+                        type2DTO.setEmail(jsonNode.get("email").asText());
+                        type2DTO.setCompanyName(jsonNode.get("companyName").asText());
+                        type2DTO.setWebsite(jsonNode.get("website").asText());
+                        type2DTO.setAddress(jsonNode.get("address").asText());
+                        result = type2DTO;
+                        break;
+                    case 3:
+                        VietQRDataDTO type3DTO = new VietQRDataDTO();
+                        type3DTO.setBankAccount(jsonNode.get("bankAccount").asText());
+                        type3DTO.setUserBankName(jsonNode.get("userBankName").asText());
+                        type3DTO.setBankCode(jsonNode.get("bankCode").asText());
+                        type3DTO.setAmount(jsonNode.get("amount").asText());
+                        type3DTO.setContent(jsonNode.get("content").asText());
+                        result = type3DTO;
+                        break;
+                    default:
+                        result = new ResponseMessageDTO("FAILED", "Invalid qrType");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        return new ResponseEntity<>(result, httpStatus);
+                }
+
+                httpStatus = HttpStatus.OK;
+            }
+        } catch (Exception e) {
+            logger.error("getQrWalletData: ERROR: " + e.getMessage() + " at " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
     @GetMapping("/qr-wallets/public")
     public ResponseEntity<Object> getAllPublicQrWallets(
             @RequestParam String userId,
