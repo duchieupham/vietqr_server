@@ -73,15 +73,13 @@ public class QrFolderController {
 
     @GetMapping("qr-feed/folders")
     public ResponseEntity<Object> getListFolderByUser(
-            @RequestBody FolderInfoByUserDTO folderInfoByUserDTO
+            @RequestParam String userId
     ) {
         Object result = null;
         HttpStatus httpStatus = null;
-        PageResDTO pageResDTO = new PageResDTO();
         try {
             List<ListQrFolderDTO> data = new ArrayList<>();
             List<IListQrFolderDTO> info = new ArrayList<>();
-            String userId = folderInfoByUserDTO.getUserId();
             info = qrFolderService.getListFolders(userId);
             data = info.stream().map(item -> {
                 ListQrFolderDTO dto = new ListQrFolderDTO();
