@@ -74,15 +74,15 @@ public interface QrWalletService {
 
     int countCommentsByQrWalletId(String qrWalletId);
 
-    List<IQrWalletPrivateDTO> getAllPrivateQrWallets(String userId, int offset, int size, String value);
+    List<IQrWalletPrivateDTO> getAllPrivateQrWallets(String userId, String value);
 
-    List<IQrWalletPrivateDTO> getQrTextPrivate(String userId, int offset, int size, String value);
+    List<IQrWalletPrivateDTO> getQrTextPrivate(String userId, String value);
 
-    List<IQrWalletPrivateDTO> getQrVCardPrivate(String userId, int offset, int size, String value);
+    List<IQrWalletPrivateDTO> getQrVCardPrivate(String userId, String value);
 
-    List<IQrWalletPrivateDTO> getQrVietQrPrivate(String userId, int offset, int size, String value);
+    List<IQrWalletPrivateDTO> getQrVietQrPrivate(String userId, String value);
 
-    List<IQrWalletPrivateDTO> getQrLinkPrivate(String userId, int offset, int size, String value);
+    List<IQrWalletPrivateDTO> getQrLinkPrivate(String userId, String value);
 
     int countPrivateQrWallets(String userId, String value);
 
