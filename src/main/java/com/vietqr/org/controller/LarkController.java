@@ -1,22 +1,22 @@
 package com.vietqr.org.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
+import com.vietqr.org.entity.LarkAccountBankEntity;
+import com.vietqr.org.entity.LarkEntity;
+import com.vietqr.org.service.LarkAccountBankService;
+import com.vietqr.org.service.LarkService;
+import com.vietqr.org.util.LarkUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.vietqr.org.entity.LarkAccountBankEntity;
-import com.vietqr.org.entity.LarkEntity;
-import com.vietqr.org.service.LarkAccountBankService;
-import com.vietqr.org.service.LarkService;
-import com.vietqr.org.util.LarkUtil;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @CrossOrigin
@@ -304,4 +304,58 @@ public class LarkController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+    @GetMapping("service/larks/information-detail")
+    public ResponseEntity<LarkDetailDTO> getLarkInformationDetail(
+            @RequestParam(value = "id") String id) {
+        LarkDetailDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            LarkEntity larkEntity = larkService.getLarkById(id);
+            if (larkEntity != null) {
+                LarkDetailDTO larkDetailDTO = new LarkDetailDTO();
+                larkDetailDTO.setId(larkEntity.getId());
+                larkDetailDTO.setWebhook(larkEntity.getWebhook());
+                larkDetailDTO.setUserId(larkEntity.getUserId());
+                List<LarkBankDTO> telBankDTOs = larkAccountBankService
+                        .getLarkAccBanksByLarkId(larkEntity.getId());
+                if (telBankDTOs != null && !telBankDTOs.isEmpty()) {
+                    larkDetailDTO.setBanks(telBankDTOs);
+                }
+                larkDetailDTO.setNotificationTypes(
+                        new ObjectMapper().readValue(larkEntity.getNotificationTypes(), new TypeReference<List<String>>() {
+                        }));
+                larkDetailDTO.setNotificationContents(
+                        new ObjectMapper().readValue(larkEntity.getNotificationContents(), new TypeReference<List<String>>() {
+                        }));
+                result = larkDetailDTO;
+                httpStatus = HttpStatus.OK;
+            } else {
+                httpStatus = HttpStatus.NOT_FOUND;
+            }
+        } catch (Exception e) {
+            logger.error("getLarkInformationDetail: ERROR: " + e.getMessage() + System.currentTimeMillis());
+            System.out.println("getLarkInformationDetail: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+    @PutMapping("service/larks/update-webhook/{id}")
+    public ResponseEntity<ResponseMessageDTO> updateLarkWebhook(@PathVariable String id, @RequestBody LarkUpdateWebhookDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            LarkEntity larkEntity = larkService.getLarkById(id);
+            larkEntity.setWebhook(dto.getWebhook());
+            larkService.updateLark(larkEntity);
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("LarkController: updateLarkWebhook: ERROR: "  + e.getMessage() + System.currentTimeMillis());
+            System.out.println("LarkController: updateLarkWebhook: ERROR: "  + e.getMessage() + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
 }

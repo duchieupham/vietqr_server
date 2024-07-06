@@ -1,10 +1,13 @@
 package com.vietqr.org.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
+import com.vietqr.org.entity.LarkEntity;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -306,4 +309,58 @@ public class GoogleChatController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // GoogleChatDetailDTO
+    @GetMapping("service/google-chats/information-detail")
+    public ResponseEntity<Object> getGoogleChatInformationDetail(
+            @RequestParam(value = "id") String id) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            GoogleChatEntity dto = googleChatService.getGoogleChatById(id);
+            if (dto != null) {
+                GoogleChatDetailDTO detailDTO = new GoogleChatDetailDTO();
+                detailDTO.setId(dto.getId());
+                detailDTO.setWebhook(dto.getWebhook());
+                detailDTO.setUserId(dto.getUserId());
+                List<GoogleChatBankDTO> bankDTOs = googleChatAccountBankService.getGoogleAccountBanks(dto.getId());
+                detailDTO.setBanks(bankDTOs);
+                detailDTO.setNotificationTypes(
+                        new ObjectMapper().readValue(dto.getNotificationTypes(), new TypeReference<List<String>>() {}));
+                detailDTO.setNotificationContents(
+                        new ObjectMapper().readValue(dto.getNotificationContents(), new TypeReference<List<String>>() {}));
+                result = detailDTO;
+                httpStatus = HttpStatus.OK;
+            } else {
+                ResponseMessageDTO responseMessageDTO = new ResponseMessageDTO("CHECK", "C13");
+                result = responseMessageDTO;
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+
+        } catch (Exception e) {
+            logger.error("GoogleChatController: getGoogleChatInformationDetail: ERROR: " + e.getMessage() + System.currentTimeMillis());
+            System.out.println("GoogleChatController: getGoogleChatInformationDetail: ERROR: " + e.getMessage() + System.currentTimeMillis());
+            ResponseMessageDTO responseMessageDTO = new ResponseMessageDTO("FAILED", "E05");
+            result = responseMessageDTO;
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+    @PutMapping("service/google-chats/update-webhook/{id}")
+    public ResponseEntity<ResponseMessageDTO> updateGoogleChatWebhook(@PathVariable String id, @RequestBody GoogleChatUpdateWebhookDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            GoogleChatEntity googleChatEntity = googleChatService.getGoogleChatById(id);
+            googleChatEntity.setWebhook(dto.getWebhook());
+            googleChatService.updateGoogleChat(googleChatEntity);
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("GoogleChatController: updateGoogleChatWebhook: ERROR: "  + e.getMessage() + System.currentTimeMillis());
+            System.out.println("GoogleChatController: updateGoogleChatWebhook: ERROR: "  + e.getMessage() + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 }
