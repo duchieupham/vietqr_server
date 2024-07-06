@@ -202,28 +202,28 @@ public class QrWalletServiceImpl implements QrWalletService {
     }
 
     @Override
-    public List<IQrWalletPrivateDTO> getAllPrivateQrWallets(String userId, int offset, int size, String value) {
-        return repo.findAllPrivateQrWallets(userId, offset, size, value);
+    public List<IQrWalletPrivateDTO> getAllPrivateQrWallets(String userId, String value) {
+        return repo.findAllPrivateQrWallets(userId, value);
     }
 
     @Override
-    public List<IQrWalletPrivateDTO> getQrTextPrivate(String userId, int offset, int size, String value) {
-        return repo.getQrTextPrivate(userId, offset, size, value);
+    public List<IQrWalletPrivateDTO> getQrTextPrivate(String userId, String value) {
+        return repo.getQrTextPrivate(userId, value);
     }
 
     @Override
-    public List<IQrWalletPrivateDTO> getQrVCardPrivate(String userId, int offset, int size, String value) {
-        return repo.getQrVCardPrivate(userId, offset, size, value);
+    public List<IQrWalletPrivateDTO> getQrVCardPrivate(String userId, String value) {
+        return repo.getQrVCardPrivate(userId, value);
     }
 
     @Override
-    public List<IQrWalletPrivateDTO> getQrVietQrPrivate(String userId, int offset, int size, String value) {
-        return repo.getQrVietQrPrivate(userId, offset, size, value);
+    public List<IQrWalletPrivateDTO> getQrVietQrPrivate(String userId, String value) {
+        return repo.getQrVietQrPrivate(userId, value);
     }
 
     @Override
-    public List<IQrWalletPrivateDTO> getQrLinkPrivate(String userId, int offset, int size, String value) {
-        return repo.getQrLinkPrivate(userId, offset, size, value);
+    public List<IQrWalletPrivateDTO> getQrLinkPrivate(String userId, String value) {
+        return repo.getQrLinkPrivate(userId, value);
     }
 
     @Override

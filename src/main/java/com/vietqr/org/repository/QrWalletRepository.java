@@ -230,12 +230,9 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "FROM qr_wallet w " +
             "LEFT JOIN account_information ai ON ai.user_id = w.user_id " +
             "WHERE (w.is_public = 0) AND (w.user_id = :userId) AND (w.title LIKE %:value%) " +
-            "ORDER BY w.title ASC " +
-            "LIMIT :offset, :size", nativeQuery = true)
+            "ORDER BY w.title ASC ", nativeQuery = true)
     List<IQrWalletPrivateDTO> findAllPrivateQrWallets(
             @Param("userId") String userId,
-            @Param("offset") int offset,
-            @Param("size") int size,
             @Param("value") String value);
 
     @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
@@ -255,12 +252,9 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "FROM qr_wallet w " +
             "LEFT JOIN account_information ai ON ai.user_id = w.user_id " +
             "WHERE (w.is_public = 0) AND (w.user_id = :userId) AND (w.qr_type = 0) AND (w.title LIKE %:value%) " +
-            "ORDER BY w.title ASC " +
-            "LIMIT :offset, :size", nativeQuery = true)
+            "ORDER BY w.title ASC ", nativeQuery = true)
     List<IQrWalletPrivateDTO> getQrLinkPrivate(
             @Param("userId") String userId,
-            @Param("offset") int offset,
-            @Param("size") int size,
             @Param("value") String value);
 
     @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
@@ -280,12 +274,9 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "FROM qr_wallet w " +
             "LEFT JOIN account_information ai ON ai.user_id = w.user_id " +
             "WHERE (w.is_public = 0) AND (w.user_id = :userId) AND (w.qr_type = 1) AND (w.title LIKE %:value%) " +
-            "ORDER BY w.title ASC " +
-            "LIMIT :offset, :size", nativeQuery = true)
+            "ORDER BY w.title ASC ", nativeQuery = true)
     List<IQrWalletPrivateDTO> getQrTextPrivate(
             @Param("userId") String userId,
-            @Param("offset") int offset,
-            @Param("size") int size,
             @Param("value") String value);
 
     @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
@@ -305,12 +296,9 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "FROM qr_wallet w " +
             "LEFT JOIN account_information ai ON ai.user_id = w.user_id " +
             "WHERE (w.is_public = 0) AND (w.user_id = :userId) AND (w.qr_type = 2) AND (w.title LIKE %:value%) " +
-            "ORDER BY w.title ASC " +
-            "LIMIT :offset, :size", nativeQuery = true)
+            "ORDER BY w.title ASC ", nativeQuery = true)
     List<IQrWalletPrivateDTO> getQrVCardPrivate(
             @Param("userId") String userId,
-            @Param("offset") int offset,
-            @Param("size") int size,
             @Param("value") String value);
 
     @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
@@ -330,12 +318,9 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "FROM qr_wallet w " +
             "LEFT JOIN account_information ai ON ai.user_id = w.user_id " +
             "WHERE (w.is_public = 0) AND (w.user_id = :userId) AND (w.qr_type = 3) AND (w.title LIKE %:value%) " +
-            "ORDER BY w.title ASC " +
-            "LIMIT :offset, :size", nativeQuery = true)
+            "ORDER BY w.title ASC ", nativeQuery = true)
     List<IQrWalletPrivateDTO> getQrVietQrPrivate(
             @Param("userId") String userId,
-            @Param("offset") int offset,
-            @Param("size") int size,
             @Param("value") String value);
 
     @Query(value = "SELECT COUNT(*) FROM qr_wallet w " +

@@ -1860,18 +1860,10 @@ public class QrWalletController {
     public ResponseEntity<Object> getAllPrivateQrWallets(
             @RequestParam String userId,
             @RequestParam int type,
-            @RequestParam int page,
-            @RequestParam int size,
             @RequestParam String value) {
         Object result = null;
         HttpStatus httpStatus = null;
-        PageResDTO pageResDTO = new PageResDTO();
-        PageDTO pageDTO = new PageDTO();
-
         try {
-            int totalElement = 0;
-            int offset = (page - 1) * size;
-
             List<IQrWalletPrivateDTO> qrWalletPrivateAll = null;
             List<IQrWalletPrivateDTO> qrLinkPrivate = null;
             List<IQrWalletPrivateDTO> qrTextPrivate = null;
@@ -1880,68 +1872,26 @@ public class QrWalletController {
 
             switch (type) {
                 case 0:
-                    qrLinkPrivate = qrWalletService.getQrLinkPrivate(userId, offset, size, value);
-                    totalElement = qrWalletService.countQrLinkPrivate(userId, value);
-
-                    pageDTO.setSize(size);
-                    pageDTO.setPage(page);
-                    pageDTO.setTotalElement(totalElement);
-                    pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
-
-                    pageResDTO.setMetadata(pageDTO);
-                    pageResDTO.setData(qrLinkPrivate);
+                    qrLinkPrivate = qrWalletService.getQrLinkPrivate(userId, value);
+                    result = qrLinkPrivate;
                     break;
                 case 1:
-                    qrTextPrivate = qrWalletService.getQrTextPrivate(userId, offset, size, value);
-                    totalElement = qrWalletService.countQrTextPrivate(userId, value);
-
-                    pageDTO.setSize(size);
-                    pageDTO.setPage(page);
-                    pageDTO.setTotalElement(totalElement);
-                    pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
-
-                    pageResDTO.setMetadata(pageDTO);
-                    pageResDTO.setData(qrTextPrivate);
+                    qrTextPrivate = qrWalletService.getQrTextPrivate(userId, value);
+                    result = qrTextPrivate;
                     break;
                 case 2:
-                    qrVCardPrivate = qrWalletService.getQrVCardPrivate(userId, offset, size, value);
-                    totalElement = qrWalletService.countQrVCardPrivate(userId, value);
-
-                    pageDTO.setSize(size);
-                    pageDTO.setPage(page);
-                    pageDTO.setTotalElement(totalElement);
-                    pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
-
-                    pageResDTO.setMetadata(pageDTO);
-                    pageResDTO.setData(qrVCardPrivate);
+                    qrVCardPrivate = qrWalletService.getQrVCardPrivate(userId, value);
+                    result = qrVCardPrivate;
                     break;
                 case 3:
-                    qrVietQrPrivate = qrWalletService.getQrVietQrPrivate(userId, offset, size, value);
-                    totalElement = qrWalletService.countQrVietQrPrivate(userId, value);
-
-                    pageDTO.setSize(size);
-                    pageDTO.setPage(page);
-                    pageDTO.setTotalElement(totalElement);
-                    pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
-
-                    pageResDTO.setMetadata(pageDTO);
-                    pageResDTO.setData(qrVietQrPrivate);
+                    qrVietQrPrivate = qrWalletService.getQrVietQrPrivate(userId, value);
+                    result = qrVietQrPrivate;
                     break;
                 case 9:
-                    qrWalletPrivateAll = qrWalletService.getAllPrivateQrWallets(userId, offset, size, value);
-                    totalElement = qrWalletService.countPrivateQrWallets(userId, value);
-
-                    pageDTO.setSize(size);
-                    pageDTO.setPage(page);
-                    pageDTO.setTotalElement(totalElement);
-                    pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
-
-                    pageResDTO.setMetadata(pageDTO);
-                    pageResDTO.setData(qrWalletPrivateAll);
+                    qrWalletPrivateAll = qrWalletService.getAllPrivateQrWallets(userId, value);
+                    result = qrWalletPrivateAll;
                     break;
             }
-
-            result = pageResDTO;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("getAllPrivateQrWallets Error at " + e.getMessage() + System.currentTimeMillis());
