@@ -1492,7 +1492,21 @@ public class QrWalletController {
 //                    VCardInputExtendDTO vCardInputDTO = objectMapper.readValue(json, VCardInputExtendDTO.class);
                     VCardInputExtendDTO input = new VCardInputExtendDTO();
                     QrVcardRequestDTO qrVcardRequestDTO = new QrVcardRequestDTO();
-                    String qr = VCardUtil.getVcardQR(input);
+                    input.setQrName(qrNameDTO);
+                    input.setQrDescription(qrDescriptionDTO);
+                    input.setFullname(fullNameDTO);
+                    input.setPhoneNo(phoneNoDTO);
+                    input.setEmail(emailDTO);
+                    input.setCompanyName(companyNameDTO);
+                    input.setWebsite(websiteDTO);
+                    input.setAddress(addressDTO);
+                    input.setUserId(userIdDTO);
+                    input.setAdditionalData(additionalDataDTO);
+                    input.setIsPublic(isPublicDTO);
+                    input.setStyle(styleDTO);
+                    input.setTheme(themeDTO);
+
+                    String qr = VCardUtil.getVcardQR(input); //
                     qrVcardRequestDTO = new QrVcardRequestDTO();
                     qrVcardRequestDTO.setQr(qr);
                     qrVcardRequestDTO.setQrName(qrNameDTO);
