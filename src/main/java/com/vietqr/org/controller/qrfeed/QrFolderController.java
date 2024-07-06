@@ -92,7 +92,7 @@ public class QrFolderController {
             }).collect(Collectors.toList());
 
             result = data;
-            httpStatus = HttpStatus.BAD_REQUEST;
+            httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("get list folder: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
