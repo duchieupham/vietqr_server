@@ -73,24 +73,16 @@ public class QrFolderController {
 
     @GetMapping("qr-feed/folders")
     public ResponseEntity<Object> getListFolderByUser(
-            @RequestParam int type,
-            @RequestParam int page,
-            @RequestParam int size,
-            @RequestParam String value,
             @RequestBody FolderInfoByUserDTO folderInfoByUserDTO
     ) {
         Object result = null;
         HttpStatus httpStatus = null;
         PageResDTO pageResDTO = new PageResDTO();
         try {
-            int totalElement = 0;
-            int offset = (page - 1) * size;
-
             List<ListQrFolderDTO> data = new ArrayList<>();
             List<IListQrFolderDTO> info = new ArrayList<>();
             String userId = folderInfoByUserDTO.getUserId();
-            totalElement = qrFolderService.countQrFolder(value,userId);
-            info = qrFolderService.getListFolders(value, offset, size, userId);
+            info = qrFolderService.getListFolders(userId);
             data = info.stream().map(item -> {
                 ListQrFolderDTO dto = new ListQrFolderDTO();
                 dto.setId(item.getId());
@@ -101,16 +93,7 @@ public class QrFolderController {
                 return dto;
             }).collect(Collectors.toList());
 
-            PageDTO pageDTO = new PageDTO();
-            pageDTO.setSize(size);
-            pageDTO.setPage(page);
-            pageDTO.setTotalElement(totalElement);
-            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
-
-            pageResDTO.setMetadata(pageDTO);
-            pageResDTO.setData(data);
-
-            result = pageResDTO;
+            result = data;
             httpStatus = HttpStatus.BAD_REQUEST;
         } catch (Exception e) {
             logger.error("get list folder: ERROR: " + e.toString());
