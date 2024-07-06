@@ -14,7 +14,10 @@ public interface LarkService {
     public List<LarkEntity> getLarksByUserId(String userId);
 
     public LarkEntity getLarkById(String id);
+    LarkEntity getLarkByWebhook(String webhook);
 
     public void removeLarkById(String id);
+
+    void updateLark(LarkEntity larkEntity);
 
 }

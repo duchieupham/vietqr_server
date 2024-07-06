@@ -25,4 +25,7 @@ public interface LarkRepository extends JpaRepository<LarkEntity, Long> {
     @Modifying
     @Query(value = "DELETE FROM lark WHERE id = :id", nativeQuery = true)
     void removeLarkById(@Param(value = "id") String id);
+
+    @Query(value="SELECT * FROM lark WHERE webhook = :webhook",nativeQuery = true)
+    LarkEntity getLarkByWebhook(@Param("webhook") String webhook);
 }
