@@ -12,9 +12,13 @@ public interface LarkService {
     public int insertLark(LarkEntity entity);
 
     public List<LarkEntity> getLarksByUserId(String userId);
+    LarkEntity getLarkByUserId(String userId);
 
     public LarkEntity getLarkById(String id);
+    LarkEntity getLarkByWebhook(String webhook);
 
     public void removeLarkById(String id);
+
+    void updateLark(LarkEntity larkEntity);
 
 }

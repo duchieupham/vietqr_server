@@ -14,18 +14,21 @@ public class TelegramDetailDTO implements Serializable {
     private String chatId;
     private String userId;
     private List<TelBankDTO> banks;
-
+    private List<String> notificationTypes;
+    private List<String> notificationContents;
     public TelegramDetailDTO() {
         super();
     }
 
-    public TelegramDetailDTO(String id, String chatId, String userId, List<TelBankDTO> banks) {
+    public TelegramDetailDTO(String id, String chatId, String userId, List<TelBankDTO> banks,
+                             List<String> notificationTypes, List<String> notificationContents) {
         this.id = id;
         this.chatId = chatId;
         this.userId = userId;
         this.banks = banks;
+        this.notificationTypes = notificationTypes;
+        this.notificationContents = notificationContents;
     }
-
     public String getId() {
         return id;
     }
@@ -58,4 +61,20 @@ public class TelegramDetailDTO implements Serializable {
         this.banks = banks;
     }
 
+
+    public List<String> getNotificationTypes() {
+        return notificationTypes;
+    }
+
+    public void setNotificationTypes(List<String> notificationTypes) {
+        this.notificationTypes = notificationTypes;
+    }
+
+    public List<String> getNotificationContents() {
+        return notificationContents;
+    }
+
+    public void setNotificationContents(List<String> notificationContents) {
+        this.notificationContents = notificationContents;
+    }
 }

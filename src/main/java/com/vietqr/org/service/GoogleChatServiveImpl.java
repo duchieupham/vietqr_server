@@ -25,6 +25,11 @@ public class GoogleChatServiveImpl implements GoogleChatService {
     }
 
     @Override
+    public GoogleChatEntity getGoogleChatByWebhook(String webhook) {
+        return repo.getGoogleChatsByWebhook(webhook);
+    }
+
+    @Override
     public void removeGoogleChat(String id) {
         repo.removeGoogleChat(id);
     }
@@ -32,6 +37,11 @@ public class GoogleChatServiveImpl implements GoogleChatService {
     @Override
     public GoogleChatEntity getGoogleChatsByUserId(String userId) {
         return repo.getGoogleChatsByUserId(userId);
+    }
+
+    @Override
+    public void updateGoogleChat(GoogleChatEntity googleChatEntity) {
+        repo.save(googleChatEntity);
     }
 
 }

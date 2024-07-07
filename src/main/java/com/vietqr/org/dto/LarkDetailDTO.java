@@ -15,15 +15,20 @@ public class LarkDetailDTO implements Serializable {
     private String userId;
     private List<LarkBankDTO> banks;
 
+    private List<String> notificationTypes;
+    private List<String> notificationContents;
+
     public LarkDetailDTO() {
         super();
     }
 
-    public LarkDetailDTO(String id, String webhook, String userId, List<LarkBankDTO> banks) {
+    public LarkDetailDTO(String id, String webhook, String userId, List<LarkBankDTO> banks, List<String> notificationTypes, List<String> notificationContents) {
         this.id = id;
         this.webhook = webhook;
         this.userId = userId;
         this.banks = banks;
+        this.notificationTypes = notificationTypes;
+        this.notificationContents = notificationContents;
     }
 
     public String getId() {
@@ -58,4 +63,20 @@ public class LarkDetailDTO implements Serializable {
         this.banks = banks;
     }
 
+
+    public List<String> getNotificationTypes() {
+        return notificationTypes;
+    }
+
+    public void setNotificationTypes(List<String> notificationTypes) {
+        this.notificationTypes = notificationTypes;
+    }
+
+    public List<String> getNotificationContents() {
+        return notificationContents;
+    }
+
+    public void setNotificationContents(List<String> notificationContents) {
+        this.notificationContents = notificationContents;
+    }
 }

@@ -18,6 +18,8 @@ public interface LarkRepository extends JpaRepository<LarkEntity, Long> {
     @Query(value = "SELECT * FROM lark WHERE user_id = :userId", nativeQuery = true)
     List<LarkEntity> getLarksByUserId(@Param(value = "userId") String userId);
 
+    @Query(value = "SELECT * FROM lark WHERE user_id = :userId", nativeQuery = true)
+    LarkEntity getLarkByUserId(@Param(value = "userId") String userId);
     @Query(value = "SELECT * FROM lark WHERE id = :id", nativeQuery = true)
     LarkEntity getLarkById(@Param(value = "id") String id);
 
@@ -25,4 +27,7 @@ public interface LarkRepository extends JpaRepository<LarkEntity, Long> {
     @Modifying
     @Query(value = "DELETE FROM lark WHERE id = :id", nativeQuery = true)
     void removeLarkById(@Param(value = "id") String id);
+
+    @Query(value="SELECT * FROM lark WHERE webhook = :webhook",nativeQuery = true)
+    LarkEntity getLarkByWebhook(@Param("webhook") String webhook);
 }

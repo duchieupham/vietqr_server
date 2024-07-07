@@ -25,14 +25,22 @@ public class GoogleChatEntity implements Serializable {
     @Column(name = "userId")
     private String userId;
 
+    @Column(name = "notificationTypes")
+    private String notificationTypes;
+
+    @Column(name = "notificationContents")
+    private String notificationContents;
+
     public GoogleChatEntity() {
         super();
     }
 
-    public GoogleChatEntity(String id, String webhook, String userId) {
+    public GoogleChatEntity(String id, String webhook, String userId, String notificationTypes, String notificationContents) {
         this.id = id;
         this.webhook = webhook;
         this.userId = userId;
+        this.notificationTypes = notificationTypes;
+        this.notificationContents = notificationContents;
     }
 
     public String getId() {
@@ -59,4 +67,20 @@ public class GoogleChatEntity implements Serializable {
         this.userId = userId;
     }
 
+
+    public String getNotificationTypes() {
+        return notificationTypes;
+    }
+
+    public void setNotificationTypes(String notificationTypes) {
+        this.notificationTypes = notificationTypes;
+    }
+
+    public String getNotificationContents() {
+        return notificationContents;
+    }
+
+    public void setNotificationContents(String notificationContents) {
+        this.notificationContents = notificationContents;
+    }
 }

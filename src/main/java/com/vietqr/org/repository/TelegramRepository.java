@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import com.vietqr.org.entity.TelegramEntity;
@@ -45,4 +46,11 @@ public interface TelegramRepository extends JpaRepository<TelegramEntity, Long> 
     @Modifying
     @Query(value = "DELETE FROM telegram WHERE id = :id", nativeQuery = true)
     void removeTelegramById(@Param(value = "id") String id);
+
+    @Query(value = "SELECT * FROM telegram WHERE chat_id = :chatId", nativeQuery = true)
+    TelegramEntity getTelegramByChatId(@Param("chatId") String chatId);
+
+
+    @Query(value = "SELECT * FROM telegram WHERE user_id = :userId", nativeQuery = true)
+    TelegramEntity getTelegramByUserId(@Param("userId") String userId);
 }
