@@ -306,11 +306,11 @@ public class LarkController {
     }
     @GetMapping("service/larks/information-detail")
     public ResponseEntity<LarkDetailDTO> getLarkInformationDetail(
-            @RequestParam(value = "id") String id) {
+            @RequestParam(value = "userId") String userId) {
         LarkDetailDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            LarkEntity larkEntity = larkService.getLarkById(id);
+            LarkEntity larkEntity = larkService.getLarkByUserId(userId);
             if (larkEntity != null) {
                 LarkDetailDTO larkDetailDTO = new LarkDetailDTO();
                 larkDetailDTO.setId(larkEntity.getId());
@@ -339,12 +339,12 @@ public class LarkController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-    @PutMapping("service/larks/update-webhook/{id}")
-    public ResponseEntity<ResponseMessageDTO> updateLarkWebhook(@PathVariable String id, @RequestBody LarkUpdateWebhookDTO dto) {
+    @PutMapping("service/larks/update-webhook/{userId}")
+    public ResponseEntity<ResponseMessageDTO> updateLarkWebhook(@PathVariable String userId, @RequestBody LarkUpdateWebhookDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            LarkEntity larkEntity = larkService.getLarkById(id);
+            LarkEntity larkEntity = larkService.getLarkByUserId(userId);
             larkEntity.setWebhook(dto.getWebhook());
             larkService.updateLark(larkEntity);
             result = new ResponseMessageDTO("SUCCESS", "");
