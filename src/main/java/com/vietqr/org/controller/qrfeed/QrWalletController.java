@@ -1165,11 +1165,11 @@ public class QrWalletController {
     }
 
     @DeleteMapping("qr-wallet/delete-qr")
-    public ResponseEntity<Object> deleteQrWallets(@RequestBody List<String> ids) {
+    public ResponseEntity<Object> deleteQrWallets(@RequestBody DeteleQrDTO qrDTO) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            qrWalletService.deleteQrWalletsByIds(ids);
+            qrWalletService.deleteQrWalletsByIds(qrDTO.getQrIds());
 
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
