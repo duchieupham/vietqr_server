@@ -87,6 +87,8 @@ public class TelegramController {
                             }
                         }
                     }
+                    result = new ResponseMessageDTO("SUCCESS", "");
+                    httpStatus = HttpStatus.BAD_REQUEST;
                 } else {
                     logger.error("NOT FOUND LARK INFORMATION");
                     System.out.println("NOT FOUND LARK INFORMATION");
@@ -331,6 +333,8 @@ public class TelegramController {
                     .getTelAccBanksByTelId(telegramEntity.getId());
             if (telBankDTOs != null && !telBankDTOs.isEmpty()) {
                 telegramDetailDTO.setBanks(telBankDTOs);
+            } else {
+                telegramDetailDTO.setBanks(new ArrayList<>());
             }
             telegramDetailDTO.setNotificationTypes(
                     new ObjectMapper().readValue(telegramEntity.getNotificationTypes(), new TypeReference<List<String>>() {
