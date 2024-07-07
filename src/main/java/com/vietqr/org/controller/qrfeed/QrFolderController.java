@@ -8,6 +8,7 @@ import com.vietqr.org.entity.qrfeed.QrFolderEntity;
 import com.vietqr.org.repository.QrWalletFolderRepository;
 import com.vietqr.org.service.qrfeed.QrFolderService;
 import com.vietqr.org.service.qrfeed.QrFolderUserService;
+import com.vietqr.org.service.qrfeed.QrWalletFolderService;
 import com.vietqr.org.service.qrfeed.QrWalletService;
 import com.vietqr.org.util.StringUtil;
 import org.apache.log4j.Logger;
@@ -36,6 +37,9 @@ public class QrFolderController {
 
     @Autowired
     QrFolderUserService qrFolderUserService;
+
+    @Autowired
+    QrWalletFolderService qrWalletFolderService;
 
     @Autowired
     QrWalletFolderRepository qrWalletFolderRepository;
@@ -130,9 +134,21 @@ public class QrFolderController {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            QrFolderEntity entity = qrFolderService.getFolderById(folderId);
+            FolderDetailDTO folderDetailDTO = new FolderDetailDTO();
+            IFolderDetailDTO iFolderDetailDTO = qrFolderService.getFolderDetailById(folderId);
 
-            result = entity;
+            folderDetailDTO.setId(iFolderDetailDTO.getId());
+            folderDetailDTO.setTitle(iFolderDetailDTO.getTitle());
+            folderDetailDTO.setDescription(iFolderDetailDTO.getDescription());
+            folderDetailDTO.setTimeCreated(iFolderDetailDTO.getTimeCreated());
+            // count user trong folder
+            int countUser = qrFolderUserService.countUsersFolder(folderId);
+            folderDetailDTO.setCountUser(countUser);
+            //count qr trong folder
+            int countQR = qrWalletFolderService.countQrFolder(folderId);
+            folderDetailDTO.setCountQr(countQR);
+
+            result = folderDetailDTO;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("update folder: ERROR: " + e.toString());

@@ -37,6 +37,9 @@ public interface QrWalletFolderRepository extends JpaRepository<QrWalletFolderEn
     @Query(value = "SELECT qr_wallet_id FROM qr_wallet_folder WHERE qr_folder_id = :qrFolderId", nativeQuery = true)
     List<String> findQrWalletIdsByQrFolderId(@Param("qrFolderId") String qrFolderId);
 
+    @Query(value = "SELECT COUNT(id) FROM qr_wallet_folder WHERE qr_folder_id = :qrFolderId", nativeQuery = true)
+    int countQrFolder(String qrFolderId);
+
     @Transactional
     @Modifying
     @Query(value = "DELETE FROM qr_wallet_folder WHERE qr_folder_id = :qrFolderId", nativeQuery = true)

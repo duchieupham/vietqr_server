@@ -1,9 +1,6 @@
 package com.vietqr.org.repository;
 
-import com.vietqr.org.dto.qrfeed.FolderInformationDTO;
-import com.vietqr.org.dto.qrfeed.IFolderInformationDTO;
-import com.vietqr.org.dto.qrfeed.IListQrFolderDTO;
-import com.vietqr.org.dto.qrfeed.IListQrWalletDTO;
+import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.qrfeed.QrFolderEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -48,6 +45,13 @@ public interface QrFolderRepository extends JpaRepository<QrFolderEntity, String
             "FROM viet_qr.qr_folder " +
             "WHERE id = :folderId ", nativeQuery = true)
     IFolderInformationDTO getQrInFolder(String folderId);
+
+    @Query(value = "SELECT a.id AS id, a.description AS description, " +
+            "DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(a.time_created), '+00:00', '+07:00'), '%d-%m-%Y %H:%i') AS timeCreated, " +
+            "a.title AS title, a.user_id AS userId " +
+            "FROM qr_folder a " +
+            "WHERE a.id = :folderId ", nativeQuery = true)
+    IFolderDetailDTO getFolderDetailById(String folderId);
 
     @Query(value = "SELECT * FROM qr_folder WHERE id = :qrFolderId", nativeQuery = true)
     QrFolderEntity findByQrFolderId(@Param("qrFolderId") String qrFolderId);

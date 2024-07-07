@@ -29,5 +29,10 @@ public class QrWalletFolderServiceImpl implements QrWalletFolderService {
         }
     }
 
+    @Override
+    public int countQrFolder(String folderId) {
+        return repo.countQrFolder(folderId);
+    }
+
 
 }
