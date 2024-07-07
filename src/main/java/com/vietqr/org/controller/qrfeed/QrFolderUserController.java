@@ -193,8 +193,8 @@ public class QrFolderUserController {
             IFolderInformationDTO qrInFolderDTO = null;
             qrInFolderDTO = qrFolderService.getQrInFolder(folderId);
 
-            List<IListQrWalletDTO> infos = new ArrayList<>();
             List<ListQrWalletDTO> dataList = new ArrayList<>();
+            List<IListQrWalletDTO> infos = new ArrayList<>();
 
             infos = qrWalletService.getQrWalletNoPagingAll(value);
             dataList = infos.stream().map(item -> {
@@ -206,6 +206,7 @@ public class QrFolderUserController {
                 listQrWalletDTO.setQrType(item.getQrType());
                 listQrWalletDTO.setTimeCreate(item.getTimeCreate());
                 listQrWalletDTO.setContent(item.getContent());
+                listQrWalletDTO.setData(item.getData());
                 return listQrWalletDTO;
             }).collect(Collectors.toList());
 

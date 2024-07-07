@@ -52,8 +52,15 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
 
     @Query(value = "SELECT a.id AS id, a.description AS description, a.is_public AS isPublic, a.qr_type as QrType, " +
             "a.time_created as timeCreate, " +
-            "a.title AS title, a.value as content, b.role AS role " +
-            "FROM viet_qr.qr_wallet a " +
+            "a.title AS title, a.value as content, b.role AS role, " +
+            "CASE " +
+            "WHEN a.qr_type = '0' THEN a.public_id " +
+            "WHEN a.qr_type = '1' THEN a.value " +
+            "WHEN a.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.phoneNo'))) " +
+            "WHEN a.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankAccount'))) " +
+            "ELSE NULL " +
+            "END AS data " +
+            "FROM qr_wallet a " +
             "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
             "WHERE ((a.description LIKE %:value%) OR (a.title LIKE %:value%)) " +
             "GROUP BY a.id, b.role " +
