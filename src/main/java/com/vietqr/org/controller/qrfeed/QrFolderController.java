@@ -73,14 +73,23 @@ public class QrFolderController {
 
     @GetMapping("qr-feed/folders")
     public ResponseEntity<Object> getListFolderByUser(
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam String value,
             @RequestParam String userId
     ) {
         Object result = null;
         HttpStatus httpStatus = null;
+        PageResDTO pageResDTO = new PageResDTO();
         try {
+            int totalElement = 0;
+            int offset = (page - 1) * size;
+
             List<ListQrFolderDTO> data = new ArrayList<>();
             List<IListQrFolderDTO> info = new ArrayList<>();
-            info = qrFolderService.getListFolders(userId);
+            totalElement = qrFolderService.countQrFolder(value,userId);
+
+            info = qrFolderService.getListFolders(value, offset, size, userId);
             data = info.stream().map(item -> {
                 ListQrFolderDTO dto = new ListQrFolderDTO();
                 dto.setId(item.getId());
@@ -91,8 +100,17 @@ public class QrFolderController {
                 return dto;
             }).collect(Collectors.toList());
 
-            result = data;
-            httpStatus = HttpStatus.BAD_REQUEST;
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageDTO.setTotalElement(totalElement);
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+
+            pageResDTO.setMetadata(pageDTO);
+            pageResDTO.setData(data);
+
+            result = pageResDTO;
+            httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("get list folder: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
