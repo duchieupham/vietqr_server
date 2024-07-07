@@ -350,6 +350,11 @@ public class TelegramController {
         try {
             TelegramEntity telegramEntity = telegramService.getTelegramByUserId(userId);
             telegramEntity.setChatId(dto.getChatId());
+            if (dto.isValid()) {
+                telegramEntity.setChatId(dto.getChatId() == null ? "" : dto.getChatId());
+            } else {
+                telegramEntity.setChatId("");
+            }
             telegramService.updateTelegram(telegramEntity);
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;

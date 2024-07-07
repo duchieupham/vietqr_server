@@ -351,7 +351,11 @@ public class GoogleChatController {
         HttpStatus httpStatus = null;
         try {
             GoogleChatEntity googleChatEntity = googleChatService.getGoogleChatsByUserId(userId);
-            googleChatEntity.setWebhook(dto.getWebhook());
+            if (dto.isValid()) {
+                googleChatEntity.setWebhook(dto.getWebhook() == null ? "" : dto.getWebhook());
+            } else {
+                googleChatEntity.setWebhook("");
+            }
             googleChatService.updateGoogleChat(googleChatEntity);
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;

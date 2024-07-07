@@ -345,7 +345,11 @@ public class LarkController {
         HttpStatus httpStatus = null;
         try {
             LarkEntity larkEntity = larkService.getLarkByUserId(userId);
-            larkEntity.setWebhook(dto.getWebhook());
+            if (dto.isValid()) {
+                larkEntity.setWebhook(dto.getWebhook() == null ? "" : dto.getWebhook());
+            } else {
+                larkEntity.setWebhook("");
+            }
             larkService.updateLark(larkEntity);
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
