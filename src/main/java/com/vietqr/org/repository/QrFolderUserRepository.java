@@ -25,7 +25,6 @@ public interface QrFolderUserRepository extends JpaRepository<QrFolderUserEntity
             @Param("qrFolderId") String qrFolderId,
             @Param("userId") String userId);
 
-
     @Transactional
     @Modifying
     @Query(value = "INSERT INTO qr_folder_user (id, qr_folder_id, user_id) " +
