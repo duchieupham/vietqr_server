@@ -16,13 +16,21 @@ public interface QrCommentRepository extends JpaRepository<QrCommentEntity, Stri
 
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO qr_comment (id, message, user_id, user_data, time_created) VALUES(:id, :message, :userId, :userData, :timeCreated)", nativeQuery = true)
-    void insertComment(@Param("id") String id, @Param("message") String message, @Param("userId") String userId, @Param("userData") String userData, @Param("timeCreated") long timeCreated);
+    @Query(value = "INSERT INTO qr_comment (id, message, user_id, user_data, time_created) " +
+            "VALUES(:id, :message, :userId, :userData, :timeCreated)", nativeQuery = true)
+    void insertComment(@Param("id") String id,
+                       @Param("message") String message,
+                       @Param("userId") String userId,
+                       @Param("userData") String userData,
+                       @Param("timeCreated") long timeCreated);
 
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO qr_wallet_comment (id, qr_wallet_id, qr_comment_id) VALUES (:id, :qrWalletId, :qrCommentId)", nativeQuery = true)
-    void linkCommentToQrWallet(@Param("id") String id, @Param("qrWalletId") String qrWalletId, @Param("qrCommentId") String qrCommentId);
+    @Query(value = "INSERT INTO qr_wallet_comment (id, qr_wallet_id, qr_comment_id) " +
+            "VALUES (:id, :qrWalletId, :qrCommentId)", nativeQuery = true)
+    void linkCommentToQrWallet(@Param("id") String id,
+                               @Param("qrWalletId") String qrWalletId,
+                               @Param("qrCommentId") String qrCommentId);
 
     @Query(value = "SELECT user_data FROM qr_wallet WHERE user_id = :userId LIMIT 1", nativeQuery = true)
     String findUserDataByUserId(@Param("userId") String userId);
