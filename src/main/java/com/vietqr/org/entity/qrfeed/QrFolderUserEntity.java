@@ -1,6 +1,5 @@
 package com.vietqr.org.entity.qrfeed;
 
-import com.vietqr.org.dto.qrfeed.UserRoleDTOs;
 
 import javax.persistence.*;
 import java.io.Serializable;

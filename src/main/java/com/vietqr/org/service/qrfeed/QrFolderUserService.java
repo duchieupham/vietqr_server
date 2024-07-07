@@ -17,5 +17,12 @@ public interface QrFolderUserService {
     List<IUserRoleDTO> getUserRolesByFolderId(String folderId);
 
 
+    List<IUserRoleDTO> getUserRolesByFolderId(String folderId, String value, int offset, int size) ;
+    int countUserRolesByFolderId(String folderId, String value);
+
+
+    void updateUserRole(String folderId, String userId, String role);
+
+    void deleteUserFromFolder(String folderId, String userId);
 
 }

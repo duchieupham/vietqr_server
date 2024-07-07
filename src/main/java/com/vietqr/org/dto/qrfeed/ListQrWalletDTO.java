@@ -8,6 +8,15 @@ public class ListQrWalletDTO {
     private String timeCreate;
     private String title;
     private String content;
+    private String data;
+
+    public String getData() {
+        return data;
+    }
+
+    public void setData(String data) {
+        this.data = data;
+    }
 
     public String getId() {
         return id;
