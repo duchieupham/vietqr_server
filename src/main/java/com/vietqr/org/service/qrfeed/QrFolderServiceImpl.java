@@ -1,6 +1,7 @@
 package com.vietqr.org.service.qrfeed;
 
 import com.vietqr.org.dto.qrfeed.FolderInformationDTO;
+import com.vietqr.org.dto.qrfeed.IFolderDetailDTO;
 import com.vietqr.org.dto.qrfeed.IFolderInformationDTO;
 import com.vietqr.org.dto.qrfeed.IListQrFolderDTO;
 import com.vietqr.org.entity.qrfeed.QrFolderEntity;
@@ -48,6 +49,11 @@ public class QrFolderServiceImpl implements QrFolderService {
     @Override
     public IFolderInformationDTO getQrInFolder(String folderId) {
         return repo.getQrInFolder(folderId);
+    }
+
+    @Override
+    public IFolderDetailDTO getFolderDetailById(String folderId) {
+        return repo.getFolderDetailById(folderId);
     }
 
     @Override
