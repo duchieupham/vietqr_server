@@ -1653,6 +1653,8 @@ public class QrWalletController {
                     String bankShortName = bankTypeService.getBankShortNameByBankCode(bankCodeDTO);
 
                     TempVietQRDTO tempVietQRDTO = new TempVietQRDTO();
+                    tempVietQRDTO.setTitle(qrNameDTO);
+                    tempVietQRDTO.setDescription(qrDescriptionDTO);
                     tempVietQRDTO.setBankAccount(bankAccountDTO);
                     tempVietQRDTO.setUserBankName(userBankNameDTO);
                     tempVietQRDTO.setBankCode(bankCodeDTO);

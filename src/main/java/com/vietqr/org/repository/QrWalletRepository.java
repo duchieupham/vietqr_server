@@ -45,6 +45,26 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "a.title AS title, a.value as content, b.role AS role " +
             "FROM viet_qr.qr_wallet a " +
             "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
+            "WHERE ((a.description LIKE %:value%) OR (a.title LIKE %:value%)) AND a.qr_type = :type " +
+            "GROUP BY a.id, b.role " +
+            "ORDER BY a.time_created DESC ", nativeQuery = true)
+    List<IListQrWalletDTO> getQrWalletNoPaging(String value, int type);
+
+    @Query(value = "SELECT a.id AS id, a.description AS description, a.is_public AS isPublic, a.qr_type as QrType, " +
+            "a.time_created as timeCreate, " +
+            "a.title AS title, a.value as content, b.role AS role " +
+            "FROM viet_qr.qr_wallet a " +
+            "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
+            "WHERE ((a.description LIKE %:value%) OR (a.title LIKE %:value%)) " +
+            "GROUP BY a.id, b.role " +
+            "ORDER BY a.time_created DESC ", nativeQuery = true)
+    List<IListQrWalletDTO> getQrWalletNoPagingAll(String value);
+
+    @Query(value = "SELECT a.id AS id, a.description AS description, a.is_public AS isPublic, a.qr_type as QrType, " +
+            "a.time_created as timeCreate, " +
+            "a.title AS title, a.value as content, b.role AS role " +
+            "FROM viet_qr.qr_wallet a " +
+            "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
             "WHERE ((a.description LIKE %:value%) OR (a.title LIKE %:value%)) AND a.is_public = 1 " +
             "GROUP BY a.id, b.role " +
             "ORDER BY a.time_created DESC " +
