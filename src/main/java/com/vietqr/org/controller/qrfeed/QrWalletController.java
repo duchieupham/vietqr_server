@@ -1945,25 +1945,68 @@ public class QrWalletController {
             switch (type) {
                 case 0:
                     qrLinkPrivate = qrWalletService.getQrLinkPrivate(userId, value);
+                    totalElement = qrWalletService.countQrLinkPrivate(userId, value);
+
+                    pageDTO.setSize(size);
+                    pageDTO.setPage(page);
+                    pageDTO.setTotalElement(totalElement);
+                    pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+
+                    pageResDTO.setMetadata(pageDTO);
+                    pageResDTO.setData(qrLinkPrivate);
                     result = qrLinkPrivate;
                     break;
                 case 1:
                     qrTextPrivate = qrWalletService.getQrTextPrivate(userId, value);
-                    result = qrTextPrivate;
+                    totalElement = qrWalletService.countQrTextPrivate(userId, value);
+
+                    pageDTO.setSize(size);
+                    pageDTO.setPage(page);
+                    pageDTO.setTotalElement(totalElement);
+                    pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+
+                    pageResDTO.setMetadata(pageDTO);
+                    pageResDTO.setData(qrTextPrivate);
                     break;
                 case 2:
                     qrVCardPrivate = qrWalletService.getQrVCardPrivate(userId, value);
-                    result = qrVCardPrivate;
+                    totalElement = qrWalletService.countQrVCardPrivate(userId, value);
+
+                    pageDTO.setSize(size);
+                    pageDTO.setPage(page);
+                    pageDTO.setTotalElement(totalElement);
+                    pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+
+                    pageResDTO.setMetadata(pageDTO);
+                    pageResDTO.setData(qrVCardPrivate);
                     break;
                 case 3:
                     qrVietQrPrivate = qrWalletService.getQrVietQrPrivate(userId, value);
-                    result = qrVietQrPrivate;
+                    totalElement = qrWalletService.countQrVietQrPrivate(userId, value);
+
+                    pageDTO.setSize(size);
+                    pageDTO.setPage(page);
+                    pageDTO.setTotalElement(totalElement);
+                    pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+
+                    pageResDTO.setMetadata(pageDTO);
+                    pageResDTO.setData(qrVietQrPrivate);
                     break;
                 case 9:
                     qrWalletPrivateAll = qrWalletService.getAllPrivateQrWallets(userId, value);
-                    result = qrWalletPrivateAll;
+                    totalElement = qrWalletService.countPrivateQrWallets(userId, value);
+
+                    pageDTO.setSize(size);
+                    pageDTO.setPage(page);
+                    pageDTO.setTotalElement(totalElement);
+                    pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+
+                    pageResDTO.setMetadata(pageDTO);
+                    pageResDTO.setData(qrWalletPrivateAll);
                     break;
             }
+
+            result = pageResDTO;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("getAllPrivateQrWallets Error at " + e.getMessage() + System.currentTimeMillis());

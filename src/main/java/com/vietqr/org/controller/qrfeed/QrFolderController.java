@@ -87,7 +87,7 @@ public class QrFolderController {
 
             List<ListQrFolderDTO> data = new ArrayList<>();
             List<IListQrFolderDTO> info = new ArrayList<>();
-            totalElement = qrFolderService.countQrFolder(value,userId);
+            totalElement = qrFolderService.countQrFolder(value, userId);
 
             info = qrFolderService.getListFolders(value, offset, size, userId);
             data = info.stream().map(item -> {
@@ -113,6 +113,23 @@ public class QrFolderController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("get list folder: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("qr-feed/folder")
+    public ResponseEntity<Object> getFolder(@RequestParam String folderId) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            QrFolderEntity entity = qrFolderService.getFolderById(folderId);
+
+            result = entity;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("update folder: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -159,24 +176,23 @@ public class QrFolderController {
     public ResponseEntity<Object> deleteFolder(@RequestParam String folderId, @RequestParam boolean deleteItems) {
         HttpStatus httpStatus = null;
         Object result = null;
-        try{
-           QrFolderEntity folder = qrFolderService.getFolderById(folderId);
-           if(deleteItems){
+        try {
+            QrFolderEntity folder = qrFolderService.getFolderById(folderId);
+            if (deleteItems) {
                 List<String> qrItems = qrWalletService.getQrWalletIdsByFolderId(folderId);
                 qrWalletService.deleteQrItemsByIds(qrItems);
-           }
-           qrWalletFolderRepository.deleteByQrFolderId(folderId);
-           qrFolderService.deleteFolderById(folderId);
+            }
+            qrWalletFolderRepository.deleteByQrFolderId(folderId);
+            qrFolderService.deleteFolderById(folderId);
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error("deleteFolder Error at " + e.getMessage() + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-
 
 
 }
