@@ -1,6 +1,6 @@
 package com.vietqr.org.dto.qrfeed;
 
-public class UserRoleDTOs implements IUserRoleDTO {
+public class UserRoleDTOs  {
     private String userId;
     private String role;
 
@@ -9,13 +9,5 @@ public class UserRoleDTOs implements IUserRoleDTO {
         this.role = role;
     }
 
-    @Override
-    public String getUserId() {
-        return null;
-    }
 
-    @Override
-    public String getRole() {
-        return null;
-    }
 }

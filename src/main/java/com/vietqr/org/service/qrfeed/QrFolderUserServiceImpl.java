@@ -17,10 +17,11 @@ import java.util.UUID;
 public class QrFolderUserServiceImpl implements QrFolderUserService {
 
     @Autowired
-    QrFolderUserRepository repo;
+    private QrFolderUserRepository repo;
     @Autowired
-    QrUserRepository qrUserRepository;
-
+    private QrUserRepository qrUserRepository;
+    @Autowired
+    private QrFolderUserRepository qrFolderUserRepository;
 
 
 //    @Transactional
@@ -62,6 +63,25 @@ public class QrFolderUserServiceImpl implements QrFolderUserService {
     @Override
     public List<IUserRoleDTO> getUserRolesByFolderId(String folderId) {
         return repo.findUserRolesByFolderId(folderId);
+    }
+    @Override
+    public List<IUserRoleDTO> getUserRolesByFolderId(String folderId, String value, int offset, int size) {
+        return repo.findUserRolesByFolderId(folderId, value, offset, size);
+    }
+
+    @Override
+    public int countUserRolesByFolderId(String folderId, String value) {
+        return repo.countUserRolesByFolderId(folderId, value);
+    }
+
+    @Override
+    public void updateUserRole(String folderId, String userId, String role) {
+        qrUserRepository.updateSingleUserRole(userId, folderId, role);
+    }
+    @Override
+    public void deleteUserFromFolder(String folderId, String userId) {
+        qrFolderUserRepository.deleteUserFromFolder(folderId, userId);
+        qrUserRepository.deleteUserRole(folderId, userId);
     }
 
 }
