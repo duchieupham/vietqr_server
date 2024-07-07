@@ -282,6 +282,8 @@ public class LarkController {
                             .getLarkAccBanksByLarkId(larkEntity.getId());
                     if (telBankDTOs != null && !telBankDTOs.isEmpty()) {
                         larkDetailDTO.setBanks(telBankDTOs);
+                    } else {
+                        larkDetailDTO.setBanks(new ArrayList<>());
                     }
                     result.add(larkDetailDTO);
                 }
@@ -330,6 +332,8 @@ public class LarkController {
                         .getLarkAccBanksByLarkId(larkEntity.getId());
                 if (telBankDTOs != null && !telBankDTOs.isEmpty()) {
                     larkDetailDTO.setBanks(telBankDTOs);
+                } else {
+                    larkDetailDTO.setBanks(new ArrayList<>());
                 }
                 larkDetailDTO.setNotificationTypes(
                         new ObjectMapper().readValue(larkEntity.getNotificationTypes(), new TypeReference<List<String>>() {

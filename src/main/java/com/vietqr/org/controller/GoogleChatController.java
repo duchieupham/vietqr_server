@@ -270,7 +270,11 @@ public class GoogleChatController {
                 detailDTO.setWebhook(dto.getWebhook());
                 detailDTO.setUserId(dto.getUserId());
                 List<GoogleChatBankDTO> bankDTOs = googleChatAccountBankService.getGoogleAccountBanks(dto.getId());
-                detailDTO.setBanks(bankDTOs);
+                if (bankDTOs != null) {
+                    detailDTO.setBanks(bankDTOs);
+                } else {
+                    detailDTO.setBanks(new ArrayList<>());
+                }
                 result = detailDTO;
                 httpStatus = HttpStatus.OK;
             } else {
