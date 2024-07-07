@@ -1,6 +1,8 @@
 package com.vietqr.org.controller.qrfeed;
 
 import com.google.gson.Gson;
+import com.vietqr.org.dto.PageDTO;
+import com.vietqr.org.dto.PageResDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.qrfeed.QrFolderEntity;
@@ -8,6 +10,7 @@ import com.vietqr.org.service.AccountInformationService;
 import com.vietqr.org.service.qrfeed.QrFolderService;
 import com.vietqr.org.service.qrfeed.QrFolderUserService;
 import com.vietqr.org.service.qrfeed.QrWalletService;
+import com.vietqr.org.util.StringUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -75,19 +78,47 @@ public class QrFolderUserController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-
-    @GetMapping("qr-folder/user-roles/{folderId}")
-    public ResponseEntity<Object> getUserRolesByFolderId(@PathVariable String folderId) {
+    @PutMapping("/qr-folder/update-user-role")
+    public ResponseEntity<Object> updateUserRole(@RequestBody UpdateSingleUserRoleRequestDTO dto) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            logger.info("Fetching user roles for folderId: " + folderId);
-            List<IUserRoleDTO> userRoles = qrFolderUserService.getUserRolesByFolderId(folderId);
-            logger.info("Fetched user roles: " + userRoles.size());
-            for (IUserRoleDTO userRole : userRoles) {
-                logger.info("User ID: " + userRole.getUserId() + ", Role: " + userRole.getRole());
-            }
-            result = userRoles;
+            qrFolderUserService.updateUserRole(dto.getFolderId(), dto.getUserId(), dto.getRole());
+
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("updateUserRole: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("qr-folder/user-roles/{folderId}")
+    public ResponseEntity<Object> getUserRolesByFolderId(
+            @PathVariable String folderId,
+            @RequestParam(value = "value", required = false, defaultValue = "") String value,
+            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            int totalElements = qrFolderUserService.countUserRolesByFolderId(folderId, value);
+            int offset = (page - 1) * size;
+            List<IUserRoleDTO> userRoles = qrFolderUserService.getUserRolesByFolderId(folderId, value, offset, size);
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageDTO.setTotalElement(totalElements);
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElements, size));
+
+            PageResDTO pageResDTO = new PageResDTO();
+            pageResDTO.setMetadata(pageDTO);
+            pageResDTO.setData(userRoles);
+
+            result = pageResDTO;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("getUserRolesByFolderId: ERROR: " + e.getMessage() + " at " + System.currentTimeMillis());
@@ -206,6 +237,21 @@ public class QrFolderUserController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+    @DeleteMapping("/qr-folder/remove-user")
+    public ResponseEntity<Object> removeUserFromFolder(@RequestBody RemoveUserFromFolderRequestDTO dto) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            // Log input values
+            logger.info("Request to remove user from folder. Folder ID: " + dto.getFolderId() + ", User ID: " + dto.getUserId());
+
+            // Check for null or empty values
+            if (dto.getFolderId() == null || dto.getFolderId().isEmpty() || dto.getUserId() == null || dto.getUserId().isEmpty()) {
+                result = new ResponseMessageDTO("FAILED", "E05");
+                httpStatus = HttpStatus.BAD_REQUEST;
+                logger.error("Folder ID or User ID is null or empty.");
+            } else {
+                qrFolderUserService.deleteUserFromFolder(dto.getFolderId(), dto.getUserId());
 
 
 }
