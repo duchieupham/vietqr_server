@@ -1744,8 +1744,7 @@ public class QrWalletController {
                         break;
                     case 1:
                         QRTextDataDTO type1DTO = new QRTextDataDTO();
-                        type1DTO.setTitle(jsonNode.get("title").asText());
-                        type1DTO.setDescription(jsonNode.get("description").asText());
+                        type1DTO.setValue(jsonNode.get("value").asText());
                         result = type1DTO;
                         break;
                     case 2:
@@ -1762,7 +1761,7 @@ public class QrWalletController {
                         VietQRDataDTO type3DTO = new VietQRDataDTO();
                         type3DTO.setBankAccount(jsonNode.get("bankAccount").asText());
                         type3DTO.setUserBankName(jsonNode.get("userBankName").asText());
-                        type3DTO.setBankCode(jsonNode.get("bankCode").asText());
+                        type3DTO.setBankShortName(jsonNode.get("bankShortName").asText());
                         type3DTO.setAmount(jsonNode.get("amount").asText());
                         type3DTO.setContent(jsonNode.get("content").asText());
                         result = type3DTO;
