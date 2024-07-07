@@ -42,4 +42,8 @@ public interface TelegramAccountBankRepository extends JpaRepository<TelegramAcc
     @Modifying
     @Query(value = "UPDATE telegram_account_bank SET chat_id = :chatId WHERE telegram_id = :telegramId", nativeQuery = true)
     void updateWebHookTelegram(String chatId, String telegramId);
+
+    @Query(value = "SELECT bank_id FROM telegram_account_bank "
+            + "WHERE bank_id = :bankId AND telegram_id = :id LIMIT 1", nativeQuery = true)
+    String checkExistedBankId(String bankId, String id);
 }

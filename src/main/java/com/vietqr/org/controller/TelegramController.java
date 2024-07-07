@@ -63,23 +63,30 @@ public class TelegramController {
 
     // add bank to telegram
     @PostMapping("service/telegram/bank")
-    public ResponseEntity<ResponseMessageDTO> insertBankIntoTelegram(@RequestBody SocialNetworkBankDTO dto) {
+    public ResponseEntity<ResponseMessageDTO> insertBankIntoTelegram(@RequestBody SocialNetworkBanksDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
             if (dto != null) {
                 TelegramEntity telegramEntity = telegramService.getTelegramById(dto.getId());
                 if (telegramEntity != null) {
-                    UUID uuid = UUID.randomUUID();
-                    TelegramAccountBankEntity telAccBankEntity = new TelegramAccountBankEntity();
-                    telAccBankEntity.setId(uuid.toString());
-                    telAccBankEntity.setBankId(dto.getBankId());
-                    telAccBankEntity.setTelegramId(dto.getId());
-                    telAccBankEntity.setUserId(dto.getUserId());
-                    telAccBankEntity.setChatId(telegramEntity.getChatId());
-                    telegramAccountBankService.insert(telAccBankEntity);
-                    result = new ResponseMessageDTO("SUCCESS", "");
-                    httpStatus = HttpStatus.OK;
+                    // check existed bank account into list
+                    for (String bankId : dto.getBankIds()) {
+                        if (bankId != null && !bankId.trim().isEmpty()) {
+                            String checkExisted = telegramAccountBankService.checkExistedBankId(bankId, dto.getId());
+                            if (checkExisted == null || checkExisted.trim().isEmpty()) {
+                                // insert google chat account bank entity
+                                UUID uuid = UUID.randomUUID();
+                                TelegramAccountBankEntity entity = new TelegramAccountBankEntity();
+                                entity.setId(uuid.toString());
+                                entity.setBankId(bankId);
+                                entity.setTelegramId(dto.getId());
+                                entity.setChatId(telegramEntity.getChatId());
+                                entity.setUserId(dto.getUserId());
+                                telegramAccountBankService.insert(entity);
+                            }
+                        }
+                    }
                 } else {
                     logger.error("NOT FOUND LARK INFORMATION");
                     System.out.println("NOT FOUND LARK INFORMATION");
