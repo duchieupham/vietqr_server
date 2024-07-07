@@ -64,6 +64,7 @@ public class QrFolderUserServiceImpl implements QrFolderUserService {
     public List<IUserRoleDTO> getUserRolesByFolderId(String folderId) {
         return repo.findUserRolesByFolderId(folderId);
     }
+
     @Override
     public List<IUserRoleDTO> getUserRolesByFolderId(String folderId, String value, int offset, int size) {
         return repo.findUserRolesByFolderId(folderId, value, offset, size);
@@ -75,9 +76,15 @@ public class QrFolderUserServiceImpl implements QrFolderUserService {
     }
 
     @Override
+    public int countUsersFolder(String folderId) {
+        return repo.countUsersFolder(folderId);
+    }
+
+    @Override
     public void updateUserRole(String folderId, String userId, String role) {
         qrUserRepository.updateSingleUserRole(userId, folderId, role);
     }
+
     @Override
     public void deleteUserFromFolder(String folderId, String userId) {
         qrFolderUserRepository.deleteUserFromFolder(folderId, userId);

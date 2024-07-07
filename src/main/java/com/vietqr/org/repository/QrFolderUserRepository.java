@@ -68,6 +68,7 @@ public interface QrFolderUserRepository extends JpaRepository<QrFolderUserEntity
             "LEFT JOIN account_information ai ON ai.user_id = qf.user_id " +
             "WHERE qf.id = :folderId", nativeQuery = true)
     List<IUserRoleDTO> findUserRolesByFolderId(@Param("folderId") String folderId);
+
     @Query(value = "SELECT * FROM (" +
             "SELECT DISTINCT qfu.user_id AS userId, qu.role AS role, " +
             "IFNULL(TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))), 'Undefined') AS fullName, " +
@@ -111,6 +112,9 @@ public interface QrFolderUserRepository extends JpaRepository<QrFolderUserEntity
             "AND (TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))) LIKE %:value%)" +
             ") AS subquery", nativeQuery = true)
     int countUserRolesByFolderId(@Param("folderId") String folderId, @Param("value") String value);
+
+    @Query(value = "SELECT COUNT(id) FROM qr_folder_user WHERE qr_folder_id = :folderId ", nativeQuery = true)
+    int countUsersFolder(String folderId);
 
     @Modifying
     @Transactional

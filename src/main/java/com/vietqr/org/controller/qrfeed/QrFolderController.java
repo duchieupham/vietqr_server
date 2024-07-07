@@ -7,6 +7,7 @@ import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.qrfeed.QrFolderEntity;
 import com.vietqr.org.repository.QrWalletFolderRepository;
 import com.vietqr.org.service.qrfeed.QrFolderService;
+import com.vietqr.org.service.qrfeed.QrFolderUserService;
 import com.vietqr.org.service.qrfeed.QrWalletService;
 import com.vietqr.org.util.StringUtil;
 import org.apache.log4j.Logger;
@@ -32,6 +33,9 @@ public class QrFolderController {
     QrFolderService qrFolderService;
     @Autowired
     QrWalletService qrWalletService;
+
+    @Autowired
+    QrFolderUserService qrFolderUserService;
 
     @Autowired
     QrWalletFolderRepository qrWalletFolderRepository;
@@ -97,6 +101,8 @@ public class QrFolderController {
                 dto.setDescription(item.getDescription());
                 dto.setUserId(item.getUserId());
                 dto.setTimeCreated(item.getTimeCreate());
+                int countUsers = qrFolderUserService.countUsersFolder(item.getId());
+                dto.setCountUsers(countUsers);
                 return dto;
             }).collect(Collectors.toList());
 

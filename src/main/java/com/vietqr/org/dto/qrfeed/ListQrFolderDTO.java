@@ -9,6 +9,7 @@ public class ListQrFolderDTO implements Serializable {
     private String title;
     private String description;
     private String userId;
+    private int countUsers;
 
     public ListQrFolderDTO(String id, long timeCreated,String description, String title, String userId) {
         this.id = id;
@@ -16,6 +17,14 @@ public class ListQrFolderDTO implements Serializable {
         this.title = title;
         this.description = description;
         this.userId = userId;
+    }
+
+    public int getCountUsers() {
+        return countUsers;
+    }
+
+    public void setCountUsers(int countUsers) {
+        this.countUsers = countUsers;
     }
 
     public String getDescription() {

@@ -11,15 +11,18 @@ import java.util.List;
 public interface QrFolderUserService {
 
     void addUserIds(String qrFolderId, List<UserRoleDTO> userRoles, String userId);
+
     public List<IUserInFolderDTO> getUserInFolder(String qrFolderId);
 
     void updateUserRoles(String qrFolderId, List<UserRoleDTO> userRoles);
+
     List<IUserRoleDTO> getUserRolesByFolderId(String folderId);
 
 
-    List<IUserRoleDTO> getUserRolesByFolderId(String folderId, String value, int offset, int size) ;
-    int countUserRolesByFolderId(String folderId, String value);
+    List<IUserRoleDTO> getUserRolesByFolderId(String folderId, String value, int offset, int size);
 
+    int countUserRolesByFolderId(String folderId, String value);
+    int countUsersFolder(String folderId);
 
     void updateUserRole(String folderId, String userId, String role);
 
