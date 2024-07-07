@@ -596,8 +596,7 @@ public class QrWalletController {
                         break;
                     case 1:
                         QRTextDataDTO type1DTO = new QRTextDataDTO();
-                        type1DTO.setTitle(jsonNode.get("title").asText());
-                        type1DTO.setDescription(jsonNode.get("description").asText());
+                        type1DTO.setValue(jsonNode.get("value").asText());
                         result = type1DTO;
                         break;
                     case 2:
