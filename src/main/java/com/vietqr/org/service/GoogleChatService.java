@@ -17,5 +17,7 @@ public interface GoogleChatService {
 
     GoogleChatEntity getGoogleChatsByUserId(String userId);
 
+    void updateGoogleChat(String webhook, String id);
+
     void updateGoogleChat(GoogleChatEntity googleChatEntity);
 }

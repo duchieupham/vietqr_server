@@ -40,6 +40,11 @@ public class GoogleChatServiveImpl implements GoogleChatService {
     }
 
     @Override
+    public void updateGoogleChat(String webhook, String id) {
+        repo.updateGoogleChat(webhook, id);
+    }
+
+    @Override
     public void updateGoogleChat(GoogleChatEntity googleChatEntity) {
         repo.save(googleChatEntity);
     }

@@ -343,19 +343,13 @@ public class TelegramController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @PutMapping("service/telegrams/update-chatId/{userId}")
-    public ResponseEntity<ResponseMessageDTO> updateTelegramChatId(@PathVariable String userId, @RequestBody TelegramUpdateChatIdDTO dto) {
+    @PutMapping("service/telegrams/update-chatId/{teleId}")
+    public ResponseEntity<ResponseMessageDTO> updateTelegramChatId(@PathVariable String teleId, @RequestBody TelegramUpdateChatIdDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            TelegramEntity telegramEntity = telegramService.getTelegramByUserId(userId);
-            telegramEntity.setChatId(dto.getChatId());
-            if (dto.isValid()) {
-                telegramEntity.setChatId(dto.getChatId() == null ? "" : dto.getChatId());
-            } else {
-                telegramEntity.setChatId("");
-            }
-            telegramService.updateTelegram(telegramEntity);
+            telegramService.updateTelegram(dto.getChatId(), teleId);
+            telegramAccountBankService.updateWebHookTelegram(dto.getChatId(), teleId);
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
