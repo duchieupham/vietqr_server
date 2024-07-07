@@ -41,6 +41,11 @@ public class LarkAccountBankServiceImpl implements LarkAccountBankService {
     }
 
     @Override
+    public String checkExistedBankId(String bankId, String larkId) {
+        return repo.checkExistedBankId(bankId, larkId);
+    }
+
+    @Override
     public void removeLarkAccBankByLarkIdAndBankId(String larkId, String bankId) {
         repo.removeLarkAccBankByLarkIdAndBankId(larkId, bankId);
     }

@@ -22,4 +22,6 @@ public interface LarkAccountBankService {
     public List<String> getWebhooksByBankId(String bankId);
 
     void updateWebhook(String webhook, String larkId);
+
+    String checkExistedBankId(String bankId, String larkId);
 }

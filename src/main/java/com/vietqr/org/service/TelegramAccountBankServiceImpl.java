@@ -41,6 +41,11 @@ public class TelegramAccountBankServiceImpl implements TelegramAccountBankServic
     }
 
     @Override
+    public String checkExistedBankId(String bankId, String id) {
+        return repo.checkExistedBankId(bankId, id);
+    }
+
+    @Override
     public void removeTelAccBankByTelIdAndBankId(String telId, String bankId) {
         repo.removeTelAccBankByTelIdAndBankId(telId, bankId);
     }

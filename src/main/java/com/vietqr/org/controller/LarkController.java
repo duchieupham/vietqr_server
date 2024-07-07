@@ -64,21 +64,29 @@ public class LarkController {
 
     // add bank to lark
     @PostMapping("service/lark/bank")
-    public ResponseEntity<ResponseMessageDTO> insertBankIntoLark(@RequestBody SocialNetworkBankDTO dto) {
+    public ResponseEntity<ResponseMessageDTO> insertBankIntoLark(@RequestBody SocialNetworkBanksDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
             if (dto != null) {
                 LarkEntity larkEntity = larkService.getLarkById(dto.getId());
                 if (larkEntity != null) {
-                    UUID uuid = UUID.randomUUID();
-                    LarkAccountBankEntity telAccBankEntity = new LarkAccountBankEntity();
-                    telAccBankEntity.setId(uuid.toString());
-                    telAccBankEntity.setBankId(dto.getBankId());
-                    telAccBankEntity.setLarkId(dto.getId());
-                    telAccBankEntity.setUserId(dto.getUserId());
-                    telAccBankEntity.setWebhook(larkEntity.getWebhook());
-                    larkAccountBankService.insert(telAccBankEntity);
+                    for (String bankId : dto.getBankIds()) {
+                        if (bankId != null && !bankId.trim().isEmpty()) {
+                            String checkExisted = larkAccountBankService.checkExistedBankId(bankId, dto.getId());
+                            if (checkExisted == null || checkExisted.trim().isEmpty()) {
+                                // insert google chat account bank entity
+                                UUID uuid = UUID.randomUUID();
+                                LarkAccountBankEntity entity = new LarkAccountBankEntity();
+                                entity.setId(uuid.toString());
+                                entity.setBankId(bankId);
+                                entity.setWebhook(larkEntity.getWebhook());
+                                entity.setLarkId(larkEntity.getId());
+                                entity.setUserId(dto.getUserId());
+                                larkAccountBankService.insert(entity);
+                            }
+                        }
+                    }
                     result = new ResponseMessageDTO("SUCCESS", "");
                     httpStatus = HttpStatus.OK;
                 } else {
