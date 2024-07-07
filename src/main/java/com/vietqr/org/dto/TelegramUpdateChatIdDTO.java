@@ -20,4 +20,8 @@ public class TelegramUpdateChatIdDTO {
     public void setChatId(String chatId) {
         this.chatId = chatId;
     }
+
+    public boolean isValid() {
+        return this.chatId != null;
+    }
 }
