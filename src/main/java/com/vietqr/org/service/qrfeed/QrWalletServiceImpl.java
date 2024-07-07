@@ -95,6 +95,16 @@ public class QrWalletServiceImpl implements QrWalletService {
     }
 
     @Override
+    public List<IListQrWalletDTO> getQrWalletNoPaging(String value, int type) {
+        return repo.getQrWalletNoPaging(value, type);
+    }
+
+    @Override
+    public List<IListQrWalletDTO> getQrWalletNoPagingAll(String value) {
+        return repo.getQrWalletNoPagingAll(value);
+    }
+
+    @Override
     public List<IListQrWalletDTO> getQrWalletPublic(String value, int offset, int size) {
         return repo.getQrWalletPublic(value, offset, size);
     }

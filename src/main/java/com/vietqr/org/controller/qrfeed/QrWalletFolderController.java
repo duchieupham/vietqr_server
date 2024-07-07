@@ -42,7 +42,6 @@ public class QrWalletFolderController {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-
             QrFolderEntity entity = qrFolderService.getFolderById(dto.getFolderId());
             if (Objects.isNull(entity)) {
                 result = new ResponseMessageDTO("FAILED", "E149");
@@ -51,7 +50,7 @@ public class QrWalletFolderController {
                 qrWalletFolderService.addQrWalletsToFolder(dto.getFolderId(), dto.getUserId(), dto.getQrIds());
 
                 result = new ResponseMessageDTO("SUCCESS", "");
-                httpStatus = HttpStatus.BAD_REQUEST;
+                httpStatus = HttpStatus.OK;
             }
         } catch (Exception e) {
             logger.error("add QR to folder: ERROR: " + e.toString());

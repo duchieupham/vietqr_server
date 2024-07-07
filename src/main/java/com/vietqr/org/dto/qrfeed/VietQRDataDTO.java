@@ -3,7 +3,7 @@ package com.vietqr.org.dto.qrfeed;
 public class VietQRDataDTO {
     private String bankAccount;
     private String userBankName;
-    private String bankCode;
+    private String bankShortName;
     private String amount;
     private String content;
 
@@ -23,12 +23,12 @@ public class VietQRDataDTO {
         this.userBankName = userBankName;
     }
 
-    public String getBankCode() {
-        return bankCode;
+    public String getBankShortName() {
+        return bankShortName;
     }
 
-    public void setBankCode(String bankCode) {
-        this.bankCode = bankCode;
+    public void setBankShortName(String bankShortName) {
+        this.bankShortName = bankShortName;
     }
 
     public String getAmount() {

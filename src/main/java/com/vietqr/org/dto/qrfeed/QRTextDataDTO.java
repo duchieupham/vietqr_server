@@ -1,22 +1,15 @@
 package com.vietqr.org.dto.qrfeed;
 
 public class QRTextDataDTO {
-    private String title;
-    private String description;
 
-    public String getTitle() {
-        return title;
+    private String value;
+
+    public String getValue() {
+        return value;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setValue(String value) {
+        this.value = value;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
 }

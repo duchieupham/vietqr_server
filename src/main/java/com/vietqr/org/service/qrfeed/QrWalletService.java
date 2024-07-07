@@ -38,6 +38,8 @@ public interface QrWalletService {
     public QrWalletEntity getQrLinkOrQrTextById(String qrId);
 
     public List<IListQrWalletDTO> getQrWallets(String value, int offset, int size);
+    public List<IListQrWalletDTO> getQrWalletNoPaging(String value, int type);
+    public List<IListQrWalletDTO> getQrWalletNoPagingAll(String value);
 
     public List<IListQrWalletDTO> getQrWalletPublic(String value, int offset, int size);
 

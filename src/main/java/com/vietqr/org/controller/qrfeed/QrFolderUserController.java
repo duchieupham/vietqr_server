@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.qrfeed.QrFolderEntity;
+import com.vietqr.org.service.AccountInformationService;
 import com.vietqr.org.service.qrfeed.QrFolderService;
 import com.vietqr.org.service.qrfeed.QrFolderUserService;
 import com.vietqr.org.service.qrfeed.QrWalletService;
@@ -31,29 +32,32 @@ public class QrFolderUserController {
     @Autowired
     QrWalletService qrWalletService;
 
-@PostMapping("/qr-feed/add-user-folder")
-public ResponseEntity<Object> updateUserToFolder(@RequestBody AddUserToFolderRequestDTO dto) {
-    Object result = null;
-    HttpStatus httpStatus = null;
-    try {
-        QrFolderEntity entity = qrFolderService.getFolderById(dto.getFolderId());
+    @Autowired
+    AccountInformationService accountInformationService;
 
-        if (Objects.isNull(entity)) {
+    @PostMapping("/qr-feed/add-user-folder")
+    public ResponseEntity<Object> updateUserToFolder(@RequestBody AddUserToFolderRequestDTO dto) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            QrFolderEntity entity = qrFolderService.getFolderById(dto.getFolderId());
+
+            if (Objects.isNull(entity)) {
+                result = new ResponseMessageDTO("FAILED", "E05");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            } else {
+                qrFolderUserService.addUserIds(dto.getFolderId(), dto.getUserRoles(), dto.getUserId());
+
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            }
+        } catch (Exception e) {
+            logger.error("add users to folder: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
-        } else {
-            qrFolderUserService.addUserIds(dto.getFolderId(), dto.getUserRoles(), dto.getUserId());
-
-            result = new ResponseMessageDTO("SUCCESS", "");
-            httpStatus = HttpStatus.OK;
         }
-    } catch (Exception e) {
-        logger.error("add users to folder: ERROR: " + e.toString());
-        result = new ResponseMessageDTO("FAILED", "E05");
-        httpStatus = HttpStatus.BAD_REQUEST;
+        return new ResponseEntity<>(result, httpStatus);
     }
-    return new ResponseEntity<>(result, httpStatus);
-}
 
     @PutMapping("/qr-feed/update-user-roles")
     public ResponseEntity<Object> updateUserRoles(@RequestBody UpdateUserRoleRequestDTO dto) {
@@ -71,6 +75,7 @@ public ResponseEntity<Object> updateUserToFolder(@RequestBody AddUserToFolderReq
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
     @GetMapping("qr-folder/user-roles/{folderId}")
     public ResponseEntity<Object> getUserRolesByFolderId(@PathVariable String folderId) {
         Object result = null;
@@ -91,6 +96,7 @@ public ResponseEntity<Object> updateUserToFolder(@RequestBody AddUserToFolderReq
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
     // lấy ra thông tin những user trong folder
     @GetMapping("qr-feed/folder-users")
     public ResponseEntity<Object> getUserInFolder(
@@ -141,15 +147,13 @@ public ResponseEntity<Object> updateUserToFolder(@RequestBody AddUserToFolderReq
     @GetMapping("qr-feed/folder-qrs")
     public ResponseEntity<Object> getQrInFolder(
             @RequestParam Integer type,
-            @RequestParam String folderId
+            @RequestParam String folderId,
+            @RequestParam String value
     ) {
         Object result = null;
         HttpStatus httpStatus = null;
         Gson gson = new Gson();
         try {
-            if (type == null) {
-                type = -1;
-            }
 
             QrInFolderResponseDTO data = new QrInFolderResponseDTO();
 
@@ -157,32 +161,44 @@ public ResponseEntity<Object> updateUserToFolder(@RequestBody AddUserToFolderReq
             IFolderInformationDTO qrInFolderDTO = null;
             qrInFolderDTO = qrFolderService.getQrInFolder(folderId);
 
-            if (Objects.nonNull(qrInFolderDTO)) {
-                // xử lý chuỗi JSON thành object
-                List<DataQrDTO> listQrDataDTOs = new ArrayList<>();
-                data.setUserId(qrInFolderDTO.getUserId());
+            List<IListQrWalletDTO> infos = new ArrayList<>();
+            List<ListQrWalletDTO> dataList = new ArrayList<>();
 
-                List<String> userDataJson = qrWalletService.getQrData(folderId, type);
-                listQrDataDTOs = userDataJson.stream().map(userInfo -> {
-                    DataQrDTO qrData = gson.fromJson(userInfo, DataQrDTO.class);
-                    return qrData;
-                }).collect(Collectors.toList());
-                // chứa qr_data và qr_info
+            infos = qrWalletService.getQrWalletNoPagingAll(value);
+            dataList = infos.stream().map(item -> {
+                ListQrWalletDTO listQrWalletDTO = new ListQrWalletDTO();
+                listQrWalletDTO.setId(item.getId());
+                listQrWalletDTO.setDescription(item.getDescription());
+                listQrWalletDTO.setTitle(item.getTitle());
+                listQrWalletDTO.setIsPublic(item.getIsPublic());
+                listQrWalletDTO.setQrType(item.getQrType());
+                listQrWalletDTO.setTimeCreate(item.getTimeCreate());
+                listQrWalletDTO.setContent(item.getContent());
+                return listQrWalletDTO;
+            }).collect(Collectors.toList());
+
+            // xử lý chuỗi JSON thành object
+            List<DataQrDTO> listQrDataDTOs = new ArrayList<>();
+            data.setUserId(qrInFolderDTO.getUserId());
+
+            List<String> userDataJson = qrWalletService.getQrData(folderId, type);
+            listQrDataDTOs = userDataJson.stream().map(userInfo -> {
+                DataQrDTO qrData = gson.fromJson(userInfo, DataQrDTO.class);
+                return qrData;
+            }).collect(Collectors.toList());
+//                Chứa qr_data và qr_info
 //                QRInfo qrInfo = new QRInfo();
 //                qrInfo.setData(listQrDataDTOs);
 //                qrInfo.setValue("Lấy value ở bảng QR bỏ vào");
 
-                data.setQrData(listQrDataDTOs);
-                data.setFolderId(qrInFolderDTO.getFolderId());
-                data.setTitleFolder(qrInFolderDTO.getTitleFolder());
-                data.setDescriptionFolder(qrInFolderDTO.getDescriptionFolder());
+            data.setQrData(dataList);
+            data.setFolderId(qrInFolderDTO.getFolderId());
+            data.setTitleFolder(qrInFolderDTO.getTitleFolder());
+            data.setDescriptionFolder(qrInFolderDTO.getDescriptionFolder());
 
-                result = data;
-                httpStatus = HttpStatus.OK;
-            } else {
-                result = new ResponseMessageDTO("FAILED", "E05");
-                httpStatus = HttpStatus.BAD_REQUEST;
-            }
+            result = data;
+            httpStatus = HttpStatus.OK;
+
         } catch (Exception e) {
             logger.error("add users to folder: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
@@ -190,7 +206,6 @@ public ResponseEntity<Object> updateUserToFolder(@RequestBody AddUserToFolderReq
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-
 
 
 }
