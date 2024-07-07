@@ -11,11 +11,20 @@ public class TempVietQRDTO implements Serializable {
     private String bankAccount;
     private String userBankName;
     private String bankCode;
+    private String bankShortName;
     private String amount;
     private String content;
     private String value;
 
     public TempVietQRDTO() {
+    }
+
+    public String getBankShortName() {
+        return bankShortName;
+    }
+
+    public void setBankShortName(String bankShortName) {
+        this.bankShortName = bankShortName;
     }
 
     @Override

@@ -21,8 +21,8 @@ public class QrFolderServiceImpl implements QrFolderService {
     }
 
     @Override
-    public List<IListQrFolderDTO> getListFolders(String userId) {
-        return repo.getListFolders(userId);
+    public List<IListQrFolderDTO> getListFolders(String value, int offset, int size, String userId) {
+        return repo.getListFolders(value, offset, size, userId);
     }
 
     @Override

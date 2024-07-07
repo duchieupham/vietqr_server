@@ -1649,17 +1649,19 @@ public class QrWalletController {
                     entity1.setValue(qrGenerate);
                     entity1.setQrType(3);
 
+                    //  get bank short name
+                    String bankShortName = bankTypeService.getBankShortNameByBankCode(bankCodeDTO);
+
                     TempVietQRDTO tempVietQRDTO = new TempVietQRDTO();
                     tempVietQRDTO.setBankAccount(bankAccountDTO);
                     tempVietQRDTO.setUserBankName(userBankNameDTO);
                     tempVietQRDTO.setBankCode(bankCodeDTO);
+                    tempVietQRDTO.setBankShortName(bankShortName);
                     tempVietQRDTO.setAmount(amountDTO);
                     tempVietQRDTO.setContent(contentDTO);
                     tempVietQRDTO.setValue(qrGenerate);
                     entity1.setQrData(tempVietQRDTO.toString());
 
-                    //  get bank short name
-                    String bankShortName = bankTypeService.getBankShortNameByBankCode(bankCodeDTO);
                     entity1.setUserData("{"
                             + "\"userId\": \"" + userIdDTO + "\", "
                             + "\"bankAccount\": \"" + bankAccountDTO + "\", "
@@ -1922,10 +1924,17 @@ public class QrWalletController {
     public ResponseEntity<Object> getAllPrivateQrWallets(
             @RequestParam String userId,
             @RequestParam int type,
+            @RequestParam int page,
+            @RequestParam int size,
             @RequestParam String value) {
         Object result = null;
         HttpStatus httpStatus = null;
+        PageResDTO pageResDTO = new PageResDTO();
+        PageDTO pageDTO = new PageDTO();
         try {
+            int totalElement = 0;
+            int offset = (page - 1) * size;
+
             List<IQrWalletPrivateDTO> qrWalletPrivateAll = null;
             List<IQrWalletPrivateDTO> qrLinkPrivate = null;
             List<IQrWalletPrivateDTO> qrTextPrivate = null;
