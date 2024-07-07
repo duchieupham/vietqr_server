@@ -78,6 +78,7 @@ public class QrFolderUserController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
     @PutMapping("/qr-folder/update-user-role")
     public ResponseEntity<Object> updateUserRole(@RequestBody UpdateSingleUserRoleRequestDTO dto) {
         Object result = null;
@@ -208,15 +209,15 @@ public class QrFolderUserController {
                 return listQrWalletDTO;
             }).collect(Collectors.toList());
 
-            // xử lý chuỗi JSON thành object
-            List<DataQrDTO> listQrDataDTOs = new ArrayList<>();
             data.setUserId(qrInFolderDTO.getUserId());
 
-//            List<String> userDataJson = qrWalletService.getQrData(folderId, type);
-//            listQrDataDTOs = userDataJson.stream().map(userInfo -> {
-//                DataQrDTO qrData = gson.fromJson(userInfo, DataQrDTO.class);
-//                return qrData;
-//            }).collect(Collectors.toList());
+            // xử lý chuỗi JSON thành object
+            List<DataQrDTO> listQrDataDTOs = new ArrayList<>();
+            List<String> userDataJson = qrWalletService.getQrData(folderId, type);
+            listQrDataDTOs = userDataJson.stream().map(userInfo -> {
+                DataQrDTO qrData = gson.fromJson(userInfo, DataQrDTO.class);
+                return qrData;
+            }).collect(Collectors.toList());
 //                Chứa qr_data và qr_info
 //                QRInfo qrInfo = new QRInfo();
 //                qrInfo.setData(listQrDataDTOs);
@@ -237,6 +238,7 @@ public class QrFolderUserController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
     @DeleteMapping("/qr-folder/remove-user")
     public ResponseEntity<Object> removeUserFromFolder(@RequestBody RemoveUserFromFolderRequestDTO dto) {
         Object result = null;
@@ -253,5 +255,13 @@ public class QrFolderUserController {
             } else {
                 qrFolderUserService.deleteUserFromFolder(dto.getFolderId(), dto.getUserId());
 
-
+            }
+        } catch (Exception e) {
+            logger.error("add users to folder: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 }
+
