@@ -181,11 +181,11 @@ public class QrFolderUserController {
             List<DataQrDTO> listQrDataDTOs = new ArrayList<>();
             data.setUserId(qrInFolderDTO.getUserId());
 
-            List<String> userDataJson = qrWalletService.getQrData(folderId, type);
-            listQrDataDTOs = userDataJson.stream().map(userInfo -> {
-                DataQrDTO qrData = gson.fromJson(userInfo, DataQrDTO.class);
-                return qrData;
-            }).collect(Collectors.toList());
+//            List<String> userDataJson = qrWalletService.getQrData(folderId, type);
+//            listQrDataDTOs = userDataJson.stream().map(userInfo -> {
+//                DataQrDTO qrData = gson.fromJson(userInfo, DataQrDTO.class);
+//                return qrData;
+//            }).collect(Collectors.toList());
 //                Chứa qr_data và qr_info
 //                QRInfo qrInfo = new QRInfo();
 //                qrInfo.setData(listQrDataDTOs);
