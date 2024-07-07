@@ -62,6 +62,9 @@ public class QrWalletController {
     private QRCodeService qrCodeService;
 
     @Autowired
+    BankTypeService bankTypeService;
+
+    @Autowired
     ImageService imageService;
 
     @Autowired
@@ -75,9 +78,6 @@ public class QrWalletController {
 
     @Autowired
     CaiBankService caiBankService;
-
-    @Autowired
-    BankTypeService bankTypeService;
 
     @Autowired
     private QrCommentService qrCommentService;
@@ -1334,7 +1334,6 @@ public class QrWalletController {
             switch (type) {
                 case 0: //link
                 case 1: //text
-//                    QrCreateRequestDTO qrCreateRequestDTO = objectMapper.readValue(json, QrCreateRequestDTO.class);
                     QrCreateRequestDTO dto01 = new QrCreateRequestDTO();
                     try {
                         // generate QR Code
@@ -1659,10 +1658,13 @@ public class QrWalletController {
                     tempVietQRDTO.setValue(qrGenerate);
                     entity1.setQrData(tempVietQRDTO.toString());
 
+                    //  get bank short name
+                    String bankShortName = bankTypeService.getBankShortNameByBankCode(bankCodeDTO);
                     entity1.setUserData("{"
                             + "\"userId\": \"" + userIdDTO + "\", "
                             + "\"bankAccount\": \"" + bankAccountDTO + "\", "
                             + "\"userBankName\": \"" + userBankNameDTO + "\", "
+                            + "\"bankShortName\": \"" + bankShortName + "\", "
                             + "\"qrType\": \"" + typeDto + "\", "
                             + "\"bankCode\": \"" + bankCodeDTO + "\""
                             + "}");

@@ -36,6 +36,11 @@ public class BankTypeServiceImpl implements BankTypeService {
 	}
 
 	@Override
+	public String getBankShortNameByBankCode(String bankCode) {
+		return bankTypeRepository.getBankShortNameByBankCode(bankCode);
+	}
+
+	@Override
 	public Boolean getRpaContainIdByBankCode(String bankCode) {
 		return bankTypeRepository.getRpaContainIdByBankCode(bankCode);
 	}

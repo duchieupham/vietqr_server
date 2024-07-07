@@ -30,10 +30,10 @@ public class QrCommentController {
     QrWalletService qrWalletService;
 
     @PostMapping("/qr-comment/add")
-    public ResponseEntity<Object> addComment(@RequestBody QrCommentRequestDTO request,
-
-                                             @RequestParam int page,
-                                             @RequestParam int size) {
+    public ResponseEntity<Object> addComment(
+            @RequestBody QrCommentRequestDTO request,
+            @RequestParam int page,
+            @RequestParam int size) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {

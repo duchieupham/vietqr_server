@@ -50,4 +50,7 @@ public interface TelegramRepository extends JpaRepository<TelegramEntity, Long> 
     @Query(value = "SELECT * FROM telegram WHERE chat_id = :chatId", nativeQuery = true)
     TelegramEntity getTelegramByChatId(@Param("chatId") String chatId);
 
+
+    @Query(value = "SELECT * FROM telegram WHERE user_id = :userId", nativeQuery = true)
+    TelegramEntity getTelegramByUserId(@Param("userId") String userId);
 }

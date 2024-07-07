@@ -312,11 +312,11 @@ public class GoogleChatController {
     // GoogleChatDetailDTO
     @GetMapping("service/google-chats/information-detail")
     public ResponseEntity<Object> getGoogleChatInformationDetail(
-            @RequestParam(value = "id") String id) {
+            @RequestParam(value = "userId") String userId) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            GoogleChatEntity dto = googleChatService.getGoogleChatById(id);
+            GoogleChatEntity dto = googleChatService.getGoogleChatsByUserId(userId);
             if (dto != null) {
                 GoogleChatDetailDTO detailDTO = new GoogleChatDetailDTO();
                 detailDTO.setId(dto.getId());
@@ -345,12 +345,12 @@ public class GoogleChatController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-    @PutMapping("service/google-chats/update-webhook/{id}")
-    public ResponseEntity<ResponseMessageDTO> updateGoogleChatWebhook(@PathVariable String id, @RequestBody GoogleChatUpdateWebhookDTO dto) {
+    @PutMapping("service/google-chats/update-webhook/{userId}")
+    public ResponseEntity<ResponseMessageDTO> updateGoogleChatWebhook(@PathVariable String userId, @RequestBody GoogleChatUpdateWebhookDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            GoogleChatEntity googleChatEntity = googleChatService.getGoogleChatById(id);
+            GoogleChatEntity googleChatEntity = googleChatService.getGoogleChatsByUserId(userId);
             googleChatEntity.setWebhook(dto.getWebhook());
             googleChatService.updateGoogleChat(googleChatEntity);
             result = new ResponseMessageDTO("SUCCESS", "");
