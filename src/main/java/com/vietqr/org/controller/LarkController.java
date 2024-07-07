@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -178,7 +179,8 @@ public class LarkController {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            if (dto != null && dto.getBankIds() != null && !dto.getBankIds().isEmpty() && dto.getNotificationTypes() != null && !dto.getNotificationTypes().isEmpty() && dto.getNotificationContents() != null && !dto.getNotificationContents().isEmpty()) {
+            if (dto != null && dto.getBankIds() != null && !dto.getBankIds().isEmpty() && dto.getNotificationTypes() != null
+                    && !dto.getNotificationTypes().isEmpty() && dto.getNotificationContents() != null && !dto.getNotificationContents().isEmpty()) {
                 UUID uuid = UUID.randomUUID();
                 LarkEntity larkEntity = new LarkEntity();
                 larkEntity.setId(uuid.toString());
@@ -339,18 +341,13 @@ public class LarkController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-    @PutMapping("service/larks/update-webhook/{userId}")
-    public ResponseEntity<ResponseMessageDTO> updateLarkWebhook(@PathVariable String userId, @RequestBody LarkUpdateWebhookDTO dto) {
+    @PutMapping("service/larks/update-webhook/{larkId}")
+    public ResponseEntity<ResponseMessageDTO> updateLarkWebhook(@PathVariable String larkId, @Valid @RequestBody LarkUpdateWebhookDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            LarkEntity larkEntity = larkService.getLarkByUserId(userId);
-            if (dto.isValid()) {
-                larkEntity.setWebhook(dto.getWebhook() == null ? "" : dto.getWebhook());
-            } else {
-                larkEntity.setWebhook("");
-            }
-            larkService.updateLark(larkEntity);
+            larkService.updateLarkWebhook(larkId, dto.getWebhook());
+            larkAccountBankService.updateWebhook(dto.getWebhook(), larkId);
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {

@@ -25,4 +25,5 @@ public interface TelegramService {
 
     TelegramEntity getTelegramByChatId(String chatId);
 
+    void updateTelegram(String chatId, String teleId);
 }

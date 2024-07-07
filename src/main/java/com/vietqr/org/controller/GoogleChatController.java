@@ -345,18 +345,13 @@ public class GoogleChatController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-    @PutMapping("service/google-chats/update-webhook/{userId}")
-    public ResponseEntity<ResponseMessageDTO> updateGoogleChatWebhook(@PathVariable String userId, @RequestBody GoogleChatUpdateWebhookDTO dto) {
+    @PutMapping("service/google-chats/update-webhook/{ggChatId}")
+    public ResponseEntity<ResponseMessageDTO> updateGoogleChatWebhook(@PathVariable String ggChatId, @RequestBody GoogleChatUpdateWebhookDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            GoogleChatEntity googleChatEntity = googleChatService.getGoogleChatsByUserId(userId);
-            if (dto.isValid()) {
-                googleChatEntity.setWebhook(dto.getWebhook() == null ? "" : dto.getWebhook());
-            } else {
-                googleChatEntity.setWebhook("");
-            }
-            googleChatService.updateGoogleChat(googleChatEntity);
+            googleChatService.updateGoogleChat(dto.getWebhook(), ggChatId);
+            googleChatAccountBankService.updateWebHookGoogleChat(dto.getWebhook(), ggChatId);
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {

@@ -20,4 +20,6 @@ public interface TelegramAccountBankService {
 
     // for case send msg
     public List<String> getChatIdsByBankId(String bankId);
+
+    void updateWebHookTelegram(String chatId, String teleId);
 }

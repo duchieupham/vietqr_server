@@ -39,4 +39,8 @@ public interface LarkAccountBankRepository extends JpaRepository<LarkAccountBank
         @Query(value = "SELECT webhook FROM lark_account_bank WHERE bank_id = :bankId", nativeQuery = true)
         List<String> getWebhooksByBankId(@Param(value = "bankId") String bankId);
 
+        @Transactional
+        @Modifying
+        @Query(value = "UPDATE lark_account_bank SET webhook = :webhook WHERE lark_id = :larkId ", nativeQuery = true)
+    void updateWebhook(String webhook, String larkId);
 }

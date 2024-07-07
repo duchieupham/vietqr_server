@@ -40,6 +40,11 @@ public class LarkServiceImpl implements LarkService {
     }
 
     @Override
+    public void updateLarkWebhook(String larkId, String webhook) {
+        repo.updateLark(webhook, larkId);
+    }
+
+    @Override
     public LarkEntity getLarkById(String id) {
         return repo.getLarkById(id);
     }
