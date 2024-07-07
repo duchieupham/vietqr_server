@@ -356,6 +356,13 @@ public class TelegramController {
                 telegramEntity.setChatId("");
             }
             telegramService.updateTelegram(telegramEntity);
+
+            // Cập nhật trong TelegramAccountBankEntity
+            List<TelegramAccountBankEntity> accountBanks = telegramAccountBankService.getTelegramAccountBanksByTelegramId(telegramEntity.getId());
+            for (TelegramAccountBankEntity accountBank : accountBanks) {
+                accountBank.setChatId(telegramEntity.getChatId());
+                telegramAccountBankService.updateTelegramAccountBank(accountBank);
+            }
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {

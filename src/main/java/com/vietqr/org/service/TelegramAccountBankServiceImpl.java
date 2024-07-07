@@ -36,6 +36,16 @@ public class TelegramAccountBankServiceImpl implements TelegramAccountBankServic
     }
 
     @Override
+    public List<TelegramAccountBankEntity> getTelegramAccountBanksByTelegramId(String telegramId) {
+        return repo.getTelegramAccountBanksByTelegramId(telegramId);
+    }
+
+    @Override
+    public void updateTelegramAccountBank(TelegramAccountBankEntity accountBankEntity) {
+        repo.save(accountBankEntity);
+    }
+
+    @Override
     public void removeTelAccBankByTelIdAndBankId(String telId, String bankId) {
         repo.removeTelAccBankByTelIdAndBankId(telId, bankId);
     }

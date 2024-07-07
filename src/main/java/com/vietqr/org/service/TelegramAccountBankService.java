@@ -20,4 +20,7 @@ public interface TelegramAccountBankService {
 
     // for case send msg
     public List<String> getChatIdsByBankId(String bankId);
+
+    List<TelegramAccountBankEntity> getTelegramAccountBanksByTelegramId(String telegramId);
+    void updateTelegramAccountBank(TelegramAccountBankEntity accountBankEntity);
 }
