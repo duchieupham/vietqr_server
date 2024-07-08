@@ -59,7 +59,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "WHEN a.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.phoneNo'))) " +
             "WHEN a.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankAccount'))) " +
             "ELSE NULL " +
-            "END AS data " +
+            "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId " +
             "FROM qr_wallet a " +
             "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
             "INNER JOIN qr_wallet_folder c ON c.qr_wallet_id = a.id " +
