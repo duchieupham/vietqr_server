@@ -62,10 +62,11 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "END AS data " +
             "FROM qr_wallet a " +
             "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
-            "WHERE ((a.description LIKE %:value%) OR (a.title LIKE %:value%)) " +
+            "INNER JOIN qr_wallet_folder c ON c.qr_wallet_id = a.id " +
+            "WHERE c.qr_folder_id = :folderId " +
             "GROUP BY a.id, b.role " +
             "ORDER BY a.time_created DESC ", nativeQuery = true)
-    List<IListQrWalletDTO> getQrWalletNoPagingAll(String value);
+    List<IListQrWalletDTO> getQrWalletNoPagingAll(String folderId);
 
     @Query(value = "SELECT a.id AS id, a.description AS description, a.is_public AS isPublic, a.qr_type as QrType, " +
             "a.time_created as timeCreate, " +

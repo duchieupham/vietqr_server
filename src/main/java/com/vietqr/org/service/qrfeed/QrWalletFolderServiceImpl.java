@@ -30,6 +30,14 @@ public class QrWalletFolderServiceImpl implements QrWalletFolderService {
     }
 
     @Override
+    public void addQrWalletsInFolder( String folderId, List<String> qrIds) {
+        for (String qrWalletId : qrIds) {
+            UUID idgens = UUID.randomUUID();
+            repo.addQrWalletFolder(idgens.toString(), folderId, qrWalletId);
+        }
+    }
+
+    @Override
     public int countQrFolder(String folderId) {
         return repo.countQrFolder(folderId);
     }

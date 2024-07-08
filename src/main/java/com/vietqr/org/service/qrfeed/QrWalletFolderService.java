@@ -10,5 +10,7 @@ public interface QrWalletFolderService {
 
     public void addQrWalletsToFolder(String folderId, String userId, List<String> qrIds);
 
+    public void addQrWalletsInFolder(String folderId, List<String> qrIds);
+
     int countQrFolder(String folderId);
 }
