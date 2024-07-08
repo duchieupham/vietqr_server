@@ -105,6 +105,11 @@ public class QrFolderController {
                 dto.setDescription(item.getDescription());
                 dto.setUserId(item.getUserId());
                 dto.setTimeCreated(item.getTimeCreate());
+
+                //count qr trong folder
+                int countQR = qrWalletFolderService.countQrFolder(item.getId());
+                dto.setCountQrs(countQR);
+
                 int countUsers = qrFolderUserService.countUsersFolder(item.getId());
                 dto.setCountUsers(countUsers);
                 return dto;
