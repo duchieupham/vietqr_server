@@ -20,10 +20,7 @@ public interface QrFolderUserRepository extends JpaRepository<QrFolderUserEntity
     @Modifying
     @Query(value = "INSERT INTO qr_folder_user (id, qr_folder_id, user_id) " +
             "VALUES (:id, :qrFolderId, :userId)", nativeQuery = true)
-    void insertQrWalletFolder(
-            @Param("id") String id,
-            @Param("qrFolderId") String qrFolderId,
-            @Param("userId") String userId);
+    void insertQrWalletFolder(String id, String qrFolderId, String userId);
 
     @Transactional
     @Modifying
