@@ -11,6 +11,7 @@ import java.util.List;
 public interface QrFolderUserService {
 
     void addUserIds(String qrFolderId, List<UserRoleDTO> userRoles, String userId);
+    void addUserAdmin(String qrFolderId, String folderId, String userId);
 
     public List<IUserInFolderDTO> getUserInFolder(String qrFolderId);
 
