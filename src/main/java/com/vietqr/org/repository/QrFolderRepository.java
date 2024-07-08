@@ -60,4 +60,14 @@ public interface QrFolderRepository extends JpaRepository<QrFolderEntity, String
     @Modifying
     @Query(value = "DELETE FROM qr_folder WHERE id = :qrFolderId", nativeQuery = true)
     void deleteByQrFolderId(@Param("qrFolderId") String qrFolderId);
+
+
+    @Query(value = "SELECT ai.user_id AS userId, " +
+            "IFNULL(TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))), '') AS fullName, " +
+            "IFNULL(al.phone_no, '') AS phoneNo, " +
+            "IFNULL(ai.img_id, '') AS imageId " +
+            "FROM account_information ai " +
+            "JOIN account_login al ON ai.user_id = al.id " +
+            "WHERE al.phone_no LIKE %:phoneNo%", nativeQuery = true)
+    List<UserDTO> findUsersByPhoneNo(@Param("phoneNo") String phoneNo);
 }

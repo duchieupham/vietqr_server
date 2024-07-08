@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.LarkEntity;
+import com.vietqr.org.util.StringUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -314,11 +315,11 @@ public class GoogleChatController {
     // GoogleChatDetailDTO
     @GetMapping("service/google-chats/information-detail")
     public ResponseEntity<Object> getGoogleChatInformationDetail(
-            @RequestParam(value = "userId") String userId) {
+            @RequestParam(value = "id") String id) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            GoogleChatEntity dto = googleChatService.getGoogleChatsByUserId(userId);
+            GoogleChatEntity dto = googleChatService.getGoogleChatById(id);
             if (dto != null) {
                 GoogleChatDetailDTO detailDTO = new GoogleChatDetailDTO();
                 detailDTO.setId(dto.getId());
@@ -364,4 +365,34 @@ public class GoogleChatController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
+    @GetMapping("service/google-chats/list")
+    public ResponseEntity<PageResDTO> getListGoogleChats(
+            @RequestParam("userId") String userId,
+            @RequestParam("page") int page,
+            @RequestParam("size") int size) {
+        HttpStatus httpStatus = null;
+        PageResDTO result = null;
+        try {
+            int totalElements = googleChatService.countGoogleChatsByUserId(userId);
+            int offset = (page - 1) * size;
+            List<GoogleChatInfoDetailDTO> googleChats = googleChatService.getGoogleChatsByUserIdWithPagination(userId, offset, size);
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageDTO.setTotalElement(totalElements);
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElements, size));
+            PageResDTO pageResDTO = new PageResDTO();
+            pageResDTO.setMetadata(pageDTO);
+            pageResDTO.setData(googleChats);
+            result = pageResDTO;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getListGoogleChats Error: " + e.getMessage() + System.currentTimeMillis());
+            result = new PageResDTO(new PageDTO(), new ArrayList<>());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
 }

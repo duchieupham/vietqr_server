@@ -46,6 +46,11 @@ public class TelegramAccountBankServiceImpl implements TelegramAccountBankServic
     }
 
     @Override
+    public int countByTelegramId(String telegramId) {
+        return repo.countByTelegramId(telegramId);
+    }
+
+    @Override
     public void removeTelAccBankByTelIdAndBankId(String telId, String bankId) {
         repo.removeTelAccBankByTelIdAndBankId(telId, bankId);
     }

@@ -2,6 +2,7 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+import com.vietqr.org.dto.LarkInfoDetailDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -52,6 +53,16 @@ public class LarkServiceImpl implements LarkService {
     @Override
     public LarkEntity getLarkByWebhook(String webhook) {
         return repo.getLarkByWebhook(webhook);
+    }
+
+    @Override
+    public List<LarkInfoDetailDTO> getLarksByUserIdWithPagination(String userId, int offset, int size) {
+        return repo.getLarksByUserIdWithPagination(userId, offset, size);
+    }
+
+    @Override
+    public int countLarksByUserId(String userId) {
+        return repo.countLarksByUserId(userId);
     }
 
 }

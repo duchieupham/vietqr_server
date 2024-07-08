@@ -25,4 +25,6 @@ public interface QrFolderService {
 
     void deleteFolderById(String folderId);
 
+
+    List<UserDTO> findUsersByPhoneNo(String phoneNo);
 }
