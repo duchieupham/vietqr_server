@@ -32,7 +32,11 @@ public interface QrWalletFolderRepository extends JpaRepository<QrWalletFolderEn
             @Param("qrWalletId") String qrWalletId,
             @Param("userId") String userId);
 
-
+    @Transactional
+    @Modifying
+    @Query(value = "INSERT INTO `qr_wallet_folder` (id, qr_folder_id, qr_wallet_id) " +
+            "VALUES (:id, :qrFolderId, :qrWalletId) ", nativeQuery = true)
+    void addQrWalletFolder(String id, String qrFolderId, String qrWalletId);
 
     @Query(value = "SELECT qr_wallet_id FROM qr_wallet_folder WHERE qr_folder_id = :qrFolderId", nativeQuery = true)
     List<String> findQrWalletIdsByQrFolderId(@Param("qrFolderId") String qrFolderId);
