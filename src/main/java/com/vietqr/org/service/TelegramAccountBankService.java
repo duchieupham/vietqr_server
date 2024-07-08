@@ -24,4 +24,6 @@ public interface TelegramAccountBankService {
     void updateWebHookTelegram(String chatId, String teleId);
 
     String checkExistedBankId(String bankId, String id);
+
+    int countByTelegramId(String id);
 }

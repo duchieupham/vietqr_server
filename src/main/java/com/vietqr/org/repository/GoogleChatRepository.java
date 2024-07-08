@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import com.vietqr.org.dto.GoogleChatInfoDetailDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -34,4 +35,16 @@ public interface GoogleChatRepository extends JpaRepository<GoogleChatEntity, Lo
     @Modifying
     @Query(value = "UPDATE google_chat SET webhook = :webhook WHERE id = :id", nativeQuery = true)
     void updateGoogleChat(String webhook, String id);
+
+
+    @Query(value = "SELECT gc.id AS googleChatId, gc.webhook AS webhook, COUNT(gcab.id) AS bankAccountCount " +
+            "FROM google_chat gc " +
+            "LEFT JOIN google_chat_account_bank gcab ON gc.id = gcab.google_chat_id " +
+            "WHERE gc.user_id = :userId " +
+            "GROUP BY gc.id, gc.webhook " +
+            "LIMIT :size OFFSET :offset", nativeQuery = true)
+    List<GoogleChatInfoDetailDTO> getGoogleChatsByUserIdWithPagination(@Param("userId") String userId, @Param("offset") int offset, @Param("size") int size);
+
+    @Query(value = "SELECT COUNT(gc.id) FROM google_chat gc WHERE gc.user_id = :userId", nativeQuery = true)
+    int countGoogleChatsByUserId(@Param("userId") String userId);
 }
