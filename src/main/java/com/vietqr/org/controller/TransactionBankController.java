@@ -5405,7 +5405,7 @@ public class TransactionBankController {
 			if (accountBankEntity.isSync() == true || accountBankEntity.isWpSync() == true) {
 				TransactionBankCustomerDTO transactionBankCustomerDTO = new TransactionBankCustomerDTO();
 				transactionBankCustomerDTO.setTransactionid(dto.getTransactionid());
-				transactionBankCustomerDTO.setTransactiontime(time);
+				transactionBankCustomerDTO.setTransactiontime(time * 1000);
 				transactionBankCustomerDTO.setReferencenumber(dto.getReferencenumber());
 				transactionBankCustomerDTO.setAmount(dto.getAmount());
 				transactionBankCustomerDTO.setContent(dto.getContent());
