@@ -41,7 +41,8 @@ public class QrFolderUserServiceImpl implements QrFolderUserService {
             // Add user with role to qr_user table
             QrUserEntity qrUserEntity = new QrUserEntity();
             qrUserEntity.setId(UUID.randomUUID().toString());
-            qrUserEntity.setQrWalletId(qrFolderId);
+            qrUserEntity.setQrWalletId("");
+            qrUserEntity.setQrFolderId(qrFolderId);
             qrUserEntity.setUserId(userRole.getUserId());
             qrUserEntity.setRole(userRole.getRole());
             qrUserRepository.save(qrUserEntity);
