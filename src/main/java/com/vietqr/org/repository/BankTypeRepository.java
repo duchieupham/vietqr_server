@@ -22,6 +22,9 @@ public interface BankTypeRepository extends JpaRepository<BankTypeEntity, Long> 
 	@Query(value = "SELECT id FROM bank_type WHERE bank_code = :bankCode", nativeQuery = true)
 	String getBankTypeIdByBankCode(@Param(value = "bankCode") String bankCode);
 
+	@Query(value = "SELECT bank_short_name AS bankShortName FROM bank_type WHERE bank_code = :bankCode", nativeQuery = true)
+	String getBankShortNameByBankCode(String bankCode);
+
 	@Query(value = "SELECT rpa_contain_id FROM bank_type WHERE bank_code = :bankCode", nativeQuery = true)
 	Boolean getRpaContainIdByBankCode(@Param(value = "bankCode") String bankCode);
 

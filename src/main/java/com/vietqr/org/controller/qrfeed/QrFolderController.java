@@ -7,6 +7,8 @@ import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.qrfeed.QrFolderEntity;
 import com.vietqr.org.repository.QrWalletFolderRepository;
 import com.vietqr.org.service.qrfeed.QrFolderService;
+import com.vietqr.org.service.qrfeed.QrFolderUserService;
+import com.vietqr.org.service.qrfeed.QrWalletFolderService;
 import com.vietqr.org.service.qrfeed.QrWalletService;
 import com.vietqr.org.util.StringUtil;
 import org.apache.log4j.Logger;
@@ -32,6 +34,12 @@ public class QrFolderController {
     QrFolderService qrFolderService;
     @Autowired
     QrWalletService qrWalletService;
+
+    @Autowired
+    QrFolderUserService qrFolderUserService;
+
+    @Autowired
+    QrWalletFolderService qrWalletFolderService;
 
     @Autowired
     QrWalletFolderRepository qrWalletFolderRepository;
@@ -73,11 +81,10 @@ public class QrFolderController {
 
     @GetMapping("qr-feed/folders")
     public ResponseEntity<Object> getListFolderByUser(
-            @RequestParam int type,
             @RequestParam int page,
             @RequestParam int size,
             @RequestParam String value,
-            @RequestBody FolderInfoByUserDTO folderInfoByUserDTO
+            @RequestParam String userId
     ) {
         Object result = null;
         HttpStatus httpStatus = null;
@@ -88,8 +95,8 @@ public class QrFolderController {
 
             List<ListQrFolderDTO> data = new ArrayList<>();
             List<IListQrFolderDTO> info = new ArrayList<>();
-            String userId = folderInfoByUserDTO.getUserId();
-            totalElement = qrFolderService.countQrFolder(value,userId);
+            totalElement = qrFolderService.countQrFolder(value, userId);
+
             info = qrFolderService.getListFolders(value, offset, size, userId);
             data = info.stream().map(item -> {
                 ListQrFolderDTO dto = new ListQrFolderDTO();
@@ -98,6 +105,8 @@ public class QrFolderController {
                 dto.setDescription(item.getDescription());
                 dto.setUserId(item.getUserId());
                 dto.setTimeCreated(item.getTimeCreate());
+                int countUsers = qrFolderUserService.countUsersFolder(item.getId());
+                dto.setCountUsers(countUsers);
                 return dto;
             }).collect(Collectors.toList());
 
@@ -111,9 +120,38 @@ public class QrFolderController {
             pageResDTO.setData(data);
 
             result = pageResDTO;
-            httpStatus = HttpStatus.BAD_REQUEST;
+            httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("get list folder: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("qr-feed/folder")
+    public ResponseEntity<Object> getFolder(@RequestParam String folderId) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            FolderDetailDTO folderDetailDTO = new FolderDetailDTO();
+            IFolderDetailDTO iFolderDetailDTO = qrFolderService.getFolderDetailById(folderId);
+
+            folderDetailDTO.setId(iFolderDetailDTO.getId());
+            folderDetailDTO.setTitle(iFolderDetailDTO.getTitle());
+            folderDetailDTO.setDescription(iFolderDetailDTO.getDescription());
+            folderDetailDTO.setTimeCreated(iFolderDetailDTO.getTimeCreated());
+            // count user trong folder
+            int countUser = qrFolderUserService.countUsersFolder(folderId);
+            folderDetailDTO.setCountUser(countUser);
+            //count qr trong folder
+            int countQR = qrWalletFolderService.countQrFolder(folderId);
+            folderDetailDTO.setCountQr(countQR);
+
+            result = folderDetailDTO;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("update folder: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -160,24 +198,23 @@ public class QrFolderController {
     public ResponseEntity<Object> deleteFolder(@RequestParam String folderId, @RequestParam boolean deleteItems) {
         HttpStatus httpStatus = null;
         Object result = null;
-        try{
-           QrFolderEntity folder = qrFolderService.getFolderById(folderId);
-           if(deleteItems){
+        try {
+            QrFolderEntity folder = qrFolderService.getFolderById(folderId);
+            if (deleteItems) {
                 List<String> qrItems = qrWalletService.getQrWalletIdsByFolderId(folderId);
                 qrWalletService.deleteQrItemsByIds(qrItems);
-           }
-           qrWalletFolderRepository.deleteByQrFolderId(folderId);
-           qrFolderService.deleteFolderById(folderId);
+            }
+            qrWalletFolderRepository.deleteByQrFolderId(folderId);
+            qrFolderService.deleteFolderById(folderId);
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error("deleteFolder Error at " + e.getMessage() + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-
 
 
 }

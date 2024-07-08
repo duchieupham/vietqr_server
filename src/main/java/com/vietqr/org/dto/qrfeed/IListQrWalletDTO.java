@@ -8,4 +8,5 @@ public interface IListQrWalletDTO {
     String getTimeCreate();
     String getTitle();
     String getContent();
+    String getData();
 }

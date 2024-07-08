@@ -48,4 +48,10 @@ public interface GoogleChatAccountBankRepository extends JpaRepository<GoogleCha
 
     @Query(value = "SELECT webhook FROM google_chat_account_bank WHERE bank_id = :bankId", nativeQuery = true)
     List<String> getWebhooksByBankId(String bankId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE google_chat_account_bank SET webhook = :webhook "
+            + "WHERE google_chat_id = :ggChatId ", nativeQuery = true)
+    void updateWebHookGoogleChat(String webhook, String ggChatId);
 }

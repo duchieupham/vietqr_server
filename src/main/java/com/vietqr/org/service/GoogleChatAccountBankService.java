@@ -21,4 +21,6 @@ public interface GoogleChatAccountBankService {
     public List<GoogleChatBankDTO> getGoogleAccountBanks(String googleChatId);
 
     List<String> getWebhooksByBankId(String bankId);
+
+    void updateWebHookGoogleChat(String webhook, String ggChatId);
 }

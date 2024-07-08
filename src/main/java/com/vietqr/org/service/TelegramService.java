@@ -16,8 +16,14 @@ public interface TelegramService {
 
     public List<TelegramEntity> getTelegramsByUserId(String userId);
 
+    TelegramEntity getTelegramByUserId(String userId);
     public TelegramEntity getTelegramById(String id);
 
     public void removeTelegramById(String id);
 
+    void updateTelegram(TelegramEntity telegramEntity);
+
+    TelegramEntity getTelegramByChatId(String chatId);
+
+    void updateTelegram(String chatId, String teleId);
 }

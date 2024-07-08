@@ -45,6 +45,33 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "a.title AS title, a.value as content, b.role AS role " +
             "FROM viet_qr.qr_wallet a " +
             "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
+            "WHERE ((a.description LIKE %:value%) OR (a.title LIKE %:value%)) AND a.qr_type = :type " +
+            "GROUP BY a.id, b.role " +
+            "ORDER BY a.time_created DESC ", nativeQuery = true)
+    List<IListQrWalletDTO> getQrWalletNoPaging(String value, int type);
+
+    @Query(value = "SELECT a.id AS id, a.description AS description, a.is_public AS isPublic, a.qr_type as QrType, " +
+            "a.time_created as timeCreate, " +
+            "a.title AS title, a.value as content, b.role AS role, " +
+            "CASE " +
+            "WHEN a.qr_type = '0' THEN a.public_id " +
+            "WHEN a.qr_type = '1' THEN a.value " +
+            "WHEN a.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.phoneNo'))) " +
+            "WHEN a.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankAccount'))) " +
+            "ELSE NULL " +
+            "END AS data " +
+            "FROM qr_wallet a " +
+            "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
+            "WHERE ((a.description LIKE %:value%) OR (a.title LIKE %:value%)) " +
+            "GROUP BY a.id, b.role " +
+            "ORDER BY a.time_created DESC ", nativeQuery = true)
+    List<IListQrWalletDTO> getQrWalletNoPagingAll(String value);
+
+    @Query(value = "SELECT a.id AS id, a.description AS description, a.is_public AS isPublic, a.qr_type as QrType, " +
+            "a.time_created as timeCreate, " +
+            "a.title AS title, a.value as content, b.role AS role " +
+            "FROM viet_qr.qr_wallet a " +
+            "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
             "WHERE ((a.description LIKE %:value%) OR (a.title LIKE %:value%)) AND a.is_public = 1 " +
             "GROUP BY a.id, b.role " +
             "ORDER BY a.time_created DESC " +
@@ -100,13 +127,13 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "qr_type = :qrType, title = :title, value = :value, style = :style, theme = :theme " +
             "WHERE id = :id ", nativeQuery = true)
     void updateQrVietQR(@Param("id") String id,
-                       @Param("description") String description,
-                       @Param("isPublic") int isPublic,
-                       @Param("qrType") int qrType,
-                       @Param("title") String title,
-                       @Param("value") String value,
-                       @Param("style") int style,
-                       @Param("theme") int theme);
+                        @Param("description") String description,
+                        @Param("isPublic") int isPublic,
+                        @Param("qrType") int qrType,
+                        @Param("title") String title,
+                        @Param("value") String value,
+                        @Param("style") int style,
+                        @Param("theme") int theme);
 
 
     @Query(value = "SELECT * FROM qr_wallet WHERE id = :qrId AND qr_type = 2 ", nativeQuery = true)
@@ -186,7 +213,6 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
     void deleteByQrWalletIds(@Param("qrWalletIds") List<String> qrWalletIds);
 
 
-
     @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
             "w.value AS value, w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
             "(SELECT COUNT(i.id) FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.interaction_type = 1) AS likeCount, " +
@@ -196,7 +222,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "WHEN w.qr_type = '0' THEN w.public_id " +
             "WHEN w.qr_type = '1' THEN w.value " +
             "WHEN w.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.phoneNo'))) " +
-            "WHEN w.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.user_data, '$.bankCode')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.user_data, '$.bankAccount'))) " +
+            "WHEN w.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.bankAccount'))) " +
             "ELSE NULL " +
             "END AS data, " +
             "IFNULL(TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))), 'Undefined') AS fullName, " +
@@ -209,11 +235,40 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "WHERE w.is_public = 1 " +
             "ORDER BY w.time_created DESC " +
             "LIMIT :offset, :size", nativeQuery = true)
-    List<IQrWalletDTO> findAllPublicQrWallets(@Param("userId") String userId, @Param("offset") int offset, @Param("size") int size);
+    List<IQrWalletDTO> findAllPublicQrWallets(
+            @Param("userId") String userId,
+            @Param("offset") int offset,
+            @Param("size") int size);
+
+    @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
+            "w.value AS value, w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
+            "(SELECT COUNT(i.id) FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.interaction_type = 1) AS likeCount, " +
+            "(SELECT COUNT(wc.id) FROM qr_wallet_comment wc WHERE wc.qr_wallet_id = w.id) AS commentCount, " +
+            "CASE WHEN (SELECT COUNT(i.id) FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.user_id = :userId AND i.interaction_type = 1) > 0 THEN 1 ELSE 0 END AS hasLiked, " +
+            "CASE " +
+            "WHEN w.qr_type = '0' THEN w.public_id " +
+            "WHEN w.qr_type = '1' THEN w.value " +
+            "WHEN w.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.phoneNo'))) " +
+            "WHEN w.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.bankAccount'))) " +
+            "ELSE NULL " +
+            "END AS data, " +
+            "IFNULL(TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))), 'Undefined') AS fullName, " +
+            "IFNULL(ai.img_id, '') AS imageId, " +
+            "IFNULL(w.style, '') AS style, " +
+            "IFNULL(w.theme, '') AS theme, " +
+            "IFNULL(w.file_attachment_id, '') AS fileAttachmentId " +
+            "FROM qr_wallet w " +
+            "LEFT JOIN account_information ai ON ai.user_id = w.user_id " +
+            "WHERE w.is_public = 1 " +
+            "ORDER BY w.time_created DESC " +
+            "LIMIT :offset, :size", nativeQuery = true)
+    List<IQrWalletDTO> getQrWalletInFolder(
+            @Param("userId") String userId,
+            @Param("offset") int offset,
+            @Param("size") int size);
 
     @Query(value = "SELECT COUNT(id) FROM qr_wallet WHERE is_public = 1", nativeQuery = true)
     int countPublicQrWallets();
-
 
     @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
             "w.value AS value, w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
@@ -231,13 +286,121 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "IFNULL(w.file_attachment_id, '') AS fileAttachmentId " +
             "FROM qr_wallet w " +
             "LEFT JOIN account_information ai ON ai.user_id = w.user_id " +
-            "WHERE w.is_public = 0 AND w.user_id = :userId " +
-            "ORDER BY w.time_created DESC " +
-            "LIMIT :offset, :size", nativeQuery = true)
-    List<IQrWalletPrivateDTO> findAllPrivateQrWallets(@Param("userId") String userId, @Param("offset") int offset, @Param("size") int size);
+            "WHERE (w.is_public = 0) AND (w.user_id = :userId) AND (w.title LIKE %:value%) " +
+            "ORDER BY w.title ASC ", nativeQuery = true)
+    List<IQrWalletPrivateDTO> findAllPrivateQrWallets(
+            @Param("userId") String userId,
+            @Param("value") String value);
 
-    @Query(value = "SELECT COUNT(id) FROM qr_wallet WHERE is_public = 0", nativeQuery = true)
-    int countPrivateQrWallets();
+    @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
+            "w.value AS value, w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
+            "CASE " +
+            "WHEN w.qr_type = '0' THEN w.public_id " +
+            "WHEN w.qr_type = '1' THEN w.value " +
+            "WHEN w.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.phoneNo'))) " +
+            "WHEN w.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.user_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.user_data, '$.bankAccount'))) " +
+            "ELSE NULL " +
+            "END AS data, " +
+            "IFNULL(TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))), 'Undefined') AS fullName, " +
+            "IFNULL(ai.img_id, '') AS imageId, " +
+            "IFNULL(w.style, '') AS style, " +
+            "IFNULL(w.theme, '') AS theme, " +
+            "IFNULL(w.file_attachment_id, '') AS fileAttachmentId " +
+            "FROM qr_wallet w " +
+            "LEFT JOIN account_information ai ON ai.user_id = w.user_id " +
+            "WHERE (w.is_public = 0) AND (w.user_id = :userId) AND (w.qr_type = 0) AND (w.title LIKE %:value%) " +
+            "ORDER BY w.title ASC ", nativeQuery = true)
+    List<IQrWalletPrivateDTO> getQrLinkPrivate(
+            @Param("userId") String userId,
+            @Param("value") String value);
+
+    @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
+            "w.value AS value, w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
+            "CASE " +
+            "WHEN w.qr_type = '0' THEN w.public_id " +
+            "WHEN w.qr_type = '1' THEN w.value " +
+            "WHEN w.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.phoneNo'))) " +
+            "WHEN w.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.user_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.user_data, '$.bankAccount'))) " +
+            "ELSE NULL " +
+            "END AS data, " +
+            "IFNULL(TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))), 'Undefined') AS fullName, " +
+            "IFNULL(ai.img_id, '') AS imageId, " +
+            "IFNULL(w.style, '') AS style, " +
+            "IFNULL(w.theme, '') AS theme, " +
+            "IFNULL(w.file_attachment_id, '') AS fileAttachmentId " +
+            "FROM qr_wallet w " +
+            "LEFT JOIN account_information ai ON ai.user_id = w.user_id " +
+            "WHERE (w.is_public = 0) AND (w.user_id = :userId) AND (w.qr_type = 1) AND (w.title LIKE %:value%) " +
+            "ORDER BY w.title ASC ", nativeQuery = true)
+    List<IQrWalletPrivateDTO> getQrTextPrivate(
+            @Param("userId") String userId,
+            @Param("value") String value);
+
+    ///
+
+    @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
+            "w.value AS value, w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
+            "CASE " +
+            "WHEN w.qr_type = '0' THEN w.public_id " +
+            "WHEN w.qr_type = '1' THEN w.value " +
+            "WHEN w.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.phoneNo'))) " +
+            "WHEN w.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.user_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.user_data, '$.bankAccount'))) " +
+            "ELSE NULL " +
+            "END AS data, " +
+            "IFNULL(TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))), 'Undefined') AS fullName, " +
+            "IFNULL(ai.img_id, '') AS imageId, " +
+            "IFNULL(w.style, '') AS style, " +
+            "IFNULL(w.theme, '') AS theme, " +
+            "IFNULL(w.file_attachment_id, '') AS fileAttachmentId " +
+            "FROM qr_wallet w " +
+            "LEFT JOIN account_information ai ON ai.user_id = w.user_id " +
+            "WHERE (w.is_public = 0) AND (w.user_id = :userId) AND (w.qr_type = 2) AND (w.title LIKE %:value%) " +
+            "ORDER BY w.title ASC ", nativeQuery = true)
+    List<IQrWalletPrivateDTO> getQrVCardPrivate(
+            @Param("userId") String userId,
+            @Param("value") String value);
+
+    @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
+            "w.value AS value, w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
+            "CASE " +
+            "WHEN w.qr_type = '0' THEN w.public_id " +
+            "WHEN w.qr_type = '1' THEN w.value " +
+            "WHEN w.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.phoneNo'))) " +
+            "WHEN w.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.bankAccount'))) " +
+            "ELSE NULL " +
+            "END AS data, " +
+            "IFNULL(TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))), 'Undefined') AS fullName, " +
+            "IFNULL(ai.img_id, '') AS imageId, " +
+            "IFNULL(w.style, '') AS style, " +
+            "IFNULL(w.theme, '') AS theme, " +
+            "IFNULL(w.file_attachment_id, '') AS fileAttachmentId " +
+            "FROM qr_wallet w " +
+            "LEFT JOIN account_information ai ON ai.user_id = w.user_id " +
+            "WHERE (w.is_public = 0) AND (w.user_id = :userId) AND (w.qr_type = 3) AND (w.title LIKE %:value%) " +
+            "ORDER BY w.title ASC ", nativeQuery = true)
+    List<IQrWalletPrivateDTO> getQrVietQrPrivate(
+            @Param("userId") String userId,
+            @Param("value") String value);
+
+    @Query(value = "SELECT COUNT(*) FROM qr_wallet w " +
+            "WHERE (w.is_public = 0) AND (w.user_id = :userId) AND (w.title LIKE %:value%) ", nativeQuery = true)
+    int countPrivateQrWallets(String userId, String value);
+
+    @Query(value = "SELECT COUNT(*) FROM qr_wallet w " +
+            "WHERE (w.is_public = 0) AND (w.user_id = :userId) AND (w.qr_type = 0) AND (w.title LIKE %:value%) ", nativeQuery = true)
+    int countQrLinkPrivate(String userId, String value);
+
+    @Query(value = "SELECT COUNT(*) FROM qr_wallet w " +
+            "WHERE (w.is_public = 0) AND (w.user_id = :userId) AND (w.qr_type = 1) AND (w.title LIKE %:value%) ", nativeQuery = true)
+    int countQrTextPrivate(String userId, String value);
+
+    @Query(value = "SELECT COUNT(*) FROM qr_wallet w " +
+            "WHERE (w.is_public = 0) AND (w.user_id = :userId) AND (w.qr_type = 2) AND (w.title LIKE %:value%) ", nativeQuery = true)
+    int countQrVCardPrivate(String userId, String value);
+
+    @Query(value = "SELECT COUNT(*) FROM qr_wallet w " +
+            "WHERE (w.is_public = 0) AND (w.user_id = :userId) AND (w.qr_type = 3) AND (w.title LIKE %:value%) ", nativeQuery = true)
+    int countQrVietQrPrivate(String userId, String value);
 
     @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
             "w.value AS value, w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
@@ -270,7 +433,8 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "FROM qr_comment c " +
             "INNER JOIN qr_wallet_comment wc ON wc.qr_comment_id = c.id " +
             "LEFT JOIN account_information ai ON ai.user_id = c.user_id " +
-            "WHERE wc.qr_wallet_id = :qrWalletId",
+            "WHERE wc.qr_wallet_id = :qrWalletId " +
+            "ORDER BY c.time_created DESC",
             countQuery = "SELECT COUNT(c.id) FROM qr_comment c INNER JOIN qr_wallet_comment wc ON wc.qr_comment_id = c.id WHERE wc.qr_wallet_id = :qrWalletId",
             nativeQuery = true)
     Page<QrCommentDTO> findCommentsByQrWalletId(@Param("qrWalletId") String qrWalletId, Pageable pageable);
@@ -307,5 +471,6 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
     int countQrWalletsByPublicStatus(@Param("isPublic") int isPublic);
 
 
-
+   @Query(value = "SELECT * FROM qr_wallet WHERE id = :qrWalletId", nativeQuery = true)
+    QrWalletEntity getQrWalletById(@Param("qrWalletId") String qrWalletId);
 }

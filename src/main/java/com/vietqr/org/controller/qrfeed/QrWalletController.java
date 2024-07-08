@@ -1,5 +1,6 @@
 package com.vietqr.org.controller.qrfeed;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.zxing.WriterException;
@@ -61,6 +62,9 @@ public class QrWalletController {
     private QRCodeService qrCodeService;
 
     @Autowired
+    BankTypeService bankTypeService;
+
+    @Autowired
     ImageService imageService;
 
     @Autowired
@@ -74,9 +78,6 @@ public class QrWalletController {
 
     @Autowired
     CaiBankService caiBankService;
-
-    @Autowired
-    BankTypeService bankTypeService;
 
     @Autowired
     private QrCommentService qrCommentService;
@@ -1164,11 +1165,11 @@ public class QrWalletController {
     }
 
     @DeleteMapping("qr-wallet/delete-qr")
-    public ResponseEntity<Object> deleteQrWallets(@RequestBody List<String> ids) {
+    public ResponseEntity<Object> deleteQrWallets(@RequestBody DeteleQrDTO qrDTO) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            qrWalletService.deleteQrWalletsByIds(ids);
+            qrWalletService.deleteQrWalletsByIds(qrDTO.getQrIds());
 
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
@@ -1333,7 +1334,6 @@ public class QrWalletController {
             switch (type) {
                 case 0: //link
                 case 1: //text
-//                    QrCreateRequestDTO qrCreateRequestDTO = objectMapper.readValue(json, QrCreateRequestDTO.class);
                     QrCreateRequestDTO dto01 = new QrCreateRequestDTO();
                     try {
                         // generate QR Code
@@ -1395,12 +1395,15 @@ public class QrWalletController {
                             entity.setTheme(Integer.parseInt(themeDTO));
 
                             // save image
-                            UUID uuid = UUID.randomUUID();
                             String fileName = StringUtils.cleanPath(file.getOriginalFilename());
                             if (!file.getOriginalFilename().isEmpty()) {
+                                UUID uuid = UUID.randomUUID();
                                 ImageEntity IE = new ImageEntity(uuid.toString(), fileName, file.getBytes());
                                 imageService.insertImage(IE);
                                 entity.setFileAttachmentId(uuid.toString());
+
+                                // update file log to qr
+                                qrWalletService.updateFileQrById(uuid.toString(), idQrWallet.toString());
                             } else {
                                 entity.setFileAttachmentId("");
                             }
@@ -1413,8 +1416,6 @@ public class QrWalletController {
                             qrUserEntity.setRole("ADMIN");
                             qrUserService.insertQrUser(qrUserEntity);
 
-                            // update file log to qr
-                            qrWalletService.updateFileQrById(uuid.toString(), idQrWallet.toString());
                         } else if (Integer.parseInt(typeDto) == 1) {
                             entity.setId(idQrWallet.toString());
                             entity.setTitle(qrNameDTO);
@@ -1454,12 +1455,15 @@ public class QrWalletController {
                             entity.setTheme(Integer.parseInt(themeDTO));
 
                             // save image
-                            UUID ids = UUID.randomUUID();
                             String fileName = StringUtils.cleanPath(file.getOriginalFilename());
                             if (!file.getOriginalFilename().isEmpty()) {
+                                UUID ids = UUID.randomUUID();
                                 ImageEntity IE = new ImageEntity(ids.toString(), fileName, file.getBytes());
                                 imageService.insertImage(IE);
                                 entity.setFileAttachmentId(ids.toString());
+
+                                // update file log to qr
+                                qrWalletService.updateFileQrById(ids.toString(), idQrWallet.toString());
                             } else {
                                 entity.setFileAttachmentId("");
                             }
@@ -1473,8 +1477,6 @@ public class QrWalletController {
                             qrUserEntity.setRole("ADMIN");
                             qrUserService.insertQrUser(qrUserEntity);
 
-                            // update file log to qr
-                            qrWalletService.updateFileQrById(ids.toString(), idQrWallet.toString());
                         }
                         // result = qrWalletResponseDTO;
                         result = new ResponseMessageDTO("SUCCESS", "");
@@ -1490,7 +1492,21 @@ public class QrWalletController {
 //                    VCardInputExtendDTO vCardInputDTO = objectMapper.readValue(json, VCardInputExtendDTO.class);
                     VCardInputExtendDTO input = new VCardInputExtendDTO();
                     QrVcardRequestDTO qrVcardRequestDTO = new QrVcardRequestDTO();
-                    String qr = VCardUtil.getVcardQR(input);
+                    input.setQrName(qrNameDTO);
+                    input.setQrDescription(qrDescriptionDTO);
+                    input.setFullname(fullNameDTO);
+                    input.setPhoneNo(phoneNoDTO);
+                    input.setEmail(emailDTO);
+                    input.setCompanyName(companyNameDTO);
+                    input.setWebsite(websiteDTO);
+                    input.setAddress(addressDTO);
+                    input.setUserId(userIdDTO);
+                    input.setAdditionalData(additionalDataDTO);
+                    input.setIsPublic(isPublicDTO);
+                    input.setStyle(styleDTO);
+                    input.setTheme(themeDTO);
+
+                    String qr = VCardUtil.getVcardQR(input); //
                     qrVcardRequestDTO = new QrVcardRequestDTO();
                     qrVcardRequestDTO.setQr(qr);
                     qrVcardRequestDTO.setQrName(qrNameDTO);
@@ -1552,13 +1568,18 @@ public class QrWalletController {
                     entity.setTheme(Integer.parseInt(themeDTO));
                     entity.setIsPublic(Integer.parseInt(isPublicDTO));
 
+
                     // save image
-                    UUID uuid = UUID.randomUUID();
                     String fileName = StringUtils.cleanPath(file.getOriginalFilename());
                     if (!file.getOriginalFilename().isEmpty()) {
+                        UUID uuid = UUID.randomUUID();
+
                         ImageEntity IE = new ImageEntity(uuid.toString(), fileName, file.getBytes());
                         imageService.insertImage(IE);
                         entity.setFileAttachmentId(uuid.toString());
+
+                        // update file log to qr
+                        qrWalletService.updateFileQrById(uuid.toString(), idQrWallet.toString());
                     } else {
                         entity.setFileAttachmentId("");
                     }
@@ -1628,10 +1649,16 @@ public class QrWalletController {
                     entity1.setValue(qrGenerate);
                     entity1.setQrType(3);
 
+                    //  get bank short name
+                    String bankShortName = bankTypeService.getBankShortNameByBankCode(bankCodeDTO);
+
                     TempVietQRDTO tempVietQRDTO = new TempVietQRDTO();
+                    tempVietQRDTO.setTitle(qrNameDTO);
+                    tempVietQRDTO.setDescription(qrDescriptionDTO);
                     tempVietQRDTO.setBankAccount(bankAccountDTO);
                     tempVietQRDTO.setUserBankName(userBankNameDTO);
                     tempVietQRDTO.setBankCode(bankCodeDTO);
+                    tempVietQRDTO.setBankShortName(bankShortName);
                     tempVietQRDTO.setAmount(amountDTO);
                     tempVietQRDTO.setContent(contentDTO);
                     tempVietQRDTO.setValue(qrGenerate);
@@ -1641,6 +1668,7 @@ public class QrWalletController {
                             + "\"userId\": \"" + userIdDTO + "\", "
                             + "\"bankAccount\": \"" + bankAccountDTO + "\", "
                             + "\"userBankName\": \"" + userBankNameDTO + "\", "
+                            + "\"bankShortName\": \"" + bankShortName + "\", "
                             + "\"qrType\": \"" + typeDto + "\", "
                             + "\"bankCode\": \"" + bankCodeDTO + "\""
                             + "}");
@@ -1656,12 +1684,16 @@ public class QrWalletController {
                     entity1.setTheme(Integer.parseInt(themeDTO));
                     entity1.setStyle(Integer.parseInt(styleDTO));
 
+
                     if (!file.getOriginalFilename().isEmpty()) {
                         UUID ids = UUID.randomUUID();
                         String files = StringUtils.cleanPath(file.getOriginalFilename());
                         ImageEntity ies = new ImageEntity(ids.toString(), files, file.getBytes());
                         imageService.insertImage(ies);
                         entity1.setFileAttachmentId(ids.toString());
+
+                        // update file log to qr
+                        qrWalletService.updateFileQrById(ids.toString(), idQr3.toString());
                     } else {
                         entity1.setFileAttachmentId("");
                     }
@@ -1689,7 +1721,66 @@ public class QrWalletController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+    @GetMapping("/qr-wallet/{qrWalletId}/data")
+    public ResponseEntity<Object> getQrWalletData(@PathVariable String qrWalletId) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            QrWalletEntity qrWallet = qrWalletService.getQrWalletById(qrWalletId);
+            if (qrWallet == null) {
+                result = new ResponseMessageDTO("FAILED", "QrWallet not found");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            } else {
+                String qrData = qrWallet.getQrData();
+                int qrType = qrWallet.getQrType();
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode jsonNode = objectMapper.readTree(qrData);
 
+                switch (qrType) {
+                    case 0:
+                        QRLinkDataDTO type0DTO = new QRLinkDataDTO();
+                        type0DTO.setValue(jsonNode.get("value").asText());
+                        result = type0DTO;
+                        break;
+                    case 1:
+                        QRTextDataDTO type1DTO = new QRTextDataDTO();
+                        type1DTO.setValue(jsonNode.get("value").asText());
+                        result = type1DTO;
+                        break;
+                    case 2:
+                        QRVCardDTO type2DTO = new QRVCardDTO();
+                        type2DTO.setFullName(jsonNode.get("fullName").asText());
+                        type2DTO.setPhoneNo(jsonNode.get("phoneNo").asText());
+                        type2DTO.setEmail(jsonNode.get("email").asText());
+                        type2DTO.setCompanyName(jsonNode.get("companyName").asText());
+                        type2DTO.setWebsite(jsonNode.get("website").asText());
+                        type2DTO.setAddress(jsonNode.get("address").asText());
+                        result = type2DTO;
+                        break;
+                    case 3:
+                        VietQRDataDTO type3DTO = new VietQRDataDTO();
+                        type3DTO.setBankAccount(jsonNode.get("bankAccount").asText());
+                        type3DTO.setUserBankName(jsonNode.get("userBankName").asText());
+                        type3DTO.setBankShortName(jsonNode.get("bankShortName").asText());
+                        type3DTO.setAmount(jsonNode.get("amount").asText());
+                        type3DTO.setContent(jsonNode.get("content").asText());
+                        result = type3DTO;
+                        break;
+                    default:
+                        result = new ResponseMessageDTO("FAILED", "Invalid qrType");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        return new ResponseEntity<>(result, httpStatus);
+                }
+
+                httpStatus = HttpStatus.OK;
+            }
+        } catch (Exception e) {
+            logger.error("getQrWalletData: ERROR: " + e.getMessage() + " at " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
     @GetMapping("/qr-wallets/public")
     public ResponseEntity<Object> getAllPublicQrWallets(
             @RequestParam String userId,
@@ -1830,41 +1921,100 @@ public class QrWalletController {
         g2d.dispose();
         return outputImage;
     }
-
     @GetMapping("/qr-wallets/private")
     public ResponseEntity<Object> getAllPrivateQrWallets(
             @RequestParam String userId,
+            @RequestParam int type,
             @RequestParam int page,
-            @RequestParam int size) {
+            @RequestParam int size,
+            @RequestParam String value) {
         Object result = null;
         HttpStatus httpStatus = null;
+        PageResDTO pageResDTO = new PageResDTO();
+        PageDTO pageDTO = new PageDTO();
         try {
-            logger.info("Fetching Private QR Wallets for userId: " + userId + ", page: " + page + ", size: " + size);
-            int totalElements = qrWalletService.countPrivateQrWallets();
+            int totalElement = 0;
             int offset = (page - 1) * size;
-            List<IQrWalletPrivateDTO> qrWallets = qrWalletService.getAllPrivateQrWallets(userId, offset, size);
-            logger.info("QR Wallets Retrieved: " + qrWallets);
 
-            PageDTO pageDTO = new PageDTO();
-            pageDTO.setSize(size);
-            pageDTO.setPage(page);
-            pageDTO.setTotalElement(totalElements);
-            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElements, size));
+            List<IQrWalletPrivateDTO> qrWalletPrivateAll = null;
+            List<IQrWalletPrivateDTO> qrLinkPrivate = null;
+            List<IQrWalletPrivateDTO> qrTextPrivate = null;
+            List<IQrWalletPrivateDTO> qrVCardPrivate = null;
+            List<IQrWalletPrivateDTO> qrVietQrPrivate = null;
 
-            PageResDTO pageResDTO = new PageResDTO();
-            pageResDTO.setMetadata(pageDTO);
-            pageResDTO.setData(qrWallets);
+            switch (type) {
+                case 0:
+                    qrLinkPrivate = qrWalletService.getQrLinkPrivate(userId, value);
+                    totalElement = qrWalletService.countQrLinkPrivate(userId, value);
+
+                    pageDTO.setSize(size);
+                    pageDTO.setPage(page);
+                    pageDTO.setTotalElement(totalElement);
+                    pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+
+                    pageResDTO.setMetadata(pageDTO);
+                    pageResDTO.setData(qrLinkPrivate);
+                    result = qrLinkPrivate;
+                    break;
+                case 1:
+                    qrTextPrivate = qrWalletService.getQrTextPrivate(userId, value);
+                    totalElement = qrWalletService.countQrTextPrivate(userId, value);
+
+                    pageDTO.setSize(size);
+                    pageDTO.setPage(page);
+                    pageDTO.setTotalElement(totalElement);
+                    pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+
+                    pageResDTO.setMetadata(pageDTO);
+                    pageResDTO.setData(qrTextPrivate);
+                    break;
+                case 2:
+                    qrVCardPrivate = qrWalletService.getQrVCardPrivate(userId, value);
+                    totalElement = qrWalletService.countQrVCardPrivate(userId, value);
+
+                    pageDTO.setSize(size);
+                    pageDTO.setPage(page);
+                    pageDTO.setTotalElement(totalElement);
+                    pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+
+                    pageResDTO.setMetadata(pageDTO);
+                    pageResDTO.setData(qrVCardPrivate);
+                    break;
+                case 3:
+                    qrVietQrPrivate = qrWalletService.getQrVietQrPrivate(userId, value);
+                    totalElement = qrWalletService.countQrVietQrPrivate(userId, value);
+
+                    pageDTO.setSize(size);
+                    pageDTO.setPage(page);
+                    pageDTO.setTotalElement(totalElement);
+                    pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+
+                    pageResDTO.setMetadata(pageDTO);
+                    pageResDTO.setData(qrVietQrPrivate);
+                    break;
+                case 9:
+                    qrWalletPrivateAll = qrWalletService.getAllPrivateQrWallets(userId, value);
+                    totalElement = qrWalletService.countPrivateQrWallets(userId, value);
+
+                    pageDTO.setSize(size);
+                    pageDTO.setPage(page);
+                    pageDTO.setTotalElement(totalElement);
+                    pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+
+                    pageResDTO.setMetadata(pageDTO);
+                    pageResDTO.setData(qrWalletPrivateAll);
+                    break;
+            }
 
             result = pageResDTO;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("getAllPrivateQrWallets Error at " + e.getMessage() + System.currentTimeMillis());
-            result = new ResponseMessageDTO("FAILED", "E05");
+            result = new ResponseMessageDTO("FAILED" + e.getMessage(), "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-
 
     @GetMapping("/qr-wallets")
     public ResponseEntity<Object> getQrWallets(

@@ -8,14 +8,41 @@ public class TempVietQRDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private String title;
+    private String description;
     private String bankAccount;
     private String userBankName;
     private String bankCode;
+    private String bankShortName;
     private String amount;
     private String content;
     private String value;
 
     public TempVietQRDTO() {
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getBankShortName() {
+        return bankShortName;
+    }
+
+    public void setBankShortName(String bankShortName) {
+        this.bankShortName = bankShortName;
     }
 
     @Override
