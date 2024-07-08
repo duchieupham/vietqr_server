@@ -371,4 +371,35 @@ public class LarkController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("service/larks/list")
+    public ResponseEntity<PageResDTO> getListLarks(
+            @RequestParam("userId") String userId,
+            @RequestParam("page") int page,
+            @RequestParam("size") int size) {
+        HttpStatus httpStatus = null;
+        PageResDTO result = null;
+        try {
+            int totalElements = larkService.countLarksByUserId(userId);
+            int offset = (page - 1) * size;
+            List<LarkInfoDetailDTO> larks = larkService.getLarksByUserIdWithPagination(userId, offset, size);
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageDTO.setTotalElement(totalElements);
+            pageDTO.setTotalPage((int) Math.ceil((double) totalElements / size));
+
+            result = new PageResDTO();
+            result.setMetadata(pageDTO);
+            result.setData(larks);
+
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getListLarks Error: " + e.getMessage() + System.currentTimeMillis());
+            result = new PageResDTO(new PageDTO(), new ArrayList<>());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
 }

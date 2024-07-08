@@ -3,6 +3,7 @@ package com.vietqr.org.service;
 import java.util.List;
 
 import com.vietqr.org.dto.ISocialMediaDTO;
+import com.vietqr.org.dto.TelegramInfoDetailDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -60,4 +61,13 @@ public class TelegramServiceImpl implements TelegramService {
         return repo.getTelegramById(id);
     }
 
+    @Override
+    public List<TelegramInfoDetailDTO> getTelegramsByUserIdWithPagination(String userId, int offset, int size) {
+        return repo.getTelegramsByUserIdWithPagination(userId, offset, size);
+    }
+
+    @Override
+    public int countTelegramsByUserId(String userId) {
+        return repo.countTelegramsByUserId(userId);
+    }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import javax.transaction.Transactional;
 
 import com.vietqr.org.dto.ISocialMediaDTO;
+import com.vietqr.org.dto.TelegramInfoDetailDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -58,4 +59,16 @@ public interface TelegramRepository extends JpaRepository<TelegramEntity, Long> 
     @Modifying
     @Query(value = "UPDATE telegram SET chat_id = :chatId WHERE id = :id", nativeQuery = true)
     void updateTelegram(String chatId, String id);
+
+    @Query(value = "SELECT t.id AS telegramId, t.chat_id AS chatId, COUNT(tab.id) AS bankAccountCount " +
+            "FROM telegram t " +
+            "LEFT JOIN telegram_account_bank tab ON t.id = tab.telegram_id " +
+            "WHERE t.user_id = :userId " +
+            "GROUP BY t.id, t.chat_id " +
+            "LIMIT :size OFFSET :offset", nativeQuery = true)
+    List<TelegramInfoDetailDTO> getTelegramsByUserIdWithPagination(@Param("userId") String userId, @Param("offset") int offset, @Param("size") int size);
+
+    @Query(value = "SELECT COUNT(t.id) FROM telegram t WHERE t.user_id = :userId", nativeQuery = true)
+    int countTelegramsByUserId(@Param("userId") String userId);
+
 }
