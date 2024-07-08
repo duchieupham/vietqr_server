@@ -216,5 +216,21 @@ public class QrFolderController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("/users/search")
+    public ResponseEntity<Object> searchUsersByPhoneNo(@RequestParam String phoneNo) {
+        Object result;
+        HttpStatus httpStatus;
+        try {
+            List<UserDTO> users = qrFolderService.findUsersByPhoneNo(phoneNo);
+            result = users;
+            httpStatus = HttpStatus.OK;
+
+        } catch (Exception e) {
+            logger.error("QrFolderController : searchUsersByPhoneNo: Error at " + e.getMessage() + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 
 }

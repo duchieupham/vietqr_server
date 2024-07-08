@@ -1,9 +1,6 @@
 package com.vietqr.org.service.qrfeed;
 
-import com.vietqr.org.dto.qrfeed.FolderInformationDTO;
-import com.vietqr.org.dto.qrfeed.IFolderDetailDTO;
-import com.vietqr.org.dto.qrfeed.IFolderInformationDTO;
-import com.vietqr.org.dto.qrfeed.IListQrFolderDTO;
+import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.qrfeed.QrFolderEntity;
 import com.vietqr.org.repository.QrFolderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +56,11 @@ public class QrFolderServiceImpl implements QrFolderService {
     @Override
     public void deleteFolderById(String folderId) {
         repo.deleteByQrFolderId(folderId);
+    }
+
+    @Override
+    public List<UserDTO> findUsersByPhoneNo(String phoneNo) {
+        return repo.findUsersByPhoneNo(phoneNo);
     }
 
 
