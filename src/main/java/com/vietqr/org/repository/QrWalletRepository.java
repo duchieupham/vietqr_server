@@ -474,4 +474,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
 
    @Query(value = "SELECT * FROM qr_wallet WHERE id = :qrWalletId", nativeQuery = true)
     QrWalletEntity getQrWalletById(@Param("qrWalletId") String qrWalletId);
+
+   @Query(value = "SELECT * FROM qr_wallet WHERE id = :qrWalletId", nativeQuery = true)
+    QrWalletEntity getQrWalletDetail(String qrWalletId);
 }
