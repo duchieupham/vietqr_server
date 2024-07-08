@@ -313,11 +313,11 @@ public class GoogleChatController {
     // GoogleChatDetailDTO
     @GetMapping("service/google-chats/information-detail")
     public ResponseEntity<Object> getGoogleChatInformationDetail(
-            @RequestParam(value = "userId") String userId) {
+            @RequestParam(value = "id") String id) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            GoogleChatEntity dto = googleChatService.getGoogleChatsByUserId(userId);
+            GoogleChatEntity dto = googleChatService.getGoogleChatById(id);
             if (dto != null) {
                 GoogleChatDetailDTO detailDTO = new GoogleChatDetailDTO();
                 detailDTO.setId(dto.getId());
@@ -383,7 +383,7 @@ public class GoogleChatController {
             PageResDTO pageResDTO = new PageResDTO();
             pageResDTO.setMetadata(pageDTO);
             pageResDTO.setData(googleChats);
-
+            result = pageResDTO;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("getListGoogleChats Error: " + e.getMessage() + System.currentTimeMillis());
