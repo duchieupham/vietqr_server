@@ -156,7 +156,7 @@ public class GoogleChatController {
                         googleChatAccountBankService.insert(googleChatAccountBankEntity);
                     }
                 }
-                result = new ResponseMessageDTO("SUCCESS", "");
+                result = new ResponseMessageDTO("SUCCESS", ggChatUUID.toString());
                 httpStatus = HttpStatus.OK;
             } else {
                 result = new ResponseMessageDTO("FAILED", "E46");
@@ -196,7 +196,7 @@ public class GoogleChatController {
                         googleChatAccountBankService.insert(googleChatAccountBankEntity);
                     }
                 }
-                result = new ResponseMessageDTO("SUCCESS", "");
+                result = new ResponseMessageDTO("SUCCESS", ggChatUUID.toString());
                 httpStatus = HttpStatus.OK;
             } else {
                 logger.error("insertGoogleChat: INVALID REQUEST BODY");
@@ -253,8 +253,6 @@ public class GoogleChatController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-
-
 
     // get google chat connection information
     // GoogleChatDetailDTO

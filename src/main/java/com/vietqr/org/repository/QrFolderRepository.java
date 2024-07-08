@@ -17,7 +17,9 @@ public interface QrFolderRepository extends JpaRepository<QrFolderEntity, String
     @Query(value = "SELECT a.id AS id, a.description AS description, a.time_created AS timeCreate, " +
             "a.title AS title, a.user_id AS userId " +
             "FROM qr_folder a " +
-            "WHERE ((a.description LIKE %:value%) OR (a.title LIKE %:value%)) AND (a.user_id = :userId) " +
+            "INNER JOIN account_information b ON a.user_id = b.user_id " +
+            "INNER JOIN qr_folder_user c ON a.user_id = c.user_id " +
+            "WHERE ((a.description LIKE %:value%) OR (a.title LIKE %:value%)) AND (c.user_id = :userId) " +
             "ORDER BY a.time_created DESC " +
             "LIMIT :offset, :size  ", nativeQuery = true)
     List<IListQrFolderDTO> getListFolders(String value, int offset, int size, String userId);

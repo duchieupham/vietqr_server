@@ -9,6 +9,37 @@ public class ListQrWalletDTO {
     private String title;
     private String content;
     private String data;
+    private String vlue;
+    private String fileAttachmentId;
+
+    public ListQrWalletDTO(String id, String description, String isPublic, String qrType, String timeCreate, String title, String content, String data, String vlue, String fileAttachmentId) {
+        this.id = id;
+        this.description = description;
+        this.isPublic = isPublic;
+        this.qrType = qrType;
+        this.timeCreate = timeCreate;
+        this.title = title;
+        this.content = content;
+        this.data = data;
+        this.vlue = vlue;
+        this.fileAttachmentId = fileAttachmentId;
+    }
+
+    public String getVlue() {
+        return vlue;
+    }
+
+    public void setVlue(String vlue) {
+        this.vlue = vlue;
+    }
+
+    public String getFileAttachmentId() {
+        return fileAttachmentId;
+    }
+
+    public void setFileAttachmentId(String fileAttachmentId) {
+        this.fileAttachmentId = fileAttachmentId;
+    }
 
     public String getData() {
         return data;

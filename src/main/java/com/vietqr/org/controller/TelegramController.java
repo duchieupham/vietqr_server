@@ -89,7 +89,7 @@ public class TelegramController {
                         }
                     }
                     result = new ResponseMessageDTO("SUCCESS", "");
-                    httpStatus = HttpStatus.BAD_REQUEST;
+                    httpStatus = HttpStatus.OK;
                 } else {
                     logger.error("NOT FOUND LARK INFORMATION");
                     System.out.println("NOT FOUND LARK INFORMATION");
@@ -167,7 +167,7 @@ public class TelegramController {
                     telAccBankEntity.setChatId(dto.getChatId());
                     telegramAccountBankService.insert(telAccBankEntity);
                 }
-                result = new ResponseMessageDTO("SUCCESS", "");
+                result = new ResponseMessageDTO("SUCCESS", uuid.toString());
                 httpStatus = HttpStatus.OK;
             } else {
                 logger.error("insertTelegramChatId: INVALID REQUEST BODY");
@@ -208,7 +208,7 @@ public class TelegramController {
                     telAccBankEntity.setChatId(dto.getChatId());
                     telegramAccountBankService.insert(telAccBankEntity);
                 }
-                result = new ResponseMessageDTO("SUCCESS", "");
+                result = new ResponseMessageDTO("SUCCESS", uuid.toString());
                 httpStatus = HttpStatus.OK;
             } else {
                 logger.error("insertTelegramChatId: INVALID REQUEST BODY");
