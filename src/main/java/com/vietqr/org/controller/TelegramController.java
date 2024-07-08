@@ -321,11 +321,11 @@ public class TelegramController {
 
     @GetMapping("service/telegrams/information-detail")
     public ResponseEntity<TelegramDetailDTO> getTelegramInformationDetail(
-            @RequestParam(value = "userId") String userId) {
+            @RequestParam(value = "id") String id) {
         TelegramDetailDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            TelegramEntity telegramEntity = telegramService.getTelegramByUserId(userId);
+            TelegramEntity telegramEntity = telegramService.getTelegramById(id);
             TelegramDetailDTO telegramDetailDTO = new TelegramDetailDTO();
             telegramDetailDTO.setId(telegramEntity.getId());
             telegramDetailDTO.setChatId(telegramEntity.getChatId());
