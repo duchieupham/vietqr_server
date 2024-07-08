@@ -2,6 +2,7 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+import com.vietqr.org.dto.GoogleChatInfoDetailDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +48,16 @@ public class GoogleChatServiveImpl implements GoogleChatService {
     @Override
     public void updateGoogleChat(GoogleChatEntity googleChatEntity) {
         repo.save(googleChatEntity);
+    }
+
+    @Override
+    public List<GoogleChatInfoDetailDTO> getGoogleChatsByUserIdWithPagination(String userId, int offset, int size) {
+        return repo.getGoogleChatsByUserIdWithPagination(userId, offset, size);
+    }
+
+    @Override
+    public int countGoogleChatsByUserId(String userId) {
+        return repo.countGoogleChatsByUserId(userId);
     }
 
 }

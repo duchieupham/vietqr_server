@@ -7,6 +7,7 @@ import com.vietqr.org.entity.TelegramAccountBankEntity;
 import com.vietqr.org.entity.TelegramEntity;
 import com.vietqr.org.service.TelegramAccountBankService;
 import com.vietqr.org.service.TelegramService;
+import com.vietqr.org.util.StringUtil;
 import com.vietqr.org.util.TelegramUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -367,4 +368,70 @@ public class TelegramController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
+    @GetMapping("service/telegrams/list-information")
+    public ResponseEntity<Object> getListTelegramInformation(
+            @RequestParam("userId") String userId,
+            @RequestParam int page,
+            @RequestParam int size) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            int totalElements = telegramService.countTelegramsByUserId(userId);
+            int offset = (page - 1) * size;
+
+            List<TelegramInfoDetailDTO> telegramDetails = telegramService.getTelegramsByUserIdWithPagination(userId, offset, size);
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageDTO.setTotalElement(totalElements);
+            pageDTO.setTotalPage((int) Math.ceil((double) totalElements / size));
+
+            PageResDTO pageResDTO = new PageResDTO();
+            pageResDTO.setMetadata(pageDTO);
+            pageResDTO.setData(telegramDetails);
+
+            result = pageResDTO;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("TelegramController: getListTelegramInformation : ERROR " + e.getMessage() + System.currentTimeMillis());
+            System.out.println("getTelegramInformationDetails: ERROR: " + e.getMessage() + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("service/telegrams/list")
+    public ResponseEntity<PageResDTO> getListTelegrams(
+            @RequestParam("userId") String userId,
+            @RequestParam("page") int page,
+            @RequestParam("size") int size) {
+        HttpStatus httpStatus = null;
+        PageResDTO result = null;
+        try {
+            int totalElements = telegramService.countTelegramsByUserId(userId);
+            int offset = (page - 1) * size;
+            List<TelegramInfoDetailDTO> telegrams = telegramService.getTelegramsByUserIdWithPagination(userId, offset, size);
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageDTO.setTotalElement(totalElements);
+            pageDTO.setTotalPage((int) Math.ceil((double) totalElements / size));
+
+            result = new PageResDTO();
+            result.setMetadata(pageDTO);
+            result.setData(telegrams);
+
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getListTelegrams Error: " + e.getMessage() + System.currentTimeMillis());
+            result = new PageResDTO(new PageDTO(), new ArrayList<>());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
 }
