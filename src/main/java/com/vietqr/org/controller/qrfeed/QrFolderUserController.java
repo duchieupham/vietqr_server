@@ -186,7 +186,6 @@ public class QrFolderUserController {
         HttpStatus httpStatus = null;
         Gson gson = new Gson();
         try {
-
             QrInFolderResponseDTO data = new QrInFolderResponseDTO();
 
             // get information about folder
@@ -196,7 +195,7 @@ public class QrFolderUserController {
             List<ListQrWalletDTO> dataList = new ArrayList<>();
             List<IListQrWalletDTO> infos = new ArrayList<>();
 
-            infos = qrWalletService.getQrWalletNoPagingAll(value);
+            infos = qrWalletService.getQrWalletNoPagingAll(folderId);
             dataList = infos.stream().map(item -> {
                 ListQrWalletDTO listQrWalletDTO = new ListQrWalletDTO();
                 listQrWalletDTO.setId(item.getId());
