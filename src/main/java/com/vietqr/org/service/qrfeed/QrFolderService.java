@@ -13,6 +13,7 @@ public interface QrFolderService {
     public int insertQrFolder(QrFolderEntity entity);
 
     public List<IListQrFolderDTO> getListFolders(String value, int offset, int size, String userId);
+    public List<IListQrFolderDTO> getListFolderForUser(String value, int offset, int size, String userId);
 
     public int countQrFolder(String value,String userId);
 

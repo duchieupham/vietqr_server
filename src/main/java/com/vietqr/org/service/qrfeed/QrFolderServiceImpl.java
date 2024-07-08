@@ -24,6 +24,11 @@ public class QrFolderServiceImpl implements QrFolderService {
     }
 
     @Override
+    public List<IListQrFolderDTO> getListFolderForUser(String value, int offset, int size, String userId) {
+        return repo.getListFolderForUser(value, offset, size, userId);
+    }
+
+    @Override
     public int countQrFolder(String value,String userId) {
         return repo.countQrFolder(value,userId);
     }
