@@ -89,7 +89,7 @@ public class TelegramController {
                         }
                     }
                     result = new ResponseMessageDTO("SUCCESS", "");
-                    httpStatus = HttpStatus.BAD_REQUEST;
+                    httpStatus = HttpStatus.OK;
                 } else {
                     logger.error("NOT FOUND LARK INFORMATION");
                     System.out.println("NOT FOUND LARK INFORMATION");
