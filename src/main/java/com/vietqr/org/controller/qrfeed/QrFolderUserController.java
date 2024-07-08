@@ -255,7 +255,8 @@ public class QrFolderUserController {
                 logger.error("Folder ID or User ID is null or empty.");
             } else {
                 qrFolderUserService.deleteUserFromFolder(dto.getFolderId(), dto.getUserId());
-
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
             }
         } catch (Exception e) {
             logger.error("add users to folder: ERROR: " + e.toString());

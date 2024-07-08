@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import com.vietqr.org.dto.*;
+import com.vietqr.org.util.StringUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -89,21 +90,46 @@ public class CustomerSyncController {
     }
 
     @GetMapping("admin/customer-sync/sorted")
-    public ResponseEntity<List<CustomerSyncListDTO>> getCustomerSyncList(
-            @RequestParam(value = "type") int type) {
+    public ResponseEntity<Object> getCustomerSyncList(
+            @RequestParam int type,
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam String value) {
         // type = 9 => all
         // type = 0 => api service
         // type = 1 => ecommerce
-        List<CustomerSyncListDTO> result = new ArrayList<>();
+        Object result = null;
         HttpStatus httpStatus = null;
+        PageResDTO pageResDTO = new PageResDTO();
+
         try {
+            int totalElements = 0;
+            int offset = (page - 1) * size;
+
+            List<CustomerSyncListDTO> data = new ArrayList<>();
+            List<CustomerSyncListDTO> infos = new ArrayList<>();
+
             if (type == 9) {
-                result = customerSyncService.getCustomerSyncList();
+                data = customerSyncService.getCustomerSyncListByMerchant(value, offset, size);
+                totalElements = customerSyncService.countCustomerSyncListByMerchant(value);
             } else if (type == 0) {
-                result = customerSyncService.getCustomerSyncAPIList();
+                data = customerSyncService.getCustomerSyncAPIListByMerchant(value, offset, size);
+                totalElements = customerSyncService.countCustomerSyncAPIListByMerchant(value);
             } else if (type == 1) {
-                result = customerSyncService.getCustomerSyncEcList();
+                data = customerSyncService.getCustomerSyncEcListByMerchant(value, offset, size);
+                totalElements = customerSyncService.countCustomerSyncEcListByMerchant(value);
             }
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageDTO.setTotalElement(totalElements);
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElements, size));
+
+            pageResDTO.setMetadata(pageDTO);
+            pageResDTO.setData(data);
+
+            result = pageResDTO;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("getCustomerSyncList: ERROR: " + e.toString());
