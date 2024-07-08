@@ -62,8 +62,11 @@ public class QrFolderController {
                 entity.setUserData("{"
                         + "\"userId\": \"" + dto.getUserId() + "\""
                         + "}");
-                // insert
+                // insert folder
                 qrFolderService.insertQrFolder(entity);
+                //insert user in folder with role ADMIN
+                UUID id = UUID.randomUUID();
+                qrFolderUserService.addUserAdmin(id.toString(), idQrFolder.toString(), dto.getUserId());
 
                 result = new ResponseMessageDTO("SUCCESS", "");
                 httpStatus = HttpStatus.OK;
