@@ -91,7 +91,14 @@ public interface QrFolderUserRepository extends JpaRepository<QrFolderUserEntity
             "WHERE qf.id = :folderId " +
             "AND (TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))) LIKE %:value%)" +
             ") AS subquery " +
-            "LIMIT :offset, :size", nativeQuery = true)
+            "ORDER BY " +
+            "CASE " +
+            "WHEN role = 'ADMIN' THEN 1 " +
+            "WHEN role = 'EDITOR' THEN 2 " +
+            "WHEN role = 'VIEWER' THEN 3 " +
+            "ELSE 4 " +
+            "END, role " +
+            "LIMIT :offset, :size ", nativeQuery = true)
     List<IUserRoleDTO> findUserRolesByFolderId(@Param("folderId") String folderId,
                                                @Param("value") String value,
                                                @Param("offset") int offset,
