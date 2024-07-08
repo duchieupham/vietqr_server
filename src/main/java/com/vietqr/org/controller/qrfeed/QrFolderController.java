@@ -145,7 +145,7 @@ public class QrFolderController {
             List<IListQrFolderDTO> info = new ArrayList<>();
             totalElement = qrFolderService.countQrFolder(value, userId);
 
-            info = qrFolderService.getListFolders(value, offset, size, userId);
+            info = qrFolderService.getListFolderForUser(value, offset, size, userId);
             data = info.stream().map(item -> {
                 ListQrFolderDTO dto = new ListQrFolderDTO();
                 dto.setId(item.getId());
@@ -153,11 +153,9 @@ public class QrFolderController {
                 dto.setDescription(item.getDescription());
                 dto.setUserId(item.getUserId());
                 dto.setTimeCreated(item.getTimeCreate());
-
                 //count qr trong folder
                 int countQR = qrWalletFolderService.countQrFolder(item.getId());
                 dto.setCountQrs(countQR);
-
                 int countUsers = qrFolderUserService.countUsersFolder(item.getId());
                 dto.setCountUsers(countUsers);
                 return dto;
