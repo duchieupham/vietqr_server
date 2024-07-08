@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -63,21 +64,29 @@ public class LarkController {
 
     // add bank to lark
     @PostMapping("service/lark/bank")
-    public ResponseEntity<ResponseMessageDTO> insertBankIntoLark(@RequestBody SocialNetworkBankDTO dto) {
+    public ResponseEntity<ResponseMessageDTO> insertBankIntoLark(@RequestBody SocialNetworkBanksDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
             if (dto != null) {
                 LarkEntity larkEntity = larkService.getLarkById(dto.getId());
                 if (larkEntity != null) {
-                    UUID uuid = UUID.randomUUID();
-                    LarkAccountBankEntity telAccBankEntity = new LarkAccountBankEntity();
-                    telAccBankEntity.setId(uuid.toString());
-                    telAccBankEntity.setBankId(dto.getBankId());
-                    telAccBankEntity.setLarkId(dto.getId());
-                    telAccBankEntity.setUserId(dto.getUserId());
-                    telAccBankEntity.setWebhook(larkEntity.getWebhook());
-                    larkAccountBankService.insert(telAccBankEntity);
+                    for (String bankId : dto.getBankIds()) {
+                        if (bankId != null && !bankId.trim().isEmpty()) {
+                            String checkExisted = larkAccountBankService.checkExistedBankId(bankId, dto.getId());
+                            if (checkExisted == null || checkExisted.trim().isEmpty()) {
+                                // insert google chat account bank entity
+                                UUID uuid = UUID.randomUUID();
+                                LarkAccountBankEntity entity = new LarkAccountBankEntity();
+                                entity.setId(uuid.toString());
+                                entity.setBankId(bankId);
+                                entity.setWebhook(larkEntity.getWebhook());
+                                entity.setLarkId(larkEntity.getId());
+                                entity.setUserId(dto.getUserId());
+                                larkAccountBankService.insert(entity);
+                            }
+                        }
+                    }
                     result = new ResponseMessageDTO("SUCCESS", "");
                     httpStatus = HttpStatus.OK;
                 } else {
@@ -178,7 +187,8 @@ public class LarkController {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            if (dto != null && dto.getBankIds() != null && !dto.getBankIds().isEmpty() && dto.getNotificationTypes() != null && !dto.getNotificationTypes().isEmpty() && dto.getNotificationContents() != null && !dto.getNotificationContents().isEmpty()) {
+            if (dto != null && dto.getBankIds() != null && !dto.getBankIds().isEmpty() && dto.getNotificationTypes() != null
+                    && !dto.getNotificationTypes().isEmpty() && dto.getNotificationContents() != null && !dto.getNotificationContents().isEmpty()) {
                 UUID uuid = UUID.randomUUID();
                 LarkEntity larkEntity = new LarkEntity();
                 larkEntity.setId(uuid.toString());
@@ -272,6 +282,8 @@ public class LarkController {
                             .getLarkAccBanksByLarkId(larkEntity.getId());
                     if (telBankDTOs != null && !telBankDTOs.isEmpty()) {
                         larkDetailDTO.setBanks(telBankDTOs);
+                    } else {
+                        larkDetailDTO.setBanks(new ArrayList<>());
                     }
                     result.add(larkDetailDTO);
                 }
@@ -320,6 +332,8 @@ public class LarkController {
                         .getLarkAccBanksByLarkId(larkEntity.getId());
                 if (telBankDTOs != null && !telBankDTOs.isEmpty()) {
                     larkDetailDTO.setBanks(telBankDTOs);
+                } else {
+                    larkDetailDTO.setBanks(new ArrayList<>());
                 }
                 larkDetailDTO.setNotificationTypes(
                         new ObjectMapper().readValue(larkEntity.getNotificationTypes(), new TypeReference<List<String>>() {
@@ -339,14 +353,13 @@ public class LarkController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-    @PutMapping("service/larks/update-webhook/{userId}")
-    public ResponseEntity<ResponseMessageDTO> updateLarkWebhook(@PathVariable String userId, @RequestBody LarkUpdateWebhookDTO dto) {
+    @PutMapping("service/larks/update-webhook/{larkId}")
+    public ResponseEntity<ResponseMessageDTO> updateLarkWebhook(@PathVariable String larkId, @Valid @RequestBody LarkUpdateWebhookDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            LarkEntity larkEntity = larkService.getLarkByUserId(userId);
-            larkEntity.setWebhook(dto.getWebhook());
-            larkService.updateLark(larkEntity);
+            larkService.updateLarkWebhook(larkId, dto.getWebhook());
+            larkAccountBankService.updateWebhook(dto.getWebhook(), larkId);
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {

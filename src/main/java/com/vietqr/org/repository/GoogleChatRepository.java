@@ -29,4 +29,9 @@ public interface GoogleChatRepository extends JpaRepository<GoogleChatEntity, Lo
 
     @Query(value ="SELECT * FROM google_chat WHERE webhook = :webhook", nativeQuery = true)
     GoogleChatEntity getGoogleChatsByWebhook(@Param("webhook") String webhook);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE google_chat SET webhook = :webhook WHERE id = :id", nativeQuery = true)
+    void updateGoogleChat(String webhook, String id);
 }

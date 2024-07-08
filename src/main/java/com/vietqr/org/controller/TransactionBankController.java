@@ -4172,7 +4172,7 @@ public class TransactionBankController {
 						result = responseMessageDTO;
 						httpStatus = HttpStatus.OK;
 					} else {
-						if ("Record existed".equals(StringUtil.getValueNullChecker(responseMessageDTO.getMessage()))) {
+						if (StringUtil.getValueNullChecker(responseMessageDTO.getMessage()).contains("Record existed")) {
 							logger.error("Already linked VietQR: Resquest Body: " + dto.toString()
 									+ " at: " + System.currentTimeMillis() + " Phone no: "
 									+ validatePhoneNoToken(token));

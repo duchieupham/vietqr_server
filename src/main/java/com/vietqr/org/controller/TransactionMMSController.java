@@ -52,6 +52,8 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
 
+import javax.validation.Valid;
+
 @RestController
 @CrossOrigin
 @RequestMapping("/api")
@@ -1655,10 +1657,10 @@ public class TransactionMMSController {
     }
 
     // Refund Service
-    @PostMapping("transaction-sync/refund")
+    @PostMapping("transaction/refund")
     public ResponseEntity<ResponseMessageDTO> refundService(
             @RequestHeader("Authorization") String token,
-            @RequestBody RefundRequestDTO dto) {
+            @Valid @RequestBody RefundRequestDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {

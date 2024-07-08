@@ -30,4 +30,9 @@ public interface LarkRepository extends JpaRepository<LarkEntity, Long> {
 
     @Query(value="SELECT * FROM lark WHERE webhook = :webhook",nativeQuery = true)
     LarkEntity getLarkByWebhook(@Param("webhook") String webhook);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE lark SET webhook = :webhook WHERE id = :larkId", nativeQuery = true)
+    void updateLark(String webhook, String larkId);
 }

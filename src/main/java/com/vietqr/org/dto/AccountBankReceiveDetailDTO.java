@@ -31,6 +31,7 @@ public class AccountBankReceiveDetailDTO implements Serializable {
     private Boolean isActiveService;
     private Long validFeeFrom;
     private Long validFeeTo;
+    private int transCount;
 //    private List<BusinessBankDetailDTO> businessDetails;
     private List<TransactionBankListDTO> transactions;
 
@@ -65,6 +66,14 @@ public class AccountBankReceiveDetailDTO implements Serializable {
         this.unlinkedType = unlinkedType;
 //        this.businessDetails = businessDetails;
         this.transactions = transactions;
+    }
+
+    public int getTransCount() {
+        return transCount;
+    }
+
+    public void setTransCount(int transCount) {
+        this.transCount = transCount;
     }
 
     public String getCaiValue() {
@@ -470,8 +479,6 @@ public class AccountBankReceiveDetailDTO implements Serializable {
         public void setTransType(String transType) {
             this.transType = transType;
         }
-
-
 
     }
 }

@@ -63,23 +63,32 @@ public class TelegramController {
 
     // add bank to telegram
     @PostMapping("service/telegram/bank")
-    public ResponseEntity<ResponseMessageDTO> insertBankIntoTelegram(@RequestBody SocialNetworkBankDTO dto) {
+    public ResponseEntity<ResponseMessageDTO> insertBankIntoTelegram(@RequestBody SocialNetworkBanksDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
             if (dto != null) {
                 TelegramEntity telegramEntity = telegramService.getTelegramById(dto.getId());
                 if (telegramEntity != null) {
-                    UUID uuid = UUID.randomUUID();
-                    TelegramAccountBankEntity telAccBankEntity = new TelegramAccountBankEntity();
-                    telAccBankEntity.setId(uuid.toString());
-                    telAccBankEntity.setBankId(dto.getBankId());
-                    telAccBankEntity.setTelegramId(dto.getId());
-                    telAccBankEntity.setUserId(dto.getUserId());
-                    telAccBankEntity.setChatId(telegramEntity.getChatId());
-                    telegramAccountBankService.insert(telAccBankEntity);
+                    // check existed bank account into list
+                    for (String bankId : dto.getBankIds()) {
+                        if (bankId != null && !bankId.trim().isEmpty()) {
+                            String checkExisted = telegramAccountBankService.checkExistedBankId(bankId, dto.getId());
+                            if (checkExisted == null || checkExisted.trim().isEmpty()) {
+                                // insert google chat account bank entity
+                                UUID uuid = UUID.randomUUID();
+                                TelegramAccountBankEntity entity = new TelegramAccountBankEntity();
+                                entity.setId(uuid.toString());
+                                entity.setBankId(bankId);
+                                entity.setTelegramId(dto.getId());
+                                entity.setChatId(telegramEntity.getChatId());
+                                entity.setUserId(dto.getUserId());
+                                telegramAccountBankService.insert(entity);
+                            }
+                        }
+                    }
                     result = new ResponseMessageDTO("SUCCESS", "");
-                    httpStatus = HttpStatus.OK;
+                    httpStatus = HttpStatus.BAD_REQUEST;
                 } else {
                     logger.error("NOT FOUND LARK INFORMATION");
                     System.out.println("NOT FOUND LARK INFORMATION");
@@ -324,6 +333,8 @@ public class TelegramController {
                     .getTelAccBanksByTelId(telegramEntity.getId());
             if (telBankDTOs != null && !telBankDTOs.isEmpty()) {
                 telegramDetailDTO.setBanks(telBankDTOs);
+            } else {
+                telegramDetailDTO.setBanks(new ArrayList<>());
             }
             telegramDetailDTO.setNotificationTypes(
                     new ObjectMapper().readValue(telegramEntity.getNotificationTypes(), new TypeReference<List<String>>() {
@@ -343,14 +354,13 @@ public class TelegramController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @PutMapping("service/telegrams/update-chatId/{userId}")
-    public ResponseEntity<ResponseMessageDTO> updateTelegramChatId(@PathVariable String userId, @RequestBody TelegramUpdateChatIdDTO dto) {
+    @PutMapping("service/telegrams/update-chatId/{teleId}")
+    public ResponseEntity<ResponseMessageDTO> updateTelegramChatId(@PathVariable String teleId, @RequestBody TelegramUpdateChatIdDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            TelegramEntity telegramEntity = telegramService.getTelegramByUserId(userId);
-            telegramEntity.setChatId(dto.getChatId());
-            telegramService.updateTelegram(telegramEntity);
+            telegramService.updateTelegram(dto.getChatId(), teleId);
+            telegramAccountBankService.updateWebHookTelegram(dto.getChatId(), teleId);
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {

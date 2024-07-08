@@ -31,6 +31,7 @@ public class AccountBankShareResponseDTO implements Serializable {
     private Boolean isValidService;
     private Long validFeeFrom;
     private Long validFeeTo;
+    private int transCount;
 
     public AccountBankShareResponseDTO() {
         super();
@@ -238,5 +239,13 @@ public class AccountBankShareResponseDTO implements Serializable {
 
     public void setValidFeeTo(Long validFeeTo) {
         this.validFeeTo = validFeeTo;
+    }
+
+    public int getTransCount() {
+        return transCount;
+    }
+
+    public void setTransCount(int transCount) {
+        this.transCount = transCount;
     }
 }

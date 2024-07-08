@@ -20,7 +20,7 @@ public interface MerchantMemberRoleService {
 
     String checkMemberHaveRole(String userId, String rolesAccept);
 
-    List<IMerchantRoleRawDTO> getMerchantIdsByUserId(String userId);
+    List<IMerchantRoleRawDTO> getMerchantIdsByMerchantMemberIds(List<String> merchantMemberIds);
 
     List<String> getListUserIdRoles(String bankId, String roles);
 

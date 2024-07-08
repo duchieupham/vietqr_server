@@ -51,6 +51,9 @@ public class AccountSettingController {
     MerchantMemberRoleService merchantMemberRoleService;
 
     @Autowired
+    MerchantMemberService merchantMemberService;
+
+    @Autowired
     MerchantBankReceiveService merchantBankReceiveService;
 
     @GetMapping("accounts/setting/{userId}")
@@ -62,21 +65,35 @@ public class AccountSettingController {
                 AccountSettingEntity entity = accountSettingService.getAccountSettingEntity(userId);
                 List<MerchantRoleSettingDTO> roles = new ArrayList<>();
                 try {
+                    List<IMerchantBankMemberDTO> iMerchantBankMemberDTOs = merchantMemberService.getIMerchantBankMemberByUserId(userId);
+                    System.out.println(iMerchantBankMemberDTOs.get(0).getMerchantMemberId());
                     List<IMerchantRoleRawDTO> merchantRoleRawDTOS = merchantMemberRoleService
-                            .getMerchantIdsByUserId(userId);
+                            .getMerchantIdsByMerchantMemberIds(iMerchantBankMemberDTOs.stream()
+                                    .map(IMerchantBankMemberDTO::getMerchantMemberId)
+                                    .collect(Collectors.toList()));
                     if (merchantRoleRawDTOS != null) {
-                        Map<MerchantBankDTO, List<IMerchantRoleRawDTO>> roleMaps = merchantRoleRawDTOS.stream()
-                                .collect(Collectors.groupingBy(item -> new MerchantBankDTO(item.getMerchantId(), item.getBankId())));
-                        roles = roleMaps.entrySet().stream().map(entry -> {
-                                    List<RoleSettingDTO> roleSettingDTOS = entry.getValue().stream()
-                                            .map(role -> new RoleSettingDTO(role.getCategory(), role.getRole()))
-                                            .collect(Collectors.toList());
-                                    MerchantBankDTO merchantBankDTO = entry.getKey();
-                                    return new MerchantRoleSettingDTO(merchantBankDTO.getMerchantId(), merchantBankDTO.getBankId(), roleSettingDTOS);
+                        Map<String, List<IMerchantRoleRawDTO>> merchantRoleMap = merchantRoleRawDTOS.stream()
+                                .collect(Collectors.groupingBy(IMerchantRoleRawDTO::getMerchantMemberId));
+                        roles = iMerchantBankMemberDTOs.stream()
+                                .map(member -> {
+                                    MerchantRoleSettingDTO setting = new MerchantRoleSettingDTO();
+                                    setting.setMerchantId(member.getMerchantId());
+                                    setting.setBankId(member.getBankId());
+                                    setting.setRoles(merchantRoleMap.getOrDefault(member.getMerchantMemberId(),new ArrayList<>())
+                                            .stream()
+                                            .map(role -> {
+                                                RoleSettingDTO roleDto = new RoleSettingDTO();
+                                                roleDto.setCategory(role.getCategory());
+                                                roleDto.setRole(role.getRole());
+                                                return roleDto;
+                                            })
+                                            .collect(Collectors.toList()));
+                                    return setting;
                                 })
                                 .collect(Collectors.toList());
                     }
-                } catch (Exception ignored) {}
+                } catch (Exception e) {
+                }
                 if (entity != null) {
                     //
                     result = new AccountSettingDTO();

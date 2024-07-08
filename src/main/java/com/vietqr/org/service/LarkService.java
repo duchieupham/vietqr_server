@@ -21,4 +21,5 @@ public interface LarkService {
 
     void updateLark(LarkEntity larkEntity);
 
+    void updateLarkWebhook(String larkId, String webhook);
 }

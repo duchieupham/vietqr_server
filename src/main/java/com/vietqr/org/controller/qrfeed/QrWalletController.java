@@ -1921,7 +1921,6 @@ public class QrWalletController {
         g2d.dispose();
         return outputImage;
     }
-
     @GetMapping("/qr-wallets/private")
     public ResponseEntity<Object> getAllPrivateQrWallets(
             @RequestParam String userId,
@@ -2016,7 +2015,6 @@ public class QrWalletController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-
 
     @GetMapping("/qr-wallets")
     public ResponseEntity<Object> getQrWallets(

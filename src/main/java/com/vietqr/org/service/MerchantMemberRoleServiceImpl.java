@@ -44,8 +44,8 @@ public class MerchantMemberRoleServiceImpl implements MerchantMemberRoleService 
     }
 
     @Override
-    public List<IMerchantRoleRawDTO> getMerchantIdsByUserId(String userId) {
-        return repo.getMerchantIdsByUserId(userId);
+    public List<IMerchantRoleRawDTO> getMerchantIdsByMerchantMemberIds(List<String> merchantMemberIds) {
+        return repo.getMerchantIdsByMerchantMemberIds(merchantMemberIds);
     }
 
     @Override

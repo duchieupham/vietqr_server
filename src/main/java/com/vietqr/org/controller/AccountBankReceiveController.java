@@ -2,10 +2,8 @@ package com.vietqr.org.controller;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -16,8 +14,7 @@ import com.vietqr.org.entity.*;
 import com.vietqr.org.entity.bidv.CustomerVaEntity;
 import com.vietqr.org.service.*;
 import com.vietqr.org.service.bidv.CustomerVaService;
-import com.vietqr.org.util.FormatUtil;
-import com.vietqr.org.util.StringUtil;
+import com.vietqr.org.util.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,8 +32,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vietqr.org.dto.AccountBankReceiveDetailDTO.TransactionBankListDTO;
-import com.vietqr.org.util.LarkUtil;
-import com.vietqr.org.util.VietQRUtil;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -55,6 +50,9 @@ public class AccountBankReceiveController {
 
     @Autowired
     BankTypeService bankTypeService;
+
+    @Autowired
+    TransReceiveTempService transReceiveTempService;
 
     @Autowired
     AccountBankReceiveShareService accountBankReceiveShareService;
@@ -771,9 +769,12 @@ public class AccountBankReceiveController {
         AccountBankReceiveDetailWT result = null;
         HttpStatus httpStatus = null;
         try {
+            long currentDateTimeUTCPlus7 = DateTimeUtil.getStartDateUTCPlus7();
             // get
             AccountBankReceiveEntity accountBankEntity = accountBankReceiveService.getAccountBankById(bankId);
             if (accountBankEntity != null) {
+                TransTempCountDTO transTempCountDTO = transReceiveTempService
+                        .getTransTempCount(accountBankEntity.getId());
                 BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(accountBankEntity.getBankTypeId());
                 // get cai value
                 String caiValue = caiBankService.getCaiValue(bankTypeEntity.getId());
@@ -797,61 +798,21 @@ public class AccountBankReceiveController {
                 result.setAuthenticated(accountBankEntity.isAuthenticated());
                 result.setNationalId(accountBankEntity.getNationalId());
                 result.setQrCode(qr);
-                result.setEwalletToken(accountBankEntity.getEwalletToken());
+                result.setEwalletToken(StringUtil.getValueNullChecker(accountBankEntity.getEwalletToken()));
                 result.setUnlinkedType(bankTypeEntity.getUnlinkedType());
                 result.setPhoneAuthenticated(accountBankEntity.getPhoneAuthenticated());
                 result.setIsActiveService(accountBankEntity.isValidService());
                 result.setValidFeeFrom(accountBankEntity.getValidFeeFrom());
                 result.setValidFeeTo(accountBankEntity.getValidFeeTo());
-                // List<String> branchIds = new ArrayList<>();
-                // branchIds = branchInformationService.getBranchIdsByBankId(bankId);
-                // // get list branch linked
-                // List<BranchInformationEntity> branchEntities = new ArrayList<>();
-                // if (branchIds != null && !branchIds.isEmpty()) {
-                // for (String branchId : branchIds) {
-                // BranchInformationEntity branchEntity =
-                // branchInformationService.getBranchById(branchId);
-                // branchEntities.add(branchEntity);
-                // }
-                // }
-                // // get list business linked
-                // List<BusinessInformationEntity> businessEntities = new ArrayList<>();
-                // if (branchEntities != null && !branchEntities.isEmpty()) {
-                // for (BranchInformationEntity branch : branchEntities) {
-                // BusinessInformationEntity businessEntity = businessInformationService
-                // .getBusinessById(branch.getBusinessId());
-                // businessEntities.add(businessEntity);
-                // }
-                // }
-                // // map business and branch
-                // List<BusinessBankDetailDTO> businessBankDetailDTOs = new ArrayList<>();
-                // if (businessEntities != null && !businessEntities.isEmpty()) {
-                // //
-                // for (BusinessInformationEntity business : businessEntities) {
-                // BusinessBankDetailDTO businessBankDTO = new BusinessBankDetailDTO();
-                // businessBankDTO.setBusinessId(business.getId());
-                // businessBankDTO.setBusinessName(business.getName());
-                // businessBankDTO.setImgId(business.getImgId());
-                // businessBankDTO.setCoverImgId(business.getCoverImgId());
-                // List<BranchBankDetailDTO> branchBanks = new ArrayList<>();
-                // if (branchEntities != null && !branchEntities.isEmpty()) {
-                // for (BranchInformationEntity branch : branchEntities) {
-                // if (branch.getBusinessId().equals(business.getId())) {
-                // BranchBankDetailDTO branchBank = new BranchBankDetailDTO();
-                // branchBank.setBranchId(branch.getId());
-                // branchBank.setBranchName(branch.getName());
-                // branchBank.setCode(branch.getCode());
-                // branchBank.setAddress(branch.getAddress());
-                // branchBanks.add(branchBank);
-                // }
-                // }
-                // }
-                // businessBankDTO.setBranchDetails(branchBanks);
-                // businessBankDetailDTOs.add(businessBankDTO);
-                // }
-                // }
-                // result.setBusinessDetails(businessBankDetailDTOs);
-
+                if (Objects.nonNull(transTempCountDTO)) {
+                    if (transTempCountDTO.getLastTimes() < currentDateTimeUTCPlus7) {
+                        result.setTransCount(0);
+                    } else {
+                        result.setTransCount(transTempCountDTO.getNums());
+                    }
+                } else {
+                    result.setTransCount(0);
+                }
                 httpStatus = HttpStatus.OK;
             } else {
                 httpStatus = HttpStatus.BAD_REQUEST;
@@ -869,8 +830,11 @@ public class AccountBankReceiveController {
         HttpStatus httpStatus = null;
         try {
             // get
+            long currentDateTimeUTCPlus7 = DateTimeUtil.getStartDateUTCPlus7();
             AccountBankReceiveEntity accountBankEntity = accountBankReceiveService.getAccountBankById(bankId);
             if (accountBankEntity != null) {
+                TransTempCountDTO transTempCountDTO = transReceiveTempService
+                        .getTransTempCount(accountBankEntity.getId());
                 BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(accountBankEntity.getBankTypeId());
                 // get cai value
                 String caiValue = caiBankService.getCaiValue(bankTypeEntity.getId());
@@ -901,26 +865,16 @@ public class AccountBankReceiveController {
                 result.setIsActiveService(accountBankEntity.isValidService());
                 result.setValidFeeFrom(accountBankEntity.getValidFeeFrom());
                 result.setValidFeeTo(accountBankEntity.getValidFeeTo());
-
+                if (Objects.nonNull(transTempCountDTO)) {
+                    if (transTempCountDTO.getLastTimes() < currentDateTimeUTCPlus7) {
+                        result.setTransCount(0);
+                    } else {
+                        result.setTransCount(transTempCountDTO.getNums());
+                    }
+                } else {
+                    result.setTransCount(0);
+                }
                 List<TransactionBankListDTO> transactions = new ArrayList<>();
-                // List<TransactionReceiveEntity> transactionEntities =
-                // transactionReceiveService
-                // .getTransactionByBankId(bankId);
-                // if (transactionEntities != null && !transactionEntities.isEmpty()) {
-                // for (TransactionReceiveEntity transactionEntity : transactionEntities) {
-                // TransactionBankListDTO transaction = new TransactionBankListDTO();
-                // transaction.setTransactionId(transactionEntity.getId());
-                // transaction.setBankAccount(transactionEntity.getBankAccount());
-                // transaction.setBankId(transactionEntity.getBankId());
-                // transaction.setAmount(transactionEntity.getAmount() + "");
-                // transaction.setContent(transactionEntity.getContent());
-                // transaction.setStatus(transactionEntity.getStatus());
-                // transaction.setTime(transactionEntity.getTime());
-                // transaction.setType(transactionEntity.getType());
-                // transaction.setTransType(transactionEntity.getTransType());
-                // transactions.add(transaction);
-                // }
-                // }
                 result.setTransactions(transactions);
                 httpStatus = HttpStatus.OK;
             } else {
@@ -980,37 +934,61 @@ public class AccountBankReceiveController {
         try {
             // get list banks
             //
+            long currentDateTimeUTCPlus7 = DateTimeUtil.getStartDateUTCPlus7();
             List<AccountBankReceiveShareDTO> banks = accountBankReceiveShareService
                     .getAccountBankReceiveShares(userId);
+            List<TransTempCountDTO> transTempCountDTOs = transReceiveTempService
+                    .getTransTempCounts(banks.stream().map(AccountBankReceiveShareDTO::getBankId)
+                            .distinct().collect(Collectors.toList()));
+
+            Map<String, TransTempCountDTO> transTempCountDTOMap = transTempCountDTOs.stream()
+                    .collect(Collectors.toMap(TransTempCountDTO::getBankId, Function.identity()));
+
+            List<CaiValueDTO> caiValues = caiBankService.getCaiValues(banks
+                    .stream().map(AccountBankReceiveShareDTO::getBankTypeId)
+                    .distinct().collect(Collectors.toList()));
+
+            Map<String, CaiValueDTO> caiValueDTOMap = caiValues.stream()
+                    .collect(Collectors.toMap(CaiValueDTO::getBankTypeId, Function.identity()));
+
             if (!FormatUtil.isListNullOrEmpty(banks)) {
                 result = banks.stream().map(item -> {
                     AccountBankShareResponseDTO dto = new AccountBankShareResponseDTO();
+                    CaiValueDTO valueDTO = caiValueDTOMap.get(item.getBankTypeId());
+                    TransTempCountDTO transTempCountDTO = transTempCountDTOMap.get(item.getBankId());
+                    if (Objects.nonNull(transTempCountDTO)) {
+                        if (transTempCountDTO.getLastTimes() < currentDateTimeUTCPlus7) {
+                            dto.setTransCount(0);
+                        } else {
+                            dto.setTransCount(transTempCountDTO.getNums());
+                        }
+                    } else {
+                        dto.setTransCount(0);
+                    }
                     dto.setId(item.getBankId());
                     dto.setBankAccount(item.getBankAccount());
-                    dto.setBankShortName(item.getBankShortName());
+                    dto.setBankShortName(valueDTO.getBankShortName());
                     dto.setUserBankName(item.getUserBankName());
-                    dto.setBankCode(item.getBankCode());
-                    dto.setBankName(item.getBankName());
-                    dto.setImgId(item.getImgId());
+                    dto.setBankCode(valueDTO.getBankCode());
+                    dto.setBankName(valueDTO.getBankName());
+                    dto.setImgId(valueDTO.getImgId());
                     dto.setType(item.getBankType());
                     dto.setBankTypeId(item.getBankTypeId());
                     dto.setEwalletToken("");
-                    dto.setUnlinkedType(item.getUnlinkedType());
+                    dto.setUnlinkedType(valueDTO.getUnlinkedType());
                     dto.setNationalId(item.getNationalId());
                     dto.setAuthenticated(item.getAuthenticated());
                     dto.setUserId(item.getUserId());
                     dto.setIsOwner(item.getIsOwner());
                     dto.setPhoneAuthenticated(item.getPhoneAuthenticated());
-                    dto.setBankTypeStatus(item.getBankTypeStatus());
+                    dto.setBankTypeStatus(valueDTO.getBankTypeStatus());
                     dto.setIsValidService(item.getIsValidService());
                     dto.setValidFeeFrom(item.getValidFeeFrom());
                     dto.setValidFeeTo(item.getValidFeeTo());
 
-                    BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(item.getBankTypeId());
-                    String caiValue = caiBankService.getCaiValue(bankTypeEntity.getId());
-                    dto.setCaiValue(caiValue);
+                    dto.setCaiValue(valueDTO.getCaiValue());
                     VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
-                    vietQRGenerateDTO.setCaiValue(caiValue);
+                    vietQRGenerateDTO.setCaiValue(valueDTO.getCaiValue());
                     vietQRGenerateDTO.setBankAccount(item.getBankAccount());
                     String qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
                     dto.setQrCode(qr);

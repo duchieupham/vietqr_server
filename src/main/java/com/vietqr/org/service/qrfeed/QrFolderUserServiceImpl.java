@@ -49,6 +49,11 @@ public class QrFolderUserServiceImpl implements QrFolderUserService {
     }
 
     @Override
+    public void addUserAdmin(String qrFolderId, String folderId, String userId) {
+            repo.addUserAdmin(qrFolderId, folderId, userId);
+    }
+
+    @Override
     public List<IUserInFolderDTO> getUserInFolder(String qrFolderId) {
         return repo.getUserInFolder(qrFolderId);
     }

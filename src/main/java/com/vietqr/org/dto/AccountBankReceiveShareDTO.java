@@ -8,13 +8,8 @@ public interface AccountBankReceiveShareDTO {
 
     String getUserBankName();
 
-    String getBankName();
-
-    String getBankShortName();
-
-    String getBankCode();
-
     String getImgId();
+
     Integer getBankType();
 
     String getNationalId();
@@ -27,14 +22,11 @@ public interface AccountBankReceiveShareDTO {
 
     boolean getIsOwner();
 
-    int getBankTypeStatus();
-
     String getBankTypeId();
 
-    String getCaiValue();
-
-    Integer getUnlinkedType();
     Boolean getIsValidService();
+
     Long getValidFeeFrom();
+
     Long getValidFeeTo();
 }
