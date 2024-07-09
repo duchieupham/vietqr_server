@@ -88,8 +88,12 @@ public class QrFolderUserController {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            qrFolderUserService.updateUserRole(dto.getFolderId(), dto.getUserId(), dto.getRole());
-            qrUserService.updateRoleUser(dto.getFolderId(), dto.getUserId(), dto.getRole());
+            String role = dto.getRole();
+            if ("MANAGER".equalsIgnoreCase(role)) {
+                role = "EDITOR";
+            }
+            qrFolderUserService.updateUserRole(dto.getFolderId(), dto.getUserId(), role);
+            qrUserService.updateRoleUser(dto.getFolderId(), dto.getUserId(), role);
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {

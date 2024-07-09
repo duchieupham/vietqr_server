@@ -90,6 +90,9 @@ public class QrFolderUserServiceImpl implements QrFolderUserService {
 
     @Override
     public void updateUserRole(String folderId, String userId, String role) {
+//        if ("MANAGER".equalsIgnoreCase(role)) {
+//            role = "EDITOR";
+//        }
         qrUserRepository.updateSingleUserRole(userId, folderId, role);
     }
 
