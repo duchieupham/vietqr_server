@@ -54,15 +54,15 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "a.time_created as timeCreate, " +
             "a.title AS title, a.value as content, b.role AS role, " +
             "CASE " +
-            "WHEN a.qr_type = '0' THEN a.public_id " +
-            "WHEN a.qr_type = '1' THEN a.value " +
+            "WHEN a.qr_type = '0' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.value'))) " +
+            "WHEN a.qr_type = '1' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.value'))) " +
             "WHEN a.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.phoneNo'))) " +
             "WHEN a.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankAccount'))) " +
             "ELSE NULL " +
             "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId " +
             "FROM qr_wallet a " +
             "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
-            "INNER JOIN qr_wallet_folder c ON c.qr_wallet_id = a.id " +
+            "INNER JOIN qr_wallet_folder c ON (b.qr_folder_id = c.qr_folder_id) AND (c.qr_wallet_id = a.id) " +
             "WHERE c.qr_folder_id = :folderId " +
             "GROUP BY a.id, b.role " +
             "ORDER BY a.time_created DESC ", nativeQuery = true)
@@ -72,7 +72,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "a.time_created as timeCreate, " +
             "a.title AS title, a.value as content, b.role AS role, " +
             "CASE " +
-            "WHEN a.qr_type = '0' THEN a.public_id " +
+            "WHEN a.qr_type = '0' THEN a.value " +
             "WHEN a.qr_type = '1' THEN a.value " +
             "WHEN a.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.phoneNo'))) " +
             "WHEN a.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankAccount'))) " +
@@ -80,7 +80,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId " +
             "FROM qr_wallet a " +
             "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
-            "INNER JOIN qr_wallet_folder c ON c.qr_wallet_id = a.id " +
+            "INNER JOIN qr_wallet_folder c ON (b.qr_folder_id = c.qr_folder_id) AND (c.qr_wallet_id = a.id) " +
             "WHERE c.qr_folder_id = :folderId AND a.qr_type = 3 " +
             "GROUP BY a.id, b.role " +
             "ORDER BY a.time_created DESC ", nativeQuery = true)
@@ -90,7 +90,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "a.time_created as timeCreate, " +
             "a.title AS title, a.value as content, b.role AS role, " +
             "CASE " +
-            "WHEN a.qr_type = '0' THEN a.public_id " +
+            "WHEN a.qr_type = '0' THEN a.value " +
             "WHEN a.qr_type = '1' THEN a.value " +
             "WHEN a.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.phoneNo'))) " +
             "WHEN a.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankAccount'))) " +
@@ -98,7 +98,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId " +
             "FROM qr_wallet a " +
             "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
-            "INNER JOIN qr_wallet_folder c ON c.qr_wallet_id = a.id " +
+            "INNER JOIN qr_wallet_folder c ON (b.qr_folder_id = c.qr_folder_id) AND (c.qr_wallet_id = a.id) " +
             "WHERE c.qr_folder_id = :folderId AND a.qr_type = 2 " +
             "GROUP BY a.id, b.role " +
             "ORDER BY a.time_created DESC ", nativeQuery = true)
@@ -116,7 +116,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId " +
             "FROM qr_wallet a " +
             "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
-            "INNER JOIN qr_wallet_folder c ON c.qr_wallet_id = a.id " +
+            "INNER JOIN qr_wallet_folder c ON (b.qr_folder_id = c.qr_folder_id) AND (c.qr_wallet_id = a.id) " +
             "WHERE c.qr_folder_id = :folderId AND a.qr_type = 1 " +
             "GROUP BY a.id, b.role " +
             "ORDER BY a.time_created DESC ", nativeQuery = true)
@@ -126,7 +126,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "a.time_created as timeCreate, " +
             "a.title AS title, a.value as content, b.role AS role, " +
             "CASE " +
-            "WHEN a.qr_type = '0' THEN a.public_id " +
+            "WHEN a.qr_type = '0' THEN a.value " +
             "WHEN a.qr_type = '1' THEN a.value " +
             "WHEN a.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.phoneNo'))) " +
             "WHEN a.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankAccount'))) " +
@@ -134,7 +134,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId " +
             "FROM qr_wallet a " +
             "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
-            "INNER JOIN qr_wallet_folder c ON c.qr_wallet_id = a.id " +
+            "INNER JOIN qr_wallet_folder c ON (b.qr_folder_id = c.qr_folder_id) AND (c.qr_wallet_id = a.id) " +
             "WHERE c.qr_folder_id = :folderId AND a.qr_type = 0 " +
             "GROUP BY a.id, b.role " +
             "ORDER BY a.time_created DESC ", nativeQuery = true)

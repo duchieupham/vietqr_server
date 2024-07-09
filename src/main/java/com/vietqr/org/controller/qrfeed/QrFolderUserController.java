@@ -230,7 +230,7 @@ public class QrFolderUserController {
                 listQrWalletDTO.setQrType(item.getQrType());
                 listQrWalletDTO.setTimeCreate(item.getTimeCreate());
                 listQrWalletDTO.setContent(item.getContent());
-                listQrWalletDTO.setData(item.getVlue());
+                listQrWalletDTO.setData(item.getData());
                 listQrWalletDTO.setVlue(item.getVlue());
                 listQrWalletDTO.setFileAttachmentId(item.getFileAttachmentId());
                 return listQrWalletDTO;
