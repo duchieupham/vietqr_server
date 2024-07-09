@@ -90,7 +90,7 @@ public interface QrFolderUserRepository extends JpaRepository<QrFolderUserEntity
             "ORDER BY " +
             "CASE " +
             "WHEN role = 'ADMIN' THEN 1 " +
-            "WHEN role = 'EDITOR' THEN 2 " +
+            "WHEN role IN ('EDITOR', 'MANAGER') THEN 2 " +
             "WHEN role = 'VIEWER' THEN 3 " +
             "ELSE 4 " +
             "END, role " +
