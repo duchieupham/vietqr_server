@@ -134,7 +134,8 @@ public interface QrFolderUserRepository extends JpaRepository<QrFolderUserEntity
     @Query(value = "DELETE FROM qr_folder_user WHERE qr_folder_id = :qrFolderId AND user_id = :userId", nativeQuery = true)
     void deleteUserFromFolder(@Param("qrFolderId") String qrFolderId, @Param("userId") String userId);
 
-
+    @Query(value = "SELECT COUNT(*) FROM qr_folder_user WHERE qr_folder_id = :qrFolderId AND user_id = :userId", nativeQuery = true)
+    int countUserInFolder(@Param("qrFolderId") String qrFolderId, @Param("userId") String userId);
 //    @Query(nativeQuery = true, name = "QrFolderUser.findUserRolesByFolderId")
 //    List<IUserRoleDTO> findUserRolesByFolderId(@Param("folderId") String folderId);
 }

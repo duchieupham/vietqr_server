@@ -6,6 +6,9 @@ import com.vietqr.org.dto.PageResDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.qrfeed.QrFolderEntity;
+import com.vietqr.org.entity.qrfeed.QrFolderUserEntity;
+import com.vietqr.org.entity.qrfeed.QrUserEntity;
+import com.vietqr.org.repository.QrFolderUserRepository;
 import com.vietqr.org.repository.QrWalletFolderRepository;
 import com.vietqr.org.service.AccountLoginService;
 import com.vietqr.org.service.qrfeed.*;
@@ -49,6 +52,9 @@ public class QrFolderController {
     @Autowired
     AccountLoginService accountLoginService;
 
+    @Autowired
+    QrFolderUserRepository qrFolderUserRepository;
+
     @PostMapping("qr-feed/generate-folder")
     public ResponseEntity<Object> createNewFolder(@RequestBody FolderCreateNewDTO dto) {
         Object result = null;
@@ -74,6 +80,24 @@ public class QrFolderController {
             qrFolderService.insertQrFolder(entity);
             // add user in folder
             qrFolderUserService.addUserIds(idQrFolder.toString(), dto.getUserRoles(), dto.getUserId());
+
+            //insert admin vao bang qr_folder_user;
+            QrFolderUserEntity qrFolderUserEntity = new QrFolderUserEntity();
+            String qrFolderUserEntityId  = UUID.randomUUID().toString();
+            qrFolderUserEntity.setId(qrFolderUserEntityId);
+            qrFolderUserEntity.setQrFolderId(idQrFolder.toString());
+            qrFolderUserEntity.setUserId(dto.getUserId());
+            qrFolderUserRepository.save(qrFolderUserEntity);
+
+            // Lưu thông tin người tạo vào bảng qr_user với vai trò ADMIN
+            QrUserEntity adminEntity = new QrUserEntity();
+            adminEntity.setId(UUID.randomUUID().toString());
+            adminEntity.setQrWalletId("");
+            adminEntity.setQrFolderId(idQrFolder.toString());
+            adminEntity.setUserId(dto.getUserId());
+            adminEntity.setRole("ADMIN");
+            qrUserService.insertQrUser(adminEntity);
+
             // add qrs to folder
             qrWalletFolderService.addQrWalletsInFolder(idQrFolder.toString(), dto.getQrIds());
 
