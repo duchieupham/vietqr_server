@@ -8,10 +8,7 @@ import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.qrfeed.QrFolderEntity;
 import com.vietqr.org.repository.QrWalletFolderRepository;
 import com.vietqr.org.service.AccountLoginService;
-import com.vietqr.org.service.qrfeed.QrFolderService;
-import com.vietqr.org.service.qrfeed.QrFolderUserService;
-import com.vietqr.org.service.qrfeed.QrWalletFolderService;
-import com.vietqr.org.service.qrfeed.QrWalletService;
+import com.vietqr.org.service.qrfeed.*;
 import com.vietqr.org.util.StringUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +36,9 @@ public class QrFolderController {
 
     @Autowired
     QrFolderUserService qrFolderUserService;
+
+    @Autowired
+    QrUserService qrUserService;
 
     @Autowired
     QrWalletFolderService qrWalletFolderService;
@@ -87,46 +87,6 @@ public class QrFolderController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-
-    @PostMapping("qr-feed/generate-folder-old")
-    public ResponseEntity<Object> createFolder(@RequestBody FolderCreateDTO dto) {
-        Object result = null;
-        HttpStatus httpStatus = null;
-        try {
-            QrFolderEntity entity = new QrFolderEntity();
-            UUID idQrFolder = UUID.randomUUID();
-            LocalDateTime currentDateTime = LocalDateTime.now();
-            if (dto.getTitle() != null && dto.getTitle() != null && dto.getTitle() != null) {
-                entity.setId(idQrFolder.toString());
-                entity.setTitle(dto.getTitle());
-                entity.setDescription(dto.getDescription());
-                entity.setTimeCreated(currentDateTime.toEpochSecond(ZoneOffset.UTC));
-                entity.setUserId(dto.getUserId());
-                // set data user (JSON)
-
-                entity.setUserData("{"
-                        + "\"userId\": \"" + dto.getUserId() + "\""
-                        + "}");
-                // insert folder
-                qrFolderService.insertQrFolder(entity);
-                //insert user in folder with role ADMIN
-                UUID id = UUID.randomUUID();
-                qrFolderUserService.addUserAdmin(id.toString(), idQrFolder.toString(), dto.getUserId());
-
-                result = new ResponseMessageDTO("SUCCESS", "");
-                httpStatus = HttpStatus.OK;
-            } else {
-                result = new ResponseMessageDTO("FAILED", "E05");
-                httpStatus = HttpStatus.BAD_REQUEST;
-            }
-        } catch (Exception e) {
-            logger.error("create folder: ERROR: " + e.toString());
-            result = new ResponseMessageDTO("FAILED", "E05");
-            httpStatus = HttpStatus.BAD_REQUEST;
-        }
-        return new ResponseEntity<>(result, httpStatus);
-    }
-
     @GetMapping("qr-feed/folders")
     public ResponseEntity<Object> getListFolderByUser(
             @RequestParam int page,
@@ -145,7 +105,7 @@ public class QrFolderController {
             List<IListQrFolderDTO> info = new ArrayList<>();
             totalElement = qrFolderService.countQrFolder(value, userId);
 
-            info = qrFolderService.getListFolders(value, offset, size, userId);
+            info = qrFolderService.getListFolderForUser(value, offset, size, userId);
             data = info.stream().map(item -> {
                 ListQrFolderDTO dto = new ListQrFolderDTO();
                 dto.setId(item.getId());
@@ -153,11 +113,9 @@ public class QrFolderController {
                 dto.setDescription(item.getDescription());
                 dto.setUserId(item.getUserId());
                 dto.setTimeCreated(item.getTimeCreate());
-
                 //count qr trong folder
                 int countQR = qrWalletFolderService.countQrFolder(item.getId());
                 dto.setCountQrs(countQR);
-
                 int countUsers = qrFolderUserService.countUsersFolder(item.getId());
                 dto.setCountUsers(countUsers);
                 return dto;
@@ -274,8 +232,7 @@ public class QrFolderController {
         Object result;
         HttpStatus httpStatus;
         try {
-            List<UserDTO> users = qrFolderService.findUsersByPhoneNo(phoneNo);
-            result = users;
+            result = qrFolderService.findUsersByPhoneNo(phoneNo);
             httpStatus = HttpStatus.OK;
 
         } catch (Exception e) {

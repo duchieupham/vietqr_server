@@ -1721,6 +1721,23 @@ public class QrWalletController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
+    @GetMapping("/qr-wallet/{qrWalletId}")
+    public ResponseEntity<Object> getQrWalletDetail(@PathVariable String qrWalletId) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            QrWalletEntity qrWallet = qrWalletService.getQrWalletDetail(qrWalletId);
+            result = qrWallet;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getQrWalletData: ERROR: " + e.getMessage() + " at " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @GetMapping("/qr-wallet/{qrWalletId}/data")
     public ResponseEntity<Object> getQrWalletData(@PathVariable String qrWalletId) {
         Object result = null;
@@ -1781,6 +1798,7 @@ public class QrWalletController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
     @GetMapping("/qr-wallets/public")
     public ResponseEntity<Object> getAllPublicQrWallets(
             @RequestParam String userId,
@@ -1921,6 +1939,7 @@ public class QrWalletController {
         g2d.dispose();
         return outputImage;
     }
+
     @GetMapping("/qr-wallets/private")
     public ResponseEntity<Object> getAllPrivateQrWallets(
             @RequestParam String userId,

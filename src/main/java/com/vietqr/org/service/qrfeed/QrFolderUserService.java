@@ -19,7 +19,6 @@ public interface QrFolderUserService {
 
     List<IUserRoleDTO> getUserRolesByFolderId(String folderId);
 
-
     List<IUserRoleDTO> getUserRolesByFolderId(String folderId, String value, int offset, int size);
 
     int countUserRolesByFolderId(String folderId, String value);

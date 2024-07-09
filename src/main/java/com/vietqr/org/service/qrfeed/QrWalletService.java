@@ -103,5 +103,6 @@ public interface QrWalletService {
 
     QrWalletEntity getQrWalletById(String qrWalletId);
 
+    QrWalletEntity getQrWalletDetail(String qrWalletId);
 
 }
