@@ -3,6 +3,7 @@ package com.vietqr.org.service;
 import java.util.List;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.dto.qrfeed.IUserInfoQrDTO;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,7 @@ import com.vietqr.org.entity.AccountLoginEntity;
 @Service
 public interface AccountLoginService {
     public IUserInfoDTO getUserInfoDetailsByUserId(String userId);
+    public IUserInfoQrDTO getUserInfoQRByUserId(String userId);
 
     public IUserInfoDTO getUserInfoByUserId(String userId);
 

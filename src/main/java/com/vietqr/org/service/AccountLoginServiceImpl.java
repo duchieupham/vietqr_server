@@ -3,6 +3,7 @@ package com.vietqr.org.service;
 import java.util.List;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.dto.qrfeed.IUserInfoQrDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,11 @@ public class AccountLoginServiceImpl implements AccountLoginService {
     @Override
     public IUserInfoDTO getUserInfoDetailsByUserId(String userId) {
         return repo.getUserInfoDetailsByUserId(userId);
+    }
+
+    @Override
+    public IUserInfoQrDTO getUserInfoQRByUserId(String userId) {
+        return repo.getUserInfoQRByUserId(userId);
     }
 
     @Override

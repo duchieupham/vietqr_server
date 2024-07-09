@@ -70,6 +70,78 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
 
     @Query(value = "SELECT a.id AS id, a.description AS description, a.is_public AS isPublic, a.qr_type as QrType, " +
             "a.time_created as timeCreate, " +
+            "a.title AS title, a.value as content, b.role AS role, " +
+            "CASE " +
+            "WHEN a.qr_type = '0' THEN a.public_id " +
+            "WHEN a.qr_type = '1' THEN a.value " +
+            "WHEN a.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.phoneNo'))) " +
+            "WHEN a.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankAccount'))) " +
+            "ELSE NULL " +
+            "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId " +
+            "FROM qr_wallet a " +
+            "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
+            "INNER JOIN qr_wallet_folder c ON c.qr_wallet_id = a.id " +
+            "WHERE c.qr_folder_id = :folderId AND a.qr_type = 3 " +
+            "GROUP BY a.id, b.role " +
+            "ORDER BY a.time_created DESC ", nativeQuery = true)
+    List<IListQrWalletDTO> getQrWalletVietQR(String folderId);
+
+    @Query(value = "SELECT a.id AS id, a.description AS description, a.is_public AS isPublic, a.qr_type as QrType, " +
+            "a.time_created as timeCreate, " +
+            "a.title AS title, a.value as content, b.role AS role, " +
+            "CASE " +
+            "WHEN a.qr_type = '0' THEN a.public_id " +
+            "WHEN a.qr_type = '1' THEN a.value " +
+            "WHEN a.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.phoneNo'))) " +
+            "WHEN a.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankAccount'))) " +
+            "ELSE NULL " +
+            "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId " +
+            "FROM qr_wallet a " +
+            "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
+            "INNER JOIN qr_wallet_folder c ON c.qr_wallet_id = a.id " +
+            "WHERE c.qr_folder_id = :folderId AND a.qr_type = 2 " +
+            "GROUP BY a.id, b.role " +
+            "ORDER BY a.time_created DESC ", nativeQuery = true)
+    List<IListQrWalletDTO> getQrWalletVCard(String folderId);
+
+    @Query(value = "SELECT a.id AS id, a.description AS description, a.is_public AS isPublic, a.qr_type as QrType, " +
+            "a.time_created as timeCreate, " +
+            "a.title AS title, a.value as content, b.role AS role, " +
+            "CASE " +
+            "WHEN a.qr_type = '0' THEN a.value " +
+            "WHEN a.qr_type = '1' THEN a.value " +
+            "WHEN a.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.phoneNo'))) " +
+            "WHEN a.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankAccount'))) " +
+            "ELSE NULL " +
+            "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId " +
+            "FROM qr_wallet a " +
+            "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
+            "INNER JOIN qr_wallet_folder c ON c.qr_wallet_id = a.id " +
+            "WHERE c.qr_folder_id = :folderId AND a.qr_type = 1 " +
+            "GROUP BY a.id, b.role " +
+            "ORDER BY a.time_created DESC ", nativeQuery = true)
+    List<IListQrWalletDTO> getQrWalletText(String folderId);
+
+    @Query(value = "SELECT a.id AS id, a.description AS description, a.is_public AS isPublic, a.qr_type as QrType, " +
+            "a.time_created as timeCreate, " +
+            "a.title AS title, a.value as content, b.role AS role, " +
+            "CASE " +
+            "WHEN a.qr_type = '0' THEN a.public_id " +
+            "WHEN a.qr_type = '1' THEN a.value " +
+            "WHEN a.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.phoneNo'))) " +
+            "WHEN a.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankAccount'))) " +
+            "ELSE NULL " +
+            "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId " +
+            "FROM qr_wallet a " +
+            "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
+            "INNER JOIN qr_wallet_folder c ON c.qr_wallet_id = a.id " +
+            "WHERE c.qr_folder_id = :folderId AND a.qr_type = 0 " +
+            "GROUP BY a.id, b.role " +
+            "ORDER BY a.time_created DESC ", nativeQuery = true)
+    List<IListQrWalletDTO> getQrWalletLink(String folderId);
+
+    @Query(value = "SELECT a.id AS id, a.description AS description, a.is_public AS isPublic, a.qr_type as QrType, " +
+            "a.time_created as timeCreate, " +
             "a.title AS title, a.value as content, b.role AS role " +
             "FROM viet_qr.qr_wallet a " +
             "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
@@ -172,11 +244,18 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "ORDER BY a.time_created DESC ", nativeQuery = true)
     List<String> getQrDataWithType(@Param("folderId") String folderId, @Param("type") int type);
 
+    @Query(value = "SELECT a.user_data AS userData " +
+            "FROM qr_wallet a " +
+            "INNER JOIN qr_wallet_folder b ON a.id = b.qr_wallet_id " +
+            "WHERE b.qr_folder_id = :folderId AND a.qr_type = :type " +
+            "ORDER BY a.time_created DESC ", nativeQuery = true)
+    List<String> getQrTextData(@Param("folderId") String folderId, @Param("type") int type);
+
     @Query(value = "SELECT a.qr_data AS qrData " +
             "FROM qr_wallet a " +
             "INNER JOIN qr_wallet_folder b ON a.id = b.qr_wallet_id " +
             "WHERE b.qr_folder_id = :folderId AND a.qr_type LIKE %:type% ", nativeQuery = true)
-    List<String> getQrDataWithoutType(@Param("folderId") String folderId, @Param("type") String type);
+    List<String> getQrDataWithoutType(String folderId, String type);
 
     @Query(value = "SELECT a.user_data AS userData " +
             "FROM qr_wallet a " +
@@ -220,7 +299,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "(SELECT COUNT(wc.id) FROM qr_wallet_comment wc WHERE wc.qr_wallet_id = w.id) AS commentCount, " +
             "CASE WHEN (SELECT COUNT(i.id) FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.user_id = :userId AND i.interaction_type = 1) > 0 THEN 1 ELSE 0 END AS hasLiked, " +
             "CASE " +
-            "WHEN w.qr_type = '0' THEN w.public_id " +
+            "WHEN w.qr_type = '0' THEN w.value " +
             "WHEN w.qr_type = '1' THEN w.value " +
             "WHEN w.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.phoneNo'))) " +
             "WHEN w.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.bankAccount'))) " +

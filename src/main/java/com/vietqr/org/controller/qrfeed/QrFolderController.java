@@ -67,7 +67,7 @@ public class QrFolderController {
             entity.setTitle(dto.getTitle());
             entity.setDescription(dto.getDescription());
             entity.setTimeCreated(currentDateTime.toEpochSecond(ZoneOffset.UTC));
-            IUserInfoDTO userDataInfo = accountLoginService.getUserInfoDetailsByUserId(dto.getUserId());
+            IUserInfoQrDTO userDataInfo = accountLoginService.getUserInfoQRByUserId(dto.getUserId());
             entity.setUserData("{"
                     + "\"userId\": \"" + dto.getUserId() + "\", "
                     + "\"fullName\": \"" + userDataInfo.getFullName() + "\", "

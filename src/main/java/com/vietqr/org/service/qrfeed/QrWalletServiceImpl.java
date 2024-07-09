@@ -105,6 +105,25 @@ public class QrWalletServiceImpl implements QrWalletService {
     }
 
     @Override
+    public List<IListQrWalletDTO> getQrWalletVietQR(String folderId) {
+        return repo.getQrWalletVietQR(folderId);
+    }
+    @Override
+    public List<IListQrWalletDTO> getQrWalletVCard(String folderId) {
+        return repo.getQrWalletVCard(folderId);
+    }
+
+    @Override
+    public List<IListQrWalletDTO> getQrWalletText(String folderId) {
+        return repo.getQrWalletText(folderId);
+    }
+
+    @Override
+    public List<IListQrWalletDTO> getQrWalletLink(String folderId) {
+        return repo.getQrWalletLink(folderId);
+    }
+
+    @Override
     public List<IListQrWalletDTO> getQrWalletPublic(String value, int offset, int size) {
         return repo.getQrWalletPublic(value, offset, size);
     }

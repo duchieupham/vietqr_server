@@ -199,7 +199,28 @@ public class QrFolderUserController {
             List<ListQrWalletDTO> dataList = new ArrayList<>();
             List<IListQrWalletDTO> infos = new ArrayList<>();
 
-            infos = qrWalletService.getQrWalletNoPagingAll(folderId);
+            switch (type) {
+                case 0:
+                    // get qr type 0
+                    infos = qrWalletService.getQrWalletLink(folderId);
+                    break;
+                case 1:
+                    // get qr type 1
+                    infos = qrWalletService.getQrWalletText(folderId);
+                    break;
+                case 2:
+                    // get qr type 2
+                    infos = qrWalletService.getQrWalletVCard(folderId);
+                    break;
+                case 3:
+                    // get qr type 3
+                    infos = qrWalletService.getQrWalletVietQR(folderId);
+                    break;
+                case 9:
+                    infos = qrWalletService.getQrWalletNoPagingAll(folderId);
+                    break;
+            }
+
             dataList = infos.stream().map(item -> {
                 ListQrWalletDTO listQrWalletDTO = new ListQrWalletDTO();
                 listQrWalletDTO.setId(item.getId());
