@@ -353,7 +353,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
     @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
             "w.value AS value, w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
             "CASE " +
-            "WHEN w.qr_type = '0' THEN w.public_id " +
+            "WHEN w.qr_type = '0' THEN w.value " +
             "WHEN w.qr_type = '1' THEN w.value " +
             "WHEN w.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.phoneNo'))) " +
             "WHEN w.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.user_data, '$.bankCode')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.user_data, '$.bankAccount'))) " +
@@ -375,7 +375,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
     @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
             "w.value AS value, w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
             "CASE " +
-            "WHEN w.qr_type = '0' THEN w.public_id " +
+            "WHEN w.qr_type = '0' THEN w.value " +
             "WHEN w.qr_type = '1' THEN w.value " +
             "WHEN w.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.phoneNo'))) " +
             "WHEN w.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.user_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.user_data, '$.bankAccount'))) " +
@@ -397,7 +397,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
     @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
             "w.value AS value, w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
             "CASE " +
-            "WHEN w.qr_type = '0' THEN w.public_id " +
+            "WHEN w.qr_type = '0' THEN w.value " +
             "WHEN w.qr_type = '1' THEN w.value " +
             "WHEN w.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.phoneNo'))) " +
             "WHEN w.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.user_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.user_data, '$.bankAccount'))) " +
@@ -421,7 +421,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
     @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
             "w.value AS value, w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
             "CASE " +
-            "WHEN w.qr_type = '0' THEN w.public_id " +
+            "WHEN w.qr_type = '0' THEN w.value " +
             "WHEN w.qr_type = '1' THEN w.value " +
             "WHEN w.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.phoneNo'))) " +
             "WHEN w.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.user_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.user_data, '$.bankAccount'))) " +
@@ -443,7 +443,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
     @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
             "w.value AS value, w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
             "CASE " +
-            "WHEN w.qr_type = '0' THEN w.public_id " +
+            "WHEN w.qr_type = '0' THEN w.value " +
             "WHEN w.qr_type = '1' THEN w.value " +
             "WHEN w.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.phoneNo'))) " +
             "WHEN w.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.bankAccount'))) " +
