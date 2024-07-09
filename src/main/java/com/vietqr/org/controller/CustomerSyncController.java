@@ -110,27 +110,33 @@ public class CustomerSyncController {
 
             List<CustomerSyncListDTO> data = new ArrayList<>();
             List<CustomerSyncListDTO> infos = new ArrayList<>();
+
             // type dùng để lấy ra danh sách
-            // type = 9 => search all
-            // type = 0 => search merchant name
-            // type = 1 => search bank Account
-            if (typeSearch == 9) { //
-
-            } else if (typeSearch == 0) {
-
-            } else if (typeSearch == 1) {
-
-            }
-
             if (type == 9) {
-                data = customerSyncService.getCustomerSyncListByMerchant(value, offset, size);
-                totalElements = customerSyncService.countCustomerSyncListByMerchant(value);
+                // type = 9 => search all
+                if (typeSearch == 9 || typeSearch == 0) { // type = 0 => search merchant name
+                    data = customerSyncService.getCustomerSyncListByMerchant(value, offset, size);
+                    totalElements = customerSyncService.countCustomerSyncListByMerchant(value);
+                } else if (typeSearch == 9 || typeSearch == 1) { // type = 1 => search bank Account
+                    data = customerSyncService.getCustomerSyncListByMerchantByBankAccount(value, offset, size);
+                    totalElements = customerSyncService.countCustomerSyncListByMerchantByBankAccount(value);
+                }
             } else if (type == 0) {
-                data = customerSyncService.getCustomerSyncAPIListByMerchant(value, offset, size);
-                totalElements = customerSyncService.countCustomerSyncAPIListByMerchant(value);
+                if (typeSearch == 9 || typeSearch == 0) { // type = 0 => search merchant name
+                    data = customerSyncService.getCustomerSyncAPIListByMerchant(value, offset, size);
+                    totalElements = customerSyncService.countCustomerSyncAPIListByMerchant(value);
+                } else if (typeSearch == 9 || typeSearch == 1) { // type = 1 => search bank Account
+                    data = customerSyncService.getCustomerSyncAPIListByMerchantByBankAccount(value, offset, size);
+                    totalElements = customerSyncService.countCustomerSyncAPIListByMerchantByBankAccount(value);
+                }
             } else if (type == 1) {
-                data = customerSyncService.getCustomerSyncEcListByMerchant(value, offset, size);
-                totalElements = customerSyncService.countCustomerSyncEcListByMerchant(value);
+                if (typeSearch == 9 || typeSearch == 0) { // type = 0 => search merchant name
+                    data = customerSyncService.getCustomerSyncEcListByMerchant(value, offset, size);
+                    totalElements = customerSyncService.countCustomerSyncEcListByMerchant(value);
+                } else if (typeSearch == 9 || typeSearch == 1) { // type = 1 => search bank Account
+                    data = customerSyncService.getCustomerSyncEcListByMerchantByBankAccount(value, offset, size);
+                    totalElements = customerSyncService.countCustomerSyncEcListByMerchantByBankAccount(value);
+                }
             }
 
             PageDTO pageDTO = new PageDTO();
