@@ -51,8 +51,7 @@ public class ImageController {
 					outputStream.write(buffer, 0, bytesRead);
 				}
 				result = outputStream.toByteArray();
-			} catch (Exception e) {
-				logger.error("getImage: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
+			} catch (Exception ignored) {
 			}
 
 			if (!(result.length > 0)) {
