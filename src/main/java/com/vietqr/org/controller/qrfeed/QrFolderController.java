@@ -6,12 +6,12 @@ import com.vietqr.org.dto.PageResDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.qrfeed.QrFolderEntity;
+import com.vietqr.org.entity.qrfeed.QrFolderUserEntity;
+import com.vietqr.org.entity.qrfeed.QrUserEntity;
+import com.vietqr.org.repository.QrFolderUserRepository;
 import com.vietqr.org.repository.QrWalletFolderRepository;
 import com.vietqr.org.service.AccountLoginService;
-import com.vietqr.org.service.qrfeed.QrFolderService;
-import com.vietqr.org.service.qrfeed.QrFolderUserService;
-import com.vietqr.org.service.qrfeed.QrWalletFolderService;
-import com.vietqr.org.service.qrfeed.QrWalletService;
+import com.vietqr.org.service.qrfeed.*;
 import com.vietqr.org.util.StringUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +41,9 @@ public class QrFolderController {
     QrFolderUserService qrFolderUserService;
 
     @Autowired
+    QrUserService qrUserService;
+
+    @Autowired
     QrWalletFolderService qrWalletFolderService;
 
     @Autowired
@@ -48,6 +51,9 @@ public class QrFolderController {
 
     @Autowired
     AccountLoginService accountLoginService;
+
+    @Autowired
+    QrFolderUserRepository qrFolderUserRepository;
 
     @PostMapping("qr-feed/generate-folder")
     public ResponseEntity<Object> createNewFolder(@RequestBody FolderCreateNewDTO dto) {
@@ -74,51 +80,29 @@ public class QrFolderController {
             qrFolderService.insertQrFolder(entity);
             // add user in folder
             qrFolderUserService.addUserIds(idQrFolder.toString(), dto.getUserRoles(), dto.getUserId());
+
+            //insert admin vao bang qr_folder_user;
+            QrFolderUserEntity qrFolderUserEntity = new QrFolderUserEntity();
+            String qrFolderUserEntityId  = UUID.randomUUID().toString();
+            qrFolderUserEntity.setId(qrFolderUserEntityId);
+            qrFolderUserEntity.setQrFolderId(idQrFolder.toString());
+            qrFolderUserEntity.setUserId(dto.getUserId());
+            qrFolderUserRepository.save(qrFolderUserEntity);
+
+            // Lưu thông tin người tạo vào bảng qr_user với vai trò ADMIN
+            QrUserEntity adminEntity = new QrUserEntity();
+            adminEntity.setId(UUID.randomUUID().toString());
+            adminEntity.setQrWalletId("");
+            adminEntity.setQrFolderId(idQrFolder.toString());
+            adminEntity.setUserId(dto.getUserId());
+            adminEntity.setRole("ADMIN");
+            qrUserService.insertQrUser(adminEntity);
+
             // add qrs to folder
             qrWalletFolderService.addQrWalletsInFolder(idQrFolder.toString(), dto.getQrIds());
 
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
-        } catch (Exception e) {
-            logger.error("create folder: ERROR: " + e.toString());
-            result = new ResponseMessageDTO("FAILED", "E05");
-            httpStatus = HttpStatus.BAD_REQUEST;
-        }
-        return new ResponseEntity<>(result, httpStatus);
-    }
-
-
-    @PostMapping("qr-feed/generate-folder-old")
-    public ResponseEntity<Object> createFolder(@RequestBody FolderCreateDTO dto) {
-        Object result = null;
-        HttpStatus httpStatus = null;
-        try {
-            QrFolderEntity entity = new QrFolderEntity();
-            UUID idQrFolder = UUID.randomUUID();
-            LocalDateTime currentDateTime = LocalDateTime.now();
-            if (dto.getTitle() != null && dto.getTitle() != null && dto.getTitle() != null) {
-                entity.setId(idQrFolder.toString());
-                entity.setTitle(dto.getTitle());
-                entity.setDescription(dto.getDescription());
-                entity.setTimeCreated(currentDateTime.toEpochSecond(ZoneOffset.UTC));
-                entity.setUserId(dto.getUserId());
-                // set data user (JSON)
-
-                entity.setUserData("{"
-                        + "\"userId\": \"" + dto.getUserId() + "\""
-                        + "}");
-                // insert folder
-                qrFolderService.insertQrFolder(entity);
-                //insert user in folder with role ADMIN
-                UUID id = UUID.randomUUID();
-                qrFolderUserService.addUserAdmin(id.toString(), idQrFolder.toString(), dto.getUserId());
-
-                result = new ResponseMessageDTO("SUCCESS", "");
-                httpStatus = HttpStatus.OK;
-            } else {
-                result = new ResponseMessageDTO("FAILED", "E05");
-                httpStatus = HttpStatus.BAD_REQUEST;
-            }
         } catch (Exception e) {
             logger.error("create folder: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
@@ -272,8 +256,7 @@ public class QrFolderController {
         Object result;
         HttpStatus httpStatus;
         try {
-            List<UserDTO> users = qrFolderService.findUsersByPhoneNo(phoneNo);
-            result = users;
+            result = qrFolderService.findUsersByPhoneNo(phoneNo);
             httpStatus = HttpStatus.OK;
 
         } catch (Exception e) {

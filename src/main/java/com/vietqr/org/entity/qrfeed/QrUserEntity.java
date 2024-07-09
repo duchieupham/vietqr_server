@@ -19,6 +19,8 @@ public class QrUserEntity implements Serializable {
     private String userId;
     @Column(name = "role")
     private String role;
+    @Column(name = "qrFolderId")
+    private String qrFolderId = "";
 
     public QrUserEntity() {
     }
@@ -60,5 +62,13 @@ public class QrUserEntity implements Serializable {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getQrFolderId() {
+        return qrFolderId;
+    }
+
+    public void setQrFolderId(String qrFolderId) {
+        this.qrFolderId = qrFolderId;
     }
 }

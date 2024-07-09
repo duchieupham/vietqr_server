@@ -63,7 +63,7 @@ public interface QrFolderUserRepository extends JpaRepository<QrFolderUserEntity
             "IFNULL(TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))), 'Undefined') AS fullName, " +
             "IFNULL(ai.img_id, '') AS imageId " +
             "FROM qr_folder_user qfu " +
-            "INNER JOIN qr_user qu ON qfu.user_id = qu.user_id " +
+            "INNER JOIN qr_user qu ON (qfu.qr_folder_id = qu.qr_folder_id AND qfu.user_id = qu.user_id) " +
             "LEFT JOIN account_information ai ON ai.user_id = qfu.user_id " +
             "WHERE qfu.qr_folder_id = :folderId " +
             "UNION " +
@@ -81,7 +81,7 @@ public interface QrFolderUserRepository extends JpaRepository<QrFolderUserEntity
             "IFNULL(ai.img_id, '') AS imageId, " +
             "IFNULL(al.phone_no, '') AS phoneNo " +
             "FROM qr_folder_user qfu " +
-            "INNER JOIN qr_user qu ON qfu.user_id = qu.user_id " +
+            "INNER JOIN qr_user qu ON (qfu.qr_folder_id = qu.qr_folder_id AND qfu.user_id = qu.user_id) " +
             "LEFT JOIN account_information ai ON ai.user_id = qfu.user_id " +
             "LEFT JOIN account_login al ON al.id = qfu.user_id " +
             "WHERE qfu.qr_folder_id = :folderId " +
@@ -113,7 +113,7 @@ public interface QrFolderUserRepository extends JpaRepository<QrFolderUserEntity
     @Query(value = "SELECT COUNT(*) FROM (" +
             "SELECT qfu.user_id " +
             "FROM qr_folder_user qfu " +
-            "INNER JOIN qr_user qu ON qfu.user_id = qu.user_id " +
+            "INNER JOIN qr_user qu ON (qfu.qr_folder_id = qu.qr_folder_id AND qfu.user_id = qu.user_id) " +
             "LEFT JOIN account_information ai ON ai.user_id = qfu.user_id " +
             "WHERE qfu.qr_folder_id = :folderId " +
             "AND (TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))) LIKE %:value%) " +
@@ -134,7 +134,8 @@ public interface QrFolderUserRepository extends JpaRepository<QrFolderUserEntity
     @Query(value = "DELETE FROM qr_folder_user WHERE qr_folder_id = :qrFolderId AND user_id = :userId", nativeQuery = true)
     void deleteUserFromFolder(@Param("qrFolderId") String qrFolderId, @Param("userId") String userId);
 
-
+    @Query(value = "SELECT COUNT(*) FROM qr_folder_user WHERE qr_folder_id = :qrFolderId AND user_id = :userId", nativeQuery = true)
+    int countUserInFolder(@Param("qrFolderId") String qrFolderId, @Param("userId") String userId);
 //    @Query(nativeQuery = true, name = "QrFolderUser.findUserRolesByFolderId")
 //    List<IUserRoleDTO> findUserRolesByFolderId(@Param("folderId") String folderId);
 }

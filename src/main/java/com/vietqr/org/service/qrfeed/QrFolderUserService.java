@@ -3,6 +3,8 @@ package com.vietqr.org.service.qrfeed;
 import com.vietqr.org.dto.qrfeed.IUserInFolderDTO;
 import com.vietqr.org.dto.qrfeed.IUserRoleDTO;
 import com.vietqr.org.dto.qrfeed.UserRoleDTO;
+import com.vietqr.org.entity.qrfeed.QrFolderUserEntity;
+import com.vietqr.org.entity.qrfeed.QrUserEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,7 +20,6 @@ public interface QrFolderUserService {
     void updateUserRoles(String qrFolderId, List<UserRoleDTO> userRoles);
 
     List<IUserRoleDTO> getUserRolesByFolderId(String folderId);
-
 
     List<IUserRoleDTO> getUserRolesByFolderId(String folderId, String value, int offset, int size);
 

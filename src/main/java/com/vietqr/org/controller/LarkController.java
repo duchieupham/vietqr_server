@@ -166,7 +166,7 @@ public class LarkController {
                     telAccBankEntity.setWebhook(dto.getWebhook());
                     larkAccountBankService.insert(telAccBankEntity);
                 }
-                result = new ResponseMessageDTO("SUCCESS", "");
+                result = new ResponseMessageDTO("SUCCESS", uuid.toString());
                 httpStatus = HttpStatus.OK;
             } else {
                 logger.error("insertLarkChatId: INVALID REQUEST BODY");
@@ -207,7 +207,7 @@ public class LarkController {
                     larkAccBankEntity.setWebhook(dto.getWebhook());
                     larkAccountBankService.insert(larkAccBankEntity);
                 }
-                result = new ResponseMessageDTO("SUCCESS", "");
+                result = new ResponseMessageDTO("SUCCESS", uuid.toString());
                 httpStatus = HttpStatus.OK;
             } else {
                 logger.error("insertLarkChatId: INVALID REQUEST BODY");
@@ -318,11 +318,11 @@ public class LarkController {
     }
     @GetMapping("service/larks/information-detail")
     public ResponseEntity<LarkDetailDTO> getLarkInformationDetail(
-            @RequestParam(value = "userId") String userId) {
+            @RequestParam(value = "id") String id) {
         LarkDetailDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            LarkEntity larkEntity = larkService.getLarkByUserId(userId);
+            LarkEntity larkEntity = larkService.getLarkById(id);
             if (larkEntity != null) {
                 LarkDetailDTO larkDetailDTO = new LarkDetailDTO();
                 larkDetailDTO.setId(larkEntity.getId());

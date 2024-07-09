@@ -156,7 +156,7 @@ public class GoogleChatController {
                         googleChatAccountBankService.insert(googleChatAccountBankEntity);
                     }
                 }
-                result = new ResponseMessageDTO("SUCCESS", "");
+                result = new ResponseMessageDTO("SUCCESS", ggChatUUID.toString());
                 httpStatus = HttpStatus.OK;
             } else {
                 result = new ResponseMessageDTO("FAILED", "E46");
@@ -196,7 +196,7 @@ public class GoogleChatController {
                         googleChatAccountBankService.insert(googleChatAccountBankEntity);
                     }
                 }
-                result = new ResponseMessageDTO("SUCCESS", "");
+                result = new ResponseMessageDTO("SUCCESS", ggChatUUID.toString());
                 httpStatus = HttpStatus.OK;
             } else {
                 logger.error("insertGoogleChat: INVALID REQUEST BODY");
@@ -253,8 +253,6 @@ public class GoogleChatController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
-
-
 
     // get google chat connection information
     // GoogleChatDetailDTO
@@ -317,11 +315,11 @@ public class GoogleChatController {
     // GoogleChatDetailDTO
     @GetMapping("service/google-chats/information-detail")
     public ResponseEntity<Object> getGoogleChatInformationDetail(
-            @RequestParam(value = "userId") String userId) {
+            @RequestParam(value = "id") String id) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            GoogleChatEntity dto = googleChatService.getGoogleChatsByUserId(userId);
+            GoogleChatEntity dto = googleChatService.getGoogleChatById(id);
             if (dto != null) {
                 GoogleChatDetailDTO detailDTO = new GoogleChatDetailDTO();
                 detailDTO.setId(dto.getId());
@@ -387,7 +385,7 @@ public class GoogleChatController {
             PageResDTO pageResDTO = new PageResDTO();
             pageResDTO.setMetadata(pageDTO);
             pageResDTO.setData(googleChats);
-
+            result = pageResDTO;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("getListGoogleChats Error: " + e.getMessage() + System.currentTimeMillis());

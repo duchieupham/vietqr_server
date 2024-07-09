@@ -3,6 +3,7 @@ package com.vietqr.org.service.qrfeed;
 import com.vietqr.org.dto.qrfeed.IUserInFolderDTO;
 import com.vietqr.org.dto.qrfeed.IUserRoleDTO;
 import com.vietqr.org.dto.qrfeed.UserRoleDTO;
+import com.vietqr.org.entity.qrfeed.QrFolderUserEntity;
 import com.vietqr.org.entity.qrfeed.QrUserEntity;
 import com.vietqr.org.repository.QrFolderUserRepository;
 import com.vietqr.org.repository.QrUserRepository;
@@ -35,16 +36,17 @@ public class QrFolderUserServiceImpl implements QrFolderUserService {
     @Override
     public void addUserIds(String qrFolderId, List<UserRoleDTO> userRoles, String userId) {
         for (UserRoleDTO userRole : userRoles) {
-            String id = UUID.randomUUID().toString();
-            repo.insertQrWalletFolder(id, qrFolderId, userRole.getUserId());
-
-            // Add user with role to qr_user table
-            QrUserEntity qrUserEntity = new QrUserEntity();
-            qrUserEntity.setId(UUID.randomUUID().toString());
-            qrUserEntity.setQrWalletId(qrFolderId);
-            qrUserEntity.setUserId(userRole.getUserId());
-            qrUserEntity.setRole(userRole.getRole());
-            qrUserRepository.save(qrUserEntity);
+            int count = repo.countUserInFolder(qrFolderId, userRole.getUserId());
+            if (count == 0) {
+                String id = UUID.randomUUID().toString();
+                repo.insertQrWalletFolder(id, qrFolderId, userRole.getUserId());
+                QrUserEntity qrUserEntity = new QrUserEntity();
+                qrUserEntity.setId(UUID.randomUUID().toString());
+                qrUserEntity.setQrWalletId("");
+                qrUserEntity.setUserId(userRole.getUserId());
+                qrUserEntity.setRole(userRole.getRole());
+                qrUserRepository.save(qrUserEntity);
+            }
         }
     }
 
@@ -95,5 +97,7 @@ public class QrFolderUserServiceImpl implements QrFolderUserService {
         qrFolderUserRepository.deleteUserFromFolder(folderId, userId);
         qrUserRepository.deleteUserRole(folderId, userId);
     }
+
+
 
 }
