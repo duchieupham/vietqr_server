@@ -1404,6 +1404,12 @@ public class QrWalletController {
 
                                 // update file log to qr
                                 qrWalletService.updateFileQrById(uuid.toString(), idQrWallet.toString());
+                                // Amazon S3
+                                UUID idS3 = UUID.randomUUID();
+                                Thread thread = new Thread(() -> {
+                                });
+                                thread.start();
+                                amazonS3Service.uploadFile(idS3.toString(), file);
                             } else {
                                 entity.setFileAttachmentId("");
                             }
@@ -1464,6 +1470,12 @@ public class QrWalletController {
 
                                 // update file log to qr
                                 qrWalletService.updateFileQrById(ids.toString(), idQrWallet.toString());
+                                // Amazon S3
+                                UUID idS3 = UUID.randomUUID();
+                                Thread thread = new Thread(() -> {
+                                });
+                                thread.start();
+                                amazonS3Service.uploadFile(idS3.toString(), file);
                             } else {
                                 entity.setFileAttachmentId("");
                             }
@@ -1568,7 +1580,6 @@ public class QrWalletController {
                     entity.setTheme(Integer.parseInt(themeDTO));
                     entity.setIsPublic(Integer.parseInt(isPublicDTO));
 
-
                     // save image
                     String fileName = StringUtils.cleanPath(file.getOriginalFilename());
                     if (!file.getOriginalFilename().isEmpty()) {
@@ -1580,6 +1591,12 @@ public class QrWalletController {
 
                         // update file log to qr
                         qrWalletService.updateFileQrById(uuid.toString(), idQrWallet.toString());
+                        // Amazon S3
+                        UUID idS3 = UUID.randomUUID();
+                        Thread thread = new Thread(() -> {
+                        });
+                        thread.start();
+                        amazonS3Service.uploadFile(idS3.toString(), file);
                     } else {
                         entity.setFileAttachmentId("");
                     }
@@ -1694,6 +1711,12 @@ public class QrWalletController {
 
                         // update file log to qr
                         qrWalletService.updateFileQrById(ids.toString(), idQr3.toString());
+                        // Amazon S3
+                        UUID idS3 = UUID.randomUUID();
+                        Thread thread = new Thread(() -> {
+                        });
+                        thread.start();
+                        amazonS3Service.uploadFile(idS3.toString(), file);
                     } else {
                         entity1.setFileAttachmentId("");
                     }
