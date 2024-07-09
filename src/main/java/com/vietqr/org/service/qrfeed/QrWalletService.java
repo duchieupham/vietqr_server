@@ -40,6 +40,10 @@ public interface QrWalletService {
     public List<IListQrWalletDTO> getQrWallets(String value, int offset, int size);
     public List<IListQrWalletDTO> getQrWalletNoPaging(String value, int type);
     public List<IListQrWalletDTO> getQrWalletNoPagingAll(String folderId);
+    public List<IListQrWalletDTO> getQrWalletVietQR(String folderId);
+    public List<IListQrWalletDTO> getQrWalletVCard(String folderId);
+    public List<IListQrWalletDTO> getQrWalletText(String folderId);
+    public List<IListQrWalletDTO> getQrWalletLink(String folderId);
 
     public List<IListQrWalletDTO> getQrWalletPublic(String value, int offset, int size);
 
