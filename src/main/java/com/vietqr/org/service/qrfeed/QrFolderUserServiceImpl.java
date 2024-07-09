@@ -45,6 +45,7 @@ public class QrFolderUserServiceImpl implements QrFolderUserService {
                 qrUserEntity.setQrWalletId("");
                 qrUserEntity.setUserId(userRole.getUserId());
                 qrUserEntity.setRole(userRole.getRole());
+                qrUserEntity.setQrFolderId(qrFolderId);
                 qrUserRepository.save(qrUserEntity);
             }
         }
@@ -52,7 +53,7 @@ public class QrFolderUserServiceImpl implements QrFolderUserService {
 
     @Override
     public void addUserAdmin(String qrFolderId, String folderId, String userId) {
-            repo.addUserAdmin(qrFolderId, folderId, userId);
+        repo.addUserAdmin(qrFolderId, folderId, userId);
     }
 
     @Override
@@ -97,7 +98,6 @@ public class QrFolderUserServiceImpl implements QrFolderUserService {
         qrFolderUserRepository.deleteUserFromFolder(folderId, userId);
         qrUserRepository.deleteUserRole(folderId, userId);
     }
-
 
 
 }
