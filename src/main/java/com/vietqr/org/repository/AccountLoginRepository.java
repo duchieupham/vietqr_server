@@ -1,6 +1,7 @@
 package com.vietqr.org.repository;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.dto.qrfeed.IUserInfoQrDTO;
 import com.vietqr.org.entity.AccountLoginEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -28,6 +29,16 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
             "INNER JOIN account_wallet c ON b.id = c.user_id " +
             "WHERE a.user_id = :userId LIMIT 1 ", nativeQuery = true)
     IUserInfoDTO getUserInfoDetailsByUserId(@Param(value = "userId") String userId);
+
+    @Query(value = "SELECT a.id AS id, b.phone_no AS phoneNo, " +
+            "COALESCE(a.first_name, '') as firstName, COALESCE(a.middle_name, '') as middleName, " +
+            "COALESCE(a.last_name, '') as lastName, " +
+            "CONCAT(COALESCE(a.first_name, ''), ' ', COALESCE(a.middle_name, ''), ' ', COALESCE(a.last_name, '')) AS fullname, " +
+            "COALESCE(a.email, '') AS email, a.address AS address " +
+            "FROM viet_qr.account_login b " +
+            "INNER JOIN account_information a ON b.id = a.user_id " +
+            "WHERE a.user_id = :userId LIMIT 1 ", nativeQuery = true)
+    IUserInfoQrDTO getUserInfoQRByUserId(String userId);
 
     @Query(value = "SELECT a.id AS id, b.phone_no AS phoneNo, " +
             "COALESCE(a.first_name, '') as firstName, COALESCE(a.middle_name, '') as middleName, " +
