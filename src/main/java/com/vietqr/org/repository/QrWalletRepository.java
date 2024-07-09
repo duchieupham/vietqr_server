@@ -61,8 +61,8 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "ELSE NULL " +
             "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId " +
             "FROM qr_wallet a " +
-            "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
-            "INNER JOIN qr_wallet_folder c ON (b.qr_folder_id = c.qr_folder_id) AND (c.qr_wallet_id = a.id) " +
+            "INNER JOIN qr_wallet_folder c ON c.qr_wallet_id = a.id " +
+            "INNER JOIN qr_user b ON (c.qr_folder_id = b.qr_folder_id AND a.user_id =  b.user_id) " +
             "WHERE c.qr_folder_id = :folderId " +
             "GROUP BY a.id, b.role " +
             "ORDER BY a.time_created DESC ", nativeQuery = true)
@@ -79,8 +79,8 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "ELSE NULL " +
             "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId " +
             "FROM qr_wallet a " +
-            "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
-            "INNER JOIN qr_wallet_folder c ON (b.qr_folder_id = c.qr_folder_id) AND (c.qr_wallet_id = a.id) " +
+            "INNER JOIN qr_wallet_folder c ON c.qr_wallet_id = a.id " +
+            "INNER JOIN qr_user b ON (c.qr_folder_id = b.qr_folder_id AND a.user_id =  b.user_id) " +
             "WHERE c.qr_folder_id = :folderId AND a.qr_type = 3 " +
             "GROUP BY a.id, b.role " +
             "ORDER BY a.time_created DESC ", nativeQuery = true)
@@ -97,8 +97,8 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "ELSE NULL " +
             "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId " +
             "FROM qr_wallet a " +
-            "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
-            "INNER JOIN qr_wallet_folder c ON (b.qr_folder_id = c.qr_folder_id) AND (c.qr_wallet_id = a.id) " +
+            "INNER JOIN qr_wallet_folder c ON c.qr_wallet_id = a.id " +
+            "INNER JOIN qr_user b ON (c.qr_folder_id = b.qr_folder_id AND a.user_id =  b.user_id) " +
             "WHERE c.qr_folder_id = :folderId AND a.qr_type = 2 " +
             "GROUP BY a.id, b.role " +
             "ORDER BY a.time_created DESC ", nativeQuery = true)
@@ -115,8 +115,8 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "ELSE NULL " +
             "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId " +
             "FROM qr_wallet a " +
-            "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
-            "INNER JOIN qr_wallet_folder c ON (b.qr_folder_id = c.qr_folder_id) AND (c.qr_wallet_id = a.id) " +
+            "INNER JOIN qr_wallet_folder c ON c.qr_wallet_id = a.id " +
+            "INNER JOIN qr_user b ON (c.qr_folder_id = b.qr_folder_id AND a.user_id =  b.user_id) " +
             "WHERE c.qr_folder_id = :folderId AND a.qr_type = 1 " +
             "GROUP BY a.id, b.role " +
             "ORDER BY a.time_created DESC ", nativeQuery = true)
@@ -133,8 +133,8 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "ELSE NULL " +
             "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId " +
             "FROM qr_wallet a " +
-            "INNER JOIN qr_user b ON a.user_id =  b.user_id " +
-            "INNER JOIN qr_wallet_folder c ON (b.qr_folder_id = c.qr_folder_id) AND (c.qr_wallet_id = a.id) " +
+            "INNER JOIN qr_wallet_folder c ON c.qr_wallet_id = a.id " +
+            "INNER JOIN qr_user b ON (c.qr_folder_id = b.qr_folder_id AND a.user_id =  b.user_id) " +
             "WHERE c.qr_folder_id = :folderId AND a.qr_type = 0 " +
             "GROUP BY a.id, b.role " +
             "ORDER BY a.time_created DESC ", nativeQuery = true)

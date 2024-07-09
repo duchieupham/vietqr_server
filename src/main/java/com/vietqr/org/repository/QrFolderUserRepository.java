@@ -75,9 +75,9 @@ public interface QrFolderUserRepository extends JpaRepository<QrFolderUserEntity
             "WHERE qf.id = :folderId", nativeQuery = true)
     List<IUserRoleDTO> findUserRolesByFolderId(@Param("folderId") String folderId);
 
-    @Query(value = "SELECT * FROM (" +
-            "SELECT DISTINCT qfu.user_id AS userId, qu.role AS role, " +
-            "IFNULL(TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))), 'Undefined') AS fullName, " +
+    @Query(value = "SELECT DISTINCT qfu.user_id AS userId, qu.role AS role, " +
+            "IFNULL(TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), " +
+            "TRIM(ai.first_name))), 'Undefined') AS fullName, " +
             "IFNULL(ai.img_id, '') AS imageId, " +
             "IFNULL(al.phone_no, '') AS phoneNo " +
             "FROM qr_folder_user qfu " +
@@ -85,7 +85,8 @@ public interface QrFolderUserRepository extends JpaRepository<QrFolderUserEntity
             "LEFT JOIN account_information ai ON ai.user_id = qfu.user_id " +
             "LEFT JOIN account_login al ON al.id = qfu.user_id " +
             "WHERE qfu.qr_folder_id = :folderId " +
-            "AND (TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))) LIKE %:value%) " +
+            "AND (TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), " +
+            "TRIM(ai.first_name))) LIKE %:value%) " +
             "ORDER BY " +
             "CASE " +
             "WHEN role = 'ADMIN' THEN 1 " +
