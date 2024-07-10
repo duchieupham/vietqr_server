@@ -4,8 +4,17 @@ public class VietQRDataDTO {
     private String bankAccount;
     private String userBankName;
     private String bankShortName;
+    private String bankCode;
     private String amount;
     private String content;
+
+    public String getBankCode() {
+        return bankCode;
+    }
+
+    public void setBankCode(String bankCode) {
+        this.bankCode = bankCode;
+    }
 
     public String getBankAccount() {
         return bankAccount;
