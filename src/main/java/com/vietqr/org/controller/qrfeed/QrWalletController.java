@@ -1404,6 +1404,12 @@ public class QrWalletController {
 
                                 // update file log to qr
                                 qrWalletService.updateFileQrById(uuid.toString(), idQrWallet.toString());
+                                // Amazon S3
+                                UUID idS3 = UUID.randomUUID();
+                                Thread thread = new Thread(() -> {
+                                });
+                                thread.start();
+                                amazonS3Service.uploadFile(idS3.toString(), file);
                             } else {
                                 entity.setFileAttachmentId("");
                             }
@@ -1464,6 +1470,12 @@ public class QrWalletController {
 
                                 // update file log to qr
                                 qrWalletService.updateFileQrById(ids.toString(), idQrWallet.toString());
+                                // Amazon S3
+                                UUID idS3 = UUID.randomUUID();
+                                Thread thread = new Thread(() -> {
+                                });
+                                thread.start();
+                                amazonS3Service.uploadFile(idS3.toString(), file);
                             } else {
                                 entity.setFileAttachmentId("");
                             }
@@ -1568,7 +1580,6 @@ public class QrWalletController {
                     entity.setTheme(Integer.parseInt(themeDTO));
                     entity.setIsPublic(Integer.parseInt(isPublicDTO));
 
-
                     // save image
                     String fileName = StringUtils.cleanPath(file.getOriginalFilename());
                     if (!file.getOriginalFilename().isEmpty()) {
@@ -1580,6 +1591,12 @@ public class QrWalletController {
 
                         // update file log to qr
                         qrWalletService.updateFileQrById(uuid.toString(), idQrWallet.toString());
+                        // Amazon S3
+                        UUID idS3 = UUID.randomUUID();
+                        Thread thread = new Thread(() -> {
+                        });
+                        thread.start();
+                        amazonS3Service.uploadFile(idS3.toString(), file);
                     } else {
                         entity.setFileAttachmentId("");
                     }
@@ -1694,6 +1711,12 @@ public class QrWalletController {
 
                         // update file log to qr
                         qrWalletService.updateFileQrById(ids.toString(), idQr3.toString());
+                        // Amazon S3
+                        UUID idS3 = UUID.randomUUID();
+                        Thread thread = new Thread(() -> {
+                        });
+                        thread.start();
+                        amazonS3Service.uploadFile(idS3.toString(), file);
                     } else {
                         entity1.setFileAttachmentId("");
                     }
@@ -1721,6 +1744,23 @@ public class QrWalletController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
+    @GetMapping("/qr-wallet/{qrWalletId}")
+    public ResponseEntity<Object> getQrWalletDetail(@PathVariable String qrWalletId) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            QrWalletEntity qrWallet = qrWalletService.getQrWalletDetail(qrWalletId);
+            result = qrWallet;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getQrWalletData: ERROR: " + e.getMessage() + " at " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @GetMapping("/qr-wallet/{qrWalletId}/data")
     public ResponseEntity<Object> getQrWalletData(@PathVariable String qrWalletId) {
         Object result = null;
@@ -1781,6 +1821,7 @@ public class QrWalletController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
     @GetMapping("/qr-wallets/public")
     public ResponseEntity<Object> getAllPublicQrWallets(
             @RequestParam String userId,
@@ -1921,6 +1962,7 @@ public class QrWalletController {
         g2d.dispose();
         return outputImage;
     }
+
     @GetMapping("/qr-wallets/private")
     public ResponseEntity<Object> getAllPrivateQrWallets(
             @RequestParam String userId,

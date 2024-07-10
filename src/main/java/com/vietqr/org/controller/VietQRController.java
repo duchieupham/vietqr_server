@@ -602,6 +602,11 @@ public class VietQRController {
 											String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
 											content = traceId;
 										}
+										if (accountBankEntity.getBankAccount().equals("4144898989")) {
+											content = !StringUtil.isNullOrEmpty(dto.getContent()) ?
+													(dto.getContent() + " " + "Ghe Massage AeonBT")
+											: "Ghe Massage AeonBT" ;
+										}
 										VietQRMMSRequestDTO requestDTO = new VietQRMMSRequestDTO();
 										requestDTO.setToken(tokenBankDTO.getAccess_token());
 										requestDTO.setTerminalId(terminalBankEntity.getTerminalId());
@@ -683,6 +688,13 @@ public class VietQRController {
 								String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
 								content = traceId;
 							}
+
+							if (accountBankEntity.getBankAccount().equals("4144898989")) {
+								content = !StringUtil.isNullOrEmpty(dto.getContent()) ?
+										(dto.getContent() + " " + "Ghe Massage AeonBT")
+										: "Ghe Massage AeonBT" ;
+							}
+
 							LocalDateTime currentDateTime = LocalDateTime.now();
 							long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
 							VietQRMMSCreateDTO vietQRMMSCreateDTO = new VietQRMMSCreateDTO();

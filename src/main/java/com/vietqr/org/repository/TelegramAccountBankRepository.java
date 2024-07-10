@@ -46,4 +46,8 @@ public interface TelegramAccountBankRepository extends JpaRepository<TelegramAcc
     @Query(value = "SELECT bank_id FROM telegram_account_bank "
             + "WHERE bank_id = :bankId AND telegram_id = :id LIMIT 1", nativeQuery = true)
     String checkExistedBankId(String bankId, String id);
+
+
+    @Query(value = "SELECT COUNT(id) FROM telegram_account_bank WHERE telegram_id = :telegramId", nativeQuery = true)
+    int countByTelegramId(@Param("telegramId") String telegramId);
 }

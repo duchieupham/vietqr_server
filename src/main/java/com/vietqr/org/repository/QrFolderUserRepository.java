@@ -20,7 +20,13 @@ public interface QrFolderUserRepository extends JpaRepository<QrFolderUserEntity
     @Modifying
     @Query(value = "INSERT INTO qr_folder_user (id, qr_folder_id, user_id) " +
             "VALUES (:id, :qrFolderId, :userId)", nativeQuery = true)
-    void insertQrWalletFolder(
+    void insertQrWalletFolder(String id, String qrFolderId, String userId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "INSERT INTO qr_folder_user (id, qr_folder_id, user_id) " +
+            "VALUES (:id, :qrFolderId, :userId)", nativeQuery = true)
+    void addUserAdmin(
             @Param("id") String id,
             @Param("qrFolderId") String qrFolderId,
             @Param("userId") String userId);
@@ -57,7 +63,7 @@ public interface QrFolderUserRepository extends JpaRepository<QrFolderUserEntity
             "IFNULL(TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))), 'Undefined') AS fullName, " +
             "IFNULL(ai.img_id, '') AS imageId " +
             "FROM qr_folder_user qfu " +
-            "INNER JOIN qr_user qu ON qfu.user_id = qu.user_id " +
+            "INNER JOIN qr_user qu ON (qfu.qr_folder_id = qu.qr_folder_id AND qfu.user_id = qu.user_id) " +
             "LEFT JOIN account_information ai ON ai.user_id = qfu.user_id " +
             "WHERE qfu.qr_folder_id = :folderId " +
             "UNION " +
@@ -69,32 +75,22 @@ public interface QrFolderUserRepository extends JpaRepository<QrFolderUserEntity
             "WHERE qf.id = :folderId", nativeQuery = true)
     List<IUserRoleDTO> findUserRolesByFolderId(@Param("folderId") String folderId);
 
-    @Query(value = "SELECT * FROM (" +
-            "SELECT DISTINCT qfu.user_id AS userId, qu.role AS role, " +
-            "IFNULL(TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))), 'Undefined') AS fullName, " +
+    @Query(value = "SELECT DISTINCT qfu.user_id AS userId, qu.role AS role, " +
+            "IFNULL(TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), " +
+            "TRIM(ai.first_name))), 'Undefined') AS fullName, " +
             "IFNULL(ai.img_id, '') AS imageId, " +
             "IFNULL(al.phone_no, '') AS phoneNo " +
             "FROM qr_folder_user qfu " +
-            "INNER JOIN qr_user qu ON qfu.user_id = qu.user_id " +
+            "INNER JOIN qr_user qu ON (qfu.qr_folder_id = qu.qr_folder_id AND qfu.user_id = qu.user_id) " +
             "LEFT JOIN account_information ai ON ai.user_id = qfu.user_id " +
             "LEFT JOIN account_login al ON al.id = qfu.user_id " +
             "WHERE qfu.qr_folder_id = :folderId " +
-            "AND (TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))) LIKE %:value%) " +
-            "UNION " +
-            "SELECT DISTINCT qf.user_id AS userId, 'ADMIN' AS role, " +
-            "IFNULL(TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))), 'Undefined') AS fullName, " +
-            "IFNULL(ai.img_id, '') AS imageId, " +
-            "IFNULL(al.phone_no, '') AS phoneNo " +
-            "FROM qr_folder qf " +
-            "LEFT JOIN account_information ai ON ai.user_id = qf.user_id " +
-            "LEFT JOIN account_login al ON al.id = qf.user_id " +
-            "WHERE qf.id = :folderId " +
-            "AND (TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))) LIKE %:value%)" +
-            ") AS subquery " +
+            "AND (TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), " +
+            "TRIM(ai.first_name))) LIKE %:value%) " +
             "ORDER BY " +
             "CASE " +
             "WHEN role = 'ADMIN' THEN 1 " +
-            "WHEN role = 'EDITOR' THEN 2 " +
+            "WHEN role IN ('EDITOR', 'MANAGER') THEN 2 " +
             "WHEN role = 'VIEWER' THEN 3 " +
             "ELSE 4 " +
             "END, role " +
@@ -107,7 +103,7 @@ public interface QrFolderUserRepository extends JpaRepository<QrFolderUserEntity
     @Query(value = "SELECT COUNT(*) FROM (" +
             "SELECT qfu.user_id " +
             "FROM qr_folder_user qfu " +
-            "INNER JOIN qr_user qu ON qfu.user_id = qu.user_id " +
+            "INNER JOIN qr_user qu ON (qfu.qr_folder_id = qu.qr_folder_id AND qfu.user_id = qu.user_id) " +
             "LEFT JOIN account_information ai ON ai.user_id = qfu.user_id " +
             "WHERE qfu.qr_folder_id = :folderId " +
             "AND (TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))) LIKE %:value%) " +
@@ -128,7 +124,8 @@ public interface QrFolderUserRepository extends JpaRepository<QrFolderUserEntity
     @Query(value = "DELETE FROM qr_folder_user WHERE qr_folder_id = :qrFolderId AND user_id = :userId", nativeQuery = true)
     void deleteUserFromFolder(@Param("qrFolderId") String qrFolderId, @Param("userId") String userId);
 
-
+    @Query(value = "SELECT COUNT(id) FROM qr_folder_user WHERE qr_folder_id = :qrFolderId AND user_id = :userId", nativeQuery = true)
+    int countUserInFolder(@Param("qrFolderId") String qrFolderId, @Param("userId") String userId);
 //    @Query(nativeQuery = true, name = "QrFolderUser.findUserRolesByFolderId")
 //    List<IUserRoleDTO> findUserRolesByFolderId(@Param("folderId") String folderId);
 }

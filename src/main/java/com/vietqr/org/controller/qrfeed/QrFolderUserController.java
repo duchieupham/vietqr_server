@@ -9,6 +9,7 @@ import com.vietqr.org.entity.qrfeed.QrFolderEntity;
 import com.vietqr.org.service.AccountInformationService;
 import com.vietqr.org.service.qrfeed.QrFolderService;
 import com.vietqr.org.service.qrfeed.QrFolderUserService;
+import com.vietqr.org.service.qrfeed.QrUserService;
 import com.vietqr.org.service.qrfeed.QrWalletService;
 import com.vietqr.org.util.StringUtil;
 import org.apache.log4j.Logger;
@@ -31,6 +32,9 @@ public class QrFolderUserController {
 
     @Autowired
     QrFolderUserService qrFolderUserService;
+
+    @Autowired
+    QrUserService qrUserService;
 
     @Autowired
     QrWalletService qrWalletService;
@@ -68,7 +72,7 @@ public class QrFolderUserController {
         HttpStatus httpStatus = null;
         try {
             qrFolderUserService.updateUserRoles(dto.getFolderId(), dto.getUserRoles());
-
+            qrUserService.updateRoleUser(dto.getFolderId(), dto.getUserRoles());
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
@@ -84,8 +88,12 @@ public class QrFolderUserController {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            qrFolderUserService.updateUserRole(dto.getFolderId(), dto.getUserId(), dto.getRole());
-
+            String role = dto.getRole();
+            if ("MANAGER".equalsIgnoreCase(role)) {
+                role = "EDITOR";
+            }
+            qrFolderUserService.updateUserRole(dto.getFolderId(), dto.getUserId(), role);
+            qrUserService.updateRoleUser(dto.getFolderId(), dto.getUserId(), role);
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
@@ -186,7 +194,6 @@ public class QrFolderUserController {
         HttpStatus httpStatus = null;
         Gson gson = new Gson();
         try {
-
             QrInFolderResponseDTO data = new QrInFolderResponseDTO();
 
             // get information about folder
@@ -196,7 +203,28 @@ public class QrFolderUserController {
             List<ListQrWalletDTO> dataList = new ArrayList<>();
             List<IListQrWalletDTO> infos = new ArrayList<>();
 
-            infos = qrWalletService.getQrWalletNoPagingAll(value);
+            switch (type) {
+                case 0:
+                    // get qr type 0
+                    infos = qrWalletService.getQrWalletLink(folderId);
+                    break;
+                case 1:
+                    // get qr type 1
+                    infos = qrWalletService.getQrWalletText(folderId);
+                    break;
+                case 2:
+                    // get qr type 2
+                    infos = qrWalletService.getQrWalletVCard(folderId);
+                    break;
+                case 3:
+                    // get qr type 3
+                    infos = qrWalletService.getQrWalletVietQR(folderId);
+                    break;
+                case 9:
+                    infos = qrWalletService.getQrWalletNoPagingAll(folderId);
+                    break;
+            }
+
             dataList = infos.stream().map(item -> {
                 ListQrWalletDTO listQrWalletDTO = new ListQrWalletDTO();
                 listQrWalletDTO.setId(item.getId());
@@ -207,6 +235,8 @@ public class QrFolderUserController {
                 listQrWalletDTO.setTimeCreate(item.getTimeCreate());
                 listQrWalletDTO.setContent(item.getContent());
                 listQrWalletDTO.setData(item.getData());
+                listQrWalletDTO.setVlue(item.getVlue());
+                listQrWalletDTO.setFileAttachmentId(item.getFileAttachmentId());
                 return listQrWalletDTO;
             }).collect(Collectors.toList());
 
@@ -249,12 +279,14 @@ public class QrFolderUserController {
             logger.info("Request to remove user from folder. Folder ID: " + dto.getFolderId() + ", User ID: " + dto.getUserId());
 
             // Check for null or empty values
-            if (dto.getFolderId() == null || dto.getFolderId().isEmpty() || dto.getUserId() == null || dto.getUserId().isEmpty()) {
-                result = new ResponseMessageDTO("FAILED", "E05");
+            if (dto.getFolderId() == null || dto.getFolderId().isEmpty() ||
+                    dto.getUserId() == null || dto.getUserId().isEmpty()) {
+                result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
                 logger.error("Folder ID or User ID is null or empty.");
             } else {
                 qrFolderUserService.deleteUserFromFolder(dto.getFolderId(), dto.getUserId());
+                qrUserService.deleteUserFromFolder(dto.getFolderId(), dto.getUserId());
                 result = new ResponseMessageDTO("SUCCESS", "");
                 httpStatus = HttpStatus.OK;
             }

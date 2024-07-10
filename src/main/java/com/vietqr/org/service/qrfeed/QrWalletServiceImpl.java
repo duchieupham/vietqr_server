@@ -100,8 +100,27 @@ public class QrWalletServiceImpl implements QrWalletService {
     }
 
     @Override
-    public List<IListQrWalletDTO> getQrWalletNoPagingAll(String value) {
-        return repo.getQrWalletNoPagingAll(value);
+    public List<IListQrWalletDTO> getQrWalletNoPagingAll(String folderId) {
+        return repo.getQrWalletNoPagingAll(folderId);
+    }
+
+    @Override
+    public List<IListQrWalletDTO> getQrWalletVietQR(String folderId) {
+        return repo.getQrWalletVietQR(folderId);
+    }
+    @Override
+    public List<IListQrWalletDTO> getQrWalletVCard(String folderId) {
+        return repo.getQrWalletVCard(folderId);
+    }
+
+    @Override
+    public List<IListQrWalletDTO> getQrWalletText(String folderId) {
+        return repo.getQrWalletText(folderId);
+    }
+
+    @Override
+    public List<IListQrWalletDTO> getQrWalletLink(String folderId) {
+        return repo.getQrWalletLink(folderId);
     }
 
     @Override
@@ -274,6 +293,11 @@ public class QrWalletServiceImpl implements QrWalletService {
     @Override
     public QrWalletEntity getQrWalletById(String qrWalletId) {
         return repo.getQrWalletById(qrWalletId);
+    }
+
+    @Override
+    public QrWalletEntity getQrWalletDetail(String qrWalletId) {
+        return repo.getQrWalletDetail(qrWalletId);
     }
 
 

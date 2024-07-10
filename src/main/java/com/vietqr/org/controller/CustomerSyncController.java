@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import com.vietqr.org.dto.*;
 import com.vietqr.org.util.StringUtil;
 import org.apache.log4j.Logger;
@@ -92,16 +93,17 @@ public class CustomerSyncController {
     @GetMapping("admin/customer-sync/sorted")
     public ResponseEntity<Object> getCustomerSyncList(
             @RequestParam int type,
+            @RequestParam int typeSearch,
             @RequestParam int page,
             @RequestParam int size,
             @RequestParam String value) {
+        // type dùng để lấy ra danh sách
         // type = 9 => all
         // type = 0 => api service
         // type = 1 => ecommerce
         Object result = null;
         HttpStatus httpStatus = null;
         PageResDTO pageResDTO = new PageResDTO();
-
         try {
             int totalElements = 0;
             int offset = (page - 1) * size;
@@ -109,15 +111,32 @@ public class CustomerSyncController {
             List<CustomerSyncListDTO> data = new ArrayList<>();
             List<CustomerSyncListDTO> infos = new ArrayList<>();
 
+            // type dùng để lấy ra danh sách
             if (type == 9) {
-                data = customerSyncService.getCustomerSyncListByMerchant(value, offset, size);
-                totalElements = customerSyncService.countCustomerSyncListByMerchant(value);
+                // type = 9 => search all
+                if (typeSearch == 9 || typeSearch == 0) { // type = 0 => search merchant name
+                    data = customerSyncService.getCustomerSyncListByMerchant(value, offset, size);
+                    totalElements = customerSyncService.countCustomerSyncListByMerchant(value);
+                } else if (typeSearch == 9 || typeSearch == 1) { // type = 1 => search bank Account
+                    data = customerSyncService.getCustomerSyncListByMerchantByBankAccount(value, offset, size);
+                    totalElements = customerSyncService.countCustomerSyncListByMerchantByBankAccount(value);
+                }
             } else if (type == 0) {
-                data = customerSyncService.getCustomerSyncAPIListByMerchant(value, offset, size);
-                totalElements = customerSyncService.countCustomerSyncAPIListByMerchant(value);
+                if (typeSearch == 9 || typeSearch == 0) { // type = 0 => search merchant name
+                    data = customerSyncService.getCustomerSyncAPIListByMerchant(value, offset, size);
+                    totalElements = customerSyncService.countCustomerSyncAPIListByMerchant(value);
+                } else if (typeSearch == 9 || typeSearch == 1) { // type = 1 => search bank Account
+                    data = customerSyncService.getCustomerSyncAPIListByMerchantByBankAccount(value, offset, size);
+                    totalElements = customerSyncService.countCustomerSyncAPIListByMerchantByBankAccount(value);
+                }
             } else if (type == 1) {
-                data = customerSyncService.getCustomerSyncEcListByMerchant(value, offset, size);
-                totalElements = customerSyncService.countCustomerSyncEcListByMerchant(value);
+                if (typeSearch == 9 || typeSearch == 0) { // type = 0 => search merchant name
+                    data = customerSyncService.getCustomerSyncEcListByMerchant(value, offset, size);
+                    totalElements = customerSyncService.countCustomerSyncEcListByMerchant(value);
+                } else if (typeSearch == 9 || typeSearch == 1) { // type = 1 => search bank Account
+                    data = customerSyncService.getCustomerSyncEcListByMerchantByBankAccount(value, offset, size);
+                    totalElements = customerSyncService.countCustomerSyncEcListByMerchantByBankAccount(value);
+                }
             }
 
             PageDTO pageDTO = new PageDTO();
@@ -333,6 +352,7 @@ public class CustomerSyncController {
         }
         return result;
     }
+
     // get systemPassword for customer
     @GetMapping("admin/customer-sync/system-password")
     public ResponseEntity<ResponseMessageDTO> getSystemPasswordForCustomer(

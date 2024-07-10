@@ -60,8 +60,18 @@ public class CustomerSyncServiceImpl implements CustomerSyncService {
     }
 
     @Override
+    public List<CustomerSyncListDTO> getCustomerSyncListByMerchantByBankAccount(String value, int offset, int size) {
+        return repo.getCustomerSyncListByMerchantByBankAccount(value, offset, size);
+    }
+
+    @Override
     public int countCustomerSyncListByMerchant(String value) {
         return repo.countCustomerSyncListByMerchant(value);
+    }
+
+    @Override
+    public int countCustomerSyncListByMerchantByBankAccount(String value) {
+        return repo.countCustomerSyncListByMerchantByBankAccount(value);
     }
 
     @Override
@@ -70,8 +80,18 @@ public class CustomerSyncServiceImpl implements CustomerSyncService {
     }
 
     @Override
+    public int countCustomerSyncAPIListByMerchantByBankAccount(String value) {
+        return repo.countCustomerSyncAPIListByMerchantByBankAccount(value);
+    }
+
+    @Override
     public int countCustomerSyncEcListByMerchant(String value) {
         return repo.countCustomerSyncEcListByMerchant(value);
+    }
+
+    @Override
+    public int countCustomerSyncEcListByMerchantByBankAccount(String value) {
+        return repo.countCustomerSyncEcListByMerchantByBankAccount(value);
     }
 
     @Override
@@ -136,6 +156,11 @@ public class CustomerSyncServiceImpl implements CustomerSyncService {
     }
 
     @Override
+    public List<CustomerSyncListDTO> getCustomerSyncAPIListByMerchantByBankAccount(String value, int offset, int size) {
+        return repo.getCustomerSyncAPIListByMerchantByBankAccount(value, offset, size);
+    }
+
+    @Override
     public List<CustomerSyncListDTO> getCustomerSyncEcList() {
         return repo.getCustomerSyncEcList();
     }
@@ -143,6 +168,11 @@ public class CustomerSyncServiceImpl implements CustomerSyncService {
     @Override
     public List<CustomerSyncListDTO> getCustomerSyncEcListByMerchant(String value, int offset, int size) {
         return repo.getCustomerSyncEcListByMerchant(value, offset, size);
+    }
+
+    @Override
+    public List<CustomerSyncListDTO> getCustomerSyncEcListByMerchantByBankAccount(String value, int offset, int size) {
+        return repo.getCustomerSyncEcListByMerchantByBankAccount(value, offset, size);
     }
 
 
