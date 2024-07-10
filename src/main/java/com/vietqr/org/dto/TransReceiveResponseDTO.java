@@ -10,6 +10,7 @@ public interface TransReceiveResponseDTO {
     // type
     // time created
     // time paid
+    String getTransactionId();
     String getReferenceNumber();
 
     String getOrderId();

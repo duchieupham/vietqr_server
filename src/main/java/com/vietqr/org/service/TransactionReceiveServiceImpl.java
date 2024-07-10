@@ -88,6 +88,11 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public TransactionReceiveEntity getTransactionReceiveByRefNumber(String referenceNumber, String transType) {
+        return repo.getTransactionReceiveByRefNumber(referenceNumber, transType, DateTimeUtil.get2LastPartition());
+    }
+
+    @Override
     public TransactionReceiveEntity getTransactionReceiveByOrderId(String orderId) {
         return repo.getTransactionReceiveByOrderId(orderId, DateTimeUtil.get2LastPartition());
     }

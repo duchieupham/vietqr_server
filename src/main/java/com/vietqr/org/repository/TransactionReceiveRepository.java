@@ -1346,7 +1346,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
         TransactionQRDTO getTransactionQRById(@Param(value = "id") String id);
 
         // check
-        @Query(value = "SELECT a.reference_number as referenceNumber, a.order_id as orderId, a.amount, a.content, "
+        @Query(value = "SELECT a.id AS transactionId, a.reference_number as referenceNumber, a.order_id as orderId, a.amount, a.content, "
                         + "a.trans_type as transType, a.status, a.type, a.time as timeCreated, a.time_paid as timePaid "
                         + "FROM transaction_receive a "
                         + "LEFT JOIN account_bank_receive b "
@@ -1376,7 +1376,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 @Param(value = "toDate") long toDate);
 
         // check
-        @Query(value = "SELECT a.reference_number as referenceNumber, a.order_id as orderId, a.amount, a.content, "
+        @Query(value = "SELECT a.id AS transactionId, a.reference_number as referenceNumber, a.order_id as orderId, a.amount, a.content, "
                         + "a.trans_type as transType, a.status, a.type, a.time as timeCreated, a.time_paid as timePaid "
                         + "FROM transaction_receive a "
                         + "LEFT JOIN account_bank_receive b "
@@ -2630,5 +2630,10 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "ORDER BY RAND() "
                 + "LIMIT 1", nativeQuery = true)
         CustomerInvoiceInfoDataDTO getTransactionReceiveCusInfo(String customerId);
+
+        @Query(value = "SELECT a.* FROM transaction_receive a WHERE a.time >= :time "
+                + "AND a.reference_number = :referenceNumber "
+                + "AND a.trans_type = :transType LIMIT 1", nativeQuery = true)
+        TransactionReceiveEntity getTransactionReceiveByRefNumber(String referenceNumber, String transType, long time);
 }
 

@@ -59,7 +59,7 @@ public class BearerTokenController {
 			try {
 				// Do something with username and password
 				result = new TokenDTO(getJWTToken(Base64.getEncoder().encodeToString(username.getBytes())), "Bearer",
-						59);
+						300);
 				httpStatus = HttpStatus.OK;
 			} catch (Exception e) {
 				httpStatus = HttpStatus.BAD_REQUEST;
@@ -180,7 +180,7 @@ public class BearerTokenController {
 								.collect(Collectors.toList()))
 				.claim("user", username)
 				.setIssuedAt(new Date(System.currentTimeMillis()))
-				.setExpiration(new Date(System.currentTimeMillis() + 59000))
+				.setExpiration(new Date(System.currentTimeMillis() + 300000))
 				.signWith(SignatureAlgorithm.HS512,
 						secretKey.getBytes())
 				.compact();
