@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.*;
@@ -110,6 +109,9 @@ public class TransactionController {
 
     @Autowired
     private SocketHandler socketHandler;
+
+    @Autowired
+    private TransactionRefundService transactionRefundService;
 
     @Autowired
     AccountCustomerBankService accountCustomerBankService;
@@ -2808,12 +2810,46 @@ public class TransactionController {
                             // 5. Find transaction
                             // 0: get by orderId
                             // 1: get by referenceNumber
-                            List<TransReceiveResponseDTO> response = new ArrayList<>();
+                            List<TransReceiveResponseDTO> responseDTOs = new ArrayList<>();
+                            List<TransReceiveResponseCheckOrderDTO> response = new ArrayList<>();
+                            List<IRefundCheckOrderDTO> iRefundCheckOrderDTOS = new ArrayList<>();
                             if (dto.getValue() != null && !dto.getValue().trim().isEmpty()) {
                                 if (dto.getType() != null && dto.getType() == 0) {
-                                    response = transactionReceiveService.getTransByOrderId(dto.getValue(),
+                                    responseDTOs = transactionReceiveService.getTransByOrderId(dto.getValue(),
                                             dto.getBankAccount());
-                                    if (response != null && !response.isEmpty()) {
+                                    if (responseDTOs != null && !responseDTOs.isEmpty()) {
+                                        iRefundCheckOrderDTOS = transactionRefundService
+                                                .getTotalRefundedByTransactionId(responseDTOs.stream()
+                                                        .map(TransReceiveResponseDTO::getTransactionId)
+                                                        .collect(Collectors.toList()));
+                                        Map<String, RefundCheckOrderDTO> refundCheckOrderDTOMap;
+                                        if (iRefundCheckOrderDTOS != null && !iRefundCheckOrderDTOS.isEmpty()) {
+                                            refundCheckOrderDTOMap = iRefundCheckOrderDTOS.stream()
+                                                    .collect(Collectors.toMap(IRefundCheckOrderDTO::getTransactionId, item ->
+                                                            new RefundCheckOrderDTO(item.getTransactionId(), item.getRefundCount(),
+                                                                    item.getAmountRefunded())));
+                                        } else {
+                                            refundCheckOrderDTOMap = new HashMap<>();
+                                        }
+                                        response = responseDTOs.stream().map(item -> {
+                                            TransReceiveResponseCheckOrderDTO checkOrderDTO = new TransReceiveResponseCheckOrderDTO();
+                                            checkOrderDTO.setAmount(item.getAmount());
+                                            checkOrderDTO.setStatus(item.getStatus());
+                                            checkOrderDTO.setNote(StringUtil.getValueNullChecker(item.getNote()));
+                                            checkOrderDTO.setContent(item.getContent());
+                                            checkOrderDTO.setOrderId(item.getOrderId());
+                                            checkOrderDTO.setReferenceNumber(item.getReferenceNumber());
+                                            checkOrderDTO.setTerminalCode(StringUtil.getValueNullChecker(item.getTerminalCode()));
+                                            checkOrderDTO.setTimeCreated(item.getTimeCreated());
+                                            checkOrderDTO.setTimePaid(item.getTimePaid());
+                                            checkOrderDTO.setType(item.getType());
+                                            checkOrderDTO.setTransType(item.getTransType());
+                                            RefundCheckOrderDTO refundCheckOrderDTO = refundCheckOrderDTOMap
+                                                    .getOrDefault(item.getTransactionId(), new RefundCheckOrderDTO(item.getTransactionId()));
+                                            checkOrderDTO.setRefundCount(refundCheckOrderDTO.getRefundCount());
+                                            checkOrderDTO.setAmountRefunded(refundCheckOrderDTO.getAmountRefunded());
+                                            return checkOrderDTO;
+                                        }).collect(Collectors.toList());
                                         result = response;
                                         httpStatus = HttpStatus.OK;
                                     } else {
@@ -2822,9 +2858,41 @@ public class TransactionController {
                                         result = new ResponseMessageDTO("FAILED", "E96");
                                     }
                                 } else if (dto.getType() != null && dto.getType() == 1) {
-                                    response = transactionReceiveService.getTransByReferenceNumber(dto.getValue(),
+                                    responseDTOs = transactionReceiveService.getTransByReferenceNumber(dto.getValue(),
                                             dto.getBankAccount());
-                                    if (response != null && !response.isEmpty()) {
+                                    if (responseDTOs != null && !responseDTOs.isEmpty()) {
+                                        iRefundCheckOrderDTOS = transactionRefundService
+                                                .getTotalRefundedByTransactionId(responseDTOs.stream()
+                                                        .map(TransReceiveResponseDTO::getTransactionId)
+                                                        .collect(Collectors.toList()));
+                                        Map<String, RefundCheckOrderDTO> refundCheckOrderDTOMap;
+                                        if (iRefundCheckOrderDTOS != null && !iRefundCheckOrderDTOS.isEmpty()) {
+                                            refundCheckOrderDTOMap = iRefundCheckOrderDTOS.stream()
+                                                    .collect(Collectors.toMap(IRefundCheckOrderDTO::getTransactionId, item ->
+                                                            new RefundCheckOrderDTO(item.getTransactionId(), item.getRefundCount(),
+                                                                    item.getAmountRefunded())));
+                                        } else {
+                                            refundCheckOrderDTOMap = new HashMap<>();
+                                        }
+                                        response = responseDTOs.stream().map(item -> {
+                                            TransReceiveResponseCheckOrderDTO checkOrderDTO = new TransReceiveResponseCheckOrderDTO();
+                                            checkOrderDTO.setAmount(item.getAmount());
+                                            checkOrderDTO.setStatus(item.getStatus());
+                                            checkOrderDTO.setNote(StringUtil.getValueNullChecker(item.getNote()));
+                                            checkOrderDTO.setContent(item.getContent());
+                                            checkOrderDTO.setOrderId(item.getOrderId());
+                                            checkOrderDTO.setReferenceNumber(item.getReferenceNumber());
+                                            checkOrderDTO.setTerminalCode(StringUtil.getValueNullChecker(item.getTerminalCode()));
+                                            checkOrderDTO.setTimeCreated(item.getTimeCreated());
+                                            checkOrderDTO.setTimePaid(item.getTimePaid());
+                                            checkOrderDTO.setType(item.getType());
+                                            checkOrderDTO.setTransType(item.getTransType());
+                                            RefundCheckOrderDTO refundCheckOrderDTO = refundCheckOrderDTOMap
+                                                    .getOrDefault(item.getTransactionId(), new RefundCheckOrderDTO(item.getTransactionId()));
+                                            checkOrderDTO.setRefundCount(refundCheckOrderDTO.getRefundCount());
+                                            checkOrderDTO.setAmountRefunded(refundCheckOrderDTO.getAmountRefunded());
+                                            return checkOrderDTO;
+                                        }).collect(Collectors.toList());
                                         result = response;
                                         httpStatus = HttpStatus.OK;
                                     } else {

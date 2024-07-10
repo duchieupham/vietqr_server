@@ -46,6 +46,8 @@ public interface TransactionReceiveService {
 
         public TransactionReceiveEntity getTransactionReceiveByRefNumber(String referenceNumber);
 
+        public TransactionReceiveEntity getTransactionReceiveByRefNumber(String referenceNumber, String transType);
+
         public TransactionReceiveEntity getTransactionReceiveByOrderId(String orderId);
 
         public TransactionCheckStatusDTO getTransactionCheckStatus(String transactionId);
