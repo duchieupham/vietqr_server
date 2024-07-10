@@ -59,7 +59,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "WHEN a.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.phoneNo'))) " +
             "WHEN a.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankAccount'))) " +
             "ELSE NULL " +
-            "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId " +
+            "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId, a.style AS style, a.theme AS theme " +
             "FROM qr_wallet a " +
             "INNER JOIN qr_wallet_folder c ON c.qr_wallet_id = a.id " +
             "INNER JOIN qr_user b ON (c.qr_folder_id = b.qr_folder_id AND a.user_id =  b.user_id) " +
@@ -77,7 +77,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "WHEN a.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.phoneNo'))) " +
             "WHEN a.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankAccount'))) " +
             "ELSE NULL " +
-            "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId " +
+            "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId, a.style AS style, a.theme AS theme " +
             "FROM qr_wallet a " +
             "INNER JOIN qr_wallet_folder c ON c.qr_wallet_id = a.id " +
             "INNER JOIN qr_user b ON (c.qr_folder_id = b.qr_folder_id AND a.user_id =  b.user_id) " +
@@ -95,7 +95,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "WHEN a.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.phoneNo'))) " +
             "WHEN a.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankAccount'))) " +
             "ELSE NULL " +
-            "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId " +
+            "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId, a.style AS style, a.theme AS theme " +
             "FROM qr_wallet a " +
             "INNER JOIN qr_wallet_folder c ON c.qr_wallet_id = a.id " +
             "INNER JOIN qr_user b ON (c.qr_folder_id = b.qr_folder_id AND a.user_id =  b.user_id) " +
@@ -113,7 +113,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "WHEN a.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.phoneNo'))) " +
             "WHEN a.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankAccount'))) " +
             "ELSE NULL " +
-            "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId " +
+            "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId, a.style AS style, a.theme AS theme " +
             "FROM qr_wallet a " +
             "INNER JOIN qr_wallet_folder c ON c.qr_wallet_id = a.id " +
             "INNER JOIN qr_user b ON (c.qr_folder_id = b.qr_folder_id AND a.user_id =  b.user_id) " +
@@ -131,7 +131,7 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
             "WHEN a.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.phoneNo'))) " +
             "WHEN a.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(a.qr_data, '$.bankAccount'))) " +
             "ELSE NULL " +
-            "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId " +
+            "END AS data, a.value AS vlue, a.file_attachment_id AS fileAttachmentId, a.style AS style, a.theme AS theme " +
             "FROM qr_wallet a " +
             "INNER JOIN qr_wallet_folder c ON c.qr_wallet_id = a.id " +
             "INNER JOIN qr_user b ON (c.qr_folder_id = b.qr_folder_id AND a.user_id =  b.user_id) " +

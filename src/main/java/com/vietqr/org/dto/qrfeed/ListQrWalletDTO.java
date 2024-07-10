@@ -11,8 +11,10 @@ public class ListQrWalletDTO {
     private String data;
     private String vlue;
     private String fileAttachmentId;
+    private int style;
+    private int theme;
 
-    public ListQrWalletDTO(String id, String description, String isPublic, String qrType, String timeCreate, String title, String content, String data, String vlue, String fileAttachmentId) {
+    public ListQrWalletDTO(String id, String description, String isPublic, String qrType, String timeCreate, String title, String content, String data, String vlue, String fileAttachmentId, int style, int theme) {
         this.id = id;
         this.description = description;
         this.isPublic = isPublic;
@@ -23,6 +25,24 @@ public class ListQrWalletDTO {
         this.data = data;
         this.vlue = vlue;
         this.fileAttachmentId = fileAttachmentId;
+        this.style = style;
+        this.theme = theme;
+    }
+
+    public int getStyle() {
+        return style;
+    }
+
+    public void setStyle(int style) {
+        this.style = style;
+    }
+
+    public int getTheme() {
+        return theme;
+    }
+
+    public void setTheme(int theme) {
+        this.theme = theme;
     }
 
     public String getVlue() {

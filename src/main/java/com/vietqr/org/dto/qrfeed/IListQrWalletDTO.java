@@ -11,4 +11,6 @@ public interface IListQrWalletDTO {
     String getData();
     String getVlue();
     String getFileAttachmentId();
+    int getStyle();
+    int getTheme();
 }
