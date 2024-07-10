@@ -33,6 +33,10 @@ import com.vietqr.org.entity.*;
 import com.vietqr.org.security.JWTAuthorizationFilter;
 import com.vietqr.org.service.*;
 import com.vietqr.org.service.bidv.CustomerVaService;
+import com.vietqr.org.service.social.DiscordAccountBankService;
+import com.vietqr.org.service.social.DiscordService;
+import com.vietqr.org.service.social.SlackAccountBankService;
+import com.vietqr.org.service.social.SlackService;
 import com.vietqr.org.util.*;
 import com.vietqr.org.util.bank.bidv.BIDVUtil;
 
@@ -200,6 +204,18 @@ public class TransactionBankController {
 
 	@Autowired
 	LarkService larkService;
+
+	@Autowired
+	SlackAccountBankService slackAccountBankService;
+
+	@Autowired
+	SlackService slackService;
+
+	@Autowired
+	DiscordAccountBankService discordAccountBankService;
+
+	@Autowired
+	DiscordService discordService;
 
 	private String getUsernameFromToken(String token) {
 		String result = "";
@@ -1986,6 +2002,57 @@ public class TransactionBankController {
 					}
 				}
 
+				// DO INSERT SLACK BY QVAN
+				List<String> slackWebhooks = slackAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+				if (slackWebhooks != null && !slackWebhooks.isEmpty()) {
+					SlackUtil slackUtil = new SlackUtil();
+					for (String webhook : slackWebhooks) {
+						try {
+							SlackEntity slackEntity = slackService.getSlackByWebhook(webhook);
+							if (slackEntity != null) {
+								List<String> notificationTypes = new ObjectMapper().readValue(slackEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+								List<String> notificationContents = new ObjectMapper().readValue(slackEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionReceiveEntity);
+								if (sendNotification) {
+									String slackMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+									slackUtil.sendMessageToSlack(slackMsg, webhook);
+								}
+							}
+						} catch (JsonProcessingException e) {
+							// Log error but do not interrupt the transaction process
+							logger.error("Error processing JSON for Slack notification: " + e.getMessage());
+						} catch (Exception e) {
+							// Log any other errors
+							logger.error("Error sending Slack notification: " + e.getMessage());
+						}
+					}
+				}
+
+				// DO INSERT DISCORD BY QVAN
+				List<String> discordWebhooks = discordAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+				if (discordWebhooks != null && !discordWebhooks.isEmpty()) {
+					DiscordUtil discordUtil = new DiscordUtil();
+					for (String webhook : discordWebhooks) {
+						try {
+							DiscordEntity discordEntity = discordService.getDiscordByWebhook(webhook);
+							if (discordEntity != null) {
+								List<String> notificationTypes = new ObjectMapper().readValue(discordEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+								List<String> notificationContents = new ObjectMapper().readValue(discordEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionReceiveEntity);
+								if (sendNotification) {
+									String discordMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+									discordUtil.sendMessageToDiscord(discordMsg, webhook);
+								}
+							}
+						} catch (JsonProcessingException e) {
+							// Log error but do not interrupt the transaction process
+							logger.error("Error processing JSON for Discord notification: " + e.getMessage());
+						} catch (Exception e) {
+							// Log any other errors
+							logger.error("Error sending Discord notification: " + e.getMessage());
+						}
+					}
+				}
 
 				Map<String, String> data = new HashMap<>();
 				data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
@@ -2253,6 +2320,59 @@ public class TransactionBankController {
 						}
 					}
 				}
+
+				// DO INSERT SLACK BY QVAN
+				List<String> slackWebhooks = slackAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+				if (slackWebhooks != null && !slackWebhooks.isEmpty()) {
+					SlackUtil slackUtil = new SlackUtil();
+					for (String webhook : slackWebhooks) {
+						try {
+							SlackEntity slackEntity = slackService.getSlackByWebhook(webhook);
+							if (slackEntity != null) {
+								List<String> notificationTypes = new ObjectMapper().readValue(slackEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+								List<String> notificationContents = new ObjectMapper().readValue(slackEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionReceiveEntity);
+								if (sendNotification) {
+									String slackMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+									slackUtil.sendMessageToSlack(slackMsg, webhook);
+								}
+							}
+						} catch (JsonProcessingException e) {
+							// Log error but do not interrupt the transaction process
+							logger.error("Error processing JSON for Slack notification: " + e.getMessage());
+						} catch (Exception e) {
+							// Log any other errors
+							logger.error("Error sending Slack notification: " + e.getMessage());
+						}
+					}
+				}
+
+				// DO INSERT DISCORD BY QVAN
+				List<String> discordWebhooks = discordAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+				if (discordWebhooks != null && !discordWebhooks.isEmpty()) {
+					DiscordUtil discordUtil = new DiscordUtil();
+					for (String webhook : discordWebhooks) {
+						try {
+							DiscordEntity discordEntity = discordService.getDiscordByWebhook(webhook);
+							if (discordEntity != null) {
+								List<String> notificationTypes = new ObjectMapper().readValue(discordEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+								List<String> notificationContents = new ObjectMapper().readValue(discordEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionReceiveEntity);
+								if (sendNotification) {
+									String discordMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+									discordUtil.sendMessageToDiscord(discordMsg, webhook);
+								}
+							}
+						} catch (JsonProcessingException e) {
+							// Log error but do not interrupt the transaction process
+							logger.error("Error processing JSON for Discord notification: " + e.getMessage());
+						} catch (Exception e) {
+							// Log any other errors
+							logger.error("Error sending Discord notification: " + e.getMessage());
+						}
+					}
+				}
+
 			}
 		} else {
 			logger.info("transaction-sync - no have terminal is empty.");
@@ -2489,6 +2609,58 @@ public class TransactionBankController {
 						logger.error("Error processing JSON for Google Chat notification: " + e.getMessage());
 					} catch (Exception e) {
 						logger.error("Error sending Google Chat notification: " + e.getMessage());
+					}
+				}
+			}
+
+			// DO INSERT SLACK BY QVAN
+			List<String> slackWebhooks = slackAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+			if (slackWebhooks != null && !slackWebhooks.isEmpty()) {
+				SlackUtil slackUtil = new SlackUtil();
+				for (String webhook : slackWebhooks) {
+					try {
+						SlackEntity slackEntity = slackService.getSlackByWebhook(webhook);
+						if (slackEntity != null) {
+							List<String> notificationTypes = new ObjectMapper().readValue(slackEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+							List<String> notificationContents = new ObjectMapper().readValue(slackEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+							boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionReceiveEntity);
+							if (sendNotification) {
+								String slackMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+								slackUtil.sendMessageToSlack(slackMsg, webhook);
+							}
+						}
+					} catch (JsonProcessingException e) {
+						// Log error but do not interrupt the transaction process
+						logger.error("Error processing JSON for Slack notification: " + e.getMessage());
+					} catch (Exception e) {
+						// Log any other errors
+						logger.error("Error sending Slack notification: " + e.getMessage());
+					}
+				}
+			}
+
+			// DO INSERT DISCORD BY QVAN
+			List<String> discordWebhooks = discordAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+			if (discordWebhooks != null && !discordWebhooks.isEmpty()) {
+				DiscordUtil discordUtil = new DiscordUtil();
+				for (String webhook : discordWebhooks) {
+					try {
+						DiscordEntity discordEntity = discordService.getDiscordByWebhook(webhook);
+						if (discordEntity != null) {
+							List<String> notificationTypes = new ObjectMapper().readValue(discordEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+							List<String> notificationContents = new ObjectMapper().readValue(discordEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+							boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionReceiveEntity);
+							if (sendNotification) {
+								String discordMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+								discordUtil.sendMessageToDiscord(discordMsg, webhook);
+							}
+						}
+					} catch (JsonProcessingException e) {
+						// Log error but do not interrupt the transaction process
+						logger.error("Error processing JSON for Discord notification: " + e.getMessage());
+					} catch (Exception e) {
+						// Log any other errors
+						logger.error("Error sending Discord notification: " + e.getMessage());
 					}
 				}
 			}
@@ -3012,6 +3184,55 @@ public class TransactionBankController {
 						}
 					}
 				}
+
+				// DO INSERT SLACK BY QVAN
+				List<String> slackWebhooks = slackAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+				if (slackWebhooks != null && !slackWebhooks.isEmpty()) {
+					SlackUtil slackUtil = new SlackUtil();
+					for (String webhook : slackWebhooks) {
+						try {
+							SlackEntity slackEntity = slackService.getSlackByWebhook(webhook);
+							if (slackEntity != null) {
+								List<String> notificationTypes = new ObjectMapper().readValue(slackEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+								List<String> notificationContents = new ObjectMapper().readValue(slackEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
+								if (sendNotification) {
+									String slackMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+									slackUtil.sendMessageToSlack(slackMsg, webhook);
+								}
+							}
+						} catch (JsonProcessingException e) {
+							logger.error("Error processing JSON for Slack notification: " + e.getMessage());
+						} catch (Exception e) {
+							logger.error("Error sending Slack notification: " + e.getMessage());
+						}
+					}
+				}
+
+				// DO INSERT DISCORD BY QVAN
+				List<String> discordWebhooks = discordAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+				if (discordWebhooks != null && !discordWebhooks.isEmpty()) {
+					DiscordUtil discordUtil = new DiscordUtil();
+					for (String webhook : discordWebhooks) {
+						try {
+							DiscordEntity discordEntity = discordService.getDiscordByWebhook(webhook);
+							if (discordEntity != null) {
+								List<String> notificationTypes = new ObjectMapper().readValue(discordEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+								List<String> notificationContents = new ObjectMapper().readValue(discordEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
+								if (sendNotification) {
+									String discordMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+									discordUtil.sendMessageToDiscord(discordMsg, webhook);
+								}
+							}
+						} catch (JsonProcessingException e) {
+							logger.error("Error processing JSON for Discord notification: " + e.getMessage());
+						} catch (Exception e) {
+							logger.error("Error sending Discord notification: " + e.getMessage());
+						}
+					}
+				}
+
 				// }
 
 				// textToSpeechService.delete(requestId);
@@ -3308,10 +3529,8 @@ public class TransactionBankController {
 								}
 							}
 						} catch (JsonProcessingException e) {
-							// Log error but do not interrupt the transaction process
 							logger.error("Error processing JSON for Lark notification: " + e.getMessage());
 						} catch (Exception e) {
-							// Log any other errors
 							logger.error("Error sending Lark notification: " + e.getMessage());
 						}
 					}
@@ -3353,6 +3572,59 @@ public class TransactionBankController {
 							logger.error("Error processing JSON for Google Chat notification: " + e.getMessage());
 						} catch (Exception e) {
 							logger.error("Error sending Google Chat notification: " + e.getMessage());
+						}
+					}
+				}
+
+				// DO INSERT SLACK BY QVAN
+				List<String> slackWebhooks = slackAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+				if (slackWebhooks != null && !slackWebhooks.isEmpty()) {
+					SlackUtil slackUtil = new SlackUtil();
+					for (String webhook : slackWebhooks) {
+						try {
+							SlackEntity slackEntity = slackService.getSlackByWebhook(webhook);
+							if (slackEntity != null) {
+								List<String> notificationTypes = new ObjectMapper().readValue(slackEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+								List<String> notificationContents = new ObjectMapper().readValue(slackEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
+								if (sendNotification) {
+									String slackMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+									slackUtil.sendMessageToSlack(slackMsg, webhook);
+								}
+							}
+						} catch (JsonProcessingException e) {
+							// Log error but do not interrupt the transaction process
+							logger.error("Error processing JSON for Slack notification: " + e.getMessage());
+						} catch (Exception e) {
+							// Log any other errors
+							logger.error("Error sending Slack notification: " + e.getMessage());
+						}
+					}
+				}
+
+
+				// DO INSERT DISCORD BY QVAN
+				List<String> discordWebhooks = discordAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+				if (discordWebhooks != null && !discordWebhooks.isEmpty()) {
+					DiscordUtil discordUtil = new DiscordUtil();
+					for (String webhook : discordWebhooks) {
+						try {
+							DiscordEntity discordEntity = discordService.getDiscordByWebhook(webhook);
+							if (discordEntity != null) {
+								List<String> notificationTypes = new ObjectMapper().readValue(discordEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+								List<String> notificationContents = new ObjectMapper().readValue(discordEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
+								if (sendNotification) {
+									String discordMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+									discordUtil.sendMessageToDiscord(discordMsg, webhook);
+								}
+							}
+						} catch (JsonProcessingException e) {
+							// Log error but do not interrupt the transaction process
+							logger.error("Error processing JSON for Discord notification: " + e.getMessage());
+						} catch (Exception e) {
+							// Log any other errors
+							logger.error("Error sending Discord notification: " + e.getMessage());
 						}
 					}
 				}
@@ -3713,6 +3985,59 @@ public class TransactionBankController {
 					}
 				}
 			}
+
+			// DO INSERT SLACK BY QVAN
+			List<String> slackWebhooks = slackAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+			if (slackWebhooks != null && !slackWebhooks.isEmpty()) {
+				SlackUtil slackUtil = new SlackUtil();
+				for (String webhook : slackWebhooks) {
+					try {
+						SlackEntity slackEntity = slackService.getSlackByWebhook(webhook);
+						if (slackEntity != null) {
+							List<String> notificationTypes = new ObjectMapper().readValue(slackEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+							List<String> notificationContents = new ObjectMapper().readValue(slackEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+							boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
+							if (sendNotification) {
+								String slackMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+								slackUtil.sendMessageToSlack(slackMsg, webhook);
+							}
+						}
+					} catch (JsonProcessingException e) {
+						// Log error but do not interrupt the transaction process
+						logger.error("Error processing JSON for Slack notification: " + e.getMessage());
+					} catch (Exception e) {
+						// Log any other errors
+						logger.error("Error sending Slack notification: " + e.getMessage());
+					}
+				}
+			}
+
+			// DO INSERT DISCORD BY QVAN
+			List<String> discordWebhooks = discordAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+			if (discordWebhooks != null && !discordWebhooks.isEmpty()) {
+				DiscordUtil discordUtil = new DiscordUtil();
+				for (String webhook : discordWebhooks) {
+					try {
+						DiscordEntity discordEntity = discordService.getDiscordByWebhook(webhook);
+						if (discordEntity != null) {
+							List<String> notificationTypes = new ObjectMapper().readValue(discordEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+							List<String> notificationContents = new ObjectMapper().readValue(discordEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+							boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
+							if (sendNotification) {
+								String discordMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+								discordUtil.sendMessageToDiscord(discordMsg, webhook);
+							}
+						}
+					} catch (JsonProcessingException e) {
+						// Log error but do not interrupt the transaction process
+						logger.error("Error processing JSON for Discord notification: " + e.getMessage());
+					} catch (Exception e) {
+						// Log any other errors
+						logger.error("Error sending Discord notification: " + e.getMessage());
+					}
+				}
+			}
+
 
 			// }
 		}
