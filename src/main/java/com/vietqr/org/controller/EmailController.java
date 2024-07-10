@@ -46,7 +46,7 @@ public class EmailController {
         HttpStatus httpStatus = null;
         try {
             emailService.sendEmail(
-                    "at050801@gmail.com",
+                    "anh.ttq@vietqr.vn",
                     "Xác thực OTP lấy key active",
                     "Mã OTP của bạn là: 123456.");
 

@@ -20,7 +20,7 @@ public class EmailServiceImpl implements EmailService {
     @Autowired
     private AmazonSimpleEmailService amazonSimpleEmailService;
 
-    private static final String FROM_ADDRESS = "anh.ttq@vietqr.vn";
+    private static final String FROM_ADDRESS = "linh.npn@vietqr.vn";
 
     @Override
     public void sendEmail(String to, String subject, String body) {
