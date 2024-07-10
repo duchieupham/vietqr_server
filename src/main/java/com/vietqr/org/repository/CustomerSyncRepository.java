@@ -252,7 +252,7 @@ public interface CustomerSyncRepository extends JpaRepository<CustomerSyncEntity
             + "WHERE (a.user_id IS NOT NULL AND a.user_id <> '') ", nativeQuery = true)
     List<CustomerSyncListDTO> getCustomerSyncEcList();
 
-    @Query(value = "SELECT a.id, COALESCE(a.merchant, ''), a.information AS url, a.ip_address AS ip, a.port, "
+    @Query(value = "SELECT a.id, COALESCE(a.merchant, '') AS merchant, a.information AS url, a.ip_address AS ip, a.port, "
             + "CASE "
             + "WHEN a.active = true THEN 1 "
             + "WHEN a.active = false THEN 0 "
@@ -266,7 +266,7 @@ public interface CustomerSyncRepository extends JpaRepository<CustomerSyncEntity
             + "LIMIT :offset, :size ", nativeQuery = true)
     List<CustomerSyncListDTO> getCustomerSyncEcListByMerchant(String value, int offset, int size);
 
-    @Query(value = "SELECT a.id, COALESCE(a.merchant, ''), a.information AS url, a.ip_address AS ip, a.port, "
+    @Query(value = "SELECT a.id, COALESCE(a.merchant, '') AS merchant, a.information AS url, a.ip_address AS ip, a.port, "
             + "CASE "
             + "WHEN a.active = true THEN 1 "
             + "WHEN a.active = false THEN 0 "
