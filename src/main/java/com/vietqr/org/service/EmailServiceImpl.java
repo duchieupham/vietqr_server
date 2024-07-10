@@ -4,9 +4,14 @@ import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
 import com.amazonaws.services.simpleemail.model.*;
 import com.vietqr.org.util.EmailConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -20,23 +25,32 @@ public class EmailServiceImpl implements EmailService {
     @Autowired
     private AmazonSimpleEmailService amazonSimpleEmailService;
 
+    @Autowired
+    private MailSender mailSender;
+
+
     private static final String FROM_ADDRESS = "linh.npn@vietqr.vn";
 
     @Override
-    public void sendEmail(String to, String subject, String body) {
+    public void sendEmail(String from, String to, String subject, String body) {
         SendEmailRequest request = new SendEmailRequest()
                 .withDestination(new Destination()
-                .withToAddresses(to))
+                        .withToAddresses(to))
                 .withMessage(new Message()
                         .withBody(new Body().withHtml(new Content().withCharset("UTF-8").withData(body)))
                         .withSubject(new Content().withCharset("UTF-8").withData(subject)))
-                .withSource(FROM_ADDRESS);
+                .withSource(from);
         try {
             amazonSimpleEmailService.sendEmail(request);
             System.out.println("Email sent successfully to " + to);
         } catch (Exception ex) {
             System.err.println("The email was not sent. Error message: " + ex.getMessage());
         }
+    }
+
+    @Override
+    public void sendMessage(SimpleMailMessage simpleMailMessage) {
+        this.mailSender.send(simpleMailMessage);
     }
 
     @Override
@@ -48,4 +62,5 @@ public class EmailServiceImpl implements EmailService {
         message.setText(text);
         emailSender.send(message);
     }
+
 }
