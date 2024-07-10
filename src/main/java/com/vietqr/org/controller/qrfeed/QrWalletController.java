@@ -2092,4 +2092,41 @@ public class QrWalletController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
+    @GetMapping("qr-feed/folder-wallets")
+    public ResponseEntity<Object> getQrWalletsByFolderStatus(
+            @RequestParam String folderId,
+            @RequestParam String userId,
+            @RequestParam(required = false) Integer addedToFolder,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int size) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            int totalElements;
+            List<IQrWalletFolderDTO> qrWallets;
+            int offset = (page - 1) * size;
+
+            totalElements = qrWalletService.countQrWalletsByFolderStatus(userId, folderId, addedToFolder);
+            qrWallets = qrWalletService.findQrWalletsByFolderStatus(userId, folderId, addedToFolder, offset, size);
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageDTO.setTotalElement(totalElements);
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElements, size));
+
+            PageResDTO pageResDTO = new PageResDTO();
+            pageResDTO.setMetadata(pageDTO);
+            pageResDTO.setData(qrWallets);
+
+            result = pageResDTO;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getQrWalletsByFolderStatus: ERROR: " + e.getMessage() + " at " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 }
