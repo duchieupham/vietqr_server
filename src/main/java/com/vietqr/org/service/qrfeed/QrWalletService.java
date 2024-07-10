@@ -4,6 +4,8 @@ import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.qrfeed.QrWalletEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -109,4 +111,8 @@ public interface QrWalletService {
 
     QrWalletEntity getQrWalletDetail(String qrWalletId);
 
+    int countQrWalletsByFolderStatus(String userId, String folderId,Integer addedToFolder);
+
+
+    List<IQrWalletFolderDTO> findQrWalletsByFolderStatus(String userId, String folderId, Integer addedToFolder, int offset, int size);
 }
