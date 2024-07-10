@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -54,6 +55,7 @@ import com.vietqr.org.security.JWTAuthorizationFilter;
 @ComponentScan(basePackages = { "com.vietqr.org" })
 @Import(WebSocketConfig.class)
 @EnableWebMvc
+@EnableAsync
 public class VietqrApplication extends SpringBootServletInitializer implements WebMvcConfigurer {
 
 	@Bean

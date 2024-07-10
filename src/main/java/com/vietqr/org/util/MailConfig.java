@@ -27,28 +27,28 @@ public class MailConfig {
 
     @Value("${aws.secret.key}")
     private String awsSecretKey;
-
-    @Bean
-    public JavaMailSender getJavaMailSender() {
-        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost("email-smtp.ap-southeast-2.amazonaws.com");
-        mailSender.setPort(587); // Hoặc 465 nếu bạn muốn sử dụng SSL/TLS
-
-        mailSender.setUsername(mailUsername);
-        mailSender.setPassword(mailPassword);
-
-        Properties props = mailSender.getJavaMailProperties();
-        props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-//        Nếu dùng cổng 465, thay đổi thành
-//        props.put("mail.smtp.ssl.enable", "true");
-        props.put("mail.debug", "true");
-
-        return mailSender;
-    }
-
-    @Primary
+//
+//    @Bean
+//    public JavaMailSender getJavaMailSender() {
+//        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+//        mailSender.setHost("email-smtp.ap-southeast-2.amazonaws.com");
+//        mailSender.setPort(587); // Hoặc 465 nếu bạn muốn sử dụng SSL/TLS
+//
+//        mailSender.setUsername(mailUsername);
+//        mailSender.setPassword(mailPassword);
+//
+//        Properties props = mailSender.getJavaMailProperties();
+//        props.put("mail.transport.protocol", "smtp");
+//        props.put("mail.smtp.auth", "true");
+//        props.put("mail.smtp.starttls.enable", "true");
+////        Nếu dùng cổng 465, thay đổi thành
+////        props.put("mail.smtp.ssl.enable", "true");
+//        props.put("mail.debug", "true");
+//
+//        return mailSender;
+//    }
+//
+//    @Primary
     @Bean
     public AmazonSimpleEmailService amazonSimpleEmailService() {
         BasicAWSCredentials awsCredentials = new BasicAWSCredentials(awsAccessKey, awsSecretKey);
@@ -57,5 +57,26 @@ public class MailConfig {
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
                 .withRegion("ap-southeast-1")
                 .build();
+    }
+
+    @Bean
+    public JavaMailSender getJavaMailSender() {
+        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+        mailSender.setHost("smtp.gmail.com");
+        mailSender.setPort(465);
+
+        mailSender.setUsername("anh.ttq@vietqr.vn");
+        mailSender.setPassword("bmgt dpoh ufzm xvwj");
+
+        Properties props = mailSender.getJavaMailProperties();
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.starttls.required", "true");
+        props.put("mail.smtp.connectiontimeout", "5000");
+        props.put("mail.smtp.timeout", "5000");
+        props.put("mail.smtp.writetimeout", "5000");
+
+        return mailSender;
     }
 }

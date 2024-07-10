@@ -19,6 +19,21 @@ public class EmailController {
     @Autowired
     private EmailService emailService;
 
+    @GetMapping("/send-email-example")
+    public ResponseEntity<Object> sendEmail(@RequestParam String to, @RequestParam String subject, @RequestParam String text) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            emailService.sendSimpleMessage(to, subject, text);
+            result = new ResponseMessageDTO("SUCCESS", "Sent mail thành công.");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED" + e.getMessage(), "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @GetMapping("sendEmail")
     public ResponseEntity<Object> sendEmail() {
         Object result = null;
@@ -74,7 +89,7 @@ public class EmailController {
 
             result = new ResponseMessageDTO("SUCCESS", "Sent mail thành công.");
             httpStatus = HttpStatus.OK;
-        }catch (Exception e) {
+        } catch (Exception e) {
             result = new ResponseMessageDTO("FAILED" + e.getMessage(), "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
