@@ -17,15 +17,15 @@ public class QrWalletFolderServiceImpl implements QrWalletFolderService {
     public void addQrWalletIds(String qrFolderId, List<String> qrWalletIds, String userId) {
         for (String qrWalletId : qrWalletIds) {
             String id = UUID.randomUUID().toString();
-            repo.insertQrWalletFolder(id, qrFolderId, qrWalletId, userId);
+            repo.insertQrWalletFolder(id, qrFolderId, qrWalletId);
         }
     }
 
     @Override
-    public void addQrWalletsToFolder(String folderId, String userId, List<String> qrIds) {
+    public void addQrWalletsToFolder(String folderId, List<String> qrIds) {
         for (String qrWalletId : qrIds) {
             String id = UUID.randomUUID().toString();
-            repo.insertQrWalletFolder(id, folderId, qrWalletId, userId);
+            repo.insertQrWalletFolder(id, folderId, qrWalletId);
         }
     }
 
@@ -43,6 +43,16 @@ public class QrWalletFolderServiceImpl implements QrWalletFolderService {
     }
 
     @Override
+    public List<String> checkQrExists(String folderId, String userId) {
+        return repo.checkQrExists(folderId, userId);
+    }
+
+    @Override
+    public List<String> getToInsert(String folderId, String userId) {
+        return repo.getToInsert(folderId, userId);
+    }
+
+    @Override
     public void deleteQrsInFolder(List<String> qrIds) {
         repo.deleteQrsInFolder(qrIds);
     }
@@ -51,6 +61,5 @@ public class QrWalletFolderServiceImpl implements QrWalletFolderService {
     public List<String> getListQrsInFolder(String folderId, String userId, List<String> qrIds) {
         return repo.getListQrsInFolder(folderId, userId, qrIds);
     }
-
 
 }
