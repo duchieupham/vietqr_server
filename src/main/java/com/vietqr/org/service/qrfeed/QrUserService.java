@@ -15,4 +15,6 @@ public interface QrUserService {
     void deleteUserFromFolder(String folderId, String userId);
 
     void updateRoleUser(String folderId, List<UserRoleDTO> userRoles);
+
+    String checkRoleEdit(String userID, String folderId);
 }

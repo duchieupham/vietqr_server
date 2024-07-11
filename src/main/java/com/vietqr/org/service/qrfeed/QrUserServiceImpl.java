@@ -35,4 +35,9 @@ public class QrUserServiceImpl implements QrUserService {
             repo.updateRoleUser(folderId, userRole.getUserId(), userRole.getRole());
         }
     }
+
+    @Override
+    public String checkRoleEdit(String userID, String folderId) {
+        return repo.checkRoleEdit(userID, folderId);
+    }
 }

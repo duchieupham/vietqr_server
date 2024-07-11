@@ -11,8 +11,9 @@ public class ListQrFolderDTO implements Serializable {
     private String userId;
     private int countUsers;
     private int countQrs;
+    private int isEdit;
 
-    public ListQrFolderDTO(String id, long timeCreated, String title, String description, String userId, int countUsers, int countQrs) {
+    public ListQrFolderDTO(String id, long timeCreated, String title, String description, String userId, int countUsers, int countQrs, int isEdit) {
         this.id = id;
         this.timeCreated = timeCreated;
         this.title = title;
@@ -20,9 +21,16 @@ public class ListQrFolderDTO implements Serializable {
         this.userId = userId;
         this.countUsers = countUsers;
         this.countQrs = countQrs;
+        this.isEdit = isEdit;
     }
 
+    public int getIsEdit() {
+        return isEdit;
+    }
 
+    public void setIsEdit(int isEdit) {
+        this.isEdit = isEdit;
+    }
 
     public int getCountUsers() {
         return countUsers;

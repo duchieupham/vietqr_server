@@ -83,7 +83,7 @@ public class QrFolderController {
 
             //insert admin vao bang qr_folder_user;
             QrFolderUserEntity qrFolderUserEntity = new QrFolderUserEntity();
-            String qrFolderUserEntityId  = UUID.randomUUID().toString();
+            String qrFolderUserEntityId = UUID.randomUUID().toString();
             qrFolderUserEntity.setId(qrFolderUserEntityId);
             qrFolderUserEntity.setQrFolderId(idQrFolder.toString());
             qrFolderUserEntity.setUserId(dto.getUserId());
@@ -129,6 +129,7 @@ public class QrFolderController {
             List<IListQrFolderDTO> info = new ArrayList<>();
             totalElement = qrFolderService.countQrFolder(value, userId);
 
+
             info = qrFolderService.getListFolderForUser(value, offset, size, userId);
             data = info.stream().map(item -> {
                 ListQrFolderDTO dto = new ListQrFolderDTO();
@@ -142,6 +143,19 @@ public class QrFolderController {
                 dto.setCountQrs(countQR);
                 int countUsers = qrFolderUserService.countUsersFolder(item.getId());
                 dto.setCountUsers(countUsers);
+
+                // check xem users đó có role là admin và editor thì cho edit
+                String checkEdit = qrUserService.checkRoleEdit(userId, item.getId());
+
+                if (checkEdit.equals("ADMIN")) {
+                    dto.setIsEdit(1);
+                } else if (checkEdit.equals("EDITOR")) {
+                    dto.setIsEdit(2);
+                } else if (checkEdit.equals("MANAGER")) {
+                    dto.setIsEdit(2);
+                } else if (checkEdit.equals("VIEWER")) {
+                    dto.setIsEdit(3);
+                }
                 return dto;
             }).collect(Collectors.toList());
 
