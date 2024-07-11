@@ -45,4 +45,8 @@ public interface QrUserRepository extends JpaRepository<QrUserEntity, String> {
     @Query(value = "DELETE FROM qr_user "
             + "WHERE user_id = :userId AND qr_folder_id = :folderId ", nativeQuery = true)
     void deleteUserFromFolder(String folderId, String userId);
+
+    @Query(value = "SELECT role FROM qr_user "
+            + "WHERE (user_id = :userID) AND (qr_folder_id = :folderId) ", nativeQuery = true)
+    String checkRoleEdit(String userID, String folderId);
 }
