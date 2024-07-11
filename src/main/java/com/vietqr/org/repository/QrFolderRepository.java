@@ -54,7 +54,7 @@ public interface QrFolderRepository extends JpaRepository<QrFolderEntity, String
 
 
     @Query(value = "SELECT user_id as userId, id AS folderId, title AS titleFolder, description AS descriptionFolder " +
-            "FROM viet_qr.qr_folder " +
+            "FROM qr_folder " +
             "WHERE id = :folderId ", nativeQuery = true)
     IFolderInformationDTO getQrInFolder(String folderId);
 

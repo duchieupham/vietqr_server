@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -48,7 +49,13 @@ public class QrWalletFolderController {
                 result = new ResponseMessageDTO("FAILED", "E149");
                 httpStatus = HttpStatus.BAD_REQUEST;
             } else {
-                qrWalletFolderService.addQrWalletsToFolder(dto.getFolderId(), dto.getUserId(), dto.getQrIds());
+                // check exist
+                List<String> checkQrExists = qrWalletFolderService.checkQrExists(dto.getFolderId(), dto.getUserId());
+                List<String> copy = new ArrayList<String>(checkQrExists);
+                copy.retainAll(dto.getQrIds());
+                dto.getQrIds().removeAll(copy);
+
+                qrWalletFolderService.addQrWalletsToFolder(dto.getFolderId(), dto.getQrIds());
 
                 result = new ResponseMessageDTO("SUCCESS", "");
                 httpStatus = HttpStatus.OK;
