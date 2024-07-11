@@ -1,5 +1,6 @@
 package com.vietqr.org.controller.qrfeed;
 
+import com.vietqr.org.dto.DeleteQrFolder;
 import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.dto.qrfeed.AddQrToFolderRequestDTO;
 import com.vietqr.org.entity.qrfeed.QrFolderEntity;
@@ -46,7 +47,7 @@ public class QrWalletFolderController {
             if (Objects.isNull(entity)) {
                 result = new ResponseMessageDTO("FAILED", "E149");
                 httpStatus = HttpStatus.BAD_REQUEST;
-            }else {
+            } else {
                 qrWalletFolderService.addQrWalletsToFolder(dto.getFolderId(), dto.getUserId(), dto.getQrIds());
 
                 result = new ResponseMessageDTO("SUCCESS", "");
@@ -60,6 +61,26 @@ public class QrWalletFolderController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @DeleteMapping("qr-feed/delete-qrs-folder")
+    public ResponseEntity<Object> deleteQrsInFolder(
+            @RequestBody DeleteQrFolder dto
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            List<String> getQrsFolder = qrWalletFolderService.getListQrsInFolder(dto.getFolderId(), dto.getUserId(), dto.getQrIds());
+
+            qrWalletFolderService.deleteQrsInFolder(getQrsFolder);
+
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("delete QR in folder: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED" + e.getMessage(), "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 
 
 }
