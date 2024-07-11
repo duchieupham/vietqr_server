@@ -49,4 +49,9 @@ public interface QrWalletFolderRepository extends JpaRepository<QrWalletFolderEn
     @Query(value = "DELETE FROM qr_wallet_folder WHERE qr_folder_id = :qrFolderId", nativeQuery = true)
     void deleteByQrFolderId(@Param("qrFolderId") String qrFolderId);
 
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM qr_wallet_folder WHERE qr_wallet_id IN :qrWalletIds", nativeQuery = true)
+    void deleteQrItemsInAllFolders(@Param("qrWalletIds") List<String> qrWalletIds);
+
 }
