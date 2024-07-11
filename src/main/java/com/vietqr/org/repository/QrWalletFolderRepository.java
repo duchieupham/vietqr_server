@@ -1,5 +1,6 @@
 package com.vietqr.org.repository;
 
+import com.google.auto.value.extension.memoized.Memoized;
 import com.vietqr.org.entity.qrfeed.QrWalletFolderEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -54,4 +55,18 @@ public interface QrWalletFolderRepository extends JpaRepository<QrWalletFolderEn
     @Query(value = "DELETE FROM qr_wallet_folder WHERE qr_wallet_id IN :qrWalletIds", nativeQuery = true)
     void deleteQrItemsInAllFolders(@Param("qrWalletIds") List<String> qrWalletIds);
 
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM qr_wallet_folder WHERE qr_wallet_id IN :qrIds", nativeQuery = true)
+    void deleteQrsInFolder(List<String> qrIds);
+
+    @Modifying
+    @Query(value = "SELECT qwf.qr_wallet_id " +
+            "FROM qr_wallet_folder qwf " +
+            "INNER JOIN qr_user qu ON qwf.qr_folder_id = qu.qr_folder_id " +
+            "WHERE qu.user_id = :userId " +
+            "AND qu.role = 'ADMIN' " +
+            "AND qwf.qr_folder_id = :folderId " +
+            "AND qwf.qr_wallet_id IN (:qrIds)", nativeQuery = true)
+    List<String> getListQrsInFolder(String folderId,String userId, List<String> qrIds);
 }

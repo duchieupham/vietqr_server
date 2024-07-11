@@ -42,5 +42,15 @@ public class QrWalletFolderServiceImpl implements QrWalletFolderService {
         return repo.countQrFolder(folderId);
     }
 
+    @Override
+    public void deleteQrsInFolder(List<String> qrIds) {
+        repo.deleteQrsInFolder(qrIds);
+    }
+
+    @Override
+    public List<String> getListQrsInFolder(String folderId, String userId, List<String> qrIds) {
+        return repo.getListQrsInFolder(folderId, userId, qrIds);
+    }
+
 
 }
