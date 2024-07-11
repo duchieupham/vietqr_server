@@ -595,19 +595,34 @@ public class QrWalletController {
 //                qrWalletEntity.setValue(qr);
 //                qrWalletEntity.setQrType(2);
 
-                TempVietQRDTO temp = new TempVietQRDTO();
-                temp.setBankAccount(dto.getBankAccount());
-                temp.setContent(dto.getContent());
-                temp.setAmount(dto.getAmount());
-                temp.setBankCode(dto.getBankCode());
-                temp.setUserBankName(dto.getUserBankName());
-                temp.setValue(qrGenerate);
+                //  get bank short name
+                String bankShortName = bankTypeService.getBankShortNameByBankCode(dto.getBankCode());
 
-                qrWalletEntity.setQrData(temp.toString());
+//                TempVietQRDTO temp = new TempVietQRDTO();
+//                temp.setBankAccount(dto.getBankAccount());
+//                temp.setContent(dto.getContent());
+//                temp.setAmount(dto.getAmount());
+//                temp.setBankCode(dto.getBankCode());
+//                temp.setUserBankName(dto.getUserBankName());
+//                temp.setValue(qrGenerate);
+
+                TempVietQRDTO tempVietQRDTO = new TempVietQRDTO();
+                tempVietQRDTO.setTitle(dto.getQrName());
+                tempVietQRDTO.setDescription(dto.getQrDescription());
+                tempVietQRDTO.setBankAccount(dto.getBankAccount());
+                tempVietQRDTO.setUserBankName(dto.getUserBankName());
+                tempVietQRDTO.setBankCode(dto.getBankCode());
+                tempVietQRDTO.setBankShortName(bankShortName);
+                tempVietQRDTO.setAmount(dto.getAmount());
+                tempVietQRDTO.setContent(dto.getContent());
+                tempVietQRDTO.setValue(qrGenerate);
+
+                qrWalletEntity.setQrData(tempVietQRDTO.toString());
                 qrWalletEntity.setUserData("{"
                         + "\"userId\": \"" + dto.getUserId() + "\", "
                         + "\"bankAccount\": \"" + dto.getBankAccount() + "\", "
                         + "\"userBankName\": \"" + dto.getUserBankName() + "\", "
+                        + "\"bankShortName\": \"" + bankShortName + "\", "
                         + "\"qrType\": \"" + 3 + "\", "
                         + "\"bankCode\": \"" + dto.getBankCode() + "\""
                         + "}");
