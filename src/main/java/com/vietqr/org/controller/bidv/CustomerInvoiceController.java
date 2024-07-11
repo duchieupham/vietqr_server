@@ -289,10 +289,9 @@ public class CustomerInvoiceController {
                             if (checkExistedCustomerId != null && !checkExistedCustomerId.trim().isEmpty()) {
                                 // check bill_id tồn tại
                                 logger.info("BILL ID: " + dto.getBill_id());
-                                if (dto.getBill_id().startsWith(EnvironmentUtil.getBidvTransactionPrefix())) {
-                                    CustomerInvoiceDataDTO customerInvoiceDataDTO = customerInvoiceService
-                                            .getCustomerInvoiceByBillId(dto.getBill_id());
-                                    if (customerInvoiceDataDTO != null) {
+                                CustomerInvoiceDataDTO customerInvoiceDataDTO = customerInvoiceService
+                                        .getCustomerInvoiceByBillId(dto.getBill_id());
+                                    if (customerInvoiceDataDTO != null && customerInvoiceDataDTO.getQrType() == 1) {
                                         // check invoice đã thanh toán hay chưa
                                         if (customerInvoiceDataDTO.getStatus() == 0) {
                                             // check số tiền có khớp hay không
@@ -354,16 +353,7 @@ public class CustomerInvoiceController {
                                                     "Hóa đơn đã gạch nợ rồi (mỗi hóa đơn chỉ gạch nợ 1 lần)");
                                             httpStatus = HttpStatus.OK;
                                         }
-                                    } else {
-                                        // mã hoá đơn không tồn tại
-                                        result = new ResponseMessageBidvDTO("021",
-                                                "Mã hóa đơn không tồn tại");
-                                        httpStatus = HttpStatus.BAD_REQUEST;
-                                    }
-                                } else {
-                                    CustomerInvoiceDataDTO customerInvoiceDataDTO = customerInvoiceService
-                                            .getCustomerInvoiceByBillId(dto.getBill_id());
-                                    if (customerInvoiceDataDTO != null) {
+                                    } else if (customerInvoiceDataDTO != null && customerInvoiceDataDTO.getQrType() == 0) {
                                         // check invoice đã thanh toán hay chưa
                                         if (customerInvoiceDataDTO.getStatus() == 0) {
                                             // check số tiền có khớp hay không
@@ -416,7 +406,6 @@ public class CustomerInvoiceController {
                                                 "Mã hóa đơn không tồn tại");
                                         httpStatus = HttpStatus.BAD_REQUEST;
                                     }
-                                }
                             } else {
                                 // customer_id không tồn tại
                                 result = new ResponseMessageBidvDTO("011",
@@ -457,8 +446,10 @@ public class CustomerInvoiceController {
                 //
                 if (tempResult.getResult_code().equals("000")) {
 
+                    CustomerInvoiceDataDTO customerInvoiceDataDTO = customerInvoiceService
+                            .getCustomerInvoiceByBillId(dto.getBill_id());
                     // Transaction Receive Entity
-                    if (dto.getBill_id().startsWith(EnvironmentUtil.getBidvTransactionPrefix())) {
+                    if (customerInvoiceDataDTO != null && customerInvoiceDataDTO.getQrType() == 1) {
                         String orderId = "";
                         String sign = "";
                         String rawCode = "";
