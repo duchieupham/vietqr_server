@@ -3,6 +3,8 @@ package com.vietqr.org.service.qrfeed;
 import com.vietqr.org.dto.qrfeed.*;
 import com.vietqr.org.entity.qrfeed.QrFolderEntity;
 import com.vietqr.org.repository.QrFolderRepository;
+import com.vietqr.org.repository.QrWalletFolderRepository;
+import com.vietqr.org.repository.QrWalletRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,12 @@ import java.util.List;
 public class QrFolderServiceImpl implements QrFolderService {
     @Autowired
     QrFolderRepository repo;
+
+    @Autowired
+    QrWalletRepository qrWalletRepository;
+
+    @Autowired
+    QrWalletFolderRepository qrWalletFolderRepository;
 
     @Override
     public int insertQrFolder(QrFolderEntity entity) {
@@ -66,6 +74,13 @@ public class QrFolderServiceImpl implements QrFolderService {
     @Override
     public List<UserDTO> findUsersByPhoneNo(String phoneNo) {
         return repo.findUsersByPhoneNo(phoneNo);
+    }
+
+    @Override
+    public void deleteQrItemsInAllFolders(List<String> ids) {
+
+        qrWalletFolderRepository.deleteQrItemsInAllFolders(ids);
+        qrWalletRepository.deleteByQrWalletIds(ids);
     }
 
 
