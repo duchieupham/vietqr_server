@@ -237,8 +237,8 @@ public class QrFolderUserController {
                 listQrWalletDTO.setData(item.getData());
                 listQrWalletDTO.setVlue(item.getVlue());
                 listQrWalletDTO.setFileAttachmentId(item.getFileAttachmentId());
-                listQrWalletDTO.setStyle(item.getStyle());
-                listQrWalletDTO.setTheme(item.getTheme());
+                listQrWalletDTO.setStyle(String.valueOf(item.getStyle()));
+                listQrWalletDTO.setTheme(String.valueOf(item.getTheme()));
                 return listQrWalletDTO;
             }).collect(Collectors.toList());
 
