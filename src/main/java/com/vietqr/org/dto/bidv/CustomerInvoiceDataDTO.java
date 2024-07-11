@@ -5,6 +5,7 @@ public interface CustomerInvoiceDataDTO {
     public String getBillId();
 
     public Long getAmount();
+    public Integer getQrType();
 
     public int getStatus();
 

@@ -35,7 +35,7 @@ public interface CustomerInvoiceRepository extends JpaRepository<CustomerInvoice
                         @Param(value = "offset") int offset);
 
         @Query(value = "SELECT a.bill_id as billId, a.amount, a.status, a.type, a.name, "
-                        + "a.time_created as timeCreated, a.time_paid as timePaid, "
+                        + "a.time_created as timeCreated, a.time_paid as timePaid, qr_type AS qrType, "
                         + "b.user_bank_name as userBankName, b.bank_account as bankAccount, b.customer_id as customerId "
                         + "FROM customer_invoice a "
                         + "INNER JOIN customer_va b "
