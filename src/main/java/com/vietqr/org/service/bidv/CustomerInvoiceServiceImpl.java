@@ -42,7 +42,7 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
     }
 
     @Override
-    public CustomerInvoiceInfoDataDTO getCustomerInvoiceInfo(String customerId) {
+    public List<CustomerInvoiceInfoDataDTO> getCustomerInvoiceInfo(String customerId) {
         return repo.getCustomerInvoiceInfo(customerId);
     }
 
@@ -59,6 +59,11 @@ public class CustomerInvoiceServiceImpl implements CustomerInvoiceService {
     @Override
     public String getCustomerIdByBillId(String billId) {
         return repo.getCustomerIdByBillId(billId);
+    }
+
+    @Override
+    public void updateInquiredInvoiceByBillIds(int inquired, List<String> billIds) {
+        repo.updateInquiredInvoiceByBillIds(inquired, billIds);
     }
 
     @Override

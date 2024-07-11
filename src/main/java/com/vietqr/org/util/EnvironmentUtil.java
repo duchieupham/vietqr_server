@@ -46,13 +46,13 @@ public class EnvironmentUtil {
     private static final String BIDV_URL_REQUEST_ADD_MERCHANT_UAT = "https://bidv.net:9303/bidvorg/service/open-banking/paygate/virtualAccount/createVAQLBH/v1";
     private static final String BIDV_URL_REQUEST_ADD_MERCHANT_PROD = "https://openapi.bidv.com.vn/bidv/service/open-banking/paygate/createVAQLBH/v1";
 
-    private static final String BIDV_URL_CONFIRM_ADD_MERCHANT_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/confirmVAQLBH/v1";
+    private static final String BIDV_URL_CONFIRM_ADD_MERCHANT_UAT = "https://bidv.net:9303/bidvorg/service/open-banking/paygate/virtualAccount/confirmVAQLBH/v1";
     private static final String BIDV_URL_CONFIRM_ADD_MERCHANT_PROD = "https://openapi.bidv.com.vn/bidv/service/open-banking/paygate/confirmVAQLBH/v1";
 
-    private static final String BIDV_URL_UNREGISTER_MERCHANT_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/deleteVAQLBH/v1";
+    private static final String BIDV_URL_UNREGISTER_MERCHANT_UAT = "https://bidv.net:9303/bidvorg/service/open-banking/paygate/virtualAccount/deleteVAQLBH/v1";
     private static final String BIDV_URL_UNREGISTER_MERCHANT_PROD = "https://openapi.bidv.com.vn/bidv/service/open-banking/paygate/deleteVAQLBH/v1";
 
-    private static final String BIDV_URL_CREATE_VIETQR_VA_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/genVietQR/v1";
+    private static final String BIDV_URL_CREATE_VIETQR_VA_UAT = "https://bidv.net:9303/bidvorg/service/open-banking/paygate/virtualAccount/genVietQR/v1";
     private static final String BIDV_URL_CREATE_VIETQR_VA_PROD = "https://openapi.bidv.com.vn/bidv/service/open-banking/paygate/genVietQR/v1";
 
     private static final String BIDV_LINKED_PAYER_DEBIT_TYPE_ACC_UAT = "810";

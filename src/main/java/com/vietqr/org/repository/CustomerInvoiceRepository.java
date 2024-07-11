@@ -52,10 +52,8 @@ public interface CustomerInvoiceRepository extends JpaRepository<CustomerInvoice
         @Query(value = "SELECT type, amount, bill_id "
                         + "FROM customer_invoice "
                         + "WHERE customer_id = :customerId "
-                        + "AND status = 0 "
-                        + "ORDER BY RAND() "
-                        + "LIMIT 1", nativeQuery = true)
-        CustomerInvoiceInfoDataDTO getCustomerInvoiceInfo(@Param(value = "customerId") String customerId);
+                        + "AND status = 0 ", nativeQuery = true)
+        List<CustomerInvoiceInfoDataDTO> getCustomerInvoiceInfo(@Param(value = "customerId") String customerId);
 
 
         // bỏ inquire = 0
@@ -88,4 +86,11 @@ public interface CustomerInvoiceRepository extends JpaRepository<CustomerInvoice
 
         @Query(value = "SELECT customer_id FROM customer_invoice WHERE bill_id = :billId ", nativeQuery = true)
         String getCustomerIdByBillId(@Param(value = "billId") String billId);
+
+        @Transactional
+        @Modifying
+        @Query(value = "UPDATE customer_invoice "
+                + "SET inquire = :inquired "
+                + "WHERE bill_id IN (:billIds)", nativeQuery = true)
+        void updateInquiredInvoiceByBillIds(int inquired, List<String> billIds);
 }

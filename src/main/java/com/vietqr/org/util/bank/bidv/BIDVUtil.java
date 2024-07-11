@@ -126,12 +126,14 @@ public class BIDVUtil {
     public static String generateUnregisterVaBody(
             String serviceId,
             String channelId,
-            String merchantId) {
+            String merchantId,
+            String tranDate) {
         String result = "";
         result = "{";
         result += "\"serviceId\":" + "\"" + serviceId + "\",";
         result += "\"channelId\":" + "\"" + channelId + "\",";
-        result += "\"merchantId\":" + "\"" + merchantId + "\"";
+        result += "\"merchantId\":" + "\"" + merchantId + "\",";
+        result += "\"tranDate\":" + "\"" + tranDate + "\"";
         result += "}";
         return result;
     }
