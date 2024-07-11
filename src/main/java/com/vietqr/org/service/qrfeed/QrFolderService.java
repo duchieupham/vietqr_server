@@ -28,4 +28,6 @@ public interface QrFolderService {
 
 
     List<UserDTO> findUsersByPhoneNo(String phoneNo);
+
+    void deleteQrItemsInAllFolders(List<String> ids);
 }

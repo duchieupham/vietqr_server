@@ -243,27 +243,55 @@ public class QrFolderController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @DeleteMapping("/delete-folder")
-    public ResponseEntity<Object> deleteFolder(@RequestParam String folderId, @RequestParam boolean deleteItems) {
-        HttpStatus httpStatus = null;
-        Object result = null;
-        try {
-            QrFolderEntity folder = qrFolderService.getFolderById(folderId);
-            if (deleteItems) {
-                List<String> qrItems = qrWalletService.getQrWalletIdsByFolderId(folderId);
-                qrWalletService.deleteQrItemsByIds(qrItems);
-            }
-            qrWalletFolderRepository.deleteByQrFolderId(folderId);
-            qrFolderService.deleteFolderById(folderId);
-            result = new ResponseMessageDTO("SUCCESS", "");
-            httpStatus = HttpStatus.OK;
-        } catch (Exception e) {
-            logger.error("deleteFolder Error at " + e.getMessage() + System.currentTimeMillis());
-            result = new ResponseMessageDTO("FAILED", "E05");
+//    @DeleteMapping("/delete-folder")
+//    public ResponseEntity<Object> deleteFolder(@RequestParam String folderId, @RequestParam boolean deleteItems) {
+//        HttpStatus httpStatus = null;
+//        Object result = null;
+//        try {
+//            QrFolderEntity folder = qrFolderService.getFolderById(folderId);
+//            if (deleteItems) {
+//                List<String> qrItems = qrWalletService.getQrWalletIdsByFolderId(folderId);
+//                qrWalletService.deleteQrItemsByIds(qrItems);
+//            }
+//            qrWalletFolderRepository.deleteByQrFolderId(folderId);
+//            qrFolderService.deleteFolderById(folderId);
+//            result = new ResponseMessageDTO("SUCCESS", "");
+//            httpStatus = HttpStatus.OK;
+//        } catch (Exception e) {
+//            logger.error("deleteFolder Error at " + e.getMessage() + System.currentTimeMillis());
+//            result = new ResponseMessageDTO("FAILED", "E05");
+//            httpStatus = HttpStatus.BAD_REQUEST;
+//        }
+//        return new ResponseEntity<>(result, httpStatus);
+//    }
+@DeleteMapping("/delete-folder")
+public ResponseEntity<Object> deleteFolder(@RequestParam String folderId, @RequestParam boolean deleteItems) {
+    HttpStatus httpStatus = null;
+    Object result = null;
+    try {
+        QrFolderEntity folder = qrFolderService.getFolderById(folderId);
+        if (folder == null) {
+            result = new ResponseMessageDTO("FAILED", "Folder not found");
             httpStatus = HttpStatus.BAD_REQUEST;
+            return new ResponseEntity<>(result, httpStatus);
         }
-        return new ResponseEntity<>(result, httpStatus);
+
+        if (deleteItems) {
+            List<String> qrItems = qrWalletService.getQrWalletIdsByFolderId(folderId);
+            qrFolderService.deleteQrItemsInAllFolders(qrItems);
+        }
+        qrWalletFolderRepository.deleteByQrFolderId(folderId);
+        qrFolderService.deleteFolderById(folderId);
+
+        result = new ResponseMessageDTO("SUCCESS", "");
+        httpStatus = HttpStatus.OK;
+    } catch (Exception e) {
+        logger.error("deleteFolder Error at " + e.getMessage() + System.currentTimeMillis());
+        result = new ResponseMessageDTO("FAILED", "E05");
+        httpStatus = HttpStatus.BAD_REQUEST;
     }
+    return new ResponseEntity<>(result, httpStatus);
+}
 
     @GetMapping("/users/search")
     public ResponseEntity<Object> searchUsersByPhoneNo(@RequestParam String phoneNo) {
