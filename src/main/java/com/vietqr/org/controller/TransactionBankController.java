@@ -1,5 +1,6 @@
 package com.vietqr.org.controller;
 
+import java.time.temporal.ValueRange;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -17,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -33,10 +35,7 @@ import com.vietqr.org.entity.*;
 import com.vietqr.org.security.JWTAuthorizationFilter;
 import com.vietqr.org.service.*;
 import com.vietqr.org.service.bidv.CustomerVaService;
-import com.vietqr.org.service.social.DiscordAccountBankService;
-import com.vietqr.org.service.social.DiscordService;
-import com.vietqr.org.service.social.SlackAccountBankService;
-import com.vietqr.org.service.social.SlackService;
+import com.vietqr.org.service.social.*;
 import com.vietqr.org.util.*;
 import com.vietqr.org.util.bank.bidv.BIDVUtil;
 
@@ -216,6 +215,12 @@ public class TransactionBankController {
 
 	@Autowired
 	DiscordService discordService;
+
+	@Autowired
+	GoogleSheetAccountBankService googleSheetAccountBankService;
+
+	@Autowired
+	GoogleSheetService googleSheetService;
 
 	private String getUsernameFromToken(String token) {
 		String result = "";
@@ -2054,6 +2059,55 @@ public class TransactionBankController {
 					}
 				}
 
+
+
+				// DO INSERT GOOGLE SHEET BY QVAN
+//				List<String> ggSheetWebhooks = googleSheetAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+//				if (ggSheetWebhooks != null && !ggSheetWebhooks.isEmpty()) {
+//					GoogleSheetUtil googleSheetUtil = new GoogleSheetUtil();
+//					for (String webhook : ggSheetWebhooks) {
+//						try {
+//							GoogleSheetEntity googleSheetEntity = googleSheetService.getGoogleSheetByWebhook(webhook);
+//							if (googleSheetEntity != null) {
+//								List<String> notificationTypes = new ObjectMapper().readValue(googleSheetEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+//								List<String> notificationContents = new ObjectMapper().readValue(googleSheetEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+//								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionReceiveEntity);
+//								if (sendNotification) {
+//									String amountString = String.valueOf(dto.getAmount()); // Chuyển đổi amount từ int sang String
+//									String message = createMessage(notificationContents, dto.getTransType(), amountString, bankTypeEntity, accountBankEntity.getBankAccount(), dto.getTransactiontime(), dto.getReferencenumber(), dto.getContent());
+//									String[] rowData = message.split("\\|");
+//									for (int i = 0; i < rowData.length; i++) {
+//										rowData[i] = rowData[i].trim();
+//									}
+//
+//									// Add headers if they don't exist
+//									List<String> headers = Arrays.asList( "Số tiền","Tài khoản", "Thời gian", "Mã tham chiếu", "Nội dung");
+//									if (!googleSheetUtil.headersExist(webhook)) {
+//										googleSheetUtil.insertRowToGoogleSheet(webhook, headers.toArray(new String[0]));
+//									}
+//
+//									// Insert data row
+//									googleSheetUtil.insertRowToGoogleSheet(webhook, rowData);
+//								}
+//							}
+//						} catch (Exception e) {
+//							logger.error("Error sending Google Sheets notification: " + e.getMessage());
+//						}
+//					}
+//				}
+
+				// DO INSERT GOOGLE SHEET BY QVAN
+
+
+
+
+
+
+
+
+
+
+
 				Map<String, String> data = new HashMap<>();
 				data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
 				data.put("notificationId", UUID.randomUUID().toString());
@@ -2373,6 +2427,47 @@ public class TransactionBankController {
 					}
 				}
 
+
+				// DO INSERT GOOGLE SHEET BY QVAN
+//				List<String> ggSheetWebhooks = googleSheetAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+//				if (ggSheetWebhooks != null && !ggSheetWebhooks.isEmpty()) {
+//					GoogleSheetUtil googleSheetUtil = new GoogleSheetUtil();
+//					for (String webhook : ggSheetWebhooks) {
+//						try {
+//							GoogleSheetEntity googleSheetEntity = googleSheetService.getGoogleSheetByWebhook(webhook);
+//							if (googleSheetEntity != null) {
+//								List<String> notificationTypes = new ObjectMapper().readValue(googleSheetEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+//								List<String> notificationContents = new ObjectMapper().readValue(googleSheetEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+//								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionReceiveEntity);
+//								if (sendNotification) {
+//									String amountString = String.valueOf(dto.getAmount()); // Chuyển đổi amount từ int sang String
+//									String messages = createMessage(notificationContents, dto.getTransType(), amountString, bankTypeEntity, accountBankEntity.getBankAccount(), dto.getTransactiontime(), dto.getReferencenumber(), dto.getContent());
+//									String[] rowData = messages.split("\\|");
+//									for (int i = 0; i < rowData.length; i++) {
+//										rowData[i] = rowData[i].trim();
+//									}
+//
+//									// Add headers if they don't exist
+//									List<String> headers = Arrays.asList( "Số tiền","Tài khoản", "Thời gian", "Mã tham chiếu", "Nội dung");
+//									if (!googleSheetUtil.headersExist(webhook)) {
+//										googleSheetUtil.insertRowToGoogleSheet(webhook, headers.toArray(new String[0]));
+//									}
+//
+//									// Insert data row
+//									googleSheetUtil.insertRowToGoogleSheet(webhook, rowData);
+//								}
+//							}
+//						} catch (Exception e) {
+//							logger.error("Error sending Google Sheets notification: " + e.getMessage());
+//						}
+//					}
+//				}
+				// DO INSERT GOOGLE SHEET BY QVAN
+
+
+
+
+
 			}
 		} else {
 			logger.info("transaction-sync - no have terminal is empty.");
@@ -2664,6 +2759,48 @@ public class TransactionBankController {
 					}
 				}
 			}
+
+
+
+			// DO INSERT GOOGLE SHEET BY QVAN
+//			List<String> ggSheetWebhooks = googleSheetAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+//			if (ggSheetWebhooks != null && !ggSheetWebhooks.isEmpty()) {
+//				GoogleSheetUtil googleSheetUtil = new GoogleSheetUtil();
+//				for (String webhook : ggSheetWebhooks) {
+//					try {
+//						GoogleSheetEntity googleSheetEntity = googleSheetService.getGoogleSheetByWebhook(webhook);
+//						if (googleSheetEntity != null) {
+//							List<String> notificationTypes = new ObjectMapper().readValue(googleSheetEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+//							List<String> notificationContents = new ObjectMapper().readValue(googleSheetEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+//							boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionReceiveEntity);
+//							if (sendNotification) {
+//								String amountString = String.valueOf(dto.getAmount()); // Chuyển đổi amount từ int sang String
+//								String messages = createMessage(notificationContents, dto.getTransType(), amountString, bankTypeEntity, accountBankEntity.getBankAccount(), dto.getTransactiontime(), dto.getReferencenumber(), dto.getContent());
+//								String[] rowData = messages.split("\\|");
+//								for (int i = 0; i < rowData.length; i++) {
+//									rowData[i] = rowData[i].trim();
+//								}
+//
+//								// Add headers if they don't exist
+//								List<String> headers = Arrays.asList( "Số tiền","Tài khoản", "Thời gian", "Mã tham chiếu", "Nội dung");
+//
+//								if (!googleSheetUtil.headersExist(webhook)) {
+//									googleSheetUtil.insertRowToGoogleSheet(webhook, headers.toArray(new String[0]));
+//								}
+//
+//								// Insert data row
+//								googleSheetUtil.insertRowToGoogleSheet(webhook, rowData);
+//							}
+//						}
+//					} catch (Exception e) {
+//						logger.error("Error sending Google Sheets notification: " + e.getMessage());
+//					}
+//				}
+//			}
+
+
+			// DO INSERT GOOGLE SHEET BY QVAN
+
 
 
 			// String requestId = "";
@@ -3233,6 +3370,51 @@ public class TransactionBankController {
 					}
 				}
 
+
+				// DO INSERT GOOGLE SHEET BY QVAN
+//				List<String> ggSheetWebhooks = googleSheetAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+//				if (ggSheetWebhooks != null && !ggSheetWebhooks.isEmpty()) {
+//					GoogleSheetUtil googleSheetUtil = new GoogleSheetUtil();
+//					for (String webhook : ggSheetWebhooks) {
+//						try {
+//							GoogleSheetEntity googleSheetEntity = googleSheetService.getGoogleSheetByWebhook(webhook);
+//							if (googleSheetEntity != null) {
+//								List<String> notificationTypes = new ObjectMapper().readValue(googleSheetEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+//								List<String> notificationContents = new ObjectMapper().readValue(googleSheetEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+//								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
+//								if (sendNotification) {
+//									String amountString = String.valueOf(dto.getAmount()); // Chuyển đổi amount từ int sang String
+//									String message = createMessage(notificationContents, dto.getTransType(), amountString, bankTypeEntity, accountBankEntity.getBankAccount(), dto.getTransactiontime(), dto.getReferencenumber(), dto.getContent());
+//									String[] rowData = message.split("\\|");
+//									for (int i = 0; i < rowData.length; i++) {
+//										rowData[i] = rowData[i].trim();
+//									}
+//
+//									// Add headers if they don't exist
+//									List<String> headers = Arrays.asList( "Số tiền","Tài khoản", "Thời gian", "Mã tham chiếu", "Nội dung");
+//
+//									if (!googleSheetUtil.headersExist(webhook)) {
+//										googleSheetUtil.insertRowToGoogleSheet(webhook, headers.toArray(new String[0]));
+//									}
+//
+//									// Insert data row
+//									googleSheetUtil.insertRowToGoogleSheet(webhook, rowData);
+//								}
+//							}
+//						} catch (Exception e) {
+//							logger.error("Error sending Google Sheets notification: " + e.getMessage());
+//						}
+//					}
+//				}
+
+				// DO INSERT GOOGLE SHEET BY QVAN
+
+
+
+
+
+
+
 				// }
 
 				// textToSpeechService.delete(requestId);
@@ -3628,6 +3810,51 @@ public class TransactionBankController {
 						}
 					}
 				}
+
+
+
+				// DO INSERT GOOGLE SHEET BY QVAN
+//				List<String> ggSheetWebhooks = googleSheetAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+//				if (ggSheetWebhooks != null && !ggSheetWebhooks.isEmpty()) {
+//					GoogleSheetUtil googleSheetUtil = new GoogleSheetUtil();
+//					for (String webhook : ggSheetWebhooks) {
+//						try {
+//							GoogleSheetEntity googleSheetEntity = googleSheetService.getGoogleSheetByWebhook(webhook);
+//							if (googleSheetEntity != null) {
+//								List<String> notificationTypes = new ObjectMapper().readValue(googleSheetEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+//								List<String> notificationContents = new ObjectMapper().readValue(googleSheetEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+//								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
+//								if (sendNotification) {
+//									String amountString = String.valueOf(dto.getAmount()); // Chuyển đổi amount từ int sang String
+//									String messages = createMessage(notificationContents, dto.getTransType(), amountString, bankTypeEntity, accountBankEntity.getBankAccount(), dto.getTransactiontime(), dto.getReferencenumber(), dto.getContent());
+//									String[] rowData = messages.split("\\|");
+//									for (int i = 0; i < rowData.length; i++) {
+//										rowData[i] = rowData[i].trim();
+//									}
+//
+//									// Add headers if they don't exist
+//									List<String> headers = Arrays.asList( "Số tiền","Tài khoản", "Thời gian", "Mã tham chiếu", "Nội dung");
+//
+//									if (!googleSheetUtil.headersExist(webhook)) {
+//										googleSheetUtil.insertRowToGoogleSheet(webhook, headers.toArray(new String[0]));
+//									}
+//
+//									// Insert data row
+//									googleSheetUtil.insertRowToGoogleSheet(webhook, rowData);
+//								}
+//							}
+//						} catch (Exception e) {
+//							logger.error("Error sending Google Sheets notification: " + e.getMessage());
+//						}
+//					}
+//				}
+
+				// DO INSERT GOOGLE SHEET BY QVAN
+
+
+
+
+
 
 
 
@@ -4039,10 +4266,54 @@ public class TransactionBankController {
 			}
 
 
+
+			// DO INSERT GOOGLE SHEET BY QVAN
+//			List<String> ggSheetWebhooks = googleSheetAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+//			if (ggSheetWebhooks != null && !ggSheetWebhooks.isEmpty()) {
+//				GoogleSheetUtil googleSheetUtil = new GoogleSheetUtil();
+//				for (String webhook : ggSheetWebhooks) {
+//					try {
+//						GoogleSheetEntity googleSheetEntity = googleSheetService.getGoogleSheetByWebhook(webhook);
+//						if (googleSheetEntity != null) {
+//							List<String> notificationTypes = new ObjectMapper().readValue(googleSheetEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+//							List<String> notificationContents = new ObjectMapper().readValue(googleSheetEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+//							boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
+//							if (sendNotification) {
+//								String amountString = String.valueOf(dto.getAmount()); // Chuyển đổi amount từ int sang String
+//								String messages = createMessage(notificationContents, dto.getTransType(), amountString, bankTypeEntity, accountBankEntity.getBankAccount(), dto.getTransactiontime(), dto.getReferencenumber(), dto.getContent());
+//								String[] rowData = messages.split("\\|");
+//								for (int i = 0; i < rowData.length; i++) {
+//									rowData[i] = rowData[i].trim();
+//								}
+//
+//								// Add headers if they don't exist
+//								List<String> headers = Arrays.asList( "Số tiền","Tài khoản", "Thời gian", "Mã tham chiếu", "Nội dung");
+//								if (!googleSheetUtil.headersExist(webhook)) {
+//									googleSheetUtil.insertRowToGoogleSheet(webhook, headers.toArray(new String[0]));
+//								}
+//
+//								// Insert data row
+//								googleSheetUtil.insertRowToGoogleSheet(webhook, rowData);
+//							}
+//						}
+//					} catch (Exception e) {
+//						logger.error("Error sending Google Sheets notification: " + e.getMessage());
+//					}
+//				}
+//			}
+
+			// DO INSERT GOOGLE SHEET BY QVAN
+
+
+
+
+
+
 			// }
 		}
 
 	}
+
 
 	private void pushNotificationWithSocket(String notiTitleUpdateTransaction, String message,
 			NotificationEntity notificationEntity, Map<String, String> data, String userId) {

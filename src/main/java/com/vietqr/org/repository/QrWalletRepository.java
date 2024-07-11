@@ -290,17 +290,44 @@ public interface QrWalletRepository extends JpaRepository<QrWalletEntity, String
     void deleteByQrWalletIds(@Param("qrWalletIds") List<String> qrWalletIds);
 
 
+//    @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
+//            "w.value AS value, w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
+//            "(SELECT COUNT(i.id) FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.interaction_type = 1) AS likeCount, " +
+//            "(SELECT COUNT(wc.id) FROM qr_wallet_comment wc WHERE wc.qr_wallet_id = w.id) AS commentCount, " +
+//            "CASE WHEN (SELECT COUNT(i.id) FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.user_id = :userId AND i.interaction_type = 1) > 0 THEN 1 ELSE 0 END AS hasLiked, " +
+//            "CASE " +
+//            "WHEN w.qr_type = '0' THEN w.value " +
+//            "WHEN w.qr_type = '1' THEN w.value " +
+//            "WHEN w.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.phoneNo'))) " +
+//            "WHEN w.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.bankAccount'))) " +
+//            "ELSE NULL " +
+//            "END AS data, " +
+//            "IFNULL(TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))), 'Undefined') AS fullName, " +
+//            "IFNULL(ai.img_id, '') AS imageId, " +
+//            "IFNULL(w.style, '') AS style, " +
+//            "IFNULL(w.theme, '') AS theme, " +
+//            "IFNULL(w.file_attachment_id, '') AS fileAttachmentId " +
+//            "FROM qr_wallet w " +
+//            "LEFT JOIN account_information ai ON ai.user_id = w.user_id " +
+//            "WHERE w.is_public = 1 " +
+//            "ORDER BY w.time_created DESC " +
+//            "LIMIT :offset, :size", nativeQuery = true)
+//    List<IQrWalletDTO> findAllPublicQrWallets(
+//            @Param("userId") String userId,
+//            @Param("offset") int offset,
+//            @Param("size") int size);
+
     @Query(value = "SELECT w.id AS id, w.title AS title, w.description AS description, " +
             "w.value AS value, w.qr_type AS qrType, w.time_created AS timeCreated, w.user_id AS userId, " +
             "(SELECT COUNT(i.id) FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.interaction_type = 1) AS likeCount, " +
             "(SELECT COUNT(wc.id) FROM qr_wallet_comment wc WHERE wc.qr_wallet_id = w.id) AS commentCount, " +
             "CASE WHEN (SELECT COUNT(i.id) FROM qr_interaction i WHERE i.qr_wallet_id = w.id AND i.user_id = :userId AND i.interaction_type = 1) > 0 THEN 1 ELSE 0 END AS hasLiked, " +
             "CASE " +
-            "WHEN w.qr_type = '0' THEN w.value " +
-            "WHEN w.qr_type = '1' THEN w.value " +
-            "WHEN w.qr_type = '2' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.fullName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.phoneNo'))) " +
-            "WHEN w.qr_type = '3' THEN CONCAT(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.bankShortName')), ' - ', JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.bankAccount'))) " +
-            "ELSE NULL " +
+            "WHEN w.qr_type = '0' THEN IFNULL(w.value, '') " +
+            "WHEN w.qr_type = '1' THEN IFNULL(w.value, '') " +
+            "WHEN w.qr_type = '2' THEN CONCAT(IFNULL(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.fullName')), ''), ' - ', IFNULL(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.phoneNo')), '')) " +
+            "WHEN w.qr_type = '3' THEN CONCAT(IFNULL(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.bankShortName')), ''), ' - ', IFNULL(JSON_UNQUOTE(JSON_EXTRACT(w.qr_data, '$.bankAccount')), '')) " +
+            "ELSE '' " +
             "END AS data, " +
             "IFNULL(TRIM(CONCAT_WS(' ', TRIM(ai.last_name), TRIM(ai.middle_name), TRIM(ai.first_name))), 'Undefined') AS fullName, " +
             "IFNULL(ai.img_id, '') AS imageId, " +

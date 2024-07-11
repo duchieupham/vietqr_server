@@ -200,9 +200,6 @@ public class QrWalletServiceImpl implements QrWalletService {
     @Override
     public List<IQrWalletDTO> getAllPublicQrWallets(String userId, int offset, int size) {
         List<IQrWalletDTO> qrWallets = repo.findAllPublicQrWallets(userId, offset, size);
-        for (IQrWalletDTO wallet : qrWallets) {
-            logger.info("QR Wallet ID: " + wallet.getId() + ", hasLiked: " + wallet.getHasLiked());
-        }
         return qrWallets;
     }
 
