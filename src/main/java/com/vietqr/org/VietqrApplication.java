@@ -55,7 +55,6 @@ import com.vietqr.org.security.JWTAuthorizationFilter;
 @ComponentScan(basePackages = { "com.vietqr.org" })
 @Import(WebSocketConfig.class)
 @EnableWebMvc
-@EnableAsync
 public class VietqrApplication extends SpringBootServletInitializer implements WebMvcConfigurer {
 
 	@Bean
