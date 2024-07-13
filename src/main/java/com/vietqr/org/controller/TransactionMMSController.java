@@ -1712,10 +1712,9 @@ public class TransactionMMSController {
                                     if (Objects.nonNull(checkMultiTimesDTO)) {
                                         if (checkMultiTimesDTO.getMultiTimes()) {
                                             // lenh refund truoc do cho hoan tien nhieu lan => cho phep hoan tien tiep
-//                                            String refundResult = refundFromMB(terminalBankEntity.getTerminalId(),
-//                                                    dto.getReferenceNumber(),
-//                                                    dto.getAmount(), dto.getContent());
-                                            String refundResult = "FT0434861312";
+                                            String refundResult = refundFromMB(terminalBankEntity.getTerminalId(),
+                                                    dto.getReferenceNumber(),
+                                                    dto.getAmount(), dto.getContent());
                                             if (refundResult != null) {
                                                 if (refundResult.trim().equals("4863")) {
                                                     logger.error(
@@ -1774,10 +1773,9 @@ public class TransactionMMSController {
                                         }
                                     } else {
                                     // chua refund truoc do
-//                                        String refundResult = refundFromMB(terminalBankEntity.getTerminalId(),
-//                                                dto.getReferenceNumber(),
-//                                                dto.getAmount(), dto.getContent());
-                                        String refundResult = "FT0434861312";
+                                        String refundResult = refundFromMB(terminalBankEntity.getTerminalId(),
+                                                dto.getReferenceNumber(),
+                                                dto.getAmount(), dto.getContent());
                                         if (refundResult != null) {
                                             if (refundResult.trim().equals("4863")) {
                                                 logger.error(
