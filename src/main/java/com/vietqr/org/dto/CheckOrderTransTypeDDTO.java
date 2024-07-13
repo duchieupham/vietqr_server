@@ -1,6 +1,6 @@
 package com.vietqr.org.dto;
 
-public class TransReceiveResponseCheckOrderDTO {
+public class CheckOrderTransTypeDDTO {
     private String referenceNumber;
     private String orderId;
     private Long amount;
@@ -12,15 +12,13 @@ public class TransReceiveResponseCheckOrderDTO {
     private Long timePaid;
     private String terminalCode;
     private String note;
-    private Integer refundCount;
-    private Long amountRefunded;
 
-    public TransReceiveResponseCheckOrderDTO() {
+    public CheckOrderTransTypeDDTO() {
     }
 
-    public TransReceiveResponseCheckOrderDTO(String referenceNumber, String orderId, Long amount, String content, String transType,
-                                             Integer status, Integer type, Long timeCreated, Long timePaid, String terminalCode,
-                                             String note, Integer refundCount, Long amountRefunded) {
+    public CheckOrderTransTypeDDTO(String referenceNumber, String orderId, Long amount, String content, String transType,
+                                   Integer status, Integer type, Long timeCreated, Long timePaid, String terminalCode,
+                                   String note) {
         this.referenceNumber = referenceNumber;
         this.orderId = orderId;
         this.amount = amount;
@@ -32,8 +30,6 @@ public class TransReceiveResponseCheckOrderDTO {
         this.timePaid = timePaid;
         this.terminalCode = terminalCode;
         this.note = note;
-        this.refundCount = refundCount;
-        this.amountRefunded = amountRefunded;
     }
 
     public String getReferenceNumber() {
@@ -122,21 +118,5 @@ public class TransReceiveResponseCheckOrderDTO {
 
     public void setNote(String note) {
         this.note = note;
-    }
-
-    public Integer getRefundCount() {
-        return refundCount;
-    }
-
-    public void setRefundCount(Integer refundCount) {
-        this.refundCount = refundCount;
-    }
-
-    public Long getAmountRefunded() {
-        return amountRefunded;
-    }
-
-    public void setAmountRefunded(Long amountRefunded) {
-        this.amountRefunded = amountRefunded;
     }
 }

@@ -6,14 +6,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -1699,12 +1692,12 @@ public class TransactionMMSController {
                                 TerminalBankEntity terminalBankEntity = terminalBankService
                                         .getTerminalBankByBankAccount(dto.getBankAccount());
                                 if (terminalBankEntity != null) {
+                                    // check multiTimes transaction_refund;
+                                    TransactionCheckMultiTimesDTO checkMultiTimesDTO =
+                                            transactionRefundService.getTransactionRefundCheck(dto.getBankAccount(),
+                                                    dto.getReferenceNumber());
                                     time = DateTimeUtil.getCurrentDateTimeUTC();
 
-                                    String refundResult = refundFromMB(terminalBankEntity.getTerminalId(),
-                                            dto.getReferenceNumber(),
-                                            dto.getAmount(), dto.getContent());
-                                    // logger
                                     refundLogEntity = new TransactionRefundLogEntity();
                                     refundLogEntity.setId(UUID.randomUUID().toString());
                                     refundLogEntity.setBankAccount(dto.getBankAccount());
@@ -1715,52 +1708,122 @@ public class TransactionMMSController {
                                     refundLogEntity.setTimeResponse(DateTimeUtil.getCurrentDateTimeUTC());
                                     refundLogEntity.setRefNumber(dto.getReferenceNumber());
                                     refundLogEntity.setCheckSum(dto.getCheckSum());
+                                    // nếu đã refund trước đó
+                                    if (Objects.nonNull(checkMultiTimesDTO)) {
+                                        if (checkMultiTimesDTO.getMultiTimes()) {
+                                            // lenh refund truoc do cho hoan tien nhieu lan => cho phep hoan tien tiep
+//                                            String refundResult = refundFromMB(terminalBankEntity.getTerminalId(),
+//                                                    dto.getReferenceNumber(),
+//                                                    dto.getAmount(), dto.getContent());
+                                            String refundResult = "FT0434861312";
+                                            if (refundResult != null) {
+                                                if (refundResult.trim().equals("4863")) {
+                                                    logger.error(
+                                                            "refundForMerchant: ERROR: " + dto.getBankAccount()
+                                                                    + " FT CODE IS NOT EXISTED");
+                                                    refundLogEntity.setReferenceNumber("");
+                                                    refundLogEntity.setStatus(0);
+                                                    refundLogEntity.setMessage(refundResult);
 
-                                    if (refundResult != null) {
-                                        if (refundResult.trim().equals("4863")) {
-                                            logger.error(
-                                                    "refundForMerchant: ERROR: " + dto.getBankAccount()
-                                                            + " FT CODE IS NOT EXISTED");
-                                            refundLogEntity.setReferenceNumber("");
-                                            refundLogEntity.setStatus(0);
-                                            refundLogEntity.setMessage(refundResult);
+                                                    httpStatus = HttpStatus.BAD_REQUEST;
+                                                    result = new ResponseMessageDTO("FAILED", "E44");
+                                                } else if (refundResult.trim().equals("4857")) {
+                                                    logger.error(
+                                                            "refundForMerchant: ERROR: " + dto.getBankAccount()
+                                                                    + " INVALID AMOUNT");
+                                                    refundLogEntity.setReferenceNumber("");
+                                                    refundLogEntity.setStatus(0);
+                                                    refundLogEntity.setMessage(refundResult);
 
-                                            httpStatus = HttpStatus.BAD_REQUEST;
-                                            result = new ResponseMessageDTO("FAILED", "E44");
-                                        } else if (refundResult.trim().equals("4857")) {
-                                            logger.error(
-                                                    "refundForMerchant: ERROR: " + dto.getBankAccount()
-                                                            + " INVALID AMOUNT");
-                                            refundLogEntity.setReferenceNumber("");
-                                            refundLogEntity.setStatus(0);
-                                            refundLogEntity.setMessage(refundResult);
+                                                    httpStatus = HttpStatus.BAD_REQUEST;
+                                                    result = new ResponseMessageDTO("FAILED", "E45");
+                                                } else if (refundResult.trim().contains("FT")) {
+                                                    refundLogEntity.setReferenceNumber(refundResult);
+                                                    refundLogEntity.setStatus(1);
+                                                    refundLogEntity.setMessage(refundResult);
 
-                                            httpStatus = HttpStatus.BAD_REQUEST;
-                                            result = new ResponseMessageDTO("FAILED", "E45");
-                                        } else if (refundResult.trim().contains("FT")) {
-                                            refundLogEntity.setReferenceNumber(refundResult);
-                                            refundLogEntity.setStatus(1);
-                                            refundLogEntity.setMessage(refundResult);
+                                                    httpStatus = HttpStatus.OK;
+                                                    result = new ResponseMessageDTO("SUCCESS", refundResult);
+                                                } else {
+                                                    logger.error("refundForMerchant: ERROR: UNEXPECTED ERROR");
+                                                    refundLogEntity.setReferenceNumber("");
+                                                    refundLogEntity.setStatus(0);
+                                                    refundLogEntity.setMessage(refundResult);
+                                                    httpStatus = HttpStatus.BAD_REQUEST;
+                                                    result = new ResponseMessageDTO("FAILED", "E05");
+                                                }
+                                            } else {
+                                                logger.error(
+                                                        "refundForMerchant: ERROR: " + dto.getBankAccount() + " REFUND FAILED");
+                                                refundLogEntity.setReferenceNumber("");
+                                                refundLogEntity.setStatus(0);
+                                                refundLogEntity.setMessage("");
 
-                                            httpStatus = HttpStatus.OK;
-                                            result = new ResponseMessageDTO("SUCCESS", refundResult);
+                                                httpStatus = HttpStatus.BAD_REQUEST;
+                                                result = new ResponseMessageDTO("FAILED", "E43");
+                                            }
                                         } else {
-                                            logger.error("refundForMerchant: ERROR: UNEXPECTED ERROR");
+                                            // lenh refund truoc do chi cho hoan tien 1 lan => tra loi
+                                            logger.error("refundService: ERROR: Only refund one time");
+                                            // logger
                                             refundLogEntity.setReferenceNumber("");
                                             refundLogEntity.setStatus(0);
-                                            refundLogEntity.setMessage(refundResult);
+                                            refundLogEntity.setMessage("");
                                             httpStatus = HttpStatus.BAD_REQUEST;
-                                            result = new ResponseMessageDTO("FAILED", "E05");
+                                            result = new ResponseMessageDTO("FAILED", "E157");
                                         }
                                     } else {
-                                        logger.error(
-                                                "refundForMerchant: ERROR: " + dto.getBankAccount() + " REFUND FAILED");
-                                        refundLogEntity.setReferenceNumber("");
-                                        refundLogEntity.setStatus(0);
-                                        refundLogEntity.setMessage("");
+                                    // chua refund truoc do
+//                                        String refundResult = refundFromMB(terminalBankEntity.getTerminalId(),
+//                                                dto.getReferenceNumber(),
+//                                                dto.getAmount(), dto.getContent());
+                                        String refundResult = "FT0434861312";
+                                        if (refundResult != null) {
+                                            if (refundResult.trim().equals("4863")) {
+                                                logger.error(
+                                                        "refundForMerchant: ERROR: " + dto.getBankAccount()
+                                                                + " FT CODE IS NOT EXISTED");
+                                                refundLogEntity.setReferenceNumber("");
+                                                refundLogEntity.setStatus(0);
+                                                refundLogEntity.setMessage(refundResult);
 
-                                        httpStatus = HttpStatus.BAD_REQUEST;
-                                        result = new ResponseMessageDTO("FAILED", "E43");
+                                                httpStatus = HttpStatus.BAD_REQUEST;
+                                                result = new ResponseMessageDTO("FAILED", "E44");
+                                            } else if (refundResult.trim().equals("4857")) {
+                                                logger.error(
+                                                        "refundForMerchant: ERROR: " + dto.getBankAccount()
+                                                                + " INVALID AMOUNT");
+                                                refundLogEntity.setReferenceNumber("");
+                                                refundLogEntity.setStatus(0);
+                                                refundLogEntity.setMessage(refundResult);
+
+                                                httpStatus = HttpStatus.BAD_REQUEST;
+                                                result = new ResponseMessageDTO("FAILED", "E45");
+                                            } else if (refundResult.trim().contains("FT")) {
+                                                refundLogEntity.setReferenceNumber(refundResult);
+                                                refundLogEntity.setStatus(1);
+                                                refundLogEntity.setMessage(refundResult);
+
+                                                httpStatus = HttpStatus.OK;
+                                                result = new ResponseMessageDTO("SUCCESS", refundResult);
+                                            } else {
+                                                logger.error("refundForMerchant: ERROR: UNEXPECTED ERROR");
+                                                refundLogEntity.setReferenceNumber("");
+                                                refundLogEntity.setStatus(0);
+                                                refundLogEntity.setMessage(refundResult);
+                                                httpStatus = HttpStatus.BAD_REQUEST;
+                                                result = new ResponseMessageDTO("FAILED", "E05");
+                                            }
+                                        } else {
+                                            logger.error(
+                                                    "refundForMerchant: ERROR: " + dto.getBankAccount() + " REFUND FAILED");
+                                            refundLogEntity.setReferenceNumber("");
+                                            refundLogEntity.setStatus(0);
+                                            refundLogEntity.setMessage("");
+
+                                            httpStatus = HttpStatus.BAD_REQUEST;
+                                            result = new ResponseMessageDTO("FAILED", "E43");
+                                        }
                                     }
                                 } else {
                                     logger.error(
@@ -1772,7 +1835,7 @@ public class TransactionMMSController {
                                 logger.error(
                                         "refundForMerchant: ERROR: " + dto.getReferenceNumber() + " INVALID CHECKSUM");
                                 httpStatus = HttpStatus.BAD_REQUEST;
-                                result = new ResponseMessageDTO("FAILED", "E41");
+                                result = new ResponseMessageDTO("FAILED", "E39");
                             }
                         } else {
                             // bank account is not matched
@@ -1818,18 +1881,25 @@ public class TransactionMMSController {
                     TransactionRefundEntity entity = new TransactionRefundEntity();
                     entity.setId(UUID.randomUUID().toString());
                     entity.setBankAccount(dto.getBankAccount());
-                    entity.setBankId(StringUtil.getValueNullChecker(transactionReceiveEntity.getBankId()));
+                    if (transactionReceiveEntity != null) {
+                        entity.setBankId(StringUtil.getValueNullChecker(transactionReceiveEntity.getBankId()));
+                        entity.setTransactionId(transactionReceiveEntity.getId());
+                        entity.setUserId(transactionReceiveEntity.getUserId());
+                    } else {
+                        entity.setBankId("");
+                        entity.setTransactionId("");
+                        entity.setUserId("");
+                    }
                     entity.setContent(dto.getContent());
                     entity.setAmount(Long.parseLong(dto.getAmount()));
                     entity.setTime(finalTime);
                     entity.setTimePaid(DateTimeUtil.getCurrentDateTimeUTC());
                     entity.setRefNumber(dto.getReferenceNumber());
-                    entity.setTransactionId(transactionReceiveEntity.getId());
                     entity.setTransType("D");
-                    entity.setUserId(transactionReceiveEntity.getUserId());
                     entity.setNote("");
                     entity.setStatus(1);
                     entity.setReferenceNumber(finalResult.getMessage());
+                    entity.setMultiTimes(StringUtil.getValueNullChecker(dto.getMultiTimes()));
                     transactionRefundService.insert(entity);
                 }
             });
