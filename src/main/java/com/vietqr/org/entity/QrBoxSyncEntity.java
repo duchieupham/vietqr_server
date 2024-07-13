@@ -40,6 +40,12 @@ public class QrBoxSyncEntity implements Serializable {
     @Column(name = "qrName")
     private String qrName;
 
+    @Column(name = "lastChecked")
+    private long lastChecked = 0;
+
+    @Column(name = "status")
+    private int status = 0;
+
     public QrBoxSyncEntity(String id, String certificate, long timeCreated, long timeSync) {
         this.id = id;
         this.certificate = certificate;
@@ -112,5 +118,21 @@ public class QrBoxSyncEntity implements Serializable {
 
     public void setQrName(String qrName) {
         this.qrName = qrName;
+    }
+
+    public long getLastChecked() {
+        return lastChecked;
+    }
+
+    public void setLastChecked(long lastChecked) {
+        this.lastChecked = lastChecked;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

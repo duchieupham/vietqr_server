@@ -15,6 +15,7 @@ public class TidInternalDTO {
     private String boxAddress;
     private String certificate;
     private int status;
+    private long lastChecked;
 
     public TidInternalDTO() {
     }
@@ -147,5 +148,13 @@ public class TidInternalDTO {
 
     public void setTerminalId(String terminalId) {
         this.terminalId = terminalId;
+    }
+
+    public long getLastChecked() {
+        return lastChecked;
+    }
+
+    public void setLastChecked(long lastChecked) {
+        this.lastChecked = lastChecked;
     }
 }

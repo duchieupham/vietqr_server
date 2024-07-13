@@ -14,5 +14,6 @@ public interface ITidInternalDTO {
     Integer getMmsActive();
     String getBoxAddress();
     String getCertificate();
-    boolean getStatus();
+    Integer getStatus();
+    Long getLastChecked();
 }

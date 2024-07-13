@@ -257,4 +257,8 @@ public class StringUtil {
     public static boolean getValueNullChecker(Boolean value) {
         return value != null ? value : false;
     }
+
+    public static long getValueNullChecker(Long value) {
+        return value != null ? value : 0;
+    }
 }

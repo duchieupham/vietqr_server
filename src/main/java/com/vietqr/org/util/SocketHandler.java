@@ -6,7 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.vietqr.org.repository.QrBoxSyncRepository;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -24,6 +26,9 @@ public class SocketHandler extends TextWebSocketHandler {
     private List<WebSocketSession> ecLoginSessions = new ArrayList<>();
     private List<WebSocketSession> transactionSessions = new ArrayList<>();
     private List<WebSocketSession> notificationBoxSessions = new ArrayList<>();
+
+    @Autowired
+    private QrBoxSyncRepository qrBoxSyncRepository;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -59,6 +64,7 @@ public class SocketHandler extends TextWebSocketHandler {
                 Map<String, String> data = new HashMap<>();
                 data.put("status", "SUCCESS");
                 data.put("notificationType", NotificationUtil.getNotiTypeConnectSuccess());
+                updateStatusVietQrBox(boxId, 1);
                 sendMessageToBoxId(boxId, data);
             } else {
                 logger.error("WS: userId is missing");
@@ -66,6 +72,18 @@ public class SocketHandler extends TextWebSocketHandler {
             }
         } catch (Exception e) {
             logger.error("WS: error add session: " + e.toString());
+        }
+    }
+
+    private void updateStatusVietQrBox(String boxId, int status) {
+        try {
+            Thread thread = new Thread(() -> {
+                String boxCode = BoxTerminalRefIdUtil.decryptBoxId(boxId);
+                qrBoxSyncRepository.updateStatusBox(boxCode, status, DateTimeUtil.getCurrentDateTimeUTC());
+            });
+            thread.start();
+        } catch (Exception e) {
+            logger.error("updateStatusVietQrBox: ERROR: " + e.getMessage());
         }
     }
 
@@ -79,7 +97,10 @@ public class SocketHandler extends TextWebSocketHandler {
         notificationSessions.remove(session);
         loginSessions.remove(session);
         transactionSessions.remove(session);
-        notificationBoxSessions.remove(session);
+        boolean checkOfflineBox = notificationBoxSessions.remove(session);
+        if (checkOfflineBox) {
+            updateStatusVietQrBox(session.getAttributes().get("boxId").toString(), 0);
+        }
         //
         logger.info("WS: remove session: " + session.toString());
         logger.info("WS: notificationSessions size: " + notificationSessions.size());

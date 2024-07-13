@@ -226,7 +226,7 @@ public class TidQrInternalController {
 
     @GetMapping("/test2")
     public String getTerminalInternalInfoHehee(@RequestParam String boxCode) {
-        return BoxTerminalRefIdUtil.decryptTransactionId(boxCode);
+        return BoxTerminalRefIdUtil.decryptBoxId(boxCode);
     }
 
     @GetMapping("tid/info/{boxCode}")
@@ -284,6 +284,8 @@ public class TidQrInternalController {
                 entity.setMacAddress(macAddr);
                 entity.setIsActive(false);
                 entity.setQrName("");
+                entity.setLastChecked(0);
+                entity.setStatus(0);
             }
             qrBoxSyncService.insert(entity);
             result = new SyncBoxQrDTO(entity.getCertificate(), boxId);
@@ -971,11 +973,8 @@ public class TidQrInternalController {
                 }
                 dto.setBoxAddress(StringUtil.getValueNotNull(item.getBoxAddress()));
                 dto.setCertificate(item.getCertificate());
-                if (item.getStatus()) {
-                    dto.setStatus(1);
-                } else {
-                    dto.setStatus(0);
-                }
+                dto.setStatus(item.getStatus());
+                dto.setLastChecked(StringUtil.getValueNullChecker(item.getLastChecked()));
                 return dto;
             }).collect(Collectors.toList());
             PageDTO pageDTO = new PageDTO();
