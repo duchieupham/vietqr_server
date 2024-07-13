@@ -30,7 +30,7 @@ public interface QrBoxSyncRepository extends JpaRepository<QrBoxSyncEntity, Stri
             + "c.bank_account AS bankAccount, d.bank_short_name AS bankShortName, "
             + "c.bank_account_name AS userBankName, COALESCE(c.mms_active, 0) AS mmsActive, "
             + "b.sub_terminal_address AS boxAddress, a.certificate AS certificate, "
-            + "a.is_active AS status "
+            + "a.status AS status, a.last_checked AS lastChecked "
             + "FROM qr_box_sync a "
             + "INNER JOIN terminal_bank_receive b ON a.qr_box_code = b.raw_terminal_code "
             + "INNER JOIN account_bank_receive c ON b.bank_id = c.id "
@@ -53,7 +53,7 @@ public interface QrBoxSyncRepository extends JpaRepository<QrBoxSyncEntity, Stri
             + "c.bank_account AS bankAccount, d.bank_short_name AS bankShortName, "
             + "c.bank_account_name AS userBankName, COALESCE(c.mms_active, 0) AS mmsActive, "
             + "b.sub_terminal_address AS boxAddress, a.certificate AS certificate, "
-            + "a.is_active AS status "
+            + "a.status AS status, a.last_checked AS lastChecked "
             + "FROM qr_box_sync a "
             + "LEFT JOIN terminal_bank_receive b ON a.qr_box_code = b.raw_terminal_code "
             + "LEFT JOIN account_bank_receive c ON b.bank_id = c.id "
@@ -74,4 +74,10 @@ public interface QrBoxSyncRepository extends JpaRepository<QrBoxSyncEntity, Stri
             + "qr_name = :name "
             + "WHERE certificate = :qrCertificate LIMIT 1", nativeQuery = true)
     void updateQrBoxSync(String qrCertificate, long time, boolean active, String name);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE qr_box_sync SET status = :status, last_checked = :lastChecked "
+            + "WHERE qr_box_code = :boxCode LIMIT 1", nativeQuery = true)
+    void updateStatusBox(String boxCode, int status, long lastChecked);
 }

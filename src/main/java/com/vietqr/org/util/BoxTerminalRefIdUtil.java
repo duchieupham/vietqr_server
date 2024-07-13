@@ -30,10 +30,10 @@ public class BoxTerminalRefIdUtil {
         return result;
     }
 
-    public static String decryptTransactionId(String refId) {
+    public static String decryptBoxId(String refId) {
         String result = "";
         try {
-            result = decode(refId);
+            result = decode(refId).replaceAll("VietQRBoxAccessKey", "");
         } catch (Exception e) {
             logger.error("decryptTransactionId: ERROR:" + e.toString());
             System.out.println("decryptTransactionId: ERROR:" + e.toString());
