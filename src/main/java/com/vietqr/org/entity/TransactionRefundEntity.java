@@ -61,6 +61,9 @@ public class TransactionRefundEntity implements Serializable {
     @Column(name = "note")
     private String note;
 
+    @Column(name = "multiTimes")
+    private boolean multiTimes;
+
     public TransactionRefundEntity() {
     }
 
@@ -184,6 +187,14 @@ public class TransactionRefundEntity implements Serializable {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public boolean isMultiTimes() {
+        return multiTimes;
+    }
+
+    public void setMultiTimes(boolean multiTimes) {
+        this.multiTimes = multiTimes;
     }
 
     public String getTransactionId() {

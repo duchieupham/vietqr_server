@@ -21,6 +21,8 @@ public class RefundRequestDTO implements Serializable {
     @NotBlank
     private String content;
 
+    private Boolean multiTimes;
+
     @NotBlank
     private String checkSum;
 
@@ -77,4 +79,11 @@ public class RefundRequestDTO implements Serializable {
         this.checkSum = checkSum;
     }
 
+    public Boolean getMultiTimes() {
+        return multiTimes;
+    }
+
+    public void setMultiTimes(Boolean multiTimes) {
+        this.multiTimes = multiTimes;
+    }
 }

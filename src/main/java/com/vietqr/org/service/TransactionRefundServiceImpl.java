@@ -1,6 +1,7 @@
 package com.vietqr.org.service;
 
 import com.vietqr.org.dto.IRefundCheckOrderDTO;
+import com.vietqr.org.dto.TransactionCheckMultiTimesDTO;
 import com.vietqr.org.entity.TransactionRefundEntity;
 import com.vietqr.org.repository.TransactionRefundRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,5 +23,15 @@ public class TransactionRefundServiceImpl implements TransactionRefundService {
     @Override
     public void insert(TransactionRefundEntity entity) {
         repo.save(entity);
+    }
+
+    @Override
+    public TransactionCheckMultiTimesDTO getTransactionRefundCheck(String bankAccount, String referenceNumber) {
+        return repo.getTransactionRefundCheck(bankAccount, referenceNumber);
+    }
+
+    @Override
+    public String checkExistRefundTransaction(String bankAccount, String referenceNumber) {
+        return repo.checkExistRefundTransaction(bankAccount, referenceNumber);
     }
 }
