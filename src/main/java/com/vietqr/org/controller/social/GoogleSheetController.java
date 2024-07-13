@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -33,34 +34,34 @@ public class GoogleSheetController {
     GoogleSheetService googleSheetService;
 
     // send first message
-    @PostMapping("service/google-sheets/send-message")
-    public ResponseEntity<ResponseMessageDTO> sendFirstMessage(@Valid @RequestBody GoogleSheetFirstMessDTO dto) {
-        ResponseMessageDTO result = null;
-        HttpStatus httpStatus = null;
-        try {
-            String message = "Xin chào quý khách 🎉"
-                    + "\nRất vui khi kết nối với quý khách qua kênh liên lạc Google Sheets."
-                    + "\nCảm ơn quý khách đã sử dụng dịch vụ của chúng tôi."
-                    + "\n🌐 Truy cập ứng dụng VietQR VN tại: https://vietqr.vn | https://vietqr.com"
-                    + "\n📱 Hoặc tải ứng dụng thông qua: https://onelink.to/q7zwpe"
-                    + "\n📞 Hotline hỗ trợ: 1900 6234 - 092 233 3636";
-            GoogleSheetUtil googleSheetUtil = new GoogleSheetUtil();
-            boolean check = googleSheetUtil.insertRowToGoogleSheet(dto.getWebhook(), new String[]{message});
-            if (check) {
-                result = new ResponseMessageDTO("SUCCESS", "");
-                httpStatus = HttpStatus.OK;
-            } else {
-                result = new ResponseMessageDTO("FAILED", "E71");
-                httpStatus = HttpStatus.BAD_REQUEST;
-            }
-        } catch (Exception e) {
-            logger.error("GoogleSheetController: sendFirstMessage: ERROR: " + e.toString());
-            System.out.println("GoogleSheetController: sendFirstMessage: ERROR: " + e.toString());
-            result = new ResponseMessageDTO("FAILED", "E05");
-            httpStatus = HttpStatus.BAD_REQUEST;
-        }
-        return new ResponseEntity<>(result, httpStatus);
-    }
+//    @PostMapping("service/google-sheets/send-message")
+//    public ResponseEntity<ResponseMessageDTO> sendFirstMessage(@Valid @RequestBody GoogleSheetFirstMessDTO dto) {
+//        ResponseMessageDTO result = null;
+//        HttpStatus httpStatus = null;
+//        try {
+//            String message = "Xin chào quý khách 🎉"
+//                    + "\nRất vui khi kết nối với quý khách qua kênh liên lạc Google Sheets."
+//                    + "\nCảm ơn quý khách đã sử dụng dịch vụ của chúng tôi."
+//                    + "\n🌐 Truy cập ứng dụng VietQR VN tại: https://vietqr.vn | https://vietqr.com"
+//                    + "\n📱 Hoặc tải ứng dụng thông qua: https://onelink.to/q7zwpe"
+//                    + "\n📞 Hotline hỗ trợ: 1900 6234 - 092 233 3636";
+//            GoogleSheetUtil googleSheetUtil = new GoogleSheetUtil();
+//            boolean check = googleSheetUtil.insertRowToGoogleSheet(dto.getWebhook(), new String[]{message});
+//            if (check) {
+//                result = new ResponseMessageDTO("SUCCESS", "");
+//                httpStatus = HttpStatus.OK;
+//            } else {
+//                result = new ResponseMessageDTO("FAILED", "E71");
+//                httpStatus = HttpStatus.BAD_REQUEST;
+//            }
+//        } catch (Exception e) {
+//            logger.error("GoogleSheetController: sendFirstMessage: ERROR: " + e.toString());
+//            System.out.println("GoogleSheetController: sendFirstMessage: ERROR: " + e.toString());
+//            result = new ResponseMessageDTO("FAILED", "E05");
+//            httpStatus = HttpStatus.BAD_REQUEST;
+//        }
+//        return new ResponseEntity<>(result, httpStatus);
+//    }
 
     // insert bank into Google Sheet
     @PostMapping("service/google-sheets/bank")
