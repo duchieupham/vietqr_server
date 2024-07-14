@@ -130,4 +130,17 @@ public class AccountLoginDTO implements Serializable {
 		this.sharingCode = sharingCode;
 	}
 
+	@Override
+	public String toString() {
+		return "AccountLoginDTO{" +
+				"phoneNo='" + phoneNo + '\'' +
+				", email='" + email + '\'' +
+				", password='" + password + '\'' +
+				", fcmToken='" + fcmToken + '\'' +
+				", platform='" + platform + '\'' +
+				", device='" + device + '\'' +
+				", hosting='" + hosting + '\'' +
+				", sharingCode='" + sharingCode + '\'' +
+				'}';
+	}
 }

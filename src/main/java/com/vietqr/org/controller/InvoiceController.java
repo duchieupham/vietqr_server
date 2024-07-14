@@ -1819,6 +1819,7 @@ public class InvoiceController {
         InvoiceUnpaidUserStaDTO result = null;
         HttpStatus httpStatus = null;
         try {
+            logger.info("getTotalInvoiceUnpaidByUserId: " + userId);
             result = new InvoiceUnpaidUserStaDTO();
             InvoiceUnpaidStatisticDTO dto = invoiceService.getTotalInvoiceUnpaidByUserId(userId);
             if (dto != null) {

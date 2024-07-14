@@ -61,6 +61,7 @@ public class AccountSettingController {
         AccountSettingDTO result = null;
         HttpStatus httpStatus = null;
         try {
+            logger.info("getAccountSetting: " + userId + " at: " + System.currentTimeMillis());
             if (userId != null && !userId.trim().isEmpty()) {
                 AccountSettingEntity entity = accountSettingService.getAccountSettingEntity(userId);
                 List<MerchantRoleSettingDTO> roles = new ArrayList<>();
@@ -93,6 +94,7 @@ public class AccountSettingController {
                                 .collect(Collectors.toList());
                     }
                 } catch (Exception e) {
+                    logger.info("getAccountSetting: ERROR: " + e.getMessage() + " " + userId + " at: " + System.currentTimeMillis());
                 }
                 if (entity != null) {
                     //

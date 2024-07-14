@@ -315,6 +315,7 @@ public class AccountController {
         String result = "";
         HttpStatus httpStatus = null;
         try {
+            logger.info("Login: " + dto.toString());
             String userId = "";
             if (dto.getPhoneNo() != null && !dto.getPhoneNo().isEmpty()) {
                 userId = accountLoginService.login(dto.getPhoneNo(), dto.getPassword());
@@ -327,6 +328,7 @@ public class AccountController {
                 // get user information
                 AccountInformationEntity accountInformationEntity = accountInformationService
                         .getAccountInformation(userId);
+                logger.info("Login: " + accountInformationEntity.toString());
                 // push notification to other devices if user logged in before
                 LocalDateTime currentDateTime = LocalDateTime.now();
                 //
@@ -425,11 +427,11 @@ public class AccountController {
                 updateAccessLogin(userId);
                 httpStatus = HttpStatus.OK;
             } else {
-                logger.error("LOGIN: Cannot find user Id");
+                logger.error("LOGIN: Cannot find user Id" + dto.toString());
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
-            logger.error("Error at login: " + e.toString());
+            logger.error("Error at login: " + e.toString() + dto.toString() + " at: " + System.currentTimeMillis());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -472,18 +474,22 @@ public class AccountController {
     public ResponseEntity<Object> searchAccount(@Valid @PathVariable("phoneNo") String phoneNo) {
         Object result = null;
         HttpStatus httpStatus = null;
+        logger.info("accounts/search " + phoneNo);
         try {
             AccountSearchDTO dto = accountInformationService.getAccountSearch(phoneNo);
             if (dto == null) {
+                logger.info("searchAccount: CHECK 01 " + phoneNo);
                 result = new ResponseMessageDTO("CHECK", "C01");
                 httpStatus = HttpStatus.valueOf(201);
             } else {
+                logger.info("searchAccount: HAVE RESULT " + phoneNo);
                 result = dto;
                 httpStatus = HttpStatus.OK;
             }
 
         } catch (Exception e) {
             System.out.println("Error at searchAccount: " + e.toString());
+            logger.error("Error at searchAccount: " + e.getMessage() + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
