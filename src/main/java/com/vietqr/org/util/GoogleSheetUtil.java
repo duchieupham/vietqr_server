@@ -22,7 +22,6 @@ public class GoogleSheetUtil {
     private static GoogleSheetUtil instance;
     public boolean headerInserted  = false;
     private int sttCounter = 1; // Khai báo và khởi tạo biến sttCounter
-
     private static final int WIDTH_PIXEL = 256;
 
     private GoogleSheetUtil() {
@@ -83,13 +82,12 @@ public class GoogleSheetUtil {
                 LocalDateTime timeCreated = convertLongToLocalDateTime(Long.parseLong(data.get("time")));
 
                 // Định nghĩa giá trị của "Loại GD"
-                String transType = data.get("transType").equals("C") ? "Khác" : "Khác";
+                String transType = data.get("transType").equals("C") ? "Giao dịch đến" : "Giao dịch đi";
                 // Định nghĩa giá trị của "Trạng thái"
                 String status = getStatusTransaction(Integer.parseInt(data.get("status")));
 
                 // Định nghĩa giá trị của "Số tiền"
-                String amount = notificationContents.contains("AMOUNT") ?
-                        (data.get("transType").equals("C") ? "+" : "-") + data.get("amount") : "";
+                String amount = notificationContents.contains("AMOUNT") ? data.get("amount") : "";
 
                 // Tạo dữ liệu hàng từ đối tượng DTO theo thứ tự cột
                 List<String> rowData = Arrays.asList(
@@ -116,10 +114,14 @@ public class GoogleSheetUtil {
                         .baseUrl(uriComponents.toUriString())
                         .build();
 
-                // Chèn hàng dữ liệu
+                // Thêm một tham số mới để chỉ định chèn trên cùng
+                Map<String, Object> payload = new HashMap<>();
+                payload.put("values", Collections.singletonList(rowData));
+                payload.put("position", "insertAtTop"); // Thêm chỉ dẫn chèn ở đầu
+
                 webClient.post()
                         .contentType(MediaType.APPLICATION_JSON)
-                        .body(BodyInserters.fromValue(Collections.singletonMap("values", Collections.singletonList(rowData))))
+                        .body(BodyInserters.fromValue(payload))
                         .exchange()
                         .block();
 
@@ -180,19 +182,32 @@ public class GoogleSheetUtil {
 
     private int getColumnWidth(int columnIndex) {
         switch (columnIndex) {
-            case 0: return 9 * WIDTH_PIXEL; // STT
-            case 1: return 22 * WIDTH_PIXEL; // Thời gian thanh toán
-            case 2: return 14 * WIDTH_PIXEL; // Số tiền (VND)
-            case 3: return 21 * WIDTH_PIXEL; // Mã giao dịch
-            case 4: return 17 * WIDTH_PIXEL; // Mã đơn hàng
-            case 5: return 17 * WIDTH_PIXEL; // Mã điểm bán
-            case 6: return 20 * WIDTH_PIXEL; // Loại GD
-            case 7: return 22 * WIDTH_PIXEL; // Thời gian tạo GD
-            case 8: return 24 * WIDTH_PIXEL; // Tài khoản nhận
-            case 9: return 40 * WIDTH_PIXEL; // Nội dung
-            case 10: return 20 * WIDTH_PIXEL; // Ghi chú
-            case 11: return 15 * WIDTH_PIXEL; // Trạng thái
-            default: return 15 * WIDTH_PIXEL;
+            case 0:
+                return 9 * WIDTH_PIXEL; // STT
+            case 1:
+                return 22 * WIDTH_PIXEL; // Thời gian thanh toán
+            case 2:
+                return 14 * WIDTH_PIXEL; // Số tiền (VND)
+            case 3:
+                return 21 * WIDTH_PIXEL; // Mã giao dịch
+            case 4:
+                return 17 * WIDTH_PIXEL; // Mã đơn hàng
+            case 5:
+                return 17 * WIDTH_PIXEL; // Mã điểm bán
+            case 6:
+                return 20 * WIDTH_PIXEL; // Loại GD
+            case 7:
+                return 22 * WIDTH_PIXEL; // Thời gian tạo GD
+            case 8:
+                return 24 * WIDTH_PIXEL; // Tài khoản nhận
+            case 9:
+                return 40 * WIDTH_PIXEL; // Nội dung
+            case 10:
+                return 20 * WIDTH_PIXEL; // Ghi chú
+            case 11:
+                return 15 * WIDTH_PIXEL; // Trạng thái
+            default:
+                return 15 * WIDTH_PIXEL;
         }
     }
 }
