@@ -76,6 +76,7 @@ public class BearerTokenController {
 		ResponseMessageDTO result = null;
 		HttpStatus httpStatus = null;
 		try {
+
 			String userId = getUserIdFromToken(token);
 			System.out.println("userId: " + userId);
 			if (userId != null && !userId.trim().isEmpty()) {
@@ -84,6 +85,7 @@ public class BearerTokenController {
 			result = new ResponseMessageDTO("SUCCESS", "");
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
+			logger.info("checkValidToken ERROR: " + e.getMessage());
 			result = new ResponseMessageDTO("FAILED", "Unexpected Error");
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}

@@ -46,6 +46,7 @@ public class AccountWalletController {
         HttpStatus httpStatus = null;
         try {
             System.out.println("userId: " + userId);
+            logger.info("getAccountWalletByUserId: " + userId);
 
             AccountWalletEntity entity = accountWalletService.getAccountWalletByUserId(userId);
             result = new AccountWalletDTO(entity.getAmount(), entity.getPoint() + "", entity.getSharingCode(),

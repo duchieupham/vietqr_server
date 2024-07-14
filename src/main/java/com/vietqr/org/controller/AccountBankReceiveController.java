@@ -934,6 +934,7 @@ public class AccountBankReceiveController {
         try {
             // get list banks
             //
+            logger.info("getAccountBankBackups: " + userId);
             long currentDateTimeUTCPlus7 = DateTimeUtil.getStartDateUTCPlus7();
             List<AccountBankReceiveShareDTO> banks = accountBankReceiveShareService
                     .getAccountBankReceiveShares(userId);
@@ -997,6 +998,7 @@ public class AccountBankReceiveController {
             }
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
+            logger.info("getAccountBankBackups: ERROR: " + e.getMessage() + " " + userId);
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
