@@ -119,28 +119,30 @@ public class AccountBankReceiveController {
             if (Objects.nonNull(checkAccount)) {
                 if (Objects.nonNull(bankReceiveEntity)) {
                     if (Objects.nonNull(terminalAddress)) {
+                        //-Nếu chưa tồn tại, gọi API sync TID của MBBank để đăng ký mới.
+                        // để LINH CONFIRM LÀM
+                        customerSyncService.getMerchantNameById("");
+
                         //-Nếu tồn tại, thì chỉ cần đổi biến mms_active = true.
                         if (!checkAccount.isSync()) {
                             checkAccount.setSync(true);
                         }
                         accountBankReceiveService.updateMMSActive(true, true, dto.getBankId());
+
                         result = new ResponseMessageDTO("SUCCESS", "");
                         httpStatus = HttpStatus.OK;
                     } else {
-                        result = new ResponseMessageDTO("FAILED", "Tài khoản không tìm thấy ở terminal_address và  terminal_bank.");
+                        result = new ResponseMessageDTO("FAILED", "E170");
                         httpStatus = HttpStatus.BAD_REQUEST;
                     }
                 } else {
-                    result = new ResponseMessageDTO("FAILED", "Tài khoản chưa được liên kết");
+                    result = new ResponseMessageDTO("FAILED", "E171");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {
-                result = new ResponseMessageDTO("FAILED", "Tài khoản chưa đã ở luồng 2/TF");
+                result = new ResponseMessageDTO("FAILED", "E172");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
-            //-Nếu chưa tồn tại, gọi API sync TID của MBBank để đăng ký mới.
-            // để LINH CONFIRM LÀM
-
         } catch (Exception e) {
             logger.error("AccountBankReceiveController: ERROR: updateBankAccountByAdmin: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
