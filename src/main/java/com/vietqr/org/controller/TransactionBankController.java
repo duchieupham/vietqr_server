@@ -2675,21 +2675,47 @@ public class TransactionBankController {
 			// textToSpeechService.delete(requestId);
 		}
 	}
-	private boolean shouldSendNotification(List<String> notificationTypes, TransactionBankDTO dto, TransactionReceiveEntity transactionReceiveEntity) {
-		if (notificationTypes.containsAll(Arrays.asList("CREDIT", "DEBIT", "RECON"))) {
-			return true;
-		}
-		if (notificationTypes.contains("CREDIT") && dto.getTransType().equals("C")) {
-			return true;
-		}
-		if (notificationTypes.contains("DEBIT") && dto.getTransType().equals("D")) {
-			return true;
-		}
-		return notificationTypes.contains("RECON") && dto.getTransType().equals("C") && (transactionReceiveEntity.getType() == 0 || transactionReceiveEntity.getType() == 1);
-	}
+    private boolean shouldSendNotification(List<String> notificationTypes, TransactionBankDTO dto, TransactionReceiveEntity transactionReceiveEntity) {
+        if (dto.getTransType().equals("D")) {
+            // Kiểm tra cấu hình có giao dịch đi hay không
+            if (notificationTypes.contains("DEBIT")) {
+                // Nếu có, push thông báo
+                return true;
+            } else {
+                // Nếu không, không push
+                return false;
+            }
+        } else if (dto.getTransType().equals("C")) {
+            // Kiểm tra cấu hình có giao dịch đến hay không
+            if (notificationTypes.contains("CREDIT")) {
+                // Nếu có, push thông báo
+                return true;
+            } else {
+                // Nếu không, kiểm tra xem có phải giao dịch RECON hay không
+                if (notificationTypes.contains("RECON")) {
+                    if (isReconTransaction(dto, transactionReceiveEntity)) {
+                        // Nếu là giao dịch RECON, push thông báo
+                        return true;
+                    } else {
+                        // Nếu không phải giao dịch RECON, không push
+                        return false;
+                    }
+                } else {
+                    // Nếu không có RECON, không push
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
+    //kiểm tra giao dịch RECON
+    private boolean isReconTransaction(TransactionBankDTO dto, TransactionReceiveEntity transactionReceiveEntity) {
+        return dto.getTransType().equals("C") && (transactionReceiveEntity.getType() == 0 || transactionReceiveEntity.getType() == 1);
+    }
 
 
-	private String createMessage(List<String> notificationContents, String transType, String amount, BankTypeEntity bankTypeEntity, String bankAccount, long time, String referenceNumber, String content) {
+    private String createMessage(List<String> notificationContents, String transType, String amount, BankTypeEntity bankTypeEntity, String bankAccount, long time, String referenceNumber, String content) {
 		StringBuilder msgBuilder = new StringBuilder();
 
 		if (notificationContents.contains("AMOUNT")) {
@@ -2715,6 +2741,16 @@ public class TransactionBankController {
 
 		return message;
 	}
+
+
+	// Định dạng thời gian cho Google Chat giống với Google Sheet Util
+	private String formatTimeForGoogleChat(long time) {
+		LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(time), ZoneId.of("GMT"));
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss", Locale.ENGLISH);
+		return dateTime.format(formatter);
+	}
+
+
 
 	// insert new transaction mean it's not created from business. So DO NOT need to
 	// push to users
@@ -3080,6 +3116,11 @@ public class TransactionBankController {
 								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 								if (sendNotification) {
 									String telegramMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+
+									// Định dạng thời gian trước khi gửi thông báo
+									String formattedTime = formatTimeForGoogleChat(time);
+									telegramMsg = telegramMsg.replace(convertLongToDate(time), formattedTime);
+
 									telegramUtil.sendMsg(chatId, telegramMsg);
 								}
 							}
@@ -3092,38 +3133,7 @@ public class TransactionBankController {
 				}
 
 
-				/////// DO INSERT LARK
-//				if (accountBankEntity.getBankAccount().equals("699699699996")) {
-//					if (transactionEntity.getTransType().equals("C")) {
-//						List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-//						if (webhooks != null && !webhooks.isEmpty()) {
-//							LarkUtil larkUtil = new LarkUtil();
-//							String larkMsg = prefix + amount + " VND"
-//									+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-//									+ accountBankEntity.getBankAccount()
-//									+ " | " + convertLongToDate(time)
-//									+ " | " + dto.getReferencenumber()
-//									+ " | ND: " + dto.getContent();
-//							for (String webhook : webhooks) {
-//								larkUtil.sendMessageToLark(larkMsg, webhook);
-//							}
-//						}
-//					}
-//				} else {
-//					List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-//					if (webhooks != null && !webhooks.isEmpty()) {
-//						LarkUtil larkUtil = new LarkUtil();
-//						String larkMsg = prefix + amount + " VND"
-//								+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-//								+ accountBankEntity.getBankAccount()
-//								+ " | " + convertLongToDate(time)
-//								+ " | " + dto.getReferencenumber()
-//								+ " | ND: " + dto.getContent();
-//						for (String webhook : webhooks) {
-//							larkUtil.sendMessageToLark(larkMsg, webhook);
-//						}
-//					}
-//				}
+
 				/////// DO INSERT LARK BY QVAN
 				List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
 				if (webhooks != null && !webhooks.isEmpty()) {
@@ -3137,6 +3147,11 @@ public class TransactionBankController {
 								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 								if (sendNotification) {
 									String larkMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+
+									// Định dạng thời gian trước khi gửi thông báo
+									String formattedTime = formatTimeForGoogleChat(time);
+									larkMsg = larkMsg.replace(convertLongToDate(time), formattedTime);
+
 									larkUtil.sendMessageToLark(larkMsg, webhook);
 								}
 							}
@@ -3149,20 +3164,6 @@ public class TransactionBankController {
 				}
 
 
-				/////// DO INSERT GOOGLE CHAT
-//				List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-//				if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
-//					GoogleChatUtil googleChatUtil = new GoogleChatUtil();
-//					String googleChatMsg = prefix + amount + " VND"
-//							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-//							+ accountBankEntity.getBankAccount()
-//							+ " | " + convertLongToDate(time)
-//							+ " | " + dto.getReferencenumber()
-//							+ " | ND: " + dto.getContent();
-//					for (String webhook : ggChatWebhooks) {
-//						googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
-//					}
-//				}
 
 				// DO INSERT GOOGLE CHAT BY QVAN
 				List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
@@ -3177,6 +3178,11 @@ public class TransactionBankController {
 								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 								if (sendNotification) {
 									String googleChatMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+
+									// Định dạng thời gian trước khi gửi thông báo
+									String formattedTime = formatTimeForGoogleChat(time);
+									googleChatMsg = googleChatMsg.replace(convertLongToDate(time), formattedTime);
+
 									googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
 								}
 							}
@@ -3187,6 +3193,7 @@ public class TransactionBankController {
 						}
 					}
 				}
+
 
 				// DO INSERT SLACK BY QVAN
 				List<String> slackWebhooks = slackAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
@@ -3201,6 +3208,11 @@ public class TransactionBankController {
 								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 								if (sendNotification) {
 									String slackMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+
+									// Định dạng thời gian trước khi gửi thông báo
+									String formattedTime = formatTimeForGoogleChat(time);
+									slackMsg = slackMsg.replace(convertLongToDate(time), formattedTime);
+
 									slackUtil.sendMessageToSlack(slackMsg, webhook);
 								}
 							}
@@ -3211,6 +3223,7 @@ public class TransactionBankController {
 						}
 					}
 				}
+
 
 				// DO INSERT DISCORD BY QVAN
 				List<String> discordWebhooks = discordAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
@@ -3225,6 +3238,11 @@ public class TransactionBankController {
 								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 								if (sendNotification) {
 									String discordMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+
+									// Định dạng thời gian trước khi gửi thông báo
+									String formattedTime = formatTimeForGoogleChat(time);
+									discordMsg = discordMsg.replace(convertLongToDate(time), formattedTime);
+
 									discordUtil.sendMessageToDiscord(discordMsg, webhook);
 								}
 							}
@@ -3237,34 +3255,7 @@ public class TransactionBankController {
 				}
 
 
-				// DO INSERT GOOGLE SHEET BY QVAN
-//				List<String> ggSheetWebhooks = googleSheetAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-//				if (ggSheetWebhooks != null && !ggSheetWebhooks.isEmpty()) {
-//					GoogleSheetUtil googleSheetUtil = GoogleSheetUtil.getInstance();
-//					for (String webhook : ggSheetWebhooks) {
-//						try {
-//							GoogleSheetEntity googleSheetEntity = googleSheetService.getGoogleSheetByWebhook(webhook);
-//							if (googleSheetEntity != null) {
-//								List<String> notificationTypes = new ObjectMapper().readValue(googleSheetEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
-//								List<String> notificationContents = new ObjectMapper().readValue(googleSheetEntity.getNotificationContents(), new TypeReference<List<String>>() {});
-//								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
-//								if (sendNotification) {
-//
-//									// Chèn tiêu đề chỉ một lần
-//									if (!googleSheetUtil.headerInserted) {
-//										googleSheetUtil.insertHeader(webhook);
-//									}
-//
-//									String amountString = String.valueOf(dto.getAmount());
-//									String message = createMessage(notificationContents, dto.getTransType(), amountString, bankTypeEntity, accountBankEntity.getBankAccount(), dto.getTransactiontime(), dto.getReferencenumber(), dto.getContent());
-//									googleSheetUtil.insertTransactionToGoogleSheet(message, webhook);
-//								}
-//							}
-//						} catch (Exception e) {
-//							logger.error("Error sending Google Sheets notification: " + e.getMessage());
-//						}
-//					}
-//				}
+
 
 				// DO INSERT GOOGLE SHEET BY QVAN
 				List<String> ggSheetWebhooks = googleSheetAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
@@ -3536,64 +3527,6 @@ public class TransactionBankController {
 //					}
 //				}
 
-				/////// DO INSERT TELEGRAM BY QVAN
-				List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
-				if (chatIds != null && !chatIds.isEmpty()) {
-					TelegramUtil telegramUtil = new TelegramUtil();
-					for (String chatId : chatIds) {
-						try {
-							TelegramEntity telegramEntity = telegramService.getTelegramByChatId(chatId);
-							if (telegramEntity != null) {
-								List<String> notificationTypes = new ObjectMapper().readValue(telegramEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
-								List<String> notificationContents = new ObjectMapper().readValue(telegramEntity.getNotificationContents(), new TypeReference<List<String>>() {});
-								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
-								if (sendNotification) {
-									String telegramMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
-									telegramUtil.sendMsg(chatId, telegramMsg);
-								}
-							}
-						} catch (JsonProcessingException e) {
-							logger.error("Error processing JSON for Telegram notification: " + e.getMessage());
-						} catch (Exception e) {
-							logger.error("Error sending Telegram notification: " + e.getMessage());
-						}
-					}
-				}
-
-
-//				/////// DO INSERT LARK
-//				if (accountBankEntity.getBankAccount().equals("699699699996")) {
-//					if (transactionEntity.getTransType().equals("C")) {
-//						List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-//						if (webhooks != null && !webhooks.isEmpty()) {
-//							LarkUtil larkUtil = new LarkUtil();
-//							String larkMsg = prefix + amount + " VND"
-//									+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-//									+ accountBankEntity.getBankAccount()
-//									+ " | " + convertLongToDate(time)
-//									+ " | " + dto.getReferencenumber()
-//									+ " | ND: " + dto.getContent();
-//							for (String webhook : webhooks) {
-//								larkUtil.sendMessageToLark(larkMsg, webhook);
-//							}
-//						}
-//					}
-//				} else {
-//					List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-//					if (webhooks != null && !webhooks.isEmpty()) {
-//						LarkUtil larkUtil = new LarkUtil();
-//						String larkMsg = prefix + amount + " VND"
-//								+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-//								+ accountBankEntity.getBankAccount()
-//								+ " | " + convertLongToDate(time)
-//								+ " | " + dto.getReferencenumber()
-//								+ " | ND: " + dto.getContent();
-//						for (String webhook : webhooks) {
-//							larkUtil.sendMessageToLark(larkMsg, webhook);
-//						}
-//					}
-//				}
-
 				/////// DO INSERT LARK BY QVAN
 				List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
 				if (webhooks != null && !webhooks.isEmpty()) {
@@ -3607,6 +3540,11 @@ public class TransactionBankController {
 								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 								if (sendNotification) {
 									String larkMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+
+									// Định dạng thời gian trước khi gửi thông báo
+									String formattedTime = formatTimeForGoogleChat(time);
+									larkMsg = larkMsg.replace(convertLongToDate(time), formattedTime);
+
 									larkUtil.sendMessageToLark(larkMsg, webhook);
 								}
 							}
@@ -3618,21 +3556,6 @@ public class TransactionBankController {
 					}
 				}
 
-
-				/////// DO INSERT GOOGLE CHAT
-//				List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-//				if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
-//					GoogleChatUtil googleChatUtil = new GoogleChatUtil();
-//					String googleChatMsg = prefix + amount + " VND"
-//							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-//							+ accountBankEntity.getBankAccount()
-//							+ " | " + convertLongToDate(time)
-//							+ " | " + dto.getReferencenumber()
-//							+ " | ND: " + dto.getContent();
-//					for (String webhook : ggChatWebhooks) {
-//						googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
-//					}
-//				}
 
 				// DO INSERT GOOGLE CHAT BY QVAN
 				List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
@@ -3647,6 +3570,11 @@ public class TransactionBankController {
 								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 								if (sendNotification) {
 									String googleChatMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+
+									// Định dạng thời gian trước khi gửi thông báo
+									String formattedTime = formatTimeForGoogleChat(time);
+									googleChatMsg = googleChatMsg.replace(convertLongToDate(time), formattedTime);
+
 									googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
 								}
 							}
@@ -3657,6 +3585,7 @@ public class TransactionBankController {
 						}
 					}
 				}
+
 
 				// DO INSERT SLACK BY QVAN
 				List<String> slackWebhooks = slackAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
@@ -3671,19 +3600,21 @@ public class TransactionBankController {
 								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 								if (sendNotification) {
 									String slackMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+
+									// Định dạng thời gian trước khi gửi thông báo
+									String formattedTime = formatTimeForGoogleChat(time);
+									slackMsg = slackMsg.replace(convertLongToDate(time), formattedTime);
+
 									slackUtil.sendMessageToSlack(slackMsg, webhook);
 								}
 							}
 						} catch (JsonProcessingException e) {
-							// Log error but do not interrupt the transaction process
 							logger.error("Error processing JSON for Slack notification: " + e.getMessage());
 						} catch (Exception e) {
-							// Log any other errors
 							logger.error("Error sending Slack notification: " + e.getMessage());
 						}
 					}
 				}
-
 
 				// DO INSERT DISCORD BY QVAN
 				List<String> discordWebhooks = discordAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
@@ -3698,14 +3629,17 @@ public class TransactionBankController {
 								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 								if (sendNotification) {
 									String discordMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+
+									// Định dạng thời gian trước khi gửi thông báo
+									String formattedTime = formatTimeForGoogleChat(time);
+									discordMsg = discordMsg.replace(convertLongToDate(time), formattedTime);
+
 									discordUtil.sendMessageToDiscord(discordMsg, webhook);
 								}
 							}
 						} catch (JsonProcessingException e) {
-							// Log error but do not interrupt the transaction process
 							logger.error("Error processing JSON for Discord notification: " + e.getMessage());
 						} catch (Exception e) {
-							// Log any other errors
 							logger.error("Error sending Discord notification: " + e.getMessage());
 						}
 					}
@@ -3968,33 +3902,7 @@ public class TransactionBankController {
 			} catch (IOException e) {
 				logger.error("WS: socketHandler.sendMessageToUser - insertNewTransaction ERROR: " + e.toString());
 			}
-			/////// DO INSERT TELEGRAM
-//			List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
-//			if (chatIds != null && !chatIds.isEmpty()) {
-//				TelegramUtil telegramUtil = new TelegramUtil();
-//				// String telegramMsg2 = "Thanh toán thành công 🎉."
-//				// + "\nTài khoản: " + bankTypeEntity.getBankShortName() + " - " +
-//				// accountBankEntity.getBankAccount()
-//				// + "\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
-//				// + "\nMã giao dịch: " + dto.getReferencenumber()
-//				// + "\nThời gian: " + convertLongToDate(time)
-//				// + "\nNội dung: " + dto.getContent();
-//				// String telegramMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
-//				// + "| TK: " + bankTypeEntity.getBankShortName() + " - "
-//				// + accountBankEntity.getBankAccount()
-//				// + "| Ma GD: " + dto.getReferencenumber()
-//				// + "| ND: " + dto.getContent()
-//				// + "| " + convertLongToDate(time);
-//				String telegramMsg = prefix + amount + " VND"
-//						+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-//						+ accountBankEntity.getBankAccount()
-//						+ " | " + convertLongToDate(time)
-//						+ " | " + dto.getReferencenumber()
-//						+ " | ND: " + dto.getContent();
-//				for (String chatId : chatIds) {
-//					telegramUtil.sendMsg(chatId, telegramMsg);
-//				}
-//			}
+
 
 			/////// DO INSERT TELEGRAM BY QVAN
 			List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
@@ -4009,6 +3917,11 @@ public class TransactionBankController {
 							boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 							if (sendNotification) {
 								String telegramMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+
+								// Định dạng thời gian trước khi gửi thông báo
+								String formattedTime = formatTimeForGoogleChat(time);
+								telegramMsg = telegramMsg.replace(convertLongToDate(time), formattedTime);
+
 								telegramUtil.sendMsg(chatId, telegramMsg);
 							}
 						}
@@ -4021,40 +3934,8 @@ public class TransactionBankController {
 			}
 
 
-			/////// DO INSERT LARK
-//			if (accountBankEntity.getBankAccount().equals("699699699996")) {
-//				if (transactionEntity.getTransType().equals("C")) {
-//					List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-//					if (webhooks != null && !webhooks.isEmpty()) {
-//						LarkUtil larkUtil = new LarkUtil();
-//						String larkMsg = prefix + amount + " VND"
-//								+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-//								+ accountBankEntity.getBankAccount()
-//								+ " | " + convertLongToDate(time)
-//								+ " | " + dto.getReferencenumber()
-//								+ " | ND: " + dto.getContent();
-//						for (String webhook : webhooks) {
-//							larkUtil.sendMessageToLark(larkMsg, webhook);
-//						}
-//					}
-//				}
-//			} else {
-//				List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-//				if (webhooks != null && !webhooks.isEmpty()) {
-//					LarkUtil larkUtil = new LarkUtil();
-//					String larkMsg = prefix + amount + " VND"
-//							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-//							+ accountBankEntity.getBankAccount()
-//							+ " | " + convertLongToDate(time)
-//							+ " | " + dto.getReferencenumber()
-//							+ " | ND: " + dto.getContent();
-//					for (String webhook : webhooks) {
-//						larkUtil.sendMessageToLark(larkMsg, webhook);
-//					}
-//				}
-//			}
 
-/////// DO INSERT LARK BY QVAN
+			/////// DO INSERT LARK BY QVAN
 			List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
 			if (webhooks != null && !webhooks.isEmpty()) {
 				LarkUtil larkUtil = new LarkUtil();
@@ -4067,6 +3948,11 @@ public class TransactionBankController {
 							boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 							if (sendNotification) {
 								String larkMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+
+								// Định dạng thời gian trước khi gửi thông báo
+								String formattedTime = formatTimeForGoogleChat(time);
+								larkMsg = larkMsg.replace(convertLongToDate(time), formattedTime);
+
 								larkUtil.sendMessageToLark(larkMsg, webhook);
 							}
 						}
@@ -4078,20 +3964,6 @@ public class TransactionBankController {
 				}
 			}
 
-			/////// DO INSERT GOOGLE CHAT
-//			List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-//			if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
-//				GoogleChatUtil googleChatUtil = new GoogleChatUtil();
-//				String googleChatMsg = prefix + amount + " VND"
-//						+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-//						+ accountBankEntity.getBankAccount()
-//						+ " | " + convertLongToDate(time)
-//						+ " | " + dto.getReferencenumber()
-//						+ " | ND: " + dto.getContent();
-//				for (String webhook : ggChatWebhooks) {
-//					googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
-//				}
-//			}
 
 			// DO INSERT GOOGLE CHAT BY QVAN
 			List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
@@ -4106,6 +3978,11 @@ public class TransactionBankController {
 							boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 							if (sendNotification) {
 								String googleChatMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+
+								// Định dạng thời gian trước khi gửi thông báo
+								String formattedTime = formatTimeForGoogleChat(time);
+								googleChatMsg = googleChatMsg.replace(convertLongToDate(time), formattedTime);
+
 								googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
 							}
 						}
@@ -4130,14 +4007,17 @@ public class TransactionBankController {
 							boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 							if (sendNotification) {
 								String slackMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+
+								// Định dạng thời gian trước khi gửi thông báo
+								String formattedTime = formatTimeForGoogleChat(time);
+								slackMsg = slackMsg.replace(convertLongToDate(time), formattedTime);
+
 								slackUtil.sendMessageToSlack(slackMsg, webhook);
 							}
 						}
 					} catch (JsonProcessingException e) {
-						// Log error but do not interrupt the transaction process
 						logger.error("Error processing JSON for Slack notification: " + e.getMessage());
 					} catch (Exception e) {
-						// Log any other errors
 						logger.error("Error sending Slack notification: " + e.getMessage());
 					}
 				}
@@ -4156,19 +4036,21 @@ public class TransactionBankController {
 							boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 							if (sendNotification) {
 								String discordMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+
+								// Định dạng thời gian trước khi gửi thông báo
+								String formattedTime = formatTimeForGoogleChat(time);
+								discordMsg = discordMsg.replace(convertLongToDate(time), formattedTime);
+
 								discordUtil.sendMessageToDiscord(discordMsg, webhook);
 							}
 						}
 					} catch (JsonProcessingException e) {
-						// Log error but do not interrupt the transaction process
 						logger.error("Error processing JSON for Discord notification: " + e.getMessage());
 					} catch (Exception e) {
-						// Log any other errors
 						logger.error("Error sending Discord notification: " + e.getMessage());
 					}
 				}
 			}
-
 
 			// DO INSERT GOOGLE SHEET BY QVAN
 			List<String> ggSheetWebhooks = googleSheetAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
