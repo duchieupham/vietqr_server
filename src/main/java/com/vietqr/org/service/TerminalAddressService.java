@@ -14,4 +14,6 @@ public interface TerminalAddressService {
     public List<TerminalAddressEntity> getTerminalAddressByTerminalBankId(String terminalBankId);
 
     TerminalAddressEntity getTerminalAddressByBankIdAndCustomerSyncId(String bankId, String customerSyncId);
+
+    TerminalAddressEntity getTerminalAddressByBankIdAndTerminalBankId(String bankId);
 }

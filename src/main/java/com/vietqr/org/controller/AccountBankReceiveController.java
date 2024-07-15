@@ -46,6 +46,9 @@ public class AccountBankReceiveController {
     AccountBankReceiveService accountBankReceiveService;
 
     @Autowired
+    TerminalAddressService terminalAddressService;
+
+    @Autowired
     TerminalService terminalService;
 
     @Autowired
@@ -95,6 +98,58 @@ public class AccountBankReceiveController {
 
     @Autowired
     InvoiceService invoiceService;
+
+    @PostMapping("admin/account/update-flow")
+    public ResponseEntity<Object> updateFlow2(
+            @Valid @RequestBody AccountUpdateMMSActiveDTO dto
+    ) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            //-Check Tài khoản này đã đăng ký luồng 2 trước đó chưa,
+            AccountBankReceiveEntity checkAccount =
+                    accountBankReceiveService.checkExistedBankAccountAuthenticated(dto.getBankAccount(), dto.getBankCode());
+            //check bank account is_authenticated
+            AccountBankReceiveEntity bankReceiveEntity = accountBankReceiveService
+                    .checkExistedBankAccountAuthenticated(dto.getBankAccount(), dto.getBankCode());
+            //-check tồn tại record trong terminal_bank, terminal_address.
+            TerminalAddressEntity terminalAddress =
+                    terminalAddressService.getTerminalAddressByBankIdAndTerminalBankId(dto.getBankId());
+            //-Nếu tồn tại, thì chỉ cần đổi biến mms_active = true.
+            if (Objects.nonNull(checkAccount)) {
+                if (Objects.nonNull(bankReceiveEntity)) {
+                    if (Objects.nonNull(terminalAddress)) {
+                        //-Nếu tồn tại, thì chỉ cần đổi biến mms_active = true.
+                        if (!checkAccount.isSync()) {
+                            checkAccount.setSync(true);
+                        }
+                        accountBankReceiveService.updateMMSActive(true, true, dto.getBankId());
+                        result = new ResponseMessageDTO("SUCCESS", "");
+                        httpStatus = HttpStatus.OK;
+                    } else {
+                        result = new ResponseMessageDTO("FAILED", "Tài khoản không tìm thấy ở terminal_address và  terminal_bank.");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    }
+                } else {
+                    result = new ResponseMessageDTO("FAILED", "Tài khoản chưa được liên kết");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                result = new ResponseMessageDTO("FAILED", "Tài khoản chưa đã ở luồng 2/TF");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+            //-Nếu chưa tồn tại, gọi API sync TID của MBBank để đăng ký mới.
+            // để LINH CONFIRM LÀM
+
+        } catch (Exception e) {
+            logger.error("AccountBankReceiveController: ERROR: updateBankAccountByAdmin: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
 
     @PostMapping("account/admin-update")
     public ResponseEntity<ResponseMessageDTO> updateBankAccountByAdmin(@RequestBody BankAccountAdminUpdateDTO dto) {
