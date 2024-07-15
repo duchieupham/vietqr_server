@@ -114,12 +114,19 @@ public class CustomerSyncController {
             // type dùng để lấy ra danh sách
             if (type == 9) {
                 // type = 9 => search all
-                if (typeSearch == 9 || typeSearch == 0) { // type = 0 => search merchant name
+                if (typeSearch == 0) { // type = 0 => search merchant name
                     data = customerSyncService.getCustomerSyncListByMerchant(value, offset, size);
                     totalElements = customerSyncService.countCustomerSyncListByMerchant(value);
-                } else if (typeSearch == 9 || typeSearch == 1) { // type = 1 => search bank Account
+                } else if (typeSearch == 1) { // type = 1 => search bank Account
+                    // check  đây câu query có vấn đề
+                    // tại vì tìm kiém theo LIKE nên truyền rỗng nó sẽ lấy hết trong bảng account_customer_bank
+                    // nên là trả ra 207 records là đúng
+                    // nên là sửa lại theo search đúng theo bankAccount
                     data = customerSyncService.getCustomerSyncListByMerchantByBankAccount(value, offset, size);
                     totalElements = customerSyncService.countCustomerSyncListByMerchantByBankAccount(value);
+                } else if (typeSearch == 9) {
+                    data = customerSyncService.getCustomerSyncListByMerchantFix(value, offset, size);
+                    totalElements = customerSyncService.countCustomerSyncListByMerchant(value);
                 }
             } else if (type == 0) {
                 if (typeSearch == 9 || typeSearch == 0) { // type = 0 => search merchant name
@@ -130,7 +137,7 @@ public class CustomerSyncController {
                     totalElements = customerSyncService.countCustomerSyncAPIListByMerchantByBankAccount(value);
                 }
             } else if (type == 1) {
-                if (typeSearch == 9 || typeSearch == 0) { // type = 0 => search merchant name
+                if (typeSearch == 9 || typeSearch == 0) { // type = 1 => search bank account
                     data = customerSyncService.getCustomerSyncEcListByMerchant(value, offset, size);
                     totalElements = customerSyncService.countCustomerSyncEcListByMerchant(value);
                 } else if (typeSearch == 9 || typeSearch == 1) { // type = 1 => search bank Account

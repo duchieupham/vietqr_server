@@ -30,6 +30,7 @@ public interface CustomerSyncService {
 
     public List<CustomerSyncListDTO> getCustomerSyncListByMerchant(String value, int offset, int size);
     public List<CustomerSyncListDTO> getCustomerSyncListByMerchantByBankAccount(String value, int offset, int size);
+    public List<CustomerSyncListDTO> getCustomerSyncListByMerchantFix(String value, int offset, int size);
 
     public int countCustomerSyncListByMerchant(String value);
     public int countCustomerSyncListByMerchantByBankAccount(String value);

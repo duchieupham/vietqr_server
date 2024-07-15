@@ -105,7 +105,37 @@ public interface CustomerSyncRepository extends JpaRepository<CustomerSyncEntity
             + "ELSE 'API service' "
             + "END AS platform "
             + "FROM customer_sync a "
-            + "INNER JOIN account_customer_bank b ON a.id = b.customer_sync_id "
+            + "WHERE (a.user_id IS NULL OR a.user_id = '') OR (a.user_id IS NOT NULL AND a.user_id <> '') "
+            + "AND (a.merchant LIKE %:value%) "
+            + "LIMIT :offset, :size ", nativeQuery = true)
+    List<CustomerSyncListDTO> getCustomerSyncListByMerchantFix(String value, int offset, int size); // All fix
+
+    @Query(value = "SELECT a.id, a.merchant, a.information AS url, a.ip_address AS ip, a.port, "
+            + "CASE "
+            + "WHEN a.active = true THEN 1 "
+            + "WHEN a.active = false THEN 0 "
+            + "END AS active, "
+            + "CASE "
+            + "WHEN a.user_id IS NOT NULL AND a.user_id <> '' THEN 'Ecommerce' "
+            + "ELSE 'API service' "
+            + "END AS platform "
+            + "FROM customer_sync a "
+            + "WHERE (a.user_id IS NULL OR a.user_id = '') OR (a.user_id IS NOT NULL AND a.user_id <> '') "
+            + "AND (a.merchant LIKE %:value%) "
+            + "LIMIT :offset, :size ", nativeQuery = true)
+    List<CustomerSyncListDTO> getCustomerSyncListByBankCountFix(String value, int offset, int size); // All fix
+
+    @Query(value = "SELECT a.id, a.merchant, a.information AS url, a.ip_address AS ip, a.port, "
+            + "CASE "
+            + "WHEN a.active = true THEN 1 "
+            + "WHEN a.active = false THEN 0 "
+            + "END AS active, "
+            + "CASE "
+            + "WHEN a.user_id IS NOT NULL AND a.user_id <> '' THEN 'Ecommerce' "
+            + "ELSE 'API service' "
+            + "END AS platform "
+            + "FROM customer_sync a "
+            + "LEFT JOIN account_customer_bank b ON a.id = b.customer_sync_id "
             + "WHERE b.bank_account LIKE %:value% "
             + "LIMIT :offset, :size ", nativeQuery = true)
     List<CustomerSyncListDTO> getCustomerSyncListByMerchantByBankAccount(String value, int offset, int size); // Search by Bank account
@@ -123,7 +153,8 @@ public interface CustomerSyncRepository extends JpaRepository<CustomerSyncEntity
             "END AS platform " +
             "FROM customer_sync a " +
             "INNER JOIN account_customer_bank b ON a.id = b.customer_sync_id " +
-            "WHERE b.bank_account LIKE %:value% " +
+            "WHERE (a.user_id IS NULL OR a.user_id = '') OR (a.user_id IS NOT NULL AND a.user_id <> '') " +
+            "AND (b.bank_account LIKE %:value%) "+
             ") AS subquery;", nativeQuery = true)
     int countCustomerSyncListByMerchantByBankAccount(String value); // Search by Bank account
 
@@ -234,9 +265,9 @@ public interface CustomerSyncRepository extends JpaRepository<CustomerSyncEntity
             "  WHEN a.user_id IS NOT NULL AND a.user_id <> '' THEN 'Ecommerce' " +
             "  ELSE 'API service' " +
             "  END AS platform " +
-            "  FROM customer_sync a " +
-            "  WHERE a.merchant LIKE %:value% " +
-            ") as total ", nativeQuery = true)
+            "  FROM customer_sync a "
+            + "WHERE a.merchant LIKE %:value% "
+            + ") as total ", nativeQuery = true)
     int countCustomerSyncListByMerchant(String value);
 
     @Query(value = "SELECT a.id, COALESCE(a.merchant, ''), a.information AS url, a.ip_address AS ip, a.port, "

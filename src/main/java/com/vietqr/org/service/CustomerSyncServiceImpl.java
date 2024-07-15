@@ -60,6 +60,11 @@ public class CustomerSyncServiceImpl implements CustomerSyncService {
     }
 
     @Override
+    public List<CustomerSyncListDTO> getCustomerSyncListByMerchantFix(String value, int offset, int size) {
+        return repo.getCustomerSyncListByMerchantFix(value, offset, size);
+    }
+
+    @Override
     public List<CustomerSyncListDTO> getCustomerSyncListByMerchantByBankAccount(String value, int offset, int size) {
         return repo.getCustomerSyncListByMerchantByBankAccount(value, offset, size);
     }
