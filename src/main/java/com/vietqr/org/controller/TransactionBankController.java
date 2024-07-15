@@ -2716,6 +2716,23 @@ public class TransactionBankController {
 		return message;
 	}
 
+	// Phương thức chuyển đổi thời gian Unix Epoch Seconds sang LocalDateTime và định dạng thành chuỗi thời gian theo định dạng "dd/MM/yyyy HH:mm:ss"
+	private String convertLongToFormattedDateTime(long time) {
+		LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(time), ZoneId.of("GMT"));
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss", Locale.ENGLISH);
+		return dateTime.format(formatter);
+	}
+
+	// Phương thức chuyển đổi thời gian Unix Epoch Seconds sang LocalDateTime với múi giờ GMT
+	private LocalDateTime convertLongToLocalDateTime(long time) {
+		return LocalDateTime.ofInstant(Instant.ofEpochSecond(time), ZoneId.of("GMT"));
+	}
+
+	// Định dạng LocalDateTime thành chuỗi thời gian theo định dạng "dd/MM/yyyy HH:mm:ss"
+	private String formatLocalDateTime(LocalDateTime dateTime) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss", Locale.ENGLISH);
+		return dateTime.format(formatter);
+	}
 	// insert new transaction mean it's not created from business. So DO NOT need to
 	// push to users
 	public void insertNewTransaction(String transcationUUID, TransactionBankDTO dto,
@@ -3165,6 +3182,30 @@ public class TransactionBankController {
 //				}
 
 				// DO INSERT GOOGLE CHAT BY QVAN
+//				List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+//				if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
+//					GoogleChatUtil googleChatUtil = new GoogleChatUtil();
+//					for (String webhook : ggChatWebhooks) {
+//						try {
+//							GoogleChatEntity googleChatEntity = googleChatService.getGoogleChatByWebhook(webhook);
+//							if (googleChatEntity != null) {
+//								List<String> notificationTypes = new ObjectMapper().readValue(googleChatEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+//								List<String> notificationContents = new ObjectMapper().readValue(googleChatEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+//								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
+//								if (sendNotification) {
+//									String googleChatMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+//									googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
+//								}
+//							}
+//						} catch (JsonProcessingException e) {
+//							logger.error("Error processing JSON for Google Chat notification: " + e.getMessage());
+//						} catch (Exception e) {
+//							logger.error("Error sending Google Chat notification: " + e.getMessage());
+//						}
+//					}
+//				}
+
+				// DO INSERT GOOGLE CHAT BY QVAN
 				List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
 				if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
 					GoogleChatUtil googleChatUtil = new GoogleChatUtil();
@@ -3176,7 +3217,11 @@ public class TransactionBankController {
 								List<String> notificationContents = new ObjectMapper().readValue(googleChatEntity.getNotificationContents(), new TypeReference<List<String>>() {});
 								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 								if (sendNotification) {
-									String googleChatMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+									// Chuyển đổi thời gian sử dụng múi giờ GMT và định dạng giống Google Sheets
+									LocalDateTime transactionTime = convertLongToLocalDateTime(dto.getTransactiontime());
+									String formattedTime = formatLocalDateTime(transactionTime);
+									long transactionTimeAsLong = dto.getTransactiontime(); // giữ nguyên giá trị long để truyền vào createMessage
+									String googleChatMsg = createMessage(notificationContents, dto.getTransType(), String.valueOf(dto.getAmount()), bankTypeEntity, accountBankEntity.getBankAccount(), transactionTimeAsLong, dto.getReferencenumber(), dto.getContent());
 									googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
 								}
 							}
@@ -3635,6 +3680,30 @@ public class TransactionBankController {
 //				}
 
 				// DO INSERT GOOGLE CHAT BY QVAN
+//				List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+//				if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
+//					GoogleChatUtil googleChatUtil = new GoogleChatUtil();
+//					for (String webhook : ggChatWebhooks) {
+//						try {
+//							GoogleChatEntity googleChatEntity = googleChatService.getGoogleChatByWebhook(webhook);
+//							if (googleChatEntity != null) {
+//								List<String> notificationTypes = new ObjectMapper().readValue(googleChatEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+//								List<String> notificationContents = new ObjectMapper().readValue(googleChatEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+//								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
+//								if (sendNotification) {
+//									String googleChatMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+//									googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
+//								}
+//							}
+//						} catch (JsonProcessingException e) {
+//							logger.error("Error processing JSON for Google Chat notification: " + e.getMessage());
+//						} catch (Exception e) {
+//							logger.error("Error sending Google Chat notification: " + e.getMessage());
+//						}
+//					}
+//				}
+
+				// DO INSERT GOOGLE CHAT BY QVAN
 				List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
 				if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
 					GoogleChatUtil googleChatUtil = new GoogleChatUtil();
@@ -3646,7 +3715,11 @@ public class TransactionBankController {
 								List<String> notificationContents = new ObjectMapper().readValue(googleChatEntity.getNotificationContents(), new TypeReference<List<String>>() {});
 								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 								if (sendNotification) {
-									String googleChatMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+									// Chuyển đổi thời gian sử dụng múi giờ GMT và định dạng giống Google Sheets
+									LocalDateTime transactionTime = convertLongToLocalDateTime(dto.getTransactiontime());
+									String formattedTime = formatLocalDateTime(transactionTime);
+									long transactionTimeAsLong = dto.getTransactiontime(); // giữ nguyên giá trị long để truyền vào createMessage
+									String googleChatMsg = createMessage(notificationContents, dto.getTransType(), String.valueOf(dto.getAmount()), bankTypeEntity, accountBankEntity.getBankAccount(), transactionTimeAsLong, dto.getReferencenumber(), dto.getContent());
 									googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
 								}
 							}
@@ -4094,6 +4167,31 @@ public class TransactionBankController {
 //			}
 
 			// DO INSERT GOOGLE CHAT BY QVAN
+//			List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+//			if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
+//				GoogleChatUtil googleChatUtil = new GoogleChatUtil();
+//				for (String webhook : ggChatWebhooks) {
+//					try {
+//						GoogleChatEntity googleChatEntity = googleChatService.getGoogleChatByWebhook(webhook);
+//						if (googleChatEntity != null) {
+//							List<String> notificationTypes = new ObjectMapper().readValue(googleChatEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+//							List<String> notificationContents = new ObjectMapper().readValue(googleChatEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+//							boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
+//							if (sendNotification) {
+//								String googleChatMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+//								googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
+//							}
+//						}
+//					} catch (JsonProcessingException e) {
+//						logger.error("Error processing JSON for Google Chat notification: " + e.getMessage());
+//					} catch (Exception e) {
+//						logger.error("Error sending Google Chat notification: " + e.getMessage());
+//					}
+//				}
+//			}
+
+
+			// DO INSERT GOOGLE CHAT BY QVAN
 			List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
 			if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
 				GoogleChatUtil googleChatUtil = new GoogleChatUtil();
@@ -4105,7 +4203,10 @@ public class TransactionBankController {
 							List<String> notificationContents = new ObjectMapper().readValue(googleChatEntity.getNotificationContents(), new TypeReference<List<String>>() {});
 							boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 							if (sendNotification) {
-								String googleChatMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+								// Chuyển đổi thời gian sử dụng múi giờ GMT và định dạng giống Google Sheets
+								LocalDateTime transactionTime = convertLongToLocalDateTime(dto.getTransactiontime());
+								String formattedTime = formatLocalDateTime(transactionTime);
+								String googleChatMsg = createMessage(notificationContents, dto.getTransType(), String.valueOf(dto.getAmount()), bankTypeEntity, accountBankEntity.getBankAccount(), Long.parseLong(formattedTime), dto.getReferencenumber(), dto.getContent());
 								googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
 							}
 						}
