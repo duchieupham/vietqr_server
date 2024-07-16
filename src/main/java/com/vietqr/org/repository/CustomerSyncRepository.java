@@ -36,6 +36,9 @@ public interface CustomerSyncRepository extends JpaRepository<CustomerSyncEntity
     @Query(value = "SELECT * FROM customer_sync WHERE id = :id", nativeQuery = true)
     CustomerSyncEntity getCustomerSyncById(@Param(value = "id") String id);
 
+    @Query(value = "SELECT customer_sync_id FROM account_customer_bank WHERE bank_id = :bankId ", nativeQuery = true)
+    String getCustomerSyncByBankId(@Param(value = "bankId") String bankId);
+
     @Query(value = "SELECT user_id FROM customer_sync WHERE user_id = :userId", nativeQuery = true)
     String checkExistedCustomerSync(@Param(value = "userId") String userId);
 
@@ -353,6 +356,9 @@ public interface CustomerSyncRepository extends JpaRepository<CustomerSyncEntity
 
     @Query(value = "SELECT merchant FROM customer_sync WHERE id = :id ", nativeQuery = true)
     String getMerchantNameById(@Param(value = "id") String id);
+
+    @Query(value = "SELECT address FROM customer_sync WHERE id = :id ", nativeQuery = true)
+    String getCustomerAddressById(@Param(value = "id") String id);
 
     // count customer
     @Query(value = "SELECT COUNT(id) as counter FROM customer_sync ", nativeQuery = true)

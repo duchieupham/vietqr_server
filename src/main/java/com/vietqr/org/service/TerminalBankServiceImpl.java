@@ -37,6 +37,16 @@ public class TerminalBankServiceImpl implements TerminalBankService {
     }
 
     @Override
+    public String getTerminalAddress(String terminalName) {
+        return repo.getTerminalAddress(terminalName);
+    }
+
+    @Override
+    public List<String> getListTerminalNames() {
+        return repo.getListTerminalNames();
+    }
+
+    @Override
     public Integer getTerminalCounting() {
         return repo.getTerminalCounting();
     }

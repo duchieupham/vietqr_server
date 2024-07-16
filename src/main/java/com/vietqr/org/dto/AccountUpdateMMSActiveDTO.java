@@ -10,7 +10,7 @@ public class AccountUpdateMMSActiveDTO {
     @NotBlank
     private String bankCode;
     @NotBlank
-    private String userBankName;
+    private String bankAccountName;
     @NotBlank
     private String userId;
     private String bankId;
@@ -20,11 +20,11 @@ public class AccountUpdateMMSActiveDTO {
     public AccountUpdateMMSActiveDTO() {
     }
 
-    public AccountUpdateMMSActiveDTO(String bankTypeId, String bankAccount, String bankCode, String userBankName, String userId, String nationalId, String phoneAuthenticated) {
+    public AccountUpdateMMSActiveDTO(String bankTypeId, String bankAccount, String bankCode, String bankAccountName, String userId, String nationalId, String phoneAuthenticated) {
         this.bankTypeId = bankTypeId;
         this.bankAccount = bankAccount;
         this.bankCode = bankCode;
-        this.userBankName = userBankName;
+        this.bankAccountName = bankAccountName;
         this.userId = userId;
         this.nationalId = nationalId;
         this.phoneAuthenticated = phoneAuthenticated;
@@ -62,12 +62,12 @@ public class AccountUpdateMMSActiveDTO {
         this.bankAccount = bankAccount;
     }
 
-    public String getUserBankName() {
-        return userBankName;
+    public String getBankAccountName() {
+        return bankAccountName;
     }
 
-    public void setUserBankName(String userBankName) {
-        this.userBankName = userBankName;
+    public void setBankAccountName(String bankAccountName) {
+        this.bankAccountName = bankAccountName;
     }
 
     public String getUserId() {
