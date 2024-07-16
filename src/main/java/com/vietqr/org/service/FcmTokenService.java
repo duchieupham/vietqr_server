@@ -20,4 +20,6 @@ public interface FcmTokenService {
 	public void updateToken(String newToken, String userId, String oldToken);
 
 	public void deleteTokensByUserId(String userId);
+
+	String checkTokenExistByUserId(String fcmToken, String userId);
 }

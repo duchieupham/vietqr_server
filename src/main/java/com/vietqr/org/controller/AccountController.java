@@ -382,7 +382,10 @@ public class AccountController {
                 fcmTokenEntity.setUserId(userId);
                 fcmTokenEntity.setPlatform(dto.getPlatform());
                 fcmTokenEntity.setDevice(dto.getDevice());
-                fcmTokenService.insertFcmToken(fcmTokenEntity);
+                String checkToken = fcmTokenService.checkTokenExistByUserId(dto.getFcmToken(), userId);
+                if (StringUtil.isNullOrEmpty(checkToken)) {
+                    fcmTokenService.insertFcmToken(fcmTokenEntity);
+                }
                 String phoneNo = accountLoginService.getPhoneNoById(userId);
                 // response login success
                 if (dto.getHosting() != null && !dto.getHosting().trim().isEmpty()) {

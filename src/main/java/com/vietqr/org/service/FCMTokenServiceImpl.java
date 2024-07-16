@@ -40,6 +40,11 @@ public class FCMTokenServiceImpl implements FcmTokenService {
 	}
 
 	@Override
+	public String checkTokenExistByUserId(String fcmToken, String userId) {
+		return repo.checkTokenExistByUserId(fcmToken, userId);
+	}
+
+	@Override
 	public List<FcmTokenEntity> getFcmTokensKiotByUserId(String userId) {
 		return repo.getFcmTokensKiotByUserId(userId);
 	}

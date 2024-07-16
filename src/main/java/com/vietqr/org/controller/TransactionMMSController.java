@@ -2157,7 +2157,7 @@ public class TransactionMMSController {
                             // check secretKey
 //                            String secretKey = "secretKey";
                             // get secretKey by bankAccount
-                            String secretKey = accountCustomerBankService.checkSecretKey(dto.getBankAccount());
+                            String secretKey = accountCustomerBankService.checkSecretKey(dto.getBankAccount(), checkExistedCustomerSync.get(0));
                             // process refund
                             String checkSum = BankEncryptUtil.generateRefundMD5Checksum(secretKey, dto.getReferenceNumber()
                                     , dto.getAmount(), dto.getBankAccount());
