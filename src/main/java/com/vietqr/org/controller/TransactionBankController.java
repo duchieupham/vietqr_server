@@ -2745,7 +2745,8 @@ public class TransactionBankController {
 
 	// Định dạng thời gian cho Google Chat giống với Google Sheet Util
 	private String formatTimeForGoogleChat(long time) {
-		LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(time), ZoneId.of("GMT"));
+		long utcPlusSevenTime = time + 25200;
+		LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(utcPlusSevenTime), ZoneId.of("GMT"));
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss", Locale.ENGLISH);
 		return dateTime.format(formatter);
 	}
