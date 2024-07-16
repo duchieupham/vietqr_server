@@ -12,7 +12,7 @@ import com.vietqr.org.entity.AccountCustomerBankEntity;
 @Service
 public interface AccountCustomerBankService {
 
-    public String checkSecretKey(String bankAccount);
+    public String checkSecretKey(String bankAccount, String customerSyncId);
 
     public int insert(AccountCustomerBankEntity entity);
 

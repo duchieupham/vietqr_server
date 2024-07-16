@@ -23,8 +23,8 @@ public class AccountCustomerBankServiceImpl implements AccountCustomerBankServic
     }
 
     @Override
-    public String checkSecretKey(String bankAccount) {
-        return repo.getSecretKey(bankAccount);
+    public String checkSecretKey(String bankAccount, String customerSyncId) {
+        return repo.getSecretKey(bankAccount, customerSyncId);
     }
 
     @Override
