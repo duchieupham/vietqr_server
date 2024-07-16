@@ -113,7 +113,7 @@ public class AccountBankReceiveController {
     @Autowired
     InvoiceService invoiceService;
 
-    @PostMapping("admin/account/update-flow")
+    @PostMapping("admin/account/update-flow-2")
     public ResponseEntity<Object> updateFlow2(
             @Valid @RequestBody AccountUpdateMMSActiveDTO dto
     ) {
@@ -135,9 +135,8 @@ public class AccountBankReceiveController {
                 if (Objects.nonNull(bankReceiveEntity)) {
                     if (Objects.isNull(terminalAddress)) {
                         //-Nếu chưa tồn tại, gọi API sync TID của MBBank để đăng ký mới.
-                        // để LINH CONFIRM LÀM
                         // gọi api sync TID nó sẽ trả về 1 đoãn json
-                        List<TerminalRequestDTO> terminals = new ArrayList<>();
+                        TerminalRequestDTO terminals = new TerminalRequestDTO();
                         TerminalBankEntity terminalBank =
                                 terminalBankService.getTerminalBankByBankAccount(dto.getBankAccount());
                         // check bankAccountNumber
@@ -176,14 +175,13 @@ public class AccountBankReceiveController {
                         TokenMBResponseDTO tokenMBResponseDTO = getToken();
 
                         // Sync TID MB Bank
-                        // String syncTID = syncTerminals(terminals, tokenBankDTO.getAccess_token());
+                        TerminalResponseSyncTidDTO terminalRequestDTO = syncTerminals(tokenMBResponseDTO.getAccess_token());
+                        String terminalIdBySyncTID = terminalRequestDTO.getData().getResult().get(0).getTerminalId();
 
                         // get TID MB Bank
-//                        TerminalResponseFlow2 terminalResponseFlow2 = getTerminals(tokenBankDTO.getAccess_token());
                         TerminalResponseFlow2 terminalResponseFlow2 = getTerminals(tokenMBResponseDTO.getAccess_token());
                         String getTerminalID = terminalResponseFlow2.getData().getTerminals().get(0).getTerminalId();
-                        String getBankAccountNumberNew =
-                                terminalResponseFlow2.getData().getTerminals().get(0).getBankAccountNumber();
+                        String getBankAccountNumberNew = terminalResponseFlow2.getData().getTerminals().get(0).getBankAccountNumber();
 
                         // insert vào 2 bảng terminal_bank, terminal_address
                         TerminalBankEntity terminalBankEntity = new TerminalBankEntity();
@@ -192,7 +190,7 @@ public class AccountBankReceiveController {
                         terminalBankEntity.setBankAccountName(dto.getBankAccountName());
                         terminalBankEntity.setBankAccountNumber(getBankAccountNumberNew); // này lấy từ api get TID từ MB
                         terminalBankEntity.setBankAccountRawNumber(dto.getBankAccount());
-                        terminalBankEntity.setBankCode(dto.getBankCode());
+                        terminalBankEntity.setBankCode("311");
                         terminalBankEntity.setBankCurrencyCode("1");
                         terminalBankEntity.setBankCurrencyName("VND");
                         terminalBankEntity.setBankName("311 - TMCP Quan Doi");
@@ -218,19 +216,179 @@ public class AccountBankReceiveController {
                         terminalAddressEntity.setId(idTerminalAddress.toString());
                         terminalAddressEntity.setBankAccount(dto.getBankAccount());
                         terminalAddressEntity.setBankId(dto.getBankId());
-                        terminalAddressEntity.setTerminalBankId(getTerminalID); // terminalID lấy từ API syncTID trả về response
+                        terminalAddressEntity.setTerminalBankId(idTerminalBank.toString()); // terminalID lấy từ API syncTID trả về response
                         terminalAddressEntity.setCustomerSyncId(customerSynId);
                         terminalAddressService.insert(terminalAddressEntity);
 
-                        // cái này để test
-                        String syncTIDTest = "Checked successfully";
-                        if (syncTIDTest.equals("Checked successfully")) {
-                            // Nếu tồn tại, thì chỉ cần đổi mms_active = true.
+                        // check syncTID is SUCESS to update MMS Active
+                        if (terminalIdBySyncTID.equals(getTerminalID)) {
+                            // đổi mms_active = true.
                             if (!checkAccount.isSync()) {
                                 checkAccount.setSync(true);
                             }
                             accountBankReceiveService.updateMMSActive(true, true, dto.getBankId());
                         }
+                        // cái này để test
+//                        String syncTIDTest = "Checked successfully";
+//                        if (syncTIDTest.equals("Checked successfully")) {
+//                            // Nếu tồn tại, thì chỉ cần đổi mms_active = true.
+//                            if (!checkAccount.isSync()) {
+//                                checkAccount.setSync(true);
+//                            }
+//                            accountBankReceiveService.updateMMSActive(true, true, dto.getBankId());
+//                        }
+
+                        result = new ResponseMessageDTO("SUCCESS", "");
+                        httpStatus = HttpStatus.OK;
+                    } else {
+                        // nếu tồn tại thì cho update luồng 2
+                        if (!checkAccount.isSync()) {
+                            checkAccount.setSync(true);
+                        }
+                        accountBankReceiveService.updateMMSActive(true, true, dto.getBankId());
+                        result = new ResponseMessageDTO("SUCCESS", "");
+                        httpStatus = HttpStatus.OK;
+                    }
+                } else {
+                    result = new ResponseMessageDTO("FAILED", "E171");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                result = new ResponseMessageDTO("FAILED", "E172");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("Update flow account: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED: " + e.getMessage(), "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("admin/account/update-flow-1")
+    public ResponseEntity<Object> updateFlow1(
+            @Valid @RequestBody AccountUpdateMMSActiveDTO dto
+    ) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        TokenProductBankDTO tokenBankDTO = MBTokenUtil.getMBBankToken();
+        try {
+            //-Check Tài khoản này đã đăng ký luồng 2 trước đó chưa,
+            AccountBankReceiveEntity checkAccount =
+                    accountBankReceiveService.checkExistedBankAccountAuthenticated(dto.getBankAccount(), dto.getBankCode());
+            //check bank account is_authenticated
+            AccountBankReceiveEntity bankReceiveEntity = accountBankReceiveService
+                    .checkExistedBankAccountAuthenticated(dto.getBankAccount(), dto.getBankCode());
+            //-check tồn tại record trong terminal_bank, terminal_address.
+            TerminalAddressEntity terminalAddress =
+                    terminalAddressService.getTerminalAddressByBankIdAndTerminalBankId(dto.getBankId());
+            //-Nếu tồn tại, thì chỉ cần đổi biến mms_active = true.
+            if (Objects.nonNull(checkAccount)) {
+                if (Objects.nonNull(bankReceiveEntity)) {
+                    if (Objects.nonNull(terminalAddress)) {
+//                        //-Nếu chưa tồn tại, gọi API sync TID của MBBank để đăng ký mới.
+//                        // để LINH CONFIRM LÀM
+//                        // gọi api sync TID nó sẽ trả về 1 đoãn json
+//                        TerminalRequestDTO terminals = new TerminalRequestDTO();
+//                        TerminalBankEntity terminalBank =
+//                                terminalBankService.getTerminalBankByBankAccount(dto.getBankAccount());
+//                        // check bankAccountNumber
+//                        String bankAccountNumberEncrypted = BankEncryptUtil.encrypt(dto.getBankAccount());
+//                        // check bankAccountName
+//                        String bankAccountName = dto.getBankAccountName().toUpperCase();
+//                        // check terminalName - BLC = merchant (từ customerSyncID)
+//                        String customerSynId = customerSyncService.getCustomerSyncByBankId(dto.getBankId());
+//
+//                        // lấy terminalName generated combine with terminal_name trong terminal_bank
+//                        String merchantName = customerSyncService.getMerchantNameById(customerSynId);
+//                        String terminalNameGenerate = "BLC" + merchantName;
+//
+//                        // lấy terminalAddress theo terminalName
+//                        String terminalAddressCheck = customerSyncService.getCustomerAddressById(customerSynId);
+//
+//                        List<String> getTerminalNames = terminalBankService.getListTerminalNames();
+//                        int i = 0;
+//                        for (String terminalName : getTerminalNames) {
+//                            if (terminalNameGenerate.equals(terminalName)) {
+//                                i++;
+//                                terminalNameGenerate = terminalNameGenerate + i;
+//                            } else {
+//                                i++;
+//                                if (i == 1) {
+//                                    terminalNameGenerate = terminalNameGenerate;
+//                                    terminalAddressCheck = terminalAddressCheck;
+//                                    break;
+//                                }
+//                                terminalNameGenerate = terminalNameGenerate + i;
+//                                terminalAddressCheck = terminalAddressCheck + i;
+//                                break;
+//                            }
+//                        }
+//                        // get token MB
+//                        TokenMBResponseDTO tokenMBResponseDTO = getToken();
+//
+//                        // Sync TID MB Bank
+//                        TerminalResponseSyncTidDTO terminalRequestDTO = syncTerminals(tokenMBResponseDTO.getAccess_token());
+//                        String terminalIdBySyncTID = terminalRequestDTO.getData().getResult().get(0).getTerminalId();
+//
+//                        // get TID MB Bank
+//                        TerminalResponseFlow2 terminalResponseFlow2 = getTerminals(tokenMBResponseDTO.getAccess_token());
+//                        String getTerminalID = terminalResponseFlow2.getData().getTerminals().get(0).getTerminalId();
+//                        String getBankAccountNumberNew = terminalResponseFlow2.getData().getTerminals().get(0).getBankAccountNumber();
+//
+//                        // insert vào 2 bảng terminal_bank, terminal_address
+//                        TerminalBankEntity terminalBankEntity = new TerminalBankEntity();
+//                        UUID idTerminalBank = UUID.randomUUID();
+//                        terminalBankEntity.setId(idTerminalBank.toString());
+//                        terminalBankEntity.setBankAccountName(dto.getBankAccountName());
+//                        terminalBankEntity.setBankAccountNumber(getBankAccountNumberNew); // này lấy từ api get TID từ MB
+//                        terminalBankEntity.setBankAccountRawNumber(dto.getBankAccount());
+//                        terminalBankEntity.setBankCode("311");
+//                        terminalBankEntity.setBankCurrencyCode("1");
+//                        terminalBankEntity.setBankCurrencyName("VND");
+//                        terminalBankEntity.setBankName("311 - TMCP Quan Doi");
+//                        terminalBankEntity.setBranchName("NH TMCP QUAN DOI CN SGD 3");
+//                        terminalBankEntity.setDistrictCode("6");
+//                        terminalBankEntity.setDistrictName("Quận Đống Đa");
+//                        terminalBankEntity.setFee(0);
+//                        terminalBankEntity.setMccCode("1024");
+//                        terminalBankEntity.setMccName("Dịch vụ tài chính");
+//                        terminalBankEntity.setMerchantId(customerSynId);
+//                        terminalBankEntity.setProvinceCode("1");
+//                        terminalBankEntity.setProvinceName("Hà Nội update");
+//                        terminalBankEntity.setStatus(1);
+//                        terminalBankEntity.setTerminalAddress(terminalAddressCheck);
+//                        terminalBankEntity.setTerminalId(getTerminalID); // terminalID lấy từ API syncTID trả về response
+//                        terminalBankEntity.setTerminalName(terminalNameGenerate);
+//                        terminalBankEntity.setWardsCode("178");
+//                        terminalBankEntity.setWardsName("Phường Cát Linh");
+//                        terminalBankService.insertTerminalBank(terminalBankEntity);
+//
+//                        TerminalAddressEntity terminalAddressEntity = new TerminalAddressEntity();
+//                        UUID idTerminalAddress = UUID.randomUUID();
+//                        terminalAddressEntity.setId(idTerminalAddress.toString());
+//                        terminalAddressEntity.setBankAccount(dto.getBankAccount());
+//                        terminalAddressEntity.setBankId(dto.getBankId());
+//                        terminalAddressEntity.setTerminalBankId(idTerminalBank.toString()); // terminalID lấy từ API syncTID trả về response
+//                        terminalAddressEntity.setCustomerSyncId(customerSynId);
+//                        terminalAddressService.insert(terminalAddressEntity);
+
+//                        // cái này để test
+//                        String syncTIDTest = "Checked successfully";
+//                        if (syncTIDTest.equals("Checked successfully")) {
+//                            // Nếu tồn tại, thì chỉ cần đổi mms_active = true.
+//                            if (!checkAccount.isSync()) {
+//                                checkAccount.setSync(true);
+//                            }
+//                            accountBankReceiveService.updateMMSActive(true, false, dto.getBankId());
+//                        }
+
+                        // Chỉ cần đổi mms_active = false.
+                        if (!checkAccount.isSync()) {
+                            accountBankReceiveService.updateMMSActive(false, false, dto.getBankId());
+                        }
+                        accountBankReceiveService.updateMMSActive(true, false, dto.getBankId());
 
                         result = new ResponseMessageDTO("SUCCESS", "");
                         httpStatus = HttpStatus.OK;
@@ -1351,28 +1509,53 @@ public class AccountBankReceiveController {
         return result;
     }
 
-    private TokenMBResponseDTO getToken() {
+    private TokenMBResponseDTO getToken() throws JsonProcessingException {
         UUID clientMessageId = UUID.randomUUID();
 
         UriComponents uriComponents = UriComponentsBuilder
                 .fromHttpUrl("https://api-private.mbbank.com.vn/private/oauth2/v1/token")
+//                .fromHttpUrl("https://kietml.click/getToken.php")
                 .build();
 
         WebClient webClient = WebClient.builder()
                 .baseUrl("https://api-private.mbbank.com.vn/private/oauth2/v1/token")
+//                .baseUrl("https://kietml.click/getToken.php")
                 .build();
 
+        Mono<ClientResponse> responseMono = webClient.post()
+                .uri(uriComponents.toUri())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("clientMessageId", clientMessageId.toString())
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .body(BodyInserters.fromFormData("grant_type", "client_credentials"))
+                .exchange();
+
+        ClientResponse response = responseMono.block();
         TokenMBResponseDTO tokenResponse = null;
 
         try {
-            tokenResponse = webClient.post()
-                    .uri("/token")
-                    .header("clientMessageId", clientMessageId.toString())
-                    .header("Content-Type", "application/x-www-form-urlencoded")
-//                    .bodyValue("grant_type=client_credentials&client_id=" + clientId + "&client_secret=" + clientSecret)
-                    .retrieve()
-                    .bodyToMono(TokenMBResponseDTO.class)
-                    .block();
+//            tokenResponse = webClient.post()
+//                    .uri(uriComponents.toUri())
+//                    .header("clientMessageId", clientMessageId.toString())
+//                    .header("Content-Type", "application/x-www-form-urlencoded")
+////                    .bodyValue("grant_type=client_credentials&client_id=" + clientId + "&client_secret=" + clientSecret)
+//                    .retrieve()
+//                    .bodyToMono(TokenMBResponseDTO.class)
+//                    .block();
+
+
+            if (response.statusCode().is2xxSuccessful()) {
+                String json = response.bodyToMono(String.class).block();
+                logger.info("getToken: RESPONSE: " + json);
+                ObjectMapper objectMapper = new ObjectMapper();
+                tokenResponse = objectMapper.readValue(json, TokenMBResponseDTO.class);
+            } else {
+                String json = response.bodyToMono(String.class).block();
+                logger.info("getToken: RESPONSE: " + response.statusCode().value() + " - " + json);
+            }
+
+            return tokenResponse;
+
         } catch (WebClientResponseException e) {
             logger.error("Response error: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
         }
@@ -1384,10 +1567,12 @@ public class AccountBankReceiveController {
 
         UriComponents uriComponents = UriComponentsBuilder
                 .fromHttpUrl("https://api-private.mbbank.com.vn/private/ms/offus/public/account-service/tid/v1.0/list-tid")
+//                .fromHttpUrl("https://kietml.click/getTID.php")
                 .build();
 
         WebClient webClient = WebClient.builder()
                 .baseUrl("https://api-private.mbbank.com.vn/private/ms/offus/public/account-service/tid/v1.0/list-tid")
+//                .baseUrl("https://kietml.click/getTID.php")
                 .build();
 
         Mono<ClientResponse> responseMono = webClient.put()
@@ -1416,62 +1601,64 @@ public class AccountBankReceiveController {
     }
 
 
-    public String syncTerminals(List<TerminalRequestDTO> terminals, String token) throws JsonProcessingException {
-        String result = null;
+    public TerminalResponseSyncTidDTO syncTerminals(String token) throws JsonProcessingException {
 
-        try {
-            UUID clientMessageId = UUID.randomUUID();
-            Map<String, Object> data = new HashMap<>();
-            data.put("terminals", terminals);
+        UUID clientMessageId = UUID.randomUUID();
+//        Map<String, Object> data = new HashMap<>();
+//        data.put("terminals", terminals);
+        TerminalRequestDTO terminalRequestDTO = new TerminalRequestDTO();
 
-            UriComponents uriComponents = UriComponentsBuilder
-                    .fromHttpUrl(EnvironmentUtil.getBankUrl()
-                            + "ms/offus/public/account-service/tid/v1.0/synchronize")
-                    .build();
+        UriComponents uriComponents = UriComponentsBuilder
+                .fromHttpUrl("https://api-private.mbbank.com.vn/private/ms/offus/public/account-service/tid/v1.0/synchronize")
+//                .fromHttpUrl("https://kietml.click/syncTID.php")
+                .build();
 
-            WebClient webClient = WebClient.builder()
-                    .baseUrl(EnvironmentUtil.getBankUrl() + "ms/offus/public/account-service/tid/v1.0/synchronize")
-                    .build();
+        WebClient webClient = WebClient.builder()
+                .baseUrl("https://api-private.mbbank.com.vn/private/ms/offus/public/account-service/tid/v1.0/synchronize")
+//                .baseUrl("https://kietml.click/syncTID.php")
+                .build();
 
-            Mono<ClientResponse> responseMono = webClient.put()
-                    .uri(uriComponents.toUri())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .header("clientMessageId", clientMessageId.toString())
-                    .header("secretKey", EnvironmentUtil.getSecretKeyAPI())
-                    .header("username", EnvironmentUtil.getUsernameAPI())
-                    .header("Authorization", "Bearer " + token)
-                    .body(BodyInserters.fromValue(data))
-                    .exchange();
+        Mono<ClientResponse> responseMono = webClient.post()
+                .uri(uriComponents.toUri())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("clientMessageId", clientMessageId.toString())
+                .header("secretKey", EnvironmentUtil.getSecretKeyAPI())
+                .header("username", EnvironmentUtil.getUsernameAPI())
+                .header("Authorization", "Bearer " + token)
+                .body(BodyInserters.fromValue(terminalRequestDTO))
+                .exchange();
 
-            ClientResponse response = responseMono.block();
+        ClientResponse response = responseMono.block();
+        TerminalResponseSyncTidDTO terminalResponse = null;
 
+        if (response.statusCode().is2xxSuccessful()) {
+//                String json = response.bodyToMono(String.class).block();
+//                logger.info("syncTerminals: RESPONSE: " + json);
+//                ObjectMapper objectMapper = new ObjectMapper();
+//                JsonNode rootNode = objectMapper.readTree(json);
+//                if (rootNode.get("data") != null) {
+//                    if (rootNode.get("data").get("qrcode") != null) {
+//                        result = rootNode.get("data").get("qrcode").asText();
+//                        logger.info("syncTerminals: RESPONSE qrcode: " + result);
+//                    } else {
+//                        logger.info("syncTerminals: RESPONSE qrcode is null");
+//                    }
+//                } else {
+//                    logger.info("syncTerminals: RESPONSE data is null");
+//                }
             if (response.statusCode().is2xxSuccessful()) {
                 String json = response.bodyToMono(String.class).block();
-                logger.info("syncTerminals: RESPONSE: " + json);
+                logger.info("getToken: RESPONSE: " + json);
                 ObjectMapper objectMapper = new ObjectMapper();
-                JsonNode rootNode = objectMapper.readTree(json);
-                if (rootNode.get("data") != null) {
-                    if (rootNode.get("data").get("qrcode") != null) {
-                        result = rootNode.get("data").get("qrcode").asText();
-                        logger.info("syncTerminals: RESPONSE qrcode: " + result);
-                    } else {
-                        logger.info("syncTerminals: RESPONSE qrcode is null");
-                    }
-                } else {
-                    logger.info("syncTerminals: RESPONSE data is null");
-                }
+                terminalResponse = objectMapper.readValue(json, TerminalResponseSyncTidDTO.class);
             } else {
                 String json = response.bodyToMono(String.class).block();
-                logger.info("syncTerminals: RESPONSE: " + response.statusCode().value() + " - " + json);
-                result = null;
+                logger.info("getToken: RESPONSE: " + response.statusCode().value() + " - " + json);
             }
-        } catch (Exception e) {
-            logger.error("requestVietQRMMS: ERROR: " + e.toString());
-        } finally {
-            LocalDateTime responseLDT = LocalDateTime.now();
-            long responseTime = responseLDT.toEpochSecond(ZoneOffset.UTC);
-            logger.info("requestVietQRMMS: response from MB at: " + responseTime);
+        } else {
+            String json = response.bodyToMono(String.class).block();
+            logger.info("syncTerminals: RESPONSE: " + response.statusCode().value() + " - " + json);
         }
-        return result;
+        return terminalResponse;
     }
 }
