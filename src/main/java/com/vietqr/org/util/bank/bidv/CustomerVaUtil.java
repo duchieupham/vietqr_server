@@ -133,6 +133,9 @@ public class CustomerVaUtil {
                     .body(BodyInserters.fromValue(body))
                     .exchange();
             System.out.println("\n\n");
+            logger.info("requestCustomerVa: X-Client-Certificate: " + clientXCertification +
+                    " X-API-Interaction-ID: " + interactionId.toString() + " X-Idempotency-Key: " +
+                    idemKey.toString());
             ClientResponse response = responseMono.block();
             if (response.statusCode().is2xxSuccessful()) {
                 String json = response.bodyToMono(String.class).block();
@@ -231,6 +234,7 @@ public class CustomerVaUtil {
             JsonWebEncryption jwe = new JsonWebEncryption();
             String payload = BIDVUtil.generateConfirmVaBody(serviceId, channelId, dto);
             System.out.println("Payload: " + payload);
+            logger.info("confirmCustomerVa: Payload: " + payload);
             //
             //
             jwe.setPayload(payload);
@@ -257,6 +261,7 @@ public class CustomerVaUtil {
             JweObj j = new JweObj(recipients, protected_, ciphertext, iv, tag);
             String jweString = gson.toJson(j);
             System.out.println("\n\nJWE: " + jweString);
+            logger.info("confirmCustomerVa: JWE: " + jweString);
             Map<String, Object> body = gson.fromJson(payload, Map.class);
             // JWS
             JsonWebSignature jws = new JsonWebSignature();
@@ -266,6 +271,7 @@ public class CustomerVaUtil {
             jws.setKey(privateKey);
             String jwsString = jws.getCompactSerialization();
             System.out.println("\n\nJWS: " + jwsString);
+            logger.info("confirmCustomerVa: JWS: " + jwsString);
             //
             // call API
             UriComponents uriComponents = UriComponentsBuilder
@@ -293,6 +299,9 @@ public class CustomerVaUtil {
                     .body(BodyInserters.fromValue(body))
                     .exchange();
             System.out.println("\n\n");
+            logger.info("confirmCustomerVa: X-Client-Certificate: " + clientXCertification +
+                    " X-API-Interaction-ID: " + interactionId.toString() + " X-Idempotency-Key: " +
+                    idemKey.toString());
             ClientResponse response = responseMono.block();
             if (response.statusCode().is2xxSuccessful()) {
                 String json = response.bodyToMono(String.class).block();
@@ -357,6 +366,7 @@ public class CustomerVaUtil {
             JsonWebEncryption jwe = new JsonWebEncryption();
             String payload = BIDVUtil.generateUnregisterVaBody(serviceId, channelId, merchantId, tranDate);
             System.out.println("Payload: " + payload);
+            logger.info("unregisterCustomerVa: Payload: " + payload);
             //
             jwe.setPayload(payload);
             jwe.setAlgorithmHeaderValue(KeyManagementAlgorithmIdentifiers.A256KW);
@@ -382,6 +392,7 @@ public class CustomerVaUtil {
             JweObj j = new JweObj(recipients, protected_, ciphertext, iv, tag);
             String jweString = gson.toJson(j);
             System.out.println("\n\nJWE: " + jweString);
+            logger.info("unregisterCustomerVa: JWE: " + jweString);
             Map<String, Object> body = gson.fromJson(payload, Map.class);
             // JWS
             JsonWebSignature jws = new JsonWebSignature();
@@ -391,6 +402,7 @@ public class CustomerVaUtil {
             jws.setKey(privateKey);
             String jwsString = jws.getCompactSerialization();
             System.out.println("\n\nJWS: " + jwsString);
+            logger.info("unregisterCustomerVa: JWS: " + jwsString);
             //
             // call API
             UriComponents uriComponents = UriComponentsBuilder
@@ -417,6 +429,9 @@ public class CustomerVaUtil {
                     .header("X-JWS-Signature", jwsString)
                     .body(BodyInserters.fromValue(body))
                     .exchange();
+            logger.info("unregisterCustomerVa: X-Client-Certificate: " + clientXCertification +
+                    " X-API-Interaction-ID: " + interactionId.toString() + " X-Idempotency-Key: " +
+                    idemKey.toString());
             System.out.println("\n\n");
             ClientResponse response = responseMono.block();
             if (response.statusCode().is2xxSuccessful()) {
@@ -505,6 +520,7 @@ public class CustomerVaUtil {
             JweObj j = new JweObj(recipients, protected_, ciphertext, iv, tag);
             String jweString = gson.toJson(j);
             System.out.println("\n\nJWE: " + jweString);
+            logger.info("generateVaInvoiceVietQR: JWE: " + jweString);
             Map<String, Object> body = gson.fromJson(jweString, Map.class);
             // JWS
             JsonWebSignature jws = new JsonWebSignature();
@@ -514,6 +530,7 @@ public class CustomerVaUtil {
             jws.setKey(privateKey);
             String jwsString = jws.getCompactSerialization();
             System.out.println("\n\nJWS: " + jwsString);
+            logger.info("generateVaInvoiceVietQR: JWS: " + jwsString);
             //
             // call API
             UriComponents uriComponents = UriComponentsBuilder
@@ -545,11 +562,14 @@ public class CustomerVaUtil {
                             body))
                     .exchange();
             System.out.println("\n\n");
+            logger.info("generateVaInvoiceVietQR: X-Client-Certificate: " + clientXCertification +
+                    " X-API-Interaction-ID: " + interactionId.toString() + " X-Idempotency-Key: " +
+                    idemKey.toString());
             ClientResponse response = responseMono.block();
             if (response.statusCode().is2xxSuccessful()) {
                 String json = response.bodyToMono(String.class).block();
-                logger.info("Response confirmCustomerVa: " + json);
-                System.out.println("Response confirmCustomerVa: " + json);
+                logger.info("Response generateVaInvoiceVietQR: " + json);
+                System.out.println("Response generateVaInvoiceVietQR: " + json);
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode rootNode = objectMapper.readTree(json);
                 //

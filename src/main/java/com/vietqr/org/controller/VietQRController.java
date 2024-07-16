@@ -381,6 +381,7 @@ public class VietQRController {
 		Object result = null;
 		HttpStatus httpStatus = null;
 		UUID transactionUUID = UUID.randomUUID();
+		logger.info("generateQRCustomer: INFO: " + dto.toString() + " token: " + token + " at: " + System.currentTimeMillis());
 		switch (dto.getBankCode().toUpperCase()) {
 			case "MB":
 				// for saving qr mms flow 2
