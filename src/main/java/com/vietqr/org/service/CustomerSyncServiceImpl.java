@@ -182,6 +182,16 @@ public class CustomerSyncServiceImpl implements CustomerSyncService {
     }
 
     @Override
+    public String getCustomerAddressById(String id) {
+        return repo.getCustomerAddressById(id);
+    }
+
+    @Override
+    public String getCustomerSyncByBankId(String bankId) {
+        return repo.getCustomerSyncByBankId(bankId);
+    }
+
+    @Override
     public Integer getCountingCustomerSync() {
         return repo.getCountingCustomerSync();
     }

@@ -29,25 +29,31 @@ public interface CustomerSyncService {
     public List<CustomerSyncListDTO> getCustomerSyncList();
 
     public List<CustomerSyncListDTO> getCustomerSyncListByMerchant(String value, int offset, int size);
+
     public List<CustomerSyncListDTO> getCustomerSyncListByMerchantByBankAccount(String value, int offset, int size);
 
     public int countCustomerSyncListByMerchant(String value);
+
     public int countCustomerSyncListByMerchantByBankAccount(String value);
 
     public int countCustomerSyncAPIListByMerchant(String value);
+
     public int countCustomerSyncAPIListByMerchantByBankAccount(String value);
 
     public int countCustomerSyncEcListByMerchant(String value);
+
     public int countCustomerSyncEcListByMerchantByBankAccount(String value);
 
     public List<CustomerSyncListDTO> getCustomerSyncAPIList();
 
     public List<CustomerSyncListDTO> getCustomerSyncAPIListByMerchant(String value, int offset, int size);
+
     public List<CustomerSyncListDTO> getCustomerSyncAPIListByMerchantByBankAccount(String value, int offset, int size);
 
     public List<CustomerSyncListDTO> getCustomerSyncEcList();
 
     public List<CustomerSyncListDTO> getCustomerSyncEcListByMerchant(String value, int offset, int size);
+
     public List<CustomerSyncListDTO> getCustomerSyncEcListByMerchantByBankAccount(String value, int offset, int size);
 
     // public List<String> checkExistedCustomerSyncByUsername(String username);
@@ -77,6 +83,10 @@ public interface CustomerSyncService {
     public List<AnnualFeeMerchantDTO> getMerchantForServiceFeeById(String customerSyncId);
 
     public String getMerchantNameById(String id);
+
+    public String getCustomerAddressById(String id);
+
+    public String getCustomerSyncByBankId(String bankId);
 
     public Integer getCountingCustomerSync();
 
