@@ -61,7 +61,7 @@ public class DateTimeUtil {
     }
 
     public static long get2LastPartition() {
-        LocalDateTime localDateTime = LocalDateTime.now().minusMonths(1).withDayOfMonth(1).with(LocalTime.MIN);
+        LocalDateTime localDateTime = LocalDateTime.now().minusDays(15).with(LocalTime.MIN);
         return localDateTime.toEpochSecond(ZoneOffset.UTC);
     }
 

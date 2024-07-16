@@ -19,7 +19,8 @@ public class MerchantSyncEntity implements Serializable {
     private String id;
     @Column(name = "name")
     private String name;
-
+    @Column(name = "fullName")
+    private String fullName = "";
     @Column(name = "vso")
     private String vso;
     @Column(name = "businessType")
@@ -36,9 +37,19 @@ public class MerchantSyncEntity implements Serializable {
     private String userId;
     @Column(name = "accountCustomerId")
     private String accountCustomerId;
-
     @Column(name = "email")
     private String email;
+    @Column(name = "phoneNo")
+    private String phoneNo;
+    @Column(name = "publishId")
+    private String publishId = "";
+
+    @Column(name = "refId")
+    private String refId = "";
+
+    @Column(name = "isMaster")
+    private boolean isMaster = false;
+
     public MerchantSyncEntity() {
     }
 
@@ -142,5 +153,45 @@ public class MerchantSyncEntity implements Serializable {
 
     public void setAccountCustomerId(String accountCustomerId) {
         this.accountCustomerId = accountCustomerId;
+    }
+
+    public String getPublishId() {
+        return publishId;
+    }
+
+    public void setPublishId(String publishId) {
+        this.publishId = publishId;
+    }
+
+    public String getRefId() {
+        return refId;
+    }
+
+    public void setRefId(String refId) {
+        this.refId = refId;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getPhoneNo() {
+        return phoneNo;
+    }
+
+    public void setPhoneNo(String phoneNo) {
+        this.phoneNo = phoneNo;
+    }
+
+    public boolean getIsMaster() {
+        return isMaster;
+    }
+
+    public void setIsMaster(boolean master) {
+        isMaster = master;
     }
 }

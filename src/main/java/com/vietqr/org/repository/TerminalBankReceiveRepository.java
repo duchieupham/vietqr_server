@@ -237,4 +237,24 @@ public interface TerminalBankReceiveRepository extends JpaRepository<TerminalBan
             + "type_of_qr AS typeOfQr, bank_id AS bankId FROM terminal_bank_receive "
             + "WHERE terminal_code = :terminalCode AND terminal_code != '' LIMIT 1 ", nativeQuery = true)
     TerminalSubRawCodeDTO getTerminalBankReceiveForRawByTerminalCode(String terminalCode);
+
+    @Query(value = "SELECT a.id AS terminalBankReceiveId, a.data1 AS data1, a.data2 AS data2, "
+            + "a.terminal_id AS terminalId, b.code AS terminalCode, "
+            + "b.raw_terminal_code AS rawTerminalCode, a.bank_id AS bankId, "
+            + "c.bank_account AS bankAccount, d.bank_code AS bankCode "
+            + "FROM terminal_bank_receive a "
+            + "INNER JOIN terminal b ON a.terminal_id = b.id "
+            + "INNER JOIN account_bank_receive c ON c.id = a.bank_id "
+            + "INNER JOIN bank_type d ON c.bank_type_id = d.id "
+            + "WHERE b.raw_terminal_code = :rawCode AND c.bank_account = :bankAccount "
+            + "AND d.bank_code = :bankCode AND c.is_authenticated = TRUE "
+            + "AND type_of_qr = 0 "
+            + "LIMIT 1 ", nativeQuery = true)
+    TerminalBankSyncDTO getTerminalBankReceive(String rawCode, String bankAccount, String bankCode);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE terminal_bank_receive SET data1 = :data1, data2 = :data2, "
+            + "trace_transfer = :traceTransfer WHERE id = :id", nativeQuery = true)
+    void updateQrCodeTerminalSync(String data1, String data2, String traceTransfer, String id);
 }

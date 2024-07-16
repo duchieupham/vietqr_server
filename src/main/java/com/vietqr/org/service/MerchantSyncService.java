@@ -1,9 +1,6 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.dto.IMerchantEditDetailDTO;
-import com.vietqr.org.dto.IMerchantInfoDTO;
-import com.vietqr.org.dto.IMerchantInvoiceDTO;
-import com.vietqr.org.dto.IMerchantSyncDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.MerchantSyncEntity;
 import org.springframework.stereotype.Service;
 
@@ -37,4 +34,22 @@ public interface MerchantSyncService {
     void savePlatformDetails(String platform, String userId, String details);
 
     void updateMerchantName(String midName, String mid);
+
+    MerchantSyncEntity getMerchantSyncByName(String merchantName);
+
+    MerchantSyncEntity getMerchantSyncByPublishId(String mid);
+
+    MerchantSyncEntity getMerchantSyncById(String mid);
+
+    int countMerchantByMidSync(String mid);
+
+    List<IMerchantSyncPublicDTO> getMerchantByMidSync(String refId, int offset, int size);
+
+    String getIdByPublicId(String publicId);
+
+    String getMerchantIdSyncByName(String merchantName);
+
+    String checkExistedPublishId(String code);
+
+    void insertAll(List<MerchantSyncEntity> merchantSyncEntities);
 }
