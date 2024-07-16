@@ -78,7 +78,10 @@ public class TransactionMMSController {
     TransactionReceiveLogService transactionReceiveLogService;
 
     @Autowired
-    AccountBankReceiveService accountBankService;
+    AccountBankReceiveService accountBankReceiveService;
+
+    @Autowired
+    TerminalItemService terminalItemService;
 
     @Autowired
     AccountBankReceiveShareService accountBankReceiveShareService;
@@ -171,8 +174,10 @@ public class TransactionMMSController {
                         if (entity.getReferenceLabelCode() != null
                                 && !entity.getReferenceLabelCode().trim().isEmpty()) {
                             // TRANSACTION QR
+                            System.out.println(System.currentTimeMillis());
                             transactionReceiveEntity = transactionReceiveService
                                     .getTransactionByOrderId(entity.getReferenceLabelCode(), entity.getDebitAmount());
+                            System.out.println(System.currentTimeMillis());
                             if (transactionReceiveEntity != null) {
                                 // transactionReceiveEntity != null:
                                 // update status transaction receive
@@ -277,7 +282,7 @@ public class TransactionMMSController {
                                     : "";
                             getCustomerSyncEntities(tempTransReceive.getId(), tempTerminalBank.getId(),
                                     entity.getFtCode(),
-                                    tempTransReceive, time, rawCode, urlLink);
+                                    tempTransReceive, time, rawCode, urlLink, "");
                             try {
                                 final String finalRawCode = rawCode;
                                 Thread thread2 = new Thread(() -> {
@@ -314,7 +319,7 @@ public class TransactionMMSController {
                         String bankTypeId = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
                         BankTypeEntity bankTypeEntity = bankTypeService
                                 .getBankTypeById(bankTypeId);
-                        AccountBankReceiveEntity accountBankEntity = accountBankService
+                        AccountBankReceiveEntity accountBankEntity = accountBankReceiveService
                                 .getAccountBankByBankAccountAndBankTypeId(tempTransReceive.getBankAccount(),
                                         bankTypeId);
                         if (accountBankEntity != null) {
@@ -325,8 +330,6 @@ public class TransactionMMSController {
                             data.put("bankName", bankTypeEntity.getBankName());
                             data.put("bankCode", bankTypeEntity.getBankCode());
                             data.put("bankId", accountBankEntity.getId());
-                            data.put("branchName", "");
-                            data.put("businessName", "");
                             data.put("terminalName", "");
                             data.put("urlLink",
                                     tempTransReceive.getUrlLink() != null ? tempTransReceive.getUrlLink() : "");
@@ -427,97 +430,39 @@ public class TransactionMMSController {
                             logger.info("transaction-mms-sync: NOT FOUND accountBankEntity");
                         }
                     } else {
-                        // check time QR tinhx
-                        LocalDateTime staticQR = LocalDateTime.now();
-                        long staticQRTime = staticQR.toEpochSecond(ZoneOffset.UTC);
-                        logger.info(
-                                "transaction-mms-sync: staticQRTime-start at:" + staticQRTime);
-                        // STATTIC QR
-                        String terminalId = "";
-                        String subRawCode = "";
-                        boolean isSubTerminal = false;
-                        boolean insertTransaction = false;
-                        TerminalSubRawCodeDTO terminalSubRawCodeDTO = null;
-                        // get trace Transfer to find VietQR terminal
-                        String traceTransfer = entity.getTraceTransfer();
-                        if (!StringUtil.isNullOrEmpty(traceTransfer)) {
-                            terminalId = terminalService
-                                    .getTerminalByTraceTransfer(traceTransfer);
-                            if (terminalId == null || terminalId.trim().isEmpty()) {
-                                try {
-                                    terminalSubRawCodeDTO = terminalBankReceiveService
-                                            .getTerminalSubFlow2ByTraceTransfer(traceTransfer);
-                                    terminalId = terminalSubRawCodeDTO.getTerminalId();
-                                } catch (Exception e) {
-                                    terminalId = terminalBankReceiveService
-                                            .getTerminalByTraceTransfer(traceTransfer);
-                                }
-                            }
-                        }
-                        // if exist terminalId, find bankAccount by terminalId
-                        if (terminalId != null && !terminalId.trim().isEmpty()) {
-                            // if VietQR terminal existed, insert new transaction
-                            TerminalEntity terminalEntity = terminalService
-                                    .findTerminalById(terminalId);
-
-                            TerminalBankReceiveEntity terminalBankReceiveEntity = terminalBankReceiveService
-                                    .getTerminalBankReceiveByTraceTransfer(traceTransfer);
-                            if (terminalBankReceiveEntity != null) {
-                                AccountBankReceiveEntity accountBankReceiveEntity = accountBankService
-                                        .getAccountBankById(terminalBankReceiveEntity.getBankId());
+                        if (!StringUtil.isNullOrEmpty(entity.getTraceTransfer())) {
+                            TerminalItemEntity terminalItemEntity = terminalItemService
+                                    .getTerminalItemByTraceTransferAndAmount(entity.getTraceTransfer(), entity.getDebitAmount(), entity.getReferenceLabelCode());
+                            if (Objects.nonNull(terminalItemEntity)) {
+                                // qr bán động
+                                AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService
+                                        .getAccountBankById(terminalItemEntity.getBankId());
                                 String transactionId = UUID.randomUUID().toString();
-                                TransactionReceiveEntity transactionReceiveEntity1 = new TransactionReceiveEntity();
-                                transactionReceiveEntity1.setId(transactionId);
-                                transactionReceiveEntity1.setStatus(1);
-                                transactionReceiveEntity1.setType(1);
-                                transactionReceiveEntity1.setAmount(Long.parseLong(entity.getDebitAmount()));
-                                transactionReceiveEntity1.setRefId(uuid.toString());
-                                transactionReceiveEntity1.setTraceId("");
-                                transactionReceiveEntity1.setTransType("C");
-                                transactionReceiveEntity1.setReferenceNumber(entity.getFtCode());
-                                transactionReceiveEntity1.setOrderId("");
-                                transactionReceiveEntity1.setSign("");
-                                transactionReceiveEntity1.setTime(time);
-                                transactionReceiveEntity1.setTimePaid(time);
-                                transactionReceiveEntity1.setBankId(accountBankReceiveEntity.getId());
-                                transactionReceiveEntity1.setTransStatus(0);
-                                if (terminalBankReceiveEntity.getTerminalCode() != null
-                                        && !terminalBankReceiveEntity.getTerminalCode().trim().isEmpty()) {
-                                    transactionReceiveEntity1
-                                            .setTerminalCode(terminalBankReceiveEntity.getTerminalCode());
-                                } else {
-                                    transactionReceiveEntity1.setTerminalCode(terminalEntity.getCode()
-                                            != null ? terminalEntity.getCode() : "");
-                                }
-                                transactionReceiveEntity1.setContent(entity.getTraceTransfer());
-                                transactionReceiveEntity1.setBankAccount(accountBankReceiveEntity.getBankAccount());
-                                transactionReceiveEntity1.setQrCode("");
-                                transactionReceiveEntity1.setUserId(accountBankReceiveEntity.getUserId());
-                                transactionReceiveEntity1.setNote("");
-                                transactionReceiveEntity1.setUrlLink("");
-                                transactionReceiveService.insertTransactionReceive(transactionReceiveEntity1);
-                                String code = "";
-                                String rawCode = "";
-                                if (terminalBankReceiveEntity.getTerminalCode() != null
-                                        && !terminalBankReceiveEntity.getTerminalCode().trim().isEmpty()) {
-                                    code = terminalBankReceiveEntity.getTerminalCode();
-                                    rawCode = terminalBankReceiveEntity.getRawTerminalCode();
-                                    subRawCode = terminalBankReceiveEntity.getRawTerminalCode();
-                                    isSubTerminal = true;
-                                } else {
-                                    code = terminalEntity.getCode();
-                                    rawCode = terminalEntity.getRawTerminalCode();
-                                }
-                                final String tempTerminalCode = code;
-                                TransactionTerminalTempEntity transactionTerminalTempEntity = new TransactionTerminalTempEntity();
-                                transactionTerminalTempEntity.setId(UUID.randomUUID().toString());
-                                transactionTerminalTempEntity.setTransactionId(transactionId);
-                                transactionTerminalTempEntity.setTerminalCode(tempTerminalCode);
-                                transactionTerminalTempEntity.setTime(time);
-                                transactionTerminalTempEntity.setAmount(Long.parseLong(entity.getDebitAmount() + ""));
-                                transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTempEntity);
+                                TransactionReceiveEntity transactionReceive = new TransactionReceiveEntity();
+                                transactionReceive.setId(transactionId);
+                                transactionReceive.setStatus(1);
+                                transactionReceive.setType(3);
+                                transactionReceive.setAmount(Long.parseLong(entity.getDebitAmount()));
+                                transactionReceive.setRefId(uuid.toString());
+                                transactionReceive.setTraceId("");
+                                transactionReceive.setTransType("C");
+                                transactionReceive.setReferenceNumber(entity.getFtCode());
+                                transactionReceive.setOrderId("");
+                                transactionReceive.setSign("");
+                                transactionReceive.setTime(time);
+                                transactionReceive.setTimePaid(time);
+                                transactionReceive.setBankId(accountBankReceiveEntity.getId());
+                                transactionReceive.setTransStatus(0);
+                                transactionReceive.setTerminalCode(terminalItemEntity.getTerminalCode());
+                                transactionReceive.setContent(entity.getTraceTransfer());
+                                transactionReceive.setBankAccount(accountBankReceiveEntity.getBankAccount());
+                                transactionReceive.setQrCode("");
+                                transactionReceive.setUserId(accountBankReceiveEntity.getUserId());
+                                transactionReceive.setNote("");
+                                transactionReceive.setUrlLink("");
+                                transactionReceive.setServiceCode(terminalItemEntity.getServiceCode());
+                                transactionReceiveService.insertTransactionReceive(transactionReceive);
 
-                                insertTransaction = true;
                                 BankTypeEntity bankTypeEntity = bankTypeService
                                         .getBankTypeById(accountBankReceiveEntity.getBankTypeId());
                                 NumberFormat nf = NumberFormat.getInstance(Locale.US);
@@ -546,444 +491,645 @@ public class TransactionMMSController {
                                 data.put("bankName", bankTypeEntity.getBankName());
                                 data.put("bankCode", bankTypeEntity.getBankCode());
                                 data.put("bankId", accountBankReceiveEntity.getId());
-                                data.put("content", "" + traceTransfer);
-                                String amountForVoice = StringUtil.removeFormatNumber(entity.getDebitAmount() + "");
+                                data.put("content", "" + terminalItemEntity.getContent());
                                 String amountForShow = StringUtil.formatNumberAsString(entity.getDebitAmount() + "");
                                 data.put("amount", "" + amountForShow);
-                                if (terminalEntity != null) {
-                                    data.put("terminalName",
-                                            terminalEntity.getName() != null ? terminalEntity.getName() : "");
-                                    data.put("terminalCode",
-                                            terminalEntity.getCode() != null ? terminalEntity.getCode() : "");
-                                    data.put("rawTerminalCode",
-                                            terminalEntity.getRawTerminalCode() != null
-                                                    ? terminalEntity.getRawTerminalCode()
-                                                    : "");
-                                }
+                                data.put("terminalName", "");
+                                data.put("terminalCode", "");
+                                data.put("rawTerminalCode", "");
                                 data.put("orderId",
                                         entity.getReferenceLabelCode() != null ? entity.getReferenceLabelCode() : "");
                                 data.put("referenceNumber", entity.getFtCode() != null ? entity.getFtCode() : "");
                                 data.put("timePaid", "" + time);
-                                data.put("type", "" + transactionReceiveEntity1.getType());
+                                data.put("type", "" + transactionReceive.getType());
                                 data.put("time", "" + time);
                                 data.put("refId", "" + uuid.toString());
                                 data.put("status", "1");
                                 data.put("traceId", "");
                                 data.put("transType", "C");
-                                pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
-                                        message, notiEntity, data, accountBankReceiveEntity.getUserId());
                                 TerminalBankEntity terminalBankEntitySync = terminalBankService
                                         .getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
                                 if (terminalBankEntitySync != null) {
                                     // push data to customerSync
                                     ////////////////////////
-                                    getCustomerSyncEntities(transactionReceiveEntity1.getId(),
+                                    getCustomerSyncEntities(transactionReceive.getId(),
                                             terminalBankEntitySync.getId(),
                                             entity.getFtCode(),
-                                            transactionReceiveEntity1, time, rawCode, "");
-                                    try {
-                                        final String finalRawCode = rawCode;
-                                        Thread thread2 = new Thread(() -> {
-                                            getCustomerSyncEntitiesV2(transactionReceiveEntity1.getId(), terminalBankEntitySync.getId(),
-                                                    entity.getFtCode(),
-                                                    transactionReceiveEntity1, time, finalRawCode, "");
-                                        });
-                                        thread2.start();
-                                    } catch (Exception e) {
-                                        logger.error("getCustomerSyncEntitiesV2: ERROR: " + e.getMessage() +
-                                                " at: " + System.currentTimeMillis());
-                                    }
+                                            transactionReceive, time, "", "",
+                                            terminalItemEntity.getServiceCode());
                                 } else {
                                     logger.info("transaction-mms-sync: NOT FOUND TerminalBankEntity");
                                 }
-                                try {
-                                    if (isSubTerminal) {
-                                        if (!StringUtil.isNullOrEmpty(subRawCode)) {
+                                pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
+                                        message, notiEntity, data, accountBankReceiveEntity.getUserId());
+
+                                // /////// DO INSERT TELEGRAM
+                                List<String> chatIds = telegramAccountBankService
+                                        .getChatIdsByBankId(terminalItemEntity.getBankId());
+                                if (chatIds != null && !chatIds.isEmpty()) {
+                                    TelegramUtil telegramUtil = new TelegramUtil();
+
+                                    String telegramMsg = "+" + nf.format(terminalItemEntity.getAmount()) + " VND"
+                                            + " | TK: " + bankTypeEntity.getBankShortName() + " - "
+                                            + terminalItemEntity.getBankAccount()
+                                            + " | " + convertLongToDate(time)
+                                            + " | " + entity.getFtCode()
+                                            + " | ND: " + terminalItemEntity.getContent();
+                                    for (String chatId : chatIds) {
+                                        telegramUtil.sendMsg(chatId, telegramMsg);
+                                    }
+                                }
+
+                                /////// DO INSERT LARK
+                                List<String> webhooks = larkAccountBankService
+                                        .getWebhooksByBankId(terminalItemEntity.getBankId());
+                                if (webhooks != null && !webhooks.isEmpty()) {
+                                    LarkUtil larkUtil = new LarkUtil();
+
+                                    String larkMsg = "+" + nf.format(terminalItemEntity.getAmount()) + " VND"
+                                            + " | TK: " + bankTypeEntity.getBankShortName() + " - "
+                                            + terminalItemEntity.getBankAccount()
+                                            + " | " + convertLongToDate(time)
+                                            + " | " + entity.getFtCode()
+                                            + " | ND: " + terminalItemEntity.getContent();
+                                    for (String webhook : webhooks) {
+                                        larkUtil.sendMessageToLark(larkMsg, webhook);
+                                    }
+                                }
+
+                                /////// DO INSERT GOOGLE CHAT
+                                List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(terminalItemEntity.getBankId());
+                                if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
+                                    GoogleChatUtil googleChatUtil = new GoogleChatUtil();
+                                    String googleChatMsg = "+" + nf.format(terminalItemEntity.getAmount()) + " VND"
+                                            + " | TK: " + bankTypeEntity.getBankShortName() + " - "
+                                            + terminalItemEntity.getBankAccount()
+                                            + " | " + convertLongToDate(time)
+                                            + " | " + entity.getFtCode()
+                                            + " | ND: " + terminalItemEntity.getContent();
+                                    for (String webhook : ggChatWebhooks) {
+                                        googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
+                                    }
+                                }
+
+                            } else {
+                                // qr tĩnh
+                                logger.info(
+                                        "transaction-mms-sync: staticQRTime-start at:" + DateTimeUtil.getCurrentDateTimeUTC());
+                                // STATTIC QR
+                                String terminalId = "";
+                                String subRawCode = "";
+                                boolean isSubTerminal = false;
+                                boolean insertTransaction = false;
+                                TerminalSubRawCodeDTO terminalSubRawCodeDTO = null;
+                                // get trace Transfer to find VietQR terminal
+                                String traceTransfer = entity.getTraceTransfer();
+                                if (!StringUtil.isNullOrEmpty(traceTransfer)) {
+                                    terminalId = terminalService
+                                            .getTerminalByTraceTransfer(traceTransfer);
+                                    if (terminalId == null || terminalId.trim().isEmpty()) {
+                                        try {
+                                            terminalSubRawCodeDTO = terminalBankReceiveService
+                                                    .getTerminalSubFlow2ByTraceTransfer(traceTransfer);
+                                            terminalId = terminalSubRawCodeDTO.getTerminalId();
+                                        } catch (Exception e) {
+                                            terminalId = terminalBankReceiveService
+                                                    .getTerminalByTraceTransfer(traceTransfer);
+                                        }
+                                    }
+                                }
+                                // if exist terminalId, find bankAccount by terminalId
+                                if (terminalId != null && !terminalId.trim().isEmpty()) {
+                                    // if VietQR terminal existed, insert new transaction
+                                    TerminalEntity terminalEntity = terminalService
+                                            .findTerminalById(terminalId);
+
+                                    TerminalBankReceiveEntity terminalBankReceiveEntity = terminalBankReceiveService
+                                            .getTerminalBankReceiveByTraceTransfer(traceTransfer);
+                                    if (terminalBankReceiveEntity != null) {
+                                        AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService
+                                                .getAccountBankById(terminalBankReceiveEntity.getBankId());
+                                        String transactionId = UUID.randomUUID().toString();
+                                        TransactionReceiveEntity transactionReceiveEntity1 = new TransactionReceiveEntity();
+                                        transactionReceiveEntity1.setId(transactionId);
+                                        transactionReceiveEntity1.setStatus(1);
+                                        transactionReceiveEntity1.setType(1);
+                                        transactionReceiveEntity1.setAmount(Long.parseLong(entity.getDebitAmount()));
+                                        transactionReceiveEntity1.setRefId(uuid.toString());
+                                        transactionReceiveEntity1.setTraceId("");
+                                        transactionReceiveEntity1.setTransType("C");
+                                        transactionReceiveEntity1.setReferenceNumber(entity.getFtCode());
+                                        transactionReceiveEntity1.setOrderId("");
+                                        transactionReceiveEntity1.setSign("");
+                                        transactionReceiveEntity1.setTime(time);
+                                        transactionReceiveEntity1.setTimePaid(time);
+                                        transactionReceiveEntity1.setBankId(accountBankReceiveEntity.getId());
+                                        transactionReceiveEntity1.setTransStatus(0);
+                                        if (terminalBankReceiveEntity.getTerminalCode() != null
+                                                && !terminalBankReceiveEntity.getTerminalCode().trim().isEmpty()) {
+                                            transactionReceiveEntity1
+                                                    .setTerminalCode(terminalBankReceiveEntity.getTerminalCode());
+                                        } else {
+                                            transactionReceiveEntity1.setTerminalCode(terminalEntity.getCode()
+                                                    != null ? terminalEntity.getCode() : "");
+                                        }
+                                        transactionReceiveEntity1.setContent(entity.getTraceTransfer());
+                                        transactionReceiveEntity1.setBankAccount(accountBankReceiveEntity.getBankAccount());
+                                        transactionReceiveEntity1.setQrCode("");
+                                        transactionReceiveEntity1.setUserId(accountBankReceiveEntity.getUserId());
+                                        transactionReceiveEntity1.setNote("");
+                                        transactionReceiveEntity1.setUrlLink("");
+                                        transactionReceiveService.insertTransactionReceive(transactionReceiveEntity1);
+                                        String code = "";
+                                        String rawCode = "";
+                                        if (terminalBankReceiveEntity.getTerminalCode() != null
+                                                && !terminalBankReceiveEntity.getTerminalCode().trim().isEmpty()) {
+                                            code = terminalBankReceiveEntity.getTerminalCode();
+                                            rawCode = terminalBankReceiveEntity.getRawTerminalCode();
+                                            subRawCode = terminalBankReceiveEntity.getRawTerminalCode();
+                                            isSubTerminal = true;
+                                        } else {
+                                            code = terminalEntity.getCode();
+                                            rawCode = terminalEntity.getRawTerminalCode();
+                                        }
+                                        final String tempTerminalCode = code;
+                                        TransactionTerminalTempEntity transactionTerminalTempEntity = new TransactionTerminalTempEntity();
+                                        transactionTerminalTempEntity.setId(UUID.randomUUID().toString());
+                                        transactionTerminalTempEntity.setTransactionId(transactionId);
+                                        transactionTerminalTempEntity.setTerminalCode(tempTerminalCode);
+                                        transactionTerminalTempEntity.setTime(time);
+                                        transactionTerminalTempEntity.setAmount(Long.parseLong(entity.getDebitAmount() + ""));
+                                        transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTempEntity);
+
+                                        insertTransaction = true;
+                                        BankTypeEntity bankTypeEntity = bankTypeService
+                                                .getBankTypeById(accountBankReceiveEntity.getBankTypeId());
+                                        NumberFormat nf = NumberFormat.getInstance(Locale.US);
+                                        Map<String, String> data = new HashMap<>();
+                                        UUID notificationUUID = UUID.randomUUID();
+                                        NotificationEntity notiEntity = new NotificationEntity();
+                                        String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
+                                                + entity.getDebitAmount()
+                                                + NotificationUtil.getNotiDescUpdateTransSuffix2()
+                                                + "+" + nf.format(Long.parseLong(entity.getDebitAmount()))
+                                                + NotificationUtil.getNotiDescUpdateTransSuffix3()
+                                                + entity.getTraceTransfer()
+                                                + NotificationUtil.getNotiDescUpdateTransSuffix4()
+                                                + entity.getTraceTransfer();
+                                        notiEntity.setId(notificationUUID.toString());
+                                        notiEntity.setRead(false);
+                                        notiEntity.setMessage(message);
+                                        notiEntity.setTime(time);
+                                        notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
+                                        notiEntity.setUserId(accountBankReceiveEntity.getUserId());
+                                        notiEntity.setData(transactionId);
+                                        data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+                                        data.put("notificationId", notificationUUID.toString());
+                                        data.put("transactionReceiveId", transactionId);
+                                        data.put("bankAccount", accountBankReceiveEntity.getBankAccount());
+                                        data.put("bankName", bankTypeEntity.getBankName());
+                                        data.put("bankCode", bankTypeEntity.getBankCode());
+                                        data.put("bankId", accountBankReceiveEntity.getId());
+                                        data.put("content", "" + traceTransfer);
+                                        String amountForVoice = StringUtil.removeFormatNumber(entity.getDebitAmount() + "");
+                                        String amountForShow = StringUtil.formatNumberAsString(entity.getDebitAmount() + "");
+                                        data.put("amount", "" + amountForShow);
+                                        if (terminalEntity != null) {
+                                            data.put("terminalName",
+                                                    terminalEntity.getName() != null ? terminalEntity.getName() : "");
+                                            data.put("terminalCode",
+                                                    terminalEntity.getCode() != null ? terminalEntity.getCode() : "");
+                                            data.put("rawTerminalCode",
+                                                    terminalEntity.getRawTerminalCode() != null
+                                                            ? terminalEntity.getRawTerminalCode()
+                                                            : "");
+                                        }
+                                        data.put("orderId",
+                                                entity.getReferenceLabelCode() != null ? entity.getReferenceLabelCode() : "");
+                                        data.put("referenceNumber", entity.getFtCode() != null ? entity.getFtCode() : "");
+                                        data.put("timePaid", "" + time);
+                                        data.put("type", "" + transactionReceiveEntity1.getType());
+                                        data.put("time", "" + time);
+                                        data.put("refId", "" + uuid.toString());
+                                        data.put("status", "1");
+                                        data.put("traceId", "");
+                                        data.put("transType", "C");
+                                        pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
+                                                message, notiEntity, data, accountBankReceiveEntity.getUserId());
+                                        TerminalBankEntity terminalBankEntitySync = terminalBankService
+                                                .getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
+                                        if (terminalBankEntitySync != null) {
+                                            // push data to customerSync
+                                            ////////////////////////
+                                            getCustomerSyncEntities(transactionReceiveEntity1.getId(),
+                                                    terminalBankEntitySync.getId(),
+                                                    entity.getFtCode(),
+                                                    transactionReceiveEntity1, time, rawCode, "", "");
                                             try {
-                                                BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
-                                                String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
-                                                data.put("message", String.format(messageForBox, amountForVoice));
-                                                String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(subRawCode);
-                                                socketHandler.sendMessageToBoxId(idRefBox, data);
-                                                logger.info("WS: socketHandler.sendMessageToQRBox - "
-                                                        + subRawCode + " at: " + System.currentTimeMillis());
+                                                final String finalRawCode = rawCode;
+                                                Thread thread2 = new Thread(() -> {
+                                                    getCustomerSyncEntitiesV2(transactionReceiveEntity1.getId(), terminalBankEntitySync.getId(),
+                                                            entity.getFtCode(),
+                                                            transactionReceiveEntity1, time, finalRawCode, "");
+                                                });
+                                                thread2.start();
+                                            } catch (Exception e) {
+                                                logger.error("getCustomerSyncEntitiesV2: ERROR: " + e.getMessage() +
+                                                        " at: " + System.currentTimeMillis());
+                                            }
+                                        } else {
+                                            logger.info("transaction-mms-sync: NOT FOUND TerminalBankEntity");
+                                        }
+                                        try {
+                                            if (isSubTerminal) {
+                                                if (!StringUtil.isNullOrEmpty(subRawCode)) {
+                                                    try {
+                                                        BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
+                                                        String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
+                                                        data.put("message", String.format(messageForBox, amountForVoice));
+                                                        String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(subRawCode);
+                                                        socketHandler.sendMessageToBoxId(idRefBox, data);
+                                                        logger.info("WS: socketHandler.sendMessageToQRBox - "
+                                                                + subRawCode + " at: " + System.currentTimeMillis());
+                                                    } catch (IOException e) {
+                                                        logger.error(
+                                                                "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
+                                                    }
+                                                }
+                                            }
+                                        } catch (Exception e) {
+                                            logger.error("transaction-mms-sync: ERROR: " + e.toString());
+                                        }
+                                    } else {
+                                        logger.info("transaction-mms-sync: NOT FOUND terminalBankReceiveEntity");
+                                    }
+
+                                    // check time tim thay terminal
+                                    LocalDateTime findTerminal = LocalDateTime.now();
+                                    long findTerminalTime = findTerminal.toEpochSecond(ZoneOffset.UTC);
+                                    logger.info(
+                                            "transaction-mms-sync: findTerminal at:" + findTerminalTime);
+                                    String bankTypeId = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
+                                    AccountBankReceiveShareForNotiDTO bankDTO = accountBankReceiveService
+                                            .findAccountBankByTraceTransfer(traceTransfer,
+                                                    bankTypeId);
+                                    if (bankDTO.getBankId() != null) {
+                                        UUID transcationUUID = UUID.randomUUID();
+                                        TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
+                                        transactionEntity.setId(transcationUUID.toString());
+                                        transactionEntity.setBankAccount(bankDTO.getBankAccount());
+                                        String bankAccount = bankDTO.getBankAccount();
+                                        transactionEntity.setBankId(bankDTO.getBankId());
+                                        // get content from terminalCode from terminal (now ignore to test static
+                                        // VietQR)
+                                        transactionEntity.setContent(traceTransfer);
+                                        //
+                                        transactionEntity.setAmount(Long.parseLong(entity.getDebitAmount()));
+                                        // final LocalDateTime currentDateTime = LocalDateTime.now();
+                                        // long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+                                        transactionEntity.setTime(time);
+                                        transactionEntity.setRefId(uuid.toString());
+                                        transactionEntity.setType(1);
+                                        transactionEntity.setStatus(1);
+                                        transactionEntity.setTraceId("");
+                                        transactionEntity.setTransType("C");
+                                        transactionEntity.setReferenceNumber(entity.getFtCode());
+                                        transactionEntity.setOrderId("");
+                                        transactionEntity.setSign("");
+                                        transactionEntity.setTimePaid(time);
+                                        transactionEntity.setTerminalCode(terminalEntity != null ? terminalEntity.getCode() : "");
+                                        transactionEntity.setQrCode("");
+                                        transactionEntity.setUserId(bankDTO.getUserId());
+                                        transactionEntity.setNote("");
+                                        transactionEntity.setTransStatus(0);
+                                        transactionEntity.setUrlLink("");
+                                        if (!insertTransaction) {
+                                            transactionReceiveService.insertTransactionReceive(transactionEntity);
+                                            final String tempTerminalCode = terminalEntity.getCode();
+                                            TransactionTerminalTempEntity transactionTerminalTempEntity = new TransactionTerminalTempEntity();
+                                            transactionTerminalTempEntity.setId(UUID.randomUUID().toString());
+                                            transactionTerminalTempEntity.setTransactionId(transcationUUID.toString());
+                                            transactionTerminalTempEntity.setTerminalCode(tempTerminalCode);
+                                            transactionTerminalTempEntity.setTime(time);
+                                            transactionTerminalTempEntity
+                                                    .setAmount(Long.parseLong(entity.getDebitAmount() + ""));
+                                            transactionTerminalTempService
+                                                    .insertTransactionTerminal(transactionTerminalTempEntity);
+                                        }
+                                        // check time insert transaction QR static success
+                                        LocalDateTime insertStatic = LocalDateTime.now();
+                                        long insertStaticTime = insertStatic.toEpochSecond(ZoneOffset.UTC);
+                                        logger.info(
+                                                "transaction-mms-sync: insertStaticQRTimeSuccess at:" + insertStaticTime);
+                                        // 4. insert and push notification to user.
+
+                                        List<String> userIds = terminalService
+                                                .getUserIdsByTerminalCode(terminalEntity.getCode());
+                                        int numThread = userIds.size();
+                                        int amount = Integer.parseInt(entity.getDebitAmount());
+                                        NumberFormat nf = NumberFormat.getInstance(Locale.US);
+                                        ExecutorService executorService = Executors.newFixedThreadPool(numThread);
+                                        for (String userId : userIds) {
+                                            Map<String, String> data = new HashMap<>();
+                                            UUID notificationUUID = UUID.randomUUID();
+                                            NotificationEntity notiEntity = new NotificationEntity();
+                                            String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
+                                                    + entity.getDebitAmount()
+                                                    + NotificationUtil.getNotiDescUpdateTransSuffix2()
+                                                    + "+" + nf.format(amount)
+                                                    + NotificationUtil.getNotiDescUpdateTransSuffix3()
+                                                    + entity.getTraceTransfer()
+                                                    + NotificationUtil.getNotiDescUpdateTransSuffix4()
+                                                    + entity.getTraceTransfer();
+                                            notiEntity.setId(notificationUUID.toString());
+                                            notiEntity.setRead(false);
+                                            notiEntity.setMessage(message);
+                                            notiEntity.setTime(time);
+                                            notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
+                                            notiEntity.setUserId(userId);
+                                            notiEntity.setData(transcationUUID.toString());
+                                            data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+                                            data.put("notificationId", notificationUUID.toString());
+                                            data.put("transactionReceiveId", transcationUUID.toString());
+                                            data.put("bankAccount", bankAccount);
+                                            data.put("bankName", bankDTO.getBankName());
+                                            data.put("bankCode", bankDTO.getBankCode());
+                                            data.put("bankId", bankDTO.getBankId());
+                                            data.put("content", "" + traceTransfer);
+                                            data.put("terminalName",
+                                                    terminalEntity.getName() != null ? terminalEntity.getName() : "");
+                                            data.put("terminalCode",
+                                                    terminalEntity.getCode() != null ? terminalEntity.getCode() : "");
+                                            data.put("rawTerminalCode",
+                                                    terminalEntity.getRawTerminalCode() != null
+                                                            ? terminalEntity.getRawTerminalCode()
+                                                            : "");
+                                            data.put("amount", "" + entity.getDebitAmount());
+                                            data.put("orderId", "");
+                                            data.put("referenceNumber", entity.getFtCode());
+                                            data.put("timePaid", "" + time);
+                                            data.put("time", "" + time);
+                                            data.put("type", "" + transactionEntity.getType());
+                                            data.put("refId", "" + uuid.toString());
+                                            data.put("status", "1");
+                                            data.put("traceId", "");
+                                            data.put("transType", "C");
+                                            data.put("urlLink", transactionEntity.getUrlLink() != null ? transactionEntity.getUrlLink() : "");
+                                            executorService.submit(
+                                                    () -> pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
+                                                            message, notiEntity, data, userId));
+                                            try {
+                                                // send msg to QR Link
+                                                String refId = TransactionRefIdUtil
+                                                        .encryptTransactionId(transactionEntity.getId());
+                                                socketHandler.sendMessageToTransactionRefId(refId, data);
                                             } catch (IOException e) {
                                                 logger.error(
-                                                        "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
+                                                        "WS: socketHandler.sendMessageToUser - updateTransaction ERROR: "
+                                                                + e.toString());
+                                            }
+                                        }
+                                        // /////// DO INSERT TELEGRAM
+                                        List<String> chatIds = telegramAccountBankService
+                                                .getChatIdsByBankId(bankDTO.getBankId());
+                                        if (chatIds != null && !chatIds.isEmpty()) {
+                                            TelegramUtil telegramUtil = new TelegramUtil();
+
+                                            String telegramMsg = "+" + nf.format(amount) + " VND"
+                                                    + " | TK: " + bankDTO.getBankShortName() + " - "
+                                                    + bankAccount
+                                                    + " | " + convertLongToDate(time)
+                                                    + " | " + entity.getFtCode()
+                                                    + " | ND: " + entity.getTraceTransfer();
+                                            for (String chatId : chatIds) {
+                                                telegramUtil.sendMsg(chatId, telegramMsg);
+                                            }
+                                        }
+
+                                        /////// DO INSERT LARK
+                                        List<String> webhooks = larkAccountBankService
+                                                .getWebhooksByBankId(bankDTO.getBankId());
+                                        if (webhooks != null && !webhooks.isEmpty()) {
+                                            LarkUtil larkUtil = new LarkUtil();
+
+                                            String larkMsg = "+" + nf.format(amount) + " VND"
+                                                    + " | TK: " + bankDTO.getBankShortName() + " - "
+                                                    + bankAccount
+                                                    + " | " + convertLongToDate(time)
+                                                    + " | " + entity.getFtCode()
+                                                    + " | ND: " + entity.getTraceTransfer();
+                                            for (String webhook : webhooks) {
+                                                larkUtil.sendMessageToLark(larkMsg, webhook);
+                                            }
+                                        }
+
+                                        /////// DO INSERT GOOGLE CHAT
+                                        List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(bankDTO.getBankId());
+                                        if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
+                                            GoogleChatUtil googleChatUtil = new GoogleChatUtil();
+                                            String googleChatMsg = "+" + amount + " VND"
+                                                    + " | TK: " + bankDTO.getBankShortName() + " - "
+                                                    + bankDTO.getBankAccount()
+                                                    + " | " + convertLongToDate(time)
+                                                    + " | " + entity.getFtCode()
+                                                    + " | ND: " + entity.getTraceTransfer();
+                                            for (String webhook : ggChatWebhooks) {
+                                                googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
                                             }
                                         }
                                     }
-                                } catch (Exception e) {
-                                    logger.error("transaction-mms-sync: ERROR: " + e.toString());
-                                }
-                            } else {
-                                logger.info("transaction-mms-sync: NOT FOUND terminalBankReceiveEntity");
-                            }
-
-                            // check time tim thay terminal
-                            LocalDateTime findTerminal = LocalDateTime.now();
-                            long findTerminalTime = findTerminal.toEpochSecond(ZoneOffset.UTC);
-                            logger.info(
-                                    "transaction-mms-sync: findTerminal at:" + findTerminalTime);
-                            String bankTypeId = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
-                            AccountBankReceiveShareForNotiDTO bankDTO = accountBankService
-                                    .findAccountBankByTraceTransfer(traceTransfer,
-                                            bankTypeId);
-                            if (bankDTO.getBankId() != null) {
-                                UUID transcationUUID = UUID.randomUUID();
-                                TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
-                                transactionEntity.setId(transcationUUID.toString());
-                                transactionEntity.setBankAccount(bankDTO.getBankAccount());
-                                String bankAccount = bankDTO.getBankAccount();
-                                transactionEntity.setBankId(bankDTO.getBankId());
-                                // get content from terminalCode from terminal (now ignore to test static
-                                // VietQR)
-                                transactionEntity.setContent(traceTransfer);
-                                //
-                                transactionEntity.setAmount(Long.parseLong(entity.getDebitAmount()));
-                                // final LocalDateTime currentDateTime = LocalDateTime.now();
-                                // long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
-                                transactionEntity.setTime(time);
-                                transactionEntity.setRefId(uuid.toString());
-                                transactionEntity.setType(1);
-                                transactionEntity.setStatus(1);
-                                transactionEntity.setTraceId("");
-                                transactionEntity.setTransType("C");
-                                transactionEntity.setReferenceNumber(entity.getFtCode());
-                                transactionEntity.setOrderId("");
-                                transactionEntity.setSign("");
-                                transactionEntity.setTimePaid(time);
-                                transactionEntity.setTerminalCode(terminalEntity != null ? terminalEntity.getCode() : "");
-                                transactionEntity.setQrCode("");
-                                transactionEntity.setUserId(bankDTO.getUserId());
-                                transactionEntity.setNote("");
-                                transactionEntity.setTransStatus(0);
-                                transactionEntity.setUrlLink("");
-                                if (!insertTransaction) {
-                                    transactionReceiveService.insertTransactionReceive(transactionEntity);
-                                    final String tempTerminalCode = terminalEntity.getCode();
-                                    TransactionTerminalTempEntity transactionTerminalTempEntity = new TransactionTerminalTempEntity();
-                                    transactionTerminalTempEntity.setId(UUID.randomUUID().toString());
-                                    transactionTerminalTempEntity.setTransactionId(transcationUUID.toString());
-                                    transactionTerminalTempEntity.setTerminalCode(tempTerminalCode);
-                                    transactionTerminalTempEntity.setTime(time);
-                                    transactionTerminalTempEntity
-                                            .setAmount(Long.parseLong(entity.getDebitAmount() + ""));
-                                    transactionTerminalTempService
-                                            .insertTransactionTerminal(transactionTerminalTempEntity);
-                                }
-                                // check time insert transaction QR static success
-                                LocalDateTime insertStatic = LocalDateTime.now();
-                                long insertStaticTime = insertStatic.toEpochSecond(ZoneOffset.UTC);
-                                logger.info(
-                                        "transaction-mms-sync: insertStaticQRTimeSuccess at:" + insertStaticTime);
-                                // 4. insert and push notification to user.
-
-                                List<String> userIds = terminalService
-                                        .getUserIdsByTerminalCode(terminalEntity.getCode());
-                                int numThread = userIds.size();
-                                int amount = Integer.parseInt(entity.getDebitAmount());
-                                NumberFormat nf = NumberFormat.getInstance(Locale.US);
-                                ExecutorService executorService = Executors.newFixedThreadPool(numThread);
-                                for (String userId : userIds) {
-                                    Map<String, String> data = new HashMap<>();
-                                    UUID notificationUUID = UUID.randomUUID();
-                                    NotificationEntity notiEntity = new NotificationEntity();
-                                    String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
-                                            + entity.getDebitAmount()
-                                            + NotificationUtil.getNotiDescUpdateTransSuffix2()
-                                            + "+" + nf.format(amount)
-                                            + NotificationUtil.getNotiDescUpdateTransSuffix3()
-                                            + entity.getTraceTransfer()
-                                            + NotificationUtil.getNotiDescUpdateTransSuffix4()
-                                            + entity.getTraceTransfer();
-                                    notiEntity.setId(notificationUUID.toString());
-                                    notiEntity.setRead(false);
-                                    notiEntity.setMessage(message);
-                                    notiEntity.setTime(time);
-                                    notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
-                                    notiEntity.setUserId(userId);
-                                    notiEntity.setData(transcationUUID.toString());
-                                    data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
-                                    data.put("notificationId", notificationUUID.toString());
-                                    data.put("transactionReceiveId", transcationUUID.toString());
-                                    data.put("bankAccount", bankAccount);
-                                    data.put("bankName", bankDTO.getBankName());
-                                    data.put("bankCode", bankDTO.getBankCode());
-                                    data.put("bankId", bankDTO.getBankId());
-                                    data.put("content", "" + traceTransfer);
-                                    data.put("terminalName",
-                                            terminalEntity.getName() != null ? terminalEntity.getName() : "");
-                                    data.put("terminalCode",
-                                            terminalEntity.getCode() != null ? terminalEntity.getCode() : "");
-                                    data.put("rawTerminalCode",
-                                            terminalEntity.getRawTerminalCode() != null
-                                                    ? terminalEntity.getRawTerminalCode()
-                                                    : "");
-                                    data.put("amount", "" + entity.getDebitAmount());
-                                    data.put("orderId", "");
-                                    data.put("referenceNumber", entity.getFtCode());
-                                    data.put("timePaid", "" + time);
-                                    data.put("time", "" + time);
-                                    data.put("type", "" + transactionEntity.getType());
-                                    data.put("refId", "" + uuid.toString());
-                                    data.put("status", "1");
-                                    data.put("traceId", "");
-                                    data.put("transType", "C");
-                                    data.put("urlLink", transactionEntity.getUrlLink() != null ? transactionEntity.getUrlLink() : "");
-                                    executorService.submit(
-                                            () -> pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
-                                                    message, notiEntity, data, userId));
+                                } else if (terminalSubRawCodeDTO != null) {
                                     try {
-                                        // send msg to QR Link
-                                        String refId = TransactionRefIdUtil
-                                                .encryptTransactionId(transactionEntity.getId());
-                                        socketHandler.sendMessageToTransactionRefId(refId, data);
-                                    } catch (IOException e) {
-                                        logger.error(
-                                                "WS: socketHandler.sendMessageToUser - updateTransaction ERROR: "
-                                                        + e.toString());
-                                    }
-                                }
-                                // /////// DO INSERT TELEGRAM
-                                List<String> chatIds = telegramAccountBankService
-                                        .getChatIdsByBankId(bankDTO.getBankId());
-                                if (chatIds != null && !chatIds.isEmpty()) {
-                                    TelegramUtil telegramUtil = new TelegramUtil();
+                                        subRawCode = terminalSubRawCodeDTO.getRawTerminalCode();
+                                        AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService
+                                                .getAccountBankById(terminalSubRawCodeDTO.getBankId());
+                                        String transactionId = UUID.randomUUID().toString();
+                                        TransactionReceiveEntity transactionReceiveEntity1 = new TransactionReceiveEntity();
+                                        transactionReceiveEntity1.setId(transactionId);
+                                        transactionReceiveEntity1.setStatus(1);
+                                        transactionReceiveEntity1.setType(1);
+                                        transactionReceiveEntity1.setAmount(Long.parseLong(entity.getDebitAmount()));
+                                        transactionReceiveEntity1.setRefId(uuid.toString());
+                                        transactionReceiveEntity1.setTraceId("");
+                                        transactionReceiveEntity1.setTransType("C");
+                                        transactionReceiveEntity1.setReferenceNumber(entity.getFtCode());
+                                        transactionReceiveEntity1.setOrderId("");
+                                        transactionReceiveEntity1.setSign("");
+                                        transactionReceiveEntity1.setTime(time);
+                                        transactionReceiveEntity1.setTimePaid(time);
+                                        transactionReceiveEntity1.setBankId(accountBankReceiveEntity.getId());
+                                        transactionReceiveEntity1.setTransStatus(0);
+                                        transactionReceiveEntity1.setTerminalCode(terminalSubRawCodeDTO.getTerminalCode());
+                                        transactionReceiveEntity1.setContent(entity.getTraceTransfer());
+                                        transactionReceiveEntity1.setBankAccount(accountBankReceiveEntity.getBankAccount());
+                                        transactionReceiveEntity1.setQrCode("");
+                                        transactionReceiveEntity1.setUserId(accountBankReceiveEntity.getUserId());
+                                        transactionReceiveEntity1.setNote("");
+                                        transactionReceiveEntity1.setUrlLink("");
+                                        transactionReceiveService.insertTransactionReceive(transactionReceiveEntity1);
+                                        TransactionTerminalTempEntity transactionTerminalTempEntity = new TransactionTerminalTempEntity();
+                                        transactionTerminalTempEntity.setId(UUID.randomUUID().toString());
+                                        transactionTerminalTempEntity.setTransactionId(transactionId);
+                                        transactionTerminalTempEntity.setTerminalCode(terminalSubRawCodeDTO.getTerminalCode());
+                                        transactionTerminalTempEntity.setTime(time);
+                                        transactionTerminalTempEntity.setAmount(Long.parseLong(entity.getDebitAmount() + ""));
+                                        transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTempEntity);
 
-                                    String telegramMsg = "+" + nf.format(amount) + " VND"
-                                            + " | TK: " + bankDTO.getBankShortName() + " - "
-                                            + bankAccount
-                                            + " | " + convertLongToDate(time)
-                                            + " | " + entity.getFtCode()
-                                            + " | ND: " + entity.getTraceTransfer();
-                                    for (String chatId : chatIds) {
-                                        telegramUtil.sendMsg(chatId, telegramMsg);
-                                    }
-                                }
+                                        insertTransaction = true;
+                                        BankTypeEntity bankTypeEntity = bankTypeService
+                                                .getBankTypeById(accountBankReceiveEntity.getBankTypeId());
+                                        NumberFormat nf = NumberFormat.getInstance(Locale.US);
+                                        Map<String, String> data = new HashMap<>();
+                                        UUID notificationUUID = UUID.randomUUID();
+                                        NotificationEntity notiEntity = new NotificationEntity();
+                                        String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
+                                                + entity.getDebitAmount()
+                                                + NotificationUtil.getNotiDescUpdateTransSuffix2()
+                                                + "+" + nf.format(Long.parseLong(entity.getDebitAmount()))
+                                                + NotificationUtil.getNotiDescUpdateTransSuffix3()
+                                                + entity.getTraceTransfer()
+                                                + NotificationUtil.getNotiDescUpdateTransSuffix4()
+                                                + entity.getTraceTransfer();
+                                        notiEntity.setId(notificationUUID.toString());
+                                        notiEntity.setRead(false);
+                                        notiEntity.setMessage(message);
+                                        notiEntity.setTime(time);
+                                        notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
+                                        notiEntity.setUserId(accountBankReceiveEntity.getUserId());
+                                        notiEntity.setData(transactionId);
+                                        data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+                                        data.put("notificationId", notificationUUID.toString());
+                                        data.put("transactionReceiveId", transactionId);
+                                        data.put("bankAccount", accountBankReceiveEntity.getBankAccount());
+                                        data.put("bankName", bankTypeEntity.getBankName());
+                                        data.put("bankCode", bankTypeEntity.getBankCode());
+                                        data.put("bankId", accountBankReceiveEntity.getId());
+                                        data.put("content", "" + traceTransfer);
+                                        String amountForVoice = StringUtil.removeFormatNumber(entity.getDebitAmount());
+                                        data.put("amount", "" + StringUtil.formatNumberAsString(entity.getDebitAmount()));
+                                        data.put("terminalName", "");
+                                        data.put("terminalCode",
+                                                terminalSubRawCodeDTO.getTerminalCode() != null ?
+                                                        terminalSubRawCodeDTO.getTerminalCode() : "");
+                                        data.put("rawTerminalCode",
+                                                terminalSubRawCodeDTO.getRawTerminalCode() != null
+                                                        ? terminalSubRawCodeDTO.getRawTerminalCode()
+                                                        : "");
 
-                                /////// DO INSERT LARK
-                                List<String> webhooks = larkAccountBankService
-                                        .getWebhooksByBankId(bankDTO.getBankId());
-                                if (webhooks != null && !webhooks.isEmpty()) {
-                                    LarkUtil larkUtil = new LarkUtil();
-
-                                    String larkMsg = "+" + nf.format(amount) + " VND"
-                                            + " | TK: " + bankDTO.getBankShortName() + " - "
-                                            + bankAccount
-                                            + " | " + convertLongToDate(time)
-                                            + " | " + entity.getFtCode()
-                                            + " | ND: " + entity.getTraceTransfer();
-                                    for (String webhook : webhooks) {
-                                        larkUtil.sendMessageToLark(larkMsg, webhook);
-                                    }
-                                }
-
-                                /////// DO INSERT GOOGLE CHAT
-                                List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(bankDTO.getBankId());
-                                if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
-                                    GoogleChatUtil googleChatUtil = new GoogleChatUtil();
-                                    String googleChatMsg = "+" + amount + " VND"
-                                            + " | TK: " + bankDTO.getBankShortName() + " - "
-                                            + bankDTO.getBankAccount()
-                                            + " | " + convertLongToDate(time)
-                                            + " | " + entity.getFtCode()
-                                            + " | ND: " + entity.getTraceTransfer();
-                                    for (String webhook : ggChatWebhooks) {
-                                        googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
-                                    }
-                                }
-                            }
-                        } else if (terminalSubRawCodeDTO != null) {
-                            try {
-                                subRawCode = terminalSubRawCodeDTO.getRawTerminalCode();
-                                AccountBankReceiveEntity accountBankReceiveEntity = accountBankService
-                                        .getAccountBankById(terminalSubRawCodeDTO.getBankId());
-                                String transactionId = UUID.randomUUID().toString();
-                                TransactionReceiveEntity transactionReceiveEntity1 = new TransactionReceiveEntity();
-                                transactionReceiveEntity1.setId(transactionId);
-                                transactionReceiveEntity1.setStatus(1);
-                                transactionReceiveEntity1.setType(1);
-                                transactionReceiveEntity1.setAmount(Long.parseLong(entity.getDebitAmount()));
-                                transactionReceiveEntity1.setRefId(uuid.toString());
-                                transactionReceiveEntity1.setTraceId("");
-                                transactionReceiveEntity1.setTransType("C");
-                                transactionReceiveEntity1.setReferenceNumber(entity.getFtCode());
-                                transactionReceiveEntity1.setOrderId("");
-                                transactionReceiveEntity1.setSign("");
-                                transactionReceiveEntity1.setTime(time);
-                                transactionReceiveEntity1.setTimePaid(time);
-                                transactionReceiveEntity1.setBankId(accountBankReceiveEntity.getId());
-                                transactionReceiveEntity1.setTransStatus(0);
-                                transactionReceiveEntity1.setTerminalCode(terminalSubRawCodeDTO.getTerminalCode());
-                                transactionReceiveEntity1.setContent(entity.getTraceTransfer());
-                                transactionReceiveEntity1.setBankAccount(accountBankReceiveEntity.getBankAccount());
-                                transactionReceiveEntity1.setQrCode("");
-                                transactionReceiveEntity1.setUserId(accountBankReceiveEntity.getUserId());
-                                transactionReceiveEntity1.setNote("");
-                                transactionReceiveEntity1.setUrlLink("");
-                                transactionReceiveService.insertTransactionReceive(transactionReceiveEntity1);
-                                TransactionTerminalTempEntity transactionTerminalTempEntity = new TransactionTerminalTempEntity();
-                                transactionTerminalTempEntity.setId(UUID.randomUUID().toString());
-                                transactionTerminalTempEntity.setTransactionId(transactionId);
-                                transactionTerminalTempEntity.setTerminalCode(terminalSubRawCodeDTO.getTerminalCode());
-                                transactionTerminalTempEntity.setTime(time);
-                                transactionTerminalTempEntity.setAmount(Long.parseLong(entity.getDebitAmount() + ""));
-                                transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTempEntity);
-
-                                insertTransaction = true;
-                                BankTypeEntity bankTypeEntity = bankTypeService
-                                        .getBankTypeById(accountBankReceiveEntity.getBankTypeId());
-                                NumberFormat nf = NumberFormat.getInstance(Locale.US);
-                                Map<String, String> data = new HashMap<>();
-                                UUID notificationUUID = UUID.randomUUID();
-                                NotificationEntity notiEntity = new NotificationEntity();
-                                String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
-                                        + entity.getDebitAmount()
-                                        + NotificationUtil.getNotiDescUpdateTransSuffix2()
-                                        + "+" + nf.format(Long.parseLong(entity.getDebitAmount()))
-                                        + NotificationUtil.getNotiDescUpdateTransSuffix3()
-                                        + entity.getTraceTransfer()
-                                        + NotificationUtil.getNotiDescUpdateTransSuffix4()
-                                        + entity.getTraceTransfer();
-                                notiEntity.setId(notificationUUID.toString());
-                                notiEntity.setRead(false);
-                                notiEntity.setMessage(message);
-                                notiEntity.setTime(time);
-                                notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
-                                notiEntity.setUserId(accountBankReceiveEntity.getUserId());
-                                notiEntity.setData(transactionId);
-                                data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
-                                data.put("notificationId", notificationUUID.toString());
-                                data.put("transactionReceiveId", transactionId);
-                                data.put("bankAccount", accountBankReceiveEntity.getBankAccount());
-                                data.put("bankName", bankTypeEntity.getBankName());
-                                data.put("bankCode", bankTypeEntity.getBankCode());
-                                data.put("bankId", accountBankReceiveEntity.getId());
-                                data.put("content", "" + traceTransfer);
-                                String amountForVoice = StringUtil.removeFormatNumber(entity.getDebitAmount());
-                                data.put("amount", "" + StringUtil.formatNumberAsString(entity.getDebitAmount()));
-                                data.put("terminalName", "");
-                                data.put("terminalCode",
-                                        terminalSubRawCodeDTO.getTerminalCode() != null ?
-                                                terminalSubRawCodeDTO.getTerminalCode() : "");
-                                data.put("rawTerminalCode",
-                                        terminalSubRawCodeDTO.getRawTerminalCode() != null
-                                                ? terminalSubRawCodeDTO.getRawTerminalCode()
-                                                : "");
-
-                                data.put("orderId",
-                                        entity.getReferenceLabelCode() != null ? entity.getReferenceLabelCode() : "");
-                                data.put("referenceNumber", entity.getFtCode() != null ? entity.getFtCode() : "");
-                                data.put("timePaid", "" + time);
-                                data.put("type", "" + transactionReceiveEntity1.getType());
-                                data.put("time", "" + time);
-                                data.put("refId", "" + uuid.toString());
-                                data.put("status", "1");
-                                data.put("traceId", "");
-                                data.put("transType", "C");
-                                data.put("urlLink", "");
-                                pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
-                                        message, notiEntity, data, accountBankReceiveEntity.getUserId());
-                                TerminalBankEntity terminalBankEntitySync = terminalBankService
-                                        .getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
-                                if (terminalBankEntitySync != null) {
-                                    // push data to customerSync
-                                    ////////////////////////
-                                    getCustomerSyncEntities(transactionReceiveEntity1.getId(),
-                                            terminalBankEntitySync.getId(),
-                                            entity.getFtCode(),
-                                            transactionReceiveEntity1, time, terminalSubRawCodeDTO.getRawTerminalCode(), "");
-                                    try {
-                                        final String finalRawCode = terminalSubRawCodeDTO.getRawTerminalCode();
-                                        Thread thread2 = new Thread(() -> {
-                                            getCustomerSyncEntitiesV2(transactionReceiveEntity1.getId(),
+                                        data.put("orderId",
+                                                entity.getReferenceLabelCode() != null ? entity.getReferenceLabelCode() : "");
+                                        data.put("referenceNumber", entity.getFtCode() != null ? entity.getFtCode() : "");
+                                        data.put("timePaid", "" + time);
+                                        data.put("type", "" + transactionReceiveEntity1.getType());
+                                        data.put("time", "" + time);
+                                        data.put("refId", "" + uuid.toString());
+                                        data.put("status", "1");
+                                        data.put("traceId", "");
+                                        data.put("transType", "C");
+                                        data.put("urlLink", "");
+                                        pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
+                                                message, notiEntity, data, accountBankReceiveEntity.getUserId());
+                                        TerminalBankEntity terminalBankEntitySync = terminalBankService
+                                                .getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
+                                        if (terminalBankEntitySync != null) {
+                                            // push data to customerSync
+                                            ////////////////////////
+                                            getCustomerSyncEntities(transactionReceiveEntity1.getId(),
                                                     terminalBankEntitySync.getId(),
                                                     entity.getFtCode(),
-                                                    transactionReceiveEntity1, time, finalRawCode, "");
-                                        });
-                                        thread2.start();
-                                    } catch (Exception e) {
-                                        logger.error("getCustomerSyncEntitiesV2: ERROR: " + e.getMessage() +
-                                                " at: " + System.currentTimeMillis());
-                                    }
-                                } else {
-                                    logger.info("transaction-mms-sync: NOT FOUND TerminalBankEntity");
-                                }
-                                try {
-                                    if (!StringUtil.isNullOrEmpty(subRawCode)) {
-                                        try {
-                                            BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
-                                            String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
-                                            data.put("message", String.format(messageForBox, amountForVoice));
-                                            String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(subRawCode);
-                                            socketHandler.sendMessageToBoxId(idRefBox, data);
-                                            logger.info("WS: socketHandler.sendMessageToQRBox MMS - "
-                                                    + subRawCode + " at: " + System.currentTimeMillis());
-                                        } catch (IOException e) {
-                                            logger.error(
-                                                    "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
+                                                    transactionReceiveEntity1, time, terminalSubRawCodeDTO.getRawTerminalCode(), "", "");
+                                            try {
+                                                final String finalRawCode = terminalSubRawCodeDTO.getRawTerminalCode();
+                                                Thread thread2 = new Thread(() -> {
+                                                    getCustomerSyncEntitiesV2(transactionReceiveEntity1.getId(),
+                                                            terminalBankEntitySync.getId(),
+                                                            entity.getFtCode(),
+                                                            transactionReceiveEntity1, time, finalRawCode, "");
+                                                });
+                                                thread2.start();
+                                            } catch (Exception e) {
+                                                logger.error("getCustomerSyncEntitiesV2: ERROR: " + e.getMessage() +
+                                                        " at: " + System.currentTimeMillis());
+                                            }
+                                        } else {
+                                            logger.info("transaction-mms-sync: NOT FOUND TerminalBankEntity");
                                         }
+                                        try {
+                                            if (!StringUtil.isNullOrEmpty(subRawCode)) {
+                                                try {
+                                                    BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
+                                                    String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
+                                                    data.put("message", String.format(messageForBox, amountForVoice));
+                                                    String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(subRawCode);
+                                                    socketHandler.sendMessageToBoxId(idRefBox, data);
+                                                    logger.info("WS: socketHandler.sendMessageToQRBox MMS - "
+                                                            + subRawCode + " at: " + System.currentTimeMillis());
+                                                } catch (IOException e) {
+                                                    logger.error(
+                                                            "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
+                                                }
+                                            }
+                                        } catch (Exception e) {
+                                            logger.error("transaction-mms-sync: ERROR: " + e.toString());
+                                        }
+                                        String bankTypeId = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
+                                        AccountBankReceiveShareForNotiDTO bankDTO = accountBankReceiveService
+                                                .findAccountBankByTraceTransfer(traceTransfer,
+                                                        bankTypeId);
+
+                                        Long amount = Long.parseLong(entity.getDebitAmount() + "");
+                                        // /////// DO INSERT TELEGRAM
+                                        List<String> chatIds = telegramAccountBankService
+                                                .getChatIdsByBankId(bankDTO.getBankId());
+                                        if (chatIds != null && !chatIds.isEmpty()) {
+                                            TelegramUtil telegramUtil = new TelegramUtil();
+
+                                            String telegramMsg = "+" + nf.format(amount) + " VND"
+                                                    + " | TK: " + bankDTO.getBankShortName() + " - "
+                                                    + bankDTO.getBankAccount()
+                                                    + " | " + convertLongToDate(time)
+                                                    + " | " + entity.getFtCode()
+                                                    + " | ND: " + entity.getTraceTransfer();
+                                            for (String chatId : chatIds) {
+                                                telegramUtil.sendMsg(chatId, telegramMsg);
+                                            }
+                                        }
+
+                                        /////// DO INSERT LARK
+                                        List<String> webhooks = larkAccountBankService
+                                                .getWebhooksByBankId(bankDTO.getBankId());
+                                        if (webhooks != null && !webhooks.isEmpty()) {
+                                            LarkUtil larkUtil = new LarkUtil();
+
+                                            String larkMsg = "+" + nf.format(amount) + " VND"
+                                                    + " | TK: " + bankDTO.getBankShortName() + " - "
+                                                    + bankDTO.getBankAccount()
+                                                    + " | " + convertLongToDate(time)
+                                                    + " | " + entity.getFtCode()
+                                                    + " | ND: " + entity.getTraceTransfer();
+                                            for (String webhook : webhooks) {
+                                                larkUtil.sendMessageToLark(larkMsg, webhook);
+                                            }
+                                        }
+
+                                        /////// DO INSERT GOOGLE CHAT
+                                        List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(bankDTO.getBankId());
+                                        if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
+                                            GoogleChatUtil googleChatUtil = new GoogleChatUtil();
+                                            String googleChatMsg = "+" + amount + " VND"
+                                                    + " | TK: " + bankTypeEntity.getBankShortName() + " - "
+                                                    + bankDTO.getBankAccount()
+                                                    + " | " + convertLongToDate(time)
+                                                    + " | " + entity.getFtCode()
+                                                    + " | ND: " + entity.getTraceTransfer();
+                                            for (String webhook : ggChatWebhooks) {
+                                                googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
+                                            }
+                                        }
+                                    } catch (Exception e) {
+                                        logger.error("transaction-mms: push to QR-Box: " + e.getMessage() + "at: " + System.currentTimeMillis());
                                     }
-                                } catch (Exception e) {
-                                    logger.error("transaction-mms-sync: ERROR: " + e.toString());
                                 }
-                                String bankTypeId = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
-                                AccountBankReceiveShareForNotiDTO bankDTO = accountBankService
-                                        .findAccountBankByTraceTransfer(traceTransfer,
-                                                bankTypeId);
-
-                                Long amount = Long.parseLong(entity.getDebitAmount() + "");
-                                // /////// DO INSERT TELEGRAM
-                                List<String> chatIds = telegramAccountBankService
-                                        .getChatIdsByBankId(bankDTO.getBankId());
-                                if (chatIds != null && !chatIds.isEmpty()) {
-                                    TelegramUtil telegramUtil = new TelegramUtil();
-
-                                    String telegramMsg = "+" + nf.format(amount) + " VND"
-                                            + " | TK: " + bankDTO.getBankShortName() + " - "
-                                            + bankDTO.getBankAccount()
-                                            + " | " + convertLongToDate(time)
-                                            + " | " + entity.getFtCode()
-                                            + " | ND: " + entity.getTraceTransfer();
-                                    for (String chatId : chatIds) {
-                                        telegramUtil.sendMsg(chatId, telegramMsg);
-                                    }
-                                }
-
-                                /////// DO INSERT LARK
-                                List<String> webhooks = larkAccountBankService
-                                        .getWebhooksByBankId(bankDTO.getBankId());
-                                if (webhooks != null && !webhooks.isEmpty()) {
-                                    LarkUtil larkUtil = new LarkUtil();
-
-                                    String larkMsg = "+" + nf.format(amount) + " VND"
-                                            + " | TK: " + bankDTO.getBankShortName() + " - "
-                                            + bankDTO.getBankAccount()
-                                            + " | " + convertLongToDate(time)
-                                            + " | " + entity.getFtCode()
-                                            + " | ND: " + entity.getTraceTransfer();
-                                    for (String webhook : webhooks) {
-                                        larkUtil.sendMessageToLark(larkMsg, webhook);
-                                    }
-                                }
-
-                                /////// DO INSERT GOOGLE CHAT
-                                List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(bankDTO.getBankId());
-                                if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
-                                    GoogleChatUtil googleChatUtil = new GoogleChatUtil();
-                                    String googleChatMsg = "+" + amount + " VND"
-                                            + " | TK: " + bankTypeEntity.getBankShortName() + " - "
-                                            + bankDTO.getBankAccount()
-                                            + " | " + convertLongToDate(time)
-                                            + " | " + entity.getFtCode()
-                                            + " | ND: " + entity.getTraceTransfer();
-                                    for (String webhook : ggChatWebhooks) {
-                                        googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
-                                    }
-                                }
-                            } catch (Exception e) {
-                                logger.error("transaction-mms: push to QR-Box: " + e.getMessage() + "at: " + System.currentTimeMillis());
                             }
                         }
                     }
@@ -1040,7 +1186,8 @@ public class TransactionMMSController {
     }
 
     private void getCustomerSyncEntities(String transReceiveId, String terminalBankId, String ftCode,
-                                         TransactionReceiveEntity transactionReceiveEntity, long time, String rawTerminalCode, String urlLink) {
+                                         TransactionReceiveEntity transactionReceiveEntity, long time,
+                                         String rawTerminalCode, String urlLink, String serviceCode) {
         try {
             // find customerSyncEntities by terminal_bank_id
             List<TerminalAddressEntity> terminalAddressEntities = new ArrayList<>();
@@ -1071,6 +1218,7 @@ public class TransactionMMSController {
                     transactionBankCustomerDTO.setTerminalCode("");
                 }
                 transactionBankCustomerDTO.setUrlLink(urlLink);
+                transactionBankCustomerDTO.setServiceCode(serviceCode);
                 for (TerminalAddressEntity terminalAddressEntity : terminalAddressEntities) {
                     CustomerSyncEntity customerSyncEntity = customerSyncService
                             .getCustomerSyncById(terminalAddressEntity.getCustomerSyncId());
@@ -1384,7 +1532,7 @@ public class TransactionMMSController {
         // final String[] msg = new String[1];
         try {
             logger.info("pushNewTransactionToCustomerSync: orderId: " +
-                    dto.getOrderId());
+                    dto.getOrderId() + " at: " + System.currentTimeMillis());
             // System.out.println("pushNewTransactionToCustomerSync: orderId: " +
             // dto.getOrderId());
             logger.info("pushNewTransactionToCustomerSync: sign: " + dto.getSign());
@@ -1398,7 +1546,7 @@ public class TransactionMMSController {
                     && !entity.getPassword().trim().isEmpty()) {
                 tokenDTO = getCustomerSyncToken(transReceiveId, entity, time);
             } else if (entity.getToken() != null && !entity.getToken().trim().isEmpty()) {
-                logger.info("Get token from record: " + entity.getId());
+                logger.info("Get token from record: " + entity.getId() + " at: " + System.currentTimeMillis());
                 tokenDTO = new TokenDTO(entity.getToken(), "Bearer", 0);
             }
             Map<String, Object> data = new HashMap<>();
@@ -1413,6 +1561,7 @@ public class TransactionMMSController {
             data.put("sign", dto.getSign());
             data.put("terminalCode", dto.getTerminalCode());
             data.put("urlLink", dto.getUrlLink());
+            data.put("serviceCode", dto.getServiceCode());
             String suffixUrl = "";
             if (entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty()) {
                 suffixUrl = entity.getSuffixUrl();
@@ -1440,9 +1589,8 @@ public class TransactionMMSController {
             System.out
                     .println("uriComponents: " + webClient.get().uri(builder -> builder.path("/").build()).toString());
             // Mono<TransactionResponseDTO> responseMono = null;
-            LocalDateTime startRequestDateTime = LocalDateTime.now();
-            long startRequestTime = startRequestDateTime.toEpochSecond(ZoneOffset.UTC);
-            logger.info("pushNewTransactionToCustomerSync request at:" + startRequestTime);
+            logger.info("pushNewTransactionToCustomerSync request orderId: " + dto.getOrderId()
+                    + " at: " + System.currentTimeMillis());
             // System.out.println("pushNewTransactionToCustomerSync request at:" +
             // startRequestTime);
             Mono<ClientResponse> responseMono = null;
@@ -1465,9 +1613,8 @@ public class TransactionMMSController {
                 // .bodyToMono(TransactionResponseDTO.class);
             }
             ClientResponse response = responseMono.block();
-            LocalDateTime responseDateTime = LocalDateTime.now();
-            long responseTime = responseDateTime.toEpochSecond(ZoneOffset.UTC);
-            logger.info("Response pushNewTransactionToCustomerSync at:" + responseTime);
+            logger.info("Response pushNewTransactionToCustomerSync response orderId: " + dto.getOrderId()
+                    + " at: " + System.currentTimeMillis());
             // System.out.println("Response pushNewTransactionToCustomerSync at:" +
             // responseTime);
             // System.out.println("response: " + response.toString());
@@ -1671,7 +1818,7 @@ public class TransactionMMSController {
                                 entity.getBillNumber(), entity.getPayDate(), entity.getDebitAmount());
                         // System.out.println("data getTraceTransfer: " + entity.getTraceTransfer());
                         // System.out.println("data getBillNumber: " + entity.getBillNumber());
-                        // System.out.println("data getPayDate: " + entity.getPayDate());
+                         System.out.println("data getPayDate: " + entity.getPayDate());
                         // System.out.println("data getDebitAmount: " + entity.getDebitAmount());
                         // System.out.println("data checksum: " + dataCheckSum);
                         if (BankEncryptUtil.isMatchChecksum(dataCheckSum, entity.getCheckSum())) {

@@ -55,10 +55,6 @@ public class StringUtil {
         return value != null ? value : 0;
     }
 
-    public static long getValueNullChecker(Long value) {
-        return value != null ? value : 0;
-    }
-
     public static double getValueNullChecker(Double value) {
         return value != null ? value : 0;
     }

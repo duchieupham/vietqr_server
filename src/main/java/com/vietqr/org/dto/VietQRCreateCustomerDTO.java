@@ -25,6 +25,7 @@ public class VietQRCreateCustomerDTO implements Serializable {
     private String urlLink;
     private Boolean reconciliation;
     private Integer qrType;
+    private String serviceCode;
 
     public VietQRCreateCustomerDTO() {
         super();
@@ -218,13 +219,21 @@ public class VietQRCreateCustomerDTO implements Serializable {
         this.qrType = qrType;
     }
 
+    public String getServiceCode() {
+        return serviceCode;
+    }
+
+    public void setServiceCode(String serviceCode) {
+        this.serviceCode = serviceCode;
+    }
+
     @Override
     public String toString() {
         return "VietQRCreateCustomerDTO [amount=" + amount + ", content=" + content + ", bankAccount=" + bankAccount
                 + ", bankCode=" + bankCode + ", userBankName=" + userBankName + ", transType=" + transType
                 + ", customerBankAccount=" + customerBankAccount + ", customerBankCode=" + customerBankCode
                 + ", customerName=" + customerName + ", orderId=" + orderId + ", sign=" + sign
-                + ", urlLink=" + urlLink + "]";
+                + ", urlLink=" + urlLink + ", serviceCode=" + serviceCode + ", qrType=" + qrType + "]";
     }
 
 }

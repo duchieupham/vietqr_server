@@ -133,6 +133,9 @@ public class TransactionReceiveEntity implements Serializable {
 	@Column(name = "terminalCode")
 	private String terminalCode;
 
+	@Column(name = "serviceCode")
+	private String serviceCode = "";
+
 	@Column(name = "qrCode")
 	private String qrCode;
 
@@ -431,5 +434,13 @@ public class TransactionReceiveEntity implements Serializable {
 
 	public void setBillId(String billId) {
 		this.billId = billId;
+	}
+
+	public String getServiceCode() {
+		return serviceCode;
+	}
+
+	public void setServiceCode(String serviceCode) {
+		this.serviceCode = serviceCode;
 	}
 }

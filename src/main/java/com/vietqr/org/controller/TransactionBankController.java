@@ -5608,6 +5608,8 @@ public class TransactionBankController {
 			System.out
 					.println("uriComponents: " + webClient.get().uri(builder -> builder.path("/").build()).toString());
 			// Mono<TransactionResponseDTO> responseMono = null;
+			logger.info("pushNewTransactionToCustomerSync request orderId: " + dto.getOrderId()
+					+ " at: " + System.currentTimeMillis());
 			Mono<ClientResponse> responseMono = null;
 			if (tokenDTO != null) {
 				responseMono = webClient.post()
@@ -5629,6 +5631,8 @@ public class TransactionBankController {
 			}
 
 			ClientResponse response = responseMono.block();
+			logger.info("Response pushNewTransactionToCustomerSync response orderId: " + dto.getOrderId()
+					+ " at: " + System.currentTimeMillis());
 			System.out.println("response status code: " + response.statusCode());
 			if (response.statusCode().is2xxSuccessful()) {
 				String json = response.bodyToMono(String.class).block();
