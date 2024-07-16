@@ -743,4 +743,12 @@ public class EnvironmentUtil {
     public static String getPrefixBidvBillIdCommon() {
         return PREFIX_BIDV_BILL_ID_COMMON;
     }
+
+    public static String getPrefixTerminalExternal() {
+        return "TER";
+    }
+
+    public static String getMerchantPrefixPublic() {
+        return "MER";
+    }
 }

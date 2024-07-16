@@ -24,6 +24,7 @@ public class VietQRCreateCustomerDTO implements Serializable {
     private String note;
     private String urlLink;
     private Boolean reconciliation;
+    private Integer qrType;
 
     public VietQRCreateCustomerDTO() {
         super();
@@ -207,6 +208,14 @@ public class VietQRCreateCustomerDTO implements Serializable {
 
     public void setReconciliation(Boolean reconciliation) {
         this.reconciliation = reconciliation;
+    }
+
+    public Integer getQrType() {
+        return qrType;
+    }
+
+    public void setQrType(Integer qrType) {
+        this.qrType = qrType;
     }
 
     @Override

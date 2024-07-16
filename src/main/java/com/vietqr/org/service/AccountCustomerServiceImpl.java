@@ -27,4 +27,9 @@ public class AccountCustomerServiceImpl implements AccountCustomerService {
         return repo.getAccessKeyByUsername(username);
     }
 
+    @Override
+    public String checkExistMerchantSyncByUsername(String username) {
+        return repo.checkExistMerchantSyncByUsername(username);
+    }
+
 }

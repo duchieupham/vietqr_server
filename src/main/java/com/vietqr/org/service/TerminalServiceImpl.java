@@ -223,6 +223,26 @@ public class TerminalServiceImpl implements TerminalService {
     }
 
     @Override
+    public List<ITerminalSyncDTO> getTerminalByMidSync(String mid, int offset, int size) {
+        return repo.getTerminalByMidSync(mid, offset, size);
+    }
+
+    @Override
+    public int countTerminalByMidSync(String midForSearch) {
+        return repo.countTerminalByMidSync(midForSearch);
+    }
+
+    @Override
+    public List<String> checkExistedTerminalRawCodes(List<String> rawCodes) {
+        return repo.checkExistedTerminalRawCodes(rawCodes);
+    }
+
+    @Override
+    public String checkExistedPublishId(String publishId) {
+        return repo.checkExistedPublishId(publishId);
+    }
+
+    @Override
     public TerminalEntity getTerminalByTerminalId(String terminalId) {
         return repo.getTerminalByTerminalId(terminalId);
     }

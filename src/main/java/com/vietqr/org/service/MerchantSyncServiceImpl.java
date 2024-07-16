@@ -1,9 +1,6 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.dto.IMerchantEditDetailDTO;
-import com.vietqr.org.dto.IMerchantInfoDTO;
-import com.vietqr.org.dto.IMerchantInvoiceDTO;
-import com.vietqr.org.dto.IMerchantSyncDTO;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.GoogleChatEntity;
 import com.vietqr.org.entity.LarkEntity;
 import com.vietqr.org.entity.MerchantSyncEntity;
@@ -149,5 +146,50 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
     @Override
     public void updateMerchantName(String midName, String mid) {
         repo.updateMerchantName(midName, mid);
+    }
+
+    @Override
+    public MerchantSyncEntity getMerchantSyncByName(String merchantName) {
+        return repo.getMerchantSyncsByMerchantName(merchantName);
+    }
+
+    @Override
+    public MerchantSyncEntity getMerchantSyncByPublishId(String mid) {
+        return repo.getMerchantSyncByPublicId(mid);
+    }
+
+    @Override
+    public MerchantSyncEntity getMerchantSyncById(String mid) {
+        return repo.getMerchantSyncById(mid);
+    }
+
+    @Override
+    public int countMerchantByMidSync(String mid) {
+        return repo.countMerchantByMidSync(mid);
+    }
+
+    @Override
+    public List<IMerchantSyncPublicDTO> getMerchantByMidSync(String refId, int offset, int size) {
+        return repo.getMerchantByMidSync(refId, offset, size);
+    }
+
+    @Override
+    public String getIdByPublicId(String publicId) {
+        return repo.getIdByPublicId(publicId);
+    }
+
+    @Override
+    public String getMerchantIdSyncByName(String merchantName) {
+        return repo.getMerchantIdSyncByName(merchantName);
+    }
+
+    @Override
+    public String checkExistedPublishId(String code) {
+        return repo.checkExistedPublishId(code);
+    }
+
+    @Override
+    public void insertAll(List<MerchantSyncEntity> entities) {
+        repo.saveAll(entities);
     }
 }
