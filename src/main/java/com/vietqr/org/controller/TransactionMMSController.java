@@ -4,15 +4,19 @@ import java.io.IOException;
 import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.service.*;
+import com.vietqr.org.service.social.*;
 import com.vietqr.org.util.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,6 +134,29 @@ public class TransactionMMSController {
 
     @Autowired
     TransactionRefundLogService transactionRefundLogService;
+    @Autowired
+    TelegramService telegramService;
+
+    @Autowired
+    LarkService larkService;
+
+    @Autowired
+    SlackAccountBankService slackAccountBankService;
+
+    @Autowired
+    SlackService slackService;
+
+    @Autowired
+    DiscordAccountBankService discordAccountBankService;
+
+    @Autowired
+    DiscordService discordService;
+
+    @Autowired
+    GoogleSheetAccountBankService googleSheetAccountBankService;
+
+    @Autowired
+    GoogleSheetService googleSheetService;
 
     @PostMapping("transaction-mms")
     public ResponseEntity<TransactionMMSResponseDTO> insertTransactionMMS(@RequestBody TransactionMMSEntity entity) {
@@ -240,6 +267,7 @@ public class TransactionMMSController {
             final TransactionMMSResponseDTO tempResult = result;
             final TransactionReceiveEntity tempTransReceive = transactionReceiveEntity;
             final TerminalBankEntity tempTerminalBank = terminalBankEntity;
+            TransactionReceiveEntity finalTransactionReceiveEntity = transactionReceiveEntity;
             Thread thread = new Thread(() -> {
                 if (tempResult != null && tempResult.getResCode().equals("00")) {
                     // tempTransReceive is null => static QR
@@ -524,38 +552,66 @@ public class TransactionMMSController {
                                         message, notiEntity, data, accountBankReceiveEntity.getUserId());
 
                                 // /////// DO INSERT TELEGRAM
-                                List<String> chatIds = telegramAccountBankService
-                                        .getChatIdsByBankId(terminalItemEntity.getBankId());
-                                if (chatIds != null && !chatIds.isEmpty()) {
-                                    TelegramUtil telegramUtil = new TelegramUtil();
-
-                                    String telegramMsg = "+" + nf.format(terminalItemEntity.getAmount()) + " VND"
-                                            + " | TK: " + bankTypeEntity.getBankShortName() + " - "
-                                            + terminalItemEntity.getBankAccount()
-                                            + " | " + convertLongToDate(time)
-                                            + " | " + entity.getFtCode()
-                                            + " | ND: " + terminalItemEntity.getContent();
-                                    for (String chatId : chatIds) {
-                                        telegramUtil.sendMsg(chatId, telegramMsg);
+//                                List<String> chatIds = telegramAccountBankService
+//                                        .getChatIdsByBankId(terminalItemEntity.getBankId());
+//                                if (chatIds != null && !chatIds.isEmpty()) {
+//                                    TelegramUtil telegramUtil = new TelegramUtil();
+//
+//                                    String telegramMsg = "+" + nf.format(terminalItemEntity.getAmount()) + " VND"
+//                                            + " | TK: " + bankTypeEntity.getBankShortName() + " - "
+//                                            + terminalItemEntity.getBankAccount()
+//                                            + " | " + convertLongToDate(time)
+//                                            + " | " + entity.getFtCode()
+//                                            + " | ND: " + terminalItemEntity.getContent();
+//                                    for (String chatId : chatIds) {
+//                                        telegramUtil.sendMsg(chatId, telegramMsg);
+//                                    }
+//                                }
+                                // Push notifications to Telegram
+                                List<String> webhooks = larkAccountBankService.getWebhooksByBankId(terminalItemEntity.getBankId());
+                                if (webhooks != null && !webhooks.isEmpty()) {
+                                    LarkUtil larkUtil = new LarkUtil();
+                                    for (String webhook : webhooks) {
+                                        try {
+                                            LarkEntity larkEntity = larkService.getLarkByWebhook(webhook);
+                                            if (larkEntity != null) {
+                                                List<String> notificationTypes = new ObjectMapper().readValue(larkEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+                                                List<String> notificationContents = new ObjectMapper().readValue(larkEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+                                                boolean sendNotification = shouldSendNotification(notificationTypes, entity, finalTransactionReceiveEntity);
+                                                if (sendNotification) {
+                                                    String larkMsg = createMessage(notificationContents, "C", terminalItemEntity.getAmount(), bankTypeEntity, terminalItemEntity.getBankAccount(), time, entity.getFtCode(), entity.getTraceTransfer());
+                                                    String formattedTime = formatTimeForGoogleChat(time);
+                                                    larkMsg = larkMsg.replace(convertLongToDate(time), formattedTime);
+                                                    larkUtil.sendMessageToLark(larkMsg, webhook);
+                                                }
+                                            }
+                                        } catch (JsonProcessingException e) {
+                                            logger.error("Error processing JSON for Lark notification: " + e.getMessage());
+                                        } catch (Exception e) {
+                                            logger.error("Error sending Lark notification: " + e.getMessage());
+                                        }
                                     }
                                 }
 
                                 /////// DO INSERT LARK
-                                List<String> webhooks = larkAccountBankService
-                                        .getWebhooksByBankId(terminalItemEntity.getBankId());
-                                if (webhooks != null && !webhooks.isEmpty()) {
-                                    LarkUtil larkUtil = new LarkUtil();
+//                                List<String> webhooks = larkAccountBankService
+//                                        .getWebhooksByBankId(terminalItemEntity.getBankId());
+//                                if (webhooks != null && !webhooks.isEmpty()) {
+//                                    LarkUtil larkUtil = new LarkUtil();
+//
+//                                    String larkMsg = "+" + nf.format(terminalItemEntity.getAmount()) + " VND"
+//                                            + " | TK: " + bankTypeEntity.getBankShortName() + " - "
+//                                            + terminalItemEntity.getBankAccount()
+//                                            + " | " + convertLongToDate(time)
+//                                            + " | " + entity.getFtCode()
+//                                            + " | ND: " + terminalItemEntity.getContent();
+//                                    for (String webhook : webhooks) {
+//                                        larkUtil.sendMessageToLark(larkMsg, webhook);
+//                                    }
+//                                }
 
-                                    String larkMsg = "+" + nf.format(terminalItemEntity.getAmount()) + " VND"
-                                            + " | TK: " + bankTypeEntity.getBankShortName() + " - "
-                                            + terminalItemEntity.getBankAccount()
-                                            + " | " + convertLongToDate(time)
-                                            + " | " + entity.getFtCode()
-                                            + " | ND: " + terminalItemEntity.getContent();
-                                    for (String webhook : webhooks) {
-                                        larkUtil.sendMessageToLark(larkMsg, webhook);
-                                    }
-                                }
+
+
 
                                 /////// DO INSERT GOOGLE CHAT
                                 List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(terminalItemEntity.getBankId());
@@ -1137,6 +1193,67 @@ public class TransactionMMSController {
             });
             thread.start();
         }
+    }
+
+
+    private boolean shouldSendNotification(List<String> notificationTypes, TransactionMMSEntity entity, TransactionReceiveEntity transactionReceiveEntity) {
+        // Kiểm tra cấu hình có giao dịch đến hay không
+        if (notificationTypes.contains("CREDIT")) {
+            // Nếu có, push thông báo
+            return true;
+        } else {
+            // Nếu không, kiểm tra xem có phải giao dịch RECON hay không
+            if (notificationTypes.contains("RECON")) {
+                if (isReconTransaction(entity, transactionReceiveEntity)) {
+                    // Nếu là giao dịch RECON, push thông báo
+                    return true;
+                } else {
+                    // Nếu không phải giao dịch RECON, không push
+                    return false;
+                }
+            } else {
+                // Nếu không có RECON, không push
+                return false;
+            }
+        }
+    }
+
+    private boolean isReconTransaction(TransactionMMSEntity entity, TransactionReceiveEntity transactionReceiveEntity) {
+        return  (transactionReceiveEntity.getType() == 0 || transactionReceiveEntity.getType() == 1);
+    }
+
+    private String createMessage(List<String> notificationContents, String transType, long amount, BankTypeEntity bankTypeEntity, String bankAccount, long time, String referenceNumber, String content) {
+        StringBuilder msgBuilder = new StringBuilder();
+
+        if (notificationContents.contains("AMOUNT")) {
+            String prefix = transType.toUpperCase().equals("D") ? "-" : "+";
+            msgBuilder.append(prefix).append(amount).append(" VND ");
+        }
+
+        msgBuilder.append("| TK: ").append(bankTypeEntity.getBankShortName()).append(" - ").append(bankAccount)
+                .append(" | ").append(convertLongToDate(time));
+
+        if (notificationContents.contains("REFERENCE_NUMBER")) {
+            msgBuilder.append(" | ").append(referenceNumber);
+        }
+        if (notificationContents.contains("CONTENT")) {
+            msgBuilder.append(" | ND: ").append(content);
+        }
+
+        // Loại bỏ ký tự "|" thừa ở đầu nếu không có "AMOUNT"
+        String message = msgBuilder.toString();
+        if (!notificationContents.contains("AMOUNT")) {
+            message = message.replaceFirst("^\\| ", "");
+        }
+
+        return message;
+    }
+
+    private String formatTimeForGoogleChat(long time) {
+        long utcPlusSevenTime = time + 25200;
+        LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(utcPlusSevenTime), ZoneId.of("GMT"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss", Locale.ENGLISH);
+        return dateTime.format(formatter);
     }
 
     private void pushNotification(String title, String message, NotificationEntity notiEntity, Map<String, String> data,
