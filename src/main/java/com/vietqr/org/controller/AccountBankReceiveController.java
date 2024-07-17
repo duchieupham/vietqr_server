@@ -1575,9 +1575,9 @@ public class AccountBankReceiveController {
 //                .baseUrl("https://kietml.click/getTID.php")
                 .build();
 
-        Mono<ClientResponse> responseMono = webClient.put()
+        Mono<ClientResponse> responseMono = webClient.get()
                 .uri(uriComponents.toUri())
-                .contentType(MediaType.APPLICATION_JSON)
+//                .contentType(MediaType.APPLICATION_JSON)
                 .header("clientMessageId", clientMessageId.toString())
                 .header("secretKey", EnvironmentUtil.getSecretKeyAPI())
                 .header("username", EnvironmentUtil.getUsernameAPI())
