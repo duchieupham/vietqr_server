@@ -256,9 +256,13 @@
 			<artifactId>google-api-services-sheets</artifactId>
 			<version>v4-rev606-1.25.0</version>
 		</dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
 
 
-	</dependencies>
+    </dependencies>
 <!--	<build>-->
 <!--		<extensions>-->
 <!--			<extension>-->

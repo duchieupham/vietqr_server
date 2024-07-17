@@ -1,9 +1,11 @@
 package com.vietqr.org.controller.social;
 
+import com.vietqr.org.dto.MessageRequestDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
+import com.vietqr.org.service.MessengerService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -19,7 +21,50 @@ public class MessengerController {
 
     @Value("${messenger.verify.token}")
     private String verifyToken;
-    private static final String FB_MSG_URL = "https://graph.facebook.com/v11.0/me/messages?access_token=";
+    private static final String FB_MSG_URL = "https://graph.facebook.com/v20.0/me/messages?access_token=";
+
+    @Autowired
+    private MessengerService messengerService;
+
+    @PostMapping("/send")
+    public ResponseEntity<Object> sendMessageTest(@RequestParam String recipientId, @RequestParam String message) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            messengerService.sendMessage(recipientId, message);
+
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED: " + e.getMessage(), "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("/send/new-test")
+    public ResponseEntity<Object> sendMessageNew(@RequestBody MessageRequestDTO messageRequest) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+
+            String url = "https://graph.facebook.com/v20.0/me/messages?access_token=" + pageAccessToken;
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<MessageRequestDTO> request = new HttpEntity<>(messageRequest, headers);
+            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+            result = new ResponseMessageDTO("SUCCESS", "" + response);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED: " + e.getMessage(), "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @PostMapping("messenger/send")
     public ResponseEntity<Object> sendMessage(@RequestParam String recipientId, @RequestParam String messageText) {
         ResponseMessageDTO result = null;
