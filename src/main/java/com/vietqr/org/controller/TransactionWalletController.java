@@ -1,12 +1,16 @@
 package com.vietqr.org.controller;
 
+import com.vietqr.org.dto.*;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -27,15 +31,6 @@ import com.vietqr.org.service.TransactionWalletService;
 import com.vietqr.org.util.EnvironmentUtil;
 import com.vietqr.org.util.RandomCodeUtil;
 import com.vietqr.org.util.VietQRUtil;
-import com.vietqr.org.dto.RequestPaymentDTO;
-import com.vietqr.org.dto.ResponseMessageDTO;
-import com.vietqr.org.dto.TransWalletInsertDTO;
-import com.vietqr.org.dto.TransWalletListDTO;
-import com.vietqr.org.dto.TransactionVNPTItemDTO;
-import com.vietqr.org.dto.VNPTEpayTransCounterDTO;
-import com.vietqr.org.dto.VietQRDTO;
-import com.vietqr.org.dto.VietQRGenerateDTO;
-import com.vietqr.org.entity.TransactionReceiveBranchEntity;
 import com.vietqr.org.entity.TransactionReceiveEntity;
 import com.vietqr.org.entity.TransactionWalletEntity;
 
@@ -89,7 +84,7 @@ public class TransactionWalletController {
                     } else if (dto.getPaymentType() == 1) {
                         // insert transaction_wallet
                         UUID transWalletUUID = UUID.randomUUID();
-                        String billNumber = "VPM" + RandomCodeUtil.generateRandomId(10);
+                        String billNumber = "VAF" + RandomCodeUtil.generateRandomId(10);
                         String otp = RandomCodeUtil.generateOTP(6);
                         LocalDateTime currentDateTime = LocalDateTime.now();
                         long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
@@ -108,6 +103,7 @@ public class TransactionWalletController {
                         transactionWalletEntity.setPaymentMethod(0);
                         transactionWalletEntity.setReferenceNumber("");
                         transactionWalletEntity.setPhoneNoRC("");
+                        transactionWalletEntity.setRefId("");
                         transactionWalletService.insertTransactionWallet(transactionWalletEntity);
                         //
                         result = new ResponseMessageDTO("SUCCESS", otp);
@@ -207,6 +203,8 @@ public class TransactionWalletController {
                     transactionReceiveEntity.setTerminalCode("");
                     transactionReceiveEntity.setUserId(userIdHost);
                     transactionReceiveEntity.setNote("");
+                    transactionReceiveEntity.setTransStatus(0);
+                    transactionReceiveEntity.setUrlLink("");
                     transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
                     // insert transaction branch
 //                    if (businessId != null && branchId != null && !businessId.trim().isEmpty()
@@ -234,6 +232,7 @@ public class TransactionWalletController {
                     transactionWalletEntity.setPaymentMethod(1);
                     transactionWalletEntity.setReferenceNumber("");
                     transactionWalletEntity.setPhoneNoRC("");
+                    transactionWalletEntity.setRefId("");
                     transactionWalletService.insertTransactionWallet(transactionWalletEntity);
                     // final
                     result = vietQRDTO;
@@ -317,6 +316,192 @@ public class TransactionWalletController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("getVNPTEpayStatisticTransaction: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("admin/transaction-wallet")
+    public ResponseEntity<PageResponseDTO> getTransactionsWalletAdmin(
+            @RequestParam(value = "page") int page,
+            @RequestParam(value = "size") int size,
+            @RequestParam(value = "from") String fromDate,
+            @RequestParam(value = "to") String toDate,
+            @RequestParam(value = "filterBy") int filterBy,
+            @RequestParam(value = "type") int type,
+            @RequestParam(value = "value") String value) {
+        DataDTO data = new DataDTO(new TransAdminWalletExtraData());
+        PageResponseDTO result = new PageResponseDTO();
+        result.setData(data);
+        List<TransactionWalletAdminDTO> response = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            int offset = (page - 1) * size;
+            int totalElement = 0;
+            // 1: Nap tien dien thoai (VNPTEpay)
+            // 2: Phan mem Viet QR
+            // 9: Tat ca
+
+            // VNPT-epay
+            switch (filterBy) {
+                case 1:
+                    response = new ArrayList<>();
+                    totalElement = 0;
+                    // 0: phone no
+                    // 1: bill number
+                    // 9: tat ca
+//                    switch (type) {
+//                        // phone no
+//                        case 0:
+//                            response = transactionWalletService
+//                                    .getTransactionWalletByPhoneNoAndVNPTEpay(value, fromDate,
+//                                            toDate, offset, size);
+//                            totalElement = transactionWalletService
+//                                    .countTransactionWalletByPhoneNoAndVNPTEpay(value, fromDate,
+//                                            toDate);
+//                            break;
+//                        // bill number
+//                        case 1:
+//                            response = transactionWalletService
+//                                    .getTransactionWalletByBillNumberAndVNPTEpay(value, fromDate,
+//                                            toDate, offset, size);
+//                            totalElement = transactionWalletService
+//                                    .countTransactionWalletByBillNumberAndVNPTEpay(value, fromDate,
+//                                            toDate);
+//                            break;
+//                        //9: all
+//                        case 9:
+//                            response = transactionWalletService
+//                                    .getTransactionWalletVNPTEpay(fromDate,
+//                                            toDate, offset, size);
+//                            totalElement = transactionWalletService
+//                                    .countTransactionWalletVNPTEpay(fromDate,
+//                                            toDate);
+//                            break;
+//                        default:
+//                            break;
+//                    }
+                    break;
+                // 2: Phan mem VietQR (Annual Fee)
+                case 2:
+                case 9:
+                    switch (type) {
+                        // 0: Phone no
+                        case 0:
+                            response = transactionWalletService
+                                    .getTransactionWalletByPhoneNoAndAnnualFee
+                                            (value, fromDate, toDate, offset, size);
+                            totalElement = transactionWalletService
+                                    .countTransactionWalletByPhoneNoAndAnnualFee
+                                            (value, fromDate, toDate);
+                            break;
+                        // 1: bill number
+                        case 1:
+                            response = transactionWalletService
+                                    .getTransactionWalletByBillNumberAndAnnualFee
+                                            (value, fromDate, toDate, offset, size);
+                            totalElement = transactionWalletService
+                                    .countTransactionWalletByBillNumberAndAnnualFee
+                                            (value, fromDate, toDate);
+                            break;
+                        //9: all
+                        case 9:
+                            response = transactionWalletService
+                                    .getTransactionWalletAnnualFee(
+                                            fromDate, toDate, offset, size);
+                            totalElement = transactionWalletService
+                                    .countTransactionWalletAnnualFee
+                                            (fromDate, toDate);
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                // all
+//                case 9:
+//                    switch (type) {
+//                        // phone no
+//                        case 0:
+//                            response = transactionWalletService
+//                                    .getTransactionWalletByPhoneNo
+//                                            (value, fromDate, toDate, offset, size);
+//                            totalElement = transactionWalletService
+//                                    .countTransactionWalletByPhoneNo
+//                                            (value, fromDate, toDate);
+//                            break;
+//                        //2: bill number
+//                        case 1:
+//                            response = transactionWalletService
+//                                    .getTransactionWalletByBillNumber(
+//                                            value, fromDate, toDate, offset, size);
+//                            totalElement = transactionWalletService
+//                                    .countTransactionWalletByBillNumber
+//                                            (value, fromDate, toDate);
+//                            break;
+//                        //9: all
+//                        case 9:
+//                            response = transactionWalletService
+//                                    .getTransactionWallet
+//                                            (fromDate, toDate, offset, size);
+//                            totalElement = transactionWalletService
+//                                    .countTransactionWallet
+//                                            (fromDate, toDate);
+//                            break;
+//                        default:
+//                            break;
+//                    }
+//                    break;
+                default:
+                    break;
+            }
+            List<TransactionWalletAdminResDTO> dtos = new ArrayList<>();
+            if (response != null && !response.isEmpty()) {
+                dtos = response.stream().map(item -> {
+                    TransactionWalletAdminResDTO dto = new TransactionWalletAdminResDTO();
+                    dto.setId(item.getId());
+                    dto.setAmount(item.getAmount());
+                    dto.setBillNumber(item.getBillNumber());
+                    dto.setStatus(item.getStatus());
+                    dto.setTimeCreated(item.getTimeCreated());
+                    dto.setTimePaid(item.getTimePaid());
+                    dto.setTransType(item.getTransType());
+                    dto.setPaymentType(item.getPaymentType());
+                    dto.setUserId(item.getUserId());
+                    dto.setFullName(item.getFullName());
+                    dto.setPhoneNo(item.getPhoneNo());
+                    if (item.getPaymentType() == 1) {
+                        dto.setAdditionData(item.getPhoneNorc());
+                        dto.setAdditionData2("");
+                    } else if (item.getPaymentType() == 2) {
+                        if (item.getBankAccount() != null) {
+                            dto.setAdditionData(item.getBankAccount());
+                            dto.setAdditionData2(item.getBankShortName());
+                        } else {
+                            dto.setAdditionData("");
+                            dto.setAdditionData2("");
+                        }
+                    } else {
+                        dto.setAdditionData("");
+                        dto.setAdditionData2("");
+                    }
+                    return dto;
+                }).collect(Collectors.toList());
+            }
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setPage(page);
+            pageDTO.setSize(size);
+            pageDTO.setTotalPage(totalElement % size == 0 ?
+                    totalElement / size : totalElement / size + 1);
+            pageDTO.setTotalElement(totalElement);
+            result.setMetadata(pageDTO);
+            data.setItems(dtos);
+            result.setData(data);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            System.out.println("getTransactionsVNPTFilter: ERROR: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            logger.error("getTransactionsVNPTFilter: ERROR: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);

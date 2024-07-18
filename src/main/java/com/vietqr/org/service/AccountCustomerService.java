@@ -8,4 +8,10 @@ import com.vietqr.org.entity.AccountCustomerEntity;
 public interface AccountCustomerService {
 
     public int insert(AccountCustomerEntity entity);
+
+    public String getAccessKey(String password);
+
+    String getAccessKeyByUsername(String username);
+
+    String checkExistMerchantSyncByUsername(String username);
 }

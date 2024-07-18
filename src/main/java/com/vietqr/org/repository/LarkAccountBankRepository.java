@@ -34,9 +34,17 @@ public interface LarkAccountBankRepository extends JpaRepository<LarkAccountBank
     @Modifying
     @Query(value = "DELETE FROM lark_account_bank WHERE lark_id = :larkId AND bank_id = :bankId ", nativeQuery = true)
     void removeLarkAccBankByLarkIdAndBankId(@Param(value = "larkId") String larkId,
-            @Param(value = "bankId") String bankId);
+                                            @Param(value = "bankId") String bankId);
 
     @Query(value = "SELECT webhook FROM lark_account_bank WHERE bank_id = :bankId", nativeQuery = true)
     List<String> getWebhooksByBankId(@Param(value = "bankId") String bankId);
 
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE lark_account_bank SET webhook = :webhook WHERE lark_id = :larkId ", nativeQuery = true)
+    void updateWebhook(String webhook, String larkId);
+
+    @Query(value = "SELECT id FROM lark_account_bank WHERE bank_id = :bankId "
+            + "AND lark_id = :larkId LIMIT 1", nativeQuery = true)
+    String checkExistedBankId(String bankId, String larkId);
 }

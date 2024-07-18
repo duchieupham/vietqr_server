@@ -54,4 +54,18 @@ public interface AccountBankReceiveShareService {
     List<AccountBankReceiveShareEntity> getAccountBankReceiveShareByTerminalId(String terminalId);
 
     int countBankAccountByTerminalId(String terminalId);
+
+    List<IAccountTerminalMemberDTO> getMembersWebByTerminalId(String terminalId, int offset);
+
+    int countMembersByTerminalId(String terminalId);
+
+    List<String> checkUserExistedFromBankId(String userId, String value);
+
+    String checkUserExistedFromBankByTerminalCode(String value, String userId);
+
+    String checkUserExistedFromBankAccountAndIsOwner(String userId, String bankId);
+
+    ITerminalBankResponseDTO getTerminalBanksByTerminalId(String terminalId);
+
+    AccountBankReceiveShareEntity getAccountAlreadyShare(String terminalId, String userId);
 }

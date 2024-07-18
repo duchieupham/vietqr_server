@@ -2,6 +2,8 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+import com.vietqr.org.dto.ISocialMediaDTO;
+import com.vietqr.org.dto.TelegramInfoDetailDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,11 @@ public class TelegramServiceImpl implements TelegramService {
     TelegramRepository repo;
 
     @Override
+    public List<ISocialMediaDTO> getSocialInfoByUserId(String userId) {
+        return repo.getSocialInfoByUserId(userId);
+    }
+
+    @Override
     public int insertTelegram(TelegramEntity entity) {
         return repo.save(entity) == null ? 0 : 1;
     }
@@ -25,8 +32,28 @@ public class TelegramServiceImpl implements TelegramService {
     }
 
     @Override
+    public TelegramEntity getTelegramByUserId(String userId) {
+        return repo.getTelegramByUserId(userId);
+    }
+
+    @Override
     public void removeTelegramById(String id) {
         repo.removeTelegramById(id);
+    }
+
+    @Override
+    public void updateTelegram(TelegramEntity telegramEntity) {
+        repo.save(telegramEntity);
+    }
+
+    @Override
+    public TelegramEntity getTelegramByChatId(String chatId) {
+        return repo.getTelegramByChatId(chatId);
+    }
+
+    @Override
+    public void updateTelegram(String chatId, String teleId) {
+        repo.updateTelegram(chatId, teleId);
     }
 
     @Override
@@ -34,4 +61,13 @@ public class TelegramServiceImpl implements TelegramService {
         return repo.getTelegramById(id);
     }
 
+    @Override
+    public List<TelegramInfoDetailDTO> getTelegramsByUserIdWithPagination(String userId, int offset, int size) {
+        return repo.getTelegramsByUserIdWithPagination(userId, offset, size);
+    }
+
+    @Override
+    public int countTelegramsByUserId(String userId) {
+        return repo.countTelegramsByUserId(userId);
+    }
 }

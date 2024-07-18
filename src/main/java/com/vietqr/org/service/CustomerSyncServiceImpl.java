@@ -55,6 +55,46 @@ public class CustomerSyncServiceImpl implements CustomerSyncService {
     }
 
     @Override
+    public List<CustomerSyncListDTO> getCustomerSyncListByMerchant(String value, int offset, int size) {
+        return repo.getCustomerSyncListByMerchant(value, offset, size);
+    }
+
+    @Override
+    public List<CustomerSyncListDTO> getCustomerSyncListByMerchantByBankAccount(String value, int offset, int size) {
+        return repo.getCustomerSyncListByMerchantByBankAccount(value, offset, size);
+    }
+
+    @Override
+    public int countCustomerSyncListByMerchant(String value) {
+        return repo.countCustomerSyncListByMerchant(value);
+    }
+
+    @Override
+    public int countCustomerSyncListByMerchantByBankAccount(String value) {
+        return repo.countCustomerSyncListByMerchantByBankAccount(value);
+    }
+
+    @Override
+    public int countCustomerSyncAPIListByMerchant(String value) {
+        return repo.countCustomerSyncAPIListByMerchant(value);
+    }
+
+    @Override
+    public int countCustomerSyncAPIListByMerchantByBankAccount(String value) {
+        return repo.countCustomerSyncAPIListByMerchantByBankAccount(value);
+    }
+
+    @Override
+    public int countCustomerSyncEcListByMerchant(String value) {
+        return repo.countCustomerSyncEcListByMerchant(value);
+    }
+
+    @Override
+    public int countCustomerSyncEcListByMerchantByBankAccount(String value) {
+        return repo.countCustomerSyncEcListByMerchantByBankAccount(value);
+    }
+
+    @Override
     public Integer checkCustomerSyncTypeById(String id) {
         return repo.checkCustomerSyncTypeById(id);
     }
@@ -81,7 +121,7 @@ public class CustomerSyncServiceImpl implements CustomerSyncService {
 
     @Override
     public void updateCustomerSync(String url, String ip, String password, String port, String suffix,
-            String username, String customerSyncId) {
+                                   String username, String customerSyncId) {
         repo.updateCustomerSync(url, ip, password, port, suffix, username, customerSyncId);
     }
 
@@ -111,13 +151,44 @@ public class CustomerSyncServiceImpl implements CustomerSyncService {
     }
 
     @Override
+    public List<CustomerSyncListDTO> getCustomerSyncAPIListByMerchant(String value, int offset, int size) {
+        return repo.getCustomerSyncAPIListByMerchant(value, offset, size);
+    }
+
+    @Override
+    public List<CustomerSyncListDTO> getCustomerSyncAPIListByMerchantByBankAccount(String value, int offset, int size) {
+        return repo.getCustomerSyncAPIListByMerchantByBankAccount(value, offset, size);
+    }
+
+    @Override
     public List<CustomerSyncListDTO> getCustomerSyncEcList() {
         return repo.getCustomerSyncEcList();
     }
 
     @Override
+    public List<CustomerSyncListDTO> getCustomerSyncEcListByMerchant(String value, int offset, int size) {
+        return repo.getCustomerSyncEcListByMerchant(value, offset, size);
+    }
+
+    @Override
+    public List<CustomerSyncListDTO> getCustomerSyncEcListByMerchantByBankAccount(String value, int offset, int size) {
+        return repo.getCustomerSyncEcListByMerchantByBankAccount(value, offset, size);
+    }
+
+
+    @Override
     public String getMerchantNameById(String id) {
         return repo.getMerchantNameById(id);
+    }
+
+    @Override
+    public String getCustomerAddressById(String id) {
+        return repo.getCustomerAddressById(id);
+    }
+
+    @Override
+    public String getCustomerSyncByBankId(String bankId) {
+        return repo.getCustomerSyncByBankId(bankId);
     }
 
     @Override

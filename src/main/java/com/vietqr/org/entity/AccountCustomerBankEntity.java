@@ -32,6 +32,9 @@ public class AccountCustomerBankEntity implements Serializable {
     @Column(name = "customerSyncId")
     private String customerSyncId;
 
+    @Column(name = "secretKey")
+    private String secretKey;
+
     public AccountCustomerBankEntity() {
         super();
     }
@@ -43,6 +46,24 @@ public class AccountCustomerBankEntity implements Serializable {
         this.bankId = bankId;
         this.bankAccount = bankAccount;
         this.customerSyncId = customerSyncId;
+    }
+
+    public AccountCustomerBankEntity(String id, String accountCustomerId, String bankId, String bankAccount, String customerSyncId, String secretKey) {
+        this.id = id;
+        this.accountCustomerId = accountCustomerId;
+        this.bankId = bankId;
+        this.bankAccount = bankAccount;
+        this.customerSyncId = customerSyncId;
+        this.secretKey = secretKey;
+    }
+
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
     }
 
     public String getId() {

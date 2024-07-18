@@ -1,6 +1,7 @@
 package com.vietqr.org.dto.bidv;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class CustomerInvoiceDTO implements Serializable {
 
@@ -11,21 +12,21 @@ public class CustomerInvoiceDTO implements Serializable {
 
     private String result_code;
     private String result_desc;
-    private String service_id;
+//    private String service_id;
     private String customer_id;
     private String customer_name;
     private String customer_addr;
-    private InvoiceDTO data;
+    private List<InvoiceDTO> data;
 
     public CustomerInvoiceDTO() {
         super();
     }
 
     public CustomerInvoiceDTO(String result_code, String result_desc, String service_id, String customer_id,
-            String customer_name, String customer_addr, InvoiceDTO data) {
+                              String customer_name, String customer_addr, List<InvoiceDTO> data) {
         this.result_code = result_code;
         this.result_desc = result_desc;
-        this.service_id = service_id;
+//        this.service_id = service_id;
         this.customer_id = customer_id;
         this.customer_name = customer_name;
         this.customer_addr = customer_addr;
@@ -48,13 +49,13 @@ public class CustomerInvoiceDTO implements Serializable {
         this.result_desc = result_desc;
     }
 
-    public String getService_id() {
-        return service_id;
-    }
-
-    public void setService_id(String service_id) {
-        this.service_id = service_id;
-    }
+//    public String getService_id() {
+//        return service_id;
+//    }
+//
+//    public void setService_id(String service_id) {
+//        this.service_id = service_id;
+//    }
 
     public String getCustomer_id() {
         return customer_id;
@@ -80,11 +81,11 @@ public class CustomerInvoiceDTO implements Serializable {
         this.customer_addr = customer_addr;
     }
 
-    public InvoiceDTO getData() {
+    public List<InvoiceDTO> getData() {
         return data;
     }
 
-    public void setData(InvoiceDTO data) {
+    public void setData(List<InvoiceDTO> data) {
         this.data = data;
     }
 

@@ -9,9 +9,9 @@ public class RequestCustomerVaDTO implements Serializable {
      */
     private static final long serialVersionUID = 1L;
 
-    // private String merchantId;
-    // private String merchantName;
+    private String merchantName;
     private String bankAccount;
+    private String bankCode;
     private String userBankName;
     private String nationalId;
     private String phoneAuthenticated;
@@ -20,32 +20,27 @@ public class RequestCustomerVaDTO implements Serializable {
         super();
     }
 
-    public RequestCustomerVaDTO(/* String merchantId, String merchantName, */ String bankAccount, String userBankName,
+    public RequestCustomerVaDTO(String merchantName,
+            String bankAccount,
+            String bankCode,
+            String userBankName,
             String nationalId,
             String phoneAuthenticated) {
-        // this.merchantId = merchantId;
-        // this.merchantName = merchantName;
+        this.merchantName = merchantName;
         this.bankAccount = bankAccount;
+        this.bankCode = bankCode;
         this.userBankName = userBankName;
         this.nationalId = nationalId;
         this.phoneAuthenticated = phoneAuthenticated;
     }
 
-    // public String getMerchantId() {
-    // return merchantId;
-    // }
+    public String getMerchantName() {
+        return merchantName;
+    }
 
-    // public void setMerchantId(String merchantId) {
-    // this.merchantId = merchantId;
-    // }
-
-    // public String getMerchantName() {
-    // return merchantName;
-    // }
-
-    // public void setMerchantName(String merchantName) {
-    // this.merchantName = merchantName;
-    // }
+    public void setMerchantName(String merchantName) {
+        this.merchantName = merchantName;
+    }
 
     public String getBankAccount() {
         return bankAccount;
@@ -53,6 +48,14 @@ public class RequestCustomerVaDTO implements Serializable {
 
     public void setBankAccount(String bankAccount) {
         this.bankAccount = bankAccount;
+    }
+
+    public String getBankCode() {
+        return bankCode;
+    }
+
+    public void setBankCode(String bankCode) {
+        this.bankCode = bankCode;
     }
 
     public String getUserBankName() {

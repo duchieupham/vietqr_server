@@ -23,6 +23,11 @@ public class AccountCustomerBankServiceImpl implements AccountCustomerBankServic
     }
 
     @Override
+    public String checkSecretKey(String bankAccount, String customerSyncId) {
+        return repo.getSecretKey(bankAccount, customerSyncId);
+    }
+
+    @Override
     public int insert(AccountCustomerBankEntity entity) {
         return repo.save(entity) == null ? 0 : 1;
     }
@@ -80,6 +85,11 @@ public class AccountCustomerBankServiceImpl implements AccountCustomerBankServic
     @Override
     public String checkExistedBankAccountIntoMerchant(String bankAccount, String customerSyncId) {
         return repo.checkExistedBankAccountIntoMerchant(bankAccount, customerSyncId);
+    }
+
+    @Override
+    public AccountCustomerBankEntity getAccountCustomerBankByBankIdAndMerchantId(String bankId, String customerSyncId) {
+        return repo.getAccountCustomerBankByBankIdAndMerchantId(bankId, customerSyncId);
     }
 
 }

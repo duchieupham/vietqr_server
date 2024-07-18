@@ -28,6 +28,10 @@ public class AccountBankShareResponseDTO implements Serializable {
     private String caiValue;
     private String ewalletToken;
     private Integer unlinkedType;
+    private Boolean isValidService;
+    private Long validFeeFrom;
+    private Long validFeeTo;
+    private int transCount;
 
     public AccountBankShareResponseDTO() {
         super();
@@ -211,5 +215,37 @@ public class AccountBankShareResponseDTO implements Serializable {
 
     public void setQrCode(String qrCode) {
         this.qrCode = qrCode;
+    }
+
+    public Boolean getIsValidService() {
+        return isValidService;
+    }
+
+    public void setIsValidService(Boolean validService) {
+        isValidService = validService;
+    }
+
+    public Long getValidFeeFrom() {
+        return validFeeFrom;
+    }
+
+    public void setValidFeeFrom(Long validFeeFrom) {
+        this.validFeeFrom = validFeeFrom;
+    }
+
+    public Long getValidFeeTo() {
+        return validFeeTo;
+    }
+
+    public void setValidFeeTo(Long validFeeTo) {
+        this.validFeeTo = validFeeTo;
+    }
+
+    public int getTransCount() {
+        return transCount;
+    }
+
+    public void setTransCount(int transCount) {
+        this.transCount = transCount;
     }
 }

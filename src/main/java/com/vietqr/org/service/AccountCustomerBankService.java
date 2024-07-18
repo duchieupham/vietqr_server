@@ -12,13 +12,15 @@ import com.vietqr.org.entity.AccountCustomerBankEntity;
 @Service
 public interface AccountCustomerBankService {
 
+    public String checkSecretKey(String bankAccount, String customerSyncId);
+
     public int insert(AccountCustomerBankEntity entity);
 
     public List<AccountCustomerBankEntity> getAccountCustomerBankByBankId(String bankId);
 
     public String checkExistedAccountCustomerBank(String bankId, String customerSyncId);
 
-    public List<String> checkExistedCustomerSyncByUsername(String username);
+    public List<String>checkExistedCustomerSyncByUsername(String username);
 
     public List<String> checkExistedAccountCustomerBankByBankAccount(String bankAccount, String customerSyncId);
 
@@ -37,4 +39,6 @@ public interface AccountCustomerBankService {
     AccountCustomerBankInfoDTO getBankSizeAndAddressByCustomerSyncId(String customerSyncId);
 
     String checkExistedBankAccountIntoMerchant(String bankAccount, String customerSyncId);
+
+    AccountCustomerBankEntity getAccountCustomerBankByBankIdAndMerchantId(String bankId, String merchantId);
 }

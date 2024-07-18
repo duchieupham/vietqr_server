@@ -2,6 +2,7 @@ package com.vietqr.org.repository;
 
 import java.util.List;
 
+import com.vietqr.org.dto.BankTypeShortNameDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,6 +22,16 @@ public interface BankTypeRepository extends JpaRepository<BankTypeEntity, Long> 
 	@Query(value = "SELECT id FROM bank_type WHERE bank_code = :bankCode", nativeQuery = true)
 	String getBankTypeIdByBankCode(@Param(value = "bankCode") String bankCode);
 
+	@Query(value = "SELECT bank_short_name AS bankShortName FROM bank_type WHERE bank_code = :bankCode", nativeQuery = true)
+	String getBankShortNameByBankCode(String bankCode);
+
 	@Query(value = "SELECT rpa_contain_id FROM bank_type WHERE bank_code = :bankCode", nativeQuery = true)
 	Boolean getRpaContainIdByBankCode(@Param(value = "bankCode") String bankCode);
+
+	@Query(value = "SELECT id AS bankTypeId, bank_short_name AS bankShortName "
+			+ "FROM bank_type WHERE id IN (:ids)", nativeQuery = true)
+    List<BankTypeShortNameDTO> getBankTypeByListId(List<String> ids);
+
+	@Query(value = "SELECT * FROM bank_type WHERE bank_code = :bankCode LIMIT 1", nativeQuery = true)
+    BankTypeEntity getBankTypeByBankCode(String bankCode);
 }

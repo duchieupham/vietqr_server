@@ -20,4 +20,8 @@ public interface LarkAccountBankService {
 
     // for case send msg
     public List<String> getWebhooksByBankId(String bankId);
+
+    void updateWebhook(String webhook, String larkId);
+
+    String checkExistedBankId(String bankId, String larkId);
 }

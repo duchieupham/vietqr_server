@@ -1,9 +1,15 @@
 package com.vietqr.org.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import com.vietqr.org.dto.*;
+import com.vietqr.org.service.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,19 +25,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.vietqr.org.dto.AccountSettingDTO;
-import com.vietqr.org.dto.AccountSettingUpdateDTO;
-import com.vietqr.org.dto.AccountSettingVoiceDTO;
-import com.vietqr.org.dto.ResponseMessageDTO;
-import com.vietqr.org.dto.UserSettingUpdateCheckDTO;
-import com.vietqr.org.dto.UserSettingUpdateDTO;
 import com.vietqr.org.entity.AccountSettingEntity;
 import com.vietqr.org.entity.ImageEntity;
 import com.vietqr.org.entity.SystemSettingEntity;
-import com.vietqr.org.service.AccountSettingService;
-import com.vietqr.org.service.ImageService;
-import com.vietqr.org.service.SystemSettingService;
-import com.vietqr.org.service.ThemeUiService;
 
 @RestController
 @CrossOrigin
@@ -51,14 +47,55 @@ public class AccountSettingController {
     @Autowired
     ImageService imageService;
 
+    @Autowired
+    MerchantMemberRoleService merchantMemberRoleService;
+
+    @Autowired
+    MerchantMemberService merchantMemberService;
+
+    @Autowired
+    MerchantBankReceiveService merchantBankReceiveService;
+
     @GetMapping("accounts/setting/{userId}")
     public ResponseEntity<AccountSettingDTO> getAccountSetting(@PathVariable("userId") String userId) {
         AccountSettingDTO result = null;
         HttpStatus httpStatus = null;
         try {
+            logger.info("getAccountSetting: " + userId + " at: " + System.currentTimeMillis());
             if (userId != null && !userId.trim().isEmpty()) {
                 AccountSettingEntity entity = accountSettingService.getAccountSettingEntity(userId);
-                //
+                List<MerchantRoleSettingDTO> roles = new ArrayList<>();
+                try {
+                    List<IMerchantBankMemberDTO> iMerchantBankMemberDTOs = merchantMemberService.getIMerchantBankMemberByUserId(userId);
+                    System.out.println(iMerchantBankMemberDTOs.get(0).getMerchantMemberId());
+                    List<IMerchantRoleRawDTO> merchantRoleRawDTOS = merchantMemberRoleService
+                            .getMerchantIdsByMerchantMemberIds(iMerchantBankMemberDTOs.stream()
+                                    .map(IMerchantBankMemberDTO::getMerchantMemberId)
+                                    .collect(Collectors.toList()));
+                    if (merchantRoleRawDTOS != null) {
+                        Map<String, List<IMerchantRoleRawDTO>> merchantRoleMap = merchantRoleRawDTOS.stream()
+                                .collect(Collectors.groupingBy(IMerchantRoleRawDTO::getMerchantMemberId));
+                        roles = iMerchantBankMemberDTOs.stream()
+                                .map(member -> {
+                                    MerchantRoleSettingDTO setting = new MerchantRoleSettingDTO();
+                                    setting.setMerchantId(member.getMerchantId());
+                                    setting.setBankId(member.getBankId());
+                                    setting.setRoles(merchantRoleMap.getOrDefault(member.getMerchantMemberId(),new ArrayList<>())
+                                            .stream()
+                                            .map(role -> {
+                                                RoleSettingDTO roleDto = new RoleSettingDTO();
+                                                roleDto.setCategory(role.getCategory());
+                                                roleDto.setRole(role.getRole());
+                                                return roleDto;
+                                            })
+                                            .collect(Collectors.toList()));
+                                    return setting;
+                                })
+                                .collect(Collectors.toList());
+                    }
+                } catch (Exception e) {
+                    logger.info("getAccountSetting: ERROR: " + e.getMessage() + " " + userId + " at: " + System.currentTimeMillis());
+                }
                 if (entity != null) {
                     //
                     result = new AccountSettingDTO();
@@ -72,6 +109,9 @@ public class AccountSettingController {
                     result.setStatus(entity.isStatus());
                     result.setEdgeImgId(entity.getEdgeImgId());
                     result.setFooterImgId(entity.getFooterImgId());
+                    result.setNotificationMobile(entity.isNotificationMobile());
+                    result.setMerchantRoles(roles);
+
                     // theme processing
                     SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
                     String themeImgUrl = "";
@@ -142,6 +182,22 @@ public class AccountSettingController {
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("accounts/setting/notification-mobile")
+    public ResponseEntity<ResponseMessageDTO> updateNotificationMobile(@RequestBody AccountSettingNotiDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            accountSettingService.updateNotificationMobile(dto.isNotificationMobile(), dto.getUserId());
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("updateNotificationMobile: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<ResponseMessageDTO>(result, httpStatus);
     }
 
     @PostMapping("accounts/setting")

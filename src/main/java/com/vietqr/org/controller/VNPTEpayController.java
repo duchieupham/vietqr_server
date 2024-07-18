@@ -352,6 +352,8 @@ public class VNPTEpayController {
                                     transactionReceiveEntity.setTerminalCode("");
                                     transactionReceiveEntity.setUserId(userIdHost);
                                     transactionReceiveEntity.setNote("");
+                                    transactionReceiveEntity.setTransStatus(0);
+                                    transactionReceiveEntity.setUrlLink("");
                                     transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
                                     // insert transaction branch
 //                                    if (businessId != null && branchId != null && !businessId.trim().isEmpty()
@@ -383,6 +385,7 @@ public class VNPTEpayController {
                                             .setReferenceNumber(paymentMobileRechargeType + "*" + carrier.getCode()
                                                     + "*" + dto.getPhoneNo() + "*" + dto.getUserId() + "*"
                                                     + dto.getOtp());
+                                    transactionWalletEntity.setRefId("");
                                     transactionWalletService.insertTransactionWallet(transactionWalletEntity);
                                     // update transaction_wallet mobile recharge
                                     LocalDateTime currentDateTimeMobile = LocalDateTime.now();

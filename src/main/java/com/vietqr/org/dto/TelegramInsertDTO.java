@@ -13,7 +13,8 @@ public class TelegramInsertDTO implements Serializable {
     private String chatId;
     private String userId;
     private List<String> bankIds;
-
+    private List<String> notificationTypes; // Thêm trường này
+    private List<String> notificationContents;
     public TelegramInsertDTO() {
         super();
     }
@@ -22,6 +23,22 @@ public class TelegramInsertDTO implements Serializable {
         this.chatId = chatId;
         this.userId = userId;
         this.bankIds = bankIds;
+    }
+
+    public List<String> getNotificationTypes() {
+        return notificationTypes;
+    }
+
+    public void setNotificationTypes(List<String> notificationTypes) {
+        this.notificationTypes = notificationTypes;
+    }
+
+    public List<String> getNotificationContents() {
+        return notificationContents;
+    }
+
+    public void setNotificationContents(List<String> notificationContents) {
+        this.notificationContents = notificationContents;
     }
 
     public String getChatId() {

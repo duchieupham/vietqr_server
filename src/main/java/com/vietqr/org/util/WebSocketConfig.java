@@ -63,6 +63,14 @@ public class WebSocketConfig implements WebSocketConfigurer {
                                 attributes.put("refId", transactionRefId);
                                 return true;
                             }
+
+                            // FOR CHECK BOX ID
+                            String boxId = servletRequest.getServletRequest().getParameter("boxId");
+                            if (boxId != null && !boxId.trim().isEmpty()) {
+                                logger.info("WS: beforeHandshake - boxId: " + boxId);
+                                attributes.put("boxId", boxId);
+                                return true;
+                            }
                         }
                         return false;
                     }

@@ -2,11 +2,10 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+import com.vietqr.org.dto.*;
+import com.vietqr.org.util.DateTimeUtil;
 import org.springframework.stereotype.Service;
 
-import com.vietqr.org.dto.TransWalletListDTO;
-import com.vietqr.org.dto.TransactionVNPTItemDTO;
-import com.vietqr.org.dto.VNPTEpayTransCounterDTO;
 import com.vietqr.org.entity.TransactionWalletEntity;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +20,11 @@ public class TransactionWalletServiceImpl implements TransactionWalletService {
     @Override
     public int insertTransactionWallet(TransactionWalletEntity entity) {
         return repo.save(entity) == null ? 0 : 1;
+    }
+
+    @Override
+    public int insertAll(List<TransactionWalletEntity> entities) {
+        return repo.saveAll(entities) == null ? 0 : 1;
     }
 
     @Override
@@ -89,6 +93,161 @@ public class TransactionWalletServiceImpl implements TransactionWalletService {
     @Override
     public VNPTEpayTransCounterDTO getVNPTEpayCounter() {
         return repo.getVNPTEpayCounter();
+    }
+
+    @Override
+    public List<TransactionWalletAdminDTO> getTransactionWalletByBillNumberAndVNPTEpay(String value,
+                                                                                       String fromDate, String toDate,
+                                                                                       int offset, int size) {
+        return repo.getTransactionWalletByBillNumberAndVNPTEpay(
+                value, DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset, size
+        );
+    }
+
+    @Override
+    public List<TransactionWalletAdminDTO> getTransactionWalletByBillNumber(String value, String fromDate, String toDate,
+                                                                            int offset, int size) {
+        return repo.getTransactionWalletByBillNumber(value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset, size
+        );
+    }
+
+    @Override
+    public List<TransactionWalletAdminDTO> getTransactionWalletByBillNumberAndAnnualFee(String value,
+                                                                                        String fromDate, String toDate,
+                                                                                        int offset, int size) {
+        return repo.getTransactionWalletByBillNumberAndAnnualFee(value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset, size
+        );
+    }
+
+    @Override
+    public List<TransactionWalletAdminDTO> getTransactionWalletByPhoneNoAndVNPTEpay(String value,
+                                                                                    String fromDate, String toDate,
+                                                                                    int offset, int size) {
+        return repo.getTransactionWalletByPhoneNoAndVNPTEpay(value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset, size
+        );
+    }
+
+    @Override
+    public List<TransactionWalletAdminDTO> getTransactionWalletByPhoneNoAndAnnualFee(String value,
+                                                                                     String fromDate, String toDate,
+                                                                                     int offset, int size) {
+        return repo.getTransactionWalletByPhoneNoAndAnnualFee(value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset, size
+        );
+    }
+
+    @Override
+    public List<TransactionWalletAdminDTO> getTransactionWalletByPhoneNo(String value, String fromDate, String toDate,
+                                                                         int offset, int size) {
+        return repo.getTransactionWalletByPhoneNo(value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset, size
+        );
+    }
+
+    @Override
+    public int countTransactionWalletByBillNumberAndVNPTEpay(String value, String fromDate, String toDate) {
+        return repo.countTransactionWalletByBillNumberAndVNPTEpay(value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public int countTransactionWalletByBillNumberAndAnnualFee(String value, String fromDate, String toDate) {
+        return repo.countTransactionWalletByBillNumberAndAnnualFee(value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public int countTransactionWalletByBillNumber(String value, String fromDate, String toDate) {
+        return repo.countTransactionWalletByBillNumber(value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public int countTransactionWalletByPhoneNoAndVNPTEpay(String value, String fromDate, String toDate) {
+        return repo.countTransactionWalletByPhoneNoAndVNPTEpay(value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate)- DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public int countTransactionWalletByPhoneNoAndAnnualFee(String value, String fromDate, String toDate) {
+        return repo.countTransactionWalletByPhoneNoAndAnnualFee(value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public int countTransactionWalletByPhoneNo(String value, String fromDate, String toDate) {
+        return repo.countTransactionWalletByPhoneNo(value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionWalletAdminDTO> getTransactionWalletVNPTEpay(String fromDate, String toDate, int offset, int size) {
+        return repo.getTransactionWalletVNPTEpay(
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset, size);
+    }
+
+    @Override
+    public int countTransactionWalletVNPTEpay(String fromDate, String toDate) {
+        return repo.countTransactionWalletVNPTEpay(
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public List<TransactionWalletAdminDTO> getTransactionWalletAnnualFee(String fromDate, String toDate, int offset, int size) {
+        return repo.getTransactionWalletAnnualFee(
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET, offset, size);
+    }
+
+    @Override
+    public int countTransactionWalletAnnualFee(String fromDate, String toDate) {
+        return repo.countTransactionWalletAnnualFee(
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
+    }
+
+    @Override
+    public TransactionWalletEntity getTransactionWalletByRefId(String id) {
+        return repo.getTransactionWalletByRefId(id);
+    }
+
+    @Override
+    public String getRefIdDebitByInvoiceRefId(String refId) {
+        return repo.getRefIdDebitByInvoiceRefId(refId);
+    }
+
+    @Override
+    public TransWalletUpdateDTO getBillNumberByRefIdTransWallet(String refIdDebit) {
+        return repo.getBillNumberByRefIdTransWallet(refIdDebit);
+    }
+
+    @Override
+    public void updateAmountTransWallet(String id, String amount) {
+        repo.updateAmountTransWallet(id, amount);
     }
 
 }

@@ -1,17 +1,16 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.dto.*;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
-import com.vietqr.org.dto.TransWalletListDTO;
-import com.vietqr.org.dto.TransactionVNPTItemDTO;
-import com.vietqr.org.dto.VNPTEpayTransCounterDTO;
 import com.vietqr.org.entity.TransactionWalletEntity;
 
 @Service
 public interface TransactionWalletService {
 
         public int insertTransactionWallet(TransactionWalletEntity entity);
+        public int insertAll(List<TransactionWalletEntity> entities);
 
         public TransactionWalletEntity getTransactionWalletById(String id);
 
@@ -41,4 +40,51 @@ public interface TransactionWalletService {
         public List<TransactionVNPTItemDTO> getTransactionsVNPTFilter(int status, int offset);
 
         public VNPTEpayTransCounterDTO getVNPTEpayCounter();
+
+        List<TransactionWalletAdminDTO> getTransactionWalletByBillNumberAndVNPTEpay(String value, String fromDate,
+                                                                                    String toDate, int offset, int size);
+
+        List<TransactionWalletAdminDTO> getTransactionWalletByBillNumber(String value, String fromDate,
+                                                                         String toDate, int offset, int size);
+
+        List<TransactionWalletAdminDTO> getTransactionWalletByBillNumberAndAnnualFee(String value,
+                                                                                     String fromDate, String toDate,
+                                                                                     int offset, int size);
+
+        List<TransactionWalletAdminDTO> getTransactionWalletByPhoneNoAndVNPTEpay(String value, String fromDate,
+                                                                                 String toDate, int offset, int size);
+
+        List<TransactionWalletAdminDTO> getTransactionWalletByPhoneNoAndAnnualFee(String value, String fromDate,
+                                                                                  String toDate, int offset, int size);
+
+        List<TransactionWalletAdminDTO> getTransactionWalletByPhoneNo(String value, String fromDate,
+                                                                      String toDate, int offset, int size);
+
+        int countTransactionWalletByBillNumberAndVNPTEpay(String value, String fromDate, String toDate);
+
+        int countTransactionWalletByBillNumberAndAnnualFee(String value, String fromDate, String toDate);
+
+        int countTransactionWalletByBillNumber(String value, String fromDate, String toDate);
+
+        int countTransactionWalletByPhoneNoAndVNPTEpay(String value, String fromDate, String toDate);
+
+        int countTransactionWalletByPhoneNoAndAnnualFee(String value, String fromDate, String toDate);
+
+        int countTransactionWalletByPhoneNo(String value, String fromDate, String toDate);
+
+        List<TransactionWalletAdminDTO> getTransactionWalletVNPTEpay(String fromDate, String toDate, int offset, int size);
+
+        int countTransactionWalletVNPTEpay(String fromDate, String toDate);
+
+        List<TransactionWalletAdminDTO> getTransactionWalletAnnualFee(String fromDate, String toDate, int offset, int size);
+
+        int countTransactionWalletAnnualFee(String fromDate, String toDate);
+
+        TransactionWalletEntity getTransactionWalletByRefId(String id);
+
+        String getRefIdDebitByInvoiceRefId(String refId);
+
+        TransWalletUpdateDTO getBillNumberByRefIdTransWallet(String refIdDebit);
+
+        void updateAmountTransWallet(String refId, String totalAmountAfterVat);
 }

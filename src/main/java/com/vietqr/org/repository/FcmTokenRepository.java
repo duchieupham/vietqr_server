@@ -36,4 +36,7 @@ public interface FcmTokenRepository extends JpaRepository<FcmTokenEntity, Long> 
 	@Modifying
 	@Query(value = "DELETE FROM fcm_token WHERE user_id = :userId", nativeQuery = true)
 	void deleteTokensByUserId(@Param(value = "userId") String userId);
+
+	@Query(value = "SELECT id FROM fcm_token WHERE user_id = :userId AND token = :fcmToken LIMIT 1", nativeQuery = true)
+    String checkTokenExistByUserId(String fcmToken, String userId);
 }

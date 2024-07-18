@@ -1,0 +1,112 @@
+package com.vietqr.org.service;
+
+import com.vietqr.org.dto.*;
+import com.vietqr.org.entity.MerchantMemberEntity;
+import com.vietqr.org.repository.MerchantMemberRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class MerchantMemberServiceImpl implements MerchantMemberService {
+
+    @Autowired
+    private MerchantMemberRepository repo;
+
+    @Override
+    public String checkUserExistedFromMerchant(String merchantId, String id) {
+        return repo.checkUserExistedFromMerchant(merchantId, id);
+    }
+
+    @Override
+    public int insert(MerchantMemberEntity entity) {
+        return repo.save(entity) != null ? 1 : 0;
+    }
+
+    @Override
+    public void removeMemberFromMerchant(String merchantId, String userId) {
+        repo.removeMemberFromMerchant(merchantId, userId);
+    }
+
+    @Override
+    public void removeMemberFromTerminal(String terminalId, String userId) {
+        repo.removeMemberFromTerminal(terminalId, userId);
+    }
+
+    @Override
+    public void insertAll(List<MerchantMemberEntity> entity) {
+        repo.saveAll(entity);
+    }
+
+    @Override
+    public List<IMerchantMemberDTO> findMerchantMemberByMerchantId(String merchantId, String value, int page, int size) {
+        return repo.findMerchantMemberMerchantId(merchantId, value, page, size);
+    }
+
+    @Override
+    public IMerchantMemberDetailDTO getUserExistedFromMerchant(String merchantId, String userId) {
+        return repo.getUserExistedFromMerchant(merchantId, userId);
+    }
+
+    @Override
+    public void deleteMerchantMemberByUserIdAndMerchantId(String merchantId, String userId) {
+        repo.deleteMerchantMemberByUserIdAndMerchantId(merchantId, userId);
+    }
+
+    @Override
+    public int countMerchantMemberByMerchantId(String merchantId) {
+        return repo.countMerchantMemberByMerchantId(merchantId);
+    }
+
+    @Override
+    public List<AccountMemberDTO> getMembersFromTerminalId(String merchantId, String terminalId) {
+        return repo.getMembersFromTerminalId(merchantId, terminalId);
+    }
+
+    @Override
+    public String checkUserExistedFromTerminal(String merchantId, String terminalId, String userId) {
+        return repo.checkUserExistedFromTerminal(merchantId, terminalId, userId);
+    }
+
+    @Override
+    public String checkUserExistedFromTerminal(String terminalId, String userId) {
+        return repo.checkUserExistedFromTerminal(terminalId, userId);
+    }
+
+    @Override
+    public List<IAccountTerminalMemberDTO> getMembersWebByTerminalIdAndPhoneNo(String terminalId, String value, int offset) {
+        return repo.getMembersWebByTerminalIdAndPhoneNo(terminalId, value, offset);
+    }
+
+    @Override
+    public List<AccountMemberDTO> getMembersFromTerminalId(String terminalId) {
+        return repo.getMembersFromTerminalId(terminalId);
+    }
+
+    @Override
+    public void removeMerchantMemberByTerminalId(String terminalId) {
+        repo.removeMerchantMemberByTerminalId(terminalId);
+    }
+
+    @Override
+    public String checkUserExistedFromBank(String userId, String bankId) {
+        return repo.checkUserExistedFromBank(userId, bankId);
+    }
+
+    @Override
+    public List<IMerchantMemberDTO> findMerchantMemberByMerchantIdAndPhoneNo(String merchantId, String value,
+                                                                             int offset, int size) {
+        return repo.findMerchantMemberByMerchantIdAndPhoneNo(merchantId, value, offset, size);
+    }
+
+    @Override
+    public List<IMerchantMemberDTO> findMerchantMemberByMerchantIdAndFullName(String merchantId, String value, int offset, int size) {
+        return repo.findMerchantMemberByMerchantIdAndFullName(merchantId, value, offset, size);
+    }
+
+    @Override
+    public List<IMerchantBankMemberDTO> getIMerchantBankMemberByUserId(String userId) {
+        return repo.getIMerchantBankMemberByUserId(userId);
+    }
+}

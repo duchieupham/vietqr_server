@@ -1,8 +1,11 @@
 package com.vietqr.org.service;
 
-import com.vietqr.org.controller.LarkController;
-import com.vietqr.org.util.EnvironmentUtil;
+import com.vietqr.org.dto.UserScheduleInvoiceDTO;
+import com.vietqr.org.entity.FcmTokenEntity;
+import com.vietqr.org.entity.NotificationEntity;
+import com.vietqr.org.util.*;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -13,12 +16,73 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 @Service
 public class AutomationManagementService {
-    private static final Logger logger = Logger.getLogger(LarkController.class);
+    private static final Logger logger = Logger.getLogger(AutomationManagementService.class);
+
+    @Autowired
+    private InvoiceService invoiceService;
+
+    @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
+    private SocketHandler socketHandler;
+
+    @Autowired
+    private FirebaseMessagingService firebaseMessagingService;
+
+    @Autowired
+    private FcmTokenService fcmTokenService;
+
+    @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 0 9 * * ?")
+    public void scheduleExecuteTaskInvoice() {
+        try {
+            List<UserScheduleInvoiceDTO> dtos = invoiceService.getUserScheduleInvoice();
+
+            for (UserScheduleInvoiceDTO item : dtos) {
+                Thread thread2 = new Thread(() -> {
+                    UUID notificationUUID = UUID.randomUUID();
+                    String notiType = NotificationUtil.getNotiInvoiceCreated();
+                    String title = NotificationUtil.getNotiTitleInvoiceUnpaid();
+                    String message = "Bạn có "
+                            + item.getNumberInvoice()
+                            + " hoá đơn chưa thanh toán. Vui Lòng kiểm tra lại trên hệ thống VietQR VN.";
+
+                    NotificationEntity notiEntity = new NotificationEntity();
+                    notiEntity.setId(notificationUUID.toString());
+                    notiEntity.setRead(false);
+                    notiEntity.setMessage(message);
+                    notiEntity.setTime(DateTimeUtil.getCurrentDateTimeUTC());
+                    notiEntity.setType(notiType);
+                    notiEntity.setUserId(item.getUserId());
+                    notiEntity.setData(item.getUserId());
+                    Map<String, String> datas = new HashMap<>();
+                    datas.put("notificationType", notiType);
+                    datas.put("notificationId", "");
+                    datas.put("bankCode", "MB");
+                    datas.put("terminalCode", "");
+                    datas.put("terminalName", "");
+                    datas.put("html", "<div><span style=\"font-size: 12;\">Bạn có "
+                            + item.getNumberInvoice()
+                            + " hóa đơn <br>cần thanh toán!</span></div>");
+                    datas.put("invoiceId", "");  //invoice ID
+                    datas.put("time", "0");
+                    datas.put("invoiceName", "");
+                    datas.put("status", 1 + "");
+                    pushNotification(title, message, notiEntity, datas, notiEntity.getUserId());
+                    logger.info("Start scheduled for invoice.");
+                });
+                thread2.start();
+            }
+        } catch (Exception e) {
+            logger.error("AutomationManagementService: ERROR: " + e.getMessage() +
+                    " at: " + System.currentTimeMillis());
+        }
+    }
 
     @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 30 8 * * MON-FRI")
     public void scheduleExecuteTask() {
@@ -34,7 +98,8 @@ public class AutomationManagementService {
                 Map<String, Object> data = new HashMap<>();
 
                 data.put("text", content);
-                final String url = "https://chat.googleapis.com/v1/spaces/AAAAEkpkd2A/messages?key=" + key
+                final String url = "https://chat.googleapis.com/v1/spaces/AAAAEkpkd2A/messages?key="
+                        + key
                         + "&token=" + token;
                 // Build URL with PathVariable
                 UriComponents uriComponents = UriComponentsBuilder
@@ -76,7 +141,8 @@ public class AutomationManagementService {
                 Map<String, Object> data = new HashMap<>();
 
                 data.put("text", content);
-                final String url = "https://chat.googleapis.com/v1/spaces/AAAAEkpkd2A/messages?key=" + key
+                final String url = "https://chat.googleapis.com/v1/spaces/AAAAEkpkd2A/messages?key="
+                        + key
                         + "&token=" + token;
                 // Build URL with PathVariable
                 UriComponents uriComponents = UriComponentsBuilder
@@ -95,6 +161,27 @@ public class AutomationManagementService {
             } catch (Exception e) {
                 logger.error("Error at scheduleUpdateTask: " + e.toString());
             }
+        }
+    }
+
+    private void pushNotification(String title, String message, NotificationEntity notiEntity, Map<String, String> data,
+                                  String userId) {
+        if (notiEntity != null) {
+            notificationService.insertNotification(notiEntity);
+        }
+
+        List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+        fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
+        firebaseMessagingService.sendUsersNotificationWithData(data,
+                fcmTokens,
+                title, message);
+        try {
+            socketHandler.sendMessageToUser(userId,
+                    data);
+        } catch (IOException e) {
+            logger.error(
+                    "transaction-sync: WS: socketHandler.sendMessageToUser - RECHARGE ERROR: "
+                            + e.toString());
         }
     }
 }

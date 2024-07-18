@@ -5,6 +5,7 @@ public class TransactionTestCallbackDTO {
     private String content;
     private String amount;
     private String transType;
+    private String urlLink;
 
     public TransactionTestCallbackDTO() {
         super();
@@ -49,4 +50,11 @@ public class TransactionTestCallbackDTO {
         this.transType = transType;
     }
 
+    public String getUrlLink() {
+        return urlLink;
+    }
+
+    public void setUrlLink(String urlLink) {
+        this.urlLink = urlLink;
+    }
 }

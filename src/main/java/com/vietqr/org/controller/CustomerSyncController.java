@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.vietqr.org.dto.*;
+import com.vietqr.org.util.StringUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -30,21 +32,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vietqr.org.dto.AccountBankReceiveServiceItemDTO;
-import com.vietqr.org.dto.AccountCustomerGenerateDTO;
-import com.vietqr.org.dto.AccountCustomerInputDTO;
-import com.vietqr.org.dto.CusSyncApiInfoDTO;
-import com.vietqr.org.dto.CusSyncEcInfoDTO;
-import com.vietqr.org.dto.CustomerSyncInsertDTO;
-import com.vietqr.org.dto.CustomerSyncListDTO;
-import com.vietqr.org.dto.CustomerSyncMappingInsertDTO;
-import com.vietqr.org.dto.CustomerSyncStatusDTO;
-import com.vietqr.org.dto.CustomerSyncTokenTestDTO;
-import com.vietqr.org.dto.CustomerSyncUpdateDTO;
-import com.vietqr.org.dto.MerchantInformationCheckDTO;
-import com.vietqr.org.dto.MerchantServiceDTO;
-import com.vietqr.org.dto.MerchantServiceItemDTO;
-import com.vietqr.org.dto.ResponseMessageDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.entity.AccountCustomerBankEntity;
 import com.vietqr.org.entity.AccountCustomerEntity;
@@ -104,21 +91,64 @@ public class CustomerSyncController {
     }
 
     @GetMapping("admin/customer-sync/sorted")
-    public ResponseEntity<List<CustomerSyncListDTO>> getCustomerSyncList(
-            @RequestParam(value = "type") int type) {
+    public ResponseEntity<Object> getCustomerSyncList(
+            @RequestParam int type,
+            @RequestParam int typeSearch,
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam String value) {
+        // type dùng để lấy ra danh sách
         // type = 9 => all
         // type = 0 => api service
         // type = 1 => ecommerce
-        List<CustomerSyncListDTO> result = new ArrayList<>();
+        Object result = null;
         HttpStatus httpStatus = null;
+        PageResDTO pageResDTO = new PageResDTO();
         try {
+            int totalElements = 0;
+            int offset = (page - 1) * size;
+
+            List<CustomerSyncListDTO> data = new ArrayList<>();
+            List<CustomerSyncListDTO> infos = new ArrayList<>();
+
+            // type dùng để lấy ra danh sách
             if (type == 9) {
-                result = customerSyncService.getCustomerSyncList();
+                // type = 9 => search all
+                if (typeSearch == 9 || typeSearch == 0) { // type = 0 => search merchant name
+                    data = customerSyncService.getCustomerSyncListByMerchant(value, offset, size);
+                    totalElements = customerSyncService.countCustomerSyncListByMerchant(value);
+                } else if (typeSearch == 9 || typeSearch == 1) { // type = 1 => search bank Account
+                    data = customerSyncService.getCustomerSyncListByMerchantByBankAccount(value, offset, size);
+                    totalElements = customerSyncService.countCustomerSyncListByMerchantByBankAccount(value);
+                }
             } else if (type == 0) {
-                result = customerSyncService.getCustomerSyncAPIList();
+                if (typeSearch == 9 || typeSearch == 0) { // type = 0 => search merchant name
+                    data = customerSyncService.getCustomerSyncAPIListByMerchant(value, offset, size);
+                    totalElements = customerSyncService.countCustomerSyncAPIListByMerchant(value);
+                } else if (typeSearch == 9 || typeSearch == 1) { // type = 1 => search bank Account
+                    data = customerSyncService.getCustomerSyncAPIListByMerchantByBankAccount(value, offset, size);
+                    totalElements = customerSyncService.countCustomerSyncAPIListByMerchantByBankAccount(value);
+                }
             } else if (type == 1) {
-                result = customerSyncService.getCustomerSyncEcList();
+                if (typeSearch == 9 || typeSearch == 0) { // type = 0 => search merchant name
+                    data = customerSyncService.getCustomerSyncEcListByMerchant(value, offset, size);
+                    totalElements = customerSyncService.countCustomerSyncEcListByMerchant(value);
+                } else if (typeSearch == 9 || typeSearch == 1) { // type = 1 => search bank Account
+                    data = customerSyncService.getCustomerSyncEcListByMerchantByBankAccount(value, offset, size);
+                    totalElements = customerSyncService.countCustomerSyncEcListByMerchantByBankAccount(value);
+                }
             }
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageDTO.setTotalElement(totalElements);
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElements, size));
+
+            pageResDTO.setMetadata(pageDTO);
+            pageResDTO.setData(data);
+
+            result = pageResDTO;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("getCustomerSyncList: ERROR: " + e.toString());
@@ -618,6 +648,9 @@ public class CustomerSyncController {
                                         accountBankReceiveEntity.setPassword("");
                                         accountBankReceiveEntity.setUsername("");
                                         accountBankReceiveEntity.setTerminalLength(10);
+                                        accountBankReceiveEntity.setValidFeeTo(0L);
+                                        accountBankReceiveEntity.setValidFeeFrom(0L);
+                                        accountBankReceiveEntity.setValidService(false);
                                         accountBankReceiveService.insertAccountBank(accountBankReceiveEntity);
                                         //
                                         UUID uuid2 = UUID.randomUUID();

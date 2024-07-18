@@ -22,6 +22,9 @@ public class CustomerInvoiceEntity implements Serializable {
     @Column(name = "customerId")
     private String customerId;
 
+    @Column(name = "name")
+    private String name;
+
     // BIDV quy định:
     // 0: Gạch nợ không khớp số tiền
     // 1: Gạch nợ khớp số tiền
@@ -34,22 +37,47 @@ public class CustomerInvoiceEntity implements Serializable {
     @Column(name = "billId")
     private String billId;
 
+    @Column(name = "timeCreated")
+    private Long timeCreated;
+
+    @Column(name = "timePaid")
+    private Long timePaid;
+
     // 0: Chưa thanh toán
     // 1: Đã thanh toán
     @Column(name = "status")
     private int status;
 
+    // 0: Chưa được vấn tin từ BIDV
+    // 1: Đã vấn tin từ BIDV
+    @Column(name = "inquire")
+    private int inquire;
+
+    // 0: Default là hóa đơn BIDV
+    // 1: Transaction_receive
+    @Column(name = "qrType")
+    private int qrType = 0;
+
     public CustomerInvoiceEntity() {
         super();
     }
 
-    public CustomerInvoiceEntity(String id, String customerId, int type, Long amount, String billId, int status) {
+    public CustomerInvoiceEntity(String id, String customerId,
+            String name,
+            int type,
+            Long amount, String billId,
+            Long timeCreated, Long timePaid,
+            int status, int inquire) {
         this.id = id;
         this.customerId = customerId;
+        this.name = name;
         this.type = type;
         this.amount = amount;
         this.billId = billId;
+        this.timeCreated = timeCreated;
+        this.timePaid = timePaid;
         this.status = status;
+        this.inquire = inquire;
     }
 
     public String getId() {
@@ -66,6 +94,14 @@ public class CustomerInvoiceEntity implements Serializable {
 
     public void setCustomerId(String customerId) {
         this.customerId = customerId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public int getType() {
@@ -92,6 +128,22 @@ public class CustomerInvoiceEntity implements Serializable {
         this.billId = billId;
     }
 
+    public Long getTimeCreated() {
+        return timeCreated;
+    }
+
+    public void setTimeCreated(Long timeCreated) {
+        this.timeCreated = timeCreated;
+    }
+
+    public Long getTimePaid() {
+        return timePaid;
+    }
+
+    public void setTimePaid(Long timePaid) {
+        this.timePaid = timePaid;
+    }
+
     public int getStatus() {
         return status;
     }
@@ -100,4 +152,19 @@ public class CustomerInvoiceEntity implements Serializable {
         this.status = status;
     }
 
+    public int getInquire() {
+        return inquire;
+    }
+
+    public void setInquire(int inquire) {
+        this.inquire = inquire;
+    }
+
+    public int getQrType() {
+        return qrType;
+    }
+
+    public void setQrType(int qrType) {
+        this.qrType = qrType;
+    }
 }

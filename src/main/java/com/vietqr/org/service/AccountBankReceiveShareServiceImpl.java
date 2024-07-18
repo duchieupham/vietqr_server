@@ -57,6 +57,41 @@ public class AccountBankReceiveShareServiceImpl implements AccountBankReceiveSha
     }
 
     @Override
+    public List<IAccountTerminalMemberDTO> getMembersWebByTerminalId(String terminalId, int offset) {
+        return repo.getMembersWebByTerminalId(terminalId, offset);
+    }
+
+    @Override
+    public int countMembersByTerminalId(String terminalId) {
+        return repo.countMembersByTerminalId(terminalId);
+    }
+
+    @Override
+    public List<String> checkUserExistedFromBankId(String userId, String value) {
+        return repo.checkUserExistedFromBankId(userId, value);
+    }
+
+    @Override
+    public String checkUserExistedFromBankByTerminalCode(String value, String userId) {
+        return repo.checkUserExistedFromBankByTerminalCode(value, userId);
+    }
+
+    @Override
+    public String checkUserExistedFromBankAccountAndIsOwner(String userId, String bankId) {
+        return repo.checkUserExistedFromBankAccountAndIsOwner(userId, bankId);
+    }
+
+    @Override
+    public ITerminalBankResponseDTO getTerminalBanksByTerminalId(String terminalId) {
+        return repo.getTerminalBanksByTerminalId(terminalId);
+    }
+
+    @Override
+    public AccountBankReceiveShareEntity getAccountAlreadyShare(String terminalId, String userId) {
+        return repo.getAccountAlreadyShare(terminalId, userId);
+    }
+
+    @Override
     public List<AccountBankReceiveShareDTO> getAccountBankReceiveShares(String userId) {
         return repo.getAccountBankReceiveShare(userId);
     }
@@ -118,8 +153,8 @@ public class AccountBankReceiveShareServiceImpl implements AccountBankReceiveSha
 
     @Override
     public List<IBankShareResponseDTO> getTerminalBankByUserId(String userId, int offset) {
-//        return repo.findBankShareByUserId(userId, offset);
-        return repo.findBankShareByUserId(userId);
+        return repo.findBankShareByUserId(userId, offset);
+//        return repo.findBankShareByUserId(userId);
     }
 
     @Override

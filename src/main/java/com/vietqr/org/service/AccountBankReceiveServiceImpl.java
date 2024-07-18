@@ -3,6 +3,7 @@ package com.vietqr.org.service;
 import java.util.List;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,31 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
 
     @Autowired
     AccountBankReceiveRepository repo;
+
+    @Override
+    public List<IBankShareDTO> getBankShareInfoByUserId(String userId) {
+        return repo.getBankShareInfoByUserId(userId);
+    }
+
+    @Override
+    public List<IBankInfoDTO> getBankInfoByUserId(String userId) {
+        return repo.getBankInfoByUserId(userId);
+    }
+
+    @Override
+    public List<IListAccountBankDTO> getListBankAccounts(String value, int offset, int size) {
+        return repo.getListBankAccounts(value, offset, size);
+    }
+
+    @Override
+    public int countListBankAccounts() {
+        return repo.countListBankAccounts();
+    }
+
+    @Override
+    public List<IAccountBankReceiveDTO> getBankIdsByUserId(String userId) {
+        return repo.getBankIdsByUserId(userId);
+    }
 
     @Override
     public int insertAccountBank(AccountBankReceiveEntity entity) {
@@ -33,6 +59,11 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     @Override
     public AccountBankReceiveEntity getAccountBankById(String bankId) {
         return repo.getAccountBankById(bankId);
+    }
+
+    @Override
+    public KeyBankReceiveActiveDTO getAccountBankKeyById(String bankId) {
+        return repo.getAccountBankKeyById(bankId);
     }
 
     @Override
@@ -171,5 +202,173 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     @Override
     public AccountBankReceiveShareForNotiDTO findAccountBankByTraceTransfer(String traceTransfer, String bankTypeId) {
         return repo.findAccountBankByTraceTransfer(traceTransfer, bankTypeId);
+    }
+
+    @Override
+    public String checkExistedBankAccountByBankAccountAndBankCode(String bankAccount, String bankCode) {
+        return repo.checkExistedBankAccountByBankAccountAndBankCode(bankAccount, bankCode);
+    }
+
+    @Override
+    public String getBankShortNameByBankId(String bankId) {
+        return repo.getBankShortNameByBankId(bankId);
+    }
+
+    @Override
+    public AccountBankReceiveEntity checkExistedBankAccountAuthenticated(String bankAccount, String bankCode) {
+        return repo.checkExistedBankAccountAuthenticated(bankAccount, bankCode);
+    }
+
+    @Override
+    public String getBankNameByBankId(String bankTypeId) {
+        return repo.getBankNameByBankId(bankTypeId);
+    }
+
+    @Override
+    public List<TerminalBankReceiveDTO> getAccountBankReceiveByUseId(String userId) {
+        return repo.getAccountBankReceiveByUseId(userId);
+    }
+
+    @Override
+    public BankReceiveCheckDTO checkBankReceiveActive(String bankId) {
+        return repo.checkBankReceiveActive(bankId);
+    }
+
+    @Override
+    public int updateActiveBankReceive(String bankId, long validFeeFrom, long validFeeTo) {
+        return repo.updateActiveBankReceive(bankId, validFeeFrom, validFeeTo);
+    }
+
+    @Override
+    public boolean checkIsActiveService(String bankId) {
+        return repo.checkIsActiveService(bankId);
+    }
+
+    @Override
+    public IBankAccountInfoDTO getAccountBankInfoById(String bankId) {
+        return repo.getAccountBankInfoById(bankId);
+    }
+
+    @Override
+    public IAccountBankReceiveDTO getAccountBankInfoResById(String bankAccount, String bankCode) {
+        return repo.getAccountBankInfoResById(bankAccount, bankCode);
+    }
+
+    @Override
+    public IBankReceiveMapperDTO getMerchantBankMapper(String bankId) {
+        return repo.getMerchantBankMapper(bankId);
+    }
+
+    @Override
+    public List<ICustomerDetailDTO> getCustomerDetailByBankId(String bankId) {
+        return repo.getCustomerDetailByBankId(bankId);
+    }
+
+    @Override
+    public int countBankInvoiceByBankAccount(String value) {
+        return repo.countBankInvoiceByBankAccount(value);
+    }
+
+    @Override
+    public List<IBankAccountInvoiceInfoDTO> getBankInvoiceByBankAccount(String value, int offset, int size) {
+        return repo.getBankInvoiceByBankAccount(value, offset, size);
+    }
+
+    @Override
+    public AccountBankDetailAdminDTO getAccountBankDetailAdmin(String bankId) {
+        return repo.getAccountBankDetailAdmin(bankId);
+    }
+
+    @Override
+    public IBankAccountInvoicesDTO getBankAccountInvoices(String bankId) {
+        return repo.getBankAccountInvoices(bankId);
+    }
+
+    @Override
+    public IAccountBankReceiveDTO getAccountBankInfoResById(String bankId) {
+        return repo.getAccountBankInfoResById(bankId);
+    }
+
+    @Override
+    public BankAccountRechargeDTO getBankAccountRecharge(String bankId) {
+        return repo.getBankAccountRecharge(bankId);
+    }
+
+    @Override
+    public IBankReceiveFeePackageDTO getCustomerBankDetailByBankId(String bankId) {
+        return repo.getCustomerBankDetailByBankId(bankId);
+    }
+
+    @Override
+    public List<IAccountBankReceiveDTO> getBankIdsByBankId(String bankId) {
+        return repo.getBankIdsByBankId(bankId);
+    }
+
+    @Override
+    public AccountBankReceiveEntity getAccountBankByCustomerIdAndByServiceId(String customerId) {
+        return repo.getAccountBankByCustomerIdAndByServiceId(customerId);
+    }
+
+    @Override
+    public CustomerVaInfoDataDTO getAccountCustomerInfo(String customerId) {
+        return repo.getAccountCustomerInfo(customerId);
+    }
+
+    @Override
+    public void updateRegisterAuthentication(String userId, String bankId) {
+        repo.updateRegisterAuthentication(userId, bankId);
+    }
+
+    @Override
+    public String getBankIdByUserIdAndMerchantId(String userId, String merchantId) {
+        return repo.getBankIdByUserIdAndMerchantId(userId, merchantId);
+    }
+
+    @Override
+    public BidvUnlinkedDTO getMerchantIdByBankAccountBidvAuthen(String bankAccount, String bankCode) {
+        return repo.getMerchantIdByBankAccountBidvAuthen(bankAccount, bankCode);
+    }
+
+    @Override
+    public void updateRegisterUnlinkBidv(String userId, String bankId) {
+        repo.updateRegisterUnlinkBidv(userId, bankId);
+    }
+
+    @Override
+    public String getBankCodeByBankId(String bankId) {
+        return repo.getBankCodeByBankId(bankId);
+    }
+
+    @Override
+    public void updateRegisterAuthenticationBankBIDV(String nationalId, String phoneAuthenticated,
+                                                     String bankAccountName, String bankAccount, String customerId,
+                                                     String ewalletToken, String bankId) {
+        repo.updateRegisterAuthenticationBankBIDV(nationalId, phoneAuthenticated, bankAccountName, bankAccount,
+                customerId, ewalletToken, bankId);
+    }
+
+    @Override
+    public String getBankIdByBankAccount(String bankAccount, String bankShortName) {
+        return repo.getBankIdByBankAccount(bankAccount, bankShortName);
+    }
+
+    @Override
+    public BankAccountAdminDTO getUserIdAndMidByBankId(String bankId) {
+        return repo.getUserIdAndMidByBankId(bankId);
+    }
+
+    @Override
+    public void updateVsoBankAccount(String vso, String bankId) {
+        repo.updateVsoBankAccount(vso, bankId);
+    }
+
+    @Override
+    public List<IAccountBankMonthDTO> getBankAccountStatistics() {
+        return repo.getBankAccountStatistics();
+    }
+
+    @Override
+    public void unRegisterAuthenBank(String bankAccount, String ewalletToken) {
+        repo.unRegisterAuthenBank(bankAccount, ewalletToken);
     }
 }

@@ -3,6 +3,7 @@ package com.vietqr.org.service;
 import java.util.List;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.dto.bidv.CustomerInvoiceInfoDataDTO;
 import org.springframework.stereotype.Service;
 import com.vietqr.org.entity.TransactionReceiveEntity;
 
@@ -11,8 +12,6 @@ public interface TransactionReceiveService {
 
         public int insertTransactionReceive(TransactionReceiveEntity entity);
 
-        public int insertAllTransactionReceive(List<TransactionReceiveEntity> entities);
-
         public void updateTransactionReceiveStatus(int status, String refId, String referenceNumber, long timePaid,
                         String id);
 
@@ -20,12 +19,11 @@ public interface TransactionReceiveService {
 
         public void updateTransactionStatusById(int status, String id);
 
-        // public List<TransactionRelatedDTO> getRelatedTransactionReceives(String
-        // businessId);
-
         public TransactionDetailDTO getTransactionById(String id);
 
         public TransactionReceiveEntity getTransactionByTraceIdAndAmount(String id, String amount, String transType);
+
+        public TransactionReceiveEntity getTransactionsById(String id);
 
         // public List<TransactionReceiveEntity> getTransactionByBankId(String bankId);
 
@@ -48,6 +46,8 @@ public interface TransactionReceiveService {
 
         public TransactionReceiveEntity getTransactionReceiveByRefNumber(String referenceNumber);
 
+        public TransactionReceiveEntity getTransactionReceiveByRefNumber(String referenceNumber, String transType);
+
         public TransactionReceiveEntity getTransactionReceiveByOrderId(String orderId);
 
         public TransactionCheckStatusDTO getTransactionCheckStatus(String transactionId);
@@ -68,6 +68,10 @@ public interface TransactionReceiveService {
 
         public List<TransByCusSyncDTO> getTransactionsByCustomerSync(String bankId, String customerSyncId, int offset,
                         String fromDate, String toDate);
+
+        public List<FeeTransactionInfoDTO> getFeePackageResponse(String time, List<String> bankId);
+
+        public List<FeeTransactionInfoDTO> getFeePackageResponseRecordType(String time, List<String> bankId);
 
         // admin
         List<TransactionReceiveAdminListDTO> getTransByBankAccountAllDate(String value, int offset);
@@ -354,17 +358,17 @@ public interface TransactionReceiveService {
         List<TransactionRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, String terminalCode, int offset);
 
         List<TransactionRelatedDTO> getAllTransTerminal(String bankId, String userId, String terminalCode, int offset);
+//
+        List<TransactionRelatedDTO> getTransTerminalByStatus(String bankId, String userId, int value, List<String> terminalCode, String fromDate, String toDate, int offset);
 
-        List<TransactionRelatedDTO> getTransTerminalByStatus(String bankId, String userId, int value, String terminalCode, String fromDate, String toDate, int offset);
+        List<TransactionRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, List<String> terminalCode, String fromDate, String toDate, int offset);
 
-        List<TransactionRelatedDTO> getTransTerminalByFtCode(String bankId, String userId, String value, String terminalCode, String fromDate, String toDate, int offset);
+        List<TransactionRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, List<String> terminalCode, String fromDate, String toDate, int offset);
 
-        List<TransactionRelatedDTO> getTransTerminalByOrderId(String bankId, String userId, String value, String terminalCode, String fromDate, String toDate, int offset);
+        List<TransactionRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, List<String> terminalCode, String fromDate, String toDate, int offset);
 
-        List<TransactionRelatedDTO> getTransTerminalByContent(String bankId, String userId, String value, String terminalCode, String fromDate, String toDate, int offset);
-
-        List<TransactionRelatedDTO> getAllTransTerminal(String bankId, String userId, String terminalCode, String fromDate, String toDate, int offset);
-
+        List<TransactionRelatedDTO> getAllTransTerminal(String bankId, String userId, List<String> terminalCode, String fromDate, String toDate, int offset);
+//
         TransStatisticDTO getTransactionOverview(String bankId, String terminalCode, String month, String userId);
 
         TransStatisticDTO getTransactionOverview(String bankId, String month);
@@ -374,4 +378,161 @@ public interface TransactionReceiveService {
         List<TransStatisticByDateDTO> getTransStatisticByTerminalIdNotSync(String bankId, String terminalCode, String month);
 
         TransStatisticDTO getTransactionOverviewNotSync(String bankId, String terminalCode, String month);
+
+        TransStatisticDTO getTransactionOverviewByDay(String bankId, String fromDate, String toDate);
+
+        TransStatisticDTO getTransactionOverviewByDay(String bankId, String fromDate, String toDate, String userId);
+
+        TransStatisticDTO getTransactionOverviewByDay(String bankId, String terminalCode, String fromDate, String toDate, String userId);
+
+        TransStatisticDTO getTransactionOverviewNotSync(String bankId, String terminalCode, String fromDate, String toDate);
+
+        List<TransStatisticByTimeDTO> getTransStatisticByTerminalIdNotSync(String bankId, String terminalCode, String fromDate, String toDate);
+
+        List<TransStatisticByTimeDTO> getTransStatisticByTerminalIdAndDate(String bankId, String terminalCode, String fromDate, String toDate, String userId);
+
+        List<TransStatisticByTimeDTO> getTransStatisticByTerminalIdAndDate(String bankId, String fromDate, String toDate, String userId);
+
+        List<TransStatisticByTimeDTO> getTransStatisticByBankIdAndDate(String bankId, String fromDate, String toDate);
+
+        List<ITransactionRelatedDetailDTO> getTransTerminalByIdAndByFtCode(String terminalId, String value, String fromDate, String toDate, int offset);
+
+        List<ITransactionRelatedDetailDTO> getTransTerminalByIdAndByOrderId(String terminalId, String value, String fromDate, String toDate, int offset);
+
+        List<ITransactionRelatedDetailDTO> getTransTerminalByIdAndByContent(String terminalId, String value, String fromDate, String toDate, int offset);
+
+        List<ITransactionRelatedDetailDTO> getTransTerminalByIdAndByStatus(String terminalId, int status, String fromDate, String toDate, int offset);
+
+        List<ITransactionRelatedDetailDTO> getAllTransTerminalById(String terminalId, String fromDate, String toDate, int offset);
+
+        List<TransactionReceiveAdminListDTO> getTransByTerminalCodeFromDateTerminal(String fromDate, String toDate, String value, String userId, int offset);
+
+        List<TransactionReceiveAdminListDTO> getTransByBankAccountFromDateTerminal(String userId, String value, String fromDate, String toDate, int offset);
+
+        List<TransactionReceiveAdminListDTO> getUnsettledTransactions(String bankId, String fromDate, String toDate, int offset);
+
+        List<TransactionReceiveAdminListDTO> getUnsettledTransactionsByFtCode(String bankId, String value, String fromDate, String toDate, int offset);
+
+        List<TransactionReceiveAdminListDTO> getUnsettledTransactionsByOrderId(String bankId, String value, String fromDate, String toDate, int offset);
+
+        List<TransactionReceiveAdminListDTO> getUnsettledTransactionsByContent(String bankId, String value, String fromDate, String toDate, int offset);
+
+        List<TransactionReceiveAdminListDTO> getUnsettledTransactionsByTerminalCode(String bankId, String value, String fromDate, String toDate, int offset);
+
+        void updateTransactionReceiveTerminal(String transactionId, String terminalCode, int type);
+
+        TransactionReceiveEntity getTransactionReceiveById(String transactionId, String userId);
+
+        TransactionReceiveEntity getTransactionReceiveById(String transactionId);
+
+        List<TransactionRelatedDTO> getTransactionsByTerminalCodeAllDateListCode(List<String> allTerminalCode, int offset, String bankId);
+
+        List<TransactionRelatedDTO> getTransactionsByTerminalCodeAndDateListCode(List<String> allTerminalCode, int offset, String bankId, String from, String to);
+
+        List<TransactionRelatedDTO> getSubTerminalTransactions(List<String> codes,
+                                                                       String fromDate, String toDate, int offset, int size);
+
+        List<TransactionRelatedDTO> getSubTerminalTransactionsByFtCode(List<String> codes, String value,
+                                                                               String fromDate, String toDate, int offset, int size);
+
+        List<TransactionRelatedDTO> getSubTerminalTransactionsByOrderId(List<String> codes, String value,
+                                                                                String fromDate, String toDate, int offset, int size);
+
+        List<TransactionRelatedDTO> getSubTerminalTransactionsByContent(List<String> codes, String value,
+                                                                                String fromDate, String toDate, int offset, int size);
+
+        List<TransactionRelatedDTO> getSubTerminalTransactionsByAmount(List<String> codes, int value, String fromDate, String toDate, int offset, int size);
+
+        int countSubTerminalTransactions(List<String> codes, String fromDate, String toDate);
+
+        int countSubTerminalTransactionsByFtCode(List<String> codes, String value, String fromDate, String toDate);
+
+        int countSubTerminalTransactionsByOrderId(List<String> codes, String value, String fromDate, String toDate);
+
+        int countSubTerminalTransactionsByContent(List<String> codes, String value, String fromDate, String toDate);
+
+        int countSubTerminalTransactionsByAmount(List<String> codes, int value, String fromDate, String toDate);
+
+        TransStatisticDTO getTransactionOverviewBySubTerminalCode(String terminalCode, String fromDate, String toDate);
+
+        TransStatisticDTO getTransactionOverviewBySubTerminalCode(List<String> subTerminalCodes,
+                                                                  String fromDate, String toDate);
+
+        List<TransStatisticByTimeDTO> getTransStatisticSubTerminalByTerminalCodeDate(List<String> codes,
+                                                                                     String fromDate, String toDate);
+
+        List<TransStatisticByTimeDTO> getTransStatisticSubTerminalByTerminalCodeDate(String subTerminalCode,
+                                                                                     String fromDate, String toDate);
+
+        List<TransStatisticByTimeDTO> getTransStatisticSubTerminalByTerminalCodeMonth(List<String> codes,
+                                                                                      String fromDate, String toDate);
+
+        List<TransStatisticByTimeDTO> getTransStatisticSubTerminalByTerminalCodeMonth(String subTerminalCode,
+                                                                                      String fromDate, String toDate);
+
+        List<TransactionRelatedDTO> getSubTerminalTransactionsByStatus(List<String> codes, int value, String fromDate, String toDate, int offset, int size);
+
+        int countSubTerminalTransactionsByStatus(List<String> codes, int value, String fromDate, String toDate);
+
+        List<ITransactionRelatedDetailDTO> getTransByBankId(String bankId, String fromDate, String toDate);
+
+        List<ITransactionRelatedDetailDTO> getTransByTerminalCode(String terminalCode,
+                                                                 String fromDate, String toDate);
+
+        List<TransactionReceiveAdminListDTO> getTransactionReceiveWithRequest(String bankId,
+                                                                              String fromDate, String toDate, int offset, int size);
+
+        int countTransactionReceiveWithRequest(String bankId, String fromDate, String toDate);
+
+        List<TransactionReceiveAdminListDTO> getTransactionReceiveWithRequestById(String bankId, String fromDate, String toDate, int offset, int size, String value);
+
+        ITransStatisticResponseWebDTO getTransactionWebOverview(String bankId, String fromDate, String toDate);
+
+        List<TransactionReceiveAdminListDTO> getTransactionReceiveWithRequestByFtCode(String bankId, String fromDate, String toDate, int offset, int size, String value);
+
+        List<TransactionReceiveAdminListDTO> getTransactionReceiveWithRequestByOrderId(String bankId, String fromDate, String toDate, int offset, int size, String value);
+
+        List<TransactionReceiveAdminListDTO> getTransactionReceiveWithRequestByTerminalCode(String bankId, String fromDate, String toDate, int offset, int size, String value);
+
+        List<TransactionReceiveAdminListDTO> getTransactionReceiveWithRequestByStatus(String bankId, String fromDate, String toDate, int offset, int size, int value);
+
+        List<TransactionReceiveAdminListDTO> getTransactionReceiveWithRequestByContent(String bankId, String fromDate, String toDate, int offset, int size, String value);
+
+        int countTransactionReceiveWithRequestByStatus(String bankId, String fromDate, String toDate, int value);
+
+        int countTransactionReceiveWithRequestByTerminalCode(String bankId, String fromDate, String toDate, String value);
+
+        int countTransactionReceiveWithRequestByContent(String bankId, String fromDate, String toDate, String value);
+
+        int countTransactionReceiveWithRequestByOrderId(String bankId, String fromDate, String toDate, String value);
+
+        int countTransactionReceiveWithRequestByFtCode(String bankId, String fromDate, String toDate, String value);
+
+        List<TransactionReceiveAdminListDTO> getUnsettledTransactionsByStatus(String bankId, int status, String fromDate, String toDate, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalWithType2ByFtCode(String bankId, String userId, String value, List<String> listCode, String fromDate, String toDate, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalWithType2ByOrderId(String bankId, String userId, String value, List<String> listCode, String fromDate, String toDate, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalWithType2ByContent(String bankId, String userId, String value, List<String> listCode, String fromDate, String toDate, int offset);
+
+        List<TransactionRelatedDTO> getTransTerminalWithType2ByStatus(String bankId, String userId, int value, List<String> listCode, String fromDate, String toDate, int offset);
+
+        List<TransactionRelatedDTO> getAllTransTerminalWithType2(String bankId, String userId, List<String> listCode, String fromDate, String toDate, int offset);
+
+        TransactionReceiveUpdateDTO getTransactionUpdateByBillNumber(String billNumberCre, String bankId, long time);
+
+        int updateTransactionReceiveForInvoice(long totalAmountAfterVat, String qr, String id);
+
+        List<FeeTransactionInfoDTO> getTransactionInfoDataByBankId(String bankId, String time);
+
+        List<DataTransactionDTO> getTransactionInfo(String bankId, String time, int recordType);
+
+        List<TransReceiveInvoicesDTO> getTransactionReceiveByBankId(String bankId, String time);
+
+        String checkExistedBillId(String billId);
+
+        CustomerInvoiceInfoDataDTO getTransactionReceiveCusInfo(String customerId);
+
+        TransactionReceiveEntity getTransactionReceiveByBillId(String billId);
 }

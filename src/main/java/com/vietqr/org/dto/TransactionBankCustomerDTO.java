@@ -21,6 +21,9 @@ public class TransactionBankCustomerDTO implements Serializable {
     private long valueDate;
     private String sign;
     private String orderId;
+    private String terminalCode;
+    private String urlLink;
+    private String serviceCode;
 
     public TransactionBankCustomerDTO() {
         super();
@@ -149,4 +152,27 @@ public class TransactionBankCustomerDTO implements Serializable {
         this.orderId = orderId;
     }
 
+    public String getTerminalCode() {
+        return terminalCode;
+    }
+
+    public void setTerminalCode(String terminalCode) {
+        this.terminalCode = terminalCode;
+    }
+
+    public String getUrlLink() {
+        return urlLink;
+    }
+
+    public void setUrlLink(String urlLink) {
+        this.urlLink = urlLink;
+    }
+
+    public String getServiceCode() {
+        return serviceCode;
+    }
+
+    public void setServiceCode(String serviceCode) {
+        this.serviceCode = serviceCode;
+    }
 }

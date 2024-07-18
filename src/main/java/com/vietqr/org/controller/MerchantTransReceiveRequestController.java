@@ -1,0 +1,536 @@
+package com.vietqr.org.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vietqr.org.dto.*;
+import com.vietqr.org.entity.*;
+import com.vietqr.org.service.*;
+import com.vietqr.org.util.EnvironmentUtil;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@RestController
+@CrossOrigin
+@RequestMapping("/api")
+public class MerchantTransReceiveRequestController {
+    private static final Logger logger = Logger.getLogger(MerchantTransReceiveRequestController.class);
+
+    @Autowired
+    private TransactionTerminalTempService transactionTerminalTempService;
+
+    @Autowired
+    private TransactionReceiveHistoryService transactionReceiveHistoryService;
+
+    @Autowired
+    private AccountBankReceiveService accountBankReceiveService;
+
+    @Autowired
+    private TransactionReceiveService transactionReceiveService;
+
+    @Autowired
+    private AccountBankReceiveShareService accountBankReceiveShareService;
+
+    @Autowired
+    private SystemSettingService systemSettingService;
+
+    @Autowired
+    private TransReceiveTempService transReceiveTempService;
+
+    @Autowired
+    private MerchantMemberRoleService merchantMemberRoleService;
+
+    @Autowired
+    private TransReceiveRequestMappingService transReceiveRequestMappingService;
+
+    @PostMapping("transaction-request")
+    public ResponseEntity<ResponseMessageDTO> mapTransactionRequestToTerminal(@RequestBody @Valid MapRequestDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            List<String> rolesAccept = new ArrayList<>();
+            rolesAccept.add(EnvironmentUtil.getRequestReceiveMerchantRoleId());
+            rolesAccept.add(EnvironmentUtil.getRequestReceiveTerminalRoleId());
+            rolesAccept.add(EnvironmentUtil.getAdminRoleId());
+            String roles = String.join("|", rolesAccept);
+            String isExist = merchantMemberRoleService.checkMemberHaveRole(dto.getUserId(),
+                    roles);
+            if (isExist == null || isExist.trim().isEmpty()) {
+                result = new ResponseMessageDTO("FAILED", "E113");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            } else {
+                TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
+                        .getTransactionReceiveById(dto.getTransactionId());
+                if (transactionReceiveEntity != null) {
+                    TransReceiveRequestMappingEntity entity = new TransReceiveRequestMappingEntity();
+                    entity.setId(UUID.randomUUID().toString());
+                    entity.setMerchantId(dto.getMerchantId());
+                    entity.setTerminalId(dto.getTerminalId());
+                    entity.setTransactionReceiveId(dto.getTransactionId());
+                    entity.setUserId(dto.getUserId());
+                    entity.setRequestType(dto.getRequestType());
+                    entity.setRequestValue(dto.getRequestValue());
+                    entity.setTimeCreated(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+                    entity.setTimeApproved(0);
+                    entity.setStatus(0);
+
+                    transactionReceiveEntity.setTransStatus(1);
+
+                    transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
+                    transReceiveRequestMappingService.insert(entity);
+                    result = new ResponseMessageDTO("SUCCESS", "");
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    result = new ResponseMessageDTO("FAILED", "E114");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            }
+
+        } catch (Exception e) {
+            logger.error("mapTransactionRequestToTerminal: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("transaction-request")
+    public ResponseEntity<Object> getListTransactionRequest(@RequestParam(value = "page") int page,
+                                                            @RequestParam(value = "size") int size,
+                                                            @RequestParam(value = "type") int type,
+                                                            @RequestParam(value = "value") String value,
+                                                            @RequestParam(value = "fromDate") String fromDate,
+                                                            @RequestParam(value = "toDate") String toDate,
+                                                            @RequestParam(value = "bankId") String bankId,
+                                                            @RequestParam(value = "userId") String userId) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            PageResultDTO dto = new PageResultDTO();
+            int totalPage = 1;
+            List<String> rolesAccept = new ArrayList<>();
+            rolesAccept.add(EnvironmentUtil.getRequestReceiveMerchantRoleId());
+            rolesAccept.add(EnvironmentUtil.getRequestReceiveTerminalRoleId());
+            rolesAccept.add(EnvironmentUtil.getAdminRoleId());
+            String roles = String.join("|", rolesAccept);
+            String isExist = merchantMemberRoleService.checkMemberHaveRole(userId,
+                    roles);
+            if (isExist == null || isExist.isEmpty()) {
+                isExist = accountBankReceiveShareService.checkUserExistedFromBankAccountAndIsOwner(userId, bankId);
+            }
+            if (isExist != null && !isExist.trim().isEmpty()) {
+                // type = 9: all
+                // type = 1: reference_number
+                // type = 2: order_id
+                // type = 3: content
+                // type = 4: terminal code
+                // type = 5: status
+                // type = 7: id
+                List<TransactionReceiveAdminListDTO> listTrans = new ArrayList<>();
+                int total = 0;
+                switch (type) {
+                    case 9:
+                        listTrans = transactionReceiveService
+                                .getTransactionReceiveWithRequest(bankId, fromDate, toDate, (page - 1) * size, size);
+                        total = transactionReceiveService.countTransactionReceiveWithRequest(bankId, fromDate, toDate);
+                        break;
+                    case 1:
+                        listTrans = transactionReceiveService
+                                .getTransactionReceiveWithRequestByFtCode(bankId, fromDate, toDate, (page - 1) * size, size, value);
+                        total = transactionReceiveService.countTransactionReceiveWithRequestByFtCode(bankId, fromDate, toDate, value);
+                        break;
+                    case 2:
+                        listTrans = transactionReceiveService
+                                .getTransactionReceiveWithRequestByOrderId(bankId, fromDate, toDate, (page - 1) * size, size, value);
+                        total = transactionReceiveService.countTransactionReceiveWithRequestByOrderId(bankId, fromDate, toDate, value);
+                        break;
+                    case 3:
+                        value = value.replace("-", " ").trim();
+                        listTrans = transactionReceiveService
+                                .getTransactionReceiveWithRequestByContent(bankId, fromDate, toDate, (page - 1) * size, size, value);
+                        total = transactionReceiveService.countTransactionReceiveWithRequestByContent(bankId, fromDate, toDate, value);
+                        break;
+                    case 4:
+                        listTrans = transactionReceiveService
+                                .getTransactionReceiveWithRequestByTerminalCode(bankId, fromDate, toDate, (page - 1) * size, size, value);
+                        total = transactionReceiveService.countTransactionReceiveWithRequestByTerminalCode(bankId, fromDate, toDate, value);
+                        break;
+                    case 5:
+                        try {
+                            int status = Integer.parseInt(value);
+                            listTrans = transactionReceiveService
+                                    .getTransactionReceiveWithRequestByStatus(bankId, fromDate, toDate, (page - 1) * size, size, status);
+                            total = transactionReceiveService.countTransactionReceiveWithRequestByStatus(bankId, fromDate, toDate, status);
+                        } catch (Exception ignored) {}
+                        break;
+                    case 7:
+                        listTrans = transactionReceiveService
+                                .getTransactionReceiveWithRequestById(bankId, fromDate, toDate, (page - 1) * size, size, value);
+                        if (!listTrans.isEmpty()) {
+                            total = 1;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                List<String> listTransId = listTrans.stream().map(TransactionReceiveAdminListDTO::getId)
+                        .collect(Collectors.toList());
+                List<TransRequestDTO> listRequests = transReceiveRequestMappingService
+                        .getTransactionReceiveRequest(listTransId);
+
+                Map<String, List<TransRequestDTO>> terminalBanksMap = listRequests.stream()
+                        .collect(Collectors.groupingBy(TransRequestDTO::getTransactionId));
+                List<TransactionRelatedRequestDTO> listTransRequest = new ArrayList<>();
+                boolean isActiveService = accountBankReceiveService.checkIsActiveService(bankId);
+                if (isActiveService) {
+                    listTransRequest = listTrans.stream().map(item -> {
+                        TransactionRelatedRequestDTO trans = new TransactionRelatedRequestDTO();
+                        trans.setId(item.getId());
+                        trans.setBankAccount(item.getBankAccount());
+                        trans.setAmount(item.getAmount() + "");
+                        trans.setBankId(item.getBankId());
+                        trans.setContent(item.getContent());
+                        trans.setOrderId(item.getOrderId());
+                        trans.setReferenceNumber(item.getReferenceNumber());
+                        trans.setStatus(item.getStatus());
+                        trans.setTimeCreated(item.getTimeCreated());
+                        trans.setTimePaid(item.getTimePaid());
+                        trans.setTransType(item.getTransType());
+                        trans.setType(item.getType());
+                        trans.setUserBankName(item.getUserBankName());
+                        trans.setBankShortName(item.getBankShortName());
+                        trans.setTerminalCode(item.getTerminalCode());
+                        trans.setNote(item.getNote());
+                        trans.setRequests(terminalBanksMap
+                                .getOrDefault(item.getId(), new ArrayList<>()));
+                        trans.setTotalRequest(trans.getRequests().size());
+                        return trans;
+                    }).collect(Collectors.toList());
+                } else {
+                    LocalDateTime now = LocalDateTime.now();
+                    long time = now.toEpochSecond(ZoneOffset.UTC);
+                    if (!listTrans.isEmpty()) {
+                        time = listTrans.get(0).getTimeCreated();
+                    }
+                    SystemSettingEntity setting = systemSettingService.getSystemSetting();
+                    if (setting.getServiceActive() > time) {
+                        listTransRequest = listTrans.stream().map(item -> {
+                            TransactionRelatedRequestDTO trans = new TransactionRelatedRequestDTO();
+                            trans.setId(item.getId());
+                            trans.setBankAccount(item.getBankAccount());
+                            trans.setAmount(item.getAmount() + "");
+                            trans.setBankId(item.getBankId());
+                            trans.setContent(item.getContent());
+                            trans.setOrderId(item.getOrderId());
+                            trans.setReferenceNumber(item.getReferenceNumber());
+                            trans.setStatus(item.getStatus());
+                            trans.setTimeCreated(item.getTimeCreated());
+                            trans.setTimePaid(item.getTimePaid());
+                            trans.setTransType(item.getTransType());
+                            trans.setType(item.getType());
+                            trans.setUserBankName(item.getUserBankName());
+                            trans.setBankShortName(item.getBankShortName());
+                            trans.setTerminalCode(item.getTerminalCode());
+                            trans.setNote(item.getNote());
+                            trans.setRequests(terminalBanksMap
+                                    .getOrDefault(item.getId(), new ArrayList<>()));
+                            trans.setTotalRequest(trans.getRequests().size());
+                            return trans;
+                        }).collect(Collectors.toList());
+                    } else {
+                        if (!listTrans.isEmpty()) {
+                            int lastIndex = listTrans.size() - 1;
+                            long lastTime = listTrans.get(lastIndex).getTimeCreated();
+                            TransReceiveTempEntity entity = transReceiveTempService.getLastTimeByBankId(bankId);
+                            if (entity != null) {
+                                if (entity.getLastTimes() <= lastTime) {
+                                    listTransRequest = listTrans.stream().map(item -> {
+                                        TransactionRelatedRequestDTO trans = new TransactionRelatedRequestDTO();
+                                        trans.setId(item.getId());
+                                        trans.setBankAccount(item.getBankAccount());
+                                        trans.setAmount("*****");
+                                        trans.setBankId(item.getBankId());
+                                        trans.setContent(item.getContent());
+                                        trans.setOrderId(item.getOrderId());
+                                        trans.setReferenceNumber(item.getReferenceNumber());
+                                        trans.setStatus(item.getStatus());
+                                        trans.setTimeCreated(item.getTimeCreated());
+                                        trans.setTimePaid(item.getTimePaid());
+                                        trans.setTransType(item.getTransType());
+                                        trans.setType(item.getType());
+                                        trans.setUserBankName(item.getUserBankName());
+                                        trans.setBankShortName(item.getBankShortName());
+                                        trans.setTerminalCode(item.getTerminalCode());
+                                        trans.setNote(item.getNote());
+                                        trans.setRequests(terminalBanksMap
+                                                .getOrDefault(item.getId(), new ArrayList<>()));
+                                        trans.setTotalRequest(trans.getRequests().size());
+                                        return trans;
+                                    }).collect(Collectors.toList());
+                                } else {
+                                    listTransRequest = listTrans.stream().map(item -> {
+                                        TransactionRelatedRequestDTO trans = new TransactionRelatedRequestDTO();
+                                        trans.setId(item.getId());
+                                        trans.setBankAccount(item.getBankAccount());
+                                        if (entity.getTransIds().contains(item.getId())) {
+                                            trans.setAmount(item.getAmount() + "");
+                                        } else if (item.getTimeCreated() < entity.getLastTimes()) {
+                                            trans.setAmount(item.getAmount() + "");
+                                        } else {
+                                            trans.setAmount("*****");
+                                        }
+                                        trans.setBankId(item.getBankId());
+                                        trans.setContent(item.getContent());
+                                        trans.setOrderId(item.getOrderId());
+                                        trans.setReferenceNumber(item.getReferenceNumber());
+                                        trans.setStatus(item.getStatus());
+                                        trans.setTimeCreated(item.getTimeCreated());
+                                        trans.setTimePaid(item.getTimePaid());
+                                        trans.setTransType(item.getTransType());
+                                        trans.setType(item.getType());
+                                        trans.setUserBankName(item.getUserBankName());
+                                        trans.setBankShortName(item.getBankShortName());
+                                        trans.setTerminalCode(item.getTerminalCode());
+                                        trans.setNote(item.getNote());
+                                        trans.setRequests(terminalBanksMap
+                                                .getOrDefault(item.getId(), new ArrayList<>()));
+                                        trans.setTotalRequest(trans.getRequests().size());
+                                        return trans;
+                                    }).collect(Collectors.toList());
+                                }
+                            } else {
+                                listTransRequest = listTrans.stream().map(item -> {
+                                    TransactionRelatedRequestDTO trans = new TransactionRelatedRequestDTO();
+                                    trans.setId(item.getId());
+                                    trans.setBankAccount(item.getBankAccount());
+                                    trans.setAmount("*****");
+                                    trans.setBankId(item.getBankId());
+                                    trans.setContent(item.getContent());
+                                    trans.setOrderId(item.getOrderId());
+                                    trans.setReferenceNumber(item.getReferenceNumber());
+                                    trans.setStatus(item.getStatus());
+                                    trans.setTimeCreated(item.getTimeCreated());
+                                    trans.setTimePaid(item.getTimePaid());
+                                    trans.setTransType(item.getTransType());
+                                    trans.setType(item.getType());
+                                    trans.setUserBankName(item.getUserBankName());
+                                    trans.setBankShortName(item.getBankShortName());
+                                    trans.setTerminalCode(item.getTerminalCode());
+                                    trans.setNote(item.getNote());
+                                    trans.setRequests(terminalBanksMap
+                                            .getOrDefault(item.getId(), new ArrayList<>()));
+                                    trans.setTotalRequest(trans.getRequests().size());
+                                    return trans;
+                                }).collect(Collectors.toList());
+                            }
+
+                        }
+                    }
+                }
+                dto.setItems(listTransRequest);
+                dto.setTotalElement(total);
+                if (total % size == 0) {
+                    totalPage = total / size;
+                } else {
+                    totalPage = total / size + 1;
+                }
+                dto.setPage(page);
+                dto.setSize(size);
+                dto.setTotalPage(totalPage);
+                result = dto;
+                httpStatus = HttpStatus.OK;
+            } else {
+                result = new ResponseMessageDTO("FAILED", "E113");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("getListTransactionRequest: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("transaction-request/total")
+    public ResponseEntity<Object> getTotalRequest(@RequestParam(value = "type") int type,
+                                                  @RequestParam(value = "value") String value,
+                                                  @RequestParam(value = "fromDate") String fromDate,
+                                                  @RequestParam(value = "toDate") String toDate,
+                                                  @RequestParam(value = "bankId") String bankId,
+                                                  @RequestParam(value = "userId") String userId) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            int total = 0;
+            switch (type) {
+                case 9:
+                    total = transactionReceiveService.countTransactionReceiveWithRequest(bankId, fromDate, toDate);
+                    break;
+                case 1:
+                    total = transactionReceiveService.countTransactionReceiveWithRequestByFtCode(bankId, fromDate, toDate, value);
+                    break;
+                case 2:
+                    total = transactionReceiveService.countTransactionReceiveWithRequestByOrderId(bankId, fromDate, toDate, value);
+                    break;
+                case 3:
+                    value = value.replace("-", " ").trim();
+                    total = transactionReceiveService.countTransactionReceiveWithRequestByContent(bankId, fromDate, toDate, value);
+                    break;
+                case 4:
+                    total = transactionReceiveService.countTransactionReceiveWithRequestByTerminalCode(bankId, fromDate, toDate, value);
+                    break;
+                case 5:
+                    int status = Integer.parseInt(value);
+                    total = transactionReceiveService.countTransactionReceiveWithRequestByStatus(bankId, fromDate, toDate, status);
+                    break;
+                default:
+                    break;
+            }
+            result = new TotalResquestDTO(total);
+            httpStatus = HttpStatus.OK;
+
+        } catch (Exception e) {
+            logger.error("getListTransactionRequest: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // approve
+    @PostMapping("transaction-approve")
+    public ResponseEntity<ResponseMessageDTO> requestMapTransactionDetail(@RequestBody @Valid ApproveTransRequestDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            List<String> rolesAccept = new ArrayList<>();
+            rolesAccept.add(EnvironmentUtil.getRequestReceiveMerchantRoleId());
+            rolesAccept.add(EnvironmentUtil.getRequestReceiveTerminalRoleId());
+            rolesAccept.add(EnvironmentUtil.getAdminRoleId());
+            String roles = String.join("|", rolesAccept);
+            String isExist = merchantMemberRoleService.checkMemberHaveRole(dto.getUserId(),
+                    roles);
+            if (isExist == null || isExist.trim().isEmpty()) {
+                result = new ResponseMessageDTO("FAILED", "E115");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            } else {
+                ObjectMapper mapper = new ObjectMapper();
+                LocalDateTime now = LocalDateTime.now();
+                long currentTime = now.toEpochSecond(ZoneOffset.UTC);
+
+                TransactionUpdateTerminalDTO data1 = new TransactionUpdateTerminalDTO();
+                TransactionUpdateTerminalDTO data2 = new TransactionUpdateTerminalDTO();
+                TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
+                        .getTransactionReceiveById(dto.getTransactionId());
+                TransReceiveRequestMappingEntity transReceiveRequestMappingEntity = transReceiveRequestMappingService
+                        .findById(dto.getRequestId());
+                if (dto.getStatus() == 1) {
+                    transReceiveRequestMappingEntity.setStatus(1);
+                    if (transactionReceiveEntity == null) {
+                        result = new ResponseMessageDTO("FAILED", "E46");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    } else {
+                        if (transactionReceiveEntity.getType() == 0) {
+                            //update terminal code
+//                            transactionReceiveService.updateTransactionReceiveTerminal(dto.getTransactionId(),
+//                                    transReceiveRequestMappingEntity.getRequestValue(), 0);
+                            data1.setTransactionId(dto.getTransactionId());
+                            data1.setTerminalCode(transactionReceiveEntity.getTerminalCode());
+                            data1.setType(transactionReceiveEntity.getType());
+                            data1.setTransStatus(transactionReceiveEntity.getTransStatus());
+                            data2.setTransactionId(dto.getTransactionId());
+                            data2.setTerminalCode(transReceiveRequestMappingEntity.getRequestValue());
+                            data2.setType(transactionReceiveEntity.getType());
+                            data2.setTransStatus(2);
+                            transactionReceiveEntity.setTerminalCode(transReceiveRequestMappingEntity.getRequestValue());
+                            transactionReceiveEntity.setType(0);
+                        } else {
+                            // update terminal code
+//                            transactionReceiveService.updateTransactionReceiveTerminal(dto.getTransactionId(),
+//                                    transReceiveRequestMappingEntity.getRequestValue(), 1);
+                            data1.setTransactionId(dto.getTransactionId());
+                            data1.setTerminalCode(transReceiveRequestMappingEntity.getRequestValue());
+                            data1.setType(transactionReceiveEntity.getType());
+                            data1.setTransStatus(transactionReceiveEntity.getTransStatus());
+                            data2.setTransactionId(dto.getTransactionId());
+                            data2.setTerminalCode(transReceiveRequestMappingEntity.getRequestValue());
+                            data2.setType(1);
+                            data2.setTransStatus(2);
+                            transactionReceiveEntity.setTerminalCode(transReceiveRequestMappingEntity.getRequestValue());
+                            transactionReceiveEntity.setType(1);
+                        }
+
+                        // insert for statistic
+                        if ("C".equalsIgnoreCase(transactionReceiveEntity.getTransType())
+                                && 1 == transactionReceiveEntity.getStatus()) {
+                            TransactionTerminalTempEntity transactionTerminalTemp = transactionTerminalTempService
+                                    .getTempByTransactionId(dto.getTransactionId());
+                            if (transactionTerminalTemp != null) {
+                                transactionTerminalTemp
+                                        .setTerminalCode(transReceiveRequestMappingEntity.getRequestValue());
+                            } else {
+                                transactionTerminalTemp = new TransactionTerminalTempEntity();
+                                transactionTerminalTemp.setId(UUID.randomUUID().toString());
+                                transactionTerminalTemp.setTransactionId(dto.getTransactionId());
+                                transactionTerminalTemp.setTerminalCode(transReceiveRequestMappingEntity
+                                        .getRequestValue());
+                                transactionTerminalTemp.setTime(transactionReceiveEntity.getTimePaid());
+                                transactionTerminalTemp.setAmount(transactionReceiveEntity.getAmount());
+                            }
+                            transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTemp);
+                        }
+
+                        TransactionReceiveHistoryEntity transactionReceiveHistoryEntity = new TransactionReceiveHistoryEntity();
+                        transactionReceiveHistoryEntity.setId(UUID.randomUUID().toString());
+                        transactionReceiveHistoryEntity.setTransactionReceiveId(dto.getTransactionId());
+                        transactionReceiveHistoryEntity.setUserId(dto.getUserId());
+                        transactionReceiveHistoryEntity.setTimeUpdated(currentTime);
+                        transactionReceiveHistoryEntity.setType(2);
+                        transactionReceiveHistoryEntity.setData3(dto.getRequestId());
+                        transactionReceiveHistoryEntity.setData2(mapper.writeValueAsString(data2));
+                        transactionReceiveHistoryEntity.setData1(mapper.writeValueAsString(data1));
+                        // update request already approve:
+                        transReceiveRequestMappingEntity.setTimeApproved(currentTime);
+                        // update transaction
+                        transactionReceiveEntity.setTransStatus(2);
+                        transactionReceiveEntity.setTerminalCode(transReceiveRequestMappingEntity.getRequestValue());
+
+                        transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
+                        transactionReceiveHistoryService.insertTransactionReceiveHistory(transactionReceiveHistoryEntity);
+                        result = new ResponseMessageDTO("SUCCESS", "");
+                        httpStatus = HttpStatus.OK;
+                    }
+                } else {
+                    transReceiveRequestMappingEntity.setStatus(2);  // rejected
+                    List<String> strings = new ArrayList<>();
+                    strings.add(dto.getTransactionId());
+                    List<TransRequestDTO> listRequests = transReceiveRequestMappingService
+                            .getTransactionReceiveRequest(strings);
+                    if (transactionReceiveEntity != null && listRequests.size() <= 1) {
+                        transactionReceiveEntity.setTransStatus(0);
+                        transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
+                    }
+                    transReceiveRequestMappingService.insert(transReceiveRequestMappingEntity);
+                    result = new ResponseMessageDTO("SUCCESS", "");
+                    httpStatus = HttpStatus.OK;
+                }
+            }
+
+        } catch (Exception e) {
+            logger.error("requestMapTransactionDetail: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+}

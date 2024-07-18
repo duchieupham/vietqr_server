@@ -18,7 +18,11 @@ public class ConfirmCustomerVaDTO implements Serializable {
         super();
     }
 
-    public ConfirmCustomerVaDTO(String merchantId, String merchantName, String confirmId, String otpNumber) {
+    public ConfirmCustomerVaDTO(
+            String merchantId,
+            String merchantName,
+            String confirmId,
+            String otpNumber) {
         this.merchantId = merchantId;
         this.merchantName = merchantName;
         this.confirmId = confirmId;

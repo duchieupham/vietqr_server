@@ -28,6 +28,10 @@ public class AccountBankReceiveDetailDTO implements Serializable {
     private String phoneAuthenticated;
     private String ewalletToken;
     private Integer unlinkedType;
+    private Boolean isActiveService;
+    private Long validFeeFrom;
+    private Long validFeeTo;
+    private int transCount;
 //    private List<BusinessBankDetailDTO> businessDetails;
     private List<TransactionBankListDTO> transactions;
 
@@ -62,6 +66,14 @@ public class AccountBankReceiveDetailDTO implements Serializable {
         this.unlinkedType = unlinkedType;
 //        this.businessDetails = businessDetails;
         this.transactions = transactions;
+    }
+
+    public int getTransCount() {
+        return transCount;
+    }
+
+    public void setTransCount(int transCount) {
+        this.transCount = transCount;
     }
 
     public String getCaiValue() {
@@ -200,7 +212,31 @@ public class AccountBankReceiveDetailDTO implements Serializable {
         this.unlinkedType = unlinkedType;
     }
 
-//    public List<BusinessBankDetailDTO> getBusinessDetails() {
+    public Boolean getIsActiveService() {
+        return isActiveService;
+    }
+
+    public void setIsActiveService(Boolean activeService) {
+        isActiveService = activeService;
+    }
+
+    public Long getValidFeeFrom() {
+        return validFeeFrom;
+    }
+
+    public void setValidFeeFrom(Long validFeeFrom) {
+        this.validFeeFrom = validFeeFrom;
+    }
+
+    public Long getValidFeeTo() {
+        return validFeeTo;
+    }
+
+    public void setValidFeeTo(Long validFeeTo) {
+        this.validFeeTo = validFeeTo;
+    }
+
+    //    public List<BusinessBankDetailDTO> getBusinessDetails() {
 //        return businessDetails;
 //    }
 //

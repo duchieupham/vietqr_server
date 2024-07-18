@@ -7,7 +7,7 @@ public class EnvironmentUtil {
     // BIDV
     // request - confirm linked bank Account
     private static final String BIDV_URL_GET_TOKEN_UAT = "https://bidv.net:9303/bidvorg/service/openapi/oauth2/token";
-    private static final String BIDV_URL_GET_TOKEN_PROD = "https://bidv.net:9303/bidvorg/service/openapi/oauth2/token";
+    private static final String BIDV_URL_GET_TOKEN_PROD = "https://openapi.bidv.com.vn/bidv/service/paygate-oauth/oauth2/token";
 
     private static final String BIDV_LINKED_URL_REQUEST_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/create-ewallet-link-collection/v1";
     private static final String BIDV_LINKED_URL_REQUEST_PROD = "https://www.bidv.net:9303/bidvorg/service/open-banking/create-ewallet-link-collection/v1";
@@ -18,17 +18,19 @@ public class EnvironmentUtil {
     private static final String BIDV_UNLINKED_URL_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/remove-ewallet-link-collection/v1";
     private static final String BIDV_UNLINKED_URL_PROD = "https://www.bidv.net:9303/bidvorg/service/open-banking/remove-ewallet-link-collection/v1";
 
-    private static final String BIDV_GET_TOKEN_CLIENT_ID_UAT = "c87962d6c3bf521c4f0911589863ff06";
-    private static final String BIDV_GET_TOKEN_CLIENT_ID_PROD = "c87962d6c3bf521c4f0911589863ff06";
+//    private static final String BIDV_GET_TOKEN_CLIENT_ID_UAT = "c87962d6c3bf521c4f0911589863ff06";
+    private static final String BIDV_GET_TOKEN_CLIENT_ID_UAT = "e17e8e38263a1248668bf9b96dabe0ad";
+    private static final String BIDV_GET_TOKEN_CLIENT_ID_PROD = "811f14b4acfcfa6647af36a1549a263d";
 
-    private static final String BIDV_GET_TOKEN_CLIENT_SECRET_UAT = "ee2d23a34ce3cdc2a4c3d6d5b794fd3c";
-    private static final String BIDV_GET_TOKEN_CLIENT_SECRET_PROD = "ee2d23a34ce3cdc2a4c3d6d5b794fd3c";
+//    private static final String BIDV_GET_TOKEN_CLIENT_SECRET_UAT = "ee2d23a34ce3cdc2a4c3d6d5b794fd3c";
+    private static final String BIDV_GET_TOKEN_CLIENT_SECRET_UAT = "28a360eab9c52df7fb0257e27b760568";
+    private static final String BIDV_GET_TOKEN_CLIENT_SECRET_PROD = "f0add8cda01ae40db66f2fcbdc63692c";
 
     private static final String BIDV_LINKED_SERVICE_ID_UAT = "BC0001";
-    private static final String BIDV_LINKED_SERVICE_ID_PROD = "BC0001";
+    private static final String BIDV_LINKED_SERVICE_ID_PROD = "BLC001";
 
     private static final String BIDV_LINKED_MERCHANT_ID_UAT = "BC0001";
-    private static final String BIDV_LINKED_MERCHANT_ID_PROD = "BC0001";
+    private static final String BIDV_LINKED_MERCHANT_ID_PROD = "BLC001";
 
     private static final String BIDV_LINKED_MERCHANT_NAME_UAT = "BLUECOM";
     private static final String BIDV_LINKED_MERCHANT_NAME_PROD = "BLUECOM";
@@ -36,21 +38,34 @@ public class EnvironmentUtil {
     private static final String BIDV_LINKED_CHANNEL_ID_UAT = "211701";
     private static final String BIDV_LINKED_CHANNEL_ID_PROD = "211701";
 
+    private static final String BIDV_TRANSACTION_PREFIX = "TRV";
+    private static final String BIDV_INVOICE_TRANSACTION_PREFIX = "ITV";
+
     // BIDV
     // request - confirm add merchant va
-    private static final String BIDV_URL_REQUEST_ADD_MERCHANT_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/createVAQLBH/v1";
-    private static final String BIDV_URL_REQUEST_ADD_MERCHANT_PROD = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/createVAQLBH/v1";
+    private static final String BIDV_URL_REQUEST_ADD_MERCHANT_UAT = "https://bidv.net:9303/bidvorg/service/open-banking/paygate/virtualAccount/createVAQLBH/v1";
+    private static final String BIDV_URL_REQUEST_ADD_MERCHANT_PROD = "https://openapi.bidv.com.vn/bidv/service/open-banking/paygate/virtualAccount/createVAQLBH/v1";
 
-    private static final String BIDV_URL_CONFIRM_ADD_MERCHANT_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/confirmVAQLBH/v1";
-    private static final String BIDV_URL_CONFIRM_ADD_MERCHANT_PROD = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/confirmVAQLBH/v1";
+    private static final String BIDV_URL_CONFIRM_ADD_MERCHANT_UAT = "https://bidv.net:9303/bidvorg/service/open-banking/paygate/virtualAccount/confirmVAQLBH/v1";
+    private static final String BIDV_URL_CONFIRM_ADD_MERCHANT_PROD = "https://openapi.bidv.com.vn/bidv/service/open-banking/paygate/virtualAccount/confirmVAQLBH/v1";
 
-    private static final String BIDV_URL_UNREGISTER_MERCHANT_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/deleteVAQLBH/v1";
-    private static final String BIDV_URL_UNREGISTER_MERCHANT_PROD = "https://www.bidv.net:9303/bidvorg/service/open-banking/paygate/deleteVAQLBH/v1";
+    private static final String BIDV_URL_UNREGISTER_MERCHANT_UAT = "https://bidv.net:9303/bidvorg/service/open-banking/paygate/virtualAccount/deleteVAQLBH/v1";
+    private static final String BIDV_URL_UNREGISTER_MERCHANT_PROD = "https://openapi.bidv.com.vn/bidv/service/open-banking/paygate/virtualAccount/deleteVAQLBH/v1";
+
+    private static final String BIDV_URL_CREATE_VIETQR_VA_UAT = "https://bidv.net:9303/bidvorg/service/open-banking/paygate/virtualAccount/genVietQR/v1";
+    private static final String BIDV_URL_CREATE_VIETQR_VA_PROD = "https://openapi.bidv.com.vn/bidv/service/open-banking/paygate/virtualAccount/genVietQR/v1";
 
     private static final String BIDV_LINKED_PAYER_DEBIT_TYPE_ACC_UAT = "810";
     private static final String BIDV_LINKED_PAYER_DEBIT_TYPE_ACC_PROD = "810";
     // private static final String BIDV_LINKED_PAYER_DEBIT_TYPE_CARD_PROD = "810";
     // private static final String BIDV_LINKED_PAYER_DEBIT_TYPE_CARD_PROD = "810";
+
+    // BIDV
+    // authentication for Get Bill & Pay Bill
+    private static final String BIDV_SECRET_KEY_UAT = "QklEVkJMVUVDT01BY2Nlc3NLZXk=";
+    private static final String BIDV_SECRET_KEY_PROD = "QklEVkJMVUVDT01BY2Nlc3NLZXk=";
+    private static final String BIDV_ACCESS_KEY_UAT = "bank-bidv-0002";
+    private static final String BIDV_ACCESS_KEY_PROD = "bank-bidv-240504";
 
     ///
     // IP ADDRESS
@@ -76,6 +91,9 @@ public class EnvironmentUtil {
     private static final String QR_LINK_UAT = "https://vietqr.vn/test/qr-generated?token=";
     private static final String QR_LINK_PROD = "https://vietqr.vn/qr-generated?token=";
 
+    // QR Link new feed
+    private static final String QR_LINK = "https://vietqr.vn/qr/security?publicRefId=";
+
     // DINO SOFT - VOICE
     private static final String VOICE_REQUEST_URL = "http://103.141.140.202:8009/tts/v1/speak";
     private static final String APP_ID_VOICE = "4a5vyvn37z4C5MNGYGsKw3dNo3Vdw4PG";
@@ -83,6 +101,14 @@ public class EnvironmentUtil {
     private static final String VOICE_CODE = "1";
     private static final String SPEED_RATE = "1.1";
     private static final int BIT_RATE = 24;
+    private static final long TIME_OUT_BIDV_GET_BILL = 3000;
+    private static final String VIET_QR_PLUS_PACKAGE = "VietQR Plus";
+    private static final String VIET_QR_PRO_PACKAGE = "VietQR Pro";
+    private static final String VIET_QR_NAME_ANNUAL_FEE = "Phí duy trì phần mềm VietQR tháng ";
+    private static final String VIET_QR_NAME_TRANS_FEE = "Phí giao dịch phần mềm VietQR tháng ";
+    private static final String VIET_QR_NAME_ANOTHER_FEE = "Phí khác";
+    private static final String MONTH_UNIT_NAME_VN = "Tháng";
+    private static final String BANK_SHORT_NAME_RECHARGE = "MBBank";
 
     // MB Bank
     private static final String BANK_URL_UAT = "https://api-sandbox.mbbank.com.vn/";
@@ -143,6 +169,9 @@ public class EnvironmentUtil {
     private static final String VNPT_EPAY_PARTNER_NAME_UAT = "BLUECOM";
     private static final String VNPT_EPAY_PARTNER_NAME_PROD = "BLUECOM";
 
+    private static final String MERCHANT_ID_QR_BOX_DEFAULT_UAT = "";
+    private static final String MERCHANT_ID_QR_BOX_DEFAULT_PROD = "f6eab070-e370-11ee-8355-c43772815012";
+
     ////////////////////////////////////
     // for get qr recharge VNPT Epay
     // OLD
@@ -168,6 +197,8 @@ public class EnvironmentUtil {
 
     ///////////////////////////////////
     // for recharge into VietQR VN
+    private static final String MMS_PREFIX_ORDER_ID = "VQO";
+
     private static final String BUSINESS_ID_RECHARGE_UAT = "";
     private static final String BUSINESS_ID_RECHARGE_PROD = "bb6ca0e0-f085-4f03-9166-18cbfc840d63";
     //
@@ -179,16 +210,31 @@ public class EnvironmentUtil {
     private static final String BANK_LOGO_ID_RECHARGE_UAT = "58b7190b-a294-4b14-968f-cd365593893e";
     private static final String BANK_LOGO_ID_RECHARGE_PROD = "58b7190b-a294-4b14-968f-cd365593893e";
     //
-    private static final String BANK_ID_RECHARGE_UAT = "";
+    private static final String BANK_ID_RECHARGE_UAT = "c085abad-9901-4acd-9c15-2e8d0b63489d";
     private static final String BANK_ID_RECHARGE_PROD = "bb25279e-b7e6-405e-bdce-a697794f465f";
+    private static final String BANK_ID_RECHARGE_UAT2 = "d0aa997d-3967-4352-af5b-82c1c47d4b47";
+    private static final String BANK_ID_RECHARGE_PROD2 = "172ff268-6d2e-4bcf-8aaa-1902badfcc63";
     //
-    private static final String BANK_ACCOUNT_RECHARGE_UAT = "";
+    private static final String BANK_ACCOUNT_RECHARGE_UAT = "29058474275";
+    private static final String BANK_ACCOUNT_RECHARGE_UAT2 = "699699699996";
     private static final String BANK_ACCOUNT_RECHARGE_PROD = "0020108679008";
+    private static final String BANK_ACCOUNT_RECHARGE_PROD2 = "0801133666888";
+    //
+    private static final String BANK_CODE_RECHARGE_UAT = "MB";
+    private static final String BANK_CODE_RECHARGE_PROD = "MB";
+    //
+    private static final String BANK_NAME_RECHARGE_UAT = "Ngân hàng TMCP Quân đội";
+    private static final String BANK_NAME_RECHARGE_PROD = "Ngân hàng TMCP Quân đội";
+    //
+    private static final String USER_BANK_NAME_RECHARGE_UAT = "Bluecom Viet Nam";
+    private static final String USER_BANK_NAME_RECHARGE_UAT2 = "Cong Ty Co Phan Bluecom Viet Nam";
+    private static final String USER_BANK_NAME_RECHARGE_PROD = "Pham Duc Tuan";
+    private static final String USER_BANK_NAME_RECHARGE_PROD2 = "Cong Ty Co Phan Bluecom Viet Nam";
     //
     private static final String BANK_TYPE_ID_RECHARGE_UAT = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
     private static final String BANK_TYPE_ID_RECHARGE_PROD = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
 
-    private static final String USER_ID_HOST_RECHARGE_UAT = "";
+    private static final String USER_ID_HOST_RECHARGE_UAT = "648dca06-4f72-4df8-b98f-429f4777fbda";
     private static final String USER_ID_HOST_RECHARGE_PROD = "6e3712ab-48ea-4bfa-a50d-f7dd1f184efb";
 
     // VIET QR ICON ID
@@ -224,6 +270,64 @@ public class EnvironmentUtil {
     private static final String MB_QR_CODE_STATIC_TYPE = "1";
     private static final String MB_QR_INIT_STATIC_METHOD = "11";
 
+    // Role for member in merchant
+    private static final String ONLY_READ_RECEIVE_MERCHANT_ROLE_ID_UAT = "ce30f63e-e5c4-11ee-abd2-c437724afb36";
+    private static final String ONLY_READ_RECEIVE_ROLE_ID_PROD = "ce30f63e-e5c4-11ee-abd2-c437724afb36";
+
+    private static final String READ_APPROVE_RECEIVE_MERCHANT_ROLE_ID_UAT = "f63ddf03-e5c4-11ee-abd2-c437724afb36";
+    private static final String READ_APPROVE_RECEIVE_MERCHANT_ROLE_ID_PROD = "f63ddf03-e5c4-11ee-abd2-c437724afb36";
+
+    private static final String ADMIN_ROLE_ID_UAT = "b9611ed2-e5c4-11ee-abd2-c437724afb36";
+    private static final String ADMIN_ROLE_ID_PROD = "b9611ed2-e5c4-11ee-abd2-c437724afb36";
+    private static final String VIET_QR_HOME_PAGE = "vietqr.vn|vietqr.com";
+    private static final String VIET_QR_PAYMENT_SUCCESS_QR_VOICE = " đồng, ";
+
+    // Role for member in terminal
+    private static final String ONLY_READ_RECEIVE_TERMINAL_ROLE_ID_UAT = "0f470d54-63a3-4cce-8691-5ec9380855f3";
+    private static final String ONLY_READ_RECEIVE_TERMINAL_ROLE_ID_PROD = "0f470d54-63a3-4cce-8691-5ec9380855f3";
+    private static final String READ_REQUEST_RECEIVE_TERMINAL_ROLE_ID_UAT = "1bf18675-e063-4070-a5d6-14add8cfb518";
+    private static final String READ_REQUEST_RECEIVE_TERMINAL_ROLE_ID_PROD = "1bf18675-e063-4070-a5d6-14add8cfb518";
+    private static final String EXPORT_EXCEL_TERMINAL_ROLE_ID_UAT = "4c0e00d8-f9c3-4504-af89-ae19b231f71f";
+    private static final String EXPORT_EXCEL_TERMINAL_ROLE_ID_PROD = "4c0e00d8-f9c3-4504-af89-ae19b231f71f";
+    private static final String EXPORT_EXCEL_MERCHANT_ROLE_ID_UAT = "dc0163d1-8d7b-4448-8b0c-6d7248335845";
+    private static final String EXPORT_EXCEL_MERCHANT_ROLE_ID_PROD = "dc0163d1-8d7b-4448-8b0c-6d7248335845";
+
+    private static final String FCM_NOTIFICATION_ROLE_ID_UAT = "072bb387-959c-4f6d-917a-4dbd74a7bc94";
+    private static final String FCM_NOTIFICATION_ROLE_ID_PROD = "072bb387-959c-4f6d-917a-4dbd74a7bc94";
+
+    private static final String HIDDEN_AMOUNT_VIET_QR = "xxxxx";
+    private static final int MAXIMUM_EXPIRED_MINUTES_OTP = 10;
+
+    private static final String VIET_QR_ACTIVE_KEY_UAT = "";
+    private static final String VIET_QR_ACTIVE_KEY_PROD = "vqsbgDbmkC";
+
+    private static final int LENGTH_KEY_ACTIVE_BANK = 12;
+    private static final String CHARACTERS_KEY_ACTIVE_BANK = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+    private static final String ADMIN_UAT_ACTIVE_KEY = "admin-vqr-active-key-2326";
+
+    private static final String PREFIX_BIDV_BILL_ID_COMMON = "VQR";
+
+    public static String getBidvSecretKey() {
+        return (IS_PRODUCTION == false) ? BIDV_SECRET_KEY_UAT : BIDV_SECRET_KEY_PROD;
+    }
+
+    public static String getBidvAccessKey() {
+        return (IS_PRODUCTION == false) ? BIDV_ACCESS_KEY_UAT : BIDV_ACCESS_KEY_PROD;
+    }
+
+    public static String getBidvUrlCreateVietQRVa() {
+        return (IS_PRODUCTION == false) ? BIDV_URL_CREATE_VIETQR_VA_UAT : BIDV_URL_CREATE_VIETQR_VA_PROD;
+    }
+
+    public static String getHiddenAmountVietQr() {
+        return HIDDEN_AMOUNT_VIET_QR;
+    }
+
+    public static String getVietQrActiveKey() {
+        return (IS_PRODUCTION == false) ? VIET_QR_ACTIVE_KEY_UAT : VIET_QR_ACTIVE_KEY_PROD;
+    }
+
     public static String getBidvUrlRequestAddMerchant() {
         return (IS_PRODUCTION == false) ? BIDV_URL_REQUEST_ADD_MERCHANT_UAT : BIDV_URL_REQUEST_ADD_MERCHANT_PROD;
     }
@@ -245,55 +349,58 @@ public class EnvironmentUtil {
     }
 
     public static String getIpVietQRVN() {
-        return (IS_PRODUCTION == false) ? IP_VIETQRVN_PROD : IP_VIETQRVN_UAT;
+        return (IS_PRODUCTION == false) ? IP_VIETQRVN_UAT : IP_VIETQRVN_PROD;
     }
 
     // BIDV BIDV_UNLINKED_URL_UAT
     public static String getBidvUrlUnlinked() {
-        return (IS_PRODUCTION == false) ? BIDV_UNLINKED_URL_PROD : BIDV_UNLINKED_URL_UAT;
+        return (IS_PRODUCTION == false) ? BIDV_UNLINKED_URL_UAT : BIDV_UNLINKED_URL_PROD;
     }
 
     public static String getBidvUrlGetToken() {
-        return (IS_PRODUCTION == false) ? BIDV_URL_GET_TOKEN_PROD : BIDV_URL_GET_TOKEN_UAT;
+        return (IS_PRODUCTION == false) ? BIDV_URL_GET_TOKEN_UAT : BIDV_URL_GET_TOKEN_PROD;
     }
 
     public static String getBidvUrlLinkedRequest() {
-        return (IS_PRODUCTION == false) ? BIDV_LINKED_URL_REQUEST_PROD : BIDV_LINKED_URL_REQUEST_UAT;
+        return (IS_PRODUCTION == false) ? BIDV_LINKED_URL_REQUEST_UAT : BIDV_LINKED_URL_REQUEST_PROD;
     }
 
     public static String getBidvUrlLinkedConfirm() {
-        return (IS_PRODUCTION == false) ? BIDV_LINKED_URL_CONFIRM_PROD : BIDV_LINKED_URL_CONFIRM_UAT;
+        return (IS_PRODUCTION == false) ? BIDV_LINKED_URL_CONFIRM_UAT : BIDV_LINKED_URL_CONFIRM_PROD;
     }
 
     public static String getBidvGetTokenClientId() {
-        return (IS_PRODUCTION == false) ? BIDV_GET_TOKEN_CLIENT_ID_PROD : BIDV_GET_TOKEN_CLIENT_ID_UAT;
+        return (IS_PRODUCTION == false) ? BIDV_GET_TOKEN_CLIENT_ID_UAT : BIDV_GET_TOKEN_CLIENT_ID_PROD;
     }
 
     public static String getBidvGetTokenClientSecret() {
-        return (IS_PRODUCTION == false) ? BIDV_GET_TOKEN_CLIENT_SECRET_PROD : BIDV_GET_TOKEN_CLIENT_SECRET_UAT;
+        return (IS_PRODUCTION == false) ? BIDV_GET_TOKEN_CLIENT_SECRET_UAT : BIDV_GET_TOKEN_CLIENT_SECRET_PROD;
     }
 
     public static String getBidvLinkedServiceId() {
-        return (IS_PRODUCTION == false) ? BIDV_LINKED_SERVICE_ID_PROD : BIDV_LINKED_SERVICE_ID_UAT;
+        return (IS_PRODUCTION == false) ? BIDV_LINKED_SERVICE_ID_UAT : BIDV_LINKED_SERVICE_ID_PROD;
     }
 
     public static final String getBidvLinkedMerchantId() {
-        return (IS_PRODUCTION == false) ? BIDV_LINKED_MERCHANT_ID_PROD : BIDV_LINKED_MERCHANT_ID_UAT;
+        return (IS_PRODUCTION == false) ? BIDV_LINKED_MERCHANT_ID_UAT : BIDV_LINKED_MERCHANT_ID_PROD;
     }
 
     public static String getBidvLinkedMerchantName() {
-        return (IS_PRODUCTION == false) ? BIDV_LINKED_MERCHANT_NAME_PROD : BIDV_LINKED_MERCHANT_NAME_UAT;
+        return (IS_PRODUCTION == false) ? BIDV_LINKED_MERCHANT_NAME_UAT : BIDV_LINKED_MERCHANT_NAME_PROD;
     }
 
     public static String getBidvLinkedChannelId() {
-        return (IS_PRODUCTION == false) ? BIDV_LINKED_CHANNEL_ID_PROD : BIDV_LINKED_CHANNEL_ID_UAT;
+        return (IS_PRODUCTION == false) ? BIDV_LINKED_CHANNEL_ID_UAT : BIDV_LINKED_CHANNEL_ID_PROD;
     }
 
     public static String getBidvLinkedPayerDebitTypeAcc() {
-        return (IS_PRODUCTION == false) ? BIDV_LINKED_PAYER_DEBIT_TYPE_ACC_PROD : BIDV_LINKED_PAYER_DEBIT_TYPE_ACC_UAT;
+        return (IS_PRODUCTION == false) ? BIDV_LINKED_PAYER_DEBIT_TYPE_ACC_UAT : BIDV_LINKED_PAYER_DEBIT_TYPE_ACC_PROD;
     }
 
     ///
+    public static String getMmsPrefixOrderId() {
+        return MMS_PREFIX_ORDER_ID;
+    }
 
     public static String getUrlVietqrVnUat() {
         return URL_VIETQR_VN_UAT;
@@ -317,6 +424,10 @@ public class EnvironmentUtil {
 
     public static String getQRLink() {
         return (IS_PRODUCTION == false) ? QR_LINK_UAT : QR_LINK_PROD;
+    }
+
+    public static String getQRLinkNewFeed() {
+        return QR_LINK;
     }
 
     public static String getVNPTEpayRequestPaymentBankUsername() {
@@ -400,6 +511,18 @@ public class EnvironmentUtil {
 
     public static String getBankAccountRecharge() {
         return (IS_PRODUCTION == false) ? BANK_ACCOUNT_RECHARGE_UAT : BANK_ACCOUNT_RECHARGE_PROD;
+    }
+
+    public static String getBankCodeRecharge() {
+        return (IS_PRODUCTION == false) ? BANK_CODE_RECHARGE_UAT : BANK_CODE_RECHARGE_PROD;
+    }
+
+    public static String getBankNameRecharge() {
+        return (IS_PRODUCTION == false) ? BANK_NAME_RECHARGE_UAT : BANK_NAME_RECHARGE_PROD;
+    }
+
+    public static String getUserBankNameRecharge() {
+        return (IS_PRODUCTION == false) ? USER_BANK_NAME_RECHARGE_UAT : USER_BANK_NAME_RECHARGE_PROD;
     }
 
     public static String getBankTypeIdRecharge() {
@@ -496,5 +619,136 @@ public class EnvironmentUtil {
 
     public static String getVietQrUrlApi() {
         return (IS_PRODUCTION == false) ? VIET_QR_URL_API_UAT : VIET_QR_URL_API_PROD;
+    }
+
+    public static String getDefaultCustomerSyncIdIot() {
+        return (IS_PRODUCTION == false) ? MERCHANT_ID_QR_BOX_DEFAULT_UAT : MERCHANT_ID_QR_BOX_DEFAULT_PROD;
+    }
+
+    public static String getOnlyReadReceiveMerchantRoleId() {
+        return (IS_PRODUCTION == false) ? ONLY_READ_RECEIVE_MERCHANT_ROLE_ID_UAT : ONLY_READ_RECEIVE_ROLE_ID_PROD;
+    }
+
+    public static String getRequestReceiveMerchantRoleId() {
+        return (IS_PRODUCTION == false) ? READ_APPROVE_RECEIVE_MERCHANT_ROLE_ID_UAT
+                : READ_APPROVE_RECEIVE_MERCHANT_ROLE_ID_PROD;
+    }
+
+    public static String getAdminRoleId() {
+        return (IS_PRODUCTION == false) ? ADMIN_ROLE_ID_UAT : ADMIN_ROLE_ID_PROD;
+    }
+
+    public static String getOnlyReadReceiveTerminalRoleId() {
+        return (IS_PRODUCTION == false) ? ONLY_READ_RECEIVE_TERMINAL_ROLE_ID_UAT
+                : ONLY_READ_RECEIVE_TERMINAL_ROLE_ID_PROD;
+    }
+
+    public static String getRequestReceiveTerminalRoleId() {
+        return (IS_PRODUCTION == false) ? READ_REQUEST_RECEIVE_TERMINAL_ROLE_ID_UAT
+                : READ_REQUEST_RECEIVE_TERMINAL_ROLE_ID_PROD;
+    }
+
+    public static String getExportExcelForTerminalRoleId() {
+        return (IS_PRODUCTION == false) ? EXPORT_EXCEL_TERMINAL_ROLE_ID_UAT : EXPORT_EXCEL_TERMINAL_ROLE_ID_PROD;
+    }
+
+    public static String getExportExcelForMerchantRoleId() {
+        return (IS_PRODUCTION == false) ? EXPORT_EXCEL_MERCHANT_ROLE_ID_UAT : EXPORT_EXCEL_MERCHANT_ROLE_ID_PROD;
+    }
+
+    public static String getFcmNotificationRoleId() {
+        return (IS_PRODUCTION == false) ? FCM_NOTIFICATION_ROLE_ID_UAT : FCM_NOTIFICATION_ROLE_ID_PROD;
+    }
+
+    public static int getMaximumExpiredMinutesOTP() {
+        return MAXIMUM_EXPIRED_MINUTES_OTP;
+    }
+
+    public static int getLengthKeyActiveBank() {
+        return LENGTH_KEY_ACTIVE_BANK;
+    }
+
+    public static String getCharactersKeyActiveBank() {
+        return CHARACTERS_KEY_ACTIVE_BANK;
+    }
+
+    public static String getAdminUatActiveKey() {
+        return ADMIN_UAT_ACTIVE_KEY;
+    }
+
+    public static String getVietQrPlusPackage() {
+        return VIET_QR_PLUS_PACKAGE;
+    }
+
+    public static String getVietQrProPackage() {
+        return VIET_QR_PRO_PACKAGE;
+    }
+
+    public static String getVietQrNameTransFee() {
+        return VIET_QR_NAME_TRANS_FEE;
+    }
+
+    public static String getVietQrNameAnotherFee() {
+        return VIET_QR_NAME_ANOTHER_FEE;
+    }
+
+    public static String getVietQrNameAnnualFee() {
+        return VIET_QR_NAME_ANNUAL_FEE;
+    }
+
+    public static String getMonthUnitNameVn() {
+        return MONTH_UNIT_NAME_VN;
+    }
+
+    public static String getVietQrHomePage() {
+        return VIET_QR_HOME_PAGE;
+    }
+
+    public static String getVietQrPaymentSuccessQrVoice() {
+        return VIET_QR_PAYMENT_SUCCESS_QR_VOICE;
+    }
+
+    public static String getVietQrBoxInteralPrefix() {
+        return "CERT-VVB-";
+    }
+
+    public static String getBankShortNameRecharge() {
+        return BANK_SHORT_NAME_RECHARGE;
+    }
+
+    public static String getBankIdRecharge2() {
+        return (isProduction() == false) ? BANK_ID_RECHARGE_UAT2 : BANK_ID_RECHARGE_PROD2;
+    }
+
+    public static String getBankAccountRecharge2() {
+        return (isProduction() == false) ? BANK_ACCOUNT_RECHARGE_UAT2: BANK_ACCOUNT_RECHARGE_PROD2;
+    }
+
+    public static String getUserBankNameRecharge2() {
+        return (isProduction() == false) ? USER_BANK_NAME_RECHARGE_UAT2 : USER_BANK_NAME_RECHARGE_PROD2;
+    }
+
+    public static String getBidvTransactionPrefix() {
+        return BIDV_TRANSACTION_PREFIX;
+    }
+
+    public static String getBidvInvoiceTransactionPrefix() {
+        return BIDV_INVOICE_TRANSACTION_PREFIX;
+    }
+
+    public static long getTimeOutBidvGetBill() {
+        return TIME_OUT_BIDV_GET_BILL;
+    }
+
+    public static String getPrefixBidvBillIdCommon() {
+        return PREFIX_BIDV_BILL_ID_COMMON;
+    }
+
+    public static String getPrefixTerminalExternal() {
+        return "TER";
+    }
+
+    public static String getMerchantPrefixPublic() {
+        return "MER";
     }
 }

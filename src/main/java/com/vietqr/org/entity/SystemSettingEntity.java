@@ -46,6 +46,18 @@ public class SystemSettingEntity implements Serializable {
     @Column(name = "logoVersion")
     private String logoVersion;
 
+    @Column(name = "serviceActive")
+    private Long serviceActive;
+
+    @Column(name = "vat")
+    private Double vat;
+
+    @Column(name = "boxEnv", columnDefinition = "JSON")
+    private String boxEnv;
+
+    @Column(name = "bankIdDefault")
+    private String bankIdDefault;
+
     public SystemSettingEntity() {
         super();
     }
@@ -145,4 +157,35 @@ public class SystemSettingEntity implements Serializable {
         this.logoVersion = logoVersion;
     }
 
+    public Long getServiceActive() {
+        return serviceActive;
+    }
+
+    public void setServiceActive(Long serviceActive) {
+        this.serviceActive = serviceActive;
+    }
+
+    public Double getVat() {
+        return vat;
+    }
+
+    public void setVat(Double vat) {
+        this.vat = vat;
+    }
+
+    public String getBoxEnv() {
+        return boxEnv;
+    }
+
+    public void setBoxEnv(String boxEnv) {
+        this.boxEnv = boxEnv;
+    }
+
+    public String getBankIdDefault() {
+        return bankIdDefault;
+    }
+
+    public void setBankIdDefault(String bankIdDefault) {
+        this.bankIdDefault = bankIdDefault;
+    }
 }

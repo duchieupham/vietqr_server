@@ -2,7 +2,7 @@ package com.vietqr.org.dto;
 
 import java.io.Serializable;
 
-public class ResponseMessageDTO implements Serializable{
+public class ResponseMessageDTO implements Serializable {
 	/**
 	 *
 	 */

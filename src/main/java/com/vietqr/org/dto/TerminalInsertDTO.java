@@ -22,6 +22,8 @@ public class TerminalInsertDTO {
     @NotBlank
     private String userId;
 
+    private String merchantId;
+
     public TerminalInsertDTO() {
     }
 
@@ -56,6 +58,14 @@ public class TerminalInsertDTO {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getMerchantId() {
+        return merchantId;
+    }
+
+    public void setMerchantId(String merchantId) {
+        this.merchantId = merchantId;
     }
 
     public List<String> getUserIds() {

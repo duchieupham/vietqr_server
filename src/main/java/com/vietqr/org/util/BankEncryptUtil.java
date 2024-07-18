@@ -23,15 +23,148 @@ public class BankEncryptUtil {
     private static final int ITERATION_COUNT = 1989;
     private static final String SECRET_KEY = "Runsystem!@#2020";
     private static final String ACCESS_KEY_CHECKSUM = "BluecomAccesskey";
+    private static final String VIET_QR_KEY_CHECKSUM = "VietQRAccesskey";
 
     public static boolean isMatchChecksum(String data, String checkSum) {
         return data.equals(checkSum);
+    }
+
+    public static String generateRefundMD5Checksum(String SECRET_KEY, String referenceNumber, String amount , String bankAccount) {
+        String result = "";
+        try {
+            String plainText = SECRET_KEY + referenceNumber + amount + bankAccount;
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(plainText.getBytes());
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b & 0xff));
+            }
+            result = sb.toString();
+        } catch (Exception e) {
+            logger.error("generateMD5Checksum ERROR: " + e.toString());
+        }
+        return result;
+    }
+
+    public static String generateIdempotencyKey(String referenceNumber, String bankAccount) {
+        String result = "";
+        try {
+            String plainText = referenceNumber + bankAccount;
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(plainText.getBytes());
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b & 0xff));
+            }
+            result = sb.toString();
+        } catch (Exception e) {
+            logger.error("generateMD5Checksum ERROR: " + e.toString());
+        }
+        return result;
     }
 
     public static String generateCheckOrderMD5Checksum(String traceTransfer, String billNumber, String referenceLabel) {
         String result = "";
         try {
             String plainText = traceTransfer + billNumber + referenceLabel + "BLC" + ACCESS_KEY_CHECKSUM;
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(plainText.getBytes());
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b & 0xff));
+            }
+            result = sb.toString();
+        } catch (Exception e) {
+            logger.error("generateMD5Checksum ERROR: " + e.toString());
+        }
+        return result;
+    }
+
+    public static String generateMD5GetBillForBankChecksum(String secretCode, String serviceId, String customerId) {
+        String result = "";
+        try {
+            String plainText = secretCode + serviceId + customerId;
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(plainText.getBytes());
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b & 0xff));
+            }
+            result = sb.toString();
+        } catch (Exception e) {
+            logger.error("generateMD5GetBillForBankChecksum: ERROR: " + e.toString());
+        }
+        return result;
+    }
+
+    public static String generateMD5GetAccountInfoCheckSum(String accountNumber, String bin,
+                                                           String accountType) {
+        String result = "";
+        try {
+            String plainText = bin + accountType + accountNumber + VIET_QR_KEY_CHECKSUM;
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(plainText.getBytes());
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b & 0xff));
+            }
+            result = sb.toString();
+        } catch (Exception e) {
+            logger.error("generateMD5GetBillForBankChecksum: ERROR: " + e.toString());
+        }
+        return result;
+    }
+
+    public static String generateMD5PayBillForBankChecksum(String secretCode,
+            String transId,
+            String billId,
+            String amount) {
+        String result = "";
+        try {
+            String plainText = secretCode + transId + billId + amount;
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(plainText.getBytes());
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b & 0xff));
+            }
+            result = sb.toString();
+        } catch (Exception e) {
+            logger.error("generateMD5GetBillForBankChecksum: ERROR: " + e.toString());
+        }
+        return result;
+    }
+
+    public static String generateMD5SyncTidChecksum(String accessKey, String bankCode,
+                                                           String bankAccount) {
+        String result = "";
+        try {
+            String plainText = accessKey + bankCode + bankAccount;
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(plainText.getBytes());
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b & 0xff));
+            }
+            result = sb.toString();
+        } catch (Exception e) {
+            logger.error("generateMD5Checksum ERROR: " + e.toString());
+        }
+        return result;
+    }
+
+    public static String generateMD5SyncMidChecksum(String accessKey, String merchantName,
+                                                    String merchantIdentity) {
+        String result = "";
+        try {
+            String plainText = accessKey + merchantName + merchantIdentity;
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(plainText.getBytes());
             byte[] digest = md.digest();

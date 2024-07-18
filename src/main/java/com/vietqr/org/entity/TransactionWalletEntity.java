@@ -61,12 +61,19 @@ public class TransactionWalletEntity implements Serializable {
     @Column(name = "phoneNoRC")
     private String phoneNoRC;
 
+    @Column(name = "data")
+    private String data;
+
+    @Column(name = "refId")
+    private String refId;
+
     public TransactionWalletEntity() {
         super();
+        this.data = "";
     }
 
     public TransactionWalletEntity(String id, String userId, String amount, String content, int status,
-            String transType, String billNumber, long timeCreated, long timePaid, String otp, int paymentType) {
+                                   String transType, String billNumber, long timeCreated, long timePaid, String otp, int paymentType) {
         this.id = id;
         this.userId = userId;
         this.amount = amount;
@@ -81,8 +88,8 @@ public class TransactionWalletEntity implements Serializable {
     }
 
     public TransactionWalletEntity(String id, String userId, String amount, String content, int status,
-            String transType, String billNumber, long timeCreated, long timePaid, String otp, int paymentType,
-            int paymentMethod, String referenceNumber) {
+                                   String transType, String billNumber, long timeCreated, long timePaid, String otp, int paymentType,
+                                   int paymentMethod, String referenceNumber) {
         this.id = id;
         this.userId = userId;
         this.amount = amount;
@@ -99,8 +106,8 @@ public class TransactionWalletEntity implements Serializable {
     }
 
     public TransactionWalletEntity(String id, String userId, String amount, String content, int status,
-            String transType, String billNumber, long timeCreated, long timePaid, String otp, int paymentType,
-            int paymentMethod, String referenceNumber, String phoneNoRC) {
+                                   String transType, String billNumber, long timeCreated, long timePaid, String otp, int paymentType,
+                                   int paymentMethod, String referenceNumber, String phoneNoRC) {
         this.id = id;
         this.userId = userId;
         this.amount = amount;
@@ -229,4 +236,19 @@ public class TransactionWalletEntity implements Serializable {
         this.referenceNumber = referenceNumber;
     }
 
+    public String getData() {
+        return data;
+    }
+
+    public void setData(String data) {
+        this.data = data;
+    }
+
+    public String getRefId() {
+        return refId;
+    }
+
+    public void setRefId(String refId) {
+        this.refId = refId;
+    }
 }

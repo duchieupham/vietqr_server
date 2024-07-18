@@ -1,6 +1,7 @@
 package com.vietqr.org.dto;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class AccountSettingDTO implements Serializable {
 
@@ -32,6 +33,8 @@ public class AccountSettingDTO implements Serializable {
     private boolean keepScreenOn;
     // qr show type (rectangular or square)
     private int qrShowType;
+    private boolean notificationMobile;
+    private List<MerchantRoleSettingDTO> merchantRoles;
 
     public AccountSettingDTO() {
         super();
@@ -63,6 +66,14 @@ public class AccountSettingDTO implements Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public List<MerchantRoleSettingDTO> getMerchantRoles() {
+        return merchantRoles;
+    }
+
+    public void setMerchantRoles(List<MerchantRoleSettingDTO> merchantRoles) {
+        this.merchantRoles = merchantRoles;
     }
 
     public String getUserId() {
@@ -177,4 +188,11 @@ public class AccountSettingDTO implements Serializable {
         this.qrShowType = qrShowType;
     }
 
+    public boolean getNotificationMobile() {
+        return notificationMobile;
+    }
+
+    public void setNotificationMobile(boolean notificationMobile) {
+        this.notificationMobile = notificationMobile;
+    }
 }

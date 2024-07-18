@@ -1,0 +1,33 @@
+  syntax = "proto3";
+
+  option java_multiple_files = true;
+  option java_package = "com.example.grpc";
+  option java_outer_classname = "UserServiceProto";
+
+  service UserService {
+    rpc GetRegisteredUsers (GetUsersRequest) returns (stream User);
+    rpc GetRegisteredUsersInMonth (GetUsersRequest) returns (stream User);
+    rpc GetUserRegistrationStatistics (GetUserRegistrationStatisticsRequest) returns (stream UserRegistrationStatisticsResponse);
+  }
+
+  message GetUsersRequest {
+    string date = 1;
+  }
+
+  message User {
+    string id = 1;
+    string phoneNo = 2;
+    string email = 3;
+    int64 time = 4;
+    string sumUserJson = 5;
+  }
+
+  message GetUserRegistrationStatisticsRequest {
+    string month = 1; // YYYY-MM
+  }
+
+  message UserRegistrationStatisticsResponse {
+    string month = 1;
+    int64 userCount = 2;
+  }
+

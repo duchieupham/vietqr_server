@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Thông Báo Giao Dịch</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-3">
+    <h1>Thông Báo Giao Dịch</h1>
+    <div th:each="transactions : ${transactions}">
+        <div th:class="${'alert alert-' + transactions.id}">
+            <h4 th:text="${transactions.content}"></h4>
+            <p>Số Tiền: <span th:text="|${transaction.amount} VND|"></span></p>
+            <p>Số Tài Khoản: <span th:text="${transactions.bankAccount}"></span></p>
+            <p>Type: <span th:text="${transactions.type}"></span></p>
+            <p>Transtype: <span th:text="${transactions.transType}"></span></p>
+            <p>Bạn có hoá đơn VT3462378 chưa thanh toán. Vui lòng kiểm tra lại trên hệ thông VietQR VN.</p>
+            <p>Mã Giao Dịch: <span th:text="${transactions.transactionId}"></span></p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

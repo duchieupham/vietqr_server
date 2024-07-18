@@ -32,4 +32,5 @@ public interface AccountBankReceiveByCusSyncDTO {
     String getServiceFeeId();
 
     String getServiceFeeName();
+    String getAddress(); // terminalAddress
 }

@@ -1,14 +1,69 @@
 package com.vietqr.org.entity;
 
+import com.vietqr.org.dto.DataTransactionDTO;
+import com.vietqr.org.dto.FeeTransactionInfoDTO;
+import com.vietqr.org.dto.TransReceiveInvoicesDTO;
+
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "TransactionReceive")
+@SqlResultSetMapping(
+		name = "TransReceiveInvoicesDTO",
+		classes = @ConstructorResult(
+				targetClass = TransReceiveInvoicesDTO.class,
+				columns = {
+						@ColumnResult(name = "id", type = String.class),
+						@ColumnResult(name = "amount", type = Long.class),
+						@ColumnResult(name = "content", type = String.class),
+						@ColumnResult(name = "trans_type", type = String.class),
+						@ColumnResult(name = "type", type = Integer.class),
+						@ColumnResult(name = "time", type = Long.class),
+						@ColumnResult(name = "time_paid", type = Long.class),
+						@ColumnResult(name = "status", type = Integer.class)
+				}
+		)
+)
+@SqlResultSetMapping(
+		name = "FeeTransactionInfoDTO",
+		classes = @ConstructorResult(
+				targetClass = FeeTransactionInfoDTO.class,
+				columns = {
+						@ColumnResult(name = "totalCount", type = Integer.class),
+						@ColumnResult(name = "totalAmount", type = Long.class),
+						@ColumnResult(name = "creditCount", type = Integer.class),
+						@ColumnResult(name = "creditAmount", type = Long.class),
+						@ColumnResult(name = "debitCount", type = Integer.class),
+						@ColumnResult(name = "debitAmount", type = Long.class),
+						@ColumnResult(name = "controlCount", type = Integer.class),
+						@ColumnResult(name = "controlAmount", type = Long.class),
+						@ColumnResult(name = "bankId", type = String.class)
+				}
+		)
+)
+
+@SqlResultSetMapping(
+		name = "DataTransactionDTO",
+		classes = @ConstructorResult(
+				targetClass = DataTransactionDTO.class,
+				columns = {
+						@ColumnResult(name = "bank_account", type = String.class),
+						@ColumnResult(name = "content", type = String.class),
+						@ColumnResult(name = "amount", type = Long.class),
+						@ColumnResult(name = "time", type = Long.class),
+						@ColumnResult(name = "time_paid", type = Long.class),
+						@ColumnResult(name = "type", type = Integer.class),
+						@ColumnResult(name = "status", type = Integer.class),
+						@ColumnResult(name = "trans_type", type = String.class),
+						@ColumnResult(name = "reference_number", type = String.class),
+						@ColumnResult(name = "order_id", type = String.class),
+						@ColumnResult(name = "terminal_code", type = String.class),
+						@ColumnResult(name = "note", type = String.class)
+				}
+		)
+)
 public class TransactionReceiveEntity implements Serializable {
 
 	/**
@@ -78,6 +133,9 @@ public class TransactionReceiveEntity implements Serializable {
 	@Column(name = "terminalCode")
 	private String terminalCode;
 
+	@Column(name = "serviceCode")
+	private String serviceCode = "";
+
 	@Column(name = "qrCode")
 	private String qrCode;
 
@@ -86,6 +144,15 @@ public class TransactionReceiveEntity implements Serializable {
 
 	@Column(name = "note")
 	private String note;
+
+	@Column(name = "transStatus")
+	private Integer transStatus;
+
+	@Column(name = "urlLink")
+	private String urlLink;
+
+	@Column(name = "billId")
+	private String billId = "";
 
 	public TransactionReceiveEntity() {
 		super();
@@ -345,4 +412,35 @@ public class TransactionReceiveEntity implements Serializable {
 		this.note = note;
 	}
 
+	public Integer getTransStatus() {
+		return transStatus;
+	}
+
+	public void setTransStatus(Integer transStatus) {
+		this.transStatus = transStatus;
+	}
+
+	public String getUrlLink() {
+		return urlLink;
+	}
+
+	public void setUrlLink(String urlLink) {
+		this.urlLink = urlLink;
+	}
+
+	public String getBillId() {
+		return billId;
+	}
+
+	public void setBillId(String billId) {
+		this.billId = billId;
+	}
+
+	public String getServiceCode() {
+		return serviceCode;
+	}
+
+	public void setServiceCode(String serviceCode) {
+		this.serviceCode = serviceCode;
+	}
 }

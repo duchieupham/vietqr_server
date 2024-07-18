@@ -1,8 +1,12 @@
 package com.vietqr.org.dto;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.Stream;
 
-public class VCardInputDTO implements Serializable {
+public class    VCardInputDTO implements Serializable {
 
     /**
      *
@@ -101,4 +105,23 @@ public class VCardInputDTO implements Serializable {
         this.additionalData = additionalData;
     }
 
+
+    public boolean isNull() {
+        Field fields[] = this.getClass().getDeclaredFields();
+        for (Field f : fields) {
+            try {
+                Object value = f.get(this);
+                if (value == null) {
+                    return true;
+                }
+            }
+            catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            }
+            catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
 }

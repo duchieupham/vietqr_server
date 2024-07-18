@@ -2,10 +2,13 @@ package com.vietqr.org.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.vietqr.org.repository.QrBoxSyncRepository;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -22,6 +25,10 @@ public class SocketHandler extends TextWebSocketHandler {
     private List<WebSocketSession> loginSessions = new ArrayList<>();
     private List<WebSocketSession> ecLoginSessions = new ArrayList<>();
     private List<WebSocketSession> transactionSessions = new ArrayList<>();
+    private List<WebSocketSession> notificationBoxSessions = new ArrayList<>();
+
+    @Autowired
+    private QrBoxSyncRepository qrBoxSyncRepository;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -31,6 +38,7 @@ public class SocketHandler extends TextWebSocketHandler {
             String loginId = (String) session.getAttributes().get("loginId");
             String ecLoginId = (String) session.getAttributes().get("ecLoginId");
             String transactionRefId = (String) session.getAttributes().get("refId");
+            String boxId = (String) session.getAttributes().get("boxId");
 
             if (userId != null && !userId.trim().isEmpty()) {
                 // save userId for this session
@@ -49,12 +57,33 @@ public class SocketHandler extends TextWebSocketHandler {
                 // save transactionRefId for this session
                 session.getAttributes().put("refId", transactionRefId);
                 transactionSessions.add(session);
+            } else if (boxId != null && !boxId.trim().isEmpty()) {
+                // save transactionRefId for this session
+                session.getAttributes().put("boxId", boxId);
+                notificationBoxSessions.add(session);
+                Map<String, String> data = new HashMap<>();
+                data.put("status", "SUCCESS");
+                data.put("notificationType", NotificationUtil.getNotiTypeConnectSuccess());
+                updateStatusVietQrBox(boxId, 1);
+                sendMessageToBoxId(boxId, data);
             } else {
                 logger.error("WS: userId is missing");
                 session.close();
             }
         } catch (Exception e) {
             logger.error("WS: error add session: " + e.toString());
+        }
+    }
+
+    private void updateStatusVietQrBox(String boxId, int status) {
+        try {
+            Thread thread = new Thread(() -> {
+                String boxCode = BoxTerminalRefIdUtil.decryptBoxId(boxId);
+                qrBoxSyncRepository.updateStatusBox(boxCode, status, DateTimeUtil.getCurrentDateTimeUTC());
+            });
+            thread.start();
+        } catch (Exception e) {
+            logger.error("updateStatusVietQrBox: ERROR: " + e.getMessage());
         }
     }
 
@@ -68,6 +97,10 @@ public class SocketHandler extends TextWebSocketHandler {
         notificationSessions.remove(session);
         loginSessions.remove(session);
         transactionSessions.remove(session);
+        boolean checkOfflineBox = notificationBoxSessions.remove(session);
+        if (checkOfflineBox) {
+            updateStatusVietQrBox(session.getAttributes().get("boxId").toString(), 0);
+        }
         //
         logger.info("WS: remove session: " + session.toString());
         logger.info("WS: notificationSessions size: " + notificationSessions.size());
@@ -115,6 +148,21 @@ public class SocketHandler extends TextWebSocketHandler {
             logger.info("WS: session Attributes: " + session.getAttributes());
             Object sessionUserId = session.getAttributes().get("userId");
             if (sessionUserId != null && sessionUserId.equals(userId)) {
+                ObjectMapper mapper = new ObjectMapper();
+                String jsonMessage = mapper.writeValueAsString(message);
+                session.sendMessage(new TextMessage(jsonMessage));
+            }
+        }
+    }
+
+    public void sendMessageToBoxId(String boxId, Map<String, String> message) throws IOException {
+        logger.info("WS: sendMessageToUser");
+        logger.info("WS: notificationSessions: " + notificationBoxSessions.size());
+        for (WebSocketSession session : notificationBoxSessions) {
+            logger.info("WS: session ID: " + session.getId());
+            logger.info("WS: session Attributes: " + session.getAttributes());
+            Object sessionUserId = session.getAttributes().get("boxId");
+            if (sessionUserId != null && sessionUserId.equals(boxId)) {
                 ObjectMapper mapper = new ObjectMapper();
                 String jsonMessage = mapper.writeValueAsString(message);
                 session.sendMessage(new TextMessage(jsonMessage));

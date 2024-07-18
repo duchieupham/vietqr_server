@@ -1,16 +1,38 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.dto.*;
+import com.vietqr.org.entity.*;
+import com.vietqr.org.repository.*;
+import com.vietqr.org.util.RandomCodeUtil;
+import com.vietqr.org.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.vietqr.org.entity.AccountSystemEntity;
-import com.vietqr.org.repository.AccountSystemRepository;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.UUID;
+import java.util.logging.Logger;
 
 @Service
 public class AccountSystemServiceImpl implements AccountSystemService {
+    private final static Logger logger = Logger.getLogger(String.valueOf(AccountSystemServiceImpl.class));
 
     @Autowired
     AccountSystemRepository repo;
+    @Autowired
+    AccountSettingService accountSettingService;
+    @Autowired
+    MobileCarrierService mobileCarrierService;
+    @Autowired
+    AccountWalletService accountWalletService;
+    @Autowired
+    AccountWalletRepository accountWalletRepository;
+    @Autowired
+    AccountSettingRepository accountSettingRepository;
+    @Autowired
+    private AccountInformationRepository accountInformationRepository;
+    @Autowired
+    private AccountLoginRepository accountLoginRepository;
 
     @Override
     public int insertNewAdmin(AccountSystemEntity entity) {
@@ -27,4 +49,36 @@ public class AccountSystemServiceImpl implements AccountSystemService {
         return repo.checkExistedAdmin(id);
     }
 
+    @Override
+    public IAccountSystemDTO findAdminById(String adminId) {
+        return repo.findAdminById(adminId);
+    }
+
+    @Override
+    public boolean resetUserPassword(String phoneNo, String newPassword) {
+        int updateRows = repo.updateUserPassword(phoneNo, newPassword);
+        return updateRows > 0;
+    }
+
+    @Override
+    public boolean updateUserStatus(String id, boolean status) {
+        int updatedRows = accountInformationRepository.updateUserStatus(id, status);
+        return updatedRows > 0;
+    }
+
+    @Override
+    public void updateUser(String userId, UserUpdateRequestDTO userUpdateRequestDTO) {
+        accountInformationRepository.updateUserByUserId(
+                userId,
+                StringUtil.getValueNullChecker(userUpdateRequestDTO.getFirstName()),
+                StringUtil.getValueNullChecker(userUpdateRequestDTO.getMiddleName()),
+                StringUtil.getValueNullChecker(userUpdateRequestDTO.getLastName()),
+                StringUtil.getValueNullChecker(userUpdateRequestDTO.getAddress()),
+                StringUtil.getValueNullChecker(userUpdateRequestDTO.getGender()),
+                StringUtil.getValueNullChecker(userUpdateRequestDTO.getEmail()),
+                StringUtil.getValueNullChecker(userUpdateRequestDTO.getNationalId()),
+                StringUtil.getValueNullChecker(userUpdateRequestDTO.getOldNationalId()),
+                StringUtil.getValueNullChecker(userUpdateRequestDTO.getNationalDate())
+        );
+    }
 }

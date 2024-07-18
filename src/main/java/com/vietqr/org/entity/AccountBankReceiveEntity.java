@@ -71,6 +71,21 @@ public class AccountBankReceiveEntity implements Serializable {
 	@Column(name = "terminalLength")
 	private int terminalLength;
 
+	@Column(name = "isValidService")
+	private Boolean isValidService;
+
+	@Column(name = "validFeeFrom")
+	private Long validFeeFrom;
+
+	@Column(name = "validFeeTo")
+	private Long validFeeTo;
+
+	@Column(name = "customerId")
+	private String customerId = "";
+
+	@Column(name = "vso")
+	private String vso = "";
+
 	public AccountBankReceiveEntity() {
 		super();
 	}
@@ -238,6 +253,50 @@ public class AccountBankReceiveEntity implements Serializable {
 
 	public void setEwalletToken(String ewalletToken) {
 		this.ewalletToken = ewalletToken;
+	}
+
+	public boolean isValidService() {
+		return isValidService;
+	}
+
+	public void setValidService(boolean validService) {
+		isValidService = validService;
+	}
+
+	public long getValidFeeFrom() {
+		return validFeeFrom;
+	}
+
+	public void setValidFeeFrom(long validFeeFrom) {
+		this.validFeeFrom = validFeeFrom;
+	}
+
+	public Long getValidFeeTo() {
+		return validFeeTo;
+	}
+
+	public void setValidFeeTo(Long validFeeTo) {
+		this.validFeeTo = validFeeTo;
+	}
+
+	public void setValidFeeFrom(Long validFeeFrom) {
+		this.validFeeFrom = validFeeFrom;
+	}
+
+	public String getCustomerId() {
+		return customerId;
+	}
+
+	public void setCustomerId(String customerId) {
+		this.customerId = customerId;
+	}
+
+	public String getVso() {
+		return vso;
+	}
+
+	public void setVso(String vso) {
+		this.vso = vso;
 	}
 
 	@Override

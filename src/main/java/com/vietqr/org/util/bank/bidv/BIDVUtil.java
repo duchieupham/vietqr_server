@@ -88,7 +88,8 @@ public class BIDVUtil {
             String merchantId,
             String merchantName,
             RequestCustomerVaDTO dto,
-            String merchantType) {
+            String merchantType,
+            String tranDate) {
         String result = "";
         result = "{";
         result += "\"serviceId\":" + "\"" + serviceId + "\",";
@@ -99,7 +100,8 @@ public class BIDVUtil {
         result += "\"accountName\":" + "\"" + dto.getUserBankName() + "\",";
         result += "\"identity\":" + "\"" + dto.getNationalId() + "\",";
         result += "\"mobile\":" + "\"" + dto.getPhoneAuthenticated() + "\",";
-        result += "\"merchantType\":" + "\"" + merchantType + "\"";
+        result += "\"merchantType\":" + "\"" + merchantType + "\",";
+        result += "\"tranDate\":" + "\"" + tranDate + "\"";
         result += "}";
         return result;
     }
@@ -117,6 +119,38 @@ public class BIDVUtil {
         result += "\"merchantName\":" + "\"" + dto.getMerchantName() + "\",";
         result += "\"confirmId\":" + "\"" + dto.getConfirmId() + "\",";
         result += "\"otpNumber\":" + "\"" + dto.getOtpNumber() + "\"";
+        result += "}";
+        return result;
+    }
+
+    public static String generateUnregisterVaBody(
+            String serviceId,
+            String channelId,
+            String merchantId,
+            String tranDate) {
+        String result = "";
+        result = "{";
+        result += "\"serviceId\":" + "\"" + serviceId + "\",";
+        result += "\"channelId\":" + "\"" + channelId + "\",";
+        result += "\"merchantId\":" + "\"" + merchantId + "\",";
+        result += "\"tranDate\":" + "\"" + tranDate + "\"";
+        result += "}";
+        return result;
+    }
+
+    public static String generateVietQRBody(
+            String serviceId,
+            String code,
+            String name,
+            String amount,
+            String description) {
+        String result = "";
+        result = "{";
+        result += "\"serviceId\":" + "\"" + serviceId + "\",";
+        result += "\"code\":" + "\"" + code + "\",";
+        result += "\"name\":" + "\"" + name + "\",";
+        result += "\"amount\":" + "\"" + amount + "\",";
+        result += "\"description\":" + "\"" + description + "\"";
         result += "}";
         return result;
     }

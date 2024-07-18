@@ -2,20 +2,37 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+import com.vietqr.org.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.entity.AccountInformationEntity;
 import com.vietqr.org.repository.AccountInformationRepository;
-import com.vietqr.org.dto.AccountInformationSyncDTO;
-import com.vietqr.org.dto.AccountSearchDTO;
-import com.vietqr.org.dto.UserInfoWalletDTO;;
+;
 
 @Service
 public class AccountInformationServiceImpl implements AccountInformationService {
 
 	@Autowired
 	AccountInformationRepository accountInformationRepo;
+
+	@Override
+	public List<IAdminListUserAccountResponseDTO> getAdminListUsersAccount(String value, int offset, int size) {
+		return accountInformationRepo.getAdminListUsersAccount(value, offset, size);
+	}
+
+	@Override
+	public List<IAdminListUserAccountResponseDTO> getAdminListUsersAccountByPhone(String value, int offset, int size) {
+		return accountInformationRepo.getAdminListUsersAccountByPhone(value, offset, size);
+	}
+	@Override
+	public int countAdminListUsersAccountByName(String value) {
+		return accountInformationRepo.countAdminListUsersAccountByName(value);
+	}
+	@Override
+	public int countAdminListUsersAccountByPhone(String value) {
+		return accountInformationRepo.countAdminListUsersAccountByPhone(value);
+	}
 
 	@Override
 	public AccountInformationEntity getAccountInformation(String userId) {
@@ -78,5 +95,35 @@ public class AccountInformationServiceImpl implements AccountInformationService 
 	@Override
 	public List<AccountInformationSyncDTO> getUserInformationSync() {
 		return accountInformationRepo.getUserInformationSync();
+	}
+
+	@Override
+	public List<IAccountTerminalMemberDTO> getMembersWebByTerminalId(String terminalId, int offset) {
+		return accountInformationRepo.getMembersWebByTerminalId(terminalId, offset);
+	}
+
+	@Override
+	public List<IAccountTerminalMemberDTO> getMembersWebByTerminalIdAndPhoneNo(String terminalId, String value, int offset) {
+		return accountInformationRepo.getMembersWebByTerminalIdAndPhoneNo(terminalId, value, offset);
+	}
+
+	@Override
+	public List<IAccountTerminalMemberDTO> getMembersWebByTerminalIdAndFullName(String terminalId, String value, int offset) {
+		return accountInformationRepo.getMembersWebByTerminalIdAndFullName(terminalId, value, offset);
+	}
+
+	@Override
+	public AccountSearchByPhoneNoDTO findAccountByPhoneNo(String phoneNo) {
+		return accountInformationRepo.findAccountByPhoneNo(phoneNo);
+	}
+
+	@Override
+	public AccountSearchByPhoneNoDTO findAccountByUserId(String userId) {
+		return accountInformationRepo.findAccountByUserId(userId);
+	}
+
+	@Override
+	public List<IAccountTerminalMemberDTO> getMembersByTerminalId(String terminalId) {
+		return accountInformationRepo.getMembersByTerminalId(terminalId);
 	}
 }

@@ -1,32 +1,23 @@
 package com.vietqr.org.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.vietqr.org.dto.ResponseMessageDTO;
-import com.vietqr.org.dto.SocialNetworkBankDTO;
-import com.vietqr.org.dto.TelBankDTO;
-import com.vietqr.org.dto.TelegramDetailDTO;
-import com.vietqr.org.dto.TelegramInsertDTO;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.TelegramAccountBankEntity;
 import com.vietqr.org.entity.TelegramEntity;
 import com.vietqr.org.service.TelegramAccountBankService;
 import com.vietqr.org.service.TelegramService;
+import com.vietqr.org.util.StringUtil;
 import com.vietqr.org.util.TelegramUtil;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @CrossOrigin
@@ -73,21 +64,30 @@ public class TelegramController {
 
     // add bank to telegram
     @PostMapping("service/telegram/bank")
-    public ResponseEntity<ResponseMessageDTO> insertBankIntoTelegram(@RequestBody SocialNetworkBankDTO dto) {
+    public ResponseEntity<ResponseMessageDTO> insertBankIntoTelegram(@RequestBody SocialNetworkBanksDTO dto) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
             if (dto != null) {
                 TelegramEntity telegramEntity = telegramService.getTelegramById(dto.getId());
                 if (telegramEntity != null) {
-                    UUID uuid = UUID.randomUUID();
-                    TelegramAccountBankEntity telAccBankEntity = new TelegramAccountBankEntity();
-                    telAccBankEntity.setId(uuid.toString());
-                    telAccBankEntity.setBankId(dto.getBankId());
-                    telAccBankEntity.setTelegramId(dto.getId());
-                    telAccBankEntity.setUserId(dto.getUserId());
-                    telAccBankEntity.setChatId(telegramEntity.getChatId());
-                    telegramAccountBankService.insert(telAccBankEntity);
+                    // check existed bank account into list
+                    for (String bankId : dto.getBankIds()) {
+                        if (bankId != null && !bankId.trim().isEmpty()) {
+                            String checkExisted = telegramAccountBankService.checkExistedBankId(bankId, dto.getId());
+                            if (checkExisted == null || checkExisted.trim().isEmpty()) {
+                                // insert google chat account bank entity
+                                UUID uuid = UUID.randomUUID();
+                                TelegramAccountBankEntity entity = new TelegramAccountBankEntity();
+                                entity.setId(uuid.toString());
+                                entity.setBankId(bankId);
+                                entity.setTelegramId(dto.getId());
+                                entity.setChatId(telegramEntity.getChatId());
+                                entity.setUserId(dto.getUserId());
+                                telegramAccountBankService.insert(entity);
+                            }
+                        }
+                    }
                     result = new ResponseMessageDTO("SUCCESS", "");
                     httpStatus = HttpStatus.OK;
                 } else {
@@ -167,7 +167,7 @@ public class TelegramController {
                     telAccBankEntity.setChatId(dto.getChatId());
                     telegramAccountBankService.insert(telAccBankEntity);
                 }
-                result = new ResponseMessageDTO("SUCCESS", "");
+                result = new ResponseMessageDTO("SUCCESS", uuid.toString());
                 httpStatus = HttpStatus.OK;
             } else {
                 logger.error("insertTelegramChatId: INVALID REQUEST BODY");
@@ -183,6 +183,90 @@ public class TelegramController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
+    @PostMapping("service/telegrams")
+    public ResponseEntity<ResponseMessageDTO> insertTelegramChatIds(@RequestBody TelegramInsertDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null && dto.getBankIds() != null && !dto.getBankIds().isEmpty() && dto.getNotificationTypes() != null && !dto.getNotificationTypes().isEmpty() && dto.getNotificationContents() != null && !dto.getNotificationContents().isEmpty()) {
+                UUID uuid = UUID.randomUUID();
+                TelegramEntity telegramEntity = new TelegramEntity();
+                telegramEntity.setId(uuid.toString());
+                telegramEntity.setUserId(dto.getUserId());
+                telegramEntity.setChatId(dto.getChatId());
+                telegramEntity.setNotificationTypes(new ObjectMapper().writeValueAsString(dto.getNotificationTypes()));
+                telegramEntity.setNotificationContents(new ObjectMapper().writeValueAsString(dto.getNotificationContents()));
+                telegramService.insertTelegram(telegramEntity);
+                for (String bankId : dto.getBankIds()) {
+                    UUID uuid2 = UUID.randomUUID();
+                    TelegramAccountBankEntity telAccBankEntity = new TelegramAccountBankEntity();
+                    telAccBankEntity.setId(uuid2.toString());
+                    telAccBankEntity.setBankId(bankId);
+                    telAccBankEntity.setTelegramId(uuid.toString());
+                    telAccBankEntity.setUserId(dto.getUserId());
+                    telAccBankEntity.setChatId(dto.getChatId());
+                    telegramAccountBankService.insert(telAccBankEntity);
+                }
+                result = new ResponseMessageDTO("SUCCESS", uuid.toString());
+                httpStatus = HttpStatus.OK;
+            } else {
+                logger.error("insertTelegramChatId: INVALID REQUEST BODY");
+                System.out.println("insertTelegramChatId: INVALID REQUEST BODY");
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("Error at insertTelegramChatId: " + e.toString());
+            System.out.println("Error at insertTelegramChatId: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // update configure
+    @PutMapping("service/telegrams/update-configure")
+    public ResponseEntity<ResponseMessageDTO> updateTelegramConfigure(@RequestBody TelegramUpdateDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null && dto.getTelegramId() != null && !dto.getTelegramId().isEmpty()) {
+                TelegramEntity telegramEntity = telegramService.getTelegramById(dto.getTelegramId());
+                if (telegramEntity != null) {
+                    // Cập nhật các thông tin cấu hình
+                    if (dto.getNotificationTypes() != null && !dto.getNotificationTypes().isEmpty()) {
+                        telegramEntity.setNotificationTypes(new ObjectMapper().writeValueAsString(dto.getNotificationTypes()));
+                    }
+                    if (dto.getNotificationContents() != null && !dto.getNotificationContents().isEmpty()) {
+                        telegramEntity.setNotificationContents(new ObjectMapper().writeValueAsString(dto.getNotificationContents()));
+                    }
+                    // Lưu lại thay đổi
+                    telegramService.updateTelegram(telegramEntity);
+
+                    result = new ResponseMessageDTO("SUCCESS", "");
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    logger.error("updateTelegramConfigure: TELEGRAM ID NOT FOUND");
+                    System.out.println("updateTelegramConfigure: TELEGRAM ID NOT FOUND");
+                    result = new ResponseMessageDTO("FAILED", "E47");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                logger.error("updateTelegramConfigure: INVALID REQUEST BODY");
+                System.out.println("updateTelegramConfigure: INVALID REQUEST BODY");
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("Error at updateTelegramConfigure: " + e.toString());
+            System.out.println("Error at updateTelegramConfigure: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
 
     // get telegram account information
     @GetMapping("service/telegram/information")
@@ -234,4 +318,124 @@ public class TelegramController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
+    @GetMapping("service/telegrams/information-detail")
+    public ResponseEntity<TelegramDetailDTO> getTelegramInformationDetail(
+            @RequestParam(value = "id") String id) {
+        TelegramDetailDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            TelegramEntity telegramEntity = telegramService.getTelegramById(id);
+            TelegramDetailDTO telegramDetailDTO = new TelegramDetailDTO();
+            telegramDetailDTO.setId(telegramEntity.getId());
+            telegramDetailDTO.setChatId(telegramEntity.getChatId());
+            telegramDetailDTO.setUserId(telegramEntity.getUserId());
+            List<TelBankDTO> telBankDTOs = telegramAccountBankService
+                    .getTelAccBanksByTelId(telegramEntity.getId());
+            if (telBankDTOs != null && !telBankDTOs.isEmpty()) {
+                telegramDetailDTO.setBanks(telBankDTOs);
+            } else {
+                telegramDetailDTO.setBanks(new ArrayList<>());
+            }
+            telegramDetailDTO.setNotificationTypes(
+                    new ObjectMapper().readValue(telegramEntity.getNotificationTypes(), new TypeReference<List<String>>() {
+                    }));
+            telegramDetailDTO.setNotificationContents(
+                    new ObjectMapper().readValue(telegramEntity.getNotificationContents(), new TypeReference<List<String>>() {
+                    }));
+            result = telegramDetailDTO;
+            httpStatus = HttpStatus.OK;
+
+
+        } catch (Exception e) {
+            logger.error("getTelegramInformationDetail: ERROR: " + e.getMessage() + System.currentTimeMillis());
+            System.out.println("getTelegramInformationDetail: ERROR: " + e.getMessage() + System.currentTimeMillis());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PutMapping("service/telegrams/update-chatId/{teleId}")
+    public ResponseEntity<ResponseMessageDTO> updateTelegramChatId(@PathVariable String teleId, @RequestBody TelegramUpdateChatIdDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            telegramService.updateTelegram(dto.getChatId(), teleId);
+            telegramAccountBankService.updateWebHookTelegram(dto.getChatId(), teleId);
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("TelegramController: updateChatId: ERROR: " + e.getMessage() + System.currentTimeMillis());
+            System.out.println("TelegramController: updateChatId: ERROR: " + e.getMessage() + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("service/telegrams/list-information")
+    public ResponseEntity<Object> getListTelegramInformation(
+            @RequestParam("userId") String userId,
+            @RequestParam int page,
+            @RequestParam int size) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            int totalElements = telegramService.countTelegramsByUserId(userId);
+            int offset = (page - 1) * size;
+
+            List<TelegramInfoDetailDTO> telegramDetails = telegramService.getTelegramsByUserIdWithPagination(userId, offset, size);
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageDTO.setTotalElement(totalElements);
+            pageDTO.setTotalPage((int) Math.ceil((double) totalElements / size));
+
+            PageResDTO pageResDTO = new PageResDTO();
+            pageResDTO.setMetadata(pageDTO);
+            pageResDTO.setData(telegramDetails);
+
+            result = pageResDTO;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("TelegramController: getListTelegramInformation : ERROR " + e.getMessage() + System.currentTimeMillis());
+            System.out.println("getTelegramInformationDetails: ERROR: " + e.getMessage() + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("service/telegrams/list")
+    public ResponseEntity<PageResDTO> getListTelegrams(
+            @RequestParam("userId") String userId,
+            @RequestParam("page") int page,
+            @RequestParam("size") int size) {
+        HttpStatus httpStatus = null;
+        PageResDTO result = null;
+        try {
+            int totalElements = telegramService.countTelegramsByUserId(userId);
+            int offset = (page - 1) * size;
+            List<TelegramInfoDetailDTO> telegrams = telegramService.getTelegramsByUserIdWithPagination(userId, offset, size);
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageDTO.setTotalElement(totalElements);
+            pageDTO.setTotalPage((int) Math.ceil((double) totalElements / size));
+
+            result = new PageResDTO();
+            result.setMetadata(pageDTO);
+            result.setData(telegrams);
+
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getListTelegrams Error: " + e.getMessage() + System.currentTimeMillis());
+            result = new PageResDTO(new PageDTO(), new ArrayList<>());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
 }
