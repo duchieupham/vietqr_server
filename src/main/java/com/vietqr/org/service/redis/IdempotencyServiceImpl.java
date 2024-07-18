@@ -17,7 +17,11 @@ public class IdempotencyServiceImpl implements IdempotencyService {
 
     @Override
     public Optional<String> getResponseForKey(String key) {
-        return Optional.ofNullable(redisTemplate.opsForValue().get(key));
+        try {
+            return Optional.ofNullable(redisTemplate.opsForValue().get(key));
+        } catch (Exception e) {
+        }
+        return Optional.ofNullable(null);
     }
 
     @Override
@@ -36,8 +40,11 @@ public class IdempotencyServiceImpl implements IdempotencyService {
     public boolean saveResponseForKey(String key, String response) {
         boolean result = false;
         String lockKey = LOCK_PREFIX + key;
-        result = Boolean.TRUE.equals(redisTemplate
-                .opsForValue().setIfAbsent(lockKey, "locked", Duration.ofSeconds(30)));
+        try {
+            result = Boolean.TRUE.equals(redisTemplate
+                    .opsForValue().setIfAbsent(lockKey, "locked", Duration.ofSeconds(30)));
+        } catch (Exception e) {
+        }
         return result;
     }
 }
