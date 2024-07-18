@@ -22,6 +22,7 @@ public interface TerminalBankService {
     public String getTerminalAddress(String terminalName);
 
     public List<String> getListTerminalNames();
+    public List<String> getTerminalAddresses();
 
     public Integer getTerminalCounting();
 
