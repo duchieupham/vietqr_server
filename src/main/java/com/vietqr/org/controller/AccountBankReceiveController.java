@@ -1645,7 +1645,7 @@ public class AccountBankReceiveController {
 
     public String checkAndModifyString(String target, List<String> stringList) {
         String modifiedString = target;
-        int counter = 1;
+        int counter = 2;
 
         while (stringList.contains(modifiedString)) {
             modifiedString = target + counter;
@@ -1657,7 +1657,7 @@ public class AccountBankReceiveController {
 
     public String checkAndModifyStringAddress(String target, List<String> stringList) {
         String modifiedString = target;
-        int counter = 1;
+        int counter = 2;
 
         while (stringList.contains(modifiedString)) {
             modifiedString = target + " - " + String.format("%02d", counter);
