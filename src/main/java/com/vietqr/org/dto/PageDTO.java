@@ -6,7 +6,6 @@ public class PageDTO {
     private int totalPage;
     private int totalElement;
 
-
     public PageDTO() {
         page = 1;
         size = 20;
