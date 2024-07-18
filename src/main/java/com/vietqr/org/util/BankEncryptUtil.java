@@ -47,6 +47,24 @@ public class BankEncryptUtil {
         return result;
     }
 
+    public static String generateIdempotencyKey(String referenceNumber, String bankAccount) {
+        String result = "";
+        try {
+            String plainText = referenceNumber + bankAccount;
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(plainText.getBytes());
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b & 0xff));
+            }
+            result = sb.toString();
+        } catch (Exception e) {
+            logger.error("generateMD5Checksum ERROR: " + e.toString());
+        }
+        return result;
+    }
+
     public static String generateCheckOrderMD5Checksum(String traceTransfer, String billNumber, String referenceLabel) {
         String result = "";
         try {
