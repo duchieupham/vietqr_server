@@ -32,6 +32,9 @@ public interface TerminalBankRepository extends JpaRepository<TerminalBankEntity
     @Query(value = "SELECT terminal_name FROM terminal_bank ", nativeQuery = true)
     List<String> getListTerminalNames();
 
+    @Query(value = "SELECT terminal_address FROM terminal_bank ", nativeQuery = true)
+    List<String> getTerminalAddresses();
+
     @Query(value = "SELECT COUNT(id) as totalTerminal "
             + "FROM terminal_bank ", nativeQuery = true)
     Integer getTerminalCounting();

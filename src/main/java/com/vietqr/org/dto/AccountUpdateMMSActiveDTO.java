@@ -14,6 +14,7 @@ public class AccountUpdateMMSActiveDTO {
     @NotBlank
     private String userId;
     private String bankId;
+    private String address;
     private String nationalId;
     private String phoneAuthenticated;
 
@@ -28,6 +29,26 @@ public class AccountUpdateMMSActiveDTO {
         this.userId = userId;
         this.nationalId = nationalId;
         this.phoneAuthenticated = phoneAuthenticated;
+    }
+
+    public AccountUpdateMMSActiveDTO(String bankTypeId, String bankAccount, String bankCode, String bankAccountName, String userId, String bankId, String address, String nationalId, String phoneAuthenticated) {
+        this.bankTypeId = bankTypeId;
+        this.bankAccount = bankAccount;
+        this.bankCode = bankCode;
+        this.bankAccountName = bankAccountName;
+        this.userId = userId;
+        this.bankId = bankId;
+        this.address = address;
+        this.nationalId = nationalId;
+        this.phoneAuthenticated = phoneAuthenticated;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getBankId() {

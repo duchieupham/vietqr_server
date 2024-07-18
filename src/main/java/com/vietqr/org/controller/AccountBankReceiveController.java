@@ -152,25 +152,15 @@ public class AccountBankReceiveController {
 
                         // lấy terminalAddress theo terminalName
                         String terminalAddressCheck = customerSyncService.getCustomerAddressById(customerSynId);
-
+                        // sửa lại cho nhập từ hệ thống khi sync TID
+                        String terminalAddressCheckNew = dto.getAddress();
                         List<String> getTerminalNames = terminalBankService.getListTerminalNames();
+                        List<String> getTerminalAddresses = terminalBankService.getTerminalAddresses();
                         int i = 0;
-                        for (String terminalName : getTerminalNames) {
-                            if (terminalNameGenerate.equals(terminalName)) {
-                                i++;
-                                terminalNameGenerate = terminalNameGenerate + i;
-                            } else {
-                                i++;
-                                if (i == 1) {
-                                    terminalNameGenerate = terminalNameGenerate;
-                                    terminalAddressCheck = terminalAddressCheck;
-                                    break;
-                                }
-                                terminalNameGenerate = terminalNameGenerate + i;
-                                terminalAddressCheck = terminalAddressCheck + i;
-                                break;
-                            }
-                        }
+
+                        String checkString = checkAndModifyString(terminalNameGenerate, getTerminalNames);
+                        String checkAddress = checkAndModifyStringAddress(terminalAddressCheckNew, getTerminalAddresses);
+
                         // get token MB
                         TokenMBResponseDTO tokenMBResponseDTO = getToken();
 
@@ -200,13 +190,13 @@ public class AccountBankReceiveController {
                         terminalBankEntity.setFee(0);
                         terminalBankEntity.setMccCode("1024");
                         terminalBankEntity.setMccName("Dịch vụ tài chính");
-                        terminalBankEntity.setMerchantId(customerSynId);
+                        terminalBankEntity.setMerchantId("b8324764-3f83-4da0-a75f-aa0f13d0f700");
                         terminalBankEntity.setProvinceCode("1");
                         terminalBankEntity.setProvinceName("Hà Nội update");
                         terminalBankEntity.setStatus(1);
-                        terminalBankEntity.setTerminalAddress(terminalAddressCheck);
+                        terminalBankEntity.setTerminalAddress(checkAddress);
                         terminalBankEntity.setTerminalId(getTerminalID); // terminalID lấy từ API syncTID trả về response
-                        terminalBankEntity.setTerminalName(terminalNameGenerate);
+                        terminalBankEntity.setTerminalName(checkString);
                         terminalBankEntity.setWardsCode("178");
                         terminalBankEntity.setWardsName("Phường Cát Linh");
                         terminalBankService.insertTerminalBank(terminalBankEntity);
@@ -1534,15 +1524,6 @@ public class AccountBankReceiveController {
         TokenMBResponseDTO tokenResponse = null;
 
         try {
-//            tokenResponse = webClient.post()
-//                    .uri(uriComponents.toUri())
-//                    .header("clientMessageId", clientMessageId.toString())
-//                    .header("Content-Type", "application/x-www-form-urlencoded")
-////                    .bodyValue("grant_type=client_credentials&client_id=" + clientId + "&client_secret=" + clientSecret)
-//                    .retrieve()
-//                    .bodyToMono(TokenMBResponseDTO.class)
-//                    .block();
-
 
             if (response.statusCode().is2xxSuccessful()) {
                 String json = response.bodyToMono(String.class).block();
@@ -1660,5 +1641,29 @@ public class AccountBankReceiveController {
             logger.info("syncTerminals: RESPONSE: " + response.statusCode().value() + " - " + json);
         }
         return terminalResponse;
+    }
+
+    public String checkAndModifyString(String target, List<String> stringList) {
+        String modifiedString = target;
+        int counter = 1;
+
+        while (stringList.contains(modifiedString)) {
+            modifiedString = target + counter;
+            counter++;
+        }
+
+        return modifiedString;
+    }
+
+    public String checkAndModifyStringAddress(String target, List<String> stringList) {
+        String modifiedString = target;
+        int counter = 1;
+
+        while (stringList.contains(modifiedString)) {
+            modifiedString = target + " - " + String.format("%02d", counter);
+            counter++;
+        }
+
+        return modifiedString;
     }
 }
