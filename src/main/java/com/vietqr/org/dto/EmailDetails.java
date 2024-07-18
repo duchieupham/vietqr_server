@@ -3,18 +3,24 @@ package com.vietqr.org.dto;
 public class EmailDetails {
 
     private String recipient;
-    private String msgBody;
-    private String subject;
+    private String userId;
     private String attachment;
 
     public EmailDetails() {
     }
 
-    public EmailDetails(String recipient, String msgBody, String subject, String attachment) {
+    public EmailDetails(String recipient, String userId, String attachment) {
         this.recipient = recipient;
-        this.msgBody = msgBody;
-        this.subject = subject;
+        this.userId = userId;
         this.attachment = attachment;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getRecipient() {
@@ -25,21 +31,6 @@ public class EmailDetails {
         this.recipient = recipient;
     }
 
-    public String getMsgBody() {
-        return msgBody;
-    }
-
-    public void setMsgBody(String msgBody) {
-        this.msgBody = msgBody;
-    }
-
-    public String getSubject() {
-        return subject;
-    }
-
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
 
     public String getAttachment() {
         return attachment;

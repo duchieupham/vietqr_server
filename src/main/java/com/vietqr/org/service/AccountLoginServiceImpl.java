@@ -47,6 +47,11 @@ public class AccountLoginServiceImpl implements AccountLoginService {
     }
 
     @Override
+    public void updateIsVerifiedByUserId(String userId) {
+        repo.updateIsVerifiedByUserId(userId);
+    }
+
+    @Override
     public int insertAccountLogin(AccountLoginEntity entity) {
         return repo.save(entity) == null ? 0 : 1;
     }

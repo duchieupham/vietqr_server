@@ -181,6 +181,7 @@ public class AccountSystemController {
                 accountLoginEntity.setCardNumber("");
                 accountLoginEntity.setCardNfcNumber("");
                 accountLoginEntity.setEmail(StringUtil.getValueNullChecker(userRequestDTO.getEmail()));
+                accountLoginEntity.setIsVerify(false);
 
                 // Create AccountInformationEntity
                 AccountInformationEntity accountInformationEntity = new AccountInformationEntity();

@@ -11,139 +11,162 @@ import javax.persistence.Table;
 @Table(name = "AccountLogin")
 public class AccountLoginEntity implements Serializable {
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
-	@Id
-	@Column(name = "id")
-	private String id;
+    @Id
+    @Column(name = "id")
+    private String id;
 
-	@Column(name = "phoneNo")
-	private String phoneNo;
+    @Column(name = "phoneNo")
+    private String phoneNo;
 
-	@Column(name = "password")
-	private String password;
+    @Column(name = "password")
+    private String password;
 
-	@Column(name = "status")
-	private boolean status;
+    @Column(name = "status")
+    private boolean status;
 
-	@Column(name = "email")
-	private String email;
+    @Column(name = "email")
+    private String email;
 
-	@Column(name = "cardNumber")
-	private String cardNumber;
+    @Column(name = "cardNumber")
+    private String cardNumber;
 
-	@Column(name = "cardNfcNumber")
-	private String cardNfcNumber;
+    @Column(name = "cardNfcNumber")
+    private String cardNfcNumber;
 
-	@Column(name = "time")
-	private long time;
+    @Column(name = "time")
+    private long time;
 
-	@Column(name = "syncBitrix")
-	private Boolean syncBitrix;
+    @Column(name = "syncBitrix")
+    private Boolean syncBitrix;
+    @Column(name = "isVerify")
+    private boolean isVerify = false;
 
-	public AccountLoginEntity() {
-		super();
-	}
+    public AccountLoginEntity() {
+        super();
+    }
 
-	public AccountLoginEntity(String id, String phoneNo, String password, boolean status, String email,
-			String cardNumber, String cardNfcNumber, Long time) {
-		super();
-		this.id = id;
-		this.phoneNo = phoneNo;
-		this.password = password;
-		this.status = status;
-		this.email = email;
-		this.cardNumber = cardNumber;
-		this.cardNfcNumber = cardNfcNumber;
-		this.time = time;
-	}
+    public AccountLoginEntity(String id, String phoneNo, String password, boolean status, String email,
+                              String cardNumber, String cardNfcNumber, Long time) {
+        super();
+        this.id = id;
+        this.phoneNo = phoneNo;
+        this.password = password;
+        this.status = status;
+        this.email = email;
+        this.cardNumber = cardNumber;
+        this.cardNfcNumber = cardNfcNumber;
+        this.time = time;
+    }
 
-	public AccountLoginEntity(String id, String phoneNo, String password, boolean status, String email,
-			String cardNumber, String cardNfcNumber, long time, Boolean syncBitrix) {
-		this.id = id;
-		this.phoneNo = phoneNo;
-		this.password = password;
-		this.status = status;
-		this.email = email;
-		this.cardNumber = cardNumber;
-		this.cardNfcNumber = cardNfcNumber;
-		this.time = time;
-		this.syncBitrix = syncBitrix;
-	}
+    public AccountLoginEntity(String id, String phoneNo, String password, boolean status, String email,
+                              String cardNumber, String cardNfcNumber, long time, Boolean syncBitrix) {
+        this.id = id;
+        this.phoneNo = phoneNo;
+        this.password = password;
+        this.status = status;
+        this.email = email;
+        this.cardNumber = cardNumber;
+        this.cardNfcNumber = cardNfcNumber;
+        this.time = time;
+        this.syncBitrix = syncBitrix;
+    }
 
-	public String getId() {
-		return id;
-	}
+    public AccountLoginEntity(String id, String phoneNo, String password, boolean status, String email, String cardNumber, String cardNfcNumber, long time, Boolean syncBitrix, boolean isVerify) {
+        this.id = id;
+        this.phoneNo = phoneNo;
+        this.password = password;
+        this.status = status;
+        this.email = email;
+        this.cardNumber = cardNumber;
+        this.cardNfcNumber = cardNfcNumber;
+        this.time = time;
+        this.syncBitrix = syncBitrix;
+        this.isVerify = isVerify;
+    }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public boolean isVerify() {
+        return isVerify;
+    }
 
-	public String getPhoneNo() {
-		return phoneNo;
-	}
+    public void setIsVerify(boolean verify) {
+        isVerify = verify;
+    }
 
-	public void setPhoneNo(String phoneNo) {
-		this.phoneNo = phoneNo;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public String getPassword() {
-		return password;
-	}
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    public String getPhoneNo() {
+        return phoneNo;
+    }
 
-	public boolean isStatus() {
-		return status;
-	}
+    public void setPhoneNo(String phoneNo) {
+        this.phoneNo = phoneNo;
+    }
 
-	public void setStatus(boolean status) {
-		this.status = status;
-	}
+    public String getPassword() {
+        return password;
+    }
 
-	public String getEmail() {
-		return email;
-	}
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    public boolean isStatus() {
+        return status;
+    }
 
-	public String getCardNumber() {
-		return cardNumber;
-	}
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
 
-	public void setCardNumber(String cardNumber) {
-		this.cardNumber = cardNumber;
-	}
+    public String getEmail() {
+        return email;
+    }
 
-	public String getCardNfcNumber() {
-		return cardNfcNumber;
-	}
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-	public void setCardNfcNumber(String cardNfcNumber) {
-		this.cardNfcNumber = cardNfcNumber;
-	}
+    public String getCardNumber() {
+        return cardNumber;
+    }
 
-	public long getTime() {
-		return time;
-	}
+    public void setCardNumber(String cardNumber) {
+        this.cardNumber = cardNumber;
+    }
 
-	public void setTime(long time) {
-		this.time = time;
-	}
+    public String getCardNfcNumber() {
+        return cardNfcNumber;
+    }
 
-	public Boolean getSyncBitrix() {
-		return syncBitrix;
-	}
+    public void setCardNfcNumber(String cardNfcNumber) {
+        this.cardNfcNumber = cardNfcNumber;
+    }
 
-	public void setSyncBitrix(Boolean syncBitrix) {
-		this.syncBitrix = syncBitrix;
-	}
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public Boolean getSyncBitrix() {
+        return syncBitrix;
+    }
+
+    public void setSyncBitrix(Boolean syncBitrix) {
+        this.syncBitrix = syncBitrix;
+    }
 
 }
