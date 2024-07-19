@@ -276,7 +276,8 @@ public class CustomerInvoiceController {
                 // check valid dto
                 if (dto != null && dto.getTrans_id() != null && dto.getTrans_date() != null
                         && dto.getCustomer_id() != null && dto.getService_id() != null && dto.getBill_id() != null
-                        && dto.getAmount() != null && dto.getChecksum() != null) {
+                        && dto.getAmount() != null && dto.getChecksum() != null && dto.getAdditionalData1() != null
+                        && dto.getAdditionalData2() != null) {
                     if (dto.getService_id().equals(serviceId)) {
                         // check valid checksum
                         String checksum = BankEncryptUtil.generateMD5PayBillForBankChecksum(secretKey,

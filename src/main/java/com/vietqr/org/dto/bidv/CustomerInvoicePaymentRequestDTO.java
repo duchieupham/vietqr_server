@@ -15,6 +15,8 @@ public class CustomerInvoicePaymentRequestDTO implements Serializable {
     private String service_id;
     private String bill_id;
     private String amount;
+    private String additionalData1;
+    private String additionalData2;
     private String checksum;
 
     public CustomerInvoicePaymentRequestDTO() {
@@ -88,10 +90,28 @@ public class CustomerInvoicePaymentRequestDTO implements Serializable {
     public void setChecksum(String checksum) {
         this.checksum = checksum;
     }
+
+    public String getAdditionalData1() {
+        return additionalData1;
+    }
+
+    public void setAdditionalData1(String additionalData1) {
+        this.additionalData1 = additionalData1;
+    }
+
+    public String getAdditionalData2() {
+        return additionalData2;
+    }
+
+    public void setAdditionalData2(String additionalData2) {
+        this.additionalData2 = additionalData2;
+    }
+
     @Override
     public String toString() {
         return "CustomerInvoicePaymentRequestDTO [trans_id=" + trans_id + ", trans_date=" + trans_date
                 + ", customer_id=" + customer_id + ", service_id=" + service_id + ", bill_id=" + bill_id
-                + ", amount=" + amount + ", checksum=" + checksum + "]";
+                + ", amount=" + amount + ", additionalData1=" + additionalData1 + ", additionalData2=" + additionalData2
+                + ", checksum=" + checksum+ "]";
     }
 }
