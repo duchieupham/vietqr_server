@@ -752,6 +752,7 @@ public class VietQRController {
 							vietQRMMSCreateDTO.setSign(dto.getSign());
 							vietQRMMSCreateDTO.setTerminalCode(dto.getTerminalCode());
 							vietQRMMSCreateDTO.setNote(dto.getNote());
+							vietQRMMSCreateDTO.setServiceCode(serviceCode);
 							if (dto.getUrlLink() != null && !dto.getUrlLink().trim().isEmpty()) {
 								vietQRMMSCreateDTO.setUrlLink(dto.getUrlLink());
 							} else {
@@ -1620,6 +1621,7 @@ public class VietQRController {
 			transactionEntity.setNote(dto.getNote() != null ? dto.getNote() : "");
 			transactionEntity.setTransStatus(0);
 			transactionEntity.setUrlLink(dto.getUrlLink() != null ? dto.getUrlLink() : "");
+			transactionEntity.setServiceCode(dto.getServiceCode());
 			transactionReceiveService.insertTransactionReceive(transactionEntity);
 			LocalDateTime endTime = LocalDateTime.now();
 			long endTimeLong = endTime.toEpochSecond(ZoneOffset.UTC);
