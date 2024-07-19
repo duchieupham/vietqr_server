@@ -36,6 +36,9 @@ public class TerminalItemEntity implements Serializable {
     @Column(name = "content")
     private String content;
 
+    @Column(name = "rawServiceCode")
+    private String rawServiceCode;
+
     // ma code cua hang
     @Column(name = "terminalCode")
     private String terminalCode;
@@ -154,5 +157,13 @@ public class TerminalItemEntity implements Serializable {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getRawServiceCode() {
+        return rawServiceCode;
+    }
+
+    public void setRawServiceCode(String rawServiceCode) {
+        this.rawServiceCode = rawServiceCode;
     }
 }

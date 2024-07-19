@@ -22,6 +22,7 @@ public class VietQRCreateDTO implements Serializable {
 	private String note;
 	private String urlLink;
 	private String subTerminalCode;
+	private String serviceCode;
 
 	public VietQRCreateDTO() {
 		super();
@@ -102,6 +103,14 @@ public class VietQRCreateDTO implements Serializable {
 		this.terminalCode = terminalCode;
 		this.orderId = orderId;
 		this.note = note;
+	}
+
+	public String getServiceCode() {
+		return serviceCode;
+	}
+
+	public void setServiceCode(String serviceCode) {
+		this.serviceCode = serviceCode;
 	}
 
 	public String getTransType() {

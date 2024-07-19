@@ -8,4 +8,8 @@ public interface TerminalItemService {
     TerminalItemEntity getTerminalItemByTraceTransferAndAmount(String traceTransfer, String amount, String serviceCode);
 
     void insert(TerminalItemEntity entity);
+
+    TerminalItemEntity getItemByBankAndServiceCode(String id, String serviceCode, String terminalCode);
+
+    void removeById(String id);
 }

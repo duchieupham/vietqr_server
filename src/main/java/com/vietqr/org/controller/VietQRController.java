@@ -425,6 +425,7 @@ public class VietQRController {
 		Object result = null;
 		HttpStatus httpStatus = null;
 		UUID transactionUUID = UUID.randomUUID();
+		String serviceCode = !StringUtil.isNullOrEmpty(dto.getServiceCode()) ? dto.getServiceCode() : "";
 		switch (dto.getBankCode().toUpperCase()) {
 			case "MB":
 				// for saving qr mms flow 2
@@ -579,6 +580,7 @@ public class VietQRController {
 							vietQRCreateDTO.setContent(dto.getContent());
 							vietQRCreateDTO.setUserId(accountBankEntity.getUserId());
 							vietQRCreateDTO.setTerminalCode(dto.getTerminalCode());
+							vietQRCreateDTO.setServiceCode(serviceCode);
 							//
 							if (dto.getTransType() != null && dto.getTransType().trim().toUpperCase().equals("D")) {
 								vietQRCreateDTO.setTransType("D");
@@ -1172,6 +1174,7 @@ public class VietQRController {
 		AccountBankReceiveEntity accountBankReceiveEntity = null;
 		String qrMMS = "";
 		String traceTransfer = "";
+		String serviceCode = "";
 		try {
 			String bankTypeId = "";
 			String content = "";
@@ -1188,6 +1191,7 @@ public class VietQRController {
 						} else {
 							content = dto.getContent();
 						}
+						serviceCode = getRandomBillId();
 						String transType = "C";
 						if (dto.getTransType() == null) {
 							transType = "C";
@@ -1215,7 +1219,7 @@ public class VietQRController {
 									VietQRMMSRequestDTO vietQRMMSRequestDTO = new VietQRMMSRequestDTO();
 									vietQRMMSRequestDTO.setAmount(dto.getAmount() + "");
 									vietQRMMSRequestDTO.setContent(content);
-									vietQRMMSRequestDTO.setOrderId(dto.getServiceCode());
+									vietQRMMSRequestDTO.setOrderId(serviceCode);
 									vietQRMMSRequestDTO.setTerminalId(terminalBankEntity.getTerminalId());
 									vietQRMMSRequestDTO.setToken(MBToken);
 									qrMMS = generateSemiDynamicQrMMS(vietQRMMSRequestDTO);
@@ -1284,12 +1288,21 @@ public class VietQRController {
 					AccountBankReceiveEntity finalAccountBankReceiveEntity = accountBankReceiveEntity;
 					String finalTraceTransfer = traceTransfer;
 					VietQRDTO finalResult = (VietQRDTO) result;
+					String finalServiceCode = serviceCode;
 					Thread thread = new Thread(() -> {
+						TerminalItemEntity existEntity = terminalItemService
+								.getItemByBankAndServiceCode(finalAccountBankReceiveEntity.getId(),
+										dto.getServiceCode(), dto.getTerminalCode()
+										);
+						if (Objects.nonNull(existEntity)) {
+							terminalItemService.removeById(existEntity.getId());
+						}
 						TerminalItemEntity entity = new TerminalItemEntity();
 						entity.setId(UUID.randomUUID().toString());
 						entity.setData1("");
 						entity.setData2(finalQrMMS);
-						entity.setServiceCode(dto.getServiceCode());
+						entity.setServiceCode(finalServiceCode);
+						entity.setRawServiceCode(dto.getServiceCode());
 						entity.setTerminalCode(dto.getTerminalCode());
 						entity.setBankId(finalAccountBankReceiveEntity.getId());
 						entity.setBankAccount(finalAccountBankReceiveEntity.getBankAccount());
@@ -1321,7 +1334,7 @@ public class VietQRController {
 			}
 			if (dto != null
 					&& content.length() <= 19
-					&& serviceCode.length() <= 13
+					&& serviceCode.length() <= 19
 					&& dto.getAmount() != null && !dto.getBankAccount().trim().isEmpty()
 					&& dto.getBankAccount() != null && !dto.getBankAccount().trim().isEmpty()
 					&& dto.getBankCode() != null && dto.getBankCode().equals("MB")
@@ -1658,6 +1671,7 @@ public class VietQRController {
 				}
 				transactionEntity.setReferenceNumber("");
 				transactionEntity.setOrderId(orderId);
+				transactionEntity.setServiceCode(dto.getServiceCode());
 				transactionEntity.setSign(sign);
 				//
 				if (dto.getTransType() != null && dto.getTransType().trim().toUpperCase().equals("D")) {
