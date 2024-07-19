@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
@@ -46,6 +47,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
+import software.amazon.awssdk.thirdparty.jackson.core.type.TypeReference;
 
 @RestController
 @CrossOrigin
@@ -119,7 +121,6 @@ public class AccountBankReceiveController {
     ) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
-        TokenProductBankDTO tokenBankDTO = MBTokenUtil.getMBBankToken();
         try {
             //-Check Tài khoản này đã đăng ký luồng 2 trước đó chưa,
             AccountBankReceiveEntity checkAccount =
@@ -162,7 +163,10 @@ public class AccountBankReceiveController {
                         String checkAddress = checkAndModifyStringAddress(terminalAddressCheckNew, getTerminalAddresses);
 
                         // get token MB
-                        TokenMBResponseDTO tokenMBResponseDTO = getToken();
+                        // luồng code cũ
+                        TokenProductBankDTO tokenBankDTO = MBTokenUtil.getMBBankToken();
+
+//                        TokenMBResponseDTO tokenMBResponseDTO = getToken();
                         // Sync TID MB Bank
                         TerminalRequestDTO.TerminalDTO terminal = new TerminalRequestDTO.TerminalDTO();
                         terminal.setTerminalId(null);
@@ -176,13 +180,13 @@ public class AccountBankReceiveController {
                         terminal.setBankCode("311");
                         terminal.setBankCodeBranch("01311038");
                         terminal.setBankAccountNumber(bankAccountNumberEncrypted);
-                        terminal.setBankAccountName(bankAccountName);
+                        terminal.setBankAccountName(bankAccountName.toUpperCase());
                         terminal.setBankCurrencyCode("1");
-                        TerminalResponseSyncTidDTO terminalRequestDTO = syncTerminals(terminal, tokenMBResponseDTO.getAccess_token());
+                        TerminalResponseSyncTidDTO terminalRequestDTO = syncTerminals(terminal, tokenBankDTO.getAccess_token());
                         String terminalIdBySyncTID = terminalRequestDTO.getData().getResult().get(0).getTerminalId();
 
                         // get TID MB Bank
-                        TerminalResponseFlow2 terminalResponseFlow2 = getTerminals(tokenMBResponseDTO.getAccess_token());
+                        TerminalResponseFlow2 terminalResponseFlow2 = getTerminals(tokenBankDTO.getAccess_token());
                         String getTerminalID = terminalResponseFlow2.getData().getTerminals().get(0).getTerminalId();
                         String getBankAccountNumberNew = terminalResponseFlow2.getData().getTerminals().get(0).getBankAccountNumber();
 
@@ -190,7 +194,7 @@ public class AccountBankReceiveController {
                         TerminalBankEntity terminalBankEntity = new TerminalBankEntity();
                         UUID idTerminalBank = UUID.randomUUID();
                         terminalBankEntity.setId(idTerminalBank.toString());
-                        terminalBankEntity.setBankAccountName(dto.getBankAccountName());
+                        terminalBankEntity.setBankAccountName(dto.getBankAccountName().toUpperCase());
                         terminalBankEntity.setBankAccountNumber(getBankAccountNumberNew); // này lấy từ api get TID từ MB
                         terminalBankEntity.setBankAccountRawNumber(dto.getBankAccount());
                         terminalBankEntity.setBankCode("311");
@@ -1527,10 +1531,10 @@ public class AccountBankReceiveController {
 
         Mono<ClientResponse> responseMono = webClient.post()
                 .uri(uriComponents.toUri())
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("clientMessageId", clientMessageId.toString())
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+//                .header("clientMessageId", clientMessageId.toString())
                 .header("Content-Type", "application/x-www-form-urlencoded")
-                .body(BodyInserters.fromFormData("grant_type", "client_credentials"))
+//                .body(BodyInserters.fromFormData("grant_type", "client_credentials"))
                 .exchange();
 
         ClientResponse response = responseMono.block();
@@ -1560,12 +1564,12 @@ public class AccountBankReceiveController {
         UUID clientMessageId = UUID.randomUUID();
 
         UriComponents uriComponents = UriComponentsBuilder
-                .fromHttpUrl("https://api-private.mbbank.com.vn/private/ms/offus/public/account-service/tid/v1.0/list-tid")
+                .fromHttpUrl(EnvironmentUtil.getBankUrl() + "ms/offus/public/account-service/tid/v1.0/list-tid")
 //                .fromHttpUrl("https://kietml.click/getTID.php")
                 .build();
 
         WebClient webClient = WebClient.builder()
-                .baseUrl("https://api-private.mbbank.com.vn/private/ms/offus/public/account-service/tid/v1.0/list-tid")
+                .baseUrl(EnvironmentUtil.getBankUrl() + "ms/offus/public/account-service/tid/v1.0/list-tid")
 //                .baseUrl("https://kietml.click/getTID.php")
                 .build();
 
@@ -1575,19 +1579,45 @@ public class AccountBankReceiveController {
                 .header("clientMessageId", clientMessageId.toString())
                 .header("secretKey", EnvironmentUtil.getSecretKeyAPI())
                 .header("username", EnvironmentUtil.getUsernameAPI())
+                .header("page", "1")
+                .header("size", "10")
                 .header("Authorization", "Bearer " + token)
                 .exchange();
 
         ClientResponse response = responseMono.block();
         TerminalResponseFlow2 terminalResponse = null;
 
+        String json = response.bodyToMono(String.class).block();
+
         if (response.statusCode().is2xxSuccessful()) {
-            String json = response.bodyToMono(String.class).block();
             logger.info("getTerminals: RESPONSE: " + json);
             ObjectMapper objectMapper = new ObjectMapper();
-            terminalResponse = objectMapper.readValue(json, TerminalResponseFlow2.class);
+
+            // Configure ObjectMapper to ignore unknown properties
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+//            JsonNode rootNode = objectMapper.readTree(json);
+//
+//            if (rootNode.get("data") != null &&
+//                    rootNode.get("data").get("terminals") != null) {
+//                String data = rootNode.get("data").get("terminals").asText();
+//                try {
+//                    List<TerminalMbDTO> terminals = objectMapper.convertValue(
+//                            data,
+//                            new TypeReference<List<TerminalMbDTO>>() {}
+//                    );
+//                } catch (JsonProcessingException e) {
+//                }
+//            }
+
+            try {
+                terminalResponse = objectMapper.readValue(json, TerminalResponseFlow2.class);
+            } catch (Exception e) {
+                logger.error("Error parsing JSON to TerminalResponseFlow2", e);
+            }
+
+            System.out.println(terminalResponse);
         } else {
-            String json = response.bodyToMono(String.class).block();
             logger.info("getTerminals: RESPONSE: " + response.statusCode().value() + " - " + json);
         }
 
@@ -1617,12 +1647,12 @@ public class AccountBankReceiveController {
         mapList.add(data2);
         data.put("terminals", mapList);
         UriComponents uriComponents = UriComponentsBuilder
-                .fromHttpUrl("https://api-private.mbbank.com.vn/private/ms/offus/public/account-service/tid/v1.0/synchronize")
+                .fromHttpUrl(EnvironmentUtil.getBankUrl() + "ms/offus/public/account-service/tid/v1.0/synchronize")
 //                .fromHttpUrl("https://kietml.click/syncTID.php")
                 .build();
 
         WebClient webClient = WebClient.builder()
-                .baseUrl("https://api-private.mbbank.com.vn/private/ms/offus/public/account-service/tid/v1.0/synchronize")
+                .baseUrl(EnvironmentUtil.getBankUrl() + "ms/offus/public/account-service/tid/v1.0/synchronize")
 //                .baseUrl("https://kietml.click/syncTID.php")
                 .build();
 
