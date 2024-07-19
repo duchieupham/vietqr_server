@@ -165,7 +165,21 @@ public class AccountBankReceiveController {
                         TokenMBResponseDTO tokenMBResponseDTO = getToken();
 
                         // Sync TID MB Bank
-                        TerminalResponseSyncTidDTO terminalRequestDTO = syncTerminals(tokenMBResponseDTO.getAccess_token());
+                        TerminalRequestDTO.TerminalDTO terminal = new TerminalRequestDTO.TerminalDTO();
+                        terminal.setTerminalId("");
+                        terminal.setTerminalName(checkString);
+                        terminal.setTerminalAddress(checkAddress);
+                        terminal.setProvinceCode("1");
+                        terminal.setDistrictCode("6");
+                        terminal.setWardsCode("178");
+                        terminal.setMccCode("1024");
+                        terminal.setFee(0);
+                        terminal.setBankCode("311");
+                        terminal.setBankCodeBranch("01311038");
+                        terminal.setBankCodeBranch(bankAccountNumberEncrypted);
+                        terminal.setBankAccountName(bankAccountName);
+                        terminal.setBankCurrencyCode("1");
+                        TerminalResponseSyncTidDTO terminalRequestDTO = syncTerminals(terminal,tokenMBResponseDTO.getAccess_token());
                         String terminalIdBySyncTID = terminalRequestDTO.getData().getResult().get(0).getTerminalId();
 
                         // get TID MB Bank
@@ -1582,12 +1596,11 @@ public class AccountBankReceiveController {
     }
 
 
-    public TerminalResponseSyncTidDTO syncTerminals(String token) throws JsonProcessingException {
+    public TerminalResponseSyncTidDTO syncTerminals(TerminalRequestDTO.TerminalDTO terminalRequestDTO, String token) throws JsonProcessingException {
 
         UUID clientMessageId = UUID.randomUUID();
 //        Map<String, Object> data = new HashMap<>();
 //        data.put("terminals", terminals);
-        TerminalRequestDTO terminalRequestDTO = new TerminalRequestDTO();
 
         UriComponents uriComponents = UriComponentsBuilder
                 .fromHttpUrl("https://api-private.mbbank.com.vn/private/ms/offus/public/account-service/tid/v1.0/synchronize")
