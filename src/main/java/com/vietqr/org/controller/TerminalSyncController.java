@@ -347,7 +347,7 @@ public class TerminalSyncController {
                             }
 
                             merchantSyncService.insertAll(merchantSyncEntities);
-                            result = midSyncResponseDTOs;
+                            result = new ResponseObjectDTO("SUCCESS", midSyncResponseDTOs);
                             httpStatus = HttpStatus.OK;
                         } else {
                             result = validateMidSync;
