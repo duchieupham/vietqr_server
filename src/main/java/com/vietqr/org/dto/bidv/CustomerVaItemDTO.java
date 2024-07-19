@@ -19,4 +19,6 @@ public interface CustomerVaItemDTO {
     String getBankAccount();
 
     Integer getUnpaidInvoiceAmount();
+
+    Integer getUnpaidInvoiceCount();
 }

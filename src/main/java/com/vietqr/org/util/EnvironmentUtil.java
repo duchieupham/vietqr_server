@@ -9,6 +9,9 @@ public class EnvironmentUtil {
     private static final String BIDV_URL_GET_TOKEN_UAT = "https://bidv.net:9303/bidvorg/service/openapi/oauth2/token";
     private static final String BIDV_URL_GET_TOKEN_PROD = "https://openapi.bidv.com.vn/bidv/service/paygate-oauth/oauth2/token";
 
+    private static final String BIDV_URL_GET_TOKEN_GEN_QR_UAT = "https://bidv.net:9303/bidvorg/service/openapi/oauth2/token";
+    private static final String BIDV_URL_GET_TOKEN_GEN_QR_PROD = "https://openapi.bidv.com.vn/bidv/service/openapi/oauth2/token";
+
     private static final String BIDV_LINKED_URL_REQUEST_UAT = "https://www.bidv.net:9303/bidvorg/service/open-banking/create-ewallet-link-collection/v1";
     private static final String BIDV_LINKED_URL_REQUEST_PROD = "https://www.bidv.net:9303/bidvorg/service/open-banking/create-ewallet-link-collection/v1";
 
@@ -750,5 +753,9 @@ public class EnvironmentUtil {
 
     public static String getMerchantPrefixPublic() {
         return "MER";
+    }
+
+    public static String getBidvUrlGenVietQrGetToken() {
+        return (isProduction() == false) ? BIDV_URL_GET_TOKEN_GEN_QR_UAT : BIDV_URL_GET_TOKEN_GEN_QR_PROD;
     }
 }

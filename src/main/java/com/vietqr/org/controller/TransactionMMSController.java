@@ -492,7 +492,7 @@ public class TransactionMMSController {
                                 transactionReceive.setUserId(accountBankReceiveEntity.getUserId());
                                 transactionReceive.setNote("");
                                 transactionReceive.setUrlLink("");
-                                transactionReceive.setServiceCode(terminalItemEntity.getServiceCode());
+                                transactionReceive.setServiceCode(terminalItemEntity.getRawServiceCode());
                                 transactionReceiveService.insertTransactionReceive(transactionReceive);
 
                                 BankTypeEntity bankTypeEntity = bankTypeService
@@ -548,7 +548,7 @@ public class TransactionMMSController {
                                             terminalBankEntitySync.getId(),
                                             entity.getFtCode(),
                                             transactionReceive, time, "", "",
-                                            terminalItemEntity.getServiceCode());
+                                            terminalItemEntity.getRawServiceCode());
                                 } else {
                                     logger.info("transaction-mms-sync: NOT FOUND TerminalBankEntity");
                                 }

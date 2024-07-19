@@ -20,4 +20,14 @@ public class TerminalItemServiceImpl implements TerminalItemService {
     public void insert(TerminalItemEntity entity) {
         repo.save(entity);
     }
+
+    @Override
+    public TerminalItemEntity getItemByBankAndServiceCode(String bankId, String serviceCode, String terminalCode) {
+        return repo.getItemByBankAndServiceCode(bankId, serviceCode, terminalCode);
+    }
+
+    @Override
+    public void removeById(String id) {
+        repo.removeById(id);
+    }
 }
