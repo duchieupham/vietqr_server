@@ -690,20 +690,6 @@ public class CustomerInvoiceController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    private String generateRandomBillId(int length) {
-        String result = "";
-        try {
-            String billId = EnvironmentUtil.getBidvInvoiceTransactionPrefix() + RandomCodeUtil.generateRandomId(10);
-            while (customerInvoiceService.checkExistedBillId(billId) != null) {
-                billId = EnvironmentUtil.getBidvInvoiceTransactionPrefix() + RandomCodeUtil.generateRandomId(10);
-            }
-            result = billId;
-        } catch (Exception e) {
-            logger.error("generateRandomBillId: ERROR: " + e.toString());
-        }
-        return result;
-    }
-
     private String getAccessKeyFromToken(String key) {
         return accountCustomerService.getAccessKey(key);
     }

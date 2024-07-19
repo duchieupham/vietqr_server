@@ -49,15 +49,17 @@ public interface CustomerVaRepository extends JpaRepository<CustomerVaEntity, Lo
 
         //
         @Query(value = "SELECT a.id, a.merchant_name as merchantName, a.merchant_id as merchantId, a.customer_id as customerId, a.bank_account as bankAccount, "
-                        + "COALESCE(b.amount, 0) as unpaidInvoiceAmount "
+                        + "COALESCE(SUM(b.amount), 0) as unpaidInvoiceAmount, "
+                        + "COALESCE(COUNT(b.id), 0) as unpaidInvoiceCount "
                         + "FROM customer_va a "
                         + "LEFT JOIN ( "
-                        + "SELECT customer_id, amount "
+                        + "SELECT customer_id, amount, id "
                         + "FROM customer_invoice "
                         + "WHERE status = 0 AND qr_type != 1 "
                         + ") b "
                         + "ON a.customer_id = b.customer_id "
-                        + "WHERE a.user_id = :userId ", nativeQuery = true)
+                        + "WHERE a.user_id = :userId "
+                        + "GROUP BY a.id ", nativeQuery = true)
         List<CustomerVaItemDTO> getCustomerVasByUserId(
                         @Param(value = "userId") String userId);
 

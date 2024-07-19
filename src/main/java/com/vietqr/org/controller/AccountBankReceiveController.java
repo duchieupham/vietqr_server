@@ -163,9 +163,22 @@ public class AccountBankReceiveController {
 
                         // get token MB
                         TokenMBResponseDTO tokenMBResponseDTO = getToken();
-
                         // Sync TID MB Bank
-                        TerminalResponseSyncTidDTO terminalRequestDTO = syncTerminals(tokenMBResponseDTO.getAccess_token());
+                        TerminalRequestDTO.TerminalDTO terminal = new TerminalRequestDTO.TerminalDTO();
+                        terminal.setTerminalId(null);
+                        terminal.setTerminalName(checkString);
+                        terminal.setTerminalAddress(checkAddress);
+                        terminal.setProvinceCode("1");
+                        terminal.setDistrictCode("6");
+                        terminal.setWardsCode("178");
+                        terminal.setMccCode("1024");
+                        terminal.setFee(0);
+                        terminal.setBankCode("311");
+                        terminal.setBankCodeBranch("01311038");
+                        terminal.setBankAccountNumber(bankAccountNumberEncrypted);
+                        terminal.setBankAccountName(bankAccountName);
+                        terminal.setBankCurrencyCode("1");
+                        TerminalResponseSyncTidDTO terminalRequestDTO = syncTerminals(terminal, tokenMBResponseDTO.getAccess_token());
                         String terminalIdBySyncTID = terminalRequestDTO.getData().getResult().get(0).getTerminalId();
 
                         // get TID MB Bank
@@ -250,7 +263,7 @@ public class AccountBankReceiveController {
         } catch (Exception e) {
             logger.error("Update flow account: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
-            result = new ResponseMessageDTO("FAILED: " + e.getMessage(), "E05");
+            result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -1582,13 +1595,27 @@ public class AccountBankReceiveController {
     }
 
 
-    public TerminalResponseSyncTidDTO syncTerminals(String token) throws JsonProcessingException {
+    public TerminalResponseSyncTidDTO syncTerminals(TerminalRequestDTO.TerminalDTO terminalRequestDTO, String token) throws JsonProcessingException {
 
         UUID clientMessageId = UUID.randomUUID();
-//        Map<String, Object> data = new HashMap<>();
-//        data.put("terminals", terminals);
-        TerminalRequestDTO terminalRequestDTO = new TerminalRequestDTO();
-
+        Map<String, List<Map<String, Object>>> data = new HashMap<>();
+        Map<String, Object> data2 = new HashMap<>();
+        data2.put("terminalId", null);
+        data2.put("terminalName", terminalRequestDTO.getTerminalName());
+        data2.put("terminalAddress", terminalRequestDTO.getTerminalAddress());
+        data2.put("provinceCode", terminalRequestDTO.getProvinceCode());
+        data2.put("districtCode", terminalRequestDTO.getDistrictCode());
+        data2.put("wardsCode", terminalRequestDTO.getWardsCode());
+        data2.put("mccCode", terminalRequestDTO.getMccCode());
+        data2.put("fee", terminalRequestDTO.getFee());
+        data2.put("bankCode", terminalRequestDTO.getBankCode());
+        data2.put("bankCodeBranch", terminalRequestDTO.getBankCodeBranch());
+        data2.put("bankAccountNumber", terminalRequestDTO.getBankAccountNumber());
+        data2.put("bankAccountName", terminalRequestDTO.getBankAccountName());
+        data2.put("bankCurrencyCode", terminalRequestDTO.getBankCurrencyCode());
+        List<Map<String, Object>> mapList = new ArrayList<>();
+        mapList.add(data2);
+        data.put("terminals", mapList);
         UriComponents uriComponents = UriComponentsBuilder
                 .fromHttpUrl("https://api-private.mbbank.com.vn/private/ms/offus/public/account-service/tid/v1.0/synchronize")
 //                .fromHttpUrl("https://kietml.click/syncTID.php")
@@ -1606,7 +1633,7 @@ public class AccountBankReceiveController {
                 .header("secretKey", EnvironmentUtil.getSecretKeyAPI())
                 .header("username", EnvironmentUtil.getUsernameAPI())
                 .header("Authorization", "Bearer " + token)
-                .body(BodyInserters.fromValue(terminalRequestDTO))
+                .body(BodyInserters.fromValue(data))
                 .exchange();
 
         ClientResponse response = responseMono.block();

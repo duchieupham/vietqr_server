@@ -60,4 +60,49 @@ public class BIDVTokenUtil {
         }
         return result;
     }
+
+    public static TokenBankBIDVDTO getBIDVTokenGenerateVietQr(String scope) {
+        TokenBankBIDVDTO result = null;
+        try {
+            String url = EnvironmentUtil.getBidvUrlGenVietQrGetToken();
+            //
+            System.out.println("URL GET TOKEN BIDV: " + url);
+            UriComponents uriComponents = UriComponentsBuilder
+                    .fromHttpUrl(url)
+                    .buildAndExpand(/* add url parameter here */);
+            WebClient webClient = WebClient.builder()
+                    .baseUrl(url)
+                    .build();
+            MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+            formData.add("grant_type", "client_credentials");
+            formData.add("scope", scope);
+            formData.add("client_id", EnvironmentUtil.getBidvGetTokenClientId());
+            formData.add("client_secret", EnvironmentUtil.getBidvGetTokenClientSecret());
+            logger.info("BIDVTokenUtil: getBIDVToken: client_id: " + EnvironmentUtil.getBidvGetTokenClientId()
+                    + " client_secret: " + EnvironmentUtil.getBidvGetTokenClientSecret());
+            // Call POST API
+            TokenBankBIDVDTO response = webClient.method(HttpMethod.POST)
+                    .uri(uriComponents.toUri())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .body(BodyInserters.fromFormData(formData))
+                    .exchange()
+                    .flatMap(clientResponse -> {
+                        if (clientResponse.statusCode().is2xxSuccessful()) {
+                            return clientResponse.bodyToMono(TokenBankBIDVDTO.class);
+                        } else {
+                            clientResponse.body((clientHttpResponse, context) -> {
+                                logger.info(clientHttpResponse.getBody().collectList().block().toString());
+                                return clientHttpResponse.getBody();
+                            });
+                            return null;
+                        }
+                    })
+                    .block();
+            result = response;
+        } catch (Exception e) {
+            logger.error("BIDVTokenUtil: getBIDVToken: ERROR: " + e.toString());
+            System.out.println("BIDVTokenUtil: getBIDVToken: ERROR: " + e.toString());
+        }
+        return result;
+    }
 }

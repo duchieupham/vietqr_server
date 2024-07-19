@@ -539,7 +539,7 @@ public class CustomerVaUtil {
             WebClient webClient = WebClient.builder()
                     .baseUrl(url)
                     .build();
-            String token = BIDVTokenUtil.getBIDVToken("ewallet").getAccess_token();
+            String token = BIDVTokenUtil.getBIDVTokenGenerateVietQr("ewallet").getAccess_token();
             String clientXCertification = JwsUtil.getClientXCertificate().trim();
             System.out.println("\n\nToken BIDV: " + token);
             System.out.println("\n\nclientXCertification BIDV: " + clientXCertification);

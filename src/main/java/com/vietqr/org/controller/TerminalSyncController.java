@@ -255,8 +255,8 @@ public class TerminalSyncController {
 
     @GetMapping("tid/list-tid")
     public ResponseEntity<Object> getListTid(@RequestHeader("Authorization") String token,
-                                             @RequestParam int page,
-                                             @RequestParam int size,
+                                             @RequestParam(defaultValue = "1") int page,
+                                             @RequestParam(defaultValue = "20") int size,
                                              @RequestParam String mid) {
         Object result = null;
         HttpStatus httpStatus = null;
@@ -377,8 +377,8 @@ public class TerminalSyncController {
 
     @GetMapping("mid/list-mid")
     public ResponseEntity<Object> getMidsExternal(@RequestHeader("Authorization") String token,
-                                                  @RequestParam int page,
-                                                  @RequestParam int size) {
+                                                  @RequestParam(defaultValue = "1") int page,
+                                                  @RequestParam(defaultValue = "20") int size) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
@@ -568,7 +568,6 @@ public class TerminalSyncController {
         }
         return result;
     }
-
 
     private ResponseMessageDTO validateBankAccountMerchant(Map<String, MidBankAccountSyncDTO> midBankAccountSyncDTOMap) {
         ResponseMessageDTO result = null;
