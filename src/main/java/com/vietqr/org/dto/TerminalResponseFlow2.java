@@ -102,6 +102,9 @@ public class TerminalResponseFlow2 {
             private String branchName;
             private int status;
 
+            // Thêm trường thiếu
+            private String sources;
+
             public Terminal() {
             }
 
@@ -128,6 +131,14 @@ public class TerminalResponseFlow2 {
                 this.bankCodeBranch = bankCodeBranch;
                 this.branchName = branchName;
                 this.status = status;
+            }
+
+            public String getSources() {
+                return sources;
+            }
+
+            public void setSources(String sources) {
+                this.sources = sources;
             }
 
             public String getTerminalId() {
