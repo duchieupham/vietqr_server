@@ -20,7 +20,7 @@ public class TerminalRequestDTO {
     public TerminalRequestDTO() {
     }
 
-    public class TerminalDTO {
+    public static class TerminalDTO {
         private String terminalId;
         private String terminalName;
         private String terminalAddress;
