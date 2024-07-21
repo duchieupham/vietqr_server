@@ -5581,6 +5581,7 @@ public class TransactionBankController {
 			data.put("sign", dto.getSign());
 			data.put("terminalCode", dto.getTerminalCode());
 			data.put("urlLink", dto.getUrlLink());
+			data.put("serviceCode", "");
 			String suffixUrl = "";
 			if (entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty()) {
 				suffixUrl = entity.getSuffixUrl();
@@ -5847,6 +5848,7 @@ public class TransactionBankController {
 			data.put("sign", dto.getSign());
 			data.put("terminalCode", dto.getTerminalCode());
 			data.put("urlLink", dto.getUrlLink());
+			data.put("serviceCode", "");
 			System.out.println("Push data V2: Request: " + data);
 			String suffixUrl = "";
 			WebClient.Builder webClientBuilder = WebClient.builder()
