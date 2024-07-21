@@ -598,7 +598,7 @@ public class CustomerInvoiceController {
         transactionReceiveEntity.setStatus(1);
         transactionReceiveEntity.setTraceId("");
         transactionReceiveEntity.setTransType("C");
-        transactionReceiveEntity.setReferenceNumber(dto.getBill_id());
+        transactionReceiveEntity.setReferenceNumber(UUID.randomUUID().toString());
         transactionReceiveEntity.setOrderId("");
         transactionReceiveEntity.setSign("");
         transactionReceiveEntity.setCustomerBankAccount("");
@@ -1434,7 +1434,7 @@ public class CustomerInvoiceController {
         // update transaction receive
         transactionReceiveService.updateTransactionReceiveStatus(1,
                 dto.getTrans_id(),
-                dto.getBill_id(),
+                UUID.randomUUID().toString(),
                 DateTimeUtil.getCurrentDateTimeUTC(),
                 transactionReceiveEntity.getId());
 
