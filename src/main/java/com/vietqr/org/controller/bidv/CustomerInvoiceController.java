@@ -291,7 +291,9 @@ public class CustomerInvoiceController {
                                 logger.info("BILL ID: " + dto.getBill_id());
                                 CustomerInvoiceDataDTO customerInvoiceDataDTO = customerInvoiceService
                                         .getCustomerInvoiceByBillId(dto.getBill_id());
-                                    if (customerInvoiceDataDTO != null && customerInvoiceDataDTO.getQrType() == 1) {
+                                    if (customerInvoiceDataDTO != null
+                                            && customerInvoiceDataDTO.getQrType() == 1
+                                            && customerInvoiceDataDTO.getStatus() == 0) {
                                         // check invoice đã thanh toán hay chưa
                                         if (customerInvoiceDataDTO.getStatus() == 0) {
                                             // check số tiền có khớp hay không
@@ -353,7 +355,9 @@ public class CustomerInvoiceController {
                                                     "Hóa đơn đã gạch nợ rồi (mỗi hóa đơn chỉ gạch nợ 1 lần)");
                                             httpStatus = HttpStatus.OK;
                                         }
-                                    } else if (customerInvoiceDataDTO != null && customerInvoiceDataDTO.getQrType() == 0) {
+                                    } else if (customerInvoiceDataDTO != null
+                                            && customerInvoiceDataDTO.getQrType() == 0
+                                            && customerInvoiceDataDTO.getStatus() == 0) {
                                         // check invoice đã thanh toán hay chưa
                                         if (customerInvoiceDataDTO.getStatus() == 0) {
                                             // check số tiền có khớp hay không
@@ -400,7 +404,41 @@ public class CustomerInvoiceController {
                                                     "Hóa đơn đã gạch nợ rồi (mỗi hóa đơn chỉ gạch nợ 1 lần)");
                                             httpStatus = HttpStatus.OK;
                                         }
+                                    } else if (Objects.nonNull(customerInvoiceDataDTO)
+                                    && customerInvoiceDataDTO.getStatus() == 1) {
+                                        accountBankReceiveEntity = accountBankReceiveService
+                                                .getAccountBankByCustomerIdAndByServiceId(dto.getCustomer_id());
+                                        TransactionBidvEntity transactionBidvEntity = new TransactionBidvEntity();
+                                        transactionBidvEntity.setId(UUID.randomUUID().toString());
+                                        transactionBidvEntity.setCustomerId(dto.getCustomer_id());
+                                        transactionBidvEntity.setServiceId(dto.getService_id());
+                                        transactionBidvEntity.setAmount(dto.getAmount());
+                                        transactionBidvEntity.setBillId(dto.getBill_id());
+                                        transactionBidvEntity.setTransDate(dto.getTrans_date());
+                                        transactionBidvEntity.setCheckSum(dto.getChecksum());
+                                        Thread thread = new Thread(() -> {
+                                            transactionBidvService.insert(transactionBidvEntity);
+                                        });
+                                        thread.start();
+                                        // hoá đơn đã gạch nợ rồi
+                                        result = new ResponseMessageBidvDTO("023",
+                                                "Hóa đơn đã gạch nợ rồi (mỗi hóa đơn chỉ gạch nợ 1 lần)");
+                                        httpStatus = HttpStatus.OK;
                                     } else {
+                                        accountBankReceiveEntity = accountBankReceiveService
+                                                .getAccountBankByCustomerIdAndByServiceId(dto.getCustomer_id());
+                                        TransactionBidvEntity transactionBidvEntity = new TransactionBidvEntity();
+                                        transactionBidvEntity.setId(UUID.randomUUID().toString());
+                                        transactionBidvEntity.setCustomerId(dto.getCustomer_id());
+                                        transactionBidvEntity.setServiceId(dto.getService_id());
+                                        transactionBidvEntity.setAmount(dto.getAmount());
+                                        transactionBidvEntity.setBillId(dto.getBill_id());
+                                        transactionBidvEntity.setTransDate(dto.getTrans_date());
+                                        transactionBidvEntity.setCheckSum(dto.getChecksum());
+                                        Thread thread = new Thread(() -> {
+                                            transactionBidvService.insert(transactionBidvEntity);
+                                        });
+                                        thread.start();
                                         // mã hoá đơn không tồn tại
                                         result = new ResponseMessageBidvDTO("021",
                                                 "Mã hóa đơn không tồn tại");
@@ -523,11 +561,148 @@ public class CustomerInvoiceController {
                         data.put("timePaid", time + "");
                         pushNotification(title, msg, notiEntity, data, userId);
                     }
+                } else if (tempResult.getResult_code().equals("021")
+                            || tempResult.getResult_code().equals("023")) {
+                    if (Objects.nonNull(finalAccountBankReceiveEntity)) {
+                        UUID transactionUUID = UUID.randomUUID();
+                        logger.info("bidv/paybill - bill_id detect: " + dto.getBill_id());
+                        getCustomerSyncEntities(transactionUUID.toString(), dto,
+                                finalAccountBankReceiveEntity, DateTimeUtil.getCurrentDateTimeUTC());
+                        insertNewTransaction(dto, transactionUUID.toString(), finalAccountBankReceiveEntity);
+                    }
                 }
-
             });
             thread.start();
         }
+    }
+
+    private void insertNewTransaction(CustomerInvoicePaymentRequestDTO dto, String transactionUUID,
+                                      AccountBankReceiveEntity accountBankReceiveEntity) {
+        String amount = processHiddenAmount(Long.parseLong(dto.getAmount()), accountBankReceiveEntity.getId(),
+                accountBankReceiveEntity.isValidService(), transactionUUID);
+        long time = DateTimeUtil.getCurrentDateTimeUTC();
+        amount = formatAmountNumber(amount);
+        BankTypeEntity bankTypeEntity = bankTypeService
+                .getBankTypeById(accountBankReceiveEntity.getBankTypeId());
+        // insert new transaction receive
+        TransactionReceiveEntity transactionReceiveEntity = new TransactionReceiveEntity();
+        transactionReceiveEntity.setId(transactionUUID);
+        transactionReceiveEntity.setBankAccount(accountBankReceiveEntity.getBankAccount());
+        transactionReceiveEntity.setBankId(accountBankReceiveEntity.getId());
+        transactionReceiveEntity.setContent(dto.getBill_id());
+        transactionReceiveEntity.setAmount(Long.parseLong(dto.getAmount()));
+        transactionReceiveEntity.setTime(DateTimeUtil.getCurrentDateTimeUTC());
+        transactionReceiveEntity.setTimePaid(DateTimeUtil.getCurrentDateTimeUTC());
+        transactionReceiveEntity.setRefId(UUID.randomUUID().toString());
+        transactionReceiveEntity.setType(2);
+        transactionReceiveEntity.setStatus(1);
+        transactionReceiveEntity.setTraceId("");
+        transactionReceiveEntity.setTransType("C");
+        transactionReceiveEntity.setReferenceNumber(dto.getBill_id());
+        transactionReceiveEntity.setOrderId("");
+        transactionReceiveEntity.setSign("");
+        transactionReceiveEntity.setCustomerBankAccount("");
+        transactionReceiveEntity.setCustomerBankCode("");
+        transactionReceiveEntity.setCustomerName("");
+        transactionReceiveEntity.setTerminalCode("");
+        transactionReceiveEntity.setServiceCode("");
+        transactionReceiveEntity.setQrCode("");
+        transactionReceiveEntity.setUserId(accountBankReceiveEntity.getUserId());
+        transactionReceiveEntity.setNote("");
+        transactionReceiveEntity.setTransStatus(0);
+        transactionReceiveEntity.setUrlLink("");
+        transactionReceiveEntity.setBillId(dto.getBill_id());
+        transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
+        logger.info("transaction-sync - no have terminal is empty.");
+        // insert notification
+        UUID notificationUUID = UUID.randomUUID();
+        NotificationEntity notiEntity = new NotificationEntity();
+        String prefix = "";
+        if (transactionReceiveEntity.getTransType().equalsIgnoreCase("D")) {
+            prefix = "-";
+        } else {
+            prefix = "+";
+        }
+        String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
+                + accountBankReceiveEntity.getBankAccount()
+                + NotificationUtil.getNotiDescUpdateTransSuffix2()
+                + prefix + amount
+                + NotificationUtil.getNotiDescUpdateTransSuffix4()
+                + transactionReceiveEntity.getContent();
+        notiEntity.setId(notificationUUID.toString());
+        notiEntity.setRead(false);
+        notiEntity.setMessage(message);
+        notiEntity.setTime(time);
+        notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
+        notiEntity.setUserId(accountBankReceiveEntity.getUserId());
+        notiEntity.setData(transactionReceiveEntity.getId());
+        Map<String, String> data = autoMapUpdateTransPushNotification(new NotificationFcmMapDTO(
+                        notificationUUID.toString(),
+                        bankTypeEntity,
+                        "", "", "",
+                        transactionReceiveEntity
+                )
+        );
+        pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
+                message, notiEntity, data, accountBankReceiveEntity.getUserId());
+        String messageSocial = prefix + amount + " VND"
+                + " | TK: " + bankTypeEntity.getBankShortName() + " - "
+                + accountBankReceiveEntity.getBankAccount()
+                + " | " + convertLongToDate(time)
+                + " | " + dto.getBill_id()
+                + " | ND: " + transactionReceiveEntity.getContent();
+        /////// DO INSERT TELEGRAM, GG CHAT, LARK
+        doInsertSocialMedia(accountBankReceiveEntity.getId(), messageSocial);
+    }
+
+    private ResponseMessageDTO getCustomerSyncEntities(String transactionUUID, CustomerInvoicePaymentRequestDTO dto,
+                                         AccountBankReceiveEntity accountBankEntity, long time) {
+        ResponseMessageDTO result = new ResponseMessageDTO("SUCCESS", "");
+        try {
+            // 1. Check bankAccountEntity with sync = true (add sync boolean field)
+            // 2. Find account_customer_bank by bank_id/bank_account AND auth = true.
+            // 3. Find customer_sync and push data to customer.
+            if (accountBankEntity.isSync() || accountBankEntity.isWpSync()) {
+                TransactionBankCustomerDTO transactionBankCustomerDTO = new TransactionBankCustomerDTO();
+                transactionBankCustomerDTO.setTransactionid(dto.getTrans_id());
+                transactionBankCustomerDTO.setTransactiontime(time * 1000);
+                transactionBankCustomerDTO.setReferencenumber(dto.getBill_id());
+                transactionBankCustomerDTO.setAmount(Long.parseLong(dto.getAmount()));
+                transactionBankCustomerDTO.setContent(dto.getBill_id());
+                transactionBankCustomerDTO.setBankaccount(accountBankEntity.getBankAccount());
+                transactionBankCustomerDTO.setTransType("C");
+                transactionBankCustomerDTO.setReciprocalAccount("");
+                transactionBankCustomerDTO.setReciprocalBankCode("");
+                transactionBankCustomerDTO.setVa("");
+                transactionBankCustomerDTO.setValueDate(time);
+                transactionBankCustomerDTO.setSign("");
+                transactionBankCustomerDTO.setOrderId("");
+                transactionBankCustomerDTO.setTerminalCode("");
+                transactionBankCustomerDTO.setTerminalCode("");
+                transactionBankCustomerDTO.setUrlLink("");
+                List<AccountCustomerBankEntity> accountCustomerBankEntities = new ArrayList<>();
+                accountCustomerBankEntities = accountCustomerBankService
+                        .getAccountCustomerBankByBankId(accountBankEntity.getId());
+                if (accountCustomerBankEntities != null && !accountCustomerBankEntities.isEmpty()) {
+                    for (AccountCustomerBankEntity accountCustomerBankEntity : accountCustomerBankEntities) {
+                        CustomerSyncEntity customerSyncEntity = customerSyncService
+                                .getCustomerSyncById(accountCustomerBankEntity.getCustomerSyncId());
+                        if (customerSyncEntity != null) {
+                            System.out.println("customerSyncEntity: " + customerSyncEntity.getId() + " - "
+                                    + customerSyncEntity.getInformation());
+                            result = pushNewTransactionToCustomerSync(transactionUUID, customerSyncEntity,
+                                    transactionBankCustomerDTO,
+                                    time);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("CustomerSync: Error: " + e.toString());
+            System.out.println("CustomerSync: Error: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05 - " + e.toString());
+        }
+        return result;
     }
 
     // API get list invoice for system
@@ -936,7 +1111,7 @@ public class CustomerInvoiceController {
             if (accountBankEntity.isSync() || accountBankEntity.isWpSync()) {
                 TransactionBankCustomerDTO transactionBankCustomerDTO = new TransactionBankCustomerDTO();
                 transactionBankCustomerDTO.setTransactionid(dto.getTrans_id());
-                transactionBankCustomerDTO.setTransactiontime(time);
+                transactionBankCustomerDTO.setTransactiontime(time * 1000);
                 transactionBankCustomerDTO.setReferencenumber(transactionReceiveEntity.getBillId());
                 transactionBankCustomerDTO.setAmount(transactionReceiveEntity.getAmount());
                 transactionBankCustomerDTO.setContent(transactionReceiveEntity.getContent());
@@ -1016,6 +1191,7 @@ public class CustomerInvoiceController {
             data.put("sign", dto.getSign());
             data.put("terminalCode", dto.getTerminalCode());
             data.put("urlLink", dto.getUrlLink());
+            data.put("serviceCode", "");
             String suffixUrl = "";
             if (entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty()) {
                 suffixUrl = entity.getSuffixUrl();
