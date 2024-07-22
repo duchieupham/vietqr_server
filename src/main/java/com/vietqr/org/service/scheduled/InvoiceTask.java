@@ -55,7 +55,8 @@ public class InvoiceTask {
     @Autowired
     FcmTokenService fcmTokenService;
 
-    @Scheduled(fixedRate = 180000) // Chỉnh thành 3 phút
+    //@Scheduled(fixedRate = 180000) // Chỉnh thành 3 phút
+    @Scheduled(cron = "0 0 0 5 * ?", zone = "Asia/Ho_Chi_Minh")
     public void createMonthlyInvoices() {
         List<MerchantSyncEntity> merchants = merchantSyncService.findAllMerchants();
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC).plusHours(7); // Chuyển sang giờ UTC+7
