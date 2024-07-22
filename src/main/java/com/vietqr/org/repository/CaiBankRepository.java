@@ -28,4 +28,9 @@ public interface CaiBankRepository extends JpaRepository<CaiBankEntity, Long> {
 			+ "INNER JOIN bank_type b ON a.bank_type_id = b.id "
 			+ "WHERE bank_type_id IN (:bankTypeIds)", nativeQuery = true)
 	List<CaiValueDTO> getCaiValues(List<String> bankTypeIds);
+
+	@Query(value = "SELECT a.cai_value FROM cai_bank a "
+			+ "INNER JOIN account_bank_receive b ON a.bank_type_id = b.bank_type_id "
+			+ "WHERE b.id = :bankId LIMIT 1", nativeQuery = true)
+    String getCaiValueByBankId(String bankId);
 }

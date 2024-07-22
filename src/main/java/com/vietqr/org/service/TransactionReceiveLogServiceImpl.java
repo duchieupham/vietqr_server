@@ -2,6 +2,7 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+import com.vietqr.org.dto.ITransactionReceiveLogDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,11 @@ public class TransactionReceiveLogServiceImpl implements TransactionReceiveLogSe
     @Override
     public List<TransactionReceiveLogEntity> getTransactionReceiveLogsByTransId(String transactionId) {
         return repo.getTransactionReceiveLogs(transactionId);
+    }
+
+    @Override
+    public List<ITransactionReceiveLogDTO> getTransactionLogsByTransId(String transactionId) {
+        return repo.getTransactionLogsByTransId(transactionId);
     }
 
 }
