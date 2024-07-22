@@ -6,6 +6,8 @@ import com.vietqr.org.repository.EmailVerifyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class EmailVerifyServiceImpl implements EmailVerifyService {
     @Autowired
@@ -18,7 +20,7 @@ public class EmailVerifyServiceImpl implements EmailVerifyService {
     }
 
     @Override
-    public EmailVerifyEntity getEmailVerifyByUserId(String userId) {
+    public List<EmailVerifyEntity> getEmailVerifyByUserId(String userId) {
         return repository.getEmailVerifyByUserId(userId);
     }
 

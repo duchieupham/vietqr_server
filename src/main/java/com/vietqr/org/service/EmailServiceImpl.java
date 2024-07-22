@@ -105,7 +105,7 @@ public class EmailServiceImpl implements EmailService {
                     + "Website: vietqr.com / vietqr.vn / vietqr.ai</p>";
             mimeMessageHelper.setText(htmlMsg, true);
 
-            byte[] imageBytes = getImageBytes(emailDetails.getAttachment());
+            byte[] imageBytes = getImageBytes("logo-vietqr-official.png");
             if (imageBytes != null) {
                 ByteArrayResource dataSource = new ByteArrayResource(imageBytes);
                 mimeMessageHelper.addInline("image", dataSource, "image/png");

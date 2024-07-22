@@ -1,5 +1,6 @@
 package com.vietqr.org.repository;
 
+import com.vietqr.org.dto.BankAccountActiveKeyResponseDTO;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.AccountBankReceiveShareEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,16 +17,25 @@ public interface AccountBankReceiveShareRepository
         extends JpaRepository<AccountBankReceiveShareEntity, Long> {
     @Query(value = "SELECT DISTINCT a.bank_id as bankId, b.bank_account as bankAccount, "
             + "b.bank_account_name as userBankName, b.phone_authenticated as phoneAuthenticated, "
-            + "b.type as bankType, b.is_authenticated as authenticated, "
-            + "b.user_id as userId, a.is_owner as isOwner, b.bank_type_id as bankTypeId, "
-            + "b.national_id as nationalId, b.is_valid_service AS isValidService, "
-            + "b.valid_fee_from AS validFeeFrom, b.valid_fee_to AS validFeeTo "
-            + "FROM account_bank_receive_share a "
-            + "INNER JOIN account_bank_receive b "
-            + "ON a.bank_id = b.id "
-            + "WHERE a.user_id = :userId  "
-            + " ORDER BY b.is_authenticated DESC, a.is_owner DESC", nativeQuery = true)
+                    + "b.type as bankType, b.is_authenticated as authenticated, "
+                    + "b.user_id as userId, a.is_owner as isOwner, b.bank_type_id as bankTypeId, "
+                    + "b.national_id as nationalId, b.is_valid_service AS isValidService, "
+                    + "b.valid_fee_from AS validFeeFrom, b.valid_fee_to AS validFeeTo "
+                    + "FROM account_bank_receive_share a "
+                    + "INNER JOIN account_bank_receive b "
+                    + "ON a.bank_id = b.id "
+                    + "WHERE a.user_id = :userId  "
+                    + " ORDER BY b.is_authenticated DESC, a.is_owner DESC", nativeQuery = true)
     List<AccountBankReceiveShareDTO> getAccountBankReceiveShare(@Param(value = "userId") String userId);
+
+    @Query(value = "SELECT DISTINCT a.bank_id as bankId, b.bank_account as bankAccount, c.bank_short_name as bankShortName, "
+            + "b.bank_account_name as userBankName, b.phone_authenticated as phoneAuthenticated, b.user_id as userId, "
+            + "c.bank_code AS bankCode "
+            + "FROM account_bank_receive_share a "
+            + "INNER JOIN account_bank_receive b ON a.bank_id = b.id "
+            + "LEFT JOIN bank_type c ON b.bank_type_id = c.id "
+            + "WHERE a.user_id = :userId ", nativeQuery = true)
+    List<IBankAccountActiveKeyResponseDTO> getAccountBankInfoActiveKey(@Param(value = "userId") String userId);
 
     @Query(value = "SELECT a.id, a.phone_no as phoneNo, b.first_name as firstName, b.middle_name as middleName, b.last_name as lastName, b.img_id as imgId, c.is_owner as isOwner "
             + "FROM account_login a "

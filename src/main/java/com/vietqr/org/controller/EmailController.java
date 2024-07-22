@@ -3,15 +3,14 @@ package com.vietqr.org.controller;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.EmailVerifyEntity;
 import com.vietqr.org.service.*;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 import software.amazon.awssdk.core.ResponseInputStream;
 
@@ -20,13 +19,18 @@ import javax.mail.internet.MimeMessage;
 import java.io.ByteArrayOutputStream;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin
 @RequestMapping("/api")
 public class EmailController {
+    private static final Logger logger = Logger.getLogger(EmailController.class);
+
 
     @Autowired
     private EmailService emailService;
@@ -49,6 +53,46 @@ public class EmailController {
     @Autowired
     AccountLoginService accountLoginService;
 
+    @Autowired
+    AccountBankReceiveService accountBankReceiveService;
+
+    @Autowired
+    AccountBankReceiveShareService accountBankReceiveShareService;
+
+    // lấy thông tin của account xác thực OTP thành công bởi userID
+    @GetMapping("bank-accounts/active-key")
+    public ResponseEntity<List<BankAccountActiveKeyResponseDTO>> getBankAccounts(@RequestParam String userId) {
+        List<BankAccountActiveKeyResponseDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            // cần có thông tin này
+//        BankAccount
+//        BankCode
+//        SĐT active key (accountVietQR)
+//        Thời gian lấy key
+            List<BankAccountActiveKeyResponseDTO> dataBankAccount = new ArrayList<>();
+            List<IBankAccountActiveKeyResponseDTO> infoBankAccount = accountBankReceiveShareService.getAccountBankInfoActiveKey(userId);
+            dataBankAccount = infoBankAccount.stream().map(item -> {
+                BankAccountActiveKeyResponseDTO dto = new BankAccountActiveKeyResponseDTO();
+                dto.setBankId(item.getBankId());
+                dto.setBankAccount(item.getBankAccount());
+                dto.setBankCode(item.getBankCode());
+                dto.setBankShortName(item.getBankShortName());
+                dto.setUserBankName(item.getUserBankName());
+                dto.setUserId(item.getUserId());
+                dto.setPhoneAuthenticated(item.getPhoneAuthenticated());
+                return dto;
+            }).collect(Collectors.toList());
+
+            result = dataBankAccount;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("bankAccountInfo Active Key: " + e.getMessage() + " at: " + System.currentTimeMillis());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @PostMapping("send-mail")
     public ResponseEntity<Object> sendEmailVerify(@RequestBody SendMailRequestDTO dto) {
         Object result = null;
@@ -56,10 +100,11 @@ public class EmailController {
         try {
             emailService.sendMail(dto.getTo(), dto);
 
+
             result = new ResponseMessageDTO("SUCCESS", "Sent mail thành công.");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            result = new ResponseMessageDTO("FAILED" + e.getMessage(), "E05");
+            result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -86,7 +131,7 @@ public class EmailController {
             String htmlMsg = "<p>Kính gửi khách hàng, </p>"
                     + "<p>Để hoàn tất quá trình đăng ký và xác minh tài khoản của bạn, vui lòng sử dụng mã OTP dưới đây<br>"
                     + "Mã OTP của bạn là: <span style=\"font-size: 18px; font-weight: bold;\">" + randomOTP + "</span><br>"
-                    + "Vui lòng nhập mã OTP này vào trang xác minh để kích hoạt tài khoản của bạn. Mã OTP này sẽ hết hạn sau 10 phút.<br>"
+                    + "Vui lòng nhập mã OTP này vào trang xác minh để kích hoạt tài khoản của bạn. <br>"
                     + "Nếu bạn không yêu cầu mã OTP này, vui lòng bỏ qua email này hoặc liên hệ với chúng tôi để được hỗ trợ.<br>"
                     + "Vui lòng nhập mã OTP này vào trang xác minh để kích hoạt tài khoản của bạn. </p>"
                     + "<p>Trân trọng, <br>"
@@ -96,7 +141,7 @@ public class EmailController {
                     + "Website: vietqr.com / vietqr.vn / vietqr.ai</p>";
             mimeMessageHelper.setText(htmlMsg, true);
 
-            byte[] imageBytes = getImageBytes(details.getAttachment());
+            byte[] imageBytes = getImageBytes("logo-vietqr-official.png");
             if (imageBytes != null) {
                 ByteArrayResource dataSource = new ByteArrayResource(imageBytes);
                 mimeMessageHelper.addInline("image", dataSource, "image/png");
@@ -118,8 +163,9 @@ public class EmailController {
 
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
-        } catch (
-                Exception e) {
+        } catch (Exception e) {
+            logger.error("Send mail error: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -132,19 +178,21 @@ public class EmailController {
         HttpStatus httpStatus = null;
         try {
             // lấy ra emailverified entity để check
-            EmailVerifyEntity emailVerifyByUserId = emailVerifyService.getEmailVerifyByUserId(confirmOtpEmailDTO.getUserId());
+            List<EmailVerifyEntity> emailVerifyByUserId = emailVerifyService.getEmailVerifyByUserId(confirmOtpEmailDTO.getUserId());
             int otpParse = Integer.parseInt(confirmOtpEmailDTO.getOtp());
-            if (emailVerifyByUserId.getOtp() == otpParse) {
-                // update isVerified = true ở bảng
-                emailVerifyService.updateEmailVerifiedByUserId(confirmOtpEmailDTO.getUserId(), otpParse);
-                // update isVerified = true ở bảng accountLogin
-                accountLoginService.updateIsVerifiedByUserId(confirmOtpEmailDTO.getUserId());
+            for (EmailVerifyEntity entity : emailVerifyByUserId) {
+                if (entity.getOtp() == otpParse) {
+                    // update isVerified = true ở bảng
+                    emailVerifyService.updateEmailVerifiedByUserId(confirmOtpEmailDTO.getUserId(), otpParse);
+                    // update isVerified = true ở bảng accountLogin
+                    accountLoginService.updateIsVerifiedByUserId(confirmOtpEmailDTO.getUserId());
 
-                result = new ResponseMessageDTO("SUCCESS", "");
-                httpStatus = HttpStatus.BAD_REQUEST;
-            } else {
-                result = new ResponseMessageDTO("FAILED", "E173");
-                httpStatus = HttpStatus.BAD_REQUEST;
+                    result = new ResponseMessageDTO("SUCCESS", "");
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    result = new ResponseMessageDTO("FAILED", "E173");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
             }
         } catch (Exception e) {
             result = new ResponseMessageDTO("FAILED", "E05");

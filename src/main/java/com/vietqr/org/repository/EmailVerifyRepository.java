@@ -7,12 +7,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 
 @Repository
 public interface EmailVerifyRepository extends JpaRepository<EmailVerifyEntity, String> {
 
     @Query(value = "SELECT * FROM email_verify WHERE user_id = :userId ", nativeQuery = true)
-    EmailVerifyEntity getEmailVerifyByUserId(String userId);
+    List<EmailVerifyEntity> getEmailVerifyByUserId(String userId);
 
     @Transactional
     @Modifying

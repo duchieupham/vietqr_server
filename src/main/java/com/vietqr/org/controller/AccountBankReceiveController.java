@@ -81,6 +81,9 @@ public class AccountBankReceiveController {
     BankReceiveBranchService bankReceiveBranchService;
 
     @Autowired
+    BankReceiveActiveHistoryService bankReceiveActiveHistoryService;
+
+    @Autowired
     CaiBankService caiBankService;
 
     @Autowired
@@ -1238,6 +1241,112 @@ public class AccountBankReceiveController {
             result = terminalInterOwners;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("account-bank/active-key/{userId}")
+    public ResponseEntity<List<AccountBankActiveKeyResponseDTO>> getAccountBankBackupAvtiveKey(
+            @PathVariable("userId") String userId) {
+        List<AccountBankActiveKeyResponseDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            // get list banks
+            //
+            logger.info("getAccountBankBackups: " + userId);
+            long currentDateTimeUTCPlus7 = DateTimeUtil.getStartDateUTCPlus7();
+            List<AccountBankReceiveShareDTO> banks = accountBankReceiveShareService
+                    .getAccountBankReceiveShares(userId);
+            List<TransTempCountDTO> transTempCountDTOs = transReceiveTempService
+                    .getTransTempCounts(banks.stream().map(AccountBankReceiveShareDTO::getBankId)
+                            .distinct().collect(Collectors.toList()));
+
+            Map<String, TransTempCountDTO> transTempCountDTOMap = transTempCountDTOs.stream()
+                    .collect(Collectors.toMap(TransTempCountDTO::getBankId, Function.identity()));
+
+            List<CaiValueDTO> caiValues = caiBankService.getCaiValues(banks
+                    .stream().map(AccountBankReceiveShareDTO::getBankTypeId)
+                    .distinct().collect(Collectors.toList()));
+
+            Map<String, CaiValueDTO> caiValueDTOMap = caiValues.stream()
+                    .collect(Collectors.toMap(CaiValueDTO::getBankTypeId, Function.identity()));
+
+            // lấy key trong bảng
+
+            if (!FormatUtil.isListNullOrEmpty(banks)) {
+                result = banks.stream().map(item -> {
+                    AccountBankActiveKeyResponseDTO dto = new AccountBankActiveKeyResponseDTO();
+                    CaiValueDTO valueDTO = caiValueDTOMap.get(item.getBankTypeId());
+                    TransTempCountDTO transTempCountDTO = transTempCountDTOMap.get(item.getBankId());
+                    if (Objects.nonNull(transTempCountDTO)) {
+                        if (transTempCountDTO.getLastTimes() < currentDateTimeUTCPlus7) {
+                            dto.setTransCount(0);
+                        } else {
+                            dto.setTransCount(transTempCountDTO.getNums());
+                        }
+                    } else {
+                        dto.setTransCount(0);
+                    }
+                    dto.setId(item.getBankId());
+                    dto.setBankAccount(item.getBankAccount());
+                    dto.setBankShortName(valueDTO.getBankShortName());
+                    dto.setUserBankName(item.getUserBankName());
+                    dto.setBankCode(valueDTO.getBankCode());
+                    dto.setBankName(valueDTO.getBankName());
+                    dto.setImgId(valueDTO.getImgId());
+                    dto.setType(item.getBankType());
+                    dto.setBankTypeId(item.getBankTypeId());
+                    dto.setEwalletToken("");
+                    dto.setUnlinkedType(valueDTO.getUnlinkedType());
+                    dto.setNationalId(item.getNationalId());
+                    dto.setAuthenticated(item.getAuthenticated());
+                    dto.setUserId(item.getUserId());
+                    dto.setIsOwner(item.getIsOwner());
+                    dto.setPhoneAuthenticated(item.getPhoneAuthenticated());
+                    dto.setBankTypeStatus(valueDTO.getBankTypeStatus());
+                    dto.setIsValidService(item.getIsValidService());
+                    dto.setValidFeeFrom(item.getValidFeeFrom());
+                    dto.setValidFeeTo(item.getValidFeeTo());
+
+                    /// khi user đã active key để lưu lại
+                    List<ICheckKeyActiveDTO> bankReceiveActiveHistoryEntity =
+                            bankReceiveActiveHistoryService.getBankReceiveActiveByUserIdAndBankIdBackUp(userId, item.getBankId());
+                    for (ICheckKeyActiveDTO checkKeyActiveDTO : bankReceiveActiveHistoryEntity) {
+                        if (Objects.nonNull(checkKeyActiveDTO)) {
+                            dto.setIsActiveKey(true);
+                            dto.setTimeActiveKey(checkKeyActiveDTO.getCreateAt());
+                            dto.setKeyActive(checkKeyActiveDTO.getKeyActive());
+                        } else {
+                            dto.setIsActiveKey(false);
+                            dto.setTimeActiveKey(0);
+                            StringUtil.isNullOrEmpty(checkKeyActiveDTO.getKeyActive());
+                        }
+                    }
+
+//                        if (checkKeyActiveDTO.getStatusActive() == 1) {
+//                            dto.setIsActiveKey(true);
+//                            dto.setTimeActiveKey(checkKeyActiveDTO.getCreateAt());
+//                            dto.setKeyActive(checkKeyActiveDTO.getKeyActive());
+//                        }else if(checkKeyActiveDTO.getStatusActive() == 0) {
+//                            dto.setIsActiveKey(false);
+//                            dto.setTimeActiveKey(0);
+//                            dto.setKeyActive("");
+//                        }
+
+                    dto.setCaiValue(valueDTO.getCaiValue());
+                    VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+                    vietQRGenerateDTO.setCaiValue(valueDTO.getCaiValue());
+                    vietQRGenerateDTO.setBankAccount(item.getBankAccount());
+                    String qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
+                    dto.setQrCode(qr);
+                    return dto;
+                }).collect(Collectors.toList());
+            }
+            httpStatus = HttpStatus.OK;
+        } catch (
+                Exception e) {
+            logger.info("getAccountBankBackups: ERROR: " + e.getMessage() + " " + userId);
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
