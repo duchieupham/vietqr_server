@@ -1,10 +1,13 @@
 package com.vietqr.org.service;
 
 import com.vietqr.org.dto.BankActiveAdminDataDTO;
+import com.vietqr.org.dto.ICheckKeyActiveDTO;
 import com.vietqr.org.entity.BankReceiveActiveHistoryEntity;
 import com.vietqr.org.repository.BankReceiveActiveHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class BankReceiveActiveHistoryServiceImpl implements BankReceiveActiveHistoryService {
@@ -20,5 +23,15 @@ public class BankReceiveActiveHistoryServiceImpl implements BankReceiveActiveHis
     @Override
     public BankActiveAdminDataDTO getBankActiveAdminData(String keyActive) {
         return repo.getBankActiveAdminData(keyActive);
+    }
+
+    @Override
+    public BankReceiveActiveHistoryEntity getBankReceiveActiveByUserIdAndBankId(String userId, String bankId) {
+        return repo.getBankReceiveActiveByUserIdAndBankId(userId, bankId);
+    }
+
+    @Override
+    public List<ICheckKeyActiveDTO> getBankReceiveActiveByUserIdAndBankIdBackUp(String userId, String bankId) {
+        return repo.getBankReceiveActiveByUserIdAndBankIdBackUp(userId, bankId);
     }
 }

@@ -25,6 +25,7 @@ import javax.mail.util.ByteArrayDataSource;
 import javax.sql.DataSource;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.Random;
 
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -88,11 +89,12 @@ public class EmailServiceImpl implements EmailService {
             mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
             mimeMessageHelper.setFrom(sender);
             mimeMessageHelper.setTo(emailDetails.getRecipient());
-            mimeMessageHelper.setSubject(emailDetails.getSubject());
+
+            int randomOTP = generateSixDigitRandomNumber();
 
             String htmlMsg = "<p>Kính gửi khách hàng, </p>"
                     + "<p>Để hoàn tất quá trình đăng ký và xác minh tài khoản của bạn, vui lòng sử dụng mã OTP dưới đây<br>"
-                    + "Mã OTP của bạn là: <span style=\"font-size: 18px; font-weight: bold;\">" + emailDetails.getMsgBody() + "</span><br>"
+                    + "Mã OTP của bạn là: <span style=\"font-size: 18px; font-weight: bold;\">" + randomOTP + "</span><br>"
                     + "Vui lòng nhập mã OTP này vào trang xác minh để kích hoạt tài khoản của bạn. Mã OTP này sẽ hết hạn sau 10 phút.<br>"
                     + "Nếu bạn không yêu cầu mã OTP này, vui lòng bỏ qua email này hoặc liên hệ với chúng tôi để được hỗ trợ.<br>"
                     + "Vui lòng nhập mã OTP này vào trang xác minh để kích hoạt tài khoản của bạn. </p>"
@@ -103,7 +105,7 @@ public class EmailServiceImpl implements EmailService {
                     + "Website: vietqr.com / vietqr.vn / vietqr.ai</p>";
             mimeMessageHelper.setText(htmlMsg, true);
 
-            byte[] imageBytes = getImageBytes(emailDetails.getAttachment());
+            byte[] imageBytes = getImageBytes("logo-vietqr-official.png");
             if (imageBytes != null) {
                 ByteArrayResource dataSource = new ByteArrayResource(imageBytes);
                 mimeMessageHelper.addInline("image", dataSource, "image/png");
@@ -113,6 +115,11 @@ public class EmailServiceImpl implements EmailService {
         } catch (MessagingException e) {
             return "Error";
         }
+    }
+
+    public int generateSixDigitRandomNumber() {
+        Random random = new Random();
+        return 100000 + random.nextInt(900000);
     }
 
     private byte[] getImageBytes(String id) {
