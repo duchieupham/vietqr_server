@@ -19,4 +19,6 @@ public interface CaiBankService {
 	public CaiBankEntity getCaiBankByCaiValue(String caiValue);
 
 	List<CaiValueDTO> getCaiValues(List<String> bankTypeIds);
+
+	String getCaiValueByBankId(String bankId);
 }

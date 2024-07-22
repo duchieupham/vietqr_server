@@ -35,6 +35,17 @@ public class TransactionReceiveLogEntity implements Serializable {
     @Column(name = "time")
     private long time;
 
+    @Column(name = "timeResponse")
+    private long timeResponse;
+
+    @Column(name = "statusCode")
+    private Integer statusCode;
+
+    // 0: GET TOKEN
+    // 1: TRANS SYNC
+    @Column(name = "type")
+    private Integer type;
+
     public TransactionReceiveLogEntity() {
         super();
     }
@@ -97,4 +108,27 @@ public class TransactionReceiveLogEntity implements Serializable {
         this.urlCallback = urlCallback;
     }
 
+    public long getTimeResponse() {
+        return timeResponse;
+    }
+
+    public void setTimeResponse(long timeResponse) {
+        this.timeResponse = timeResponse;
+    }
+
+    public Integer getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(Integer statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
 }
