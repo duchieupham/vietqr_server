@@ -1432,7 +1432,9 @@ public class TransactionMMSController {
             }
         }
         long time = DateTimeUtil.getCurrentDateTimeUTC();
+        TransactionLogResponseDTO transactionLogResponseDTO = new TransactionLogResponseDTO();
         try {
+            transactionLogResponseDTO.setTimeRequest(DateTimeUtil.getCurrentDateTimeUTC());
             logger.info("pushNewTransactionToCustomerSync: orderId: " +
                     dto.getOrderId());
             logger.info("pushNewTransactionToCustomerSync: sign: " + dto.getSign());
@@ -1499,6 +1501,10 @@ public class TransactionMMSController {
 
             ClientResponse response = responseMono.block();
             System.out.println("response status code: " + response.statusCode());
+            try {
+                transactionLogResponseDTO.setTimeResponse(DateTimeUtil.getCurrentDateTimeUTC());
+                transactionLogResponseDTO.setStatusCode(response.statusCode().value());
+            } catch (Exception e) {}
             if (response.statusCode().is2xxSuccessful()) {
                 String json = response.bodyToMono(String.class).block();
                 System.out.println("Response pushNewTransactionToCustomerSync: " + json);
@@ -1553,7 +1559,10 @@ public class TransactionMMSController {
                 logEntity.setTransactionId(transReceiveId);
                 logEntity.setStatus(result.getStatus());
                 logEntity.setMessage(result.getMessage());
-                logEntity.setTime(time);
+                logEntity.setStatusCode(StringUtil.getValueNullChecker(transactionLogResponseDTO.getStatusCode()));
+                logEntity.setType(1);
+                logEntity.setTimeResponse(transactionLogResponseDTO.getTimeResponse());
+                logEntity.setTime(transactionLogResponseDTO.getTimeRequest());
                 logEntity.setUrlCallback(address);
                 transactionReceiveLogService.insert(logEntity);
             }
@@ -1581,7 +1590,9 @@ public class TransactionMMSController {
     private TokenDTO getCustomerSyncTokenV2(String transReceiveId, MerchantConnectionEntity entity, long time) {
         TokenDTO result = null;
         ResponseMessageDTO msgDTO = null;
+        TransactionLogResponseDTO transactionLogResponseDTO = new TransactionLogResponseDTO();
         try {
+            transactionLogResponseDTO.setTimeRequest(DateTimeUtil.getCurrentDateTimeUTC());
             String key = entity.getUsername() + ":" + entity.getPassword();
             String encodedKey = Base64.getEncoder().encodeToString(key.getBytes());
             logger.info("key: " + encodedKey + " - username: " + entity.getUsername() + " - password: "
@@ -1604,6 +1615,10 @@ public class TransactionMMSController {
                     .exchange()
                     .flatMap(clientResponse -> {
                         System.out.println("status code: " + clientResponse.statusCode());
+                        try {
+                            transactionLogResponseDTO.setTimeResponse(DateTimeUtil.getCurrentDateTimeUTC());
+                            transactionLogResponseDTO.setStatusCode(clientResponse.statusCode().value());
+                        } catch (Exception e) {}
                         if (clientResponse.statusCode().is2xxSuccessful()) {
                             return clientResponse.bodyToMono(TokenDTO.class);
                         } else {
@@ -1636,7 +1651,10 @@ public class TransactionMMSController {
                 logEntity.setTransactionId(transReceiveId);
                 logEntity.setStatus(msgDTO.getStatus());
                 logEntity.setMessage(msgDTO.getMessage());
-                logEntity.setTime(time);
+                logEntity.setStatusCode(transactionLogResponseDTO.getStatusCode());
+                logEntity.setType(0);
+                logEntity.setTimeResponse(transactionLogResponseDTO.getTimeResponse());
+                logEntity.setTime(transactionLogResponseDTO.getTimeRequest());
                 logEntity.setUrlCallback(address);
                 transactionReceiveLogService.insert(logEntity);
             }
@@ -1651,7 +1669,9 @@ public class TransactionMMSController {
         // final ResponseMessageDTO[] results = new ResponseMessageDTO[1];
         // final List<ResponseMessageDTO> results = new ArrayList<>();
         // final String[] msg = new String[1];
+        TransactionLogResponseDTO transactionLogResponseDTO = new TransactionLogResponseDTO();
         try {
+            transactionLogResponseDTO.setTimeRequest(DateTimeUtil.getCurrentDateTimeUTC());
             logger.info("pushNewTransactionToCustomerSync: orderId: " +
                     dto.getOrderId() + " at: " + System.currentTimeMillis());
             // System.out.println("pushNewTransactionToCustomerSync: orderId: " +
@@ -1734,6 +1754,10 @@ public class TransactionMMSController {
                 // .bodyToMono(TransactionResponseDTO.class);
             }
             ClientResponse response = responseMono.block();
+            try {
+                transactionLogResponseDTO.setTimeResponse(DateTimeUtil.getCurrentDateTimeUTC());
+                transactionLogResponseDTO.setStatusCode(response.statusCode().value());
+            } catch (Exception e) {}
             logger.info("Response pushNewTransactionToCustomerSync response orderId: " + dto.getOrderId()
                     + " at: " + System.currentTimeMillis());
             // System.out.println("Response pushNewTransactionToCustomerSync at:" +
@@ -1796,7 +1820,10 @@ public class TransactionMMSController {
                 logEntity.setTransactionId(transReceiveId);
                 logEntity.setStatus(result.getStatus());
                 logEntity.setMessage(result.getMessage());
-                logEntity.setTime(time);
+                logEntity.setStatusCode(StringUtil.getValueNullChecker(transactionLogResponseDTO.getStatusCode()));
+                logEntity.setType(1);
+                logEntity.setTimeResponse(transactionLogResponseDTO.getTimeResponse());
+                logEntity.setTime(transactionLogResponseDTO.getTimeRequest());
                 logEntity.setUrlCallback(address);
                 transactionReceiveLogService.insert(logEntity);
             }
@@ -1807,7 +1834,9 @@ public class TransactionMMSController {
     private TokenDTO getCustomerSyncToken(String transReceiveId, CustomerSyncEntity entity, long time) {
         TokenDTO result = null;
         ResponseMessageDTO msgDTO = null;
+        TransactionLogResponseDTO transactionLogResponseDTO = new TransactionLogResponseDTO();
         try {
+            transactionLogResponseDTO.setTimeRequest(DateTimeUtil.getCurrentDateTimeUTC());
             String key = entity.getUsername() + ":" + entity.getPassword();
             String encodedKey = Base64.getEncoder().encodeToString(key.getBytes());
             logger.info("key: " + encodedKey + " - username: " + entity.getUsername() + " - password: "
@@ -1850,6 +1879,10 @@ public class TransactionMMSController {
                     .exchange()
                     .flatMap(clientResponse -> {
                         System.out.println("status code: " + clientResponse.statusCode());
+                        try {
+                            transactionLogResponseDTO.setTimeResponse(DateTimeUtil.getCurrentDateTimeUTC());
+                            transactionLogResponseDTO.setStatusCode(clientResponse.statusCode().value());
+                        } catch (Exception e) {}
                         if (clientResponse.statusCode().is2xxSuccessful()) {
                             return clientResponse.bodyToMono(TokenDTO.class);
                         } else {
@@ -1910,7 +1943,10 @@ public class TransactionMMSController {
                 logEntity.setTransactionId(transReceiveId);
                 logEntity.setStatus(msgDTO.getStatus());
                 logEntity.setMessage(msgDTO.getMessage());
-                logEntity.setTime(time);
+                logEntity.setStatusCode(StringUtil.getValueNullChecker(transactionLogResponseDTO.getStatusCode()));
+                logEntity.setType(0);
+                logEntity.setTimeResponse(transactionLogResponseDTO.getTimeResponse());
+                logEntity.setTime(transactionLogResponseDTO.getTimeRequest());
                 logEntity.setUrlCallback(address);
                 transactionReceiveLogService.insert(logEntity);
             }

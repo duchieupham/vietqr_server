@@ -534,6 +534,7 @@ public class AccountController {
                 long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
                 accountLoginEntity.setTime(time);
                 accountLoginEntity.setSyncBitrix(false);
+                accountLoginEntity.setIsVerify(false);
                 accountLoginService.insertAccountLogin(accountLoginEntity);
 
                 // insert account_information
@@ -553,6 +554,7 @@ public class AccountController {
                 accountInformationEntity.setNationalId("");
                 accountInformationEntity.setOldNationalId("");
                 accountInformationEntity.setNationalDate("");
+
                 // set carrier type id
                 if (dto.getPhoneNo() != null && !dto.getPhoneNo().trim().isEmpty()) {
                     String prefix = dto.getPhoneNo().substring(0, 3);

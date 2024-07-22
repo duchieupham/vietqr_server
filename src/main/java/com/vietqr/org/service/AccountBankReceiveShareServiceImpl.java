@@ -1,5 +1,6 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.dto.BankAccountActiveKeyResponseDTO;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.AccountBankReceiveShareEntity;
 import com.vietqr.org.repository.AccountBankReceiveShareRepository;
@@ -94,6 +95,11 @@ public class AccountBankReceiveShareServiceImpl implements AccountBankReceiveSha
     @Override
     public List<AccountBankReceiveShareDTO> getAccountBankReceiveShares(String userId) {
         return repo.getAccountBankReceiveShare(userId);
+    }
+
+    @Override
+    public List<IBankAccountActiveKeyResponseDTO> getAccountBankInfoActiveKey(String userId) {
+        return repo.getAccountBankInfoActiveKey(userId);
     }
 
     @Override

@@ -2635,5 +2635,45 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "AND a.reference_number = :referenceNumber "
                 + "AND a.trans_type = :transType LIMIT 1", nativeQuery = true)
         TransactionReceiveEntity getTransactionReceiveByRefNumber(String referenceNumber, String transType, long time);
+
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+                + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
+                + "a.status AS status, a.type AS type, a.trans_type AS transType, "
+                + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
+                + "a.content AS content, a.bank_account AS bankAccount "
+                + "FROM transaction_receive a "
+                + "WHERE "
+                + "a.trans_type IN (:transType) AND a.bank_id = :bankId "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedV2DTO> getTransactionsV2(String bankId, List<String> transType, long fromDate,
+                                                    long toDate, int offset);
+
+        @Query(value = "SELECT COALESCE(SUM(CASE WHEN a.trans_type = 'C' AND a.status = 1 THEN a.amount END), 0) AS totalCredit, "
+                + "COALESCE(SUM(CASE WHEN a.trans_type = 'D' AND a.status = 1 THEN a.amount END), 0) AS totalDebit "
+                + "FROM transaction_receive a "
+                + "WHERE a.bank_id = :bankId "
+                + "AND a.time BETWEEN :fromDate AND :toDate ", nativeQuery = true)
+        ITransStatisticListExtra getExtraTransactionsV2(String bankId, long fromDate, long toDate);
+
+        @Query(value = "SELECT COALESCE(COUNT(a.id), 0) "
+                + "FROM transaction_receive a "
+                + "WHERE "
+                + "a.trans_type IN (:transType) AND a.bank_id = :bankId "
+                + "AND a.time BETWEEN :fromDate AND :toDate ", nativeQuery = true)
+        int countTransactionsV2(String bankId, List<String> transType, long fromDate, long toDate);
+
+        @Query(value = "SELECT a.id, a.amount, a.bank_id as bankId, b.bank_account as bankAccount, a.content, a.status, "
+                + "a.time, a.time_paid as timePaid, a.type, a.trans_type as transType, b.bank_account_name as userBankName, "
+                + "c.img_id as imgId, a.reference_number as referenceNumber, a.service_code AS serviceCode, "
+                + "a.hash_tag AS hashTag, a.qr_code AS qrCode, "
+                + "a.terminal_code as terminalCode, a.note, a.order_id as orderId, c.bank_short_name as bankShortName "
+                + "FROM transaction_receive a "
+                + "INNER JOIN account_bank_receive b "
+                + "ON a.bank_id = b.id "
+                + "INNER JOIN bank_type c "
+                + "ON b.bank_type_id = c.id "
+                + " WHERE a.id = :id LIMIT 1", nativeQuery = true)
+        TransactionDetailV2DTO getTransactionV2ById(String id);
 }
 

@@ -35,4 +35,9 @@ public class CaiBankServiceImpl implements CaiBankService {
 		return caiBankRepository.getCaiValues(bankTypeIds);
 	}
 
+	@Override
+	public String getCaiValueByBankId(String bankId) {
+		return caiBankRepository.getCaiValueByBankId(bankId);
+	}
+
 }

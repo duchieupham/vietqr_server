@@ -1421,6 +1421,37 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public List<TransactionRelatedV2DTO> getTransactionsV2(String bankId, List<String> transType,
+                                                           String fromDate, String toDate, int offset) {
+        return repo.getTransactionsV2(bankId, transType,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
+    public ITransStatisticListExtra getExtraTransactionsV2(String bankId, String fromDate, String toDate) {
+        return repo.getExtraTransactionsV2(bankId,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET
+        );
+    }
+
+    @Override
+    public int countTransactionsV2(String bankId, List<String> transType, String fromDate, String toDate) {
+        return repo.countTransactionsV2(
+                bankId, transType,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET
+        );
+    }
+
+    @Override
+    public TransactionDetailV2DTO getTransactionV2ById(String id) {
+        return repo.getTransactionV2ById(id);
+    }
+
+    @Override
     public TransStatisticDTO getTransactionOverviewBySubTerminalCode(String subTerminalCode, String fromDate, String toDate) {
         return repo.getTransactionOverviewBySubTerminalCode(subTerminalCode,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,

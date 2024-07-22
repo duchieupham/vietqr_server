@@ -154,6 +154,9 @@ public class TransactionReceiveEntity implements Serializable {
 	@Column(name = "billId")
 	private String billId = "";
 
+	@Column(name = "hashTag")
+	private String hashTag = "";
+
 	public TransactionReceiveEntity() {
 		super();
 	}
@@ -442,5 +445,13 @@ public class TransactionReceiveEntity implements Serializable {
 
 	public void setServiceCode(String serviceCode) {
 		this.serviceCode = serviceCode;
+	}
+
+	public String getHashTag() {
+		return hashTag;
+	}
+
+	public void setHashTag(String hashTag) {
+		this.hashTag = hashTag;
 	}
 }

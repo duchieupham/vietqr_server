@@ -1,5 +1,6 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.dto.BankAccountActiveKeyResponseDTO;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.AccountBankReceiveShareEntity;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,8 @@ public interface AccountBankReceiveShareService {
     public int insertAccountBankReceiveShare(AccountBankReceiveShareEntity entity);
 
     public List<AccountBankReceiveShareDTO> getAccountBankReceiveShares(String userId);
+
+    public List<IBankAccountActiveKeyResponseDTO> getAccountBankInfoActiveKey(String userId);
 
     public List<AccountMemberDTO> getMembersFromBankReceiveShare(String bankId);
 
