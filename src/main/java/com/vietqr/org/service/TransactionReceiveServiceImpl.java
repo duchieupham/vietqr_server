@@ -1438,17 +1438,13 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
-    public int countTransactionsV2(String bankId, List<String> transType, String fromDate, String toDate) {
-        return repo.countTransactionsV2(
-                bankId, transType,
-                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
-                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET
-        );
+    public TransactionDetailV2DTO getTransactionV2ById(String id) {
+        return repo.getTransactionV2ById(id);
     }
 
     @Override
-    public TransactionDetailV2DTO getTransactionV2ById(String id) {
-        return repo.getTransactionV2ById(id);
+    public void updateHashTagTransaction(String hashTag, String transactionId) {
+        repo.updateHashTagTransaction(hashTag, transactionId);
     }
 
     @Override

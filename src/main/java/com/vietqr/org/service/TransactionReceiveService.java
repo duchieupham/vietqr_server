@@ -543,7 +543,7 @@ public interface TransactionReceiveService {
 
     ITransStatisticListExtra getExtraTransactionsV2(String bankId, String fromDate, String toDate);
 
-    int countTransactionsV2(String bankId, List<String> transType, String fromDate, String toDate);
-
     TransactionDetailV2DTO getTransactionV2ById(String id);
+
+    void updateHashTagTransaction(String hashTag, String transactionId);
 }
