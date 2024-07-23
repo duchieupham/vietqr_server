@@ -67,6 +67,9 @@ public class AccountSettingEntity implements Serializable {
     @Column(name = "notificationMobile")
     private boolean notificationMobile;
 
+    @Column(name = "notificationMessage")
+    private String notificationMessage;
+
     public AccountSettingEntity() {
         super();
     }
@@ -90,6 +93,34 @@ public class AccountSettingEntity implements Serializable {
         this.themeType = themeType;
         this.keepScreenOn = keepScreenOn;
         this.qrShowType = qrShowType;
+    }
+
+    public AccountSettingEntity(String id, String userId, boolean guideWeb, boolean guideMobile, boolean voiceWeb, boolean voiceMobile, boolean voiceMobileKiot, boolean status, long lastLogin, long accessCount, String edgeImgId, String footerImgId, int themeType, boolean keepScreenOn, int qrShowType, boolean notificationMobile, String notificationMessage) {
+        this.id = id;
+        this.userId = userId;
+        this.guideWeb = guideWeb;
+        this.guideMobile = guideMobile;
+        this.voiceWeb = voiceWeb;
+        this.voiceMobile = voiceMobile;
+        this.voiceMobileKiot = voiceMobileKiot;
+        this.status = status;
+        this.lastLogin = lastLogin;
+        this.accessCount = accessCount;
+        this.edgeImgId = edgeImgId;
+        this.footerImgId = footerImgId;
+        this.themeType = themeType;
+        this.keepScreenOn = keepScreenOn;
+        this.qrShowType = qrShowType;
+        this.notificationMobile = notificationMobile;
+        this.notificationMessage = notificationMessage;
+    }
+
+    public String getNotificationMessage() {
+        return notificationMessage;
+    }
+
+    public void setNotificationMessage(String notificationMessage) {
+        this.notificationMessage = notificationMessage;
     }
 
     public String getId() {

@@ -21,6 +21,8 @@ public class TransactionDetailResV2DTO {
     private String serviceCode;
     private String hashTag;
     private String qrCode;
+    private String bankCode;
+    private String bankName;
 
     public TransactionDetailResV2DTO() {
     }
@@ -210,5 +212,21 @@ public class TransactionDetailResV2DTO {
 
     public void setQrCode(String qrCode) {
         this.qrCode = qrCode;
+    }
+
+    public String getBankCode() {
+        return bankCode;
+    }
+
+    public void setBankCode(String bankCode) {
+        this.bankCode = bankCode;
+    }
+
+    public String getBankName() {
+        return bankName;
+    }
+
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
     }
 }

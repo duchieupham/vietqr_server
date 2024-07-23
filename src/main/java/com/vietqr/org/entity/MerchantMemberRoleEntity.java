@@ -25,7 +25,6 @@ public class MerchantMemberRoleEntity {
     @Column(name = "transRefundRoleIds")
     private String transRefundRoleIds;
 
-
     public void setId(String id) {
         this.id = id;
     }

@@ -1,6 +1,7 @@
 package com.vietqr.org.dto;
 
 public class AccountBankActiveKeyResponseDTO extends AccountBankShareResponseDTO {
+    private boolean isEmailVerified;
     private boolean isActiveKey;
     private String keyActive;
     private long timeActiveKey;
@@ -19,6 +20,18 @@ public class AccountBankActiveKeyResponseDTO extends AccountBankShareResponseDTO
         this.isActiveKey = isActiveKey;
         this.keyActive = keyActive;
         this.timeActiveKey = timeActiveKey;
+    }
+
+    public boolean isEmailVerified() {
+        return isEmailVerified;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        isEmailVerified = emailVerified;
+    }
+
+    public void setActiveKey(boolean activeKey) {
+        isActiveKey = activeKey;
     }
 
     public boolean isActiveKey() {

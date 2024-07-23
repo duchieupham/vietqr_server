@@ -118,6 +118,9 @@ public class AccountBankReceiveController {
     @Autowired
     InvoiceService invoiceService;
 
+    @Autowired
+    EmailVerifyService emailVerifyService;
+
     @PostMapping("admin/account/update-flow-2")
     public ResponseEntity<Object> updateFlow2(
             @Valid @RequestBody AccountUpdateMMSActiveDTO dto
@@ -1316,7 +1319,7 @@ public class AccountBankReceiveController {
                     dto.setValidFeeFrom(item.getValidFeeFrom());
                     dto.setValidFeeTo(item.getValidFeeTo());
 
-                    /// khi user đã active key để lưu lại
+                    // khi user đã active key để lưu lại
                     List<ICheckKeyActiveDTO> bankReceiveActiveHistoryEntity =
                             bankReceiveActiveHistoryService.getBankReceiveActiveByUserIdAndBankIdBackUp(userId, item.getBankId());
                     for (ICheckKeyActiveDTO checkKeyActiveDTO : bankReceiveActiveHistoryEntity) {
@@ -1360,9 +1363,9 @@ public class AccountBankReceiveController {
     }
 
     @GetMapping("account-bank/{userId}")
-    public ResponseEntity<List<AccountBankShareResponseDTO>> getAccountBankBackups(
+    public ResponseEntity<List<AccountBankActiveKeyResponseDTO>> getAccountBankBackups(
             @PathVariable("userId") String userId) {
-        List<AccountBankShareResponseDTO> result = new ArrayList<>();
+        List<AccountBankActiveKeyResponseDTO> result = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
             // get list banks
@@ -1387,7 +1390,7 @@ public class AccountBankReceiveController {
 
             if (!FormatUtil.isListNullOrEmpty(banks)) {
                 result = banks.stream().map(item -> {
-                    AccountBankShareResponseDTO dto = new AccountBankShareResponseDTO();
+                    AccountBankActiveKeyResponseDTO dto = new AccountBankActiveKeyResponseDTO();
                     CaiValueDTO valueDTO = caiValueDTOMap.get(item.getBankTypeId());
                     TransTempCountDTO transTempCountDTO = transTempCountDTOMap.get(item.getBankId());
                     if (Objects.nonNull(transTempCountDTO)) {
@@ -1420,12 +1423,41 @@ public class AccountBankReceiveController {
                     dto.setValidFeeFrom(item.getValidFeeFrom());
                     dto.setValidFeeTo(item.getValidFeeTo());
 
+                    /// khi user đã active key để lưu lại
+                    List<ICheckKeyActiveDTO> bankReceiveActiveHistoryEntity =
+                            bankReceiveActiveHistoryService.getBankReceiveActiveByUserIdAndBankIdBackUp(userId, item.getBankId());
+
+                    for (ICheckKeyActiveDTO checkKeyActiveDTO : bankReceiveActiveHistoryEntity) {
+                        if (Objects.nonNull(checkKeyActiveDTO)) {
+                            dto.setIsActiveKey(true);
+                            dto.setTimeActiveKey(checkKeyActiveDTO.getCreateAt());
+                            dto.setKeyActive(checkKeyActiveDTO.getKeyActive());
+                        } else {
+                            dto.setIsActiveKey(false);
+                            dto.setTimeActiveKey(0);
+                            StringUtil.isNullOrEmpty(checkKeyActiveDTO.getKeyActive());
+                        }
+                    }
+
+                    // set thêm field để biết verify email hay chưa
+                    List<EmailVerifyEntity> emailVerify = emailVerifyService.getEmailVerifyByUserId(dto.getUserId());
+                    for (EmailVerifyEntity emailVerifyEntity : emailVerify) {
+                        if(emailVerifyEntity.isVerify() == false) {
+                            dto.setEmailVerified(false);
+                        }
+                        dto.setEmailVerified(true);
+                    }
+
                     dto.setCaiValue(valueDTO.getCaiValue());
                     VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
                     vietQRGenerateDTO.setCaiValue(valueDTO.getCaiValue());
                     vietQRGenerateDTO.setBankAccount(item.getBankAccount());
                     String qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
                     dto.setQrCode(qr);
+
+                    //thêm 1 thông báo nhỏ thông báo là bắt đầu thu phí từ ngày 01/07/2024
+
+
                     return dto;
                 }).collect(Collectors.toList());
             }

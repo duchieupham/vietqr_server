@@ -39,6 +39,9 @@ public class AccountSettingController {
     AccountSettingService accountSettingService;
 
     @Autowired
+    AccountLoginService accountLoginService;
+
+    @Autowired
     SystemSettingService systemSettingService;
 
     @Autowired
@@ -57,8 +60,8 @@ public class AccountSettingController {
     MerchantBankReceiveService merchantBankReceiveService;
 
     @GetMapping("accounts/setting/{userId}")
-    public ResponseEntity<AccountSettingDTO> getAccountSetting(@PathVariable("userId") String userId) {
-        AccountSettingDTO result = null;
+    public ResponseEntity<AccountSettingBackUpDTO> getAccountSetting(@PathVariable("userId") String userId) {
+        AccountSettingBackUpDTO result = null;
         HttpStatus httpStatus = null;
         try {
             logger.info("getAccountSetting: " + userId + " at: " + System.currentTimeMillis());
@@ -98,7 +101,7 @@ public class AccountSettingController {
                 }
                 if (entity != null) {
                     //
-                    result = new AccountSettingDTO();
+                    result = new AccountSettingBackUpDTO();
                     result.setId(entity.getId());
                     result.setUserId(entity.getUserId());
                     result.setGuideMobile(entity.isGuideWeb());
@@ -111,6 +114,12 @@ public class AccountSettingController {
                     result.setFooterImgId(entity.getFooterImgId());
                     result.setNotificationMobile(entity.isNotificationMobile());
                     result.setMerchantRoles(roles);
+                    //check verifyEmail
+                    boolean checkVerify = accountLoginService.getVerifyEmailStatus(userId);
+                    result.setVerifyEmail(checkVerify);
+
+                    // cái này làm cho phần thông báo message
+                    result.setNotificationMessage(entity.getNotificationMessage());
 
                     // theme processing
                     SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
@@ -142,7 +151,7 @@ public class AccountSettingController {
             logger.error("getAccountSetting: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
-        return new ResponseEntity<AccountSettingDTO>(result, httpStatus);
+        return new ResponseEntity<AccountSettingBackUpDTO>(result, httpStatus);
     }
 
     @PostMapping("accounts/setting/image")

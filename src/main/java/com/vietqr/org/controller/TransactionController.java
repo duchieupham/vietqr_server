@@ -1845,12 +1845,97 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    private List<String> getTerminalCodeAccess(String bankId, String userId) {
-        List<String> result = new ArrayList<>();
+    private ResponseObjectDTO getTerminalCodeAccess(String bankId, String userId) {
+        ResponseObjectDTO result = null;
         try {
+            if (!StringUtil.isNullOrEmpty(accountBankReceiveService.checkIsOwner(bankId, userId))) {
+                // access all
+                result = new ResponseObjectDTO("SUCCESS", "");
+            } else {
+                List<String> listCode = new ArrayList<>();
+                List<String> terminalCodeAccess = new ArrayList<>();
 
+                List<String> roles = merchantMemberRoleService.getRoleByUserIdAndBankId(userId, bankId);
+                // check role có được xem giao dịch chưa xaác nhân không và là cấp nào nào
+                // check level:
+                // 0 : terminal, 1: merchant
+                // check accept see type = 2
+                int acceptSee = 0;
+                int level = 0;
+
+                if (roles != null && !roles.isEmpty()) {
+                    if (roles.contains(EnvironmentUtil.getRequestReceiveMerchantRoleId())) {
+                        level = 1;
+                        acceptSee = 1;
+                    } else if (roles.contains(EnvironmentUtil.getRequestReceiveTerminalRoleId())) {
+                        acceptSee = 1;
+                    } else if (roles.contains(EnvironmentUtil.getOnlyReadReceiveMerchantRoleId())) {
+                        level = 1;
+                        acceptSee = 1;
+                    }
+                }
+                if (level == 0) {
+                    terminalCodeAccess = terminalBankReceiveService.getTerminalCodeByUserIdAndBankId(userId, bankId);
+                } else {
+                    terminalCodeAccess = terminalBankReceiveService.getTerminalCodeByUserIdAndBankIdNoTerminal(userId, bankId);
+                }
+                listCode = terminalBankReceiveService.getTerminalCodeByMainTerminalCodeList(terminalCodeAccess);
+                listCode.addAll(terminalCodeAccess);
+                if (acceptSee == 1) {
+                    listCode.add("");
+                    listCode.add(null);
+                }
+                if (!listCode.isEmpty()) {
+                    result =  new ResponseObjectDTO("CHECK", listCode);
+                } else {
+                    result = new ResponseObjectDTO("FAILED", "");
+                }
+            }
         } catch (Exception e) {
-            result = new ArrayList<>();
+            result = new ResponseObjectDTO("FAILED", "");
+        }
+        return result;
+    }
+
+    private TypeValueFilterDTO processFilterSearch(String value, String bankId) {
+        value = StringUtil.removeDiacritics(value);
+        TypeValueFilterDTO result = new TypeValueFilterDTO();
+        if (StringUtil.isNullOrEmpty(value)) {
+            result.setType(9);
+            result.setValue("");
+        } else if (StringUtil.isValidRegular(value, "(?i)^(Thanh cong|Da huy|Cho TT|Cho thanh toan).*")) {
+            result.setType(5);
+            switch (value.toLowerCase()) {
+                case "thanh cong":
+                    result.setValue("1");
+                    break;
+                case "da huy":
+                    result.setValue("2");
+                    break;
+                case "cho tt":
+                case "cho thanh toan":
+                    result.setValue("0");
+                    break;
+            }
+        } else if (StringUtil.isValidRegular(value, "^[1-9][0-9]*00$")) {
+            result.setType(6);
+            result.setValue(value);
+        } else if (StringUtil.isValidRegular(value, "(?i)^ft\\d{6,19}$")) {
+            result.setType(1);
+            result.setValue(value);
+        } else if (StringUtil.isValidRegular(value, "(?i)^(CH |Cua hang ).*")) {
+            result.setType(4);
+            String name = value.replaceFirst("(?i)^(CH |Cua hang )", "").trim();
+            List<String> codeList = terminalService.getAllCodeByNameAndBankId(name, bankId);
+            if (codeList != null && !codeList.isEmpty()) {
+                result.setValue(String.join(",", codeList));
+            }
+        } else if (StringUtil.isValidRegular(value, "^.{1,12}$")) {
+            result.setType(2);
+            result.setValue(value);
+        } else {
+            result.setType(3);
+            result.setValue(value);
         }
         return result;
     }
@@ -1866,7 +1951,7 @@ public class TransactionController {
             @RequestParam(value = "offset", defaultValue = "0") int offset) {
         List<TransactionRelatedV2DTO> dtos = new ArrayList<>();
         List<TransactionRelatedResponseV2DTO> result = new ArrayList<>();
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
         HttpStatus httpStatus = null;
         try {
             // type = 9: all
@@ -1875,7 +1960,8 @@ public class TransactionController {
             // type = 3: content
             // type = 4: terminal code
             // type = 5: status
-            List<String> terminalCodeAccess = new ArrayList<>();
+            // type = 6: amount
+            System.out.println("Pre get Transaction: " + System.currentTimeMillis());
             List<String> transType = new ArrayList<>();
             switch (type) {
                 case 0:
@@ -1889,25 +1975,145 @@ public class TransactionController {
                     transType.add("D");
                     break;
             }
-
-            Callable<List<TransactionRelatedV2DTO>> callableTask1 = () -> {
+            TypeValueFilterDTO typeCase = processFilterSearch(value, bankId);
+            Callable<ResponseObjectDTO> callableTask3 = () -> {
                 // Thực hiện công việc
-                return transactionReceiveService.getTransactionsV2(bankId, transType, fromDate, toDate, offset);
+                return getTerminalCodeAccess(bankId, userId);
             };
+            Future<ResponseObjectDTO> future3 = executorService.submit(callableTask3);
+            Callable<List<TransactionRelatedV2DTO>> callableTask1 = null;
+            Callable<BankDetailTypeCaiValueDTO> callableTask2 = null;
+            Future<List<TransactionRelatedV2DTO>> future1 = null;
+            Future<BankDetailTypeCaiValueDTO> future2 = null;
+            ResponseObjectDTO responseObjectDTO = future3.get();
+            System.out.println("After get Transaction: " + System.currentTimeMillis());
+            switch (responseObjectDTO.getStatus()) {
+                case "SUCCESS":
+                    callableTask1 = () -> {
+                        List<TransactionRelatedV2DTO> relatedList = new ArrayList<>();
+                        // Thực hiện công việc
+                        String search = typeCase.getValue();
+                        switch (typeCase.getType()) {
+                            case 9:
+                                // type = 9: all
+                                // type = 1: reference_number
+                                // type = 2: order_id
+                                // type = 3: content
+                                // type = 4: terminal code
+                                // type = 5: status
+                                // type = 6: amount
+                                relatedList = transactionReceiveService.getTransactionsV2(bankId, transType, fromDate, toDate, offset);
+                                break;
+                            case 1:
+                                relatedList = transactionReceiveService.getTransactionsV2ByFtCode(bankId, transType, search, fromDate, toDate, offset);
+                                break;
+                            case 2:
+                                relatedList = transactionReceiveService.getTransactionsV2ByOrderId(bankId, transType, search, fromDate, toDate, offset);
+                                break;
+                            case 3:
+                                relatedList = transactionReceiveService.getTransactionsV2ByContent(bankId, transType, search, fromDate, toDate, offset);
+                                break;
+                            case 4:
+                                List<String> terminalCode = Arrays.stream(search.split(","))
+                                        .map(String::trim)
+                                        .collect(Collectors.toList());
+                                relatedList = transactionReceiveService.getTransactionsV2ByTerminalCode(bankId, transType, terminalCode, fromDate, toDate, offset);
+                                break;
+                            case 5:
+                                relatedList = transactionReceiveService.getTransactionsV2ByStatus(bankId, transType, search, fromDate, toDate, offset);
+                                break;
+                            case 6:
+                                relatedList = transactionReceiveService.getTransactionsV2ByAmount(bankId, transType, search, fromDate, toDate, offset);
+                                break;
+                        }
+                        return relatedList;
+                    };
+                    future1 = executorService.submit(callableTask1);
 
-            Future<List<TransactionRelatedV2DTO>> future1 = executorService.submit(callableTask1);
+                    callableTask2 = () -> {
+                        // Thực hiện công việc
+                        return accountBankReceiveService.getBankAccountTypeDetail(bankId);
+                    };
+                    future2 = executorService.submit(callableTask2);
+                    break;
+                case "CHECK":
+                    List<String> listCode;
+                    if (responseObjectDTO.getData() instanceof List) {
+                        listCode = (List<String>) responseObjectDTO.getData();
+                    } else {
+                        listCode = new ArrayList<>();
+                    }
+                    callableTask1 = () -> {
+                        List<TransactionRelatedV2DTO> relatedList = new ArrayList<>();
+                        // Thực hiện công việc
+                        String search = typeCase.getValue();
+                        // type = 9: all
+                        // type = 1: reference_number
+                        // type = 2: order_id
+                        // type = 3: content
+                        // type = 4: terminal code
+                        // type = 5: status
+                        // type = 6: amount
+                        switch (typeCase.getType()) {
+                            case 9:
+                                relatedList = transactionReceiveService.getTransactionsListCodeV2(bankId, listCode, transType, fromDate, toDate, offset);
+                                break;
+                            case 1:
+                                relatedList = transactionReceiveService
+                                        .getTransactionsListCodeV2ByReferenceNumber(bankId, listCode, transType, search, fromDate, toDate, offset);
+                                break;
+                            case 2:
+                                relatedList = transactionReceiveService
+                                        .getTransactionsListCodeV2ByOrderId(bankId, listCode, transType, search, fromDate, toDate, offset);
+                                break;
+                            case 3:
+                                relatedList = transactionReceiveService
+                                        .getTransactionsListCodeV2ByContent(bankId, listCode, transType, search, fromDate, toDate, offset);
+                                break;
+                            case 4:
+                                List<String> terminalCode = Arrays.stream(search.split(","))
+                                        .map(String::trim)
+                                        .collect(Collectors.toList());
+                                relatedList = transactionReceiveService
+                                        .getTransactionsListCodeV2ByTerminalCode(bankId, listCode, transType, terminalCode, fromDate, toDate, offset);
+                                break;
+                            case 5:
+                                relatedList = transactionReceiveService
+                                        .getTransactionsListCodeV2ByStatus(bankId, listCode, transType, search, fromDate, toDate, offset);
+                                break;
+                            case 6:
+                                relatedList = transactionReceiveService
+                                        .getTransactionsListCodeV2ByAmount(bankId, listCode, transType, search, fromDate, toDate, offset);
+                                break;
+                        }
+                        return relatedList;
+                    };
+                    future1 = executorService.submit(callableTask1);
 
-            Callable<BankDetailTypeCaiValueDTO> callableTask2 = () -> {
-                // Thực hiện công việc
-                return accountBankReceiveService.getBankAccountTypeDetail(bankId);
-            };
+                    callableTask2 = () -> {
+                        // Thực hiện công việc
+                        return accountBankReceiveService.getBankAccountTypeDetail(bankId);
+                    };
+                    future2 = executorService.submit(callableTask2);
+                    break;
+                default:
+                    // Thực hiện công việc
+                    callableTask1 = ArrayList::new;
+                    future1 = executorService.submit(callableTask1);
 
-            Future<BankDetailTypeCaiValueDTO> future2 = executorService.submit(callableTask2);
+                    callableTask2 = () -> {
+                        // Thực hiện công việc
+                        return accountBankReceiveService.getBankAccountTypeDetail(bankId);
+                    };
+                    future2 = executorService.submit(callableTask2);
+                    break;
+            }
 
+            BankDetailTypeCaiValueDTO bankDetailDTO = future2.get();
             dtos = future1.get();
+            System.out.println("END get Transaction: " + System.currentTimeMillis());
             String caiValue = "";
             boolean isActiveService = true;
-            BankDetailTypeCaiValueDTO bankDetailDTO = future2.get();
             if (Objects.nonNull(bankDetailDTO)) {
                 caiValue = bankDetailDTO.getCaiValue();
                 isActiveService = bankDetailDTO.getIsValidService();
@@ -2080,6 +2286,7 @@ public class TransactionController {
                     }
                 }
             }
+            System.out.println("Response Time: " + System.currentTimeMillis());
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("getTransactionsFilter: ERROR: " + e.toString());
@@ -2099,7 +2306,22 @@ public class TransactionController {
         HttpStatus httpStatus = null;
         TransStatisticListExtra result = null;
         try {
-            ITransStatisticListExtra extra = transactionReceiveService.getExtraTransactionsV2(bankId, fromDate, toDate);
+            ResponseObjectDTO responseObjectDTO = getTerminalCodeAccess(bankId, userId);
+            ITransStatisticListExtra extra = null;
+            switch (responseObjectDTO.getStatus()) {
+                case "SUCCESS":
+                    extra = transactionReceiveService.getExtraTransactionsV2(bankId, fromDate, toDate);
+                    break;
+                case "CHECK":
+                    List<String> listCode;
+                    if (responseObjectDTO.getData() instanceof List) {
+                        listCode = (List<String>) responseObjectDTO.getData();
+                    } else {
+                        listCode = new ArrayList<>();
+                    }
+                    extra = transactionReceiveService.getExtraTransactionsByListCodeV2(bankId, listCode, fromDate, toDate);
+                    break;
+            }
             if (Objects.nonNull(extra)) {
                 result = new TransStatisticListExtra();
                 result.setTotalCredit(extra.getTotalCredit());
@@ -2124,31 +2346,170 @@ public class TransactionController {
             dto = transactionReceiveService.getTransactionV2ById(id);
             if (Objects.nonNull(dto)) {
                 String caiValue = caiBankService.getCaiValueByBankId(dto.getBankId());
-                result = new TransactionDetailResV2DTO();
-                result.setId(dto.getId());
-                result.setBankId(dto.getBankId());
-                result.setImgId(dto.getImgId());
-                result.setReferenceNumber(StringUtil.getValueNullChecker(dto.getReferenceNumber()));
-                result.setBankAccount(dto.getBankAccount());
-                result.setUserBankName(dto.getUserBankName());
-                result.setBankShortName(StringUtil.getValueNullChecker(dto.getBankShortName()));
-                result.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
-                result.setTransType(dto.getTransType());
-                result.setAmount(formatAmountNumber(dto.getAmount() + ""));
-                result.setStatus(dto.getStatus());
-                result.setTime(dto.getTime());
-                result.setTimePaid(dto.getTimePaid());
-                result.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
-                result.setContent(dto.getContent());
-                result.setType(dto.getType());
-                result.setNote(StringUtil.getValueNullChecker(dto.getNote()));
-                result.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
-                result.setHashTag(StringUtil.getValueNullChecker(dto.getHashTag()));
-                if (StringUtil.isNullOrEmpty(dto.getQrCode())) {
-                    String qrCode = getQrCode(caiValue, dto.getBankAccount(), dto.getContent(), dto.getAmount() + "");
-                    result.setQrCode(qrCode);
+
+                boolean isActiveService = accountBankReceiveService.checkIsActiveService(dto.getBankId());
+                if (isActiveService) {
+                    result = new TransactionDetailResV2DTO();
+                    result.setId(dto.getId());
+                    result.setBankId(dto.getBankId());
+                    result.setImgId(dto.getImgId());
+                    result.setReferenceNumber(StringUtil.getValueNullChecker(dto.getReferenceNumber()));
+                    result.setBankAccount(dto.getBankAccount());
+                    result.setUserBankName(dto.getUserBankName());
+                    result.setBankShortName(StringUtil.getValueNullChecker(dto.getBankShortName()));
+                    result.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
+                    result.setTransType(dto.getTransType());
+                    result.setAmount(formatAmountNumber(dto.getAmount() + ""));
+                    result.setStatus(dto.getStatus());
+                    result.setTime(dto.getTime());
+                    result.setTimePaid(dto.getTimePaid());
+                    result.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
+                    result.setContent(dto.getContent());
+                    result.setType(dto.getType());
+                    result.setBankCode(dto.getBankCode());
+                    result.setBankName(dto.getBankName());
+                    result.setNote(StringUtil.getValueNullChecker(dto.getNote()));
+                    result.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
+                    result.setHashTag(StringUtil.getValueNullChecker(dto.getHashTag()));
+                    if (StringUtil.isNullOrEmpty(dto.getQrCode())) {
+                        String qrCode = getQrCode(caiValue, dto.getBankAccount(), dto.getContent(), dto.getAmount() + "");
+                        result.setQrCode(qrCode);
+                    } else {
+                        result.setQrCode(StringUtil.getValueNullChecker(dto.getQrCode()));
+                    }
                 } else {
-                    result.setQrCode(StringUtil.getValueNullChecker(dto.getQrCode()));
+                    long time = dto.getTime();
+                    SystemSettingEntity setting = systemSettingService.getSystemSetting();
+                    if (setting.getServiceActive() > time) {
+                        result = new TransactionDetailResV2DTO();
+                        result.setId(dto.getId());
+                        result.setBankId(dto.getBankId());
+                        result.setImgId(dto.getImgId());
+                        result.setReferenceNumber(StringUtil.getValueNullChecker(dto.getReferenceNumber()));
+                        result.setBankAccount(dto.getBankAccount());
+                        result.setUserBankName(dto.getUserBankName());
+                        result.setBankShortName(StringUtil.getValueNullChecker(dto.getBankShortName()));
+                        result.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
+                        result.setTransType(dto.getTransType());
+                        result.setAmount(formatAmountNumber(dto.getAmount() + ""));
+                        result.setStatus(dto.getStatus());
+                        result.setTime(dto.getTime());
+                        result.setTimePaid(dto.getTimePaid());
+                        result.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
+                        result.setContent(dto.getContent());
+                        result.setType(dto.getType());
+                        result.setBankCode(dto.getBankCode());
+                        result.setBankName(dto.getBankName());
+                        result.setNote(StringUtil.getValueNullChecker(dto.getNote()));
+                        result.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
+                        result.setHashTag(StringUtil.getValueNullChecker(dto.getHashTag()));
+                        if (StringUtil.isNullOrEmpty(dto.getQrCode())) {
+                            String qrCode = getQrCode(caiValue, dto.getBankAccount(), dto.getContent(), dto.getAmount() + "");
+                            result.setQrCode(qrCode);
+                        } else {
+                            result.setQrCode(StringUtil.getValueNullChecker(dto.getQrCode()));
+                        }
+                    } else {
+                        long lastTime = dto.getTime();
+                        TransReceiveTempEntity entity = transReceiveTempService.getLastTimeByBankId(dto.getBankId());
+                        if (entity != null) {
+                            if (entity.getLastTimes() <= lastTime) {
+                                result = new TransactionDetailResV2DTO();
+                                result.setId(dto.getId());
+                                result.setBankId(dto.getBankId());
+                                result.setImgId(dto.getImgId());
+                                result.setReferenceNumber(StringUtil.getValueNullChecker(dto.getReferenceNumber()));
+                                result.setBankAccount(dto.getBankAccount());
+                                result.setUserBankName(dto.getUserBankName());
+                                result.setBankShortName(StringUtil.getValueNullChecker(dto.getBankShortName()));
+                                result.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
+                                result.setTransType(dto.getTransType());
+                                result.setAmount("*****");
+                                result.setStatus(dto.getStatus());
+                                result.setTime(dto.getTime());
+                                result.setTimePaid(dto.getTimePaid());
+                                result.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
+                                result.setContent(dto.getContent());
+                                result.setType(dto.getType());
+                                result.setBankCode(dto.getBankCode());
+                                result.setBankName(dto.getBankName());
+                                result.setNote(StringUtil.getValueNullChecker(dto.getNote()));
+                                result.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
+                                result.setHashTag(StringUtil.getValueNullChecker(dto.getHashTag()));
+                                if (StringUtil.isNullOrEmpty(dto.getQrCode())) {
+                                    String qrCode = getQrCode(caiValue, dto.getBankAccount(), dto.getContent(), dto.getAmount() + "");
+                                    result.setQrCode(qrCode);
+                                } else {
+                                    result.setQrCode(StringUtil.getValueNullChecker(dto.getQrCode()));
+                                }
+                            } else {
+                                result = new TransactionDetailResV2DTO();
+                                result.setId(dto.getId());
+                                result.setBankId(dto.getBankId());
+                                result.setImgId(dto.getImgId());
+                                result.setReferenceNumber(StringUtil.getValueNullChecker(dto.getReferenceNumber()));
+                                result.setBankAccount(dto.getBankAccount());
+                                result.setUserBankName(dto.getUserBankName());
+                                result.setBankShortName(StringUtil.getValueNullChecker(dto.getBankShortName()));
+                                result.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
+                                result.setTransType(dto.getTransType());
+                                if (entity.getTransIds().contains(dto.getId())) {
+                                    result.setAmount(formatAmountNumber(dto.getAmount() + ""));
+                                } else if (dto.getTime() < entity.getLastTimes()) {
+                                    result.setAmount(formatAmountNumber(dto.getAmount() + ""));
+                                } else {
+                                    result.setAmount("*****");
+                                }
+                                result.setStatus(dto.getStatus());
+                                result.setTime(dto.getTime());
+                                result.setTimePaid(dto.getTimePaid());
+                                result.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
+                                result.setContent(dto.getContent());
+                                result.setType(dto.getType());
+                                result.setBankCode(dto.getBankCode());
+                                result.setBankName(dto.getBankName());
+                                result.setNote(StringUtil.getValueNullChecker(dto.getNote()));
+                                result.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
+                                result.setHashTag(StringUtil.getValueNullChecker(dto.getHashTag()));
+                                if (StringUtil.isNullOrEmpty(dto.getQrCode())) {
+                                    String qrCode = getQrCode(caiValue, dto.getBankAccount(), dto.getContent(), dto.getAmount() + "");
+                                    result.setQrCode(qrCode);
+                                } else {
+                                    result.setQrCode(StringUtil.getValueNullChecker(dto.getQrCode()));
+                                }
+                            }
+                        } else {
+                            result = new TransactionDetailResV2DTO();
+                            result.setId(dto.getId());
+                            result.setBankId(dto.getBankId());
+                            result.setImgId(dto.getImgId());
+                            result.setReferenceNumber(StringUtil.getValueNullChecker(dto.getReferenceNumber()));
+                            result.setBankAccount(dto.getBankAccount());
+                            result.setUserBankName(dto.getUserBankName());
+                            result.setBankShortName(StringUtil.getValueNullChecker(dto.getBankShortName()));
+                            result.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
+                            result.setTransType(dto.getTransType());
+                            result.setAmount("*****");
+                            result.setStatus(dto.getStatus());
+                            result.setTime(dto.getTime());
+                            result.setTimePaid(dto.getTimePaid());
+                            result.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
+                            result.setContent(dto.getContent());
+                            result.setType(dto.getType());
+                            result.setBankCode(dto.getBankCode());
+                            result.setBankName(dto.getBankName());
+                            result.setNote(StringUtil.getValueNullChecker(dto.getNote()));
+                            result.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
+                            result.setHashTag(StringUtil.getValueNullChecker(dto.getHashTag()));
+                            if (StringUtil.isNullOrEmpty(dto.getQrCode())) {
+                                String qrCode = getQrCode(caiValue, dto.getBankAccount(), dto.getContent(), dto.getAmount() + "");
+                                result.setQrCode(qrCode);
+                            } else {
+                                result.setQrCode(StringUtil.getValueNullChecker(dto.getQrCode()));
+                            }
+                        }
+
+                    }
                 }
             }
             httpStatus = HttpStatus.OK;
@@ -2198,6 +2559,22 @@ public class TransactionController {
         vietQRGenerateDTO.setAmount(amount);
         vietQRGenerateDTO.setContent(content);
         return VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+    }
+
+    @PostMapping("transaction/hash-tag")
+    public ResponseEntity<ResponseMessageDTO> updateHashTagTransaction(@Valid @RequestBody TransactionHashTagDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            transactionReceiveService.updateHashTagTransaction(dto.getHashTag(), dto.getTransactionId());
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+            logger.error("uploadImageTransaction: ERROR: " + e.toString());
+        }
+        return new ResponseEntity<>(result, httpStatus);
     }
 
     @GetMapping("transaction/{id}")
@@ -2381,7 +2758,6 @@ public class TransactionController {
     }
 
     // get transaction image
-
     @GetMapping("transaction/image/{transactionId}")
     public ResponseEntity<List<TransImgIdDTO>> getTransactionImages(
             @PathVariable(value = "transactionId") String transactionId) {

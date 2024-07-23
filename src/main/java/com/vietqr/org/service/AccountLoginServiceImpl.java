@@ -175,6 +175,11 @@ public class AccountLoginServiceImpl implements AccountLoginService {
     public long getTotalUsersUntilDate(long endTime) {
         return repo.getTotalUsersUntilDate(endTime);
     }
+
+    @Override
+    public boolean getVerifyEmailStatus(String userId) {
+        return repo.getVerifyEmailStatus(userId);
+    }
     @Override
     public List<IAccountLogin> findUsersRegisteredInMonth(long startTime, long endTime) {
         return repo.findUsersRegisteredInMonth(startTime, endTime);

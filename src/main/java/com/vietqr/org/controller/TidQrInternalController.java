@@ -173,25 +173,25 @@ public class TidQrInternalController {
                             }
                             break;
                         case "BIDV":
+                            AccountBankReceiveEntity accountBankEntity = accountBankReceiveService
+                                    .getAccountBankById(accountBankInfoResById.getBankId());
                             String qr = "";
                             String billId = getRandomBillId();
                             VietQRCreateDTO vietQRCreateDTO = new VietQRCreateDTO();
                             vietQRCreateDTO.setBankId(accountBankInfoResById.getBankId());
-                            vietQRCreateDTO.setAmount("5000");
+                            vietQRCreateDTO.setAmount("0");
                             vietQRCreateDTO.setContent(billId);
-                            vietQRCreateDTO.setUserId("");
-                            vietQRCreateDTO.setTerminalCode("");
+                            vietQRCreateDTO.setUserId(accountBankEntity.getUserId());
+                            vietQRCreateDTO.setTerminalCode(terminalCode);
 
                             ResponseMessageDTO responseMessageDTO =
                                     insertNewCustomerInvoiceTransBIDV(vietQRCreateDTO, accountBankInfoResById, billId);
                             if ("SUCCESS".equals(responseMessageDTO.getStatus())) {
                                 VietQRVaRequestDTO vietQRVaRequestDTO = new VietQRVaRequestDTO();
-                                vietQRVaRequestDTO.setAmount("5000");
+                                vietQRVaRequestDTO.setAmount("0");
                                 vietQRVaRequestDTO.setBillId(billId);
                                 vietQRVaRequestDTO.setUserBankName(accountBankInfoResById.getUserBankName());
                                 vietQRVaRequestDTO.setDescription(StringUtil.getValueNullChecker(billId));
-                                AccountBankReceiveEntity accountBankEntity = accountBankReceiveService
-                                        .getAccountBankById(accountBankInfoResById.getBankId());
                                 ResponseMessageDTO generateVaInvoiceVietQR = CustomerVaUtil
                                         .generateVaInvoiceVietQR(vietQRVaRequestDTO, accountBankEntity.getCustomerId());
                                 if ("SUCCESS".equals(generateVaInvoiceVietQR.getStatus())) {
@@ -461,25 +461,25 @@ public class TidQrInternalController {
                             }
                             break;
                         case "BIDV":
+                            AccountBankReceiveEntity accountBankEntity = accountBankReceiveService
+                                    .getAccountBankById(accountBankInfoResById.getBankId());
                             String qr = "";
                             String billId = getRandomBillId();
                             VietQRCreateDTO vietQRCreateDTO = new VietQRCreateDTO();
                             vietQRCreateDTO.setBankId(accountBankInfoResById.getBankId());
-                            vietQRCreateDTO.setAmount("5000");
+                            vietQRCreateDTO.setAmount("0");
                             vietQRCreateDTO.setContent(billId);
-                            vietQRCreateDTO.setUserId("");
-                            vietQRCreateDTO.setTerminalCode("");
+                            vietQRCreateDTO.setUserId(accountBankEntity.getUserId());
+                            vietQRCreateDTO.setTerminalCode(terminalCode);
 
                             ResponseMessageDTO responseMessageDTO =
                                     insertNewCustomerInvoiceTransBIDV(vietQRCreateDTO, accountBankInfoResById, billId);
                             if ("SUCCESS".equals(responseMessageDTO.getStatus())) {
                                 VietQRVaRequestDTO vietQRVaRequestDTO = new VietQRVaRequestDTO();
-                                vietQRVaRequestDTO.setAmount("5000");
+                                vietQRVaRequestDTO.setAmount("0");
                                 vietQRVaRequestDTO.setBillId(billId);
                                 vietQRVaRequestDTO.setUserBankName(accountBankInfoResById.getUserBankName());
                                 vietQRVaRequestDTO.setDescription(StringUtil.getValueNullChecker(billId));
-                                AccountBankReceiveEntity accountBankEntity = accountBankReceiveService
-                                        .getAccountBankById(accountBankInfoResById.getBankId());
                                 ResponseMessageDTO generateVaInvoiceVietQR = CustomerVaUtil
                                         .generateVaInvoiceVietQR(vietQRVaRequestDTO, accountBankEntity.getCustomerId());
                                 if ("SUCCESS".equals(generateVaInvoiceVietQR.getStatus())) {
@@ -579,7 +579,7 @@ public class TidQrInternalController {
                     entity.setBillId(billId);
                     entity.setStatus(0);
                     entity.setType(1);
-                    entity.setName("");
+                    entity.setName(dto.getTerminalCode());
                     entity.setTimeCreated(DateTimeUtil.getCurrentDateTimeUTC());
                     entity.setTimePaid(0L);
                     entity.setInquire(0);

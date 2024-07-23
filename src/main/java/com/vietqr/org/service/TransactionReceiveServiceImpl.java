@@ -1438,17 +1438,141 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
-    public int countTransactionsV2(String bankId, List<String> transType, String fromDate, String toDate) {
-        return repo.countTransactionsV2(
-                bankId, transType,
-                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
-                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET
-        );
+    public TransactionDetailV2DTO getTransactionV2ById(String id) {
+        return repo.getTransactionV2ById(id);
     }
 
     @Override
-    public TransactionDetailV2DTO getTransactionV2ById(String id) {
-        return repo.getTransactionV2ById(id);
+    public void updateHashTagTransaction(String hashTag, String transactionId) {
+        repo.updateHashTagTransaction(hashTag, transactionId);
+    }
+
+    @Override
+    public List<TransactionRelatedV2DTO> getTransactionsListCodeV2(String bankId, List<String> terminalCodes,
+                                                                   List<String> transType, String fromDate, String toDate, int offset) {
+        return repo.getTransactionsListCodeV2(bankId, terminalCodes, transType,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
+    public List<TransactionRelatedV2DTO> getTransactionsV2ByAmount(String bankId, List<String> transType, String value, String fromDate, String toDate, int offset) {
+        return repo.getTransactionsV2ByAmount(bankId, transType, value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
+    public List<TransactionRelatedV2DTO> getTransactionsV2ByStatus(String bankId, List<String> transType, String value, String fromDate, String toDate, int offset) {
+        return repo.getTransactionsV2ByStatus(bankId, transType, value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
+    public List<TransactionRelatedV2DTO> getTransactionsV2ByTerminalCode(String bankId, List<String> transType, List<String> terminalCodes,
+                                                                         String fromDate, String toDate, int offset) {
+        return repo.getTransactionsV2ByTerminalCode(bankId, transType, terminalCodes,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
+    public List<TransactionRelatedV2DTO> getTransactionsV2ByContent(String bankId, List<String> transType, String value,
+                                                                    String fromDate, String toDate, int offset) {
+        return repo.getTransactionsV2ByContent(bankId, transType, value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
+    public List<TransactionRelatedV2DTO> getTransactionsV2ByFtCode(String bankId, List<String> transType, String value,
+                                                                   String fromDate, String toDate, int offset) {
+        return repo.getTransactionsV2ByFtCode(bankId, transType, value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
+    public List<TransactionRelatedV2DTO> getTransactionsV2ByOrderId(String bankId, List<String> transType, String value, String fromDate, String toDate, int offset) {
+        return repo.getTransactionsV2ByOrderId(bankId, transType, value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
+    public List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByAmount(String bankId, List<String> terminalCodes,
+                                                                           List<String> transType, String value,
+                                                                           String fromDate, String toDate, int offset) {
+        return repo.getTransactionsListCodeV2ByAmount(bankId, terminalCodes, transType, value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
+    public List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByStatus(String bankId, List<String> terminalCodes,
+                                                                           List<String> transType, String value,
+                                                                           String fromDate, String toDate, int offset) {
+        return repo.getTransactionsListCodeV2ByStatus(bankId, terminalCodes, transType, value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
+    public List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByTerminalCode(String bankId, List<String> terminalCodes,
+                                                                                 List<String> transType, List<String> value,
+                                                                                 String fromDate, String toDate, int offset) {
+        return repo.getTransactionsListCodeV2ByTerminalCode(bankId, terminalCodes, transType, value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
+    public List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByContent(String bankId, List<String> terminalCodes,
+                                                                            List<String> transType, String value,
+                                                                            String fromDate, String toDate, int offset) {
+        return repo.getTransactionsListCodeV2ByContent(bankId, terminalCodes, transType, value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
+    public List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByOrderId(String bankId, List<String> terminalCodes,
+                                                                            List<String> transType, String value,
+                                                                            String fromDate, String toDate, int offset) {
+        return repo.getTransactionsListCodeV2ByOrderId(bankId, terminalCodes, transType, value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
+    public List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByReferenceNumber(String bankId, List<String> terminalCodes,
+                                                                                    List<String> transType, String value,
+                                                                                    String fromDate, String toDate, int offset) {
+        return repo.getTransactionsListCodeV2ByReferenceNumber(bankId, terminalCodes, transType, value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
+    public ITransStatisticListExtra getExtraTransactionsByListCodeV2(String bankId, List<String> listCode, String fromDate, String toDate) {
+        return repo.getExtraTransactionsByListCodeV2(bankId, listCode,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET
+        );
     }
 
     @Override

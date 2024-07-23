@@ -142,6 +142,10 @@ public class StringUtil {
         return str == null || str.trim().isEmpty();
     }
 
+    public static boolean isValidRegular(String value, String regex) {
+        return value != null && value.matches(regex);
+    }
+
     public static String removeFormatNumber(String debitAmount) {
         String result = "";
         try {

@@ -389,6 +389,7 @@ public class KeyBankReceiveController {
                     entity.setCreateAt(currentTime);
                     entity.setVersion(0);
                     entity.setStatus(0);
+                    entity.setBankId("");
                     entities.add(entity);
                 }
                 keyActiveBankReceiveService.insertAll(entities);
@@ -399,6 +400,62 @@ public class KeyBankReceiveController {
                 result = new ResponseMessageDTO("FAILED", "E74");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            logger.error("generateKeyForAdmin: ERROR: " + e.getMessage() + " at " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("key-active-bank/generate-key/back-up")
+    public ResponseEntity<Object> generateKeyBackUp(
+            @Valid @RequestBody GenerateKeyBankBackUpDTO dto
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        KeyActiveResponseDTO responseDTO = new KeyActiveResponseDTO();
+        try {
+            List<String> keyActives = generateKeyActiveWithCheckDuplicated(dto.getNumOfKeys());
+            List<KeyActiveBankReceiveEntity> entities = new ArrayList<>();
+            List<KeyActiveBankReceiveEntity> listKeys = keyActiveBankReceiveService.getListKeyByBankId(dto.getBankId());
+            List<String> keys = new ArrayList<>();
+            for (KeyActiveBankReceiveEntity keyActiveTemp : listKeys) {
+                if (Objects.nonNull(listKeys)) {
+                    keys.add(keyActiveTemp.getKeyActive());
+                    responseDTO.setKeyActive(keyActiveTemp.getKeyActive());
+                    responseDTO.setStatus(keyActiveTemp.getStatus());
+                    responseDTO.setBankId(keyActiveTemp.getBankId());
+                    result = responseDTO;
+                    httpStatus = HttpStatus.OK;
+                    return new ResponseEntity<>(result, httpStatus);
+                }
+            }
+            LocalDateTime time = LocalDateTime.now();
+            long currentTime = time.toEpochSecond(ZoneOffset.UTC);
+            for (String keyActive : keyActives) {
+                KeyActiveBankReceiveEntity entity = new KeyActiveBankReceiveEntity();
+                entity.setId(UUID.randomUUID().toString());
+                entity.setKeyActive(keyActive);
+                entity.setSecretKey(generateSecretKey());
+                entity.setValueActive(generateValueActive(keyActive, entity.getSecretKey(), dto.getDuration()));
+                entity.setDuration(dto.getDuration());
+                entity.setCreateAt(currentTime);
+                entity.setVersion(0);
+                entity.setStatus(0);
+                entity.setBankId(dto.getBankId());
+                entities.add(entity);
+            }
+            keyActiveBankReceiveService.insertAll(entities);
+
+            responseDTO.setKeyActive(keyActives.get(0));
+            responseDTO.setStatus(0);
+            responseDTO.setBankId(dto.getBankId());
+
+            result = responseDTO;
+            httpStatus = HttpStatus.OK;
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -496,11 +553,11 @@ public class KeyBankReceiveController {
                 if (bankReceiveCheckDTO == null) {
                     result = new ResponseMessageDTO("FAILED", "E25");
                     httpStatus = HttpStatus.BAD_REQUEST;
-                // bankId chưa active
+                    // bankId chưa active
                 } else if (!bankReceiveCheckDTO.getAuthenticated()) {
                     result = new ResponseMessageDTO("FAILED", "E101");
                     httpStatus = HttpStatus.BAD_REQUEST;
-                // bankId khong thuoc userId
+                    // bankId khong thuoc userId
                 } else if (!Objects.equals(bankReceiveCheckDTO.getUserId(), dto.getUserId())) {
                     result = new ResponseMessageDTO("FAILED", "E126");
                     httpStatus = HttpStatus.BAD_REQUEST;

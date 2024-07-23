@@ -30,7 +30,8 @@ public class NotificationFcmMapDTO {
     }
 
     public NotificationFcmMapDTO(String notificationUUID, BankTypeEntity bankTypeEntity,
-                                 String terminalName, String terminalCode, String rawTerminalCode, TransactionReceiveEntity transactionReceiveEntity) {
+                                 String terminalName, String terminalCode, String rawTerminalCode, String amount,
+                                 TransactionReceiveEntity transactionReceiveEntity) {
         this.notificationUUID = notificationUUID;
         this.transId = transactionReceiveEntity.getId();
         this.bankAccount = transactionReceiveEntity.getBankAccount();
@@ -43,7 +44,7 @@ public class NotificationFcmMapDTO {
         this.orderId = transactionReceiveEntity.getOrderId();
         this.referenceNumber = transactionReceiveEntity.getReferenceNumber();
         this.content = transactionReceiveEntity.getContent();
-        this.amount = transactionReceiveEntity.getAmount() + "";
+        this.amount = amount;
         this.timePaid = DateTimeUtil.getCurrentDateTimeUTC() + "";
         this.type = transactionReceiveEntity.getType() + "";
         this.time = transactionReceiveEntity.getTime() + "";

@@ -353,4 +353,21 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             + "FROM terminal "
             + "WHERE public_id = :publishId LIMIT 1 ", nativeQuery = true)
     String checkExistedPublishId(String publishId);
+
+    @Query(value = "SELECT a.code "
+            + "FROM terminal a "
+            + "INNER JOIN terminal_bank_receive b ON a.id = b.terminal_id "
+            + "WHERE a.name LIKE %:terminalName% AND b.bank_id = :bankId "
+            + "UNION "
+            + "SELECT b.terminal_code "
+            + "FROM terminal a "
+            + "INNER JOIN terminal_bank_receive b ON a.id = b.terminal_id "
+            + "WHERE a.name LIKE %:terminalName% AND b.bank_id = :bankId "
+            + "AND b.terminal_code != '' AND b.terminal_code IS NOT NULL "
+            + "AND a.code IN ("
+            + "SELECT a.code FROM terminal a "
+            + "INNER JOIN terminal_bank_receive b ON a.id = b.terminal_id "
+            + "WHERE a.name LIKE %:terminalName% AND b.bank_id = :bankId "
+            + ") ", nativeQuery = true)
+    List<String> getAllCodeByNameAndBankId(String terminalName, String bankId);
 }

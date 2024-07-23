@@ -41,6 +41,17 @@ public class KeyActiveBankReceiveEntity implements Serializable {
     @Column(name = "version")
     private int version;
 
+    @Column(name = "bankId")
+    private String bankId;
+
+    public String getBankId() {
+        return bankId;
+    }
+
+    public void setBankId(String bankId) {
+        this.bankId = bankId;
+    }
+
     public void setId(String id) {
         this.id = id;
     }

@@ -543,7 +543,56 @@ public interface TransactionReceiveService {
 
     ITransStatisticListExtra getExtraTransactionsV2(String bankId, String fromDate, String toDate);
 
-    int countTransactionsV2(String bankId, List<String> transType, String fromDate, String toDate);
-
     TransactionDetailV2DTO getTransactionV2ById(String id);
+
+    void updateHashTagTransaction(String hashTag, String transactionId);
+
+    List<TransactionRelatedV2DTO> getTransactionsListCodeV2(String bankId, List<String> terminalCodes,
+                                                            List<String> transType, String fromDate, String toDate, int offset);
+
+    List<TransactionRelatedV2DTO> getTransactionsV2ByAmount(String bankId, List<String> transType, String value,
+                                                            String fromDate, String toDate, int offset);
+
+    List<TransactionRelatedV2DTO> getTransactionsV2ByStatus(String bankId, List<String> transType, String value,
+                                                            String fromDate, String toDate, int offset);
+
+    List<TransactionRelatedV2DTO> getTransactionsV2ByTerminalCode(String bankId, List<String> transType,
+                                                                  List<String> terminalCodes, String fromDate,
+                                                                  String toDate, int offset);
+
+    List<TransactionRelatedV2DTO> getTransactionsV2ByContent(String bankId, List<String> transType, String value,
+                                                             String fromDate, String toDate, int offset);
+
+    List<TransactionRelatedV2DTO> getTransactionsV2ByFtCode(String bankId, List<String> transType, String value,
+                                                            String fromDate, String toDate, int offset);
+
+    List<TransactionRelatedV2DTO> getTransactionsV2ByOrderId(String bankId, List<String> transType, String value,
+                                                             String fromDate, String toDate, int offset);
+
+    List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByAmount(String bankId, List<String> listCode,
+                                                                    List<String> transType, String value,
+                                                                    String fromDate, String toDate, int offset);
+
+    List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByStatus(String bankId, List<String> terminalCodes,
+                                                                    List<String> transType, String value,
+                                                                    String fromDate, String toDate, int offset);
+
+    List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByTerminalCode(String bankId, List<String> terminalCodes,
+                                                                          List<String> transType, List<String> value,
+                                                                          String fromDate, String toDate, int offset);
+
+    List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByContent(String bankId, List<String> terminalCodes,
+                                                                     List<String> transType, String value,
+                                                                     String fromDate, String toDate, int offset);
+
+    List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByOrderId(String bankId, List<String> terminalCodes,
+                                                                     List<String> transType, String value,
+                                                                     String fromDate, String toDate, int offset);
+
+    List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByReferenceNumber(String bankId, List<String> listCode,
+                                                                             List<String> transType, String value,
+                                                                             String fromDate, String toDate, int offset);
+
+    ITransStatisticListExtra getExtraTransactionsByListCodeV2(String bankId, List<String> listCode,
+                                                              String fromDate, String toDate);
 }
