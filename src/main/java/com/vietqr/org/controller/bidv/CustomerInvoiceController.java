@@ -284,8 +284,8 @@ public class CustomerInvoiceController {
                         // check valid checksum
                         String checksum = BankEncryptUtil.generateMD5PayBillForBankChecksum(secretKey,
                                 dto.getTrans_id(), dto.getBill_id(), dto.getAmount());
-//                        if (BankEncryptUtil.isMatchChecksum(dto.getChecksum(), checksum)) {
-                        if (true) {
+                        if (BankEncryptUtil.isMatchChecksum(dto.getChecksum(), checksum)) {
+//                        if (true) {
                             // check customer_id tồn tại
                             String checkExistedCustomerId = customerVaService
                                     .checkExistedCustomerId(dto.getCustomer_id());
