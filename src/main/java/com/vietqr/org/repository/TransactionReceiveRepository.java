@@ -2645,6 +2645,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "WHERE "
                 + "a.trans_type IN (:transType) AND a.bank_id = :bankId "
                 + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "ORDER BY a.time DESC "
                 + "LIMIT :offset, 20", nativeQuery = true)
         List<TransactionRelatedV2DTO> getTransactionsV2(String bankId, List<String> transType, long fromDate,
                                                     long toDate, int offset);

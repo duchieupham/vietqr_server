@@ -1845,6 +1845,16 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    private List<String> getTerminalCodeAccess(String bankId, String userId) {
+        List<String> result = new ArrayList<>();
+        try {
+
+        } catch (Exception e) {
+            result = new ArrayList<>();
+        }
+        return result;
+    }
+
     @GetMapping("transactions/list/v2")
     public ResponseEntity<List<TransactionRelatedResponseV2DTO>> getTransactionsMobile(
             @RequestParam(value = "bankId") String bankId,
@@ -1865,6 +1875,7 @@ public class TransactionController {
             // type = 3: content
             // type = 4: terminal code
             // type = 5: status
+            List<String> terminalCodeAccess = new ArrayList<>();
             List<String> transType = new ArrayList<>();
             switch (type) {
                 case 0:
