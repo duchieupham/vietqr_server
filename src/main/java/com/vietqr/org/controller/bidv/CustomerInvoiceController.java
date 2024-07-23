@@ -292,7 +292,7 @@ public class CustomerInvoiceController {
                                 CustomerInvoiceDataDTO customerInvoiceDataDTO = customerInvoiceService
                                         .getCustomerInvoiceByBillId(dto.getBill_id());
                                     if (customerInvoiceDataDTO != null
-                                            && customerInvoiceDataDTO.getQrType() == 1
+                                            && customerInvoiceDataDTO.getQrType() != 0
                                             && customerInvoiceDataDTO.getStatus() == 0) {
                                         // check invoice đã thanh toán hay chưa
                                         if (customerInvoiceDataDTO.getStatus() == 0) {
@@ -1450,12 +1450,13 @@ public class CustomerInvoiceController {
         BankTypeEntity bankTypeEntity = bankTypeService
                 .getBankTypeById(accountBankReceiveEntity.getBankTypeId());
         // update transaction receive
+        String referenceNumber = UUID.randomUUID().toString();
         transactionReceiveService.updateTransactionReceiveStatus(1,
                 dto.getTrans_id(),
-                UUID.randomUUID().toString(),
+                referenceNumber,
                 DateTimeUtil.getCurrentDateTimeUTC(),
                 transactionReceiveEntity.getId());
-
+        transactionReceiveEntity.setReferenceNumber(referenceNumber);
         if (!StringUtil.isNullOrEmpty(transactionReceiveEntity.getTerminalCode())) {
             TerminalEntity terminalEntity = terminalService
                     .getTerminalByTerminalCode(transactionReceiveEntity.getTerminalCode(),

@@ -2072,6 +2072,10 @@ public class VietQRController {
 						dto1.setContent(billId);
 						dto1.setAmount(dto.getAmount() + "");
 						dto1.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
+						if (StringUtil.isNullOrEmpty(dto.getTerminalCode()) &&
+								!StringUtil.isNullOrEmpty(dto.getSubTerminalCode())) {
+							dto1.setTerminalCode(dto.getSubTerminalCode());
+						}
 						dto1.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
 						dto1.setNote(StringUtil.getValueNullChecker(dto.getNote()));
 						dto1.setUrlLink(StringUtil.getValueNullChecker(dto.getUrlLink()));
