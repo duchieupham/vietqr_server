@@ -1042,8 +1042,6 @@ public class TerminalController {
                     // insert account-bank-receive-share
                     List<AccountBankReceiveShareEntity> accountBankReceiveShareEntities = new ArrayList<>();
 
-
-
                     // insert merchant member
                     List<MerchantMemberEntity> entities = new ArrayList<>();
                     List<MerchantMemberRoleEntity> merchantMemberRoleEntities = new ArrayList<>();
@@ -1081,7 +1079,7 @@ public class TerminalController {
                             MerchantMemberRoleEntity merchantMemberRoleEntity = new MerchantMemberRoleEntity();
                             merchantMemberRoleEntity.setId(UUID.randomUUID().toString());
                             merchantMemberRoleEntity.setMerchantMemberId(merchantMemberId);
-                            merchantMemberRoleEntity.setUserId(dto.getUserId());
+                            merchantMemberRoleEntity.setUserId(userId);
                             merchantMemberRoleEntity.setTransReceiveRoleIds(mapper
                                     .writeValueAsString(roleReceives));
                             merchantMemberRoleEntity.setTransRefundRoleIds(mapper
@@ -1163,7 +1161,7 @@ public class TerminalController {
                                         vietQRCreateDTO.setAmount("0");
                                         vietQRCreateDTO.setContent(billId);
                                         vietQRCreateDTO.setUserId(accountBankReceiveEntity.getUserId());
-                                        vietQRCreateDTO.setTerminalCode("");
+                                        vietQRCreateDTO.setTerminalCode(dto.getCode());
 
                                         ResponseMessageDTO responseMessageDTO =
                                                 insertNewCustomerInvoiceTransBIDV(vietQRCreateDTO, accountBankReceiveEntity, billId);
@@ -1284,7 +1282,7 @@ public class TerminalController {
                     entity.setBillId(billId);
                     entity.setStatus(0);
                     entity.setType(1);
-                    entity.setName("");
+                    entity.setName(dto.getTerminalCode());
                     entity.setTimeCreated(DateTimeUtil.getCurrentDateTimeUTC());
                     entity.setTimePaid(0L);
                     entity.setInquire(0);
