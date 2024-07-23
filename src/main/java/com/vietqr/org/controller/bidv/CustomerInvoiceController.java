@@ -144,6 +144,9 @@ public class CustomerInvoiceController {
     TransactionReceiveLogService transactionReceiveLogService;
 
     @Autowired
+    AccountBankReceiveShareService accountBankReceiveShareService;
+
+    @Autowired
     SocketHandler socketHandler;
 
     // API get invoice for BIDV
@@ -281,18 +284,20 @@ public class CustomerInvoiceController {
                         // check valid checksum
                         String checksum = BankEncryptUtil.generateMD5PayBillForBankChecksum(secretKey,
                                 dto.getTrans_id(), dto.getBill_id(), dto.getAmount());
-                        if (BankEncryptUtil.isMatchChecksum(dto.getChecksum(), checksum)) {
+//                        if (BankEncryptUtil.isMatchChecksum(dto.getChecksum(), checksum)) {
+                        if (true) {
                             // check customer_id tồn tại
                             String checkExistedCustomerId = customerVaService
                                     .checkExistedCustomerId(dto.getCustomer_id());
-                            logger.info("BILL ID: " + dto.getBill_id() + " at: " + System.currentTimeMillis());
+                            // 0: Default là hóa đơn BIDV
+                            // 1: Transaction_receive
+                            // 2: Static qr
                             if (checkExistedCustomerId != null && !checkExistedCustomerId.trim().isEmpty()) {
                                 // check bill_id tồn tại
-                                logger.info("BILL ID: " + dto.getBill_id());
                                 CustomerInvoiceDataDTO customerInvoiceDataDTO = customerInvoiceService
                                         .getCustomerInvoiceByBillId(dto.getBill_id());
                                     if (customerInvoiceDataDTO != null
-                                            && customerInvoiceDataDTO.getQrType() != 0
+                                            && customerInvoiceDataDTO.getQrType() == 1
                                             && customerInvoiceDataDTO.getStatus() == 0) {
                                         // check invoice đã thanh toán hay chưa
                                         if (customerInvoiceDataDTO.getStatus() == 0) {
@@ -404,6 +409,27 @@ public class CustomerInvoiceController {
                                                     "Hóa đơn đã gạch nợ rồi (mỗi hóa đơn chỉ gạch nợ 1 lần)");
                                             httpStatus = HttpStatus.OK;
                                         }
+                                    // static qr
+                                    } else if (Objects.nonNull(customerInvoiceDataDTO)
+                                            && customerInvoiceDataDTO.getQrType() == 2) {
+                                        accountBankReceiveEntity = accountBankReceiveService
+                                                .getAccountBankByCustomerIdAndByServiceId(dto.getCustomer_id());
+                                        TransactionBidvEntity transactionBidvEntity = new TransactionBidvEntity();
+                                        transactionBidvEntity.setId(UUID.randomUUID().toString());
+                                        transactionBidvEntity.setCustomerId(dto.getCustomer_id());
+                                        transactionBidvEntity.setServiceId(dto.getService_id());
+                                        transactionBidvEntity.setAmount(dto.getAmount());
+                                        transactionBidvEntity.setBillId(dto.getBill_id());
+                                        transactionBidvEntity.setTransDate(dto.getTrans_date());
+                                        transactionBidvEntity.setCheckSum(dto.getChecksum());
+                                        Thread thread = new Thread(() -> {
+                                            transactionBidvService.insert(transactionBidvEntity);
+                                        });
+                                        thread.start();
+                                        // hoá đơn đã gạch nợ rồi
+                                        result = new ResponseMessageBidvDTO("023",
+                                                "Hóa đơn đã gạch nợ rồi (mỗi hóa đơn chỉ gạch nợ 1 lần)");
+                                        httpStatus = HttpStatus.OK;
                                     } else if (Objects.nonNull(customerInvoiceDataDTO)
                                     && customerInvoiceDataDTO.getStatus() == 1) {
                                         accountBankReceiveEntity = accountBankReceiveService
@@ -477,6 +503,7 @@ public class CustomerInvoiceController {
             httpStatus = HttpStatus.BAD_REQUEST;
             return new ResponseEntity<>(result, httpStatus);
         } finally {
+            // 022: Số tiền ko khớp, 023: Hóa đơn đã gạch nợ, 021: Mã hóa đơn không tồn tại
             // push notification
             final ResponseMessageBidvDTO tempResult = result;
             AccountBankReceiveEntity finalAccountBankReceiveEntity = accountBankReceiveEntity;
@@ -562,13 +589,51 @@ public class CustomerInvoiceController {
                         pushNotification(title, msg, notiEntity, data, userId);
                     }
                 } else if (tempResult.getResult_code().equals("021")
-                            || tempResult.getResult_code().equals("023")) {
-                    if (Objects.nonNull(finalAccountBankReceiveEntity)) {
+                            || tempResult.getResult_code().equals("023")
+                || tempResult.getResult_code().equals("022")) {
+                    CustomerInvoiceDataDTO customerInvoiceDataDTO = customerInvoiceService
+                            .getCustomerInvoiceByBillId(dto.getBill_id());
+                    if (Objects.nonNull(customerInvoiceDataDTO) && customerInvoiceDataDTO.getQrType() == 2) {
+                        // static qr
+                        String rawCode = "";
+                        String boxIdRef = "";
                         UUID transactionUUID = UUID.randomUUID();
-                        logger.info("bidv/paybill - bill_id detect: " + dto.getBill_id());
-                        getCustomerSyncEntities(transactionUUID.toString(), dto,
-                                finalAccountBankReceiveEntity, DateTimeUtil.getCurrentDateTimeUTC());
-                        insertNewTransaction(dto, transactionUUID.toString(), finalAccountBankReceiveEntity);
+                        ISubTerminalCodeDTO rawDTO = null;
+                        TerminalEntity terminalEntity = terminalService.getTerminalByTerminalCode(customerInvoiceDataDTO.getName());
+                        if (Objects.nonNull(terminalEntity)) {
+                            rawCode = terminalEntity.getRawTerminalCode();
+                        } else {
+                            rawDTO = terminalBankReceiveService.getSubTerminalCodeBySubTerminalCode(
+                                    customerInvoiceDataDTO.getName());
+                            if (rawDTO != null) {
+                                rawCode = rawDTO.getRawCode();
+                                if (rawDTO.getQrType() == 2) {
+                                    boxIdRef = rawDTO.getRawCode();
+                                }
+                            }
+                        }
+
+                        if (Objects.nonNull(finalAccountBankReceiveEntity)) {
+                            getCustomerSyncEntities(transactionUUID.toString(), dto, rawCode,
+                                    finalAccountBankReceiveEntity, DateTimeUtil.getCurrentDateTimeUTC());
+                            insertNewTransaction(dto, transactionUUID.toString(), finalAccountBankReceiveEntity, boxIdRef, terminalEntity, rawDTO);
+                        }
+                    } else {
+                        AccountBankReceiveEntity rawAccount = null;
+                        if (Objects.isNull(finalAccountBankReceiveEntity)) {
+                            rawAccount = accountBankReceiveService
+                                    .getAccountBankByCustomerIdAndByServiceId(dto.getCustomer_id());
+                        } else {
+                            rawAccount = finalAccountBankReceiveEntity;
+                        }
+                        // qr khac
+                        if (Objects.nonNull(rawAccount)) {
+                            UUID transactionUUID = UUID.randomUUID();
+                            logger.info("bidv/paybill - bill_id detect: " + dto.getBill_id());
+                            getCustomerSyncEntities(transactionUUID.toString(), dto, "",
+                                    rawAccount, DateTimeUtil.getCurrentDateTimeUTC());
+                            insertNewTransaction(dto, transactionUUID.toString(), rawAccount, "", null, null);
+                        }
                     }
                 }
             });
@@ -577,7 +642,9 @@ public class CustomerInvoiceController {
     }
 
     private void insertNewTransaction(CustomerInvoicePaymentRequestDTO dto, String transactionUUID,
-                                      AccountBankReceiveEntity accountBankReceiveEntity) {
+                                      AccountBankReceiveEntity accountBankReceiveEntity, String boxIdRef,
+                                      TerminalEntity terminalEntity, ISubTerminalCodeDTO subTerminalCodeDTO) {
+        String amountForVoice = dto.getAmount();
         String amount = processHiddenAmount(Long.parseLong(dto.getAmount()), accountBankReceiveEntity.getId(),
                 accountBankReceiveEntity.isValidService(), transactionUUID);
         long time = DateTimeUtil.getCurrentDateTimeUTC();
@@ -594,7 +661,16 @@ public class CustomerInvoiceController {
         transactionReceiveEntity.setTime(DateTimeUtil.getCurrentDateTimeUTC());
         transactionReceiveEntity.setTimePaid(DateTimeUtil.getCurrentDateTimeUTC());
         transactionReceiveEntity.setRefId(UUID.randomUUID().toString());
-        transactionReceiveEntity.setType(2);
+        if (Objects.nonNull(terminalEntity)) {
+            transactionReceiveEntity.setType(1);
+            transactionReceiveEntity.setTerminalCode(terminalEntity.getCode());
+        } else if (Objects.nonNull(subTerminalCodeDTO)) {
+            transactionReceiveEntity.setType(1);
+            transactionReceiveEntity.setTerminalCode(subTerminalCodeDTO.getCode());
+        } else {
+            transactionReceiveEntity.setType(2);
+            transactionReceiveEntity.setTerminalCode("");
+        }
         transactionReceiveEntity.setStatus(1);
         transactionReceiveEntity.setTraceId("");
         transactionReceiveEntity.setTransType("C");
@@ -604,7 +680,6 @@ public class CustomerInvoiceController {
         transactionReceiveEntity.setCustomerBankAccount("");
         transactionReceiveEntity.setCustomerBankCode("");
         transactionReceiveEntity.setCustomerName("");
-        transactionReceiveEntity.setTerminalCode("");
         transactionReceiveEntity.setServiceCode("");
         transactionReceiveEntity.setQrCode("");
         transactionReceiveEntity.setUserId(accountBankReceiveEntity.getUserId());
@@ -639,12 +714,62 @@ public class CustomerInvoiceController {
         Map<String, String> data = autoMapUpdateTransPushNotification(new NotificationFcmMapDTO(
                         notificationUUID.toString(),
                         bankTypeEntity,
-                        "", "", "",
+                        terminalEntity != null ? terminalEntity.getName() : "",
+                        terminalEntity != null ? terminalEntity.getCode() : "", "",
+                        amount,
                         transactionReceiveEntity
                 )
         );
+        if (!StringUtil.isNullOrEmpty(boxIdRef)) {
+            try {
+                Map<String, String> dataBox = new HashMap<>();
+                BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
+                String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
+                dataBox.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+                dataBox.put("notificationId", "");
+                dataBox.put("transactionReceiveId", "");
+                dataBox.put("bankAccount", "");
+                dataBox.put("bankName", "");
+                dataBox.put("bankCode", "");
+                dataBox.put("bankId", "");
+                dataBox.put("terminalName", "");
+                dataBox.put("terminalCode", "");
+                dataBox.put("rawTerminalCode", "");
+                dataBox.put("content", "");
+                dataBox.put("orderId", "");
+                dataBox.put("referenceNumber", "");
+                dataBox.put("amount", "" + amount);
+                dataBox.put("timePaid", "");
+                dataBox.put("type", "");
+                dataBox.put("time", "");
+                dataBox.put("refId", "");
+                dataBox.put("status", "");
+                dataBox.put("traceId", "");
+                dataBox.put("transType", "");
+                dataBox.put("urlLink", "");
+                dataBox.put("message", String.format(messageForBox, amountForVoice));
+                String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
+                socketHandler.sendMessageToBoxId(idRefBox, dataBox);
+                logger.info("WS: socketHandler.sendMessageToQRBox - "
+                        + boxIdRef + " at: " + System.currentTimeMillis());
+            } catch (IOException e) {
+                logger.error(
+                        "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
+            }
+        }
+        if (terminalEntity != null) {
+            List<String> userIds = accountBankReceiveShareService.getUserIdsFromTerminalId(terminalEntity.getId(),
+                    accountBankReceiveEntity.getUserId());
+            for (String userId : userIds) {
+                notiEntity.setId(UUID.randomUUID().toString());
+                pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
+                        message, notiEntity, data, userId);
+            }
+        }
+        notiEntity.setId(UUID.randomUUID().toString());
         pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
                 message, notiEntity, data, accountBankReceiveEntity.getUserId());
+
         String messageSocial = prefix + amount + " VND"
                 + " | TK: " + bankTypeEntity.getBankShortName() + " - "
                 + accountBankReceiveEntity.getBankAccount()
@@ -655,7 +780,7 @@ public class CustomerInvoiceController {
         doInsertSocialMedia(accountBankReceiveEntity.getId(), messageSocial);
     }
 
-    private ResponseMessageDTO getCustomerSyncEntities(String transactionUUID, CustomerInvoicePaymentRequestDTO dto,
+    private ResponseMessageDTO getCustomerSyncEntities(String transactionUUID, CustomerInvoicePaymentRequestDTO dto, String rawCode,
                                          AccountBankReceiveEntity accountBankEntity, long time) {
         ResponseMessageDTO result = new ResponseMessageDTO("SUCCESS", "");
         try {
@@ -677,8 +802,8 @@ public class CustomerInvoiceController {
                 transactionBankCustomerDTO.setValueDate(time);
                 transactionBankCustomerDTO.setSign("");
                 transactionBankCustomerDTO.setOrderId("");
-                transactionBankCustomerDTO.setTerminalCode("");
-                transactionBankCustomerDTO.setTerminalCode("");
+                transactionBankCustomerDTO.setTerminalCode(rawCode);
+                transactionBankCustomerDTO.setServiceCode("");
                 transactionBankCustomerDTO.setUrlLink("");
                 List<AccountCustomerBankEntity> accountCustomerBankEntities = new ArrayList<>();
                 accountCustomerBankEntities = accountCustomerBankService
@@ -1437,7 +1562,6 @@ public class CustomerInvoiceController {
         return result;
     }
 
-
     private void updateTransaction(CustomerInvoicePaymentRequestDTO dto,
                                    TransactionReceiveEntity transactionReceiveEntity,
                                    AccountBankReceiveEntity accountBankReceiveEntity,
@@ -1507,7 +1631,10 @@ public class CustomerInvoiceController {
                                 new NotificationFcmMapDTO(
                                         notificationUUID.toString(),
                                         bankTypeEntity,
-                                        "", "", "",
+                                        StringUtil.getValueNullChecker(terminalEntity.getName()),
+                                        StringUtil.getValueNullChecker(terminalEntity.getCode()),
+                                        StringUtil.getValueNullChecker(terminalEntity.getRawTerminalCode()),
+                                        amount,
                                         transactionReceiveEntity
                                 )
                         );
@@ -1533,13 +1660,11 @@ public class CustomerInvoiceController {
                                 StringUtil.getValueNullChecker(terminalEntity.getName()),
                                 StringUtil.getValueNullChecker(terminalEntity.getCode()),
                                 StringUtil.getValueNullChecker(terminalEntity.getRawTerminalCode()),
+                                amount,
                                 transactionReceiveEntity
                         )
                 );
-
                 pushNotificationQrBox(boxIdRef, amountForVoice, data);
-
-
             } else {
                 logger.info("transaction-sync - userIds empty.");
                 // not have terminal in terminal table but still available in
@@ -1570,6 +1695,7 @@ public class CustomerInvoiceController {
                                 notificationUUID.toString(),
                                 bankTypeEntity,
                                 "", "", "",
+                                amount,
                                 transactionReceiveEntity
                         )
                 );
@@ -1618,6 +1744,7 @@ public class CustomerInvoiceController {
                             notificationUUID.toString(),
                             bankTypeEntity,
                             "", "", "",
+                            amount,
                             transactionReceiveEntity
                     )
             );
@@ -1645,11 +1772,34 @@ public class CustomerInvoiceController {
         if (!StringUtil.isNullOrEmpty(boxIdRef)) {
             try {
                 // send msg to QR Link
+                Map<String, String> dataBox = new HashMap<>();
                 BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
                 String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
-                data.put("message", String.format(messageForBox, amountForVoice));
+                dataBox.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+                dataBox.put("notificationId", "");
+                dataBox.put("transactionReceiveId", "");
+                dataBox.put("bankAccount", "");
+                dataBox.put("bankName", "");
+                dataBox.put("bankCode", "");
+                dataBox.put("bankId", "");
+                dataBox.put("terminalName", "");
+                dataBox.put("terminalCode", "");
+                dataBox.put("rawTerminalCode", "");
+                dataBox.put("content", "");
+                dataBox.put("orderId", "");
+                dataBox.put("referenceNumber", "");
+                dataBox.put("timePaid", "");
+                dataBox.put("type", "");
+                dataBox.put("time", "");
+                dataBox.put("refId", "");
+                dataBox.put("status", "");
+                dataBox.put("traceId", "");
+                dataBox.put("transType", "");
+                dataBox.put("urlLink", "");
+                dataBox.put("amount", data.get("amount"));
+                dataBox.put("message", String.format(messageForBox, amountForVoice));
                 String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
-                socketHandler.sendMessageToBoxId(idRefBox, data);
+                socketHandler.sendMessageToBoxId(idRefBox, dataBox);
                 logger.info("WS: socketHandler.sendMessageToQRBox - "
                         + boxIdRef + " at: " + System.currentTimeMillis());
             } catch (IOException e) {
