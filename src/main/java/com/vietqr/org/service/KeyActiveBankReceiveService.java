@@ -10,6 +10,7 @@ import java.util.List;
 @Service
 public interface KeyActiveBankReceiveService {
     KeyActiveBankReceiveDTO checkKeyExist(String keyActive);
+
     KeyActiveBankCheckDTO checkKeyActiveByKey(String keyActive);
 
     int updateActiveKey(String keyActive, int version, int newVersion);
@@ -17,4 +18,6 @@ public interface KeyActiveBankReceiveService {
     List<String> checkDuplicatedKeyActives(List<String> keys);
 
     void insertAll(List<KeyActiveBankReceiveEntity> entities);
+
+    List<KeyActiveBankReceiveEntity> getListKeyByBankId(String bankId);
 }

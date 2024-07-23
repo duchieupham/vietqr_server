@@ -984,15 +984,15 @@ public class AccountController {
     }
 
     @GetMapping("user/information/{userId}")
-    public ResponseEntity<AccountInformationDTO> getUserInformation(@PathVariable(value = "userId") String userId) {
-        AccountInformationDTO result = null;
+    public ResponseEntity<AccountInformationBackUpDTO> getUserInformation(@PathVariable(value = "userId") String userId) {
+        AccountInformationBackUpDTO result = null;
         HttpStatus httpStatus = null;
         try {
             if (userId != null && !userId.isEmpty()) {
                 AccountInformationEntity accountInformationEntity = accountInformationService
                         .getAccountInformation(userId);
                 if (accountInformationEntity != null) {
-                    result = new AccountInformationDTO();
+                    result = new AccountInformationBackUpDTO();
                     result.setFirstName(accountInformationEntity.getFirstName());
                     result.setMiddleName(accountInformationEntity.getMiddleName());
                     result.setLastName(accountInformationEntity.getLastName());
@@ -1006,6 +1006,8 @@ public class AccountController {
                     result.setNationalDate(accountInformationEntity.getNationalDate());
                     result.setImgId(accountInformationEntity.getImgId());
                     result.setCarrierTypeId(accountInformationEntity.getCarrierTypeId());
+                    boolean checkVerify = accountLoginService.getVerifyEmailStatus(userId);
+                    result.setVerify(checkVerify);
                     httpStatus = HttpStatus.OK;
                 } else {
                     logger.error("getUserInformation: EMPTY RECORD ");

@@ -38,4 +38,9 @@ public class KeyActiveBankReceiveServiceImpl implements KeyActiveBankReceiveServ
     public void insertAll(List<KeyActiveBankReceiveEntity> entities) {
         repo.saveAll(entities);
     }
+
+    @Override
+    public List<KeyActiveBankReceiveEntity> getListKeyByBankId(String bankId) {
+        return repo.getListKeyByBankId(bankId);
+    }
 }
