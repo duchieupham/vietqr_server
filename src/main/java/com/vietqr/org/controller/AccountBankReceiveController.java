@@ -1316,7 +1316,7 @@ public class AccountBankReceiveController {
                     dto.setValidFeeFrom(item.getValidFeeFrom());
                     dto.setValidFeeTo(item.getValidFeeTo());
 
-                    /// khi user đã active key để lưu lại
+                    // khi user đã active key để lưu lại
                     List<ICheckKeyActiveDTO> bankReceiveActiveHistoryEntity =
                             bankReceiveActiveHistoryService.getBankReceiveActiveByUserIdAndBankIdBackUp(userId, item.getBankId());
                     for (ICheckKeyActiveDTO checkKeyActiveDTO : bankReceiveActiveHistoryEntity) {
@@ -1360,9 +1360,9 @@ public class AccountBankReceiveController {
     }
 
     @GetMapping("account-bank/{userId}")
-    public ResponseEntity<List<AccountBankShareResponseDTO>> getAccountBankBackups(
+    public ResponseEntity<List<AccountBankActiveKeyResponseDTO>> getAccountBankBackups(
             @PathVariable("userId") String userId) {
-        List<AccountBankShareResponseDTO> result = new ArrayList<>();
+        List<AccountBankActiveKeyResponseDTO> result = new ArrayList<>();
         HttpStatus httpStatus = null;
         try {
             // get list banks
@@ -1387,7 +1387,7 @@ public class AccountBankReceiveController {
 
             if (!FormatUtil.isListNullOrEmpty(banks)) {
                 result = banks.stream().map(item -> {
-                    AccountBankShareResponseDTO dto = new AccountBankShareResponseDTO();
+                    AccountBankActiveKeyResponseDTO dto = new AccountBankActiveKeyResponseDTO();
                     CaiValueDTO valueDTO = caiValueDTOMap.get(item.getBankTypeId());
                     TransTempCountDTO transTempCountDTO = transTempCountDTOMap.get(item.getBankId());
                     if (Objects.nonNull(transTempCountDTO)) {
@@ -1419,6 +1419,21 @@ public class AccountBankReceiveController {
                     dto.setIsValidService(item.getIsValidService());
                     dto.setValidFeeFrom(item.getValidFeeFrom());
                     dto.setValidFeeTo(item.getValidFeeTo());
+
+                    /// khi user đã active key để lưu lại
+                    List<ICheckKeyActiveDTO> bankReceiveActiveHistoryEntity =
+                            bankReceiveActiveHistoryService.getBankReceiveActiveByUserIdAndBankIdBackUp(userId, item.getBankId());
+                    for (ICheckKeyActiveDTO checkKeyActiveDTO : bankReceiveActiveHistoryEntity) {
+                        if (Objects.nonNull(checkKeyActiveDTO)) {
+                            dto.setIsActiveKey(true);
+                            dto.setTimeActiveKey(checkKeyActiveDTO.getCreateAt());
+                            dto.setKeyActive(checkKeyActiveDTO.getKeyActive());
+                        } else {
+                            dto.setIsActiveKey(false);
+                            dto.setTimeActiveKey(0);
+                            StringUtil.isNullOrEmpty(checkKeyActiveDTO.getKeyActive());
+                        }
+                    }
 
                     dto.setCaiValue(valueDTO.getCaiValue());
                     VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
