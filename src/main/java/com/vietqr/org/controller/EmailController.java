@@ -189,9 +189,7 @@ public class EmailController {
 
                     result = new ResponseMessageDTO("SUCCESS", "");
                     httpStatus = HttpStatus.OK;
-                } else {
-                    result = new ResponseMessageDTO("FAILED", "E173");
-                    httpStatus = HttpStatus.BAD_REQUEST;
+                    break;
                 }
             }
         } catch (Exception e) {
