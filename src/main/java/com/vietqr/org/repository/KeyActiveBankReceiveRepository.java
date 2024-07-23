@@ -39,4 +39,8 @@ public interface KeyActiveBankReceiveRepository extends JpaRepository<KeyActiveB
             + "FROM key_active_bank_receive "
             + "WHERE key_active IN (:keyActives) ", nativeQuery = true)
     List<String> checkDuplicatedKeyActives(@Param(value = "keyActives") List<String> keyActives);
+
+    @Query(value = "SELECT a.* FROM key_active_bank_receive a "
+            + "WHERE bank_id = :bankId ", nativeQuery = true)
+    List<KeyActiveBankReceiveEntity> getListKeyByBankId(String bankId);
 }
