@@ -2682,5 +2682,208 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
         @Query(value = "UPDATE transaction_receive SET hash_tag = :hashTag "
                 + "WHERE id = :transactionId LIMIT 1 ", nativeQuery = true)
         void updateHashTagTransaction(String hashTag, String transactionId);
+
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+                + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
+                + "a.status AS status, a.type AS type, a.trans_type AS transType, "
+                + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
+                + "a.content AS content, a.bank_account AS bankAccount "
+                + "FROM transaction_receive a "
+                + "WHERE "
+                + "a.trans_type IN (:transType) AND a.bank_id = :bankId "
+                + "AND a.terminal_code IN (:terminalCodes) "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "ORDER BY a.time DESC "
+                + "LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedV2DTO> getTransactionsListCodeV2(String bankId, List<String> terminalCodes, List<String> transType,
+                                                                long fromDate, long toDate, int offset);
+
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+                + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
+                + "a.status AS status, a.type AS type, a.trans_type AS transType, "
+                + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
+                + "a.content AS content, a.bank_account AS bankAccount "
+                + "FROM transaction_receive a "
+                + "WHERE a.amount = :value "
+                + "AND a.trans_type IN (:transType) AND a.bank_id = :bankId "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "ORDER BY a.time DESC "
+                + "LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedV2DTO> getTransactionsV2ByAmount(String bankId, List<String> transType, String value,
+                                                                long fromDate, long toDate, int offset);
+
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+                + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
+                + "a.status AS status, a.type AS type, a.trans_type AS transType, "
+                + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
+                + "a.content AS content, a.bank_account AS bankAccount "
+                + "FROM transaction_receive a "
+                + "WHERE a.status = :value "
+                + "AND a.trans_type IN (:transType) AND a.bank_id = :bankId "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "ORDER BY a.time DESC "
+                + "LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedV2DTO> getTransactionsV2ByStatus(String bankId, List<String> transType, String value,
+                                                                long fromDate, long toDate, int offset);
+
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+                + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
+                + "a.status AS status, a.type AS type, a.trans_type AS transType, "
+                + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
+                + "a.content AS content, a.bank_account AS bankAccount "
+                + "FROM transaction_receive a "
+                + "WHERE a.terminal_code IN (:terminalCodes) "
+                + "AND a.trans_type IN (:transType) AND a.bank_id = :bankId "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "ORDER BY a.time DESC "
+                + "LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedV2DTO> getTransactionsV2ByTerminalCode(String bankId, List<String> transType,
+                                                                      List<String> terminalCodes, long fromDate,
+                                                                      long toDate, int offset);
+
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+                + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
+                + "a.status AS status, a.type AS type, a.trans_type AS transType, "
+                + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
+                + "a.content AS content, a.bank_account AS bankAccount "
+                + "FROM transaction_receive a "
+                + "WHERE a.content LIKE %:value% "
+                + "AND a.trans_type IN (:transType) AND a.bank_id = :bankId "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "ORDER BY a.time DESC "
+                + "LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedV2DTO> getTransactionsV2ByContent(String bankId, List<String> transType, String value,
+                                                                 long fromDate, long toDate, int offset);
+
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+                + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
+                + "a.status AS status, a.type AS type, a.trans_type AS transType, "
+                + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
+                + "a.content AS content, a.bank_account AS bankAccount "
+                + "FROM transaction_receive a "
+                + "WHERE a.reference_number = :value "
+                + "AND a.trans_type IN (:transType) AND a.bank_id = :bankId "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "ORDER BY a.time DESC "
+                + "LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedV2DTO> getTransactionsV2ByFtCode(String bankId, List<String> transType, String value,
+                                                                long fromDate, long toDate, int offset);
+
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+                + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
+                + "a.status AS status, a.type AS type, a.trans_type AS transType, "
+                + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
+                + "a.content AS content, a.bank_account AS bankAccount "
+                + "FROM transaction_receive a "
+                + "WHERE (a.order_id = :value OR a.content LIKE %:value%) "
+                + "AND a.trans_type IN (:transType) AND a.bank_id = :bankId "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "ORDER BY a.time DESC "
+                + "LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedV2DTO> getTransactionsV2ByOrderId(String bankId, List<String> transType, String value,
+                                                                 long fromDate, long toDate, int offset);
+
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+                + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
+                + "a.status AS status, a.type AS type, a.trans_type AS transType, "
+                + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
+                + "a.content AS content, a.bank_account AS bankAccount "
+                + "FROM transaction_receive a "
+                + "WHERE a.amount = :value "
+                + "AND a.trans_type IN (:transType) AND a.bank_id = :bankId "
+                + "AND a.terminal_code IN (:terminalCodes) "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "ORDER BY a.time DESC "
+                + "LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByAmount(String bankId, List<String> terminalCodes,
+                                                                        List<String> transType, String value,
+                                                                        long fromDate, long toDate, int offset);
+
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+                + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
+                + "a.status AS status, a.type AS type, a.trans_type AS transType, "
+                + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
+                + "a.content AS content, a.bank_account AS bankAccount "
+                + "FROM transaction_receive a "
+                + "WHERE a.status = :value "
+                + "AND a.trans_type IN (:transType) AND a.bank_id = :bankId "
+                + "AND a.terminal_code IN (:terminalCodes) "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "ORDER BY a.time DESC "
+                + "LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByStatus(String bankId, List<String> terminalCodes,
+                                                                        List<String> transType, String value,
+                                                                        long fromDate, long toDate, int offset);
+
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+                + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
+                + "a.status AS status, a.type AS type, a.trans_type AS transType, "
+                + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
+                + "a.content AS content, a.bank_account AS bankAccount "
+                + "FROM transaction_receive a "
+                + "WHERE a.terminal_code IN (:value) "
+                + "AND a.trans_type IN (:transType) AND a.bank_id = :bankId "
+                + "AND a.terminal_code IN (:terminalCodes) "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "ORDER BY a.time DESC "
+                + "LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByTerminalCode(String bankId, List<String> terminalCodes,
+                                                                              List<String> transType, List<String> value,
+                                                                              long fromDate, long toDate, int offset);
+
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+                + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
+                + "a.status AS status, a.type AS type, a.trans_type AS transType, "
+                + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
+                + "a.content AS content, a.bank_account AS bankAccount "
+                + "FROM transaction_receive a "
+                + "WHERE a.content LIKE %:value% "
+                + "AND a.trans_type IN (:transType) AND a.bank_id = :bankId "
+                + "AND a.terminal_code IN (:terminalCodes) "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "ORDER BY a.time DESC "
+                + "LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByContent(String bankId, List<String> terminalCodes,
+                                                                         List<String> transType, String value,
+                                                                         long fromDate, long toDate, int offset);
+
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+                + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
+                + "a.status AS status, a.type AS type, a.trans_type AS transType, "
+                + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
+                + "a.content AS content, a.bank_account AS bankAccount "
+                + "FROM transaction_receive a "
+                + "WHERE (a.content LIKE %:value% OR a.order_id = :value) "
+                + "AND a.trans_type IN (:transType) AND a.bank_id = :bankId "
+                + "AND a.terminal_code IN (:terminalCodes) "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "ORDER BY a.time DESC "
+                + "LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByOrderId(String bankId, List<String> terminalCodes,
+                                                                         List<String> transType, String value,
+                                                                         long fromDate, long toDate, int offset);
+
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+                + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
+                + "a.status AS status, a.type AS type, a.trans_type AS transType, "
+                + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
+                + "a.content AS content, a.bank_account AS bankAccount "
+                + "FROM transaction_receive a "
+                + "WHERE a.reference_number = :value "
+                + "AND a.trans_type IN (:transType) AND a.bank_id = :bankId "
+                + "AND a.terminal_code IN (:terminalCodes) "
+                + "AND a.time BETWEEN :fromDate AND :toDate "
+                + "ORDER BY a.time DESC "
+                + "LIMIT :offset, 20", nativeQuery = true)
+        List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByReferenceNumber(String bankId, List<String> terminalCodes,
+                                                                                 List<String> transType, String value,
+                                                                                 long fromDate, long toDate, int offset);
+
+        @Query(value = "SELECT COALESCE(SUM(CASE WHEN a.trans_type = 'C' AND a.status = 1 THEN a.amount END), 0) AS totalCredit, "
+                + "COALESCE(SUM(CASE WHEN a.trans_type = 'D' AND a.status = 1 THEN a.amount END), 0) AS totalDebit "
+                + "FROM transaction_receive a "
+                + "WHERE a.bank_id = :bankId AND a.terminal_code IN (:terminalCodes) "
+                + "AND a.time BETWEEN :fromDate AND :toDate ", nativeQuery = true)
+        ITransStatisticListExtra getExtraTransactionsByListCodeV2(String bankId, List<String> terminalCodes, long fromDate, long toDate);
 }
 

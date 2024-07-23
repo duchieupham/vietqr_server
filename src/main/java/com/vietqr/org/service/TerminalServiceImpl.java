@@ -243,6 +243,11 @@ public class TerminalServiceImpl implements TerminalService {
     }
 
     @Override
+    public List<String> getAllCodeByNameAndBankId(String name, String bankId) {
+        return repo.getAllCodeByNameAndBankId(name, bankId);
+    }
+
+    @Override
     public TerminalEntity getTerminalByTerminalId(String terminalId) {
         return repo.getTerminalByTerminalId(terminalId);
     }
