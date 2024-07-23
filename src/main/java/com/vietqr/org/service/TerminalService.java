@@ -100,4 +100,6 @@ public interface TerminalService {
     List<String> checkExistedTerminalRawCodes(List<String> terminalCodes);
 
     String checkExistedPublishId(String publishId);
+
+    List<String> getAllCodeByNameAndBankId(String name, String bankId);
 }

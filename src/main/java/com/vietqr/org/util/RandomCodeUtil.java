@@ -1,10 +1,14 @@
 package com.vietqr.org.util;
 
+import com.vietqr.org.controller.TerminalController;
+import org.apache.log4j.Logger;
+
 import java.security.SecureRandom;
 import java.util.Random;
 import java.util.UUID;
 
 public class RandomCodeUtil {
+	private static final Logger logger = Logger.getLogger(RandomCodeUtil.class);
 
 	// type = 1: Business Information code: BU
 	// type = 2: Branch Information code: BR
@@ -46,6 +50,17 @@ public class RandomCodeUtil {
 			randomChars[i] = CHARACTERS.charAt(SECURE_RANDOM.nextInt(CHARACTERS.length()));
 		}
 		return new String(randomChars);
+	}
+
+	public static String getRandomBillId() {
+		String result = "";
+		try {
+			result = EnvironmentUtil.getPrefixBidvBillIdCommon() + DateTimeUtil.getCurrentWeekYear() +
+					StringUtil.convertToHexadecimal(DateTimeUtil.getMinusCurrentDate()) + RandomCodeUtil.generateRandomId(4);
+		} catch (Exception e) {
+			logger.error("getRandomBillId: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
+		}
+		return result;
 	}
 
 	private static final String DIGITS = "0123456789";
