@@ -2141,6 +2141,8 @@ public class TransactionController {
                 result.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
                 result.setContent(dto.getContent());
                 result.setType(dto.getType());
+                result.setBankCode(dto.getBankCode());
+                result.setBankName(dto.getBankName());
                 result.setNote(StringUtil.getValueNullChecker(dto.getNote()));
                 result.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
                 result.setHashTag(StringUtil.getValueNullChecker(dto.getHashTag()));
