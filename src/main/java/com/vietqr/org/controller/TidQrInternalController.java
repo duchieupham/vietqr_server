@@ -177,7 +177,7 @@ public class TidQrInternalController {
                             String billId = getRandomBillId();
                             VietQRCreateDTO vietQRCreateDTO = new VietQRCreateDTO();
                             vietQRCreateDTO.setBankId(accountBankInfoResById.getBankId());
-                            vietQRCreateDTO.setAmount("5000");
+                            vietQRCreateDTO.setAmount("0");
                             vietQRCreateDTO.setContent(billId);
                             vietQRCreateDTO.setUserId("");
                             vietQRCreateDTO.setTerminalCode("");
@@ -186,7 +186,7 @@ public class TidQrInternalController {
                                     insertNewCustomerInvoiceTransBIDV(vietQRCreateDTO, accountBankInfoResById, billId);
                             if ("SUCCESS".equals(responseMessageDTO.getStatus())) {
                                 VietQRVaRequestDTO vietQRVaRequestDTO = new VietQRVaRequestDTO();
-                                vietQRVaRequestDTO.setAmount("5000");
+                                vietQRVaRequestDTO.setAmount("0");
                                 vietQRVaRequestDTO.setBillId(billId);
                                 vietQRVaRequestDTO.setUserBankName(accountBankInfoResById.getUserBankName());
                                 vietQRVaRequestDTO.setDescription(StringUtil.getValueNullChecker(billId));
