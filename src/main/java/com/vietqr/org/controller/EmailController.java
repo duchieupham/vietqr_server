@@ -115,12 +115,12 @@ public class EmailController {
     public ResponseEntity<Object> sendMailWithAttachment(@RequestBody EmailDetails details) throws MessagingException {
         Object result = null;
         HttpStatus httpStatus = null;
-        // Creating a mime message
-        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-        MimeMessageHelper mimeMessageHelper;
+
         try {
+            // Creating a mime message
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper mimeMessageHelper;
 //            String status = emailService.sendMailWithAttachment(details);
-            // Setting multipart as true for attachments to
             mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
             mimeMessageHelper.setFrom(sender);
             mimeMessageHelper.setTo(details.getRecipient());
@@ -146,7 +146,10 @@ public class EmailController {
                 ByteArrayResource dataSource = new ByteArrayResource(imageBytes);
                 mimeMessageHelper.addInline("image", dataSource, "image/png");
             }
-            javaMailSender.send(mimeMessage);
+            Thread thread = new Thread(() -> {
+                javaMailSender.send(mimeMessage);
+            });
+            thread.start();
 
             // insert data vào bảng EmailVerifyEntity
             UUID id = UUID.randomUUID();
