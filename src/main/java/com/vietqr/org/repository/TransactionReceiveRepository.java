@@ -2676,5 +2676,11 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "ON b.bank_type_id = c.id "
                 + " WHERE a.id = :id LIMIT 1", nativeQuery = true)
         TransactionDetailV2DTO getTransactionV2ById(String id);
+
+        @Transactional
+        @Modifying
+        @Query(value = "UPDATE transaction_receive SET hash_tag = :hashTag "
+                + "WHERE id = :transactionId LIMIT 1 ", nativeQuery = true)
+        void updateHashTagTransaction(String hashTag, String transactionId);
 }
 

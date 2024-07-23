@@ -2200,6 +2200,22 @@ public class TransactionController {
         return VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
     }
 
+    @PostMapping("transaction/hash-tag")
+    public ResponseEntity<ResponseMessageDTO> updateHashTagTransaction(@Valid @RequestBody TransactionHashTagDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            transactionReceiveService.updateHashTagTransaction(dto.getHashTag(), dto.getTransactionId());
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+            logger.error("uploadImageTransaction: ERROR: " + e.toString());
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @GetMapping("transaction/{id}")
     public ResponseEntity<TransactionDetailResDTO> getTransactionById(@PathVariable(value = "id") String id) {
         TransactionDetailResDTO result = null;
@@ -2381,7 +2397,6 @@ public class TransactionController {
     }
 
     // get transaction image
-
     @GetMapping("transaction/image/{transactionId}")
     public ResponseEntity<List<TransImgIdDTO>> getTransactionImages(
             @PathVariable(value = "transactionId") String transactionId) {
