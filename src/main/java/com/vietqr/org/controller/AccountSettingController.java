@@ -119,7 +119,7 @@ public class AccountSettingController {
                     result.setVerifyEmail(checkVerify);
 
                     // cái này làm cho phần thông báo message
-                    result.setNotificationMessage("");
+                    result.setNotificationMessage(entity.getNotificationMessage());
 
                     // theme processing
                     SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
