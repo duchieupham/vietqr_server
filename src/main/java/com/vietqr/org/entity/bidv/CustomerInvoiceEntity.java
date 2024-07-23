@@ -55,6 +55,7 @@ public class CustomerInvoiceEntity implements Serializable {
 
     // 0: Default là hóa đơn BIDV
     // 1: Transaction_receive
+    // 2: Static qr
     @Column(name = "qrType")
     private int qrType = 0;
 
