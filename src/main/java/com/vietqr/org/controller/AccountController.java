@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -992,8 +993,14 @@ public class AccountController {
                 AccountInformationEntity accountInformationEntity = accountInformationService
                         .getAccountInformation(userId);
                 IBalanceAndScoreDTO balanceAndScoreDTO = null;
-                //set balance and score
+                // set balance and score
                 balanceAndScoreDTO = accountWalletService.getBalanceAndScore(userId);
+                // get ngãy đăng ký tài khoản
+                long registerDate = accountLoginService.getRegisterDate(userId);
+                // Chuyển đổi thời gian kiểu long thành LocalDateTime
+                LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(registerDate), ZoneId.systemDefault());
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                String formattedDateTime = dateTime.format(formatter);
 
                 if (accountInformationEntity != null) {
                     result = new AccountInformationBackUpDTO();
@@ -1014,6 +1021,7 @@ public class AccountController {
                     result.setVerify(checkVerify);
                     result.setBalance(balanceAndScoreDTO.getBalance());
                     result.setScore(balanceAndScoreDTO.getScore());
+                    result.setTimeCreated(formattedDateTime);
                     httpStatus = HttpStatus.OK;
                 } else {
                     logger.error("getUserInformation: EMPTY RECORD ");
