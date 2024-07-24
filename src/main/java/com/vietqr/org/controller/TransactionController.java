@@ -2146,6 +2146,11 @@ public class TransactionController {
                     } else {
                         responseDTO.setQrCode(dto.getQrCode());
                     }
+                    responseDTO.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
+                    String refId = TransactionRefIdUtil
+                            .encryptTransactionId(dto.getTransactionId());
+                    String qrLink = EnvironmentUtil.getQRLink() + refId;
+                    responseDTO.setQrLink(qrLink);
                     return responseDTO;
 
                 }).collect(Collectors.toList());
@@ -2181,6 +2186,11 @@ public class TransactionController {
                         } else {
                             responseDTO.setQrCode(dto.getQrCode());
                         }
+                        responseDTO.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
+                        String refId = TransactionRefIdUtil
+                                .encryptTransactionId(dto.getTransactionId());
+                        String qrLink = EnvironmentUtil.getQRLink() + refId;
+                        responseDTO.setQrLink(qrLink);
                         return responseDTO;
 
                     }).collect(Collectors.toList());
@@ -2215,6 +2225,11 @@ public class TransactionController {
                                     } else {
                                         responseDTO.setQrCode(dto.getQrCode());
                                     }
+                                    responseDTO.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
+                                    String refId = TransactionRefIdUtil
+                                            .encryptTransactionId(dto.getTransactionId());
+                                    String qrLink = EnvironmentUtil.getQRLink() + refId;
+                                    responseDTO.setQrLink(qrLink);
                                     return responseDTO;
 
                                 }).collect(Collectors.toList());
@@ -2249,6 +2264,11 @@ public class TransactionController {
                                     } else {
                                         responseDTO.setQrCode(dto.getQrCode());
                                     }
+                                    responseDTO.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
+                                    String refId = TransactionRefIdUtil
+                                            .encryptTransactionId(dto.getTransactionId());
+                                    String qrLink = EnvironmentUtil.getQRLink() + refId;
+                                    responseDTO.setQrLink(qrLink);
                                     return responseDTO;
 
                                 }).collect(Collectors.toList());
@@ -2278,6 +2298,11 @@ public class TransactionController {
                                 } else {
                                     responseDTO.setQrCode(dto.getQrCode());
                                 }
+                                responseDTO.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
+                                String refId = TransactionRefIdUtil
+                                        .encryptTransactionId(dto.getTransactionId());
+                                String qrLink = EnvironmentUtil.getQRLink() + refId;
+                                responseDTO.setQrLink(qrLink);
                                 return responseDTO;
 
                             }).collect(Collectors.toList());
@@ -2377,6 +2402,10 @@ public class TransactionController {
                     } else {
                         result.setQrCode(StringUtil.getValueNullChecker(dto.getQrCode()));
                     }
+                    String refId = TransactionRefIdUtil
+                            .encryptTransactionId(dto.getId());
+                    String qrLink = EnvironmentUtil.getQRLink() + refId;
+                    result.setQrLink(qrLink);
                 } else {
                     long time = dto.getTime();
                     SystemSettingEntity setting = systemSettingService.getSystemSetting();
@@ -2409,6 +2438,10 @@ public class TransactionController {
                         } else {
                             result.setQrCode(StringUtil.getValueNullChecker(dto.getQrCode()));
                         }
+                        String refId = TransactionRefIdUtil
+                                .encryptTransactionId(dto.getId());
+                        String qrLink = EnvironmentUtil.getQRLink() + refId;
+                        result.setQrLink(qrLink);
                     } else {
                         long lastTime = dto.getTime();
                         TransReceiveTempEntity entity = transReceiveTempService.getLastTimeByBankId(dto.getBankId());
@@ -2442,6 +2475,10 @@ public class TransactionController {
                                 } else {
                                     result.setQrCode(StringUtil.getValueNullChecker(dto.getQrCode()));
                                 }
+                                String refId = TransactionRefIdUtil
+                                        .encryptTransactionId(dto.getId());
+                                String qrLink = EnvironmentUtil.getQRLink() + refId;
+                                result.setQrLink(qrLink);
                             } else {
                                 result = new TransactionDetailResV2DTO();
                                 result.setId(dto.getId());
@@ -2477,6 +2514,10 @@ public class TransactionController {
                                 } else {
                                     result.setQrCode(StringUtil.getValueNullChecker(dto.getQrCode()));
                                 }
+                                String refId = TransactionRefIdUtil
+                                        .encryptTransactionId(dto.getId());
+                                String qrLink = EnvironmentUtil.getQRLink() + refId;
+                                result.setQrLink(qrLink);
                             }
                         } else {
                             result = new TransactionDetailResV2DTO();
@@ -2507,6 +2548,10 @@ public class TransactionController {
                             } else {
                                 result.setQrCode(StringUtil.getValueNullChecker(dto.getQrCode()));
                             }
+                            String refId = TransactionRefIdUtil
+                                    .encryptTransactionId(dto.getId());
+                            String qrLink = EnvironmentUtil.getQRLink() + refId;
+                            result.setQrLink(qrLink);
                         }
 
                     }

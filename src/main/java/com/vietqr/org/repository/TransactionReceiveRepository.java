@@ -2636,7 +2636,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "AND a.trans_type = :transType LIMIT 1", nativeQuery = true)
         TransactionReceiveEntity getTransactionReceiveByRefNumber(String referenceNumber, String transType, long time);
 
-        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, a.terminal_code AS terminalCode, "
                 + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
                 + "a.status AS status, a.type AS type, a.trans_type AS transType, "
                 + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
@@ -2683,7 +2683,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                 + "WHERE id = :transactionId LIMIT 1 ", nativeQuery = true)
         void updateHashTagTransaction(String hashTag, String transactionId);
 
-        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, a.terminal_code AS terminalCode, "
                 + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
                 + "a.status AS status, a.type AS type, a.trans_type AS transType, "
                 + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
@@ -2698,7 +2698,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
         List<TransactionRelatedV2DTO> getTransactionsListCodeV2(String bankId, List<String> terminalCodes, List<String> transType,
                                                                 long fromDate, long toDate, int offset);
 
-        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, a.terminal_code AS terminalCode, "
                 + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
                 + "a.status AS status, a.type AS type, a.trans_type AS transType, "
                 + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
@@ -2712,7 +2712,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
         List<TransactionRelatedV2DTO> getTransactionsV2ByAmount(String bankId, List<String> transType, String value,
                                                                 long fromDate, long toDate, int offset);
 
-        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, a.terminal_code AS terminalCode, "
                 + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
                 + "a.status AS status, a.type AS type, a.trans_type AS transType, "
                 + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
@@ -2726,7 +2726,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
         List<TransactionRelatedV2DTO> getTransactionsV2ByStatus(String bankId, List<String> transType, String value,
                                                                 long fromDate, long toDate, int offset);
 
-        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, a.terminal_code AS terminalCode, "
                 + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
                 + "a.status AS status, a.type AS type, a.trans_type AS transType, "
                 + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
@@ -2741,7 +2741,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                                                                       List<String> terminalCodes, long fromDate,
                                                                       long toDate, int offset);
 
-        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, a.terminal_code AS terminalCode, "
                 + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
                 + "a.status AS status, a.type AS type, a.trans_type AS transType, "
                 + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
@@ -2755,7 +2755,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
         List<TransactionRelatedV2DTO> getTransactionsV2ByContent(String bankId, List<String> transType, String value,
                                                                  long fromDate, long toDate, int offset);
 
-        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, a.terminal_code AS terminalCode, "
                 + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
                 + "a.status AS status, a.type AS type, a.trans_type AS transType, "
                 + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
@@ -2769,7 +2769,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
         List<TransactionRelatedV2DTO> getTransactionsV2ByFtCode(String bankId, List<String> transType, String value,
                                                                 long fromDate, long toDate, int offset);
 
-        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, a.terminal_code AS terminalCode, "
                 + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
                 + "a.status AS status, a.type AS type, a.trans_type AS transType, "
                 + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
@@ -2783,7 +2783,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
         List<TransactionRelatedV2DTO> getTransactionsV2ByOrderId(String bankId, List<String> transType, String value,
                                                                  long fromDate, long toDate, int offset);
 
-        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, a.terminal_code AS terminalCode, "
                 + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
                 + "a.status AS status, a.type AS type, a.trans_type AS transType, "
                 + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
@@ -2799,7 +2799,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                                                                         List<String> transType, String value,
                                                                         long fromDate, long toDate, int offset);
 
-        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, a.terminal_code AS terminalCode, "
                 + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
                 + "a.status AS status, a.type AS type, a.trans_type AS transType, "
                 + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
@@ -2815,7 +2815,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                                                                         List<String> transType, String value,
                                                                         long fromDate, long toDate, int offset);
 
-        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, a.terminal_code AS terminalCode, "
                 + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
                 + "a.status AS status, a.type AS type, a.trans_type AS transType, "
                 + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
@@ -2831,7 +2831,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                                                                               List<String> transType, List<String> value,
                                                                               long fromDate, long toDate, int offset);
 
-        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, a.terminal_code AS terminalCode, "
                 + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
                 + "a.status AS status, a.type AS type, a.trans_type AS transType, "
                 + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
@@ -2847,7 +2847,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                                                                          List<String> transType, String value,
                                                                          long fromDate, long toDate, int offset);
 
-        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, a.terminal_code AS terminalCode, "
                 + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
                 + "a.status AS status, a.type AS type, a.trans_type AS transType, "
                 + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
@@ -2863,7 +2863,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
                                                                          List<String> transType, String value,
                                                                          long fromDate, long toDate, int offset);
 
-        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, "
+        @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, a.terminal_code AS terminalCode, "
                 + "a.qr_code AS qrCode, a.time AS time, a.time_paid AS timePaid, "
                 + "a.status AS status, a.type AS type, a.trans_type AS transType, "
                 + "a.reference_number AS referenceNumber, a.order_id AS orderId, "
