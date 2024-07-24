@@ -991,6 +991,10 @@ public class AccountController {
             if (userId != null && !userId.isEmpty()) {
                 AccountInformationEntity accountInformationEntity = accountInformationService
                         .getAccountInformation(userId);
+                IBalanceAndScoreDTO balanceAndScoreDTO = null;
+                //set balance and score
+                balanceAndScoreDTO = accountWalletService.getBalanceAndScore(userId);
+
                 if (accountInformationEntity != null) {
                     result = new AccountInformationBackUpDTO();
                     result.setFirstName(accountInformationEntity.getFirstName());
@@ -1008,6 +1012,8 @@ public class AccountController {
                     result.setCarrierTypeId(accountInformationEntity.getCarrierTypeId());
                     boolean checkVerify = accountLoginService.getVerifyEmailStatus(userId);
                     result.setVerify(checkVerify);
+                    result.setBalance(balanceAndScoreDTO.getBalance());
+                    result.setScore(balanceAndScoreDTO.getScore());
                     httpStatus = HttpStatus.OK;
                 } else {
                     logger.error("getUserInformation: EMPTY RECORD ");
