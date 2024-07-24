@@ -22,6 +22,8 @@ public interface AccountInformationService {
 			String address, int gender, String email, String nationalId, String oldNationalId, String nationalDate,
 			String userId);
 
+	public void updateEmailAccountInformation(String userId, String email);
+
 	public void updateImageId(String imgId, String userId);
 
 	public String getPhoneNoByUserId(String userId);
