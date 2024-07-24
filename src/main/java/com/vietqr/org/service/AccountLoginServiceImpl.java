@@ -47,8 +47,8 @@ public class AccountLoginServiceImpl implements AccountLoginService {
     }
 
     @Override
-    public void updateIsVerifiedByUserId(String userId) {
-        repo.updateIsVerifiedByUserId(userId);
+    public void updateIsVerifiedByUserId(String userId, String email) {
+        repo.updateIsVerifiedByUserId(userId, email);
     }
 
     @Override
@@ -159,6 +159,11 @@ public class AccountLoginServiceImpl implements AccountLoginService {
     @Override
     public long getTotalUsers() {
         return repo.getTotalUsers();
+    }
+
+    @Override
+    public long getRegisterDate(String userId) {
+        return repo.getRegisterDate(userId);
     }
 
     @Override

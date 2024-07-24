@@ -18,6 +18,8 @@ public class TransactionRelatedResponseV2DTO {
     private String bankName;
     private String imgId;
     private String bankShortName;
+    private String qrLink;
+    private String terminalCode;
 
     public TransactionRelatedResponseV2DTO() {
     }
@@ -170,5 +172,21 @@ public class TransactionRelatedResponseV2DTO {
 
     public void setBankShortName(String bankShortName) {
         this.bankShortName = bankShortName;
+    }
+
+    public String getQrLink() {
+        return qrLink;
+    }
+
+    public void setQrLink(String qrLink) {
+        this.qrLink = qrLink;
+    }
+
+    public String getTerminalCode() {
+        return terminalCode;
+    }
+
+    public void setTerminalCode(String terminalCode) {
+        this.terminalCode = terminalCode;
     }
 }

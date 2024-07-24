@@ -48,6 +48,11 @@ public class AccountInformationServiceImpl implements AccountInformationService 
 	}
 
 	@Override
+	public void updateEmailAccountInformation(String email, String userId) {
+		accountInformationRepo.updateEmailAccountInformation(email, userId);
+	}
+
+	@Override
 	public void updateImageId(String imgId, String userId) {
 		accountInformationRepo.updateImage(imgId, userId);
 	}

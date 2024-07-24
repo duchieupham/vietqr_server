@@ -24,4 +24,6 @@ public interface TransactionRelatedV2DTO {
     String getBankAccount();
 
     String getContent();
+
+    String getTerminalCode();
 }

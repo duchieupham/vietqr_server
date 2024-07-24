@@ -22,7 +22,7 @@ public interface AccountLoginService {
 
     public void updatePassword(String password, String userId);
 
-    public void updateIsVerifiedByUserId(String userId);
+    public void updateIsVerifiedByUserId(String userId, String email);
 
     public int insertAccountLogin(AccountLoginEntity entity);
 
@@ -65,6 +65,7 @@ public interface AccountLoginService {
     boolean isPhoneNoExists(String phoneNo);
     long countAccountsRegisteredInDay(long startTime, long endTime);
     long getTotalUsers();
+    long getRegisterDate(String userId);
 
     void updateEmailByUserId(String email, String userId);
 

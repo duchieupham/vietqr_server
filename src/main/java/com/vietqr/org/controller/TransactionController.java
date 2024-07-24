@@ -26,15 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import io.jsonwebtoken.Claims;
@@ -2146,6 +2138,11 @@ public class TransactionController {
                     } else {
                         responseDTO.setQrCode(dto.getQrCode());
                     }
+                    responseDTO.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
+                    String refId = TransactionRefIdUtil
+                            .encryptTransactionId(dto.getTransactionId());
+                    String qrLink = EnvironmentUtil.getQRLink() + refId;
+                    responseDTO.setQrLink(qrLink);
                     return responseDTO;
 
                 }).collect(Collectors.toList());
@@ -2181,6 +2178,11 @@ public class TransactionController {
                         } else {
                             responseDTO.setQrCode(dto.getQrCode());
                         }
+                        responseDTO.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
+                        String refId = TransactionRefIdUtil
+                                .encryptTransactionId(dto.getTransactionId());
+                        String qrLink = EnvironmentUtil.getQRLink() + refId;
+                        responseDTO.setQrLink(qrLink);
                         return responseDTO;
 
                     }).collect(Collectors.toList());
@@ -2215,6 +2217,11 @@ public class TransactionController {
                                     } else {
                                         responseDTO.setQrCode(dto.getQrCode());
                                     }
+                                    responseDTO.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
+                                    String refId = TransactionRefIdUtil
+                                            .encryptTransactionId(dto.getTransactionId());
+                                    String qrLink = EnvironmentUtil.getQRLink() + refId;
+                                    responseDTO.setQrLink(qrLink);
                                     return responseDTO;
 
                                 }).collect(Collectors.toList());
@@ -2249,6 +2256,11 @@ public class TransactionController {
                                     } else {
                                         responseDTO.setQrCode(dto.getQrCode());
                                     }
+                                    responseDTO.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
+                                    String refId = TransactionRefIdUtil
+                                            .encryptTransactionId(dto.getTransactionId());
+                                    String qrLink = EnvironmentUtil.getQRLink() + refId;
+                                    responseDTO.setQrLink(qrLink);
                                     return responseDTO;
 
                                 }).collect(Collectors.toList());
@@ -2278,6 +2290,11 @@ public class TransactionController {
                                 } else {
                                     responseDTO.setQrCode(dto.getQrCode());
                                 }
+                                responseDTO.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
+                                String refId = TransactionRefIdUtil
+                                        .encryptTransactionId(dto.getTransactionId());
+                                String qrLink = EnvironmentUtil.getQRLink() + refId;
+                                responseDTO.setQrLink(qrLink);
                                 return responseDTO;
 
                             }).collect(Collectors.toList());
@@ -2377,6 +2394,10 @@ public class TransactionController {
                     } else {
                         result.setQrCode(StringUtil.getValueNullChecker(dto.getQrCode()));
                     }
+                    String refId = TransactionRefIdUtil
+                            .encryptTransactionId(dto.getId());
+                    String qrLink = EnvironmentUtil.getQRLink() + refId;
+                    result.setQrLink(qrLink);
                 } else {
                     long time = dto.getTime();
                     SystemSettingEntity setting = systemSettingService.getSystemSetting();
@@ -2409,6 +2430,10 @@ public class TransactionController {
                         } else {
                             result.setQrCode(StringUtil.getValueNullChecker(dto.getQrCode()));
                         }
+                        String refId = TransactionRefIdUtil
+                                .encryptTransactionId(dto.getId());
+                        String qrLink = EnvironmentUtil.getQRLink() + refId;
+                        result.setQrLink(qrLink);
                     } else {
                         long lastTime = dto.getTime();
                         TransReceiveTempEntity entity = transReceiveTempService.getLastTimeByBankId(dto.getBankId());
@@ -2442,6 +2467,10 @@ public class TransactionController {
                                 } else {
                                     result.setQrCode(StringUtil.getValueNullChecker(dto.getQrCode()));
                                 }
+                                String refId = TransactionRefIdUtil
+                                        .encryptTransactionId(dto.getId());
+                                String qrLink = EnvironmentUtil.getQRLink() + refId;
+                                result.setQrLink(qrLink);
                             } else {
                                 result = new TransactionDetailResV2DTO();
                                 result.setId(dto.getId());
@@ -2477,6 +2506,10 @@ public class TransactionController {
                                 } else {
                                     result.setQrCode(StringUtil.getValueNullChecker(dto.getQrCode()));
                                 }
+                                String refId = TransactionRefIdUtil
+                                        .encryptTransactionId(dto.getId());
+                                String qrLink = EnvironmentUtil.getQRLink() + refId;
+                                result.setQrLink(qrLink);
                             }
                         } else {
                             result = new TransactionDetailResV2DTO();
@@ -2507,6 +2540,10 @@ public class TransactionController {
                             } else {
                                 result.setQrCode(StringUtil.getValueNullChecker(dto.getQrCode()));
                             }
+                            String refId = TransactionRefIdUtil
+                                    .encryptTransactionId(dto.getId());
+                            String qrLink = EnvironmentUtil.getQRLink() + refId;
+                            result.setQrLink(qrLink);
                         }
 
                     }
@@ -2775,6 +2812,23 @@ public class TransactionController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             System.out.println("getTransactionImages: ERROR: " + e.toString());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @DeleteMapping("transaction/image")
+    public ResponseEntity<ResponseMessageDTO> deleteTransactionImages(
+            @Valid @RequestBody TransactionImgDeleteDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            transactionReceiveImageService.removeTransactionImgage(dto.getTransactionId(), dto.getImgId());
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            System.out.println("deleteTransactionImages: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);

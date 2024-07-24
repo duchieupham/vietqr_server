@@ -2,6 +2,106 @@ package com.vietqr.org.dto;
 
 public class AccountInformationBackUpDTO extends AccountInformationDTO{
     private boolean isVerify;
+    private long balance;
+    private long score;
+    private String timeCreated;
+
+    public AccountInformationBackUpDTO(boolean isVerify, long balance, long score) {
+        this.isVerify = isVerify;
+        this.balance = balance;
+        this.score = score;
+    }
+
+    public AccountInformationBackUpDTO(String firstName, String middleName, String lastName, String birthDate, String address, int gender, String email, String userId, boolean isVerify, long balance, long score) {
+        super(firstName, middleName, lastName, birthDate, address, gender, email, userId);
+        this.isVerify = isVerify;
+        this.balance = balance;
+        this.score = score;
+    }
+
+    public AccountInformationBackUpDTO(String firstName, String middleName, String lastName, String birthDate, String address, int gender, String email, String nationalId, String oldNationalId, String nationalDate, String userId, boolean isVerify, long balance, long score) {
+        super(firstName, middleName, lastName, birthDate, address, gender, email, nationalId, oldNationalId, nationalDate, userId);
+        this.isVerify = isVerify;
+        this.balance = balance;
+        this.score = score;
+    }
+
+    public AccountInformationBackUpDTO(String firstName, String middleName, String lastName, String birthDate, String address, int gender, String email, String userId, String nationalId, String oldNationalId, String nationalDate, String imgId, boolean isVerify, long balance, long score) {
+        super(firstName, middleName, lastName, birthDate, address, gender, email, userId, nationalId, oldNationalId, nationalDate, imgId);
+        this.isVerify = isVerify;
+        this.balance = balance;
+        this.score = score;
+    }
+
+    public AccountInformationBackUpDTO(String firstName, String middleName, String lastName, String birthDate, String address, int gender, String email, String userId, String nationalId, String oldNationalId, String nationalDate, String imgId, String carrierTypeId, boolean isVerify, long balance, long score) {
+        super(firstName, middleName, lastName, birthDate, address, gender, email, userId, nationalId, oldNationalId, nationalDate, imgId, carrierTypeId);
+        this.isVerify = isVerify;
+        this.balance = balance;
+        this.score = score;
+    }
+
+    public AccountInformationBackUpDTO(boolean isVerify, long balance, long score, String timeCreated) {
+        this.isVerify = isVerify;
+        this.balance = balance;
+        this.score = score;
+        this.timeCreated = timeCreated;
+    }
+
+    public AccountInformationBackUpDTO(String firstName, String middleName, String lastName, String birthDate, String address, int gender, String email, String userId, boolean isVerify, long balance, long score, String timeCreated) {
+        super(firstName, middleName, lastName, birthDate, address, gender, email, userId);
+        this.isVerify = isVerify;
+        this.balance = balance;
+        this.score = score;
+        this.timeCreated = timeCreated;
+    }
+
+    public AccountInformationBackUpDTO(String firstName, String middleName, String lastName, String birthDate, String address, int gender, String email, String nationalId, String oldNationalId, String nationalDate, String userId, boolean isVerify, long balance, long score, String timeCreated) {
+        super(firstName, middleName, lastName, birthDate, address, gender, email, nationalId, oldNationalId, nationalDate, userId);
+        this.isVerify = isVerify;
+        this.balance = balance;
+        this.score = score;
+        this.timeCreated = timeCreated;
+    }
+
+    public AccountInformationBackUpDTO(String firstName, String middleName, String lastName, String birthDate, String address, int gender, String email, String userId, String nationalId, String oldNationalId, String nationalDate, String imgId, boolean isVerify, long balance, long score, String timeCreated) {
+        super(firstName, middleName, lastName, birthDate, address, gender, email, userId, nationalId, oldNationalId, nationalDate, imgId);
+        this.isVerify = isVerify;
+        this.balance = balance;
+        this.score = score;
+        this.timeCreated = timeCreated;
+    }
+
+    public AccountInformationBackUpDTO(String firstName, String middleName, String lastName, String birthDate, String address, int gender, String email, String userId, String nationalId, String oldNationalId, String nationalDate, String imgId, String carrierTypeId, boolean isVerify, long balance, long score, String timeCreated) {
+        super(firstName, middleName, lastName, birthDate, address, gender, email, userId, nationalId, oldNationalId, nationalDate, imgId, carrierTypeId);
+        this.isVerify = isVerify;
+        this.balance = balance;
+        this.score = score;
+        this.timeCreated = timeCreated;
+    }
+
+    public String getTimeCreated() {
+        return timeCreated;
+    }
+
+    public void setTimeCreated(String timeCreated) {
+        this.timeCreated = timeCreated;
+    }
+
+    public long getBalance() {
+        return balance;
+    }
+
+    public void setBalance(long balance) {
+        this.balance = balance;
+    }
+
+    public long getScore() {
+        return score;
+    }
+
+    public void setScore(long score) {
+        this.score = score;
+    }
 
     public boolean isVerify() {
         return isVerify;

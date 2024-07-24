@@ -23,6 +23,7 @@ public class TransactionDetailResV2DTO {
     private String qrCode;
     private String bankCode;
     private String bankName;
+    private String qrLink;
 
     public TransactionDetailResV2DTO() {
     }
@@ -228,5 +229,13 @@ public class TransactionDetailResV2DTO {
 
     public void setBankName(String bankName) {
         this.bankName = bankName;
+    }
+
+    public String getQrLink() {
+        return qrLink;
+    }
+
+    public void setQrLink(String qrLink) {
+        this.qrLink = qrLink;
     }
 }

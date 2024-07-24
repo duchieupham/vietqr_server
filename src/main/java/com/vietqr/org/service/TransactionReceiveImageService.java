@@ -9,4 +9,6 @@ public interface TransactionReceiveImageService {
     public int insertTransactionReceiveImage(TransactionReceiveImageEntity entity);
 
     public List<String> getImgIdsByTransReceiveId(String transactionReceiveId);
+
+    void removeTransactionImgage(String transactionId, String imgId);
 }
