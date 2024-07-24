@@ -25,5 +25,4 @@ public class TransImgIdDTO implements Serializable {
     public void setImgId(String imgId) {
         this.imgId = imgId;
     }
-
 }

@@ -25,4 +25,9 @@ public class TransactionReceiveImageServiceImpl implements TransactionReceiveIma
         return repo.getImgIdsByTransReceiveId(transactionReceiveId);
     }
 
+    @Override
+    public void removeTransactionImgage(String transactionId, String imgId) {
+        repo.removeTransactionImgage(transactionId, imgId);
+    }
+
 }
