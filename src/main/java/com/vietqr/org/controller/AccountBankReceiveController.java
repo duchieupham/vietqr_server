@@ -1293,7 +1293,8 @@ public class AccountBankReceiveController {
                         if (transTempCountDTO.getLastTimes() < currentDateTimeUTCPlus7) {
                             dto.setTransCount(0);
                         } else {
-                            dto.setTransCount(transTempCountDTO.getNums());
+                            // fix
+                            dto.setTransCount(Objects.nonNull(transTempCountDTO.getNums()) ? transTempCountDTO.getNums() : 0);
                         }
                     } else {
                         dto.setTransCount(0);
@@ -1397,7 +1398,8 @@ public class AccountBankReceiveController {
                         if (transTempCountDTO.getLastTimes() < currentDateTimeUTCPlus7) {
                             dto.setTransCount(0);
                         } else {
-                            dto.setTransCount(transTempCountDTO.getNums());
+//                            dto.setTransCount(transTempCountDTO.getNums());
+                            dto.setTransCount(Objects.nonNull(transTempCountDTO.getNums()) ? transTempCountDTO.getNums() : 0);
                         }
                     } else {
                         dto.setTransCount(0);
@@ -1454,9 +1456,6 @@ public class AccountBankReceiveController {
                     vietQRGenerateDTO.setBankAccount(item.getBankAccount());
                     String qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
                     dto.setQrCode(qr);
-
-                    //thêm 1 thông báo nhỏ thông báo là bắt đầu thu phí từ ngày 01/07/2024
-
 
                     return dto;
                 }).collect(Collectors.toList());
