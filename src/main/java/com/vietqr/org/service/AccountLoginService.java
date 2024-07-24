@@ -22,7 +22,7 @@ public interface AccountLoginService {
 
     public void updatePassword(String password, String userId);
 
-    public void updateIsVerifiedByUserId(String userId);
+    public void updateIsVerifiedByUserId(String userId, String email);
 
     public int insertAccountLogin(AccountLoginEntity entity);
 

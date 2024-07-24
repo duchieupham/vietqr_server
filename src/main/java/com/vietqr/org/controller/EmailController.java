@@ -188,7 +188,7 @@ public class EmailController {
                     // update isVerified = true ở bảng
                     emailVerifyService.updateEmailVerifiedByUserId(confirmOtpEmailDTO.getUserId(), otpParse);
                     // update isVerified = true ở bảng accountLogin
-                    accountLoginService.updateIsVerifiedByUserId(confirmOtpEmailDTO.getUserId());
+                    accountLoginService.updateIsVerifiedByUserId(confirmOtpEmailDTO.getUserId(), confirmOtpEmailDTO.getEmail());
 
                     result = new ResponseMessageDTO("SUCCESS", "");
                     httpStatus = HttpStatus.OK;
