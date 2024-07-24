@@ -162,6 +162,11 @@ public class AccountLoginServiceImpl implements AccountLoginService {
     }
 
     @Override
+    public long getRegisterDate(String userId) {
+        return repo.getRegisterDate(userId);
+    }
+
+    @Override
     public void updateEmailByUserId(String email, String userId) {
         repo.updateEmailByUserId(email, userId);
     }
