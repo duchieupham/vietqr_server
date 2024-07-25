@@ -2887,7 +2887,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
         ITransStatisticListExtra getExtraTransactionsByListCodeV2(String bankId, List<String> terminalCodes, long fromDate, long toDate);
 
         @Query(value = "SELECT id FROM transaction_receive "
-                + "WHERE bank_id = :bankId AND order_id = :orderId LIMIT 1", nativeQuery = true)
+                + "WHERE bank_id = :bankId AND order_id = :orderId AND status != 2 LIMIT 1", nativeQuery = true)
         String checkExistedOrderId(String bankId, String orderId);
 }
 
