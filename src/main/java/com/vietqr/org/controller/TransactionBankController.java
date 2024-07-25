@@ -3285,33 +3285,22 @@ public class TransactionBankController {
 								List<String> notificationContents = new ObjectMapper().readValue(googleSheetEntity.getNotificationContents(), new TypeReference<List<String>>() {});
 								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 								if (sendNotification) {
-									if (!googleSheetUtil.headerInserted) {
-										googleSheetUtil.insertHeader(webhook);
-									}
-
 									Map<String, String> data = new HashMap<>();
 									data.put("notificationId", UUID.randomUUID().toString());
 									data.put("transactionReceiveId", transactionEntity.getId());
 									data.put("bankAccount", accountBankEntity.getBankAccount());
-									data.put("bankName", bankTypeEntity.getBankName());
-									data.put("bankCode", bankTypeEntity.getBankCode());
-									data.put("bankId", accountBankEntity.getId());
+									data.put("bankShortName", bankTypeEntity.getBankShortName());
 									data.put("content", dto.getContent());
 									data.put("amount", String.valueOf(dto.getAmount()));
 									data.put("timePaid", String.valueOf(transactionEntity.getTimePaid()));
 									data.put("time", String.valueOf(time));
 									data.put("type", String.valueOf(transactionEntity.getType()));
-									data.put("refId", dto.getTransactionid());
 									data.put("terminalName", "");
-									data.put("terminalCode", "");
-									data.put("rawTerminalCode", "");
 									data.put("orderId", transactionEntity.getOrderId() != null ? transactionEntity.getOrderId() : "");
 									data.put("referenceNumber", transactionEntity.getReferenceNumber() != null ? transactionEntity.getReferenceNumber() : "");
 									data.put("status", "1");
-									data.put("traceId", "");
 									data.put("transType", dto.getTransType());
-									data.put("urlLink", transactionEntity.getUrlLink() != null ? transactionEntity.getUrlLink() : "");
-									//data.put("note", dto.getNote() != null ? dto.getNote() : "");
+									data.put("note", "");
 
 									googleSheetUtil.insertTransactionToGoogleSheet(data, notificationContents, webhook);
 								}
@@ -3675,32 +3664,22 @@ public class TransactionBankController {
 								List<String> notificationContents = new ObjectMapper().readValue(googleSheetEntity.getNotificationContents(), new TypeReference<List<String>>() {});
 								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 								if (sendNotification) {
-									if (!googleSheetUtil.headerInserted) {
-										googleSheetUtil.insertHeader(webhook);
-									}
-
 									Map<String, String> datas = new HashMap<>();
 									datas.put("notificationId", UUID.randomUUID().toString());
 									datas.put("transactionReceiveId", transactionEntity.getId());
 									datas.put("bankAccount", accountBankEntity.getBankAccount());
-									datas.put("bankName", bankTypeEntity.getBankName());
-									datas.put("bankCode", bankTypeEntity.getBankCode());
+									datas.put("bankShortName", bankTypeEntity.getBankShortName());
 									datas.put("content", dto.getContent());
 									datas.put("amount", String.valueOf(dto.getAmount()));
 									datas.put("timePaid", String.valueOf(transactionEntity.getTimePaid()));
 									datas.put("time", String.valueOf(time));
 									datas.put("type", String.valueOf(transactionEntity.getType()));
-									datas.put("refId", dto.getTransactionid());
 									datas.put("terminalName", "");
-									datas.put("terminalCode", "");
-									datas.put("rawTerminalCode", "");
 									datas.put("orderId", transactionEntity.getOrderId() != null ? transactionEntity.getOrderId() : "");
 									datas.put("referenceNumber", transactionEntity.getReferenceNumber() != null ? transactionEntity.getReferenceNumber() : "");
 									datas.put("status", "1");
-									datas.put("traceId", "");
 									datas.put("transType", dto.getTransType());
-									datas.put("urlLink", transactionEntity.getUrlLink() != null ? transactionEntity.getUrlLink() : "");
-									//data.put("note", dto.getNote() != null ? dto.getNote() : "");
+									datas.put("note", "");
 
 									googleSheetUtil.insertTransactionToGoogleSheet(datas, notificationContents, webhook);
 								}
@@ -4080,33 +4059,22 @@ public class TransactionBankController {
 							List<String> notificationContents = new ObjectMapper().readValue(googleSheetEntity.getNotificationContents(), new TypeReference<List<String>>() {});
 							boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 							if (sendNotification) {
-								if (!googleSheetUtil.headerInserted) {
-									googleSheetUtil.insertHeader(webhook);
-								}
-
 								Map<String, String> datas = new HashMap<>();
-
+								datas.put("notificationId", UUID.randomUUID().toString());
 								datas.put("transactionReceiveId", transactionEntity.getId());
 								datas.put("bankAccount", accountBankEntity.getBankAccount());
-								datas.put("bankName", bankTypeEntity.getBankName());
-								datas.put("bankCode", bankTypeEntity.getBankCode());
-								datas.put("bankId", accountBankEntity.getId());
+								datas.put("bankShortName", bankTypeEntity.getBankShortName());
 								datas.put("content", dto.getContent());
 								datas.put("amount", String.valueOf(dto.getAmount()));
 								datas.put("timePaid", String.valueOf(transactionEntity.getTimePaid()));
 								datas.put("time", String.valueOf(time));
 								datas.put("type", String.valueOf(transactionEntity.getType()));
-								datas.put("refId", dto.getTransactionid());
 								datas.put("terminalName", "");
-								datas.put("terminalCode", "");
-								datas.put("rawTerminalCode", "");
 								datas.put("orderId", transactionEntity.getOrderId() != null ? transactionEntity.getOrderId() : "");
 								datas.put("referenceNumber", transactionEntity.getReferenceNumber() != null ? transactionEntity.getReferenceNumber() : "");
 								datas.put("status", "1");
-								datas.put("traceId", "");
 								datas.put("transType", dto.getTransType());
-								datas.put("urlLink", transactionEntity.getUrlLink() != null ? transactionEntity.getUrlLink() : "");
-								//data.put("note", dto.getNote() != null ? dto.getNote() : "");
+								datas.put("note", "");
 
 								googleSheetUtil.insertTransactionToGoogleSheet(datas, notificationContents, webhook);
 							}
