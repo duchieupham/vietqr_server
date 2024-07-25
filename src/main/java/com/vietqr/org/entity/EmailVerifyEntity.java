@@ -29,16 +29,28 @@ public class EmailVerifyEntity implements Serializable {
     @Column(name = "timeCreated")
     private long timeCreated;
 
+    @Column(name = "timeVerified")
+    private long timeVerified;
+
     public EmailVerifyEntity() {
     }
 
-    public EmailVerifyEntity(String id, String email, String userId, int otp, boolean isVerify, long timeCreated) {
+    public EmailVerifyEntity(String id, String email, String userId, int otp, boolean isVerify, long timeCreated, long timeVerified) {
         this.id = id;
         this.email = email;
         this.userId = userId;
         this.otp = otp;
         this.isVerify = isVerify;
         this.timeCreated = timeCreated;
+        this.timeVerified = timeVerified;
+    }
+
+    public long getTimeVerified() {
+        return timeVerified;
+    }
+
+    public void setTimeVerified(long timeVerified) {
+        this.timeVerified = timeVerified;
     }
 
     public String getId() {
