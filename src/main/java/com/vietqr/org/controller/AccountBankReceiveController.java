@@ -98,6 +98,9 @@ public class AccountBankReceiveController {
     AccountCustomerBankService accountCustomerBankService;
 
     @Autowired
+    KeyActiveBankReceiveService keyActiveBankReceiveService;
+
+    @Autowired
     AccountLoginService accountLoginService;
 
     @Autowired
@@ -1428,27 +1431,38 @@ public class AccountBankReceiveController {
                     /// khi user đã active key để lưu lại
                     List<ICheckKeyActiveDTO> bankReceiveActiveHistoryEntity =
                             bankReceiveActiveHistoryService.getBankReceiveActiveByUserIdAndBankIdBackUp(userId, item.getBankId());
-
                     for (ICheckKeyActiveDTO checkKeyActiveDTO : bankReceiveActiveHistoryEntity) {
                         if (Objects.nonNull(checkKeyActiveDTO)) {
-                            dto.setIsActiveKey(true);
+//                            dto.setIsActiveKey(true);
                             dto.setTimeActiveKey(checkKeyActiveDTO.getCreateAt());
                             dto.setKeyActive(checkKeyActiveDTO.getKeyActive());
                         } else {
-                            dto.setIsActiveKey(false);
+//                            dto.setIsActiveKey(false);
                             dto.setTimeActiveKey(0);
                             StringUtil.isNullOrEmpty(checkKeyActiveDTO.getKeyActive());
                         }
                     }
-
                     // set thêm field để biết verify email hay chưa
                     List<EmailVerifyEntity> emailVerify = emailVerifyService.getEmailVerifyByUserId(dto.getUserId());
                     for (EmailVerifyEntity emailVerifyEntity : emailVerify) {
-                        if(emailVerifyEntity.isVerify() == false) {
+                        if (emailVerifyEntity.isVerify() == false) {
                             dto.setEmailVerified(false);
+                            break;
                         }
                         dto.setEmailVerified(true);
+                        break;
                     }
+
+                    // check key đó đã active hay chưa
+                    Thread thread = new Thread(() -> {
+                        Integer statusByKeyAndBankId = keyActiveBankReceiveService.getStatusByKeyAndBankId(dto.getKeyActive());
+                        if (statusByKeyAndBankId != null && statusByKeyAndBankId == 1) {
+                            dto.setIsActiveKey(true);
+                        } else if (statusByKeyAndBankId != null && statusByKeyAndBankId == 0) {
+                            dto.setIsActiveKey(false);
+                        }
+                    });
+                    thread.start();
 
                     dto.setCaiValue(valueDTO.getCaiValue());
                     VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
@@ -1463,6 +1477,7 @@ public class AccountBankReceiveController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.info("getAccountBankBackups: ERROR: " + e.getMessage() + " " + userId);
+            System.out.println(e.getMessage());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
