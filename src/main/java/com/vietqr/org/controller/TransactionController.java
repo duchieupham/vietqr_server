@@ -2117,8 +2117,8 @@ public class TransactionController {
                 result = dtos.stream().map(dto -> {
                     TransactionRelatedResponseV2DTO responseDTO = new TransactionRelatedResponseV2DTO();
                     responseDTO.setTransactionId(dto.getTransactionId());
-                    responseDTO.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
-                    responseDTO.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
+                    responseDTO.setReferenceNumber(StringUtil.getValueNullChecker(dto.getReferenceNumber()));
+                    responseDTO.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
                     responseDTO.setTransType(dto.getTransType());
                     responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
                     responseDTO.setStatus(dto.getStatus());
@@ -2157,8 +2157,8 @@ public class TransactionController {
                     result = dtos.stream().map(dto -> {
                         TransactionRelatedResponseV2DTO responseDTO = new TransactionRelatedResponseV2DTO();
                         responseDTO.setTransactionId(dto.getTransactionId());
-                        responseDTO.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
-                        responseDTO.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
+                        responseDTO.setReferenceNumber(StringUtil.getValueNullChecker(dto.getReferenceNumber()));
+                        responseDTO.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
                         responseDTO.setTransType(dto.getTransType());
                         responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
                         responseDTO.setStatus(dto.getStatus());
@@ -2196,8 +2196,8 @@ public class TransactionController {
                                 result = dtos.stream().map(dto -> {
                                     TransactionRelatedResponseV2DTO responseDTO = new TransactionRelatedResponseV2DTO();
                                     responseDTO.setTransactionId(dto.getTransactionId());
-                                    responseDTO.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
-                                    responseDTO.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
+                                    responseDTO.setReferenceNumber(StringUtil.getValueNullChecker(dto.getReferenceNumber()));
+                                    responseDTO.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
                                     responseDTO.setTransType(dto.getTransType());
                                     responseDTO.setAmount("*****");
                                     responseDTO.setStatus(dto.getStatus());
@@ -2229,8 +2229,8 @@ public class TransactionController {
                                 result = dtos.stream().map(dto -> {
                                     TransactionRelatedResponseV2DTO responseDTO = new TransactionRelatedResponseV2DTO();
                                     responseDTO.setTransactionId(dto.getTransactionId());
-                                    responseDTO.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
-                                    responseDTO.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
+                                    responseDTO.setReferenceNumber(StringUtil.getValueNullChecker(dto.getReferenceNumber()));
+                                    responseDTO.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
                                     responseDTO.setTransType(dto.getTransType());
                                     if (entity.getTransIds().contains(dto.getTransactionId())) {
                                         responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
@@ -2269,8 +2269,8 @@ public class TransactionController {
                             result = dtos.stream().map(dto -> {
                                 TransactionRelatedResponseV2DTO responseDTO = new TransactionRelatedResponseV2DTO();
                                 responseDTO.setTransactionId(dto.getTransactionId());
-                                responseDTO.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
-                                responseDTO.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
+                                responseDTO.setReferenceNumber(StringUtil.getValueNullChecker(dto.getReferenceNumber()));
+                                responseDTO.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
                                 responseDTO.setTransType(dto.getTransType());
                                 responseDTO.setAmount("*****");
                                 responseDTO.setStatus(dto.getStatus());
@@ -2310,6 +2310,28 @@ public class TransactionController {
             httpStatus = HttpStatus.BAD_REQUEST;
         } finally {
             executorService.shutdown();
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("transaction-check/order")
+    public ResponseEntity<ResponseMessageDTO> checkOrderIdTransaction(
+            @RequestParam(value = "bankId") String bankId,
+            @RequestParam(value = "orderId") String orderId) {
+        HttpStatus httpStatus = null;
+        ResponseMessageDTO result = null;
+        try {
+            String transactionId = transactionReceiveService.checkExistedOrderId(bankId, orderId);
+            if (!StringUtil.isNullOrEmpty(transactionId)) {
+                result = new ResponseMessageDTO("CHECK", "");
+            } else {
+                result = new ResponseMessageDTO("SUCCESS", "");
+            }
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getTransactionExtraByBankId: ERROR: " + e.getMessage());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
     }
