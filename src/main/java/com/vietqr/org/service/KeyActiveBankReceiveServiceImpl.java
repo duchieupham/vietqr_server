@@ -50,7 +50,7 @@ public class KeyActiveBankReceiveServiceImpl implements KeyActiveBankReceiveServ
     }
 
     @Override
-    public Integer getStatusByKeyAndBankId(String key) {
+    public int getStatusByKeyAndBankId(String key) {
         return repo.getStatusByKeyAndBankId(key);
     }
 }

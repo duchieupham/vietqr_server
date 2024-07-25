@@ -14,6 +14,7 @@ public interface BankReceiveActiveHistoryService {
     BankActiveAdminDataDTO getBankActiveAdminData(String keyActive);
 
     BankReceiveActiveHistoryEntity getBankReceiveActiveByUserIdAndBankId(String userId, String bankId);
+    List<String>  getIdBankReceiveActiveByUserIdAndBankId(String userId, String bankId);
 
     List<ICheckKeyActiveDTO> getBankReceiveActiveByUserIdAndBankIdBackUp(String userId, String bankId);
 }

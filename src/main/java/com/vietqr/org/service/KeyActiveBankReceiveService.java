@@ -23,5 +23,5 @@ public interface KeyActiveBankReceiveService {
 
     String getBankIdByKey(String key);
 
-    Integer getStatusByKeyAndBankId(String key);
+    int getStatusByKeyAndBankId(String key);
 }

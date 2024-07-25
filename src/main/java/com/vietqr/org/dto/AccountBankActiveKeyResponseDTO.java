@@ -30,15 +30,11 @@ public class AccountBankActiveKeyResponseDTO extends AccountBankShareResponseDTO
         isEmailVerified = emailVerified;
     }
 
-    public void setActiveKey(boolean activeKey) {
-        isActiveKey = activeKey;
-    }
-
     public boolean isActiveKey() {
         return isActiveKey;
     }
 
-    public void setIsActiveKey(boolean activeKey) {
+    public void setActiveKey(boolean activeKey) {
         isActiveKey = activeKey;
     }
 
