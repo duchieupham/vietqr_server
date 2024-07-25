@@ -15,6 +15,7 @@ public class VietQRCreateFromTransactionDTO implements Serializable {
     private String userId;
     private String terminalCode;
     private String transactionId;
+    private String orderId;
 
     // newTransaction = true => create new Transaction and generate QR
     // newTransaction = false => generate QR
@@ -100,4 +101,11 @@ public class VietQRCreateFromTransactionDTO implements Serializable {
         this.transactionId = transactionId;
     }
 
+    public String getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
+    }
 }

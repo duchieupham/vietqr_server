@@ -29,8 +29,13 @@ public interface BankReceiveActiveHistoryRepository extends JpaRepository<BankRe
 
     @Query(value = "SELECT * FROM viet_qr.bank_receive_active_history " +
             "WHERE user_id = :userId AND bank_id = :bankId " +
-            "ORDER BY create_at DESC;", nativeQuery = true)
+            "ORDER BY create_at DESC ", nativeQuery = true)
     BankReceiveActiveHistoryEntity getBankReceiveActiveByUserIdAndBankId(String userId, String bankId);
+
+    @Query(value = "SELECT id FROM viet_qr.bank_receive_active_history " +
+            "WHERE user_id = :userId AND bank_id = :bankId " +
+            "ORDER BY create_at DESC ", nativeQuery = true)
+    List<String>  getIdBankReceiveActiveByUserIdAndBankId(String userId, String bankId);
 
     @Query(value = "SELECT a.id AS id, a.bank_id AS bankId, a.create_at AS createAt, a.key_id AS keyId, a.user_id AS userId, " +
             "COALESCE(a.key_active, '') AS keyActive, b.status AS statusActive " +

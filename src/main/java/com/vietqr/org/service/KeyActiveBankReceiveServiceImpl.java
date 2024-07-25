@@ -43,4 +43,14 @@ public class KeyActiveBankReceiveServiceImpl implements KeyActiveBankReceiveServ
     public List<KeyActiveBankReceiveEntity> getListKeyByBankId(String bankId) {
         return repo.getListKeyByBankId(bankId);
     }
+
+    @Override
+    public String getBankIdByKey(String key) {
+        return repo.getBankIdByKey(key);
+    }
+
+    @Override
+    public int getStatusByKeyAndBankId(String key) {
+        return repo.getStatusByKeyAndBankId(key);
+    }
 }

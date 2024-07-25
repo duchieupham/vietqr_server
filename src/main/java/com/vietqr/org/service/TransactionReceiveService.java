@@ -595,4 +595,6 @@ public interface TransactionReceiveService {
 
     ITransStatisticListExtra getExtraTransactionsByListCodeV2(String bankId, List<String> listCode,
                                                               String fromDate, String toDate);
+
+    String checkExistedOrderId(String bankId, String orderId);
 }

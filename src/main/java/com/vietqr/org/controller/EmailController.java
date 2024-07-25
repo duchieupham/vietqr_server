@@ -164,6 +164,10 @@ public class EmailController {
             LocalDateTime currentDateTime = LocalDateTime.now();
             long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
             emailVerifyEntity.setTimeCreated(time);
+            // add 10 phút hiệu lực cho OTP
+            LocalDateTime timeVerifiedDateTime = currentDateTime.plusMinutes(10);
+            long timeVerified = timeVerifiedDateTime.toEpochSecond(ZoneOffset.UTC);
+            emailVerifyEntity.setTimeVerified(timeVerified);
             emailVerifyEntity.setVerify(false);
             emailVerifyService.insertEmailVerify(emailVerifyEntity);
 
@@ -186,8 +190,19 @@ public class EmailController {
             // lấy ra emailverified entity để check
             List<EmailVerifyEntity> emailVerifyByUserId = emailVerifyService.getEmailVerifyByUserId(confirmOtpEmailDTO.getUserId());
             int otpParse = Integer.parseInt(confirmOtpEmailDTO.getOtp());
+            // Lấy thời gian hiện tại
+            LocalDateTime currentDateTime = LocalDateTime.now();
+            // Thêm 10 phút vào thời gian hiện tại
+            LocalDateTime timeVerifiedDateTime = currentDateTime.plusMinutes(10);
+            // Chuyển thời gian đã thêm 10 phút thành epoch seconds
+            long timeVerified = timeVerifiedDateTime.toEpochSecond(ZoneOffset.UTC);
+
             for (EmailVerifyEntity entity : emailVerifyByUserId) {
-                if (entity.getOtp() == otpParse) {
+                if (timeVerified < entity.getTimeVerified()) {
+                    result = new ResponseMessageDTO("FAILED", "E175");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    break;
+                } else if (entity.getOtp() == otpParse) {
                     // update isVerified = true ở bảng
                     emailVerifyService.updateEmailVerifiedByUserId(confirmOtpEmailDTO.getUserId(), otpParse);
                     // update isVerified = true ở bảng accountLogin

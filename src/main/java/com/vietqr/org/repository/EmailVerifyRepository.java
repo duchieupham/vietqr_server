@@ -13,7 +13,7 @@ import java.util.List;
 @Repository
 public interface EmailVerifyRepository extends JpaRepository<EmailVerifyEntity, String> {
 
-    @Query(value = "SELECT * FROM email_verify WHERE user_id = :userId ", nativeQuery = true)
+    @Query(value = "SELECT * FROM email_verify WHERE user_id = :userId ORDER BY time_created DESC ", nativeQuery = true)
     List<EmailVerifyEntity> getEmailVerifyByUserId(String userId);
 
     @Transactional

@@ -20,4 +20,8 @@ public interface KeyActiveBankReceiveService {
     void insertAll(List<KeyActiveBankReceiveEntity> entities);
 
     List<KeyActiveBankReceiveEntity> getListKeyByBankId(String bankId);
+
+    String getBankIdByKey(String key);
+
+    int getStatusByKeyAndBankId(String key);
 }

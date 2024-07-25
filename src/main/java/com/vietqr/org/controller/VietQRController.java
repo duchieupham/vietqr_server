@@ -1767,7 +1767,7 @@ public class VietQRController {
 				transactionEntity.setTraceId(traceId);
 				transactionEntity.setTransType("C");
 				transactionEntity.setReferenceNumber("");
-				transactionEntity.setOrderId("");
+				transactionEntity.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
 				transactionEntity.setSign("");
 				transactionEntity.setTimePaid(0);
 				transactionEntity.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
