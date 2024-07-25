@@ -31,6 +31,11 @@ public class BankReceiveActiveHistoryServiceImpl implements BankReceiveActiveHis
     }
 
     @Override
+    public List<String>  getIdBankReceiveActiveByUserIdAndBankId(String userId, String bankId) {
+        return repo.getIdBankReceiveActiveByUserIdAndBankId(userId, bankId);
+    }
+
+    @Override
     public List<ICheckKeyActiveDTO> getBankReceiveActiveByUserIdAndBankIdBackUp(String userId, String bankId) {
         return repo.getBankReceiveActiveByUserIdAndBankIdBackUp(userId, bankId);
     }

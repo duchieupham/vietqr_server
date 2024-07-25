@@ -45,10 +45,10 @@ public interface KeyActiveBankReceiveRepository extends JpaRepository<KeyActiveB
     List<KeyActiveBankReceiveEntity> getListKeyByBankId(String bankId);
 
     @Query(value = "SELECT a.bank_id FROM key_active_bank_receive a "
-            + "WHERE key_active = :key ", nativeQuery = true)
+            + "WHERE a.key_active = :key ", nativeQuery = true)
     String getBankIdByKey(String key);
 
-    @Query(value = "SELECT a.status AS statusActive FROM key_active_bank_receive a "
-            + "WHERE key_active = :key ", nativeQuery = true)
-    Integer getStatusByKeyAndBankId(String key);
+    @Query(value = "SELECT a.status FROM key_active_bank_receive a "
+            + "WHERE a.key_active = :key ", nativeQuery = true)
+    int getStatusByKeyAndBankId(String key);
 }
