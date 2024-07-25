@@ -1,18 +1,17 @@
 package com.vietqr.org.util;
 
+import com.google.api.services.sheets.v4.Sheets;
 import org.apache.log4j.Logger;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -74,8 +73,7 @@ public class GoogleSheetUtil {
         }
     }
 
-    public boolean insertTransactionToGoogleSheet(Map<String, String> data, List<String> notificationContents, String webhook) {
-        boolean check = false;
+    public void insertTransactionToGoogleSheet(Map<String, String> data, List<String> notificationContents, String webhook) {
         try {
             if (webhook != null && !webhook.trim().isEmpty()) {
                 LocalDateTime timePaid = convertLongToLocalDateTime(Long.parseLong(data.get("timePaid")));
@@ -87,21 +85,21 @@ public class GoogleSheetUtil {
                 String status = getStatusTransaction(Integer.parseInt(data.get("status")));
 
                 // Định nghĩa giá trị của "Số tiền"
-                String amount = notificationContents.contains("AMOUNT") ? data.get("amount") : "";
+                String amount = notificationContents.contains("AMOUNT") ? StringUtil.formatNumberAsString(data.get("amount")) : "-";
 
                 // Tạo dữ liệu hàng từ đối tượng DTO theo thứ tự cột
                 List<String> rowData = Arrays.asList(
-                        String.valueOf(sttCounter++), // STT
-                        formatLocalDateTime(timePaid), // Thời gian thanh toán
-                        amount, // Số tiền (VND)
-                        notificationContents.contains("REFERENCE_NUMBER") ? data.get("referenceNumber") : "", // Mã giao dịch
-                        data.get("orderId"), // Mã đơn hàng
-                        data.get("terminalName"), // Mã điểm bán
+                        "1", // STT
+                        "'" + formatLocalDateTime(timePaid), // Thời gian thanh toán
+                        "'" + amount, // Số tiền (VND)
+                        notificationContents.contains("REFERENCE_NUMBER") ? data.get("referenceNumber") : "-", // Mã giao dịch
+                        !StringUtil.isNullOrEmpty(data.get("orderId")) ? data.get("orderId") : "-", // Mã đơn hàng
+                        !StringUtil.isNullOrEmpty(data.get("terminalName")) ? data.get("terminalName") : "-", // Mã điểm bán
                         transType, // Loại GD
-                        formatLocalDateTime(timeCreated), // Thời gian tạo GD
-                        data.get("bankAccount") + " - " + data.get("bankName"), // Tài khoản nhận
-                        notificationContents.contains("CONTENT") ? data.get("content") : "", // Nội dung
-                        data.get("note"), // Ghi chú
+                        "'" + formatLocalDateTime(timeCreated), // Thời gian tạo GD
+                        data.get("bankAccount") + " - " + data.get("bankShortName"), // Tài khoản nhận
+                        notificationContents.contains("CONTENT") ? data.get("content") : "-", // Nội dung
+                        !StringUtil.isNullOrEmpty(data.get("note")) ? data.get("note") : "-", // Ghi chú
                         status // Trạng thái
                 );
 
@@ -117,20 +115,16 @@ public class GoogleSheetUtil {
                 // Thêm một tham số mới để chỉ định chèn trên cùng
                 Map<String, Object> payload = new HashMap<>();
                 payload.put("values", Collections.singletonList(rowData));
-                payload.put("position", "insertAtTop"); // Thêm chỉ dẫn chèn ở đầu
 
                 webClient.post()
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(BodyInserters.fromValue(payload))
                         .exchange()
                         .block();
-
-                check = true;
             }
         } catch (Exception e) {
             logger.error("GoogleSheetUtil: insertTransactionToGoogleSheet: ERROR: " + e.toString());
         }
-        return check;
     }
 
     // Chuyển đổi Unix Epoch Seconds sang LocalDateTime với múi giờ GMT
