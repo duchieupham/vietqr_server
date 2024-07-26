@@ -188,20 +188,27 @@ public class EmailController {
         HttpStatus httpStatus = null;
         try {
             // lấy ra emailverified entity để check
-            List<EmailVerifyEntity> emailVerifyByUserId = emailVerifyService.getEmailVerifyByUserId(confirmOtpEmailDTO.getUserId());
+            List<EmailVerifyEntity> emailVerifyByUserId =
+                    emailVerifyService.getEmailVerifyByUserId(confirmOtpEmailDTO.getUserId());
             int otpParse = Integer.parseInt(confirmOtpEmailDTO.getOtp());
             // Lấy thời gian hiện tại
             LocalDateTime currentDateTime = LocalDateTime.now();
             long timeVerified = currentDateTime.toEpochSecond(ZoneOffset.UTC);
-            if (otpParse != emailVerifyByUserId.get(0).getOtp()) {
-                result = new ResponseMessageDTO("FAILED", "E178");
-                httpStatus = HttpStatus.BAD_REQUEST;
-                return new ResponseEntity<>(result, httpStatus);
-            }else {
-                for (EmailVerifyEntity entity : emailVerifyByUserId) {
-                    if (entity.getOtp() != otpParse) {
+//            if (otpParse != emailVerifyByUserId.get(0).getOtp()) {
+//                result = new ResponseMessageDTO("FAILED", "E178");
+//                httpStatus = HttpStatus.BAD_REQUEST;
+//                return new ResponseEntity<>(result, httpStatus);
+//            } else {
+            for (EmailVerifyEntity entity : emailVerifyByUserId) {
+                if (emailVerifyByUserId.get(0).getOtp() != otpParse) {
+                    result = new ResponseMessageDTO("FAILED", "E178");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    break;
+                } else {
+                    if (entity.getOtp() != otpParse ) {
                         result = new ResponseMessageDTO("FAILED", "E177");
                         httpStatus = HttpStatus.BAD_REQUEST;
+                        break;
                     } else {
                         if (timeVerified > entity.getTimeVerified()) {
                             result = new ResponseMessageDTO("FAILED", "E175");
@@ -221,8 +228,9 @@ public class EmailController {
                         }
 
                     }
-
                 }
+
+
             }
 
         } catch (Exception e) {
