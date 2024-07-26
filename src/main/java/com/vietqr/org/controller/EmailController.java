@@ -193,24 +193,38 @@ public class EmailController {
             // Lấy thời gian hiện tại
             LocalDateTime currentDateTime = LocalDateTime.now();
             long timeVerified = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+            if (otpParse != emailVerifyByUserId.get(0).getOtp()) {
+                result = new ResponseMessageDTO("FAILED", "E178");
+                httpStatus = HttpStatus.BAD_REQUEST;
+                return new ResponseEntity<>(result, httpStatus);
+            }else {
+                for (EmailVerifyEntity entity : emailVerifyByUserId) {
+                    if (entity.getOtp() != otpParse) {
+                        result = new ResponseMessageDTO("FAILED", "E177");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    } else {
+                        if (timeVerified > entity.getTimeVerified()) {
+                            result = new ResponseMessageDTO("FAILED", "E175");
+                            httpStatus = HttpStatus.BAD_REQUEST;
+                            break;
+                        } else {
+                            // update isVerified = true ở bảng
+                            emailVerifyService.updateEmailVerifiedByUserId(confirmOtpEmailDTO.getUserId(), otpParse);
+                            // update isVerified = true ở bảng accountLogin
+                            accountLoginService.updateIsVerifiedByUserId(confirmOtpEmailDTO.getUserId(), confirmOtpEmailDTO.getEmail());
+                            accountInformationService.updateEmailAccountInformation(confirmOtpEmailDTO.getEmail(), confirmOtpEmailDTO.getUserId());
 
-            for (EmailVerifyEntity entity : emailVerifyByUserId) {
-                if (timeVerified > entity.getTimeVerified()) {
-                    result = new ResponseMessageDTO("FAILED", "E175");
-                    httpStatus = HttpStatus.BAD_REQUEST;
-                    break;
-                } else if (entity.getOtp() == otpParse) {
-                    // update isVerified = true ở bảng
-                    emailVerifyService.updateEmailVerifiedByUserId(confirmOtpEmailDTO.getUserId(), otpParse);
-                    // update isVerified = true ở bảng accountLogin
-                    accountLoginService.updateIsVerifiedByUserId(confirmOtpEmailDTO.getUserId(), confirmOtpEmailDTO.getEmail());
-                    accountInformationService.updateEmailAccountInformation(confirmOtpEmailDTO.getEmail(), confirmOtpEmailDTO.getUserId());
+                            result = new ResponseMessageDTO("SUCCESS", "");
+                            httpStatus = HttpStatus.OK;
+                            break;
 
-                    result = new ResponseMessageDTO("SUCCESS", "");
-                    httpStatus = HttpStatus.OK;
-                    break;
+                        }
+
+                    }
+
                 }
             }
+
         } catch (Exception e) {
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
