@@ -165,7 +165,7 @@ public class EmailController {
             long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
             emailVerifyEntity.setTimeCreated(time);
             // add 10 phút hiệu lực cho OTP
-            LocalDateTime timeVerifiedDateTime = currentDateTime.plusMinutes(1);
+            LocalDateTime timeVerifiedDateTime = currentDateTime.plusMinutes(10);
             long timeVerified = timeVerifiedDateTime.toEpochSecond(ZoneOffset.UTC);
             emailVerifyEntity.setTimeVerified(timeVerified);
             emailVerifyEntity.setVerify(false);
