@@ -1,15 +1,15 @@
 package com.vietqr.org.util;
 
-import com.google.api.services.sheets.v4.Sheets;
 import org.apache.log4j.Logger;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -45,7 +45,7 @@ public class GoogleSheetUtil {
     }
 
     private void loadHeaderInsertedProperties() {
-        try (InputStream input = new FileInputStream(HEADER_INSERTED_FILE)) {
+        try (InputStream input = Files.newInputStream(Paths.get(HEADER_INSERTED_FILE))) {
             headerInsertedProperties.load(input);
         } catch (IOException ex) {
             logger.error("Error loading header inserted properties: " + ex.getMessage());
@@ -53,7 +53,7 @@ public class GoogleSheetUtil {
     }
 
     private void saveHeaderInsertedProperties() {
-        try (OutputStream output = new FileOutputStream(HEADER_INSERTED_FILE)) {
+        try (OutputStream output = Files.newOutputStream(Paths.get(HEADER_INSERTED_FILE))) {
             headerInsertedProperties.store(output, null);
         } catch (IOException ex) {
             logger.error("Error saving header inserted properties: " + ex.getMessage());
@@ -61,7 +61,7 @@ public class GoogleSheetUtil {
     }
 
     private void loadSttCounter() {
-        try (InputStream input = new FileInputStream(STT_FILE)) {
+        try (InputStream input = Files.newInputStream(Paths.get(STT_FILE))) {
             Properties sttProps = new Properties();
             sttProps.load(input);
             sttProps.forEach((key, value) -> sttCounterMap.put((String) key, Integer.parseInt((String) value)));
@@ -71,7 +71,7 @@ public class GoogleSheetUtil {
     }
 
     private void saveSttCounter() {
-        try (OutputStream output = new FileOutputStream(STT_FILE)) {
+        try (OutputStream output = Files.newOutputStream(Paths.get(STT_FILE))) {
             Properties sttProps = new Properties();
             sttCounterMap.forEach((key, value) -> sttProps.setProperty(key, String.valueOf(value)));
             sttProps.store(output, null);
