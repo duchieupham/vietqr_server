@@ -3288,27 +3288,20 @@ public class TransactionBankController {
 									}
 
 									Map<String, String> datas = new HashMap<>();
-									datas.put("transactionReceiveId", transactionEntity.getId());
 									datas.put("bankAccount", accountBankEntity.getBankAccount());
 									datas.put("bankName", bankTypeEntity.getBankName());
-									datas.put("bankCode", bankTypeEntity.getBankCode());
-									datas.put("bankId", accountBankEntity.getId());
+									datas.put("bankShortName", bankTypeEntity.getBankShortName());
 									datas.put("content", dto.getContent());
 									datas.put("amount", String.valueOf(dto.getAmount()));
 									datas.put("timePaid", String.valueOf(transactionEntity.getTimePaid()));
 									datas.put("time", String.valueOf(time));
 									datas.put("type", String.valueOf(transactionEntity.getType()));
-									datas.put("refId", dto.getTransactionid());
-									datas.put("terminalName", "");
-									datas.put("terminalCode", "");
-									datas.put("rawTerminalCode", "");
+									datas.put("terminalName", Objects.nonNull(terminalEntity)
+											? terminalEntity.getName() : "");
 									datas.put("orderId", transactionEntity.getOrderId() != null ? transactionEntity.getOrderId() : "");
 									datas.put("referenceNumber", transactionEntity.getReferenceNumber() != null ? transactionEntity.getReferenceNumber() : "");
-									datas.put("status", "1");
-									datas.put("traceId", "");
 									datas.put("transType", dto.getTransType());
-									datas.put("urlLink", transactionEntity.getUrlLink() != null ? transactionEntity.getUrlLink() : "");
-
+									datas.put("status", "1");
 									googleSheetUtil.insertTransactionToGoogleSheet(datas, notificationContents, webhook);
 								}
 							}
@@ -3672,27 +3665,19 @@ public class TransactionBankController {
 									}
 
 									Map<String, String> datas = new HashMap<>();
-									datas.put("transactionReceiveId", transactionEntity.getId());
 									datas.put("bankAccount", accountBankEntity.getBankAccount());
 									datas.put("bankName", bankTypeEntity.getBankName());
-									datas.put("bankCode", bankTypeEntity.getBankCode());
-									datas.put("bankId", accountBankEntity.getId());
+									datas.put("bankShortName", bankTypeEntity.getBankShortName());
 									datas.put("content", dto.getContent());
 									datas.put("amount", String.valueOf(dto.getAmount()));
 									datas.put("timePaid", String.valueOf(transactionEntity.getTimePaid()));
 									datas.put("time", String.valueOf(time));
 									datas.put("type", String.valueOf(transactionEntity.getType()));
-									datas.put("refId", dto.getTransactionid());
-									datas.put("terminalName", "");
-									datas.put("terminalCode", "");
-									datas.put("rawTerminalCode", "");
+									datas.put("terminalName", Objects.nonNull(terminalEntity) ? terminalEntity.getName() : "");
 									datas.put("orderId", transactionEntity.getOrderId() != null ? transactionEntity.getOrderId() : "");
 									datas.put("referenceNumber", transactionEntity.getReferenceNumber() != null ? transactionEntity.getReferenceNumber() : "");
-									datas.put("status", "1");
-									datas.put("traceId", "");
 									datas.put("transType", dto.getTransType());
-									datas.put("urlLink", transactionEntity.getUrlLink() != null ? transactionEntity.getUrlLink() : "");
-
+									datas.put("status", "1");
 									googleSheetUtil.insertTransactionToGoogleSheet(datas, notificationContents, webhook);
 								}
 							}
@@ -4079,26 +4064,19 @@ public class TransactionBankController {
 								}
 
 								Map<String, String> datas = new HashMap<>();
-								datas.put("transactionReceiveId", transactionEntity.getId());
 								datas.put("bankAccount", accountBankEntity.getBankAccount());
 								datas.put("bankName", bankTypeEntity.getBankName());
-								datas.put("bankCode", bankTypeEntity.getBankCode());
-								datas.put("bankId", accountBankEntity.getId());
+								datas.put("bankShortName", bankTypeEntity.getBankShortName());
 								datas.put("content", dto.getContent());
 								datas.put("amount", String.valueOf(dto.getAmount()));
 								datas.put("timePaid", String.valueOf(transactionEntity.getTimePaid()));
 								datas.put("time", String.valueOf(time));
 								datas.put("type", String.valueOf(transactionEntity.getType()));
-								datas.put("refId", dto.getTransactionid());
 								datas.put("terminalName", "");
-								datas.put("terminalCode", "");
-								datas.put("rawTerminalCode", "");
 								datas.put("orderId", transactionEntity.getOrderId() != null ? transactionEntity.getOrderId() : "");
 								datas.put("referenceNumber", transactionEntity.getReferenceNumber() != null ? transactionEntity.getReferenceNumber() : "");
 								datas.put("status", "1");
-								datas.put("traceId", "");
 								datas.put("transType", dto.getTransType());
-								datas.put("urlLink", transactionEntity.getUrlLink() != null ? transactionEntity.getUrlLink() : "");
 
 								googleSheetUtil.insertTransactionToGoogleSheet(datas, notificationContents, webhook);
 							}

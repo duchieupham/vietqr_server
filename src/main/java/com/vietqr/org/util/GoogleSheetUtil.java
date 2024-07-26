@@ -17,8 +17,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class GoogleSheetUtil {
     public static final int WIDTH_PIXEL = 256;
-    public static final String HEADER_INSERTED_FILE = "headerInserted.properties";
-    public static final String STT_FILE = "sttCounter.properties";
+    public static final String HEADER_INSERTED_FILE = "/opt/google-sheet/headerInserted.properties";
+    public static final String STT_FILE = "/opt/google-sheet/sttCounter.properties";
     private static final Logger logger = Logger.getLogger(GoogleSheetUtil.class);
     public static GoogleSheetUtil instance;
     public Properties headerInsertedProperties = new Properties();
