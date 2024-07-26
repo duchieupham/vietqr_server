@@ -91,8 +91,8 @@ public class GoogleSheetUtil {
             }
 
             List<String> headers = Arrays.asList(
-                    "STT", "Thời gian thanh toán", "Số tiền (VND)", "Mã giao dịch", "Mã đơn hàng",
-                    "Mã điểm bán", "Loại GD", "Thời gian tạo GD", "Tài khoản nhận", "Nội dung",
+                    "STT", "Thời gian TT", "Số tiền (VND)", "Mã giao dịch", "Mã đơn hàng",
+                    "Mã điểm bán", "Loại GD", "Thời gian tạo", "Tài khoản nhận", "Nội dung",
                     "Ghi chú", "Trạng thái"
             );
 
@@ -133,20 +133,24 @@ public class GoogleSheetUtil {
                 String transType = data.get("transType").equals("C") ? "Giao dịch đến" : "Giao dịch đi";
                 String status = getStatusTransaction(Integer.parseInt(data.get("status")));
 
-                String amount = notificationContents.contains("AMOUNT") ? data.get("amount") : "";
+                String amount = notificationContents.contains("AMOUNT") ?
+                        StringUtil.formatNumberAsString(data.get("amount")) : "";
 
                 List<String> rowData = Arrays.asList(
                         String.valueOf(getSttCounter(webhook)), // STT
                         formatLocalDateTime(timePaid), // Thời gian thanh toán
-                        amount, // Số tiền (VND)
-                        notificationContents.contains("REFERENCE_NUMBER") ? data.get("referenceNumber") : "", // Mã giao dịch
-                        data.get("orderId"), // Mã đơn hàng
-                        data.get("terminalName"), // Mã điểm bán
+                        "'" + amount, // Số tiền (VND)
+                        notificationContents.contains("REFERENCE_NUMBER") ? data.get("referenceNumber") : "-", // Mã giao dịch
+                        !StringUtil.isNullOrEmpty(data.get("orderId")) ?
+                                data.get("orderId") : "-", // Mã đơn hàng
+                        !StringUtil.isNullOrEmpty(data.get("terminalName")) ?
+                                data.get("terminalName") : "-",
                         transType, // Loại GD
                         formatLocalDateTime(timeCreated), // Thời gian tạo GD
-                        data.get("bankAccount") + " - " + data.get("bankName"), // Tài khoản nhận
-                        notificationContents.contains("CONTENT") ? data.get("content") : "", // Nội dung
-                        data.get("note"), // Ghi chú
+                        data.get("bankAccount") + " - " + data.get("bankShortName"), // Tài khoản nhận
+                        notificationContents.contains("CONTENT") ? data.get("content") : "-", // Nội dung
+                        !StringUtil.isNullOrEmpty(data.get("note")) ?
+                                data.get("note") : "-", // Ghi chú
                         status // Trạng thái
                 );
 
