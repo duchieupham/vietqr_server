@@ -3271,8 +3271,6 @@ public class TransactionBankController {
 				}
 
 
-
-
 				// DO INSERT GOOGLE SHEET BY QVAN
 				List<String> ggSheetWebhooks = googleSheetAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
 				if (ggSheetWebhooks != null && !ggSheetWebhooks.isEmpty()) {
@@ -3285,24 +3283,26 @@ public class TransactionBankController {
 								List<String> notificationContents = new ObjectMapper().readValue(googleSheetEntity.getNotificationContents(), new TypeReference<List<String>>() {});
 								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 								if (sendNotification) {
-									Map<String, String> data = new HashMap<>();
-									data.put("notificationId", UUID.randomUUID().toString());
-									data.put("transactionReceiveId", transactionEntity.getId());
-									data.put("bankAccount", accountBankEntity.getBankAccount());
-									data.put("bankShortName", bankTypeEntity.getBankShortName());
-									data.put("content", dto.getContent());
-									data.put("amount", String.valueOf(dto.getAmount()));
-									data.put("timePaid", String.valueOf(transactionEntity.getTimePaid()));
-									data.put("time", String.valueOf(time));
-									data.put("type", String.valueOf(transactionEntity.getType()));
-									data.put("terminalName", "");
-									data.put("orderId", transactionEntity.getOrderId() != null ? transactionEntity.getOrderId() : "");
-									data.put("referenceNumber", transactionEntity.getReferenceNumber() != null ? transactionEntity.getReferenceNumber() : "");
-									data.put("status", "1");
-									data.put("transType", dto.getTransType());
-									data.put("note", "");
+									if (!googleSheetUtil.headerInsertedProperties.containsKey(webhook) || !Boolean.parseBoolean(googleSheetUtil.headerInsertedProperties.getProperty(webhook))) {
+										googleSheetUtil.insertHeader(webhook);
+									}
 
-									googleSheetUtil.insertTransactionToGoogleSheet(data, notificationContents, webhook);
+									Map<String, String> datas = new HashMap<>();
+									datas.put("bankAccount", accountBankEntity.getBankAccount());
+									datas.put("bankName", bankTypeEntity.getBankName());
+									datas.put("bankShortName", bankTypeEntity.getBankShortName());
+									datas.put("content", dto.getContent());
+									datas.put("amount", String.valueOf(dto.getAmount()));
+									datas.put("timePaid", String.valueOf(transactionEntity.getTimePaid()));
+									datas.put("time", String.valueOf(time));
+									datas.put("type", String.valueOf(transactionEntity.getType()));
+									datas.put("terminalName", Objects.nonNull(terminalEntity)
+											? terminalEntity.getName() : "");
+									datas.put("orderId", transactionEntity.getOrderId() != null ? transactionEntity.getOrderId() : "");
+									datas.put("referenceNumber", transactionEntity.getReferenceNumber() != null ? transactionEntity.getReferenceNumber() : "");
+									datas.put("transType", dto.getTransType());
+									datas.put("status", "1");
+									googleSheetUtil.insertTransactionToGoogleSheet(datas, notificationContents, webhook);
 								}
 							}
 						} catch (Exception e) {
@@ -3310,9 +3310,6 @@ public class TransactionBankController {
 						}
 					}
 				}
-
-				// }
-
 				// textToSpeechService.delete(requestId);
 			} else {
 				logger.info("transaction-sync - cannot find terminal but already detech code.");
@@ -3651,7 +3648,6 @@ public class TransactionBankController {
 				}
 
 
-
 				// DO INSERT GOOGLE SHEET BY QVAN
 				List<String> ggSheetWebhooks = googleSheetAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
 				if (ggSheetWebhooks != null && !ggSheetWebhooks.isEmpty()) {
@@ -3664,23 +3660,24 @@ public class TransactionBankController {
 								List<String> notificationContents = new ObjectMapper().readValue(googleSheetEntity.getNotificationContents(), new TypeReference<List<String>>() {});
 								boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 								if (sendNotification) {
+									if (!googleSheetUtil.headerInsertedProperties.containsKey(webhook) || !Boolean.parseBoolean(googleSheetUtil.headerInsertedProperties.getProperty(webhook))) {
+										googleSheetUtil.insertHeader(webhook);
+									}
+
 									Map<String, String> datas = new HashMap<>();
-									datas.put("notificationId", UUID.randomUUID().toString());
-									datas.put("transactionReceiveId", transactionEntity.getId());
 									datas.put("bankAccount", accountBankEntity.getBankAccount());
+									datas.put("bankName", bankTypeEntity.getBankName());
 									datas.put("bankShortName", bankTypeEntity.getBankShortName());
 									datas.put("content", dto.getContent());
 									datas.put("amount", String.valueOf(dto.getAmount()));
 									datas.put("timePaid", String.valueOf(transactionEntity.getTimePaid()));
 									datas.put("time", String.valueOf(time));
 									datas.put("type", String.valueOf(transactionEntity.getType()));
-									datas.put("terminalName", "");
+									datas.put("terminalName", Objects.nonNull(terminalEntity) ? terminalEntity.getName() : "");
 									datas.put("orderId", transactionEntity.getOrderId() != null ? transactionEntity.getOrderId() : "");
 									datas.put("referenceNumber", transactionEntity.getReferenceNumber() != null ? transactionEntity.getReferenceNumber() : "");
-									datas.put("status", "1");
 									datas.put("transType", dto.getTransType());
-									datas.put("note", "");
-
+									datas.put("status", "1");
 									googleSheetUtil.insertTransactionToGoogleSheet(datas, notificationContents, webhook);
 								}
 							}
@@ -3689,6 +3686,9 @@ public class TransactionBankController {
 						}
 					}
 				}
+
+
+
 
 
 				// }
@@ -4059,10 +4059,13 @@ public class TransactionBankController {
 							List<String> notificationContents = new ObjectMapper().readValue(googleSheetEntity.getNotificationContents(), new TypeReference<List<String>>() {});
 							boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
 							if (sendNotification) {
+								if (!googleSheetUtil.headerInsertedProperties.containsKey(webhook) || !Boolean.parseBoolean(googleSheetUtil.headerInsertedProperties.getProperty(webhook))) {
+									googleSheetUtil.insertHeader(webhook);
+								}
+
 								Map<String, String> datas = new HashMap<>();
-								datas.put("notificationId", UUID.randomUUID().toString());
-								datas.put("transactionReceiveId", transactionEntity.getId());
 								datas.put("bankAccount", accountBankEntity.getBankAccount());
+								datas.put("bankName", bankTypeEntity.getBankName());
 								datas.put("bankShortName", bankTypeEntity.getBankShortName());
 								datas.put("content", dto.getContent());
 								datas.put("amount", String.valueOf(dto.getAmount()));
@@ -4074,7 +4077,6 @@ public class TransactionBankController {
 								datas.put("referenceNumber", transactionEntity.getReferenceNumber() != null ? transactionEntity.getReferenceNumber() : "");
 								datas.put("status", "1");
 								datas.put("transType", dto.getTransType());
-								datas.put("note", "");
 
 								googleSheetUtil.insertTransactionToGoogleSheet(datas, notificationContents, webhook);
 							}
@@ -4084,10 +4086,6 @@ public class TransactionBankController {
 					}
 				}
 			}
-
-
-
-			// }
 		}
 
 	}
