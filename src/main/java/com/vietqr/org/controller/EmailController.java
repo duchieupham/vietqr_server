@@ -188,32 +188,51 @@ public class EmailController {
         HttpStatus httpStatus = null;
         try {
             // lấy ra emailverified entity để check
-            List<EmailVerifyEntity> emailVerifyByUserId = emailVerifyService.getEmailVerifyByUserId(confirmOtpEmailDTO.getUserId());
+            List<EmailVerifyEntity> emailVerifyByUserId =
+                    emailVerifyService.getEmailVerifyByUserId(confirmOtpEmailDTO.getUserId());
             int otpParse = Integer.parseInt(confirmOtpEmailDTO.getOtp());
             // Lấy thời gian hiện tại
             LocalDateTime currentDateTime = LocalDateTime.now();
-            // Thêm 10 phút vào thời gian hiện tại
-            LocalDateTime timeVerifiedDateTime = currentDateTime.plusMinutes(10);
-            // Chuyển thời gian đã thêm 10 phút thành epoch seconds
-            long timeVerified = timeVerifiedDateTime.toEpochSecond(ZoneOffset.UTC);
-
+            long timeVerified = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+//            if (otpParse != emailVerifyByUserId.get(0).getOtp()) {
+//                result = new ResponseMessageDTO("FAILED", "E178");
+//                httpStatus = HttpStatus.BAD_REQUEST;
+//                return new ResponseEntity<>(result, httpStatus);
+//            } else {
             for (EmailVerifyEntity entity : emailVerifyByUserId) {
-                if (timeVerified < entity.getTimeVerified()) {
-                    result = new ResponseMessageDTO("FAILED", "E175");
+                if (emailVerifyByUserId.get(0).getOtp() != otpParse) {
+                    result = new ResponseMessageDTO("FAILED", "E178");
                     httpStatus = HttpStatus.BAD_REQUEST;
                     break;
-                } else if (entity.getOtp() == otpParse) {
-                    // update isVerified = true ở bảng
-                    emailVerifyService.updateEmailVerifiedByUserId(confirmOtpEmailDTO.getUserId(), otpParse);
-                    // update isVerified = true ở bảng accountLogin
-                    accountLoginService.updateIsVerifiedByUserId(confirmOtpEmailDTO.getUserId(), confirmOtpEmailDTO.getEmail());
-                    accountInformationService.updateEmailAccountInformation(confirmOtpEmailDTO.getEmail(), confirmOtpEmailDTO.getUserId());
+                } else {
+                    if (entity.getOtp() != otpParse ) {
+                        result = new ResponseMessageDTO("FAILED", "E177");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        break;
+                    } else {
+                        if (timeVerified > entity.getTimeVerified()) {
+                            result = new ResponseMessageDTO("FAILED", "E175");
+                            httpStatus = HttpStatus.BAD_REQUEST;
+                            break;
+                        } else {
+                            // update isVerified = true ở bảng
+                            emailVerifyService.updateEmailVerifiedByUserId(confirmOtpEmailDTO.getUserId(), otpParse);
+                            // update isVerified = true ở bảng accountLogin
+                            accountLoginService.updateIsVerifiedByUserId(confirmOtpEmailDTO.getUserId(), confirmOtpEmailDTO.getEmail());
+                            accountInformationService.updateEmailAccountInformation(confirmOtpEmailDTO.getEmail(), confirmOtpEmailDTO.getUserId());
 
-                    result = new ResponseMessageDTO("SUCCESS", "");
-                    httpStatus = HttpStatus.OK;
-                    break;
+                            result = new ResponseMessageDTO("SUCCESS", "");
+                            httpStatus = HttpStatus.OK;
+                            break;
+
+                        }
+
+                    }
                 }
+
+
             }
+
         } catch (Exception e) {
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;

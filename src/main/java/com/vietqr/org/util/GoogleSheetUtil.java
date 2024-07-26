@@ -1,30 +1,34 @@
 package com.vietqr.org.util;
 
-import com.google.api.services.sheets.v4.Sheets;
 import org.apache.log4j.Logger;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class GoogleSheetUtil {
+    public static final int WIDTH_PIXEL = 256;
+    public static final String HEADER_INSERTED_FILE = "/opt/google-sheet/headerInserted.properties";
+    public static final String STT_FILE = "/opt/google-sheet/sttCounter.properties";
     private static final Logger logger = Logger.getLogger(GoogleSheetUtil.class);
+    public static GoogleSheetUtil instance;
+    public Properties headerInsertedProperties = new Properties();
+    public Map<String, Integer> sttCounterMap = new ConcurrentHashMap<>();
 
-    private static GoogleSheetUtil instance;
-    public boolean headerInserted  = false;
-    private int sttCounter = 1; // Khai báo và khởi tạo biến sttCounter
-    private static final int WIDTH_PIXEL = 256;
-
-    private GoogleSheetUtil() {
-
+    public GoogleSheetUtil() {
+        loadHeaderInsertedProperties();
+        loadSttCounter();
     }
 
     public static synchronized GoogleSheetUtil getInstance() {
@@ -34,34 +38,82 @@ public class GoogleSheetUtil {
         return instance;
     }
 
-    // CÁch 6
+    public static void shutdown() {
+        if (instance != null) {
+            instance.saveSttCounter();
+        }
+    }
+
+    private void loadHeaderInsertedProperties() {
+        try (InputStream input = Files.newInputStream(Paths.get(HEADER_INSERTED_FILE))) {
+            headerInsertedProperties.load(input);
+        } catch (IOException ex) {
+            logger.error("Error loading header inserted properties: " + ex.getMessage());
+        }
+    }
+
+    private void saveHeaderInsertedProperties() {
+        try (OutputStream output = Files.newOutputStream(Paths.get(HEADER_INSERTED_FILE))) {
+            headerInsertedProperties.store(output, null);
+        } catch (IOException ex) {
+            logger.error("Error saving header inserted properties: " + ex.getMessage());
+        }
+    }
+
+    private void loadSttCounter() {
+        try (InputStream input = Files.newInputStream(Paths.get(STT_FILE))) {
+            Properties sttProps = new Properties();
+            sttProps.load(input);
+            sttProps.forEach((key, value) -> sttCounterMap.put((String) key, Integer.parseInt((String) value)));
+        } catch (IOException ex) {
+            logger.error("Error loading STT counter properties: " + ex.getMessage());
+        }
+    }
+
+    private void saveSttCounter() {
+        try (OutputStream output = Files.newOutputStream(Paths.get(STT_FILE))) {
+            Properties sttProps = new Properties();
+            sttCounterMap.forEach((key, value) -> sttProps.setProperty(key, String.valueOf(value)));
+            sttProps.store(output, null);
+        } catch (IOException ex) {
+            logger.error("Error saving STT counter properties: " + ex.getMessage());
+        }
+    }
+
+    private int getSttCounter(String webhook) {
+        int newStt = sttCounterMap.compute(webhook, (key, val) -> (val == null) ? 1 : val + 1);
+        saveSttCounter(); // Save the STT counter after updating
+        return newStt;
+    }
+
     public boolean insertHeader(String webhook) {
         try {
-            // Định nghĩa tiêu đề các cột giống với file Excel
+            if (headerInsertedProperties.containsKey(webhook) && Boolean.parseBoolean(headerInsertedProperties.getProperty(webhook))) {
+                return true; // Tiêu đề đã được chèn
+            }
+
             List<String> headers = Arrays.asList(
-                    "STT", "Thời gian thanh toán", "Số tiền (VND)", "Mã giao dịch", "Mã đơn hàng",
-                    "Mã điểm bán", "Loại GD", "Thời gian tạo GD", "Tài khoản nhận", "Nội dung",
+                    "STT", "Thời gian TT", "Số tiền (VND)", "Mã giao dịch", "Mã đơn hàng",
+                    "Mã điểm bán", "Loại GD", "Thời gian tạo", "Tài khoản nhận", "Nội dung",
                     "Ghi chú", "Trạng thái"
             );
 
-            // Xây dựng URL với PathVariable
             UriComponents uriComponents = UriComponentsBuilder
                     .fromHttpUrl(webhook).buildAndExpand();
 
-            // Tạo WebClient với header authorization
             WebClient webClient = WebClient.builder()
                     .baseUrl(uriComponents.toUriString())
                     .build();
 
-            // Chèn tiêu đề
             webClient.post()
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(BodyInserters.fromValue(Collections.singletonMap("values", Collections.singletonList(headers))))
                     .exchange()
                     .block();
-            headerInserted = true;
 
-            // Đặt kích thước cột
+            headerInsertedProperties.setProperty(webhook, "true");
+            saveHeaderInsertedProperties();
+
             for (int i = 0; i < headers.size(); i++) {
                 setColumnWidth(webhook, i, getColumnWidth(i));
             }
@@ -76,45 +128,43 @@ public class GoogleSheetUtil {
     public void insertTransactionToGoogleSheet(Map<String, String> data, List<String> notificationContents, String webhook) {
         try {
             if (webhook != null && !webhook.trim().isEmpty()) {
-                LocalDateTime timePaid = convertLongToLocalDateTime(Long.parseLong(data.get("timePaid")));
-                LocalDateTime timeCreated = convertLongToLocalDateTime(Long.parseLong(data.get("time")));
+                LocalDateTime timePaid = convertLongToLocalDateTime(Long.parseLong(data.get("timePaid"))).plusHours(7);
+                LocalDateTime timeCreated = convertLongToLocalDateTime(Long.parseLong(data.get("time"))).plusHours(7);
 
-                // Định nghĩa giá trị của "Loại GD"
                 String transType = data.get("transType").equals("C") ? "Giao dịch đến" : "Giao dịch đi";
-                // Định nghĩa giá trị của "Trạng thái"
                 String status = getStatusTransaction(Integer.parseInt(data.get("status")));
 
-                // Định nghĩa giá trị của "Số tiền"
-                String amount = notificationContents.contains("AMOUNT") ? StringUtil.formatNumberAsString(data.get("amount")) : "-";
+                String amount = notificationContents.contains("AMOUNT") ?
+                        StringUtil.formatNumberAsString(data.get("amount")) : "";
 
-                // Tạo dữ liệu hàng từ đối tượng DTO theo thứ tự cột
                 List<String> rowData = Arrays.asList(
-                        "1", // STT
-                        "'" + formatLocalDateTime(timePaid), // Thời gian thanh toán
+                        String.valueOf(getSttCounter(webhook)), // STT
+                        formatLocalDateTime(timePaid), // Thời gian thanh toán
                         "'" + amount, // Số tiền (VND)
                         notificationContents.contains("REFERENCE_NUMBER") ? data.get("referenceNumber") : "-", // Mã giao dịch
-                        !StringUtil.isNullOrEmpty(data.get("orderId")) ? data.get("orderId") : "-", // Mã đơn hàng
-                        !StringUtil.isNullOrEmpty(data.get("terminalName")) ? data.get("terminalName") : "-", // Mã điểm bán
+                        !StringUtil.isNullOrEmpty(data.get("orderId")) ?
+                                data.get("orderId") : "-", // Mã đơn hàng
+                        !StringUtil.isNullOrEmpty(data.get("terminalName")) ?
+                                data.get("terminalName") : "-",
                         transType, // Loại GD
-                        "'" + formatLocalDateTime(timeCreated), // Thời gian tạo GD
+                        formatLocalDateTime(timeCreated), // Thời gian tạo GD
                         data.get("bankAccount") + " - " + data.get("bankShortName"), // Tài khoản nhận
                         notificationContents.contains("CONTENT") ? data.get("content") : "-", // Nội dung
-                        !StringUtil.isNullOrEmpty(data.get("note")) ? data.get("note") : "-", // Ghi chú
+                        !StringUtil.isNullOrEmpty(data.get("note")) ?
+                                data.get("note") : "-", // Ghi chú
                         status // Trạng thái
                 );
 
-                // Xây dựng URL với PathVariable
                 UriComponents uriComponents = UriComponentsBuilder
                         .fromHttpUrl(webhook).buildAndExpand();
 
-                // Tạo WebClient với header authorization
                 WebClient webClient = WebClient.builder()
                         .baseUrl(uriComponents.toUriString())
                         .build();
 
-                // Thêm một tham số mới để chỉ định chèn trên cùng
                 Map<String, Object> payload = new HashMap<>();
                 payload.put("values", Collections.singletonList(rowData));
+                //payload.put("position", "insertAtTop");
 
                 webClient.post()
                         .contentType(MediaType.APPLICATION_JSON)
@@ -127,12 +177,10 @@ public class GoogleSheetUtil {
         }
     }
 
-    // Chuyển đổi Unix Epoch Seconds sang LocalDateTime với múi giờ GMT
     private LocalDateTime convertLongToLocalDateTime(long time) {
         return LocalDateTime.ofInstant(Instant.ofEpochSecond(time), ZoneId.of("GMT"));
     }
 
-    // Định dạng LocalDateTime thành chuỗi thời gian theo định dạng "dd/MM/yyyy HH:mm:ss"
     private String formatLocalDateTime(LocalDateTime dateTime) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss", Locale.ENGLISH);
         return dateTime.format(formatter);
@@ -153,17 +201,14 @@ public class GoogleSheetUtil {
 
     private void setColumnWidth(String webhook, int columnIndex, int width) {
         try {
-            // Xây dựng URL với PathVariable
             UriComponents uriComponents = UriComponentsBuilder
                     .fromHttpUrl(webhook + "/columns/" + columnIndex + "/width")
                     .buildAndExpand();
 
-            // Tạo WebClient với header authorization
             WebClient webClient = WebClient.builder()
                     .baseUrl(uriComponents.toUriString())
                     .build();
 
-            // Đặt kích thước cột
             webClient.post()
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(BodyInserters.fromValue(Collections.singletonMap("width", width)))
