@@ -375,6 +375,127 @@ public class TerminalSyncController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @PostMapping("mid/synchronize/v2")
+    public ResponseEntity<Object> syncMidExternalV2(@RequestHeader("Authorization") String token,
+                                                  @RequestBody MidSyncDTO dto) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            String username = getUsernameFromToken(token);
+
+            if (!StringUtil.isNullOrEmpty(username)) {
+                String checkExistMerchantSync = accountCustomerService.checkExistMerchantSyncByUsername(username);
+                String accessKey = accountCustomerService.getAccessKeyByUsername(username);
+                if (!StringUtil.isNullOrEmpty(checkExistMerchantSync)) {
+                    MerchantSyncEntity merchantSyncAdmin = merchantSyncService.getMerchantSyncById(checkExistMerchantSync);
+                    if (Objects.nonNull(merchantSyncAdmin) && merchantSyncAdmin.getIsMaster()) {
+                        ResponseMessageDTO validateMidSync = validateMidSyncV2(accessKey, dto.getMerchants());
+                        if ("SUCCESS".equals(validateMidSync.getStatus())) {
+                            List<MidSyncResponseDTO> midSyncResponseDTOs = new ArrayList<>();
+                            List<MerchantSyncEntity> merchantSyncEntities = new ArrayList<>();
+                            for (MidSynchronizeDTO item: dto.getMerchants()) {
+                                String publishId = generateRandomMerPublishId();
+                                String merchantName = item.getMerchantName().toUpperCase();
+                                MerchantSyncEntity merchantSyncEntity = new MerchantSyncEntity();
+                                merchantSyncEntity.setId(UUID.randomUUID().toString());
+                                merchantSyncEntity.setName(merchantName);
+                                merchantSyncEntity.setFullName(item.getMerchantFullName());
+                                merchantSyncEntity.setVso("");
+                                merchantSyncEntity.setBusinessType("");
+                                merchantSyncEntity.setCareer("");
+                                merchantSyncEntity.setAddress(item.getMerchantAddress());
+                                merchantSyncEntity.setNationalId(item.getMerchantIdentity());
+                                merchantSyncEntity.setIsActive(true);
+                                merchantSyncEntity.setUserId("");
+                                merchantSyncEntity.setAccountCustomerId("");
+                                merchantSyncEntity.setEmail(item.getContactEmail());
+                                merchantSyncEntity.setPhoneNo(item.getContactPhone());
+                                merchantSyncEntity.setPublishId(publishId);
+                                merchantSyncEntity.setRefId(checkExistMerchantSync);
+
+                                MidSyncResponseDTO midSyncResponseDTO = new MidSyncResponseDTO();
+                                midSyncResponseDTO.setMid(publishId);
+                                midSyncResponseDTO.setMerchantName(merchantName);
+
+                                midSyncResponseDTOs.add(midSyncResponseDTO);
+                                merchantSyncEntities.add(merchantSyncEntity);
+                            }
+
+                            merchantSyncService.insertAll(merchantSyncEntities);
+                            result = new ResponseObjectDTO("SUCCESS", midSyncResponseDTOs);
+                            httpStatus = HttpStatus.OK;
+                        } else {
+                            result = validateMidSync;
+                            httpStatus = HttpStatus.BAD_REQUEST;
+                        }
+                    } else {
+                        result = new ResponseMessageDTO("FAILED", "E150");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    }
+                } else {
+                    logger.error("getListTid: MERCHANT IS NOT EXISTED");
+                    result = new ResponseMessageDTO("FAILED", "E104");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                logger.error("getListTid: INVALID TOKEN");
+                result = new ResponseMessageDTO("FAILED", "E74");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+            result = new ResponseMessageDTO("FAILED", "E05");
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("mid/list-mid/v2")
+    public ResponseEntity<Object> getMidsExternalV2(@RequestHeader("Authorization") String token,
+                                                  @RequestParam(defaultValue = "1") int page,
+                                                  @RequestParam(defaultValue = "20") int size) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            String username = getUsernameFromToken(token);
+            String mid = "";
+            if (!StringUtil.isNullOrEmpty(username)) {
+                String checkExistMerchantSync = accountCustomerService.checkExistMerchantSyncByUsername(username);
+                if (!StringUtil.isNullOrEmpty(checkExistMerchantSync)) {
+                    mid = checkExistMerchantSync;
+                    int offset = (page - 1) * size;
+                    int totalElement = 0;
+                    PageResDTO response = new PageResDTO();
+                    totalElement = merchantSyncService.countMerchantByMidSync(mid);
+                    List<IMerchantSyncPublicDTO> iTerminalSyncDTOs = merchantSyncService
+                            .getMerchantByMidSync(mid, offset, size);
+                    PageDTO pageDTO = new PageDTO();
+                    pageDTO.setPage(page);
+                    pageDTO.setSize(size);
+                    pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+                    pageDTO.setTotalElement(totalElement);
+                    response.setMetadata(pageDTO);
+                    response.setData(iTerminalSyncDTOs);
+                    result = response;
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    logger.error("getMidsExternal: MERCHANT IS NOT EXISTED");
+                    result = new ResponseMessageDTO("FAILED", "E104");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                logger.error("getMidsExternal: INVALID TOKEN");
+                result = new ResponseMessageDTO("FAILED", "E74");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+            result = new ResponseMessageDTO("FAILED", "E05");
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @GetMapping("mid/list-mid")
     public ResponseEntity<Object> getMidsExternal(@RequestHeader("Authorization") String token,
                                                   @RequestParam(defaultValue = "1") int page,
@@ -423,6 +544,45 @@ public class TerminalSyncController {
 
 
     private ResponseMessageDTO validateMidSync(String accessKey, List<MidSynchronizeDTO> dtos) {
+        ResponseMessageDTO result = new ResponseMessageDTO();
+        if (Objects.nonNull(dtos)) {
+            for (MidSynchronizeDTO item : dtos) {
+                String checkSum = BankEncryptUtil.generateMD5SyncMidChecksum(accessKey, item.getMerchantName(),
+                        item.getMerchantIdentity());
+                if (BankEncryptUtil.isMatchChecksum(checkSum, item.getCheckSum())) {
+                    if (ObjectUtils.allNotNull(item.getMerchantFullName(), item.getMerchantName(), item.getMerchantAddress(),
+                            item.getMerchantIdentity(), item.getContactEmail(), item.getContactPhone())) {
+                        String merchantId = merchantSyncService.getMerchantIdSyncByName(item.getMerchantName().toUpperCase());
+                        if (StringUtil.isNullOrEmpty(merchantId)) {
+                            result = new ResponseMessageDTO("SUCCESS", "");
+                        } else {
+                            logger.error(
+                                    "validateMidSync: ERROR: INVALID Mid Sync DTO: " + item.toString()
+                                            + " at: " + System.currentTimeMillis());
+                            result = new ResponseMessageDTO("FAILED", "E154");
+                            break;
+                        }
+                    } else {
+                        logger.error(
+                                "validateMidSync: ERROR: INVALID Mid Sync DTO: " + item.toString()
+                                        + " at: " + System.currentTimeMillis());
+                        result = new ResponseMessageDTO("FAILED", "E46");
+                        break;
+                    }
+                } else {
+                    logger.error(
+                            "validateMidSync: ERROR: INVALID CHECKSUM");
+                    result = new ResponseMessageDTO("FAILED", "E39");
+                    break;
+                }
+            }
+        } else {
+            result = new ResponseMessageDTO("FAILED", "E46");
+        }
+        return result;
+    }
+
+    private ResponseMessageDTO validateMidSyncV2(String accessKey, List<MidSynchronizeDTO> dtos) {
         ResponseMessageDTO result = new ResponseMessageDTO();
         if (Objects.nonNull(dtos)) {
             for (MidSynchronizeDTO item : dtos) {
