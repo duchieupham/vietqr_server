@@ -383,4 +383,10 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
     @Modifying
     @Query(value = "UPDATE invoice SET file_attachment_id = :id WHERE id = :invoiceId ", nativeQuery = true)
     void updateFileInvoiceById(String id, String invoiceId);
+
+    @Query(value = "SELECT a.id AS invoiceId, a.name AS invoiceName, "
+            + "a.total_amount AS totalAmount "
+            + "FROM invoice a "
+            + "WHERE a.user_id = :userId ", nativeQuery = true)
+    List<IInvoiceLatestDTO> getInvoiceLatestByUserId(String userId);
 }

@@ -32,6 +32,7 @@ public class AccountBankShareResponseDTO implements Serializable {
     private Long validFeeFrom;
     private Long validFeeTo;
     private int transCount;
+    private Boolean mmsActive;
 
     public AccountBankShareResponseDTO() {
         super();
@@ -247,5 +248,13 @@ public class AccountBankShareResponseDTO implements Serializable {
 
     public void setTransCount(int transCount) {
         this.transCount = transCount;
+    }
+
+    public Boolean getMmsActive() {
+        return mmsActive;
+    }
+
+    public void setMmsActive(Boolean mmsActive) {
+        this.mmsActive = mmsActive;
     }
 }

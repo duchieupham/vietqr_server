@@ -1520,6 +1520,32 @@ public class InvoiceController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("/invoice/overview/{userId}")
+    public ResponseEntity<Object> getInvoicesByUser(
+            @PathVariable String userId
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            InvoiceOverviewDTO response = new InvoiceOverviewDTO();
+            List<IInvoiceLatestDTO> dtos = invoiceService.getInvoiceLatestByUserId(userId);
+            if (Objects.nonNull(dtos) && !dtos.isEmpty()) {
+                long totalAmount = dtos.stream()
+                        .mapToLong(IInvoiceLatestDTO::getTotalAmount)
+                        .sum();
+                int countInvoice = dtos.size();
+                response.setCountInvoice(countInvoice);
+                response.setAmountUnpaid(totalAmount);
+                response.setInvoices(dtos);
+            }
+            result = response;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @GetMapping("/invoice/{userId}")
     public ResponseEntity<Object> getInvoicesByUser(
             @PathVariable String userId,

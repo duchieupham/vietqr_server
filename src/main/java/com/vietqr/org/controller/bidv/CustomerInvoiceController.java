@@ -1275,7 +1275,6 @@ public class CustomerInvoiceController {
                 } else {
                     transactionBankCustomerDTO.setTerminalCode("");
                 }
-                transactionBankCustomerDTO.setTerminalCode(rawTerminalCode);
                 transactionBankCustomerDTO.setUrlLink(urlLink);
                 logger.info("getCustomerSyncEntities: Order ID: " + orderId);
                 logger.info("getCustomerSyncEntities: Signature: " + sign);

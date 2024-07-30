@@ -597,4 +597,8 @@ public interface TransactionReceiveService {
                                                               String fromDate, String toDate);
 
     String checkExistedOrderId(String bankId, String orderId);
+
+    TransStatisticV2DTO getTransactionOverviewV2(String bankId, String fromDate, String toDate);
+
+    List<ITransactionLatestDTO> getTransactionLastest(String bankId, int limit);
 }

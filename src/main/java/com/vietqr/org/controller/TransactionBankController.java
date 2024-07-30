@@ -149,6 +149,9 @@ public class TransactionBankController {
     TelegramAccountBankService telegramAccountBankService;
 
     @Autowired
+    AccountBankReceiveShareService accountBankReceiveShareService;
+
+    @Autowired
     TransactionReceiveLogService transactionReceiveLogService;
 
     @Autowired
@@ -363,6 +366,11 @@ public class TransactionBankController {
         String bankTypeId = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
         AccountBankReceiveEntity accountBankEntity = accountBankService
                 .getAccountBankByBankAccountAndBankTypeId(dto.getBankaccount(), bankTypeId);
+        if (Objects.isNull(accountBankEntity)) {
+            accountBankEntity = accountBankService
+                    .getAccountBankByBankAccountAndBankTypeId(dto.getBankaccount(), "f44cbe47-cb2b-427e-98b5-10afa0375690");
+        }
+
         try {
             List<Object> list = transactionBankService.checkTransactionIdInserted(dto.getTransactionid(),
                     dto.getTransType());
@@ -467,6 +475,7 @@ public class TransactionBankController {
                                 String rawCode = "";
                                 String boxIdRef = "";
                                 ISubTerminalCodeDTO rawDTO = null;
+                                TerminalEntity terminalEntity = null;
                                 if (traceId != null && !traceId.isEmpty()) {
                                     logger.info("transaction-sync - trace ID detect: " + traceId);
                                     TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
@@ -477,15 +486,24 @@ public class TransactionBankController {
                                         sign = transactionReceiveEntity.getSign();
                                         if (transactionReceiveEntity.getTerminalCode() != null
                                                 && !transactionReceiveEntity.getTerminalCode().trim().isEmpty()) {
-                                            TerminalEntity terminalEntity = terminalService
+                                            terminalEntity = terminalService
                                                     .getTerminalByTerminalCode(
                                                             transactionReceiveEntity.getTerminalCode());
                                             if (terminalEntity != null) {
                                                 rawCode = terminalEntity.getRawTerminalCode();
                                             } else {
-                                                rawCode = terminalBankReceiveService
-                                                        .getTerminalBankReceiveByTerminalCode(
-                                                                transactionReceiveEntity.getTerminalCode());
+                                                rawDTO = terminalBankReceiveService
+                                                        .getSubTerminalCodeBySubTerminalCode(transactionReceiveEntity.getTerminalCode());
+                                                if (rawDTO != null) {
+                                                    rawCode = StringUtil.getValueNullChecker(rawDTO.getRawCode());
+                                                    if (rawDTO.getQrType() == 2) {
+                                                        boxIdRef = rawDTO.getRawCode();
+                                                    }
+                                                    if (!StringUtil.isNullOrEmpty(rawDTO.getTerminalId())) {
+                                                        terminalEntity = terminalService.getTerminalByTerminalId(rawDTO.getTerminalId());
+                                                    }
+                                                }
+
                                             }
                                         }
                                         String urlLink = transactionReceiveEntity.getUrlLink() != null
@@ -493,7 +511,7 @@ public class TransactionBankController {
                                                 : "";
                                         result = getCustomerSyncEntities(transactionReceiveEntity.getId(), dto,
                                                 accountBankEntity, time, orderId, sign, rawCode, urlLink, transactionReceiveEntity.getTerminalCode());
-                                        updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time, nf, boxIdRef);
+                                        updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time, nf, boxIdRef, rawDTO, terminalEntity);
                                         // check if recharge => do update status and push data to customer
                                         ////////// USER RECHAGE VQR || USER RECHARGE MOBILE
                                         if (transactionReceiveEntity.getType() == 5) {
@@ -519,7 +537,7 @@ public class TransactionBankController {
                                         }
 
                                         if (!terminalCode.trim().isEmpty()) {
-                                            TerminalEntity terminalEntity = terminalService
+                                            terminalEntity = terminalService
                                                     .getTerminalByTerminalCode(terminalCode);
                                             if (terminalEntity != null) {
                                                 rawCode = terminalEntity.getRawTerminalCode();
@@ -527,6 +545,9 @@ public class TransactionBankController {
                                                 rawDTO = terminalBankReceiveService.getSubTerminalCodeBySubTerminalCode(
                                                         terminalCode);
                                                 if (rawDTO != null) {
+                                                    if (!StringUtil.isNullOrEmpty(rawDTO.getTerminalId())) {
+                                                        terminalEntity = terminalService.getTerminalByTerminalId(rawDTO.getTerminalId());
+                                                    }
                                                     rawCode = rawDTO.getRawCode();
                                                     if (rawDTO.getQrType() == 2) {
                                                         boxIdRef = rawDTO.getRawCode();
@@ -542,8 +563,9 @@ public class TransactionBankController {
                                             final String finalSign = sign;
                                             final String finalRawCode = rawCode;
                                             final String finalTerminalCode = terminalCode;
+                                            AccountBankReceiveEntity finalAccountBankEntity = accountBankEntity;
                                             Thread thread = new Thread(() -> {
-                                                getCustomerSyncEntitiesV2(transcationUUID.toString(), dto, accountBankEntity,
+                                                getCustomerSyncEntitiesV2(transcationUUID.toString(), dto, finalAccountBankEntity,
                                                         time, finalOrderId, finalSign, finalRawCode, "", finalTerminalCode);
                                             });
                                             thread.start();
@@ -552,7 +574,7 @@ public class TransactionBankController {
                                                     " at: " + System.currentTimeMillis());
                                         }
                                         insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity, time,
-                                                traceId, uuid, nf, "", "", boxIdRef);
+                                                traceId, uuid, nf, "", "", boxIdRef, rawDTO, terminalEntity);
                                     }
                                     // }
                                 } else {
@@ -571,7 +593,7 @@ public class TransactionBankController {
                                     }
 
                                     if (!terminalCode.trim().isEmpty()) {
-                                        TerminalEntity terminalEntity = terminalService
+                                        terminalEntity = terminalService
                                                 .getTerminalByTerminalCode(terminalCode);
                                         if (terminalEntity != null) {
                                             rawCode = terminalEntity.getRawTerminalCode();
@@ -579,6 +601,10 @@ public class TransactionBankController {
                                             rawDTO = terminalBankReceiveService.getSubTerminalCodeBySubTerminalCode(
                                                     terminalCode);
                                             if (rawDTO != null) {
+                                                if (!StringUtil.isNullOrEmpty(rawDTO.getTerminalId())) {
+                                                    terminalEntity = terminalService
+                                                            .getTerminalByTerminalId(rawDTO.getTerminalId());
+                                                }
                                                 rawCode = rawDTO.getRawCode();
                                                 if (rawDTO.getQrType() == 2) {
                                                     boxIdRef = rawDTO.getRawCode();
@@ -591,7 +617,7 @@ public class TransactionBankController {
                                     getCustomerSyncEntitiesV2(transcationUUID.toString(), dto, accountBankEntity,
                                             time, orderId, sign, rawCode, "", terminalCode);
                                     insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity, time,
-                                            traceId, uuid, nf, "", "", boxIdRef);
+                                            traceId, uuid, nf, "", "", boxIdRef, rawDTO, terminalEntity);
                                 }
                             }
                         } else {
@@ -716,6 +742,7 @@ public class TransactionBankController {
                                 String rawCode = "";
                                 String boxIdRef = "";
                                 ISubTerminalCodeDTO rawDTO = null;
+                                TerminalEntity terminalEntity = null;
                                 if (traceId != null && !traceId.isEmpty()) {
                                     logger.info("transaction-sync - trace ID detect: " + traceId);
                                     TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
@@ -728,15 +755,15 @@ public class TransactionBankController {
                                             sign = transactionReceiveEntity.getSign();
                                             if (transactionReceiveEntity.getTerminalCode() != null
                                                     && !transactionReceiveEntity.getTerminalCode().trim().isEmpty()) {
-                                                TerminalEntity terminalEntity = terminalService
+                                                terminalEntity = terminalService
                                                         .getTerminalByTerminalCode(
                                                                 transactionReceiveEntity.getTerminalCode());
                                                 if (terminalEntity != null) {
                                                     rawCode = terminalEntity.getRawTerminalCode();
+                                                    if (!StringUtil.isNullOrEmpty(rawDTO.getTerminalId())) {
+                                                        terminalEntity = terminalService.getTerminalByTerminalId(rawDTO.getTerminalId());
+                                                    }
                                                 } else {
-//													rawCode = terminalBankReceiveService
-//															.getTerminalBankReceiveByTerminalCode(
-//																	transactionReceiveEntity.getTerminalCode());
                                                     rawDTO = terminalBankReceiveService.getSubTerminalCodeBySubTerminalCode(
                                                             transactionReceiveEntity.getTerminalCode());
                                                     if (rawDTO != null) {
@@ -754,7 +781,7 @@ public class TransactionBankController {
                                                     accountBankEntity, time, orderId, sign, rawCode, urlLink, "");
                                             try {
                                                 updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time,
-                                                        nf, boxIdRef);
+                                                        nf, boxIdRef, rawDTO, terminalEntity);
                                             } catch (JsonProcessingException e) {
                                                 throw new RuntimeException(e);
                                             }
@@ -801,6 +828,7 @@ public class TransactionBankController {
                                     String rawCode = "";
                                     String rawCodeResult = "";
                                     String boxIdRef = "";
+                                    TerminalEntity terminalEntity = null;
                                     ISubTerminalCodeDTO rawDTO = null;
                                     if (traceId != null && !traceId.isEmpty()) {
                                         logger.info("transaction-sync - trace ID detect: " + traceId);
@@ -812,19 +840,19 @@ public class TransactionBankController {
                                             sign = transactionReceiveEntity.getSign();
                                             if (transactionReceiveEntity.getTerminalCode() != null
                                                     && !transactionReceiveEntity.getTerminalCode().trim().isEmpty()) {
-                                                TerminalEntity terminalEntity = terminalService
+                                                terminalEntity = terminalService
                                                         .getTerminalByTerminalCode(
                                                                 transactionReceiveEntity.getTerminalCode());
                                                 if (terminalEntity != null) {
                                                     rawCode = terminalEntity.getRawTerminalCode();
                                                 } else {
-//													rawCode = terminalBankReceiveService
-//															.getTerminalBankReceiveByTerminalCode(
-//																	transactionReceiveEntity.getTerminalCode());
                                                     rawDTO = terminalBankReceiveService.getSubTerminalCodeBySubTerminalCode(
                                                             transactionReceiveEntity.getTerminalCode());
                                                     if (rawDTO != null) {
                                                         rawCode = rawDTO.getRawCode();
+                                                        if (!StringUtil.isNullOrEmpty(rawDTO.getTerminalId())) {
+                                                            terminalEntity = terminalService.getTerminalByTerminalId(rawDTO.getTerminalId());
+                                                        }
                                                         if (rawDTO.getQrType() == 2) {
                                                             boxIdRef = rawDTO.getRawCode();
                                                         }
@@ -843,7 +871,7 @@ public class TransactionBankController {
                                                     accountBankEntity, time, orderId, sign, rawCodeResult, urlLink, transactionReceiveEntity.getTerminalCode());
                                             try {
                                                 updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time,
-                                                        nf, boxIdRef);
+                                                        nf, boxIdRef, rawDTO, terminalEntity);
                                             } catch (JsonProcessingException e) {
                                                 throw new RuntimeException(e);
                                             }
@@ -878,7 +906,7 @@ public class TransactionBankController {
                                             }
 
                                             if (!terminalCode.trim().isEmpty()) {
-                                                TerminalEntity terminalEntity = terminalService
+                                                terminalEntity = terminalService
                                                         .getTerminalByTerminalCode(terminalCode);
                                                 if (terminalEntity != null) {
                                                     rawCode = terminalEntity.getRawTerminalCode();
@@ -886,6 +914,9 @@ public class TransactionBankController {
                                                     rawDTO = terminalBankReceiveService.getSubTerminalCodeBySubTerminalCode(terminalCode);
                                                     if (rawDTO != null) {
                                                         rawCode = rawDTO.getRawCode();
+                                                        if (!StringUtil.isNullOrEmpty(rawDTO.getTerminalId())) {
+                                                            terminalEntity = terminalService.getTerminalByTerminalId(rawDTO.getTerminalId());
+                                                        }
                                                         if (rawDTO.getQrType() == 2) {
                                                             boxIdRef = rawDTO.getRawCode();
                                                         }
@@ -901,7 +932,7 @@ public class TransactionBankController {
 
                                             insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity,
                                                     time,
-                                                    traceId, uuid, nf, "", "", boxIdRef);
+                                                    traceId, uuid, nf, "", "", boxIdRef, rawDTO, terminalEntity);
 
 
                                         }
@@ -922,7 +953,7 @@ public class TransactionBankController {
                                         }
 
                                         if (!terminalCode.trim().isEmpty()) {
-                                            TerminalEntity terminalEntity = terminalService
+                                            terminalEntity = terminalService
                                                     .getTerminalByTerminalCode(terminalCode);
                                             if (terminalEntity != null) {
                                                 rawCode = terminalEntity.getRawTerminalCode();
@@ -931,6 +962,9 @@ public class TransactionBankController {
                                                         terminalCode);
                                                 if (rawDTO != null) {
                                                     rawCode = rawDTO.getRawCode();
+                                                    if (!StringUtil.isNullOrEmpty(rawDTO.getTerminalId())) {
+                                                        terminalEntity = terminalService.getTerminalByTerminalId(rawDTO.getTerminalId());
+                                                    }
                                                     if (rawDTO.getQrType() == 2) {
                                                         boxIdRef = rawDTO.getRawCode();
                                                     }
@@ -943,7 +977,7 @@ public class TransactionBankController {
                                         getCustomerSyncEntitiesV2(transcationUUID.toString(), dto, accountBankEntity,
                                                 time, orderId, sign, rawCode, "", terminalCode);
                                         insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity, time,
-                                                traceId, uuid, nf, "", "", boxIdRef);
+                                                traceId, uuid, nf, "", "", boxIdRef, rawDTO, terminalEntity);
                                     }
                                 }
                             } else {
@@ -1668,7 +1702,8 @@ public class TransactionBankController {
     // cập nhaatk transaction và push notification cho user
     @Async
     public void updateTransaction(TransactionBankDTO dto, TransactionReceiveEntity transactionReceiveEntity,
-                                  AccountBankReceiveEntity accountBankEntity, long time, NumberFormat nf, String boxIdRef) throws JsonProcessingException {
+                                  AccountBankReceiveEntity accountBankEntity, long time,
+                                  NumberFormat nf, String boxIdRef, ISubTerminalCodeDTO rawDTO, TerminalEntity terminalEntity) throws JsonProcessingException {
 
         String amount = "";
         if (dto.getAmount() != 0) {
@@ -1758,12 +1793,9 @@ public class TransactionBankController {
         // find userIds into terminal
         if (StringUtil.isNullOrEmpty(transactionReceiveEntity.getTerminalCode()) == false) {
             // find all userIds belong to terminal
-            TerminalEntity terminalEntity = terminalService
-                    .getTerminalByTerminalCode(transactionReceiveEntity.getTerminalCode(),
-                            accountBankEntity.getBankAccount());
             if (terminalEntity != null) {
-                List<String> userIds = terminalService
-                        .getUserIdsByTerminalCode(transactionReceiveEntity.getTerminalCode());
+                List<String> userIds = accountBankReceiveShareService
+                        .getUserIdsFromTerminalId(terminalEntity.getId(), accountBankEntity.getUserId());
                 String prefix = "";
                 if (dto.getTransType().toUpperCase().equals("D")) {
                     prefix = "-";
@@ -1845,33 +1877,6 @@ public class TransactionBankController {
                     }
                     executorService.shutdown();
                 }
-                /////// DO INSERT TELEGRAM
-//				List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
-//				if (chatIds != null && !chatIds.isEmpty()) {
-//					TelegramUtil telegramUtil = new TelegramUtil();
-//					// String telegramMsg2 = "Thanh toán thành công 🎉."
-//					// + "\nTài khoản: " + bankTypeEntity.getBankShortName() + " - "
-//					// + accountBankEntity.getBankAccount()
-//					// + "\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
-//					// + "\nMã giao dịch: " + dto.getReferencenumber()
-//					// + "\nThời gian: " + convertLongToDate(time)
-//					// + "\nNội dung: " + dto.getContent();
-//					// String telegramMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
-//					// + "| TK: " + bankTypeEntity.getBankShortName() + " - "
-//					// + accountBankEntity.getBankAccount()
-//					// + "| Ma GD: " + dto.getReferencenumber()
-//					// + "| ND: " + dto.getContent()
-//					// + "| " + convertLongToDate(time);
-//					String telegramMsg = prefix + amount + " VND"
-//							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-//							+ accountBankEntity.getBankAccount()
-//							+ " | " + convertLongToDate(time)
-//							+ " | " + dto.getReferencenumber()
-//							+ " | ND: " + dto.getContent();
-//					for (String chatId : chatIds) {
-//						telegramUtil.sendMsg(chatId, telegramMsg);
-//					}
-//				}
 
                 /////// DO INSERT TELEGRAM BY QVAN
                 List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
@@ -1899,40 +1904,6 @@ public class TransactionBankController {
                     }
                 }
 
-
-                /////// DO INSERT LARK
-//				if (accountBankEntity.getBankAccount().equals("699699699996")) {
-//					if (transactionReceiveEntity.getTransType().equals("C")) {
-//						List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-//						if (webhooks != null && !webhooks.isEmpty()) {
-//							LarkUtil larkUtil = new LarkUtil();
-//							String larkMsg = prefix + amount + " VND"
-//									+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-//									+ accountBankEntity.getBankAccount()
-//									+ " | " + convertLongToDate(time)
-//									+ " | " + dto.getReferencenumber()
-//									+ " | ND: " + dto.getContent();
-//							for (String webhook : webhooks) {
-//								larkUtil.sendMessageToLark(larkMsg, webhook);
-//							}
-//						}
-//					}
-//				} else {
-//					List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-//					if (webhooks != null && !webhooks.isEmpty()) {
-//						LarkUtil larkUtil = new LarkUtil();
-//						String larkMsg = prefix + amount + " VND"
-//								+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-//								+ accountBankEntity.getBankAccount()
-//								+ " | " + convertLongToDate(time)
-//								+ " | " + dto.getReferencenumber()
-//								+ " | ND: " + dto.getContent();
-//						for (String webhook : webhooks) {
-//							larkUtil.sendMessageToLark(larkMsg, webhook);
-//						}
-//					}
-//				}
-
                 /////// DO INSERT LARK BY QVAN
                 List<String> webhooks = larkAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
                 if (webhooks != null && !webhooks.isEmpty()) {
@@ -1958,23 +1929,6 @@ public class TransactionBankController {
                         }
                     }
                 }
-
-
-                /////// DO INSERT GOOGLE CHAT
-//				List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
-//				if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
-//					GoogleChatUtil googleChatUtil = new GoogleChatUtil();
-//					String googleChatMsg = prefix + amount + " VND"
-//							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-//							+ accountBankEntity.getBankAccount()
-//							+ " | " + convertLongToDate(time)
-//							+ " | " + dto.getReferencenumber()
-//							+ " | ND: " + dto.getContent();
-//					for (String webhook : ggChatWebhooks) {
-//						googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
-//					}
-//				}
-
 
                 // DO INSERT GOOGLE CHAT BY QVAN
                 List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
@@ -2089,21 +2043,7 @@ public class TransactionBankController {
                 data.put("traceId", "" + transactionReceiveEntity.getTraceId());
                 data.put("transType", dto.getTransType());
                 data.put("urlLink", transactionReceiveEntity.getUrlLink() != null ? transactionReceiveEntity.getUrlLink() : "");
-                if (!StringUtil.isNullOrEmpty(boxIdRef)) {
-                    try {
-                        // send msg to QR Link
-                        BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
-                        String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
-                        data.put("message", String.format(messageForBox, amountForVoice));
-                        String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
-                        socketHandler.sendMessageToBoxId(idRefBox, data);
-                        logger.info("WS: socketHandler.sendMessageToQRBox - "
-                                + boxIdRef + " at: " + System.currentTimeMillis());
-                    } catch (IOException e) {
-                        logger.error(
-                                "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
-                    }
-                }
+                pushNotificationBoxIdRef(amountForVoice, amount, boxIdRef);
                 // textToSpeechService.delete(requestId);
             } else {
                 logger.info("transaction-sync - userIds empty.");
@@ -2165,21 +2105,7 @@ public class TransactionBankController {
                 try {
                     String refId = TransactionRefIdUtil.encryptTransactionId(transactionReceiveEntity.getId());
                     socketHandler.sendMessageToTransactionRefId(refId, data);
-                    if (!StringUtil.isNullOrEmpty(boxIdRef)) {
-                        try {
-                            // send msg to QR Link
-                            BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
-                            String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
-                            data.put("message", String.format(messageForBox, amountForVoice));
-                            String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
-                            socketHandler.sendMessageToBoxId(idRefBox, data);
-                            logger.info("WS: socketHandler.sendMessageToQRBox - "
-                                    + boxIdRef + " at: " + System.currentTimeMillis());
-                        } catch (IOException e) {
-                            logger.error(
-                                    "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
-                        }
-                    }
+                    pushNotificationBoxIdRef(amountForVoice, amount, boxIdRef);
                 } catch (IOException e) {
                     logger.error("WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
                 }
@@ -2456,20 +2382,7 @@ public class TransactionBankController {
                 // send msg to QR Link
                 String refId = TransactionRefIdUtil.encryptTransactionId(transactionReceiveEntity.getId());
                 socketHandler.sendMessageToTransactionRefId(refId, data);
-                if (!StringUtil.isNullOrEmpty(boxIdRef)) {
-                    try {
-                        BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
-                        String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
-                        data.put("message", String.format(messageForBox, amountForVoice));
-                        String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
-                        socketHandler.sendMessageToBoxId(idRefBox, data);
-                        logger.info("WS: socketHandler.sendMessageToQRBox - "
-                                + boxIdRef + " at: " + System.currentTimeMillis());
-                    } catch (IOException e) {
-                        logger.error(
-                                "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
-                    }
-                }
+                pushNotificationBoxIdRef(amountForVoice, amount, boxIdRef);
             } catch (IOException e) {
                 logger.error("WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
             }
@@ -2777,7 +2690,8 @@ public class TransactionBankController {
     // push to users
     public void insertNewTransaction(String transcationUUID, TransactionBankDTO dto,
                                      AccountBankReceiveEntity accountBankEntity, long time,
-                                     String traceId, UUID uuid, NumberFormat nf, String orderId, String sign, String boxIdRef) {
+                                     String traceId, UUID uuid, NumberFormat nf, String orderId, String sign, String boxIdRef,
+                                     ISubTerminalCodeDTO rawDTO, TerminalEntity terminalEntity) {
         SystemSettingEntity systemSetting = systemSettingService.getSystemSetting();
         String amount = "";
         if (dto.getAmount() != 0) {
@@ -2870,19 +2784,6 @@ public class TransactionBankController {
         if (StringUtil.isNullOrEmpty(terminalCode) == false) {
             logger.info("transaction-sync - insertNewTransaction - terminalCode: " + terminalCode);
             // find all userIds belong to terminal
-            TerminalEntity terminalEntity = terminalService
-                    .getTerminalByTerminalCode(terminalCode,
-                            accountBankEntity.getBankAccount());
-            if (terminalEntity == null) {
-                logger.info(
-                        "transaction-sync - insertNewTransaction - terminalEntity is null: find terminalBankReceive");
-                terminalEntity = terminalService
-                        .getTerminalByTerminalBankReceiveCode(terminalCode);
-                if (terminalEntity == null) {
-                    terminalEntity = terminalService
-                            .getTerminalByTerminalCode(terminalCode);
-                }
-            }
             if (terminalEntity != null) {
                 TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
                 transactionEntity.setId(transcationUUID);
@@ -3011,20 +2912,7 @@ public class TransactionBankController {
                         // send msg to QR Link
                         String refId = TransactionRefIdUtil.encryptTransactionId(transactionEntity.getId());
                         socketHandler.sendMessageToTransactionRefId(refId, data1);
-                        if (!StringUtil.isNullOrEmpty(boxIdRef)) {
-                            try {
-                                BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
-                                String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
-                                data1.put("message", String.format(messageForBox, amountForVoice));
-                                String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
-                                socketHandler.sendMessageToBoxId(idRefBox, data1);
-                                logger.info("WS: socketHandler.sendMessageToQRBox - "
-                                        + boxIdRef + " at: " + System.currentTimeMillis());
-                            } catch (IOException e) {
-                                logger.error(
-                                        "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
-                            }
-                        }
+                        pushNotificationBoxIdRef(amountForVoice, amount, boxIdRef);
                     } catch (IOException e) {
                         logger.error(
                                 "WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
@@ -3099,20 +2987,7 @@ public class TransactionBankController {
                         // send msg to QR Link
                         String refId = TransactionRefIdUtil.encryptTransactionId(transactionEntity.getId());
                         socketHandler.sendMessageToTransactionRefId(refId, data);
-                        if (!StringUtil.isNullOrEmpty(boxIdRef)) {
-                            try {
-                                BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
-                                String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
-                                data.put("message", String.format(messageForBox, amountForVoice));
-                                String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
-                                socketHandler.sendMessageToBoxId(idRefBox, data);
-                                logger.info("WS: socketHandler.sendMessageToQRBox - "
-                                        + boxIdRef + " at: " + System.currentTimeMillis());
-                            } catch (IOException e) {
-                                logger.error(
-                                        "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
-                            }
-                        }
+                        pushNotificationBoxIdRef(amountForVoice, amount, boxIdRef);
                     } catch (IOException e) {
                         logger.error(
                                 "WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
@@ -3521,20 +3396,7 @@ public class TransactionBankController {
                     // send msg to QR Link
                     String refId = TransactionRefIdUtil.encryptTransactionId(transcationUUID.toString());
                     socketHandler.sendMessageToTransactionRefId(refId, data);
-                    if (!StringUtil.isNullOrEmpty(boxIdRef)) {
-                        try {
-                            BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
-                            String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv()).trim();
-                            data.put("message", String.format(messageForBox, amountForVoice));
-                            String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
-                            socketHandler.sendMessageToBoxId(idRefBox, data);
-                            logger.info("WS: socketHandler.sendMessageToQRBox - "
-                                    + boxIdRef + " at: " + System.currentTimeMillis());
-                        } catch (IOException e) {
-                            logger.error(
-                                    "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
-                        }
-                    }
+                    pushNotificationBoxIdRef(amountForVoice, amount, boxIdRef);
                 } catch (IOException e) {
                     logger.error("WS: socketHandler.sendMessageToUser - insertNewTransaction ERROR: " + e.toString());
                 }
@@ -3866,20 +3728,7 @@ public class TransactionBankController {
                     // send msg to QR Link
                     String refId = TransactionRefIdUtil.encryptTransactionId(transactionEntity.getId());
                     socketHandler.sendMessageToTransactionRefId(refId, data1);
-                    if (!StringUtil.isNullOrEmpty(boxIdRef)) {
-                        try {
-                            BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
-                            String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
-                            data1.put("message", String.format(messageForBox, amountForVoice));
-                            String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
-                            socketHandler.sendMessageToBoxId(idRefBox, data1);
-                            logger.info("WS: socketHandler.sendMessageToQRBox - "
-                                    + boxIdRef + " at: " + System.currentTimeMillis());
-                        } catch (IOException e) {
-                            logger.error(
-                                    "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
-                        }
-                    }
+                    pushNotificationBoxIdRef(amountForVoice, amount, boxIdRef);
                 } catch (IOException e) {
                     logger.error(
                             "WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
@@ -3924,20 +3773,7 @@ public class TransactionBankController {
                 // send msg to QR Link
                 String refId = TransactionRefIdUtil.encryptTransactionId(transcationUUID.toString());
                 socketHandler.sendMessageToTransactionRefId(refId, data);
-                if (!StringUtil.isNullOrEmpty(boxIdRef)) {
-                    try {
-                        BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
-                        String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
-                        data.put("message", String.format(messageForBox, amountForVoice));
-                        String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
-                        socketHandler.sendMessageToBoxId(idRefBox, data);
-                        logger.info("WS: socketHandler.sendMessageToQRBox - "
-                                + boxIdRef + " at: " + System.currentTimeMillis());
-                    } catch (IOException e) {
-                        logger.error(
-                                "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
-                    }
-                }
+                pushNotificationBoxIdRef(amountForVoice, amount, boxIdRef);
             } catch (IOException e) {
                 logger.error("WS: socketHandler.sendMessageToUser - insertNewTransaction ERROR: " + e.toString());
             }
@@ -6312,5 +6148,25 @@ public class TransactionBankController {
                     e.getMessage() + " at: " + System.currentTimeMillis());
         }
         return result;
+    }
+
+    private void pushNotificationBoxIdRef(String amountForVoice, String amount, String boxIdRef) {
+        Map<String, String> data = new HashMap<>();
+        if (!StringUtil.isNullOrEmpty(boxIdRef)) {
+            try {
+                BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
+                String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
+                data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+                data.put("amount", amount);
+                data.put("message", String.format(messageForBox, amountForVoice));
+                String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
+                socketHandler.sendMessageToBoxId(idRefBox, data);
+                logger.info("WS: socketHandler.sendMessageToQRBox - "
+                        + boxIdRef + " at: " + System.currentTimeMillis());
+            } catch (IOException e) {
+                logger.error(
+                        "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
+            }
+        }
     }
 }

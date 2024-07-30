@@ -26,6 +26,8 @@ public interface AccountBankReceiveShareDTO {
 
     Boolean getIsValidService();
 
+    Boolean getMmsActive();
+
     Long getValidFeeFrom();
 
     Long getValidFeeTo();
