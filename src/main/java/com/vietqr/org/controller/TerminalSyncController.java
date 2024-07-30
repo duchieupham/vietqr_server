@@ -67,9 +67,9 @@ public class TerminalSyncController {
                         List<BankAccountSyncDTO> bankDto = getUniqueBankAccountSyncDTOs(dto.getTerminals());
                         ResponseObjectDTO responseCheckCode = checkRawTerminalCodeUnique(dto.getTerminals().stream()
                                 .map(TidSynchronizeDTO::getTerminalCode)
-                        .collect(Collectors.toList()));
+                                .collect(Collectors.toList()));
                         if ("SUCCESS".equals(responseCheckCode.getStatus()) ||
-                        "CHECK".equals(responseCheckCode.getStatus())) {
+                                "CHECK".equals(responseCheckCode.getStatus())) {
                             Set<String> terminalCodeDup = new HashSet<>();
                             if ("CHECK".equals(responseCheckCode.getStatus())) {
                                 terminalCodeDup = (Set<String>) responseCheckCode.getData();
@@ -318,7 +318,7 @@ public class TerminalSyncController {
                         if ("SUCCESS".equals(validateMidSync.getStatus())) {
                             List<MidSyncResponseDTO> midSyncResponseDTOs = new ArrayList<>();
                             List<MerchantSyncEntity> merchantSyncEntities = new ArrayList<>();
-                            for (MidSynchronizeDTO item: dto.getMerchants()) {
+                            for (MidSynchronizeDTO item : dto.getMerchants()) {
                                 String publishId = generateRandomMerPublishId();
                                 String merchantName = item.getMerchantName().toUpperCase();
                                 MerchantSyncEntity merchantSyncEntity = new MerchantSyncEntity();
@@ -377,7 +377,7 @@ public class TerminalSyncController {
 
     @PostMapping("mid/synchronize/v2")
     public ResponseEntity<Object> syncMidExternalV2(@RequestHeader("Authorization") String token,
-                                                  @RequestBody MidSyncDTO dto) {
+                                                    @RequestBody MidSyncV2DTO dto) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
@@ -391,18 +391,19 @@ public class TerminalSyncController {
                     if (Objects.nonNull(merchantSyncAdmin) && merchantSyncAdmin.getIsMaster()) {
                         ResponseMessageDTO validateMidSync = validateMidSyncV2(accessKey, dto.getMerchants());
                         if ("SUCCESS".equals(validateMidSync.getStatus())) {
-                            List<MidSyncResponseDTO> midSyncResponseDTOs = new ArrayList<>();
+                            List<MidSyncResponseV2DTO> midSyncResponseDTOs = new ArrayList<>();
                             List<MerchantSyncEntity> merchantSyncEntities = new ArrayList<>();
-                            for (MidSynchronizeDTO item: dto.getMerchants()) {
+                            for (MidSynchronizeV2DTO item : dto.getMerchants()) {
                                 String publishId = generateRandomMerPublishId();
                                 String merchantName = item.getMerchantName().toUpperCase();
                                 MerchantSyncEntity merchantSyncEntity = new MerchantSyncEntity();
-                                merchantSyncEntity.setId(UUID.randomUUID().toString());
+                                UUID idMerchant = UUID.randomUUID();
+                                merchantSyncEntity.setId(idMerchant.toString());
                                 merchantSyncEntity.setName(merchantName);
                                 merchantSyncEntity.setFullName(item.getMerchantFullName());
                                 merchantSyncEntity.setVso("");
                                 merchantSyncEntity.setBusinessType("");
-                                merchantSyncEntity.setCareer("");
+                                merchantSyncEntity.setCareer(item.getCareer());
                                 merchantSyncEntity.setAddress(item.getMerchantAddress());
                                 merchantSyncEntity.setNationalId(item.getMerchantIdentity());
                                 merchantSyncEntity.setIsActive(true);
@@ -413,10 +414,33 @@ public class TerminalSyncController {
                                 merchantSyncEntity.setPublishId(publishId);
                                 merchantSyncEntity.setRefId(checkExistMerchantSync);
 
-                                MidSyncResponseDTO midSyncResponseDTO = new MidSyncResponseDTO();
-                                midSyncResponseDTO.setMid(publishId);
-                                midSyncResponseDTO.setMerchantName(merchantName);
+                                String certificate = EnvironmentUtil.getVietQrMerchantPrefix()
+                                        + MerchantRefUtil.encryptMerchantId(publishId + merchantName);
+                                merchantSyncEntity.setCertificate(certificate);
+                                merchantSyncEntity.setWebhook(item.getWebhook());
+                                merchantSyncEntity.setWebSocket(item.getWebSocket());
 
+                                MidSyncResponseV2DTO midSyncResponseDTO = new MidSyncResponseV2DTO();
+                                // set master data
+                                MasterDataDTO masterData = new MasterDataDTO();
+                                masterData.setMid(StringUtil.getValueNullChecker(""));
+                                masterData.setMidName(StringUtil.getValueNullChecker(""));
+                                masterData.setCertificate(StringUtil.getValueNullChecker(""));
+                                masterData.setWebhook(StringUtil.getValueNullChecker(""));
+                                masterData.setWebSocket(StringUtil.getValueNullChecker(""));
+                                midSyncResponseDTO.setMasterData(masterData);
+                                // set merchants data
+                                List<MidSynchronizeV2DTO> merchantDataDTOS = new ArrayList<>();
+                                for (MidSynchronizeV2DTO merchantDataDTO : dto.getMerchants()) {
+                                    merchantDataDTO.setMerchantFullName(item.getMerchantFullName());
+                                    merchantDataDTO.setMerchantName(merchantName);
+                                    merchantDataDTO.setCertificate(certificate);
+                                    merchantDataDTO.setWebhook(item.getWebhook());
+                                    merchantDataDTO.setWebSocket(item.getWebSocket());
+                                    merchantDataDTOS.add(merchantDataDTO);
+                                }
+
+                                midSyncResponseDTO.setMerchantData(merchantDataDTOS);
                                 midSyncResponseDTOs.add(midSyncResponseDTO);
                                 merchantSyncEntities.add(merchantSyncEntity);
                             }
@@ -452,8 +476,8 @@ public class TerminalSyncController {
 
     @GetMapping("mid/list-mid/v2")
     public ResponseEntity<Object> getMidsExternalV2(@RequestHeader("Authorization") String token,
-                                                  @RequestParam(defaultValue = "1") int page,
-                                                  @RequestParam(defaultValue = "20") int size) {
+                                                    @RequestParam(defaultValue = "1") int page,
+                                                    @RequestParam(defaultValue = "20") int size) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
@@ -469,14 +493,71 @@ public class TerminalSyncController {
                     totalElement = merchantSyncService.countMerchantByMidSync(mid);
                     List<IMerchantSyncPublicDTO> iTerminalSyncDTOs = merchantSyncService
                             .getMerchantByMidSync(mid, offset, size);
+
+                    PageMerchantDTO pageMerchantDTO = new PageMerchantDTO();
                     PageDTO pageDTO = new PageDTO();
                     pageDTO.setPage(page);
                     pageDTO.setSize(size);
                     pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
                     pageDTO.setTotalElement(totalElement);
-                    response.setMetadata(pageDTO);
-                    response.setData(iTerminalSyncDTOs);
-                    result = response;
+                    pageMerchantDTO.setMetadata(pageDTO);
+
+//                    MidSyncResponseV2DTO midSyncResponseDTO = new MidSyncResponseV2DTO();
+//                    for (IMerchantSyncPublicDTO iTerminalSyncDTO : iTerminalSyncDTOs) {
+//                        if (iTerminalSyncDTO.getIsMaster() == true) {
+//                            // set data master merchant and merchant
+//                            MasterDataDTO masterData = new MasterDataDTO();
+//                            masterData.setMid(StringUtil.getValueNullChecker(iTerminalSyncDTO.getMid()));
+//                            masterData.setMidName(StringUtil.getValueNullChecker(iTerminalSyncDTO.getMerchantName()));
+//                            masterData.setCertificate(StringUtil.getValueNullChecker(iTerminalSyncDTO.getCertificate()));
+//                            masterData.setWebhook(StringUtil.getValueNullChecker(iTerminalSyncDTO.getWebhook()));
+//                            masterData.setWebSocket(StringUtil.getValueNullChecker(iTerminalSyncDTO.getWebSocket()));
+////                            merchantData.setMasterData(masterData);
+//                            midSyncResponseDTO.setMasterData(masterData);
+//                            // set merchants data
+//                            List<MidSynchronizeV2DTO> merchantDataDTOS = new ArrayList<>();
+//                            for (MidSynchronizeV2DTO merchantDataDTO : merchantDataDTOS) {
+//                                merchantDataDTO.setMerchantFullName(iTerminalSyncDTO.getMerchantFullName());
+//                                merchantDataDTO.setMerchantName(iTerminalSyncDTO.getMerchantName());
+//                                merchantDataDTO.setCertificate(iTerminalSyncDTO.getCertificate());
+//                                merchantDataDTO.setWebhook(iTerminalSyncDTO.getWebhook());
+//                                merchantDataDTO.setWebSocket(iTerminalSyncDTO.getWebSocket());
+//                                merchantDataDTOS.add(merchantDataDTO);
+//                                midSyncResponseDTO.setMerchantData(merchantDataDTOS);
+//                            }
+//                            pageMerchantDTO.setData(midSyncResponseDTO);
+//                        } else if (iTerminalSyncDTO.getIsMaster() == false){
+////                          set data master merchant and merchant
+//                            MasterDataDTO masterData = new MasterDataDTO();
+//                            masterData.setMid(StringUtil.getValueNullChecker(""));
+//                            masterData.setMidName(StringUtil.getValueNullChecker(""));
+//                            masterData.setCertificate(StringUtil.getValueNullChecker(""));
+//                            masterData.setWebhook(StringUtil.getValueNullChecker(""));
+//                            masterData.setWebSocket(StringUtil.getValueNullChecker(""));
+////                            midSyncResponseDTO.setMasterData(masterData);
+//                            midSyncResponseDTO.setMasterData(masterData);
+//                            // set merchants data
+//                            List<MidSynchronizeV2DTO> merchantDataDTOS = new ArrayList<>();
+//                            for (MidSynchronizeV2DTO merchantDataDTO : merchantDataDTOS) {
+//                                merchantDataDTO.setMerchantFullName(iTerminalSyncDTO.getMerchantFullName());
+//                                merchantDataDTO.setMerchantName(iTerminalSyncDTO.getMerchantName());
+//                                merchantDataDTO.setCertificate(iTerminalSyncDTO.getCertificate());
+//                                merchantDataDTO.setWebhook(iTerminalSyncDTO.getWebhook());
+//                                merchantDataDTO.setWebSocket(iTerminalSyncDTO.getWebSocket());
+//                                merchantDataDTOS.add(merchantDataDTO);
+//                                midSyncResponseDTO.setMerchantData(merchantDataDTOS);
+//                            }
+//                            pageMerchantDTO.setData(midSyncResponseDTO);
+//                        }
+//
+//                        pageMerchantDTO.setData(iTerminalSyncDTOs);
+//                    }
+//                  response.setMetadata(pageDTO);
+//                  response.setData(iTerminalSyncDTOs);
+
+                    pageMerchantDTO.setMetadata(pageDTO);
+                    pageMerchantDTO.setData(iTerminalSyncDTOs);
+                    result = pageMerchantDTO;
                     httpStatus = HttpStatus.OK;
                 } else {
                     logger.error("getMidsExternal: MERCHANT IS NOT EXISTED");
@@ -582,12 +663,13 @@ public class TerminalSyncController {
         return result;
     }
 
-    private ResponseMessageDTO validateMidSyncV2(String accessKey, List<MidSynchronizeDTO> dtos) {
+    private ResponseMessageDTO validateMidSyncV2(String accessKey, List<MidSynchronizeV2DTO> dtos) {
         ResponseMessageDTO result = new ResponseMessageDTO();
         if (Objects.nonNull(dtos)) {
             for (MidSynchronizeDTO item : dtos) {
                 String checkSum = BankEncryptUtil.generateMD5SyncMidChecksum(accessKey, item.getMerchantName(),
                         item.getMerchantIdentity());
+                System.out.println(checkSum);
                 if (BankEncryptUtil.isMatchChecksum(checkSum, item.getCheckSum())) {
                     if (ObjectUtils.allNotNull(item.getMerchantFullName(), item.getMerchantName(), item.getMerchantAddress(),
                             item.getMerchantIdentity(), item.getContactEmail(), item.getContactPhone())) {
@@ -641,7 +723,7 @@ public class TerminalSyncController {
                     } else {
                         logger.error(
                                 "validateTidSync: ERROR: INVALID Tid Sync DTO: " + item.toString()
-                        + " at: " + System.currentTimeMillis());
+                                        + " at: " + System.currentTimeMillis());
                         result = new ResponseMessageDTO("FAILED", "E46");
                         break;
                     }
@@ -816,7 +898,7 @@ public class TerminalSyncController {
             result = code;
         } catch (Exception e) {
             logger.error("getRandomUniqueCodeInTerminalCode: ERROR: " + e.getMessage()
-            + " at: " + System.currentTimeMillis());
+                    + " at: " + System.currentTimeMillis());
         }
         return result;
     }

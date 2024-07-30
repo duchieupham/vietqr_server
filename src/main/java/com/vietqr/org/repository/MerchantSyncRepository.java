@@ -95,9 +95,10 @@ public interface MerchantSyncRepository extends JpaRepository<MerchantSyncEntity
 
     @Query(value = "SELECT publish_id AS mid, full_name AS merchantFullName, "
             + "name AS merchantName, address AS merchantAddress, national_id AS merchantIdentify, "
-            + "email AS contactEmail, phone_no AS contactPhone "
-            + " FROM merchant_sync WHERE (ref_id = :mid OR id = :mid) "
-            + "ORDER BY id "
+            + "email AS contactEmail, phone_no AS contactPhone, certificate AS certificate, "
+            + "web_socket AS webSocket, webhook AS webhook, is_master AS isMaster "
+            + "FROM merchant_sync WHERE (ref_id = :mid OR id = :mid) "
+            + "ORDER BY publish_id DESC "
             + "LIMIT :offset, :size", nativeQuery = true)
     List<IMerchantSyncPublicDTO> getMerchantByMidSync(String mid, int offset, int size);
 

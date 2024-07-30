@@ -3,6 +3,7 @@ package com.vietqr.org.dto;
 public class MidSynchronizeV2DTO extends MidSynchronizeDTO{
     private String career;
     private String webhook;
+    private String webSocket;
     private String certificate;
 
     public MidSynchronizeV2DTO(String merchantFullName, String merchantName, String merchantAddress, String merchantIdentity, String contactEmail, String contactPhone) {
@@ -23,6 +24,14 @@ public class MidSynchronizeV2DTO extends MidSynchronizeDTO{
         this.career = career;
         this.webhook = webhook;
         this.certificate = certificate;
+    }
+
+    public String getWebSocket() {
+        return webSocket;
+    }
+
+    public void setWebSocket(String webSocket) {
+        this.webSocket = webSocket;
     }
 
     public String getCareer() {
