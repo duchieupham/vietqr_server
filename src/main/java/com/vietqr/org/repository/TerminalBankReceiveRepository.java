@@ -56,8 +56,9 @@ public interface TerminalBankReceiveRepository extends JpaRepository<TerminalBan
             "WHERE terminal_code = :terminalCode LIMIT 1", nativeQuery = true)
     String getTerminalBankReceiveByTerminalCode(String terminalCode);
 
-    @Query(value = "SELECT raw_terminal_code AS rawCode, type_of_qr AS qrType, id AS boxId, terminal_code AS code FROM terminal_bank_receive " +
-            "WHERE terminal_code = :terminalCode LIMIT 1", nativeQuery = true)
+    @Query(value = "SELECT raw_terminal_code AS rawCode, type_of_qr AS qrType, id AS boxId, "
+            + "terminal_code AS code, terminal_id AS terminalId FROM terminal_bank_receive "
+            + "WHERE terminal_code = :terminalCode LIMIT 1", nativeQuery = true)
     ISubTerminalCodeDTO getSubTerminalCodeByTerminalCode(String terminalCode);
 
     @Query(value = "SELECT * FROM terminal_bank_receive " +

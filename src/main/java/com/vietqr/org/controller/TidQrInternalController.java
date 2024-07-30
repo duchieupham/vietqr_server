@@ -419,7 +419,7 @@ public class TidQrInternalController {
                         terminalBankReceiveEntity = new TerminalBankReceiveEntity();
                         terminalBankReceiveEntity.setId(UUID.randomUUID().toString());
                     }
-                    terminalBankReceiveEntity.setTerminalId("");
+                    terminalBankReceiveEntity.setTerminalId(dto.getTerminalId());
                     if (terminalEntity != null) {
                         terminalBankReceiveEntity.setSubTerminalAddress(terminalEntity.getAddress());
                     } else {
