@@ -1425,17 +1425,16 @@ public class AccountBankReceiveController {
                     dto.setIsValidService(item.getIsValidService());
                     dto.setValidFeeFrom(item.getValidFeeFrom());
                     dto.setValidFeeTo(item.getValidFeeTo());
+                    dto.setMmsActive(item.getMmsActive());
 
                     /// khi user đã active key để lưu lại
                     List<ICheckKeyActiveDTO> bankReceiveActiveHistoryEntity =
                             bankReceiveActiveHistoryService.getBankReceiveActiveByUserIdAndBankIdBackUp(userId, item.getBankId());
                     for (ICheckKeyActiveDTO checkKeyActiveDTO : bankReceiveActiveHistoryEntity) {
                         if (Objects.nonNull(checkKeyActiveDTO)) {
-//                            dto.setIsActiveKey(true);
                             dto.setTimeActiveKey(checkKeyActiveDTO.getCreateAt());
-                            dto.setKeyActive(checkKeyActiveDTO.getKeyActive());
+                            dto.setKeyActive(StringUtil.getValueNullChecker(checkKeyActiveDTO.getKeyActive()));
                         } else {
-//                            dto.setIsActiveKey(false);
                             dto.setTimeActiveKey(0);
                             StringUtil.isNullOrEmpty(checkKeyActiveDTO.getKeyActive());
                         }
@@ -1459,39 +1458,8 @@ public class AccountBankReceiveController {
                                 dto.setActiveKey(false);
                             }
                         }
-
-//                        int statusByKeyAndBankId = keyActiveBankReceiveService.getStatusByKeyAndBankId(dto.getKeyActive());
-//                        if (statusByKeyAndBankId == 1) {
-//                            dto.setActiveKey(true);
-//                        } else if (statusByKeyAndBankId == 0) {
-//                            dto.setActiveKey(false);
-//                        }
-
                     });
                     thread.start();
-
-                    // check key đó đã active hay chưa
-//                    Thread thread = new Thread(() -> {
-//                        try {
-//                            Integer statusByKeyAndBankId = keyActiveBankReceiveService.getStatusByKeyAndBankId(dto.getKeyActive());
-//                            String IdBankReceiveActiveHistory = bankReceiveActiveHistoryService
-//                                            .getIdBankReceiveActiveByUserIdAndBankId(dto.getUserId(), item.getBankId());
-//                            if  (IdBankReceiveActiveHistory != null) {
-//                                dto.setIsActiveKey(true);
-//                                System.out.println(IdBankReceiveActiveHistory);
-//                                return;
-//                            } else {
-//                                if (statusByKeyAndBankId != null && statusByKeyAndBankId == 1) {
-//                                    dto.setIsActiveKey(true);
-//                                } else if (statusByKeyAndBankId != null && statusByKeyAndBankId == 0) {
-//                                    dto.setIsActiveKey(false);
-//                                }
-//                            }
-//                        }catch (Exception e) {
-//                            System.out.println(e.getMessage());
-//                        }
-//                    });
-//                    thread.start();
 
                     dto.setCaiValue(valueDTO.getCaiValue());
                     VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
