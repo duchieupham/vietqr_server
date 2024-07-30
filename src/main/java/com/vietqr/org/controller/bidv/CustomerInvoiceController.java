@@ -552,7 +552,7 @@ public class CustomerInvoiceController {
                                 getCustomerSyncEntities(transactionReceiveEntity.getId(), dto, transactionReceiveEntity,
                                         finalAccountBankReceiveEntity, DateTimeUtil.getCurrentDateTimeUTC(),
                                         orderId, sign, rawCode, urlLink, transactionReceiveEntity.getTerminalCode());
-                                updateTransaction(dto, transactionReceiveEntity, finalAccountBankReceiveEntity, boxIdRef);
+                                updateTransaction(dto, transactionReceiveEntity, finalAccountBankReceiveEntity, boxIdRef, rawDTO);
                             }
                         }
 
@@ -757,13 +757,24 @@ public class CustomerInvoiceController {
                         "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
             }
         }
-        if (terminalEntity != null) {
-            List<String> userIds = accountBankReceiveShareService.getUserIdsFromTerminalId(terminalEntity.getId(),
-                    accountBankReceiveEntity.getUserId());
-            for (String userId : userIds) {
-                notiEntity.setId(UUID.randomUUID().toString());
-                pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
-                        message, notiEntity, data, userId);
+        if (terminalEntity != null ||
+                (Objects.nonNull(subTerminalCodeDTO)
+                        && !StringUtil.isNullOrEmpty(subTerminalCodeDTO.getTerminalId()))) {
+            List<String> userIds = new ArrayList<>();
+            if (Objects.nonNull(terminalEntity)) {
+                userIds = accountBankReceiveShareService.getUserIdsFromTerminalId(terminalEntity.getId(),
+                        accountBankReceiveEntity.getUserId());
+            } else {
+                userIds = accountBankReceiveShareService.getUserIdsFromTerminalId(subTerminalCodeDTO.getTerminalId(),
+                        accountBankReceiveEntity.getUserId());
+            }
+
+            if (Objects.nonNull(userIds)) {
+                for (String userId : userIds) {
+                    notiEntity.setId(UUID.randomUUID().toString());
+                    pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
+                            message, notiEntity, data, userId);
+                }
             }
         }
         notiEntity.setId(UUID.randomUUID().toString());
@@ -996,14 +1007,23 @@ public class CustomerInvoiceController {
 
     private void pushNotification(String title, String msg, NotificationEntity notiEntity, Map<String, String> data,
             String userId) {
-        if (notiEntity != null) {
-            notificationService.insertNotification(notiEntity);
-        }
-        List<FcmTokenEntity> fcmTokens = new ArrayList<>();
-        fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
-        firebaseMessagingService.sendUsersNotificationWithData(data,
-                fcmTokens,
-                title, msg);
+        try {
+            if (notiEntity != null) {
+                notificationService.insertNotification(notiEntity);
+            }
+        } catch (Exception e) {}
+
+        try {
+            Thread thread = new Thread(() -> {
+                List<FcmTokenEntity> fcmTokens = new ArrayList<>();
+                fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
+                firebaseMessagingService.sendUsersNotificationWithData(data,
+                        fcmTokens,
+                        title, msg);
+            });
+            thread.start();
+        } catch (Exception e) {}
+
         try {
             socketHandler.sendMessageToUser(userId,
                     data);
@@ -1565,11 +1585,11 @@ public class CustomerInvoiceController {
     private void updateTransaction(CustomerInvoicePaymentRequestDTO dto,
                                    TransactionReceiveEntity transactionReceiveEntity,
                                    AccountBankReceiveEntity accountBankReceiveEntity,
-                                   String boxIdRef) {
+                                   String boxIdRef, ISubTerminalCodeDTO iSubTerminalCodeDTO) {
         String amount = processHiddenAmount(transactionReceiveEntity.getAmount(), accountBankReceiveEntity.getId(),
                 accountBankReceiveEntity.isValidService(), transactionReceiveEntity.getId());
         long time = DateTimeUtil.getCurrentDateTimeUTC();
-        String amountForVoice = amount;
+        String amountForVoice = dto.getAmount();
         amount = formatAmountNumber(amount);
         BankTypeEntity bankTypeEntity = bankTypeService
                 .getBankTypeById(accountBankReceiveEntity.getBankTypeId());
@@ -1586,9 +1606,18 @@ public class CustomerInvoiceController {
                     .getTerminalByTerminalCode(transactionReceiveEntity.getTerminalCode(),
                             accountBankReceiveEntity.getBankAccount());
 
-            if (Objects.nonNull(terminalEntity)) {
-                List<String> userIds = terminalService
-                        .getUserIdsByTerminalCode(transactionReceiveEntity.getTerminalCode());
+            if (Objects.nonNull(terminalEntity) ||
+                    (Objects.nonNull(iSubTerminalCodeDTO))
+            && !StringUtil.isNullOrEmpty(iSubTerminalCodeDTO.getTerminalId())) {
+                List<String> userIds = new ArrayList<>();
+                if (Objects.nonNull(terminalEntity)) {
+                    userIds = accountBankReceiveShareService
+                            .getUserIdsFromTerminalId(terminalEntity.getId(), accountBankReceiveEntity.getUserId());
+                } else {
+                    userIds = accountBankReceiveShareService
+                            .getUserIdsFromTerminalId(iSubTerminalCodeDTO.getTerminalId(), accountBankReceiveEntity.getUserId());
+                }
+
                 String prefix = "";
                 if (transactionReceiveEntity.getTransType().equalsIgnoreCase("D")) {
                     prefix = "-";
@@ -1599,7 +1628,7 @@ public class CustomerInvoiceController {
                     TransactionTerminalTempEntity transactionTerminalTempEntity = new TransactionTerminalTempEntity();
                     transactionTerminalTempEntity.setId(UUID.randomUUID().toString());
                     transactionTerminalTempEntity.setTransactionId(transactionReceiveEntity.getId());
-                    transactionTerminalTempEntity.setTerminalCode(terminalEntity.getCode());
+                    transactionTerminalTempEntity.setTerminalCode(transactionReceiveEntity.getTerminalCode());
                     transactionTerminalTempEntity.setTime(DateTimeUtil.getCurrentDateTimeUTC());
                     transactionTerminalTempEntity.setAmount(Long.parseLong(dto.getAmount() + ""));
                     transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTempEntity);
@@ -1617,7 +1646,7 @@ public class CustomerInvoiceController {
                                 + NotificationUtil.getNotiDescUpdateTransSuffix2()
                                 + prefix + amount
                                 + NotificationUtil.getNotiDescUpdateTransSuffix3()
-                                + terminalEntity.getName()
+                                + ""
                                 + NotificationUtil.getNotiDescUpdateTransSuffix4()
                                 + transactionReceiveEntity.getContent();
                         notiEntity.setId(notificationUUID.toString());
@@ -1627,44 +1656,94 @@ public class CustomerInvoiceController {
                         notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
                         notiEntity.setUserId(userId);
                         notiEntity.setData(transactionReceiveEntity.getId());
-                        Map<String, String> data = autoMapUpdateTransPushNotification(
-                                new NotificationFcmMapDTO(
-                                        notificationUUID.toString(),
-                                        bankTypeEntity,
-                                        StringUtil.getValueNullChecker(terminalEntity.getName()),
-                                        StringUtil.getValueNullChecker(terminalEntity.getCode()),
-                                        StringUtil.getValueNullChecker(terminalEntity.getRawTerminalCode()),
-                                        amount,
-                                        transactionReceiveEntity
-                                )
-                        );
+                        Map<String, String> data = new HashMap<>();
+                        if (terminalEntity != null) {
+                            data = autoMapUpdateTransPushNotification(
+                                    new NotificationFcmMapDTO(
+                                            notificationUUID.toString(),
+                                            bankTypeEntity,
+                                            StringUtil.getValueNullChecker(terminalEntity.getName()),
+                                            StringUtil.getValueNullChecker(terminalEntity.getCode()),
+                                            StringUtil.getValueNullChecker(terminalEntity.getRawTerminalCode()),
+                                            amount,
+                                            transactionReceiveEntity
+                                    )
+                            );
+                        } else {
+                            data = autoMapUpdateTransPushNotification(
+                                    new NotificationFcmMapDTO(
+                                            notificationUUID.toString(),
+                                            bankTypeEntity,
+                                            "",
+                                            "",
+                                            "",
+                                            amount,
+                                            transactionReceiveEntity
+                                    )
+                            );
+                        }
+                        Map<String, String> finalData = data;
                         executorService.submit(() -> pushNotification(NotificationUtil
-                                .getNotiTitleUpdateTransaction(), message, notiEntity, data, userId));
+                                .getNotiTitleUpdateTransaction(), message, notiEntity, finalData, userId));
                     }
                     executorService.shutdown();
                 }
-
                 String message = prefix + amount + " VND"
                         + " | TK: " + bankTypeEntity.getBankShortName() + " - "
                         + accountBankReceiveEntity.getBankAccount()
                         + " | " + convertLongToDate(time)
                         + " | " + dto.getBill_id()
                         + " | ND: " + transactionReceiveEntity.getContent();
+
+                String notificationUUID = UUID.randomUUID().toString();
+                Map<String, String> data = new HashMap<>();
+                if (terminalEntity != null) {
+                    data = autoMapUpdateTransPushNotification(
+                            new NotificationFcmMapDTO(
+                                    notificationUUID,
+                                    bankTypeEntity,
+                                    StringUtil.getValueNullChecker(terminalEntity.getName()),
+                                    StringUtil.getValueNullChecker(terminalEntity.getCode()),
+                                    StringUtil.getValueNullChecker(terminalEntity.getRawTerminalCode()),
+                                    amount,
+                                    transactionReceiveEntity
+                            )
+                    );
+                } else {
+                    data = autoMapUpdateTransPushNotification(
+                            new NotificationFcmMapDTO(
+                                    notificationUUID,
+                                    bankTypeEntity,
+                                    "",
+                                    "",
+                                    "",
+                                    amount,
+                                    transactionReceiveEntity
+                            )
+                    );
+                }
+
+                NotificationEntity notiEntity = new NotificationEntity();
+                String msg = NotificationUtil.getNotiDescUpdateTransSuffix1()
+                        + accountBankReceiveEntity.getBankAccount()
+                        + NotificationUtil.getNotiDescUpdateTransSuffix2()
+                        + prefix + amount
+                        + NotificationUtil.getNotiDescUpdateTransSuffix3()
+                        + ""
+                        + NotificationUtil.getNotiDescUpdateTransSuffix4()
+                        + transactionReceiveEntity.getContent();
+                notiEntity.setId(notificationUUID);
+                notiEntity.setRead(false);
+                notiEntity.setMessage(msg);
+                notiEntity.setTime(time);
+                notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
+                notiEntity.setUserId(accountBankReceiveEntity.getUserId());
+                notiEntity.setData(transactionReceiveEntity.getId());
+                pushNotification(NotificationUtil
+                        .getNotiTitleUpdateTransaction(), msg, notiEntity, data, accountBankReceiveEntity.getUserId());
+                pushNotificationQrBox(boxIdRef, amountForVoice, data);
                 // INSERT TELEGRAM, GG CHAT, LARK
                 doInsertSocialMedia(accountBankReceiveEntity.getId(), message);
-
-                Map<String, String> data = autoMapUpdateTransPushNotification(
-                        new NotificationFcmMapDTO(
-                                UUID.randomUUID().toString(),
-                                bankTypeEntity,
-                                StringUtil.getValueNullChecker(terminalEntity.getName()),
-                                StringUtil.getValueNullChecker(terminalEntity.getCode()),
-                                StringUtil.getValueNullChecker(terminalEntity.getRawTerminalCode()),
-                                amount,
-                                transactionReceiveEntity
-                        )
-                );
-                pushNotificationQrBox(boxIdRef, amountForVoice, data);
             } else {
                 logger.info("transaction-sync - userIds empty.");
                 // not have terminal in terminal table but still available in
