@@ -5,4 +5,5 @@ public interface ISubTerminalCodeDTO {
     String getCode();
     String getBoxId();
     int getQrType();
+    String getTerminalId();
 }
