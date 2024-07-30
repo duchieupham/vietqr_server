@@ -107,4 +107,6 @@ public interface InvoiceService {
     void updateDataInvoiceByBankId(String data, String bankId);
 
     void updateFileInvoiceById(String id, String invoiceId);
+
+    List<IInvoiceLatestDTO> getInvoiceLatestByUserId(String userId);
 }

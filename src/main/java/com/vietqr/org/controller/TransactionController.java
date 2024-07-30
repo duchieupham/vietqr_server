@@ -1522,7 +1522,6 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-
     @GetMapping("transactions")
     public ResponseEntity<List<TransactionRelatedDTO>> getTransactionsFilter(
             @RequestParam(value = "bankId") String bankId,
@@ -1580,6 +1579,73 @@ public class TransactionController {
                 result.setTotalSettled(0);
                 result.setTotalUnsettled(0);
                 result.setTotalCashUnsettled(0L);
+            }
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getTransactionOverviewWeb: ERROR: " + e.getMessage());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("transactions/overview/v2")
+    public ResponseEntity<TransStatisticResponseV2DTO> getTransactionOverviewV2(
+            @RequestParam(value = "bankId") String bankId,
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "fromDate") String fromDate,
+            @RequestParam(value = "toDate") String toDate) {
+        TransStatisticResponseV2DTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            TransStatisticV2DTO dto = null;
+            dto = transactionReceiveService
+                    .getTransactionOverviewV2(bankId, fromDate, toDate);
+            if (Objects.nonNull(dto)) {
+                result = new TransStatisticResponseV2DTO();
+                result.setCountCredit(dto.getCountCredit());
+                result.setTotalCredit(dto.getTotalCredit());
+                result.setCountDebit(dto.getCountDebit());
+                result.setTotalDebit(dto.getTotalDebit());
+            } else {
+                result = new TransStatisticResponseV2DTO();
+                result.setCountCredit(0);
+                result.setTotalCredit(0);
+                result.setCountDebit(0);
+                result.setTotalDebit(0);
+            }
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getTransactionOverviewWeb: ERROR: " + e.getMessage());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("transactions/latest")
+    public ResponseEntity<List<TransactionLatestDTO>> getTransactionLatest(
+            @RequestParam(value = "bankId") String bankId,
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "limit") int limit) {
+        List<TransactionLatestDTO> result = new ArrayList<>();
+        HttpStatus httpStatus = null;
+        try {
+            List<ITransactionLatestDTO> dtos = null;
+            dtos = transactionReceiveService
+                    .getTransactionLastest(bankId, limit);
+            if (Objects.nonNull(dtos) && !dtos.isEmpty()) {
+                result = dtos.stream().map(dto -> {
+                    TransactionLatestDTO responseDTO = new TransactionLatestDTO();
+                    responseDTO.setTransactionId(dto.getTransactionId());
+                    responseDTO.setTransType(dto.getTransType());
+                    responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
+                    responseDTO.setStatus(dto.getStatus());
+                    responseDTO.setTime(dto.getTime());
+                    responseDTO.setTimePaid(dto.getTimePaid());
+                    responseDTO.setType(dto.getType());
+                    return responseDTO;
+                }).collect(Collectors.toList());
+            } else {
+                result = new ArrayList<>();
             }
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {

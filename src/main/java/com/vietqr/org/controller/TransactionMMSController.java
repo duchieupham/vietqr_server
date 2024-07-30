@@ -436,20 +436,7 @@ public class TransactionMMSController {
                                         data1.put("traceId", "");
                                         data1.put("transType", "C");
                                         data1.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
-                                        if (!StringUtil.isNullOrEmpty(rawCode)) {
-                                            try {
-                                                BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
-                                                String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
-                                                data1.put("message", String.format(messageForBox, amountForVoice));
-                                                String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(rawCode);
-                                                socketHandler.sendMessageToBoxId(idRefBox, data1);
-                                                logger.info("WS: socketHandler.sendMessageToQRBox - "
-                                                        + rawCode + " at: " + System.currentTimeMillis());
-                                            } catch (IOException e) {
-                                                logger.error(
-                                                        "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
-                                            }
-                                        }
+                                        pushNotificationBoxIdRef(amountForVoice, amountForShow, rawCode);
                                     } catch (Exception ignored) {
                                     }
                                 }
@@ -802,20 +789,7 @@ public class TransactionMMSController {
                                         }
                                         try {
                                             if (isSubTerminal) {
-                                                if (!StringUtil.isNullOrEmpty(subRawCode)) {
-                                                    try {
-                                                        BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
-                                                        String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
-                                                        data.put("message", String.format(messageForBox, amountForVoice));
-                                                        String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(subRawCode);
-                                                        socketHandler.sendMessageToBoxId(idRefBox, data);
-                                                        logger.info("WS: socketHandler.sendMessageToQRBox - "
-                                                                + subRawCode + " at: " + System.currentTimeMillis());
-                                                    } catch (IOException e) {
-                                                        logger.error(
-                                                                "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
-                                                    }
-                                                }
+                                                pushNotificationBoxIdRef(amountForVoice, amountForShow, subRawCode);
                                             }
                                         } catch (Exception e) {
                                             logger.error("transaction-mms-sync: ERROR: " + e.toString());
@@ -1115,20 +1089,9 @@ public class TransactionMMSController {
                                             logger.info("transaction-mms-sync: NOT FOUND TerminalBankEntity");
                                         }
                                         try {
-                                            if (!StringUtil.isNullOrEmpty(subRawCode)) {
-                                                try {
-                                                    BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
-                                                    String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
-                                                    data.put("message", String.format(messageForBox, amountForVoice));
-                                                    String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(subRawCode);
-                                                    socketHandler.sendMessageToBoxId(idRefBox, data);
-                                                    logger.info("WS: socketHandler.sendMessageToQRBox MMS - "
-                                                            + subRawCode + " at: " + System.currentTimeMillis());
-                                                } catch (IOException e) {
-                                                    logger.error(
-                                                            "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
-                                                }
-                                            }
+                                            pushNotificationBoxIdRef(amountForVoice,
+                                                    StringUtil.formatNumberAsString(entity.getDebitAmount()),
+                                                    subRawCode);
                                         } catch (Exception e) {
                                             logger.error("transaction-mms-sync: ERROR: " + e.toString());
                                         }
@@ -2689,5 +2652,25 @@ public class TransactionMMSController {
             }
         }
         return result;
+    }
+
+    private void pushNotificationBoxIdRef(String amountForVoice, String amount, String boxIdRef) {
+        Map<String, String> data = new HashMap<>();
+        if (!StringUtil.isNullOrEmpty(boxIdRef)) {
+            try {
+                BoxEnvironmentResDTO messageBox = systemSettingService.getSystemSettingBoxEnv();
+                String messageForBox = StringUtil.getMessageBox(messageBox.getBoxEnv());
+                data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+                data.put("amount", amount);
+                data.put("message", String.format(messageForBox, amountForVoice));
+                String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
+                socketHandler.sendMessageToBoxId(idRefBox, data);
+                logger.info("WS: socketHandler.sendMessageToQRBox - "
+                        + boxIdRef + " at: " + System.currentTimeMillis());
+            } catch (IOException e) {
+                logger.error(
+                        "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
+            }
+        }
     }
 }
