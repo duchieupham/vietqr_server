@@ -829,7 +829,26 @@ public class VietQRController {
 									vietQRVaRequestDTO.setUserBankName(accountBankEntity.getBankAccountName());
 									vietQRVaRequestDTO.setDescription(StringUtil.getValueNullChecker(billId));
 
-									ResponseMessageDTO generateVaInvoiceVietQR = CustomerVaUtil.generateVaInvoiceVietQR(vietQRVaRequestDTO, accountBankEntity.getCustomerId());
+									ResponseMessageDTO generateVaInvoiceVietQR = new ResponseMessageDTO("SUCCESS", "");
+									if (!EnvironmentUtil.isProduction()) {
+										String bankAccountRequest= "";
+										if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
+											bankAccountRequest = dto.getBankAccount();
+										} else {
+											bankAccountRequest = dto.getCustomerBankAccount();
+										}
+										String caiValue = caiBankService.getCaiValue(bankTypeEntity.getId());
+										VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+										vietQRGenerateDTO.setCaiValue(caiValue);
+										vietQRGenerateDTO.setAmount(dto.getAmount() + "");
+										content = billId;
+										vietQRGenerateDTO.setContent(content);
+										vietQRGenerateDTO.setBankAccount(bankAccountRequest);
+										qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+										generateVaInvoiceVietQR = new ResponseMessageDTO("SUCCESS", qr);
+									} else {
+										generateVaInvoiceVietQR = CustomerVaUtil.generateVaInvoiceVietQR(vietQRVaRequestDTO, accountBankEntity.getCustomerId());
+									}
 									if ("SUCCESS".equals(generateVaInvoiceVietQR.getStatus())) {
 										qr = generateVaInvoiceVietQR.getMessage();
 
@@ -911,7 +930,7 @@ public class VietQRController {
 				} finally {
 					if (Objects.nonNull(accountBankEntity) && !StringUtil.isNullOrEmpty(qr)) {
 						VietQRBIDVCreateDTO dto1 = new VietQRBIDVCreateDTO();
-						dto1.setContent(billId);
+						dto1.setContent(dto.getContent());
 						dto1.setAmount(dto.getAmount() + "");
 						dto1.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
 						dto1.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
@@ -2069,7 +2088,7 @@ public class VietQRController {
 							}
 						}
 						VietQRBIDVCreateDTO dto1 = new VietQRBIDVCreateDTO();
-						dto1.setContent(billId);
+						dto1.setContent(dto.getContent());
 						dto1.setAmount(dto.getAmount() + "");
 						dto1.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
 						if (StringUtil.isNullOrEmpty(dto.getTerminalCode()) &&
@@ -2421,7 +2440,7 @@ public class VietQRController {
 				transactionEntity.setRefId("");
 				transactionEntity.setType(0);
 				transactionEntity.setStatus(0);
-				transactionEntity.setTraceId("");
+				transactionEntity.setTraceId(dto.getBillId());
 				transactionEntity.setTimePaid(0);
 				transactionEntity.setTerminalCode(dto.getTerminalCode());
 				transactionEntity.setQrCode(dto.getQr());

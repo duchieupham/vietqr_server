@@ -309,4 +309,9 @@ public class InvoiceServiceImpl implements InvoiceService {
     public void updateFileInvoiceById(String id, String invoiceId) {
         repo.updateFileInvoiceById(id, invoiceId);
     }
+
+    @Override
+    public List<IInvoiceLatestDTO> getInvoiceLatestByUserId(String userId) {
+        return repo.getInvoiceLatestByUserId(userId);
+    }
 }
