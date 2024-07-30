@@ -68,7 +68,8 @@ public interface CustomerSyncRepository extends JpaRepository<CustomerSyncEntity
             + "WHEN a.user_id IS NOT NULL AND a.user_id <> '' THEN 'Ecommerce' "
             + "ELSE 'API service' "
             + "END AS platform "
-            + "FROM customer_sync a ", nativeQuery = true)
+            + "FROM customer_sync a "
+            + "ORDER BY a.merchant ASC", nativeQuery = true)
     List<CustomerSyncListDTO> getCustomerSyncList();
 
     @Query(value = "SELECT a.id, a.merchant, a.information AS url, a.ip_address AS ip, a.port, "
