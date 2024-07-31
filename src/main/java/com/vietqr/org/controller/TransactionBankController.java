@@ -6164,6 +6164,17 @@ public class TransactionBankController {
                 data.put("amount", amount);
                 data.put("message", String.format(messageForBox, amountForVoice));
                 String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
+                try {
+                    MessageBoxDTO messageBoxDTO = new MessageBoxDTO();
+                    messageBoxDTO.setNotificationType(NotificationUtil.getNotiTypeUpdateTransaction());
+                    messageBoxDTO.setAmount(amount);
+                    messageBoxDTO.setMessage(String.format(messageForBox, amountForVoice));
+                    ObjectMapper mapper = new ObjectMapper();
+                    mqttMessagingService.sendMessageToBoxId(idRefBox, mapper.writeValueAsString(messageBoxDTO));
+                } catch (Exception e) {
+                    logger.error("MQTT: socketHandler.sendMessageToQRBox - "
+                            + boxIdRef + " at: " + System.currentTimeMillis());
+                }
                 socketHandler.sendMessageToBoxId(idRefBox, data);
                 logger.info("WS: socketHandler.sendMessageToQRBox - "
                         + boxIdRef + " at: " + System.currentTimeMillis());
