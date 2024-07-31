@@ -47,11 +47,11 @@ public interface MerchantSyncRepository extends JpaRepository<MerchantSyncEntity
     IMerchantInfoDTO getMerchantSyncInfo(String merchantId);
 
 
-    @Query(value="SELECT id, name, vso, business_type AS bussinessType,"
-             + " address , national_id AS nationalId, is_active AS isActive, "
-             + " user_id as userId , account_customer_id AS accountCustomerId "
-             + " FROM merchant_sync "
-            + " WHERE name LIKE %:value%  LIMIT :offset, :size" , nativeQuery = true)
+    @Query(value = "SELECT id, name, vso, business_type AS bussinessType,"
+            + " address , national_id AS nationalId, is_active AS isActive, "
+            + " user_id as userId , account_customer_id AS accountCustomerId "
+            + " FROM merchant_sync "
+            + " WHERE name LIKE %:value%  LIMIT :offset, :size", nativeQuery = true)
     List<IMerchantSyncDTO> getAllMerchants(@Param("value") String value, @Param("offset") int offset, @Param("size") int size);
 
     @Query(value = "SELECT id, name, vso, business_type AS businessType,"
@@ -80,6 +80,23 @@ public interface MerchantSyncRepository extends JpaRepository<MerchantSyncEntity
     @Query(value = "UPDATE merchant_sync SET name = :midName WHERE id = :mid", nativeQuery = true)
     void updateMerchantName(String midName, String mid);
 
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE merchant_sync SET account_customer_id = :accountCustomerId, address = :address, career = :career, " +
+            "business_type = :businessType, name = :name, user_id = :userId, vso = :vso, email = :email, " +
+            "ref_id = :refId, full_name = :fullName, phone_no = :phoneNo WHERE publish_id = :publishId", nativeQuery = true)
+    void updateMerchantV2(@Param("publishId") String publishId,
+                          @Param("accountCustomerId") String accountCustomerId,
+                          @Param("address") String address,
+                          @Param("career") String career,
+                          @Param("businessType") String businessType,
+                          @Param("name") String name,
+                          @Param("userId") String userId,
+                          @Param("vso") String vso,
+                          @Param("email") String email,
+                          @Param("refId") String refId,
+                          @Param("fullName") String fullName,
+                          @Param("phoneNo") String phoneNo);
     @Query(value = "SELECT * FROM merchant_sync "
             + "WHERE publish_id = :mid LIMIT 1", nativeQuery = true)
     MerchantSyncEntity getMerchantSyncByPublicId(String mid);
@@ -90,17 +107,28 @@ public interface MerchantSyncRepository extends JpaRepository<MerchantSyncEntity
     @Query(value = "SELECT * FROM merchant_sync WHERE id = :mid LIMIT 1", nativeQuery = true)
     MerchantSyncEntity getMerchantSyncById(String mid);
 
+    @Query(value = "SELECT * FROM merchant_sync WHERE publish_id = :mid LIMIT 1", nativeQuery = true)
+    MerchantSyncEntity getMerchantSyncByPublishId(String mid);
+
     @Query(value = "SELECT COUNT(id) FROM merchant_sync WHERE (ref_id = :mid OR id = :mid) LIMIT 1", nativeQuery = true)
     int countMerchantByMidSync(String mid);
 
     @Query(value = "SELECT publish_id AS mid, full_name AS merchantFullName, "
             + "name AS merchantName, address AS merchantAddress, national_id AS merchantIdentify, "
             + "email AS contactEmail, phone_no AS contactPhone, certificate AS certificate, "
-            + "web_socket AS webSocket, webhook AS webhook, is_master AS isMaster "
+            + "client_id AS clientId, webhook AS webhook, is_master AS isMaster "
             + "FROM merchant_sync WHERE (ref_id = :mid OR id = :mid) "
             + "ORDER BY publish_id DESC "
             + "LIMIT :offset, :size", nativeQuery = true)
     List<IMerchantSyncPublicDTO> getMerchantByMidSync(String mid, int offset, int size);
+
+    @Query(value = "SELECT publish_id AS mid, full_name AS merchantFullName, "
+            + "name AS merchantName, address AS merchantAddress, national_id AS merchantIdentify, "
+            + "email AS contactEmail, phone_no AS contactPhone, certificate AS certificate, "
+            + "client_id AS clientId, webhook AS webhook, is_master AS isMaster "
+            + "FROM merchant_sync WHERE (ref_id = :mid OR id = :mid) "
+            + "ORDER BY publish_id DESC ", nativeQuery = true)
+    List<IMerchantSyncPublicDTO> getMerchantByMidSyncV2(String mid);
 
     @Query(value = "SELECT id FROM merchant_sync "
             + "WHERE publish_id = :publicId LIMIT 1", nativeQuery = true)

@@ -56,13 +56,13 @@ public class MerchantSyncEntity implements Serializable {
     @Column(name = "webhook")
     private String webhook = "";
 
-    @Column(name = "webSocket")
-    private String webSocket = "";
+    @Column(name = "clientId")
+    private String clientId = "";
 
     public MerchantSyncEntity() {
     }
 
-    public MerchantSyncEntity(String id, String name, String fullName, String vso, String businessType, String career, String address, String nationalId, boolean isActive, String userId, String accountCustomerId, String email, String phoneNo, String publishId, String refId, boolean isMaster, String certificate, String webhook, String webSocket) {
+    public MerchantSyncEntity(String id, String name, String fullName, String vso, String businessType, String career, String address, String nationalId, boolean isActive, String userId, String accountCustomerId, String email, String phoneNo, String publishId, String refId, boolean isMaster, String certificate, String webhook, String clientId) {
         this.id = id;
         this.name = name;
         this.fullName = fullName;
@@ -81,7 +81,7 @@ public class MerchantSyncEntity implements Serializable {
         this.isMaster = isMaster;
         this.certificate = certificate;
         this.webhook = webhook;
-        this.webSocket = webSocket;
+        this.clientId = clientId;
     }
 
     public MerchantSyncEntity(String id, String name, String vso, String businessType,
@@ -115,12 +115,12 @@ public class MerchantSyncEntity implements Serializable {
         this.webhook = webhook;
     }
 
-    public String getWebSocket() {
-        return webSocket;
+    public String getClientId() {
+        return clientId;
     }
 
-    public void setWebSocket(String webSocket) {
-        this.webSocket = webSocket;
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
     }
 
     public String getEmail() {

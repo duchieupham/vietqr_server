@@ -23,6 +23,7 @@ public class NotificationUtil {
 	private static final String NOTI_SEND_DYNAMIC_QR = "N17";
 	private static final String NOTI_SEND_INVOICE = "N18";
 	private static final String NOTI_SEND_INVOICE_CREATE = "N19";
+	private static final String NOTI_SYNC_MID_V2 = "N20";
 
 	// Title
 	private static final String NOTI_TITLE_TRANSACTION = "Thông báo biến động số dư";
@@ -136,6 +137,9 @@ public class NotificationUtil {
 
 	public static String getNotiInvoiceCreated() {
 		return NOTI_SEND_INVOICE_CREATE;
+	}
+	public static String getNotiSyncMidV2() {
+		return NOTI_SYNC_MID_V2;
 	}
 
 	public static String getNotiTitleMobileTopup() {

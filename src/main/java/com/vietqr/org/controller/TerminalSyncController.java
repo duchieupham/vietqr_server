@@ -1,5 +1,6 @@
 package com.vietqr.org.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.service.*;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -49,6 +51,12 @@ public class TerminalSyncController {
 
     @Autowired
     private BankTypeService bankTypeService;
+
+    @Autowired
+    SocketHandler socketHandler;
+
+    @Autowired
+    private SystemSettingService systemSettingService;
 
     @PostMapping("tid/synchronize/v1")
     public ResponseEntity<Object> syncTidExternal(@RequestHeader("Authorization") String token,
@@ -375,7 +383,7 @@ public class TerminalSyncController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @PostMapping("mid/synchronize/v2")
+    @PostMapping("mid/synchronize/v2") // sửa lại update data merchant-syn theo merchantId lúc tạo certificate
     public ResponseEntity<Object> syncMidExternalV2(@RequestHeader("Authorization") String token,
                                                     @RequestBody MidSyncV2DTO dto) {
         Object result = null;
@@ -391,63 +399,91 @@ public class TerminalSyncController {
                     if (Objects.nonNull(merchantSyncAdmin) && merchantSyncAdmin.getIsMaster()) {
                         ResponseMessageDTO validateMidSync = validateMidSyncV2(accessKey, dto.getMerchants());
                         if ("SUCCESS".equals(validateMidSync.getStatus())) {
-                            List<MidSyncResponseV2DTO> midSyncResponseDTOs = new ArrayList<>();
                             List<MerchantSyncEntity> merchantSyncEntities = new ArrayList<>();
+                            ResponseMerchantV2DTO responseMerchantV2DTO = new ResponseMerchantV2DTO();
                             for (MidSynchronizeV2DTO item : dto.getMerchants()) {
                                 String publishId = generateRandomMerPublishId();
                                 String merchantName = item.getMerchantName().toUpperCase();
-                                MerchantSyncEntity merchantSyncEntity = new MerchantSyncEntity();
-                                UUID idMerchant = UUID.randomUUID();
-                                merchantSyncEntity.setId(idMerchant.toString());
-                                merchantSyncEntity.setName(merchantName);
-                                merchantSyncEntity.setFullName(item.getMerchantFullName());
-                                merchantSyncEntity.setVso("");
-                                merchantSyncEntity.setBusinessType("");
-                                merchantSyncEntity.setCareer(item.getCareer());
-                                merchantSyncEntity.setAddress(item.getMerchantAddress());
-                                merchantSyncEntity.setNationalId(item.getMerchantIdentity());
-                                merchantSyncEntity.setIsActive(true);
-                                merchantSyncEntity.setUserId("");
-                                merchantSyncEntity.setAccountCustomerId("");
-                                merchantSyncEntity.setEmail(item.getContactEmail());
-                                merchantSyncEntity.setPhoneNo(item.getContactPhone());
-                                merchantSyncEntity.setPublishId(publishId);
-                                merchantSyncEntity.setRefId(checkExistMerchantSync);
-
+                                String merchantIdentity = item.getMerchantIdentity().toUpperCase();
                                 String certificate = EnvironmentUtil.getVietQrMerchantPrefix()
-                                        + MerchantRefUtil.encryptMerchantId(publishId + merchantName);
-                                merchantSyncEntity.setCertificate(certificate);
-                                merchantSyncEntity.setWebhook(item.getWebhook());
-                                merchantSyncEntity.setWebSocket(item.getWebSocket());
+                                        + MerchantRefUtil.encryptMerchantId(publishId + merchantIdentity);
+                                // update lại data trong merchant-sync theo merchantId truyền vào
+                                MerchantSyncEntity merchantSyncEntity =
+                                        merchantSyncService.getMerchantSyncByPublishId(item.getMerchantId());
+                                if (merchantSyncEntity != null) {
+                                    // update data merchant-sync
+                                    merchantSyncService.updateMerchantV2(item.getMerchantId(), "", "", item.getCareer(),
+                                            "", merchantName, "", "", item.getContactEmail(),
+                                            checkExistMerchantSync, item.getMerchantFullName(), item.getContactPhone());
 
-                                MidSyncResponseV2DTO midSyncResponseDTO = new MidSyncResponseV2DTO();
-                                // set master data
-                                MasterDataDTO masterData = new MasterDataDTO();
-                                masterData.setMid(StringUtil.getValueNullChecker(""));
-                                masterData.setMidName(StringUtil.getValueNullChecker(""));
-                                masterData.setCertificate(StringUtil.getValueNullChecker(""));
-                                masterData.setWebhook(StringUtil.getValueNullChecker(""));
-                                masterData.setWebSocket(StringUtil.getValueNullChecker(""));
-                                midSyncResponseDTO.setMasterData(masterData);
-                                // set merchants data
-                                List<MidSynchronizeV2DTO> merchantDataDTOS = new ArrayList<>();
-                                for (MidSynchronizeV2DTO merchantDataDTO : dto.getMerchants()) {
-                                    merchantDataDTO.setMerchantFullName(item.getMerchantFullName());
-                                    merchantDataDTO.setMerchantName(merchantName);
-                                    merchantDataDTO.setCertificate(certificate);
-                                    merchantDataDTO.setWebhook(item.getWebhook());
-                                    merchantDataDTO.setWebSocket(item.getWebSocket());
-                                    merchantDataDTOS.add(merchantDataDTO);
+                                    // trả response
+                                    String mid = checkExistMerchantSync;
+                                    List<IMerchantSyncPublicDTO> iTerminalSyncDTOs = merchantSyncService
+                                            .getMerchantByMidSyncV2(mid);
+                                    for (IMerchantSyncPublicDTO iMerchantSyncPublicDTO : iTerminalSyncDTOs) {
+                                        if (iMerchantSyncPublicDTO.getIsMaster() == true) {
+//                                      set data master merchant and merchant
+                                            MasterDataDTO masterData = new MasterDataDTO();
+                                            masterData.setMid(StringUtil.getValueNullChecker(iMerchantSyncPublicDTO.getMid()));
+                                            masterData.setMerchantName(StringUtil.getValueNullChecker(iMerchantSyncPublicDTO.getMerchantName()));
+                                            masterData.setMerchantFullName(StringUtil.getValueNullChecker(iMerchantSyncPublicDTO.getMerchantFullName()));
+                                            masterData.setMerchantAddress(StringUtil.getValueNullChecker(iMerchantSyncPublicDTO.getMerchantAddress()));
+                                            masterData.setContactEmail(StringUtil.getValueNullChecker(iMerchantSyncPublicDTO.getContactEmail()));
+                                            masterData.setContactPhone(StringUtil.getValueNullChecker(iMerchantSyncPublicDTO.getContactPhone()));
+                                            masterData.setMerchantIdentify(StringUtil.getValueNullChecker(iMerchantSyncPublicDTO.getMerchantIdentify()));
+                                            masterData.setCertificate(StringUtil.getValueNullChecker(iMerchantSyncPublicDTO.getCertificate()));
+                                            masterData.setWebhook(StringUtil.getValueNullChecker(iMerchantSyncPublicDTO.getWebhook()));
+                                            masterData.setClientId(StringUtil.getValueNullChecker(iMerchantSyncPublicDTO.getClientId()));
+                                            responseMerchantV2DTO.setMasterData(masterData);
+                                        }
+                                    }
+                                    // set merchants data
+                                    List<MidSynchronizeV2DTO> merchantDataDTOS = new ArrayList<>();
+                                    for (MidSynchronizeV2DTO merchantDataDTO : dto.getMerchants()) {
+                                        merchantDataDTO.setMerchantFullName(item.getMerchantFullName());
+                                        merchantDataDTO.setMerchantName(merchantName);
+                                        merchantDataDTO.setMerchantAddress(item.getMerchantAddress());
+                                        merchantDataDTO.setMerchantIdentity(item.getMerchantIdentity());
+                                        merchantDataDTO.setContactPhone(item.getContactPhone());
+                                        merchantDataDTO.setContactEmail(item.getContactEmail());
+                                        merchantDataDTO.setCertificate(certificate);
+                                        merchantDataDTO.setWebhook(item.getWebhook());
+                                        merchantDataDTO.setClientId(merchantSyncEntity.getClientId());
+                                        merchantDataDTOS.add(merchantDataDTO);
+                                    }
+
+                                    // push webSocket
+                                    Map<String, String> data = new HashMap<>();
+                                    data.put("notificationType", NotificationUtil.getNotiSyncMidV2());
+                                    data.put("merchantFullName", item.getMerchantFullName());
+                                    data.put("merchantName", item.getMerchantName());
+                                    data.put("merchantAddress", item.getMerchantAddress());
+                                    data.put("merchantIdentity", item.getMerchantIdentity());
+                                    data.put("contactEmail", item.getContactEmail());
+                                    data.put("contactPhone", item.getContactPhone());
+                                    data.put("merchantId", item.getMerchantId());
+                                    data.put("career", item.getCareer());
+                                    data.put("webhook", item.getWebhook());
+                                    data.put("certificate", item.getCertificate());
+                                    socketHandler.sendMessageToClientId(merchantSyncEntity.getClientId(), data);
+
+                                    responseMerchantV2DTO.setData(merchantDataDTOS);
+                                    merchantSyncEntities.add(merchantSyncEntity);
+
+                                    responseMerchantV2DTO.setStatus("SUCCESS");
+                                    result = responseMerchantV2DTO;
+                                    httpStatus = HttpStatus.OK;
+                                } else {
+                                    result = new ResponseMessageDTO("FAILED", "E161");
+                                    httpStatus = HttpStatus.BAD_REQUEST;
+                                    break;
                                 }
-
-                                midSyncResponseDTO.setMerchantData(merchantDataDTOS);
-                                midSyncResponseDTOs.add(midSyncResponseDTO);
-                                merchantSyncEntities.add(merchantSyncEntity);
                             }
 
-                            merchantSyncService.insertAll(merchantSyncEntities);
-                            result = new ResponseObjectDTO("SUCCESS", midSyncResponseDTOs);
-                            httpStatus = HttpStatus.OK;
+//                            merchantSyncService.insertAll(merchantSyncEntities);
+//                            responseMerchantV2DTO.setStatus("SUCCESS");
+//                            result = responseMerchantV2DTO;
+//                            httpStatus = HttpStatus.OK;
                         } else {
                             result = validateMidSync;
                             httpStatus = HttpStatus.BAD_REQUEST;
@@ -489,7 +525,6 @@ public class TerminalSyncController {
                     mid = checkExistMerchantSync;
                     int offset = (page - 1) * size;
                     int totalElement = 0;
-                    PageResDTO response = new PageResDTO();
                     totalElement = merchantSyncService.countMerchantByMidSync(mid);
                     List<IMerchantSyncPublicDTO> iTerminalSyncDTOs = merchantSyncService
                             .getMerchantByMidSync(mid, offset, size);
@@ -502,60 +537,24 @@ public class TerminalSyncController {
                     pageDTO.setTotalElement(totalElement);
                     pageMerchantDTO.setMetadata(pageDTO);
 
-//                    MidSyncResponseV2DTO midSyncResponseDTO = new MidSyncResponseV2DTO();
-//                    for (IMerchantSyncPublicDTO iTerminalSyncDTO : iTerminalSyncDTOs) {
-//                        if (iTerminalSyncDTO.getIsMaster() == true) {
-//                            // set data master merchant and merchant
-//                            MasterDataDTO masterData = new MasterDataDTO();
-//                            masterData.setMid(StringUtil.getValueNullChecker(iTerminalSyncDTO.getMid()));
-//                            masterData.setMidName(StringUtil.getValueNullChecker(iTerminalSyncDTO.getMerchantName()));
-//                            masterData.setCertificate(StringUtil.getValueNullChecker(iTerminalSyncDTO.getCertificate()));
-//                            masterData.setWebhook(StringUtil.getValueNullChecker(iTerminalSyncDTO.getWebhook()));
-//                            masterData.setWebSocket(StringUtil.getValueNullChecker(iTerminalSyncDTO.getWebSocket()));
-////                            merchantData.setMasterData(masterData);
-//                            midSyncResponseDTO.setMasterData(masterData);
-//                            // set merchants data
-//                            List<MidSynchronizeV2DTO> merchantDataDTOS = new ArrayList<>();
-//                            for (MidSynchronizeV2DTO merchantDataDTO : merchantDataDTOS) {
-//                                merchantDataDTO.setMerchantFullName(iTerminalSyncDTO.getMerchantFullName());
-//                                merchantDataDTO.setMerchantName(iTerminalSyncDTO.getMerchantName());
-//                                merchantDataDTO.setCertificate(iTerminalSyncDTO.getCertificate());
-//                                merchantDataDTO.setWebhook(iTerminalSyncDTO.getWebhook());
-//                                merchantDataDTO.setWebSocket(iTerminalSyncDTO.getWebSocket());
-//                                merchantDataDTOS.add(merchantDataDTO);
-//                                midSyncResponseDTO.setMerchantData(merchantDataDTOS);
-//                            }
-//                            pageMerchantDTO.setData(midSyncResponseDTO);
-//                        } else if (iTerminalSyncDTO.getIsMaster() == false){
-////                          set data master merchant and merchant
-//                            MasterDataDTO masterData = new MasterDataDTO();
-//                            masterData.setMid(StringUtil.getValueNullChecker(""));
-//                            masterData.setMidName(StringUtil.getValueNullChecker(""));
-//                            masterData.setCertificate(StringUtil.getValueNullChecker(""));
-//                            masterData.setWebhook(StringUtil.getValueNullChecker(""));
-//                            masterData.setWebSocket(StringUtil.getValueNullChecker(""));
-////                            midSyncResponseDTO.setMasterData(masterData);
-//                            midSyncResponseDTO.setMasterData(masterData);
-//                            // set merchants data
-//                            List<MidSynchronizeV2DTO> merchantDataDTOS = new ArrayList<>();
-//                            for (MidSynchronizeV2DTO merchantDataDTO : merchantDataDTOS) {
-//                                merchantDataDTO.setMerchantFullName(iTerminalSyncDTO.getMerchantFullName());
-//                                merchantDataDTO.setMerchantName(iTerminalSyncDTO.getMerchantName());
-//                                merchantDataDTO.setCertificate(iTerminalSyncDTO.getCertificate());
-//                                merchantDataDTO.setWebhook(iTerminalSyncDTO.getWebhook());
-//                                merchantDataDTO.setWebSocket(iTerminalSyncDTO.getWebSocket());
-//                                merchantDataDTOS.add(merchantDataDTO);
-//                                midSyncResponseDTO.setMerchantData(merchantDataDTOS);
-//                            }
-//                            pageMerchantDTO.setData(midSyncResponseDTO);
-//                        }
-//
-//                        pageMerchantDTO.setData(iTerminalSyncDTOs);
-//                    }
-//                  response.setMetadata(pageDTO);
-//                  response.setData(iTerminalSyncDTOs);
+                    for (IMerchantSyncPublicDTO iMerchantSyncPublicDTO : iTerminalSyncDTOs) {
+                        if (iMerchantSyncPublicDTO.getIsMaster() == true) {
+//                         set data master merchant and merchant
+                            MasterDataDTO masterData = new MasterDataDTO();
+                            masterData.setMid(StringUtil.getValueNullChecker(iMerchantSyncPublicDTO.getMid()));
+                            masterData.setMerchantName(StringUtil.getValueNullChecker(iMerchantSyncPublicDTO.getMerchantName()));
+                            masterData.setMerchantFullName(StringUtil.getValueNullChecker(iMerchantSyncPublicDTO.getMerchantFullName()));
+                            masterData.setMerchantAddress(StringUtil.getValueNullChecker(iMerchantSyncPublicDTO.getMerchantAddress()));
+                            masterData.setContactEmail(StringUtil.getValueNullChecker(iMerchantSyncPublicDTO.getContactEmail()));
+                            masterData.setContactPhone(StringUtil.getValueNullChecker(iMerchantSyncPublicDTO.getContactPhone()));
+                            masterData.setMerchantIdentify(StringUtil.getValueNullChecker(iMerchantSyncPublicDTO.getMerchantIdentify()));
+                            masterData.setCertificate(StringUtil.getValueNullChecker(iMerchantSyncPublicDTO.getCertificate()));
+                            masterData.setWebhook(StringUtil.getValueNullChecker(iMerchantSyncPublicDTO.getWebhook()));
+                            masterData.setClientId(StringUtil.getValueNullChecker(iMerchantSyncPublicDTO.getClientId()));
+                            pageMerchantDTO.setMasterData(masterData);
+                        }
+                    }
 
-                    pageMerchantDTO.setMetadata(pageDTO);
                     pageMerchantDTO.setData(iTerminalSyncDTOs);
                     result = pageMerchantDTO;
                     httpStatus = HttpStatus.OK;
@@ -574,6 +573,70 @@ public class TerminalSyncController {
             result = new ResponseMessageDTO("FAILED", "E05");
         }
 
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("mid/certificate/v2")
+    public ResponseEntity<Object> getQrCertificate(
+            @RequestHeader("Authorization") String token,
+            @Valid @RequestBody QrCertificateDTO dto
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        QrCertificateResponseDTO response = new QrCertificateResponseDTO();
+        try {
+
+            String publishId = generateRandomMerPublishId(); // trả về cái này
+            // check user từ token
+            // nếu là master merchant thì Prefix sẽ là MCT
+            // nếu là merchant thì Prefix sẽ là MCS
+
+            String certificate = EnvironmentUtil.getVietQrMerchantPrefix()
+                    + MerchantRefUtil.encryptMerchantId(publishId + dto.getMerchantIdentify());
+            // sinh ra cho KH 1 URL webSocket
+            String clientId = MerchantRefUtil.encryptMerchantId(publishId);
+            // kiểm tra đã có record nào dưới DB đã có publishId chưa
+            MerchantSyncEntity checkEntity = merchantSyncService.getMerchantSyncByPublishId(publishId);
+            if (checkEntity != null) {
+                clientId = MerchantRefUtil.encryptMerchantId(checkEntity.getPublishId());
+            } else {
+                // tạo 1 records để lưu vào bảng merchant-sync
+                checkEntity = new MerchantSyncEntity();
+                UUID idMerchantSync = UUID.randomUUID();
+                checkEntity.setId(idMerchantSync.toString());
+                checkEntity.setName("");
+                checkEntity.setFullName("");
+                checkEntity.setVso("");
+                checkEntity.setBusinessType("");
+                checkEntity.setAddress("");
+                checkEntity.setCareer("");
+                checkEntity.setNationalId(dto.getMerchantIdentify());
+                checkEntity.setIsActive(true);
+                checkEntity.setUserId("");
+                checkEntity.setAccountCustomerId("");
+                checkEntity.setEmail("");
+                checkEntity.setPhoneNo("");
+                checkEntity.setPublishId(publishId);
+                checkEntity.setRefId("");
+                checkEntity.setCertificate(certificate);
+                checkEntity.setWebhook(dto.getWebhook());
+                // generate webSocket
+                checkEntity.setClientId(clientId);
+            }
+            merchantSyncService.insert(checkEntity);
+
+            // trả về response
+            response.setMerchantId(publishId);
+            response.setCertificate(certificate);
+            response.setWebhook(dto.getWebhook());
+            response.setClientId(clientId);
+
+            result = response;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
         return new ResponseEntity<>(result, httpStatus);
     }
 

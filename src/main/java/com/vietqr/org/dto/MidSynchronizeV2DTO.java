@@ -1,9 +1,10 @@
 package com.vietqr.org.dto;
 
 public class MidSynchronizeV2DTO extends MidSynchronizeDTO{
+    private String merchantId;
     private String career;
     private String webhook;
-    private String webSocket;
+    private String clientId;
     private String certificate;
 
     public MidSynchronizeV2DTO(String merchantFullName, String merchantName, String merchantAddress, String merchantIdentity, String contactEmail, String contactPhone) {
@@ -26,12 +27,20 @@ public class MidSynchronizeV2DTO extends MidSynchronizeDTO{
         this.certificate = certificate;
     }
 
-    public String getWebSocket() {
-        return webSocket;
+    public String getMerchantId() {
+        return merchantId;
     }
 
-    public void setWebSocket(String webSocket) {
-        this.webSocket = webSocket;
+    public void setMerchantId(String merchantId) {
+        this.merchantId = merchantId;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
     }
 
     public String getCareer() {

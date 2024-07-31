@@ -715,6 +715,10 @@ public class EnvironmentUtil {
         return "CERT-VVB-";
     }
 
+    public static String getVietQrMasterMerchantPrefix() {
+        return "CERT-MCT-";
+    }
+
     public static String getVietQrMerchantPrefix() {
         return "CERT-MCS-";
     }

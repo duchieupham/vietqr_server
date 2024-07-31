@@ -9,7 +9,7 @@ public interface IMerchantSyncPublicDTO {
     String getContactEmail();
     String getContactPhone();
     String getCertificate();
-    String getWebSocket();
+    String getClientId();
     String getWebhook();
     Boolean getIsMaster();
 }
