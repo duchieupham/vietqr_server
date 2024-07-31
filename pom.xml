@@ -260,6 +260,17 @@
 			<artifactId>google-api-services-sheets</artifactId>
 			<version>v4-rev606-1.25.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.eclipse.paho</groupId>
+			<artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+			<version>1.2.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.integration</groupId>
+			<artifactId>spring-integration-mqtt</artifactId>
+			<version>5.5.7</version>
+		</dependency>
+
 
 
 	</dependencies>

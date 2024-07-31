@@ -23,6 +23,9 @@ public class VietQRCreateDTO implements Serializable {
 	private String urlLink;
 	private String subTerminalCode;
 	private String serviceCode;
+	private String additionalData1;
+
+
 
 	public VietQRCreateDTO() {
 		super();
@@ -103,6 +106,25 @@ public class VietQRCreateDTO implements Serializable {
 		this.terminalCode = terminalCode;
 		this.orderId = orderId;
 		this.note = note;
+	}
+
+	public VietQRCreateDTO(String bankId, String amount, String content, String userId, String transType, String customerBankAccount, String customerBankCode, String customerName, String terminalCode, String orderId, String note, String urlLink, String subTerminalCode, String serviceCode, String additionalData1) {
+		this.bankId = bankId;
+		this.amount = amount;
+		this.content = content;
+		this.userId = userId;
+		this.transType = transType;
+		this.customerBankAccount = customerBankAccount;
+		this.customerBankCode = customerBankCode;
+		this.customerName = customerName;
+		this.terminalCode = terminalCode;
+		this.orderId = orderId;
+		this.note = note;
+		this.urlLink = urlLink;
+		this.subTerminalCode = subTerminalCode;
+		this.serviceCode = serviceCode;
+		this.additionalData1 = additionalData1;
+
 	}
 
 	public String getServiceCode() {
@@ -216,4 +238,14 @@ public class VietQRCreateDTO implements Serializable {
 	public void setSubTerminalCode(String subTerminalCode) {
 		this.subTerminalCode = subTerminalCode;
 	}
+
+
+	public String getAdditionalData1() {
+		return additionalData1;
+	}
+
+	public void setAdditionalData1(String additionalData1) {
+		this.additionalData1 = additionalData1;
+	}
+
 }

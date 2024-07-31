@@ -15,6 +15,10 @@ public class VietQRBIDVCreateDTO {
     private String customerName;
     private String qr;
 
+    private String serviceCode;
+
+    private String additionalData1;
+
     public VietQRBIDVCreateDTO() {
     }
 
@@ -34,6 +38,40 @@ public class VietQRBIDVCreateDTO {
         this.customerBankAccount = customerBankAccount;
         this.customerBankCode = customerBankCode;
         this.customerName = customerName;
+    }
+
+    public VietQRBIDVCreateDTO(String content, String amount, String terminalCode, String orderId, String note, String urlLink, String transType, String sign, String billId, String customerBankAccount, String customerBankCode, String customerName, String qr, String serviceCode, String additionalData1) {
+        this.content = content;
+        this.amount = amount;
+        this.terminalCode = terminalCode;
+        this.orderId = orderId;
+        this.note = note;
+        this.urlLink = urlLink;
+        this.transType = transType;
+        this.sign = sign;
+        this.billId = billId;
+        this.customerBankAccount = customerBankAccount;
+        this.customerBankCode = customerBankCode;
+        this.customerName = customerName;
+        this.qr = qr;
+        this.serviceCode = serviceCode;
+        this.additionalData1 = additionalData1;
+    }
+
+    public String getServiceCode() {
+        return serviceCode;
+    }
+
+    public void setServiceCode(String serviceCode) {
+        this.serviceCode = serviceCode;
+    }
+
+    public String getAdditionalData1() {
+        return additionalData1;
+    }
+
+    public void setAdditionalData1(String additionalData1) {
+        this.additionalData1 = additionalData1;
     }
 
     public String getContent() {
