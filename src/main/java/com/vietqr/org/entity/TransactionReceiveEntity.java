@@ -157,6 +157,9 @@ public class TransactionReceiveEntity implements Serializable {
 	@Column(name = "hashTag")
 	private String hashTag = "";
 
+	@Column(name = "additionalData", columnDefinition = "JSON")
+	private String additionalData;
+
 	public TransactionReceiveEntity() {
 		super();
 	}
@@ -237,6 +240,37 @@ public class TransactionReceiveEntity implements Serializable {
 		this.qrCode = qrCode;
 		this.userId = userId;
 		this.note = note;
+	}
+
+	public TransactionReceiveEntity(String id, String bankAccount, String bankId, String content, long amount, long time, long timePaid, String refId, int type, int status, String traceId, String transType, String referenceNumber, String orderId, String sign, String customerBankAccount, String customerBankCode, String customerName, String terminalCode, String serviceCode, String qrCode, String userId, String note, Integer transStatus, String urlLink, String billId, String hashTag, String additionalData) {
+		this.id = id;
+		this.bankAccount = bankAccount;
+		this.bankId = bankId;
+		this.content = content;
+		this.amount = amount;
+		this.time = time;
+		this.timePaid = timePaid;
+		this.refId = refId;
+		this.type = type;
+		this.status = status;
+		this.traceId = traceId;
+		this.transType = transType;
+		this.referenceNumber = referenceNumber;
+		this.orderId = orderId;
+		this.sign = sign;
+		this.customerBankAccount = customerBankAccount;
+		this.customerBankCode = customerBankCode;
+		this.customerName = customerName;
+		this.terminalCode = terminalCode;
+		this.serviceCode = serviceCode;
+		this.qrCode = qrCode;
+		this.userId = userId;
+		this.note = note;
+		this.transStatus = transStatus;
+		this.urlLink = urlLink;
+		this.billId = billId;
+		this.hashTag = hashTag;
+		this.additionalData = additionalData;
 	}
 
 	public String getId() {
@@ -453,5 +487,13 @@ public class TransactionReceiveEntity implements Serializable {
 
 	public void setHashTag(String hashTag) {
 		this.hashTag = hashTag;
+	}
+
+	public String getAdditionalData() {
+		return additionalData;
+	}
+
+	public void setAdditionalData(String additionalData) {
+		this.additionalData = additionalData;
 	}
 }

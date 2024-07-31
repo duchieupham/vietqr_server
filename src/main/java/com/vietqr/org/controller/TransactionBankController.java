@@ -33,6 +33,7 @@ import com.vietqr.org.entity.*;
 import com.vietqr.org.security.JWTAuthorizationFilter;
 import com.vietqr.org.service.*;
 import com.vietqr.org.service.bidv.CustomerVaService;
+import com.vietqr.org.service.mqtt.MQTTMessagingService;
 import com.vietqr.org.service.social.*;
 import com.vietqr.org.util.*;
 import com.vietqr.org.util.bank.bidv.BIDVUtil;
@@ -213,6 +214,9 @@ public class TransactionBankController {
 
     @Autowired
     LarkService larkService;
+
+	@Autowired
+	private MQTTMessagingService mqttMessagingService;
 
     @Autowired
     SlackAccountBankService slackAccountBankService;
@@ -6160,6 +6164,17 @@ public class TransactionBankController {
                 data.put("amount", amount);
                 data.put("message", String.format(messageForBox, amountForVoice));
                 String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
+                try {
+                    MessageBoxDTO messageBoxDTO = new MessageBoxDTO();
+                    messageBoxDTO.setNotificationType(NotificationUtil.getNotiTypeUpdateTransaction());
+                    messageBoxDTO.setAmount(amount);
+                    messageBoxDTO.setMessage(String.format(messageForBox, amountForVoice));
+                    ObjectMapper mapper = new ObjectMapper();
+                    mqttMessagingService.sendMessageToBoxId(idRefBox, mapper.writeValueAsString(messageBoxDTO));
+                } catch (Exception e) {
+                    logger.error("MQTT: socketHandler.sendMessageToQRBox - "
+                            + boxIdRef + " at: " + System.currentTimeMillis());
+                }
                 socketHandler.sendMessageToBoxId(idRefBox, data);
                 logger.info("WS: socketHandler.sendMessageToQRBox - "
                         + boxIdRef + " at: " + System.currentTimeMillis());

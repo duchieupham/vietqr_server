@@ -119,7 +119,9 @@ public class AccountController {
 
             //set total user today
             StartEndTimeDTO startEndTime = DateTimeUtil.getStartEndCurrentDate();
-            long countUseToday = accountLoginService.countAccountsRegisteredInDay(startEndTime.getStartTime(), startEndTime.getEndTime());
+            long countUseToday = accountLoginService
+                    .countAccountsRegisteredInDay(
+                            startEndTime.getStartTime(), startEndTime.getEndTime());
 
             accountCountDTO.setTotalUsers(countTotalUsers);
             accountCountDTO.setTotalUserRegisterToday(countUseToday);
