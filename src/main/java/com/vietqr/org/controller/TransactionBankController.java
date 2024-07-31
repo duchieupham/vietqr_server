@@ -33,6 +33,7 @@ import com.vietqr.org.entity.*;
 import com.vietqr.org.security.JWTAuthorizationFilter;
 import com.vietqr.org.service.*;
 import com.vietqr.org.service.bidv.CustomerVaService;
+import com.vietqr.org.service.mqtt.MQTTMessagingService;
 import com.vietqr.org.service.social.*;
 import com.vietqr.org.util.*;
 import com.vietqr.org.util.bank.bidv.BIDVUtil;
@@ -210,6 +211,9 @@ public class TransactionBankController {
 
 	@Autowired
 	LarkService larkService;
+
+	@Autowired
+	private MQTTMessagingService mqttMessagingService;
 
 	@Autowired
 	SlackAccountBankService slackAccountBankService;
@@ -636,6 +640,8 @@ public class TransactionBankController {
 		AccountBankReceiveEntity accountBankEntity = accountBankService
 				.getAccountBankByBankAccountAndBankTypeId(dto.getBankaccount(), bankTypeId);
 		try {
+			ObjectMapper mapper = new ObjectMapper();
+			mqttMessagingService.sendMessageToBoxId("VlZCODc1Nzk1VmlldFFSQm94QWNjZXNzS2V5", mapper.writeValueAsString(dto));
 			// danh sách transaction Id đã được insert
 			List<Object> list = transactionBankService.checkTransactionIdInserted(dto.getTransactionid(),
 					dto.getTransType());

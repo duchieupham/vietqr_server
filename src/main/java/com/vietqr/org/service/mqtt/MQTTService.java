@@ -1,4 +1,4 @@
-package com.vietqr.org.util;
+package com.vietqr.org.service.mqtt;
 
 import com.vietqr.org.util.annotation.SubscribeToTopicAspect;
 import org.apache.log4j.Logger;
@@ -9,18 +9,15 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 
 @Service
-public class MQTTHandler {
+public class MQTTService {
 
-    private static final Logger logger = Logger.getLogger(MQTTHandler.class);
-
-    private final IMqttClient mqttClient;
-    private final SubscribeToTopicAspect subscribeToTopicAspect;
+    private static final Logger logger = Logger.getLogger(MQTTService.class);
 
     @Autowired
-    public MQTTHandler(IMqttClient mqttClient, SubscribeToTopicAspect subscribeToTopicAspect) {
-        this.mqttClient = mqttClient;
-        this.subscribeToTopicAspect = subscribeToTopicAspect;
-    }
+    private IMqttClient mqttClient;
+
+    @Autowired
+    private SubscribeToTopicAspect subscribeToTopicAspect;
 
     @PostConstruct
     public void init() {
@@ -37,29 +34,26 @@ public class MQTTHandler {
             }
 
             @Override
-            public void deliveryComplete(IMqttDeliveryToken token) {
-                // Not used for receiving messages
-            }
+            public void deliveryComplete(IMqttDeliveryToken token) {}
         });
     }
 
-    public void sendMessage(String topic, String messageContent) {
+    public void sendMessageToQrBox(String boxId, String messageContent) {
         try {
             MqttMessage message = new MqttMessage(messageContent.getBytes());
             message.setQos(1);
-            mqttClient.publish(topic, message);
+            mqttClient.publish("vietQr-box/boxId/" + boxId, message);
         } catch (Exception e) {
-            logger.error("send Message Failed: ERROR: " + e.getMessage() + " topic: " + topic +
-                    " message: " + messageContent);
+            logger.error("Send message failed: " + e.getMessage());
         }
     }
 
     public void subscribeToTopic(String topic) {
         try {
-            mqttClient.subscribe(topic, 1); // QoS level 1
+            mqttClient.subscribe(topic, 1);
             logger.info("Subscribed to topic: " + topic);
         } catch (MqttException e) {
-            logger.error("Subscription failed: ERROR: " + e.getMessage() + " Topic: " + topic);
+            logger.error("Subscription failed: " + e.getMessage());
         }
     }
 }
