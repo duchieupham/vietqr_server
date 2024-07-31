@@ -148,6 +148,8 @@ public class VietQRServer {
                                     vietQRDTO.setExisting(1);
                                     vietQRDTO.setTransactionId("");
                                     vietQRDTO.setTerminalCode(dto.getTerminalCode());
+                                    vietQRDTO.setServiceCode(dto.getServiceCode());
+                                    vietQRDTO.setAdditionalData1(dto.getAdditionalData1());
                                     String refId = TransactionRefIdUtil.encryptTransactionId(transactionUUID.toString());
                                     String qrLink = EnvironmentUtil.getQRLink() + refId;
                                     vietQRDTO.setTransactionRefId(refId);
@@ -181,6 +183,8 @@ public class VietQRServer {
                                     vietQRDTO.setQrCode(qr);
                                     vietQRDTO.setImgId(bankTypeEntity.getImgId());
                                     vietQRDTO.setExisting(0);
+                                    vietQRDTO.setServiceCode(dto.getServiceCode());
+                                    vietQRDTO.setAdditionalData1(dto.getAdditionalData1());
                                     result = vietQRDTO;
                                     httpStatus = HttpStatus.OK;
                                 }
@@ -224,6 +228,7 @@ public class VietQRServer {
                             vietQRCreateDTO.setUrlLink(dto.getUrlLink() != null && !dto.getUrlLink().trim().isEmpty()
                                     ? dto.getUrlLink()
                                     : "");
+                            vietQRCreateDTO.setAdditionalData1(dto.getAdditionalData1());
                             insertNewTransaction(transactionUUID, traceId, vietQRCreateDTO, vietQRDTO, dto.getOrderId(), dto.getSign(), true);
                         }
                         LocalDateTime currentDateTime = LocalDateTime.now();
@@ -322,6 +327,8 @@ public class VietQRServer {
                                 vietQRDTO.setQrCode(qr);
                                 vietQRDTO.setImgId(bankTypeEntity.getImgId());
                                 vietQRDTO.setExisting(0);
+                                vietQRDTO.setServiceCode(dto.getServiceCode());
+                                vietQRDTO.setAdditionalData1(dto.getAdditionalData1());
                                 result = vietQRDTO;
                                 httpStatus = HttpStatus.OK;
                             }
@@ -397,6 +404,8 @@ public class VietQRServer {
                         vietQRDTO.setQrCode(qr);
                         vietQRDTO.setImgId(bankTypeEntity.getImgId());
                         vietQRDTO.setExisting(0);
+                        vietQRDTO.setServiceCode(dto.getServiceCode());
+                        vietQRDTO.setAdditionalData1(dto.getAdditionalData1());
                         result = vietQRDTO;
                         httpStatus = HttpStatus.OK;
                     } else {
@@ -450,12 +459,29 @@ public class VietQRServer {
                 transactionEntity.setReferenceNumber("");
                 transactionEntity.setOrderId(orderId);
                 transactionEntity.setServiceCode(dto.getServiceCode());
-                transactionEntity.setSign(sign);
+                transactionEntity.setSign(sign != null ? sign :"");
                 if (dto.getTransType() != null && dto.getTransType().trim().toUpperCase().equals("D")) {
                     transactionEntity.setCustomerBankAccount(dto.getCustomerBankAccount());
                     transactionEntity.setCustomerBankCode(dto.getCustomerBankCode());
                     transactionEntity.setCustomerName(dto.getCustomerName());
                 }
+
+
+                ZoneOffset offset = ZoneOffset.ofHours(7); // UTC+7
+                long timestampUtcPlus7 = currentDateTime.toEpochSecond(offset);
+                List<Object> additionalDataList = new ArrayList<>();
+                additionalDataList.add(new AdditionalData(
+                        result.getTerminalCode(),
+                        result.getServiceCode(),
+                        dto.getAdditionalData1(),
+                        dto.getAmount(),
+                        timestampUtcPlus7
+                ));
+                // Chuyển đổi danh sách thành JSON và gán vào transactionEntity
+                ObjectMapper mapper = new ObjectMapper();
+                String additionalDataJson = mapper.writeValueAsString(additionalDataList);
+                transactionEntity.setAdditionalData(additionalDataJson);
+
                 transactionReceiveService.insertTransactionReceive(transactionEntity);
 
                 UUID notificationUUID = UUID.randomUUID();
@@ -466,10 +492,10 @@ public class VietQRServer {
                         + NotificationUtil
                         .getNotiDescNewTransSuffix2();
 
-                if (!isFromMerchantSync) {
+                if (isFromMerchantSync) {
                     // Gửi thông báo qua MQTT
                     try {
-                        mqttClient = new MqttClient("tcp://your-mqtt-broker-address:1883", MqttClient.generateClientId(), new MemoryPersistence());
+                        mqttClient = new MqttClient("tcp://broker.hivemq.com:1883", MqttClient.generateClientId(), new MemoryPersistence());
                         mqttClient.connect();
 
                         Gson gson = new Gson();
@@ -484,6 +510,9 @@ public class VietQRServer {
                         data.put("content", result.getContent());
                         data.put("qrCode", result.getQrCode());
                         data.put("imgId", result.getImgId());
+                        data.put("serviceCode", result.getServiceCode());
+                        data.put("terminalCode", result.getTerminalCode());
+                        data.put("additionalData1",result.getAdditionalData1());
 
                         String jsonMessage = gson.toJson(data);
                         MqttMessage mqttMessage = new MqttMessage(jsonMessage.getBytes());
@@ -596,6 +625,7 @@ public class VietQRServer {
                     transactionEntity.setCustomerBankCode(dto.getCustomerBankCode());
                     transactionEntity.setCustomerName(dto.getCustomerName());
                 }
+
                 transactionReceiveService.insertTransactionReceive(transactionEntity);
                 logger.info("After insertNewTransactionBIDV at: " + DateTimeUtil.getCurrentDateTimeUTC());
             }

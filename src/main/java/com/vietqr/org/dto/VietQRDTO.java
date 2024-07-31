@@ -26,6 +26,10 @@ public class VietQRDTO implements Serializable {
 	// terminalCode to show what terminal is
 	private String terminalCode;
 
+	private String serviceCode;
+
+	private String additionalData1;
+
 	public VietQRDTO() {
 		super();
 	}
@@ -47,6 +51,25 @@ public class VietQRDTO implements Serializable {
 		this.transactionRefId = transactionRefId;
 		this.terminalCode = terminalCode;
 		this.qrLink = qrLink;
+	}
+
+
+	public VietQRDTO(String bankCode, String bankName, String bankAccount, String userBankName, String amount, String content, String qrCode, String imgId, int existing, String transactionId, String transactionRefId, String qrLink, String terminalCode, String serviceCode,String additionalData1) {
+		this.bankCode = bankCode;
+		this.bankName = bankName;
+		this.bankAccount = bankAccount;
+		this.userBankName = userBankName;
+		this.amount = amount;
+		this.content = content;
+		this.qrCode = qrCode;
+		this.imgId = imgId;
+		this.existing = existing;
+		this.transactionId = transactionId;
+		this.transactionRefId = transactionRefId;
+		this.qrLink = qrLink;
+		this.terminalCode = terminalCode;
+		this.serviceCode = serviceCode;
+		this.additionalData1 =additionalData1;
 	}
 
 	public String getBankCode() {
@@ -151,6 +174,23 @@ public class VietQRDTO implements Serializable {
 
 	public void setQrLink(String qrLink) {
 		this.qrLink = qrLink;
+	}
+
+
+	public String getServiceCode() {
+		return serviceCode;
+	}
+
+	public void setServiceCode(String serviceCode) {
+		this.serviceCode = serviceCode;
+	}
+
+	public String getAdditionalData1() {
+		return additionalData1;
+	}
+
+	public void setAdditionalData1(String additionalData1) {
+		this.additionalData1 = additionalData1;
 	}
 
 	@Override
