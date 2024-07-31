@@ -108,7 +108,6 @@ public class TerminalServiceImpl implements TerminalService {
 
     @Override
     public List<ITerminalDetailWebDTO> getTerminalByUserId(String userId, int offset, String value) {
-        StartEndTimeDTO dto = DateTimeUtil.getStartEndCurrentDate();
         return repo.getTerminalWebByUserId(userId, offset, value);
     }
 
