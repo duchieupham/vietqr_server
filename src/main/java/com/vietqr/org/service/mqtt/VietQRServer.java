@@ -1,5 +1,6 @@
 package com.vietqr.org.service.mqtt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.vietqr.org.controller.AccountController;
 import com.vietqr.org.dto.*;
@@ -14,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
@@ -33,8 +35,8 @@ public class VietQRServer {
     private static final String CLIENT_ID = "VietQRServer";
     private static final String REQUEST_TOPIC = "vietqr/request";
     private static final String RESPONSE_TOPIC = "vietqr/response";
-    private static final String USERNAME = "VietQR123"; // thêm username
-    private static final String PASSWORD = "VietQR123";
+//    private static final String USERNAME = "VietQR123"; // thêm username
+//    private static final String PASSWORD = "VietQR123";
     private MqttClient client;
 
     @Autowired
@@ -57,47 +59,47 @@ public class VietQRServer {
         client = new MqttClient(BROKER, CLIENT_ID, persistence);
         MqttConnectOptions connOpts = new MqttConnectOptions();
         connOpts.setCleanSession(true);
-        connOpts.setUserName(USERNAME);
-        connOpts.setPassword(PASSWORD.toCharArray());
+//        connOpts.setUserName(USERNAME);
+//        connOpts.setPassword(PASSWORD.toCharArray());
         client.connect(connOpts);
 
         client.subscribe(REQUEST_TOPIC, new IMqttMessageListener() {
             @Override
             public void messageArrived(String topic, MqttMessage message) throws Exception {
                 String payload = new String(message.getPayload());
-                Gson gson = new Gson();
-                VietQRCreateCustomerDTO dto = gson.fromJson(payload, VietQRCreateCustomerDTO.class);
+                System.out.println("Received request: " + payload);
+//                Gson gson = new Gson();
+                ObjectMapper mapper = new ObjectMapper();
+                VietQRCreateCustomerDTO dto = mapper.readValue(payload, VietQRCreateCustomerDTO.class);
 
-                ResponseEntity<Object> response = generateQRCustomer(dto);
-                String responsePayload = gson.toJson(response.getBody());
+                VietQRDTO response = (VietQRDTO) generateQRCustomer(dto);
+                String responsePayload = mapper.writeValueAsString(response);
 
                 MqttMessage responseMessage = new MqttMessage(responsePayload.getBytes());
                 responseMessage.setQos(2);
                 client.publish(RESPONSE_TOPIC, responseMessage);
+                System.out.println("Response sent: " + responsePayload);
             }
         });
     }
 
-    public ResponseEntity<Object> generateQRCustomer(VietQRCreateCustomerDTO dto) {
+    public Object generateQRCustomer(VietQRCreateCustomerDTO dto) {
         Object result = null;
-        HttpStatus httpStatus = null;
         int qrType = dto.getQrType() != null ? dto.getQrType() : 0;
-        ResponseEntity<Object> response = null;
+        Object response = null;
 
         if (qrType == 0) {
             response = generateDynamicQrCustomer(dto);
-            result = response.getBody();
-            httpStatus = response.getStatusCode();
+            result = response;
         } else {
             // Invalid QR type
             result = new ResponseMessageDTO("FAILED", "E46");
-            httpStatus = HttpStatus.BAD_REQUEST;
         }
 
-        return new ResponseEntity<>(result, httpStatus);
+        return result;
     }
 
-    private ResponseEntity<Object> generateDynamicQrCustomer(VietQRCreateCustomerDTO dto) {
+    private Object generateDynamicQrCustomer(VietQRCreateCustomerDTO dto) {
         Object result = null;
         HttpStatus httpStatus = null;
         UUID transactionUUID = UUID.randomUUID();
@@ -190,13 +192,13 @@ public class VietQRServer {
                             result = new ResponseMessageDTO("FAILED", "E26");
                             httpStatus = HttpStatus.BAD_REQUEST;
                         }
-                        return new ResponseEntity<>(result, httpStatus);
+                        return result;
                     } catch (Exception e) {
                         logger.error(e.toString());
                         System.out.println(e.toString());
                         result = new ResponseMessageDTO("FAILED", "Unexpected Error");
                         httpStatus = HttpStatus.BAD_REQUEST;
-                        return new ResponseEntity<>(result, httpStatus);
+                        return result;
                     } finally {
                         if (dto.getTransType() != null && dto.getTransType().trim().toUpperCase().equals("D")) {
                             bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
@@ -331,7 +333,7 @@ public class VietQRServer {
                         result = new ResponseMessageDTO("FAILED", "E26");
                         httpStatus = HttpStatus.BAD_REQUEST;
                     }
-                    return new ResponseEntity<>(result, httpStatus);
+                    return result;
                 } catch (Exception e) {
                     logger.error(e.toString());
                     System.out.println(e.toString());
@@ -407,7 +409,7 @@ public class VietQRServer {
                 }
                 break;
         }
-        return new ResponseEntity<>(result, httpStatus);
+        return result;
     }
 
     @Async
@@ -604,11 +606,4 @@ public class VietQRServer {
         }
     }
 
-    public static void main(String[] args) {
-        try {
-            new VietQRServer();
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
-    }
 }
