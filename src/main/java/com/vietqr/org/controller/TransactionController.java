@@ -2200,9 +2200,9 @@ public class TransactionController {
                     responseDTO.setBankShortName(bankDetailDTO.getBankShortName());
                     if (StringUtil.isNullOrEmpty(dto.getQrCode()) && dto.getStatus() == 0) {
                         String qrCode = getQrCode(finalCaiValue, dto.getBankAccount(), dto.getContent(), dto.getAmount());
-                        responseDTO.setQrCode(qrCode);
+                        responseDTO.setQrCode(StringUtil.getValueNullChecker(qrCode));
                     } else {
-                        responseDTO.setQrCode(dto.getQrCode());
+                        responseDTO.setQrCode(StringUtil.getValueNullChecker(dto.getQrCode()));
                     }
                     responseDTO.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
                     String refId = TransactionRefIdUtil

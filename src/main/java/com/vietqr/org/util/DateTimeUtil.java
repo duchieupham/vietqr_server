@@ -99,9 +99,9 @@ public class DateTimeUtil {
 
     public static StartEndTimeDTO getStartEndCurrentDate() {
         StartEndTimeDTO startEndTimeDTO = new StartEndTimeDTO();
-        LocalDateTime localDateTime = LocalDateTime.now().atZone(ZoneId.of(GMT_PLUS_7)).toLocalDateTime();
-        startEndTimeDTO.setStartTime(localDateTime.with(LocalTime.MIN).toEpochSecond(ZoneOffset.UTC));
-        startEndTimeDTO.setEndTime(localDateTime.with(LocalTime.MAX).toEpochSecond(ZoneOffset.UTC));
+        LocalDateTime localDateTime = LocalDateTime.now(ZoneId.of(GMT_PLUS_7));
+        startEndTimeDTO.setStartTime(localDateTime.with(LocalTime.MIN).toEpochSecond(ZoneOffset.UTC) - 25200);
+        startEndTimeDTO.setEndTime(localDateTime.with(LocalTime.MAX).toEpochSecond(ZoneOffset.UTC) - 25200);
         return startEndTimeDTO;
     }
 
