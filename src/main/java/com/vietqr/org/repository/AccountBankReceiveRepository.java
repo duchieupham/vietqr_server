@@ -565,4 +565,82 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "INNER JOIN cai_bank c ON b.id = c.bank_type_id "
 			+ "WHERE a.id = :bankId LIMIT 1", nativeQuery = true)
 	BankDetailTypeCaiValueDTO getBankAccountTypeDetail(String bankId);
+
+	@Query(value = "SELECT abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_from AS validFeeFrom, "
+			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status "
+			+ "FROM account_bank_receive abr "
+			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
+			+ "INNER JOIN account_login al ON abr.user_id = al.id "
+			+ "ORDER BY abr.bank_account_name ASC "
+			+ "LIMIT :offset, :size", nativeQuery = true)
+	List<IBankAccountResponseDTO> getAllBankAccounts(@Param("offset") int offset, @Param("size") int size);
+
+	@Query(value = "SELECT COUNT(abr.id) FROM account_bank_receive abr", nativeQuery = true)
+	int countAllBankAccounts();
+
+	@Query(value = "SELECT abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_from AS validFeeFrom, "
+			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status "
+			+ "FROM account_bank_receive abr "
+			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
+			+ "INNER JOIN account_login al ON abr.user_id = al.id "
+			+ "WHERE abr.bank_account LIKE %:keyword% "
+			+ "ORDER BY abr.bank_account_name ASC "
+			+ "LIMIT :offset, :size", nativeQuery = true)
+	List<IBankAccountResponseDTO> getBankAccountsByAccount(@Param("keyword") String keyword, @Param("offset") int offset, @Param("size") int size);
+
+	@Query(value = "SELECT COUNT(abr.id) FROM account_bank_receive abr "
+			+ "WHERE abr.bank_account LIKE %:keyword%", nativeQuery = true)
+	int countBankAccountsByAccount(@Param("keyword") String keyword);
+
+	@Query(value = "SELECT abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_from AS validFeeFrom, "
+			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status "
+			+ "FROM account_bank_receive abr "
+			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
+			+ "INNER JOIN account_login al ON abr.user_id = al.id "
+			+ "WHERE abr.bank_account_name LIKE %:keyword% "
+			+ "ORDER BY abr.bank_account_name ASC "
+			+ "LIMIT :offset, :size", nativeQuery = true)
+	List<IBankAccountResponseDTO> getBankAccountsByAccountName(@Param("keyword") String keyword, @Param("offset") int offset, @Param("size") int size);
+
+	@Query(value = "SELECT COUNT(abr.id) FROM account_bank_receive abr "
+			+ "WHERE abr.bank_account_name LIKE %:keyword%", nativeQuery = true)
+	int countBankAccountsByAccountName(@Param("keyword") String keyword);
+
+	@Query(value = "SELECT abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_from AS validFeeFrom, "
+			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status "
+			+ "FROM account_bank_receive abr "
+			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
+			+ "INNER JOIN account_login al ON abr.user_id = al.id "
+			+ "WHERE abr.phone_authenticated LIKE %:keyword% "
+			+ "ORDER BY abr.bank_account_name ASC "
+			+ "LIMIT :offset, :size", nativeQuery = true)
+	List<IBankAccountResponseDTO> getBankAccountsByPhoneAuthenticated(@Param("keyword") String keyword, @Param("offset") int offset, @Param("size") int size);
+
+	@Query(value = "SELECT COUNT(abr.id) FROM account_bank_receive abr "
+			+ "WHERE abr.phone_authenticated LIKE %:keyword%", nativeQuery = true)
+	int countBankAccountsByPhoneAuthenticated(@Param("keyword") String keyword);
+
+	@Query(value = "SELECT abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_from AS validFeeFrom, "
+			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status "
+			+ "FROM account_bank_receive abr "
+			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
+			+ "INNER JOIN account_login al ON abr.user_id = al.id "
+			+ "WHERE abr.national_id LIKE %:keyword% "
+			+ "ORDER BY abr.bank_account_name ASC "
+			+ "LIMIT :offset, :size", nativeQuery = true)
+	List<IBankAccountResponseDTO> getBankAccountsByNationalId(@Param("keyword") String keyword, @Param("offset") int offset, @Param("size") int size);
+
+	@Query(value = "SELECT COUNT(abr.id) FROM account_bank_receive abr "
+			+ "WHERE abr.national_id LIKE %:keyword%", nativeQuery = true)
+	int countBankAccountsByNationalId(@Param("keyword") String keyword);
 }
