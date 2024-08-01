@@ -60,6 +60,11 @@ public interface MerchantSyncRepository extends JpaRepository<MerchantSyncEntity
             + " FROM merchant_sync WHERE id = :id", nativeQuery = true)
     IMerchantSyncDTO getMerchantById(@Param("id") String id);
 
+    @Query(value = "SELECT b.is_master FROM account_customer a "
+            + "LEFT JOIN merchant_sync b ON a.id = b.account_customer_id "
+            + "WHERE a.username = :username ", nativeQuery = true)
+    boolean getMerchantSyncByUsername(String username);
+
     @Query(value = "SELECT COUNT(id) FROM merchant_sync WHERE name LIKE %:value%", nativeQuery = true)
     int countMerchantsByName(@Param("value") String value);
 
@@ -100,6 +105,10 @@ public interface MerchantSyncRepository extends JpaRepository<MerchantSyncEntity
     @Query(value = "SELECT * FROM merchant_sync "
             + "WHERE publish_id = :mid LIMIT 1", nativeQuery = true)
     MerchantSyncEntity getMerchantSyncByPublicId(String mid);
+
+    @Query(value = "SELECT * FROM merchant_sync "
+            + "WHERE national_id = :merchantIdentity LIMIT 1", nativeQuery = true)
+    MerchantSyncEntity getMerchantByMerchantIdentity(String merchantIdentity);
 
     @Query(value = "SELECT publish_id FROM merchant_sync "
             + "WHERE certificate = :certificate LIMIT 1", nativeQuery = true)

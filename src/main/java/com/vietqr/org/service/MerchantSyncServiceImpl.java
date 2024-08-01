@@ -70,6 +70,11 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
     }
 
     @Override
+    public boolean getMerchantSyncByUsername(String username) {
+        return repo.getMerchantSyncByUsername(username);
+    }
+
+    @Override
     public MerchantSyncEntity updateMerchant(String id, MerchantSyncEntity entity) {
 //        if (repo.existsById(id)) {
 //            entity.setId(id);
@@ -164,6 +169,11 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
     @Override
     public MerchantSyncEntity getMerchantSyncByPublishId(String mid) {
         return repo.getMerchantSyncByPublicId(mid);
+    }
+
+    @Override
+    public MerchantSyncEntity getMerchantByMerchantIdentity(String merchantIdentity) {
+        return repo.getMerchantByMerchantIdentity(merchantIdentity);
     }
 
     @Override

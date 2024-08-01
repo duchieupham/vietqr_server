@@ -1,5 +1,6 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.entity.MerchantSyncEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,7 @@ public class AccountCustomerServiceImpl implements AccountCustomerService {
     public String checkExistMerchantSyncByUsername(String username) {
         return repo.checkExistMerchantSyncByUsername(username);
     }
+
 
     @Override
     public String checkExistMerchantSyncByUsernameV2(String username) {

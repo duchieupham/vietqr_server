@@ -24,6 +24,7 @@ public interface MerchantSyncService {
     IMerchantSyncDTO getMerchantById(String id);
 
     MerchantSyncEntity createMerchant(MerchantSyncEntity entity);
+    boolean getMerchantSyncByUsername(String username);
 
     MerchantSyncEntity updateMerchant(String id, MerchantSyncEntity entity);
 
@@ -43,6 +44,7 @@ public interface MerchantSyncService {
     MerchantSyncEntity getMerchantSyncByName(String merchantName);
 
     MerchantSyncEntity getMerchantSyncByPublishId(String mid);
+    MerchantSyncEntity getMerchantByMerchantIdentity(String merchantIdentity);
     String getPublishIdSyncByCertificate(String mid);
 
     MerchantSyncEntity getMerchantSyncById(String mid);

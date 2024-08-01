@@ -805,11 +805,19 @@ public class TerminalSyncController {
 
             String publishId = generateRandomMerPublishId(); // trả về cái này
             // check user từ token
-            // nếu là master merchant thì Prefix sẽ là MCT
-            // nếu là merchant thì Prefix sẽ là MCS
+            // nếu là master merchant thì sẽ tạo Certificate syncMID là MCS
+            // nếu là merchant thì sẽ tạo Certificate syncTID Prefix sẽ là MCT
+            String username = getUsernameFromToken(token);
+            String certificate = "";
+            boolean checkIsMasterMerchant = merchantSyncService.getMerchantSyncByUsername(username);
+            if (checkIsMasterMerchant == true) {
+                certificate = EnvironmentUtil.getVietQrMerchantPrefix()
+                        + MerchantRefUtil.encryptMerchantId(publishId + dto.getMerchantIdentify());
+            } else {
+                certificate = EnvironmentUtil.getVietQrMasterMerchantPrefix()
+                        + MerchantRefUtil.encryptMerchantId(publishId + dto.getMerchantIdentify());
+            }
 
-            String certificate = EnvironmentUtil.getVietQrMerchantPrefix()
-                    + MerchantRefUtil.encryptMerchantId(publishId + dto.getMerchantIdentify());
             // sinh ra cho KH 1 URL webSocket
             String clientId = MerchantRefUtil.encryptMerchantId(publishId);
             // kiểm tra đã có record nào dưới DB đã có publishId chưa
@@ -851,7 +859,7 @@ public class TerminalSyncController {
             result = response;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            result = new ResponseMessageDTO("FAILED", "E05");
+            result = new ResponseMessageDTO("FAILED" + e.getMessage(), "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
