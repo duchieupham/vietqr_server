@@ -765,6 +765,7 @@ public class VietQRController {
 				}
 				break;
 			case "BIDV":
+				String traceBIDVId = "VQR" + RandomCodeUtil.generateRandomUUID();
 				String qr = "";
 				String billId = "";
 				BankTypeEntity bankTypeEntity = null;
@@ -841,7 +842,7 @@ public class VietQRController {
 										VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
 										vietQRGenerateDTO.setCaiValue(caiValue);
 										vietQRGenerateDTO.setAmount(dto.getAmount() + "");
-										content = billId;
+										content = traceBIDVId + " " + billId;
 										vietQRGenerateDTO.setContent(content);
 										vietQRGenerateDTO.setBankAccount(bankAccountRequest);
 										qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
@@ -945,7 +946,8 @@ public class VietQRController {
 						dto1.setQr(qr);
 						AccountBankReceiveEntity accountBankReceiveEntity = accountBankEntity;
 						Thread thread = new Thread(() -> {
-							insertNewTransactionBIDV(transactionUUID, dto1, false, accountBankReceiveEntity);
+							insertNewTransactionBIDV(transactionUUID, dto1, false,traceBIDVId,
+									accountBankReceiveEntity);
 						});
 						thread.start();
 					}
@@ -2106,7 +2108,7 @@ public class VietQRController {
 						dto1.setCustomerName(StringUtil.getValueNullChecker(dto.getCustomerName()));
 						dto1.setQr(qr);
                         Thread thread = new Thread(() -> {
-							insertNewTransactionBIDV(transcationUUID, dto1, false, accountBankEntity);
+							insertNewTransactionBIDV(transcationUUID, dto1, false, "", accountBankEntity);
 						});
 						thread.start();
 
@@ -2425,7 +2427,7 @@ public class VietQRController {
 	}
 
 	private void insertNewTransactionBIDV(UUID transcationUUID, VietQRBIDVCreateDTO dto,
-											boolean isFromMerchantSync,
+											boolean isFromMerchantSync,String traceId,
 											AccountBankReceiveEntity accountBankEntity) {
 		logger.info("QR generate - start insertNewTransactionBIDV at: " + DateTimeUtil.getCurrentDateTimeUTC());
 		try {
@@ -2440,7 +2442,7 @@ public class VietQRController {
 				transactionEntity.setRefId("");
 				transactionEntity.setType(0);
 				transactionEntity.setStatus(0);
-				transactionEntity.setTraceId(dto.getBillId());
+				transactionEntity.setTraceId(traceId);
 				transactionEntity.setTimePaid(0);
 				transactionEntity.setTerminalCode(dto.getTerminalCode());
 				transactionEntity.setQrCode(dto.getQr());
