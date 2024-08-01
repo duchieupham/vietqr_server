@@ -3,7 +3,6 @@ package com.vietqr.org.service;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.TerminalEntity;
 import org.jvnet.hk2.annotations.Service;
-import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
@@ -102,4 +101,6 @@ public interface TerminalService {
     String checkExistedPublishId(String publishId);
 
     List<String> getAllCodeByNameAndBankId(String name, String bankId);
+
+    List<TerminalBankV2DTO> getTerminalByUserIdAndMerchantIds(String userId, List<String> merchantIds);
 }

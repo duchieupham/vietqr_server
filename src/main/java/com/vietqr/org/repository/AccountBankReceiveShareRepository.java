@@ -15,7 +15,7 @@ import java.util.List;
 @Repository
 public interface AccountBankReceiveShareRepository
         extends JpaRepository<AccountBankReceiveShareEntity, Long> {
-    @Query(value = "SELECT DISTINCT a.bank_id as bankId, b.bank_account as bankAccount, "
+    @Query(value = "SELECT DISTINCT a.bank_id as bankId, b.bank_account as bankAccount, a.arrangement, "
             + "b.bank_account_name as userBankName, b.phone_authenticated as phoneAuthenticated, "
                     + "b.type as bankType, b.is_authenticated as authenticated, b.mms_active AS mmsActive, "
                     + "b.user_id as userId, a.is_owner as isOwner, b.bank_type_id as bankTypeId, "
