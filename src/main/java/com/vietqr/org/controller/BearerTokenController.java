@@ -188,4 +188,25 @@ public class BearerTokenController {
 				.compact();
 		return token;
 	}
+
+	private String getJWTTokenForever(String username) {
+		String secretKey = "mySecretKey";
+		List<GrantedAuthority> grantedAuthorities = AuthorityUtils
+				.commaSeparatedStringToAuthorityList("ROLE_USER");
+
+		String token = Jwts
+				.builder()
+				// .claim("grantType",grantType)
+				.claim("authorities",
+						grantedAuthorities.stream()
+								.map(GrantedAuthority::getAuthority)
+								.collect(Collectors.toList()))
+				.claim("user", username)
+				.setIssuedAt(new Date(System.currentTimeMillis()))
+//				.setExpiration(new Date(System.currentTimeMillis() + 300000))
+				.signWith(SignatureAlgorithm.HS512,
+						secretKey.getBytes())
+				.compact();
+		return token;
+	}
 }

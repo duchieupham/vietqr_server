@@ -24,13 +24,19 @@ public interface MerchantSyncService {
     IMerchantSyncDTO getMerchantById(String id);
 
     MerchantSyncEntity createMerchant(MerchantSyncEntity entity);
+    boolean getMerchantSyncByUsername(String username);
 
     MerchantSyncEntity updateMerchant(String id, MerchantSyncEntity entity);
+
+    void updateMerchantV2(String id, String account_customer_id, String address, String career, String business_type,
+                          String name, String user_id, String vso,String email, String ref_id, String full_name, String phone_no);
+
     Optional<MerchantSyncEntity> findById(String id);
 
     void deleteMerchant(String id);
 
     int countMerchantsByName(String value);
+
     void savePlatformDetails(String platform, String userId, String details);
 
     void updateMerchantName(String midName, String mid);
@@ -38,12 +44,16 @@ public interface MerchantSyncService {
     MerchantSyncEntity getMerchantSyncByName(String merchantName);
 
     MerchantSyncEntity getMerchantSyncByPublishId(String mid);
+    MerchantSyncEntity getMerchantByMerchantIdentity(String merchantIdentity);
+    String getPublishIdSyncByCertificate(String mid);
 
     MerchantSyncEntity getMerchantSyncById(String mid);
 
     int countMerchantByMidSync(String mid);
 
     List<IMerchantSyncPublicDTO> getMerchantByMidSync(String refId, int offset, int size);
+
+    List<IMerchantSyncPublicDTO> getMerchantByMidSyncV2(String refId);
 
     String getIdByPublicId(String publicId);
 
@@ -52,4 +62,6 @@ public interface MerchantSyncService {
     String checkExistedPublishId(String code);
 
     void insertAll(List<MerchantSyncEntity> merchantSyncEntities);
+
+    int insert(MerchantSyncEntity entity);
 }
