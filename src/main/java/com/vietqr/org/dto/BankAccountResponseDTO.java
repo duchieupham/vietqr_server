@@ -7,10 +7,13 @@ public class BankAccountResponseDTO {
     private String phoneAuthenticated;
     private boolean mmsActive;
     private String nationalId;
-    private Long validFeeFrom;
+    private Long validFeeTo;
     private String phoneNo;
     private String email;
     private boolean status;
+
+
+    private String vso;
 
     // Constructors, getters and setters
 
@@ -19,17 +22,18 @@ public class BankAccountResponseDTO {
 
     public BankAccountResponseDTO(String bankAccount, String bankAccountName, String bankShortName,
                                   String phoneAuthenticated, boolean mmsActive, String nationalId,
-                                  Long validFeeFrom, String phoneNo, String email, boolean status) {
+                                  Long validFeeTo, String phoneNo, String email, boolean status, String vso) {
         this.bankAccount = bankAccount;
         this.bankAccountName = bankAccountName;
         this.bankShortName = bankShortName;
         this.phoneAuthenticated = phoneAuthenticated;
         this.mmsActive = mmsActive;
         this.nationalId = nationalId;
-        this.validFeeFrom = validFeeFrom;
+        this.validFeeTo = validFeeTo;
         this.phoneNo = phoneNo;
         this.email = email;
         this.status = status;
+        this.vso = vso;
     }
 
     // Getters and Setters
@@ -82,13 +86,6 @@ public class BankAccountResponseDTO {
         this.nationalId = nationalId;
     }
 
-    public Long getValidFeeFrom() {
-        return validFeeFrom;
-    }
-
-    public void setValidFeeFrom(Long validFeeFrom) {
-        this.validFeeFrom = validFeeFrom;
-    }
 
     public String getPhoneNo() {
         return phoneNo;
@@ -112,5 +109,21 @@ public class BankAccountResponseDTO {
 
     public void setStatus(boolean status) {
         this.status = status;
+    }
+
+    public String getVso() {
+        return vso;
+    }
+
+    public void setVso(String vso) {
+        this.vso = vso;
+    }
+
+    public Long getValidFeeTo() {
+        return validFeeTo;
+    }
+
+    public void setValidFeeTo(Long validFeeTo) {
+        this.validFeeTo = validFeeTo;
     }
 }

@@ -7,8 +7,9 @@ public interface IBankAccountResponseDTO {
     String getPhoneAuthenticated();
     boolean getMmsActive();
     String getNationalId();
-    Long getValidFeeFrom();
+    Long getValidFeeTo();
     String getPhoneNo();
     String getEmail();
     boolean getStatus();
+    String getVso();
 }

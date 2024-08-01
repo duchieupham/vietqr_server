@@ -158,22 +158,13 @@ public interface AccountBankReceiveService {
 	List<IAccountBankMonthDTO> getBankAccountStatistics();
 
 	BankDetailTypeCaiValueDTO getBankAccountTypeDetail(String bankId);
-	List<IBankAccountResponseDTO> getAllBankAccounts(int offset, int size);
 	int countAllBankAccounts();
-	List<IBankAccountResponseDTO> getBankAccountsByAccount(String keyword, int offset, int size);
 	int countBankAccountsByAccount(String keyword);
-	List<IBankAccountResponseDTO> getBankAccountsByAccountName(String keyword, int offset, int size);
 	int countBankAccountsByAccountName(String keyword);
-
-	List<IBankAccountResponseDTO> getBankAccountsByPhoneAuthenticated(String keyword, int offset, int size);
 
 	int countBankAccountsByPhoneAuthenticated(String keyword);
 
-	List<IBankAccountResponseDTO> getBankAccountsByNationalId(String keyword, int offset, int size);
-
 	int countBankAccountsByNationalId(String keyword);
-
-
 	List<BankAccountResponseDTO> getAllBankAccount(int offset, int size);
 
 	List<BankAccountResponseDTO> getBankAccountsByAccounts(String keyword, int offset, int size);
@@ -182,5 +173,5 @@ public interface AccountBankReceiveService {
 
 	List<BankAccountResponseDTO> getBankAccountsByNationalIds(String keyword, int offset, int size);
 
-	List<BankAccountResponseDTO> getBankAccountsByPhoneAuthenticateds(String keyword, int offset, int size);
+	List<BankAccountResponseDTO> getBankAccountsByPhoneAuthenticated(String keyword, int offset, int size);
 }
