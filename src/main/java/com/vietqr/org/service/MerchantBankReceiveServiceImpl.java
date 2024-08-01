@@ -53,4 +53,9 @@ public class MerchantBankReceiveServiceImpl implements MerchantBankReceiveServic
     public int countMerchantBankV2ByBankId(String bankId, String userId) {
         return repo.countMerchantBankV2ByBankId(bankId, userId);
     }
+
+    @Override
+    public MerchantBankV2DTO getMerchantBankV2OverviewByBankId(String bankId, String userId) {
+        return repo.getMerchantBankV2OverviewByBankId(bankId, userId);
+    }
 }

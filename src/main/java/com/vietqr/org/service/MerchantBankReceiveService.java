@@ -23,4 +23,6 @@ public interface MerchantBankReceiveService {
                                                       int offset, int size);
 
     int countMerchantBankV2ByBankId(String bankId, String userId);
+
+    MerchantBankV2DTO getMerchantBankV2OverviewByBankId(String bankId, String userId);
 }

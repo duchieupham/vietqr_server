@@ -42,4 +42,12 @@ public interface MerchantBankReceiveRepository extends JpaRepository<MerchantBan
             + "INNER JOIN merchant_member c ON b.id = c.merchant_id "
             + "WHERE a.bank_id = :bankId AND c.user_id = :userId ", nativeQuery = true)
     int countMerchantBankV2ByBankId(String bankId, String userId);
+
+    @Query(value = "SELECT b.id AS merchantId, b.name AS merchantName "
+            + "FROM merchant_bank_receive a "
+            + "INNER JOIN merchant b ON a.merchant_id = b.id "
+            + "INNER JOIN merchant_member c ON b.id = c.merchant_id "
+            + "WHERE a.bank_id = :bankId AND c.user_id = :userId "
+            + "LIMIT 1 ", nativeQuery = true)
+    MerchantBankV2DTO getMerchantBankV2OverviewByBankId(String bankId, String userId);
 }

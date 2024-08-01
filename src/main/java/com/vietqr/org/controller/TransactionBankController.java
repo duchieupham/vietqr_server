@@ -33,7 +33,7 @@ import com.vietqr.org.entity.*;
 import com.vietqr.org.security.JWTAuthorizationFilter;
 import com.vietqr.org.service.*;
 import com.vietqr.org.service.bidv.CustomerVaService;
-import com.vietqr.org.service.mqtt.MQTTMessagingService;
+import com.vietqr.org.service.mqtt.MqttMessagingService;
 import com.vietqr.org.service.social.*;
 import com.vietqr.org.util.*;
 import com.vietqr.org.util.bank.bidv.BIDVUtil;
@@ -216,7 +216,7 @@ public class TransactionBankController {
     LarkService larkService;
 
 	@Autowired
-	private MQTTMessagingService mqttMessagingService;
+	private MqttMessagingService mqttMessagingService;
 
     @Autowired
     SlackAccountBankService slackAccountBankService;

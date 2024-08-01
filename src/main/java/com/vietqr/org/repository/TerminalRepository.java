@@ -397,4 +397,18 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             + " ) t ", nativeQuery = true)
     List<TerminalBankV2DTO> getTerminalByUserIdAndMerchantIds(String userId,
                                                               List<String> merchantIds);
+@Query(value = "SELECT "
+        + "terminalName "
+        + "FROM ( "
+        + "SELECT a.name AS terminalName "
+        + "FROM terminal a "
+        + "INNER JOIN merchant_member c ON c.merchant_id = a.merchant_id "
+        + "WHERE c.user_id = :userId AND a.merchant_id = :merchantId "
+        + "UNION "
+        + "SELECT a.name AS terminalName "
+        + "FROM terminal a "
+        + "INNER JOIN merchant_member c ON (c.merchant_id = a.merchant_id AND a.id = c.terminal_id) "
+        + "WHERE c.user_id = :userId AND a.merchant_id = :merchantId "
+        + " ) t ", nativeQuery = true)
+    List<String> getTerminalByUserIdAndMerchantId(String userId, String merchantId);
 }

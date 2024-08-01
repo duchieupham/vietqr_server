@@ -16,6 +16,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.service.*;
+import com.vietqr.org.service.mqtt.MqttMessagingService;
 import com.vietqr.org.service.redis.IdempotencyService;
 import com.vietqr.org.service.social.*;
 import com.vietqr.org.util.*;
@@ -143,6 +144,9 @@ public class TransactionMMSController {
 
     @Autowired
     IdempotencyService idempotencyService;
+
+    @Autowired
+    MqttMessagingService mqttMessagingService;
 
     @Autowired
     SlackAccountBankService slackAccountBankService;
@@ -2665,6 +2669,17 @@ public class TransactionMMSController {
                 data.put("message", String.format(messageForBox, amountForVoice));
                 String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
                 socketHandler.sendMessageToBoxId(idRefBox, data);
+                try {
+                    MessageBoxDTO messageBoxDTO = new MessageBoxDTO();
+                    messageBoxDTO.setNotificationType(NotificationUtil.getNotiTypeUpdateTransaction());
+                    messageBoxDTO.setAmount(amount);
+                    messageBoxDTO.setMessage(String.format(messageForBox, amountForVoice));
+                    ObjectMapper mapper = new ObjectMapper();
+                    mqttMessagingService.sendMessageToBoxId(idRefBox, mapper.writeValueAsString(messageBoxDTO));
+                } catch (Exception e) {
+                    logger.error("MQTT: socketHandler.sendMessageToQRBox - "
+                            + boxIdRef + " at: " + System.currentTimeMillis());
+                }
                 logger.info("WS: socketHandler.sendMessageToQRBox - "
                         + boxIdRef + " at: " + System.currentTimeMillis());
             } catch (IOException e) {
