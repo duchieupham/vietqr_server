@@ -247,6 +247,16 @@ public class TerminalServiceImpl implements TerminalService {
     }
 
     @Override
+    public List<TerminalBankV2DTO> getTerminalByUserIdAndMerchantIds(String userId, List<String> merchantIds) {
+        return repo.getTerminalByUserIdAndMerchantIds(userId, merchantIds);
+    }
+
+    @Override
+    public List<String> getTerminalByUserIdAndMerchantId(String userId, String merchantId) {
+        return repo.getTerminalByUserIdAndMerchantId(userId, merchantId);
+    }
+
+    @Override
     public TerminalEntity getTerminalByTerminalId(String terminalId) {
         return repo.getTerminalByTerminalId(terminalId);
     }

@@ -1,6 +1,7 @@
 package com.vietqr.org.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
@@ -372,8 +373,83 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
         return repo.getBankAccountTypeDetail(bankId);
     }
 
+
+    @Override
+    public int countAllBankAccounts() {
+        return repo.countAllBankAccounts();
+    }
+
+    @Override
+    public int countBankAccountsByAccount(String keyword) {
+        return repo.countBankAccountsByAccount(keyword);
+    }
+
+    @Override
+    public int countBankAccountsByAccountName(String keyword) {
+        return repo.countBankAccountsByAccountName(keyword);
+    }
+
+    @Override
+    public int countBankAccountsByPhoneAuthenticated(String keyword) {
+        return repo.countBankAccountsByPhoneAuthenticated(keyword);
+    }
+
+    @Override
+    public int countBankAccountsByNationalId(String keyword) {
+        return repo.countBankAccountsByNationalId(keyword);
+    }
+
+    @Override
+    public List<BankAccountResponseDTO> getAllBankAccount(int offset, int size) {
+        List<IBankAccountResponseDTO> accounts = repo.getAllBankAccounts(offset, size);
+        return convertAndSanitize(accounts);
+    }
+
     @Override
     public void unRegisterAuthenBank(String bankAccount, String ewalletToken) {
         repo.unRegisterAuthenBank(bankAccount, ewalletToken);
     }
+
+    @Override
+    public List<BankAccountResponseDTO> getBankAccountsByNationalIds(String keyword, int offset, int size) {
+        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByNationalId(keyword, offset, size);
+        return convertAndSanitize(accounts);
+    }
+
+    @Override
+    public List<BankAccountResponseDTO> getBankAccountsByPhoneAuthenticated(String keyword, int offset, int size) {
+        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByPhoneAuthenticated(keyword, offset, size);
+        return convertAndSanitize(accounts);
+    }
+    @Override
+    public List<BankAccountResponseDTO> getBankAccountsByAccountNames(String keyword, int offset, int size) {
+        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByAccountName(keyword, offset, size);
+        return convertAndSanitize(accounts);
+    }
+    @Override
+    public List<BankAccountResponseDTO> getBankAccountsByAccounts(String keyword, int offset, int size) {
+        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByAccount(keyword, offset, size);
+        return convertAndSanitize(accounts);
+    }
+
+    private List<BankAccountResponseDTO> convertAndSanitize(List<IBankAccountResponseDTO> accounts) {
+        return accounts.stream()
+                .map(account -> new BankAccountResponseDTO(
+                        account.getBankId()== null ? "" : account.getBankId(),
+                        account.getBankAccount() == null ? "" : account.getBankAccount(),
+                        account.getBankAccountName() == null ? "" : account.getBankAccountName(),
+                        account.getBankShortName() == null ? "" : account.getBankShortName(),
+                        account.getPhoneAuthenticated() == null ? "" : account.getPhoneAuthenticated(),
+                        account.getMmsActive(),
+                        account.getNationalId() == null ? "" : account.getNationalId(),
+                        account.getValidFeeTo() == null ? 0 : account.getValidFeeTo(),
+                        account.getPhoneNo() == null ? "" : account.getPhoneNo(),
+                        account.getEmail() == null ? "" : account.getEmail(),
+                        account.getStatus(),
+                        account.getVso() == null ? "": account.getVso()
+                ))
+                .collect(Collectors.toList());
+    }
+
+
 }

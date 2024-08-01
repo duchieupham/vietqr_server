@@ -26,6 +26,8 @@ public class SocketHandler extends TextWebSocketHandler {
     private List<WebSocketSession> ecLoginSessions = new ArrayList<>();
     private List<WebSocketSession> transactionSessions = new ArrayList<>();
     private List<WebSocketSession> notificationBoxSessions = new ArrayList<>();
+    private List<WebSocketSession> notificationClientSessions = new ArrayList<>();
+
 
     @Autowired
     private QrBoxSyncRepository qrBoxSyncRepository;
@@ -39,6 +41,7 @@ public class SocketHandler extends TextWebSocketHandler {
             String ecLoginId = (String) session.getAttributes().get("ecLoginId");
             String transactionRefId = (String) session.getAttributes().get("refId");
             String boxId = (String) session.getAttributes().get("boxId");
+            String clientId = (String) session.getAttributes().get("clientId");
 
             if (userId != null && !userId.trim().isEmpty()) {
                 // save userId for this session
@@ -66,6 +69,10 @@ public class SocketHandler extends TextWebSocketHandler {
                 data.put("notificationType", NotificationUtil.getNotiTypeConnectSuccess());
                 updateStatusVietQrBox(boxId, 1);
                 sendMessageToBoxId(boxId, data);
+            }else if (clientId != null && !clientId.trim().isEmpty()) {
+                // save clientId for this session
+                session.getAttributes().put("clientId", clientId);
+                notificationClientSessions.add(session);
             } else {
                 logger.error("WS: userId is missing");
                 session.close();
@@ -97,6 +104,7 @@ public class SocketHandler extends TextWebSocketHandler {
         notificationSessions.remove(session);
         loginSessions.remove(session);
         transactionSessions.remove(session);
+        notificationClientSessions.remove(session);
         boolean checkOfflineBox = notificationBoxSessions.remove(session);
         if (checkOfflineBox) {
             updateStatusVietQrBox(session.getAttributes().get("boxId").toString(), 0);
@@ -107,6 +115,7 @@ public class SocketHandler extends TextWebSocketHandler {
         logger.info("WS: loginSessions size: " + loginSessions.size());
         logger.info("WS: ecLoginSessions size: " + ecLoginSessions.size());
         logger.info("WS: transactionSessions size: " + transactionSessions.size());
+        logger.info("WS: notificationClientSessions size: " + notificationClientSessions.size());
         //
     }
 
@@ -118,6 +127,21 @@ public class SocketHandler extends TextWebSocketHandler {
             logger.info("WS: ec-login session Attributes: " + session.getAttributes());
             Object sessionEcLoginId = session.getAttributes().get("ecLoginId");
             if (sessionEcLoginId != null && sessionEcLoginId.equals(ecLoginId)) {
+                ObjectMapper mapper = new ObjectMapper();
+                String jsonMessage = mapper.writeValueAsString(message);
+                session.sendMessage(new TextMessage(jsonMessage));
+            }
+        }
+    }
+
+    public void sendMessageToClientId(String clientId, Map<String, String> message) throws IOException {
+        logger.info("WS: sendMessageToClient");
+        logger.info("WS: notificationSessions: " + notificationClientSessions.size());
+        for (WebSocketSession session : notificationClientSessions) {
+            logger.info("WS: session ID: " + session.getId());
+            logger.info("WS: session Attributes: " + session.getAttributes());
+            Object sessionClientId = session.getAttributes().get("clientId");
+            if (sessionClientId != null && sessionClientId.equals(clientId)) {
                 ObjectMapper mapper = new ObjectMapper();
                 String jsonMessage = mapper.writeValueAsString(message);
                 session.sendMessage(new TextMessage(jsonMessage));

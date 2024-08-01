@@ -659,7 +659,8 @@ public class AccountController {
                     customerSyncService.insertCustomerSync(customerSyncEntity);
                 }
                 if (check == 1) {
-                    LarkUtil larkUtil = new LarkUtil();
+//                    LarkUtil larkUtil = new LarkUtil();
+                    GoogleChatUtil googleChatUtil = new GoogleChatUtil();
                     String msgSharingCode = "";
                     if (dto.getSharingCode() != null && !dto.getSharingCode().trim().isEmpty()) {
                         msgSharingCode = "\\nĐã nhập mã giới thiệu: " + dto.getSharingCode();
@@ -671,7 +672,8 @@ public class AccountController {
                             + msgSharingCode;
                     // SEND TO LARK VIETQR
                     SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
-                    larkUtil.sendMessageToLark(larkMsg, systemSettingEntity.getWebhookUrl());
+//                    googleChatUtil.sendMessageToGoogleChat(larkMsg, systemSettingEntity.getWebhookUrl());
+                    googleChatUtil.sendMessageToGoogleChat(larkMsg, systemSettingEntity.getWebhookUrl());
                     // SEND TO LARK PARTNER
 
                     List<LarkWebhookPartnerEntity> partners = new ArrayList<>();
@@ -681,7 +683,7 @@ public class AccountController {
                             if (partner.getWebhook() != null && !partner.getWebhook().trim().isEmpty()
                                     && partner.getActive() != null && partner.getActive() == true) {
                                 try {
-                                    larkUtil.sendMessageToLark(msgSharingCode, partner.getWebhook());
+                                    googleChatUtil.sendMessageToGoogleChat(msgSharingCode, partner.getWebhook());
                                 } catch (Exception e) {
                                     logger.error("registerAccount - send lark to customer: " + partner.getWebhook()
                                             + " - " + e.toString());
@@ -1051,7 +1053,8 @@ public class AccountController {
                         dto.getNationalId(), dto.getOldNationalId(), dto.getNationalDate(),
                         dto.getUserId());
                 //
-                LarkUtil larkUtil = new LarkUtil();
+//                LarkUtil larkUtil = new LarkUtil();
+                GoogleChatUtil googleChatUtil = new GoogleChatUtil();
                 String phoneNo = accountLoginService.getPhoneNoById(dto.getUserId());
                 String fullname = dto.getLastName() + " " + dto.getMiddleName() + " " + dto.getFirstName();
                 String gender = (dto.getGender() == 0) ? "Nam" : "Nữ";
@@ -1064,7 +1067,7 @@ public class AccountController {
                         + "\\nGiới tính: " + gender;
                 // SEND TO LARK VIETQR
                 SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
-                larkUtil.sendMessageToLark(larkMsg, systemSettingEntity.getWebhookUrl());
+                googleChatUtil.sendMessageToGoogleChat(larkMsg, systemSettingEntity.getWebhookUrl());
                 // SEND TO LARK PARTNER
                 List<LarkWebhookPartnerEntity> partners = new ArrayList<>();
                 partners = larkWebhookPartnerService.getLarkWebhookPartners();
@@ -1072,7 +1075,7 @@ public class AccountController {
                     for (LarkWebhookPartnerEntity partner : partners) {
                         if (partner.getWebhook() != null && !partner.getWebhook().trim().isEmpty()
                                 && partner.getActive() != null && partner.getActive() == true) {
-                            larkUtil.sendMessageToLark(larkMsg, partner.getWebhook());
+                            googleChatUtil.sendMessageToGoogleChat(larkMsg, partner.getWebhook());
                         }
                     }
                 }
@@ -1330,5 +1333,6 @@ public class AccountController {
 
         return token;
     }
+
 
 }

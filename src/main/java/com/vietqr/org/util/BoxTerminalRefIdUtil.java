@@ -8,6 +8,8 @@ import java.util.Base64;
 public class BoxTerminalRefIdUtil {
     private static final Logger logger = Logger.getLogger(BoxTerminalRefIdUtil.class);
     private static final String VIET_QR_BOX_ACCESS_KEY = "VietQRBoxAccessKey";
+//    private static final String VIET_QR_MERCHANT_ACCESS_KEY = "VietQRMerchantAccessKey";
+
     public static String encode(String input) {
         byte[] encodedBytes = Base64.getUrlEncoder().withoutPadding().encode(input.getBytes(StandardCharsets.UTF_8));
         return new String(encodedBytes, StandardCharsets.UTF_8);
@@ -29,6 +31,18 @@ public class BoxTerminalRefIdUtil {
         }
         return result;
     }
+
+//    public static String encryptMerchantId(String id) {
+//        String result = "";
+//        try {
+//            String encryptedId = encode(id + VIET_QR_MERCHANT_ACCESS_KEY);
+//            result = encryptedId;
+//        } catch (Exception e) {
+//            logger.error("encryptTransactionId: ERROR:" + e.toString());
+//            System.out.println("encryptTransactionId: ERROR:" + e.toString());
+//        }
+//        return result;
+//    }
 
     public static String decryptBoxId(String refId) {
         String result = "";

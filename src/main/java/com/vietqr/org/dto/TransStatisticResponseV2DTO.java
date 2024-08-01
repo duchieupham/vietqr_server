@@ -1,10 +1,14 @@
 package com.vietqr.org.dto;
 
+import java.util.List;
+
 public class TransStatisticResponseV2DTO {
     private long totalCredit;
     private int countCredit;
     private long totalDebit;
     private int countDebit;
+    private String merchantName;
+    private List<String> terminals;
 
     public TransStatisticResponseV2DTO() {
     }
@@ -46,5 +50,21 @@ public class TransStatisticResponseV2DTO {
 
     public void setCountDebit(int countDebit) {
         this.countDebit = countDebit;
+    }
+
+    public String getMerchantName() {
+        return merchantName;
+    }
+
+    public void setMerchantName(String merchantName) {
+        this.merchantName = merchantName;
+    }
+
+    public List<String> getTerminals() {
+        return terminals;
+    }
+
+    public void setTerminals(List<String> terminals) {
+        this.terminals = terminals;
     }
 }

@@ -158,4 +158,20 @@ public interface AccountBankReceiveService {
 	List<IAccountBankMonthDTO> getBankAccountStatistics();
 
 	BankDetailTypeCaiValueDTO getBankAccountTypeDetail(String bankId);
+	int countAllBankAccounts();
+	int countBankAccountsByAccount(String keyword);
+	int countBankAccountsByAccountName(String keyword);
+
+	int countBankAccountsByPhoneAuthenticated(String keyword);
+
+	int countBankAccountsByNationalId(String keyword);
+	List<BankAccountResponseDTO> getAllBankAccount(int offset, int size);
+
+	List<BankAccountResponseDTO> getBankAccountsByAccounts(String keyword, int offset, int size);
+
+	List<BankAccountResponseDTO> getBankAccountsByAccountNames(String keyword, int offset, int size);
+
+	List<BankAccountResponseDTO> getBankAccountsByNationalIds(String keyword, int offset, int size);
+
+	List<BankAccountResponseDTO> getBankAccountsByPhoneAuthenticated(String keyword, int offset, int size);
 }

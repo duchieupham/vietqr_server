@@ -1,6 +1,5 @@
 package com.vietqr.org.controller;
 
-import java.io.IOException;
 import java.util.*;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -15,6 +14,7 @@ import com.vietqr.org.entity.*;
 import com.vietqr.org.entity.bidv.CustomerInvoiceEntity;
 import com.vietqr.org.service.*;
 import com.vietqr.org.service.bidv.CustomerInvoiceService;
+import com.vietqr.org.service.mqtt.MqttMessagingService;
 import com.vietqr.org.util.*;
 import com.vietqr.org.util.bank.bidv.CustomerVaUtil;
 import com.vietqr.org.util.bank.mb.MBVietQRUtil;
@@ -59,6 +59,9 @@ public class VietQRController {
 
 	@Autowired
 	BankTypeService bankTypeService;
+
+	@Autowired
+	MqttMessagingService mqttMessagingService;
 
 	@Autowired
 	AccountBankReceiveService accountBankReceiveService;
@@ -765,6 +768,7 @@ public class VietQRController {
 				}
 				break;
 			case "BIDV":
+				String traceBIDVId = "VQR" + RandomCodeUtil.generateRandomUUID();
 				String qr = "";
 				String billId = "";
 				BankTypeEntity bankTypeEntity = null;
@@ -841,7 +845,7 @@ public class VietQRController {
 										VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
 										vietQRGenerateDTO.setCaiValue(caiValue);
 										vietQRGenerateDTO.setAmount(dto.getAmount() + "");
-										content = billId;
+										content = traceBIDVId + " " + billId;
 										vietQRGenerateDTO.setContent(content);
 										vietQRGenerateDTO.setBankAccount(bankAccountRequest);
 										qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
@@ -945,7 +949,8 @@ public class VietQRController {
 						dto1.setQr(qr);
 						AccountBankReceiveEntity accountBankReceiveEntity = accountBankEntity;
 						Thread thread = new Thread(() -> {
-							insertNewTransactionBIDV(transactionUUID, dto1, false, accountBankReceiveEntity);
+							insertNewTransactionBIDV(transactionUUID, dto1, false,traceBIDVId,
+									accountBankReceiveEntity);
 						});
 						thread.start();
 					}
@@ -1501,6 +1506,24 @@ public class VietQRController {
 			data.put("terminalCode", result.getTerminalCode() != null ? result.getTerminalCode() : "");
 			data.put("terminalName", terminalName != null ? terminalName : "");
 			socketHandler.sendMessageToBoxId(boxId, data);
+
+			try {
+				ObjectMapper mapper = new ObjectMapper();
+				DynamicQRBoxDTO dynamicQRBoxDTO = new DynamicQRBoxDTO();
+				dynamicQRBoxDTO.setNotificationType(NotificationUtil.getNotiSendDynamicQr());
+				dynamicQRBoxDTO.setTransactionReceiveId(transactionUUID);
+				dynamicQRBoxDTO.setBankAccount(result.getBankAccount());
+				dynamicQRBoxDTO.setBankShortName(result.getBankCode());
+				dynamicQRBoxDTO.setUserBankName(result.getUserBankName());
+				dynamicQRBoxDTO.setContent(result.getContent());
+				dynamicQRBoxDTO.setAmount(StringUtil.formatNumberAsString(result.getAmount()));
+				dynamicQRBoxDTO.setQrCode(qr);
+				dynamicQRBoxDTO.setQrType(0 + "");
+				mqttMessagingService
+						.sendMessageToBoxId(boxId, mapper.writeValueAsString(dynamicQRBoxDTO));
+			} catch (Exception e) {
+
+			}
 			responseMessageDTO = new ResponseMessageDTO("SUCCESS", "");
 			return responseMessageDTO;
 		} catch (Exception e) {
@@ -2106,7 +2129,7 @@ public class VietQRController {
 						dto1.setCustomerName(StringUtil.getValueNullChecker(dto.getCustomerName()));
 						dto1.setQr(qr);
                         Thread thread = new Thread(() -> {
-							insertNewTransactionBIDV(transcationUUID, dto1, false, accountBankEntity);
+							insertNewTransactionBIDV(transcationUUID, dto1, false, "", accountBankEntity);
 						});
 						thread.start();
 
@@ -2425,7 +2448,7 @@ public class VietQRController {
 	}
 
 	private void insertNewTransactionBIDV(UUID transcationUUID, VietQRBIDVCreateDTO dto,
-											boolean isFromMerchantSync,
+											boolean isFromMerchantSync,String traceId,
 											AccountBankReceiveEntity accountBankEntity) {
 		logger.info("QR generate - start insertNewTransactionBIDV at: " + DateTimeUtil.getCurrentDateTimeUTC());
 		try {
@@ -2440,7 +2463,7 @@ public class VietQRController {
 				transactionEntity.setRefId("");
 				transactionEntity.setType(0);
 				transactionEntity.setStatus(0);
-				transactionEntity.setTraceId(dto.getBillId());
+				transactionEntity.setTraceId(traceId);
 				transactionEntity.setTimePaid(0);
 				transactionEntity.setTerminalCode(dto.getTerminalCode());
 				transactionEntity.setQrCode(dto.getQr());

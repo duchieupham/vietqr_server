@@ -70,6 +70,11 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
     }
 
     @Override
+    public boolean getMerchantSyncByUsername(String username) {
+        return repo.getMerchantSyncByUsername(username);
+    }
+
+    @Override
     public MerchantSyncEntity updateMerchant(String id, MerchantSyncEntity entity) {
 //        if (repo.existsById(id)) {
 //            entity.setId(id);
@@ -99,6 +104,13 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
     }
 
     @Override
+    public void updateMerchantV2(String publishId, String accountCustomerId, String address, String career, String businessType,
+                                 String name, String userId, String vso, String email, String refId, String fullName, String phoneNo
+    ) {
+        repo.updateMerchantV2(publishId, accountCustomerId, address, career, businessType, name, userId, vso, email, refId, fullName, phoneNo);
+    }
+
+    @Override
     public Optional<MerchantSyncEntity> findById(String id) {
         return Optional.empty();
     }
@@ -112,6 +124,7 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
     public int countMerchantsByName(String value) {
         return repo.countMerchantsByName(value);
     }
+
     @Override
     public void savePlatformDetails(String platform, String userId, String details) {
         if (platform == null || details == null) {
@@ -159,6 +172,16 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
     }
 
     @Override
+    public MerchantSyncEntity getMerchantByMerchantIdentity(String merchantIdentity) {
+        return repo.getMerchantByMerchantIdentity(merchantIdentity);
+    }
+
+    @Override
+    public String getPublishIdSyncByCertificate(String certificate) {
+        return repo.getPublishIdSyncByCertificate(certificate);
+    }
+
+    @Override
     public MerchantSyncEntity getMerchantSyncById(String mid) {
         return repo.getMerchantSyncById(mid);
     }
@@ -171,6 +194,11 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
     @Override
     public List<IMerchantSyncPublicDTO> getMerchantByMidSync(String refId, int offset, int size) {
         return repo.getMerchantByMidSync(refId, offset, size);
+    }
+
+    @Override
+    public List<IMerchantSyncPublicDTO> getMerchantByMidSyncV2(String refId) {
+        return repo.getMerchantByMidSyncV2(refId);
     }
 
     @Override
@@ -191,5 +219,10 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
     @Override
     public void insertAll(List<MerchantSyncEntity> entities) {
         repo.saveAll(entities);
+    }
+
+    @Override
+    public int insert(MerchantSyncEntity entity) {
+        return repo.save(entity) == null ? 0 : 1;
     }
 }
