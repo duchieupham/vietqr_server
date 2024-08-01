@@ -697,7 +697,8 @@ public class AccountBankReceiveController {
                 contactService.insertContact(contactEntity);
             }
             //
-            LarkUtil larkUtil = new LarkUtil();
+//            LarkUtil larkUtil = new LarkUtil();
+            GoogleChatUtil googleChatUtil = new GoogleChatUtil();
             String phoneNo = accountInformationService.getPhoneNoByUserId(dto.getUserId());
             AccountInformationEntity accountInformationEntity = accountInformationService
                     .getAccountInformation(dto.getUserId());
@@ -727,7 +728,8 @@ public class AccountBankReceiveController {
                     + email
                     + address;
             SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
-            larkUtil.sendMessageToLark(larkMsg, systemSettingEntity.getWebhookUrl());
+//            larkUtil.sendMessageToLark(larkMsg, systemSettingEntity.getWebhookUrl());
+            googleChatUtil.sendMessageToGoogleChat(larkMsg, systemSettingEntity.getWebhookUrl());
             result = new ResponseMessageDTO("SUCCESS", uuid.toString() + "*" + qr);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
@@ -892,7 +894,8 @@ public class AccountBankReceiveController {
                     break;
             }
             //
-            LarkUtil larkUtil = new LarkUtil();
+//            LarkUtil larkUtil = new LarkUtil();
+            GoogleChatUtil googleChatUtil = new GoogleChatUtil();
             AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService
                     .getAccountBankById(dto.getBankId());
             String phoneNo = accountInformationService.getPhoneNoByUserId(accountBankReceiveEntity.getUserId());
@@ -924,7 +927,8 @@ public class AccountBankReceiveController {
                     + email
                     + address;
             SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
-            larkUtil.sendMessageToLark(larkMsg, systemSettingEntity.getWebhookUrl());
+//            larkUtil.sendMessageToLark(larkMsg, systemSettingEntity.getWebhookUrl());
+            googleChatUtil.sendMessageToGoogleChat(larkMsg, systemSettingEntity.getWebhookUrl());
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
@@ -1066,7 +1070,8 @@ public class AccountBankReceiveController {
                 contactService.insertContact(contactEntity);
             }
             //
-            LarkUtil larkUtil = new LarkUtil();
+//            LarkUtil larkUtil = new LarkUtil();
+            GoogleChatUtil googleChatUtil = new GoogleChatUtil();
             // AccountBankReceiveEntity accountBankReceiveEntity =
             // accountBankService.getAccountBankById(dto.getBankId());
             String phoneNo = accountInformationService.getPhoneNoByUserId(dto.getUserId());
@@ -1097,7 +1102,7 @@ public class AccountBankReceiveController {
                     + email
                     + address;
             SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
-            larkUtil.sendMessageToLark(larkMsg, systemSettingEntity.getWebhookUrl());
+            googleChatUtil.sendMessageToGoogleChat(larkMsg, systemSettingEntity.getWebhookUrl());
             result = new ResponseMessageDTO("SUCCESS", uuid.toString() + "*" + qr);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
