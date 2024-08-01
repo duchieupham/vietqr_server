@@ -1606,12 +1606,16 @@ public class TransactionController {
                 result.setTotalCredit(dto.getTotalCredit());
                 result.setCountDebit(dto.getCountDebit());
                 result.setTotalDebit(dto.getTotalDebit());
+                result.setMerchantName("FAKE MERCHANT");
+                result.setTerminals(new ArrayList<>());
             } else {
                 result = new TransStatisticResponseV2DTO();
                 result.setCountCredit(0);
                 result.setTotalCredit(0);
                 result.setCountDebit(0);
                 result.setTotalDebit(0);
+                result.setMerchantName("FAKE MERCHANT");
+                result.setTerminals(new ArrayList<>());
             }
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
