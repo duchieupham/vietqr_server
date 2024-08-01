@@ -1875,4 +1875,70 @@ public class AccountBankReceiveController {
 
         return modifiedString;
     }
+
+    @GetMapping("/list-account-bank")
+    public ResponseEntity<Object> getListBankAccount(
+            @RequestParam(required = false) Integer type,
+            @RequestParam(required = false) String value,
+            @RequestParam int page,
+            @RequestParam int size) {
+        Object result;
+        HttpStatus httpStatus;
+        PageResDTO pageResDTO = new PageResDTO();
+
+        try {
+            int totalElement;
+            int offset = (page - 1) * size;
+            List<BankAccountResponseDTO> data;
+            // List<IBankAccountResponseDTO> data;
+
+            if (type == null || value == null || value.isEmpty()) {
+                data = accountBankReceiveService.getAllBankAccount(offset, size);
+                totalElement = accountBankReceiveService.countAllBankAccounts();
+            } else {
+                switch (type) {
+                    case 1:
+                        data = accountBankReceiveService.getBankAccountsByAccounts(value, offset, size);
+                        totalElement = accountBankReceiveService.countBankAccountsByAccount(value);
+                        break;
+                    case 2:
+                        data = accountBankReceiveService.getBankAccountsByAccountNames(value, offset, size);
+                        totalElement = accountBankReceiveService.countBankAccountsByAccountName(value);
+                        break;
+                    case 3:
+                        data = accountBankReceiveService.getBankAccountsByPhoneAuthenticated(value, offset, size);
+                        totalElement = accountBankReceiveService.countBankAccountsByPhoneAuthenticated(value);
+                        break;
+                    case 4:
+                        data = accountBankReceiveService.getBankAccountsByNationalIds(value, offset, size);
+                        totalElement = accountBankReceiveService.countBankAccountsByNationalId(value);
+                        break;
+                    default:
+                        data = new ArrayList<>();
+                        totalElement = 0;
+                        break;
+                }
+            }
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageDTO.setTotalElement(totalElement);
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+
+            pageResDTO.setMetadata(pageDTO);
+            pageResDTO.setData(data);
+
+            httpStatus = HttpStatus.OK;
+            result = pageResDTO;
+        } catch (Exception e) {
+            logger.error("BankAccountController: ERROR: getListBankAccount: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
 }
