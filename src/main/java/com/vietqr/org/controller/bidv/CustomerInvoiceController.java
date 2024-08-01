@@ -1896,7 +1896,7 @@ public class CustomerInvoiceController {
                 try {
                     MessageBoxDTO messageBoxDTO = new MessageBoxDTO();
                     messageBoxDTO.setNotificationType(NotificationUtil.getNotiTypeUpdateTransaction());
-                    messageBoxDTO.setAmount(data.get("amount");
+                    messageBoxDTO.setAmount(data.get("amount"));
                     messageBoxDTO.setMessage(String.format(messageForBox, amountForVoice));
                     ObjectMapper mapper = new ObjectMapper();
                     mqttMessagingService.sendMessageToBoxId(idRefBox, mapper.writeValueAsString(messageBoxDTO));
