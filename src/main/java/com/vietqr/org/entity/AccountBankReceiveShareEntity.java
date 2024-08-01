@@ -29,6 +29,9 @@ public class AccountBankReceiveShareEntity implements Serializable {
     @Column(name = "traceTransfer")
     private String traceTransfer;
 
+    @Column(name = "arrangement")
+    private int arrangement = 99;
+
     public AccountBankReceiveShareEntity() {
         super();
     }
@@ -97,6 +100,14 @@ public class AccountBankReceiveShareEntity implements Serializable {
 
     public void setQrCode(String qrCode) {
         this.qrCode = qrCode;
+    }
+
+    public int getArrangement() {
+        return arrangement;
+    }
+
+    public void setArrangement(int arrangement) {
+        this.arrangement = arrangement;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.dto.MerchantBankV2DTO;
 import com.vietqr.org.entity.MerchantBankReceiveEntity;
 import com.vietqr.org.repository.MerchantBankReceiveRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,5 +42,20 @@ public class MerchantBankReceiveServiceImpl implements MerchantBankReceiveServic
     @Override
     public MerchantBankReceiveEntity getMerchantBankByMerchantId(String merchantId, String bankId) {
         return repo.getMerchantBankByMerchantId(merchantId, bankId);
+    }
+
+    @Override
+    public List<MerchantBankV2DTO> getMerchantBankV2ByBankId(String bankId, String userId, int offset, int size) {
+        return repo.getMerchantBankV2ByBankId(bankId, userId, offset, size);
+    }
+
+    @Override
+    public int countMerchantBankV2ByBankId(String bankId, String userId) {
+        return repo.countMerchantBankV2ByBankId(bankId, userId);
+    }
+
+    @Override
+    public MerchantBankV2DTO getMerchantBankV2OverviewByBankId(String bankId, String userId) {
+        return repo.getMerchantBankV2OverviewByBankId(bankId, userId);
     }
 }

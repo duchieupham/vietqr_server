@@ -1,5 +1,6 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.dto.MerchantBankV2DTO;
 import com.vietqr.org.entity.MerchantBankReceiveEntity;
 import org.springframework.stereotype.Service;
 
@@ -17,4 +18,11 @@ public interface MerchantBankReceiveService {
     String getBankIdReceiveByMerchant(String key);
 
     MerchantBankReceiveEntity getMerchantBankByMerchantId(String merchantId, String bankId);
+
+    List<MerchantBankV2DTO> getMerchantBankV2ByBankId(String bankId, String userId,
+                                                      int offset, int size);
+
+    int countMerchantBankV2ByBankId(String bankId, String userId);
+
+    MerchantBankV2DTO getMerchantBankV2OverviewByBankId(String bankId, String userId);
 }

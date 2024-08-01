@@ -104,6 +104,9 @@ public class TransactionController {
     private SocketHandler socketHandler;
 
     @Autowired
+    private MerchantBankReceiveService merchantBankReceiveService;
+
+    @Autowired
     private TransactionRefundService transactionRefundService;
 
     @Autowired
@@ -1600,21 +1603,28 @@ public class TransactionController {
             TransStatisticV2DTO dto = null;
             dto = transactionReceiveService
                     .getTransactionOverviewV2(bankId, fromDate, toDate);
+            MerchantBankV2DTO merchantBankV2DTO = merchantBankReceiveService
+                    .getMerchantBankV2OverviewByBankId(bankId, userId);
             if (Objects.nonNull(dto)) {
                 result = new TransStatisticResponseV2DTO();
                 result.setCountCredit(dto.getCountCredit());
                 result.setTotalCredit(dto.getTotalCredit());
                 result.setCountDebit(dto.getCountDebit());
                 result.setTotalDebit(dto.getTotalDebit());
-                result.setMerchantName("FAKE MERCHANT");
-                result.setTerminals(new ArrayList<>());
+                if (Objects.nonNull(merchantBankV2DTO)) {
+                    result.setMerchantName(StringUtil
+                            .getValueNullChecker(merchantBankV2DTO.getMerchantName()));
+                    List<String> terminalDTOs = terminalService
+                            .getTerminalByUserIdAndMerchantId(userId, merchantBankV2DTO.getMerchantId());
+                    result.setTerminals(terminalDTOs != null ? terminalDTOs : new ArrayList<>());
+                }
             } else {
                 result = new TransStatisticResponseV2DTO();
                 result.setCountCredit(0);
                 result.setTotalCredit(0);
                 result.setCountDebit(0);
                 result.setTotalDebit(0);
-                result.setMerchantName("FAKE MERCHANT");
+                result.setMerchantName("");
                 result.setTerminals(new ArrayList<>());
             }
             httpStatus = HttpStatus.OK;

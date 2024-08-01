@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.service.*;
+import com.vietqr.org.service.mqtt.MqttMessagingService;
 import com.vietqr.org.util.*;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
@@ -130,6 +131,9 @@ public class CustomerInvoiceController {
 
     @Autowired
     SystemSettingService systemSettingService;
+
+    @Autowired
+    MqttMessagingService mqttMessagingService;
 
     @Autowired
     CustomerSyncService customerSyncService;
@@ -750,6 +754,17 @@ public class CustomerInvoiceController {
                 dataBox.put("message", String.format(messageForBox, amountForVoice));
                 String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
                 socketHandler.sendMessageToBoxId(idRefBox, dataBox);
+                try {
+                    MessageBoxDTO messageBoxDTO = new MessageBoxDTO();
+                    messageBoxDTO.setNotificationType(NotificationUtil.getNotiTypeUpdateTransaction());
+                    messageBoxDTO.setAmount(amount);
+                    messageBoxDTO.setMessage(String.format(messageForBox, amountForVoice));
+                    ObjectMapper mapper = new ObjectMapper();
+                    mqttMessagingService.sendMessageToBoxId(idRefBox, mapper.writeValueAsString(messageBoxDTO));
+                } catch (Exception e) {
+                    logger.error("MQTT: socketHandler.sendMessageToQRBox - "
+                            + boxIdRef + " at: " + System.currentTimeMillis());
+                }
                 logger.info("WS: socketHandler.sendMessageToQRBox - "
                         + boxIdRef + " at: " + System.currentTimeMillis());
             } catch (IOException e) {
@@ -1878,6 +1893,17 @@ public class CustomerInvoiceController {
                 dataBox.put("message", String.format(messageForBox, amountForVoice));
                 String idRefBox = BoxTerminalRefIdUtil.encryptQrBoxId(boxIdRef);
                 socketHandler.sendMessageToBoxId(idRefBox, dataBox);
+                try {
+                    MessageBoxDTO messageBoxDTO = new MessageBoxDTO();
+                    messageBoxDTO.setNotificationType(NotificationUtil.getNotiTypeUpdateTransaction());
+                    messageBoxDTO.setAmount(data.get("amount");
+                    messageBoxDTO.setMessage(String.format(messageForBox, amountForVoice));
+                    ObjectMapper mapper = new ObjectMapper();
+                    mqttMessagingService.sendMessageToBoxId(idRefBox, mapper.writeValueAsString(messageBoxDTO));
+                } catch (Exception e) {
+                    logger.error("MQTT: socketHandler.sendMessageToQRBox - "
+                            + boxIdRef + " at: " + System.currentTimeMillis());
+                }
                 logger.info("WS: socketHandler.sendMessageToQRBox - "
                         + boxIdRef + " at: " + System.currentTimeMillis());
             } catch (IOException e) {

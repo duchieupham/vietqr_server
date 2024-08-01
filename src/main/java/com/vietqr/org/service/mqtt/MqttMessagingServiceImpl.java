@@ -4,7 +4,7 @@ import com.vietqr.org.util.MQTTUtil;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MQTTMessagingServiceImpl implements MQTTMessagingService {
+public class MqttMessagingServiceImpl implements MqttMessagingService {
     @Override
     public void sendMessageToBoxId(String boxId, String message) {
         try {

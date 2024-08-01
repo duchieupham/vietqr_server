@@ -370,4 +370,45 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             + "WHERE a.name LIKE %:terminalName% AND b.bank_id = :bankId "
             + ") ", nativeQuery = true)
     List<String> getAllCodeByNameAndBankId(String terminalName, String bankId);
+
+    @Query(value = "SELECT "
+            + "terminalId, terminalName, terminalCode, merchantId, "
+            + "terminalAddress, qrCode, rawTerminalCode "
+            + "FROM ( "
+            + "SELECT a.id AS terminalId, a.name AS terminalName, a.merchant_id AS merchantId, "
+            + "a.code AS terminalCode, a.address AS terminalAddress, "
+            + "a.raw_terminal_code AS rawTerminalCode, "
+            + "CASE WHEN b.trace_transfer = '' || b.trace_transfer IS NULL THEN "
+            + "b.data1 ELSE b.data2 END AS qrCode "
+            + "FROM terminal a "
+            + "INNER JOIN terminal_bank_receive b ON a.id = b.terminal_id "
+            + "INNER JOIN merchant_member c ON c.merchant_id = a.merchant_id "
+            + "WHERE c.user_id = :userId AND a.merchant_id IN (:merchantIds) "
+            + "UNION "
+            + "SELECT a.id AS terminalId, a.name AS terminalName, a.merchant_id AS merchantId, "
+            + "a.code AS terminalCode, a.address AS terminalAddress, "
+            + "a.raw_terminal_code AS rawTerminalCode, "
+            + "CASE WHEN b.trace_transfer = '' || b.trace_transfer IS NULL THEN "
+            + "b.data1 ELSE b.data2 END AS qrCode "
+            + "FROM terminal a "
+            + "INNER JOIN terminal_bank_receive b ON a.id = b.terminal_id "
+            + "INNER JOIN merchant_member c ON (c.merchant_id = a.merchant_id AND a.id = c.terminal_id) "
+            + "WHERE c.user_id = :userId AND a.merchant_id IN (:merchantIds) "
+            + " ) t ", nativeQuery = true)
+    List<TerminalBankV2DTO> getTerminalByUserIdAndMerchantIds(String userId,
+                                                              List<String> merchantIds);
+@Query(value = "SELECT "
+        + "terminalName "
+        + "FROM ( "
+        + "SELECT a.name AS terminalName "
+        + "FROM terminal a "
+        + "INNER JOIN merchant_member c ON c.merchant_id = a.merchant_id "
+        + "WHERE c.user_id = :userId AND a.merchant_id = :merchantId "
+        + "UNION "
+        + "SELECT a.name AS terminalName "
+        + "FROM terminal a "
+        + "INNER JOIN merchant_member c ON (c.merchant_id = a.merchant_id AND a.id = c.terminal_id) "
+        + "WHERE c.user_id = :userId AND a.merchant_id = :merchantId "
+        + " ) t ", nativeQuery = true)
+    List<String> getTerminalByUserIdAndMerchantId(String userId, String merchantId);
 }

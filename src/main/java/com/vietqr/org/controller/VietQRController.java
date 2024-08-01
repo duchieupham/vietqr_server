@@ -1,6 +1,5 @@
 package com.vietqr.org.controller;
 
-import java.io.IOException;
 import java.util.*;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -15,6 +14,7 @@ import com.vietqr.org.entity.*;
 import com.vietqr.org.entity.bidv.CustomerInvoiceEntity;
 import com.vietqr.org.service.*;
 import com.vietqr.org.service.bidv.CustomerInvoiceService;
+import com.vietqr.org.service.mqtt.MqttMessagingService;
 import com.vietqr.org.util.*;
 import com.vietqr.org.util.bank.bidv.CustomerVaUtil;
 import com.vietqr.org.util.bank.mb.MBVietQRUtil;
@@ -59,6 +59,9 @@ public class VietQRController {
 
 	@Autowired
 	BankTypeService bankTypeService;
+
+	@Autowired
+	MqttMessagingService mqttMessagingService;
 
 	@Autowired
 	AccountBankReceiveService accountBankReceiveService;
@@ -1503,6 +1506,24 @@ public class VietQRController {
 			data.put("terminalCode", result.getTerminalCode() != null ? result.getTerminalCode() : "");
 			data.put("terminalName", terminalName != null ? terminalName : "");
 			socketHandler.sendMessageToBoxId(boxId, data);
+
+			try {
+				ObjectMapper mapper = new ObjectMapper();
+				DynamicQRBoxDTO dynamicQRBoxDTO = new DynamicQRBoxDTO();
+				dynamicQRBoxDTO.setNotificationType(NotificationUtil.getNotiSendDynamicQr());
+				dynamicQRBoxDTO.setTransactionReceiveId(transactionUUID);
+				dynamicQRBoxDTO.setBankAccount(result.getBankAccount());
+				dynamicQRBoxDTO.setBankShortName(result.getBankCode());
+				dynamicQRBoxDTO.setUserBankName(result.getUserBankName());
+				dynamicQRBoxDTO.setContent(result.getContent());
+				dynamicQRBoxDTO.setAmount(StringUtil.formatNumberAsString(result.getAmount()));
+				dynamicQRBoxDTO.setQrCode(qr);
+				dynamicQRBoxDTO.setQrType(0 + "");
+				mqttMessagingService
+						.sendMessageToBoxId(boxId, mapper.writeValueAsString(dynamicQRBoxDTO));
+			} catch (Exception e) {
+
+			}
 			responseMessageDTO = new ResponseMessageDTO("SUCCESS", "");
 			return responseMessageDTO;
 		} catch (Exception e) {

@@ -151,6 +151,72 @@ public class TerminalController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("terminal/v2")
+    public ResponseEntity<Object> getTerminalByBankId(
+            @RequestParam String userId,
+            @RequestParam String bankId,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "20") int size
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            PageResDTO response = new PageResDTO();
+            PageDTO metadata = new PageDTO();
+            metadata.setPage(page);
+            metadata.setSize(size);
+            int totalElement = 0;
+            int offset = (page - 1) * size;
+            List<MerchantTerminalV2DTO> data = new ArrayList<>();
+
+            // lay danh sach merchant dua vao bank id va userId
+            List<MerchantBankV2DTO> merchantBanks = merchantBankReceiveService.
+                    getMerchantBankV2ByBankId(bankId, userId, offset, size);
+            totalElement = merchantBankReceiveService.
+                    countMerchantBankV2ByBankId(bankId, userId);
+            List<String> merchantIds = merchantBanks.stream()
+                    .map(MerchantBankV2DTO::getMerchantId)
+                    .collect(Collectors.toList());
+
+            // lấy danh sách terminal trong từng merchant;
+            List<TerminalBankV2DTO> terminalDTOs = terminalService
+                    .getTerminalByUserIdAndMerchantIds(userId, merchantIds);
+
+            Map<String, List<TerminalBankV2DTO>> terminalsByMerchantId = terminalDTOs.stream()
+                    .collect(Collectors.groupingBy(TerminalBankV2DTO::getMerchantId));
+
+            data = merchantBanks.stream().map(item -> {
+                MerchantTerminalV2DTO dto = new MerchantTerminalV2DTO();
+                dto.setMerchantId(item.getMerchantId());
+                dto.setMerchantName(item.getMerchantName());
+                List<TerminalResponseV2DTO> terminals = terminalsByMerchantId
+                        .getOrDefault(item.getMerchantId(), new ArrayList<>()).stream()
+                        .map(terminal -> {
+                            TerminalResponseV2DTO itemTer = new TerminalResponseV2DTO();
+                            itemTer.setTerminalId(terminal.getTerminalId());
+                            itemTer.setTerminalName(StringUtil.getValueNullChecker(terminal.getTerminalName()));
+                            itemTer.setTerminalCode(StringUtil.getValueNullChecker(terminal.getTerminalCode()));
+                            itemTer.setRawTerminalCode(StringUtil.getValueNullChecker(terminal.getRawTerminalCode()));
+                            itemTer.setTerminalAddress(StringUtil.getValueNullChecker(terminal.getTerminalAddress()));
+                            itemTer.setQrCode(StringUtil.getValueNullChecker(terminal.getQrCode()));
+                            return itemTer;
+                        }).collect(Collectors.toList());
+                dto.setTerminals(terminals);
+                return dto;
+            }).collect(Collectors.toList());
+            metadata.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+            metadata.setTotalElement(totalElement);
+            response.setMetadata(metadata);
+            response.setData(data);
+            result = response;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @GetMapping("merchant/terminal-list")
     public ResponseEntity<Object> getListTerminalByUserId(@RequestParam String userId,
                                                                  @RequestParam String merchantId,
