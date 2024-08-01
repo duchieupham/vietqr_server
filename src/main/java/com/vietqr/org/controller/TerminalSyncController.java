@@ -261,6 +261,223 @@ public class TerminalSyncController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @PostMapping("tid/synchronize/v2")
+    public ResponseEntity<Object> syncTidExternalV2(@RequestHeader("Authorization") String token,
+                                                    @RequestBody TidSyncV2DTO dto) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            String username = getUsernameFromToken(token);
+            if (!StringUtil.isNullOrEmpty(username)) {
+                String checkExistMerchantSync = accountCustomerService.checkExistMerchantSyncByUsernameV2(username);
+                String accessKey = accountCustomerService.getAccessKeyByUsername(username);
+                if (!StringUtil.isNullOrEmpty(checkExistMerchantSync)) {
+                    ResponseMessageDTO validateDto = validateTidSyncV2(accessKey, dto);
+                    if ("SUCCESS".equals(validateDto.getStatus())) {
+                        // check all bank is_authenticated = true;
+                        List<BankAccountSyncDTO> bankDto = getUniqueBankAccountSyncV2DTOs(dto.getTerminals());
+                        ResponseObjectDTO responseCheckCode = checkRawTerminalCodeUnique(dto.getTerminals().stream()
+                                .map(TidSynchronizeV2DTO::getTerminalCode)
+                                .collect(Collectors.toList()));
+                        if ("SUCCESS".equals(responseCheckCode.getStatus()) ||
+                                "CHECK".equals(responseCheckCode.getStatus())) {
+                            Set<String> terminalCodeDup = new HashSet<>();
+                            if ("CHECK".equals(responseCheckCode.getStatus())) {
+                                terminalCodeDup = (Set<String>) responseCheckCode.getData();
+                            }
+                            ResponseObjectDTO validateBankAccount = validateBankAccountAuthenticated(bankDto);
+                            if ("SUCCESS".equals(validateBankAccount.getStatus())) {
+                                Map<BankAccountSyncDTO, AccountBankReceiveEntity> accountBankReceiveMap
+                                        = (Map<BankAccountSyncDTO, AccountBankReceiveEntity>) validateBankAccount.getData();
+                                Map<String, MidBankAccountSyncDTO> midBankAccountSyncDTOMap = new HashMap<>();
+                                Map<String, MerchantSyncEntity> merchantSyncEntityMapByMid = new HashMap<>();
+                                Map<String, MerchantSyncEntity> merchantSyncEntityMapByName = new HashMap<>();
+                                boolean validateMerchant = true;
+                                // validate MERCHANT
+                                for (TidSynchronizeV2DTO item : dto.getTerminals()) {
+                                    MerchantSyncEntity merchantSyncEntity = null;
+                                    // false = mid, true = name
+                                    boolean isNameOrMid = false;
+                                    if (!StringUtil.isNullOrEmpty(item.getMid())) {
+                                        merchantSyncEntity = merchantSyncEntityMapByMid.get(item.getMid());
+                                    } else if (!StringUtil.isNullOrEmpty(item.getMerchantName())) {
+                                        isNameOrMid = true;
+                                        merchantSyncEntity = merchantSyncEntityMapByName.get(item.getMerchantName());
+                                    }
+                                    // Neu chua lay ra truoc do moi connect database de lay du lieu
+                                    if (Objects.isNull(merchantSyncEntity)) {
+                                        merchantSyncEntity = isNameOrMid ? merchantSyncService.getMerchantSyncByName(item.getMerchantName()) :
+                                                merchantSyncService.getMerchantSyncByPublishId(item.getMid());
+                                        if (Objects.nonNull(merchantSyncEntity)) {
+                                            AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveMap
+                                                    .get(new BankAccountSyncDTO(item.getBankAccount(), item.getBankCode()));
+                                            MidBankAccountSyncDTO midBankAccountSyncDTO
+                                                    = new MidBankAccountSyncDTO(merchantSyncEntity.getId(), item.getBankAccount(),
+                                                    item.getBankCode(), accountBankReceiveEntity.getId());
+                                            midBankAccountSyncDTOMap.put(merchantSyncEntity.getId(), midBankAccountSyncDTO);
+                                            merchantSyncEntityMapByMid.put(merchantSyncEntity.getPublishId(), merchantSyncEntity);
+                                            merchantSyncEntityMapByName.put(merchantSyncEntity.getName(), merchantSyncEntity);
+                                        } else {
+                                            validateMerchant = false;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if (validateMerchant) {
+                                    // validate bank account nếu đã tồn tại ở merchant khac
+                                    ResponseMessageDTO validateBankAccountMerchant = validateBankAccountMerchant(midBankAccountSyncDTOMap);
+                                    if ("SUCCESS".equals(validateBankAccountMerchant.getStatus())) {
+                                        List<TidSyncResponseV2DTO> tidSyncResponseDTOs = new ArrayList<>();
+                                        List<TerminalEntity> terminalEntities = new ArrayList<>();
+                                        List<TerminalBankReceiveEntity> terminalBankReceiveEntities = new ArrayList<>();
+                                        for (TidSynchronizeV2DTO item : dto.getTerminals()) {
+                                            String terminalCode = getRandomUniqueCodeInTerminalCode();
+                                            TerminalEntity terminalEntity = new TerminalEntity();
+                                            UUID uuid = UUID.randomUUID();
+                                            terminalEntity.setId(uuid.toString());
+                                            terminalEntity.setCode(terminalCode);
+                                            terminalEntity.setRawTerminalCode(item.getTerminalCode());
+                                            terminalEntity.setAddress(item.getTerminalAddress());
+                                            terminalEntity.setName(item.getTerminalName());
+                                            terminalEntity.setDefault(false);
+                                            terminalEntity.setTimeCreated(DateTimeUtil.getCurrentDateTimeUTC());
+                                            MerchantSyncEntity merchantSyncEntity = !StringUtil.isNullOrEmpty(item.getMid()) ?
+                                                    merchantSyncEntityMapByMid.get(item.getMid()) : merchantSyncEntityMapByName.get(item.getMerchantName());
+                                            terminalEntity.setMerchantId(merchantSyncEntity.getId());
+                                            String publicId = generateRandomTerPublishId();
+                                            terminalEntity.setPublicId(publicId);
+
+                                            AccountBankReceiveEntity accountBankReceiveEntity =
+                                                    accountBankReceiveMap
+                                                            .get(new BankAccountSyncDTO(item.getBankAccount(), item.getBankCode()));
+                                            terminalEntity.setUserId(accountBankReceiveEntity.getUserId());
+
+                                            TerminalBankReceiveEntity terminalBankReceiveEntity = new TerminalBankReceiveEntity();
+                                            terminalBankReceiveEntity.setId(UUID.randomUUID().toString());
+                                            terminalBankReceiveEntity.setTerminalCode("");
+                                            terminalBankReceiveEntity.setRawTerminalCode("");
+                                            terminalBankReceiveEntity.setTerminalId(uuid.toString());
+                                            terminalBankReceiveEntity.setSubTerminalAddress("");
+                                            terminalBankReceiveEntity.setTypeOfQR(0);
+                                            terminalBankReceiveEntity.setBankId(accountBankReceiveEntity.getId());
+                                            terminalBankReceiveEntity.setData1("");
+                                            terminalBankReceiveEntity.setData2("");
+                                            terminalBankReceiveEntity.setTraceTransfer("");
+
+                                            TidSyncResponseV2DTO tidSyncResponseDTO = new TidSyncResponseV2DTO();
+                                            tidSyncResponseDTO.setTid(terminalEntity.getPublicId());
+                                            tidSyncResponseDTO.setTerminalName(terminalEntity.getName());
+                                            tidSyncResponseDTO.setTerminalCode(terminalEntity.getRawTerminalCode());
+                                            tidSyncResponseDTO.setBankAccount(item.getBankAccount());
+                                            tidSyncResponseDTO.setBankCode(item.getBankCode());
+                                            tidSyncResponseDTOs.add(tidSyncResponseDTO);
+
+                                            terminalEntities.add(terminalEntity);
+                                            terminalBankReceiveEntities.add(terminalBankReceiveEntity);
+
+                                            // push webSocket
+                                            Map<String, String> data = new HashMap<>();
+                                            data.put("notificationType", NotificationUtil.getNotiSyncTidV2());
+                                            data.put("merchantId", item.getMid());
+                                            data.put("merchantName", item.getMerchantName());
+                                            data.put("terminalName", item.getTerminalName());
+                                            data.put("terminalCode", item.getTerminalCode());
+                                            data.put("terminalAddress", item.getTerminalAddress());
+                                            data.put("bankCode", item.getBankCode());
+                                            data.put("bankAccount", item.getBankAccount());
+                                            data.put("checkSum", item.getCheckSum());
+                                            socketHandler.sendMessageToClientId(merchantSyncEntity.getClientId(), data);
+                                        }
+                                        List<BankReceiveConnectionEntity> bankReceiveConnectionEntities = new ArrayList<>();
+
+                                        for (Map.Entry<String, MidBankAccountSyncDTO> midBankItem :
+                                                midBankAccountSyncDTOMap.entrySet()) {
+                                            String mid = midBankItem.getKey();
+                                            MidBankAccountSyncDTO midBankAccountSyncDTO = midBankItem.getValue();
+                                            BankReceiveConnectionEntity bankReceiveConnectionEntity =
+                                                    bankReceiveConnectionService
+                                                            .getBankReceiveConnectionByBankIdAndMid(
+                                                                    midBankAccountSyncDTO.getBankId(),
+                                                                    mid);
+                                            AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveMap
+                                                    .get(new BankAccountSyncDTO(midBankAccountSyncDTO.getBankAccount(), midBankAccountSyncDTO.getBankCode()));
+                                            if (Objects.isNull(bankReceiveConnectionEntity)) {
+                                                List<String> midConnectIds = merchantConnectionService
+                                                        .getIdMerchantConnectionByMid(checkExistMerchantSync);
+                                                String terminalBankId = "";
+                                                if (accountBankReceiveEntity.isMmsActive()) {
+                                                    TerminalBankEntity terminalBankEntity =
+                                                            terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
+                                                    if (Objects.nonNull(terminalBankEntity)) {
+                                                        terminalBankId = terminalBankEntity.getId();
+                                                    }
+                                                }
+                                                for (String midConnected : midConnectIds) {
+                                                    bankReceiveConnectionEntity = new BankReceiveConnectionEntity();
+                                                    bankReceiveConnectionEntity.setId(UUID.randomUUID().toString());
+                                                    bankReceiveConnectionEntity.setBankId(accountBankReceiveEntity.getId());
+                                                    bankReceiveConnectionEntity.setMid(mid);
+                                                    bankReceiveConnectionEntity.setActive(true);
+                                                    bankReceiveConnectionEntity.setData("{}");
+                                                    bankReceiveConnectionEntity.setMidConnectId(midConnected);
+                                                    bankReceiveConnectionEntity.setTerminalBankId(terminalBankId);
+                                                    bankReceiveConnectionEntities.add(bankReceiveConnectionEntity);
+                                                }
+                                            }
+                                        }
+
+                                        if (!bankReceiveConnectionEntities.isEmpty()) {
+                                            bankReceiveConnectionService.insertAll(bankReceiveConnectionEntities);
+                                        }
+                                        terminalService.insertAllTerminal(terminalEntities);
+                                        terminalBankReceiveService.insertAll(terminalBankReceiveEntities);
+
+                                        httpStatus = HttpStatus.OK;
+                                        result = new ResponseObjectDTO("SUCCESS", tidSyncResponseDTOs);
+                                    } else {
+                                        httpStatus = HttpStatus.BAD_REQUEST;
+                                        result = validateBankAccountMerchant;
+                                    }
+                                } else {
+                                    // Khong ton tai merchant trong request
+                                    logger.error("syncTidExternal: MERCHANT IS NOT EXISTED");
+                                    httpStatus = HttpStatus.BAD_REQUEST;
+                                    result = new ResponseMessageDTO("FAILED", "E104");
+                                }
+                            } else {
+                                httpStatus = HttpStatus.BAD_REQUEST;
+                                result = validateBankAccount;
+                            }
+                        } else {
+                            httpStatus = HttpStatus.BAD_REQUEST;
+                            result = responseCheckCode;
+                        }
+
+                    } else {
+                        // Invalid Validated
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        result = validateDto;
+                    }
+                } else {
+                    logger.error("syncTidExternal: MERCHANT IS NOT EXISTED");
+                    result = new ResponseMessageDTO("FAILED", "E104");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                logger.error("syncTidExternal: INVALID TOKEN");
+                result = new ResponseMessageDTO("FAILED", "E74");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("syncTidExternal: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
+            httpStatus = HttpStatus.BAD_REQUEST;
+            result = new ResponseMessageDTO("FAILED", "E05");
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @GetMapping("tid/list-tid")
     public ResponseEntity<Object> getListTid(@RequestHeader("Authorization") String token,
                                              @RequestParam(defaultValue = "1") int page,
@@ -803,7 +1020,55 @@ public class TerminalSyncController {
         return result;
     }
 
+    private ResponseMessageDTO validateTidSyncV2(String accessKey, TidSyncV2DTO dto) {
+        ResponseMessageDTO result = new ResponseMessageDTO();
+        if (Objects.nonNull(dto)) {
+            for (TidSynchronizeV2DTO item : dto.getTerminals()) {
+                String checkSum = BankEncryptUtil.generateMD5SyncTidChecksum(accessKey, item.getBankCode(),
+                        item.getBankAccount());
+                System.out.println(checkSum);
+                if (BankEncryptUtil.isMatchChecksum(checkSum, item.getCheckSum())) {
+                    if (ObjectUtils.allNotNull(item.getBankAccount(), item.getBankCode(), item.getTerminalCode(),
+                            item.getTerminalAddress(), item.getTerminalName())) {
+                        if (!StringUtil.isNullOrEmpty(item.getMid()) || !StringUtil.isNullOrEmpty(item.getMerchantName())) {
+                            result = new ResponseMessageDTO("SUCCESS", "");
+                        } else {
+                            logger.error(
+                                    "validateTidSync: ERROR: INVALID Tid Sync DTO: " + item.toString()
+                                            + " at: " + System.currentTimeMillis());
+                            result = new ResponseMessageDTO("FAILED", "E46");
+                        }
+                    } else {
+                        logger.error(
+                                "validateTidSync: ERROR: INVALID Tid Sync DTO: " + item.toString()
+                                        + " at: " + System.currentTimeMillis());
+                        result = new ResponseMessageDTO("FAILED", "E46");
+                        break;
+                    }
+                } else {
+                    logger.error(
+                            "validateTidSync: ERROR: INVALID CHECKSUM");
+                    result = new ResponseMessageDTO("FAILED", "E39");
+                    break;
+                }
+            }
+        } else {
+            result = new ResponseMessageDTO("FAILED", "E46");
+        }
+        return result;
+    }
+
     private List<BankAccountSyncDTO> getUniqueBankAccountSyncDTOs(List<TidSynchronizeDTO> dtoList) {
+        return dtoList.stream()
+                .map(item -> {
+                    BankAccountSyncDTO accountSyncDTO = new BankAccountSyncDTO();
+                    accountSyncDTO.setBankAccount(item.getBankAccount());
+                    accountSyncDTO.setBankCode(item.getBankCode());
+                    return accountSyncDTO;
+                }).distinct().collect(Collectors.toList());
+    }
+
+    private List<BankAccountSyncDTO> getUniqueBankAccountSyncV2DTOs(List<TidSynchronizeV2DTO> dtoList) {
         return dtoList.stream()
                 .map(item -> {
                     BankAccountSyncDTO accountSyncDTO = new BankAccountSyncDTO();

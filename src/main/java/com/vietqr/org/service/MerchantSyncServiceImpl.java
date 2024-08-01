@@ -167,6 +167,11 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
     }
 
     @Override
+    public String getPublishIdSyncByCertificate(String certificate) {
+        return repo.getPublishIdSyncByCertificate(certificate);
+    }
+
+    @Override
     public MerchantSyncEntity getMerchantSyncById(String mid) {
         return repo.getMerchantSyncById(mid);
     }

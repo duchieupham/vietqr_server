@@ -43,6 +43,7 @@ public interface MerchantSyncService {
     MerchantSyncEntity getMerchantSyncByName(String merchantName);
 
     MerchantSyncEntity getMerchantSyncByPublishId(String mid);
+    String getPublishIdSyncByCertificate(String mid);
 
     MerchantSyncEntity getMerchantSyncById(String mid);
 

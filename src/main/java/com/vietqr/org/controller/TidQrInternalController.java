@@ -59,6 +59,9 @@ public class TidQrInternalController {
     private AccountBankReceiveService accountBankReceiveService;
 
     @Autowired
+    private MerchantSyncService merchantSyncService;
+
+    @Autowired
     private QrBoxSyncService qrBoxSyncService;
 
     @Autowired
@@ -260,6 +263,164 @@ public class TidQrInternalController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
+//    @PostMapping("tid-internal/sync/v2")
+//    public ResponseEntity<Object> syncQrBoxInternalV2(@Valid @RequestBody TerminalSyncInterV2DTO dto) {
+//        Object result = null;
+//        HttpStatus httpStatus = null;
+//        try {
+//            String terminalCode = "";
+//            terminalCode = getRandomUniqueCodeInTerminalCode();
+//            IAccountBankReceiveDTO accountBankInfoResById
+//                    = accountBankReceiveService.getAccountBankInfoResById(dto.getBankAccount(), dto.getBankCode());
+////            String boxCode = qrBoxSyncService.getByQrCertificate(dto.getQrCertificate());
+//            // lấy publishID theo certificate
+//            String mid = merchantSyncService.getPublishIdSyncByCertificate(dto.getQrCertificate());
+//            MerchantSyncEntity merchantSyncEntity =
+//                    merchantSyncService.getMerchantSyncByPublishId(item.getMerchantId());
+//            if (accountBankInfoResById != null && mid != null && !mid.isEmpty()) {
+//                if (accountBankInfoResById.getIsAuthenticated()) {
+//                    TerminalBankReceiveEntity terminalBankReceiveEntity = terminalBankReceiveService
+//                            .getTerminalBankReceiveByRawTerminalCode(mid);
+//                    if (terminalBankReceiveEntity == null) {
+//                        terminalBankReceiveEntity = new TerminalBankReceiveEntity();
+//                        terminalBankReceiveEntity.setId(UUID.randomUUID().toString());
+//                    }
+//                    terminalBankReceiveEntity.setTerminalId("");
+//                    terminalBankReceiveEntity.setSubTerminalAddress(dto.getTerminalAddress());
+//                    terminalBankReceiveEntity.setBankId(accountBankInfoResById.getBankId());
+//                    terminalBankReceiveEntity.setRawTerminalCode(mid); // TerminalCode chính là mid (publishID)
+//                    terminalBankReceiveEntity.setTerminalCode(terminalCode);
+//                    terminalBankReceiveEntity.setTypeOfQR(2);
+//                    String qrCode = "";
+//                    switch (accountBankInfoResById.getBankCode()) {
+//                        case "MB":
+//                            if (accountBankInfoResById.getIsMmsActive()) {
+//                                TerminalBankEntity terminalBankEntity =
+//                                        terminalBankService.getTerminalBankByBankAccount(accountBankInfoResById.getBankAccount());
+//                                if (terminalBankEntity != null) {
+//                                    String qr = MBVietQRUtil.generateStaticVietQRMMS(
+//                                            new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
+//                                                    terminalBankEntity.getTerminalId(), terminalCode));
+//                                    terminalBankReceiveEntity.setData2(qr);
+//                                    qrCode = qr;
+//                                    String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
+//                                    terminalBankReceiveEntity.setTraceTransfer(traceTransfer);
+//                                    terminalBankReceiveEntity.setData1("");
+//                                } else {
+//                                    logger.error("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
+//                                }
+//                            } else {
+//                                // luồng thuong
+//                                String qrCodeContent = "SQR" + terminalCode;
+//                                String bankAccount = accountBankInfoResById.getBankAccount();
+//                                String caiValue = accountBankReceiveService.getCaiValueByBankId(accountBankInfoResById.getBankId());
+//                                VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO(caiValue, "", qrCodeContent, bankAccount);
+//                                String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+//                                terminalBankReceiveEntity.setData1(qr);
+//                                qrCode = qr;
+//                                terminalBankReceiveEntity.setData2("");
+//                                terminalBankReceiveEntity.setTraceTransfer("");
+//                            }
+//                            break;
+//                        case "BIDV":
+//                            AccountBankReceiveEntity accountBankEntity = accountBankReceiveService
+//                                    .getAccountBankById(accountBankInfoResById.getBankId());
+//                            String qr = "";
+//                            String billId = getRandomBillId();
+//                            VietQRCreateDTO vietQRCreateDTO = new VietQRCreateDTO();
+//                            vietQRCreateDTO.setBankId(accountBankInfoResById.getBankId());
+//                            vietQRCreateDTO.setAmount("0");
+//                            vietQRCreateDTO.setContent(billId);
+//                            vietQRCreateDTO.setUserId(accountBankEntity.getUserId());
+//                            vietQRCreateDTO.setTerminalCode(terminalCode);
+//
+//                            ResponseMessageDTO responseMessageDTO =
+//                                    insertNewCustomerInvoiceTransBIDV(vietQRCreateDTO, accountBankInfoResById, billId);
+//                            if ("SUCCESS".equals(responseMessageDTO.getStatus())) {
+//                                VietQRVaRequestDTO vietQRVaRequestDTO = new VietQRVaRequestDTO();
+//                                vietQRVaRequestDTO.setAmount("0");
+//                                vietQRVaRequestDTO.setBillId(billId);
+//                                vietQRVaRequestDTO.setUserBankName(accountBankInfoResById.getUserBankName());
+//                                vietQRVaRequestDTO.setDescription(StringUtil.getValueNullChecker(billId));
+//                                ResponseMessageDTO generateVaInvoiceVietQR = CustomerVaUtil
+//                                        .generateVaInvoiceVietQR(vietQRVaRequestDTO, accountBankEntity.getCustomerId());
+//                                if ("SUCCESS".equals(generateVaInvoiceVietQR.getStatus())) {
+//                                    qr = generateVaInvoiceVietQR.getMessage();
+//                                    terminalBankReceiveEntity.setData1(qr);
+//                                    qrCode = qr;
+//                                    terminalBankReceiveEntity.setData2("");
+//                                    terminalBankReceiveEntity.setTraceTransfer("");
+//                                }
+//                            }
+//                            break;
+//                    }
+//                    terminalBankReceiveService.insert(terminalBankReceiveEntity);
+//                    BoxMachineCreatedDTO response = new BoxMachineCreatedDTO();
+//                    ResponseSyncTidDTO responseSyncTidDTO = new ResponseSyncTidDTO();
+//                    String tid = BoxTerminalRefIdUtil
+//                            .encryptQrBoxId(terminalBankReceiveEntity.getRawTerminalCode());
+//                    responseSyncTidDTO.setTid(tid);
+//                    responseSyncTidDTO.setTerminalCode(terminalCode);
+//                    responseSyncTidDTO.setTerminalName(dto.getTerminalName() != null ? dto.getTerminalName() : "");
+//                    responseSyncTidDTO.setQrCode(qrCode);
+//                    responseSyncTidDTO.setBankAccount(dto.getBankAccount());
+//                    responseSyncTidDTO.setBankCode(dto.getBankCode());
+//                    responseSyncTidDTO.setMerchantId(mid);
+//
+////                    response.setBoxId(boxId);
+////                    response.setBankAccount(dto.getBankAccount());
+////                    response.setBankCode(dto.getBankCode());
+////                    response.setQrCode(qrCode);
+////                    response.setBoxCode(boxCode);
+////                    response.setTerminalCode();
+//
+//                    result = responseSyncTidDTO;
+//
+//                    Map<String, String> data = new HashMap<>();
+//                    data.put("notificationType", NotificationUtil.getNotiConnectQrSuccess());
+//                    data.put("bankAccount", dto.getBankAccount());
+//                    data.put("bankShortName", accountBankInfoResById.getBankAccount());
+//                    data.put("userBankName", accountBankInfoResById.getUserBankName());
+//                    data.put("qrCode", responseSyncTidDTO.getQrCode());
+//                    data.put("machineId", terminalBankReceiveEntity.getId());
+//                    data.put("terminalCode", terminalCode);
+//                    data.put("terminalName", dto.getTerminalName() != null ? dto.getTerminalName() : "");
+//                    data.put("tid", tid);
+//                    data.put("boxAddress", dto.getTerminalAddress());
+//                    data.put("merchantId", mid);
+//                    data.put("bankCode", accountBankInfoResById.getBankCode());
+//                    String homePage = EnvironmentUtil.getVietQrHomePage();
+//                    BoxEnvironmentResDTO boxEnvironmentResDTO = systemSettingService.getSystemSettingBoxEnv();
+//                    if (boxEnvironmentResDTO != null) {
+//                        try {
+//                            ObjectMapper mapper = new ObjectMapper();
+//                            BoxEnvironmentVarDTO boxEnvironmentVarDTO = mapper.readValue(boxEnvironmentResDTO.getBoxEnv(), BoxEnvironmentVarDTO.class);
+//                            homePage = boxEnvironmentVarDTO.getHomePage();
+//                        } catch (Exception e) {
+//                            homePage = EnvironmentUtil.getVietQrHomePage();
+//                        }
+//                    }
+//                    data.put("homePage", homePage);
+//                    socketHandler.sendMessageToClientId(clientid, data);
+//
+//                    qrBoxSyncService.updateQrBoxSync(dto.getQrCertificate(), DateTimeUtil.getCurrentDateTimeUTC(),
+//                            true, dto.getTerminalName());
+//                    httpStatus = HttpStatus.OK;
+//                } else {
+//                    result = new ResponseMessageDTO("FAILED", "E46");
+//                    httpStatus = HttpStatus.BAD_REQUEST;
+//                }
+//            } else {
+//                result = new ResponseMessageDTO("FAILED", "E46");
+//                httpStatus = HttpStatus.BAD_REQUEST;
+//            }
+//        } catch (Exception e) {
+//            result = new ResponseMessageDTO("FAILED", "E05");
+//            httpStatus = HttpStatus.BAD_REQUEST;
+//        }
+//        return new ResponseEntity<>(result, httpStatus);
+//    }
 
     @GetMapping("/test")
     public String getTerminalInternalInfoHehe(@RequestParam String boxCode) {

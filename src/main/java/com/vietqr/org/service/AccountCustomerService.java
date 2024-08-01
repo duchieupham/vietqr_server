@@ -14,4 +14,5 @@ public interface AccountCustomerService {
     String getAccessKeyByUsername(String username);
 
     String checkExistMerchantSyncByUsername(String username);
+    String checkExistMerchantSyncByUsernameV2(String username);
 }

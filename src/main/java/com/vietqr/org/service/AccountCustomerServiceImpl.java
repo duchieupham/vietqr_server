@@ -32,4 +32,9 @@ public class AccountCustomerServiceImpl implements AccountCustomerService {
         return repo.checkExistMerchantSyncByUsername(username);
     }
 
+    @Override
+    public String checkExistMerchantSyncByUsernameV2(String username) {
+        return repo.checkExistMerchantSyncByUsernameV2(username);
+    }
+
 }

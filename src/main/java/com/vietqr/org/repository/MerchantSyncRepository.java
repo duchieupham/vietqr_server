@@ -101,6 +101,10 @@ public interface MerchantSyncRepository extends JpaRepository<MerchantSyncEntity
             + "WHERE publish_id = :mid LIMIT 1", nativeQuery = true)
     MerchantSyncEntity getMerchantSyncByPublicId(String mid);
 
+    @Query(value = "SELECT publish_id FROM merchant_sync "
+            + "WHERE certificate = :certificate LIMIT 1", nativeQuery = true)
+    String getPublishIdSyncByCertificate(String certificate);
+
     @Query(value = "SELECT * FROM merchant_sync WHERE name = :merchantName LIMIT 1", nativeQuery = true)
     MerchantSyncEntity getMerchantSyncsByMerchantName(String merchantName);
 

@@ -23,4 +23,9 @@ public interface AccountCustomerRepository extends JpaRepository<AccountCustomer
             + "INNER JOIN merchant_sync b ON b.account_customer_id = a.id "
             + "WHERE a.username = :username ", nativeQuery = true)
     String checkExistMerchantSyncByUsername(String username);
+
+    @Query(value = "SELECT b.publish_id FROM account_customer a "
+            + "INNER JOIN merchant_sync b ON b.account_customer_id = a.id "
+            + "WHERE a.username = :username ", nativeQuery = true)
+    String checkExistMerchantSyncByUsernameV2(String username);
 }
