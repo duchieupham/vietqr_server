@@ -1,6 +1,7 @@
 package com.vietqr.org.dto;
 
 public class BankAccountResponseDTO {
+    private String bankId;
     private String bankAccount;
     private String bankAccountName;
     private String bankShortName;
@@ -20,9 +21,10 @@ public class BankAccountResponseDTO {
     public BankAccountResponseDTO() {
     }
 
-    public BankAccountResponseDTO(String bankAccount, String bankAccountName, String bankShortName,
+    public BankAccountResponseDTO(String bankId, String bankAccount, String bankAccountName, String bankShortName,
                                   String phoneAuthenticated, boolean mmsActive, String nationalId,
                                   Long validFeeTo, String phoneNo, String email, boolean status, String vso) {
+        this.bankId = bankId;
         this.bankAccount = bankAccount;
         this.bankAccountName = bankAccountName;
         this.bankShortName = bankShortName;
@@ -125,5 +127,13 @@ public class BankAccountResponseDTO {
 
     public void setValidFeeTo(Long validFeeTo) {
         this.validFeeTo = validFeeTo;
+    }
+
+    public String getBankId() {
+        return bankId;
+    }
+
+    public void setBankId(String bankId) {
+        this.bankId = bankId;
     }
 }

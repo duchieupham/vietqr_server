@@ -566,7 +566,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "WHERE a.id = :bankId LIMIT 1", nativeQuery = true)
 	BankDetailTypeCaiValueDTO getBankAccountTypeDetail(String bankId);
 
-	@Query(value = "SELECT abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_from AS validFeeFrom, "
 			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
@@ -580,7 +580,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Query(value = "SELECT COUNT(abr.id) FROM account_bank_receive abr", nativeQuery = true)
 	int countAllBankAccounts();
 
-	@Query(value = "SELECT abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, "
 			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso  "
@@ -596,7 +596,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "WHERE abr.bank_account LIKE %:keyword%", nativeQuery = true)
 	int countBankAccountsByAccount(@Param("keyword") String keyword);
 
-	@Query(value = "SELECT abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, "
 			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso  "
@@ -612,7 +612,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "WHERE abr.bank_account_name LIKE %:keyword%", nativeQuery = true)
 	int countBankAccountsByAccountName(@Param("keyword") String keyword);
 
-	@Query(value = "SELECT abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, "
 			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso  "
@@ -628,7 +628,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "WHERE abr.phone_authenticated LIKE %:keyword%", nativeQuery = true)
 	int countBankAccountsByPhoneAuthenticated(@Param("keyword") String keyword);
 
-	@Query(value = "SELECT abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, "
 			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso  "

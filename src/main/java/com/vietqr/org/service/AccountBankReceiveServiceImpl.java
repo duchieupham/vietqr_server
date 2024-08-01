@@ -435,6 +435,7 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     private List<BankAccountResponseDTO> convertAndSanitize(List<IBankAccountResponseDTO> accounts) {
         return accounts.stream()
                 .map(account -> new BankAccountResponseDTO(
+                        account.getBankId()== null ? "" : account.getBankId(),
                         account.getBankAccount() == null ? "" : account.getBankAccount(),
                         account.getBankAccountName() == null ? "" : account.getBankAccountName(),
                         account.getBankShortName() == null ? "" : account.getBankShortName(),

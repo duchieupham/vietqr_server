@@ -1,6 +1,7 @@
 package com.vietqr.org.dto;
 
 public interface IBankAccountResponseDTO {
+    String getBankId();
     String getBankAccount();
     String getBankAccountName();
     String getBankShortName();
