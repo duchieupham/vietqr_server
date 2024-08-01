@@ -93,6 +93,11 @@ public class AccountBankReceiveShareServiceImpl implements AccountBankReceiveSha
     }
 
     @Override
+    public int updateAccountBankArrangement(String bankId, int index, String userId) {
+        return repo.updateAccountBankArrangement(bankId, index, userId);
+    }
+
+    @Override
     public List<AccountBankReceiveShareDTO> getAccountBankReceiveShares(String userId) {
         return repo.getAccountBankReceiveShare(userId);
     }

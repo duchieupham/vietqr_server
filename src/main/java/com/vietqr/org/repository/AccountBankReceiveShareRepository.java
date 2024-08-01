@@ -25,7 +25,7 @@ public interface AccountBankReceiveShareRepository
                     + "INNER JOIN account_bank_receive b "
                     + "ON a.bank_id = b.id "
                     + "WHERE a.user_id = :userId  "
-                    + " ORDER BY b.is_authenticated DESC, a.is_owner DESC, b.bank_account ASC ", nativeQuery = true)
+                    + "ORDER BY a.arrangement ASC, b.is_authenticated DESC, a.is_owner DESC, b.bank_account ASC ", nativeQuery = true)
     List<AccountBankReceiveShareDTO> getAccountBankReceiveShare(@Param(value = "userId") String userId);
 
     @Query(value = "SELECT DISTINCT a.bank_id as bankId, b.bank_account as bankAccount, c.bank_short_name as bankShortName, "
@@ -240,4 +240,10 @@ public interface AccountBankReceiveShareRepository
             + "INNER JOIN terminal_bank_receive b ON b.bank_id = a.bank_id "
             + "WHERE b.terminal_id = :terminalId AND a.user_id = :userId LIMIT 1", nativeQuery = true)
     AccountBankReceiveShareEntity getAccountAlreadyShare(String terminalId, String userId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE account_bank_receive_share SET arrangement = :index WHERE "
+            + "bank_id = :bankId AND user_id = :userId ", nativeQuery = true)
+    int updateAccountBankArrangement(String bankId, int index, String userId);
 }

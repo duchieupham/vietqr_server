@@ -71,4 +71,6 @@ public interface AccountBankReceiveShareService {
     ITerminalBankResponseDTO getTerminalBanksByTerminalId(String terminalId);
 
     AccountBankReceiveShareEntity getAccountAlreadyShare(String terminalId, String userId);
+
+    int updateAccountBankArrangement(String bankId, int index, String userId);
 }

@@ -282,6 +282,30 @@ public class AccountBankReceiveController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @PostMapping("account-bank/update-arrangement")
+    public ResponseEntity<ResponseMessageDTO> updateAccountBankArrangement(
+        @Valid @RequestBody UpdateBankArrangeDTO dto
+    ) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (Objects.nonNull(dto) && !dto.getBankArranges().isEmpty()) {
+                for (BankArrangeDTO item: dto.getBankArranges()) {
+                    accountBankReceiveShareService
+                            .updateAccountBankArrangement(item.getBankId(), item.getIndex(), dto.getUserId());
+                }
+            }
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("updateAccountBankArrangement ERROR : " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @PostMapping("admin/account/update-flow-1")
     public ResponseEntity<Object> updateFlow1(
             @Valid @RequestBody AccountUpdateMMSActiveDTO dto
