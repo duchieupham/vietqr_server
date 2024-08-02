@@ -663,12 +663,12 @@ public class AccountController {
                     GoogleChatUtil googleChatUtil = new GoogleChatUtil();
                     String msgSharingCode = "";
                     if (dto.getSharingCode() != null && !dto.getSharingCode().trim().isEmpty()) {
-                        msgSharingCode = "\\nĐã nhập mã giới thiệu: " + dto.getSharingCode();
+                        msgSharingCode = "\nĐã nhập mã giới thiệu: " + dto.getSharingCode();
                     }
                     String larkMsg = "🙋‍♂️ Người dùng mới"
-                            + "\\nSố điện thoại: " + dto.getPhoneNo()
-                            + "\\nNền tảng: " + dto.getPlatform()
-                            + "\\nIP: " + dto.getDevice()
+                            + "\nSố điện thoại: " + dto.getPhoneNo()
+                            + "\nNền tảng: " + dto.getPlatform()
+                            + "\nIP: " + dto.getDevice()
                             + msgSharingCode;
                     // SEND TO LARK VIETQR
                     SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
@@ -1059,12 +1059,12 @@ public class AccountController {
                 String fullname = dto.getLastName() + " " + dto.getMiddleName() + " " + dto.getFirstName();
                 String gender = (dto.getGender() == 0) ? "Nam" : "Nữ";
                 String larkMsg = "🧰 Người dùng cập nhật thông tin"
-                        + "\\nSố điện thoại: " + phoneNo
-                        + "\\nHọ tên: " + fullname.trim()
-                        + "\\nĐịa chỉ: " + dto.getAddress()
-                        + "\\nEmail: " + dto.getEmail()
-                        + "\\nNgày sinh: " + dto.getBirthDate()
-                        + "\\nGiới tính: " + gender;
+                        + "\nSố điện thoại: " + phoneNo
+                        + "\nHọ tên: " + fullname.trim()
+                        + "\nĐịa chỉ: " + dto.getAddress()
+                        + "\nEmail: " + dto.getEmail()
+                        + "\nNgày sinh: " + dto.getBirthDate()
+                        + "\nGiới tính: " + gender;
                 // SEND TO LARK VIETQR
                 SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
                 googleChatUtil.sendMessageToGoogleChat(larkMsg, systemSettingEntity.getWebhookUrl());

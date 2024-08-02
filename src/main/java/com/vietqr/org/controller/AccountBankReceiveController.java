@@ -710,21 +710,21 @@ public class AccountBankReceiveController {
             String email = "";
             if (accountInformationEntity.getEmail() != null
                     && !accountInformationEntity.getEmail().trim().isEmpty()) {
-                email = "\\nEmail " + accountInformationEntity.getEmail();
+                email = "\nEmail " + accountInformationEntity.getEmail();
             }
             String address = "";
             if (accountInformationEntity.getAddress() != null
                     && !accountInformationEntity.getAddress().trim().isEmpty()) {
-                address = "\\nĐịa chỉ: " + accountInformationEntity.getAddress();
+                address = "\nĐịa chỉ: " + accountInformationEntity.getAddress();
             }
 
             BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(dto.getBankTypeId());
             String larkMsg = "💳 Thêm TK mới: " + bankTypeEntity.getBankShortName()
-                    + "\\nSố TK: " + dto.getBankAccount()
-                    + "\\nChủ Tài khoản: " + dto.getUserBankName()
-                    + "\\nTrạng thái: Chưa liên kết"
-                    + "\\nSĐT đăng nhập: " + phoneNo
-                    + "\\nTên đăng nhập: " + fullname.trim()
+                    + "\nSố TK: " + dto.getBankAccount()
+                    + "\nChủ Tài khoản: " + dto.getUserBankName()
+                    + "\nTrạng thái: Chưa liên kết"
+                    + "\nSĐT đăng nhập: " + phoneNo
+                    + "\nTên đăng nhập: " + fullname.trim()
                     + email
                     + address;
             SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
@@ -909,21 +909,21 @@ public class AccountBankReceiveController {
             String email = "";
             if (accountInformationEntity.getEmail() != null
                     && !accountInformationEntity.getEmail().trim().isEmpty()) {
-                email = "\\nEmail " + accountInformationEntity.getEmail();
+                email = "\nEmail " + accountInformationEntity.getEmail();
             }
             String address = "";
             if (accountInformationEntity.getAddress() != null
                     && !accountInformationEntity.getAddress().trim().isEmpty()) {
-                address = "\\nĐịa chỉ: " + accountInformationEntity.getAddress();
+                address = "\nĐịa chỉ: " + accountInformationEntity.getAddress();
             }
 
             String larkMsg = "💳 Liên kết TK: " + "MBBank"
-                    + "\\nSố TK: " + dto.getBankAccount()
-                    + "\\nChủ Tài khoản: " + accountBankReceiveEntity.getBankAccountName()
-                    + "\\nSĐT Xác thực: " + dto.getPhoneAuthenticated()
-                    + "\\nTrạng thái: Đã liên kết"
-                    + "\\nSĐT đăng nhập: " + phoneNo
-                    + "\\nTên đăng nhập: " + fullname.trim()
+                    + "\nSố TK: " + dto.getBankAccount()
+                    + "\nChủ Tài khoản: " + accountBankReceiveEntity.getBankAccountName()
+                    + "\nSĐT Xác thực: " + dto.getPhoneAuthenticated()
+                    + "\nTrạng thái: Đã liên kết"
+                    + "\nSĐT đăng nhập: " + phoneNo
+                    + "\nTên đăng nhập: " + fullname.trim()
                     + email
                     + address;
             SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
@@ -1085,20 +1085,20 @@ public class AccountBankReceiveController {
             String email = "";
             if (accountInformationEntity.getEmail() != null
                     && !accountInformationEntity.getEmail().trim().isEmpty()) {
-                email = "\\nEmail " + accountInformationEntity.getEmail();
+                email = "\nEmail " + accountInformationEntity.getEmail();
             }
             String address = "";
             if (accountInformationEntity.getAddress() != null
                     && !accountInformationEntity.getAddress().trim().isEmpty()) {
-                address = "\\nĐịa chỉ: " + accountInformationEntity.getAddress();
+                address = "\nĐịa chỉ: " + accountInformationEntity.getAddress();
             }
             String larkMsg = "💳 Liên kết TK: " + "MBBank"
-                    + "\\nSố TK: " + dto.getBankAccount()
-                    + "\\nChủ Tài khoản: " + dto.getUserBankName()
-                    + "\\nSĐT Xác thực: " + dto.getPhoneAuthenticated()
-                    + "\\nTrạng thái: Đã liên kết"
-                    + "\\nSĐT đăng nhập: " + phoneNo
-                    + "\\nTên đăng nhập: " + fullname.trim()
+                    + "\nSố TK: " + dto.getBankAccount()
+                    + "\nChủ Tài khoản: " + dto.getUserBankName()
+                    + "\nSĐT Xác thực: " + dto.getPhoneAuthenticated()
+                    + "\nTrạng thái: Đã liên kết"
+                    + "\nSĐT đăng nhập: " + phoneNo
+                    + "\nTên đăng nhập: " + fullname.trim()
                     + email
                     + address;
             SystemSettingEntity systemSettingEntity = systemSettingService.getSystemSetting();
