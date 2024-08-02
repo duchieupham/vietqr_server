@@ -1,58 +1,21 @@
 package com.vietqr.org.service.mqtt;
 
 public class AdditionalData {
-    private String terminalCode;
-    private String serviceCode;
-    private String additionalData;
-    private String amount;
-    private long timestamp;
 
+    private String additionalData1;
 
-    public AdditionalData(String terminalCode, String serviceCode, String additionalData, String amount, long timestamp) {
-        this.terminalCode = terminalCode;
-        this.serviceCode = serviceCode;
-        this.additionalData = additionalData;
-        this.amount = amount;
-        this.timestamp = timestamp;
+    public AdditionalData() {
     }
 
-    public String getTerminalCode() {
-        return terminalCode;
+    public AdditionalData(String additionalData1) {
+        this.additionalData1 = additionalData1;
     }
 
-    public void setTerminalCode(String terminalCode) {
-        this.terminalCode = terminalCode;
+    public String getAdditionalData1() {
+        return additionalData1;
     }
 
-    public String getServiceCode() {
-        return serviceCode;
-    }
-
-    public void setServiceCode(String serviceCode) {
-        this.serviceCode = serviceCode;
-    }
-
-    public String getAdditionalData() {
-        return additionalData;
-    }
-
-    public void setAdditionalData(String additionalData) {
-        this.additionalData = additionalData;
-    }
-
-    public String getAmount() {
-        return amount;
-    }
-
-    public void setAmount(String amount) {
-        this.amount = amount;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
+    public void setAdditionalData1(String additionalData1) {
+        this.additionalData1 = additionalData1;
     }
 }

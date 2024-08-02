@@ -33,10 +33,8 @@ public class VietQRServer {
     private static final Logger logger = Logger.getLogger(VietQRServer.class);
     private static final String BROKER = "tcp://broker.hivemq.com:1883";
     private static final String CLIENT_ID = "VietQRServer";
-    private static final String REQUEST_TOPIC = "vietqr/request";
-    private static final String RESPONSE_TOPIC = "vietqr/response";
-//    private static final String USERNAME = "VietQR123"; // thêm username
-//    private static final String PASSWORD = "VietQR123";
+    private static final String RESPONSE_TOPIC_BASE = "vietqr/response";
+
     private MqttClient client;
 
     @Autowired
@@ -59,26 +57,32 @@ public class VietQRServer {
         client = new MqttClient(BROKER, CLIENT_ID, persistence);
         MqttConnectOptions connOpts = new MqttConnectOptions();
         connOpts.setCleanSession(true);
-//        connOpts.setUserName(USERNAME);
-//        connOpts.setPassword(PASSWORD.toCharArray());
         client.connect(connOpts);
 
-        client.subscribe(REQUEST_TOPIC, new IMqttMessageListener() {
+        client.subscribe("vietqr/request/#", new IMqttMessageListener() {
             @Override
             public void messageArrived(String topic, MqttMessage message) throws Exception {
                 String payload = new String(message.getPayload());
                 System.out.println("Received request: " + payload);
-//                Gson gson = new Gson();
                 ObjectMapper mapper = new ObjectMapper();
                 VietQRCreateCustomerDTO dto = mapper.readValue(payload, VietQRCreateCustomerDTO.class);
 
+                // Xử lý yêu cầu và tạo phản hồi
                 VietQRDTO response = (VietQRDTO) generateQRCustomer(dto);
                 String responsePayload = mapper.writeValueAsString(response);
 
+                // Lấy thông tin trạm và trụ từ DTO
+                String tramId = dto.getAdditionalData().get(0).getAdditionalData1(); // Tram ID từ additionalData1
+                String truId = dto.getTerminalCode(); // Terminal ID là mã của trụ xăng
+
+                // Xác định topic phản hồi
+                String responseTopic = RESPONSE_TOPIC_BASE + "/" + tramId + "/" + truId;
+
+                // Gửi phản hồi lên đúng topic
                 MqttMessage responseMessage = new MqttMessage(responsePayload.getBytes());
                 responseMessage.setQos(2);
-                client.publish(RESPONSE_TOPIC, responseMessage);
-                System.out.println("Response sent: " + responsePayload);
+                client.publish(responseTopic, responseMessage);
+                System.out.println("Response sent to topic: " + responseTopic + " Payload: " + responsePayload);
             }
         });
     }
@@ -149,7 +153,7 @@ public class VietQRServer {
                                     vietQRDTO.setTransactionId("");
                                     vietQRDTO.setTerminalCode(dto.getTerminalCode());
                                     vietQRDTO.setServiceCode(dto.getServiceCode());
-                                    vietQRDTO.setAdditionalData1(dto.getAdditionalData1());
+                                    vietQRDTO.setAdditionalData(dto.getAdditionalData());
                                     String refId = TransactionRefIdUtil.encryptTransactionId(transactionUUID.toString());
                                     String qrLink = EnvironmentUtil.getQRLink() + refId;
                                     vietQRDTO.setTransactionRefId(refId);
@@ -184,7 +188,7 @@ public class VietQRServer {
                                     vietQRDTO.setImgId(bankTypeEntity.getImgId());
                                     vietQRDTO.setExisting(0);
                                     vietQRDTO.setServiceCode(dto.getServiceCode());
-                                    vietQRDTO.setAdditionalData1(dto.getAdditionalData1());
+                                    vietQRDTO.setAdditionalData(dto.getAdditionalData());
                                     result = vietQRDTO;
                                     httpStatus = HttpStatus.OK;
                                 }
@@ -228,7 +232,7 @@ public class VietQRServer {
                             vietQRCreateDTO.setUrlLink(dto.getUrlLink() != null && !dto.getUrlLink().trim().isEmpty()
                                     ? dto.getUrlLink()
                                     : "");
-                            vietQRCreateDTO.setAdditionalData1(dto.getAdditionalData1());
+                            vietQRCreateDTO.setAdditionalData(dto.getAdditionalData());
                             insertNewTransaction(transactionUUID, traceId, vietQRCreateDTO, vietQRDTO, dto.getOrderId(), dto.getSign(), true);
                         }
                         LocalDateTime currentDateTime = LocalDateTime.now();
@@ -328,7 +332,7 @@ public class VietQRServer {
                                 vietQRDTO.setImgId(bankTypeEntity.getImgId());
                                 vietQRDTO.setExisting(0);
                                 vietQRDTO.setServiceCode(dto.getServiceCode());
-                                vietQRDTO.setAdditionalData1(dto.getAdditionalData1());
+                                vietQRDTO.setAdditionalData(dto.getAdditionalData());
                                 result = vietQRDTO;
                                 httpStatus = HttpStatus.OK;
                             }
@@ -405,7 +409,7 @@ public class VietQRServer {
                         vietQRDTO.setImgId(bankTypeEntity.getImgId());
                         vietQRDTO.setExisting(0);
                         vietQRDTO.setServiceCode(dto.getServiceCode());
-                        vietQRDTO.setAdditionalData1(dto.getAdditionalData1());
+                        vietQRDTO.setAdditionalData(dto.getAdditionalData());
                         result = vietQRDTO;
                         httpStatus = HttpStatus.OK;
                     } else {
@@ -470,13 +474,16 @@ public class VietQRServer {
                 ZoneOffset offset = ZoneOffset.ofHours(7); // UTC+7
                 long timestampUtcPlus7 = currentDateTime.toEpochSecond(offset);
                 List<Object> additionalDataList = new ArrayList<>();
-                additionalDataList.add(new AdditionalData(
-                        result.getTerminalCode(),
-                        result.getServiceCode(),
-                        dto.getAdditionalData1(),
-                        dto.getAmount(),
-                        timestampUtcPlus7
-                ));
+                // Lặp qua từng phần tử trong danh sách additionalData của DTO
+                for (AdditionalData additionalData : dto.getAdditionalData()) {
+                    additionalDataList.add(new AdditionalDataInTransaction(
+                            dto.getAmount(),
+                            timestampUtcPlus7,
+                            result.getServiceCode(),
+                            result.getTerminalCode(),
+                            additionalData.getAdditionalData1() // Lấy giá trị của additionalData1
+                    ));
+                }
                 // Chuyển đổi danh sách thành JSON và gán vào transactionEntity
                 ObjectMapper mapper = new ObjectMapper();
                 String additionalDataJson = mapper.writeValueAsString(additionalDataList);
@@ -484,61 +491,60 @@ public class VietQRServer {
 
                 transactionReceiveService.insertTransactionReceive(transactionEntity);
 
-                UUID notificationUUID = UUID.randomUUID();
-                NotificationEntity notiEntity = new NotificationEntity();
-                String message = NotificationUtil.getNotiDescNewTransPrefix2()
-                        + NotificationUtil.getNotiDescNewTransSuffix1()
-                        + nf.format(Double.parseDouble(dto.getAmount()))
-                        + NotificationUtil
-                        .getNotiDescNewTransSuffix2();
-
-                if (isFromMerchantSync) {
-                    // Gửi thông báo qua MQTT
-                    try {
-                        mqttClient = new MqttClient("tcp://broker.hivemq.com:1883", MqttClient.generateClientId(), new MemoryPersistence());
-                        mqttClient.connect();
-
-                        Gson gson = new Gson();
-                        Map<String, String> data = new HashMap<>();
-                        data.put("notificationType", NotificationUtil.getNotiTypeNewTransaction());
-                        data.put("notificationId", notificationUUID.toString());
-                        data.put("bankCode", result.getBankCode());
-                        data.put("bankName", result.getBankName());
-                        data.put("bankAccount", result.getBankAccount());
-                        data.put("userBankName", result.getUserBankName());
-                        data.put("amount", result.getAmount());
-                        data.put("content", result.getContent());
-                        data.put("qrCode", result.getQrCode());
-                        data.put("imgId", result.getImgId());
-                        data.put("serviceCode", result.getServiceCode());
-                        data.put("terminalCode", result.getTerminalCode());
-                        data.put("additionalData1",result.getAdditionalData1());
-
-                        String jsonMessage = gson.toJson(data);
-                        MqttMessage mqttMessage = new MqttMessage(jsonMessage.getBytes());
-                        mqttMessage.setQos(2);
-                        mqttClient.publish("notification/topic", mqttMessage);
-                    } catch (MqttException e) {
-                        logger.error("Error sending MQTT message: " + e.toString());
-                    } finally {
-                        if (mqttClient != null && mqttClient.isConnected()) {
-                            try {
-                                mqttClient.disconnect();
-                            } catch (MqttException e) {
-                                logger.error("Error disconnecting MQTT client: " + e.toString());
-                            }
-                        }
-                    }
-                }
-
-                notiEntity.setId(notificationUUID.toString());
-                notiEntity.setRead(false);
-                notiEntity.setMessage(message);
-                notiEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
-                notiEntity.setType(NotificationUtil.getNotiTypeNewTransaction());
-                notiEntity.setUserId(dto.getUserId());
-                notiEntity.setData(transcationUUID.toString());
-                notificationService.insertNotification(notiEntity);
+//                UUID notificationUUID = UUID.randomUUID();
+//                NotificationEntity notiEntity = new NotificationEntity();
+//                String message = NotificationUtil.getNotiDescNewTransPrefix2()
+//                        + NotificationUtil.getNotiDescNewTransSuffix1()
+//                        + nf.format(Double.parseDouble(dto.getAmount()))
+//                        + NotificationUtil
+//                        .getNotiDescNewTransSuffix2();
+//
+//                if (isFromMerchantSync) {
+//                    // Gửi thông báo qua MQTT
+//                    try {
+//                        mqttClient = new MqttClient("tcp://broker.hivemq.com:1883", MqttClient.generateClientId(), new MemoryPersistence());
+//                        mqttClient.connect();
+//
+//                        Gson gson = new Gson();
+//                        Map<String, String> data = new HashMap<>();
+//                        data.put("notificationType", NotificationUtil.getNotiTypeNewTransaction());
+//                        data.put("notificationId", notificationUUID.toString());
+//                        data.put("bankCode", result.getBankCode());
+//                        data.put("bankName", result.getBankName());
+//                        data.put("bankAccount", result.getBankAccount());
+//                        data.put("userBankName", result.getUserBankName());
+//                        data.put("amount", result.getAmount());
+//                        data.put("content", result.getContent());
+//                        data.put("qrCode", result.getQrCode());
+//                        data.put("imgId", result.getImgId());
+//                        data.put("serviceCode", result.getServiceCode());
+//                        data.put("terminalCode", result.getTerminalCode());
+//
+//                        String jsonMessage = gson.toJson(data);
+//                        MqttMessage mqttMessage = new MqttMessage(jsonMessage.getBytes());
+//                        mqttMessage.setQos(2);
+//                        mqttClient.publish("notification/topic", mqttMessage);
+//                    } catch (MqttException e) {
+//                        logger.error("Error sending MQTT message: " + e.toString());
+//                    } finally {
+//                        if (mqttClient != null && mqttClient.isConnected()) {
+//                            try {
+//                                mqttClient.disconnect();
+//                            } catch (MqttException e) {
+//                                logger.error("Error disconnecting MQTT client: " + e.toString());
+//                            }
+//                        }
+//                    }
+//                }
+//
+//                notiEntity.setId(notificationUUID.toString());
+//                notiEntity.setRead(false);
+//                notiEntity.setMessage(message);
+//                notiEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
+//                notiEntity.setType(NotificationUtil.getNotiTypeNewTransaction());
+//                notiEntity.setUserId(dto.getUserId());
+//                notiEntity.setData(transcationUUID.toString());
+//                notificationService.insertNotification(notiEntity);
 
             }
         } catch (Exception e) {

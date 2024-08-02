@@ -1,6 +1,9 @@
 package com.vietqr.org.dto;
 
+import com.vietqr.org.service.mqtt.AdditionalData;
+
 import java.io.Serializable;
+import java.util.List;
 
 public class VietQRDTO implements Serializable {
 
@@ -28,7 +31,7 @@ public class VietQRDTO implements Serializable {
 
 	private String serviceCode;
 
-	private String additionalData1;
+	private List<AdditionalData> additionalData;
 
 	public VietQRDTO() {
 		super();
@@ -54,7 +57,7 @@ public class VietQRDTO implements Serializable {
 	}
 
 
-	public VietQRDTO(String bankCode, String bankName, String bankAccount, String userBankName, String amount, String content, String qrCode, String imgId, int existing, String transactionId, String transactionRefId, String qrLink, String terminalCode, String serviceCode,String additionalData1) {
+	public VietQRDTO(String bankCode, String bankName, String bankAccount, String userBankName, String amount, String content, String qrCode, String imgId, int existing, String transactionId, String transactionRefId, String qrLink, String terminalCode, String serviceCode,List<AdditionalData> additionalData) {
 		this.bankCode = bankCode;
 		this.bankName = bankName;
 		this.bankAccount = bankAccount;
@@ -69,7 +72,7 @@ public class VietQRDTO implements Serializable {
 		this.qrLink = qrLink;
 		this.terminalCode = terminalCode;
 		this.serviceCode = serviceCode;
-		this.additionalData1 =additionalData1;
+		this.additionalData =additionalData;
 	}
 
 	public String getBankCode() {
@@ -185,12 +188,12 @@ public class VietQRDTO implements Serializable {
 		this.serviceCode = serviceCode;
 	}
 
-	public String getAdditionalData1() {
-		return additionalData1;
+	public List<AdditionalData> getAdditionalData() {
+		return additionalData;
 	}
 
-	public void setAdditionalData1(String additionalData1) {
-		this.additionalData1 = additionalData1;
+	public void setAdditionalData(List<AdditionalData> additionalData) {
+		this.additionalData = additionalData;
 	}
 
 	@Override

@@ -1,6 +1,9 @@
 package com.vietqr.org.dto;
 
+import com.vietqr.org.service.mqtt.AdditionalData;
+
 import java.io.Serializable;
+import java.util.List;
 
 public class VietQRCreateCustomerDTO implements Serializable {
 
@@ -27,7 +30,7 @@ public class VietQRCreateCustomerDTO implements Serializable {
     private Integer qrType;
     private String serviceCode;
 
-    private String additionalData1;
+    private List<AdditionalData> additionalData;
 
 
     public VietQRCreateCustomerDTO() {
@@ -94,26 +97,16 @@ public class VietQRCreateCustomerDTO implements Serializable {
         this.note = note;
     }
 
-    public VietQRCreateCustomerDTO(Long amount, String content, String bankAccount, String bankCode, String userBankName, String transType, String customerBankAccount, String customerBankCode, String customerName, String orderId, String sign, String terminalCode, String note, String urlLink, Boolean reconciliation, Integer qrType, String serviceCode, String additionalData1) {
+    public VietQRCreateCustomerDTO(Long amount, String content, String bankAccount, String bankCode, String userBankName, String orderId, String terminalCode, String serviceCode, List<AdditionalData> additionalData) {
         this.amount = amount;
         this.content = content;
         this.bankAccount = bankAccount;
         this.bankCode = bankCode;
         this.userBankName = userBankName;
-        this.transType = transType;
-        this.customerBankAccount = customerBankAccount;
-        this.customerBankCode = customerBankCode;
-        this.customerName = customerName;
         this.orderId = orderId;
-        this.sign = sign;
         this.terminalCode = terminalCode;
-        this.note = note;
-        this.urlLink = urlLink;
-        this.reconciliation = reconciliation;
-        this.qrType = qrType;
         this.serviceCode = serviceCode;
-        this.additionalData1 = additionalData1;
-
+        this.additionalData = additionalData;
     }
 
     public String getBankAccount() {
@@ -252,12 +245,12 @@ public class VietQRCreateCustomerDTO implements Serializable {
         this.serviceCode = serviceCode;
     }
 
-    public String getAdditionalData1() {
-        return additionalData1;
+    public List<AdditionalData> getAdditionalData() {
+        return additionalData;
     }
 
-    public void setAdditionalData1(String additionalData1) {
-        this.additionalData1 = additionalData1;
+    public void setAdditionalData(List<AdditionalData> additionalData) {
+        this.additionalData = additionalData;
     }
 
     @Override
