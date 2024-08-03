@@ -13,4 +13,8 @@ public interface IBankAccountResponseDTO {
     String getEmail();
     boolean getStatus();
     String getVso();
+    Boolean getIsValidService();
+    Boolean getIsAuthenticated();
+    Integer getBankTypeStatus();
+    String getBankCode();
 }

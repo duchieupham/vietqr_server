@@ -1921,7 +1921,7 @@ public class AccountBankReceiveController {
             List<BankAccountResponseDTO> data;
             // List<IBankAccountResponseDTO> data;
 
-            if (type == null || value == null || value.isEmpty()) {
+            if (type == null || value == null || value.isEmpty() || type == 9) {
                 data = accountBankReceiveService.getAllBankAccount(offset, size);
                 totalElement = accountBankReceiveService.countAllBankAccounts();
             } else {

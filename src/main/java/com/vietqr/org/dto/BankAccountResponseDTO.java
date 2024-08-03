@@ -12,6 +12,10 @@ public class BankAccountResponseDTO {
     private String phoneNo;
     private String email;
     private boolean status;
+    private String bankCode;
+    private boolean isValidService;
+    private boolean isAuthenticated;
+    private int bankTypeStatus;
 
 
     private String vso;
@@ -23,7 +27,9 @@ public class BankAccountResponseDTO {
 
     public BankAccountResponseDTO(String bankId, String bankAccount, String bankAccountName, String bankShortName,
                                   String phoneAuthenticated, boolean mmsActive, String nationalId,
-                                  Long validFeeTo, String phoneNo, String email, boolean status, String vso) {
+                                  Long validFeeTo, String phoneNo, String email, boolean status, String vso,
+                                  boolean isValidService, boolean isAuthenticated, Integer bankTypeStatus,
+                                  String bankCode) {
         this.bankId = bankId;
         this.bankAccount = bankAccount;
         this.bankAccountName = bankAccountName;
@@ -36,6 +42,18 @@ public class BankAccountResponseDTO {
         this.email = email;
         this.status = status;
         this.vso = vso;
+        this.isValidService = isValidService;
+        this.isAuthenticated = isAuthenticated;
+        this.bankTypeStatus = bankTypeStatus;
+        this.bankCode = bankCode;
+    }
+
+    public String getBankCode() {
+        return bankCode;
+    }
+
+    public void setBankCode(String bankCode) {
+        this.bankCode = bankCode;
     }
 
     // Getters and Setters
@@ -135,5 +153,29 @@ public class BankAccountResponseDTO {
 
     public void setBankId(String bankId) {
         this.bankId = bankId;
+    }
+
+    public boolean isValidService() {
+        return isValidService;
+    }
+
+    public void setValidService(boolean validService) {
+        isValidService = validService;
+    }
+
+    public boolean isAuthenticated() {
+        return isAuthenticated;
+    }
+
+    public void setAuthenticated(boolean authenticated) {
+        isAuthenticated = authenticated;
+    }
+
+    public int getBankTypeStatus() {
+        return bankTypeStatus;
+    }
+
+    public void setBankTypeStatus(int bankTypeStatus) {
+        this.bankTypeStatus = bankTypeStatus;
     }
 }

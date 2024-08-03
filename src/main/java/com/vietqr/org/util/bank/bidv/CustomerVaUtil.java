@@ -617,4 +617,122 @@ public class CustomerVaUtil {
         }
         return result;
     }
+
+    public static ResponseMessageDTO requestCustomerVaV2(RequestCustomerVaDTO dto,
+                                                         String merchantId, String merchantType, Long customerVaLength,
+                                                         String checkExistedMerchantId) {
+        ResponseMessageDTO result = null;
+        try {
+            //
+            // initial
+            UUID interactionId = UUID.randomUUID();
+            UUID idemKey = UUID.randomUUID();
+            String url = EnvironmentUtil.getBidvUrlRequestAddMerchant();
+            String serviceId = EnvironmentUtil.getBidvLinkedServiceId();
+
+            // String merchantName = EnvironmentUtil.getBidvLinkedMerchantName();
+            String merchantName = dto.getMerchantName();
+            String channelId = EnvironmentUtil.getBidvLinkedChannelId();
+            String tranDate = DateTimeUtil.getBidvTranDate();
+            //
+            // jws and jwe request body
+            String myKey = JwsUtil.getSymmatricKey();
+            logger.info("myKey: " + myKey);
+            Key key = new AesKey(JwsUtil.hexStringToBytes(myKey));
+            logger.info("new AesKey(JwsUtil.hexStringToBytes(myKey): " + key);
+            JsonWebEncryption jwe = new JsonWebEncryption();
+            String payload = BIDVUtil.generateRequestVaBody(serviceId, channelId, merchantId, merchantName, dto,
+                    merchantType, tranDate);
+            logger.info("requestCustomerVa: Payload: " + payload);
+            System.out.println("Payload: " + payload);
+            //
+            jwe.setPayload(payload);
+            jwe.setAlgorithmHeaderValue(KeyManagementAlgorithmIdentifiers.A256KW);
+            jwe.setEncryptionMethodHeaderParameter(ContentEncryptionAlgorithmIdentifiers.AES_128_CBC_HMAC_SHA_256);
+            jwe.setKey(key);
+            String serializedJwe = jwe.getCompactSerialization();
+            String[] split = serializedJwe.split("\\.");
+            Gson gson = new Gson();
+            String protected_ = split[0];
+            byte[] decodedBytes = Base64.getDecoder().decode(protected_);
+            String decodedString = new String(decodedBytes);
+            Header h = gson.fromJson(decodedString, Header.class);
+            String encryptedKey = split[1];
+            String iv = split[2];
+            String ciphertext = split[3];
+            String tag = split[4];
+            Recipients recipient = new Recipients();
+            recipient.setHeader(h);
+            recipient.setEncrypted_key(encryptedKey);
+            Recipients[] recipients = new Recipients[1];
+            recipients[0] = recipient;
+            // JWE
+            JweObj j = new JweObj(recipients, protected_, ciphertext, iv, tag);
+            String jweString = gson.toJson(j);
+            System.out.println("\n\nJWE: " + jweString);
+            // requestCustomerVa
+            logger.info("\n\nrequestCustomerVa: JWE: " + jweString);
+            Map<String, Object> body = gson.fromJson(jweString, Map.class);
+            // JWS
+            JsonWebSignature jws = new JsonWebSignature();
+            jws.setPayload(jweString);
+            jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.RSA_USING_SHA256);
+            PrivateKey privateKey = JwsUtil.getPrivateKey();
+            jws.setKey(privateKey);
+            String jwsString = jws.getCompactSerialization();
+            System.out.println("\n\nrequestCustomerVa: JWS: " + jwsString);
+            logger.info("\n\nrequestCustomerVa: JWS: " + jwsString);
+            //
+            // call API
+            UriComponents uriComponents = UriComponentsBuilder
+                    .fromHttpUrl(url)
+                    .buildAndExpand(/* add url parameter here */);
+            WebClient webClient = WebClient.builder()
+                    .baseUrl(url)
+                    .build();
+            String token = BIDVTokenUtil.getBIDVToken("ewallet").getAccess_token();
+            String clientXCertification = JwsUtil.getClientXCertificate();
+            System.out.println("\n\nToken BIDV: " + token);
+            logger.info("\n\nrequestCustomerVa: Token BIDV: " + token);
+            System.out.println("\n\nclientXCertification BIDV: " + clientXCertification);
+            logger.info("\n\nrequestCustomerVa: clientXCertification BIDV: " + clientXCertification);
+            Mono<ClientResponse> responseMono = webClient.post()
+                    .uri(uriComponents.toUri())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Channel", EnvironmentUtil.getBidvLinkedChannelId())
+                    .header("User-Agent", EnvironmentUtil.getBidvLinkedMerchantName())
+                    .header("X-Client-Certificate", clientXCertification)
+                    .header("X-API-Interaction-ID", interactionId.toString())
+                    .header("X-Idempotency-Key", idemKey.toString())
+                    .header("TimeStamp", BIDVDateUtil.getSystemTimeWithOffset())
+                    .header("X-Customer-IP-Address", EnvironmentUtil.getIpVietQRVN())
+                    .header("Authorization", "Bearer " + token)
+                    .header("X-JWS-Signature", jwsString)
+                    .body(BodyInserters.fromValue(body))
+                    .exchange();
+            System.out.println("\n\n");
+            logger.info("requestCustomerVa: X-Client-Certificate: " + clientXCertification +
+                    " X-API-Interaction-ID: " + interactionId.toString() + " X-Idempotency-Key: " +
+                    idemKey.toString());
+            ClientResponse response = responseMono.block();
+
+            if (response.statusCode().is2xxSuccessful()) {
+                String json = response.bodyToMono(String.class).block();
+                logger.info("Response requestCustomerVa: " + json);
+                System.out.println("Response requestCustomerVa: " + json);
+                result = new ResponseMessageDTO("SUCCESS", json);
+            } else {
+                String json = response.bodyToMono(String.class).block();
+                logger.info("Response requestCustomerVa: " + json);
+                System.out.println("Response requestCustomerVa: " + json);
+                result = new ResponseMessageDTO("FAILED", "E05 - " + json);
+            }
+            //
+        } catch (Exception e) {
+            logger.error("CustomerVaUtil: requestCustomerVa: ERROR: " + e.toString());
+            System.out.println("CustomerVaUtil: requestCustomerVa: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05 - " + e.getMessage());
+        }
+        return result;
+    }
 }

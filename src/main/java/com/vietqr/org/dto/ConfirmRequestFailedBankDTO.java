@@ -67,4 +67,14 @@ public class ConfirmRequestFailedBankDTO implements Serializable {
         this.path = path;
     }
 
+    @Override
+    public String toString() {
+        return "ConfirmRequestFailedBankDTO{" +
+                "error='" + error + '\'' +
+                ", soaErrorCode='" + soaErrorCode + '\'' +
+                ", soaErrorDesc='" + soaErrorDesc + '\'' +
+                ", clientMessageId='" + clientMessageId + '\'' +
+                ", path='" + path + '\'' +
+                '}';
+    }
 }

@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
+import com.vietqr.org.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -446,7 +447,11 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
                         account.getPhoneNo() == null ? "" : account.getPhoneNo(),
                         account.getEmail() == null ? "" : account.getEmail(),
                         account.getStatus(),
-                        account.getVso() == null ? "": account.getVso()
+                        account.getVso() == null ? "": account.getVso(),
+                        StringUtil.getValueNullChecker(account.getIsValidService()),
+                        StringUtil.getValueNullChecker(account.getIsAuthenticated()),
+                        account.getBankTypeStatus(),
+                        account.getBankCode()
                 ))
                 .collect(Collectors.toList());
     }
