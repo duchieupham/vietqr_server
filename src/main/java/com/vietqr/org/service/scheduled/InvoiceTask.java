@@ -55,8 +55,8 @@ public class InvoiceTask {
     @Autowired
     FcmTokenService fcmTokenService;
 
-    //@Scheduled(fixedRate = 180000) // Chỉnh thành 3 phút
-    @Scheduled(cron = "0 0 0 5 * ?", zone = "Asia/Ho_Chi_Minh")
+
+    @Scheduled(cron = "0 0 5 1 * ?", zone = "Asia/Ho_Chi_Minh")
     public void createMonthlyInvoices() {
         List<MerchantSyncEntity> merchants = merchantSyncService.findAllMerchants();
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC).plusHours(7); // Chuyển sang giờ UTC+7
@@ -121,7 +121,7 @@ public class InvoiceTask {
 
                 // Kiểm tra và thêm phí thường niên nếu có
                 long annualFeeAmount = calculateAnnualFee(bankAccount);
-                if (annualFeeAmount > 0) {
+
                     InvoiceItemCreateDTO annualFeeItem = new InvoiceItemCreateDTO();
                     annualFeeItem.setType(0); // Type cho phí thường niên
                     annualFeeItem.setTimeProcess(formattedDate);
@@ -142,7 +142,7 @@ public class InvoiceTask {
                     if (!isInvoiceItemExist(bankAccount.getId(), merchantId, 0, formattedDate)) {
                         items.add(annualFeeItem);
                     }
-                }
+
             }
         }
 
