@@ -31,9 +31,11 @@ import static com.vietqr.org.util.RandomCodeUtil.getRandomBillId;
 @Component
 public class VietQRServer {
     private static final Logger logger = Logger.getLogger(VietQRServer.class);
-    private static final String BROKER = "tcp://broker.hivemq.com:1883";
+    private static final String BROKER = "tcp://112.78.1.220:1883";
     private static final String CLIENT_ID = "VietQRServer";
     private static final String RESPONSE_TOPIC_BASE = "vietqr/response";
+    private static final String USERNAME ="vietqrbnsmqtt";
+    private static final String PASSWORD ="123456789";
 
     private MqttClient client;
 
@@ -57,6 +59,8 @@ public class VietQRServer {
         client = new MqttClient(BROKER, CLIENT_ID, persistence);
         MqttConnectOptions connOpts = new MqttConnectOptions();
         connOpts.setCleanSession(true);
+        connOpts.setUserName(USERNAME);
+        connOpts.setPassword(PASSWORD.toCharArray());
         client.connect(connOpts);
 
         client.subscribe("vietqr/request/#", new IMqttMessageListener() {
