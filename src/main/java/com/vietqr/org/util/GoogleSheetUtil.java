@@ -135,12 +135,12 @@ public class GoogleSheetUtil {
                 String status = getStatusTransaction(Integer.parseInt(data.get("status")));
 
                 String amount = notificationContents.contains("AMOUNT") ?
-                        StringUtil.formatNumberAsString(data.get("amount")) : "";
+                        data.get("amount") : "-";
 
                 List<String> rowData = Arrays.asList(
                         String.valueOf(getSttCounter(webhook)), // STT
                         formatLocalDateTime(timePaid), // Thời gian thanh toán
-                        "'" + amount, // Số tiền (VND)
+                        amount, // Số tiền (VND)
                         notificationContents.contains("REFERENCE_NUMBER") ? data.get("referenceNumber") : "-", // Mã giao dịch
                         !StringUtil.isNullOrEmpty(data.get("orderId")) ?
                                 data.get("orderId") : "-", // Mã đơn hàng
