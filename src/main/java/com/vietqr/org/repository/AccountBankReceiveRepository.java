@@ -648,4 +648,11 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Query(value = "SELECT COUNT(abr.id) FROM account_bank_receive abr "
 			+ "WHERE abr.national_id LIKE %:keyword%", nativeQuery = true)
 	int countBankAccountsByNationalId(@Param("keyword") String keyword);
+
+	@Query(value = "SELECT abr.* " +
+			"FROM account_bank_receive abr " +
+			"INNER JOIN bank_receive_fee_package brfp ON abr.id = brfp.bank_id " +
+			"INNER JOIN merchant_sync ms ON brfp.mid = ms.id " +
+			"WHERE ms.id = :merchantId", nativeQuery = true)
+	List<AccountBankReceiveEntity> findBankAccountsByMerchantId(@Param("merchantId") String merchantId);
 }

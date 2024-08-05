@@ -1,6 +1,7 @@
 package com.vietqr.org.service;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.entity.BankReceiveFeePackageEntity;
 import com.vietqr.org.repository.BankReceiveFeePackageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -62,5 +63,10 @@ public class BankReceiveFeePackageServiceImpl implements BankReceiveFeePackageSe
     @Override
     public List<PackageFeeResponseDTO> getFeePackageFeeResponse(String userId) {
         return repo.getFeePackageByUsersId(userId);
+    }
+
+    @Override
+    public BankReceiveFeePackageEntity getFeePackageByBankIds(String bankId) {
+        return repo.getFeePackageByBankIds(bankId);
     }
 }

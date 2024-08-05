@@ -63,5 +63,7 @@ public interface MerchantSyncService {
 
     void insertAll(List<MerchantSyncEntity> merchantSyncEntities);
 
+    List<MerchantSyncEntity> findAllMerchants();
+
     int insert(MerchantSyncEntity entity);
 }

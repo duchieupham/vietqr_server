@@ -410,6 +410,11 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     public void unRegisterAuthenBank(String bankAccount, String ewalletToken) {
         repo.unRegisterAuthenBank(bankAccount, ewalletToken);
     }
+    @Override
+    public List<AccountBankReceiveEntity> findBankAccountsByMerchantId(String merchantId) {
+        return repo.findBankAccountsByMerchantId(merchantId);
+    }
+
 
     @Override
     public List<BankAccountResponseDTO> getBankAccountsByNationalIds(String keyword, int offset, int size) {
