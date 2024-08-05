@@ -582,6 +582,8 @@ public class CustomerVaUtil {
                         if (rootNode.get("vietQR") != null) {
                             qrCode = rootNode.get("vietQR").asText();
                             result = new ResponseMessageDTO("SUCCESS", qrCode);
+                            logger.info("SUCCESS generate QR BIDV: customerId: " + customerId + " dto: " + dto.toString()
+                            + " at: " + System.currentTimeMillis());
                         } else {
                             result = new ResponseMessageDTO("FAILED", "E05");
                         }
