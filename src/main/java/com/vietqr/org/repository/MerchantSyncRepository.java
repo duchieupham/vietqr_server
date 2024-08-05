@@ -154,4 +154,7 @@ public interface MerchantSyncRepository extends JpaRepository<MerchantSyncEntity
     @Query(value = "SELECT id FROM merchant_sync "
             + "WHERE publish_id = :code LIMIT 1", nativeQuery = true)
     String checkExistedPublishId(String code);
+
+    @Query(value = "SELECT * from merchant_sync",nativeQuery = true)
+    List<MerchantSyncEntity> findAllMerchants();
 }

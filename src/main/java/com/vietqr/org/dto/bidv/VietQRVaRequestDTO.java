@@ -60,4 +60,13 @@ public class VietQRVaRequestDTO implements Serializable {
         this.description = description;
     }
 
+    @Override
+    public String toString() {
+        return "VietQRVaRequestDTO{" +
+                "billId='" + billId + '\'' +
+                ", userBankName='" + userBankName + '\'' +
+                ", amount='" + amount + '\'' +
+                ", description='" + description + '\'' +
+                '}';
+    }
 }

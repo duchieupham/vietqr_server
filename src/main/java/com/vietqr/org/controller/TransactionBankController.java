@@ -1667,22 +1667,6 @@ public class TransactionBankController {
         }
     }
 
-    private void pushFakenotification(String userId, Map<String, String> data) {
-        List<FcmTokenEntity> fcmTokens = new ArrayList<>();
-        fcmTokens = fcmTokenService.getFcmTokensByUserId(userId);
-        firebaseMessagingService.sendUsersNotificationWithData(data,
-                fcmTokens,
-                "", "");
-        try {
-            socketHandler.sendMessageToUser(userId,
-                    data);
-        } catch (IOException e) {
-            logger.error(
-                    "transaction-sync: WS: socketHandler.sendMessageToUser - RECHARGE ERROR: "
-                            + e.toString());
-        }
-    }
-
     private void pushNotification(String title, String message, NotificationEntity notiEntity, Map<String, String> data,
                                   String userId) {
         if (notiEntity != null) {
@@ -2652,7 +2636,6 @@ public class TransactionBankController {
         return dto.getTransType().equals("C") && (transactionReceiveEntity.getType() == 0 || transactionReceiveEntity.getType() == 1);
     }
 
-
     private String createMessage(List<String> notificationContents, String transType, String amount, BankTypeEntity bankTypeEntity, String bankAccount, long time, String referenceNumber, String content) {
         StringBuilder msgBuilder = new StringBuilder();
 
@@ -2680,7 +2663,6 @@ public class TransactionBankController {
         return message;
     }
 
-
     // Định dạng thời gian cho Google Chat giống với Google Sheet Util
     private String formatTimeForGoogleChat(long time) {
         long utcPlusSevenTime = time + 25200;
@@ -2688,7 +2670,6 @@ public class TransactionBankController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss", Locale.ENGLISH);
         return dateTime.format(formatter);
     }
-
 
     // insert new transaction mean it's not created from business. So DO NOT need to
     // push to users
@@ -4232,26 +4213,6 @@ public class TransactionBankController {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            result = requestLinkedMBOTP(dto);
-            if (result != null && result.getStatus().trim().equals("SUCCESS")) {
-                httpStatus = HttpStatus.OK;
-            } else {
-                httpStatus = HttpStatus.BAD_REQUEST;
-            }
-        } catch (Exception e) {
-            logger.error("Error at requestOTP: " + e.toString());
-            result = new ResponseMessageDTO("FAILED", "E05");
-            httpStatus = HttpStatus.BAD_REQUEST;
-        }
-        return new ResponseEntity<>(result, httpStatus);
-    }
-
-    @PostMapping("check-log/request_otp_bank")
-    public ResponseEntity<ResponseMessageDTO> requestOTPCheckLog(@Valid @RequestBody RequestBankDTO dto) {
-        ResponseMessageDTO result = null;
-        HttpStatus httpStatus = null;
-        try {
-            logger.info("requestOTPCheckLog: " + dto.toString() + " at: " + System.currentTimeMillis());
             result = requestLinkedMBOTP(dto);
             if (result != null && result.getStatus().trim().equals("SUCCESS")) {
                 httpStatus = HttpStatus.OK;

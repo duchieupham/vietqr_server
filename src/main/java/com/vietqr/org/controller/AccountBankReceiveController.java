@@ -13,14 +13,17 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
+import com.vietqr.org.dto.bidv.RequestCustomerVaDTO;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.entity.bidv.CustomerVaEntity;
 import com.vietqr.org.service.*;
 import com.vietqr.org.service.bidv.CustomerVaService;
 import com.vietqr.org.util.*;
+import com.vietqr.org.util.bank.bidv.CustomerVaUtil;
 import com.vietqr.org.util.bank.mb.MBTokenUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -1905,6 +1908,172 @@ public class AccountBankReceiveController {
         return modifiedString;
     }
 
+    @PostMapping("check-log/request_otp_bank")
+    public ResponseEntity<ResponseMessageDTO> requestOTPCheckLog(@Valid @RequestBody RequestLinkedBankDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null) {
+                if (dto.getBankCode().trim().equals("MB")) {
+                    RequestBankDTO requestBankDTO = new RequestBankDTO();
+                    requestBankDTO.setNationalId(dto.getNationalId());
+                    requestBankDTO.setAccountNumber(dto.getAccountNumber());
+                    requestBankDTO.setAccountName(dto.getAccountName());
+                    requestBankDTO.setPhoneNumber(dto.getPhoneNumber());
+                    requestBankDTO.setApplicationType(dto.getApplicationType());
+                    ResponseMessageDTO responseMessageDTO = requestLinkedMBOTPV2(requestBankDTO);
+                    result = responseMessageDTO;
+                    if (result.getStatus().equals("SUCCESS")) {
+                        httpStatus = HttpStatus.OK;
+                    } else {
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    }
+                } else if (dto.getBankCode().trim().equals("BIDV")) {
+                    Long customerVaLength = customerVaService.getCustomerVaLength() + 1;
+                    String merchantName = "";
+                    String rawMerchantName = dto.getAccountName().replaceAll(" ", "");
+                    if (!StringUtil.isNullOrEmpty(rawMerchantName)) {
+                        // GENERATE MERCHANT NAME
+                        int size = (rawMerchantName.length() / 3) * 2;
+                        merchantName = (rawMerchantName.substring(size) + RandomCodeUtil.generateOTP(3)).toUpperCase();
+                    } else {
+                        merchantName = rawMerchantName.toUpperCase();
+                    }
+                    String merchantId = CustomerVaUtil.generateMerchantId(merchantName, customerVaLength);
+                    String checkExistedMerchantId = customerVaService.checkExistedMerchantId(merchantId);
+                    RequestCustomerVaDTO requestCustomerVaDTO = new RequestCustomerVaDTO();
+                    requestCustomerVaDTO.setBankCode(dto.getBankCode());
+                    requestCustomerVaDTO.setBankAccount(dto.getAccountNumber());
+                    requestCustomerVaDTO.setMerchantName(merchantName);
+                    requestCustomerVaDTO.setUserBankName(dto.getAccountName());
+                    requestCustomerVaDTO.setNationalId(dto.getNationalId());
+                    requestCustomerVaDTO.setPhoneAuthenticated(dto.getPhoneNumber());
+                    result = CustomerVaUtil.requestCustomerVaV2(requestCustomerVaDTO, merchantId, "1",
+                            customerVaLength, checkExistedMerchantId);
+//					result = requestLinkedBIDVOTP(dto);
+                    if (result.getStatus().equals("SUCCESS")) {
+                        httpStatus = HttpStatus.OK;
+                    } else {
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    }
+                } else {
+                    logger.error("requestLinkedBankOTP: INVALID BANK CODE");
+                    System.out.println("requestLinkedBankOTP: INVALID BANK CODE");
+                    result = new ResponseMessageDTO("FAILED", "E109");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                logger.error("requestLinkedBankOTP: INVALID REQUEST BODY");
+                System.out.println("requestLinkedBankOTP: INVALID REQUEST BODY");
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("Error at requestOTP: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05 - " + e.getMessage());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    private ResponseMessageDTO requestLinkedMBOTPV2(RequestBankDTO dto) {
+        ResponseMessageDTO result = null;
+        try {
+            UUID clientMessageId = UUID.randomUUID();
+            Map<String, Object> data = new HashMap<>();
+            data.put("nationalId", dto.getNationalId());
+            data.put("accountNumber", dto.getAccountNumber());
+            data.put("accountName", dto.getAccountName());
+            data.put("phoneNumber", dto.getPhoneNumber());
+            data.put("authenType", "SMS");
+            data.put("applicationType", dto.getApplicationType());
+            data.put("transType", "DC");
+            UriComponents uriComponents = UriComponentsBuilder
+                    .fromHttpUrl(EnvironmentUtil.getBankUrl()
+                            + "ms/push-mesages-partner/v1.0/bdsd/subscribe/request")
+                    .buildAndExpand(/* add url parameter here */);
+            WebClient webClient = WebClient.builder()
+                    .baseUrl(
+                            EnvironmentUtil.getBankUrl()
+                                    + "ms/push-mesages-partner/v1.0/bdsd/subscribe/request")
+                    .build();
+            Mono<ClientResponse> responseMono = webClient.post()
+                    .uri(uriComponents.toUri())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("clientMessageId", clientMessageId.toString())
+                    .header("transactionId", RandomCodeUtil.generateRandomUUID())
+                    .header("Authorization", "Bearer " + getMBBankToken().getAccess_token())
+                    .body(BodyInserters.fromValue(data))
+                    .exchange();
+            ClientResponse response = responseMono.block();
+            if (response.statusCode().is2xxSuccessful()) {
+                String json = response.bodyToMono(String.class).block();
+                logger.info("Response requestOTP: " + json);
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode rootNode = objectMapper.readTree(json);
+                String requestId = rootNode.get("data").get("requestId").asText();
+                result = new ResponseMessageDTO("SUCCESS",
+                        requestId);
+            } else {
+                ConfirmRequestFailedBankDTO confirmRequestBankDTO = response.bodyToMono(
+                                ConfirmRequestFailedBankDTO.class)
+                        .block();
+                LocalDateTime currentDateTime = LocalDateTime.now();
+                logger.info("Response requestOTP error: Request Body: " + dto.toString() + " at: " + System.currentTimeMillis());
+                logger.error("Response requestOTP error: client msg id: " + clientMessageId.toString() + " - "
+                        + confirmRequestBankDTO.getSoaErrorCode() + "-"
+                        + confirmRequestBankDTO.getSoaErrorDesc() + " at "
+                        + currentDateTime.toEpochSecond(ZoneOffset.UTC));
+                String status = "FAILED";
+                String message = confirmRequestBankDTO.toString();
+                result = new ResponseMessageDTO(status, message);
+            }
+        } catch (Exception e) {
+            logger.error("requestLinkedMBOTP: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05 - " + e.getMessage());
+        }
+        return result;
+    }
+
+    // get token MB Bank
+    private TokenProductBankDTO getMBBankToken() {
+        TokenProductBankDTO result = null;
+        try {
+            String key = EnvironmentUtil.getUserBankAccess() + ":" + EnvironmentUtil.getPasswordBankAccess();
+            String encodedKey = Base64.getEncoder().encodeToString(key.getBytes());
+            UriComponents uriComponents = UriComponentsBuilder
+                    .fromHttpUrl(EnvironmentUtil.getBankUrl() + "oauth2/v1/token")
+                    .buildAndExpand(/* add url parameter here */);
+            WebClient webClient = WebClient.builder()
+                    .baseUrl(EnvironmentUtil.getBankUrl()
+                            + "oauth2/v1/token")
+                    .build();
+            // Call POST API
+            TokenProductBankDTO response = webClient.method(HttpMethod.POST)
+                    .uri(uriComponents.toUri())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .header("Authorization", "Basic " + encodedKey)
+                    .body(BodyInserters.fromFormData("grant_type", "client_credentials"))
+                    .exchange()
+                    .flatMap(clientResponse -> {
+                        if (clientResponse.statusCode().is2xxSuccessful()) {
+                            return clientResponse.bodyToMono(TokenProductBankDTO.class);
+                        } else {
+                            clientResponse.body((clientHttpResponse, context) -> {
+                                logger.info(clientHttpResponse.getBody().collectList().block().toString());
+                                return clientHttpResponse.getBody();
+                            });
+                            return null;
+                        }
+                    })
+                    .block();
+            result = response;
+        } catch (Exception e) {
+            logger.error(e.toString());
+        }
+        return result;
+    }
+
     @GetMapping("/list-account-bank")
     public ResponseEntity<Object> getListBankAccount(
             @RequestParam(required = false) Integer type,
@@ -1921,7 +2090,7 @@ public class AccountBankReceiveController {
             List<BankAccountResponseDTO> data;
             // List<IBankAccountResponseDTO> data;
 
-            if (type == null || value == null || value.isEmpty()) {
+            if (type == null || value == null || value.isEmpty() || type == 9) {
                 data = accountBankReceiveService.getAllBankAccount(offset, size);
                 totalElement = accountBankReceiveService.countAllBankAccounts();
             } else {
