@@ -431,8 +431,8 @@ public class CustomerInvoiceController {
                                         });
                                         thread.start();
                                         // hoá đơn đã gạch nợ rồi
-                                        result = new ResponseMessageBidvDTO("023",
-                                                "Hóa đơn đã gạch nợ rồi (mỗi hóa đơn chỉ gạch nợ 1 lần)");
+                                        result = new ResponseMessageBidvDTO("000",
+                                                "Thành công");
                                         httpStatus = HttpStatus.OK;
                                     } else if (Objects.nonNull(customerInvoiceDataDTO)
                                     && customerInvoiceDataDTO.getStatus() == 1) {
@@ -451,8 +451,8 @@ public class CustomerInvoiceController {
                                         });
                                         thread.start();
                                         // hoá đơn đã gạch nợ rồi
-                                        result = new ResponseMessageBidvDTO("000",
-                                                "Thành công");
+                                        result = new ResponseMessageBidvDTO("023",
+                                                "Hóa đơn đã gạch nợ rồi (mỗi hóa đơn chỉ gạch nợ 1 lần)");
                                         httpStatus = HttpStatus.OK;
                                     } else {
                                         accountBankReceiveEntity = accountBankReceiveService
@@ -587,6 +587,7 @@ public class CustomerInvoiceController {
                                     finalAccountBankReceiveEntity, DateTimeUtil.getCurrentDateTimeUTC());
                             insertNewTransaction(dto, transactionUUID.toString(), finalAccountBankReceiveEntity, boxIdRef, terminalEntity, rawDTO);
                         }
+                        // hoa đơn
                     } else {
                         String userId = "";
                         String userIdResult = customerVaService.getUserIdByCustomerId(dto.getCustomer_id());
