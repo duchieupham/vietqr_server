@@ -1370,7 +1370,7 @@ public class TransactionMMSController {
                                 .getMerchanConnectionById(bankReceiveConnectionEntity.getMidConnectId());
                         if (merchantConnectionEntity != null) {
                             executorService.submit(() -> pushNewTransactionToCustomerSyncV2(transReceiveId, merchantConnectionEntity,
-                                    transactionBankCustomerDTO, 1));
+                                    transactionBankCustomerDTO));
                         }
                     }
                     executorService.shutdown();
@@ -1384,20 +1384,19 @@ public class TransactionMMSController {
     }
 
     private void pushNewTransactionToCustomerSyncV2(String transReceiveId, MerchantConnectionEntity entity,
-                                                    TransactionBankCustomerDTO dto,
-                                                    int retry) {
+                                                    TransactionBankCustomerDTO dto) {
         ResponseMessageDTO result = null;
         // final ResponseMessageDTO[] results = new ResponseMessageDTO[1];
         // final List<ResponseMessageDTO> results = new ArrayList<>();
         // final String[] msg = new String[1];
-        if (retry > 1 && retry <= 5) {
-            try {
-                Thread.sleep(12000); // Sleep for 12000 milliseconds (12 seconds)
-            } catch (InterruptedException e) {
-                // Handle the exception if the thread is interrupted during sleep
-                e.printStackTrace();
-            }
-        }
+//        if (retry > 1 && retry <= 5) {
+//            try {
+//                Thread.sleep(12000); // Sleep for 12000 milliseconds (12 seconds)
+//            } catch (InterruptedException e) {
+//                // Handle the exception if the thread is interrupted during sleep
+//                e.printStackTrace();
+//            }
+//        }
         long time = DateTimeUtil.getCurrentDateTimeUTC();
         TransactionLogResponseDTO transactionLogResponseDTO = new TransactionLogResponseDTO();
         try {
@@ -1491,13 +1490,13 @@ public class TransactionMMSController {
             } else {
                 String json = response.bodyToMono(String.class).block();
                 // nếu trả sai format retry callback
-                if (!validateFormatCallbackResponse(json)) {
-                    // retry callback
-                    if (retry < 5) {
-                        pushNewTransactionToCustomerSyncV2(transReceiveId, entity,
-                                dto, ++retry);
-                    }
-                }
+//                if (!validateFormatCallbackResponse(json)) {
+//                    // retry callback
+//                    if (retry < 5) {
+//                        pushNewTransactionToCustomerSyncV2(transReceiveId, entity,
+//                                dto, ++retry);
+//                    }
+//                }
                 System.out.println("Response pushNewTransactionToCustomerSync: " + json);
                 logger.info("Response pushNewTransactionToCustomerSync: " + json + " status: " + response.statusCode());
                 result = new ResponseMessageDTO("FAILED", "E05 - " + json);
@@ -1512,11 +1511,11 @@ public class TransactionMMSController {
                             + e.toString()
                             + " at: " + responseTime);
 
-            // retry callback
-            if (retry < 5) {
-                pushNewTransactionToCustomerSyncV2(transReceiveId, entity,
-                        dto, ++retry);
-            }
+//            // retry callback
+//            if (retry < 5) {
+//                pushNewTransactionToCustomerSyncV2(transReceiveId, entity,
+//                        dto, ++retry);
+//            }
         } finally {
             if (result != null) {
                 UUID logUUID = UUID.randomUUID();

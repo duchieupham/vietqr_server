@@ -387,6 +387,6 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
     @Query(value = "SELECT a.id AS invoiceId, a.name AS invoiceName, "
             + "a.total_amount AS totalAmount "
             + "FROM invoice a "
-            + "WHERE a.user_id = :userId ", nativeQuery = true)
+            + "WHERE a.user_id = :userId AND a.status = 0 ", nativeQuery = true)
     List<IInvoiceLatestDTO> getInvoiceLatestByUserId(String userId);
 }

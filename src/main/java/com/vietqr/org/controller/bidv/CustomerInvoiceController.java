@@ -431,8 +431,8 @@ public class CustomerInvoiceController {
                                         });
                                         thread.start();
                                         // hoá đơn đã gạch nợ rồi
-                                        result = new ResponseMessageBidvDTO("023",
-                                                "Hóa đơn đã gạch nợ rồi (mỗi hóa đơn chỉ gạch nợ 1 lần)");
+                                        result = new ResponseMessageBidvDTO("000",
+                                                "Thành công");
                                         httpStatus = HttpStatus.OK;
                                     } else if (Objects.nonNull(customerInvoiceDataDTO)
                                     && customerInvoiceDataDTO.getStatus() == 1) {
@@ -513,6 +513,7 @@ public class CustomerInvoiceController {
             AccountBankReceiveEntity finalAccountBankReceiveEntity = accountBankReceiveEntity;
             Thread thread = new Thread(() -> {
                 //
+                // khi result = 021, 022, 02 insert transaction mới
                 if (tempResult.getResult_code().equals("000")) {
 
                     CustomerInvoiceDataDTO customerInvoiceDataDTO = customerInvoiceService
@@ -561,6 +562,32 @@ public class CustomerInvoiceController {
                         }
 
                     //
+                    } else if (Objects.nonNull(customerInvoiceDataDTO) && customerInvoiceDataDTO.getQrType() == 2) {
+                        // static qr
+                        String rawCode = "";
+                        String boxIdRef = "";
+                        UUID transactionUUID = UUID.randomUUID();
+                        ISubTerminalCodeDTO rawDTO = null;
+                        TerminalEntity terminalEntity = terminalService.getTerminalByTerminalCode(customerInvoiceDataDTO.getName());
+                        if (Objects.nonNull(terminalEntity)) {
+                            rawCode = terminalEntity.getRawTerminalCode();
+                        } else {
+                            rawDTO = terminalBankReceiveService.getSubTerminalCodeBySubTerminalCode(
+                                    customerInvoiceDataDTO.getName());
+                            if (rawDTO != null) {
+                                rawCode = rawDTO.getRawCode();
+                                if (rawDTO.getQrType() == 2) {
+                                    boxIdRef = rawDTO.getRawCode();
+                                }
+                            }
+                        }
+
+                        if (Objects.nonNull(finalAccountBankReceiveEntity)) {
+                            getCustomerSyncEntities(transactionUUID.toString(), dto, rawCode,
+                                    finalAccountBankReceiveEntity, DateTimeUtil.getCurrentDateTimeUTC());
+                            insertNewTransaction(dto, transactionUUID.toString(), finalAccountBankReceiveEntity, boxIdRef, terminalEntity, rawDTO);
+                        }
+                        // hoa đơn
                     } else {
                         String userId = "";
                         String userIdResult = customerVaService.getUserIdByCustomerId(dto.getCustomer_id());
