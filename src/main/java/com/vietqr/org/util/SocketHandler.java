@@ -24,6 +24,7 @@ public class SocketHandler extends TextWebSocketHandler {
     private List<WebSocketSession> ecLoginSessions = new ArrayList<>();
     private List<WebSocketSession> transactionSessions = new ArrayList<>();
     private List<WebSocketSession> notificationBoxSessions = new ArrayList<>();
+    private final Object lock = new Object();
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -129,7 +130,19 @@ public class SocketHandler extends TextWebSocketHandler {
             if (sessionUserId != null && sessionUserId.equals(userId)) {
                 ObjectMapper mapper = new ObjectMapper();
                 String jsonMessage = mapper.writeValueAsString(message);
-                session.sendMessage(new TextMessage(jsonMessage));
+                synchronized (lock) {
+                    if (session.isOpen()) {
+                        try {
+                            session.sendMessage(new TextMessage(jsonMessage));
+                        } catch (IllegalStateException e) {
+                            logger.error("WS: Error sending message", e);
+                        }
+                    } else {
+                        logger.warn("WS: WebSocket session is not open: " + session.getId());
+                    }
+                }
+//                System.out.println(System.currentTimeMillis());
+//                session.sendMessage(new TextMessage(jsonMessage));
             }
         }
     }

@@ -502,45 +502,9 @@ public class TerminalController {
                             long lastTime = list.get(lastIndex).getTime();
                             TransReceiveTempEntity entity = transReceiveTempService.getLastTimeByBankId(bankId);
                             if (entity != null) {
-                                if (entity.getLastTimes() <= lastTime) {
-                                    dtos = list.stream().map(item -> {
-                                        TransactionExportTerminalDTO dto = new TransactionExportTerminalDTO();
-                                        dto.setAmount(item.getAmount());
-                                        dto.setHiddenAmount(true);
-                                        dto.setBankAccount(StringUtil.formatBankAccount(item.getBankAccount()));
-                                        dto.setBankCode(item.getBankCode() != null && !item.getBankCode().isEmpty() ? item.getBankCode() : "-");
-                                        dto.setBankName(item.getBankName() != null && !item.getBankName().isEmpty() ? item.getBankName() : "-");
-                                        dto.setContent(item.getContent() != null ? item.getContent() : "-");
-                                        dto.setReferenceNumber(item.getReferenceNumber() != null && !item.getReferenceNumber().isEmpty() ? item.getReferenceNumber() : "-");
-                                        dto.setOrderId(item.getOrderId() != null && !item.getOrderId().isEmpty() ? item.getOrderId() : "-");
-                                        dto.setTerminalCode(item.getTerminalCode() != null && !item.getTerminalCode().isEmpty() ? item.getTerminalCode() : "-");
-                                        dto.setTime(DateTimeUtil.getDateStringBaseLong(item.getTime()));
-                                        dto.setTimePaid(DateTimeUtil.getDateStringBaseLong(item.getTimePaid()));
-                                        dto.setTransType(item.getTransType().equals("C") ? "Giao dịch đến" : "Giao dịch đi");
-                                        dto.setStatus(getStatusTransaction(item.getStatus()));
-                                        dto.setType(getTypeTransaction(item.getType()));
-                                        dto.setNote(item.getNote() != null && !item.getNote().isEmpty() ? item.getNote() : "-");
-                                        dto.setBankShortName(item.getBankShortName() != null && !item.getBankShortName().isEmpty() ? item.getBankShortName() : "-");
-                                        TerminalExportDTO terminalExportDTO = terminalExports.get(item.getTerminalCode());
-                                        if (terminalExportDTO != null) {
-                                            dto.setTerminalAddress(terminalExportDTO.getTerminalAddress()
-                                                    .isEmpty() ? "-" : terminalExportDTO.getTerminalAddress());
-                                            dto.setTerminalName(terminalExportDTO.getTerminalName()
-                                                    .isEmpty() ? "-" : terminalExportDTO.getTerminalName());
-                                        } else {
-                                            dto.setTerminalAddress("-");
-                                            dto.setTerminalName("-");
-                                        }
-                                        return dto;
-
-                                    }).collect(Collectors.toList());
-                                } else {
                                     dtos = list.stream().map(item -> {
                                         TransactionExportTerminalDTO dto = new TransactionExportTerminalDTO();
                                         if (entity.getTransIds().contains(item.getTransactionId())) {
-                                            dto.setAmount(item.getAmount());
-                                            dto.setHiddenAmount(false);
-                                        } else if (item.getTime() < entity.getLastTimes()) {
                                             dto.setAmount(item.getAmount());
                                             dto.setHiddenAmount(false);
                                         } else {
@@ -574,7 +538,6 @@ public class TerminalController {
                                         return dto;
 
                                     }).collect(Collectors.toList());
-                                }
                             } else {
                                 dtos = list.stream().map(item -> {
                                     TransactionExportTerminalDTO dto = new TransactionExportTerminalDTO();

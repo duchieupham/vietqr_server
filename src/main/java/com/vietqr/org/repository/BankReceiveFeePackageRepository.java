@@ -91,13 +91,14 @@ public interface BankReceiveFeePackageRepository extends JpaRepository<BankRecei
             + "WHERE a.bank_id = :bankId AND a.mid = :merchantId ", nativeQuery = true)
     IMerchantBankMapperDTO getMerchantBankMapper(String merchantId, String bankId);
 
-    @Query(value = "SELECT b.vso AS vso, b.name AS merchantName, "
+    @Query(value = "SELECT a.vso AS vso, b.name AS merchantName, "
             + "c.email AS email, c.phone_no AS phoneNo, '' AS platform, "
             + "JSON_EXTRACT(a.data, '$.bankAccount') AS bankAccount, "
             + "JSON_EXTRACT(a.data, '$.bankShortName') AS bankShortName, "
             + "JSON_EXTRACT(a.data, '$.userBankName') AS userBankName, "
             + "JSON_EXTRACT(a.data, '$.mmsActive') AS mmsActive "
             + "FROM bank_receive_fee_package a "
+            + "INNER JOIN account_bank_receive d ON a.bank_id = d.id "
             + "INNER JOIN merchant_sync b ON b.id = a.mid "
             + "INNER JOIN account_login c ON c.id = a.user_id "
             + "WHERE a.bank_id = :bankId ", nativeQuery = true)

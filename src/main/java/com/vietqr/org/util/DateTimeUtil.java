@@ -285,4 +285,15 @@ public class DateTimeUtil {
         Duration duration = Duration.between(startOfWeekDateTime, now);
         return duration.getSeconds();
     }
+
+    public static long getStartDateUTCPlus7() {
+        LocalDateTime toDateTime = LocalDateTime.now(ZoneOffset.UTC).plusHours(7);
+        LocalDate startDate = toDateTime.toLocalDate();
+        LocalDateTime startUtcPlus7 = startDate.atStartOfDay();
+
+        // Chuyển thời điểm này về UTC
+        ZonedDateTime startUtcPlus7Zoned = startUtcPlus7.atZone(ZoneOffset.ofHours(7));
+        ZonedDateTime startUtc = startUtcPlus7Zoned.withZoneSameInstant(ZoneOffset.UTC);
+        return startUtc.toEpochSecond();
+    }
 }

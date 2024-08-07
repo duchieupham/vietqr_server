@@ -400,7 +400,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "WHERE a.id = :bankId ", nativeQuery = true)
 	IBankReceiveMapperDTO getMerchantBankMapper(String bankId);
 
-	@Query(value = "SELECT '' AS vso, '' AS merchantName, '' AS platform, "
+	@Query(value = "SELECT a.vso AS vso, '' AS merchantName, '' AS platform, "
 			+ "COALESCE(b.email, '') AS email, b.phone_no AS phoneNo, a.user_id AS userId, "
 			+ "a.bank_account AS bankAccount, a.bank_account_name AS userBankName, "
 			+ "c.bank_short_name AS bankShortName, a.mms_active AS mmsActive "
