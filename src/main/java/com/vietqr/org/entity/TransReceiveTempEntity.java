@@ -21,6 +21,9 @@ public class TransReceiveTempEntity {
     @Column(name = "lastTimes")
     private long lastTimes;
 
+    @Column(name = "nums")
+    private int nums;
+
     public void setId(String id) {
         this.id = id;
     }
@@ -51,5 +54,13 @@ public class TransReceiveTempEntity {
 
     public void setLastTimes(long lastTimes) {
         this.lastTimes = lastTimes;
+    }
+
+    public int getNums() {
+        return nums;
+    }
+
+    public void setNums(int nums) {
+        this.nums = nums;
     }
 }

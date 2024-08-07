@@ -18,6 +18,11 @@ public class TransReceiveTempServiceImpl implements TransReceiveTempService {
     }
 
     @Override
+    public String getTransIdsByBankId(String bankId) {
+        return repo.getTransIdsByBankId(bankId);
+    }
+
+    @Override
     public void insert(TransReceiveTempEntity entity) {
         repo.save(entity);
     }
@@ -30,5 +35,11 @@ public class TransReceiveTempServiceImpl implements TransReceiveTempService {
     @Override
     public TransTempCountDTO getTransTempCount(String bankId) {
         return repo.getTransTempCount(bankId);
+    }
+
+    @Override
+    public int updateTransReceiveTemp(String transIds, int aftNum, long currentStartDate,
+                                      long lastTime, int preNum, String transId, String id) {
+        return repo.updateTransReceiveTemp(transIds, aftNum, currentStartDate, lastTime, preNum, transId, id);
     }
 }

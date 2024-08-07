@@ -249,65 +249,35 @@ public class MerchantTransReceiveRequestController {
                         }).collect(Collectors.toList());
                     } else {
                         if (!listTrans.isEmpty()) {
-                            int lastIndex = listTrans.size() - 1;
-                            long lastTime = listTrans.get(lastIndex).getTimeCreated();
                             TransReceiveTempEntity entity = transReceiveTempService.getLastTimeByBankId(bankId);
                             if (entity != null) {
-                                if (entity.getLastTimes() <= lastTime) {
-                                    listTransRequest = listTrans.stream().map(item -> {
-                                        TransactionRelatedRequestDTO trans = new TransactionRelatedRequestDTO();
-                                        trans.setId(item.getId());
-                                        trans.setBankAccount(item.getBankAccount());
+                                listTransRequest = listTrans.stream().map(item -> {
+                                    TransactionRelatedRequestDTO trans = new TransactionRelatedRequestDTO();
+                                    trans.setId(item.getId());
+                                    trans.setBankAccount(item.getBankAccount());
+                                    if (entity.getTransIds().contains(item.getId())) {
+                                        trans.setAmount(item.getAmount() + "");
+                                    } else {
                                         trans.setAmount("*****");
-                                        trans.setBankId(item.getBankId());
-                                        trans.setContent(item.getContent());
-                                        trans.setOrderId(item.getOrderId());
-                                        trans.setReferenceNumber(item.getReferenceNumber());
-                                        trans.setStatus(item.getStatus());
-                                        trans.setTimeCreated(item.getTimeCreated());
-                                        trans.setTimePaid(item.getTimePaid());
-                                        trans.setTransType(item.getTransType());
-                                        trans.setType(item.getType());
-                                        trans.setUserBankName(item.getUserBankName());
-                                        trans.setBankShortName(item.getBankShortName());
-                                        trans.setTerminalCode(item.getTerminalCode());
-                                        trans.setNote(item.getNote());
-                                        trans.setRequests(terminalBanksMap
-                                                .getOrDefault(item.getId(), new ArrayList<>()));
-                                        trans.setTotalRequest(trans.getRequests().size());
-                                        return trans;
-                                    }).collect(Collectors.toList());
-                                } else {
-                                    listTransRequest = listTrans.stream().map(item -> {
-                                        TransactionRelatedRequestDTO trans = new TransactionRelatedRequestDTO();
-                                        trans.setId(item.getId());
-                                        trans.setBankAccount(item.getBankAccount());
-                                        if (entity.getTransIds().contains(item.getId())) {
-                                            trans.setAmount(item.getAmount() + "");
-                                        } else if (item.getTimeCreated() < entity.getLastTimes()) {
-                                            trans.setAmount(item.getAmount() + "");
-                                        } else {
-                                            trans.setAmount("*****");
-                                        }
-                                        trans.setBankId(item.getBankId());
-                                        trans.setContent(item.getContent());
-                                        trans.setOrderId(item.getOrderId());
-                                        trans.setReferenceNumber(item.getReferenceNumber());
-                                        trans.setStatus(item.getStatus());
-                                        trans.setTimeCreated(item.getTimeCreated());
-                                        trans.setTimePaid(item.getTimePaid());
-                                        trans.setTransType(item.getTransType());
-                                        trans.setType(item.getType());
-                                        trans.setUserBankName(item.getUserBankName());
-                                        trans.setBankShortName(item.getBankShortName());
-                                        trans.setTerminalCode(item.getTerminalCode());
-                                        trans.setNote(item.getNote());
-                                        trans.setRequests(terminalBanksMap
-                                                .getOrDefault(item.getId(), new ArrayList<>()));
-                                        trans.setTotalRequest(trans.getRequests().size());
-                                        return trans;
-                                    }).collect(Collectors.toList());
-                                }
+                                    }
+                                    trans.setBankId(item.getBankId());
+                                    trans.setContent(item.getContent());
+                                    trans.setOrderId(item.getOrderId());
+                                    trans.setReferenceNumber(item.getReferenceNumber());
+                                    trans.setStatus(item.getStatus());
+                                    trans.setTimeCreated(item.getTimeCreated());
+                                    trans.setTimePaid(item.getTimePaid());
+                                    trans.setTransType(item.getTransType());
+                                    trans.setType(item.getType());
+                                    trans.setUserBankName(item.getUserBankName());
+                                    trans.setBankShortName(item.getBankShortName());
+                                    trans.setTerminalCode(item.getTerminalCode());
+                                    trans.setNote(item.getNote());
+                                    trans.setRequests(terminalBanksMap
+                                            .getOrDefault(item.getId(), new ArrayList<>()));
+                                    trans.setTotalRequest(trans.getRequests().size());
+                                    return trans;
+                                }).collect(Collectors.toList());
                             } else {
                                 listTransRequest = listTrans.stream().map(item -> {
                                     TransactionRelatedRequestDTO trans = new TransactionRelatedRequestDTO();

@@ -166,6 +166,9 @@ public class TransactionMMSController {
     @Autowired
     GoogleSheetService googleSheetService;
 
+    @Autowired
+    TransReceiveTempService transReceiveTempService;
+
     @PostMapping("transaction-mms")
     public ResponseEntity<TransactionMMSResponseDTO> insertTransactionMMS(@RequestBody TransactionMMSEntity entity) {
         TransactionMMSResponseDTO result = null;
@@ -280,7 +283,6 @@ public class TransactionMMSController {
                 if (tempResult != null && tempResult.getResCode().equals("00")) {
                     // tempTransReceive is null => static QR
                     // tempTransReceive is not empty => transaction QR
-
                     ///
                     //
                     // TRANSACTION QR
@@ -393,8 +395,14 @@ public class TransactionMMSController {
                                     ? tempTransReceive.getReferenceNumber()
                                     : "");
                             data.put("content", tempTransReceive.getContent());
+                            String amountForShow = StringUtil.formatNumberAsString(entity.getDebitAmount() + "");
+                            try {
+                                amountForShow = processHiddenAmount(tempTransReceive.getAmount(), accountBankEntity.getId(),
+                                        accountBankEntity.isValidService(), tempTransReceive.getId());
+                            } catch (Exception e) {
+                                logger.error("processHiddenAmount: ERROR: MMS:" + e.getMessage() + " at: " + System.currentTimeMillis());
+                            }
                             String amountForVoice = StringUtil.removeFormatNumber(tempTransReceive.getAmount() + "");
-                            String amountForShow = StringUtil.formatNumberAsString(tempTransReceive.getAmount() + "");
                             data.put("amount", "" + amountForShow);
                             data.put("timePaid", "" + tempTransReceive.getTimePaid());
                             data.put("time", "" + time);

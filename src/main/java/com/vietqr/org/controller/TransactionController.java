@@ -524,57 +524,31 @@ public class TransactionController {
                         }).collect(Collectors.toList());
                     } else {
                         if (!dtos.isEmpty()) {
-                            int lastIndex = dtos.size() - 1;
-                            long lastTime = dtos.get(lastIndex).getTime();
                             TransReceiveTempEntity entity = transReceiveTempService.getLastTimeByBankId(bankId);
                             if (entity != null) {
-                                if (entity.getLastTimes() <= lastTime) {
-                                    result = dtos.stream().map(dto -> {
-                                        TransactionRelatedResponseDTO responseDTO = new TransactionRelatedResponseDTO();
-                                        responseDTO.setTransactionId(dto.getTransactionId());
-                                        responseDTO.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
-                                        responseDTO.setBankAccount(dto.getBankAccount());
-                                        responseDTO.setBankShortName(bankShortName != null ? bankShortName : "");
-                                        responseDTO.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
-                                        responseDTO.setTransType(dto.getTransType());
+                                result = dtos.stream().map(dto -> {
+                                    TransactionRelatedResponseDTO responseDTO = new TransactionRelatedResponseDTO();
+                                    responseDTO.setTransactionId(dto.getTransactionId());
+                                    responseDTO.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
+                                    responseDTO.setBankAccount(dto.getBankAccount());
+                                    responseDTO.setBankShortName(bankShortName != null ? bankShortName : "");
+                                    responseDTO.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
+                                    responseDTO.setTransType(dto.getTransType());
+                                    if (entity.getTransIds().contains(dto.getTransactionId())) {
+                                        responseDTO.setAmount(dto.getAmount());
+                                    } else {
                                         responseDTO.setAmount("*****");
-                                        responseDTO.setStatus(dto.getStatus());
-                                        responseDTO.setTime(dto.getTime());
-                                        responseDTO.setTimePaid(dto.getTimePaid());
-                                        responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
-                                        responseDTO.setContent(dto.getContent());
-                                        responseDTO.setType(dto.getType());
-                                        responseDTO.setNote(dto.getNote() != null ? dto.getNote() : "");
-                                        return responseDTO;
+                                    }
+                                    responseDTO.setStatus(dto.getStatus());
+                                    responseDTO.setTime(dto.getTime());
+                                    responseDTO.setTimePaid(dto.getTimePaid());
+                                    responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
+                                    responseDTO.setContent(dto.getContent());
+                                    responseDTO.setType(dto.getType());
+                                    responseDTO.setNote(dto.getNote() != null ? dto.getNote() : "");
+                                    return responseDTO;
 
-                                    }).collect(Collectors.toList());
-                                } else {
-                                    result = dtos.stream().map(dto -> {
-                                        TransactionRelatedResponseDTO responseDTO = new TransactionRelatedResponseDTO();
-                                        responseDTO.setTransactionId(dto.getTransactionId());
-                                        responseDTO.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
-                                        responseDTO.setBankAccount(dto.getBankAccount());
-                                        responseDTO.setBankShortName(bankShortName != null ? bankShortName : "");
-                                        responseDTO.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
-                                        responseDTO.setTransType(dto.getTransType());
-                                        if (entity.getTransIds().contains(dto.getTransactionId())) {
-                                            responseDTO.setAmount(dto.getAmount());
-                                        } else if (dto.getTime() < entity.getLastTimes()) {
-                                            responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
-                                        } else {
-                                            responseDTO.setAmount("*****");
-                                        }
-                                        responseDTO.setStatus(dto.getStatus());
-                                        responseDTO.setTime(dto.getTime());
-                                        responseDTO.setTimePaid(dto.getTimePaid());
-                                        responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
-                                        responseDTO.setContent(dto.getContent());
-                                        responseDTO.setType(dto.getType());
-                                        responseDTO.setNote(dto.getNote() != null ? dto.getNote() : "");
-                                        return responseDTO;
-
-                                    }).collect(Collectors.toList());
-                                }
+                                }).collect(Collectors.toList());
                             } else {
                                 result = dtos.stream().map(dto -> {
                                     TransactionRelatedResponseDTO responseDTO = new TransactionRelatedResponseDTO();
@@ -593,10 +567,8 @@ public class TransactionController {
                                     responseDTO.setType(dto.getType());
                                     responseDTO.setNote(dto.getNote() != null ? dto.getNote() : "");
                                     return responseDTO;
-
                                 }).collect(Collectors.toList());
                             }
-
                         }
                     }
                 }
@@ -1023,65 +995,35 @@ public class TransactionController {
                             }).collect(Collectors.toList());
                         } else {
                             if (!dtos.isEmpty()) {
-                                int lastIndex = dtos.size() - 1;
-                                long lastTime = dtos.get(lastIndex).getTimeCreated();
                                 TransReceiveTempEntity entity = transReceiveTempService.getLastTimeByBankId(bankId);
                                 if (entity != null) {
-                                    if (entity.getLastTimes() <= lastTime) {
-                                        result = dtos.stream().map(item -> {
-                                            TransactionRelatedRequestDTO trans = new TransactionRelatedRequestDTO();
-                                            trans.setId(item.getId());
-                                            trans.setBankAccount(item.getBankAccount());
+                                    result = dtos.stream().map(item -> {
+                                        TransactionRelatedRequestDTO trans = new TransactionRelatedRequestDTO();
+                                        trans.setId(item.getId());
+                                        trans.setBankAccount(item.getBankAccount());
+                                        if (entity.getTransIds().contains(item.getId())) {
+                                            trans.setAmount(formatAmountNumber(item.getAmount() + ""));
+                                        } else {
                                             trans.setAmount("*****");
-                                            trans.setBankId(item.getBankId());
-                                            trans.setContent(item.getContent());
-                                            trans.setOrderId(item.getOrderId());
-                                            trans.setReferenceNumber(item.getReferenceNumber());
-                                            trans.setStatus(item.getStatus());
-                                            trans.setTimeCreated(item.getTimeCreated());
-                                            trans.setTimePaid(item.getTimePaid());
-                                            trans.setTransType(item.getTransType());
-                                            trans.setType(item.getType());
-                                            trans.setUserBankName(item.getUserBankName());
-                                            trans.setBankShortName(item.getBankShortName());
-                                            trans.setTerminalCode(item.getTerminalCode());
-                                            trans.setNote(item.getNote());
-                                            trans.setRequests(terminalBanksMap
-                                                    .getOrDefault(item.getId(), new ArrayList<>()));
-                                            trans.setTotalRequest(trans.getRequests().size());
-                                            return trans;
-                                        }).collect(Collectors.toList());
-                                    } else {
-                                        result = dtos.stream().map(item -> {
-                                            TransactionRelatedRequestDTO trans = new TransactionRelatedRequestDTO();
-                                            trans.setId(item.getId());
-                                            trans.setBankAccount(item.getBankAccount());
-                                            if (entity.getTransIds().contains(item.getId())) {
-                                                trans.setAmount(formatAmountNumber(item.getAmount() + ""));
-                                            } else if (item.getTimeCreated() < entity.getLastTimes()) {
-                                                trans.setAmount(formatAmountNumber(item.getAmount() + ""));
-                                            } else {
-                                                trans.setAmount("*****");
-                                            }
-                                            trans.setBankId(item.getBankId());
-                                            trans.setContent(item.getContent());
-                                            trans.setOrderId(item.getOrderId());
-                                            trans.setReferenceNumber(item.getReferenceNumber());
-                                            trans.setStatus(item.getStatus());
-                                            trans.setTimeCreated(item.getTimeCreated());
-                                            trans.setTimePaid(item.getTimePaid());
-                                            trans.setTransType(item.getTransType());
-                                            trans.setType(item.getType());
-                                            trans.setUserBankName(item.getUserBankName());
-                                            trans.setBankShortName(item.getBankShortName());
-                                            trans.setTerminalCode(item.getTerminalCode());
-                                            trans.setNote(item.getNote());
-                                            trans.setRequests(terminalBanksMap
-                                                    .getOrDefault(item.getId(), new ArrayList<>()));
-                                            trans.setTotalRequest(trans.getRequests().size());
-                                            return trans;
-                                        }).collect(Collectors.toList());
-                                    }
+                                        }
+                                        trans.setBankId(item.getBankId());
+                                        trans.setContent(item.getContent());
+                                        trans.setOrderId(item.getOrderId());
+                                        trans.setReferenceNumber(item.getReferenceNumber());
+                                        trans.setStatus(item.getStatus());
+                                        trans.setTimeCreated(item.getTimeCreated());
+                                        trans.setTimePaid(item.getTimePaid());
+                                        trans.setTransType(item.getTransType());
+                                        trans.setType(item.getType());
+                                        trans.setUserBankName(item.getUserBankName());
+                                        trans.setBankShortName(item.getBankShortName());
+                                        trans.setTerminalCode(item.getTerminalCode());
+                                        trans.setNote(item.getNote());
+                                        trans.setRequests(terminalBanksMap
+                                                .getOrDefault(item.getId(), new ArrayList<>()));
+                                        trans.setTotalRequest(trans.getRequests().size());
+                                        return trans;
+                                    }).collect(Collectors.toList());
                                 } else {
                                     result = dtos.stream().map(item -> {
                                         TransactionRelatedRequestDTO trans = new TransactionRelatedRequestDTO();
@@ -1107,7 +1049,6 @@ public class TransactionController {
                                         return trans;
                                     }).collect(Collectors.toList());
                                 }
-
                             }
                         }
                     }
@@ -1265,53 +1206,29 @@ public class TransactionController {
                         long lastTime = dtos.get(lastIndex).getTime();
                         TransReceiveTempEntity entity = transReceiveTempService.getLastTimeByBankId(bankId);
                         if (entity != null) {
-                            if (entity.getLastTimes() <= lastTime) {
-                                responses = dtos.stream().map(dto -> {
-                                    TransactionRelatedResDTO responseDTO = new TransactionRelatedResDTO();
-                                    responseDTO.setTransactionId(dto.getTransactionId());
-                                    responseDTO.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
-                                    responseDTO.setBankAccount(dto.getBankAccount());
-                                    responseDTO.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
-                                    responseDTO.setTransType(dto.getTransType());
+                            responses = dtos.stream().map(dto -> {
+                                TransactionRelatedResDTO responseDTO = new TransactionRelatedResDTO();
+                                responseDTO.setTransactionId(dto.getTransactionId());
+                                responseDTO.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
+                                responseDTO.setBankAccount(dto.getBankAccount());
+                                responseDTO.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
+                                responseDTO.setTransType(dto.getTransType());
+                                if (entity.getTransIds().contains(dto.getTransactionId())) {
+                                    responseDTO.setAmount(dto.getAmount());
+                                } else {
                                     responseDTO.setAmount("*****");
-                                    responseDTO.setStatus(dto.getStatus());
-                                    responseDTO.setTime(dto.getTime());
-                                    responseDTO.setTimePaid(dto.getTimePaid());
-                                    responseDTO.setBankShortName(dto.getBankShortName());
-                                    responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
-                                    responseDTO.setContent(dto.getContent());
-                                    responseDTO.setType(dto.getType());
-                                    responseDTO.setNote(dto.getNote() != null ? dto.getNote() : "");
-                                    return responseDTO;
+                                }
+                                responseDTO.setStatus(dto.getStatus());
+                                responseDTO.setTime(dto.getTime());
+                                responseDTO.setBankShortName(dto.getBankShortName());
+                                responseDTO.setTimePaid(dto.getTimePaid());
+                                responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
+                                responseDTO.setContent(dto.getContent());
+                                responseDTO.setType(dto.getType());
+                                responseDTO.setNote(dto.getNote() != null ? dto.getNote() : "");
+                                return responseDTO;
 
-                                }).collect(Collectors.toList());
-                            } else {
-                                responses = dtos.stream().map(dto -> {
-                                    TransactionRelatedResDTO responseDTO = new TransactionRelatedResDTO();
-                                    responseDTO.setTransactionId(dto.getTransactionId());
-                                    responseDTO.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
-                                    responseDTO.setBankAccount(dto.getBankAccount());
-                                    responseDTO.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
-                                    responseDTO.setTransType(dto.getTransType());
-                                    if (entity.getTransIds().contains(dto.getTransactionId())) {
-                                        responseDTO.setAmount(dto.getAmount());
-                                    } else if (dto.getTime() < entity.getLastTimes()) {
-                                        responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
-                                    } else {
-                                        responseDTO.setAmount("*****");
-                                    }
-                                    responseDTO.setStatus(dto.getStatus());
-                                    responseDTO.setTime(dto.getTime());
-                                    responseDTO.setBankShortName(dto.getBankShortName());
-                                    responseDTO.setTimePaid(dto.getTimePaid());
-                                    responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
-                                    responseDTO.setContent(dto.getContent());
-                                    responseDTO.setType(dto.getType());
-                                    responseDTO.setNote(dto.getNote() != null ? dto.getNote() : "");
-                                    return responseDTO;
-
-                                }).collect(Collectors.toList());
-                            }
+                            }).collect(Collectors.toList());
                         } else {
                             responses = dtos.stream().map(dto -> {
                                 TransactionRelatedResDTO responseDTO = new TransactionRelatedResDTO();
@@ -1836,53 +1753,29 @@ public class TransactionController {
                         long lastTime = dtos.get(lastIndex).getTime();
                         TransReceiveTempEntity entity = transReceiveTempService.getLastTimeByBankId(bankId);
                         if (entity != null) {
-                            if (entity.getLastTimes() <= lastTime) {
-                                result = dtos.stream().map(dto -> {
-                                    TransactionRelatedResponseDTO responseDTO = new TransactionRelatedResponseDTO();
-                                    responseDTO.setTransactionId(dto.getTransactionId());
-                                    responseDTO.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
-                                    responseDTO.setBankAccount(dto.getBankAccount());
-                                    responseDTO.setBankShortName(bankShortName != null ? bankShortName : "");
-                                    responseDTO.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
-                                    responseDTO.setTransType(dto.getTransType());
+                            result = dtos.stream().map(dto -> {
+                                TransactionRelatedResponseDTO responseDTO = new TransactionRelatedResponseDTO();
+                                responseDTO.setTransactionId(dto.getTransactionId());
+                                responseDTO.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
+                                responseDTO.setBankAccount(dto.getBankAccount());
+                                responseDTO.setBankShortName(bankShortName != null ? bankShortName : "");
+                                responseDTO.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
+                                responseDTO.setTransType(dto.getTransType());
+                                if (entity.getTransIds().contains(dto.getTransactionId())) {
+                                    responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
+                                } else {
                                     responseDTO.setAmount("*****");
-                                    responseDTO.setStatus(dto.getStatus());
-                                    responseDTO.setTime(dto.getTime());
-                                    responseDTO.setTimePaid(dto.getTimePaid());
-                                    responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
-                                    responseDTO.setContent(dto.getContent());
-                                    responseDTO.setType(dto.getType());
-                                    responseDTO.setNote(dto.getNote() != null ? dto.getNote() : "");
-                                    return responseDTO;
+                                }
+                                responseDTO.setStatus(dto.getStatus());
+                                responseDTO.setTime(dto.getTime());
+                                responseDTO.setTimePaid(dto.getTimePaid());
+                                responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
+                                responseDTO.setContent(dto.getContent());
+                                responseDTO.setType(dto.getType());
+                                responseDTO.setNote(dto.getNote() != null ? dto.getNote() : "");
+                                return responseDTO;
 
-                                }).collect(Collectors.toList());
-                            } else {
-                                result = dtos.stream().map(dto -> {
-                                    TransactionRelatedResponseDTO responseDTO = new TransactionRelatedResponseDTO();
-                                    responseDTO.setTransactionId(dto.getTransactionId());
-                                    responseDTO.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
-                                    responseDTO.setBankAccount(dto.getBankAccount());
-                                    responseDTO.setBankShortName(bankShortName != null ? bankShortName : "");
-                                    responseDTO.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
-                                    responseDTO.setTransType(dto.getTransType());
-                                    if (entity.getTransIds().contains(dto.getTransactionId())) {
-                                        responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
-                                    } else if (dto.getTime() < entity.getLastTimes()) {
-                                        responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
-                                    } else {
-                                        responseDTO.setAmount("*****");
-                                    }
-                                    responseDTO.setStatus(dto.getStatus());
-                                    responseDTO.setTime(dto.getTime());
-                                    responseDTO.setTimePaid(dto.getTimePaid());
-                                    responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
-                                    responseDTO.setContent(dto.getContent());
-                                    responseDTO.setType(dto.getType());
-                                    responseDTO.setNote(dto.getNote() != null ? dto.getNote() : "");
-                                    return responseDTO;
-
-                                }).collect(Collectors.toList());
-                            }
+                            }).collect(Collectors.toList());
                         } else {
                             result = dtos.stream().map(dto -> {
                                 TransactionRelatedResponseDTO responseDTO = new TransactionRelatedResponseDTO();
@@ -2774,62 +2667,34 @@ public class TransactionController {
                     result.setType(dto.getType());
                     result.setNote(dto.getNote() != null ? dto.getNote() : "");
                 } else {
-                    long lastTime = dto.getTime();
                     TransReceiveTempEntity entity = transReceiveTempService.getLastTimeByBankId(dto.getBankId());
                     if (entity != null) {
-                        if (entity.getLastTimes() <= lastTime) {
-                            result = new TransactionDetailResDTO();
-                            result.setId(dto.getId());
-                            result.setBankId(dto.getBankId());
-                            result.setRefId(dto.getRefId());
-                            result.setTraceId(dto.getTraceId());
-                            result.setBankAccountName(dto.getBankAccountName());
-                            result.setBankCode(dto.getBankCode());
-                            result.setBankName(dto.getBankName());
-                            result.setImgId(dto.getImgId());
-                            result.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
-                            result.setBankAccount(dto.getBankAccount());
-                            result.setBankShortName(dto.getBankShortName() != null ? dto.getBankShortName() : "");
-                            result.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
-                            result.setTransType(dto.getTransType());
-                            result.setAmount("*****");
-                            result.setStatus(dto.getStatus());
-                            result.setTime(dto.getTime());
-                            result.setTimePaid(dto.getTimePaid());
-                            result.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
-                            result.setContent(dto.getContent());
-                            result.setType(dto.getType());
-                            result.setNote(dto.getNote() != null ? dto.getNote() : "");
+                        result = new TransactionDetailResDTO();
+                        result.setId(dto.getId());
+                        result.setBankId(dto.getBankId());
+                        result.setRefId(dto.getRefId());
+                        result.setTraceId(dto.getTraceId());
+                        result.setBankAccountName(dto.getBankAccountName());
+                        result.setBankCode(dto.getBankCode());
+                        result.setBankName(dto.getBankName());
+                        result.setImgId(dto.getImgId());
+                        result.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
+                        result.setBankAccount(dto.getBankAccount());
+                        result.setBankShortName(dto.getBankShortName() != null ? dto.getBankShortName() : "");
+                        result.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
+                        result.setTransType(dto.getTransType());
+                        if (entity.getTransIds().contains(dto.getId())) {
+                            result.setAmount(formatAmountNumber(dto.getAmount() + ""));
                         } else {
-                            result = new TransactionDetailResDTO();
-                            result.setId(dto.getId());
-                            result.setBankId(dto.getBankId());
-                            result.setRefId(dto.getRefId());
-                            result.setTraceId(dto.getTraceId());
-                            result.setBankAccountName(dto.getBankAccountName());
-                            result.setBankCode(dto.getBankCode());
-                            result.setBankName(dto.getBankName());
-                            result.setImgId(dto.getImgId());
-                            result.setReferenceNumber(dto.getReferenceNumber() != null ? dto.getReferenceNumber() : "");
-                            result.setBankAccount(dto.getBankAccount());
-                            result.setBankShortName(dto.getBankShortName() != null ? dto.getBankShortName() : "");
-                            result.setOrderId(dto.getOrderId() != null ? dto.getOrderId() : "");
-                            result.setTransType(dto.getTransType());
-                            if (entity.getTransIds().contains(dto.getId())) {
-                                result.setAmount(formatAmountNumber(dto.getAmount() + ""));
-                            } else if (dto.getTime() < entity.getLastTimes()) {
-                                result.setAmount(formatAmountNumber(dto.getAmount() + ""));
-                            } else {
-                                result.setAmount("*****");
-                            }
-                            result.setStatus(dto.getStatus());
-                            result.setTime(dto.getTime());
-                            result.setTimePaid(dto.getTimePaid());
-                            result.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
-                            result.setContent(dto.getContent());
-                            result.setType(dto.getType());
-                            result.setNote(dto.getNote() != null ? dto.getNote() : "");
+                            result.setAmount("*****");
                         }
+                        result.setStatus(dto.getStatus());
+                        result.setTime(dto.getTime());
+                        result.setTimePaid(dto.getTimePaid());
+                        result.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
+                        result.setContent(dto.getContent());
+                        result.setType(dto.getType());
+                        result.setNote(dto.getNote() != null ? dto.getNote() : "");
                     } else {
                         result = new TransactionDetailResDTO();
                         result.setId(dto.getId());
