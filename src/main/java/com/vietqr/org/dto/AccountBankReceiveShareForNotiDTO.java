@@ -12,4 +12,5 @@ public interface AccountBankReceiveShareForNotiDTO {
     String getUserId();
 
     String getBankShortName();
+    Boolean getIsValidService();
 }

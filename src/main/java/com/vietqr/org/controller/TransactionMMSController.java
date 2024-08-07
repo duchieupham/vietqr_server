@@ -166,6 +166,9 @@ public class TransactionMMSController {
     @Autowired
     GoogleSheetService googleSheetService;
 
+    @Autowired
+    TransReceiveTempService transReceiveTempService;
+
     @PostMapping("transaction-mms")
     public ResponseEntity<TransactionMMSResponseDTO> insertTransactionMMS(@RequestBody TransactionMMSEntity entity) {
         TransactionMMSResponseDTO result = null;
@@ -280,7 +283,6 @@ public class TransactionMMSController {
                 if (tempResult != null && tempResult.getResCode().equals("00")) {
                     // tempTransReceive is null => static QR
                     // tempTransReceive is not empty => transaction QR
-
                     ///
                     //
                     // TRANSACTION QR
@@ -393,8 +395,14 @@ public class TransactionMMSController {
                                     ? tempTransReceive.getReferenceNumber()
                                     : "");
                             data.put("content", tempTransReceive.getContent());
+                            String amountForShow = StringUtil.formatNumberAsString(entity.getDebitAmount() + "");
+                            try {
+                                amountForShow = processHiddenAmount(tempTransReceive.getAmount(), accountBankEntity.getId(),
+                                        accountBankEntity.isValidService(), tempTransReceive.getId());
+                            } catch (Exception e) {
+                                logger.error("processHiddenAmount: ERROR: MMS:" + e.getMessage() + " at: " + System.currentTimeMillis());
+                            }
                             String amountForVoice = StringUtil.removeFormatNumber(tempTransReceive.getAmount() + "");
-                            String amountForShow = StringUtil.formatNumberAsString(tempTransReceive.getAmount() + "");
                             data.put("amount", "" + amountForShow);
                             data.put("timePaid", "" + tempTransReceive.getTimePaid());
                             data.put("time", "" + time);
@@ -516,6 +524,12 @@ public class TransactionMMSController {
                                 data.put("bankId", accountBankReceiveEntity.getId());
                                 data.put("content", "" + terminalItemEntity.getContent());
                                 String amountForShow = StringUtil.formatNumberAsString(entity.getDebitAmount() + "");
+                                try {
+                                    amountForShow = processHiddenAmount(tempTransReceive.getAmount(), accountBankReceiveEntity.getId(),
+                                            accountBankReceiveEntity.isValidService(), tempTransReceive.getId());
+                                } catch (Exception e) {
+                                    logger.error("processHiddenAmount: ERROR: MMS:" + e.getMessage() + " at: " + System.currentTimeMillis());
+                                }
                                 data.put("amount", "" + amountForShow);
                                 data.put("terminalName", "");
                                 data.put("terminalCode", "");
@@ -744,6 +758,12 @@ public class TransactionMMSController {
                                         data.put("content", "" + traceTransfer);
                                         String amountForVoice = StringUtil.removeFormatNumber(entity.getDebitAmount() + "");
                                         String amountForShow = StringUtil.formatNumberAsString(entity.getDebitAmount() + "");
+                                        try {
+                                            amountForShow = processHiddenAmount(tempTransReceive.getAmount(), accountBankReceiveEntity.getId(),
+                                                    accountBankReceiveEntity.isValidService(), tempTransReceive.getId());
+                                        } catch (Exception e) {
+                                            logger.error("processHiddenAmount: ERROR: MMS:" + e.getMessage() + " at: " + System.currentTimeMillis());
+                                        }
                                         data.put("amount", "" + amountForShow);
                                         if (terminalEntity != null) {
                                             data.put("terminalName",
@@ -1044,7 +1064,14 @@ public class TransactionMMSController {
                                         data.put("bankId", accountBankReceiveEntity.getId());
                                         data.put("content", "" + traceTransfer);
                                         String amountForVoice = StringUtil.removeFormatNumber(entity.getDebitAmount());
-                                        data.put("amount", "" + StringUtil.formatNumberAsString(entity.getDebitAmount()));
+                                        String amountForShow = StringUtil.formatNumberAsString(entity.getDebitAmount() + "");
+                                        try {
+                                            amountForShow = processHiddenAmount(tempTransReceive.getAmount(), accountBankReceiveEntity.getId(),
+                                                    accountBankReceiveEntity.isValidService(), tempTransReceive.getId());
+                                        } catch (Exception e) {
+                                            logger.error("processHiddenAmount: ERROR: MMS:" + e.getMessage() + " at: " + System.currentTimeMillis());
+                                        }
+                                        data.put("amount", "" + amountForShow);
                                         data.put("terminalName", "");
                                         data.put("terminalCode",
                                                 terminalSubRawCodeDTO.getTerminalCode() != null ?
@@ -1175,7 +1202,7 @@ public class TransactionMMSController {
         } else {
             // Nếu không, kiểm tra xem có phải giao dịch RECON hay không
             if (notificationTypes.contains("RECON")) {
-                if (isReconTransaction(entity, transactionReceiveEntity)) {
+                if (isReconTransaction(transactionReceiveEntity)) {
                     // Nếu là giao dịch RECON, push thông báo
                     return true;
                 } else {
@@ -1189,7 +1216,7 @@ public class TransactionMMSController {
         }
     }
 
-    private boolean isReconTransaction(TransactionMMSEntity entity, TransactionReceiveEntity transactionReceiveEntity) {
+    private boolean isReconTransaction(TransactionReceiveEntity transactionReceiveEntity) {
         return (transactionReceiveEntity.getType() == 0 || transactionReceiveEntity.getType() == 1);
     }
 
@@ -1411,7 +1438,7 @@ public class TransactionMMSController {
             if (entity.getUsername() != null && !entity.getUsername().trim().isEmpty() &&
                     entity.getPassword() != null
                     && !entity.getPassword().trim().isEmpty()) {
-                tokenDTO = getCustomerSyncTokenV2(transReceiveId, entity, time);
+                tokenDTO = getCustomerSyncTokenV2(transReceiveId, entity);
             } else if (entity.getToken() != null && !entity.getToken().trim().isEmpty()) {
                 logger.info("Get token from record: " + entity.getId());
                 tokenDTO = new TokenDTO(entity.getToken(), "Bearer", 0);
@@ -1428,7 +1455,6 @@ public class TransactionMMSController {
             data.put("sign", dto.getSign());
             data.put("terminalCode", dto.getTerminalCode());
             data.put("urlLink", dto.getUrlLink());
-            String suffixUrl = "";
             WebClient.Builder webClientBuilder = WebClient.builder()
                     .baseUrl(entity.getUrlCallback());
 
@@ -1553,7 +1579,7 @@ public class TransactionMMSController {
         return result;
     }
 
-    private TokenDTO getCustomerSyncTokenV2(String transReceiveId, MerchantConnectionEntity entity, long time) {
+    private TokenDTO getCustomerSyncTokenV2(String transReceiveId, MerchantConnectionEntity entity) {
         TokenDTO result = null;
         ResponseMessageDTO msgDTO = null;
         TransactionLogResponseDTO transactionLogResponseDTO = new TransactionLogResponseDTO();
@@ -1651,7 +1677,7 @@ public class TransactionMMSController {
             if (entity.getUsername() != null && !entity.getUsername().trim().isEmpty() &&
                     entity.getPassword() != null
                     && !entity.getPassword().trim().isEmpty()) {
-                tokenDTO = getCustomerSyncToken(transReceiveId, entity, time);
+                tokenDTO = getCustomerSyncToken(transReceiveId, entity);
             } else if (entity.getToken() != null && !entity.getToken().trim().isEmpty()) {
                 logger.info("Get token from record: " + entity.getId() + " at: " + System.currentTimeMillis());
                 tokenDTO = new TokenDTO(entity.getToken(), "Bearer", 0);
@@ -1797,7 +1823,7 @@ public class TransactionMMSController {
         return result;
     }
 
-    private TokenDTO getCustomerSyncToken(String transReceiveId, CustomerSyncEntity entity, long time) {
+    private TokenDTO getCustomerSyncToken(String transReceiveId, CustomerSyncEntity entity) {
         TokenDTO result = null;
         ResponseMessageDTO msgDTO = null;
         TransactionLogResponseDTO transactionLogResponseDTO = new TransactionLogResponseDTO();
@@ -2686,5 +2712,131 @@ public class TransactionMMSController {
                         "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
             }
         }
+    }
+
+
+    private String processHiddenAmount(long amount, String bankId, boolean isValidService, String transactionId) {
+        String result = "";
+        try {
+            long currentStartDate = DateTimeUtil.getStartDateUTCPlus7();
+            result = amount + "";
+            if (isValidService) {
+                result = formatAmountNumber(amount + "");
+
+                // Save transactionReceiveId if user expired active
+                Thread thread = new Thread(() -> {
+                    SystemSettingEntity systemSetting = systemSettingService.getSystemSetting();
+                    if (systemSetting.getServiceActive() <= currentStartDate) {
+                        TransReceiveTempEntity entity = transReceiveTempService
+                                .getLastTimeByBankId(bankId);
+                        String transIds = "";
+                        if (entity == null) {
+                            entity = new TransReceiveTempEntity();
+                            entity.setId(UUID.randomUUID().toString());
+                            entity.setBankId(bankId);
+                            entity.setLastTimes(currentStartDate);
+                            entity.setTransIds(transactionId);
+                            entity.setNums(1);
+                            transReceiveTempService.insert(entity);
+                        } else {
+                            processSaveTransReceiveTemp(bankId, entity.getNums(), entity.getLastTimes(), transactionId,
+                                    currentStartDate, entity, 1);
+                        }
+                    }
+                });
+                thread.start();
+            } else {
+                SystemSettingEntity systemSetting = systemSettingService.getSystemSetting();
+
+                if (systemSetting.getServiceActive() <= currentStartDate) {
+                    TransReceiveTempEntity entity = transReceiveTempService
+                            .getLastTimeByBankId(bankId);
+                    if (entity == null) {
+                        result = formatAmountNumber(amount + "");
+                        entity = new TransReceiveTempEntity();
+                        entity.setNums(1);
+                        entity.setId(UUID.randomUUID().toString());
+                        entity.setBankId(bankId);
+                        entity.setTransIds(transactionId);
+                        entity.setLastTimes(currentStartDate);
+                        transReceiveTempService.insert(entity);
+                    } else {
+                        boolean checkFiveTrans = processSaveTransReceiveTemp(bankId, entity.getNums(),
+                                entity.getLastTimes(), transactionId,
+                                currentStartDate, entity, 1);
+                        if (checkFiveTrans) {
+                            result = formatAmountNumber(amount + "");
+                        } else {
+                            result = "*****";
+                        }
+                    }
+                } else {
+                    result = formatAmountNumber(amount + "");
+                }
+            }
+        } catch (Exception e) {
+            result = formatAmountNumber(amount + "");
+            logger.error("TransactionBankController: ERROR: processHiddenAmount: "
+                    + e.getMessage() + " at: " + System.currentTimeMillis());
+        }
+        return result;
+    }
+
+    private String formatAmountNumber(String amount) {
+        String result = amount;
+        try {
+            if (StringUtil.containsOnlyDigits(amount)) {
+                NumberFormat nf = NumberFormat.getInstance(Locale.US);
+                Long numberAmount = Long.parseLong(amount);
+                result = nf.format(numberAmount);
+            }
+        } catch (Exception ignored) {}
+        return result;
+    }
+
+    private boolean processSaveTransReceiveTemp(String bankId, int preNum,
+                                                long lastTime, String transactionId,
+                                                long currentStartDate, TransReceiveTempEntity entity,
+                                                int numBreak) {
+        boolean result = false;
+        if (numBreak <= 5) {
+            ++numBreak;
+            try {
+                if (preNum == 5 && lastTime == currentStartDate) {
+                    result = false;
+                } else {
+                    int aftNum = preNum;
+                    String transIds = transactionId + "," + entity.getTransIds();
+                    int nums = entity.getNums();
+                    if (entity.getLastTimes() < currentStartDate) {
+                        aftNum = 1;
+                        if (StringUtil.isNullOrEmpty(entity.getTransIds())) {
+                            transIds = transactionId;
+                        } else {
+                            transIds = transactionId + "," + entity.getTransIds();
+                        }
+                    } else if (entity.getNums() < 5) {
+                        aftNum = preNum + 1;
+                        transIds = transactionId + "," + entity.getTransIds();
+                    }
+                    int checkUpdateSuccess = transReceiveTempService
+                            .updateTransReceiveTemp(transIds, aftNum, currentStartDate,
+                                    lastTime, preNum, entity.getTransIds(), entity.getId());
+                    if (checkUpdateSuccess == 0) {
+                        TransReceiveTempEntity updateReceiveEntity = transReceiveTempService
+                                .getLastTimeByBankId(bankId);
+                        result = processSaveTransReceiveTemp(updateReceiveEntity.getBankId(), updateReceiveEntity.getNums(),
+                                updateReceiveEntity.getLastTimes(), transactionId, currentStartDate, updateReceiveEntity, numBreak);
+                    } else {
+                        result = true;
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("processSaveTransReceiveTemp: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
+            }
+        } else {
+            result = false;
+        }
+        return result;
     }
 }
