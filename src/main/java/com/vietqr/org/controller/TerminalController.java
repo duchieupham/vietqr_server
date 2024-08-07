@@ -571,8 +571,6 @@ public class TerminalController {
                         }).collect(Collectors.toList());
                     } else {
                         if (!list.isEmpty()) {
-                            int lastIndex = list.size() - 1;
-                            long lastTime = list.get(lastIndex).getTime();
                             TransReceiveTempEntity entity = transReceiveTempService.getLastTimeByBankId(bankId);
                             if (entity != null) {
                                     dtos = list.stream().map(item -> {
