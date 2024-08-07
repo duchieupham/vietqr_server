@@ -1691,78 +1691,17 @@ public class TransactionBankController {
     @Async
     public void updateTransaction(TransactionBankDTO dto, TransactionReceiveEntity transactionReceiveEntity,
                                   AccountBankReceiveEntity accountBankEntity, long time,
-                                  NumberFormat nf, String boxIdRef, ISubTerminalCodeDTO rawDTO, TerminalEntity terminalEntity) throws JsonProcessingException {
-
+                                  NumberFormat nf, String boxIdRef, ISubTerminalCodeDTO rawDTO,
+                                  TerminalEntity terminalEntity)
+            throws JsonProcessingException {
+        long amountValue = 0;
         String amount = "";
         if (dto.getAmount() != 0) {
-            amount = dto.getAmount() + "";
+            amount = processHiddenAmount(dto.getAmount(), accountBankEntity.getId(),
+                    accountBankEntity.isValidService(), transactionReceiveEntity.getId());
         } else {
-            amount = transactionReceiveEntity.getAmount() + "";
-        }
-        SystemSettingEntity systemSetting = systemSettingService.getSystemSetting();
-        if (accountBankEntity.isValidService()) {
-            amount = "";
-            if (dto.getAmount() != 0) {
-                amount = dto.getAmount() + "";
-            } else {
-                amount = "0";
-            }
-            if (systemSetting.getServiceActive() <= time) {
-                TransReceiveTempEntity entity = transReceiveTempService
-                        .getLastTimeByBankId(accountBankEntity.getId());
-                if (entity == null) {
-                    entity = new TransReceiveTempEntity();
-                    List<String> transIds = new ArrayList<>();
-                    transIds.add(transactionReceiveEntity.getId());
-                    entity.setId(UUID.randomUUID().toString());
-                    entity.setBankId(accountBankEntity.getId());
-                    entity.setLastTimes(time);
-                    entity.setTransIds(String.join(",", transIds));
-                    transReceiveTempService.insert(entity);
-                } else {
-                    List<String> transIds = new ArrayList<>();
-                    if (entity.getTransIds() != null && !entity.getTransIds().isEmpty()) {
-                        transIds = new ArrayList<>(Arrays.asList(entity.getTransIds().split(",")));
-                    }
-                    if (transIds.size() < 5) {
-                        transIds.add(transactionReceiveEntity.getId());
-                        entity.setLastTimes(time);
-                        entity.setTransIds(String.join(",", transIds));
-                        transReceiveTempService.insert(entity);
-                    }
-                }
-            }
-        } else {
-            if (systemSetting.getServiceActive() <= time) {
-                TransReceiveTempEntity entity = transReceiveTempService
-                        .getLastTimeByBankId(accountBankEntity.getId());
-                if (entity == null) {
-                    entity = new TransReceiveTempEntity();
-                    List<String> transIds = new ArrayList<>();
-                    transIds.add(transactionReceiveEntity.getId());
-                    entity.setId(UUID.randomUUID().toString());
-                    entity.setBankId(accountBankEntity.getId());
-                    entity.setLastTimes(time);
-                    entity.setTransIds(String.join(",", transIds));
-                    transReceiveTempService.insert(entity);
-                } else {
-                    List<String> transIds = new ArrayList<>();
-                    if (entity.getTransIds() != null && !entity.getTransIds().isEmpty()) {
-                        transIds = new ArrayList<>(Arrays.asList(entity.getTransIds().split(",")));
-                    }
-                    if (transIds.size() < 5) {
-                        transIds.add(transactionReceiveEntity.getId());
-                        entity.setLastTimes(time);
-                        entity.setTransIds(String.join(",", transIds));
-
-                        transReceiveTempService.insert(entity);
-                    } else {
-                        if (!accountBankEntity.isValidService()) {
-                            amount = "*****";
-                        }
-                    }
-                }
-            }
+            amount = processHiddenAmount(transactionReceiveEntity.getAmount(), accountBankEntity.getId(),
+                    accountBankEntity.isValidService(), transactionReceiveEntity.getId());
         }
         String amountForVoice = amount;
         amount = formatAmountNumber(amount);
@@ -6143,5 +6082,118 @@ public class TransactionBankController {
                         "WS: socketHandler.sendMessageToBox - updateTransaction ERROR: " + e.toString());
             }
         }
+    }
+
+    private String processHiddenAmount(long amount, String bankId, boolean isValidService, String transactionId) {
+        String result = "";
+        try {
+            long currentStartDate = DateTimeUtil.getStartDateUTCPlus7();
+            result = amount + "";
+            if (isValidService) {
+                result = formatAmountNumber(amount + "");
+
+                // Save transactionReceiveId if user expired active
+                Thread thread = new Thread(() -> {
+                    SystemSettingEntity systemSetting = systemSettingService.getSystemSetting();
+                    if (systemSetting.getServiceActive() <= currentStartDate) {
+                        TransReceiveTempEntity entity = transReceiveTempService
+                                .getLastTimeByBankId(bankId);
+                        String transIds = "";
+                        if (entity == null) {
+                            entity = new TransReceiveTempEntity();
+                            entity.setId(UUID.randomUUID().toString());
+                            entity.setBankId(bankId);
+                            entity.setLastTimes(currentStartDate);
+                            entity.setTransIds(transactionId);
+                            entity.setNums(1);
+                            transReceiveTempService.insert(entity);
+                        } else {
+                            processSaveTransReceiveTemp(bankId, entity.getNums(), entity.getLastTimes(), transactionId,
+                                    currentStartDate, entity, 1);
+                        }
+                    }
+                });
+                thread.start();
+            } else {
+                SystemSettingEntity systemSetting = systemSettingService.getSystemSetting();
+
+                if (systemSetting.getServiceActive() <= currentStartDate) {
+                    TransReceiveTempEntity entity = transReceiveTempService
+                            .getLastTimeByBankId(bankId);
+                    if (entity == null) {
+                        result = formatAmountNumber(amount + "");
+                        entity = new TransReceiveTempEntity();
+                        entity.setNums(1);
+                        entity.setId(UUID.randomUUID().toString());
+                        entity.setBankId(bankId);
+                        entity.setTransIds(transactionId);
+                        entity.setLastTimes(currentStartDate);
+                        transReceiveTempService.insert(entity);
+                    } else {
+                        boolean checkFiveTrans = processSaveTransReceiveTemp(bankId, entity.getNums(),
+                                entity.getLastTimes(), transactionId,
+                                currentStartDate, entity, 1);
+                        if (checkFiveTrans) {
+                            result = formatAmountNumber(amount + "");
+                        } else {
+                            result = "*****";
+                        }
+                    }
+                } else {
+                    result = formatAmountNumber(amount + "");
+                }
+            }
+        } catch (Exception e) {
+            result = formatAmountNumber(amount + "");
+            logger.error("TransactionBankController: ERROR: processHiddenAmount: "
+                    + e.getMessage() + " at: " + System.currentTimeMillis());
+        }
+        return result;
+    }
+
+    private boolean processSaveTransReceiveTemp(String bankId, int preNum,
+                                                long lastTime, String transactionId,
+                                                long currentStartDate, TransReceiveTempEntity entity,
+                                                int numBreak) {
+        boolean result = false;
+        if (numBreak <= 5) {
+            ++numBreak;
+            try {
+                if (preNum == 5 && lastTime == currentStartDate) {
+                    result = false;
+                } else {
+                    int aftNum = preNum;
+                    String transIds = transactionId + "," + entity.getTransIds();
+                    int nums = entity.getNums();
+                    if (entity.getLastTimes() < currentStartDate) {
+                        aftNum = 1;
+                        if (StringUtil.isNullOrEmpty(entity.getTransIds())) {
+                            transIds = transactionId;
+                        } else {
+                            transIds = transactionId + "," + entity.getTransIds();
+                        }
+                    } else if (entity.getNums() < 5) {
+                        aftNum = preNum + 1;
+                        transIds = transactionId + "," + entity.getTransIds();
+                    }
+                    int checkUpdateSuccess = transReceiveTempService
+                            .updateTransReceiveTemp(transIds, aftNum, currentStartDate,
+                                    lastTime, preNum, entity.getTransIds(), entity.getId());
+                    if (checkUpdateSuccess == 0) {
+                        TransReceiveTempEntity updateReceiveEntity = transReceiveTempService
+                                .getLastTimeByBankId(bankId);
+                        result = processSaveTransReceiveTemp(updateReceiveEntity.getBankId(), updateReceiveEntity.getNums(),
+                                updateReceiveEntity.getLastTimes(), transactionId, currentStartDate, updateReceiveEntity, numBreak);
+                    } else {
+                        result = true;
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("processSaveTransReceiveTemp: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
+            }
+        } else {
+            result = false;
+        }
+        return result;
     }
 }

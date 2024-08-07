@@ -1202,8 +1202,6 @@ public class TransactionController {
                     }).collect(Collectors.toList());
                 } else {
                     if (!dtos.isEmpty()) {
-                        int lastIndex = dtos.size() - 1;
-                        long lastTime = dtos.get(lastIndex).getTime();
                         TransReceiveTempEntity entity = transReceiveTempService.getLastTimeByBankId(bankId);
                         if (entity != null) {
                             responses = dtos.stream().map(dto -> {
@@ -1552,6 +1550,10 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+
+    ////
+
+    ////
     @GetMapping("transactions/latest")
     public ResponseEntity<List<TransactionLatestDTO>> getTransactionLatest(
             @RequestParam(value = "bankId") String bankId,
@@ -1749,8 +1751,6 @@ public class TransactionController {
                     }).collect(Collectors.toList());
                 } else {
                     if (!dtos.isEmpty()) {
-                        int lastIndex = dtos.size() - 1;
-                        long lastTime = dtos.get(lastIndex).getTime();
                         TransReceiveTempEntity entity = transReceiveTempService.getLastTimeByBankId(bankId);
                         if (entity != null) {
                             result = dtos.stream().map(dto -> {
@@ -1851,7 +1851,7 @@ public class TransactionController {
                     listCode.add(null);
                 }
                 if (!listCode.isEmpty()) {
-                    result =  new ResponseObjectDTO("CHECK", listCode);
+                    result = new ResponseObjectDTO("CHECK", listCode);
                 } else {
                     result = new ResponseObjectDTO("FAILED", "");
                 }
@@ -2161,83 +2161,45 @@ public class TransactionController {
                     }).collect(Collectors.toList());
                 } else {
                     if (!dtos.isEmpty()) {
-                        int lastIndex = dtos.size() - 1;
-                        long lastTime = dtos.get(lastIndex).getTime();
                         TransReceiveTempEntity entity = transReceiveTempService.getLastTimeByBankId(bankId);
                         if (entity != null) {
-                            if (entity.getLastTimes() <= lastTime) {
-                                result = dtos.stream().map(dto -> {
-                                    TransactionRelatedResponseV2DTO responseDTO = new TransactionRelatedResponseV2DTO();
-                                    responseDTO.setTransactionId(dto.getTransactionId());
-                                    responseDTO.setReferenceNumber(StringUtil.getValueNullChecker(dto.getReferenceNumber()));
-                                    responseDTO.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
-                                    responseDTO.setTransType(dto.getTransType());
+                            result = dtos.stream().map(dto -> {
+                                TransactionRelatedResponseV2DTO responseDTO = new TransactionRelatedResponseV2DTO();
+                                responseDTO.setTransactionId(dto.getTransactionId());
+                                responseDTO.setReferenceNumber(StringUtil.getValueNullChecker(dto.getReferenceNumber()));
+                                responseDTO.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
+                                responseDTO.setTransType(dto.getTransType());
+                                if (entity.getTransIds().contains(dto.getTransactionId())) {
+                                    responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
+                                } else {
                                     responseDTO.setAmount("*****");
-                                    responseDTO.setStatus(dto.getStatus());
-                                    responseDTO.setTime(dto.getTime());
-                                    responseDTO.setTimePaid(dto.getTimePaid());
-                                    responseDTO.setType(dto.getType());
-                                    responseDTO.setContent(dto.getContent());
-                                    responseDTO.setImgId(bankDetailDTO.getImgId());
-                                    responseDTO.setBankAccount(bankDetailDTO.getBankAccount());
-                                    responseDTO.setUserBankName(bankDetailDTO.getUserBankName());
-                                    responseDTO.setBankCode(bankDetailDTO.getBankCode());
-                                    responseDTO.setBankName(bankDetailDTO.getBankName());
-                                    responseDTO.setBankShortName(bankDetailDTO.getBankShortName());
-                                    if (StringUtil.isNullOrEmpty(dto.getQrCode()) && dto.getStatus() == 0) {
-                                        String qrCode = getQrCode(finalCaiValue, dto.getBankAccount(), dto.getContent(), dto.getAmount());
-                                        responseDTO.setQrCode(qrCode);
-                                    } else {
-                                        responseDTO.setQrCode(dto.getQrCode());
-                                    }
-                                    responseDTO.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
-                                    String refId = TransactionRefIdUtil
-                                            .encryptTransactionId(dto.getTransactionId());
-                                    String qrLink = EnvironmentUtil.getQRLink() + refId;
-                                    responseDTO.setQrLink(qrLink);
-                                    return responseDTO;
+                                }
+                                responseDTO.setStatus(dto.getStatus());
+                                responseDTO.setTime(dto.getTime());
+                                responseDTO.setTimePaid(dto.getTimePaid());
+                                responseDTO.setType(dto.getType());
+                                responseDTO.setContent(dto.getContent());
+                                responseDTO.setImgId(bankDetailDTO.getImgId());
+                                responseDTO.setBankAccount(bankDetailDTO.getBankAccount());
+                                responseDTO.setUserBankName(bankDetailDTO.getUserBankName());
+                                responseDTO.setBankCode(bankDetailDTO.getBankCode());
+                                responseDTO.setBankName(bankDetailDTO.getBankName());
+                                responseDTO.setBankShortName(bankDetailDTO.getBankShortName());
+                                if (StringUtil.isNullOrEmpty(dto.getQrCode()) && dto.getStatus() == 0) {
+                                    String qrCode = getQrCode(finalCaiValue, dto.getBankAccount(), dto.getContent(), dto.getAmount());
+                                    responseDTO.setQrCode(qrCode);
+                                } else {
+                                    responseDTO.setQrCode(dto.getQrCode());
+                                }
+                                responseDTO.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
+                                String refId = TransactionRefIdUtil
+                                        .encryptTransactionId(dto.getTransactionId());
+                                String qrLink = EnvironmentUtil.getQRLink() + refId;
+                                responseDTO.setQrLink(qrLink);
+                                return responseDTO;
 
-                                }).collect(Collectors.toList());
-                            } else {
-                                result = dtos.stream().map(dto -> {
-                                    TransactionRelatedResponseV2DTO responseDTO = new TransactionRelatedResponseV2DTO();
-                                    responseDTO.setTransactionId(dto.getTransactionId());
-                                    responseDTO.setReferenceNumber(StringUtil.getValueNullChecker(dto.getReferenceNumber()));
-                                    responseDTO.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
-                                    responseDTO.setTransType(dto.getTransType());
-                                    if (entity.getTransIds().contains(dto.getTransactionId())) {
-                                        responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
-                                    } else if (dto.getTime() < entity.getLastTimes()) {
-                                        responseDTO.setAmount(formatAmountNumber(dto.getAmount()));
-                                    } else {
-                                        responseDTO.setAmount("*****");
-                                    }
-                                    responseDTO.setStatus(dto.getStatus());
-                                    responseDTO.setTime(dto.getTime());
-                                    responseDTO.setTimePaid(dto.getTimePaid());
-                                    responseDTO.setType(dto.getType());
-                                    responseDTO.setContent(dto.getContent());
-                                    responseDTO.setImgId(bankDetailDTO.getImgId());
-                                    responseDTO.setBankAccount(bankDetailDTO.getBankAccount());
-                                    responseDTO.setUserBankName(bankDetailDTO.getUserBankName());
-                                    responseDTO.setBankCode(bankDetailDTO.getBankCode());
-                                    responseDTO.setBankName(bankDetailDTO.getBankName());
-                                    responseDTO.setBankShortName(bankDetailDTO.getBankShortName());
-                                    if (StringUtil.isNullOrEmpty(dto.getQrCode()) && dto.getStatus() == 0) {
-                                        String qrCode = getQrCode(finalCaiValue, dto.getBankAccount(), dto.getContent(), dto.getAmount());
-                                        responseDTO.setQrCode(qrCode);
-                                    } else {
-                                        responseDTO.setQrCode(dto.getQrCode());
-                                    }
-                                    responseDTO.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
-                                    String refId = TransactionRefIdUtil
-                                            .encryptTransactionId(dto.getTransactionId());
-                                    String qrLink = EnvironmentUtil.getQRLink() + refId;
-                                    responseDTO.setQrLink(qrLink);
-                                    return responseDTO;
+                            }).collect(Collectors.toList());
 
-                                }).collect(Collectors.toList());
-                            }
                         } else {
                             result = dtos.stream().map(dto -> {
                                 TransactionRelatedResponseV2DTO responseDTO = new TransactionRelatedResponseV2DTO();
@@ -2430,82 +2392,46 @@ public class TransactionController {
                         String qrLink = EnvironmentUtil.getQRLink() + refId;
                         result.setQrLink(qrLink);
                     } else {
-                        long lastTime = dto.getTime();
                         TransReceiveTempEntity entity = transReceiveTempService.getLastTimeByBankId(dto.getBankId());
                         if (entity != null) {
-                            if (entity.getLastTimes() <= lastTime) {
-                                result = new TransactionDetailResV2DTO();
-                                result.setId(dto.getId());
-                                result.setBankId(dto.getBankId());
-                                result.setImgId(dto.getImgId());
-                                result.setReferenceNumber(StringUtil.getValueNullChecker(dto.getReferenceNumber()));
-                                result.setBankAccount(dto.getBankAccount());
-                                result.setUserBankName(dto.getUserBankName());
-                                result.setBankShortName(StringUtil.getValueNullChecker(dto.getBankShortName()));
-                                result.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
-                                result.setTransType(dto.getTransType());
-                                result.setAmount("*****");
-                                result.setStatus(dto.getStatus());
-                                result.setTime(dto.getTime());
-                                result.setTimePaid(dto.getTimePaid());
-                                result.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
-                                result.setContent(dto.getContent());
-                                result.setType(dto.getType());
-                                result.setBankCode(dto.getBankCode());
-                                result.setBankName(dto.getBankName());
-                                result.setNote(StringUtil.getValueNullChecker(dto.getNote()));
-                                result.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
-                                result.setHashTag(StringUtil.getValueNullChecker(dto.getHashTag()));
-                                if (StringUtil.isNullOrEmpty(dto.getQrCode())) {
-                                    String qrCode = getQrCode(caiValue, dto.getBankAccount(), dto.getContent(), dto.getAmount() + "");
-                                    result.setQrCode(qrCode);
-                                } else {
-                                    result.setQrCode(StringUtil.getValueNullChecker(dto.getQrCode()));
-                                }
-                                String refId = TransactionRefIdUtil
-                                        .encryptTransactionId(dto.getId());
-                                String qrLink = EnvironmentUtil.getQRLink() + refId;
-                                result.setQrLink(qrLink);
+                            result = new TransactionDetailResV2DTO();
+                            result.setId(dto.getId());
+                            result.setBankId(dto.getBankId());
+                            result.setImgId(dto.getImgId());
+                            result.setReferenceNumber(StringUtil.getValueNullChecker(dto.getReferenceNumber()));
+                            result.setBankAccount(dto.getBankAccount());
+                            result.setUserBankName(dto.getUserBankName());
+                            result.setBankShortName(StringUtil.getValueNullChecker(dto.getBankShortName()));
+                            result.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
+                            result.setTransType(dto.getTransType());
+                            if (entity.getTransIds().contains(dto.getId())) {
+                                result.setAmount(formatAmountNumber(dto.getAmount() + ""));
+                            } else if (dto.getTime() < entity.getLastTimes()) {
+                                result.setAmount(formatAmountNumber(dto.getAmount() + ""));
                             } else {
-                                result = new TransactionDetailResV2DTO();
-                                result.setId(dto.getId());
-                                result.setBankId(dto.getBankId());
-                                result.setImgId(dto.getImgId());
-                                result.setReferenceNumber(StringUtil.getValueNullChecker(dto.getReferenceNumber()));
-                                result.setBankAccount(dto.getBankAccount());
-                                result.setUserBankName(dto.getUserBankName());
-                                result.setBankShortName(StringUtil.getValueNullChecker(dto.getBankShortName()));
-                                result.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
-                                result.setTransType(dto.getTransType());
-                                if (entity.getTransIds().contains(dto.getId())) {
-                                    result.setAmount(formatAmountNumber(dto.getAmount() + ""));
-                                } else if (dto.getTime() < entity.getLastTimes()) {
-                                    result.setAmount(formatAmountNumber(dto.getAmount() + ""));
-                                } else {
-                                    result.setAmount("*****");
-                                }
-                                result.setStatus(dto.getStatus());
-                                result.setTime(dto.getTime());
-                                result.setTimePaid(dto.getTimePaid());
-                                result.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
-                                result.setContent(dto.getContent());
-                                result.setType(dto.getType());
-                                result.setBankCode(dto.getBankCode());
-                                result.setBankName(dto.getBankName());
-                                result.setNote(StringUtil.getValueNullChecker(dto.getNote()));
-                                result.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
-                                result.setHashTag(StringUtil.getValueNullChecker(dto.getHashTag()));
-                                if (StringUtil.isNullOrEmpty(dto.getQrCode())) {
-                                    String qrCode = getQrCode(caiValue, dto.getBankAccount(), dto.getContent(), dto.getAmount() + "");
-                                    result.setQrCode(qrCode);
-                                } else {
-                                    result.setQrCode(StringUtil.getValueNullChecker(dto.getQrCode()));
-                                }
-                                String refId = TransactionRefIdUtil
-                                        .encryptTransactionId(dto.getId());
-                                String qrLink = EnvironmentUtil.getQRLink() + refId;
-                                result.setQrLink(qrLink);
+                                result.setAmount("*****");
                             }
+                            result.setStatus(dto.getStatus());
+                            result.setTime(dto.getTime());
+                            result.setTimePaid(dto.getTimePaid());
+                            result.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
+                            result.setContent(dto.getContent());
+                            result.setType(dto.getType());
+                            result.setBankCode(dto.getBankCode());
+                            result.setBankName(dto.getBankName());
+                            result.setNote(StringUtil.getValueNullChecker(dto.getNote()));
+                            result.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
+                            result.setHashTag(StringUtil.getValueNullChecker(dto.getHashTag()));
+                            if (StringUtil.isNullOrEmpty(dto.getQrCode())) {
+                                String qrCode = getQrCode(caiValue, dto.getBankAccount(), dto.getContent(), dto.getAmount() + "");
+                                result.setQrCode(qrCode);
+                            } else {
+                                result.setQrCode(StringUtil.getValueNullChecker(dto.getQrCode()));
+                            }
+                            String refId = TransactionRefIdUtil
+                                    .encryptTransactionId(dto.getId());
+                            String qrLink = EnvironmentUtil.getQRLink() + refId;
+                            result.setQrLink(qrLink);
                         } else {
                             result = new TransactionDetailResV2DTO();
                             result.setId(dto.getId());
