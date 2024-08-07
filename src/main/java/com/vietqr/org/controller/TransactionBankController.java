@@ -2616,78 +2616,13 @@ public class TransactionBankController {
                                      AccountBankReceiveEntity accountBankEntity, long time,
                                      String traceId, UUID uuid, NumberFormat nf, String orderId, String sign, String boxIdRef,
                                      ISubTerminalCodeDTO rawDTO, TerminalEntity terminalEntity) {
-        SystemSettingEntity systemSetting = systemSettingService.getSystemSetting();
         String amount = "";
         if (dto.getAmount() != 0) {
-            amount = dto.getAmount() + "";
+            amount = processHiddenAmount(dto.getAmount(), accountBankEntity.getId(),
+                    accountBankEntity.isValidService(), transcationUUID);
         } else {
-            amount = "0";
-        }
-        if (accountBankEntity.isValidService() == true) {
-            if (dto.getAmount() != 0) {
-                amount = dto.getAmount() + "";
-            } else {
-                amount = "0";
-            }
-            if (systemSetting.getServiceActive() <= time) {
-                TransReceiveTempEntity entity = transReceiveTempService
-                        .getLastTimeByBankId(accountBankEntity.getId());
-                if (entity == null) {
-                    entity = new TransReceiveTempEntity();
-                    List<String> transIds = new ArrayList<>();
-                    transIds.add(transcationUUID);
-                    entity.setId(UUID.randomUUID().toString());
-                    entity.setBankId(accountBankEntity.getId());
-                    entity.setLastTimes(time);
-                    entity.setTransIds(String.join(",", transIds));
-                    transReceiveTempService.insert(entity);
-                } else {
-                    List<String> transIds = new ArrayList<>();
-                    if (entity.getTransIds() != null && !entity.getTransIds().isEmpty()) {
-                        transIds = new ArrayList<>(Arrays.asList(entity.getTransIds().split(",")));
-                    }
-                    if (transIds.size() < 5) {
-                        transIds.add(transcationUUID);
-                        entity.setLastTimes(time);
-                        entity.setTransIds(String.join(",", transIds));
-                        transReceiveTempService.insert(entity);
-                    }
-                }
-            }
-        } else {
-            if (systemSetting.getServiceActive() <= time) {
-                TransReceiveTempEntity entity = transReceiveTempService
-                        .getLastTimeByBankId(accountBankEntity.getId());
-                if (entity == null) {
-                    entity = new TransReceiveTempEntity();
-                    List<String> transIds = new ArrayList<>();
-                    transIds.add(transcationUUID);
-                    entity.setId(UUID.randomUUID().toString());
-                    entity.setBankId(accountBankEntity.getId());
-                    entity.setLastTimes(time);
-                    entity.setTransIds(String.join(",", transIds));
-                    transReceiveTempService.insert(entity);
-                } else {
-                    List<String> transIds = new ArrayList<>();
-
-                    if (entity.getTransIds() != null && !entity.getTransIds().isEmpty()) {
-                        transIds = new ArrayList<>(Arrays.asList(entity.getTransIds().split(",")));
-                    }
-
-                    if (transIds.size() < 5) {
-                        transIds.add(transcationUUID);
-                        entity.setLastTimes(time);
-                        entity.setTransIds(String.join(",", transIds));
-
-                        transReceiveTempService.insert(entity);
-                    } else {
-                        if (accountBankEntity.isValidService() == false) {
-                            amount = "*****";
-                        }
-                    }
-
-                }
-            }
+            amount = processHiddenAmount(0, accountBankEntity.getId(),
+                    accountBankEntity.isValidService(), transcationUUID);
         }
         String amountForVoice = amount;
         amount = formatAmountNumber(amount);

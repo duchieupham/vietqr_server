@@ -524,6 +524,12 @@ public class TransactionMMSController {
                                 data.put("bankId", accountBankReceiveEntity.getId());
                                 data.put("content", "" + terminalItemEntity.getContent());
                                 String amountForShow = StringUtil.formatNumberAsString(entity.getDebitAmount() + "");
+                                try {
+                                    amountForShow = processHiddenAmount(tempTransReceive.getAmount(), accountBankReceiveEntity.getId(),
+                                            accountBankReceiveEntity.isValidService(), tempTransReceive.getId());
+                                } catch (Exception e) {
+                                    logger.error("processHiddenAmount: ERROR: MMS:" + e.getMessage() + " at: " + System.currentTimeMillis());
+                                }
                                 data.put("amount", "" + amountForShow);
                                 data.put("terminalName", "");
                                 data.put("terminalCode", "");
@@ -752,6 +758,12 @@ public class TransactionMMSController {
                                         data.put("content", "" + traceTransfer);
                                         String amountForVoice = StringUtil.removeFormatNumber(entity.getDebitAmount() + "");
                                         String amountForShow = StringUtil.formatNumberAsString(entity.getDebitAmount() + "");
+                                        try {
+                                            amountForShow = processHiddenAmount(tempTransReceive.getAmount(), accountBankReceiveEntity.getId(),
+                                                    accountBankReceiveEntity.isValidService(), tempTransReceive.getId());
+                                        } catch (Exception e) {
+                                            logger.error("processHiddenAmount: ERROR: MMS:" + e.getMessage() + " at: " + System.currentTimeMillis());
+                                        }
                                         data.put("amount", "" + amountForShow);
                                         if (terminalEntity != null) {
                                             data.put("terminalName",
@@ -1052,7 +1064,14 @@ public class TransactionMMSController {
                                         data.put("bankId", accountBankReceiveEntity.getId());
                                         data.put("content", "" + traceTransfer);
                                         String amountForVoice = StringUtil.removeFormatNumber(entity.getDebitAmount());
-                                        data.put("amount", "" + StringUtil.formatNumberAsString(entity.getDebitAmount()));
+                                        String amountForShow = StringUtil.formatNumberAsString(entity.getDebitAmount() + "");
+                                        try {
+                                            amountForShow = processHiddenAmount(tempTransReceive.getAmount(), accountBankReceiveEntity.getId(),
+                                                    accountBankReceiveEntity.isValidService(), tempTransReceive.getId());
+                                        } catch (Exception e) {
+                                            logger.error("processHiddenAmount: ERROR: MMS:" + e.getMessage() + " at: " + System.currentTimeMillis());
+                                        }
+                                        data.put("amount", "" + amountForShow);
                                         data.put("terminalName", "");
                                         data.put("terminalCode",
                                                 terminalSubRawCodeDTO.getTerminalCode() != null ?
