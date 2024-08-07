@@ -1,11 +1,12 @@
 package com.vietqr.org.util.annotation;
 
-import com.vietqr.org.service.mqtt.MQTTService;
+import com.vietqr.org.util.MQTTHandler;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
@@ -17,7 +18,7 @@ import java.util.Map;
 public class SubscribeToTopicAspect {
 
     @Autowired
-    private MQTTService mqttService;
+    private ApplicationContext applicationContext;
 
     private final Map<String, Method> topicMethodMap = new HashMap<>();
     private final Map<String, Object> topicInstanceMap = new HashMap<>();
@@ -29,7 +30,10 @@ public class SubscribeToTopicAspect {
         Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         topicMethodMap.put(topic, method);
         topicInstanceMap.put(topic, target);
-        mqttService.subscribeToTopic(topic);
+
+        // Get the MQTTHandler bean from the application context
+        MQTTHandler mqttHandler = applicationContext.getBean(MQTTHandler.class);
+        mqttHandler.subscribeToTopic(topic);
     }
 
     public void handleMessage(String topic, String message) throws Exception {

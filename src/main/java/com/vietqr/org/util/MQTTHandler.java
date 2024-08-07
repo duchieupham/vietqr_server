@@ -33,6 +33,7 @@ public class MQTTHandler {
             @Override
             public void messageArrived(String topic, MqttMessage message) throws Exception {
                 logger.info("Message arrived. Topic: " + topic + " Message: " + new String(message.getPayload()));
+                System.out.println("topic: "+ topic + " message: " + new String(message.getPayload()));
                 subscribeToTopicAspect.handleMessage(topic, new String(message.getPayload()));
             }
 

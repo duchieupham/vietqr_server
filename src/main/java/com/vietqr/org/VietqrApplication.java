@@ -16,10 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.*;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -54,6 +51,7 @@ import com.vietqr.org.security.JWTAuthorizationFilter;
 @SpringBootApplication
 @ComponentScan(basePackages = { "com.vietqr.org" })
 @Import(WebSocketConfig.class)
+@EnableAspectJAutoProxy
 @EnableWebMvc
 public class VietqrApplication extends SpringBootServletInitializer implements WebMvcConfigurer {
 
@@ -117,6 +115,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		SpringApplication.run(VietqrApplication.class, args);
 		String tranDate = DateTimeUtil.getBidvTranDate();
 		System.out.println(tranDate);
+		MQTTUtil.sub("#");
 		// get bill
 //		 String checksum =
 //		 BankEncryptUtil.generateMD5GetBillForBankChecksum("QklEVkJMVUVDT01BY2Nlc3NLZXk=",
