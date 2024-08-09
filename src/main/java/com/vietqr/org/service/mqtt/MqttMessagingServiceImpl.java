@@ -1,6 +1,6 @@
 package com.vietqr.org.service.mqtt;
 
-import com.vietqr.org.util.MQTTUtil;
+//import com.vietqr.org.util.MQTTUtil;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -9,7 +9,7 @@ public class MqttMessagingServiceImpl implements MqttMessagingService {
     public void sendMessageToBoxId(String boxId, String message) {
         try {
             String topicQrBox = "vietqr/boxId/" + boxId;
-            MQTTUtil.sendMessage(topicQrBox, message);
+//            MQTTUtil.sendMessage(topicQrBox, message);
         } catch (Exception e) {
             e.printStackTrace();
         }

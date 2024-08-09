@@ -115,7 +115,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		SpringApplication.run(VietqrApplication.class, args);
 		String tranDate = DateTimeUtil.getBidvTranDate();
 		System.out.println(tranDate);
-		MQTTUtil.sub("#");
+//		MQTTUtil.sub("#");
 		// get bill
 //		 String checksum =
 //		 BankEncryptUtil.generateMD5GetBillForBankChecksum("QklEVkJMVUVDT01BY2Nlc3NLZXk=",
