@@ -1532,6 +1532,9 @@ public class TransactionController {
                     List<String> terminalDTOs = terminalService
                             .getTerminalByUserIdAndMerchantId(userId, merchantBankV2DTO.getMerchantId());
                     result.setTerminals(terminalDTOs != null ? terminalDTOs : new ArrayList<>());
+                } else {
+                    result.setMerchantName("");
+                    result.setTerminals(new ArrayList<>());
                 }
             } else {
                 result = new TransStatisticResponseV2DTO();
