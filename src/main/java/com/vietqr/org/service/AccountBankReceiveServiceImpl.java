@@ -376,4 +376,9 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     public void unRegisterAuthenBank(String bankAccount, String ewalletToken) {
         repo.unRegisterAuthenBank(bankAccount, ewalletToken);
     }
+
+    @Override
+    public String getBankAccountNameByBankAccount(String bankAccount) {
+        return repo.getBankAccountNameByBankAccount(bankAccount);
+    }
 }

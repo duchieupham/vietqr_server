@@ -565,4 +565,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "INNER JOIN cai_bank c ON b.id = c.bank_type_id "
 			+ "WHERE a.id = :bankId LIMIT 1", nativeQuery = true)
 	BankDetailTypeCaiValueDTO getBankAccountTypeDetail(String bankId);
+
+    @Query(value = "SELECT bank_account_name FROM account_bank_receive where bank_account = :bankAccount",nativeQuery = true)
+	String getBankAccountNameByBankAccount(@Param("bankAccount") String bankAccount);
 }

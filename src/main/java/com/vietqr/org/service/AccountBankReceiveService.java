@@ -158,4 +158,5 @@ public interface AccountBankReceiveService {
 	List<IAccountBankMonthDTO> getBankAccountStatistics();
 
 	BankDetailTypeCaiValueDTO getBankAccountTypeDetail(String bankId);
+	String getBankAccountNameByBankAccount(String bankAccount);
 }

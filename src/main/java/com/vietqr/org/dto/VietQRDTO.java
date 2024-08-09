@@ -30,6 +30,7 @@ public class VietQRDTO implements Serializable {
 	private String terminalCode;
 
 	private String serviceCode;
+	private String orderId;
 
 	private List<AdditionalData> additionalData;
 
@@ -57,7 +58,8 @@ public class VietQRDTO implements Serializable {
 	}
 
 
-	public VietQRDTO(String bankCode, String bankName, String bankAccount, String userBankName, String amount, String content, String qrCode, String imgId, int existing, String transactionId, String transactionRefId, String qrLink, String terminalCode, String serviceCode,List<AdditionalData> additionalData) {
+	public VietQRDTO(String bankCode, String bankName,
+					 String bankAccount, String userBankName, String amount, String content, String qrCode, String imgId, int existing, String transactionId, String transactionRefId, String qrLink, String terminalCode, String serviceCode, String orderId, List<AdditionalData> additionalData) {
 		this.bankCode = bankCode;
 		this.bankName = bankName;
 		this.bankAccount = bankAccount;
@@ -72,6 +74,7 @@ public class VietQRDTO implements Serializable {
 		this.qrLink = qrLink;
 		this.terminalCode = terminalCode;
 		this.serviceCode = serviceCode;
+		this.orderId = orderId;
 		this.additionalData =additionalData;
 	}
 
@@ -194,6 +197,14 @@ public class VietQRDTO implements Serializable {
 
 	public void setAdditionalData(List<AdditionalData> additionalData) {
 		this.additionalData = additionalData;
+	}
+
+	public String getOrderId() {
+		return orderId;
+	}
+
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
 	}
 
 	@Override

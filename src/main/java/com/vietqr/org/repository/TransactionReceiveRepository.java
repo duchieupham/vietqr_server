@@ -2889,5 +2889,11 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
         @Query(value = "SELECT id FROM transaction_receive "
                 + "WHERE bank_id = :bankId AND order_id = :orderId AND status != 2 LIMIT 1", nativeQuery = true)
         String checkExistedOrderId(String bankId, String orderId);
+
+
+        @Query(value = "SELECT status FROM transaction_receive WHERE order_id = :orderId", nativeQuery = true)
+        int getStatusTransactionByOrderId(@Param("orderId") String orderId);
+
+
 }
 

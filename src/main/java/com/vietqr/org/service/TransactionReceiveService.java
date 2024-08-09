@@ -597,4 +597,8 @@ public interface TransactionReceiveService {
                                                               String fromDate, String toDate);
 
     String checkExistedOrderId(String bankId, String orderId);
+
+    int getStatusTransactionByOrderId(String orderId);
+
+
 }

@@ -2,10 +2,11 @@ package com.vietqr.org.service.mqtt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.vietqr.org.controller.AccountController;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.bidv.VietQRVaRequestDTO;
-import com.vietqr.org.entity.*;
+import com.vietqr.org.entity.AccountBankReceiveEntity;
+import com.vietqr.org.entity.BankTypeEntity;
+import com.vietqr.org.entity.TransactionReceiveEntity;
 import com.vietqr.org.entity.bidv.CustomerInvoiceEntity;
 import com.vietqr.org.service.*;
 import com.vietqr.org.service.bidv.CustomerInvoiceService;
@@ -15,16 +16,19 @@ import org.apache.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.text.NumberFormat;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.vietqr.org.util.RandomCodeUtil.getRandomBillId;
 
@@ -34,11 +38,10 @@ public class VietQRServer {
     private static final String BROKER = "tcp://112.78.1.220:1883";
     private static final String CLIENT_ID = "VietQRServer";
     private static final String RESPONSE_TOPIC_BASE = "vietqr/response";
-    private static final String USERNAME ="vietqrbnsmqtt";
-    private static final String PASSWORD ="123456789";
+    private static final String USERNAME = "vietqrbnsmqtt";
+    private static final String PASSWORD = "123456789";
 
-    private MqttClient client;
-
+    public MqttClient client;
     @Autowired
     AccountBankReceiveService accountBankReceiveService;
     @Autowired
@@ -47,49 +50,155 @@ public class VietQRServer {
     CaiBankService caiBankService;
     @Autowired
     TransactionReceiveService transactionReceiveService;
-
     @Autowired
     CustomerInvoiceService customerInvoiceService;
-
     @Autowired
     NotificationService notificationService;
 
-    public VietQRServer() throws MqttException {
-        MemoryPersistence persistence = new MemoryPersistence();
-        client = new MqttClient(BROKER, CLIENT_ID, persistence);
-        MqttConnectOptions connOpts = new MqttConnectOptions();
-        connOpts.setCleanSession(true);
-        connOpts.setUserName(USERNAME);
-        connOpts.setPassword(PASSWORD.toCharArray());
-        client.connect(connOpts);
+    @Autowired
+    private TransactionRefundService transactionRefundService;
 
-        client.subscribe("vietqr/request/#", new IMqttMessageListener() {
-            @Override
-            public void messageArrived(String topic, MqttMessage message) throws Exception {
-                String payload = new String(message.getPayload());
-                System.out.println("Received request: " + payload);
-                ObjectMapper mapper = new ObjectMapper();
-                VietQRCreateCustomerDTO dto = mapper.readValue(payload, VietQRCreateCustomerDTO.class);
+    @Autowired
+    AccountCustomerBankService accountCustomerBankService;
 
-                // Xử lý yêu cầu và tạo phản hồi
-                VietQRDTO response = (VietQRDTO) generateQRCustomer(dto);
-                String responsePayload = mapper.writeValueAsString(response);
 
-                // Lấy thông tin trạm và trụ từ DTO
-                String tramId = dto.getAdditionalData().get(0).getAdditionalData1(); // Tram ID từ additionalData1
-                String truId = dto.getTerminalCode(); // Terminal ID là mã của trụ xăng
+    @PostConstruct
+    public void init() {
+        try {
+            MemoryPersistence persistence = new MemoryPersistence();
+            client = new MqttClient(BROKER, CLIENT_ID, persistence);
+            MqttConnectOptions connOpts = new MqttConnectOptions();
+            connOpts.setCleanSession(true);
+            connOpts.setUserName(USERNAME);
+            connOpts.setPassword(PASSWORD.toCharArray());
+            client.connect(connOpts);
 
-                // Xác định topic phản hồi
-                String responseTopic = RESPONSE_TOPIC_BASE + "/" + tramId + "/" + truId;
+            client.subscribe("vietqr/request/#", new IMqttMessageListener() {
+                @Override
+                public void messageArrived(String topic, MqttMessage message) throws Exception {
+                    String payload = new String(message.getPayload());
+                    System.out.println("Received request: " + payload);
+                    ObjectMapper mapper = new ObjectMapper();
+                    VietQRCreateCustomerDTO dto = mapper.readValue(payload, VietQRCreateCustomerDTO.class);
 
-                // Gửi phản hồi lên đúng topic
-                MqttMessage responseMessage = new MqttMessage(responsePayload.getBytes());
-                responseMessage.setQos(2);
-                client.publish(responseTopic, responseMessage);
-                System.out.println("Response sent to topic: " + responseTopic + " Payload: " + responsePayload);
-            }
-        });
+                    // Xử lý yêu cầu và tạo phản hồi
+                    VietQRDTO response = (VietQRDTO) generateQRCustomer(dto);
+                    String responsePayload = mapper.writeValueAsString(response);
+
+                    // Lấy thông tin trạm và trụ từ DTO
+                    String tramId = dto.getTerminalCode();
+
+                    // Xác định topic phản hồi
+                    String responseTopic = RESPONSE_TOPIC_BASE + "/" + tramId;
+
+                    // Gửi phản hồi lên đúng topic
+                    MqttMessage responseMessage = new MqttMessage(responsePayload.getBytes());
+                    responseMessage.setQos(1);
+                    client.publish(responseTopic, responseMessage);
+                    System.out.println("Response sent to topic: " + responseTopic + " Payload: " + responsePayload);
+                }
+            });
+
+            client.subscribe("vietqr/request/status/#", new IMqttMessageListener() {
+                @Override
+                public void messageArrived(String topic, MqttMessage message) throws Exception {
+                    String payload = new String(message.getPayload());
+                    ObjectMapper mapper = new ObjectMapper();
+                    TransactionCheckOrderInputDTO dto = mapper.readValue(payload, TransactionCheckOrderInputDTO.class);
+                    handleTransactionStatusRequest(dto, topic);
+                }
+            });
+
+        } catch (MqttException e) {
+            logger.error("Error initializing MQTT client: " + e.getMessage());
+        }
     }
+
+    public MqttClient getClient() {
+        return client;
+    }
+
+
+    public void handleTransactionStatusRequest(TransactionCheckOrderInputDTO dto, String topic) throws MqttException {
+        Object result = null;
+        try {
+            // Check valid object
+            if (dto != null) {
+                    String bankAccountName = accountBankReceiveService.getBankAccountNameByBankAccount(dto.getBankAccount());
+                    // Check checksum
+                    String checkSum = BankEncryptUtil.generateMD5CheckOrderChecksum(dto.getBankAccount(), bankAccountName);
+                    if (BankEncryptUtil.isMatchChecksum(dto.getCheckSum(), checkSum)) {
+                        // Find transaction
+                        List<TransReceiveResponseDTO> responseDTOs = new ArrayList<>();
+                        if (dto.getValue() != null && !dto.getValue().trim().isEmpty()) {
+                            if (dto.getType() != null && dto.getType() == 0) {
+                                responseDTOs = transactionReceiveService.getTransByOrderId(dto.getValue(), dto.getBankAccount());
+                                result = processTransactions(responseDTOs, dto);
+                            } else if (dto.getType() != null && dto.getType() == 1) {
+                                responseDTOs = transactionReceiveService.getTransByReferenceNumber(dto.getValue(), dto.getBankAccount());
+                                result = processTransactions(responseDTOs, dto);
+                            } else {
+                                result = new ResponseMessageDTO("FAILED", "E95");
+                            }
+                        } else {
+                            result = new ResponseMessageDTO("FAILED", "E46");
+                        }
+                    } else {
+                        result = new ResponseMessageDTO("FAILED", "E39");
+                    }
+
+            } else {
+                result = new ResponseMessageDTO("FAILED", "E46");
+            }
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+        }
+
+        // Send response via MQTT
+        Gson gson = new Gson();
+        String payload = gson.toJson(result);
+        MqttMessage message = new MqttMessage(payload.getBytes());
+        message.setQos(1);
+        // Assuming dto has terminalCode
+
+        String responseTopic = topic.replace("request", "response");
+        client.publish(responseTopic, message);
+        System.out.println("Transaction status response sent to topic: " + responseTopic + " Payload: " + payload);
+    }
+
+    private List<TransReceiveResponseCheckOrderDTO> processTransactions(List<TransReceiveResponseDTO> responseDTOs, TransactionCheckOrderInputDTO dto) {
+        List<IRefundCheckOrderDTO> iRefundCheckOrderDTOS = transactionRefundService.getTotalRefundedByTransactionId(
+                responseDTOs.stream().map(TransReceiveResponseDTO::getTransactionId).collect(Collectors.toList()));
+        Map<String, RefundCheckOrderDTO> refundCheckOrderDTOMap;
+        if (iRefundCheckOrderDTOS != null && !iRefundCheckOrderDTOS.isEmpty()) {
+            refundCheckOrderDTOMap = iRefundCheckOrderDTOS.stream()
+                    .collect(Collectors.toMap(IRefundCheckOrderDTO::getTransactionId, item ->
+                            new RefundCheckOrderDTO(item.getTransactionId(), item.getRefundCount(), item.getAmountRefunded())));
+        } else {
+            refundCheckOrderDTOMap = new HashMap<>();
+        }
+
+        return responseDTOs.stream().map(item -> {
+            TransReceiveResponseCheckOrderDTO checkOrderDTO = new TransReceiveResponseCheckOrderDTO();
+            checkOrderDTO.setAmount(item.getAmount());
+            checkOrderDTO.setStatus(item.getStatus());
+            checkOrderDTO.setNote(StringUtil.getValueNullChecker(item.getNote()));
+            checkOrderDTO.setContent(item.getContent());
+            checkOrderDTO.setOrderId(item.getOrderId());
+            checkOrderDTO.setReferenceNumber(item.getReferenceNumber());
+            checkOrderDTO.setTerminalCode(StringUtil.getValueNullChecker(item.getTerminalCode()));
+            checkOrderDTO.setTimeCreated(item.getTimeCreated());
+            checkOrderDTO.setTimePaid(item.getTimePaid());
+            checkOrderDTO.setType(item.getType());
+            checkOrderDTO.setTransType(item.getTransType());
+            RefundCheckOrderDTO refundCheckOrderDTO = refundCheckOrderDTOMap
+                    .getOrDefault(item.getTransactionId(), new RefundCheckOrderDTO(item.getTransactionId()));
+            checkOrderDTO.setRefundCount(refundCheckOrderDTO.getRefundCount());
+            checkOrderDTO.setAmountRefunded(refundCheckOrderDTO.getAmountRefunded());
+            return checkOrderDTO;
+        }).collect(Collectors.toList());
+    }
+
 
     public Object generateQRCustomer(VietQRCreateCustomerDTO dto) {
         Object result = null;
@@ -157,6 +266,7 @@ public class VietQRServer {
                                     vietQRDTO.setTransactionId("");
                                     vietQRDTO.setTerminalCode(dto.getTerminalCode());
                                     vietQRDTO.setServiceCode(dto.getServiceCode());
+                                    vietQRDTO.setOrderId(dto.getOrderId());
                                     vietQRDTO.setAdditionalData(dto.getAdditionalData());
                                     String refId = TransactionRefIdUtil.encryptTransactionId(transactionUUID.toString());
                                     String qrLink = EnvironmentUtil.getQRLink() + refId;
@@ -192,6 +302,7 @@ public class VietQRServer {
                                     vietQRDTO.setImgId(bankTypeEntity.getImgId());
                                     vietQRDTO.setExisting(0);
                                     vietQRDTO.setServiceCode(dto.getServiceCode());
+                                    vietQRDTO.setOrderId(dto.getOrderId());
                                     vietQRDTO.setAdditionalData(dto.getAdditionalData());
                                     result = vietQRDTO;
                                     httpStatus = HttpStatus.OK;
@@ -467,7 +578,7 @@ public class VietQRServer {
                 transactionEntity.setReferenceNumber("");
                 transactionEntity.setOrderId(orderId);
                 transactionEntity.setServiceCode(dto.getServiceCode());
-                transactionEntity.setSign(sign != null ? sign :"");
+                transactionEntity.setSign(sign != null ? sign : "");
                 if (dto.getTransType() != null && dto.getTransType().trim().toUpperCase().equals("D")) {
                     transactionEntity.setCustomerBankAccount(dto.getCustomerBankAccount());
                     transactionEntity.setCustomerBankCode(dto.getCustomerBankCode());
@@ -494,61 +605,6 @@ public class VietQRServer {
                 transactionEntity.setAdditionalData(additionalDataJson);
 
                 transactionReceiveService.insertTransactionReceive(transactionEntity);
-
-//                UUID notificationUUID = UUID.randomUUID();
-//                NotificationEntity notiEntity = new NotificationEntity();
-//                String message = NotificationUtil.getNotiDescNewTransPrefix2()
-//                        + NotificationUtil.getNotiDescNewTransSuffix1()
-//                        + nf.format(Double.parseDouble(dto.getAmount()))
-//                        + NotificationUtil
-//                        .getNotiDescNewTransSuffix2();
-//
-//                if (isFromMerchantSync) {
-//                    // Gửi thông báo qua MQTT
-//                    try {
-//                        mqttClient = new MqttClient("tcp://broker.hivemq.com:1883", MqttClient.generateClientId(), new MemoryPersistence());
-//                        mqttClient.connect();
-//
-//                        Gson gson = new Gson();
-//                        Map<String, String> data = new HashMap<>();
-//                        data.put("notificationType", NotificationUtil.getNotiTypeNewTransaction());
-//                        data.put("notificationId", notificationUUID.toString());
-//                        data.put("bankCode", result.getBankCode());
-//                        data.put("bankName", result.getBankName());
-//                        data.put("bankAccount", result.getBankAccount());
-//                        data.put("userBankName", result.getUserBankName());
-//                        data.put("amount", result.getAmount());
-//                        data.put("content", result.getContent());
-//                        data.put("qrCode", result.getQrCode());
-//                        data.put("imgId", result.getImgId());
-//                        data.put("serviceCode", result.getServiceCode());
-//                        data.put("terminalCode", result.getTerminalCode());
-//
-//                        String jsonMessage = gson.toJson(data);
-//                        MqttMessage mqttMessage = new MqttMessage(jsonMessage.getBytes());
-//                        mqttMessage.setQos(2);
-//                        mqttClient.publish("notification/topic", mqttMessage);
-//                    } catch (MqttException e) {
-//                        logger.error("Error sending MQTT message: " + e.toString());
-//                    } finally {
-//                        if (mqttClient != null && mqttClient.isConnected()) {
-//                            try {
-//                                mqttClient.disconnect();
-//                            } catch (MqttException e) {
-//                                logger.error("Error disconnecting MQTT client: " + e.toString());
-//                            }
-//                        }
-//                    }
-//                }
-//
-//                notiEntity.setId(notificationUUID.toString());
-//                notiEntity.setRead(false);
-//                notiEntity.setMessage(message);
-//                notiEntity.setTime(currentDateTime.toEpochSecond(ZoneOffset.UTC));
-//                notiEntity.setType(NotificationUtil.getNotiTypeNewTransaction());
-//                notiEntity.setUserId(dto.getUserId());
-//                notiEntity.setData(transcationUUID.toString());
-//                notificationService.insertNotification(notiEntity);
 
             }
         } catch (Exception e) {
@@ -600,6 +656,7 @@ public class VietQRServer {
         }
         return responseMessageDTO;
     }
+
     private void insertNewTransactionBIDV(UUID transcationUUID, VietQRBIDVCreateDTO dto,
                                           boolean isFromMerchantSync,
                                           AccountBankReceiveEntity accountBankEntity) {
@@ -645,5 +702,10 @@ public class VietQRServer {
             logger.info("QR generate - end insertNewTransactionBIDV at: " + DateTimeUtil.getCurrentDateTimeUTC());
         }
     }
-
+    private  String formatTimeUtcPlus(long time) {
+        long utcPlusSevenTime = time + 25200;
+        LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(utcPlusSevenTime), ZoneId.of("GMT"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss", Locale.ENGLISH);
+        return dateTime.format(formatter);
+    }
 }

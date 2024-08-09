@@ -1581,6 +1581,13 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public int getStatusTransactionByOrderId(String orderId) {
+        return repo.getStatusTransactionByOrderId(orderId);
+    }
+
+
+
+    @Override
     public TransStatisticDTO getTransactionOverviewBySubTerminalCode(String subTerminalCode, String fromDate, String toDate) {
         return repo.getTransactionOverviewBySubTerminalCode(subTerminalCode,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,

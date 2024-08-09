@@ -1,5 +1,9 @@
 package com.vietqr.org.dto;
 
+import com.vietqr.org.service.mqtt.AdditionalData;
+
+import java.util.List;
+
 public class VietQRBIDVCreateDTO {
     private String content;
     private String amount;
@@ -17,7 +21,7 @@ public class VietQRBIDVCreateDTO {
 
     private String serviceCode;
 
-    private String additionalData1;
+    private List<AdditionalData> additionalData;
 
     public VietQRBIDVCreateDTO() {
     }
@@ -40,7 +44,7 @@ public class VietQRBIDVCreateDTO {
         this.customerName = customerName;
     }
 
-    public VietQRBIDVCreateDTO(String content, String amount, String terminalCode, String orderId, String note, String urlLink, String transType, String sign, String billId, String customerBankAccount, String customerBankCode, String customerName, String qr, String serviceCode, String additionalData1) {
+    public VietQRBIDVCreateDTO(String content, String amount, String terminalCode, String orderId, String note, String urlLink, String transType, String sign, String billId, String customerBankAccount, String customerBankCode, String customerName, String qr, String serviceCode, List<AdditionalData> additionalData) {
         this.content = content;
         this.amount = amount;
         this.terminalCode = terminalCode;
@@ -55,7 +59,7 @@ public class VietQRBIDVCreateDTO {
         this.customerName = customerName;
         this.qr = qr;
         this.serviceCode = serviceCode;
-        this.additionalData1 = additionalData1;
+        this.additionalData = additionalData;
     }
 
     public String getServiceCode() {
@@ -66,13 +70,7 @@ public class VietQRBIDVCreateDTO {
         this.serviceCode = serviceCode;
     }
 
-    public String getAdditionalData1() {
-        return additionalData1;
-    }
 
-    public void setAdditionalData1(String additionalData1) {
-        this.additionalData1 = additionalData1;
-    }
 
     public String getContent() {
         return content;
@@ -176,5 +174,13 @@ public class VietQRBIDVCreateDTO {
 
     public void setQr(String qr) {
         this.qr = qr;
+    }
+
+    public List<AdditionalData> getAdditionalData() {
+        return additionalData;
+    }
+
+    public void setAdditionalData(List<AdditionalData> additionalData) {
+        this.additionalData = additionalData;
     }
 }
