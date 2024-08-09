@@ -17,6 +17,7 @@ import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -61,7 +62,7 @@ public class VietQRServer {
     @Autowired
     AccountCustomerBankService accountCustomerBankService;
 
-
+    private Set<String> processedMessages = Collections.synchronizedSet(new HashSet<>());
     @PostConstruct
     public void init() {
         try {
@@ -73,7 +74,7 @@ public class VietQRServer {
             connOpts.setPassword(PASSWORD.toCharArray());
             client.connect(connOpts);
 
-            client.subscribe("vietqr/request/#", new IMqttMessageListener() {
+            client.subscribe("vietqr/request/+", new IMqttMessageListener() {
                 @Override
                 public void messageArrived(String topic, MqttMessage message) throws Exception {
                     String payload = new String(message.getPayload());
@@ -359,26 +360,45 @@ public class VietQRServer {
             case "BIDV":
                 String qr = "";
                 String billId = "";
+                BankTypeEntity bankTypeEntity = null;
                 AccountBankReceiveEntity accountBankEntity = null;
-                BankTypeEntity bankTypeEntity = dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")
-                        ? bankTypeService.getBankTypeByBankCode(dto.getBankCode())
-                        : bankTypeService.getBankTypeByBankCode(dto.getCustomerBankCode());
+                if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
+                    bankTypeEntity = bankTypeService.getBankTypeByBankCode(dto.getBankCode());
+                } else {
+                    bankTypeEntity = bankTypeService.getBankTypeByBankCode(dto.getCustomerBankCode());
+                }
                 VietQRDTO vietQRDTO = new VietQRDTO();
                 try {
                     if (dto.getContent().length() <= 50) {
-                        if (bankTypeEntity != null) {
-                            accountBankEntity = dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")
-                                    ? accountBankReceiveService.getAccountBankByBankAccountAndBankTypeId(dto.getBankAccount(), bankTypeEntity.getId())
-                                    : accountBankReceiveService.getAccountBankByBankAccountAndBankTypeId(dto.getCustomerBankAccount(), bankTypeEntity.getId());
-                            if (accountBankEntity != null) {
+                        // check if generate qr with transtype = D or C
+                        // if D => generate with customer information
+                        // if C => do normal
+                        // find bankTypeId by bankcode
+                        if (Objects.nonNull(bankTypeEntity)) {
+                            // find bank by bankAccount and banktypeId
+
+                            if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
+                                accountBankEntity = accountBankReceiveService
+                                        .getAccountBankByBankAccountAndBankTypeId(dto.getBankAccount(),
+                                                bankTypeEntity.getId());
+                            } else {
+                                accountBankEntity = accountBankReceiveService
+                                        .getAccountBankByBankAccountAndBankTypeId(dto.getCustomerBankAccount(),
+                                                bankTypeEntity.getId());
+                            }
+                            if (Objects.nonNull(accountBankEntity)) {
+                                // get cai value
                                 billId = getRandomBillId();
                                 String content = billId;
+                                // generate qr BIDV
                                 VietQRCreateDTO vietQRCreateDTO = new VietQRCreateDTO();
                                 vietQRCreateDTO.setBankId(accountBankEntity.getId());
                                 vietQRCreateDTO.setAmount(dto.getAmount() + "");
                                 vietQRCreateDTO.setContent(billId);
                                 vietQRCreateDTO.setUserId(accountBankEntity.getUserId());
                                 vietQRCreateDTO.setTerminalCode(dto.getTerminalCode());
+                                vietQRCreateDTO.setAdditionalData(dto.getAdditionalData());
+                                //
                                 if (dto.getTransType() != null && dto.getTransType().trim().equalsIgnoreCase("D")) {
                                     vietQRCreateDTO.setTransType("D");
                                     vietQRCreateDTO.setCustomerBankAccount(dto.getCustomerBankAccount());
@@ -387,17 +407,29 @@ public class VietQRServer {
                                 } else {
                                     vietQRCreateDTO.setTransType("C");
                                 }
-                                vietQRCreateDTO.setUrlLink(dto.getUrlLink() != null && !dto.getUrlLink().trim().isEmpty() ? dto.getUrlLink() : "");
-                                ResponseMessageDTO responseMessageDTO = insertNewCustomerInvoiceTransBIDV(vietQRCreateDTO, accountBankEntity, billId);
+                                if (dto.getUrlLink() != null && !dto.getUrlLink().trim().isEmpty()) {
+                                    vietQRCreateDTO.setUrlLink(dto.getUrlLink());
+                                } else {
+                                    vietQRCreateDTO.setUrlLink("");
+                                }
+                                ResponseMessageDTO responseMessageDTO =
+                                        insertNewCustomerInvoiceTransBIDV(vietQRCreateDTO, accountBankEntity, billId);
+
+                                // insert success transaction_receive
                                 if ("SUCCESS".equals(responseMessageDTO.getStatus())) {
                                     VietQRVaRequestDTO vietQRVaRequestDTO = new VietQRVaRequestDTO();
                                     vietQRVaRequestDTO.setAmount(dto.getAmount() + "");
                                     vietQRVaRequestDTO.setBillId(billId);
                                     vietQRVaRequestDTO.setUserBankName(accountBankEntity.getBankAccountName());
                                     vietQRVaRequestDTO.setDescription(StringUtil.getValueNullChecker(billId));
-                                    ResponseMessageDTO generateVaInvoiceVietQR = CustomerVaUtil.generateVaInvoiceVietQR(vietQRVaRequestDTO, accountBankEntity.getCustomerId());
-                                    if ("SUCCESS".equals(generateVaInvoiceVietQR.getStatus())) {
-                                        qr = generateVaInvoiceVietQR.getMessage();
+
+                                   // ResponseMessageDTO generateVaInvoiceVietQR = CustomerVaUtil.generateVaInvoiceVietQR(vietQRVaRequestDTO, accountBankEntity.getCustomerId());
+                                    String statuses = "SUCCESS";
+//                                    if ("SUCCESS".equals(generateVaInvoiceVietQR.getStatus())) {
+                                        if ("SUCCESS".equals(statuses)) {
+                                       // qr = generateVaInvoiceVietQR.getMessage();
+                                        qr="982372367";
+                                        // generate VietQRDTO
                                         vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
                                         vietQRDTO.setBankName(bankTypeEntity.getBankName());
                                         vietQRDTO.setBankAccount(accountBankEntity.getBankAccount());
@@ -409,10 +441,12 @@ public class VietQRServer {
                                         vietQRDTO.setExisting(1);
                                         vietQRDTO.setTransactionId("");
                                         vietQRDTO.setTerminalCode(dto.getTerminalCode());
+                                        vietQRDTO.setAdditionalData(dto.getAdditionalData());
                                         String refId = TransactionRefIdUtil.encryptTransactionId(transactionUUID.toString());
                                         String qrLink = EnvironmentUtil.getQRLink() + refId;
                                         vietQRDTO.setTransactionRefId(refId);
                                         vietQRDTO.setQrLink(qrLink);
+                                        //
                                         result = vietQRDTO;
                                         httpStatus = HttpStatus.OK;
                                     } else {
@@ -423,20 +457,28 @@ public class VietQRServer {
                                     httpStatus = HttpStatus.BAD_REQUEST;
                                 }
                             } else {
-                                String bankAccount = dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")
-                                        ? dto.getBankAccount()
-                                        : dto.getCustomerBankAccount();
-                                String userBankName = dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")
-                                        ? dto.getUserBankName().trim().toUpperCase()
-                                        : dto.getCustomerName().trim().toUpperCase();
+                                String bankAccount = "";
+                                String userBankName = "";
+                                String content = "";
+                                if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
+                                    bankAccount = dto.getBankAccount();
+                                    userBankName = dto.getUserBankName().trim().toUpperCase();
+                                } else {
+                                    bankAccount = dto.getCustomerBankAccount();
+                                    userBankName = dto.getCustomerName().trim().toUpperCase();
+                                }
+                                // get cai value
                                 String caiValue = caiBankService.getCaiValue(bankTypeEntity.getId());
+                                // generate VietQRGenerateDTO
                                 VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
                                 vietQRGenerateDTO.setCaiValue(caiValue);
                                 vietQRGenerateDTO.setAmount(dto.getAmount() + "");
-                                String content = billId;
+                                content = billId;
                                 vietQRGenerateDTO.setContent(content);
                                 vietQRGenerateDTO.setBankAccount(bankAccount);
                                 qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+                                //
+                                // generate VietQRDTO
                                 vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
                                 vietQRDTO.setBankName(bankTypeEntity.getBankName());
                                 vietQRDTO.setBankAccount(bankAccount);
@@ -446,7 +488,6 @@ public class VietQRServer {
                                 vietQRDTO.setQrCode(qr);
                                 vietQRDTO.setImgId(bankTypeEntity.getImgId());
                                 vietQRDTO.setExisting(0);
-                                vietQRDTO.setServiceCode(dto.getServiceCode());
                                 vietQRDTO.setAdditionalData(dto.getAdditionalData());
                                 result = vietQRDTO;
                                 httpStatus = HttpStatus.OK;
@@ -459,14 +500,14 @@ public class VietQRServer {
                         result = new ResponseMessageDTO("FAILED", "E26");
                         httpStatus = HttpStatus.BAD_REQUEST;
                     }
-                    return result;
+                    return new ResponseEntity<>(result, httpStatus);
                 } catch (Exception e) {
                     logger.error(e.toString());
                     System.out.println(e.toString());
                     result = new ResponseMessageDTO("FAILED", "Unexpected Error");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 } finally {
-                    if (accountBankEntity != null && !StringUtil.isNullOrEmpty(qr)) {
+                    if (Objects.nonNull(accountBankEntity) && !StringUtil.isNullOrEmpty(qr)) {
                         VietQRBIDVCreateDTO dto1 = new VietQRBIDVCreateDTO();
                         dto1.setContent(billId);
                         dto1.setAmount(dto.getAmount() + "");
@@ -491,29 +532,41 @@ public class VietQRServer {
                 break;
             default:
                 String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
-                String bankTypeId = dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")
-                        ? bankTypeService.getBankTypeIdByBankCode(dto.getBankCode())
-                        : bankTypeService.getBankTypeIdByBankCode(dto.getCustomerBankCode());
+                String bankTypeId = "";
+                if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
+                    bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
+                } else {
+                    bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getCustomerBankCode());
+                }
                 try {
-                    String bankAccount = dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")
-                            ? dto.getBankAccount()
-                            : dto.getCustomerBankAccount();
-                    String userBankName = dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")
-                            ? dto.getUserBankName().trim().toUpperCase()
-                            : dto.getCustomerName().trim().toUpperCase();
+                    String bankAccount = "";
+                    String userBankName = "";
+                    String content = "";
+                    if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
+                        bankAccount = dto.getBankAccount();
+                        userBankName = dto.getUserBankName().trim().toUpperCase();
+                    } else {
+                        bankAccount = dto.getCustomerBankAccount();
+                        userBankName = dto.getCustomerName().trim().toUpperCase();
+                    }
                     if (dto.getContent().length() <= 50) {
                         bankTypeEntity = bankTypeService.getBankTypeById(bankTypeId);
                         String caiValue = caiBankService.getCaiValue(bankTypeId);
+                        // generate VietQRGenerateDTO
                         VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
                         vietQRGenerateDTO.setCaiValue(caiValue);
                         vietQRGenerateDTO.setAmount(dto.getAmount() + "");
-                        String content = dto.getReconciliation() == null || dto.getReconciliation()
-                                ? traceId + " " + dto.getContent()
-                                : dto.getContent();
+                        if (dto.getReconciliation() == null || dto.getReconciliation()) {
+                            content = traceId + " " + dto.getContent();
+                        } else {
+                            content = dto.getContent();
+                        }
                         vietQRGenerateDTO.setContent(content);
                         vietQRGenerateDTO.setBankAccount(bankAccount);
                         qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+                        //
                         vietQRDTO = new VietQRDTO();
+                        // generate VietQRDTO
                         vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
                         vietQRDTO.setBankName(bankTypeEntity.getBankName());
                         vietQRDTO.setBankAccount(bankAccount);
@@ -523,7 +576,6 @@ public class VietQRServer {
                         vietQRDTO.setQrCode(qr);
                         vietQRDTO.setImgId(bankTypeEntity.getImgId());
                         vietQRDTO.setExisting(0);
-                        vietQRDTO.setServiceCode(dto.getServiceCode());
                         vietQRDTO.setAdditionalData(dto.getAdditionalData());
                         result = vietQRDTO;
                         httpStatus = HttpStatus.OK;
@@ -585,15 +637,12 @@ public class VietQRServer {
                     transactionEntity.setCustomerName(dto.getCustomerName());
                 }
 
-
-                ZoneOffset offset = ZoneOffset.ofHours(7); // UTC+7
-                long timestampUtcPlus7 = currentDateTime.toEpochSecond(offset);
                 List<Object> additionalDataList = new ArrayList<>();
                 // Lặp qua từng phần tử trong danh sách additionalData của DTO
                 for (AdditionalData additionalData : dto.getAdditionalData()) {
                     additionalDataList.add(new AdditionalDataInTransaction(
                             dto.getAmount(),
-                            timestampUtcPlus7,
+                            DateTimeUtil.getCurrentDateTimeUTC(),
                             result.getServiceCode(),
                             result.getTerminalCode(),
                             additionalData.getAdditionalData1() // Lấy giá trị của additionalData1
@@ -657,6 +706,7 @@ public class VietQRServer {
         return responseMessageDTO;
     }
 
+
     private void insertNewTransactionBIDV(UUID transcationUUID, VietQRBIDVCreateDTO dto,
                                           boolean isFromMerchantSync,
                                           AccountBankReceiveEntity accountBankEntity) {
@@ -693,6 +743,24 @@ public class VietQRServer {
                     transactionEntity.setCustomerName(dto.getCustomerName());
                 }
 
+                // Lưu trữ additionalData vào transactionEntity
+                if (dto.getAdditionalData() != null && !dto.getAdditionalData().isEmpty()) {
+
+                    List<Object> additionalDataList = new ArrayList<>();
+                    for (AdditionalData additionalData : dto.getAdditionalData()) {
+                        additionalDataList.add(new AdditionalDataInTransaction(
+                                dto.getAmount(),
+                                DateTimeUtil.getCurrentDateTimeUTC(),
+                                dto.getServiceCode(),
+                                dto.getTerminalCode(),
+                                additionalData.getAdditionalData1()
+                        ));
+                    }
+                    ObjectMapper mapper = new ObjectMapper();
+                    String additionalDataJson = mapper.writeValueAsString(additionalDataList);
+                    transactionEntity.setAdditionalData(additionalDataJson);
+                }
+
                 transactionReceiveService.insertTransactionReceive(transactionEntity);
                 logger.info("After insertNewTransactionBIDV at: " + DateTimeUtil.getCurrentDateTimeUTC());
             }
@@ -702,10 +770,5 @@ public class VietQRServer {
             logger.info("QR generate - end insertNewTransactionBIDV at: " + DateTimeUtil.getCurrentDateTimeUTC());
         }
     }
-    private  String formatTimeUtcPlus(long time) {
-        long utcPlusSevenTime = time + 25200;
-        LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(utcPlusSevenTime), ZoneId.of("GMT"));
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss", Locale.ENGLISH);
-        return dateTime.format(formatter);
-    }
+
 }
