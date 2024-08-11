@@ -1349,12 +1349,8 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
     @Query(value = "SELECT a.id AS transactionId, a.reference_number as referenceNumber, a.order_id as orderId, a.amount, a.content, "
             + "a.trans_type as transType, a.status, a.type, a.time as timeCreated, a.time_paid as timePaid "
             + "FROM transaction_receive a "
-            + "LEFT JOIN account_bank_receive b "
-            + "ON a.bank_id = b.id "
-            + "WHERE a.order_id = :value "
-            + "AND a.time >= :time "
-            + "AND a.bank_account = :bankAccount "
-            + "AND b.is_authenticated = true ", nativeQuery = true)
+            + "WHERE a.order_id = :value AND a.bank_account = :bankAccount "
+            + "AND a.time >= :time ", nativeQuery = true)
     List<TransReceiveResponseDTO> getTransByOrderId(
             @Param(value = "value") String value,
             @Param(value = "bankAccount") String bankAccount,
@@ -1379,12 +1375,9 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
     @Query(value = "SELECT a.id AS transactionId, a.reference_number as referenceNumber, a.order_id as orderId, a.amount, a.content, "
             + "a.trans_type as transType, a.status, a.type, a.time as timeCreated, a.time_paid as timePaid "
             + "FROM transaction_receive a "
-            + "LEFT JOIN account_bank_receive b "
-            + "ON a.bank_id = b.id "
             + "WHERE a.reference_number = :value "
             + "AND a.bank_account = :bankAccount "
-            + "AND a.time >= :time "
-            + "AND b.is_authenticated = true ", nativeQuery = true)
+            + "AND a.time >= :time ", nativeQuery = true)
     List<TransReceiveResponseDTO> getTransByReferenceNumber(
             @Param(value = "value") String value,
             @Param(value = "bankAccount") String bankAccount,
