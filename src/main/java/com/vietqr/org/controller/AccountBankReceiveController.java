@@ -1468,7 +1468,7 @@ public class AccountBankReceiveController {
                             dto.setKeyActive(StringUtil.getValueNullChecker(checkKeyActiveDTO.getKeyActive()));
                         } else {
                             dto.setTimeActiveKey(0);
-                            StringUtil.isNullOrEmpty(checkKeyActiveDTO.getKeyActive());
+                            dto.setKeyActive(StringUtil.getValueNullChecker(checkKeyActiveDTO.getKeyActive()));
                         }
                     }
                     // set thêm field để biết verify email hay chưa
