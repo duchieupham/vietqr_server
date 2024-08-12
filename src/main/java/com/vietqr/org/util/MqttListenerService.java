@@ -1,7 +1,10 @@
 package com.vietqr.org.util;
 
-import com.vietqr.org.util.annotation.MqttTopicHandler;
+import com.vietqr.org.mqtt.TidInternalSubscriber;
+import com.vietqr.org.service.QrBoxSyncService;
+import org.apache.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -14,11 +17,21 @@ public class MqttListenerService implements MqttCallback {
 
     private final IMqttClient mqttClient;
 
-    private final Map<String, Method> topicHandlers = new HashMap<>();
+    private static final Logger logger = Logger.getLogger(MqttListenerService.class);
+    private final MqttTopicHandlerScanner mqttTopicHandlerScanner;
+    private static final int CODE_LENGTH = 6;
+    private static final String NUMBERS = "0123456789";
 
-    public MqttListenerService(IMqttClient mqttClient) {
+    @Autowired
+    private QrBoxSyncService qrBoxSyncService;
+
+    private Map<String, MqttTopicHandlerScanner.MethodHandlerPair> topicHandlers = new HashMap<>();
+
+
+    public MqttListenerService(IMqttClient mqttClient, MqttTopicHandlerScanner mqttTopicHandlerScanner) {
         this.mqttClient = mqttClient;
-        initTopicHandlers();
+        this.mqttTopicHandlerScanner = mqttTopicHandlerScanner;
+        this.topicHandlers = initTopicHandlers();
     }
 
     @PostConstruct
@@ -41,7 +54,16 @@ public class MqttListenerService implements MqttCallback {
     public void messageArrived(String topic, MqttMessage message) throws Exception {
         System.out.println("Message received from topic: " + topic);
         System.out.println("Message: " + new String(message.getPayload()));
-
+        MqttTopicHandlerScanner.MethodHandlerPair handlerPair = topicHandlers.get(topic);
+        try {
+            if (handlerPair != null) {
+                handlerPair.getMethod().invoke(handlerPair.getBean(), topic, message);
+            } else {
+                System.out.println("No handler for topic: " + topic);
+            }
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
     }
 
     @Override
@@ -49,25 +71,15 @@ public class MqttListenerService implements MqttCallback {
         // Handle delivery completion
     }
 
-    private void initTopicHandlers() {
-        for (Method method : this.getClass().getDeclaredMethods()) {
-            if (method.isAnnotationPresent(MqttTopicHandler.class)) {
-                MqttTopicHandler annotation = method.getAnnotation(MqttTopicHandler.class);
-                topicHandlers.put(annotation.topic(), method);
-            }
-        }
+    private Map<String, MqttTopicHandlerScanner.MethodHandlerPair> initTopicHandlers() {
+        return mqttTopicHandlerScanner.scanForMqttTopicHandlers(TidInternalSubscriber.class);
     }
 
-    private void publishMessageToCommonTopic(String topic, String payload) throws MqttException {
+    public void publishMessageToCommonTopic(String topic, String payload) throws MqttException {
         MqttMessage message = new MqttMessage();
         message.setPayload(payload.getBytes());
         message.setQos(1);
         mqttClient.publish(topic, message);
     }
 
-    @MqttTopicHandler(topic = "your/topic1")
-    public void handleTopic1Message(String topic, MqttMessage message) {
-        System.out.println("Handling message from topic1: " + new String(message.getPayload()));
-        // Add your logic here
-    }
 }
