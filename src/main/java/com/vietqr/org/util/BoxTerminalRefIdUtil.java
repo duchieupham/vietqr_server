@@ -3,6 +3,7 @@ package com.vietqr.org.util;
 import org.apache.log4j.Logger;
 
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.Base64;
 
 public class BoxTerminalRefIdUtil {
@@ -28,6 +29,36 @@ public class BoxTerminalRefIdUtil {
         } catch (Exception e) {
             logger.error("encryptTransactionId: ERROR:" + e.toString());
             System.out.println("encryptTransactionId: ERROR:" + e.toString());
+        }
+        return result;
+    }
+
+//    public static String encryptMacAddr(String macAddr) {
+//        String result = "";
+//        try {
+//            String encryptedId = encode(macAddr + VIET_QR_BOX_ACCESS_KEY);
+//            result = encryptedId;
+//        } catch (Exception e) {
+//            logger.error("encryptTransactionId: ERROR:" + e.toString());
+//            System.out.println("encryptTransactionId: ERROR:" + e.toString());
+//        }
+//        return result;
+//    }
+
+    public static String encryptMacAddr(String macAddr) {
+        String result = "";
+        try {
+            String plainText = macAddr + VIET_QR_BOX_ACCESS_KEY;
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(plainText.getBytes());
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b & 0xff));
+            }
+            result = sb.toString();
+        } catch (Exception e) {
+            logger.error("generateMD5GetBillForBankChecksum: ERROR: " + e.toString());
         }
         return result;
     }
