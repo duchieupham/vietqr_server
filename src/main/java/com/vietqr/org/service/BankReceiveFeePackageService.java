@@ -31,4 +31,8 @@ public interface BankReceiveFeePackageService {
     List<PackageFeeResponseDTO> getFeePackageFeeResponse(String userId);
 
     BankReceiveFeePackageEntity getFeePackageByBankIds(String bankId);
+
+    void deleteBankReceiveFeePackage(String id);
+
+    void saveBankReceiveFeePackage(String id, BankReceiveFeePackageDTOv2 dto);
 }
