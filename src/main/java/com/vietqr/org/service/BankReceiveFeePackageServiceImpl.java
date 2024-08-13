@@ -69,4 +69,9 @@ public class BankReceiveFeePackageServiceImpl implements BankReceiveFeePackageSe
     public BankReceiveFeePackageEntity getFeePackageByBankIds(String bankId) {
         return repo.getFeePackageByBankIds(bankId);
     }
+
+    @Override
+    public BankReceiveFeePackageEntity insertBankReceiveFeePackage(BankReceiveFeePackageEntity entity) {
+       return repo.save(entity);
+    }
 }
