@@ -1703,7 +1703,7 @@ public class TransactionBankController {
             amount = processHiddenAmount(transactionReceiveEntity.getAmount(), accountBankEntity.getId(),
                     accountBankEntity.isValidService(), transactionReceiveEntity.getId());
         }
-        String amountForVoice = amount;
+        String amountForVoice = dto.getAmount() + "";
         amount = formatAmountNumber(amount);
 
         BankTypeEntity bankTypeEntity = bankTypeService
@@ -2624,7 +2624,7 @@ public class TransactionBankController {
             amount = processHiddenAmount(0, accountBankEntity.getId(),
                     accountBankEntity.isValidService(), transcationUUID);
         }
-        String amountForVoice = amount;
+        String amountForVoice = dto.getAmount() + "";
         amount = formatAmountNumber(amount);
 
         BankTypeEntity bankTypeEntity = bankTypeService

@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.UUID;
+
 @Configuration
 public class MQTTConfig {
 
@@ -14,9 +16,6 @@ public class MQTTConfig {
 
     @Value("${spring.mqtt.broker}")
     private String brokerUrl;
-
-    @Value("${spring.mqtt.clientId}")
-    private String clientId;
 
     @Value("${spring.mqtt.username}")
     private String username;
@@ -26,6 +25,8 @@ public class MQTTConfig {
 
     @Bean
     public IMqttClient mqttClient() throws MqttException {
+        String clientId = UUID.randomUUID().toString();
+        logger.info("MQTT CONFIG clientID: " + clientId);
         MemoryPersistence persistence = new MemoryPersistence();
         IMqttClient client = new MqttClient(brokerUrl, clientId, persistence);
         MqttConnectOptions connOpts = new MqttConnectOptions();
