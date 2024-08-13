@@ -1490,35 +1490,16 @@ public class VietQRController {
 			String boxId = BoxTerminalRefIdUtil.encryptQrBoxId(boxCode);
 			Map<String, String> data = new HashMap<>();
 			data.put("notificationType", NotificationUtil.getNotiSendDynamicQr());
-			data.put("transactionReceiveId", transactionUUID);
-			data.put("bankAccount", result.getBankAccount());
-			data.put("bankName", result.getBankName());
-			data.put("bankShortName", result.getBankCode());
-			data.put("userBankName", result.getUserBankName());
-			data.put("note", note != null ? note : "");
-			data.put("content", result.getContent());
 			data.put("amount", StringUtil.formatNumberAsString(result.getAmount()));
-			data.put("imgId", "");
 			data.put("qrCode", qr);
-			data.put("qrType", "0");
-			data.put("boxId", boxId);
-			data.put("boxCode", boxCode);
-			data.put("terminalCode", result.getTerminalCode() != null ? result.getTerminalCode() : "");
-			data.put("terminalName", terminalName != null ? terminalName : "");
 			socketHandler.sendMessageToBoxId(boxId, data);
 
 			try {
 				ObjectMapper mapper = new ObjectMapper();
 				DynamicQRBoxDTO dynamicQRBoxDTO = new DynamicQRBoxDTO();
 				dynamicQRBoxDTO.setNotificationType(NotificationUtil.getNotiSendDynamicQr());
-				dynamicQRBoxDTO.setTransactionReceiveId(transactionUUID);
-				dynamicQRBoxDTO.setBankAccount(result.getBankAccount());
-				dynamicQRBoxDTO.setBankShortName(result.getBankCode());
-				dynamicQRBoxDTO.setUserBankName(result.getUserBankName());
-				dynamicQRBoxDTO.setContent(result.getContent());
 				dynamicQRBoxDTO.setAmount(StringUtil.formatNumberAsString(result.getAmount()));
 				dynamicQRBoxDTO.setQrCode(qr);
-				dynamicQRBoxDTO.setQrType(0 + "");
 				mqttMessagingService
 						.sendMessageToBoxId(boxId, mapper.writeValueAsString(dynamicQRBoxDTO));
 			} catch (Exception e) {
