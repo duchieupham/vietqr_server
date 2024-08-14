@@ -300,11 +300,16 @@ public class MerchantController {
 
     @DeleteMapping("/merchant/delete/{id}")
     public ResponseEntity<ResponseMessageDTO> deleteMerchant(@PathVariable String id) {
+        ResponseMessageDTO result;
+        HttpStatus httpStatus;
         try {
             merchantService.deleteMerchant(id);
-            return new ResponseEntity<>(new ResponseMessageDTO("SUCCESS",""), HttpStatus.OK);
+            result = new ResponseMessageDTO("SUCCESS","");
+            httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            return new ResponseEntity<>(new ResponseMessageDTO("FAIL","E104"), HttpStatus.BAD_REQUEST);
+            result = new ResponseMessageDTO("FAIL","E104");
+            httpStatus = HttpStatus.BAD_REQUEST;
         }
+        return new ResponseEntity<>(result, httpStatus);
     }
 }
