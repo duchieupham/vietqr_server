@@ -64,6 +64,9 @@ public class VietQRController {
 	MqttMessagingService mqttMessagingService;
 
 	@Autowired
+	AccountCustomerBankService accountCustomerBankService;
+
+	@Autowired
 	AccountBankReceiveService accountBankReceiveService;
 
 	@Autowired
@@ -398,29 +401,58 @@ public class VietQRController {
 		if (Objects.nonNull(dto.getQrType())) {
 			qrType = dto.getQrType();
 		}
-		switch (qrType) {
-			case 0:
-				response = generateDynamicQrCustomer(dto, token);
-				result = response.getBody();
-				httpStatus = response.getStatusCode();
-				break;
-			case 1:
-				response = generateStaticQrCustomer(dto, token);
-				result = response.getBody();
-				httpStatus = response.getStatusCode();
-				break;
-			case 3:
-				response = generateSemiDynamicQrCustomer(dto, token);
-				result = response.getBody();
-				httpStatus = response.getStatusCode();
-				break;
-			default:
-				// Invalid QR type
-				result = new ResponseMessageDTO("FAILED", "E46");
+		try {
+			String username = getUsernameFromToken(token);
+			List<String> checkExistedCustomerSync = accountCustomerBankService
+					.checkExistedCustomerSyncByUsername(username);
+			if (checkExistedCustomerSync != null && !checkExistedCustomerSync.isEmpty()) {
+				switch (qrType) {
+					case 0:
+						response = generateDynamicQrCustomer(dto, token);
+						result = response.getBody();
+						httpStatus = response.getStatusCode();
+						break;
+					case 1:
+						response = generateStaticQrCustomer(dto, token);
+						result = response.getBody();
+						httpStatus = response.getStatusCode();
+						break;
+					case 3:
+						response = generateSemiDynamicQrCustomer(dto, token);
+						result = response.getBody();
+						httpStatus = response.getStatusCode();
+						break;
+					default:
+						// Invalid QR type
+						result = new ResponseMessageDTO("FAILED", "E46");
+						httpStatus = HttpStatus.BAD_REQUEST;
+						break;
+				}
+			} else {
+				result = new ResponseMessageDTO("FAILED", "E76");
 				httpStatus = HttpStatus.BAD_REQUEST;
-				break;
+			}
+		} catch (Exception e) {
+			logger.error("VietQRController: generateQRCustomer: ERROR: " + e.getMessage() + " at: "
+					+ System.currentTimeMillis());
+			result = new ResponseMessageDTO("FAILED", "E05");
+			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(result, httpStatus);
+	}
+
+	private String getUsernameFromToken(String token) {
+		String result = "";
+		if (token != null && !token.trim().isEmpty()) {
+			String secretKey = "mySecretKey";
+			String jwtToken = token.substring(7); // remove "Bearer " from the beginning
+			Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(jwtToken).getBody();
+			String userId = (String) claims.get("user");
+			if (userId != null) {
+				result = new String(Base64.getDecoder().decode(userId));
+			}
+		}
+		return result;
 	}
 
 

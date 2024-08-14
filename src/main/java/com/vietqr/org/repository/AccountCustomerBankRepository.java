@@ -48,7 +48,7 @@ public interface AccountCustomerBankRepository extends JpaRepository<AccountCust
                         + "ON a.account_customer_id = b.id "
                         + "INNER JOIN customer_sync c "
                         + "ON a.customer_sync_id = c.id "
-                        + "WHERE b.username = :username ", nativeQuery = true)
+                        + "WHERE b.username = :username AND c.active = TRUE ", nativeQuery = true)
         List<String> checkExistedCustomerSyncByUsername(@Param(value = "username") String username);
 
         @Query(value = "SELECT id FROM account_customer_bank WHERE bank_account = :bankAccount AND customer_sync_id = :customerSyncId ", nativeQuery = true)
