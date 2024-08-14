@@ -196,10 +196,8 @@ public class TransactionMMSController {
                     // find bankAccount by terminalLabel (terminal ID)
                     // notify to TID
                     httpStatus = HttpStatus.OK;
-                    LocalDateTime insertLocalTime = LocalDateTime.now();
-                    long insertTime = insertLocalTime.toEpochSecond(ZoneOffset.UTC);
                     logger.info(
-                            "transaction-mms-sync: INSERT (insertTransactionMMS) SUCCESS at: " + insertTime);
+                            "transaction-mms-sync: INSERT (insertTransactionMMS) SUCCESS at: " + DateTimeUtil.getCurrentDateTimeUTC());
                     ///
                     // find transaction_receive to update
                     // amount
@@ -222,11 +220,9 @@ public class TransactionMMSController {
                                 transactionReceiveService.updateTransactionReceiveStatus(1, uuid.toString(),
                                         entity.getFtCode(), time,
                                         transactionReceiveEntity.getId());
-                                LocalDateTime updateLocalTime = LocalDateTime.now();
-                                long updateTime = updateLocalTime.toEpochSecond(ZoneOffset.UTC);
                                 logger.info(
                                         "transaction-mms-sync: updateTransactionReceiveStatus SUCCESS at: "
-                                                + updateTime);
+                                                + DateTimeUtil.getCurrentDateTimeUTC());
                             } else {
                                 //////////////////////////////////////////
                                 logger.info("transaction-mms-sync: NOT FOUND transactionReceiveEntity");
@@ -237,40 +233,24 @@ public class TransactionMMSController {
                     }
                 } else {
                     httpStatus = HttpStatus.BAD_REQUEST;
-                    LocalDateTime insertLocalTime = LocalDateTime.now();
-                    long insertTime = insertLocalTime.toEpochSecond(ZoneOffset.UTC);
                     logger.error(
-                            "transaction-mms-sync: INSERT ERROR at: " + insertTime);
-                    // System.out.println(
-                    // "transaction-mms-sync: INSERT ERROR at: " + insertTime);
+                            "transaction-mms-sync: INSERT ERROR at: " + DateTimeUtil.getCurrentDateTimeUTC());
                 }
             } else {
                 httpStatus = HttpStatus.BAD_REQUEST;
-                LocalDateTime resLocalBankTime = LocalDateTime.now();
-                long resBankTime = resLocalBankTime.toEpochSecond(ZoneOffset.UTC);
                 logger.error(
                         "transaction-mms-sync: Response ERROR: " + result.getResCode() + " - " + result.getResDesc()
-                                + " at: " + resBankTime);
-                // System.out.println(
-                // "transaction-mms-sync: Response ERROR: " + result.getResCode() + " - " +
-                // result.getResDesc()
-                // + " at: " + resBankTime);
+                                + " at: " + DateTimeUtil.getCurrentDateTimeUTC());
             }
-            LocalDateTime responseLocalTime = LocalDateTime.now();
-            long responseTime = responseLocalTime.toEpochSecond(ZoneOffset.UTC);
             logger.info(
-                    "transaction-mms-sync: RESPONSE: " + result.getResCode() + " at: " + responseTime);
-            // System.out.println(
-            // "transaction-mms-sync: RESPONSE at: " + responseTime);
+                    "transaction-mms-sync: RESPONSE: " + result.getResCode() + " at: " + DateTimeUtil.getCurrentDateTimeUTC());
             return new ResponseEntity<>(result, httpStatus);
         } catch (Exception e) {
             logger.error("transaction-mms-sync: Error " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
             result = new TransactionMMSResponseDTO("99", "Internal error");
-            LocalDateTime responseLocalTime = LocalDateTime.now();
-            long responseTime = responseLocalTime.toEpochSecond(ZoneOffset.UTC);
             logger.info(
-                    "transaction-mms-sync: RESPONSE ERRPR at: " + responseTime);
+                    "transaction-mms-sync: RESPONSE ERRPR at: " + DateTimeUtil.getCurrentDateTimeUTC());
             // System.out.println(
             // "transaction-mms-sync: RESPONSE ERRPR at: " + responseTime);
             return new ResponseEntity<>(result, httpStatus);
@@ -410,7 +390,28 @@ public class TransactionMMSController {
                             data.put("status", "1");
                             data.put("traceId", "");
                             data.put("transType", "C");
-                            data.put("urlLink", tempTransReceive.getUrlLink() != null ? tempTransReceive.getUrlLink() : "");
+                            data.put("urlLink", tempTransReceive.getUrlLink() != null ?
+                                    tempTransReceive.getUrlLink() : "");
+
+                            UUID notificationUUID = UUID.randomUUID();
+                            NotificationEntity notiEntity = new NotificationEntity();
+                            String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
+                                    + accountBankEntity.getBankAccount()
+                                    + NotificationUtil.getNotiDescUpdateTransSuffix2()
+                                    + "+" + amountForShow
+                                    + NotificationUtil.getNotiDescUpdateTransSuffix3()
+                                    + StringUtil.getValueNullChecker(tempTransReceive.getTerminalCode())
+                                    + NotificationUtil.getNotiDescUpdateTransSuffix4()
+                                    + tempTransReceive.getContent();
+                            notiEntity.setId(notificationUUID.toString());
+                            notiEntity.setRead(false);
+                            notiEntity.setMessage(message);
+                            notiEntity.setTime(time);
+                            notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
+                            notiEntity.setUserId(tempTransReceive.getUserId());
+                            notiEntity.setData(tempTransReceive.getId());
+                            pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
+                                    message, notiEntity, data, tempTransReceive.getUserId());
                             // send msg to QR Link
                             String refId = TransactionRefIdUtil
                                     .encryptTransactionId(tempTransReceive.getId());
@@ -419,9 +420,6 @@ public class TransactionMMSController {
                                 long startRequestTime = startRequestDateTime.toEpochSecond(ZoneOffset.UTC);
                                 logger.info(
                                         "transaction-mms-sync: sendMessageToTransactionRefId at:" + startRequestTime);
-                                // System.out.println(
-                                // "transaction-mms-sync: sendMessageToTransactionRefId at:" +
-                                // startRequestTime);
                                 if (isSubTerminal) {
                                     try {
                                         Map<String, String> data1 = new HashMap<>();
@@ -461,14 +459,23 @@ public class TransactionMMSController {
                             logger.info("transaction-mms-sync: NOT FOUND accountBankEntity");
                         }
                     } else {
+
                         if (!StringUtil.isNullOrEmpty(entity.getTraceTransfer())) {
                             TerminalItemEntity terminalItemEntity = terminalItemService
-                                    .getTerminalItemByTraceTransferAndAmount(entity.getTraceTransfer(), entity.getDebitAmount(), entity.getReferenceLabelCode());
+                                    .getTerminalItemByTraceTransferAndAmount(entity.getTraceTransfer(),
+                                            entity.getDebitAmount(), entity.getReferenceLabelCode());
                             if (Objects.nonNull(terminalItemEntity)) {
                                 // qr bán động
+                                String transactionId = UUID.randomUUID().toString();
                                 AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService
                                         .getAccountBankById(terminalItemEntity.getBankId());
-                                String transactionId = UUID.randomUUID().toString();
+                                String amountForShow = StringUtil.formatNumberAsString(entity.getDebitAmount() + "");
+                                try {
+                                    amountForShow = processHiddenAmount(Long.parseLong(entity.getDebitAmount()), accountBankReceiveEntity.getId(),
+                                            accountBankReceiveEntity.isValidService(), transactionId);
+                                } catch (Exception e) {
+                                    logger.error("processHiddenAmount: ERROR: MMS:" + e.getMessage() + " at: " + System.currentTimeMillis());
+                                }
                                 TransactionReceiveEntity transactionReceive = new TransactionReceiveEntity();
                                 transactionReceive.setId(transactionId);
                                 transactionReceive.setStatus(1);
@@ -501,9 +508,9 @@ public class TransactionMMSController {
                                 UUID notificationUUID = UUID.randomUUID();
                                 NotificationEntity notiEntity = new NotificationEntity();
                                 String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
-                                        + entity.getDebitAmount()
+                                        + accountBankReceiveEntity.getBankAccount()
                                         + NotificationUtil.getNotiDescUpdateTransSuffix2()
-                                        + "+" + nf.format(Long.parseLong(entity.getDebitAmount()))
+                                        + "+" + amountForShow
                                         + NotificationUtil.getNotiDescUpdateTransSuffix3()
                                         + entity.getTraceTransfer()
                                         + NotificationUtil.getNotiDescUpdateTransSuffix4()
@@ -523,13 +530,6 @@ public class TransactionMMSController {
                                 data.put("bankCode", bankTypeEntity.getBankCode());
                                 data.put("bankId", accountBankReceiveEntity.getId());
                                 data.put("content", "" + terminalItemEntity.getContent());
-                                String amountForShow = StringUtil.formatNumberAsString(entity.getDebitAmount() + "");
-                                try {
-                                    amountForShow = processHiddenAmount(tempTransReceive.getAmount(), accountBankReceiveEntity.getId(),
-                                            accountBankReceiveEntity.isValidService(), tempTransReceive.getId());
-                                } catch (Exception e) {
-                                    logger.error("processHiddenAmount: ERROR: MMS:" + e.getMessage() + " at: " + System.currentTimeMillis());
-                                }
                                 data.put("amount", "" + amountForShow);
                                 data.put("terminalName", "");
                                 data.put("terminalCode", "");
@@ -560,22 +560,6 @@ public class TransactionMMSController {
                                 pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
                                         message, notiEntity, data, accountBankReceiveEntity.getUserId());
 
-                                // /////// DO INSERT TELEGRAM
-//                                List<String> chatIds = telegramAccountBankService
-//                                        .getChatIdsByBankId(terminalItemEntity.getBankId());
-//                                if (chatIds != null && !chatIds.isEmpty()) {
-//                                    TelegramUtil telegramUtil = new TelegramUtil();
-//
-//                                    String telegramMsg = "+" + nf.format(terminalItemEntity.getAmount()) + " VND"
-//                                            + " | TK: " + bankTypeEntity.getBankShortName() + " - "
-//                                            + terminalItemEntity.getBankAccount()
-//                                            + " | " + convertLongToDate(time)
-//                                            + " | " + entity.getFtCode()
-//                                            + " | ND: " + terminalItemEntity.getContent();
-//                                    for (String chatId : chatIds) {
-//                                        telegramUtil.sendMsg(chatId, telegramMsg);
-//                                    }
-//                                }
                                 // Push notifications to Telegram
                                 List<String> webhooks = larkAccountBankService.getWebhooksByBankId(terminalItemEntity.getBankId());
                                 if (webhooks != null && !webhooks.isEmpty()) {
@@ -590,7 +574,7 @@ public class TransactionMMSController {
                                                 });
                                                 boolean sendNotification = shouldSendNotification(notificationTypes, entity, finalTransactionReceiveEntity);
                                                 if (sendNotification) {
-                                                    String larkMsg = createMessage(notificationContents, "C", terminalItemEntity.getAmount(), bankTypeEntity, terminalItemEntity.getBankAccount(), time, entity.getFtCode(), entity.getTraceTransfer());
+                                                    String larkMsg = createMessage(notificationContents, "C", amountForShow, bankTypeEntity, terminalItemEntity.getBankAccount(), time, entity.getFtCode(), entity.getTraceTransfer());
                                                     String formattedTime = formatTimeForGoogleChat(time);
                                                     larkMsg = larkMsg.replace(convertLongToDate(time), formattedTime);
                                                     larkUtil.sendMessageToLark(larkMsg, webhook);
@@ -604,29 +588,11 @@ public class TransactionMMSController {
                                     }
                                 }
 
-                                /////// DO INSERT LARK
-//                                List<String> webhooks = larkAccountBankService
-//                                        .getWebhooksByBankId(terminalItemEntity.getBankId());
-//                                if (webhooks != null && !webhooks.isEmpty()) {
-//                                    LarkUtil larkUtil = new LarkUtil();
-//
-//                                    String larkMsg = "+" + nf.format(terminalItemEntity.getAmount()) + " VND"
-//                                            + " | TK: " + bankTypeEntity.getBankShortName() + " - "
-//                                            + terminalItemEntity.getBankAccount()
-//                                            + " | " + convertLongToDate(time)
-//                                            + " | " + entity.getFtCode()
-//                                            + " | ND: " + terminalItemEntity.getContent();
-//                                    for (String webhook : webhooks) {
-//                                        larkUtil.sendMessageToLark(larkMsg, webhook);
-//                                    }
-//                                }
-
-
                                 /////// DO INSERT GOOGLE CHAT
                                 List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(terminalItemEntity.getBankId());
                                 if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
                                     GoogleChatUtil googleChatUtil = new GoogleChatUtil();
-                                    String googleChatMsg = "+" + nf.format(terminalItemEntity.getAmount()) + " VND"
+                                    String googleChatMsg = "+" + amountForShow + " VND"
                                             + " | TK: " + bankTypeEntity.getBankShortName() + " - "
                                             + terminalItemEntity.getBankAccount()
                                             + " | " + convertLongToDate(time)
@@ -652,11 +618,13 @@ public class TransactionMMSController {
                                 if (!StringUtil.isNullOrEmpty(traceTransfer)) {
                                     terminalId = terminalService
                                             .getTerminalByTraceTransfer(traceTransfer);
-                                    if (terminalId == null || terminalId.trim().isEmpty()) {
+                                    if (StringUtil.isNullOrEmpty(terminalId)) {
                                         try {
                                             terminalSubRawCodeDTO = terminalBankReceiveService
                                                     .getTerminalSubFlow2ByTraceTransfer(traceTransfer);
-                                            terminalId = terminalSubRawCodeDTO.getTerminalId();
+                                            if (Objects.nonNull(terminalSubRawCodeDTO)) {
+                                                terminalId = terminalSubRawCodeDTO.getTerminalId();
+                                            }
                                         } catch (Exception e) {
                                             terminalId = terminalBankReceiveService
                                                     .getTerminalByTraceTransfer(traceTransfer);
@@ -672,9 +640,16 @@ public class TransactionMMSController {
                                     TerminalBankReceiveEntity terminalBankReceiveEntity = terminalBankReceiveService
                                             .getTerminalBankReceiveByTraceTransfer(traceTransfer);
                                     if (terminalBankReceiveEntity != null) {
+                                        String transactionId = UUID.randomUUID().toString();
                                         AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService
                                                 .getAccountBankById(terminalBankReceiveEntity.getBankId());
-                                        String transactionId = UUID.randomUUID().toString();
+                                        String amountForShow = StringUtil.formatNumberAsString(entity.getDebitAmount() + "");
+                                        try {
+                                            amountForShow = processHiddenAmount(Long.parseLong(entity.getDebitAmount()), accountBankReceiveEntity.getId(),
+                                                    accountBankReceiveEntity.isValidService(), transactionId);
+                                        } catch (Exception e) {
+                                            logger.error("processHiddenAmount: ERROR: MMS:" + e.getMessage() + " at: " + System.currentTimeMillis());
+                                        }
                                         TransactionReceiveEntity transactionReceiveEntity1 = new TransactionReceiveEntity();
                                         transactionReceiveEntity1.setId(transactionId);
                                         transactionReceiveEntity1.setStatus(1);
@@ -734,9 +709,9 @@ public class TransactionMMSController {
                                         UUID notificationUUID = UUID.randomUUID();
                                         NotificationEntity notiEntity = new NotificationEntity();
                                         String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
-                                                + entity.getDebitAmount()
+                                                + accountBankReceiveEntity.getBankAccount()
                                                 + NotificationUtil.getNotiDescUpdateTransSuffix2()
-                                                + "+" + nf.format(Long.parseLong(entity.getDebitAmount()))
+                                                + "+" + amountForShow
                                                 + NotificationUtil.getNotiDescUpdateTransSuffix3()
                                                 + entity.getTraceTransfer()
                                                 + NotificationUtil.getNotiDescUpdateTransSuffix4()
@@ -757,13 +732,6 @@ public class TransactionMMSController {
                                         data.put("bankId", accountBankReceiveEntity.getId());
                                         data.put("content", "" + traceTransfer);
                                         String amountForVoice = StringUtil.removeFormatNumber(entity.getDebitAmount() + "");
-                                        String amountForShow = StringUtil.formatNumberAsString(entity.getDebitAmount() + "");
-                                        try {
-                                            amountForShow = processHiddenAmount(tempTransReceive.getAmount(), accountBankReceiveEntity.getId(),
-                                                    accountBankReceiveEntity.isValidService(), tempTransReceive.getId());
-                                        } catch (Exception e) {
-                                            logger.error("processHiddenAmount: ERROR: MMS:" + e.getMessage() + " at: " + System.currentTimeMillis());
-                                        }
                                         data.put("amount", "" + amountForShow);
                                         if (terminalEntity != null) {
                                             data.put("terminalName",
@@ -823,16 +791,21 @@ public class TransactionMMSController {
                                     }
 
                                     // check time tim thay terminal
-                                    LocalDateTime findTerminal = LocalDateTime.now();
-                                    long findTerminalTime = findTerminal.toEpochSecond(ZoneOffset.UTC);
                                     logger.info(
-                                            "transaction-mms-sync: findTerminal at:" + findTerminalTime);
+                                            "transaction-mms-sync: findTerminal at:" + DateTimeUtil.getCurrentDateTimeUTC());
                                     String bankTypeId = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
                                     AccountBankReceiveShareForNotiDTO bankDTO = accountBankReceiveService
                                             .findAccountBankByTraceTransfer(traceTransfer,
                                                     bankTypeId);
-                                    if (bankDTO.getBankId() != null) {
+                                    if (bankDTO != null && bankDTO.getBankId() != null) {
                                         UUID transcationUUID = UUID.randomUUID();
+                                        String amountForShow = StringUtil.formatNumberAsString(entity.getDebitAmount() + "");
+                                        try {
+                                            amountForShow = processHiddenAmount(Long.parseLong(entity.getDebitAmount()), bankDTO.getBankId(),
+                                                    bankDTO.getIsValidService(), transcationUUID.toString());
+                                        } catch (Exception e) {
+                                            logger.error("processHiddenAmount: ERROR: MMS:" + e.getMessage() + " at: " + System.currentTimeMillis());
+                                        }
                                         TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();
                                         transactionEntity.setId(transcationUUID.toString());
                                         transactionEntity.setBankAccount(bankDTO.getBankAccount());
@@ -874,11 +847,8 @@ public class TransactionMMSController {
                                             transactionTerminalTempService
                                                     .insertTransactionTerminal(transactionTerminalTempEntity);
                                         }
-                                        // check time insert transaction QR static success
-                                        LocalDateTime insertStatic = LocalDateTime.now();
-                                        long insertStaticTime = insertStatic.toEpochSecond(ZoneOffset.UTC);
                                         logger.info(
-                                                "transaction-mms-sync: insertStaticQRTimeSuccess at:" + insertStaticTime);
+                                                "transaction-mms-sync: insertStaticQRTimeSuccess at:" + DateTimeUtil.getCurrentDateTimeUTC());
                                         // 4. insert and push notification to user.
 
                                         List<String> userIds = terminalService
@@ -892,9 +862,9 @@ public class TransactionMMSController {
                                             UUID notificationUUID = UUID.randomUUID();
                                             NotificationEntity notiEntity = new NotificationEntity();
                                             String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
-                                                    + entity.getDebitAmount()
+                                                    + bankDTO.getBankAccount()
                                                     + NotificationUtil.getNotiDescUpdateTransSuffix2()
-                                                    + "+" + nf.format(amount)
+                                                    + "+" + amountForShow
                                                     + NotificationUtil.getNotiDescUpdateTransSuffix3()
                                                     + entity.getTraceTransfer()
                                                     + NotificationUtil.getNotiDescUpdateTransSuffix4()
@@ -922,7 +892,7 @@ public class TransactionMMSController {
                                                     terminalEntity.getRawTerminalCode() != null
                                                             ? terminalEntity.getRawTerminalCode()
                                                             : "");
-                                            data.put("amount", "" + entity.getDebitAmount());
+                                            data.put("amount", "" + amountForShow);
                                             data.put("orderId", "");
                                             data.put("referenceNumber", entity.getFtCode());
                                             data.put("timePaid", "" + time);
@@ -953,7 +923,7 @@ public class TransactionMMSController {
                                         if (chatIds != null && !chatIds.isEmpty()) {
                                             TelegramUtil telegramUtil = new TelegramUtil();
 
-                                            String telegramMsg = "+" + nf.format(amount) + " VND"
+                                            String telegramMsg = "+" + amountForShow + " VND"
                                                     + " | TK: " + bankDTO.getBankShortName() + " - "
                                                     + bankAccount
                                                     + " | " + convertLongToDate(time)
@@ -970,7 +940,7 @@ public class TransactionMMSController {
                                         if (webhooks != null && !webhooks.isEmpty()) {
                                             LarkUtil larkUtil = new LarkUtil();
 
-                                            String larkMsg = "+" + nf.format(amount) + " VND"
+                                            String larkMsg = "+" + amountForShow + " VND"
                                                     + " | TK: " + bankDTO.getBankShortName() + " - "
                                                     + bankAccount
                                                     + " | " + convertLongToDate(time)
@@ -985,7 +955,7 @@ public class TransactionMMSController {
                                         List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(bankDTO.getBankId());
                                         if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
                                             GoogleChatUtil googleChatUtil = new GoogleChatUtil();
-                                            String googleChatMsg = "+" + amount + " VND"
+                                            String googleChatMsg = "+" + amountForShow + " VND"
                                                     + " | TK: " + bankDTO.getBankShortName() + " - "
                                                     + bankDTO.getBankAccount()
                                                     + " | " + convertLongToDate(time)
@@ -998,10 +968,17 @@ public class TransactionMMSController {
                                     }
                                 } else if (terminalSubRawCodeDTO != null) {
                                     try {
+                                        String transactionId = UUID.randomUUID().toString();
                                         subRawCode = terminalSubRawCodeDTO.getRawTerminalCode();
                                         AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService
                                                 .getAccountBankById(terminalSubRawCodeDTO.getBankId());
-                                        String transactionId = UUID.randomUUID().toString();
+                                        String amountForShow = StringUtil.formatNumberAsString(entity.getDebitAmount() + "");
+                                        try {
+                                            amountForShow = processHiddenAmount(Long.parseLong(entity.getDebitAmount()), accountBankReceiveEntity.getId(),
+                                                    accountBankReceiveEntity.isValidService(), transactionId);
+                                        } catch (Exception e) {
+                                            logger.error("processHiddenAmount: ERROR: MMS:" + e.getMessage() + " at: " + System.currentTimeMillis());
+                                        }
                                         TransactionReceiveEntity transactionReceiveEntity1 = new TransactionReceiveEntity();
                                         transactionReceiveEntity1.setId(transactionId);
                                         transactionReceiveEntity1.setStatus(1);
@@ -1041,9 +1018,9 @@ public class TransactionMMSController {
                                         UUID notificationUUID = UUID.randomUUID();
                                         NotificationEntity notiEntity = new NotificationEntity();
                                         String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
-                                                + entity.getDebitAmount()
+                                                + accountBankReceiveEntity.getBankAccount()
                                                 + NotificationUtil.getNotiDescUpdateTransSuffix2()
-                                                + "+" + nf.format(Long.parseLong(entity.getDebitAmount()))
+                                                + "+" + amountForShow
                                                 + NotificationUtil.getNotiDescUpdateTransSuffix3()
                                                 + entity.getTraceTransfer()
                                                 + NotificationUtil.getNotiDescUpdateTransSuffix4()
@@ -1064,13 +1041,6 @@ public class TransactionMMSController {
                                         data.put("bankId", accountBankReceiveEntity.getId());
                                         data.put("content", "" + traceTransfer);
                                         String amountForVoice = StringUtil.removeFormatNumber(entity.getDebitAmount());
-                                        String amountForShow = StringUtil.formatNumberAsString(entity.getDebitAmount() + "");
-                                        try {
-                                            amountForShow = processHiddenAmount(tempTransReceive.getAmount(), accountBankReceiveEntity.getId(),
-                                                    accountBankReceiveEntity.isValidService(), tempTransReceive.getId());
-                                        } catch (Exception e) {
-                                            logger.error("processHiddenAmount: ERROR: MMS:" + e.getMessage() + " at: " + System.currentTimeMillis());
-                                        }
                                         data.put("amount", "" + amountForShow);
                                         data.put("terminalName", "");
                                         data.put("terminalCode",
@@ -1138,7 +1108,7 @@ public class TransactionMMSController {
                                         if (chatIds != null && !chatIds.isEmpty()) {
                                             TelegramUtil telegramUtil = new TelegramUtil();
 
-                                            String telegramMsg = "+" + nf.format(amount) + " VND"
+                                            String telegramMsg = "+" + amountForShow + " VND"
                                                     + " | TK: " + bankDTO.getBankShortName() + " - "
                                                     + bankDTO.getBankAccount()
                                                     + " | " + convertLongToDate(time)
@@ -1155,7 +1125,7 @@ public class TransactionMMSController {
                                         if (webhooks != null && !webhooks.isEmpty()) {
                                             LarkUtil larkUtil = new LarkUtil();
 
-                                            String larkMsg = "+" + nf.format(amount) + " VND"
+                                            String larkMsg = "+" + amountForShow + " VND"
                                                     + " | TK: " + bankDTO.getBankShortName() + " - "
                                                     + bankDTO.getBankAccount()
                                                     + " | " + convertLongToDate(time)
@@ -1170,7 +1140,7 @@ public class TransactionMMSController {
                                         List<String> ggChatWebhooks = googleChatAccountBankService.getWebhooksByBankId(bankDTO.getBankId());
                                         if (ggChatWebhooks != null && !ggChatWebhooks.isEmpty()) {
                                             GoogleChatUtil googleChatUtil = new GoogleChatUtil();
-                                            String googleChatMsg = "+" + amount + " VND"
+                                            String googleChatMsg = "+" + amountForShow + " VND"
                                                     + " | TK: " + bankTypeEntity.getBankShortName() + " - "
                                                     + bankDTO.getBankAccount()
                                                     + " | " + convertLongToDate(time)
@@ -1220,7 +1190,7 @@ public class TransactionMMSController {
         return (transactionReceiveEntity.getType() == 0 || transactionReceiveEntity.getType() == 1);
     }
 
-    private String createMessage(List<String> notificationContents, String transType, long amount, BankTypeEntity bankTypeEntity, String bankAccount, long time, String referenceNumber, String content) {
+    private String createMessage(List<String> notificationContents, String transType, String amount, BankTypeEntity bankTypeEntity, String bankAccount, long time, String referenceNumber, String content) {
         StringBuilder msgBuilder = new StringBuilder();
 
         if (notificationContents.contains("AMOUNT")) {
@@ -1971,6 +1941,7 @@ public class TransactionMMSController {
                         // System.out.println("data getDebitAmount: " + entity.getDebitAmount());
                         // System.out.println("data checksum: " + dataCheckSum);
                         if (BankEncryptUtil.isMatchChecksum(dataCheckSum, entity.getCheckSum())) {
+//                        if (true) {
                             result = new TransactionMMSResponseDTO("00", "Success");
                         } else {
                             result = new TransactionMMSResponseDTO("12", "False checksum");
