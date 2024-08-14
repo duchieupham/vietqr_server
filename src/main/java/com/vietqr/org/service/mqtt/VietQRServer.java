@@ -23,11 +23,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.text.NumberFormat;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -55,23 +52,22 @@ public class VietQRServer {
     CustomerInvoiceService customerInvoiceService;
     @Autowired
     NotificationService notificationService;
-
+    @Autowired
+    AccountCustomerBankService accountCustomerBankService;
     @Autowired
     private TransactionRefundService transactionRefundService;
 
-    @Autowired
-    AccountCustomerBankService accountCustomerBankService;
-
-    private Set<String> processedMessages = Collections.synchronizedSet(new HashSet<>());
     @PostConstruct
     public void init() {
         try {
             MemoryPersistence persistence = new MemoryPersistence();
             client = new MqttClient(BROKER, CLIENT_ID, persistence);
             MqttConnectOptions connOpts = new MqttConnectOptions();
-            connOpts.setCleanSession(true);
+            connOpts.setCleanSession(false);
             connOpts.setUserName(USERNAME);
             connOpts.setPassword(PASSWORD.toCharArray());
+            connOpts.setAutomaticReconnect(true); // Tự động kết nối lại khi bị mất kết nối
+            connOpts.setKeepAliveInterval(60);    // Thời gian giữ kết nối sống, tính bằng giây
             client.connect(connOpts);
 
             client.subscribe("vietqr/request/+", new IMqttMessageListener() {
@@ -94,7 +90,7 @@ public class VietQRServer {
 
                     // Gửi phản hồi lên đúng topic
                     MqttMessage responseMessage = new MqttMessage(responsePayload.getBytes());
-                    responseMessage.setQos(1);
+                    responseMessage.setQos(0);
                     client.publish(responseTopic, responseMessage);
                     System.out.println("Response sent to topic: " + responseTopic + " Payload: " + responsePayload);
                 }
@@ -109,7 +105,6 @@ public class VietQRServer {
                     handleTransactionStatusRequest(dto, topic);
                 }
             });
-
         } catch (MqttException e) {
             logger.error("Error initializing MQTT client: " + e.getMessage());
         }
@@ -119,34 +114,33 @@ public class VietQRServer {
         return client;
     }
 
-
     public void handleTransactionStatusRequest(TransactionCheckOrderInputDTO dto, String topic) throws MqttException {
         Object result = null;
         try {
             // Check valid object
             if (dto != null) {
-                    String bankAccountName = accountBankReceiveService.getBankAccountNameByBankAccount(dto.getBankAccount());
-                    // Check checksum
-                    String checkSum = BankEncryptUtil.generateMD5CheckOrderChecksum(dto.getBankAccount(), bankAccountName);
-                    if (BankEncryptUtil.isMatchChecksum(dto.getCheckSum(), checkSum)) {
-                        // Find transaction
-                        List<TransReceiveResponseDTO> responseDTOs = new ArrayList<>();
-                        if (dto.getValue() != null && !dto.getValue().trim().isEmpty()) {
-                            if (dto.getType() != null && dto.getType() == 0) {
-                                responseDTOs = transactionReceiveService.getTransByOrderId(dto.getValue(), dto.getBankAccount());
-                                result = processTransactions(responseDTOs, dto);
-                            } else if (dto.getType() != null && dto.getType() == 1) {
-                                responseDTOs = transactionReceiveService.getTransByReferenceNumber(dto.getValue(), dto.getBankAccount());
-                                result = processTransactions(responseDTOs, dto);
-                            } else {
-                                result = new ResponseMessageDTO("FAILED", "E95");
-                            }
+                String bankAccountName = accountBankReceiveService.getBankAccountNameByBankAccount(dto.getBankAccount());
+                // Check checksum
+                String checkSum = BankEncryptUtil.generateMD5CheckOrderChecksum(dto.getBankAccount(), bankAccountName);
+                if (BankEncryptUtil.isMatchChecksum(dto.getCheckSum(), checkSum)) {
+                    // Find transaction
+                    List<TransReceiveResponseDTO> responseDTOs = new ArrayList<>();
+                    if (dto.getValue() != null && !dto.getValue().trim().isEmpty()) {
+                        if (dto.getType() != null && dto.getType() == 0) {
+                            responseDTOs = transactionReceiveService.getTransByOrderId(dto.getValue(), dto.getBankAccount());
+                            result = processTransactions(responseDTOs, dto);
+                        } else if (dto.getType() != null && dto.getType() == 1) {
+                            responseDTOs = transactionReceiveService.getTransByReferenceNumber(dto.getValue(), dto.getBankAccount());
+                            result = processTransactions(responseDTOs, dto);
                         } else {
-                            result = new ResponseMessageDTO("FAILED", "E46");
+                            result = new ResponseMessageDTO("FAILED", "E95");
                         }
                     } else {
-                        result = new ResponseMessageDTO("FAILED", "E39");
+                        result = new ResponseMessageDTO("FAILED", "E46");
                     }
+                } else {
+                    result = new ResponseMessageDTO("FAILED", "E39");
+                }
 
             } else {
                 result = new ResponseMessageDTO("FAILED", "E46");
@@ -159,7 +153,7 @@ public class VietQRServer {
         Gson gson = new Gson();
         String payload = gson.toJson(result);
         MqttMessage message = new MqttMessage(payload.getBytes());
-        message.setQos(1);
+        message.setQos(0);
         // Assuming dto has terminalCode
 
         String responseTopic = topic.replace("request", "response");
@@ -423,12 +417,10 @@ public class VietQRServer {
                                     vietQRVaRequestDTO.setUserBankName(accountBankEntity.getBankAccountName());
                                     vietQRVaRequestDTO.setDescription(StringUtil.getValueNullChecker(billId));
 
-                                   // ResponseMessageDTO generateVaInvoiceVietQR = CustomerVaUtil.generateVaInvoiceVietQR(vietQRVaRequestDTO, accountBankEntity.getCustomerId());
-                                    String statuses = "SUCCESS";
-//                                    if ("SUCCESS".equals(generateVaInvoiceVietQR.getStatus())) {
-                                        if ("SUCCESS".equals(statuses)) {
-                                       // qr = generateVaInvoiceVietQR.getMessage();
-                                        qr="982372367";
+                                    ResponseMessageDTO generateVaInvoiceVietQR = CustomerVaUtil.generateVaInvoiceVietQR(vietQRVaRequestDTO, accountBankEntity.getCustomerId());
+
+                                    if ("SUCCESS".equals(generateVaInvoiceVietQR.getStatus())) {
+                                        qr = generateVaInvoiceVietQR.getMessage();
                                         // generate VietQRDTO
                                         vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
                                         vietQRDTO.setBankName(bankTypeEntity.getBankName());

@@ -1934,7 +1934,7 @@ public class TransactionBankController {
 						notificationData.put("bankAccount", transactionReceiveEntity.getBankAccount());
 						notificationData.put("amount", Double.parseDouble(amount.replace(",", "")));
 
-						notificationData.put("transType", transactionReceiveEntity.getTransType().toUpperCase().equals("C") ? "Giao dịch đến" : "Giao dịch đi");
+						notificationData.put("transType", transactionReceiveEntity.getTransType());
 						notificationData.put("content", transactionReceiveEntity.getContent());
 						notificationData.put("status", 1);
 						String formattedTime = formatTimeUtcPlus(time);
@@ -1946,7 +1946,7 @@ public class TransactionBankController {
 
 						// Tạo thông điệp MQTT
 						MqttMessage mqttMessage = new MqttMessage(payload.getBytes());
-						mqttMessage.setQos(1); // Đảm bảo thông điệp được nhận ít nhất một lần
+						mqttMessage.setQos(0); // Đảm bảo thông điệp được nhận ít nhất một lần
 
 						// Xuất bản thông điệp lên topic
 						vietQRServer.getClient().publish(mqttTopic, mqttMessage);
@@ -2270,7 +2270,7 @@ public class TransactionBankController {
 							notificationData.put("bankAccount", transactionReceiveEntity.getBankAccount());
 							notificationData.put("amount", Double.parseDouble(amount.replace(",", "")));
 
-							notificationData.put("transType", transactionReceiveEntity.getTransType().toUpperCase().equals("C") ? "Giao dịch đến" : "Giao dịch đi");
+							notificationData.put("transType", transactionReceiveEntity.getTransType());
 							notificationData.put("content", transactionReceiveEntity.getContent());
 							notificationData.put("status", 1);
 							String formattedTime = formatTimeUtcPlus(time);
@@ -2283,7 +2283,7 @@ public class TransactionBankController {
 
 							// Tạo thông điệp MQTT
 							MqttMessage mqttMessage = new MqttMessage(payload.getBytes());
-							mqttMessage.setQos(1); // Đảm bảo thông điệp được nhận ít nhất một lần
+							mqttMessage.setQos(0); // Đảm bảo thông điệp được nhận ít nhất một lần
 
 							// Xuất bản thông điệp lên topic
 							vietQRServer.getClient().publish(mqttTopic, mqttMessage);
