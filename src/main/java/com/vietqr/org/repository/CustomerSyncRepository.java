@@ -33,7 +33,7 @@ public interface CustomerSyncRepository extends JpaRepository<CustomerSyncEntity
     @Query(value = "SELECT * FROM customer_sync WHERE active = true AND account_id = :accountId ", nativeQuery = true)
     List<CustomerSyncEntity> getCustomerSyncByAccountId(@Param(value = "accountId") String accountId);
 
-    @Query(value = "SELECT * FROM customer_sync WHERE id = :id", nativeQuery = true)
+    @Query(value = "SELECT * FROM customer_sync WHERE id = :id AND active = TRUE", nativeQuery = true)
     CustomerSyncEntity getCustomerSyncById(@Param(value = "id") String id);
 
     @Query(value = "SELECT customer_sync_id FROM account_customer_bank WHERE bank_id = :bankId ", nativeQuery = true)
