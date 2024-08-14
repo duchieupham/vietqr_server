@@ -75,4 +75,7 @@ public interface MerchantRepository extends JpaRepository<MerchantEntity, Long> 
             + "WHERE a.user_id = :userId AND c.bank_id = :bankId "
             + "GROUP BY a.id ", nativeQuery = true)
     List<MerchantResponseDTO> getMerchantsByUserIdNoPaging(String userId, String bankId);
+
+    @Query(value = "DELETE FROM merchant WHERE id = :id", nativeQuery = true)
+    void deleteMerchantById(@Param(value = "id") String id);
 }
