@@ -64,6 +64,25 @@ public class MerchantEntity {
     public MerchantEntity() {
     }
 
+    public MerchantEntity(String id, String name, String userId) {
+        this.id = id;
+        this.name = name;
+        this.userId = userId;
+        this.address = "";
+        this.vsoCode = "";
+        this.businessType = 0; // default: cá nhân
+        this.taxId = "";
+        this.businessSector = "";
+        this.type = 0; // default: api service
+        this.timeCreated = System.currentTimeMillis();
+        this.timePublish = 0L;
+        this.accountCustomerMerchantId = "";
+        this.publicId = "";
+        this.refId = "";
+        this.isMaster = false;
+        this.isActive = true;
+    }
+
     public int getBusinessType() {
         return businessType;
     }

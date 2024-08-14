@@ -4,6 +4,7 @@ import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.BankReceiveFeePackageEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -125,4 +126,14 @@ public interface BankReceiveFeePackageRepository extends JpaRepository<BankRecei
             + "WHERE a.bank_id = :bankId LIMIT 1", nativeQuery = true)
     BankReceiveFeePackageEntity getFeePackageByBankIds(String bankId);
 
+    @Query(value = "DELETE  FROM bank_receive_fee_package WHERE id = :id", nativeQuery = true)
+    void deleteBankReceiveFeePackage(@Param(value = "id") String id);
+
+    @Query(value = "UPDATE bank_receive_fee_package SET active_fee = :activeFee, annual_fee = :annualFee, fix_fee = :fixFee, percent_fee = :percentFee, record_type = :recordType WHERE id = :id", nativeQuery = true)
+    void updateBankReceiveFeePackage(@Param("id") String id,
+                                     @Param("activeFee") long activeFee,
+                                     @Param("annualFee") long annualFee,
+                                     @Param("fixFee") long fixFee,
+                                     @Param("percentFee") double percentFee,
+                                     @Param("recordType") int recordType);
 }

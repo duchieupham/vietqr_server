@@ -6,7 +6,6 @@ import com.vietqr.org.repository.BankReceiveFeePackageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -68,5 +67,15 @@ public class BankReceiveFeePackageServiceImpl implements BankReceiveFeePackageSe
     @Override
     public BankReceiveFeePackageEntity getFeePackageByBankIds(String bankId) {
         return repo.getFeePackageByBankIds(bankId);
+    }
+
+    @Override
+    public void deleteBankReceiveFeePackage(String id) {
+        repo.deleteBankReceiveFeePackage(id);
+    }
+
+    @Override
+    public void saveBankReceiveFeePackage(String id, BankReceiveFeePackageDTOv2 dto) {
+        repo.updateBankReceiveFeePackage(id, dto.getActiveFee(), dto.getAnnualFee(), dto.getFixFee(), dto.getPercentFee(), dto.getRecordType());
     }
 }
