@@ -45,8 +45,8 @@ public class TidInternalSubscriber {
             String checkSum = BoxTerminalRefIdUtil.encryptMacAddr(dto.getMacAddr());
             if (checkSum.equals(dto.getCheckSum())) {
                 String macAddr = dto.getMacAddr().replaceAll("\\:", "");
-                dto.setMacAddr(macAddr);
-                macAddr = dto.getMacAddr().replaceAll("\\.", "");
+//                dto.setMacAddr(macAddr);
+                macAddr = macAddr.replaceAll("\\.", "");
                 String qrBoxCode = getRandomNumberUniqueQRBox();
                 String certificate = EnvironmentUtil.getVietQrBoxInteralPrefix() + BoxTerminalRefIdUtil.encryptQrBoxId(qrBoxCode + macAddr);
                 String boxId = BoxTerminalRefIdUtil.encryptQrBoxId(qrBoxCode);
