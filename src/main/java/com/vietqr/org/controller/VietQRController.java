@@ -12,8 +12,10 @@ import com.vietqr.org.dto.bidv.VietQRVaRequestDTO;
 import com.vietqr.org.dto.mb.VietQRStaticMMSRequestDTO;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.entity.bidv.CustomerInvoiceEntity;
+import com.vietqr.org.entity.bidv.CustomerVaEntity;
 import com.vietqr.org.service.*;
 import com.vietqr.org.service.bidv.CustomerInvoiceService;
+import com.vietqr.org.service.bidv.CustomerVaService;
 import com.vietqr.org.service.mqtt.MqttMessagingService;
 import com.vietqr.org.util.*;
 import com.vietqr.org.util.bank.bidv.CustomerVaUtil;
@@ -68,6 +70,9 @@ public class VietQRController {
 
 	@Autowired
 	AccountBankReceiveService accountBankReceiveService;
+
+	@Autowired
+	CustomerVaService customerVaService;
 
 	@Autowired
 	TerminalBankReceiveService terminalBankReceiveService;
@@ -441,6 +446,37 @@ public class VietQRController {
 		return new ResponseEntity<>(result, httpStatus);
 	}
 
+	@PostMapping("qr/generate-bidv")
+	public ResponseEntity<Object> generateQRBIDV(@RequestBody BIDVGenerateQrDTO dto) {
+		Object result = null;
+		HttpStatus httpStatus = null;
+		ResponseEntity<Object> response = null;
+		try {
+			AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService.getAccountBankById(dto.getBankId());
+			VietQRVaRequestDTO vietQRVaRequestDTO = new VietQRVaRequestDTO();
+			vietQRVaRequestDTO.setAmount(dto.getAmount() + "");
+			vietQRVaRequestDTO.setBillId(dto.getBillId());
+			vietQRVaRequestDTO.setUserBankName(accountBankReceiveEntity.getBankAccountName());
+			vietQRVaRequestDTO.setDescription(dto.getContent());
+			String vaNumber = customerVaService.getVaNumberByBankId(dto.getBankId());
+			ResponseMessageDTO generateVaInvoiceVietQR = CustomerVaUtil.generateVaInvoiceVietQR(vietQRVaRequestDTO, accountBankReceiveEntity.getCustomerId());
+			VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+			vietQRGenerateDTO.setCaiValue("970418");
+			vietQRGenerateDTO.setBankAccount(vaNumber);
+			vietQRGenerateDTO.setAmount(dto.getAmount());
+			vietQRGenerateDTO.setContent(dto.getContent());
+			String qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
+			result = new ResponseMessageDTO(qr, generateVaInvoiceVietQR.getMessage());
+			httpStatus = HttpStatus.OK;
+		} catch (Exception e) {
+			logger.error("VietQRController: generateQRCustomer: ERROR: " + e.getMessage() + " at: "
+					+ System.currentTimeMillis());
+			result = new ResponseMessageDTO("FAILED", "E05");
+			httpStatus = HttpStatus.BAD_REQUEST;
+		}
+		return new ResponseEntity<>(result, httpStatus);
+	}
+
 	private String getUsernameFromToken(String token) {
 		String result = "";
 		if (token != null && !token.trim().isEmpty()) {
@@ -454,7 +490,6 @@ public class VietQRController {
 		}
 		return result;
 	}
-
 
 	private ResponseEntity<Object> generateDynamicQrCustomer(VietQRCreateCustomerDTO dto, String token) {
 		Object result = null;
