@@ -74,7 +74,7 @@ public class BankReceiveFeePackageController {
                 bankReceiveFeePackageDTOV2.setRecordType(updateDTO.getRecordType());
             }
 
-            bankReceiveFeePackageService.saveBankReceiveFeePackage(id, bankReceiveFeePackageDTOV2);
+            bankReceiveFeePackageService.updateBankReceiveFeePackage(id, bankReceiveFeePackageDTOV2);
 
             return new ResponseEntity<>(new ResponseMessageDTO("SUCCESS", ""), HttpStatus.OK);
         } catch (Exception e) {

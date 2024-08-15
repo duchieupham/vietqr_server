@@ -75,7 +75,12 @@ public class BankReceiveFeePackageServiceImpl implements BankReceiveFeePackageSe
     }
 
     @Override
-    public void saveBankReceiveFeePackage(String id, BankReceiveFeePackageDTOv2 dto) {
+    public void updateBankReceiveFeePackage(String id, BankReceiveFeePackageDTOv2 dto) {
         repo.updateBankReceiveFeePackage(id, dto.getActiveFee(), dto.getAnnualFee(), dto.getFixFee(), dto.getPercentFee(), dto.getRecordType());
+    }
+
+    @Override
+    public BankReceiveFeePackageEntity saveBankReceiveFeePackage(BankReceiveFeePackageEntity bankReceiveFeePackageEntity) {
+        return repo.save(bankReceiveFeePackageEntity);
     }
 }

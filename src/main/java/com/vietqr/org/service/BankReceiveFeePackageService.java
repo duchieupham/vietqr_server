@@ -34,5 +34,7 @@ public interface BankReceiveFeePackageService {
 
     void deleteBankReceiveFeePackage(String id);
 
-    void saveBankReceiveFeePackage(String id, BankReceiveFeePackageDTOv2 dto);
+    void updateBankReceiveFeePackage(String id, BankReceiveFeePackageDTOv2 dto);
+
+    BankReceiveFeePackageEntity saveBankReceiveFeePackage(BankReceiveFeePackageEntity bankReceiveFeePackageEntity);
 }
