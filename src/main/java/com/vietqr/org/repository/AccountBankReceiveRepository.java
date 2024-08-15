@@ -656,6 +656,6 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			"WHERE ms.id = :merchantId", nativeQuery = true)
 	List<AccountBankReceiveEntity> findBankAccountsByMerchantId(@Param("merchantId") String merchantId);
 
-	@Query(value = "SELECT bank_account_name FROM account_bank_receive where bank_account = :bankAccount",nativeQuery = true)
+	@Query(value = "SELECT bank_account_name FROM account_bank_receive where bank_account = :bankAccount LIMIT 1",nativeQuery = true)
 	String getBankAccountNameByBankAccount(@Param("bankAccount") String bankAccount);
 }

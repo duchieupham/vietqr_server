@@ -2,6 +2,7 @@ package com.vietqr.org.dto;
 
 import com.vietqr.org.service.mqtt.AdditionalData;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class VietQRBIDVCreateDTO {
@@ -18,12 +19,12 @@ public class VietQRBIDVCreateDTO {
     private String customerBankCode;
     private String customerName;
     private String qr;
-
     private String serviceCode;
-
-    private List<AdditionalData> additionalData;
+    private List<AdditionalData> additionalData = new ArrayList<>();
 
     public VietQRBIDVCreateDTO() {
+        this.serviceCode = "";
+        this.additionalData = new ArrayList<>();
     }
 
     public VietQRBIDVCreateDTO(String content, String amount, String terminalCode,

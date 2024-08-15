@@ -71,6 +71,24 @@ public class TidInternalSubscriber {
     @Autowired
     private TransactionRefundService transactionRefundService;
 
+    @Autowired
+    private AccountBankReceiveService accountBankReceiveService;
+
+    @Autowired
+    private BankTypeService bankTypeService;
+
+    @Autowired
+    private CaiBankService caiBankService;
+
+    @Autowired
+    private TransactionReceiveService transactionReceiveService;
+
+    @Autowired
+    private CustomerInvoiceService customerInvoiceService;
+
+    @Autowired
+    private TransactionRefundService transactionRefundService;
+
     @PostConstruct
     public void init() {
         System.out.println("TidInternalSubscriber initialized");

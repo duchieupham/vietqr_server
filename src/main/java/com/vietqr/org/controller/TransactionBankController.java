@@ -354,7 +354,7 @@ public class TransactionBankController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    public ResponseMessageDTO insertTransBank(TransactionBankDTO dto) throws JsonProcessingException, MqttException {
+    public ResponseMessageDTO insertTransBank(TransactionBankDTO dto) {
         ResponseMessageDTO result = null;
         //
         UUID uuid = UUID.randomUUID();
@@ -785,12 +785,9 @@ public class TransactionBankController {
                                                     : "";
                                             getCustomerSyncEntities(transactionReceiveEntity.getId(), dto,
                                                     accountBankEntity, time, orderId, sign, rawCode, urlLink, "");
-                                            try {
-                                                updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time,
-                                                        nf, boxIdRef, rawDTO, terminalEntity);
-                                            } catch (Exception e) {
-                                                logger.error(" Has Error at Push MQTT notification " + e.getMessage() + System.currentTimeMillis());
-                                            }
+                                            updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time,
+                                                    nf, boxIdRef, rawDTO, terminalEntity);
+
                                             // check if recharge => do update status and push data to customer
                                             ////////// USER RECHAGE VQR || USER RECHARGE MOBILE
                                             // giao dịch nạp tiền đt (VNPTePay) của Bluecom
@@ -799,12 +796,8 @@ public class TransactionBankController {
                                                 // find transactionWallet by billNumber and status = 0
                                                 TransactionWalletEntity transactionWalletEntity = transactionWalletService
                                                         .getTransactionWalletByBillNumber(orderId);
-                                                try {
-                                                    processTransactionWallet(nf, time, dto, orderId,
-                                                            transactionWalletEntity, transactionReceiveEntity.getId());
-                                                } catch (JsonProcessingException e) {
-                                                    throw new RuntimeException(e);
-                                                }
+                                                processTransactionWallet(nf, time, dto, orderId,
+                                                        transactionWalletEntity, transactionReceiveEntity.getId());
                                             }
                                         }
                                     } else {
@@ -875,13 +868,8 @@ public class TransactionBankController {
                                                     : "";
                                             getCustomerSyncEntities(transactionReceiveEntity.getId(), dto,
                                                     accountBankEntity, time, orderId, sign, rawCodeResult, urlLink, transactionReceiveEntity.getTerminalCode());
-                                            try {
                                                 updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time,
                                                         nf, boxIdRef, rawDTO, terminalEntity);
-                                            }
-                                            catch (Exception e) {
-                                                logger.error(" Has Error at Push MQTT notification " + e.getMessage() + System.currentTimeMillis());
-                                            }
 
                                             // check if recharge => do update status and push data to customer
                                             ////////// USER RECHAGE VQR || USER RECHARGE MOBILE
@@ -889,12 +877,8 @@ public class TransactionBankController {
                                                 // find transactionWallet by billNumber and status = 0
                                                 TransactionWalletEntity transactionWalletEntity = transactionWalletService
                                                         .getTransactionWalletByBillNumber(orderId);
-                                                try {
                                                     processTransactionWallet(nf, time, dto, orderId,
                                                             transactionWalletEntity, transactionReceiveEntity.getId());
-                                                } catch (JsonProcessingException e) {
-                                                    throw new RuntimeException(e);
-                                                }
                                             }
                                         } else {
                                             logger.info(
@@ -1111,7 +1095,7 @@ public class TransactionBankController {
 
     @Async
     protected void processTransactionWallet(NumberFormat nf, long time, TransactionBankDTO dto, String orderId,
-                                            TransactionWalletEntity entity, String transactionId) throws JsonProcessingException {
+                                            TransactionWalletEntity entity, String transactionId) {
         if (entity != null) {
             // update transaction wallet
             transactionWalletService.updateTransactionWalletStatus(1, time,
@@ -1501,8 +1485,14 @@ public class TransactionBankController {
                                     InvoiceEntity invoiceEntity = invoiceService.getInvoiceEntityById(invoiceTransactionEntity.getInvoiceId());
                                     if (invoiceTransactionEntity != null && invoiceEntity != null) {
                                         String invoiceItemIds = invoiceTransactionEntity.getInvoiceItemIds();
-                                        List<String> itemIds = mapper.readValue(invoiceItemIds, new TypeReference<List<String>>() {
-                                        });
+                                        List<String> itemIds = new ArrayList<>();
+                                        try {
+                                            itemIds = mapper.readValue(invoiceItemIds, new TypeReference<List<String>>() {
+                                            });
+                                        } catch (Exception e) {
+                                            logger.error("processTransactionWallet: ERROR: pay Invoice: " + e.getMessage() + " at: "
+                                            + System.currentTimeMillis());
+                                        }
                                         List<InvoiceItemEntity> invoiceItemEntities = new ArrayList<>();
                                         int check = invoiceItemService.updateAllItemIds(itemIds, timePaid);
                                         int checkNotPaid = 0;
@@ -1696,8 +1686,7 @@ public class TransactionBankController {
     public void updateTransaction(TransactionBankDTO dto, TransactionReceiveEntity transactionReceiveEntity,
                                   AccountBankReceiveEntity accountBankEntity, long time,
                                   NumberFormat nf, String boxIdRef, ISubTerminalCodeDTO rawDTO,
-                                  TerminalEntity terminalEntity)
-            throws JsonProcessingException, MqttException {
+                                  TerminalEntity terminalEntity) {
         long amountValue = 0;
         String amount = "";
         if (dto.getAmount() != 0) {
