@@ -66,27 +66,6 @@ public class TidInternalSubscriber {
     private CustomerInvoiceService customerInvoiceService;
 
     @Autowired
-    private NotificationService notificationService;
-
-    @Autowired
-    private TransactionRefundService transactionRefundService;
-
-    @Autowired
-    private AccountBankReceiveService accountBankReceiveService;
-
-    @Autowired
-    private BankTypeService bankTypeService;
-
-    @Autowired
-    private CaiBankService caiBankService;
-
-    @Autowired
-    private TransactionReceiveService transactionReceiveService;
-
-    @Autowired
-    private CustomerInvoiceService customerInvoiceService;
-
-    @Autowired
     private TransactionRefundService transactionRefundService;
 
     @PostConstruct
