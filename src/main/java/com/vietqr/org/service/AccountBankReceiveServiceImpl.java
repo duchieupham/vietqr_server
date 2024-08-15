@@ -415,6 +415,11 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
         return repo.findBankAccountsByMerchantId(merchantId);
     }
 
+    @Override
+    public String getBankAccountNameByBankAccount(String bankAccount) {
+        return repo.getBankAccountNameByBankAccount(bankAccount);
+    }
+
 
     @Override
     public List<BankAccountResponseDTO> getBankAccountsByNationalIds(String keyword, int offset, int size) {

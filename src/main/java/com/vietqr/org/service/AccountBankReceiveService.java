@@ -176,4 +176,6 @@ public interface AccountBankReceiveService {
 	List<BankAccountResponseDTO> getBankAccountsByPhoneAuthenticated(String keyword, int offset, int size);
 
 	List<AccountBankReceiveEntity> findBankAccountsByMerchantId(String merchantId);
+
+	String getBankAccountNameByBankAccount(String bankAccount);
 }

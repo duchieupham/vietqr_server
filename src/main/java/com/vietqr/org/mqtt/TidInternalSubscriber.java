@@ -169,63 +169,63 @@ public class TidInternalSubscriber {
             logger.error("Error handling QR request: " + e.getMessage());
         }
     }
-//    @MqttTopicHandler(topic = "vietqr/request/status/#") // Xử lý yêu cầu trạng thái giao dịch
-//    public void handleTransactionStatus(String topic, MqttMessage message) {
-//        try {
-//            // Chuyển payload sang TransactionCheckOrderInputDTO
-//            String payload = new String(message.getPayload());
-//            ObjectMapper mapper = new ObjectMapper();
-//            TransactionCheckOrderInputDTO dto = mapper.readValue(payload, TransactionCheckOrderInputDTO.class);
-//
-//            // Xử lý yêu cầu và tạo phản hồi
-//            Object result = handleTransactionStatusRequest(dto);
-//            String responsePayload = mapper.writeValueAsString(result);
-//
-//            // Xác định topic phản hồi
-//            String responseTopic = topic.replace("request", "response");
-//
-//            // Gửi phản hồi lên đúng topic
-//            mqttListenerService.publishMessageToCommonTopic(responseTopic, responsePayload);
-//            logger.info("Response sent to topic: " + responseTopic + " Payload: " + responsePayload);
-//
-//        } catch (Exception e) {
-//            logger.error("Error handling transaction status request: " + e.getMessage());
-//        }
-//    }
-//    public Object handleTransactionStatusRequest(TransactionCheckOrderInputDTO dto) {
-//        Object result = null;
-//        try {
-//            if (dto != null) {
-//                String bankAccountName = accountBankReceiveService.getBankAccountNameByBankAccount(dto.getBankAccount());
-//                String checkSum = BankEncryptUtil.generateMD5CheckOrderChecksum(dto.getBankAccount(), bankAccountName);
-//
-//                if (BankEncryptUtil.isMatchChecksum(dto.getCheckSum(), checkSum)) {
-//                    List<TransReceiveResponseDTO> responseDTOs = new ArrayList<>();
-//                    if (dto.getValue() != null && !dto.getValue().trim().isEmpty()) {
-//                        if (dto.getType() != null && dto.getType() == 0) {
-//                            responseDTOs = transactionReceiveService.getTransByOrderId(dto.getValue(), dto.getBankAccount());
-//                            result = processTransactions(responseDTOs, dto);
-//                        } else if (dto.getType() != null && dto.getType() == 1) {
-//                            responseDTOs = transactionReceiveService.getTransByReferenceNumber(dto.getValue(), dto.getBankAccount());
-//                            result = processTransactions(responseDTOs, dto);
-//                        } else {
-//                            result = new ResponseMessageDTO("FAILED", "E95");
-//                        }
-//                    } else {
-//                        result = new ResponseMessageDTO("FAILED", "E46");
-//                    }
-//                } else {
-//                    result = new ResponseMessageDTO("FAILED", "E39");
-//                }
-//
-//            } else {
-//                result = new ResponseMessageDTO("FAILED", "E46");
-//            }
-//        } catch (Exception e) {
-//            result = new ResponseMessageDTO("FAILED", "E05");
-//        }
-//        return result;
-//    }
+    @MqttTopicHandler(topic = "vietqr/request/status/#") // Xử lý yêu cầu trạng thái giao dịch
+    public void handleTransactionStatus(String topic, MqttMessage message) {
+        try {
+            // Chuyển payload sang TransactionCheckOrderInputDTO
+            String payload = new String(message.getPayload());
+            ObjectMapper mapper = new ObjectMapper();
+            TransactionCheckOrderInputDTO dto = mapper.readValue(payload, TransactionCheckOrderInputDTO.class);
+
+            // Xử lý yêu cầu và tạo phản hồi
+            Object result = handleTransactionStatusRequest(dto);
+            String responsePayload = mapper.writeValueAsString(result);
+
+            // Xác định topic phản hồi
+            String responseTopic = topic.replace("request", "response");
+
+            // Gửi phản hồi lên đúng topic
+            mqttListenerService.publishMessageToCommonTopic(responseTopic, responsePayload);
+            logger.info("Response sent to topic: " + responseTopic + " Payload: " + responsePayload);
+
+        } catch (Exception e) {
+            logger.error("Error handling transaction status request: " + e.getMessage());
+        }
+    }
+    public Object handleTransactionStatusRequest(TransactionCheckOrderInputDTO dto) {
+        Object result = null;
+        try {
+            if (dto != null) {
+                String bankAccountName = accountBankReceiveService.getBankAccountNameByBankAccount(dto.getBankAccount());
+                String checkSum = BankEncryptUtil.generateMD5CheckOrderChecksum(dto.getBankAccount(), bankAccountName);
+
+                if (BankEncryptUtil.isMatchChecksum(dto.getCheckSum(), checkSum)) {
+                    List<TransReceiveResponseDTO> responseDTOs = new ArrayList<>();
+                    if (dto.getValue() != null && !dto.getValue().trim().isEmpty()) {
+                        if (dto.getType() != null && dto.getType() == 0) {
+                            responseDTOs = transactionReceiveService.getTransByOrderId(dto.getValue(), dto.getBankAccount());
+                            result = processTransactions(responseDTOs, dto);
+                        } else if (dto.getType() != null && dto.getType() == 1) {
+                            responseDTOs = transactionReceiveService.getTransByReferenceNumber(dto.getValue(), dto.getBankAccount());
+                            result = processTransactions(responseDTOs, dto);
+                        } else {
+                            result = new ResponseMessageDTO("FAILED", "E95");
+                        }
+                    } else {
+                        result = new ResponseMessageDTO("FAILED", "E46");
+                    }
+                } else {
+                    result = new ResponseMessageDTO("FAILED", "E39");
+                }
+
+            } else {
+                result = new ResponseMessageDTO("FAILED", "E46");
+            }
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+        }
+        return result;
+    }
 
 
 

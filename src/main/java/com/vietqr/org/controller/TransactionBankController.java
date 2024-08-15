@@ -39,6 +39,8 @@ import com.vietqr.org.util.*;
 import com.vietqr.org.util.bank.bidv.BIDVUtil;
 
 import com.vietqr.org.util.bank.bidv.CustomerVaUtil;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -1804,7 +1806,47 @@ public class TransactionBankController {
                     }
                     executorService.shutdown();
                 }
+                // DO INSERT MQTT BY QVAN
+                try {
+                    if(transactionReceiveEntity.getAdditionalData() != null){
+                        try {
+                            ObjectMapper objectMapper = new ObjectMapper();
+                            JsonNode additionalDataArray = objectMapper.readTree(transactionReceiveEntity.getAdditionalData());
+                            String terminalCode = additionalDataArray.get(0).get("terminalCode").asText();
 
+                            // Tạo mqttTopic với giá trị terminalCode
+                            String mqttTopic = "vietqr/bdsd/" + terminalCode;
+                            // Tạo dữ liệu JSON thông báo
+                            Map<String, Object> notificationData = new HashMap<>();
+                            notificationData.put("referenceNumber", transactionReceiveEntity.getReferenceNumber());
+                            notificationData.put("bankAccount", transactionReceiveEntity.getBankAccount());
+                            notificationData.put("amount", Double.parseDouble(amount.replace(",", "")));
+
+                            notificationData.put("transType", transactionReceiveEntity.getTransType());
+                            notificationData.put("content", transactionReceiveEntity.getContent());
+                            notificationData.put("status", 1);
+                            String formattedTime = formatTimeUtcPlus(time);
+                            notificationData.put("timePaid", formattedTime);
+                            notificationData.put("orderId", transactionReceiveEntity.getOrderId());
+
+                            // Chuyển đổi dữ liệu thành chuỗi JSON
+                            Gson gson = new Gson();
+                            String payload = gson.toJson(notificationData);
+
+                            // Xuất bản thông điệp lên topic
+                            MQTTUtil.sendMessage(mqttTopic, payload);
+                            System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
+                        } catch (MqttException e) {
+                            System.err.println("Error sending balance change notification via MQTT: " + e.toString());
+                        }
+
+
+                        //sendBalanceChangeNotification(transactionReceiveEntity,String.valueOf(dto.getAmount()) , dto.getTransType(), dto.getContent(), transactionReceiveEntity.getTime());
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error while sending balance change notification: " + e.toString());
+                    // Log thêm thông tin lỗi nếu cần
+                }
                 /////// DO INSERT TELEGRAM BY QVAN
                 List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
                 if (chatIds != null && !chatIds.isEmpty()) {
@@ -2051,6 +2093,47 @@ public class TransactionBankController {
 //					}
 //				}
 
+                // DO INSERT MQTT BY QVAN
+                try {
+                    if(transactionReceiveEntity.getAdditionalData() != null){
+                        try {
+                            ObjectMapper objectMapper = new ObjectMapper();
+                            JsonNode additionalDataArray = objectMapper.readTree(transactionReceiveEntity.getAdditionalData());
+                            String terminalCode = additionalDataArray.get(0).get("terminalCode").asText();
+
+                            // Tạo mqttTopic với giá trị terminalCode
+                            String mqttTopic = "vietqr/bdsd/" + terminalCode;
+                            // Tạo dữ liệu JSON thông báo
+                            Map<String, Object> notificationData = new HashMap<>();
+                            notificationData.put("referenceNumber", transactionReceiveEntity.getReferenceNumber());
+                            notificationData.put("bankAccount", transactionReceiveEntity.getBankAccount());
+                            notificationData.put("amount", Double.parseDouble(amount.replace(",", "")));
+
+                            notificationData.put("transType", transactionReceiveEntity.getTransType());
+                            notificationData.put("content", transactionReceiveEntity.getContent());
+                            notificationData.put("status", 1);
+                            String formattedTime = formatTimeUtcPlus(time);
+                            notificationData.put("timePaid", formattedTime);
+                            notificationData.put("orderId", transactionReceiveEntity.getOrderId());
+
+                            // Chuyển đổi dữ liệu thành chuỗi JSON
+                            Gson gson = new Gson();
+                            String payload = gson.toJson(notificationData);
+
+                            // Xuất bản thông điệp lên topic
+                            MQTTUtil.sendMessage(mqttTopic, payload);
+                            System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
+                        } catch (MqttException e) {
+                            System.err.println("Error sending balance change notification via MQTT: " + e.toString());
+                        }
+
+
+                        //sendBalanceChangeNotification(transactionReceiveEntity,String.valueOf(dto.getAmount()) , dto.getTransType(), dto.getContent(), transactionReceiveEntity.getTime());
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error while sending balance change notification: " + e.toString());
+                    // Log thêm thông tin lỗi nếu cần
+                }
 
                 /////// DO INSERT TELEGRAM BY QVAN
                 List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
@@ -2342,7 +2425,47 @@ public class TransactionBankController {
 //				}
 //			}
 
+            // DO INSERT MQTT BY QVAN
+            try {
+                if(transactionReceiveEntity.getAdditionalData() != null){
+                    try {
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        JsonNode additionalDataArray = objectMapper.readTree(transactionReceiveEntity.getAdditionalData());
+                        String terminalCode = additionalDataArray.get(0).get("terminalCode").asText();
 
+                        // Tạo mqttTopic với giá trị terminalCode
+                        String mqttTopic = "vietqr/bdsd/" + terminalCode;
+                        // Tạo dữ liệu JSON thông báo
+                        Map<String, Object> notificationData = new HashMap<>();
+                        notificationData.put("referenceNumber", transactionReceiveEntity.getReferenceNumber());
+                        notificationData.put("bankAccount", transactionReceiveEntity.getBankAccount());
+                        notificationData.put("amount", Double.parseDouble(amount.replace(",", "")));
+
+                        notificationData.put("transType", transactionReceiveEntity.getTransType());
+                        notificationData.put("content", transactionReceiveEntity.getContent());
+                        notificationData.put("status", 1);
+                        String formattedTime = formatTimeUtcPlus(time);
+                        notificationData.put("timePaid", formattedTime);
+                        notificationData.put("orderId", transactionReceiveEntity.getOrderId());
+
+                        // Chuyển đổi dữ liệu thành chuỗi JSON
+                        Gson gson = new Gson();
+                        String payload = gson.toJson(notificationData);
+
+                        // Xuất bản thông điệp lên topic
+                        MQTTUtil.sendMessage(mqttTopic, payload);
+                        System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
+                    } catch (MqttException e) {
+                        System.err.println("Error sending balance change notification via MQTT: " + e.toString());
+                    }
+
+
+                    //sendBalanceChangeNotification(transactionReceiveEntity,String.valueOf(dto.getAmount()) , dto.getTransType(), dto.getContent(), transactionReceiveEntity.getTime());
+                }
+            } catch (Exception e) {
+                System.err.println("Error while sending balance change notification: " + e.toString());
+                // Log thêm thông tin lỗi nếu cần
+            }
 /////// DO INSERT TELEGRAM BY QVAN
             List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
             if (chatIds != null && !chatIds.isEmpty()) {
