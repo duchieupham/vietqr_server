@@ -74,4 +74,5 @@ public interface AccountLoginService {
     List<IAccountLogin> findUsersRegisteredInMonth(long startTime, long endTime);
 
     boolean getVerifyEmailStatus(String userId);
+    AccountLoginEntity getAccountLoginByPhoneNo(String phoneNo);
 }

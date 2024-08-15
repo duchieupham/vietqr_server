@@ -179,4 +179,7 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
 
     @Query(value = "SELECT a.id, a.phone_no, a.email, a.time FROM account_login as a WHERE a.time BETWEEN :startTime AND :endTime", nativeQuery = true)
     List<IAccountLogin> findUsersRegisteredInMonth(@Param("startTime") long startTime, @Param("endTime") long endTime);
+
+    @Query(value = "SELECT * FROM account_login WHERE phone_no = :phoneNo LIMIT 1", nativeQuery = true)
+    AccountLoginEntity getAccountLoginEntityByPhoneNo(String phoneNo);
 }
