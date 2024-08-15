@@ -4269,26 +4269,16 @@ public class TransactionBankController {
                     requestBankDTO.setPhoneNumber(dto.getPhoneNumber());
                     requestBankDTO.setApplicationType(dto.getApplicationType());
                     ResponseMessageDTO responseMessageDTO = requestLinkedMBOTP(requestBankDTO);
-                    if (responseMessageDTO.getMessage().contains("410-Record is not exist")) {
-                        // sai CCCD
-                        result = new ResponseMessageDTO("FAILED", "E159");
-                        httpStatus = HttpStatus.BAD_REQUEST;
-                    } else if (responseMessageDTO.getMessage().contains("219-Phone number is invalid")) {
-                        // sai SĐT
-                        result = new ResponseMessageDTO("FAILED", "E160");
-                        httpStatus = HttpStatus.BAD_REQUEST;
-                    } else {
-                        if (responseMessageDTO != null && responseMessageDTO.getStatus().trim().equals("SUCCESS")) {
-                            result = responseMessageDTO;
-                            httpStatus = HttpStatus.OK;
-                        } else {
-                            if (StringUtil.getValueNullChecker(responseMessageDTO.getMessage()).contains("Record existed")) {
-                                logger.error("Already linked VietQR: Resquest Body: " + dto.toString()
-                                        + " at: " + System.currentTimeMillis() + " Phone no: "
-                                        + validatePhoneNoToken(token));
-                            }
+                    if (responseMessageDTO != null) {
+                        result = responseMessageDTO;
+                        if ("FAILED".equals(responseMessageDTO.getStatus().trim())) {
                             httpStatus = HttpStatus.BAD_REQUEST;
+                        } else {
+                            httpStatus = HttpStatus.OK;
                         }
+                    } else {
+                        result = new ResponseMessageDTO("FAILED", "E05");
+                        httpStatus = HttpStatus.BAD_REQUEST;
                     }
                 } else if (dto.getBankCode().trim().equals("BIDV")) {
                     Long customerVaLength = customerVaService.getCustomerVaLength() + 1;
@@ -5017,39 +5007,42 @@ public class TransactionBankController {
     }
 
     String getMessageBankCode(String errBankCode) {
-        String result = "E05";
-        if (errBankCode.equals("293")) {
-            result = "E15";
-        } else if (errBankCode.equals("40503")) {
-            result = "E16";
-        } else if (errBankCode.equals("1020")) {
-            result = "E17";
-        } else if (errBankCode.equals("40600")) {
-            result = "E18";
-        } else if (errBankCode.equals("219")) {
-            result = "E19";
-        } else if (errBankCode.equals("40017")) {
-            result = "E20";
-        } else if (errBankCode.equals("40506")) {
-            result = "E21";
-        } else if (errBankCode.equals("40509")) {
-            result = "E22";
-        } else if (errBankCode.equals("40504")) {
-            result = "E23";
-        } else if (errBankCode.equals("40507")) {
-            result = "E24";
-        } else if (errBankCode.equals("40505")) {
-            result = "E25";
-        } else if (errBankCode.equals("203")) {
-            result = "E26";
-        } else if (errBankCode.equals("4630")) {
-            result = "E27";
-        } else if (errBankCode.equals("237")) {
-            result = "E28";
-        } else if (errBankCode.equals("002")) {
-            result = "E29";
+        switch (errBankCode) {
+            case "293":
+                return "E15";
+            case "40503":
+                return "E16";
+            case "1020":
+                return "E17";
+            case "40600":
+                return "E18";
+            case "219":
+                return "E19";
+            case "40017":
+                return "E20";
+            case "40506":
+                return "E21";
+            case "40509":
+                return "E22";
+            case "40504":
+                return "E23";
+            case "40507":
+                return "E24";
+            case "40505":
+                return "E25";
+            case "203":
+                return "E26";
+            case "4630":
+                return "E27";
+            case "237":
+                return "E28";
+            case "002":
+                return "E29";
+            case "410":
+                return "E159";
+            default:
+                return "E05";
         }
-        return result;
     }
 
     @PostMapping("callback-login")
