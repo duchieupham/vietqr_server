@@ -45,17 +45,17 @@ public class VietQRClient {
         client.disconnect();
     }
 
-    public static void main(String[] args) {
-        try {
-            VietQRClient client = new VietQRClient();
-            VietQRCreateCustomerDTO dto = new VietQRCreateCustomerDTO(10000L, "Dondathangsanpham", "0373568944", "MB",
-                    "NGUYEN PHUONG NHAI LINH", "5035Linh9", null, "123", null);
-            client.sendRequest(dto);
-            // Giữ kết nối hoặc đợi phản hồi tùy theo yêu cầu cụ thể
-            Thread.sleep(10000); // Giữ chương trình chạy 10 giây để nhận phản hồi
-            client.disconnect();
-        } catch (MqttException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+//    public static void main(String[] args) {
+//        try {
+//            VietQRClient client = new VietQRClient();
+//            VietQRCreateCustomerDTO dto = new VietQRCreateCustomerDTO(10000L, "Dondathangsanpham", "0373568944", "MB",
+//                    "NGUYEN PHUONG NHAI LINH", "5035Linh9", null, "123", null);
+//            client.sendRequest(dto);
+//            // Giữ kết nối hoặc đợi phản hồi tùy theo yêu cầu cụ thể
+//            Thread.sleep(10000); // Giữ chương trình chạy 10 giây để nhận phản hồi
+//            client.disconnect();
+//        } catch (MqttException | InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//    }
 }
