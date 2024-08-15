@@ -34,8 +34,30 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
     @Value("${aws.s3.endpoint.url}")
     private String endpointUrl;
 
+//    public String uploadFile(String key, MultipartFile file) {
+//        String result = "";
+//        try {
+//            String fileName = file.getOriginalFilename();
+//            PutObjectRequest request = PutObjectRequest.builder()
+//                    .bucket(bucketName)
+//                    .key(key)
+//                    .metadata(Collections.singletonMap("name", fileName))
+//                    .build();
+//
+//            File filePut = convertMultiPartToFile(file);
+//            s3Client.putObject(request, RequestBody.fromFile(filePut));
+//            result = endpointUrl + "/" + key;
+//            System.out.println("File uploaded successfully at: " + System.currentTimeMillis());
+//        } catch (Exception ignored) {
+//            System.out.println("Error at uploadFile: " + ignored.toString());
+//            logger.info("Error at uploadFile: " + ignored.toString());
+//        }
+//        return result;
+//    }
+
     public String uploadFile(String key, MultipartFile file) {
         String result = "";
+        File filePut = null;
         try {
             String fileName = file.getOriginalFilename();
             PutObjectRequest request = PutObjectRequest.builder()
@@ -44,16 +66,21 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
                     .metadata(Collections.singletonMap("name", fileName))
                     .build();
 
-            File filePut = convertMultiPartToFile(file);
+            filePut = convertMultiPartToFile(file);
             s3Client.putObject(request, RequestBody.fromFile(filePut));
             result = endpointUrl + "/" + key;
             System.out.println("File uploaded successfully at: " + System.currentTimeMillis());
         } catch (Exception ignored) {
             System.out.println("Error at uploadFile: " + ignored.toString());
             logger.info("Error at uploadFile: " + ignored.toString());
+        } finally {
+            if (filePut != null && filePut.exists()) {
+                filePut.delete();
+            }
         }
         return result;
     }
+
 
     @Override
     public String getFileLinkById(String key) {
