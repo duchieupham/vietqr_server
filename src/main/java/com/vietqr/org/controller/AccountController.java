@@ -1190,9 +1190,16 @@ public class AccountController {
         HttpStatus httpStatus = null;
         try {
             if (dto != null) {
-                accountLoginService.resetPassword(dto.getPassword(), dto.getPhoneNo());
-                result = new ResponseMessageDTO("SUCCESS", "");
-                httpStatus = HttpStatus.OK;
+                AccountLoginEntity accountLoginEntity = accountLoginService.getAccountLoginByPhoneNo(dto.getPhoneNo());
+                String currentPassword = accountLoginEntity.getPassword();
+                if (currentPassword != null && currentPassword.equals(dto.getPassword())) {
+                    result = new ResponseMessageDTO("FAIL", "E182");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                } else {
+                    accountLoginService.resetPassword(dto.getPassword(), dto.getPhoneNo());
+                    result = new ResponseMessageDTO("SUCCESS", "");
+                    httpStatus = HttpStatus.OK;
+                }
             } else {
                 logger.error("resetPassword: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
