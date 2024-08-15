@@ -66,4 +66,9 @@ public class CustomerVaServiceImpl implements CustomerVaService {
         return repo.checkExistedMerchantId(merchantid);
     }
 
+    @Override
+    public String getVaNumberByBankId(String bankId) {
+        return repo.getVaNumberByBankId(bankId);
+    }
+
 }
