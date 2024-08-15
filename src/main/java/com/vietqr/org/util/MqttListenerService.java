@@ -33,13 +33,32 @@ public class MqttListenerService implements MqttCallback {
         this.topicHandlers = initTopicHandlers();
     }
 
-    // Thay đổi phương thức isTopicMatching để xử lý wildcard # và +
+    // Phương thức cải tiến để khớp wildcard # và +
     public static boolean isTopicMatching(String topicPattern, String actualTopic) {
-        String regex = topicPattern
-                .replace("+", "[^/]+")  // Thay thế + bằng regex cho một phần tử bất kỳ không có dấu "/"
-                .replace("#", ".*");    // Thay thế # bằng regex cho phần còn lại của chuỗi
-        return actualTopic.matches(regex);
+        String[] patternLevels = topicPattern.split("/");
+        String[] topicLevels = actualTopic.split("/");
+
+        for (int i = 0; i < patternLevels.length; i++) {
+            // Nếu vượt quá độ dài của actualTopic, chủ đề không khớp
+            if (i >= topicLevels.length) {
+                return false;
+            }
+
+            // Nếu gặp wildcard #, khớp toàn bộ phần còn lại
+            if (patternLevels[i].equals("#")) {
+                return true;  // Khớp toàn bộ phần còn lại của chuỗi actualTopic
+            }
+
+            // Nếu gặp wildcard +, khớp với đúng một cấp của actualTopic
+            if (!patternLevels[i].equals("+") && !patternLevels[i].equals(topicLevels[i])) {
+                return false;  // Nếu không khớp, trả về false
+            }
+        }
+
+        // Chủ đề khớp nếu có cùng độ dài với topicPattern
+        return patternLevels.length == topicLevels.length;
     }
+
 
     @PostConstruct
     public void startListening() throws MqttException {
@@ -67,6 +86,7 @@ public class MqttListenerService implements MqttCallback {
         MqttTopicHandlerScanner.MethodHandlerPair handlerPair = findHandlerForTopic(topic);
         try {
             if (handlerPair != null) {
+                System.out.println(topic);
                 handlerPair.getMethod().invoke(handlerPair.getBean(), topic, message);
             } else {
                 System.out.println("No handler for topic: " + topic);
@@ -92,14 +112,16 @@ public class MqttListenerService implements MqttCallback {
         mqttClient.publish(topic, message);
     }
 
-    // Tìm kiếm handler phù hợp với chủ đề được nhận
+    // Phương thức tìm kiếm handler phù hợp
     private MqttTopicHandlerScanner.MethodHandlerPair findHandlerForTopic(String topic) {
         for (Map.Entry<String, MqttTopicHandlerScanner.MethodHandlerPair> entry : topicHandlers.entrySet()) {
             String key = entry.getKey();
+            // Sử dụng phương thức isTopicMatching để tìm chủ đề phù hợp
             if (isTopicMatching(key, topic)) {
                 return entry.getValue();
             }
         }
         return null;
     }
+
 }
