@@ -119,9 +119,6 @@ public class AccountBankReceiveController {
     ContactService contactService;
 
     @Autowired
-    CustomerVaService customerVaService;
-
-    @Autowired
     MerchantSyncService merchantSyncService;
 
     @Autowired

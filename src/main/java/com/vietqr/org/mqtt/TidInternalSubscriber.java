@@ -69,7 +69,7 @@ public class TidInternalSubscriber {
                 qrBoxSyncService.insert(entity);
 
                 //send to macAddress
-                SyncBoxQrDTO syncBoxQrDTO = new SyncBoxQrDTO(certificate, boxId);
+                SyncBoxQrDTO syncBoxQrDTO = new SyncBoxQrDTO(entity.getCertificate(), boxId);
                 mqttListenerService.publishMessageToCommonTopic("/vqr/handle-box/response/" + dto.getMacAddr(),
                         mapper.writeValueAsString(syncBoxQrDTO));
             }
