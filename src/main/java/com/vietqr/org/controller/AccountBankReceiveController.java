@@ -1146,7 +1146,23 @@ public class AccountBankReceiveController {
                 // generate VietQRGenerateDTO
                 VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
                 vietQRGenerateDTO.setCaiValue(caiValue);
-                vietQRGenerateDTO.setBankAccount(accountBankEntity.getBankAccount());
+                switch (bankTypeEntity.getBankCode()) {
+                    case "BIDV":
+                        if (accountBankEntity.isAuthenticated()) {
+                            String vaNumber = customerVaService.getVaNumberByBankId(accountBankEntity.getId());
+                            if (!StringUtil.isNullOrEmpty(vaNumber)) {
+                                vietQRGenerateDTO.setBankAccount(vaNumber);
+                            } else {
+                                vietQRGenerateDTO.setBankAccount(accountBankEntity.getBankAccount());
+                            }
+                        } else {
+                            vietQRGenerateDTO.setBankAccount(accountBankEntity.getBankAccount());
+                        }
+                        break;
+                    default:
+                        vietQRGenerateDTO.setBankAccount(accountBankEntity.getBankAccount());
+                        break;
+                }
                 String qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
                 // set values
                 result = new AccountBankReceiveDetailWT();
