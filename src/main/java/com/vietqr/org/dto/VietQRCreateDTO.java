@@ -1,6 +1,9 @@
 package com.vietqr.org.dto;
 
+import com.vietqr.org.service.mqtt.AdditionalData;
+
 import java.io.Serializable;
+import java.util.List;
 
 public class VietQRCreateDTO implements Serializable {
 
@@ -23,7 +26,7 @@ public class VietQRCreateDTO implements Serializable {
 	private String urlLink;
 	private String subTerminalCode;
 	private String serviceCode;
-	private String additionalData1;
+	private List<AdditionalData> additionalData;
 
 
 
@@ -32,7 +35,7 @@ public class VietQRCreateDTO implements Serializable {
 	}
 
 	public VietQRCreateDTO(String bankId, String amount, String content,
-			String userId) {
+						   String userId) {
 		super();
 		this.bankId = bankId;
 		this.amount = amount;
@@ -41,7 +44,7 @@ public class VietQRCreateDTO implements Serializable {
 	}
 
 	public VietQRCreateDTO(String bankId, String amount, String content,
-			String userId, String terminalCode, String note) {
+						   String userId, String terminalCode, String note) {
 		super();
 		this.bankId = bankId;
 		this.amount = amount;
@@ -52,7 +55,7 @@ public class VietQRCreateDTO implements Serializable {
 	}
 
 	public VietQRCreateDTO(String bankId, String amount, String content,
-			String userId, String transType, String customerBankAccount, String customerBankCode, String customerName) {
+						   String userId, String transType, String customerBankAccount, String customerBankCode, String customerName) {
 		this.bankId = bankId;
 		this.amount = amount;
 		this.content = content;
@@ -64,8 +67,8 @@ public class VietQRCreateDTO implements Serializable {
 	}
 
 	public VietQRCreateDTO(String bankId, String amount, String content,
-			String userId, String transType, String customerBankAccount, String customerBankCode, String customerName,
-			String note) {
+						   String userId, String transType, String customerBankAccount, String customerBankCode, String customerName,
+						   String note) {
 		this.bankId = bankId;
 		this.amount = amount;
 		this.content = content;
@@ -78,8 +81,8 @@ public class VietQRCreateDTO implements Serializable {
 	}
 
 	public VietQRCreateDTO(String bankId, String amount, String content,
-			String userId, String transType, String customerBankAccount, String customerBankCode, String customerName,
-			String terminalCode, String note) {
+						   String userId, String transType, String customerBankAccount, String customerBankCode, String customerName,
+						   String terminalCode, String note) {
 		this.bankId = bankId;
 		this.amount = amount;
 		this.content = content;
@@ -93,8 +96,8 @@ public class VietQRCreateDTO implements Serializable {
 	}
 
 	public VietQRCreateDTO(String bankId, String amount, String content,
-			String userId, String transType, String customerBankAccount, String customerBankCode, String customerName,
-			String terminalCode, String orderId, String note) {
+						   String userId, String transType, String customerBankAccount, String customerBankCode, String customerName,
+						   String terminalCode, String orderId, String note) {
 		this.bankId = bankId;
 		this.amount = amount;
 		this.content = content;
@@ -108,7 +111,7 @@ public class VietQRCreateDTO implements Serializable {
 		this.note = note;
 	}
 
-	public VietQRCreateDTO(String bankId, String amount, String content, String userId, String transType, String customerBankAccount, String customerBankCode, String customerName, String terminalCode, String orderId, String note, String urlLink, String subTerminalCode, String serviceCode, String additionalData1) {
+	public VietQRCreateDTO(String bankId, String amount, String content, String userId, String transType, String customerBankAccount, String customerBankCode, String customerName, String terminalCode, String orderId, String note, String urlLink, String subTerminalCode, String serviceCode,  List<AdditionalData>  additionalData) {
 		this.bankId = bankId;
 		this.amount = amount;
 		this.content = content;
@@ -123,7 +126,7 @@ public class VietQRCreateDTO implements Serializable {
 		this.urlLink = urlLink;
 		this.subTerminalCode = subTerminalCode;
 		this.serviceCode = serviceCode;
-		this.additionalData1 = additionalData1;
+		this.additionalData = additionalData;
 
 	}
 
@@ -239,13 +242,11 @@ public class VietQRCreateDTO implements Serializable {
 		this.subTerminalCode = subTerminalCode;
 	}
 
-
-	public String getAdditionalData1() {
-		return additionalData1;
+	public List<AdditionalData> getAdditionalData() {
+		return additionalData;
 	}
 
-	public void setAdditionalData1(String additionalData1) {
-		this.additionalData1 = additionalData1;
+	public void setAdditionalData(List<AdditionalData> additionalData) {
+		this.additionalData = additionalData;
 	}
-
 }

@@ -20,12 +20,14 @@ public interface AccountBankReceiveShareRepository
                     + "b.type as bankType, b.is_authenticated as authenticated, b.mms_active AS mmsActive, "
                     + "b.user_id as userId, a.is_owner as isOwner, b.bank_type_id as bankTypeId, "
                     + "b.national_id as nationalId, b.is_valid_service AS isValidService, "
-                    + "b.valid_fee_from AS validFeeFrom, b.valid_fee_to AS validFeeTo "
+                    + "b.valid_fee_from AS validFeeFrom, b.valid_fee_to AS validFeeTo, "
+                    + "COALESCE(c.va_number, '') AS vaNumber "
                     + "FROM account_bank_receive_share a "
                     + "INNER JOIN account_bank_receive b "
+                    + "LEFT JOIN customer_va c ON c.bank_id = b.id "
                     + "ON a.bank_id = b.id "
                     + "WHERE a.user_id = :userId  "
-                    + "GROUP BY b.id, a.is_owner, a.arrangement "
+                    + "GROUP BY b.id, a.is_owner, a.arrangement, vaNumber "
                     + "ORDER BY a.arrangement ASC, b.is_authenticated DESC, "
                     + "a.is_owner DESC, b.bank_account ASC ", nativeQuery = true)
     List<AccountBankReceiveShareDTO> getAccountBankReceiveShare(@Param(value = "userId") String userId);

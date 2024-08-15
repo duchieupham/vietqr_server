@@ -22,6 +22,8 @@ public interface AccountBankReceiveShareDTO {
 
     boolean getIsOwner();
 
+    String getVaNumber();
+
     String getBankTypeId();
 
     Boolean getIsValidService();

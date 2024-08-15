@@ -189,4 +189,9 @@ public class AccountLoginServiceImpl implements AccountLoginService {
     public List<IAccountLogin> findUsersRegisteredInMonth(long startTime, long endTime) {
         return repo.findUsersRegisteredInMonth(startTime, endTime);
     }
+
+    @Override
+    public AccountLoginEntity getAccountLoginByPhoneNo(String phoneNo) {
+        return repo.getAccountLoginEntityByPhoneNo(phoneNo);
+    }
 }

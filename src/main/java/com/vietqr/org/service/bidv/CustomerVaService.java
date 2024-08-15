@@ -30,4 +30,6 @@ public interface CustomerVaService {
     public String getUserIdByCustomerId(String customerId);
 
     public String checkExistedMerchantId(String merchantid);
+
+    String getVaNumberByBankId(String bankId);
 }

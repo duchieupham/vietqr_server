@@ -92,6 +92,9 @@ public class AccountBankReceiveController {
     CaiBankService caiBankService;
 
     @Autowired
+    CustomerVaService customerVaService;
+
+    @Autowired
     TransactionReceiveService transactionReceiveService;
 
     @Autowired
@@ -114,9 +117,6 @@ public class AccountBankReceiveController {
 
     @Autowired
     ContactService contactService;
-
-    @Autowired
-    CustomerVaService customerVaService;
 
     @Autowired
     MerchantSyncService merchantSyncService;
@@ -1206,7 +1206,23 @@ public class AccountBankReceiveController {
                 // generate VietQRGenerateDTO
                 VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
                 vietQRGenerateDTO.setCaiValue(caiValue);
-                vietQRGenerateDTO.setBankAccount(accountBankEntity.getBankAccount());
+                switch (bankTypeEntity.getBankCode()) {
+                    case "BIDV":
+                        if (accountBankEntity.isAuthenticated()) {
+                            String vaNumber = customerVaService.getVaNumberByBankId(accountBankEntity.getId());
+                            if (!StringUtil.isNullOrEmpty(vaNumber)) {
+                                vietQRGenerateDTO.setBankAccount(vaNumber);
+                            } else {
+                                vietQRGenerateDTO.setBankAccount(accountBankEntity.getBankAccount());
+                            }
+                        } else {
+                            vietQRGenerateDTO.setBankAccount(accountBankEntity.getBankAccount());
+                        }
+                        break;
+                    default:
+                        vietQRGenerateDTO.setBankAccount(accountBankEntity.getBankAccount());
+                        break;
+                }
                 String qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
                 // set values
                 result = new AccountBankReceiveDetailDTO();
@@ -1364,19 +1380,9 @@ public class AccountBankReceiveController {
                             dto.setKeyActive(checkKeyActiveDTO.getKeyActive());
                         } else {
                             dto.setTimeActiveKey(0);
-                            StringUtil.isNullOrEmpty(checkKeyActiveDTO.getKeyActive());
+                            dto.setKeyActive("");
                         }
                     }
-
-//                        if (checkKeyActiveDTO.getStatusActive() == 1) {
-//                            dto.setIsActiveKey(true);
-//                            dto.setTimeActiveKey(checkKeyActiveDTO.getCreateAt());
-//                            dto.setKeyActive(checkKeyActiveDTO.getKeyActive());
-//                        }else if(checkKeyActiveDTO.getStatusActive() == 0) {
-//                            dto.setIsActiveKey(false);
-//                            dto.setTimeActiveKey(0);
-//                            dto.setKeyActive("");
-//                        }
 
                     dto.setCaiValue(valueDTO.getCaiValue());
                     VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
@@ -1468,7 +1474,7 @@ public class AccountBankReceiveController {
                             dto.setKeyActive(StringUtil.getValueNullChecker(checkKeyActiveDTO.getKeyActive()));
                         } else {
                             dto.setTimeActiveKey(0);
-                            dto.setKeyActive(StringUtil.getValueNullChecker(checkKeyActiveDTO.getKeyActive()));
+                            dto.setKeyActive("");
                         }
                     }
                     // set thêm field để biết verify email hay chưa
@@ -1495,11 +1501,26 @@ public class AccountBankReceiveController {
 
                     dto.setCaiValue(valueDTO.getCaiValue());
                     VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
-                    vietQRGenerateDTO.setCaiValue(valueDTO.getCaiValue());
-                    vietQRGenerateDTO.setBankAccount(item.getBankAccount());
-                    String qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
+                    String qr = "";
+                    switch (valueDTO.getBankCode()) {
+                        case "BIDV":
+                            if (item.getAuthenticated()) {
+                                vietQRGenerateDTO.setCaiValue(valueDTO.getCaiValue());
+                                vietQRGenerateDTO.setBankAccount(item.getVaNumber());
+                                qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
+                            } else {
+                                vietQRGenerateDTO.setCaiValue(valueDTO.getCaiValue());
+                                vietQRGenerateDTO.setBankAccount(item.getBankAccount());
+                                qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
+                            }
+                            break;
+                        default:
+                            vietQRGenerateDTO.setCaiValue(valueDTO.getCaiValue());
+                            vietQRGenerateDTO.setBankAccount(item.getBankAccount());
+                            qr = VietQRUtil.generateStaticQR(vietQRGenerateDTO);
+                            break;
+                    }
                     dto.setQrCode(qr);
-
                     return dto;
                 }).collect(Collectors.toList());
             }
