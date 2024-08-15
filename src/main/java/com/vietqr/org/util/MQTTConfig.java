@@ -33,6 +33,7 @@ public class MQTTConfig {
         connOpts.setCleanSession(true);
         connOpts.setUserName(username);
         connOpts.setPassword(password.toCharArray());
+        connOpts.setAutomaticReconnect(true);
         client.connect(connOpts);
         return client;
     }

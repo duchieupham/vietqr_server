@@ -788,10 +788,8 @@ public class TransactionBankController {
                                             try {
                                                 updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time,
                                                         nf, boxIdRef, rawDTO, terminalEntity);
-                                            } catch (JsonProcessingException e) {
-                                                throw new RuntimeException(e);
-                                            } catch (MqttException e) {
-                                                throw new RuntimeException(e);
+                                            } catch (Exception e) {
+                                                logger.error(" Has Error at Push MQTT notification " + e.getMessage() + System.currentTimeMillis());
                                             }
                                             // check if recharge => do update status and push data to customer
                                             ////////// USER RECHAGE VQR || USER RECHARGE MOBILE
@@ -880,11 +878,11 @@ public class TransactionBankController {
                                             try {
                                                 updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time,
                                                         nf, boxIdRef, rawDTO, terminalEntity);
-                                            } catch (JsonProcessingException e) {
-                                                throw new RuntimeException(e);
-                                            } catch (MqttException e) {
-                                                throw new RuntimeException(e);
                                             }
+                                            catch (Exception e) {
+                                                logger.error(" Has Error at Push MQTT notification " + e.getMessage() + System.currentTimeMillis());
+                                            }
+
                                             // check if recharge => do update status and push data to customer
                                             ////////// USER RECHAGE VQR || USER RECHARGE MOBILE
                                             if (transactionReceiveEntity.getType() == 5) {
@@ -1841,7 +1839,8 @@ public class TransactionBankController {
                         MQTTUtil.sendMessage(mqttTopic, payload);
                         System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
                     }
-                } catch (Exception e) {
+                }
+                catch (Exception e) {
                     // Xử lý các ngoại lệ khác nếu có
                     System.err.println("Error while sending balance change notification: " + e.toString());
                 }
