@@ -113,8 +113,6 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
-		String tranDate = DateTimeUtil.getBidvTranDate();
-		System.out.println(tranDate);
 //		MQTTUtil.sub("#");
 		// get bill
 //		 String checksum =

@@ -2025,7 +2025,7 @@ public class VietQRController {
 											vietQRDTO.setBankName(bankTypeEntity.getBankName());
 											vietQRDTO.setBankAccount(bankAccount);
 											vietQRDTO.setUserBankName(userBankName);
-											vietQRDTO.setAmount(FormatterUtil.formatNumber(dto.getAmount()));
+											vietQRDTO.setAmount(StringUtil.formatNumberAsString(dto.getAmount()));
 											vietQRDTO.setContent(content);
 											vietQRDTO.setQrCode(qrCode);
 											vietQRDTO.setImgId(bankTypeEntity.getImgId());
@@ -2151,7 +2151,7 @@ public class VietQRController {
 							vietQRDTO.setBankName(bankTypeEntity.getBankName());
 							vietQRDTO.setBankAccount(accountBankEntity.getBankAccount());
 							vietQRDTO.setUserBankName(accountBankEntity.getBankAccountName().toUpperCase());
-							vietQRDTO.setAmount(FormatterUtil.formatNumber(dto.getAmount()));
+							vietQRDTO.setAmount(StringUtil.formatNumberAsString(dto.getAmount()));
 							vietQRDTO.setContent(billId);
 							vietQRDTO.setQrCode(qr);
 							vietQRDTO.setImgId(bankTypeEntity.getImgId());
@@ -2194,7 +2194,7 @@ public class VietQRController {
 						vietQRDTO.setBankName(bankTypeEntity.getBankName());
 						vietQRDTO.setBankAccount(accountBankEntity.getBankAccount());
 						vietQRDTO.setUserBankName(accountBankEntity.getBankAccountName().toUpperCase());
-						vietQRDTO.setAmount(FormatterUtil.formatNumber(dto.getAmount()));
+						vietQRDTO.setAmount(StringUtil.formatNumberAsString(dto.getAmount()));
 						vietQRDTO.setContent(traceId + " " + dto.getContent());
 						vietQRDTO.setQrCode(qr);
 						vietQRDTO.setImgId(bankTypeEntity.getImgId());
