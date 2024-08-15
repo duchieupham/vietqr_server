@@ -80,7 +80,7 @@ public class BankReceiveFeePackageServiceImpl implements BankReceiveFeePackageSe
     }
 
     @Override
-    public BankReceiveFeePackageEntity saveBankReceiveFeePackage(BankReceiveFeePackageEntity bankReceiveFeePackageEntity) {
-        return repo.save(bankReceiveFeePackageEntity);
+    public BankReceiveFeePackageEntity saveBankReceiveFeePackage(BankReceiveFeePackageEntity entity) {
+        return repo.save(entity);
     }
 }

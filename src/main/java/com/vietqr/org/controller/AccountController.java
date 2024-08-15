@@ -1193,7 +1193,7 @@ public class AccountController {
                 AccountLoginEntity accountLoginEntity = accountLoginService.getAccountLoginByPhoneNo(dto.getPhoneNo());
                 String currentPassword = accountLoginEntity.getPassword();
                 if (currentPassword != null && currentPassword.equals(dto.getPassword())) {
-                    result = new ResponseMessageDTO("FAIL", "E182");
+                    result = new ResponseMessageDTO("FAILED", "E182");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 } else {
                     accountLoginService.resetPassword(dto.getPassword(), dto.getPhoneNo());

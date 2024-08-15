@@ -11,6 +11,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.AccountBankInfoDTO;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
@@ -137,34 +138,45 @@ public class AccountBankFeeController {
                                 // insert bankfee
                                 accountBankFeeService.insert(entity);
 
-                                AccountBankReceiveEntity accountBankReceiveEntity =  accountBankReceiveService.getAccountBankById(bankId);
-                                BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(accountBankReceiveEntity.getBankTypeId());
-                                AccountBankInfoDTO accountBankInfoDTO = new AccountBankInfoDTO();
-                                accountBankInfoDTO.setMmsActive(false);
-                                accountBankInfoDTO.setUserBankName(accountBankReceiveEntity.getBankAccountName());
-                                accountBankInfoDTO.setBankAccount(accountBankReceiveEntity.getBankAccount());
-                                accountBankInfoDTO.setBankShortName(bankTypeEntity.getBankShortName());
-                                ObjectMapper objectMapper = new ObjectMapper();
-                                String jsonData = objectMapper.writeValueAsString(accountBankInfoDTO);
+                                try {
+                                    Thread thread = new Thread(() -> {
+                                        AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService.getAccountBankById(bankId);
+                                        BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(accountBankReceiveEntity.getBankTypeId());
+                                        AccountBankInfoDTO accountBankInfoDTO = new AccountBankInfoDTO();
+                                        accountBankInfoDTO.setMmsActive(false);
+                                        accountBankInfoDTO.setUserBankName(accountBankReceiveEntity.getBankAccountName());
+                                        accountBankInfoDTO.setBankAccount(accountBankReceiveEntity.getBankAccount());
+                                        accountBankInfoDTO.setBankShortName(bankTypeEntity.getBankShortName());
+                                        ObjectMapper objectMapper = new ObjectMapper();
+                                        String jsonData = null;
+                                        try {
+                                            jsonData = objectMapper.writeValueAsString(accountBankInfoDTO);
+                                        } catch (JsonProcessingException e) {
+                                            throw new RuntimeException(e);
+                                        }
 
-                                BankReceiveFeePackageEntity bankReceiveFeePackage = new BankReceiveFeePackageEntity();
-                                bankReceiveFeePackage.setId(uuid.toString());
-                                bankReceiveFeePackage.setActiveFee(serviceFeeEntity.getActiveFee());
-                                bankReceiveFeePackage.setAnnualFee(serviceFeeEntity.getAnnualFee());
-                                bankReceiveFeePackage.setBankId(bankId);
-                                bankReceiveFeePackage.setData(jsonData);
-                                bankReceiveFeePackage.setFeePackageId(dto.getServiceFeeId());
-                                bankReceiveFeePackage.setFixFee(serviceFeeEntity.getTransFee());
-                                bankReceiveFeePackage.setPercentFee(serviceFeeEntity.getPercentFee());
-                                if (serviceFeeEntity.getCountingTransType() == 0 || serviceFeeEntity.getCountingTransType() == 1) {
-                                    bankReceiveFeePackage.setRecordType(serviceFeeEntity.getCountingTransType());
+                                        BankReceiveFeePackageEntity bankReceiveFeePackage = new BankReceiveFeePackageEntity();
+                                        bankReceiveFeePackage.setId(uuid.toString());
+                                        bankReceiveFeePackage.setActiveFee(serviceFeeEntity.getActiveFee());
+                                        bankReceiveFeePackage.setAnnualFee(serviceFeeEntity.getAnnualFee());
+                                        bankReceiveFeePackage.setBankId(bankId);
+                                        bankReceiveFeePackage.setData(jsonData);
+                                        bankReceiveFeePackage.setFeePackageId(dto.getServiceFeeId());
+                                        bankReceiveFeePackage.setFixFee(serviceFeeEntity.getTransFee());
+                                        bankReceiveFeePackage.setPercentFee(serviceFeeEntity.getPercentFee());
+                                        if (serviceFeeEntity.getCountingTransType() == 0 || serviceFeeEntity.getCountingTransType() == 1) {
+                                            bankReceiveFeePackage.setRecordType(serviceFeeEntity.getCountingTransType());
+                                        }
+                                        bankReceiveFeePackage.setTitle(serviceFeeEntity.getShortName());
+                                        bankReceiveFeePackage.setVat(serviceFeeEntity.getVat());
+                                        bankReceiveFeePackage.setUserId(accountBankReceiveEntity.getUserId());
+                                        //insert bankReceiveFeePackage
+                                        bankReceiveFeePackageService.saveBankReceiveFeePackage(bankReceiveFeePackage);
+                                    });
+                                    thread.start();
+                                } catch (Exception e) {
+                                    logger.error("BankReceiveFeePackageEntity ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
                                 }
-                                bankReceiveFeePackage.setTitle(serviceFeeEntity.getShortName());
-                                bankReceiveFeePackage.setVat(serviceFeeEntity.getVat());
-                                bankReceiveFeePackage.setUserId(accountBankReceiveEntity.getUserId());
-                                //insert bankReceiveFeePackage
-                                bankReceiveFeePackageService.saveBankReceiveFeePackage(bankReceiveFeePackage);
-
                                 // check annual fee -> add into annual acc bank
                                 PaymentAnnualAccBankEntity entity2 = new PaymentAnnualAccBankEntity();
                                 UUID uuid2 = UUID.randomUUID();
@@ -223,34 +235,45 @@ public class AccountBankFeeController {
                         // insert bankfee
                         accountBankFeeService.insert(entity);
 
-                        AccountBankReceiveEntity accountBankReceiveEntity =  accountBankReceiveService.getAccountBankById(dto.getBankId());
-                        BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(accountBankReceiveEntity.getBankTypeId());
-                        AccountBankInfoDTO accountBankInfoDTO = new AccountBankInfoDTO();
-                        accountBankInfoDTO.setMmsActive(false);
-                        accountBankInfoDTO.setUserBankName(accountBankReceiveEntity.getBankAccountName());
-                        accountBankInfoDTO.setBankAccount(accountBankReceiveEntity.getBankAccount());
-                        accountBankInfoDTO.setBankShortName(bankTypeEntity.getBankShortName());
-                        ObjectMapper objectMapper = new ObjectMapper();
-                        String jsonData = objectMapper.writeValueAsString(accountBankInfoDTO);
+                        try {
+                            Thread thread = new Thread(() -> {
+                                AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService.getAccountBankById(dto.getBankId());
+                                BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(accountBankReceiveEntity.getBankTypeId());
+                                AccountBankInfoDTO accountBankInfoDTO = new AccountBankInfoDTO();
+                                accountBankInfoDTO.setMmsActive(false);
+                                accountBankInfoDTO.setUserBankName(accountBankReceiveEntity.getBankAccountName());
+                                accountBankInfoDTO.setBankAccount(accountBankReceiveEntity.getBankAccount());
+                                accountBankInfoDTO.setBankShortName(bankTypeEntity.getBankShortName());
+                                ObjectMapper objectMapper = new ObjectMapper();
+                                String jsonData = null;
+                                try {
+                                    jsonData = objectMapper.writeValueAsString(accountBankInfoDTO);
+                                } catch (JsonProcessingException e) {
+                                    throw new RuntimeException(e);
+                                }
 
-                        BankReceiveFeePackageEntity bankReceiveFeePackage = new BankReceiveFeePackageEntity();
-                        bankReceiveFeePackage.setId(uuid.toString());
-                        bankReceiveFeePackage.setActiveFee(serviceFeeEntity.getActiveFee());
-                        bankReceiveFeePackage.setAnnualFee(serviceFeeEntity.getAnnualFee());
-                        bankReceiveFeePackage.setBankId(dto.getBankId());
-                        bankReceiveFeePackage.setData(jsonData);
-                        bankReceiveFeePackage.setFeePackageId(dto.getServiceFeeId());
-                        bankReceiveFeePackage.setFixFee(serviceFeeEntity.getTransFee());
-                        bankReceiveFeePackage.setPercentFee(serviceFeeEntity.getPercentFee());
-                        if (serviceFeeEntity.getCountingTransType() == 0 || serviceFeeEntity.getCountingTransType() == 1) {
-                            bankReceiveFeePackage.setRecordType(serviceFeeEntity.getCountingTransType());
+                                BankReceiveFeePackageEntity bankReceiveFeePackage = new BankReceiveFeePackageEntity();
+                                bankReceiveFeePackage.setId(uuid.toString());
+                                bankReceiveFeePackage.setActiveFee(serviceFeeEntity.getActiveFee());
+                                bankReceiveFeePackage.setAnnualFee(serviceFeeEntity.getAnnualFee());
+                                bankReceiveFeePackage.setBankId(dto.getBankId());
+                                bankReceiveFeePackage.setData(jsonData);
+                                bankReceiveFeePackage.setFeePackageId(dto.getServiceFeeId());
+                                bankReceiveFeePackage.setFixFee(serviceFeeEntity.getTransFee());
+                                bankReceiveFeePackage.setPercentFee(serviceFeeEntity.getPercentFee());
+                                if (serviceFeeEntity.getCountingTransType() == 0 || serviceFeeEntity.getCountingTransType() == 1) {
+                                    bankReceiveFeePackage.setRecordType(serviceFeeEntity.getCountingTransType());
+                                }
+                                bankReceiveFeePackage.setTitle(serviceFeeEntity.getShortName());
+                                bankReceiveFeePackage.setVat(serviceFeeEntity.getVat());
+                                bankReceiveFeePackage.setUserId(accountBankReceiveEntity.getUserId());
+                                //insert bankReceiveFeePackage
+                                bankReceiveFeePackageService.saveBankReceiveFeePackage(bankReceiveFeePackage);
+                            });
+                            thread.start();
+                        } catch (Exception e) {
+                            logger.error("BankReceiveFeePackageEntity ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
                         }
-                        bankReceiveFeePackage.setTitle(serviceFeeEntity.getShortName());
-                        bankReceiveFeePackage.setVat(serviceFeeEntity.getVat());
-                        bankReceiveFeePackage.setUserId(accountBankReceiveEntity.getUserId());
-                        //insert bankReceiveFeePackage
-                        bankReceiveFeePackageService.saveBankReceiveFeePackage(bankReceiveFeePackage);
-
                         // check annual fee -> add into annual acc bank
                         PaymentAnnualAccBankEntity entity2 = new PaymentAnnualAccBankEntity();
                         UUID uuid2 = UUID.randomUUID();

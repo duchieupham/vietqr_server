@@ -15,15 +15,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 import java.util.logging.Logger;
 
 @Service
 public class AmazonS3ServiceImpl implements AmazonS3Service {
 
-    private Logger logger = Logger.getLogger(AmazonS3ServiceImpl.class.getName());
+    private final Logger logger = Logger.getLogger(AmazonS3ServiceImpl.class.getName());
 
     @Autowired
     private S3Client s3Client;
@@ -70,9 +67,9 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
             s3Client.putObject(request, RequestBody.fromFile(filePut));
             result = endpointUrl + "/" + key;
             System.out.println("File uploaded successfully at: " + System.currentTimeMillis());
-        } catch (Exception ignored) {
-            System.out.println("Error at uploadFile: " + ignored.toString());
-            logger.info("Error at uploadFile: " + ignored.toString());
+        } catch (Exception e) {
+            System.out.println("Error at uploadFile: " + e.toString());
+            logger.info("Error at uploadFile: " + e.toString());
         } finally {
             if (filePut != null && filePut.exists()) {
                 filePut.delete();
