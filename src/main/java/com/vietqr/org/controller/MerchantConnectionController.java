@@ -28,13 +28,13 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 @RestController
 @CrossOrigin
 @RequestMapping("/api/merchant-connection")
 public class MerchantConnectionController {
-    private static final Logger logger = Logger.getLogger(String.valueOf(MerchantConnectionController.class));
+    private static final Logger logger = Logger.getLogger(MerchantConnectionController.class);
 
     @Autowired
     private MerchantConnectionService merchantConnectionService;
@@ -218,10 +218,12 @@ public class MerchantConnectionController {
                 result = new ResponseMessageDTO("SUCCESS", "");
                 httpStatus = HttpStatus.OK;
             } else {
-                result = new ResponseMessageDTO("deleteMerchantConnection: ERROR: ", "E183");
+                logger.error("deleteMerchantConnection: ID IS EMPTY OR INVALID");
+                result = new ResponseMessageDTO("FAILED", "E184");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
+            logger.error("deleteMerchantConnection: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -263,10 +265,12 @@ public class MerchantConnectionController {
                 result = new ResponseMessageDTO("SUCCESS", "");
                 httpStatus = HttpStatus.OK;
             } else {
-                result = new ResponseMessageDTO("updateMerchantConnection: ERROR: ", "E183");
+                logger.error("updateMerchantConnection: INPUT IS INVALID");
+                result = new ResponseMessageDTO("FAILED", "E183");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
+            logger.error("updateMerchantConnection: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
