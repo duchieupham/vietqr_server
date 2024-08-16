@@ -149,7 +149,7 @@ public class TransactionReceiveEntity implements Serializable {
 	private Integer transStatus;
 
 	@Column(name = "urlLink")
-	private String urlLink;
+	private String urlLink = "";
 
 	@Column(name = "billId")
 	private String billId = "";
@@ -158,10 +158,12 @@ public class TransactionReceiveEntity implements Serializable {
 	private String hashTag = "";
 
 	@Column(name = "additionalData", columnDefinition = "JSON")
-	private String additionalData;
+	private String additionalData = "[]";
 
 	public TransactionReceiveEntity() {
 		super();
+		this.hashTag = "";
+		this.additionalData = "[]";
 	}
 
 	public TransactionReceiveEntity(String id, String bankAccount, String bankId, String content, long amount,
