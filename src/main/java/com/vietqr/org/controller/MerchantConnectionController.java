@@ -28,13 +28,13 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 @RestController
 @CrossOrigin
 @RequestMapping("/api/merchant-connection")
 public class MerchantConnectionController {
-    private static final Logger logger = Logger.getLogger(String.valueOf(MerchantConnectionController.class));
+    private static final Logger logger = Logger.getLogger(MerchantConnectionController.class);
 
     @Autowired
     private MerchantConnectionService merchantConnectionService;
@@ -207,4 +207,73 @@ public class MerchantConnectionController {
         return encodedText;
     }
 
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<ResponseMessageDTO> deleteMerchantConnection(
+            @PathVariable String id) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (id != null && !id.isEmpty()) {
+                merchantConnectionService.deleteMerchantConnectionById(id);
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            } else {
+                logger.error("deleteMerchantConnection: ID IS EMPTY OR INVALID");
+                result = new ResponseMessageDTO("FAILED", "E184");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("deleteMerchantConnection: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<ResponseMessageDTO> updateMerchantConnection(
+            @Valid @RequestBody MerchantConnectionUpdateDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null && dto.getId() != null && !dto.getId().isEmpty()) {
+                MerchantConnectionEntity entity = merchantConnectionService.getMerchanConnectionById(dto.getId());
+                if (dto.getMid() != null) {
+                    entity.setMid(dto.getMid());
+                }
+                if (dto.getUrlGetToken() != null) {
+                    entity.setUrlGetToken(dto.getUrlGetToken());
+                }
+                if (dto.getUrlCallback() != null) {
+                    entity.setUrlCallback(dto.getUrlCallback());
+                }
+                if (dto.getPassword() != null) {
+                    entity.setPassword(dto.getPassword());
+                }
+                if (dto.getUsername() != null) {
+                    entity.setUsername(dto.getUsername());
+                }
+                if (dto.getToken() != null) {
+                    entity.setToken(dto.getToken());
+                    if (dto.getToken().isEmpty()) {
+                        entity.setType(0);
+                    } else {
+                        entity.setType(1);
+                    }
+                }
+                merchantConnectionService.updateMerchantConnectionById(entity);
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            } else {
+                logger.error("updateMerchantConnection: INPUT IS INVALID");
+                result = new ResponseMessageDTO("FAILED", "E183");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("updateMerchantConnection: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 }

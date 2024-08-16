@@ -35,4 +35,14 @@ public class MerchantConnectionServiceImpl implements MerchantConnectionService 
     public MerchantConnectionEntity getMerchanConnectionById(String id) {
         return repo.getMerchanConnectionById(id);
     }
+
+    @Override
+    public void updateMerchantConnectionById(MerchantConnectionEntity entity) {
+        repo.updateMerchantConnectionById(entity.getId(), entity.getUrlCallback(), entity.getUrlGetToken(), entity.getMid(), entity.getPassword(), entity.getToken(), entity.getType(), entity.getUsername());
+    }
+
+    @Override
+    public void deleteMerchantConnectionById(String id) {
+        repo.deleteMerchantConnectionById(id);
+    }
 }
