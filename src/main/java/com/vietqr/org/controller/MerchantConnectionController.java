@@ -207,4 +207,69 @@ public class MerchantConnectionController {
         return encodedText;
     }
 
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<ResponseMessageDTO> deleteMerchantConnection(
+            @PathVariable String id) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (id != null && !id.isEmpty()) {
+                merchantConnectionService.deleteMerchantConnectionById(id);
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            } else {
+                result = new ResponseMessageDTO("deleteMerchantConnection: ERROR: ", "E183");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<ResponseMessageDTO> updateMerchantConnection(
+            @Valid @RequestBody MerchantConnectionUpdateDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null && dto.getId() != null && !dto.getId().isEmpty()) {
+                MerchantConnectionEntity entity = merchantConnectionService.getMerchanConnectionById(dto.getId());
+                if (dto.getMid() != null) {
+                    entity.setMid(dto.getMid());
+                }
+                if (dto.getUrlGetToken() != null) {
+                    entity.setUrlGetToken(dto.getUrlGetToken());
+                }
+                if (dto.getUrlCallback() != null) {
+                    entity.setUrlCallback(dto.getUrlCallback());
+                }
+                if (dto.getPassword() != null) {
+                    entity.setPassword(dto.getPassword());
+                }
+                if (dto.getUsername() != null) {
+                    entity.setUsername(dto.getUsername());
+                }
+                if (dto.getToken() != null) {
+                    entity.setToken(dto.getToken());
+                    if (dto.getToken().isEmpty()) {
+                        entity.setType(0);
+                    } else {
+                        entity.setType(1);
+                    }
+                }
+                merchantConnectionService.updateMerchantConnectionById(entity);
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            } else {
+                result = new ResponseMessageDTO("updateMerchantConnection: ERROR: ", "E183");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 }

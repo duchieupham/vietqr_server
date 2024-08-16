@@ -1,10 +1,13 @@
 package com.vietqr.org.repository;
 
 import com.vietqr.org.entity.MerchantConnectionEntity;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Modifying;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Repository
@@ -27,4 +30,30 @@ public interface MerchantConnectionRepository extends JpaRepository<MerchantConn
 
     @Query(value = "SELECT * FROM merchant_connection WHERE id = :id ", nativeQuery = true)
     MerchantConnectionEntity getMerchanConnectionById(String id);
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM merchant_connection WHERE id = :id", nativeQuery = true)
+    void deleteMerchantConnectionById(@Param(value = "id") String id);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE merchant_connection " +
+            "SET url_callback = :urlCallback, " +
+            "url_get_token = :urlGetToken, " +
+            "mid = :mid, " +
+            "password = :password, " +
+            "token = :token, " +
+            "type = :type, " +
+            "username = :username " +
+            "WHERE id = :id", nativeQuery = true)
+    void updateMerchantConnectionById(@Param("id") String id,
+                                  @Param("urlCallback") String urlCallback,
+                                  @Param("urlGetToken") String urlGetToken,
+                                  @Param("mid") String mid,
+                                  @Param("password") String password,
+                                  @Param("token") String token,
+                                  @Param("type") int type,
+                                  @Param("username") String username);
+
 }
