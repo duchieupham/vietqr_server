@@ -7,8 +7,6 @@ import com.vietqr.org.entity.BankReceiveConnectionEntity;
 import com.vietqr.org.entity.MerchantConnectionEntity;
 import com.vietqr.org.repository.BankReceiveConnectionRepository;
 import com.vietqr.org.service.MerchantConnectionService;
-import com.vietqr.org.service.MerchantSyncService;
-import com.vietqr.org.util.EnvironmentUtil;
 import com.vietqr.org.util.StringUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 @RestController
 @CrossOrigin
