@@ -164,8 +164,10 @@ public class AccountBankFeeController {
                                         bankReceiveFeePackage.setFeePackageId(dto.getServiceFeeId());
                                         bankReceiveFeePackage.setFixFee(serviceFeeEntity.getTransFee());
                                         bankReceiveFeePackage.setPercentFee(serviceFeeEntity.getPercentFee());
-                                        if (serviceFeeEntity.getCountingTransType() == 0 || serviceFeeEntity.getCountingTransType() == 1) {
-                                            bankReceiveFeePackage.setRecordType(serviceFeeEntity.getCountingTransType());
+                                        if (serviceFeeEntity.getCountingTransType() == 0) {
+                                            bankReceiveFeePackage.setRecordType(1);
+                                        } else if (serviceFeeEntity.getCountingTransType() == 1) {
+                                            bankReceiveFeePackage.setRecordType(0);
                                         }
                                         bankReceiveFeePackage.setTitle(serviceFeeEntity.getShortName());
                                         bankReceiveFeePackage.setVat(serviceFeeEntity.getVat());
@@ -261,8 +263,10 @@ public class AccountBankFeeController {
                                 bankReceiveFeePackage.setFeePackageId(dto.getServiceFeeId());
                                 bankReceiveFeePackage.setFixFee(serviceFeeEntity.getTransFee());
                                 bankReceiveFeePackage.setPercentFee(serviceFeeEntity.getPercentFee());
-                                if (serviceFeeEntity.getCountingTransType() == 0 || serviceFeeEntity.getCountingTransType() == 1) {
-                                    bankReceiveFeePackage.setRecordType(serviceFeeEntity.getCountingTransType());
+                                if (serviceFeeEntity.getCountingTransType() == 0) {
+                                    bankReceiveFeePackage.setRecordType(1);
+                                } else if (serviceFeeEntity.getCountingTransType() == 1) {
+                                    bankReceiveFeePackage.setRecordType(0);
                                 }
                                 bankReceiveFeePackage.setTitle(serviceFeeEntity.getShortName());
                                 bankReceiveFeePackage.setVat(serviceFeeEntity.getVat());
