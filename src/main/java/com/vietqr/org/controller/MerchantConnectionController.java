@@ -9,6 +9,8 @@ import com.vietqr.org.repository.BankReceiveConnectionRepository;
 import com.vietqr.org.service.MerchantConnectionService;
 import com.vietqr.org.service.MerchantSyncService;
 import com.vietqr.org.util.EnvironmentUtil;
+import com.vietqr.org.util.StringUtil;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -26,9 +28,10 @@ import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 @RestController
 @CrossOrigin
@@ -40,10 +43,6 @@ public class MerchantConnectionController {
     private MerchantConnectionService merchantConnectionService;
     @Autowired
     private BankReceiveConnectionRepository bankReceiveConnectionRepository;
-
-    @Autowired
-    private MerchantSyncService merchantSyncService;
-
 
     @PostMapping
     public ResponseEntity<Object> createMerchantConnection(@Valid @RequestBody MerchantConnectionRequestDTO requestDTO,
@@ -207,6 +206,36 @@ public class MerchantConnectionController {
         return encodedText;
     }
 
+    @GetMapping()
+    public ResponseEntity<Object> getListMerchantConnection(@RequestParam(defaultValue = "1") int page,
+                                                            @RequestParam(defaultValue = "20") int size) {
+        Object result;
+        HttpStatus httpStatus;
+        PageResDTO pageResDTO = new PageResDTO();
+        try {
+            int offset = (page - 1) * size;
+            int totalElement;
+            List<MerchantConnectionEntity> data = merchantConnectionService.getAllMerchantConnectionEntity(offset, size);
+            totalElement = merchantConnectionService.countAllMerchantConnection();
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageDTO.setTotalElement(totalElement);
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+
+            pageResDTO.setMetadata(pageDTO);
+            pageResDTO.setData(data);
+
+            result= pageResDTO;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("MerchantConnection: ERROR: getListMerchantConnection " + e.getMessage() + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<ResponseMessageDTO> deleteMerchantConnection(
             @PathVariable String id) {

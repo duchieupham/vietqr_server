@@ -45,4 +45,14 @@ public class MerchantConnectionServiceImpl implements MerchantConnectionService 
     public void deleteMerchantConnectionById(String id) {
         repo.deleteMerchantConnectionById(id);
     }
+
+    @Override
+    public List<MerchantConnectionEntity> getAllMerchantConnectionEntity(int offset, int size) {
+        return repo.getAllMerchantConnection(offset, size);
+    }
+
+    @Override
+    public int countAllMerchantConnection() {
+        return repo.countAllMerchantConnection();
+    }
 }

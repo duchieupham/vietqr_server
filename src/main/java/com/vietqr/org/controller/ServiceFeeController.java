@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.vietqr.org.dto.FeePackageDTO;
+import com.vietqr.org.entity.FeePackageEntity;
+import com.vietqr.org.service.FeePackageService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +32,9 @@ public class ServiceFeeController {
 
     @Autowired
     ServiceFeeService serviceFeeService;
+
+    @Autowired
+    FeePackageService feePackageService;
 
     @PostMapping("service-fee")
     public ResponseEntity<ResponseMessageDTO> insertNewServiceFee(
@@ -56,6 +62,31 @@ public class ServiceFeeController {
                 serviceFeeService.insert(entity);
                 result = new ResponseMessageDTO("SUCCESS", "");
                 httpStatus = HttpStatus.OK;
+
+                try {
+                    Thread thread = new Thread(() -> {
+                        FeePackageEntity feePackageEntity = new FeePackageEntity();
+                        feePackageEntity.setId(uuid.toString());
+                        feePackageEntity.setActiveFee(dto.getActiveFee());
+                        feePackageEntity.setAnnualFee(dto.getAnnualFee());
+                        feePackageEntity.setFixFee(dto.getTransFee());
+                        feePackageEntity.setPercentFee(dto.getPercentFee());
+                        if (dto.getCountingTransType() == 0) {
+                            feePackageEntity.setRecordType(1);
+                        } else if (dto.getCountingTransType() == 1) {
+                            feePackageEntity.setRecordType(0);
+                        }
+                        feePackageEntity.setRefId(dto.getRefId());
+                        feePackageEntity.setShortName(dto.getShortName());
+                        feePackageEntity.setTitle(dto.getShortName());
+                        feePackageEntity.setVat(dto.getVat());
+
+                        feePackageService.insertFeePackage(feePackageEntity);
+                    });
+                    thread.start();
+                } catch (Exception e) {
+                    logger.error("FeePackageEntity ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
+                }
             } else {
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;

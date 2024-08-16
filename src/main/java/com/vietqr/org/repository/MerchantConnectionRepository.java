@@ -4,6 +4,7 @@ import com.vietqr.org.entity.MerchantConnectionEntity;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.Modifying;
 
@@ -56,4 +57,10 @@ public interface MerchantConnectionRepository extends JpaRepository<MerchantConn
                                   @Param("type") int type,
                                   @Param("username") String username);
 
+
+    @Query(value = "SELECT * FROM merchant_connection LIMIT :offset, :size", nativeQuery = true)
+    List<MerchantConnectionEntity> getAllMerchantConnection(@Param("offset") int offset, @Param("size") int size);
+
+    @Query(value = "SELECT COUNT(*) FROM merchant_connection", nativeQuery = true)
+    int countAllMerchantConnection();
 }

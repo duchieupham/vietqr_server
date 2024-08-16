@@ -20,4 +20,8 @@ public interface MerchantConnectionService {
     void updateMerchantConnectionById(MerchantConnectionEntity entity);
 
     void deleteMerchantConnectionById(String id);
+
+    List<MerchantConnectionEntity> getAllMerchantConnectionEntity(int offset, int size);
+
+    int countAllMerchantConnection();
 }
