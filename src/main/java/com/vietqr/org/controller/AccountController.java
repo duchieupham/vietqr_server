@@ -971,7 +971,10 @@ public class AccountController {
             // if valid, update password
             String passwordCheck = accountLoginService.checkOldPassword(dto.getUserId(), dto.getOldPassword());
             if (passwordCheck != null && !passwordCheck.isEmpty()) {
-                if (passwordCheck.equals(dto.getOldPassword())) {
+                if (passwordCheck.equals(dto.getNewPassword())) {
+                    result = new ResponseMessageDTO("FAILED", "E182");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                } else {
                     accountLoginService.updatePassword(dto.getNewPassword(), dto.getUserId());
                     result = new ResponseMessageDTO("SUCCESS", "");
                     httpStatus = HttpStatus.OK;
