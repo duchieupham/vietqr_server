@@ -407,10 +407,10 @@ public class VietQRController {
 			qrType = dto.getQrType();
 		}
 		try {
-			String username = getUsernameFromToken(token);
-			List<String> checkExistedCustomerSync = accountCustomerBankService
-					.checkExistedCustomerSyncByUsername(username);
-			if (checkExistedCustomerSync != null && !checkExistedCustomerSync.isEmpty()) {
+//			String username = getUsernameFromToken(token);
+//			List<String> checkExistedCustomerSync = accountCustomerBankService
+//					.checkExistedCustomerSyncByUsername(username);
+//			if (checkExistedCustomerSync != null && !checkExistedCustomerSync.isEmpty()) {
 				switch (qrType) {
 					case 0:
 						response = generateDynamicQrCustomer(dto, token);
@@ -433,10 +433,10 @@ public class VietQRController {
 						httpStatus = HttpStatus.BAD_REQUEST;
 						break;
 				}
-			} else {
-				result = new ResponseMessageDTO("FAILED", "E76");
-				httpStatus = HttpStatus.BAD_REQUEST;
-			}
+//			} else {
+//				result = new ResponseMessageDTO("FAILED", "E76");
+//				httpStatus = HttpStatus.BAD_REQUEST;
+//			}
 		} catch (Exception e) {
 			logger.error("VietQRController: generateQRCustomer: ERROR: " + e.getMessage() + " at: "
 					+ System.currentTimeMillis());
