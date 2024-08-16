@@ -7,8 +7,8 @@ import com.vietqr.org.entity.BankReceiveConnectionEntity;
 import com.vietqr.org.entity.MerchantConnectionEntity;
 import com.vietqr.org.repository.BankReceiveConnectionRepository;
 import com.vietqr.org.service.MerchantConnectionService;
-import com.vietqr.org.service.MerchantSyncService;
-import com.vietqr.org.util.EnvironmentUtil;
+import com.vietqr.org.util.StringUtil;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -26,24 +26,20 @@ import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Logger;
 
 @RestController
 @CrossOrigin
 @RequestMapping("/api/merchant-connection")
 public class MerchantConnectionController {
-    private static final Logger logger = Logger.getLogger(String.valueOf(MerchantConnectionController.class));
+    private static final Logger logger = Logger.getLogger(MerchantConnectionController.class);
 
     @Autowired
     private MerchantConnectionService merchantConnectionService;
     @Autowired
     private BankReceiveConnectionRepository bankReceiveConnectionRepository;
-
-    @Autowired
-    private MerchantSyncService merchantSyncService;
-
 
     @PostMapping
     public ResponseEntity<Object> createMerchantConnection(@Valid @RequestBody MerchantConnectionRequestDTO requestDTO,
@@ -207,4 +203,103 @@ public class MerchantConnectionController {
         return encodedText;
     }
 
+    @GetMapping()
+    public ResponseEntity<Object> getListMerchantConnection(@RequestParam(defaultValue = "1") int page,
+                                                            @RequestParam(defaultValue = "20") int size) {
+        Object result;
+        HttpStatus httpStatus;
+        PageResDTO pageResDTO = new PageResDTO();
+        try {
+            int offset = (page - 1) * size;
+            int totalElement;
+            List<MerchantConnectionEntity> data = merchantConnectionService.getAllMerchantConnectionEntity(offset, size);
+            totalElement = merchantConnectionService.countAllMerchantConnection();
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageDTO.setTotalElement(totalElement);
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+
+            pageResDTO.setMetadata(pageDTO);
+            pageResDTO.setData(data);
+
+            result= pageResDTO;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("MerchantConnection: ERROR: getListMerchantConnection " + e.getMessage() + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<ResponseMessageDTO> deleteMerchantConnection(
+            @PathVariable String id) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (id != null && !id.isEmpty()) {
+                merchantConnectionService.deleteMerchantConnectionById(id);
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            } else {
+                logger.error("deleteMerchantConnection: ID IS EMPTY OR INVALID");
+                result = new ResponseMessageDTO("FAILED", "E184");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("deleteMerchantConnection: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<ResponseMessageDTO> updateMerchantConnection(
+            @Valid @RequestBody MerchantConnectionUpdateDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if (dto != null && dto.getId() != null && !dto.getId().isEmpty()) {
+                MerchantConnectionEntity entity = merchantConnectionService.getMerchanConnectionById(dto.getId());
+                if (dto.getMid() != null) {
+                    entity.setMid(dto.getMid());
+                }
+                if (dto.getUrlGetToken() != null) {
+                    entity.setUrlGetToken(dto.getUrlGetToken());
+                }
+                if (dto.getUrlCallback() != null) {
+                    entity.setUrlCallback(dto.getUrlCallback());
+                }
+                if (dto.getPassword() != null) {
+                    entity.setPassword(dto.getPassword());
+                }
+                if (dto.getUsername() != null) {
+                    entity.setUsername(dto.getUsername());
+                }
+                if (dto.getToken() != null) {
+                    entity.setToken(dto.getToken());
+                    if (dto.getToken().isEmpty()) {
+                        entity.setType(0);
+                    } else {
+                        entity.setType(1);
+                    }
+                }
+                merchantConnectionService.updateMerchantConnectionById(entity);
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            } else {
+                logger.error("updateMerchantConnection: INPUT IS INVALID");
+                result = new ResponseMessageDTO("FAILED", "E183");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("updateMerchantConnection: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 }

@@ -16,4 +16,12 @@ public interface MerchantConnectionService {
     List<String> getIdMerchantConnectionByMid(String mid);
 
     MerchantConnectionEntity getMerchanConnectionById(String id);
+
+    void updateMerchantConnectionById(MerchantConnectionEntity entity);
+
+    void deleteMerchantConnectionById(String id);
+
+    List<MerchantConnectionEntity> getAllMerchantConnectionEntity(int offset, int size);
+
+    int countAllMerchantConnection();
 }
