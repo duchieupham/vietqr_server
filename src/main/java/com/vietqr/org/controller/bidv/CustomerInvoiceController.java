@@ -267,9 +267,10 @@ public class CustomerInvoiceController {
         ResponseMessageBidvDTO result = null;
         HttpStatus httpStatus = null;
         AccountBankReceiveEntity accountBankReceiveEntity = null;
+        CustomerInvoiceDataDTO customerInvoiceDataDTO = null;
         try {
             logger.info("CustomerInvoiceController: INFO : receive paybill from BIDV: " + dto.toString()
-            + " at: " + System.currentTimeMillis());
+                    + " at: " + System.currentTimeMillis());
             // for check valid token
             String accessKey = EnvironmentUtil.getBidvAccessKey();
             String keyDecoded = JWTUtil.getKeyFromToken(token);
@@ -298,124 +299,42 @@ public class CustomerInvoiceController {
                             // 2: Static qr
                             if (checkExistedCustomerId != null && !checkExistedCustomerId.trim().isEmpty()) {
                                 // check bill_id tồn tại
-                                CustomerInvoiceDataDTO customerInvoiceDataDTO = customerInvoiceService
+                                customerInvoiceDataDTO = customerInvoiceService
                                         .getCustomerInvoiceByBillId(dto.getBill_id());
-                                    if (customerInvoiceDataDTO != null
-                                            && customerInvoiceDataDTO.getQrType() == 1
-                                            && customerInvoiceDataDTO.getStatus() == 0) {
-                                        // check invoice đã thanh toán hay chưa
-                                        if (customerInvoiceDataDTO.getStatus() == 0) {
-                                            // check số tiền có khớp hay không
-                                            Long paymentAmount = 0L;
-                                            Long amountParsing = Long.parseLong(dto.getAmount());
-                                            if (amountParsing != null) {
-                                                paymentAmount = amountParsing;
-                                            }
-                                            System.out.println("customerInvoiceDataDTO.getAmount(): "
-                                                    + customerInvoiceDataDTO.getAmount());
-                                            System.out.println("paymentAmount: " + paymentAmount);
-                                            if (customerInvoiceDataDTO.getAmount().equals(paymentAmount)) {
-                                                // nếu có: insert invoice payment + update trạng thái hoá đơn
-                                                // insert invoice payment
-                                                UUID uuid = UUID.randomUUID();
-                                                CustomerInvoiceTransactionEntity customerInvoiceTransactionEntity = new CustomerInvoiceTransactionEntity();
-                                                customerInvoiceTransactionEntity.setId(uuid.toString());
-                                                customerInvoiceTransactionEntity.setTrans_id(dto.getTrans_id());
-                                                customerInvoiceTransactionEntity.setTrans_date(dto.getTrans_date());
-                                                customerInvoiceTransactionEntity.setCustomer_id(dto.getCustomer_id());
-                                                customerInvoiceTransactionEntity.setService_id(dto.getService_id());
-                                                customerInvoiceTransactionEntity.setBill_id(dto.getBill_id());
-                                                customerInvoiceTransactionEntity.setAmount(dto.getAmount());
-                                                customerInvoiceTransactionEntity.setChecksum(dto.getChecksum());
-                                                customerInvoiceTransactionService.insert(customerInvoiceTransactionEntity);
-                                                // update status + timepaid invoice
-                                                LocalDateTime currentDateTime = LocalDateTime.now();
-                                                long timePaid = currentDateTime.toEpochSecond(ZoneOffset.UTC);
-                                                customerInvoiceService.updateCustomerVaInvoice(1,
-                                                        timePaid, dto.getBill_id());
+                                // Transaction QR
+                                if (customerInvoiceDataDTO != null
+                                        && customerInvoiceDataDTO.getQrType() == 1
+                                        && customerInvoiceDataDTO.getStatus() == 0) {
 
-                                                accountBankReceiveEntity = accountBankReceiveService
-                                                        .getAccountBankByCustomerIdAndByServiceId(dto.getCustomer_id());
-                                                TransactionBidvEntity transactionBidvEntity = new TransactionBidvEntity();
-                                                transactionBidvEntity.setId(UUID.randomUUID().toString());
-                                                transactionBidvEntity.setCustomerId(dto.getCustomer_id());
-                                                transactionBidvEntity.setServiceId(dto.getService_id());
-                                                transactionBidvEntity.setAmount(dto.getAmount());
-                                                transactionBidvEntity.setBillId(dto.getBill_id());
-                                                transactionBidvEntity.setTransDate(dto.getTrans_date());
-                                                transactionBidvEntity.setCheckSum(dto.getChecksum());
-                                                Thread thread = new Thread(() -> {
-                                                    transactionBidvService.insert(transactionBidvEntity);
-                                                });
-                                                thread.start();
-                                                // response
-                                                result = new ResponseMessageBidvDTO("000",
-                                                        "Thành công");
-                                                httpStatus = HttpStatus.OK;
-                                            } else {
-                                                // nếu chưa: báo lỗi số tiền không khớp
-                                                result = new ResponseMessageBidvDTO("022",
-                                                        "Số tiền gửi lên không đúng với số tiền trong hóa đơn");
-                                                httpStatus = HttpStatus.BAD_REQUEST;
-                                            }
-                                        } else {
-                                            // hoá đơn đã gạch nợ rồi
-                                            result = new ResponseMessageBidvDTO("023",
-                                                    "Hóa đơn đã gạch nợ rồi (mỗi hóa đơn chỉ gạch nợ 1 lần)");
-                                            httpStatus = HttpStatus.OK;
-                                        }
-                                    } else if (customerInvoiceDataDTO != null
-                                            && customerInvoiceDataDTO.getQrType() == 0
-                                            && customerInvoiceDataDTO.getStatus() == 0) {
-                                        // check invoice đã thanh toán hay chưa
-                                        if (customerInvoiceDataDTO.getStatus() == 0) {
-                                            // check số tiền có khớp hay không
-                                            Long paymentAmount = 0L;
-                                            Long amountParsing = Long.parseLong(dto.getAmount());
-                                            if (amountParsing != null) {
-                                                paymentAmount = amountParsing;
-                                            }
-                                            System.out.println("customerInvoiceDataDTO.getAmount(): "
-                                                    + customerInvoiceDataDTO.getAmount());
-                                            System.out.println("paymentAmount: " + paymentAmount);
-                                            if (customerInvoiceDataDTO.getAmount().equals(paymentAmount)) {
-                                                // nếu có: insert invoice payment + update trạng thái hoá đơn
-                                                // insert invoice payment
-                                                UUID uuid = UUID.randomUUID();
-                                                CustomerInvoiceTransactionEntity customerInvoiceTransactionEntity = new CustomerInvoiceTransactionEntity();
-                                                customerInvoiceTransactionEntity.setId(uuid.toString());
-                                                customerInvoiceTransactionEntity.setTrans_id(dto.getTrans_id());
-                                                customerInvoiceTransactionEntity.setTrans_date(dto.getTrans_date());
-                                                customerInvoiceTransactionEntity.setCustomer_id(dto.getCustomer_id());
-                                                customerInvoiceTransactionEntity.setService_id(dto.getService_id());
-                                                customerInvoiceTransactionEntity.setBill_id(dto.getBill_id());
-                                                customerInvoiceTransactionEntity.setAmount(dto.getAmount());
-                                                customerInvoiceTransactionEntity.setChecksum(dto.getChecksum());
-                                                customerInvoiceTransactionService.insert(customerInvoiceTransactionEntity);
-                                                // update status + timepaid invoice
-                                                LocalDateTime currentDateTime = LocalDateTime.now();
-                                                long timePaid = currentDateTime.toEpochSecond(ZoneOffset.UTC);
-                                                customerInvoiceService.updateCustomerVaInvoice(1,
-                                                        timePaid, dto.getBill_id());
-                                                // response
-                                                result = new ResponseMessageBidvDTO("000",
-                                                        "Thành công");
-                                                httpStatus = HttpStatus.OK;
-                                            } else {
-                                                // nếu chưa: báo lỗi số tiền không khớp
-                                                result = new ResponseMessageBidvDTO("022",
-                                                        "Số tiền gửi lên không đúng với số tiền trong hóa đơn");
-                                                httpStatus = HttpStatus.BAD_REQUEST;
-                                            }
-                                        } else {
-                                            // hoá đơn đã gạch nợ rồi
-                                            result = new ResponseMessageBidvDTO("023",
-                                                    "Hóa đơn đã gạch nợ rồi (mỗi hóa đơn chỉ gạch nợ 1 lần)");
-                                            httpStatus = HttpStatus.OK;
-                                        }
-                                    // static qr
-                                    } else if (Objects.nonNull(customerInvoiceDataDTO)
-                                            && customerInvoiceDataDTO.getQrType() == 2) {
+//                                        if (customerInvoiceDataDTO.getStatus() == 0) {
+                                    // check số tiền có khớp hay không
+                                    Long paymentAmount = 0L;
+                                    Long amountParsing = Long.parseLong(dto.getAmount());
+                                    if (amountParsing != null) {
+                                        paymentAmount = amountParsing;
+                                    }
+                                    System.out.println("customerInvoiceDataDTO.getAmount(): "
+                                            + customerInvoiceDataDTO.getAmount());
+                                    System.out.println("paymentAmount: " + paymentAmount);
+                                    if (customerInvoiceDataDTO.getAmount().equals(paymentAmount)) {
+                                        // insert invoice payment
+                                        UUID uuid = UUID.randomUUID();
+                                        CustomerInvoiceTransactionEntity customerInvoiceTransactionEntity = new CustomerInvoiceTransactionEntity();
+                                        customerInvoiceTransactionEntity.setId(uuid.toString());
+                                        customerInvoiceTransactionEntity.setTrans_id(dto.getTrans_id());
+                                        customerInvoiceTransactionEntity.setTrans_date(dto.getTrans_date());
+                                        customerInvoiceTransactionEntity.setCustomer_id(dto.getCustomer_id());
+                                        customerInvoiceTransactionEntity.setService_id(dto.getService_id());
+                                        customerInvoiceTransactionEntity.setBill_id(dto.getBill_id());
+                                        customerInvoiceTransactionEntity.setAmount(dto.getAmount());
+                                        customerInvoiceTransactionEntity.setChecksum(dto.getChecksum());
+                                        customerInvoiceTransactionService.insert(customerInvoiceTransactionEntity);
+                                        // update status + timepaid invoice
+                                        LocalDateTime currentDateTime = LocalDateTime.now();
+                                        long timePaid = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+                                        customerInvoiceService.updateCustomerVaInvoice(1,
+                                                timePaid, dto.getBill_id());
+
                                         accountBankReceiveEntity = accountBankReceiveService
                                                 .getAccountBankByCustomerIdAndByServiceId(dto.getCustomer_id());
                                         TransactionBidvEntity transactionBidvEntity = new TransactionBidvEntity();
@@ -430,50 +349,149 @@ public class CustomerInvoiceController {
                                             transactionBidvService.insert(transactionBidvEntity);
                                         });
                                         thread.start();
-                                        // hoá đơn đã gạch nợ rồi
+                                        // response
                                         result = new ResponseMessageBidvDTO("000",
                                                 "Thành công");
                                         httpStatus = HttpStatus.OK;
-                                    } else if (Objects.nonNull(customerInvoiceDataDTO)
-                                    && customerInvoiceDataDTO.getStatus() == 1) {
-                                        accountBankReceiveEntity = accountBankReceiveService
-                                                .getAccountBankByCustomerIdAndByServiceId(dto.getCustomer_id());
-                                        TransactionBidvEntity transactionBidvEntity = new TransactionBidvEntity();
-                                        transactionBidvEntity.setId(UUID.randomUUID().toString());
-                                        transactionBidvEntity.setCustomerId(dto.getCustomer_id());
-                                        transactionBidvEntity.setServiceId(dto.getService_id());
-                                        transactionBidvEntity.setAmount(dto.getAmount());
-                                        transactionBidvEntity.setBillId(dto.getBill_id());
-                                        transactionBidvEntity.setTransDate(dto.getTrans_date());
-                                        transactionBidvEntity.setCheckSum(dto.getChecksum());
-                                        Thread thread = new Thread(() -> {
-                                            transactionBidvService.insert(transactionBidvEntity);
-                                        });
-                                        thread.start();
+//                                            } else {
+//                                                // nếu chưa: báo lỗi số tiền không khớp
+////                                                result = new ResponseMessageBidvDTO("022",
+////                                                        "Số tiền gửi lên không đúng với số tiền trong hóa đơn");
+////                                                httpStatus = HttpStatus.BAD_REQUEST;
+//                                                result = new ResponseMessageBidvDTO("000",
+//                                                        "Thành công");
+//                                                httpStatus = HttpStatus.OK;
+//                                            }
+                                    } else {
                                         // hoá đơn đã gạch nợ rồi
-                                        result = new ResponseMessageBidvDTO("023",
-                                                "Hóa đơn đã gạch nợ rồi (mỗi hóa đơn chỉ gạch nợ 1 lần)");
+//                                            result = new ResponseMessageBidvDTO("023",
+//                                                    "Hóa đơn đã gạch nợ rồi (mỗi hóa đơn chỉ gạch nợ 1 lần)");
+//                                            httpStatus = HttpStatus.OK;
+                                        result = new ResponseMessageBidvDTO("000",
+                                                "Thành công");
+                                        httpStatus = HttpStatus.OK;
+                                    }
+                                    // Hóa đơn BIDV
+                                } else if (customerInvoiceDataDTO != null
+                                        && customerInvoiceDataDTO.getQrType() == 0
+                                        && customerInvoiceDataDTO.getStatus() == 0) {
+//                                        if (customerInvoiceDataDTO.getStatus() == 0) {
+                                    // check số tiền có khớp hay không
+                                    Long paymentAmount = 0L;
+                                    Long amountParsing = Long.parseLong(dto.getAmount());
+                                    if (amountParsing != null) {
+                                        paymentAmount = amountParsing;
+                                    }
+                                    System.out.println("customerInvoiceDataDTO.getAmount(): "
+                                            + customerInvoiceDataDTO.getAmount());
+                                    System.out.println("paymentAmount: " + paymentAmount);
+                                    if (customerInvoiceDataDTO.getAmount().equals(paymentAmount)) {
+                                        // nếu có: insert invoice payment + update trạng thái hoá đơn
+                                        // insert invoice payment
+                                        UUID uuid = UUID.randomUUID();
+                                        CustomerInvoiceTransactionEntity customerInvoiceTransactionEntity = new CustomerInvoiceTransactionEntity();
+                                        customerInvoiceTransactionEntity.setId(uuid.toString());
+                                        customerInvoiceTransactionEntity.setTrans_id(dto.getTrans_id());
+                                        customerInvoiceTransactionEntity.setTrans_date(dto.getTrans_date());
+                                        customerInvoiceTransactionEntity.setCustomer_id(dto.getCustomer_id());
+                                        customerInvoiceTransactionEntity.setService_id(dto.getService_id());
+                                        customerInvoiceTransactionEntity.setBill_id(dto.getBill_id());
+                                        customerInvoiceTransactionEntity.setAmount(dto.getAmount());
+                                        customerInvoiceTransactionEntity.setChecksum(dto.getChecksum());
+                                        customerInvoiceTransactionService.insert(customerInvoiceTransactionEntity);
+                                        // update status + timepaid invoice
+                                        LocalDateTime currentDateTime = LocalDateTime.now();
+                                        long timePaid = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+                                        customerInvoiceService.updateCustomerVaInvoice(1,
+                                                timePaid, dto.getBill_id());
+                                        // response
+                                        result = new ResponseMessageBidvDTO("000",
+                                                "Thành công");
                                         httpStatus = HttpStatus.OK;
                                     } else {
-                                        accountBankReceiveEntity = accountBankReceiveService
-                                                .getAccountBankByCustomerIdAndByServiceId(dto.getCustomer_id());
-                                        TransactionBidvEntity transactionBidvEntity = new TransactionBidvEntity();
-                                        transactionBidvEntity.setId(UUID.randomUUID().toString());
-                                        transactionBidvEntity.setCustomerId(dto.getCustomer_id());
-                                        transactionBidvEntity.setServiceId(dto.getService_id());
-                                        transactionBidvEntity.setAmount(dto.getAmount());
-                                        transactionBidvEntity.setBillId(dto.getBill_id());
-                                        transactionBidvEntity.setTransDate(dto.getTrans_date());
-                                        transactionBidvEntity.setCheckSum(dto.getChecksum());
-                                        Thread thread = new Thread(() -> {
-                                            transactionBidvService.insert(transactionBidvEntity);
-                                        });
-                                        thread.start();
-                                        // mã hoá đơn không tồn tại
-                                        result = new ResponseMessageBidvDTO("021",
-                                                "Mã hóa đơn không tồn tại");
-                                        httpStatus = HttpStatus.BAD_REQUEST;
+                                        // nếu chưa: báo lỗi số tiền không khớp
+//                                                result = new ResponseMessageBidvDTO("022",
+//                                                        "Số tiền gửi lên không đúng với số tiền trong hóa đơn");
+//                                                httpStatus = HttpStatus.BAD_REQUEST;
+                                        result = new ResponseMessageBidvDTO("000",
+                                                "Thành công");
+                                        httpStatus = HttpStatus.OK;
                                     }
+//                                        } else {
+//                                            // hoá đơn đã gạch nợ rồi
+////                                            result = new ResponseMessageBidvDTO("023",
+////                                                    "Hóa đơn đã gạch nợ rồi (mỗi hóa đơn chỉ gạch nợ 1 lần)");
+////                                            httpStatus = HttpStatus.OK;
+//                                            result = new ResponseMessageBidvDTO("000",
+//                                                    "Thành công");
+//                                            httpStatus = HttpStatus.OK;
+//                                        }
+                                    // static qr
+                                } else if (Objects.nonNull(customerInvoiceDataDTO)
+                                        && customerInvoiceDataDTO.getQrType() == 2) {
+                                    accountBankReceiveEntity = accountBankReceiveService
+                                            .getAccountBankByCustomerIdAndByServiceId(dto.getCustomer_id());
+                                    TransactionBidvEntity transactionBidvEntity = new TransactionBidvEntity();
+                                    transactionBidvEntity.setId(UUID.randomUUID().toString());
+                                    transactionBidvEntity.setCustomerId(dto.getCustomer_id());
+                                    transactionBidvEntity.setServiceId(dto.getService_id());
+                                    transactionBidvEntity.setAmount(dto.getAmount());
+                                    transactionBidvEntity.setBillId(dto.getBill_id());
+                                    transactionBidvEntity.setTransDate(dto.getTrans_date());
+                                    transactionBidvEntity.setCheckSum(dto.getChecksum());
+                                    Thread thread = new Thread(() -> {
+                                        transactionBidvService.insert(transactionBidvEntity);
+                                    });
+                                    thread.start();
+                                    result = new ResponseMessageBidvDTO("000",
+                                            "Thành công");
+                                    httpStatus = HttpStatus.OK;
+                                } else if (Objects.nonNull(customerInvoiceDataDTO)
+                                        && customerInvoiceDataDTO.getStatus() == 1) {
+                                    accountBankReceiveEntity = accountBankReceiveService
+                                            .getAccountBankByCustomerIdAndByServiceId(dto.getCustomer_id());
+                                    TransactionBidvEntity transactionBidvEntity = new TransactionBidvEntity();
+                                    transactionBidvEntity.setId(UUID.randomUUID().toString());
+                                    transactionBidvEntity.setCustomerId(dto.getCustomer_id());
+                                    transactionBidvEntity.setServiceId(dto.getService_id());
+                                    transactionBidvEntity.setAmount(dto.getAmount());
+                                    transactionBidvEntity.setBillId(dto.getBill_id());
+                                    transactionBidvEntity.setTransDate(dto.getTrans_date());
+                                    transactionBidvEntity.setCheckSum(dto.getChecksum());
+                                    Thread thread = new Thread(() -> {
+                                        transactionBidvService.insert(transactionBidvEntity);
+                                    });
+                                    thread.start();
+                                    // hoá đơn đã gạch nợ rồi
+//                                        result = new ResponseMessageBidvDTO("023",
+//                                                "Hóa đơn đã gạch nợ rồi (mỗi hóa đơn chỉ gạch nợ 1 lần)");
+//                                        httpStatus = HttpStatus.OK;
+                                    result = new ResponseMessageBidvDTO("000",
+                                            "Thành công");
+                                    httpStatus = HttpStatus.OK;
+                                } else {
+                                    accountBankReceiveEntity = accountBankReceiveService
+                                            .getAccountBankByCustomerIdAndByServiceId(dto.getCustomer_id());
+                                    TransactionBidvEntity transactionBidvEntity = new TransactionBidvEntity();
+                                    transactionBidvEntity.setId(UUID.randomUUID().toString());
+                                    transactionBidvEntity.setCustomerId(dto.getCustomer_id());
+                                    transactionBidvEntity.setServiceId(dto.getService_id());
+                                    transactionBidvEntity.setAmount(dto.getAmount());
+                                    transactionBidvEntity.setBillId(dto.getBill_id());
+                                    transactionBidvEntity.setTransDate(dto.getTrans_date());
+                                    transactionBidvEntity.setCheckSum(dto.getChecksum());
+                                    Thread thread = new Thread(() -> {
+                                        transactionBidvService.insert(transactionBidvEntity);
+                                    });
+                                    thread.start();
+                                    // mã hoá đơn không tồn tại
+//                                        result = new ResponseMessageBidvDTO("021",
+//                                                "Mã hóa đơn không tồn tại");
+//                                        httpStatus = HttpStatus.BAD_REQUEST;
+                                    result = new ResponseMessageBidvDTO("000",
+                                            "Thành công");
+                                    httpStatus = HttpStatus.OK;
+                                }
                             } else {
                                 // customer_id không tồn tại
                                 result = new ResponseMessageBidvDTO("011",
@@ -511,15 +529,18 @@ public class CustomerInvoiceController {
             // push notification
             final ResponseMessageBidvDTO tempResult = result;
             AccountBankReceiveEntity finalAccountBankReceiveEntity = accountBankReceiveEntity;
+            CustomerInvoiceDataDTO finalCustomerInvoiceDataDTO = customerInvoiceDataDTO;
             Thread thread = new Thread(() -> {
                 //
                 // khi result = 021, 022, 02 insert transaction mới
                 if (tempResult.getResult_code().equals("000")) {
 
-                    CustomerInvoiceDataDTO customerInvoiceDataDTO = customerInvoiceService
-                            .getCustomerInvoiceByBillId(dto.getBill_id());
+//                    CustomerInvoiceDataDTO customerInvoiceDataDTO = customerInvoiceService
+//                            .getCustomerInvoiceByBillId(dto.getBill_id());
                     // Transaction Receive Entity
-                    if (customerInvoiceDataDTO != null && customerInvoiceDataDTO.getQrType() == 1) {
+                    if (finalCustomerInvoiceDataDTO != null
+                            && finalCustomerInvoiceDataDTO.getQrType() == 1
+                            && finalCustomerInvoiceDataDTO.getStatus() == 0) {
                         String orderId = "";
                         String sign = "";
                         String rawCode = "";
@@ -561,19 +582,20 @@ public class CustomerInvoiceController {
                             }
                         }
 
-                    //
-                    } else if (Objects.nonNull(customerInvoiceDataDTO) && customerInvoiceDataDTO.getQrType() == 2) {
+                        //
+                    } else if (Objects.nonNull(finalCustomerInvoiceDataDTO)
+                            && finalCustomerInvoiceDataDTO.getQrType() == 2) {
                         // static qr
                         String rawCode = "";
                         String boxIdRef = "";
                         UUID transactionUUID = UUID.randomUUID();
                         ISubTerminalCodeDTO rawDTO = null;
-                        TerminalEntity terminalEntity = terminalService.getTerminalByTerminalCode(customerInvoiceDataDTO.getName());
+                        TerminalEntity terminalEntity = terminalService.getTerminalByTerminalCode(finalCustomerInvoiceDataDTO.getName());
                         if (Objects.nonNull(terminalEntity)) {
                             rawCode = terminalEntity.getRawTerminalCode();
                         } else {
                             rawDTO = terminalBankReceiveService.getSubTerminalCodeBySubTerminalCode(
-                                    customerInvoiceDataDTO.getName());
+                                    finalCustomerInvoiceDataDTO.getName());
                             if (rawDTO != null) {
                                 rawCode = rawDTO.getRawCode();
                                 if (rawDTO.getQrType() == 2) {
@@ -587,8 +609,10 @@ public class CustomerInvoiceController {
                                     finalAccountBankReceiveEntity, DateTimeUtil.getCurrentDateTimeUTC());
                             insertNewTransaction(dto, transactionUUID.toString(), finalAccountBankReceiveEntity, boxIdRef, terminalEntity, rawDTO);
                         }
-                        // hoa đơn
-                    } else {
+                        // hoa đơn BIDV
+                    } else if (Objects.nonNull(finalCustomerInvoiceDataDTO)
+                            && finalCustomerInvoiceDataDTO.getQrType() == 0
+                            && finalCustomerInvoiceDataDTO.getStatus() == 0) {
                         String userId = "";
                         String userIdResult = customerVaService.getUserIdByCustomerId(dto.getCustomer_id());
                         if (userIdResult != null && !userIdResult.trim().isEmpty()) {
@@ -618,37 +642,6 @@ public class CustomerInvoiceController {
                         data.put("amount", dto.getAmount());
                         data.put("timePaid", time + "");
                         pushNotification(title, msg, notiEntity, data, userId);
-                    }
-                } else if (tempResult.getResult_code().equals("021")
-                            || tempResult.getResult_code().equals("023")
-                || tempResult.getResult_code().equals("022")) {
-                    CustomerInvoiceDataDTO customerInvoiceDataDTO = customerInvoiceService
-                            .getCustomerInvoiceByBillId(dto.getBill_id());
-                    if (Objects.nonNull(customerInvoiceDataDTO) && customerInvoiceDataDTO.getQrType() == 2) {
-                        // static qr
-                        String rawCode = "";
-                        String boxIdRef = "";
-                        UUID transactionUUID = UUID.randomUUID();
-                        ISubTerminalCodeDTO rawDTO = null;
-                        TerminalEntity terminalEntity = terminalService.getTerminalByTerminalCode(customerInvoiceDataDTO.getName());
-                        if (Objects.nonNull(terminalEntity)) {
-                            rawCode = terminalEntity.getRawTerminalCode();
-                        } else {
-                            rawDTO = terminalBankReceiveService.getSubTerminalCodeBySubTerminalCode(
-                                    customerInvoiceDataDTO.getName());
-                            if (rawDTO != null) {
-                                rawCode = rawDTO.getRawCode();
-                                if (rawDTO.getQrType() == 2) {
-                                    boxIdRef = rawDTO.getRawCode();
-                                }
-                            }
-                        }
-
-                        if (Objects.nonNull(finalAccountBankReceiveEntity)) {
-                            getCustomerSyncEntities(transactionUUID.toString(), dto, rawCode,
-                                    finalAccountBankReceiveEntity, DateTimeUtil.getCurrentDateTimeUTC());
-                            insertNewTransaction(dto, transactionUUID.toString(), finalAccountBankReceiveEntity, boxIdRef, terminalEntity, rawDTO);
-                        }
                     } else {
                         AccountBankReceiveEntity rawAccount = null;
                         if (Objects.isNull(finalAccountBankReceiveEntity)) {
@@ -719,6 +712,22 @@ public class CustomerInvoiceController {
         transactionReceiveEntity.setUrlLink("");
         transactionReceiveEntity.setBillId(dto.getBill_id());
         transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
+
+        // Insert transaction for statistic
+        if (transactionReceiveEntity.getType() == 1
+            && !StringUtil.isNullOrEmpty(transactionReceiveEntity.getTerminalCode())
+        ) {
+            Thread thread = new Thread(() -> {
+                TransactionTerminalTempEntity transactionTerminalTempEntity = new TransactionTerminalTempEntity();
+                transactionTerminalTempEntity.setId(UUID.randomUUID().toString());
+                transactionTerminalTempEntity.setTransactionId(transactionReceiveEntity.getId());
+                transactionTerminalTempEntity.setTerminalCode(transactionReceiveEntity.getTerminalCode());
+                transactionTerminalTempEntity.setTime(DateTimeUtil.getCurrentDateTimeUTC());
+                transactionTerminalTempEntity.setAmount(Long.parseLong(dto.getAmount() + ""));
+                transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTempEntity);
+            });
+            thread.start();
+        }
         logger.info("transaction-sync - no have terminal is empty.");
         // insert notification
         UUID notificationUUID = UUID.randomUUID();
