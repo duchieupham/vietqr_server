@@ -21,6 +21,7 @@ public class VietQRBIDVCreateDTO {
     private String qr;
     private String serviceCode;
     private List<AdditionalData> additionalData = new ArrayList<>();
+    private String subTerminalCode;
 
     public VietQRBIDVCreateDTO() {
         this.serviceCode = "";
@@ -70,8 +71,6 @@ public class VietQRBIDVCreateDTO {
     public void setServiceCode(String serviceCode) {
         this.serviceCode = serviceCode;
     }
-
-
 
     public String getContent() {
         return content;
@@ -183,5 +182,13 @@ public class VietQRBIDVCreateDTO {
 
     public void setAdditionalData(List<AdditionalData> additionalData) {
         this.additionalData = additionalData;
+    }
+
+    public String getSubTerminalCode() {
+        return subTerminalCode;
+    }
+
+    public void setSubTerminalCode(String subTerminalCode) {
+        this.subTerminalCode = subTerminalCode;
     }
 }

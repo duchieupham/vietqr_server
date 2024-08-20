@@ -516,7 +516,8 @@ public class TransactionBankController {
                                                 ? transactionReceiveEntity.getUrlLink()
                                                 : "";
                                         result = getCustomerSyncEntities(transactionReceiveEntity.getId(), dto,
-                                                accountBankEntity, time, orderId, sign, rawCode, urlLink, transactionReceiveEntity.getTerminalCode());
+                                                accountBankEntity, time, orderId, sign, rawCode, urlLink,
+                                                transactionReceiveEntity.getTerminalCode(), transactionReceiveEntity.getSubCode());
                                         updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time, nf, boxIdRef, rawDTO, terminalEntity);
                                         // check if recharge => do update status and push data to customer
                                         ////////// USER RECHAGE VQR || USER RECHARGE MOBILE
@@ -563,7 +564,7 @@ public class TransactionBankController {
                                         }
 
                                         result = getCustomerSyncEntities(transcationUUID.toString(), dto,
-                                                accountBankEntity, time, orderId, sign, rawCode, "", terminalCode);
+                                                accountBankEntity, time, orderId, sign, rawCode, "", terminalCode, "");
                                         try {
                                             final String finalOrderId = orderId;
                                             final String finalSign = sign;
@@ -572,7 +573,7 @@ public class TransactionBankController {
                                             AccountBankReceiveEntity finalAccountBankEntity = accountBankEntity;
                                             Thread thread = new Thread(() -> {
                                                 getCustomerSyncEntitiesV2(transcationUUID.toString(), dto, finalAccountBankEntity,
-                                                        time, finalOrderId, finalSign, finalRawCode, "", finalTerminalCode);
+                                                        time, finalOrderId, finalSign, finalRawCode, "", finalTerminalCode, "");
                                             });
                                             thread.start();
                                         } catch (Exception e) {
@@ -619,9 +620,9 @@ public class TransactionBankController {
                                         }
                                     }
                                     result = getCustomerSyncEntities(transcationUUID.toString(), dto, accountBankEntity,
-                                            time, orderId, sign, rawCode, "", terminalCode);
+                                            time, orderId, sign, rawCode, "", terminalCode, "");
                                     getCustomerSyncEntitiesV2(transcationUUID.toString(), dto, accountBankEntity,
-                                            time, orderId, sign, rawCode, "", terminalCode);
+                                            time, orderId, sign, rawCode, "", terminalCode, "");
                                     insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity, time,
                                             traceId, uuid, nf, "", "", boxIdRef, rawDTO, terminalEntity);
                                 }
@@ -784,7 +785,9 @@ public class TransactionBankController {
                                                     ? transactionReceiveEntity.getUrlLink()
                                                     : "";
                                             getCustomerSyncEntities(transactionReceiveEntity.getId(), dto,
-                                                    accountBankEntity, time, orderId, sign, rawCode, urlLink, "");
+                                                    accountBankEntity, time, orderId, sign, rawCode,
+                                                    urlLink, transactionReceiveEntity.getTerminalCode(),
+                                                    transactionReceiveEntity.getSubCode());
                                             updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time,
                                                     nf, boxIdRef, rawDTO, terminalEntity);
 
@@ -867,9 +870,10 @@ public class TransactionBankController {
                                                     ? transactionReceiveEntity.getUrlLink()
                                                     : "";
                                             getCustomerSyncEntities(transactionReceiveEntity.getId(), dto,
-                                                    accountBankEntity, time, orderId, sign, rawCodeResult, urlLink, transactionReceiveEntity.getTerminalCode());
-                                                updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time,
-                                                        nf, boxIdRef, rawDTO, terminalEntity);
+                                                    accountBankEntity, time, orderId, sign, rawCodeResult, urlLink,
+                                                    transactionReceiveEntity.getTerminalCode(), transactionReceiveEntity.getSubCode());
+                                            updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time,
+                                                    nf, boxIdRef, rawDTO, terminalEntity);
 
                                             // check if recharge => do update status and push data to customer
                                             ////////// USER RECHAGE VQR || USER RECHARGE MOBILE
@@ -916,17 +920,13 @@ public class TransactionBankController {
                                                 }
                                             }
                                             getCustomerSyncEntities(transcationUUID.toString(), dto, accountBankEntity,
-                                                    time, orderId, sign, rawCode, "", terminalCode);
+                                                    time, orderId, sign, rawCode, "", terminalCode, "");
                                             getCustomerSyncEntitiesV2(transcationUUID.toString(), dto, accountBankEntity,
-                                                    time, orderId, sign, rawCode, "", terminalCode);
+                                                    time, orderId, sign, rawCode, "", terminalCode, "");
                                             // push notification
-
-
                                             insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity,
                                                     time,
                                                     traceId, uuid, nf, "", "", boxIdRef, rawDTO, terminalEntity);
-
-
                                         }
                                         // }
                                     } else {
@@ -965,9 +965,9 @@ public class TransactionBankController {
                                         }
                                         getCustomerSyncEntities(transcationUUID.toString(), dto, accountBankEntity,
                                                 time,
-                                                orderId, sign, rawCode, "", terminalCode);
+                                                orderId, sign, rawCode, "", terminalCode, "");
                                         getCustomerSyncEntitiesV2(transcationUUID.toString(), dto, accountBankEntity,
-                                                time, orderId, sign, rawCode, "", terminalCode);
+                                                time, orderId, sign, rawCode, "", terminalCode, "");
                                         insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity, time,
                                                 traceId, uuid, nf, "", "", boxIdRef, rawDTO, terminalEntity);
                                     }
@@ -5389,6 +5389,7 @@ public class TransactionBankController {
             data.put("sign", dto.getSign());
             data.put("terminalCode", dto.getTerminalCode());
             data.put("urlLink", dto.getUrlLink());
+            data.put("subTerminalCode", dto.getSubTerminalCode());
             data.put("serviceCode", "");
             String suffixUrl = "";
             if (entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty()) {
@@ -5666,6 +5667,7 @@ public class TransactionBankController {
             data.put("terminalCode", dto.getTerminalCode());
             data.put("urlLink", dto.getUrlLink());
             data.put("serviceCode", "");
+            data.put("subTerminalCode", dto.getSubTerminalCode());
             System.out.println("Push data V2: Request: " + data);
             String suffixUrl = "";
             WebClient.Builder webClientBuilder = WebClient.builder()
@@ -5853,7 +5855,8 @@ public class TransactionBankController {
 
     private ResponseMessageDTO getCustomerSyncEntities(String transReceiveId, TransactionBankDTO dto,
                                                        AccountBankReceiveEntity accountBankEntity,
-                                                       long time, String orderId, String sign, String rawTerminalCode, String urlLink, String terminalCode) {
+                                                       long time, String orderId, String sign, String rawTerminalCode,
+                                                       String urlLink, String terminalCode, String subCode) {
         ResponseMessageDTO result = new ResponseMessageDTO("SUCCESS", "");
         try {
             // 1. Check bankAccountEntity with sync = true (add sync boolean field)
@@ -5882,6 +5885,7 @@ public class TransactionBankController {
                     transactionBankCustomerDTO.setTerminalCode("");
                 }
                 transactionBankCustomerDTO.setUrlLink(urlLink);
+                transactionBankCustomerDTO.setSubTerminalCode(StringUtil.getValueNullChecker(subCode));
                 logger.info("getCustomerSyncEntities: Order ID: " + orderId);
                 logger.info("getCustomerSyncEntities: Signature: " + sign);
                 List<AccountCustomerBankEntity> accountCustomerBankEntities = new ArrayList<>();
@@ -5912,7 +5916,7 @@ public class TransactionBankController {
     private void getCustomerSyncEntitiesV2(String transReceiveId, TransactionBankDTO dto,
                                            AccountBankReceiveEntity accountBankEntity,
                                            long time, String orderId, String sign,
-                                           String rawTerminalCode, String urlLink, String terminalCode) {
+                                           String rawTerminalCode, String urlLink, String terminalCode, String subCode) {
         try {
             // 1. Check bankAccountEntity with sync = true (add sync boolean field)
             // 2. Find account_customer_bank by bank_id/bank_account AND auth = true.
@@ -5938,6 +5942,7 @@ public class TransactionBankController {
                     transactionBankCustomerDTO.setTerminalCode("");
                 }
                 transactionBankCustomerDTO.setUrlLink(urlLink);
+                transactionBankCustomerDTO.setSubTerminalCode(StringUtil.getValueNullChecker(subCode));
                 logger.info("getCustomerSyncEntities: Order ID: " + orderId);
                 logger.info("getCustomerSyncEntities: Signature: " + sign);
                 List<BankReceiveConnectionEntity> bankReceiveConnectionEntities = new ArrayList<>();

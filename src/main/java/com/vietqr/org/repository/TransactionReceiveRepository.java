@@ -216,6 +216,21 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             @Param(value = "toDate") long toDate,
             @Param(value = "bankId") String bankId);
 
+    @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount, a.content, a.time, "
+            + "a.time_paid as timePaid, a.status, a.type,a.trans_type as transType, "
+            + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, "
+            + "a.note, a.order_id as orderId "
+            + "FROM transaction_receive a "
+            + "WHERE a.bank_id = :bankId AND a.sub_code LIKE %:value% "
+            + "AND a.time BETWEEN :fromDate AND :toDate "
+            + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
+    List<TransactionRelatedDTO> getTransactionsBySubCode(
+            @Param(value = "value") String value,
+            @Param(value = "offset") int offset,
+            @Param(value = "fromDate") long fromDate,
+            @Param(value = "toDate") long toDate,
+            @Param(value = "bankId") String bankId);
+
     @Query(value = "SELECT a.id as transactionId, a.amount, a.bank_account as bankAccount, a.content, a.time, "
             + "a.time_paid as timePaid, a.status, a.type, a.trans_type as transType, "
             + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, "
