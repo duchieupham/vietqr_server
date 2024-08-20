@@ -302,21 +302,23 @@ public class CustomerInvoiceController {
                                 customerInvoiceDataDTO = customerInvoiceService
                                         .getCustomerInvoiceByBillId(dto.getBill_id());
                                 // Transaction QR
+                                Long paymentAmount = 0L;
+                                Long amountParsing = Long.parseLong(dto.getAmount());
+                                if (amountParsing != null) {
+                                    paymentAmount = amountParsing;
+                                }
                                 if (customerInvoiceDataDTO != null
                                         && customerInvoiceDataDTO.getQrType() == 1
-                                        && customerInvoiceDataDTO.getStatus() == 0) {
+                                        && customerInvoiceDataDTO.getStatus() == 0
+                                        && customerInvoiceDataDTO.getAmount().equals(paymentAmount)) {
 
 //                                        if (customerInvoiceDataDTO.getStatus() == 0) {
                                     // check số tiền có khớp hay không
-                                    Long paymentAmount = 0L;
-                                    Long amountParsing = Long.parseLong(dto.getAmount());
-                                    if (amountParsing != null) {
-                                        paymentAmount = amountParsing;
-                                    }
                                     System.out.println("customerInvoiceDataDTO.getAmount(): "
                                             + customerInvoiceDataDTO.getAmount());
                                     System.out.println("paymentAmount: " + paymentAmount);
-                                    if (customerInvoiceDataDTO.getAmount().equals(paymentAmount)) {
+//                                    if (customerInvoiceDataDTO.getAmount().equals(paymentAmount)) {
+                                        // transaction_receive type = 0
                                         // insert invoice payment
                                         UUID uuid = UUID.randomUUID();
                                         CustomerInvoiceTransactionEntity customerInvoiceTransactionEntity = new CustomerInvoiceTransactionEntity();
@@ -362,30 +364,26 @@ public class CustomerInvoiceController {
 //                                                        "Thành công");
 //                                                httpStatus = HttpStatus.OK;
 //                                            }
-                                    } else {
+//                                    } else {
                                         // hoá đơn đã gạch nợ rồi
 //                                            result = new ResponseMessageBidvDTO("023",
 //                                                    "Hóa đơn đã gạch nợ rồi (mỗi hóa đơn chỉ gạch nợ 1 lần)");
 //                                            httpStatus = HttpStatus.OK;
-                                        result = new ResponseMessageBidvDTO("000",
-                                                "Thành công");
-                                        httpStatus = HttpStatus.OK;
-                                    }
+//                                        result = new ResponseMessageBidvDTO("000",
+//                                                "Thành công");
+//                                        httpStatus = HttpStatus.OK;
+//                                    }
                                     // Hóa đơn BIDV
                                 } else if (customerInvoiceDataDTO != null
                                         && customerInvoiceDataDTO.getQrType() == 0
-                                        && customerInvoiceDataDTO.getStatus() == 0) {
+                                        && customerInvoiceDataDTO.getStatus() == 0
+                                        && customerInvoiceDataDTO.getAmount().equals(paymentAmount)) {
 //                                        if (customerInvoiceDataDTO.getStatus() == 0) {
                                     // check số tiền có khớp hay không
-                                    Long paymentAmount = 0L;
-                                    Long amountParsing = Long.parseLong(dto.getAmount());
-                                    if (amountParsing != null) {
-                                        paymentAmount = amountParsing;
-                                    }
                                     System.out.println("customerInvoiceDataDTO.getAmount(): "
                                             + customerInvoiceDataDTO.getAmount());
                                     System.out.println("paymentAmount: " + paymentAmount);
-                                    if (customerInvoiceDataDTO.getAmount().equals(paymentAmount)) {
+//                                    if (customerInvoiceDataDTO.getAmount().equals(paymentAmount)) {
                                         // nếu có: insert invoice payment + update trạng thái hoá đơn
                                         // insert invoice payment
                                         UUID uuid = UUID.randomUUID();
@@ -408,15 +406,15 @@ public class CustomerInvoiceController {
                                         result = new ResponseMessageBidvDTO("000",
                                                 "Thành công");
                                         httpStatus = HttpStatus.OK;
-                                    } else {
-                                        // nếu chưa: báo lỗi số tiền không khớp
-//                                                result = new ResponseMessageBidvDTO("022",
-//                                                        "Số tiền gửi lên không đúng với số tiền trong hóa đơn");
-//                                                httpStatus = HttpStatus.BAD_REQUEST;
-                                        result = new ResponseMessageBidvDTO("000",
-                                                "Thành công");
-                                        httpStatus = HttpStatus.OK;
-                                    }
+//                                    } else {
+//                                        // nếu chưa: báo lỗi số tiền không khớp
+////                                                result = new ResponseMessageBidvDTO("022",
+////                                                        "Số tiền gửi lên không đúng với số tiền trong hóa đơn");
+////                                                httpStatus = HttpStatus.BAD_REQUEST;
+//                                        result = new ResponseMessageBidvDTO("000",
+//                                                "Thành công");
+//                                        httpStatus = HttpStatus.OK;
+//                                    }
 //                                        } else {
 //                                            // hoá đơn đã gạch nợ rồi
 ////                                            result = new ResponseMessageBidvDTO("023",
@@ -429,6 +427,7 @@ public class CustomerInvoiceController {
                                     // static qr
                                 } else if (Objects.nonNull(customerInvoiceDataDTO)
                                         && customerInvoiceDataDTO.getQrType() == 2) {
+                                    // transaction_receive type = 1
                                     accountBankReceiveEntity = accountBankReceiveService
                                             .getAccountBankByCustomerIdAndByServiceId(dto.getCustomer_id());
                                     TransactionBidvEntity transactionBidvEntity = new TransactionBidvEntity();
@@ -446,8 +445,8 @@ public class CustomerInvoiceController {
                                     result = new ResponseMessageBidvDTO("000",
                                             "Thành công");
                                     httpStatus = HttpStatus.OK;
-                                } else if (Objects.nonNull(customerInvoiceDataDTO)
-                                        && customerInvoiceDataDTO.getStatus() == 1) {
+                                } else if (Objects.nonNull(customerInvoiceDataDTO)) {
+                                    // transaction_receive type = 2
                                     accountBankReceiveEntity = accountBankReceiveService
                                             .getAccountBankByCustomerIdAndByServiceId(dto.getCustomer_id());
                                     TransactionBidvEntity transactionBidvEntity = new TransactionBidvEntity();
@@ -470,6 +469,7 @@ public class CustomerInvoiceController {
                                             "Thành công");
                                     httpStatus = HttpStatus.OK;
                                 } else {
+                                    // transaction_receive type = 2
                                     accountBankReceiveEntity = accountBankReceiveService
                                             .getAccountBankByCustomerIdAndByServiceId(dto.getCustomer_id());
                                     TransactionBidvEntity transactionBidvEntity = new TransactionBidvEntity();
@@ -538,9 +538,12 @@ public class CustomerInvoiceController {
 //                    CustomerInvoiceDataDTO customerInvoiceDataDTO = customerInvoiceService
 //                            .getCustomerInvoiceByBillId(dto.getBill_id());
                     // Transaction Receive Entity
+                    Long paymentAmount = 0L;
+                    paymentAmount = Long.parseLong(dto.getAmount());
                     if (finalCustomerInvoiceDataDTO != null
                             && finalCustomerInvoiceDataDTO.getQrType() == 1
-                            && finalCustomerInvoiceDataDTO.getStatus() == 0) {
+                            && finalCustomerInvoiceDataDTO.getStatus() == 0
+                            && finalCustomerInvoiceDataDTO.getAmount().equals(paymentAmount)) {
                         String orderId = "";
                         String sign = "";
                         String rawCode = "";
@@ -612,7 +615,8 @@ public class CustomerInvoiceController {
                         // hoa đơn BIDV
                     } else if (Objects.nonNull(finalCustomerInvoiceDataDTO)
                             && finalCustomerInvoiceDataDTO.getQrType() == 0
-                            && finalCustomerInvoiceDataDTO.getStatus() == 0) {
+                            && finalCustomerInvoiceDataDTO.getStatus() == 0
+                            && finalCustomerInvoiceDataDTO.getAmount().equals(paymentAmount)) {
                         String userId = "";
                         String userIdResult = customerVaService.getUserIdByCustomerId(dto.getCustomer_id());
                         if (userIdResult != null && !userIdResult.trim().isEmpty()) {
@@ -714,20 +718,25 @@ public class CustomerInvoiceController {
         transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
 
         // Insert transaction for statistic
-        if (transactionReceiveEntity.getType() == 1
-            && !StringUtil.isNullOrEmpty(transactionReceiveEntity.getTerminalCode())
-        ) {
-            Thread thread = new Thread(() -> {
-                TransactionTerminalTempEntity transactionTerminalTempEntity = new TransactionTerminalTempEntity();
-                transactionTerminalTempEntity.setId(UUID.randomUUID().toString());
-                transactionTerminalTempEntity.setTransactionId(transactionReceiveEntity.getId());
-                transactionTerminalTempEntity.setTerminalCode(transactionReceiveEntity.getTerminalCode());
-                transactionTerminalTempEntity.setTime(DateTimeUtil.getCurrentDateTimeUTC());
-                transactionTerminalTempEntity.setAmount(Long.parseLong(dto.getAmount() + ""));
-                transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTempEntity);
-            });
-            thread.start();
+        try {
+            if ((transactionReceiveEntity.getType() == 1 || transactionReceiveEntity.getType() == 0)
+                    && !StringUtil.isNullOrEmpty(transactionReceiveEntity.getTerminalCode())
+            ) {
+                Thread thread = new Thread(() -> {
+                    TransactionTerminalTempEntity transactionTerminalTempEntity = new TransactionTerminalTempEntity();
+                    transactionTerminalTempEntity.setId(UUID.randomUUID().toString());
+                    transactionTerminalTempEntity.setTransactionId(transactionReceiveEntity.getId());
+                    transactionTerminalTempEntity.setTerminalCode(transactionReceiveEntity.getTerminalCode());
+                    transactionTerminalTempEntity.setTime(DateTimeUtil.getCurrentDateTimeUTC());
+                    transactionTerminalTempEntity.setAmount(Long.parseLong(dto.getAmount() + ""));
+                    transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTempEntity);
+                });
+                thread.start();
+            }
+        } catch (Exception e) {
+            logger.error("paybill: - Insert transaction for statistic: " + e.getMessage());
         }
+
         logger.info("transaction-sync - no have terminal is empty.");
         // insert notification
         UUID notificationUUID = UUID.randomUUID();
@@ -1343,6 +1352,7 @@ public class CustomerInvoiceController {
                     transactionBankCustomerDTO.setTerminalCode("");
                 }
                 transactionBankCustomerDTO.setUrlLink(urlLink);
+                transactionBankCustomerDTO.setSubTerminalCode(transactionReceiveEntity.getSubCode());
                 logger.info("getCustomerSyncEntities: Order ID: " + orderId);
                 logger.info("getCustomerSyncEntities: Signature: " + sign);
                 List<AccountCustomerBankEntity> accountCustomerBankEntities = new ArrayList<>();
@@ -1405,6 +1415,7 @@ public class CustomerInvoiceController {
             data.put("terminalCode", dto.getTerminalCode());
             data.put("urlLink", dto.getUrlLink());
             data.put("serviceCode", "");
+            data.put("subTerminalCode", dto.getSubTerminalCode());
             String suffixUrl = "";
             if (entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty()) {
                 suffixUrl = entity.getSuffixUrl();
@@ -1690,16 +1701,24 @@ public class CustomerInvoiceController {
                 } else {
                     prefix = "+";
                 }
-                Thread thread = new Thread(() -> {
-                    TransactionTerminalTempEntity transactionTerminalTempEntity = new TransactionTerminalTempEntity();
-                    transactionTerminalTempEntity.setId(UUID.randomUUID().toString());
-                    transactionTerminalTempEntity.setTransactionId(transactionReceiveEntity.getId());
-                    transactionTerminalTempEntity.setTerminalCode(transactionReceiveEntity.getTerminalCode());
-                    transactionTerminalTempEntity.setTime(DateTimeUtil.getCurrentDateTimeUTC());
-                    transactionTerminalTempEntity.setAmount(Long.parseLong(dto.getAmount() + ""));
-                    transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTempEntity);
-                });
-                thread.start();
+                try {
+                    if ((transactionReceiveEntity.getType() == 1 || transactionReceiveEntity.getType() == 0)
+                            && !StringUtil.isNullOrEmpty(transactionReceiveEntity.getTerminalCode())
+                    ) {
+                        Thread thread = new Thread(() -> {
+                            TransactionTerminalTempEntity transactionTerminalTempEntity = new TransactionTerminalTempEntity();
+                            transactionTerminalTempEntity.setId(UUID.randomUUID().toString());
+                            transactionTerminalTempEntity.setTransactionId(transactionReceiveEntity.getId());
+                            transactionTerminalTempEntity.setTerminalCode(transactionReceiveEntity.getTerminalCode());
+                            transactionTerminalTempEntity.setTime(DateTimeUtil.getCurrentDateTimeUTC());
+                            transactionTerminalTempEntity.setAmount(Long.parseLong(dto.getAmount() + ""));
+                            transactionTerminalTempService.insertTransactionTerminal(transactionTerminalTempEntity);
+                        });
+                        thread.start();
+                    }
+                } catch (Exception e) {
+                    logger.error("paybill: - Insert transaction for statistic: " + e.getMessage());
+                }
 
                 if (userIds != null && !userIds.isEmpty()) {
                     int numThread = userIds.size();

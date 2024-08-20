@@ -1649,6 +1649,10 @@ public class TransactionController {
                         Integer status = Integer.parseInt(value);
                         dtos = transactionReceiveService.getTransactionsByStatus(status, offset, bankId);
                         break;
+                    case 6:
+//                        dtos = transactionReceiveService.getTransactionsBySubCode(value, offset, bankId);
+                        dtos = new ArrayList<>();
+                        break;
                     default:
                         logger.error("getTransactionsMobile: ERROR: INVALID TYPE");
                         break;
@@ -1697,6 +1701,9 @@ public class TransactionController {
                         } else {
                             dtos = transactionReceiveService.getTransactions(offset, bankId, from, to);
                         }
+                        break;
+                    case 6:
+                        dtos = transactionReceiveService.getTransactionsBySubCode(value, offset, bankId, from, to);
                         break;
                     default:
                         logger.error("getTransactionsMobile: ERROR: INVALID TYPE");

@@ -19,6 +19,7 @@ public class VietQRMMSCreateDTO implements Serializable {
     private String note;
     private String urlLink;
     private String serviceCode = "";
+    private String subTerminalCode = "";
 
     public VietQRMMSCreateDTO() {
         super();
@@ -124,5 +125,13 @@ public class VietQRMMSCreateDTO implements Serializable {
 
     public void setServiceCode(String serviceCode) {
         this.serviceCode = serviceCode;
+    }
+
+    public String getSubTerminalCode() {
+        return subTerminalCode;
+    }
+
+    public void setSubTerminalCode(String subTerminalCode) {
+        this.subTerminalCode = subTerminalCode;
     }
 }

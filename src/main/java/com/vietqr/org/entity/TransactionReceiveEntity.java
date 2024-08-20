@@ -160,6 +160,9 @@ public class TransactionReceiveEntity implements Serializable {
 	@Column(name = "additionalData", columnDefinition = "JSON")
 	private String additionalData = "[]";
 
+	@Column(name = "subCode")
+	private String subCode = "";
+
 	public TransactionReceiveEntity() {
 		super();
 		this.hashTag = "";
@@ -497,5 +500,13 @@ public class TransactionReceiveEntity implements Serializable {
 
 	public void setAdditionalData(String additionalData) {
 		this.additionalData = additionalData;
+	}
+
+	public String getSubCode() {
+		return subCode;
+	}
+
+	public void setSubCode(String subCode) {
+		this.subCode = subCode;
 	}
 }
