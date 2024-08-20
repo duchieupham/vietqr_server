@@ -300,13 +300,13 @@ public class TransactionMMSController {
                                     : "";
                             getCustomerSyncEntities(tempTransReceive.getId(), tempTerminalBank.getId(),
                                     entity.getFtCode(),
-                                    tempTransReceive, time, rawCode, urlLink, "");
+                                    tempTransReceive, time, rawCode, urlLink, "", tempTransReceive.getSubCode());
                             try {
                                 final String finalRawCode = rawCode;
                                 Thread thread2 = new Thread(() -> {
                                     getCustomerSyncEntitiesV2(tempTransReceive.getId(), tempTerminalBank.getId(),
                                             entity.getFtCode(),
-                                            tempTransReceive, time, finalRawCode, urlLink);
+                                            tempTransReceive, time, finalRawCode, urlLink, "");
                                 });
                                 thread2.start();
                             } catch (Exception e) {
@@ -553,7 +553,7 @@ public class TransactionMMSController {
                                             terminalBankEntitySync.getId(),
                                             entity.getFtCode(),
                                             transactionReceive, time, "", "",
-                                            terminalItemEntity.getRawServiceCode());
+                                            terminalItemEntity.getRawServiceCode(), "");
                                 } else {
                                     logger.info("transaction-mms-sync: NOT FOUND TerminalBankEntity");
                                 }
@@ -763,13 +763,13 @@ public class TransactionMMSController {
                                             getCustomerSyncEntities(transactionReceiveEntity1.getId(),
                                                     terminalBankEntitySync.getId(),
                                                     entity.getFtCode(),
-                                                    transactionReceiveEntity1, time, rawCode, "", "");
+                                                    transactionReceiveEntity1, time, rawCode, "", "", "");
                                             try {
                                                 final String finalRawCode = rawCode;
                                                 Thread thread2 = new Thread(() -> {
                                                     getCustomerSyncEntitiesV2(transactionReceiveEntity1.getId(), terminalBankEntitySync.getId(),
                                                             entity.getFtCode(),
-                                                            transactionReceiveEntity1, time, finalRawCode, "");
+                                                            transactionReceiveEntity1, time, finalRawCode, "", "");
                                                 });
                                                 thread2.start();
                                             } catch (Exception e) {
@@ -1072,14 +1072,15 @@ public class TransactionMMSController {
                                             getCustomerSyncEntities(transactionReceiveEntity1.getId(),
                                                     terminalBankEntitySync.getId(),
                                                     entity.getFtCode(),
-                                                    transactionReceiveEntity1, time, terminalSubRawCodeDTO.getRawTerminalCode(), "", "");
+                                                    transactionReceiveEntity1, time, terminalSubRawCodeDTO.getRawTerminalCode(),
+                                                    "", "", "");
                                             try {
                                                 final String finalRawCode = terminalSubRawCodeDTO.getRawTerminalCode();
                                                 Thread thread2 = new Thread(() -> {
                                                     getCustomerSyncEntitiesV2(transactionReceiveEntity1.getId(),
                                                             terminalBankEntitySync.getId(),
                                                             entity.getFtCode(),
-                                                            transactionReceiveEntity1, time, finalRawCode, "");
+                                                            transactionReceiveEntity1, time, finalRawCode, "", "");
                                                 });
                                                 thread2.start();
                                             } catch (Exception e) {
@@ -1272,7 +1273,7 @@ public class TransactionMMSController {
 
     private void getCustomerSyncEntities(String transReceiveId, String terminalBankId, String ftCode,
                                          TransactionReceiveEntity transactionReceiveEntity, long time,
-                                         String rawTerminalCode, String urlLink, String serviceCode) {
+                                         String rawTerminalCode, String urlLink, String serviceCode, String subCode) {
         try {
             // find customerSyncEntities by terminal_bank_id
             List<TerminalAddressEntity> terminalAddressEntities = new ArrayList<>();
@@ -1304,6 +1305,7 @@ public class TransactionMMSController {
                 }
                 transactionBankCustomerDTO.setUrlLink(urlLink);
                 transactionBankCustomerDTO.setServiceCode(serviceCode);
+                transactionBankCustomerDTO.setSubTerminalCode(StringUtil.getValueNullChecker(subCode));
                 for (TerminalAddressEntity terminalAddressEntity : terminalAddressEntities) {
                     CustomerSyncEntity customerSyncEntity = customerSyncService
                             .getCustomerSyncById(terminalAddressEntity.getCustomerSyncId());
@@ -1324,7 +1326,8 @@ public class TransactionMMSController {
     }
 
     private void getCustomerSyncEntitiesV2(String transReceiveId, String terminalBankId, String ftCode,
-                                           TransactionReceiveEntity transactionReceiveEntity, long time, String rawTerminalCode, String urlLink) {
+                                           TransactionReceiveEntity transactionReceiveEntity, long time,
+                                           String rawTerminalCode, String urlLink, String subCode) {
         try {
             // find customerSyncEntities by terminal_bank_id
             List<TerminalAddressEntity> terminalAddressEntities = new ArrayList<>();
@@ -1355,6 +1358,7 @@ public class TransactionMMSController {
                     transactionBankCustomerDTO.setTerminalCode("");
                 }
                 transactionBankCustomerDTO.setUrlLink(urlLink);
+                transactionBankCustomerDTO.setSubTerminalCode(StringUtil.getValueNullChecker(subCode));
                 String bankId = terminalAddressEntities.get(0).getBankId();
                 List<BankReceiveConnectionEntity> bankReceiveConnectionEntities = new ArrayList<>();
                 bankReceiveConnectionEntities = bankReceiveConnectionService
@@ -1425,6 +1429,8 @@ public class TransactionMMSController {
             data.put("sign", dto.getSign());
             data.put("terminalCode", dto.getTerminalCode());
             data.put("urlLink", dto.getUrlLink());
+            data.put("serviceCode", dto.getServiceCode());
+            data.put("subTerminalCode", dto.getSubTerminalCode());
             WebClient.Builder webClientBuilder = WebClient.builder()
                     .baseUrl(entity.getUrlCallback());
 
@@ -1665,6 +1671,7 @@ public class TransactionMMSController {
             data.put("terminalCode", dto.getTerminalCode());
             data.put("urlLink", dto.getUrlLink());
             data.put("serviceCode", dto.getServiceCode());
+            data.put("subTerminalCode", dto.getSubTerminalCode());
             String suffixUrl = "";
             if (entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty()) {
                 suffixUrl = entity.getSuffixUrl();

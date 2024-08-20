@@ -867,7 +867,7 @@ public class AccountBankReceiveController {
             switch (bankCode) {
                 case "MB":
                     accountBankReceiveService.updateRegisterAuthenticationBank(dto.getNationalId(), dto.getPhoneAuthenticated(),
-                            dto.getBankAccountName(), dto.getBankAccount(),
+                            dto.getBankAccountName(), dto.getBankAccount().replaceAll(" ", ""),
                             ewalletToken,
                             dto.getBankId());
                     break;
