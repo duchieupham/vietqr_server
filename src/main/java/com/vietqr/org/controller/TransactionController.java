@@ -1726,6 +1726,7 @@ public class TransactionController {
                     responseDTO.setTime(dto.getTime());
                     responseDTO.setTimePaid(dto.getTimePaid());
                     responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
+                    responseDTO.setSubCode(dto.getSubCode() != null ? dto.getSubCode() : "");
                     responseDTO.setContent(dto.getContent());
                     responseDTO.setType(dto.getType());
                     responseDTO.setNote(dto.getNote() != null ? dto.getNote() : "");
@@ -1753,6 +1754,7 @@ public class TransactionController {
                         responseDTO.setTime(dto.getTime());
                         responseDTO.setTimePaid(dto.getTimePaid());
                         responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
+                        responseDTO.setSubCode(dto.getSubCode() != null ? dto.getSubCode() : "");
                         responseDTO.setContent(dto.getContent());
                         responseDTO.setType(dto.getType());
                         responseDTO.setNote(dto.getNote() != null ? dto.getNote() : "");
@@ -1780,6 +1782,7 @@ public class TransactionController {
                                 responseDTO.setTime(dto.getTime());
                                 responseDTO.setTimePaid(dto.getTimePaid());
                                 responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
+                                responseDTO.setSubCode(dto.getSubCode() != null ? dto.getSubCode() : "");
                                 responseDTO.setContent(dto.getContent());
                                 responseDTO.setType(dto.getType());
                                 responseDTO.setNote(dto.getNote() != null ? dto.getNote() : "");
@@ -1800,6 +1803,7 @@ public class TransactionController {
                                 responseDTO.setTime(dto.getTime());
                                 responseDTO.setTimePaid(dto.getTimePaid());
                                 responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
+                                responseDTO.setSubCode(dto.getSubCode() != null ? dto.getSubCode() : "");
                                 responseDTO.setContent(dto.getContent());
                                 responseDTO.setType(dto.getType());
                                 responseDTO.setNote(dto.getNote() != null ? dto.getNote() : "");
