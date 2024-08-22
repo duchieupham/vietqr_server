@@ -2276,8 +2276,8 @@ public class InvoiceController {
         Object result = null;
         HttpStatus httpStatus = null;
         PageResponseDTO pageResponseDTO = new PageResponseDTO();
-        DataDTO dataDTO = new DataDTO();
-        dataDTO.setExtraData(null);
+        AdminExtraInvoiceDTO extraInvoiceDTO = new AdminExtraInvoiceDTO();
+        DataDTO dataDTO = new DataDTO(extraInvoiceDTO);
 
         try {
             int totalElement = 0;
@@ -2285,7 +2285,7 @@ public class InvoiceController {
             List<AdminInvoiceDTO> invoiceData = new ArrayList<>();
             List<AdminMerchantDTO> merchantData = new ArrayList<>();
             List<IAdminInvoiceDTO> dtos = new ArrayList<>();
-
+            IAdminExtraInvoiceDTO extraInvoiceDTO1 = null;
             switch (filterType) {
                 // Lọc theo hóa đơn
                 case 0:
@@ -2437,6 +2437,19 @@ public class InvoiceController {
                 default:
                     throw new IllegalArgumentException("Loại filter không hợp lệ");
             }
+            if ("0".equals(time)) {
+                extraInvoiceDTO1 = invoiceItemService.getExtraInvoiceForAllTime();
+            } else {
+                extraInvoiceDTO1 = invoiceItemService.getExtraInvoice(time);
+            }
+            if (extraInvoiceDTO1 != null) {
+                extraInvoiceDTO.setMonth(time);
+                extraInvoiceDTO.setCompleteCount(extraInvoiceDTO1.getCompleteCount());
+                extraInvoiceDTO.setCompleteAmount(extraInvoiceDTO1.getCompleteFee());
+                extraInvoiceDTO.setPendingCount(extraInvoiceDTO1.getPendingCount());
+                extraInvoiceDTO.setPendingAmount(extraInvoiceDTO1.getPendingFee());
+                extraInvoiceDTO.setUnFullyPaidCount(extraInvoiceDTO1.getUnfullyPaidCount());
+            }
 
             PageDTO pageDTO = new PageDTO();
             pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
@@ -2444,8 +2457,8 @@ public class InvoiceController {
             pageDTO.setSize(size);
             pageDTO.setPage(page);
             pageResponseDTO.setMetadata(pageDTO);
+            dataDTO.setExtraData(extraInvoiceDTO);
             pageResponseDTO.setData(dataDTO);
-
             result = pageResponseDTO;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {

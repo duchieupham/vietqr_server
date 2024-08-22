@@ -37,5 +37,5 @@ public interface InvoiceItemService {
     List<InvoiceItemProcessDateDTO> getInvoiceItemByInvoiceId(String invoiceId);
 
     List<BankIdProcessDateResponseDTO> getProcessDatesByType(int type, List<String> bankIds, String processDate);
-
+    IAdminExtraInvoiceDTO getExtraInvoiceForAllTime();
 }
