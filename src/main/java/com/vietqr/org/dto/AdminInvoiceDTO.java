@@ -1,5 +1,8 @@
 package com.vietqr.org.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AdminInvoiceDTO {
     private String invoiceId;
     private long timePaid;
