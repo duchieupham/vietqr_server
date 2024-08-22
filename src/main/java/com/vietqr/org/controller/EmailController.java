@@ -103,7 +103,6 @@ public class EmailController {
         try {
             emailService.sendMail(dto.getTo(), dto);
 
-
             result = new ResponseMessageDTO("SUCCESS", "Sent mail thành công.");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
