@@ -314,4 +314,115 @@ public class InvoiceServiceImpl implements InvoiceService {
     public List<IInvoiceLatestDTO> getInvoiceLatestByUserId(String userId) {
         return repo.getInvoiceLatestByUserId(userId);
     }
+
+    @Override
+    public List<IAdminInvoiceDTO> getInvoiceByMerchantName(String value, int offset, int size, String time) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(time);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.getInvoiceByMerchantName(value, offset, size, fromDate, toDate);
+    }
+
+    @Override
+    public int countInvoiceByMerchantName(String value, String time) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(time);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.countInvoiceByMerchantName(value, fromDate, toDate);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getInvoiceByVsoCode(String value, int offset, int size, String time) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(time);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.getInvoiceByVsoCode(value, offset, size, fromDate, toDate);
+    }
+
+    @Override
+    public int countInvoiceByVsoCode(String value, String time) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(time);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.countInvoiceByVsoCode(value, fromDate, toDate);
+    }
+
+    @Override
+    public IInvoicePaymentDTO getInvoicePaymentInfo(String invoiceId) {
+        return repo.getInvoicePaymentInfo(invoiceId);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getAllInvoicesByInvoiceNumber(String value, int offset, int size) {
+        return repo.getAllInvoicesByInvoiceNumber(value, offset, size);
+    }
+
+    @Override
+    public int countAllInvoicesByInvoiceNumber(String value) {
+        return repo.countAllInvoicesByInvoiceNumber(value);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getAllInvoicesByBankAccount(String value, int offset, int size) {
+        return repo.getAllInvoicesByBankAccount(value, offset, size);
+    }
+
+    @Override
+    public int countAllInvoicesByBankAccount(String value) {
+        return repo.countAllInvoicesByBankAccount(value);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getAllInvoicesByPhoneNo(String value, int offset, int size) {
+        return repo.getAllInvoicesByPhoneNo(value, offset, size);
+    }
+
+    @Override
+    public int countAllInvoicesByPhoneNo(String value) {
+        return repo.countAllInvoicesByPhoneNo(value);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getAllInvoicesByMerchantId(String value, int offset, int size) {
+        return repo.getAllInvoicesByMerchantId(value, offset, size);
+    }
+
+
+    @Override
+    public int countAllInvoicesByMerchantId(String value) {
+        return repo.countAllInvoicesByMerchantId(value);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getAllInvoicesByMerchantName(String value, int offset, int size) {
+        return  repo.getAllInvoicesByMerchantName(value, offset, size);
+
+    }
+
+    @Override
+    public int countAllInvoicesByMerchantName(String value) {
+        return repo.countAllInvoicesByMerchantName(value);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getAllInvoicesByVsoCode(String value, int offset, int size) {
+        return repo.getAllInvoicesByVsoCode(value, offset, size);
+    }
+
+    @Override
+    public int countAllInvoicesByVsoCode(String value) {
+        return repo.countAllInvoicesByVsoCode(value);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getAllInvoices(int offset, int size) {
+        return repo.getAllInvoices(offset, size);
+    }
+
+    @Override
+    public int countAllInvoices() {
+        return repo.countAllInvoices();
+    }
+
+
 }
