@@ -1649,6 +1649,10 @@ public class TransactionController {
                         Integer status = Integer.parseInt(value);
                         dtos = transactionReceiveService.getTransactionsByStatus(status, offset, bankId);
                         break;
+                    case 6:
+//                        dtos = transactionReceiveService.getTransactionsBySubCode(value, offset, bankId);
+                        dtos = new ArrayList<>();
+                        break;
                     default:
                         logger.error("getTransactionsMobile: ERROR: INVALID TYPE");
                         break;
@@ -1698,6 +1702,9 @@ public class TransactionController {
                             dtos = transactionReceiveService.getTransactions(offset, bankId, from, to);
                         }
                         break;
+                    case 6:
+                        dtos = transactionReceiveService.getTransactionsBySubCode(value, offset, bankId, from, to);
+                        break;
                     default:
                         logger.error("getTransactionsMobile: ERROR: INVALID TYPE");
                         break;
@@ -1719,6 +1726,7 @@ public class TransactionController {
                     responseDTO.setTime(dto.getTime());
                     responseDTO.setTimePaid(dto.getTimePaid());
                     responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
+                    responseDTO.setSubCode(dto.getSubCode() != null ? dto.getSubCode() : "");
                     responseDTO.setContent(dto.getContent());
                     responseDTO.setType(dto.getType());
                     responseDTO.setNote(dto.getNote() != null ? dto.getNote() : "");
@@ -1746,6 +1754,7 @@ public class TransactionController {
                         responseDTO.setTime(dto.getTime());
                         responseDTO.setTimePaid(dto.getTimePaid());
                         responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
+                        responseDTO.setSubCode(dto.getSubCode() != null ? dto.getSubCode() : "");
                         responseDTO.setContent(dto.getContent());
                         responseDTO.setType(dto.getType());
                         responseDTO.setNote(dto.getNote() != null ? dto.getNote() : "");
@@ -1773,6 +1782,7 @@ public class TransactionController {
                                 responseDTO.setTime(dto.getTime());
                                 responseDTO.setTimePaid(dto.getTimePaid());
                                 responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
+                                responseDTO.setSubCode(dto.getSubCode() != null ? dto.getSubCode() : "");
                                 responseDTO.setContent(dto.getContent());
                                 responseDTO.setType(dto.getType());
                                 responseDTO.setNote(dto.getNote() != null ? dto.getNote() : "");
@@ -1793,6 +1803,7 @@ public class TransactionController {
                                 responseDTO.setTime(dto.getTime());
                                 responseDTO.setTimePaid(dto.getTimePaid());
                                 responseDTO.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
+                                responseDTO.setSubCode(dto.getSubCode() != null ? dto.getSubCode() : "");
                                 responseDTO.setContent(dto.getContent());
                                 responseDTO.setType(dto.getType());
                                 responseDTO.setNote(dto.getNote() != null ? dto.getNote() : "");

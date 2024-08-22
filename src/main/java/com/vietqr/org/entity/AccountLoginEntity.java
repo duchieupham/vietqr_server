@@ -46,6 +46,12 @@ public class AccountLoginEntity implements Serializable {
     @Column(name = "isVerify")
     private boolean isVerify = false;
 
+    @Column(name = "otp")
+    private String otp;
+
+    @Column(name = "timeExpired")
+    private long timeExpired = 0;
+
     public AccountLoginEntity() {
         super();
     }
@@ -169,4 +175,19 @@ public class AccountLoginEntity implements Serializable {
         this.syncBitrix = syncBitrix;
     }
 
+    public String getOtp() {
+        return otp;
+    }
+
+    public void setOtp(String otp) {
+        this.otp = otp;
+    }
+
+    public long getTimeExpired() {
+        return timeExpired;
+    }
+
+    public void setTimeExpired(long timeExpired) {
+        this.timeExpired = timeExpired;
+    }
 }

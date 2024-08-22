@@ -569,6 +569,7 @@ public class VietQRController {
 									vietQRDTO.setOrderId(dto.getOrderId());
 									vietQRDTO.setAdditionalData(new ArrayList<>());
 									vietQRDTO.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
+									vietQRDTO.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
 									//
 									result = vietQRDTO;
 									httpStatus = HttpStatus.OK;
@@ -612,6 +613,7 @@ public class VietQRController {
 									vietQRDTO.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
 									vietQRDTO.setAdditionalData(new ArrayList<>());
 									vietQRDTO.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
+									vietQRDTO.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
 									result = vietQRDTO;
 									httpStatus = HttpStatus.OK;
 									// result = new ResponseMessageDTO("FAILED", "E25");
@@ -761,6 +763,7 @@ public class VietQRController {
 												vietQRDTO.setOrderId(dto.getOrderId());
 												vietQRDTO.setAdditionalData(new ArrayList<>());
 												vietQRDTO.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
+												vietQRDTO.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
 												result = vietQRDTO;
 												httpStatus = HttpStatus.OK;
 												// result = vietQRMMSDTO;
@@ -824,6 +827,7 @@ public class VietQRController {
 							vietQRMMSCreateDTO.setTerminalCode(dto.getTerminalCode());
 							vietQRMMSCreateDTO.setNote(dto.getNote());
 							vietQRMMSCreateDTO.setServiceCode(serviceCode);
+							vietQRMMSCreateDTO.setSubTerminalCode(dto.getSubTerminalCode());
 							if (dto.getUrlLink() != null && !dto.getUrlLink().trim().isEmpty()) {
 								vietQRMMSCreateDTO.setUrlLink(dto.getUrlLink());
 							} else {
@@ -943,6 +947,7 @@ public class VietQRController {
 										vietQRDTO.setOrderId(dto.getOrderId());
 										vietQRDTO.setAdditionalData(new ArrayList<>());
 										vietQRDTO.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
+										vietQRDTO.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
 										//
 										result = vietQRDTO;
 										httpStatus = HttpStatus.OK;
@@ -988,6 +993,7 @@ public class VietQRController {
 								vietQRDTO.setOrderId(dto.getOrderId());
 								vietQRDTO.setAdditionalData(new ArrayList<>());
 								vietQRDTO.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
+								vietQRDTO.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
 								result = vietQRDTO;
 								httpStatus = HttpStatus.OK;
 							}
@@ -1020,10 +1026,11 @@ public class VietQRController {
 						dto1.setCustomerBankAccount(StringUtil.getValueNullChecker(dto.getCustomerBankAccount()));
 						dto1.setCustomerBankCode(StringUtil.getValueNullChecker(dto.getCustomerBankCode()));
 						dto1.setCustomerName(StringUtil.getValueNullChecker(dto.getCustomerName()));
+						dto1.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
 						dto1.setQr(qr);
 						AccountBankReceiveEntity accountBankReceiveEntity = accountBankEntity;
 						Thread thread = new Thread(() -> {
-							insertNewTransactionBIDV(transactionUUID, dto1, false,traceBIDVId,
+							insertNewTransactionBIDV(transactionUUID, dto1, false, traceBIDVId,
 									accountBankReceiveEntity);
 						});
 						thread.start();
@@ -1079,6 +1086,7 @@ public class VietQRController {
 						vietQRDTO.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
 						vietQRDTO.setAdditionalData(new ArrayList<>());
 						vietQRDTO.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
+						vietQRDTO.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
 						result = vietQRDTO;
 						httpStatus = HttpStatus.OK;
 					} else {
@@ -1716,6 +1724,7 @@ public class VietQRController {
 			transactionEntity.setSign(dto.getSign());
 			transactionEntity.setTimePaid(time);
 			transactionEntity.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
+			transactionEntity.setSubCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
 			transactionEntity.setQrCode(qrCode);
 			transactionEntity.setUserId(accountBankReceiveEntity.getUserId());
 			transactionEntity.setNote(dto.getNote() != null ? dto.getNote() : "");
@@ -1760,6 +1769,7 @@ public class VietQRController {
 				transactionEntity.setTraceId(traceId);
 				transactionEntity.setTimePaid(0);
 				transactionEntity.setTerminalCode(result.getTerminalCode() != null ? result.getTerminalCode() : "");
+				transactionEntity.setSubCode(StringUtil.getValueNullChecker(result.getSubTerminalCode()));
 				transactionEntity.setQrCode("");
 				transactionEntity.setUserId(accountBankEntity.getUserId());
 				transactionEntity.setOrderId(orderId);
@@ -1871,6 +1881,7 @@ public class VietQRController {
 				transactionEntity.setSign("");
 				transactionEntity.setTimePaid(0);
 				transactionEntity.setTerminalCode(dto.getTerminalCode() != null ? dto.getTerminalCode() : "");
+				transactionEntity.setSubCode(StringUtil.getValueNullChecker(result.getSubTerminalCode()));
 				transactionEntity.setQrCode("");
 				transactionEntity.setUserId(accountBankEntity.getUserId());
 				transactionEntity.setNote("");
@@ -2124,6 +2135,7 @@ public class VietQRController {
 							vietQRMMSCreateDTO.setSign(vietQrFlow2.getSign());
 							vietQRMMSCreateDTO.setTerminalCode(subRawCode);
 							vietQRMMSCreateDTO.setNote(vietQrFlow2.getNote());
+							vietQRMMSCreateDTO.setSubTerminalCode(dto.getSubTerminalCode());
 							if (vietQrFlow2.getUrlLink() != null && !vietQrFlow2.getUrlLink().trim().isEmpty()) {
 								vietQRMMSCreateDTO.setUrlLink(vietQrFlow2.getUrlLink());
 							} else {
@@ -2524,6 +2536,7 @@ public class VietQRController {
 				transactionEntity.setTraceId(traceId);
 				transactionEntity.setTimePaid(0);
 				transactionEntity.setTerminalCode(dto.getTerminalCode());
+				transactionEntity.setSubCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
 				transactionEntity.setQrCode(dto.getQr());
 				transactionEntity.setUserId(accountBankEntity.getUserId());
 				transactionEntity.setOrderId(dto.getOrderId());
