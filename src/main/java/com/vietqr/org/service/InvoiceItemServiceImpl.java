@@ -88,6 +88,11 @@ public class InvoiceItemServiceImpl implements InvoiceItemService {
         return repo.getProcessDateByType(type, bankIds, processDate);
     }
 
+    @Override
+    public IAdminExtraInvoiceDTO getExtraInvoiceForAllTime() {
+        return repo.getExtraInvoiceForAllTime();
+    }
+
 
     @Override
     public List<InvoiceItemProcessDateDTO> getInvoiceItemByInvoiceId(String invoiceId) {
