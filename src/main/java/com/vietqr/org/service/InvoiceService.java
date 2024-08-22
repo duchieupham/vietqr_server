@@ -109,4 +109,29 @@ public interface InvoiceService {
     void updateFileInvoiceById(String id, String invoiceId);
 
     List<IInvoiceLatestDTO> getInvoiceLatestByUserId(String userId);
+
+    List<IAdminInvoiceDTO> getInvoiceByMerchantName(String value, int offset, int size, String time);
+    int countInvoiceByMerchantName(String value, String time);
+
+    List<IAdminInvoiceDTO> getInvoiceByVsoCode(String value, int offset, int size, String time);
+
+    int countInvoiceByVsoCode(String value, String time);
+
+    IInvoicePaymentDTO getInvoicePaymentInfo(String invoiceId);
+
+    List<IAdminInvoiceDTO> getAllInvoicesByInvoiceNumber(String value, int offset, int size);
+    int countAllInvoicesByInvoiceNumber(String value);
+    List<IAdminInvoiceDTO> getAllInvoicesByBankAccount(String value, int offset, int size);
+    int countAllInvoicesByBankAccount(String value);
+    List<IAdminInvoiceDTO> getAllInvoicesByPhoneNo(String value, int offset, int size);
+    int countAllInvoicesByPhoneNo(String value);
+    List<IAdminInvoiceDTO> getAllInvoicesByMerchantId(String value, int offset, int size);
+    int countAllInvoicesByMerchantId(String value);
+    List<IAdminInvoiceDTO> getAllInvoicesByMerchantName(String value, int offset, int size);
+    int countAllInvoicesByMerchantName(String value);
+    List<IAdminInvoiceDTO> getAllInvoicesByVsoCode(String value, int offset, int size);
+    int countAllInvoicesByVsoCode(String value);
+    List<IAdminInvoiceDTO> getAllInvoices(int offset, int size);
+    int countAllInvoices();
+
 }

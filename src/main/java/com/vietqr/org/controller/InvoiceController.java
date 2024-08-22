@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.*;
-import com.vietqr.org.entity.qrfeed.FileAttachmentEntity;
 import com.vietqr.org.service.*;
 import com.vietqr.org.util.*;
 import org.apache.log4j.Logger;
@@ -19,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -2264,6 +2262,212 @@ public class InvoiceController {
                     "transaction-sync: WS: socketHandler.sendMessageToUser - RECHARGE ERROR: "
                             + e.toString());
         }
+    }
+
+    @GetMapping("/new-invoice-list")
+    public ResponseEntity<Object> getInvoiceListAdmin(
+            @RequestParam int filterType,  // Loại lọc chính: 0 = Hóa đơn, 1 = Đại lý, 2 = Thời gian
+            @RequestParam(required = false, defaultValue = "0") int subFilterType,  // Loại lọc con (mã hóa đơn, đại lý, tài khoản ngân hàng, ...)
+            @RequestParam(required = false) String value,  // Giá trị cần lọc theo
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam(required = false, defaultValue = "0") String time  // Thời gian: tất cả hoặc theo tháng
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        PageResponseDTO pageResponseDTO = new PageResponseDTO();
+        AdminExtraInvoiceDTO extraInvoiceDTO = new AdminExtraInvoiceDTO();
+        DataDTO dataDTO = new DataDTO(extraInvoiceDTO);
+
+        try {
+            int totalElement = 0;
+            int offset = (page - 1) * size;
+            List<AdminInvoiceDTO> invoiceData = new ArrayList<>();
+            List<AdminMerchantDTO> merchantData = new ArrayList<>();
+            List<IAdminInvoiceDTO> dtos = new ArrayList<>();
+            IAdminExtraInvoiceDTO extraInvoiceDTO1 = null;
+            switch (filterType) {
+                // Lọc theo hóa đơn
+                case 0:
+                    switch (subFilterType) {
+                        case 0: // Mã hóa đơn
+                            if ("0".equals(time)) {
+                                dtos = invoiceService.getAllInvoicesByInvoiceNumber(value, offset, size);
+                                totalElement = invoiceService.countAllInvoicesByInvoiceNumber(value);
+                            } else {
+                                dtos = invoiceService.getInvoiceByInvoiceNumber(value, offset, size, time);
+                                totalElement = invoiceService.countInvoiceByInvoiceNumber(value, time);
+                            }
+                            break;
+                        case 1: // Tài khoản ngân hàng
+                            if ("0".equals(time)) {
+                                dtos = invoiceService.getAllInvoicesByBankAccount(value, offset, size);
+                                totalElement = invoiceService.countAllInvoicesByBankAccount(value);
+                            } else {
+                                dtos = invoiceService.getInvoiceByBankAccount(value, offset, size, time);
+                                totalElement = invoiceService.countInvoiceByBankAccount(value, time);
+                            }
+                            break;
+                        case 2: // Theo số điện thoại
+                            if ("0".equals(time)) {
+                                dtos = invoiceService.getAllInvoicesByPhoneNo(value, offset, size);
+                                totalElement = invoiceService.countAllInvoicesByPhoneNo(value);
+                            } else {
+                                dtos = invoiceService.getInvoiceByPhoneNo(value, offset, size, time);
+                                totalElement = invoiceService.countInvoiceByPhoneNo(value, time);
+                            }
+                            break;
+                        case 3: // Đại lý
+                            if ("0".equals(time)) {
+                                dtos = invoiceService.getAllInvoicesByMerchantId(value, offset, size);
+                                totalElement = invoiceService.countAllInvoicesByMerchantId(value);
+                            } else {
+                                dtos = invoiceService.getInvoiceByMerchantId(value, offset, size, time);
+                                totalElement = invoiceService.countInvoiceByMerchantId(value, time);
+                            }
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Loại subFilter không hợp lệ");
+                    }
+
+                    // Format dữ liệu trả về cho hóa đơn
+                    invoiceData = dtos.stream().map(item -> {
+                        AdminInvoiceDTO dto = new AdminInvoiceDTO();
+                        AccountBankInfoDTO bankInfoDTO = getBankAccountInfoByData(item.getData());
+                        dto.setInvoiceId(Optional.ofNullable(item.getInvoiceId()).orElse(""));
+                        dto.setTimePaid(Optional.ofNullable(item.getTimePaid()).orElse(0L));
+                        dto.setVso(Optional.ofNullable(item.getVso()).orElse(""));
+                        dto.setMidName(Optional.ofNullable(item.getMidName()).orElse(""));
+                        dto.setAmount(Optional.ofNullable(item.getAmount()).orElse(0L));
+                        dto.setBankShortName(Optional.ofNullable(bankInfoDTO.getBankShortName()).orElse(""));
+                        dto.setBankAccount(Optional.ofNullable(bankInfoDTO.getBankAccount()).orElse(""));
+                        dto.setVat(Optional.ofNullable(item.getVat()).orElse(0.0));
+                        dto.setVatAmount(Optional.ofNullable(item.getVatAmount()).orElse(0L));
+                        dto.setBillNumber(Optional.ofNullable(item.getBillNumber()).orElse(""));
+                        dto.setInvoiceName(Optional.ofNullable(item.getInvoiceName()).orElse(""));
+                        dto.setFullName(Optional.ofNullable(bankInfoDTO.getUserBankName()).orElse(""));
+                        dto.setPhoneNo(Optional.ofNullable(item.getPhoneNo()).orElse(""));
+                        dto.setEmail(Optional.ofNullable(item.getEmail()).orElse(""));
+                        dto.setTimeCreated(Optional.ofNullable(item.getTimeCreated()).orElse(0L));
+                        dto.setStatus(Optional.ofNullable(item.getStatus()).orElse(0));
+                        return dto;
+                    }).collect(Collectors.toList());
+
+                    dataDTO.setItems(invoiceData);
+                    break;
+
+                // Lọc theo đại lý
+                case 1:
+                    switch (subFilterType) {
+                        case 0: // Tên đại lý
+                            if ("0".equals(time)) {
+                                dtos = invoiceService.getAllInvoicesByMerchantName(value, offset, size);
+                                totalElement = invoiceService.countAllInvoicesByMerchantName(value);
+                            } else {
+                                dtos = invoiceService.getInvoiceByMerchantName(value, offset, size, time);
+                                totalElement = invoiceService.countInvoiceByMerchantName(value, time);
+                            }
+                            break;
+                        case 1: // VSO
+                            if ("0".equals(time)) {
+                                dtos = invoiceService.getAllInvoicesByVsoCode(value, offset, size);
+                                totalElement = invoiceService.countAllInvoicesByVsoCode(value);
+                            } else {
+                                dtos = invoiceService.getInvoiceByVsoCode(value, offset, size, time);
+                                totalElement = invoiceService.countInvoiceByVsoCode(value, time);
+                            }
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Loại subFilter không hợp lệ");
+                    }
+
+                    // Format dữ liệu trả về cho đại lý
+                    merchantData = dtos.stream().map(item -> {
+                        AdminMerchantDTO dto = new AdminMerchantDTO();
+                        dto.setInvoiceId(Optional.ofNullable(item.getInvoiceId()).orElse(""));
+                        dto.setVso(Optional.ofNullable(item.getVso()).orElse(""));
+                        dto.setMerchantName(Optional.ofNullable(item.getMidName()).orElse(""));
+                        IInvoicePaymentDTO paymentInfo = invoiceService.getInvoicePaymentInfo(item.getInvoiceId());
+                        dto.setCompleteAmount(Optional.ofNullable(paymentInfo.getCompleteFee()).orElse(0L));
+                        dto.setPendingAmount(Optional.ofNullable(paymentInfo.getPendingFee()).orElse(0L));
+                        dto.setVietQrAccount(Optional.ofNullable(item.getPhoneNo()).orElse(""));
+                        dto.setEmail(Optional.ofNullable(item.getEmail()).orElse(""));
+                        return dto;
+                    }).collect(Collectors.toList());
+                    dataDTO.setItems(merchantData);
+                    break;
+
+                // Lọc theo thời gian
+                case 2:
+                    if ("0".equals(time)) {
+                        dtos = invoiceService.getAllInvoices(offset, size);
+                        totalElement = invoiceService.countAllInvoices();
+                    } else {
+                        dtos = invoiceService.getInvoices(offset, size, time);
+                        totalElement = invoiceService.countInvoice(time);
+                    }
+                    // Format dữ liệu trả về
+                    invoiceData = dtos.stream().map(item -> {
+                        AdminInvoiceDTO dto = new AdminInvoiceDTO();
+                        String qrCode = "";
+                        AccountBankInfoDTO bankInfoDTO = getBankAccountInfoByData(item.getData());
+                        dto.setInvoiceId(Optional.ofNullable(item.getInvoiceId()).orElse(""));
+                        dto.setTimePaid(Optional.ofNullable(item.getTimePaid()).orElse(0L));
+                        dto.setVso(Optional.ofNullable(item.getVso()).orElse(""));
+                        dto.setMidName(Optional.ofNullable(item.getMidName()).orElse(""));
+                        dto.setAmount(Optional.ofNullable(item.getAmount()).orElse(0L));
+                        dto.setQrCode(qrCode);
+                        dto.setBankShortName(Optional.ofNullable(bankInfoDTO.getBankShortName()).orElse(""));
+                        dto.setBankAccount(Optional.ofNullable(bankInfoDTO.getBankAccount()).orElse(""));
+                        dto.setVat(Optional.ofNullable(item.getVat()).orElse(0.0));
+                        dto.setVatAmount(Optional.ofNullable(item.getVatAmount()).orElse(0L));
+                        dto.setBillNumber(Optional.ofNullable(item.getBillNumber()).orElse(""));
+                        dto.setInvoiceName(Optional.ofNullable(item.getInvoiceName()).orElse(""));
+                        dto.setFullName(Optional.ofNullable(bankInfoDTO.getUserBankName()).orElse(""));
+                        dto.setPhoneNo(Optional.ofNullable(item.getPhoneNo()).orElse(""));
+                        dto.setEmail(Optional.ofNullable(item.getEmail()).orElse(""));
+                        dto.setTimeCreated(Optional.ofNullable(item.getTimeCreated()).orElse(0L));
+                        dto.setStatus(Optional.ofNullable(item.getStatus()).orElse(0));
+                        return dto;
+                    }).collect(Collectors.toList());
+
+                    dataDTO.setItems(invoiceData);
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Loại filter không hợp lệ");
+            }
+            if ("0".equals(time)) {
+                extraInvoiceDTO1 = invoiceItemService.getExtraInvoiceForAllTime();
+            } else {
+                extraInvoiceDTO1 = invoiceItemService.getExtraInvoice(time);
+            }
+            if (extraInvoiceDTO1 != null) {
+                extraInvoiceDTO.setMonth(time);
+                extraInvoiceDTO.setCompleteCount(extraInvoiceDTO1.getCompleteCount());
+                extraInvoiceDTO.setCompleteAmount(extraInvoiceDTO1.getCompleteFee());
+                extraInvoiceDTO.setPendingCount(extraInvoiceDTO1.getPendingCount());
+                extraInvoiceDTO.setPendingAmount(extraInvoiceDTO1.getPendingFee());
+                extraInvoiceDTO.setUnFullyPaidCount(extraInvoiceDTO1.getUnfullyPaidCount());
+            }
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+            pageDTO.setTotalElement(totalElement);
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageResponseDTO.setMetadata(pageDTO);
+            dataDTO.setExtraData(extraInvoiceDTO);
+            pageResponseDTO.setData(dataDTO);
+            result = pageResponseDTO;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("InvoiceController: ERROR: getInvoiceListAdmin: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
     }
 
 
