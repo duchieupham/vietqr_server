@@ -54,5 +54,10 @@ public class MerchantServiceImpl implements MerchantService {
         return repo.getMerchantsByUserId(userId);
     }
 
+    @Override
+    public List<MerchantEntity> getAllMerchants() {
+        return repo.findAll();
+    }
+
 
 }

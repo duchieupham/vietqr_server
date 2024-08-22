@@ -50,6 +50,11 @@ public interface BankReceiveFeePackageRepository extends JpaRepository<BankRecei
             + "WHERE a.bank_id = :bankId LIMIT 1", nativeQuery = true)
     IInvoiceItemCreateDTO getFeePackageByBankId(String bankId);
 
+    @Query(value = "SELECT a.* "
+            + "FROM bank_receive_fee_package a "
+            + "WHERE a.bank_id = :bankId LIMIT 1", nativeQuery = true)
+    BankReceiveFeePackageEntity getFeePackageByBankIds(String bankId);
+
     @Query(value = "SELECT a.bank_id AS bankId, a.data AS data, a.title AS feePackage, "
             + "b.phone_no AS phoneNo, b.email AS email, c.vso AS vso "
             + "FROM bank_receive_fee_package a "

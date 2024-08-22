@@ -156,4 +156,6 @@ public interface AccountBankReceiveService {
 	void updateVsoBankAccount(String vso, String bankId);
 
 	List<IAccountBankMonthDTO> getBankAccountStatistics();
+
+	List<AccountBankReceiveEntity> findBankAccountsByMerchantId(String merchantId);
 }

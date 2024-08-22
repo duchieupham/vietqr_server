@@ -1,6 +1,7 @@
 package com.vietqr.org.service;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.entity.MerchantSyncEntity;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ public interface MerchantSyncService {
     IMerchantInfoDTO getMerchantSyncInfo(String merchantId);
 
     List<IMerchantSyncDTO> getAllMerchants(String value, int offset, int size);
+    List<MerchantSyncEntity> findAllMerchants();
 
     IMerchantSyncDTO getMerchantById(String id);
 
@@ -52,4 +54,5 @@ public interface MerchantSyncService {
     String checkExistedPublishId(String code);
 
     void insertAll(List<MerchantSyncEntity> merchantSyncEntities);
+
 }

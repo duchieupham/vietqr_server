@@ -1,11 +1,11 @@
 package com.vietqr.org.service;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.entity.BankReceiveFeePackageEntity;
 import com.vietqr.org.repository.BankReceiveFeePackageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -32,6 +32,11 @@ public class BankReceiveFeePackageServiceImpl implements BankReceiveFeePackageSe
     @Override
     public IInvoiceItemCreateDTO getFeePackageByBankId(String bankId) {
         return repo.getFeePackageByBankId(bankId);
+    }
+
+    @Override
+    public BankReceiveFeePackageEntity getFeePackageByBankIds(String bankId) {
+        return repo.getFeePackageByBankIds(bankId);
     }
 
     @Override

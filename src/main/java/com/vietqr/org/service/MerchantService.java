@@ -23,4 +23,6 @@ public interface MerchantService {
     List<MerchantResponseDTO> getMerchantsByUserIdNoPaging(String userId, String bankId);
 
     List<MerchantResponseListDTO> getMerchantsByUserId(String userId);
+
+    List<MerchantEntity> getAllMerchants();
 }

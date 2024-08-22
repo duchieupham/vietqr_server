@@ -1,10 +1,7 @@
 package com.vietqr.org.service;
 
 import com.vietqr.org.dto.*;
-import com.vietqr.org.entity.GoogleChatEntity;
-import com.vietqr.org.entity.LarkEntity;
-import com.vietqr.org.entity.MerchantSyncEntity;
-import com.vietqr.org.entity.TelegramEntity;
+import com.vietqr.org.entity.*;
 import com.vietqr.org.repository.GoogleChatRepository;
 import com.vietqr.org.repository.LarkRepository;
 import com.vietqr.org.repository.MerchantSyncRepository;
@@ -57,6 +54,11 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
     @Override
     public List<IMerchantSyncDTO> getAllMerchants(String value, int offset, int size) {
         return repo.getAllMerchants(value, offset, size);
+    }
+
+    @Override
+    public List<MerchantSyncEntity> findAllMerchants() {
+        return repo.findAllMerchants();
     }
 
     @Override
@@ -192,4 +194,6 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
     public void insertAll(List<MerchantSyncEntity> entities) {
         repo.saveAll(entities);
     }
+
+
 }
