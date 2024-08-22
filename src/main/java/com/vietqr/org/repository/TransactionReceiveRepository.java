@@ -77,7 +77,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
 
     @Query(value = "SELECT a.id as transactionId ,a.amount, a.bank_account as bankAccount, a.content, a.time, "
             + "a.time_paid as timePaid, a.status, a.type, a.trans_type as transType, "
-            + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, "
+            + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, a.sub_code AS subCode, "
             + "a.note, a.order_id as orderId "
             + "FROM transaction_receive a "
             + "WHERE a.bank_id=:bankId AND a.status != 2 "
@@ -91,7 +91,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
     @Query(value = "SELECT a.id as transactionId, a.amount, "
             + "a.bank_account as bankAccount, a.content, a.time, a.time_paid as timePaid, "
             + "a.status, a.type, a.trans_type as transType, "
-            + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, "
+            + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, a.sub_code AS subCode, "
             + "a.note, a.order_id as orderId "
             + "FROM transaction_receive a "
             + "WHERE a.bank_id = :bankId AND a.status = :status "
@@ -118,7 +118,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
 
     @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, "
             + "a.time_paid as timePaid,a.status,a.type,a.trans_type as transType, "
-            + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, "
+            + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, a.sub_code AS subCode, "
             + "a.note, a.order_id as orderId "
             + "FROM transaction_receive a "
             + "WHERE a.bank_id= :bankId AND a.reference_number = :value "
@@ -145,7 +145,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
 
     @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount, a.content, a.time, "
             + "a.time_paid as timePaid,a.status,a.type,a.trans_type as transType, "
-            + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, "
+            + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, a.sub_code AS subCode, "
             + "a.note, a.order_id as orderId "
             + "FROM transaction_receive a "
             + "WHERE a.bank_id = :bankId AND a.order_id = :value "
@@ -174,7 +174,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
 
     @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,"
             + "a.time, a.time_paid as timePaid,a.status,a.type,a.trans_type as transType, "
-            + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, "
+            + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, a.sub_code AS subCode, "
             + "a.note, a.order_id as orderId "
             + "FROM transaction_receive a "
             + "WHERE a.bank_id= :bankId AND a.content LIKE %:value% "
@@ -203,7 +203,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
 
     @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount, a.content, a.time, "
             + "a.time_paid as timePaid, a.status, a.type,a.trans_type as transType, "
-            + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, "
+            + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, a.sub_code AS subCode, "
             + "a.note, a.order_id as orderId "
             + "FROM transaction_receive a "
             + "WHERE a.bank_id = :bankId AND a.terminal_code LIKE %:value% "
@@ -218,7 +218,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
 
     @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount, a.content, a.time, "
             + "a.time_paid as timePaid, a.status, a.type,a.trans_type as transType, "
-            + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, "
+            + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, a.sub_code AS subCode, "
             + "a.note, a.order_id as orderId "
             + "FROM transaction_receive a "
             + "WHERE a.bank_id = :bankId AND a.sub_code LIKE %:value% "
@@ -2149,7 +2149,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
 
     @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount, a.content, a.time, "
             + "a.time_paid as timePaid, a.status, a.type,a.trans_type as transType, "
-            + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, "
+            + "a.reference_number as referenceNumber, a.terminal_code as terminalCode, a.sub_code AS subCode, "
             + "a.note, a.order_id as orderId "
             + "FROM transaction_receive a "
             + "WHERE a.bank_id = :bankId AND a.terminal_code IN (:allTerminalCode) "
