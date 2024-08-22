@@ -1,6 +1,7 @@
 package com.vietqr.org.service;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.entity.BankReceiveFeePackageEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,4 +29,6 @@ public interface BankReceiveFeePackageService {
     IBankReceiveFeePackageDTO getCustomerInfoByBankId(String bankId);
 
     List<PackageFeeResponseDTO> getFeePackageFeeResponse(String userId);
+
+    BankReceiveFeePackageEntity getFeePackageByBankIds(String bankId);
 }

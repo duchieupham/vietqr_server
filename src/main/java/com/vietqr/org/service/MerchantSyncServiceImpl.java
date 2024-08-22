@@ -192,4 +192,8 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
     public void insertAll(List<MerchantSyncEntity> entities) {
         repo.saveAll(entities);
     }
+    @Override
+    public List<MerchantSyncEntity> findAllMerchants() {
+        return repo.findAllMerchants();
+    }
 }

@@ -52,4 +52,6 @@ public interface MerchantSyncService {
     String checkExistedPublishId(String code);
 
     void insertAll(List<MerchantSyncEntity> merchantSyncEntities);
+
+    List<MerchantSyncEntity> findAllMerchants();
 }
