@@ -28,5 +28,6 @@ public interface TransactionRelatedDTO {
      String getOrderId();
 
      String getBankShortName();
+
      String getSubCode();
 }

@@ -644,7 +644,7 @@ public class AccountBankReceiveController {
             AccountBankReceiveEntity entity = new AccountBankReceiveEntity();
             entity.setId(uuid.toString());
             entity.setBankTypeId(dto.getBankTypeId());
-            entity.setBankAccount(dto.getBankAccount());
+            entity.setBankAccount(dto.getBankAccount().replaceAll(" ", ""));
             entity.setBankAccountName(dto.getUserBankName());
             entity.setType(0);
             entity.setUserId(dto.getUserId());
@@ -873,7 +873,7 @@ public class AccountBankReceiveController {
                     break;
                 case "BIDV":
                     accountBankReceiveService.updateRegisterAuthenticationBankBIDV(dto.getNationalId(), dto.getPhoneAuthenticated(),
-                            dto.getBankAccountName(), dto.getBankAccount(), dto.getVaNumber().substring(4),
+                            dto.getBankAccountName(), dto.getBankAccount().replaceAll(" ", ""), dto.getVaNumber().substring(4),
                             ewalletToken,
                             dto.getBankId());
                     AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService
@@ -887,7 +887,7 @@ public class AccountBankReceiveController {
                     customerVaEntity.setBankId(dto.getBankId());
                     customerVaEntity.setUserId(accountBankReceiveEntity.getUserId());
                     customerVaEntity.setCustomerId(dto.getVaNumber().substring(4));
-                    customerVaEntity.setBankAccount(dto.getBankAccount());
+                    customerVaEntity.setBankAccount(dto.getBankAccount().replaceAll(" ", ""));
                     customerVaEntity.setUserBankName(accountBankReceiveEntity.getBankAccountName());
                     customerVaEntity.setNationalId(dto.getNationalId());
                     customerVaEntity.setPhoneAuthenticated(dto.getPhoneAuthenticated());
