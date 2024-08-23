@@ -1,10 +1,12 @@
 package com.vietqr.org.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
+import com.vietqr.org.util.DateTimeUtil;
 import com.vietqr.org.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -420,6 +422,61 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
         return repo.getBankAccountNameByBankAccount(bankAccount);
     }
 
+    @Override
+    public List<BankAccountResponseDTO> getBankAccountsByValidFeeToAndIsValidService(int offset, int size) {
+        long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L;
+
+        // Lấy các danh sách tài khoản theo trạng thái: quá hạn, gần hết hạn, còn hạn, chưa đăng ký dịch vụ
+        List<BankAccountResponseDTO> overdueAccounts = convertAndSanitize(repo.getOverdueBankAccounts(currentTime, offset, size));
+        List<BankAccountResponseDTO> nearlyExpiredAccounts = convertAndSanitize(repo.getNearlyExpiredBankAccounts(currentTime, sevenDaysLater, offset, size));
+        List<BankAccountResponseDTO> validAccounts = convertAndSanitize(repo.getValidBankAccounts(sevenDaysLater, offset, size));
+        List<BankAccountResponseDTO> notRegisteredAccounts = convertAndSanitize(repo.getNotRegisteredBankAccounts(offset, size));
+
+        // Tạo danh sách tổng hợp và thêm các tài khoản theo thứ tự yêu cầu
+        List<BankAccountResponseDTO> allAccounts = new ArrayList<>();
+        allAccounts.addAll(overdueAccounts); // Quá hạn trước
+        allAccounts.addAll(nearlyExpiredAccounts); // Gần hết hạn
+        allAccounts.addAll(validAccounts); // Còn hạn
+        allAccounts.addAll(notRegisteredAccounts); // Chưa đăng ký dịch vụ
+
+        return allAccounts;
+    }
+
+    @Override
+    public int countBankAccountsByValidFeeToAndIsValidService() {
+        long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L;
+
+        int overdueCount = repo.countOverdueBankAccounts(currentTime);
+        int nearlyExpiredCount = repo.countNearlyExpiredBankAccounts(currentTime, sevenDaysLater);
+        int validCount = repo.countValidBankAccounts(sevenDaysLater);
+        int notRegisteredCount = repo.countNotRegisteredBankAccounts();
+
+        // Trả về tổng số lượng tài khoản
+        return overdueCount + nearlyExpiredCount + validCount + notRegisteredCount;
+    }
+
+
+
+    @Override
+    public List<BankAccountResponseDTO> getBankAccountsByTimeCreate(int offset, int size) {
+        return convertAndSanitize(repo.getBankAccountsByTimeCreate(offset, size));
+    }
+
+    @Override
+    public int countBankAccountsByTimeCreate() {
+        return repo.countBankAccountsByTimeCreate();
+    }
+
+    @Override
+    public IAdminExtraBankDTO getExtraBankDataForAllTime() {
+        long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L; // 7 ngày sau từ thời điểm hiện tại
+        return repo.getExtraBankDataForAllTime(currentTime, sevenDaysLater);
+    }
+
+
 
     @Override
     public List<BankAccountResponseDTO> getBankAccountsByNationalIds(String keyword, int offset, int size) {
@@ -454,6 +511,8 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
                         account.getMmsActive(),
                         account.getNationalId() == null ? "" : account.getNationalId(),
                         account.getValidFeeTo() == null ? 0 : account.getValidFeeTo(),
+                        account.getValidFrom() == null ? 0 : account.getValidFrom(),
+                        account.getTimeCreate() == null ? 0 : account.getTimeCreate(),
                         account.getPhoneNo() == null ? "" : account.getPhoneNo(),
                         account.getEmail() == null ? "" : account.getEmail(),
                         account.getStatus(),
@@ -465,6 +524,7 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
                 ))
                 .collect(Collectors.toList());
     }
+
 
 
 }
