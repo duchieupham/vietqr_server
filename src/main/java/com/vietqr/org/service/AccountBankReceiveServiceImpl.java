@@ -472,10 +472,73 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     @Override
     public IAdminExtraBankDTO getExtraBankDataForAllTime() {
         long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET;
-        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L; // 7 ngày sau từ thời điểm hiện tại
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L;
         return repo.getExtraBankDataForAllTime(currentTime, sevenDaysLater);
     }
 
+    @Override
+    public List<BankAccountResponseDTO> getBankAccountsByValidFeeToAndIsValidServiceWithSearch(Integer searchType, String value, int offset, int size) {
+        switch (searchType) {
+            case 3:
+                return getBankAccountsByAccounts(value, offset, size);
+            case 4:
+                return getBankAccountsByAccountNames(value, offset, size);
+            case 5:
+                return getBankAccountsByPhoneAuthenticated(value, offset, size);
+            case 6:
+                return getBankAccountsByNationalIds(value, offset, size);
+            default:
+                return getBankAccountsByValidFeeToAndIsValidService(offset, size);
+        }
+    }
+
+    @Override
+    public int countBankAccountsByValidFeeToAndIsValidServiceWithSearch(Integer searchType, String value) {
+        switch (searchType) {
+            case 3:
+                return countBankAccountsByAccount(value);
+            case 4:
+                return countBankAccountsByAccountName(value);
+            case 5:
+                return countBankAccountsByPhoneAuthenticated(value);
+            case 6:
+                return countBankAccountsByNationalId(value);
+            default:
+                return countBankAccountsByValidFeeToAndIsValidService();
+        }
+    }
+
+    @Override
+    public List<BankAccountResponseDTO> getBankAccountsByTimeCreateWithSearch(Integer searchType, String value, int offset, int size) {
+        switch (searchType) {
+            case 3: // Tìm kiếm theo TKNH
+                return getBankAccountsByAccounts(value, offset, size); // Sử dụng service có sẵn
+            case 4: // Tìm kiếm theo Chủ TK
+                return getBankAccountsByAccountNames(value, offset, size); // Sử dụng service có sẵn
+            case 5: // Tìm kiếm theo SĐT
+                return getBankAccountsByPhoneAuthenticated(value, offset, size); // Sử dụng service có sẵn
+            case 6: // Tìm kiếm theo CMND
+                return getBankAccountsByNationalIds(value, offset, size); // Sử dụng service có sẵn
+            default: // Nếu không có searchType hoặc không tìm kiếm theo 3,4,5,6
+                return getBankAccountsByTimeCreate(offset, size); // Lọc theo thời gian tạo gần đây
+        }
+    }
+
+    @Override
+    public int countBankAccountsByTimeCreateWithSearch(Integer searchType, String value) {
+        switch (searchType) {
+            case 3: // Tìm kiếm theo TKNH
+                return countBankAccountsByAccount(value); // Sử dụng service có sẵn
+            case 4: // Tìm kiếm theo Chủ TK
+                return countBankAccountsByAccountName(value); // Sử dụng service có sẵn
+            case 5: // Tìm kiếm theo SĐT
+                return countBankAccountsByPhoneAuthenticated(value); // Sử dụng service có sẵn
+            case 6: // Tìm kiếm theo CMND
+                return countBankAccountsByNationalId(value); // Sử dụng service có sẵn
+            default: // Nếu không có searchType hoặc không tìm kiếm theo 3,4,5,6
+                return countBankAccountsByTimeCreate(); // Lọc theo thời gian tạo gần đây
+        }
+    }
 
 
     @Override

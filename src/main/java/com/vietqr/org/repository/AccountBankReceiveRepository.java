@@ -693,10 +693,10 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 
 
 	@Query(value = "SELECT "
-			+ "COALESCE(SUM(CASE WHEN valid_fee_to < :currentTime THEN 1 ELSE 0 END), 0) AS overdueCount, "  // Tài khoản quá hạn
+			+ "COALESCE(SUM(CASE WHEN  valid_fee_to != 0 and  valid_fee_to < :currentTime THEN 1 ELSE 0 END), 0) AS overdueCount, "  // Tài khoản quá hạn
 			+ "COALESCE(SUM(CASE WHEN valid_fee_to BETWEEN :currentTime AND :sevenDaysLater THEN 1 ELSE 0 END), 0) AS nearlyExpireCount, "  // Tài khoản gần hết hạn (trong vòng 7 ngày tới)
-			+ "COALESCE(SUM(CASE WHEN valid_fee_to > :sevenDaysLater THEN 1 ELSE 0 END), 0) AS validCount, "  // Tài khoản còn hạn (hết hạn sau 7 ngày)
-			+ "COALESCE(SUM(CASE WHEN is_valid_service = false AND valid_fee_to IS NULL THEN 1 ELSE 0 END), 0) AS notRegisteredCount "  // Tài khoản chưa đăng ký dịch vụ
+			+ "COALESCE(SUM(CASE WHEN is_authenticated IS NOT NULL THEN 1 ELSE 0 END), 0) AS validCount, "
+			+ "COALESCE(SUM(CASE WHEN is_authenticated = true THEN 1 ELSE 0 END), 0) AS notRegisteredCount "
 			+ "FROM account_bank_receive", nativeQuery = true)
 	IAdminExtraBankDTO getExtraBankDataForAllTime(@Param("currentTime") long currentTime, @Param("sevenDaysLater") long sevenDaysLater);
 

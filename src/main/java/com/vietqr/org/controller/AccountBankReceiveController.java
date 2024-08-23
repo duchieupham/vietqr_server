@@ -2180,6 +2180,7 @@ public class AccountBankReceiveController {
     public ResponseEntity<Object> getNewListBankAccount(
             @RequestParam(required = false) Integer type,
             @RequestParam(required = false) String value,
+            @RequestParam(required = false) Integer searchType,  // Thêm searchType để biết tìm kiếm theo tiêu chí gì
             @RequestParam int page,
             @RequestParam int size) {
         Object result;
@@ -2194,36 +2195,36 @@ public class AccountBankReceiveController {
             List<BankAccountResponseDTO> data;
             IAdminExtraBankDTO extraBankDTO1 = null;
 
-            switch (type) {
-                case 1: // Thời gian kích hoạt DV
-                    data = accountBankReceiveService.getBankAccountsByValidFeeToAndIsValidService(offset, size);
-                    totalElement = accountBankReceiveService.countBankAccountsByValidFeeToAndIsValidService();
-                    break;
-                case 2: // Thêm gần đây
-                    data = accountBankReceiveService.getBankAccountsByTimeCreate(offset, size);
-                    totalElement = accountBankReceiveService.countBankAccountsByTimeCreate();
-                    break;
-                case 3: // TKNH
-                    data = accountBankReceiveService.getBankAccountsByAccounts(value, offset, size);
-                    totalElement = accountBankReceiveService.countBankAccountsByAccount(value);
-                    break;
-                case 4: // Chu TK
-                    data = accountBankReceiveService.getBankAccountsByAccountNames(value, offset, size);
-                    totalElement = accountBankReceiveService.countBankAccountsByAccountName(value);
-                    break;
-                case 5: // SDT
-                    data = accountBankReceiveService.getBankAccountsByPhoneAuthenticated(value, offset, size);
-                    totalElement = accountBankReceiveService.countBankAccountsByPhoneAuthenticated(value);
-                    break;
-                case 6: // CMND
-                    data = accountBankReceiveService.getBankAccountsByNationalIds(value, offset, size);
-                    totalElement = accountBankReceiveService.countBankAccountsByNationalId(value);
-                    break;
-
-                default: // Search by account number or name or other filters
-                    data = accountBankReceiveService.getBankAccountsByAccounts(value, offset, size);
-                    totalElement = accountBankReceiveService.countBankAccountsByAccount(value);
-                    break;
+            // Xác định tìm kiếm theo tiêu chí nào
+            if (type == 1) { // Lọc theo thời gian kích hoạt DV
+                data = accountBankReceiveService.getBankAccountsByValidFeeToAndIsValidServiceWithSearch(searchType, value, offset, size);
+                totalElement = accountBankReceiveService.countBankAccountsByValidFeeToAndIsValidServiceWithSearch(searchType, value);
+            } else if (type == 2) { // Lọc theo thời gian thêm gần đây
+                data = accountBankReceiveService.getBankAccountsByTimeCreateWithSearch(searchType, value, offset, size);
+                totalElement = accountBankReceiveService.countBankAccountsByTimeCreateWithSearch(searchType, value);
+            } else { // Tìm kiếm trực tiếp theo các trường khác
+                switch (type) {
+                    case 3: // Tìm kiếm theo TKNH
+                        data = accountBankReceiveService.getBankAccountsByAccounts(value, offset, size);
+                        totalElement = accountBankReceiveService.countBankAccountsByAccount(value);
+                        break;
+                    case 4: // Tìm kiếm theo Chủ TK
+                        data = accountBankReceiveService.getBankAccountsByAccountNames(value, offset, size);
+                        totalElement = accountBankReceiveService.countBankAccountsByAccountName(value);
+                        break;
+                    case 5: // Tìm kiếm theo SĐT
+                        data = accountBankReceiveService.getBankAccountsByPhoneAuthenticated(value, offset, size);
+                        totalElement = accountBankReceiveService.countBankAccountsByPhoneAuthenticated(value);
+                        break;
+                    case 6: // Tìm kiếm theo CMND
+                        data = accountBankReceiveService.getBankAccountsByNationalIds(value, offset, size);
+                        totalElement = accountBankReceiveService.countBankAccountsByNationalId(value);
+                        break;
+                    default: // Nếu không có bộ lọc, mặc định tìm kiếm theo TKNH
+                        data = accountBankReceiveService.getBankAccountsByAccounts(value, offset, size);
+                        totalElement = accountBankReceiveService.countBankAccountsByAccount(value);
+                        break;
+                }
             }
 
             // Thống kê nhanh (extraData)

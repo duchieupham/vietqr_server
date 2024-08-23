@@ -187,4 +187,10 @@ public interface AccountBankReceiveService {
 	int countBankAccountsByTimeCreate();
 	IAdminExtraBankDTO getExtraBankDataForAllTime();
 
+	List<BankAccountResponseDTO> getBankAccountsByValidFeeToAndIsValidServiceWithSearch(Integer searchType, String value, int offset, int size);
+	int countBankAccountsByValidFeeToAndIsValidServiceWithSearch(Integer searchType, String value);
+	List<BankAccountResponseDTO> getBankAccountsByTimeCreateWithSearch(Integer searchType, String value, int offset, int size);
+	int countBankAccountsByTimeCreateWithSearch(Integer searchType, String value);
+
+
 }
