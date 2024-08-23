@@ -219,8 +219,8 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     }
 
     @Override
-    public AccountBankReceiveEntity checkExistedBankAccountAuthenticated(String bankAccount, String bankCode) {
-        return repo.checkExistedBankAccountAuthenticated(bankAccount, bankCode);
+    public AccountBankReceiveEntity getAccountBankReceiveByBankAccountAndBankCode(String bankAccount, String bankCode) {
+        return repo.getAccountBankReceiveByBankAccountAndBankCode(bankAccount, bankCode);
     }
 
     @Override

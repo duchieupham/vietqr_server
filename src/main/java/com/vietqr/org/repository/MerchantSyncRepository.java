@@ -157,4 +157,10 @@ public interface MerchantSyncRepository extends JpaRepository<MerchantSyncEntity
 
     @Query(value = "SELECT * from merchant_sync",nativeQuery = true)
     List<MerchantSyncEntity> findAllMerchants();
+
+    @Query(value = "SELECT * from merchant_sync WHERE certificate = :certificate LIMIT 1",nativeQuery = true)
+    MerchantSyncEntity getMerchantSyncByCertificate(String certificate);
+
+    @Query(value = "SELECT * from merchant_sync WHERE id IN (:merchantIds) AND is_active = TRUE",nativeQuery = true)
+    List<MerchantSyncEntity> getMerchantSyncByIds(List<String> merchantIds);
 }

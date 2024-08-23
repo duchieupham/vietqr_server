@@ -120,6 +120,25 @@ public class BankEncryptUtil {
         return result;
     }
 
+    public static String generateMD5EcommerceCheckSum(String accessKey,
+                                                           String ecommerceSite) {
+        String result = "";
+        try {
+            String plainText = accessKey + ":" + ecommerceSite + VIET_QR_KEY_CHECKSUM;
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(plainText.getBytes());
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b & 0xff));
+            }
+            result = sb.toString();
+        } catch (Exception e) {
+            logger.error("generateMD5GetBillForBankChecksum: ERROR: " + e.toString());
+        }
+        return result;
+    }
+
     public static String generateMD5PayBillForBankChecksum(String secretCode,
             String transId,
             String billId,

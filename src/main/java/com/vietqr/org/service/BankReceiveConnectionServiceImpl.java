@@ -32,4 +32,9 @@ public class BankReceiveConnectionServiceImpl implements BankReceiveConnectionSe
     public String checkBankAccountByBankIdAndMid(String bankId, String mid) {
         return repo.checkBankAccountByBankIdAndMid(bankId, mid);
     }
+
+    @Override
+    public void insert(BankReceiveConnectionEntity bankReceiveConnectionEntity) {
+        repo.save(bankReceiveConnectionEntity);
+    }
 }

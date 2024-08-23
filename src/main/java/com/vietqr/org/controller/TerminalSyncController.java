@@ -1176,7 +1176,7 @@ public class TerminalSyncController {
                 BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeByBankCode(item.getBankCode());
                 if (Objects.nonNull(bankTypeEntity)) {
                     AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService
-                            .checkExistedBankAccountAuthenticated(item.getBankAccount(), item.getBankCode());
+                            .getAccountBankReceiveByBankAccountAndBankCode(item.getBankAccount(), item.getBankCode());
                     if (Objects.nonNull(accountBankReceiveEntity)) {
                         accountBankReceiveEntities.put(item, accountBankReceiveEntity);
                     } else {

@@ -14,4 +14,6 @@ public interface BankReceiveConnectionService {
     List<BankReceiveConnectionEntity> getBankReceiveConnectionByBankId(String bankId);
 
     String checkBankAccountByBankIdAndMid(String bankId, String mid);
+
+    void insert(BankReceiveConnectionEntity bankReceiveConnectionEntity);
 }

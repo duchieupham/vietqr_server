@@ -62,6 +62,28 @@ public class MerchantSyncEntity implements Serializable {
     public MerchantSyncEntity() {
     }
 
+    public MerchantSyncEntity(String id, String name, String fullName, String businessType, String publishId, String certificate, String webhook, String clientId) {
+        this.id = id;
+        this.name = name;
+        this.fullName = fullName;
+        this.vso = "";
+        this.businessType = businessType;
+        this.career = "";
+        this.address = "";
+        this.nationalId = "";
+        this.isActive = false;
+        this.userId = "";
+        this.accountCustomerId = "";
+        this.email = "";
+        this.phoneNo = "";
+        this.publishId = publishId;
+        this.refId = "";
+        this.isMaster = false;
+        this.certificate = certificate;
+        this.webhook = webhook;
+        this.clientId = clientId;
+    }
+
     public MerchantSyncEntity(String id, String name, String fullName, String vso, String businessType, String career, String address, String nationalId, boolean isActive, String userId, String accountCustomerId, String email, String phoneNo, String publishId, String refId, boolean isMaster, String certificate, String webhook, String clientId) {
         this.id = id;
         this.name = name;

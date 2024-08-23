@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -518,6 +519,9 @@ public class TransactionBankController {
                                         result = getCustomerSyncEntities(transactionReceiveEntity.getId(), dto,
                                                 accountBankEntity, time, orderId, sign, rawCode, urlLink,
                                                 transactionReceiveEntity.getTerminalCode(), transactionReceiveEntity.getSubCode());
+                                        getCustomerSyncEntitiesV2(transactionReceiveEntity.getId(), dto,
+                                                accountBankEntity, time, orderId, sign, rawCode, urlLink,
+                                                transactionReceiveEntity.getTerminalCode(), transactionReceiveEntity.getSubCode());
                                         updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time, nf, boxIdRef, rawDTO, terminalEntity);
                                         // check if recharge => do update status and push data to customer
                                         ////////// USER RECHAGE VQR || USER RECHARGE MOBILE
@@ -788,6 +792,9 @@ public class TransactionBankController {
                                                     accountBankEntity, time, orderId, sign, rawCode,
                                                     urlLink, transactionReceiveEntity.getTerminalCode(),
                                                     transactionReceiveEntity.getSubCode());
+                                            getCustomerSyncEntitiesV2(transactionReceiveEntity.getId(), dto,
+                                                    accountBankEntity, time, orderId, sign, rawCode, urlLink,
+                                                    transactionReceiveEntity.getTerminalCode(), transactionReceiveEntity.getSubCode());
                                             updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time,
                                                     nf, boxIdRef, rawDTO, terminalEntity);
 
@@ -871,6 +878,9 @@ public class TransactionBankController {
                                                     : "";
                                             getCustomerSyncEntities(transactionReceiveEntity.getId(), dto,
                                                     accountBankEntity, time, orderId, sign, rawCodeResult, urlLink,
+                                                    transactionReceiveEntity.getTerminalCode(), transactionReceiveEntity.getSubCode());
+                                            getCustomerSyncEntitiesV2(transactionReceiveEntity.getId(), dto,
+                                                    accountBankEntity, time, orderId, sign, rawCode, urlLink,
                                                     transactionReceiveEntity.getTerminalCode(), transactionReceiveEntity.getSubCode());
                                             updateTransaction(dto, transactionReceiveEntity, accountBankEntity, time,
                                                     nf, boxIdRef, rawDTO, terminalEntity);
@@ -5948,6 +5958,24 @@ public class TransactionBankController {
                 List<BankReceiveConnectionEntity> bankReceiveConnectionEntities = new ArrayList<>();
                 bankReceiveConnectionEntities = bankReceiveConnectionService
                         .getBankReceiveConnectionByBankId(accountBankEntity.getId());
+
+                try {
+                    if (bankReceiveConnectionEntities != null && !bankReceiveConnectionEntities.isEmpty()) {
+                        List<String> merchantIds = bankReceiveConnectionEntities.stream()
+                                .map(BankReceiveConnectionEntity::getMid) // Replace with the actual method to get the merchant ID
+                                .distinct() // Ensures the list is unique
+                                .collect(Collectors.toList());
+                        List<MerchantSyncEntity> merchantSyncEntities = merchantSyncService.getMerchantSyncByIds(merchantIds);
+                        if (merchantSyncEntities != null && !merchantSyncEntities.isEmpty()) {
+                            for (MerchantSyncEntity entity: merchantSyncEntities) {
+                                pushTransactionSyncForClientId(entity, transactionBankCustomerDTO);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.error("getCustomerSyncEntitiesV2 WSS: ERROR: " + e.toString());
+                }
+
                 if (bankReceiveConnectionEntities != null && !bankReceiveConnectionEntities.isEmpty()) {
                     int numThread = bankReceiveConnectionEntities.size();
                     ExecutorService executorService = Executors.newFixedThreadPool(numThread);
@@ -5965,6 +5993,37 @@ public class TransactionBankController {
         } catch (Exception e) {
             logger.error("CustomerSync: Error: " + e.toString());
             System.out.println("CustomerSync: Error: " + e.toString());
+        }
+    }
+
+    private void pushTransactionSyncForClientId(MerchantSyncEntity merchantSyncEntity, TransactionBankCustomerDTO dto) {
+        try {
+            Thread thread = new Thread(() -> {
+                try {
+                    Map<String, String> data = new HashMap<>();
+                    data.put("transactionid", dto.getTransactionid());
+                    data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+                    data.put("transactiontime", dto.getTransactiontime() + "");
+                    data.put("referencenumber", dto.getReferencenumber());
+                    data.put("amount", dto.getAmount() + "");
+                    data.put("content", dto.getContent());
+                    data.put("bankaccount", dto.getBankaccount());
+                    data.put("transType", dto.getTransType());
+                    data.put("orderId", dto.getOrderId());
+                    data.put("terminalCode", dto.getTerminalCode());
+                    data.put("serviceCode", dto.getServiceCode());
+                    data.put("subTerminalCode", dto.getSubTerminalCode());
+                    socketHandler.sendMessageToClientId(merchantSyncEntity.getClientId(),
+                            data);
+                } catch (IOException e) {
+                    logger.error(
+                            "transaction-sync: WS: socketHandler.sendMessageToUser - RECHARGE ERROR: "
+                                    + e.toString());
+                }
+            });
+            thread.start();
+        } catch (Exception e) {
+            logger.error("CustomerSync: Error: " + e.toString());
         }
     }
 
