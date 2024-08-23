@@ -1537,6 +1537,9 @@ public class AccountBankReceiveController {
                             break;
                     }
                     dto.setQrCode(qr);
+                    if (dto.getKeyActive() == null) {
+                        dto.setKeyActive("");
+                    }
                     return dto;
                 }).collect(Collectors.toList());
             }
