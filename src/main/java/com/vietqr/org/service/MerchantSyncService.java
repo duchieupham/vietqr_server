@@ -66,4 +66,8 @@ public interface MerchantSyncService {
     List<MerchantSyncEntity> findAllMerchants();
 
     int insert(MerchantSyncEntity entity);
+
+    MerchantSyncEntity getMerchantSyncByCertificate(String certificate);
+
+    List<MerchantSyncEntity> getMerchantSyncByIds(List<String> merchantIds);
 }

@@ -96,7 +96,7 @@ public interface AccountBankReceiveService {
 
 	String getBankShortNameByBankId(String bankId);
 
-	AccountBankReceiveEntity checkExistedBankAccountAuthenticated(String bankAccount, String bankCode);
+	AccountBankReceiveEntity getAccountBankReceiveByBankAccountAndBankCode(String bankAccount, String bankCode);
 
 	String getBankNameByBankId(String bankTypeId);
 

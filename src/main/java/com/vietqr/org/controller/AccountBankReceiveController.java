@@ -136,10 +136,10 @@ public class AccountBankReceiveController {
         try {
             //-Check Tài khoản này đã đăng ký luồng 2 trước đó chưa,
             AccountBankReceiveEntity checkAccount =
-                    accountBankReceiveService.checkExistedBankAccountAuthenticated(dto.getBankAccount(), dto.getBankCode());
+                    accountBankReceiveService.getAccountBankReceiveByBankAccountAndBankCode(dto.getBankAccount(), dto.getBankCode());
             //check bank account is_authenticated
             AccountBankReceiveEntity bankReceiveEntity = accountBankReceiveService
-                    .checkExistedBankAccountAuthenticated(dto.getBankAccount(), dto.getBankCode());
+                    .getAccountBankReceiveByBankAccountAndBankCode(dto.getBankAccount(), dto.getBankCode());
             //-check tồn tại record trong terminal_bank, terminal_address.
             TerminalAddressEntity terminalAddress =
                     terminalAddressService.getTerminalAddressByBankIdAndTerminalBankId(dto.getBankId());
@@ -319,10 +319,10 @@ public class AccountBankReceiveController {
         try {
             //-Check Tài khoản này đã đăng ký luồng 2 trước đó chưa,
             AccountBankReceiveEntity checkAccount =
-                    accountBankReceiveService.checkExistedBankAccountAuthenticated(dto.getBankAccount(), dto.getBankCode());
+                    accountBankReceiveService.getAccountBankReceiveByBankAccountAndBankCode(dto.getBankAccount(), dto.getBankCode());
             //check bank account is_authenticated
             AccountBankReceiveEntity bankReceiveEntity = accountBankReceiveService
-                    .checkExistedBankAccountAuthenticated(dto.getBankAccount(), dto.getBankCode());
+                    .getAccountBankReceiveByBankAccountAndBankCode(dto.getBankAccount(), dto.getBankCode());
             //-check tồn tại record trong terminal_bank, terminal_address.
             TerminalAddressEntity terminalAddress =
                     terminalAddressService.getTerminalAddressByBankIdAndTerminalBankId(dto.getBankId());
