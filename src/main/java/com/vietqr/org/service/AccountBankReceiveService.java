@@ -178,4 +178,13 @@ public interface AccountBankReceiveService {
 	List<AccountBankReceiveEntity> findBankAccountsByMerchantId(String merchantId);
 
 	String getBankAccountNameByBankAccount(String bankAccount);
+
+	List<BankAccountResponseDTO> getBankAccountsByValidFeeToAndIsValidService(int offset, int size);
+	int countBankAccountsByValidFeeToAndIsValidService();
+
+	List<BankAccountResponseDTO> getBankAccountsByTimeCreate(int offset, int size);
+
+	int countBankAccountsByTimeCreate();
+	IAdminExtraBankDTO getExtraBankDataForAllTime();
+
 }

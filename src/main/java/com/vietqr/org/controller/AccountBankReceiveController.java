@@ -2176,4 +2176,86 @@ public class AccountBankReceiveController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("/new-list-bank-account")
+    public ResponseEntity<Object> getNewListBankAccount(
+            @RequestParam(required = false) Integer type,
+            @RequestParam(required = false) String value,
+            @RequestParam int page,
+            @RequestParam int size) {
+        Object result;
+        HttpStatus httpStatus;
+        PageResponseDTO pageResponseDTO = new PageResponseDTO();
+        AdminExtraBankDTO extraBankDTO = new AdminExtraBankDTO();
+        DataDTO dataDTO = new DataDTO(extraBankDTO);
+
+        try {
+            int totalElement;
+            int offset = (page - 1) * size;
+            List<BankAccountResponseDTO> data;
+            IAdminExtraBankDTO extraBankDTO1 = null;
+
+            switch (type) {
+                case 1: // Thời gian kích hoạt DV
+                    data = accountBankReceiveService.getBankAccountsByValidFeeToAndIsValidService(offset, size);
+                    totalElement = accountBankReceiveService.countBankAccountsByValidFeeToAndIsValidService();
+                    break;
+                case 2: // Thêm gần đây
+                    data = accountBankReceiveService.getBankAccountsByTimeCreate(offset, size);
+                    totalElement = accountBankReceiveService.countBankAccountsByTimeCreate();
+                    break;
+                case 3: // TKNH
+                    data = accountBankReceiveService.getBankAccountsByAccounts(value, offset, size);
+                    totalElement = accountBankReceiveService.countBankAccountsByAccount(value);
+                    break;
+                case 4: // Chu TK
+                    data = accountBankReceiveService.getBankAccountsByAccountNames(value, offset, size);
+                    totalElement = accountBankReceiveService.countBankAccountsByAccountName(value);
+                    break;
+                case 5: // SDT
+                    data = accountBankReceiveService.getBankAccountsByPhoneAuthenticated(value, offset, size);
+                    totalElement = accountBankReceiveService.countBankAccountsByPhoneAuthenticated(value);
+                    break;
+                case 6: // CMND
+                    data = accountBankReceiveService.getBankAccountsByNationalIds(value, offset, size);
+                    totalElement = accountBankReceiveService.countBankAccountsByNationalId(value);
+                    break;
+
+                default: // Search by account number or name or other filters
+                    data = accountBankReceiveService.getBankAccountsByAccounts(value, offset, size);
+                    totalElement = accountBankReceiveService.countBankAccountsByAccount(value);
+                    break;
+            }
+
+            // Thống kê nhanh (extraData)
+            extraBankDTO1 = accountBankReceiveService.getExtraBankDataForAllTime();
+            if (extraBankDTO1 != null) {
+                extraBankDTO.setOverdueCount(extraBankDTO1.getOverdueCount());
+                extraBankDTO.setNearlyExpireCount(extraBankDTO1.getNearlyExpireCount());
+                extraBankDTO.setValidCount(extraBankDTO1.getValidCount());
+                extraBankDTO.setNotRegisteredCount(extraBankDTO1.getNotRegisteredCount());
+            }
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+            pageDTO.setTotalElement(totalElement);
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageResponseDTO.setMetadata(pageDTO);
+            dataDTO.setItems(data);
+            dataDTO.setExtraData(extraBankDTO);
+            pageResponseDTO.setData(dataDTO);
+            result = pageResponseDTO;
+            httpStatus = HttpStatus.OK;
+
+        } catch (Exception e) {
+            logger.error("BankAccountController: ERROR: getListBankAccount: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+
 }
