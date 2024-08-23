@@ -136,10 +136,10 @@ public class AccountBankReceiveController {
         try {
             //-Check Tài khoản này đã đăng ký luồng 2 trước đó chưa,
             AccountBankReceiveEntity checkAccount =
-                    accountBankReceiveService.checkExistedBankAccountAuthenticated(dto.getBankAccount(), dto.getBankCode());
+                    accountBankReceiveService.getAccountBankReceiveByBankAccountAndBankCode(dto.getBankAccount(), dto.getBankCode());
             //check bank account is_authenticated
             AccountBankReceiveEntity bankReceiveEntity = accountBankReceiveService
-                    .checkExistedBankAccountAuthenticated(dto.getBankAccount(), dto.getBankCode());
+                    .getAccountBankReceiveByBankAccountAndBankCode(dto.getBankAccount(), dto.getBankCode());
             //-check tồn tại record trong terminal_bank, terminal_address.
             TerminalAddressEntity terminalAddress =
                     terminalAddressService.getTerminalAddressByBankIdAndTerminalBankId(dto.getBankId());
@@ -319,10 +319,10 @@ public class AccountBankReceiveController {
         try {
             //-Check Tài khoản này đã đăng ký luồng 2 trước đó chưa,
             AccountBankReceiveEntity checkAccount =
-                    accountBankReceiveService.checkExistedBankAccountAuthenticated(dto.getBankAccount(), dto.getBankCode());
+                    accountBankReceiveService.getAccountBankReceiveByBankAccountAndBankCode(dto.getBankAccount(), dto.getBankCode());
             //check bank account is_authenticated
             AccountBankReceiveEntity bankReceiveEntity = accountBankReceiveService
-                    .checkExistedBankAccountAuthenticated(dto.getBankAccount(), dto.getBankCode());
+                    .getAccountBankReceiveByBankAccountAndBankCode(dto.getBankAccount(), dto.getBankCode());
             //-check tồn tại record trong terminal_bank, terminal_address.
             TerminalAddressEntity terminalAddress =
                     terminalAddressService.getTerminalAddressByBankIdAndTerminalBankId(dto.getBankId());
@@ -1537,6 +1537,9 @@ public class AccountBankReceiveController {
                             break;
                     }
                     dto.setQrCode(qr);
+                    if (dto.getKeyActive() == null) {
+                        dto.setKeyActive("");
+                    }
                     return dto;
                 }).collect(Collectors.toList());
             }
@@ -2175,5 +2178,88 @@ public class AccountBankReceiveController {
 
         return new ResponseEntity<>(result, httpStatus);
     }
+
+    @GetMapping("/new-list-bank-account")
+    public ResponseEntity<Object> getNewListBankAccount(
+            @RequestParam(required = false) Integer type,
+            @RequestParam(required = false) String value,
+            @RequestParam(required = false) Integer searchType,  // Thêm searchType để biết tìm kiếm theo tiêu chí gì
+            @RequestParam int page,
+            @RequestParam int size) {
+        Object result;
+        HttpStatus httpStatus;
+        PageResponseDTO pageResponseDTO = new PageResponseDTO();
+        AdminExtraBankDTO extraBankDTO = new AdminExtraBankDTO();
+        DataDTO dataDTO = new DataDTO(extraBankDTO);
+
+        try {
+            int totalElement;
+            int offset = (page - 1) * size;
+            List<BankAccountResponseDTO> data;
+            IAdminExtraBankDTO extraBankDTO1 = null;
+
+            // Xác định tìm kiếm theo tiêu chí nào
+            if (type == 1) { // Lọc theo thời gian kích hoạt DV
+                data = accountBankReceiveService.getBankAccountsByValidFeeToAndIsValidServiceWithSearch(searchType, value, offset, size);
+                totalElement = accountBankReceiveService.countBankAccountsByValidFeeToAndIsValidServiceWithSearch(searchType, value);
+            } else if (type == 2) { // Lọc theo thời gian thêm gần đây
+                data = accountBankReceiveService.getBankAccountsByTimeCreateWithSearch(searchType, value, offset, size);
+                totalElement = accountBankReceiveService.countBankAccountsByTimeCreateWithSearch(searchType, value);
+            } else { // Tìm kiếm trực tiếp theo các trường khác
+                switch (type) {
+                    case 3: // Tìm kiếm theo TKNH
+                        data = accountBankReceiveService.getBankAccountsByAccounts(value, offset, size);
+                        totalElement = accountBankReceiveService.countBankAccountsByAccount(value);
+                        break;
+                    case 4: // Tìm kiếm theo Chủ TK
+                        data = accountBankReceiveService.getBankAccountsByAccountNames(value, offset, size);
+                        totalElement = accountBankReceiveService.countBankAccountsByAccountName(value);
+                        break;
+                    case 5: // Tìm kiếm theo SĐT
+                        data = accountBankReceiveService.getBankAccountsByPhoneAuthenticated(value, offset, size);
+                        totalElement = accountBankReceiveService.countBankAccountsByPhoneAuthenticated(value);
+                        break;
+                    case 6: // Tìm kiếm theo CMND
+                        data = accountBankReceiveService.getBankAccountsByNationalIds(value, offset, size);
+                        totalElement = accountBankReceiveService.countBankAccountsByNationalId(value);
+                        break;
+                    default: // Nếu không có bộ lọc, mặc định tìm kiếm theo TKNH
+                        data = accountBankReceiveService.getBankAccountsByAccounts(value, offset, size);
+                        totalElement = accountBankReceiveService.countBankAccountsByAccount(value);
+                        break;
+                }
+            }
+
+            // Thống kê nhanh (extraData)
+            extraBankDTO1 = accountBankReceiveService.getExtraBankDataForAllTime();
+            if (extraBankDTO1 != null) {
+                extraBankDTO.setOverdueCount(extraBankDTO1.getOverdueCount());
+                extraBankDTO.setNearlyExpireCount(extraBankDTO1.getNearlyExpireCount());
+                extraBankDTO.setValidCount(extraBankDTO1.getValidCount());
+                extraBankDTO.setNotRegisteredCount(extraBankDTO1.getNotRegisteredCount());
+            }
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+            pageDTO.setTotalElement(totalElement);
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageResponseDTO.setMetadata(pageDTO);
+            dataDTO.setItems(data);
+            dataDTO.setExtraData(extraBankDTO);
+            pageResponseDTO.setData(dataDTO);
+            result = pageResponseDTO;
+            httpStatus = HttpStatus.OK;
+
+        } catch (Exception e) {
+            logger.error("BankAccountController: ERROR: getListBankAccount: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
 
 }

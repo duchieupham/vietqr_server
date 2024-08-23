@@ -61,6 +61,52 @@ public class BearerTokenPeripheralController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @PostMapping("ecommerce/token_generate")
+    public ResponseEntity<TokenDTO> getTokenEcommerce(HttpServletRequest request) {
+        TokenDTO result = null;
+        HttpStatus httpStatus = null;
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.toLowerCase().startsWith("basic")) {
+            String base64Credentials = authHeader.substring("Basic".length()).trim();
+            byte[] credDecoded = Base64.getDecoder().decode(base64Credentials);
+            String credentials = new String(credDecoded, StandardCharsets.UTF_8);
+            // credentials = "username:password"
+            final String[] values = credentials.split(":", 2);
+            String username = values[0];
+            try {
+                // Do something with username and password
+                result = new TokenDTO(getJWTTokenInfinity(Base64.getEncoder().encodeToString(username.getBytes())), "Bearer",
+                        0);
+                httpStatus = HttpStatus.OK;
+            } catch (Exception e) {
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } else {
+            httpStatus = HttpStatus.UNAUTHORIZED;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    private String getJWTTokenInfinity(String username) {
+        String secretKey = "mySecretKey";
+        List<GrantedAuthority> grantedAuthorities = AuthorityUtils
+                .commaSeparatedStringToAuthorityList("ROLE_USER");
+
+        String token = Jwts
+                .builder()
+                // .claim("grantType",grantType)
+                .claim("authorities",
+                        grantedAuthorities.stream()
+                                .map(GrantedAuthority::getAuthority)
+                                .collect(Collectors.toList()))
+                .claim("user", username)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .signWith(SignatureAlgorithm.HS512,
+                        secretKey.getBytes())
+                .compact();
+        return token;
+    }
+
     private String getJWTToken(String username) {
         String secretKey = "mySecretKey";
         List<GrantedAuthority> grantedAuthorities = AuthorityUtils

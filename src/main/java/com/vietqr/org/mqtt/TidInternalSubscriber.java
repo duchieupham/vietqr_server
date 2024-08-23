@@ -48,8 +48,8 @@ public class TidInternalSubscriber {
     private QrBoxSyncService qrBoxSyncService;
 
     @Autowired
-
     private MqttListenerService mqttListenerService;
+
     @Autowired
     private AccountBankReceiveService accountBankReceiveService;
 

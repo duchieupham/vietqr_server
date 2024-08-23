@@ -2224,7 +2224,7 @@ public class TerminalController {
                             if (BankEncryptUtil.isMatchChecksum(dto.getCheckSum(), checkSum)) {
                                 //check bank account is_authenticated
                                 AccountBankReceiveEntity bankReceiveEntity = accountBankReceiveService
-                                        .checkExistedBankAccountAuthenticated(dto.getBankAccount(), dto.getBankCode());
+                                        .getAccountBankReceiveByBankAccountAndBankCode(dto.getBankAccount(), dto.getBankCode());
                                 if (bankReceiveEntity != null) {
                                     String checkValidBankAccount = merchantBankReceiveService
                                             .checkExistedBankAccountInOtherMerchant(
@@ -2397,7 +2397,7 @@ public class TerminalController {
                                     LocalDateTime now = LocalDateTime.now();
                                     entity.setTimeCreated(now.toEpochSecond(ZoneOffset.UTC));
                                     AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService
-                                            .checkExistedBankAccountAuthenticated(dto.getBankAccount(), dto.getBankCode());
+                                            .getAccountBankReceiveByBankAccountAndBankCode(dto.getBankAccount(), dto.getBankCode());
                                     TerminalBankReceiveEntity terminalBankReceiveEntity = new TerminalBankReceiveEntity();
                                     terminalBankReceiveEntity.setId(UUID.randomUUID().toString());
                                     terminalBankReceiveEntity.setTypeOfQR(0);

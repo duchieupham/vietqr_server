@@ -9,6 +9,8 @@ public class BankAccountResponseDTO {
     private boolean mmsActive;
     private String nationalId;
     private Long validFeeTo;
+    private Long validFrom;
+    private Long timeCreate;
     private String phoneNo;
     private String email;
     private boolean status;
@@ -27,7 +29,7 @@ public class BankAccountResponseDTO {
 
     public BankAccountResponseDTO(String bankId, String bankAccount, String bankAccountName, String bankShortName,
                                   String phoneAuthenticated, boolean mmsActive, String nationalId,
-                                  Long validFeeTo, String phoneNo, String email, boolean status, String vso,
+                                  Long validFeeTo, Long validFrom, Long timeCreate, String phoneNo, String email, boolean status, String vso,
                                   boolean isValidService, boolean isAuthenticated, Integer bankTypeStatus,
                                   String bankCode) {
         this.bankId = bankId;
@@ -38,6 +40,8 @@ public class BankAccountResponseDTO {
         this.mmsActive = mmsActive;
         this.nationalId = nationalId;
         this.validFeeTo = validFeeTo;
+        this.validFrom = validFrom;
+        this.timeCreate = timeCreate;
         this.phoneNo = phoneNo;
         this.email = email;
         this.status = status;
@@ -177,5 +181,21 @@ public class BankAccountResponseDTO {
 
     public void setBankTypeStatus(int bankTypeStatus) {
         this.bankTypeStatus = bankTypeStatus;
+    }
+
+    public Long getValidFrom() {
+        return validFrom;
+    }
+
+    public void setValidFrom(Long validFrom) {
+        this.validFrom = validFrom;
+    }
+
+    public Long getTimeCreate() {
+        return timeCreate;
+    }
+
+    public void setTimeCreate(Long timeCreate) {
+        this.timeCreate = timeCreate;
     }
 }

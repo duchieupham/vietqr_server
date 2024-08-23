@@ -1123,7 +1123,7 @@ public class VietQRController {
 				if (dto.getBankCode().equals("MB")) {
 					AccountBankReceiveEntity accountBankReceiveEntity =
 							accountBankReceiveService
-									.checkExistedBankAccountAuthenticated(dto.getBankAccount(),
+									.getAccountBankReceiveByBankAccountAndBankCode(dto.getBankAccount(),
 											dto.getBankCode());
 
 					if (Objects.nonNull(accountBankReceiveEntity)) {
