@@ -12,6 +12,10 @@ public class EcommerceActiveDTO {
     private String webhook;
     private String career;
     private String merchantName;
+    private String userBankName;
+
+    public EcommerceActiveDTO() {
+    }
 
     public EcommerceActiveDTO(String fullName, String bankCode, String bankAccount, String certificate, String nationalId,
                               String email, String phoneNo, String address, String webhook, String career) {
@@ -113,5 +117,13 @@ public class EcommerceActiveDTO {
 
     public void setMerchantName(String merchantName) {
         this.merchantName = merchantName;
+    }
+
+    public String getUserBankName() {
+        return userBankName;
+    }
+
+    public void setUserBankName(String userBankName) {
+        this.userBankName = userBankName;
     }
 }
