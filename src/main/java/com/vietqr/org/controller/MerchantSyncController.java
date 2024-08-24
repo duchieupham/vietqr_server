@@ -162,6 +162,7 @@ public class MerchantSyncController {
                 Map<String, String> data = new HashMap<>();
                 data.put("notificationType", NotificationUtil.getNotiSyncEcommerce());
                 data.put("bankAccount", dto.getBankAccount());
+                data.put("userBankName", dto.getUserBankName());
                 data.put("bankCode", dto.getBankCode());
                 data.put("ecommerceSite", dto.getMerchantName());
                 socketHandler.sendMessageToClientId(clientId,
