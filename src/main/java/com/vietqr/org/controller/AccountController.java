@@ -1464,5 +1464,27 @@ public class AccountController {
         return token;
     }
 
+    @PutMapping("/change-email")
+    public ResponseEntity<Object> changeEmailUser(@RequestBody ChangeEmailRequestDTO changeEmailRequestDTO) {
+
+        Object result=null;
+        HttpStatus httpStatus=null;
+        try {
+            // Gọi service để thay đổi email
+            boolean isUpdated = accountLoginService.updateEmailByPhoneNo(changeEmailRequestDTO.getPhoneNo(), changeEmailRequestDTO.getNewEmail());
+
+            if (isUpdated) {
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            }
+        } catch (Exception e) {
+            // Log lỗi nếu có ngoại lệ
+            logger.error("AccountController: ERROR: changeEmailForMerchant: " + e.getMessage() + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
 
 }

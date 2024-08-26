@@ -77,4 +77,6 @@ public interface AccountLoginService {
     AccountLoginEntity getAccountLoginByPhoneNo(String phoneNo);
 
     void updateOtpLogin(String email, String phoneNo, long timeVerified, String randomOTP);
+
+    boolean updateEmailByPhoneNo(String phoneNo, String newEmail);
 }
