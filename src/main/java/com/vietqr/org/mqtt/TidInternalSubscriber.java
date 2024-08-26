@@ -168,7 +168,7 @@ public class TidInternalSubscriber {
         }
     }
 
-    @MqttTopicHandler(topic = "vietqr/request/status/#") // Xử lý yêu cầu trạng thái giao dịch
+    @MqttTopicHandler(topic = "vietqr/request-status/#") // Xử lý yêu cầu trạng thái giao dịch
     public void handleTransactionStatus(String topic, MqttMessage message) {
         try {
             // Chuyển payload sang TransactionCheckOrderInputDTO
@@ -181,7 +181,7 @@ public class TidInternalSubscriber {
             String responsePayload = mapper.writeValueAsString(result);
 
             // Xác định topic phản hồi
-            String responseTopic = topic.replace("request", "response");
+            String responseTopic = topic.replace("request-status", "response-status");
 
             // Gửi phản hồi lên đúng topic
             mqttListenerService.publishMessageToCommonTopic(responseTopic, responsePayload);

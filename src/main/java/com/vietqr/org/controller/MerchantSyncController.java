@@ -44,6 +44,9 @@ public class MerchantSyncController {
     @Autowired
     private SocketHandler socketHandler;
 
+    @Autowired
+    private MerchantConnectionService merchantConnectionService;
+
     @GetMapping("merchant-sync")
     public ResponseEntity<Object> getAllMerchants(
             @RequestParam(value = "value", defaultValue = "") String value,
@@ -192,7 +195,7 @@ public class MerchantSyncController {
                     entity.setAddress(dto.getAddress());
                     entity.setWebhook(dto.getWebhook());
                     entity.setCareer(dto.getCareer());
-
+                    CustomerSyncEntity customerSyncEntity = customerSyncService.getCustomerSyncById(entity.getId());
                     BankReceiveConnectionEntity bankReceiveConnectionEntity = new BankReceiveConnectionEntity();
                     bankReceiveConnectionEntity.setId(UUID.randomUUID().toString());
                     if (accountBankReceiveEntity.isMmsActive()) {
@@ -205,8 +208,41 @@ public class MerchantSyncController {
                     bankReceiveConnectionEntity.setData("[]");
                     bankReceiveConnectionService.insert(bankReceiveConnectionEntity);
                     merchantSyncService.insert(entity);
+                    result = new ResponseMessageDTO("SUCCESS", "");
                     httpStatus = HttpStatus.OK;
+
+                    try {
+                        Thread thread = new Thread(() -> {
+
+                            Map<String, String> data = new HashMap<>();
+                            data.put("notificationType", NotificationUtil.getNotiSyncEcommerce());
+                            data.put("bankAccount", accountBankReceiveEntity.getBankAccount());
+                            data.put("userBankName", accountBankReceiveEntity.getBankAccountName());
+                            data.put("bankCode", "MB");
+                            if (Objects.nonNull(customerSyncEntity)) {
+                                data.put("ecommerceSite", StringUtil.getValueNullChecker(customerSyncEntity.getInformation()));
+                            } else {
+                                data.put("ecommerceSite", "");
+                            }
+                            try {
+                                socketHandler.sendMessageToClientId(entity.getClientId(),
+                                        data);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+                        thread.start();
+                    } catch (Exception e) {
+
+                    }
+
+                } else {
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    result = new ResponseMessageDTO("FAILED", "E05");
                 }
+            } else {
+                httpStatus = HttpStatus.BAD_REQUEST;
+                result = new ResponseMessageDTO("FAILED", "E05");
             }
         } catch (Exception e) {
             httpStatus = HttpStatus.BAD_REQUEST;
