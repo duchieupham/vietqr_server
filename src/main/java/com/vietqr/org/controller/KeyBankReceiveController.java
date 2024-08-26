@@ -148,8 +148,6 @@ public class KeyBankReceiveController {
                         httpStatus = HttpStatus.OK;
                     }
                 }
-
-
             }
             //3. check key có valid không (đã tồn tại trong db chưa)
             //
