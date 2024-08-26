@@ -492,6 +492,7 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
         }
     }
 
+
     @Override
     public int countBankAccountsByValidFeeToAndIsValidServiceWithSearch(Integer searchType, String value) {
         switch (searchType) {
@@ -540,26 +541,66 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
         }
     }
 
+    @Override
+    public List<BankAccountResponseDTO> getBankAccountsByAccountAndSorted(String keyword, int offset, int size) {
+        long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET; // Thời gian hiện tại (UTC+7)
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L; // 7 ngày sau
+        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByAccountAndSorted(keyword, currentTime, sevenDaysLater, offset, size);
+        return convertAndSanitize(accounts);
+    }
+
+    @Override
+    public List<BankAccountResponseDTO> getBankAccountsByAccountNameAndSorted(String keyword, int offset, int size) {
+        long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET; // Thời gian hiện tại (UTC+7)
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L; // 7 ngày sau
+        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByAccountNameAndSorted(keyword, currentTime, sevenDaysLater, offset, size);
+        return convertAndSanitize(accounts);
+    }
+
+    @Override
+    public List<BankAccountResponseDTO> getBankAccountsByPhoneAuthenticatedAndSorted(String keyword, int offset, int size) {
+        long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET; // Thời gian hiện tại (UTC+7)
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L; // 7 ngày sau
+        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByPhoneAuthenticatedAndSorted(keyword, currentTime, sevenDaysLater, offset, size);
+        return convertAndSanitize(accounts);
+    }
+
+    @Override
+    public List<BankAccountResponseDTO> getBankAccountsByNationalIdAndSorted(String keyword, int offset, int size) {
+        long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET; // Thời gian hiện tại (UTC+7)
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L; // 7 ngày sau
+        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByNationalIdAndSorted(keyword, currentTime, sevenDaysLater, offset, size);
+        return convertAndSanitize(accounts);
+    }
+
 
     @Override
     public List<BankAccountResponseDTO> getBankAccountsByNationalIds(String keyword, int offset, int size) {
-        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByNationalId(keyword, offset, size);
+        long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET; // Thời gian hiện tại (UTC+7)
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L; // 7 ngày sau
+        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByNationalIdAndSorted(keyword, currentTime, sevenDaysLater, offset, size);
         return convertAndSanitize(accounts);
     }
 
     @Override
     public List<BankAccountResponseDTO> getBankAccountsByPhoneAuthenticated(String keyword, int offset, int size) {
-        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByPhoneAuthenticated(keyword, offset, size);
+        long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET; // Thời gian hiện tại (UTC+7)
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L; // 7 ngày sau
+        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByPhoneAuthenticatedAndSorted(keyword, currentTime, sevenDaysLater, offset, size);
         return convertAndSanitize(accounts);
     }
     @Override
     public List<BankAccountResponseDTO> getBankAccountsByAccountNames(String keyword, int offset, int size) {
-        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByAccountName(keyword, offset, size);
+        long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET; // Thời gian hiện tại (UTC+7)
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L; // 7 ngày sau
+        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByAccountNameAndSorted(keyword, currentTime, sevenDaysLater, offset, size);
         return convertAndSanitize(accounts);
     }
     @Override
     public List<BankAccountResponseDTO> getBankAccountsByAccounts(String keyword, int offset, int size) {
-        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByAccount(keyword, offset, size);
+        long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET; // Thời gian hiện tại (UTC+7)
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L; // 7 ngày sau
+        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByAccountAndSorted(keyword, currentTime, sevenDaysLater, offset, size);
         return convertAndSanitize(accounts);
     }
 

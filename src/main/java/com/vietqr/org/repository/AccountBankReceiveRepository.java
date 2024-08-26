@@ -764,6 +764,70 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 
 	@Query(value = "SELECT COUNT(*) FROM account_bank_receive WHERE is_valid_service = false AND valid_fee_to IS NULL", nativeQuery = true)
 	int countNotRegisteredBankAccounts();
+	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
+			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, abr.time_create AS timeCreate, "
+			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "FROM account_bank_receive abr "
+			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
+			+ "INNER JOIN account_login al ON abr.user_id = al.id "
+			+ "WHERE abr.bank_account LIKE %:keyword% "
+			+ "ORDER BY CASE WHEN abr.is_valid_service =true and abr.valid_fee_from != 0  and abr.valid_fee_to != 0  and  abr.valid_fee_to < :currentTime THEN 1 "  // Quá hạn
+			+ "WHEN abr.valid_fee_to BETWEEN :currentTime AND :sevenDaysLater THEN 2 "  // Gần hết hạn
+			+ "WHEN abr.valid_fee_to > :sevenDaysLater THEN 3 "  // Còn hạn
+			+ "ELSE 4 END, abr.bank_account_name ASC "
+			+ "LIMIT :offset, :size", nativeQuery = true)
+	List<IBankAccountResponseDTO> getBankAccountsByAccountAndSorted(@Param("keyword") String keyword, @Param("currentTime") long currentTime, @Param("sevenDaysLater") long sevenDaysLater, @Param("offset") int offset, @Param("size") int size);
+
+
+	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
+			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, abr.time_create AS timeCreate, "
+			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "FROM account_bank_receive abr "
+			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
+			+ "INNER JOIN account_login al ON abr.user_id = al.id "
+			+ "WHERE abr.bank_account_name LIKE %:keyword% "
+			+ "ORDER BY CASE WHEN abr.is_valid_service =true and abr.valid_fee_from != 0  and abr.valid_fee_to != 0 and abr.valid_fee_to < :currentTime THEN 1 "  // Quá hạn
+			+ "WHEN abr.valid_fee_to BETWEEN :currentTime AND :sevenDaysLater THEN 2 "  // Gần hết hạn
+			+ "WHEN abr.valid_fee_to > :sevenDaysLater THEN 3 "  // Còn hạn
+			+ "ELSE 4 END, abr.bank_account_name ASC "
+			+ "LIMIT :offset, :size", nativeQuery = true)
+	List<IBankAccountResponseDTO> getBankAccountsByAccountNameAndSorted(@Param("keyword") String keyword, @Param("currentTime") long currentTime, @Param("sevenDaysLater") long sevenDaysLater, @Param("offset") int offset, @Param("size") int size);
+	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
+			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, abr.time_create AS timeCreate, "
+			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "FROM account_bank_receive abr "
+			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
+			+ "INNER JOIN account_login al ON abr.user_id = al.id "
+			+ "WHERE abr.phone_authenticated LIKE %:keyword% "
+			+ "ORDER BY CASE WHEN abr.is_valid_service =true and abr.valid_fee_from != 0  and abr.valid_fee_to != 0 and abr.valid_fee_to < :currentTime THEN 1 "  // Quá hạn
+			+ "WHEN abr.valid_fee_to BETWEEN :currentTime AND :sevenDaysLater THEN 2 "  // Gần hết hạn
+			+ "WHEN abr.valid_fee_to > :sevenDaysLater THEN 3 "  // Còn hạn
+			+ "ELSE 4 END, abr.bank_account_name ASC "
+			+ "LIMIT :offset, :size", nativeQuery = true)
+	List<IBankAccountResponseDTO> getBankAccountsByPhoneAuthenticatedAndSorted(@Param("keyword") String keyword, @Param("currentTime") long currentTime, @Param("sevenDaysLater") long sevenDaysLater, @Param("offset") int offset, @Param("size") int size);
+
+
+	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
+			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, abr.time_create AS timeCreate, "
+			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "FROM account_bank_receive abr "
+			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
+			+ "INNER JOIN account_login al ON abr.user_id = al.id "
+			+ "WHERE abr.national_id LIKE %:keyword% "
+			+ "ORDER BY CASE WHEN abr.is_valid_service = true and abr.valid_fee_from != 0  and abr.valid_fee_to < :currentTime THEN 1 "  // Quá hạn
+			+ "WHEN abr.valid_fee_to != 0 and abr.valid_fee_to BETWEEN :currentTime AND :sevenDaysLater THEN 2 "  // Gần hết hạn
+			+ "WHEN abr.valid_fee_to > :sevenDaysLater THEN 3 "  // Còn hạn
+			+ "ELSE 4 END, abr.bank_account_name ASC "
+			+ "LIMIT :offset, :size", nativeQuery = true)
+	List<IBankAccountResponseDTO> getBankAccountsByNationalIdAndSorted(@Param("keyword") String keyword, @Param("currentTime") long currentTime, @Param("sevenDaysLater") long sevenDaysLater, @Param("offset") int offset, @Param("size") int size);
 
 
 }
