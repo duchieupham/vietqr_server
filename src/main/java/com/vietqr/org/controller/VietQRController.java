@@ -12,7 +12,6 @@ import com.vietqr.org.dto.bidv.VietQRVaRequestDTO;
 import com.vietqr.org.dto.mb.VietQRStaticMMSRequestDTO;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.entity.bidv.CustomerInvoiceEntity;
-import com.vietqr.org.entity.bidv.CustomerVaEntity;
 import com.vietqr.org.service.*;
 import com.vietqr.org.service.bidv.CustomerInvoiceService;
 import com.vietqr.org.service.bidv.CustomerVaService;
@@ -517,7 +516,7 @@ public class VietQRController {
 					}
 					VietQRDTO vietQRDTO = new VietQRDTO();
 					try {
-						if (dto.getContent().length() <= 50) {
+						if (checkRequestBodyFlow1(dto)) {
 							// check if generate qr with transtype = D or C
 							// if D => generate with customer information
 							// if C => do normal
@@ -624,7 +623,7 @@ public class VietQRController {
 								httpStatus = HttpStatus.BAD_REQUEST;
 							}
 						} else {
-							result = new ResponseMessageDTO("FAILED", "E26");
+							result = new ResponseMessageDTO("FAILED", "E34");
 							httpStatus = HttpStatus.BAD_REQUEST;
 						}
 						return new ResponseEntity<>(result, httpStatus);
@@ -852,7 +851,7 @@ public class VietQRController {
 				}
 				VietQRDTO vietQRDTO = new VietQRDTO();
 				try {
-					if (dto.getContent().length() <= 50) {
+					if (checkRequestBodyFlow1(dto)) {
 						// check if generate qr with transtype = D or C
 						// if D => generate with customer information
 						// if C => do normal
@@ -1692,7 +1691,36 @@ public class VietQRController {
 					&& orderId.length() <= 13
 					&& dto.getAmount() != null && !dto.getBankAccount().trim().isEmpty()
 					&& dto.getBankAccount() != null && !dto.getBankAccount().trim().isEmpty()
-					&& dto.getBankCode() != null && dto.getBankCode().equals("MB")) {
+					&& dto.getBankCode() != null && dto.getBankCode().equals("MB")
+					&& StringUtil.isLatinAndNumeric(content)) {
+				result = true;
+			}
+		} catch (Exception e) {
+			logger.error("checkRequestBody: ERROR: " + e.toString());
+		}
+		return result;
+	}
+
+	private boolean checkRequestBodyFlow1(VietQRCreateCustomerDTO dto) {
+		boolean result = false;
+		try {
+			// content up to 19
+			// orderId up to 13
+			String content = "";
+			String orderId = "";
+			if (dto.getContent() != null) {
+				content = dto.getContent();
+			}
+			if (dto.getOrderId() != null) {
+				orderId = dto.getOrderId();
+			}
+			if (dto != null
+					&& content.length() <= 19
+					&& orderId.length() <= 13
+					&& dto.getAmount() != null && !dto.getBankAccount().trim().isEmpty()
+					&& dto.getBankAccount() != null && !dto.getBankAccount().trim().isEmpty()
+					&& !StringUtil.isNullOrEmpty(dto.getBankCode())
+					&& StringUtil.isLatinAndNumeric(content)) {
 				result = true;
 			}
 		} catch (Exception e) {
