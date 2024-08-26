@@ -1657,7 +1657,7 @@ public class AccountBankReceiveController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @GetMapping("account-bank/admin/confirm-active")
+    @PostMapping("account-bank/admin/confirm-active")
     public ResponseEntity<Object> confirmActiveBankAccount(
             @Valid @RequestBody AdminConfirmActiveDTO dto,
             @RequestHeader("Authorization") String token) {
