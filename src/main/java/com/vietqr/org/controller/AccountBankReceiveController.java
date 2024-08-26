@@ -71,6 +71,9 @@ public class AccountBankReceiveController {
     TerminalService terminalService;
 
     @Autowired
+    BankReceiveOtpService bankReceiveOtpService;
+
+    @Autowired
     BankTypeService bankTypeService;
 
     @Autowired
@@ -1552,6 +1555,222 @@ public class AccountBankReceiveController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @PostMapping("account-bank/admin/request-active")
+    public ResponseEntity<Object> requestActiveBankAccount(
+            @Valid @RequestBody AdminRequestActiveDTO dto,
+            @RequestHeader("Authorization") String token) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            logger.info("requestActiveBankReceive: request: " + dto.toString()
+                    + " at: " + System.currentTimeMillis());
+            //
+            //1. check password chính xác hay chưa
+            String checkSum = BankEncryptUtil.generateActiveKeyMD5Checksum(dto.getBankId(), dto.getKeyActive());
+            if (!dto.getCheckSum().equals(checkSum)) {
+                result = new ResponseMessageDTO("FAILED", "E39");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            } else {
+                //2. check bankId có tồn tại hay không và đã authenticated chưa (đã active chưa)
+                BankReceiveCheckDTO bankReceiveCheckDTO = accountBankReceiveService
+                        .checkBankReceiveActive(dto.getBankId());
+
+                if (bankReceiveCheckDTO == null) {
+                    result = new ResponseMessageDTO("FAILED", "E25");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                } else if (!bankReceiveCheckDTO.getAuthenticated()) {
+                    result = new ResponseMessageDTO("FAILED", "E101");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                } else {
+                    LocalDateTime time = LocalDateTime.now();
+                    long currentTime = time.toEpochSecond(ZoneOffset.UTC);
+                    //3. check key có valid không (đã tồn tại trong db chưa)
+                    KeyActiveBankReceiveDTO keyActiveEntity = keyActiveBankReceiveService.checkKeyExist(dto.getKeyActive());
+                    if (keyActiveEntity == null) {
+                        result = new ResponseMessageDTO("FAILED", "E127");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    } else if (!isKeyActive(dto.getKeyActive(), keyActiveEntity.getSecretKey(), keyActiveEntity.getDuration(),
+                            keyActiveEntity.getValueActive())) {
+                        result = new ResponseMessageDTO("FAILED", "E131");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    } else if (keyActiveEntity.getStatus() != 0) {
+                        result = new ResponseMessageDTO("FAILED", "E130");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    } else {
+                        String otp = RandomCodeUtil.generateOTP(4);
+                        KeyBankReceiveActiveDTO entity = accountBankReceiveService
+                                .getAccountBankKeyById(dto.getBankId());
+                        long validFeeFrom = entity.getValidFeeFrom();
+                        long validFeeTo = entity.getValidFeeTo();
+                        SystemSettingEntity systemSetting = systemSettingService.getSystemSetting();
+                        if (currentTime > systemSetting.getServiceActive()) {
+                            if (bankReceiveCheckDTO.getIsValidService()) {
+                                validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeTo, keyActiveEntity.getDuration());
+                            } else {
+                                validFeeFrom = currentTime;
+                                validFeeTo = DateTimeUtil.plusMonthAsLongInt(currentTime, keyActiveEntity.getDuration());
+                            }
+                        } else {
+                            if (bankReceiveCheckDTO.getIsValidService()) {
+                                validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeTo, keyActiveEntity.getDuration());
+                            } else {
+                                validFeeFrom = systemSetting.getServiceActive();
+                                validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeFrom, keyActiveEntity.getDuration());
+                            }
+                        }
+                        // save otp
+                        BankReceiveOtpEntity bankReceiveOTPEntity = bankReceiveOtpService
+                                .getBankReceiveOtpByKey(dto.getKeyActive(), dto.getBankId(), bankReceiveCheckDTO.getUserId());
+                        if (bankReceiveOTPEntity != null) {
+                            bankReceiveOTPEntity.setOtpToken(otp);
+                            bankReceiveOTPEntity.setExpiredDate(DateTimeUtil.plusMinuteAsLongInt(time, EnvironmentUtil.getMaximumExpiredMinutesOTP()));
+                        } else {
+                            bankReceiveOTPEntity = new BankReceiveOtpEntity();
+                            bankReceiveOTPEntity.setId(UUID.randomUUID().toString());
+                            bankReceiveOTPEntity.setBankId(dto.getBankId());
+                            bankReceiveOTPEntity.setUserId(bankReceiveCheckDTO.getUserId());
+                            bankReceiveOTPEntity.setOtpToken(otp);
+                            bankReceiveOTPEntity.setExpiredDate(DateTimeUtil.plusMinuteAsLongInt(time, EnvironmentUtil.getMaximumExpiredMinutesOTP()));
+                            bankReceiveOTPEntity.setStatus(0);
+                            bankReceiveOTPEntity.setKeyActive(keyActiveEntity.getKeyActive());
+                        }
+                        bankReceiveOtpService.insert(bankReceiveOTPEntity);
+
+                        // return response
+                        RequestActiveBankResponseDTO responseDTO = new RequestActiveBankResponseDTO();
+                        responseDTO.setKey(keyActiveEntity.getKeyActive());
+                        responseDTO.setOtp(otp);
+                        responseDTO.setDuration(keyActiveEntity.getDuration());
+                        responseDTO.setValidFrom(validFeeFrom);
+                        responseDTO.setValidTo(validFeeTo);
+
+                        result = new ResponseObjectDTO("SUCCESS", responseDTO);
+                        httpStatus = HttpStatus.OK;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("getAccountBankReceiveWps: ERROR: " + e.toString() + " at: " + System.currentTimeMillis());
+            result = new ResponseObjectDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("account-bank/admin/confirm-active")
+    public ResponseEntity<Object> confirmActiveBankAccount(
+            @Valid @RequestBody AdminConfirmActiveDTO dto,
+            @RequestHeader("Authorization") String token) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            logger.info("confirmActiveBankReceive: request: " + dto.toString() + " at: " + System.currentTimeMillis());
+            //
+            ObjectMapper mapper = new ObjectMapper();
+            String checkSum = BankEncryptUtil.generateConfirmKeyMD5Checksum(dto.getOtp(), dto.getKeyActive());
+            if (!checkSum.equals(dto.getCheckSum())) {
+                result = new ResponseMessageDTO("FAILED", "E39");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            } else {
+                //2. check bankId có tồn tại hay không và đã authenticated chưa (đã active chưa)
+                BankReceiveCheckDTO bankReceiveCheckDTO = accountBankReceiveService
+                        .checkBankReceiveActive(dto.getBankId());
+
+                if (bankReceiveCheckDTO == null) {
+                    result = new ResponseMessageDTO("FAILED", "E25");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                } else if (!bankReceiveCheckDTO.getAuthenticated()) {
+                    result = new ResponseMessageDTO("FAILED", "E101");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                } else if (!Objects.equals(bankReceiveCheckDTO.getUserId(), bankReceiveCheckDTO.getUserId())) {
+                    result = new ResponseMessageDTO("FAILED", "E126");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                } else {
+                    LocalDateTime time = LocalDateTime.now();
+                    long currentTime = time.toEpochSecond(ZoneOffset.UTC);
+                    BankReceiveOtpDTO bankReceiveOtpDTO = bankReceiveOtpService
+                            .checkBankReceiveOtp(bankReceiveCheckDTO.getUserId(), dto.getBankId(), dto.getOtp(), dto.getKeyActive());
+                    if (bankReceiveOtpDTO == null) {
+                        // otp sai hoặc ko tìm thấy key
+                        result = new ResponseMessageDTO("FAILED", "E128");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    } else if (currentTime > bankReceiveOtpDTO.getExpiredDate()) {
+                        result = new ResponseMessageDTO("FAILED", "E129");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    } else {
+                        KeyActiveBankReceiveDTO keyActiveEntity = keyActiveBankReceiveService
+                                .checkKeyExist(bankReceiveOtpDTO.getKeyActive());
+                        if (keyActiveEntity == null) {
+                            result = new ResponseMessageDTO("FAILED", "E127");
+                            httpStatus = HttpStatus.BAD_REQUEST;
+                        } else if (keyActiveEntity.getStatus() != 0) {
+                            result = new ResponseMessageDTO("FAILED", "E130");
+                            httpStatus = HttpStatus.BAD_REQUEST;
+                        } else if (!isKeyActive(bankReceiveOtpDTO.getKeyActive(), keyActiveEntity.getSecretKey(),
+                                keyActiveEntity.getDuration(), keyActiveEntity.getValueActive())) {
+                            result = new ResponseMessageDTO("FAILED", "E131");
+                            httpStatus = HttpStatus.BAD_REQUEST;
+                        } else {
+                            int newVersion = keyActiveEntity.getVersion() + 1;
+                            int isSuccess = keyActiveBankReceiveService
+                                    .updateActiveKey(bankReceiveOtpDTO.getKeyActive(), keyActiveEntity.getVersion(), newVersion);
+                            if (isSuccess == 1) {
+                                long validFeeFrom = bankReceiveCheckDTO.getValidFrom();
+                                long validFeeTo = bankReceiveCheckDTO.getValidTo();
+                                // update validFeeFrom, validFeeTo
+                                SystemSettingEntity systemSetting = systemSettingService.getSystemSetting();
+                                if (currentTime > systemSetting.getServiceActive()) {
+                                    if (bankReceiveCheckDTO.getIsValidService()) {
+                                        validFeeFrom = bankReceiveCheckDTO.getValidFrom();
+                                        validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeTo, keyActiveEntity.getDuration());
+                                    } else {
+                                        validFeeFrom = currentTime;
+                                        validFeeTo = DateTimeUtil.plusMonthAsLongInt(currentTime, keyActiveEntity.getDuration());
+                                    }
+                                } else {
+                                    if (bankReceiveCheckDTO.getIsValidService()) {
+                                        validFeeFrom = bankReceiveCheckDTO.getValidFrom();
+                                        validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeTo, keyActiveEntity.getDuration());
+                                    } else {
+                                        validFeeFrom = systemSetting.getServiceActive();
+                                        validFeeTo = DateTimeUtil.plusMonthAsLongInt(validFeeFrom, keyActiveEntity.getDuration());
+                                    }
+                                }
+                                // save history
+                                BankReceiveActiveHistoryEntity bankReceiveActiveHistoryEntity = new BankReceiveActiveHistoryEntity();
+                                bankReceiveActiveHistoryEntity.setId(UUID.randomUUID().toString());
+                                bankReceiveActiveHistoryEntity.setKeyId(bankReceiveOtpDTO.getId());
+                                bankReceiveActiveHistoryEntity.setType(0);
+                                bankReceiveActiveHistoryEntity.setKeyActive(bankReceiveOtpDTO.getKeyActive());
+                                bankReceiveActiveHistoryEntity.setBankId(dto.getBankId());
+                                bankReceiveActiveHistoryEntity.setUserId(bankReceiveCheckDTO.getUserId());
+                                bankReceiveActiveHistoryEntity.setCreateAt(currentTime);
+                                bankReceiveActiveHistoryEntity.setValidFeeFrom(validFeeFrom);
+                                bankReceiveActiveHistoryEntity.setValidFeeTo(validFeeTo);
+                                bankReceiveActiveHistoryEntity.setData(mapper.writeValueAsString(dto));
+                                bankReceiveActiveHistoryEntity.setRefId("");
+
+                                bankReceiveOtpService.updateStatusBankReceiveOtp(bankReceiveOtpDTO.getId(), 1);
+                                bankReceiveActiveHistoryService.insert(bankReceiveActiveHistoryEntity);
+                                accountBankReceiveService.updateActiveBankReceive(dto.getBankId(), validFeeFrom, validFeeTo);
+                                result = new ResponseMessageDTO("SUCCESS", "");
+                                httpStatus = HttpStatus.OK;
+                            } else {
+                                result = new ResponseMessageDTO("FAILED", "E130");
+                                httpStatus = HttpStatus.BAD_REQUEST;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("getAccountBankReceiveWps: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @DeleteMapping("account-bank")
     public ResponseEntity<ResponseMessageDTO> deleteAccountBank(@Valid @RequestBody BankAccountRemoveDTO dto) {
         ResponseMessageDTO result = null;
@@ -2261,5 +2480,8 @@ public class AccountBankReceiveController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-
+    private boolean isKeyActive(String keyActive, String secretKey, int duration, String valueActive) {
+        String data = BcryptKeyUtil.hashKeyActive(keyActive, secretKey, duration);
+        return data.equals(valueActive);
+    }
 }

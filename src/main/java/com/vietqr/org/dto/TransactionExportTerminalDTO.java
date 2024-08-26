@@ -16,6 +16,7 @@ public class TransactionExportTerminalDTO {
     private String note;
     private String referenceNumber;
     private String orderId;
+    private String subCode;
     private String terminalCode;
     private String terminalName;
     private String terminalAddress;
@@ -174,5 +175,13 @@ public class TransactionExportTerminalDTO {
 
     public void setHiddenAmount(boolean hiddenAmount) {
         this.hiddenAmount = hiddenAmount;
+    }
+
+    public String getSubCode() {
+        return subCode;
+    }
+
+    public void setSubCode(String subCode) {
+        this.subCode = subCode;
     }
 }

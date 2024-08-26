@@ -167,7 +167,8 @@ public class TidInternalSubscriber {
             logger.error("Error handling QR request: " + e.getMessage());
         }
     }
-    @MqttTopicHandler(topic = "vietqr/request/status/#") // Xử lý yêu cầu trạng thái giao dịch
+
+    @MqttTopicHandler(topic = "vietqr/request-status/#") // Xử lý yêu cầu trạng thái giao dịch
     public void handleTransactionStatus(String topic, MqttMessage message) {
         try {
             // Chuyển payload sang TransactionCheckOrderInputDTO
@@ -180,7 +181,7 @@ public class TidInternalSubscriber {
             String responsePayload = mapper.writeValueAsString(result);
 
             // Xác định topic phản hồi
-            String responseTopic = topic.replace("request", "response");
+            String responseTopic = topic.replace("request-status", "response-status");
 
             // Gửi phản hồi lên đúng topic
             mqttListenerService.publishMessageToCommonTopic(responseTopic, responsePayload);
@@ -190,6 +191,31 @@ public class TidInternalSubscriber {
             logger.error("Error handling transaction status request: " + e.getMessage());
         }
     }
+
+    @MqttTopicHandler(topic = "vietqr/request-status/#") // Xử lý yêu cầu trạng thái giao dịch
+    public void handleTransactionStatusV2(String topic, MqttMessage message) {
+        try {
+            // Chuyển payload sang TransactionCheckOrderInputDTO
+            String payload = new String(message.getPayload());
+            ObjectMapper mapper = new ObjectMapper();
+            TransactionCheckOrderInputDTO dto = mapper.readValue(payload, TransactionCheckOrderInputDTO.class);
+
+            // Xử lý yêu cầu và tạo phản hồi
+            Object result = handleTransactionStatusRequest(dto);
+            String responsePayload = mapper.writeValueAsString(result);
+
+            // Xác định topic phản hồi
+            String responseTopic = topic.replace("request-status", "response-status");
+
+            // Gửi phản hồi lên đúng topic
+            mqttListenerService.publishMessageToCommonTopic(responseTopic, responsePayload);
+            logger.info("Response sent to topic: " + responseTopic + " Payload: " + responsePayload);
+
+        } catch (Exception e) {
+            logger.error("Error handling transaction status request: " + e.getMessage());
+        }
+    }
+
     public Object handleTransactionStatusRequest(TransactionCheckOrderInputDTO dto) {
         Object result = null;
         try {

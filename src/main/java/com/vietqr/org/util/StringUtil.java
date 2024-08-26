@@ -9,7 +9,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vietqr.org.dto.BoxEnvironmentResDTO;
 import com.vietqr.org.dto.BoxEnvironmentVarDTO;
 import org.apache.log4j.Logger;
 
@@ -45,6 +44,16 @@ public class StringUtil {
             logger.error("findHashtags: ERROR: " + e.toString());
         }
         return hashtags;
+    }
+
+    public static boolean isLatinAndNumeric(String input) {
+        boolean result = false;
+        try {
+            result = !isNullOrEmpty(input) && input.matches("[a-zA-Z0-9]*");
+        } catch (Exception e) {
+            logger.error("isLatinAlphabet: ERROR: " + e.toString());
+        }
+        return result;
     }
 
     public static String getValueNullChecker(String value) {
