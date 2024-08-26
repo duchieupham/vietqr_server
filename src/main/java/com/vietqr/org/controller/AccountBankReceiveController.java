@@ -1667,7 +1667,7 @@ public class AccountBankReceiveController {
             logger.info("confirmActiveBankReceive: request: " + dto.toString() + " at: " + System.currentTimeMillis());
             //
             ObjectMapper mapper = new ObjectMapper();
-            String checkSum = BankEncryptUtil.generateActiveKeyMD5Checksum(dto.getOtp(), dto.getKeyActive());
+            String checkSum = BankEncryptUtil.generateConfirmKeyMD5Checksum(dto.getOtp(), dto.getKeyActive());
             if (!checkSum.equals(dto.getCheckSum())) {
                 result = new ResponseMessageDTO("FAILED", "E39");
                 httpStatus = HttpStatus.BAD_REQUEST;
