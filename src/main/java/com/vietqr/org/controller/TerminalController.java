@@ -510,6 +510,7 @@ public class TerminalController {
                         dto.setContent(item.getContent() != null ? item.getContent() : "-");
                         dto.setReferenceNumber(item.getReferenceNumber() != null && !item.getReferenceNumber().isEmpty() ? item.getReferenceNumber() : "-");
                         dto.setOrderId(item.getOrderId() != null && !item.getOrderId().isEmpty() ? item.getOrderId() : "-");
+                        dto.setSubCode(item.getSubCode() != null && !item.getSubCode().isEmpty() ? item.getSubCode() : "-");
                         dto.setTerminalCode(item.getTerminalCode() != null && !item.getTerminalCode().isEmpty() ? item.getTerminalCode() : "-");
                         dto.setTime(DateTimeUtil.getDateStringBaseLong(item.getTime()));
                         dto.setTimePaid(DateTimeUtil.getDateStringBaseLong(item.getTimePaid()));
@@ -548,6 +549,7 @@ public class TerminalController {
                             dto.setContent(item.getContent() != null ? item.getContent() : "-");
                             dto.setReferenceNumber(item.getReferenceNumber() != null && !item.getReferenceNumber().isEmpty() ? item.getReferenceNumber() : "-");
                             dto.setOrderId(item.getOrderId() != null && !item.getOrderId().isEmpty() ? item.getOrderId() : "-");
+                            dto.setSubCode(item.getSubCode() != null && !item.getSubCode().isEmpty() ? item.getSubCode() : "-");
                             dto.setTerminalCode(item.getTerminalCode() != null && !item.getTerminalCode().isEmpty() ? item.getTerminalCode() : "-");
                             dto.setTime(DateTimeUtil.getDateStringBaseLong(item.getTime()));
                             dto.setTimePaid(DateTimeUtil.getDateStringBaseLong(item.getTimePaid()));
@@ -588,6 +590,7 @@ public class TerminalController {
                                         dto.setContent(item.getContent() != null ? item.getContent() : "-");
                                         dto.setReferenceNumber(item.getReferenceNumber() != null && !item.getReferenceNumber().isEmpty() ? item.getReferenceNumber() : "-");
                                         dto.setOrderId(item.getOrderId() != null && !item.getOrderId().isEmpty() ? item.getOrderId() : "-");
+                                        dto.setSubCode(item.getSubCode() != null && !item.getSubCode().isEmpty() ? item.getSubCode() : "-");
                                         dto.setTerminalCode(item.getTerminalCode() != null && !item.getTerminalCode().isEmpty() ? item.getTerminalCode() : "-");
                                         dto.setTime(DateTimeUtil.getDateStringBaseLong(item.getTime()));
                                         dto.setTimePaid(DateTimeUtil.getDateStringBaseLong(item.getTimePaid()));
@@ -620,6 +623,7 @@ public class TerminalController {
                                     dto.setContent(item.getContent() != null ? item.getContent() : "-");
                                     dto.setReferenceNumber(item.getReferenceNumber() != null && !item.getReferenceNumber().isEmpty() ? item.getReferenceNumber() : "-");
                                     dto.setOrderId(item.getOrderId() != null && !item.getOrderId().isEmpty() ? item.getOrderId() : "-");
+                                    dto.setSubCode(item.getSubCode() != null && !item.getSubCode().isEmpty() ? item.getSubCode() : "-");
                                     dto.setTerminalCode(item.getTerminalCode() != null && !item.getTerminalCode().isEmpty() ? item.getTerminalCode() : "-");
                                     dto.setTime(DateTimeUtil.getDateStringBaseLong(item.getTime()));
                                     dto.setTimePaid(DateTimeUtil.getDateStringBaseLong(item.getTimePaid()));
@@ -651,7 +655,7 @@ public class TerminalController {
                 // Tạo hàng tiêu đề
                 Row headerRow = sheet.createRow(0);
                 String[] headers = {"STT", "Thời gian TT", "Số tiền (VND)", "Loại", "Trạng thái", "Mã giao dịch", "Mã đơn hàng",
-                        "Cửa hàng", "Tài khoản nhận", "Thời gian tạo", "Nội dung TT", "Ghi chú", "Loại giao dịch"};
+                        "Mã điểm bán", "Cửa hàng", "Tài khoản nhận", "Thời gian tạo", "Nội dung TT", "Ghi chú", "Loại giao dịch"};
 
                 XSSFCellStyle style = workbook.getXSSFWorkbook().createCellStyle();
                 XSSFCellStyle styleCommon = workbook.getXSSFWorkbook().createCellStyle();
@@ -717,13 +721,16 @@ public class TerminalController {
                     row.createCell(4).setCellValue(item.getStatus());
                     row.createCell(5).setCellValue(item.getReferenceNumber());
                     row.createCell(6).setCellValue(item.getOrderId());
-                    row.createCell(7).setCellValue(item.getTerminalName());
-                    row.createCell(8).setCellValue(item.getBankAccount() + " - " + item.getBankShortName());
-                    row.createCell(9).setCellValue(item.getTime());
-                    row.createCell(10).setCellValue(item.getContent());
-                    row.createCell(11).setCellValue(item.getNote());
-                    row.createCell(12).setCellValue(item.getType());
-                    for (int i = 0; i < 13; i++) {
+                    row.createCell(7).setCellValue(item.getSubCode());
+                    row.createCell(8).setCellValue(item.getTerminalName());
+                    row.createCell(9).setCellValue(item.getBankAccount() + " - " + item.getBankShortName());
+                    row.createCell(10).setCellValue(item.getTime());
+                    row.createCell(11).setCellValue(item.getContent());
+                    row.createCell(12).setCellValue(item.getNote());
+                    row.createCell(13).setCellValue(item.getType());
+
+
+                    for (int i = 0; i < 14; i++) {
                         row.getCell(i).setCellStyle(styleCommon);
                         if (i == 2) {
                             if (item.isHiddenAmount()) {
@@ -742,26 +749,28 @@ public class TerminalController {
                 sheet.setColumnWidth(4, 20 * WIDTH_PIXEL);
                 sheet.setColumnWidth(5, 21 * WIDTH_PIXEL);
                 sheet.setColumnWidth(6, 17 * WIDTH_PIXEL);
-                sheet.setColumnWidth(7, 35 * WIDTH_PIXEL);
-                sheet.setColumnWidth(8, 24 * WIDTH_PIXEL);
-                sheet.setColumnWidth(9, 22 * WIDTH_PIXEL);
-                sheet.setColumnWidth(10, 40 * WIDTH_PIXEL);
-                sheet.setColumnWidth(11, 20 * WIDTH_PIXEL);
-                sheet.setColumnWidth(12, 15 * WIDTH_PIXEL);
+                sheet.setColumnWidth(7, 20 * WIDTH_PIXEL);
+                sheet.setColumnWidth(8, 35 * WIDTH_PIXEL);
+                sheet.setColumnWidth(9, 24 * WIDTH_PIXEL);
+                sheet.setColumnWidth(10, 22 * WIDTH_PIXEL);
+                sheet.setColumnWidth(11, 40 * WIDTH_PIXEL);
+                sheet.setColumnWidth(12, 20 * WIDTH_PIXEL);
+                sheet.setColumnWidth(13, 15 * WIDTH_PIXEL);
                 sheet.setDefaultRowHeightInPoints(17);
 
-                // Tạo một mảng byte từ workbook
+
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 workbook.write(outputStream);
                 byte[] fileContent = outputStream.toByteArray();
                 String name = "DanhSachGiaoDich_" + DateTimeUtil.getCurrentDateTimeAsString() + ".xlsx";
-                // Thiết lập các thông số của response
+
+
                 response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
                 response.setHeader("Content-Disposition", "attachment; filename=" + name);
                 response.setContentLength(fileContent.length);
 
-                // Ghi dữ liệu vào response
                 response.getOutputStream().write(fileContent);
+
             }
 
             response.getOutputStream().flush();
