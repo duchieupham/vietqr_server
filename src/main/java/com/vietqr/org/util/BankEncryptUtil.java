@@ -47,6 +47,42 @@ public class BankEncryptUtil {
         return result;
     }
 
+    public static String generateActiveKeyMD5Checksum(String bankId, String keyActive) {
+        String result = "";
+        try {
+            String plainText = VIET_QR_KEY_CHECKSUM + bankId + keyActive;
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(plainText.getBytes());
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b & 0xff));
+            }
+            result = sb.toString();
+        } catch (Exception e) {
+            logger.error("generateMD5Checksum ERROR: " + e.toString());
+        }
+        return result;
+    }
+
+    public static String generateConfirmKeyMD5Checksum(String otp, String keyActive) {
+        String result = "";
+        try {
+            String plainText = VIET_QR_KEY_CHECKSUM + otp + keyActive;
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(plainText.getBytes());
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b & 0xff));
+            }
+            result = sb.toString();
+        } catch (Exception e) {
+            logger.error("generateMD5Checksum ERROR: " + e.toString());
+        }
+        return result;
+    }
+
     public static String generateIdempotencyKey(String referenceNumber, String bankAccount) {
         String result = "";
         try {
