@@ -102,7 +102,7 @@ public class FirebaseMessagingService {
 		if (fcmTokens != null && !fcmTokens.isEmpty()) {
 			for (FcmTokenEntity fcmToken : fcmTokens) {
 				try {
-					if (!fcmToken.getToken().trim().isEmpty()) {
+					if (fcmToken.getToken() != null && !fcmToken.getToken().trim().isEmpty()) {
 						FcmRequestDTO fcmDTO = new FcmRequestDTO();
 						fcmDTO.setTitle(title);
 						fcmDTO.setMessage(message);
