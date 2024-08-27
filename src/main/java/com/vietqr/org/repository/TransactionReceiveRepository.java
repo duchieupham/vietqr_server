@@ -2339,7 +2339,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
 
     @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, a.bank_account AS bankAccount, "
             + "a.content AS content, a.time AS time, a.time_paid AS timePaid, a.status AS status, "
-            + "a.type AS type, d.bank_name AS bankName, d.bank_short_name AS bankShortName, "
+            + "a.type AS type, d.bank_name AS bankName, d.bank_short_name AS bankShortName, a.sub_code AS subCode, "
             + "d.bank_code AS bankCode, a.note AS note, a.reference_number AS referenceNumber, "
             + "a.order_id AS orderId, a.terminal_code AS terminalCode, a.trans_type AS transType "
             + "FROM transaction_receive a "
