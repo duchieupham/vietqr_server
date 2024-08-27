@@ -424,5 +424,85 @@ public class InvoiceServiceImpl implements InvoiceService {
         return repo.countAllInvoices();
     }
 
+    @Override
+    public List<IAdminInvoiceDTO> getAllInvoicesByInvoiceNumber(int dataType, String value, int offset, int size) {
+        return repo.getAllInvoicesByInvoiceNumber(dataType, value, offset, size);
+    }
+
+    @Override
+    public int countAllInvoicesByInvoiceNumber(int dataType, String value) {
+        return repo.countAllInvoicesByInvoiceNumber(dataType, value);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getInvoiceByInvoiceNumber(int dataType, String value, int offset, int size, String time) {
+        return repo.getInvoiceByInvoiceNumber(dataType, value, offset, size, time);
+    }
+
+    @Override
+    public int countInvoiceByInvoiceNumber(int dataType, String value, String time) {
+        return repo.countInvoiceByInvoiceNumber(dataType, value, time);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getAllInvoicesByBankAccount(int dataType, String value, int offset, int size) {
+        return repo.getAllInvoicesByBankAccount(dataType, value, offset, size);
+    }
+
+    @Override
+    public int countAllInvoicesByBankAccount(int dataType, String value) {
+        return repo.countAllInvoicesByBankAccount(dataType, value);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getInvoiceByBankAccount(int dataType, String value, int offset, int size, String time) {
+        return repo.getInvoiceByBankAccount(dataType, value, offset, size, time);
+    }
+
+    @Override
+    public int countInvoiceByBankAccount(int dataType, String value, String time) {
+        return repo.countInvoiceByBankAccount(dataType, value, time);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getAllInvoicesByPhoneNo(int dataType, String value, int offset, int size) {
+        return repo.getAllInvoicesByPhoneNo(dataType, value, offset, size);
+    }
+
+    @Override
+    public int countAllInvoicesByPhoneNo(int dataType, String value) {
+        return repo.countAllInvoicesByPhoneNo(dataType, value);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getInvoiceByPhoneNo(int dataType, String value, int offset, int size, String time) {
+        return repo.getInvoiceByPhoneNo(dataType, value, offset, size, time);
+    }
+
+    @Override
+    public int countInvoiceByPhoneNo(int dataType, String value, String time) {
+        return repo.countInvoiceByPhoneNo(dataType, value, time);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getAllInvoicesByMerchantId(int dataType, String value, int offset, int size) {
+        return repo.getAllInvoicesByMerchantId(dataType, value, offset, size);
+    }
+
+    @Override
+    public int countAllInvoicesByMerchantId(int dataType, String value) {
+        return repo.countAllInvoicesByMerchantId(dataType, value);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getInvoiceByMerchantId(int dataType, String value, int offset, int size, String time) {
+        return repo.getInvoiceByMerchantId(dataType, value, offset, size, time);
+    }
+
+    @Override
+    public int countInvoiceByMerchantId(int dataType, String value, String time) {
+        return repo.countInvoiceByMerchantId(dataType, value, time);
+    }
+
 
 }

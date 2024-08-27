@@ -133,5 +133,40 @@ public interface InvoiceService {
     int countAllInvoicesByVsoCode(String value);
     List<IAdminInvoiceDTO> getAllInvoices(int offset, int size);
     int countAllInvoices();
+    List<IAdminInvoiceDTO> getAllInvoicesByInvoiceNumber(int dataType, String value, int offset, int size);
 
+    int countAllInvoicesByInvoiceNumber(int dataType, String value);
+
+    List<IAdminInvoiceDTO> getInvoiceByInvoiceNumber(int dataType, String value,
+                                                     int offset, int size, String time);
+
+    int countInvoiceByInvoiceNumber(int dataType, String value, String time);
+
+    List<IAdminInvoiceDTO> getAllInvoicesByBankAccount(int dataType, String value,
+                                                       int offset, int size);
+
+    int countAllInvoicesByBankAccount(int dataType, String value);
+
+    List<IAdminInvoiceDTO> getInvoiceByBankAccount(int dataType, String value,
+                                                   int offset, int size, String time);
+
+    int countInvoiceByBankAccount(int dataType, String value, String time);
+
+    List<IAdminInvoiceDTO> getAllInvoicesByPhoneNo(int dataType, String value, int offset, int size);
+
+    int countAllInvoicesByPhoneNo(int dataType, String value);
+
+    List<IAdminInvoiceDTO> getInvoiceByPhoneNo(int dataType, String value,
+                                               int offset, int size, String time);
+
+    int countInvoiceByPhoneNo(int dataType, String value, String time);
+
+    List<IAdminInvoiceDTO> getAllInvoicesByMerchantId(int dataType, String value, int offset, int size);
+
+    int countAllInvoicesByMerchantId(int dataType, String value);
+
+    List<IAdminInvoiceDTO> getInvoiceByMerchantId(int dataType, String value,
+                                                  int offset, int size, String time);
+
+    int countInvoiceByMerchantId(int dataType, String value, String time);
 }
