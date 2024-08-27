@@ -53,7 +53,7 @@ public class StringUtil {
         } catch (Exception e) {
             logger.error("isLatinAlphabet: ERROR: " + e.toString());
         }
-        return result;
+        return true;
     }
 
     public static String getValueNullChecker(String value) {
