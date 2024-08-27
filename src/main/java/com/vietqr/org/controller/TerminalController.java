@@ -722,7 +722,11 @@ public class TerminalController {
                     row.createCell(5).setCellValue(item.getReferenceNumber());
                     row.createCell(6).setCellValue(item.getOrderId());
                     row.createCell(7).setCellValue(item.getSubCode());
-                    row.createCell(8).setCellValue(item.getTerminalName());
+                    if ("-".equals(item.getTerminalName())) {
+                        row.createCell(8).setCellValue(item.getTerminalCode());
+                    } else {
+                        row.createCell(8).setCellValue(item.getTerminalName());
+                    }
                     row.createCell(9).setCellValue(item.getBankAccount() + " - " + item.getBankShortName());
                     row.createCell(10).setCellValue(item.getTime());
                     row.createCell(11).setCellValue(item.getContent());
