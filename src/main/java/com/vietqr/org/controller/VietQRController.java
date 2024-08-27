@@ -375,7 +375,7 @@ public class VietQRController {
 				vietQRDTO.setBankName(bankTypeEntity.getBankName());
 				vietQRDTO.setBankAccount(dto.getBankAccount());
 				vietQRDTO.setUserBankName(dto.getUserBankName().toUpperCase());
-				vietQRDTO.setAmount(amount);
+				vietQRDTO.setAmount(StringUtil.formatNumberAsString(amount));
 				vietQRDTO.setContent(content);
 				vietQRDTO.setQrCode(qr);
 				vietQRDTO.setImgId(bankTypeEntity.getImgId());

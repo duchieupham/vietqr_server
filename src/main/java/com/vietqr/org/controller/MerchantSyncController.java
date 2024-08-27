@@ -194,6 +194,7 @@ public class MerchantSyncController {
                     entity.setPhoneNo(dto.getPhoneNo());
                     entity.setAddress(dto.getAddress());
                     entity.setWebhook(dto.getWebhook());
+                    entity.setIsActive(true);
                     entity.setCareer(dto.getCareer());
                     CustomerSyncEntity customerSyncEntity = customerSyncService.getCustomerSyncById(entity.getId());
                     BankReceiveConnectionEntity bankReceiveConnectionEntity = new BankReceiveConnectionEntity();
@@ -201,11 +202,14 @@ public class MerchantSyncController {
                     if (accountBankReceiveEntity.isMmsActive()) {
                         TerminalBankEntity terminalBankEntity = terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
                         bankReceiveConnectionEntity.setTerminalBankId(Objects.nonNull(terminalBankEntity) ? terminalBankEntity.getId() : "");
+                    } else {
+                        bankReceiveConnectionEntity.setTerminalBankId("");
                     }
                     bankReceiveConnectionEntity.setActive(true);
                     bankReceiveConnectionEntity.setMidConnectId("");
                     bankReceiveConnectionEntity.setBankId(accountBankReceiveEntity.getId());
                     bankReceiveConnectionEntity.setData("[]");
+                    bankReceiveConnectionEntity.setMid(entity.getId());
                     bankReceiveConnectionService.insert(bankReceiveConnectionEntity);
                     merchantSyncService.insert(entity);
                     result = new ResponseMessageDTO("SUCCESS", "");

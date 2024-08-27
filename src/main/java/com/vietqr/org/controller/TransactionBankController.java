@@ -5946,6 +5946,7 @@ public class TransactionBankController {
                 transactionBankCustomerDTO.setValueDate(dto.getValueDate());
                 transactionBankCustomerDTO.setSign(sign);
                 transactionBankCustomerDTO.setOrderId(orderId);
+                transactionBankCustomerDTO.setServiceCode("");
                 if (!StringUtil.isNullOrEmpty(rawTerminalCode)) {
                     transactionBankCustomerDTO.setTerminalCode(rawTerminalCode);
                 } else {

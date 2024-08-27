@@ -2572,8 +2572,8 @@ public class TransactionMMSController {
                 ClientResponse response = responseMono.block();
 
                 String json = response.bodyToMono(String.class).block();
-                System.out.println("refundFromMB: RESPONSE: " + json);
-                logger.info("refundFromMB: RESPONSE: " + json);
+                System.out.println("refundFromMB: RESPONSE: " + json + " FT Code: " + ftCode);
+                logger.info("refundFromMB: RESPONSE: " + json + " FT Code: " + ftCode);
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode rootNode = objectMapper.readTree(json);
                 if (rootNode.get("errorCode") != null) {
