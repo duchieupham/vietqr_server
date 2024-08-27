@@ -516,7 +516,7 @@ public class VietQRController {
 					}
 					VietQRDTO vietQRDTO = new VietQRDTO();
 					try {
-						if (checkRequestBodyFlow1(dto)) {
+						if (dto.getContent().length() <= 50) {
 							// check if generate qr with transtype = D or C
 							// if D => generate with customer information
 							// if C => do normal
@@ -623,7 +623,7 @@ public class VietQRController {
 								httpStatus = HttpStatus.BAD_REQUEST;
 							}
 						} else {
-							result = new ResponseMessageDTO("FAILED", "E34");
+							result = new ResponseMessageDTO("FAILED", "E26");
 							httpStatus = HttpStatus.BAD_REQUEST;
 						}
 						return new ResponseEntity<>(result, httpStatus);
@@ -851,7 +851,7 @@ public class VietQRController {
 				}
 				VietQRDTO vietQRDTO = new VietQRDTO();
 				try {
-					if (checkRequestBodyFlow1(dto)) {
+					if (dto.getContent().length() <= 50) {
 						// check if generate qr with transtype = D or C
 						// if D => generate with customer information
 						// if C => do normal
