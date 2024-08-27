@@ -216,6 +216,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "WHEN b.is_sync = true AND b.mms_active = false THEN 1  "
 			+ "WHEN b.is_sync = true AND b.mms_active = true THEN 2  "
 			+ "WHEN b.is_sync = false AND b.mms_active = true THEN 2  "
+			+ "WHEN b.is_sync = false AND b.mms_active = false THEN 1  "
 			+ "END AS flow, "
 			+ "d.service_fee_id AS serviceFeeId, d.short_name as serviceFeeName, "
 			+ "e.address AS address "
