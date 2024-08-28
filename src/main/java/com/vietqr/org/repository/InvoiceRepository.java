@@ -149,7 +149,6 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "AND a.name LIKE %:value% AND a.time_created BETWEEN :fromDate AND :toDate ", nativeQuery = true)
     int countInvoiceUnpaid(String value, long fromDate, long toDate, String userId);
 
-
     @Query(value = "SELECT COUNT(a.id) "
             + "FROM invoice a "
             + "INNER JOIN account_login c ON c.id = a.user_id "
@@ -484,6 +483,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "WHERE JSON_EXTRACT(a.data, '$.bankAccount') LIKE %:value% "
            , nativeQuery = true)
     int countAllInvoicesByBankAccount(@Param("value") String value);
+
     @Query(value = "SELECT a.id AS invoiceId, "
             + "a.time_paid AS timePaid, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.vso')), '') AS vso, b.name AS midName, "
             + "a.data AS data, a.amount AS amountNoVat, a.vat AS vat, a.vat_amount AS vatAmount, "
@@ -495,6 +495,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "WHERE c.phone_no LIKE %:value% "
             + "LIMIT :offset, :size ", nativeQuery = true)
     List<IAdminInvoiceDTO> getAllInvoicesByPhoneNo(@Param("value") String value, @Param("offset") int offset, @Param("size") int size);
+
     @Query(value = "SELECT COUNT(a.id) "
             + "FROM invoice a "
             + "INNER JOIN account_login c ON c.id = a.user_id "
@@ -583,4 +584,173 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "INNER JOIN account_login c ON c.id = a.user_id "
             + "LEFT JOIN merchant_sync b ON a.merchant_id = b.id", nativeQuery = true)
     int countAllInvoices();
+
+    @Query(value = "SELECT a.id AS invoiceId, "
+            + "a.time_paid AS timePaid, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.vso')), '') AS vso, b.name AS midName, "
+            + "a.data AS data, a.amount AS amountNoVat, a.vat AS vat, a.vat_amount AS vatAmount, "
+            + "a.total_amount AS amount, a.invoice_id AS billNumber, a.name AS invoiceName, "
+            + "c.phone_no AS phoneNo, c.email AS email, a.time_created AS timeCreated, a.status AS status "
+            + "FROM invoice a "
+            + "INNER JOIN account_login c ON c.id = a.user_id "
+            + "LEFT JOIN merchant_sync b ON a.merchant_id = b.id "
+            + "WHERE a.invoice_id LIKE %:value% AND a.data_type = :dataType "
+            + "LIMIT :offset, :size ", nativeQuery = true)
+    List<IAdminInvoiceDTO> getAllInvoicesByInvoiceNumber(int dataType, String value, int offset, int size);
+
+    @Query(value = "SELECT COUNT(a.id) "
+            + "FROM invoice a "
+            + "INNER JOIN account_login c ON c.id = a.user_id "
+            + "WHERE a.invoice_id LIKE %:value% AND a.data_type = :dataType "
+            , nativeQuery = true)
+    int countAllInvoicesByInvoiceNumber(int dataType, String value);
+
+    @Query(value = "SELECT a.id AS invoiceId, "
+            + "a.time_paid AS timePaid, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.vso')), '') AS vso, b.name AS midName, "
+            + "a.data AS data, a.amount AS amountNoVat, a.vat AS vat, a.vat_amount AS vatAmount, "
+            + "a.total_amount AS amount, a.invoice_id AS billNumber, a.name AS invoiceName, "
+            + "c.phone_no AS phoneNo, c.email AS email, a.time_created AS timeCreated, a.status AS status "
+            + "FROM invoice a "
+            + "INNER JOIN account_login c ON c.id = a.user_id "
+            + "LEFT JOIN merchant_sync b ON a.merchant_id = b.id "
+            + "WHERE a.invoice_id LIKE %:value% AND a.data_type = :dataType "
+            + "AND a.time_created BETWEEN :fromDate AND :toDate "
+            + "ORDER BY a.time_created DESC "
+            + "LIMIT :offset, :size ", nativeQuery = true)
+    List<IAdminInvoiceDTO> getInvoiceByInvoiceNumber(int dataType, String value, int offset, int size, long fromDate, long toDate);
+
+    @Query(value = "SELECT COUNT(a.id) "
+            + "FROM invoice a "
+            + "INNER JOIN account_login c ON c.id = a.user_id "
+            + "LEFT JOIN merchant_sync b ON a.merchant_id = b.id "
+            + "WHERE a.invoice_id LIKE %:value% AND a.data_type = :dataType "
+            + "AND a.time_created BETWEEN :fromDate AND :toDate ", nativeQuery = true)
+    int countInvoiceByInvoiceNumber(int dataType, String value, long fromDate, long toDate);
+
+    @Query(value = "SELECT a.id AS invoiceId, "
+            + "a.time_paid AS timePaid, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.vso')), '') AS vso, b.name AS midName, "
+            + "a.data AS data, a.amount AS amountNoVat, a.vat AS vat, a.vat_amount AS vatAmount, "
+            + "a.total_amount AS amount, a.invoice_id AS billNumber, a.name AS invoiceName, "
+            + "c.phone_no AS phoneNo, c.email AS email, a.time_created AS timeCreated, a.status AS status "
+            + "FROM invoice a "
+            + "INNER JOIN account_login c ON c.id = a.user_id "
+            + "LEFT JOIN merchant_sync b ON a.merchant_id = b.id "
+            + "WHERE JSON_EXTRACT(a.data, '$.bankAccount') LIKE %:value% AND a.data_type = :dataType "
+            + "LIMIT :offset, :size ", nativeQuery = true)
+    List<IAdminInvoiceDTO> getAllInvoicesByBankAccount(int dataType, String value, int offset, int size);
+
+    @Query(value = "SELECT COUNT(a.id) "
+            + "FROM invoice a "
+            + "INNER JOIN account_login c ON c.id = a.user_id "
+            + "WHERE JSON_EXTRACT(a.data, '$.bankAccount') LIKE %:value%  AND a.data_type = :dataType "
+            , nativeQuery = true)
+    int countAllInvoicesByBankAccount(int dataType, String value);
+
+    @Query(value = "SELECT a.id AS invoiceId, "
+            + "a.time_paid AS timePaid, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.vso')), '') AS vso, b.name AS midName, "
+            + "a.data AS data, a.amount AS amountNoVat, a.vat AS vat, a.vat_amount AS vatAmount, "
+            + "a.total_amount AS amount, a.invoice_id AS billNumber, a.name AS invoiceName, "
+            + "c.phone_no AS phoneNo, c.email AS email, a.time_created AS timeCreated, a.status AS status "
+            + "FROM invoice a "
+            + "INNER JOIN account_login c ON c.id = a.user_id "
+            + "LEFT JOIN merchant_sync b ON a.merchant_id = b.id "
+            + "WHERE JSON_EXTRACT(a.data, '$.bankAccount') LIKE %:value% AND a.data_type = :dataType "
+            + "AND a.time_created BETWEEN :fromDate AND :toDate "
+            + "ORDER BY a.time_created DESC "
+            + "LIMIT :offset, :size ", nativeQuery = true)
+    List<IAdminInvoiceDTO> getInvoiceByBankAccount(int dataType, String value, int offset, int size, long fromDate, long toDate);
+
+    @Query(value = "SELECT COUNT(a.id) "
+            + "FROM invoice a "
+            + "INNER JOIN account_login c ON c.id = a.user_id "
+            + "WHERE JSON_EXTRACT(a.data, '$.bankAccount') LIKE %:value% AND a.data_type = :dataType "
+            + "AND a.time_created BETWEEN :fromDate AND :toDate ", nativeQuery = true)
+    int countInvoiceByBankAccount(int dataType, String value, long fromDate, long toDate);
+
+    @Query(value = "SELECT a.id AS invoiceId, "
+            + "a.time_paid AS timePaid, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.vso')), '') AS vso, b.name AS midName, "
+            + "a.data AS data, a.amount AS amountNoVat, a.vat AS vat, a.vat_amount AS vatAmount, "
+            + "a.total_amount AS amount, a.invoice_id AS billNumber, a.name AS invoiceName, "
+            + "c.phone_no AS phoneNo, c.email AS email, a.time_created AS timeCreated, a.status AS status "
+            + "FROM invoice a "
+            + "INNER JOIN account_login c ON c.id = a.user_id "
+            + "LEFT JOIN merchant_sync b ON a.merchant_id = b.id "
+            + "WHERE c.phone_no LIKE %:value% AND a.data_type = :dataType "
+            + "LIMIT :offset, :size ", nativeQuery = true)
+    List<IAdminInvoiceDTO> getAllInvoicesByPhoneNo(int dataType, String value, int offset, int size);
+
+    @Query(value = "SELECT COUNT(a.id) "
+            + "FROM invoice a "
+            + "INNER JOIN account_login c ON c.id = a.user_id "
+            + "LEFT JOIN merchant_sync b ON a.merchant_id = b.id "
+            + "WHERE c.phone_no  LIKE %:value% AND a.data_type = :dataType "
+            , nativeQuery = true)
+    int countAllInvoicesByPhoneNo(int dataType, String value);
+
+    @Query(value = "SELECT a.id AS invoiceId, "
+            + "a.time_paid AS timePaid, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.vso')), '') AS vso, b.name AS midName, "
+            + "a.data AS data, a.amount AS amountNoVat, a.vat AS vat, a.vat_amount AS vatAmount, "
+            + "a.total_amount AS amount, a.invoice_id AS billNumber, a.name AS invoiceName, "
+            + "c.phone_no AS phoneNo, c.email AS email, a.time_created AS timeCreated, a.status AS status "
+            + "FROM invoice a "
+            + "INNER JOIN account_login c ON c.id = a.user_id "
+            + "LEFT JOIN merchant_sync b ON a.merchant_id = b.id "
+            + "WHERE c.phone_no LIKE %:value% AND a.data_type = :dataType "
+            + "AND a.time_created BETWEEN :fromDate AND :toDate "
+            + "ORDER BY a.time_created DESC "
+            + "LIMIT :offset, :size ", nativeQuery = true)
+    List<IAdminInvoiceDTO> getInvoiceByPhoneNo(int dataType, String value, int offset, int size, long fromDate, long toDate);
+
+    @Query(value = "SELECT COUNT(a.id) "
+            + "FROM invoice a "
+            + "INNER JOIN account_login c ON c.id = a.user_id "
+            + "LEFT JOIN merchant_sync b ON a.merchant_id = b.id "
+            + "WHERE c.phone_no LIKE %:value% AND a.data_type = :dataType "
+            + "AND a.time_created BETWEEN :fromDate AND :toDate ", nativeQuery = true)
+    int countInvoiceByPhoneNo(int dataType, String value, long fromDate, long toDate);
+
+    @Query(value = "SELECT a.id AS invoiceId, "
+            + "a.time_paid AS timePaid, " +
+            "COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.vso')), '') AS vso, " +
+            "b.name AS midName, "
+            + "a.data AS data, a.amount AS amountNoVat, a.vat AS vat, a.vat_amount AS vatAmount, "
+            + "a.total_amount AS amount, a.invoice_id AS billNumber, a.name AS invoiceName, "
+            + "c.phone_no AS phoneNo, c.email AS email, a.time_created AS timeCreated, a.status AS status "
+            + "FROM invoice a "
+            + "INNER JOIN account_login c ON c.id = a.user_id "
+            + "LEFT JOIN merchant_sync b ON a.merchant_id = b.id "
+            + "WHERE b.id LIKE %:value% AND a.data_type = :dataType "
+            + "LIMIT :offset, :size ", nativeQuery = true)
+    List<IAdminInvoiceDTO> getAllInvoicesByMerchantId(int dataType, String value, int offset, int size);
+
+    @Query(value = "SELECT COUNT(a.id) "
+            + "FROM invoice a "
+            + "INNER JOIN account_login c ON c.id = a.user_id "
+            + "LEFT JOIN merchant_sync b ON a.merchant_id = b.id "
+            + "WHERE b.id  LIKE %:value% AND a.data_type = :dataType "
+            , nativeQuery = true)
+    int countAllInvoicesByMerchantId(int dataType, String value);
+
+    @Query(value = "SELECT a.id AS invoiceId, "
+            + "a.time_paid AS timePaid, " +
+            "COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.vso')), '') AS vso, " +
+            "b.name AS midName, "
+            + "a.data AS data, a.amount AS amountNoVat, a.vat AS vat, a.vat_amount AS vatAmount, "
+            + "a.total_amount AS amount, a.invoice_id AS billNumber, a.name AS invoiceName, "
+            + "c.phone_no AS phoneNo, c.email AS email, a.time_created AS timeCreated, a.status AS status "
+            + "FROM invoice a "
+            + "INNER JOIN account_login c ON c.id = a.user_id "
+            + "LEFT JOIN merchant_sync b ON a.merchant_id = b.id "
+            + "WHERE b.id LIKE %:value% AND a.data_type = :dataType "
+            + "AND a.time_created BETWEEN :fromDate AND :toDate "
+            + "ORDER BY a.time_created DESC "
+            + "LIMIT :offset, :size ", nativeQuery = true)
+    List<IAdminInvoiceDTO> getInvoiceByMerchantId(int dataType, String value, int offset, int size, long fromDate, long toDate);
+
+    @Query(value = "SELECT COUNT(a.id) "
+            + "FROM invoice a "
+            + "INNER JOIN account_login c ON c.id = a.user_id "
+            + "LEFT JOIN merchant_sync b ON a.merchant_id = b.id "
+            + "WHERE b.id LIKE %:value% AND a.data_type = :dataType "
+            + "AND a.time_created BETWEEN :fromDate AND :toDate ", nativeQuery = true)
+    int countInvoiceByMerchantId(int dataType, String value, long fromDate, long toDate);
 }

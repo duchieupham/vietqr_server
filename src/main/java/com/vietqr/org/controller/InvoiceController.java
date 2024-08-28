@@ -2269,7 +2269,8 @@ public class InvoiceController {
             @RequestParam int filterType,  // Loại lọc chính: 0 = Hóa đơn, 1 = Đại lý, 2 = Thời gian
             @RequestParam(required = false, defaultValue = "0") int subFilterType,  // Loại lọc con (mã hóa đơn, đại lý, tài khoản ngân hàng, ...)
             @RequestParam(required = false) String value,  // Giá trị cần lọc theo
-            @RequestParam(required = false) int invoiceType,  // 0: Hóa đơn thu phis, 1: Hóa giao dich, 2: Hóa đơn nạp tiền, 9: tất cả
+            @RequestParam(required = false) int invoiceType,  // 0: Hóa đơn thu phis, 1: Hóa giao dich,
+            // 2: Hóa đơn nạp tiền, 9: tất cả
             @RequestParam int page,
             @RequestParam int size,
             @RequestParam(required = false, defaultValue = "0") String time  // Thời gian: tất cả hoặc theo tháng
@@ -2290,6 +2291,7 @@ public class InvoiceController {
             switch (invoiceType) {
                 //
                 case 0:
+                case 1:
                     switch (filterType) {
                         // Lọc theo hóa đơn thu phi
                         case 0:
@@ -2442,8 +2444,6 @@ public class InvoiceController {
                         default:
                             throw new IllegalArgumentException("Loại filter không hợp lệ");
                     }
-                    break;
-                case 1:
                     break;
                 case 2:
                     dtos = new ArrayList<>();
