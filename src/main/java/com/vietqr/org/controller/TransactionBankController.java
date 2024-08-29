@@ -5999,6 +5999,7 @@ public class TransactionBankController {
 
     private void pushTransactionSyncForClientId(MerchantSyncEntity merchantSyncEntity, TransactionBankCustomerDTO dto) {
         try {
+            logger.info("transaction-sync: WS: pushTransactionSyncForClientId - orderId: " + dto.getOrderId() + " clientId: " + merchantSyncEntity.getClientId());
             Thread thread = new Thread(() -> {
                 try {
                     Map<String, String> data = new HashMap<>();
@@ -6018,7 +6019,7 @@ public class TransactionBankController {
                             data);
                 } catch (IOException e) {
                     logger.error(
-                            "transaction-sync: WS: socketHandler.sendMessageToUser - RECHARGE ERROR: "
+                            "transaction-sync: WS: socketHandler.pushTransactionSyncForClientId - RECHARGE ERROR: "
                                     + e.toString());
                 }
             });

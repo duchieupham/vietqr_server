@@ -385,4 +385,7 @@ public interface CustomerSyncRepository extends JpaRepository<CustomerSyncEntity
     @Transactional
     @Query(value = "DELETE FROM customer_sync WHERE id = :id", nativeQuery = true)
     void deleteCustomerSyncById(@Param("id") String id);
+
+    @Query(value = "SELECT * FROM customer_sync WHERE information = :information LIMIT 1", nativeQuery = true)
+    CustomerSyncEntity getCustomerSyncByInformation(String information);
 }
