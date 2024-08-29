@@ -2,6 +2,7 @@ package com.vietqr.org.dto;
 
 public class EcommerceActiveDTO {
     private String fullName;
+    private String name;
     private String bankCode;
     private String bankAccount;
     private String certificate;
@@ -11,8 +12,7 @@ public class EcommerceActiveDTO {
     private String address;
     private String webhook;
     private String career;
-    private String merchantName;
-    private String userBankName;
+    private int businessType;
 
     public EcommerceActiveDTO() {
     }
@@ -111,19 +111,19 @@ public class EcommerceActiveDTO {
         this.career = career;
     }
 
-    public String getMerchantName() {
-        return merchantName;
+    public String getName() {
+        return name;
     }
 
-    public void setMerchantName(String merchantName) {
-        this.merchantName = merchantName;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getUserBankName() {
-        return userBankName;
+    public int getBusinessType() {
+        return businessType;
     }
 
-    public void setUserBankName(String userBankName) {
-        this.userBankName = userBankName;
+    public void setBusinessType(int businessType) {
+        this.businessType = businessType;
     }
 }

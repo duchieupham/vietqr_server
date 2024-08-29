@@ -45,6 +45,9 @@ public class MerchantSyncController {
     private SocketHandler socketHandler;
 
     @Autowired
+    private BankTypeService bankTypeService;
+
+    @Autowired
     private MerchantConnectionService merchantConnectionService;
 
     @GetMapping("merchant-sync")
@@ -91,32 +94,52 @@ public class MerchantSyncController {
                 if (!StringUtil.isNullOrEmpty(accessKey)) {
                     String checkSum = BankEncryptUtil.generateMD5EcommerceCheckSum(accessKey, dto.getEcommerceSite());
                     if (dto.getCheckSum().equals(checkSum)) {
-                        CustomerSyncEntity entity = new CustomerSyncEntity();
-                        UUID uuid = UUID.randomUUID();
-                        entity.setId(uuid.toString());
-                        entity.setUsername("");
-                        entity.setPassword("");
-                        entity.setIpAddress("");
-                        entity.setPort("");
-                        entity.setSuffixUrl("");
-                        entity.setInformation(dto.getEcommerceSite());
-                        entity.setUserId("");
-                        entity.setActive(false);
-                        entity.setToken("");
-                        entity.setMerchant("");
-                        entity.setAddress("");
-                        entity.setMaster(false);
-                        entity.setAccountId("");
-                        entity.setRefId("");
-                        String publishId = "MER" + RandomCodeUtil.generateOTP(8);
-                        String certificate = "MER-ECM-" + publishId;
-                        String clientId = BoxTerminalRefIdUtil.encryptQrBoxId(uuid.toString());
-                        MerchantSyncEntity merchantSyncEntity = new MerchantSyncEntity(uuid.toString(),
-                                "", "", "Ecommerce wordpress", publishId, certificate,
-                                StringUtil.getValueNullChecker(dto.getWebhook()), clientId);
+                        CustomerSyncEntity entity = customerSyncService.getCustomerSyncByInformation(dto.getEcommerceSite());
+                        String clientId = "";
+                        String certificate = "";
+                        if (entity == null) {
+                            entity = new CustomerSyncEntity();
+                            UUID uuid = UUID.randomUUID();
+                            entity.setId(uuid.toString());
+                            entity.setUsername("");
+                            entity.setPassword("");
+                            entity.setIpAddress("");
+                            entity.setPort("");
+                            entity.setSuffixUrl("");
+                            entity.setInformation(dto.getEcommerceSite());
+                            entity.setUserId("");
+                            entity.setActive(false);
+                            entity.setToken("");
+                            entity.setMerchant("");
+                            entity.setAddress("");
+                            entity.setMaster(false);
+                            entity.setAccountId("");
+                            entity.setRefId("");
+                            String publishId = "MER" + RandomCodeUtil.generateOTP(8);
+                            certificate = "MER-ECM-" + publishId;
+                            clientId = BoxTerminalRefIdUtil.encryptQrBoxId(uuid.toString());
+                            MerchantSyncEntity merchantSyncEntity = new MerchantSyncEntity(uuid.toString(),
+                                    "", "", "Ecommerce wordpress", publishId, certificate,
+                                    StringUtil.getValueNullChecker(dto.getWebhook()), clientId);
+                            customerSyncService.insertCustomerSync(entity);
+                            merchantSyncService.insert(merchantSyncEntity);
+                        } else {
+                            MerchantSyncEntity merchantSyncEntity = merchantSyncService.getMerchantSyncById(entity.getId());
+                            if (merchantSyncEntity != null) {
+                                String publishId = merchantSyncEntity.getPublishId();
+                                certificate = "MER-ECM-" + publishId;
+                                clientId = BoxTerminalRefIdUtil.encryptQrBoxId(entity.getId());
+                            } else {
+                                String publishId = "MER" + RandomCodeUtil.generateOTP(8);
+                                certificate = "MER-ECM-" + publishId;
+                                clientId = BoxTerminalRefIdUtil.encryptQrBoxId(entity.getId());
+                                merchantSyncEntity = new MerchantSyncEntity(entity.getId(),
+                                        "", "", "Ecommerce wordpress", publishId, certificate,
+                                        StringUtil.getValueNullChecker(dto.getWebhook()), clientId);
+                                merchantSyncService.insert(merchantSyncEntity);
+                            }
+                        }
 
-                        customerSyncService.insertCustomerSync(entity);
-                        merchantSyncService.insert(merchantSyncEntity);
                         result = new MerchantSyncEcommerceDTO(StringUtil.getValueNullChecker(dto.getWebhook()), clientId, certificate);
                         httpStatus = HttpStatus.OK;
                     } else {
@@ -157,27 +180,6 @@ public class MerchantSyncController {
         return result;
     }
 
-    @PostMapping("ecommerce/test")
-    public ResponseEntity<Object> syncEcommerceTet(@RequestParam String clientId, @RequestBody EcommerceActiveDTO dto) {
-        Object result = null;
-        HttpStatus httpStatus = null;
-        try {
-                Map<String, String> data = new HashMap<>();
-                data.put("notificationType", NotificationUtil.getNotiSyncEcommerce());
-                data.put("bankAccount", dto.getBankAccount());
-                data.put("userBankName", dto.getUserBankName());
-                data.put("bankCode", dto.getBankCode());
-                data.put("ecommerceSite", dto.getMerchantName());
-                socketHandler.sendMessageToClientId(clientId,
-                        data);
-            httpStatus = HttpStatus.OK;
-        } catch (Exception e) {
-            httpStatus = HttpStatus.BAD_REQUEST;
-            result = new ResponseMessageDTO("FAILED", "E05");
-        }
-        return new ResponseEntity<>(result, httpStatus);
-    }
-
     @PostMapping("ecommerce/active")
     public ResponseEntity<Object> syncEcommerce(@RequestBody EcommerceActiveDTO dto) {
         Object result = null;
@@ -189,6 +191,7 @@ public class MerchantSyncController {
                         .getAccountBankReceiveByBankAccountAndBankCode(dto.getBankAccount(), dto.getBankCode());
                 if (Objects.nonNull(accountBankReceiveEntity)) {
                     entity.setFullName(dto.getFullName());
+                    entity.setName(dto.getName());
                     entity.setNationalId(dto.getNationalId());
                     entity.setEmail(dto.getEmail());
                     entity.setPhoneNo(dto.getPhoneNo());
@@ -196,6 +199,12 @@ public class MerchantSyncController {
                     entity.setWebhook(dto.getWebhook());
                     entity.setIsActive(true);
                     entity.setCareer(dto.getCareer());
+                    if (dto.getBusinessType() == 0) {
+                        entity.setBusinessType("Cá nhân");
+                    } else {
+                        entity.setBusinessType("Doanh nghiệp");
+                    }
+
                     CustomerSyncEntity customerSyncEntity = customerSyncService.getCustomerSyncById(entity.getId());
                     BankReceiveConnectionEntity bankReceiveConnectionEntity = new BankReceiveConnectionEntity();
                     bankReceiveConnectionEntity.setId(UUID.randomUUID().toString());
@@ -217,12 +226,12 @@ public class MerchantSyncController {
 
                     try {
                         Thread thread = new Thread(() -> {
-
                             Map<String, String> data = new HashMap<>();
+                            BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(accountBankReceiveEntity.getBankTypeId());
                             data.put("notificationType", NotificationUtil.getNotiSyncEcommerce());
                             data.put("bankAccount", accountBankReceiveEntity.getBankAccount());
                             data.put("userBankName", accountBankReceiveEntity.getBankAccountName());
-                            data.put("bankCode", "MB");
+                            data.put("bankCode", bankTypeEntity.getBankCode());
                             if (Objects.nonNull(customerSyncEntity)) {
                                 data.put("ecommerceSite", StringUtil.getValueNullChecker(customerSyncEntity.getInformation()));
                             } else {
@@ -236,17 +245,15 @@ public class MerchantSyncController {
                             }
                         });
                         thread.start();
-                    } catch (Exception e) {
-
+                    } catch (Exception ignored) {
                     }
-
                 } else {
                     httpStatus = HttpStatus.BAD_REQUEST;
-                    result = new ResponseMessageDTO("FAILED", "E05");
+                    result = new ResponseMessageDTO("FAILED", "E25");
                 }
             } else {
                 httpStatus = HttpStatus.BAD_REQUEST;
-                result = new ResponseMessageDTO("FAILED", "E05");
+                result = new ResponseMessageDTO("FAILED", "E163");
             }
         } catch (Exception e) {
             httpStatus = HttpStatus.BAD_REQUEST;

@@ -187,4 +187,7 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
     @Modifying
     @Query(value = "UPDATE account_login SET otp = :randomOTP, time_expired = :timeVerified WHERE phone_no = :phoneNo AND email = :email AND is_verify = TRUE LIMIT 1", nativeQuery = true)
     void updateOtpLogin(String email, String phoneNo, long timeVerified, String randomOTP);
+
+    @Query(value = "SELECT * FROM account_login WHERE id = :userId LIMIT 1", nativeQuery = true)
+    AccountLoginEntity getAccountLoginById(String userId);
 }

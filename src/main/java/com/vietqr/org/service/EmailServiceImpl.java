@@ -1,30 +1,20 @@
 package com.vietqr.org.service;
 
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
-import com.amazonaws.services.simpleemail.model.*;
-import com.vietqr.org.dto.EmailDetails;
+import com.vietqr.org.dto.EmailDetailDTO;
 import com.vietqr.org.dto.SendMailRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 import software.amazon.awssdk.core.ResponseInputStream;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import javax.mail.util.ByteArrayDataSource;
-import javax.sql.DataSource;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.util.Random;
 
 @Service
@@ -80,7 +70,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public String sendMailWithAttachment(EmailDetails emailDetails) throws MessagingException {
+    public String sendMailWithAttachment(EmailDetailDTO emailDetailDTO) throws MessagingException {
         // Creating a mime message
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper;
@@ -88,7 +78,7 @@ public class EmailServiceImpl implements EmailService {
             // Setting multipart as true for attachments to
             mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
             mimeMessageHelper.setFrom(sender);
-            mimeMessageHelper.setTo(emailDetails.getRecipient());
+            mimeMessageHelper.setTo(emailDetailDTO.getRecipient());
 
             int randomOTP = generateSixDigitRandomNumber();
 
