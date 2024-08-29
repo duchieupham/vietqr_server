@@ -3428,6 +3428,210 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @PostMapping("ecommerce-transactions/check-order")
+    public ResponseEntity<Object> checkTransactionStatusEcommerce(
+            @RequestHeader("Authorization") String token,
+            @RequestBody TransactionCheckOrderInputDTO dto) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            // 1. get info from token
+            String username = getUsernameFromToken(token);
+            if (username != null && !username.trim().isEmpty()) {
+                // 2. If valid token, check valid object
+                if (dto != null) {
+                    // 3. If valid object, check condition (bank&trans belong to merchant)
+
+                        // 4. Check checksum
+                        String checkSum = BankEncryptUtil.generateMD5CheckOrderChecksum(dto.getBankAccount(), username);
+                        if (BankEncryptUtil.isMatchChecksum(dto.getCheckSum(), checkSum)) {
+                            // 5. Find transaction
+                            // 0: get by orderId
+                            // 1: get by referenceNumber
+                            List<TransReceiveResponseDTO> responseDTOs = new ArrayList<>();
+                            List<TransReceiveResponseCheckOrderDTO> response = new ArrayList<>();
+                            List<IRefundCheckOrderDTO> iRefundCheckOrderDTOS = new ArrayList<>();
+                            if (dto.getValue() != null && !dto.getValue().trim().isEmpty()) {
+                                if (dto.getType() != null && dto.getType() == 0) {
+                                    responseDTOs = transactionReceiveService.getTransByOrderId(dto.getValue(),
+                                            dto.getBankAccount());
+                                    if (responseDTOs != null && !responseDTOs.isEmpty()) {
+                                        iRefundCheckOrderDTOS = transactionRefundService
+                                                .getTotalRefundedByTransactionId(responseDTOs.stream()
+                                                        .map(TransReceiveResponseDTO::getTransactionId)
+                                                        .collect(Collectors.toList()));
+                                        Map<String, RefundCheckOrderDTO> refundCheckOrderDTOMap;
+                                        if (iRefundCheckOrderDTOS != null && !iRefundCheckOrderDTOS.isEmpty()) {
+                                            refundCheckOrderDTOMap = iRefundCheckOrderDTOS.stream()
+                                                    .collect(Collectors.toMap(IRefundCheckOrderDTO::getTransactionId, item ->
+                                                            new RefundCheckOrderDTO(item.getTransactionId(), item.getRefundCount(),
+                                                                    item.getAmountRefunded())));
+                                        } else {
+                                            refundCheckOrderDTOMap = new HashMap<>();
+                                        }
+
+                                        boolean allTransTypeD = responseDTOs.stream().allMatch(item -> "D".equals(item.getTransType()));
+                                        if (allTransTypeD) {
+                                            List<CheckOrderTransTypeDDTO> responseD = responseDTOs.stream().map(item -> {
+                                                CheckOrderTransTypeDDTO checkOrderDTO = new CheckOrderTransTypeDDTO();
+                                                checkOrderDTO.setAmount(item.getAmount());
+                                                checkOrderDTO.setStatus(item.getStatus());
+                                                checkOrderDTO.setNote(StringUtil.getValueNullChecker(item.getNote()));
+                                                checkOrderDTO.setContent(item.getContent());
+                                                checkOrderDTO.setOrderId(item.getOrderId());
+                                                checkOrderDTO.setReferenceNumber(item.getReferenceNumber());
+                                                checkOrderDTO.setTerminalCode(StringUtil.getValueNullChecker(item.getTerminalCode()));
+                                                checkOrderDTO.setTimeCreated(item.getTimeCreated());
+                                                checkOrderDTO.setTimePaid(item.getTimePaid());
+                                                String checkExistRefundReferenceNumber =
+                                                        transactionRefundService.checkExistRefundTransaction(dto.getBankAccount(),
+                                                                item.getReferenceNumber());
+                                                if (StringUtil.isNullOrEmpty(checkExistRefundReferenceNumber)) {
+                                                    checkOrderDTO.setType(item.getType());
+                                                } else {
+                                                    checkOrderDTO.setType(6);
+                                                }
+                                                checkOrderDTO.setTransType(item.getTransType());
+                                                return checkOrderDTO;
+                                            }).collect(Collectors.toList());
+                                            result = responseD;
+                                        } else {
+                                            response = responseDTOs.stream().map(item -> {
+                                                TransReceiveResponseCheckOrderDTO checkOrderDTO = new TransReceiveResponseCheckOrderDTO();
+                                                checkOrderDTO.setAmount(item.getAmount());
+                                                checkOrderDTO.setStatus(item.getStatus());
+                                                checkOrderDTO.setNote(StringUtil.getValueNullChecker(item.getNote()));
+                                                checkOrderDTO.setContent(item.getContent());
+                                                checkOrderDTO.setOrderId(item.getOrderId());
+                                                checkOrderDTO.setReferenceNumber(item.getReferenceNumber());
+                                                checkOrderDTO.setTerminalCode(StringUtil.getValueNullChecker(item.getTerminalCode()));
+                                                checkOrderDTO.setTimeCreated(item.getTimeCreated());
+                                                checkOrderDTO.setTimePaid(item.getTimePaid());
+                                                checkOrderDTO.setType(item.getType());
+                                                checkOrderDTO.setTransType(item.getTransType());
+                                                RefundCheckOrderDTO refundCheckOrderDTO = refundCheckOrderDTOMap
+                                                        .getOrDefault(item.getTransactionId(), new RefundCheckOrderDTO(item.getTransactionId()));
+                                                checkOrderDTO.setRefundCount(refundCheckOrderDTO.getRefundCount());
+                                                checkOrderDTO.setAmountRefunded(refundCheckOrderDTO.getAmountRefunded());
+                                                return checkOrderDTO;
+                                            }).collect(Collectors.toList());
+                                            result = response;
+                                        }
+                                        httpStatus = HttpStatus.OK;
+                                    } else {
+                                        logger.error("checkTransactionStatus: NOT FOUND TRANSACTION");
+                                        httpStatus = HttpStatus.BAD_REQUEST;
+                                        result = new ResponseMessageDTO("FAILED", "E96");
+                                    }
+                                } else if (dto.getType() != null && dto.getType() == 1) {
+                                    responseDTOs = transactionReceiveService.getTransByReferenceNumber(dto.getValue(),
+                                            dto.getBankAccount());
+                                    if (responseDTOs != null && !responseDTOs.isEmpty()) {
+                                        iRefundCheckOrderDTOS = transactionRefundService
+                                                .getTotalRefundedByTransactionId(responseDTOs.stream()
+                                                        .map(TransReceiveResponseDTO::getTransactionId)
+                                                        .collect(Collectors.toList()));
+                                        Map<String, RefundCheckOrderDTO> refundCheckOrderDTOMap;
+                                        if (iRefundCheckOrderDTOS != null && !iRefundCheckOrderDTOS.isEmpty()) {
+                                            refundCheckOrderDTOMap = iRefundCheckOrderDTOS.stream()
+                                                    .collect(Collectors.toMap(IRefundCheckOrderDTO::getTransactionId, item ->
+                                                            new RefundCheckOrderDTO(item.getTransactionId(), item.getRefundCount(),
+                                                                    item.getAmountRefunded())));
+                                        } else {
+                                            refundCheckOrderDTOMap = new HashMap<>();
+                                        }
+
+                                        boolean allTransTypeD = responseDTOs.stream().allMatch(item -> "D".equals(item.getTransType()));
+                                        if (allTransTypeD) {
+                                            List<CheckOrderTransTypeDDTO> responseD = responseDTOs.stream().map(item -> {
+                                                CheckOrderTransTypeDDTO checkOrderDTO = new CheckOrderTransTypeDDTO();
+                                                checkOrderDTO.setAmount(item.getAmount());
+                                                checkOrderDTO.setStatus(item.getStatus());
+                                                checkOrderDTO.setNote(StringUtil.getValueNullChecker(item.getNote()));
+                                                checkOrderDTO.setContent(item.getContent());
+                                                checkOrderDTO.setOrderId(item.getOrderId());
+                                                checkOrderDTO.setReferenceNumber(item.getReferenceNumber());
+                                                checkOrderDTO.setTerminalCode(StringUtil.getValueNullChecker(item.getTerminalCode()));
+                                                checkOrderDTO.setTimeCreated(item.getTimeCreated());
+                                                checkOrderDTO.setTimePaid(item.getTimePaid());
+                                                String checkExistRefundReferenceNumber =
+                                                        transactionRefundService.checkExistRefundTransaction(dto.getBankAccount(),
+                                                                item.getReferenceNumber());
+                                                if (StringUtil.isNullOrEmpty(checkExistRefundReferenceNumber)) {
+                                                    checkOrderDTO.setType(item.getType());
+                                                } else {
+                                                    checkOrderDTO.setType(6);
+                                                }
+                                                checkOrderDTO.setTransType(item.getTransType());
+                                                return checkOrderDTO;
+                                            }).collect(Collectors.toList());
+                                            result = responseD;
+                                        } else {
+                                            response = responseDTOs.stream().map(item -> {
+                                                TransReceiveResponseCheckOrderDTO checkOrderDTO = new TransReceiveResponseCheckOrderDTO();
+                                                checkOrderDTO.setAmount(item.getAmount());
+                                                checkOrderDTO.setStatus(item.getStatus());
+                                                checkOrderDTO.setNote(StringUtil.getValueNullChecker(item.getNote()));
+                                                checkOrderDTO.setContent(item.getContent());
+                                                checkOrderDTO.setOrderId(item.getOrderId());
+                                                checkOrderDTO.setReferenceNumber(item.getReferenceNumber());
+                                                checkOrderDTO.setTerminalCode(StringUtil.getValueNullChecker(item.getTerminalCode()));
+                                                checkOrderDTO.setTimeCreated(item.getTimeCreated());
+                                                checkOrderDTO.setTimePaid(item.getTimePaid());
+                                                checkOrderDTO.setType(item.getType());
+                                                checkOrderDTO.setTransType(item.getTransType());
+                                                RefundCheckOrderDTO refundCheckOrderDTO = refundCheckOrderDTOMap
+                                                        .getOrDefault(item.getTransactionId(), new RefundCheckOrderDTO(item.getTransactionId()));
+                                                checkOrderDTO.setRefundCount(refundCheckOrderDTO.getRefundCount());
+                                                checkOrderDTO.setAmountRefunded(refundCheckOrderDTO.getAmountRefunded());
+                                                return checkOrderDTO;
+                                            }).collect(Collectors.toList());
+                                            result = response;
+                                        }
+                                        httpStatus = HttpStatus.OK;
+                                    } else {
+                                        logger.error("checkTransactionStatus: NOT FOUND TRANSACTION");
+                                        httpStatus = HttpStatus.BAD_REQUEST;
+                                        result = new ResponseMessageDTO("FAILED", "E96");
+                                    }
+                                } else {
+                                    logger.error("checkTransactionStatus: INVALID CHECK TYPE");
+                                    httpStatus = HttpStatus.BAD_REQUEST;
+                                    result = new ResponseMessageDTO("FAILED", "E95");
+                                }
+                            } else {
+                                System.out.println("checkTransactionStatus: INVALID REQUEST BODY");
+                                logger.error("checkTransactionStatus: INVALID REQUEST BODY");
+                                result = new ResponseMessageDTO("FAILED", "E46");
+                                httpStatus = HttpStatus.BAD_REQUEST;
+                            }
+                        } else {
+                            logger.error("checkTransactionStatus: INVALID CHECKSUM");
+                            httpStatus = HttpStatus.BAD_REQUEST;
+                            result = new ResponseMessageDTO("FAILED", "E39");
+                        }
+
+                } else {
+                    System.out.println("checkTransactionStatus: INVALID REQUEST BODY");
+                    logger.error("checkTransactionStatus: INVALID REQUEST BODY");
+                    result = new ResponseMessageDTO("FAILED", "E46");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                System.out.println("checkTransactionStatus: INVALID TOKEN");
+                logger.error("checkTransactionStatus: INVALID TOKEN");
+                result = new ResponseMessageDTO("FAILED", "E74");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            System.out.println("checkTransactionStatus: ERROR: " + e.toString());
+            logger.error("checkTransactionStatus: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     private String getUsernameFromToken(String token) {
         String result = "";
         if (token != null && !token.trim().isEmpty()) {
