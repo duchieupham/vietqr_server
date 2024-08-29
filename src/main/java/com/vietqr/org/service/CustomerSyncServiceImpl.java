@@ -208,6 +208,11 @@ public class CustomerSyncServiceImpl implements CustomerSyncService {
         repo.deleteCustomerSyncById(id);
     }
 
+    @Override
+    public CustomerSyncEntity getCustomerSyncByInformation(String information) {
+        return repo.getCustomerSyncByInformation(information);
+    }
+
     // @Override
     // public List<String> checkExistedCustomerSyncByUsername(String username) {
     // return repo.checkExistedCustomerSyncByUsername(username);

@@ -199,4 +199,9 @@ public class AccountLoginServiceImpl implements AccountLoginService {
     public void updateOtpLogin(String email, String phoneNo, long timeVerified, String randomOTP) {
         repo.updateOtpLogin(email, phoneNo, timeVerified, randomOTP);
     }
+
+    @Override
+    public AccountLoginEntity getAccountLoginById(String userId) {
+        return repo.getAccountLoginById(userId);
+    }
 }
