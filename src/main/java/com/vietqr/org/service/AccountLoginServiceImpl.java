@@ -204,4 +204,14 @@ public class AccountLoginServiceImpl implements AccountLoginService {
     public AccountLoginEntity getAccountLoginById(String userId) {
         return repo.getAccountLoginById(userId);
     }
+
+    @Override
+    public boolean updateEmailByPhoneNo(String phoneNo, String newEmail) {
+        if (repo.existsByPhoneNo(phoneNo)) {
+            int rowsUpdated = repo.updateEmailByPhoneNo(phoneNo, newEmail);
+            return rowsUpdated > 0;
+        }
+        return false;
+    }
+
 }

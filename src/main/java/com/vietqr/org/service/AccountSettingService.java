@@ -34,4 +34,6 @@ public interface AccountSettingService {
     public void updateQrShowType(int value, String userId);
 
     void updateNotificationMobile(boolean notificationMobile, String userId);
+
+    void updateSettingConfig(String dataConfig, String userId);
 }

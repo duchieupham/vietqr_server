@@ -1,15 +1,15 @@
 package com.vietqr.org.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
+import com.vietqr.org.json.AccountSettingConfigDTO;
 import com.vietqr.org.service.*;
+import com.vietqr.org.util.StringUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -137,6 +137,19 @@ public class AccountSettingController {
                     result.setLogoUrl(systemSettingEntity.getLogoUrl());
                     result.setKeepScreenOn(entity.isKeepScreenOn());
                     result.setQrShowType(entity.getQrShowType());
+                    // user config
+                    ObjectMapper mapper = new ObjectMapper();
+                    AccountSettingConfigDTO accountSettingConfigDTO = null;
+                    try {
+                        accountSettingConfigDTO = mapper.readValue(entity.getDataConfig(), AccountSettingConfigDTO.class);
+                    } catch (Exception e) {
+                        logger.error("getAccountSetting: ERROR: accountSettingConfigDTO: " + e.getMessage());
+                    }
+                    if (Objects.nonNull(accountSettingConfigDTO)) {
+                        result.setUserConfig(accountSettingConfigDTO);
+                    } else {
+                        result.setUserConfig(new AccountSettingConfigDTO(true));
+                    }
                     //
                     httpStatus = HttpStatus.OK;
                 } else {
@@ -152,6 +165,40 @@ public class AccountSettingController {
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<AccountSettingBackUpDTO>(result, httpStatus);
+    }
+
+    @PostMapping("accounts/setting/data-config")
+    public ResponseEntity<ResponseMessageDTO> updateDataConfig(@RequestBody UserConfigAccountSettingDTO dto) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            AccountSettingConfigDTO accountSettingConfigDTO = null;
+            if (dto.getUserConfig() != null) {
+                // user config
+                AccountSettingEntity entity = accountSettingService.getAccountSettingEntity(dto.getUserId());
+                try {
+                    accountSettingConfigDTO = mapper.readValue(entity.getDataConfig(), AccountSettingConfigDTO.class);
+                } catch (Exception e) {
+                    logger.error("getAccountSetting: ERROR: accountSettingConfigDTO: " + e.getMessage());
+                }
+                if (Objects.nonNull(accountSettingConfigDTO)) {
+                    accountSettingConfigDTO.setBidvNotification(dto.getUserConfig().isBidvNotification());
+                } else {
+                    accountSettingConfigDTO = new AccountSettingConfigDTO();
+                    accountSettingConfigDTO.setBidvNotification(false);
+                }
+            }
+            String mapping = mapper.writeValueAsString(accountSettingConfigDTO);
+            accountSettingService.updateSettingConfig(mapping, dto.getUserId());
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("updateNotificationMobile: ERROR: " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<ResponseMessageDTO>(result, httpStatus);
     }
 
     @PostMapping("accounts/setting/image")

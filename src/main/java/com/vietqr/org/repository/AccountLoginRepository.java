@@ -190,4 +190,9 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
 
     @Query(value = "SELECT * FROM account_login WHERE id = :userId LIMIT 1", nativeQuery = true)
     AccountLoginEntity getAccountLoginById(String userId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE account_login a SET a.email = :newEmail WHERE a.phone_no = :phoneNo", nativeQuery = true)
+    int updateEmailByPhoneNo(@Param("phoneNo") String phoneNo, @Param("newEmail") String newEmail);
 }
