@@ -79,4 +79,6 @@ public interface AccountLoginService {
     void updateOtpLogin(String email, String phoneNo, long timeVerified, String randomOTP);
 
     AccountLoginEntity getAccountLoginById(String userId);
+
+    boolean updateEmailByPhoneNo(String phoneNo, String newEmail);
 }
