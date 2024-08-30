@@ -1,7 +1,10 @@
 package com.vietqr.org.dto;
 
-public class AccountSettingBackUpDTO extends AccountSettingDTO{
+import com.vietqr.org.json.AccountSettingConfigDTO;
+
+public class AccountSettingBackUpDTO extends AccountSettingDTO {
     private boolean isVerifyEmail;
+    private AccountSettingConfigDTO userConfig;
     private String notificationMessage;
 
     public AccountSettingBackUpDTO() {
@@ -41,5 +44,13 @@ public class AccountSettingBackUpDTO extends AccountSettingDTO{
         super(id, userId, guideWeb, guideMobile, voiceWeb, voiceMobile, voiceMobileKiot, status, edgeImgId, footerImgId, themeType, themeImgUrl, logoUrl, keepScreenOn, qrShowType);
         this.isVerifyEmail = isVerifyEmail;
         this.notificationMessage = notificationMessage;
+    }
+
+    public AccountSettingConfigDTO getUserConfig() {
+        return userConfig;
+    }
+
+    public void setUserConfig(AccountSettingConfigDTO userConfig) {
+        this.userConfig = userConfig;
     }
 }

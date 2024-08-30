@@ -70,6 +70,9 @@ public class AccountSettingEntity implements Serializable {
     @Column(name = "notificationMessage")
     private String notificationMessage;
 
+    @Column(name = "dataConfig", columnDefinition = "JSON")
+    private String dataConfig;
+
     public AccountSettingEntity() {
         super();
     }
@@ -249,5 +252,13 @@ public class AccountSettingEntity implements Serializable {
 
     public void setNotificationMobile(boolean notificationMobile) {
         this.notificationMobile = notificationMobile;
+    }
+
+    public String getDataConfig() {
+        return dataConfig;
+    }
+
+    public void setDataConfig(String dataConfig) {
+        this.dataConfig = dataConfig;
     }
 }

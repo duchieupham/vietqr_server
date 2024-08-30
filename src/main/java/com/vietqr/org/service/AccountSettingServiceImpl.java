@@ -82,4 +82,9 @@ public class AccountSettingServiceImpl implements AccountSettingService {
         repo.updateNotificationMobile(value, userId);
     }
 
+    @Override
+    public void updateSettingConfig(String dataConfig, String userId) {
+        repo.updateSettingConfig(dataConfig, userId);
+    }
+
 }

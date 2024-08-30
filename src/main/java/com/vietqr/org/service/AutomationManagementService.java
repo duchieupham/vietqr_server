@@ -111,7 +111,7 @@ public class AutomationManagementService {
                 logger.error("scheduleExecuteTaskCheckPerformance: ERROR: " + e.getMessage() +
                         " at: " + System.currentTimeMillis());
             } finally {
-                if ((timeResponse - time) >= 2000) {
+                if ((timeResponse - time) >= 3000) {
                     String content = "HEATH CHECK WARNING: " +
                             "\uD83D\uDE4B\u200D♂\uFE0F\uD83D\uDE4B\u200D♂\uFE0F\uD83D\uDE4B\u200D♂\uFE0F." +
                             "\n\nVUI LÒNG KIỂM TRA HEATH CHECK.\n\n" +
