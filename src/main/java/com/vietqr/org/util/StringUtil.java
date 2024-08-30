@@ -68,8 +68,16 @@ public class StringUtil {
         return value != null ? value : 0;
     }
 
-    public static String getValueNotNull(String value) {
-        return value != null ? value : "";
+    public static String getValueNullChecker(String value, String expected) {
+        return value != null ? value : expected;
+    }
+
+    public static int getValueNullChecker(Integer value, int expected) {
+        return value != null ? value : expected;
+    }
+
+    public static double getValueNullChecker(Double value, double expected) {
+        return value != null ? value : expected;
     }
 
     public static int getTotalPage(int totalElement, int size) {
