@@ -87,6 +87,10 @@ public class StringUtil {
         return result;
     }
 
+    public static String getValueNotNull(String value) {
+        return value != null ? value : "";
+    }
+
     public static boolean containsOnlyDigits(String amount) {
         return amount.matches("\\d+");
     }
