@@ -169,4 +169,8 @@ public interface InvoiceService {
                                                   int offset, int size, String time);
 
     int countInvoiceByMerchantId(int dataType, String value, String time);
+
+    List<AdminMerchantDTO> getUnpaidInvoicesByMerchantId(String merchantId, int offset, int size);
+
+    int countUnpaidInvoicesByMerchantId(String merchantId);
 }

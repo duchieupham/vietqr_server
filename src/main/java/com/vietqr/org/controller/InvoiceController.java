@@ -2637,5 +2637,43 @@ public class InvoiceController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("/unpaid-invoice-list")
+    public ResponseEntity<Object> getUnpaidInvoices(
+            @RequestParam String merchantId,  // ID của đại lý
+            @RequestParam int page,
+            @RequestParam int size) {
+
+        Object result;
+        HttpStatus httpStatus;
+        try {
+            int offset = (page - 1) * size;
+            List<AdminMerchantDTO> unpaidInvoices = invoiceService.getUnpaidInvoicesByMerchantId(merchantId, offset, size);
+            int totalElement = invoiceService.countUnpaidInvoicesByMerchantId(merchantId);
+
+            // Format dữ liệu trả về
+            DataDTO dataDTO = new DataDTO();
+            dataDTO.setItems(unpaidInvoices);
+            dataDTO.setExtraData(null);
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+            pageDTO.setTotalElement(totalElement);
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+
+            PageResponseDTO pageResponseDTO = new PageResponseDTO();
+            pageResponseDTO.setMetadata(pageDTO);
+            pageResponseDTO.setData(dataDTO);
+
+            result = pageResponseDTO;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("InvoiceController: ERROR: getUnpaidInvoices: " + e.getMessage());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+
 
 }
