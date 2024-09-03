@@ -753,4 +753,24 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "WHERE b.id LIKE %:value% AND a.data_type = :dataType "
             + "AND a.time_created BETWEEN :fromDate AND :toDate ", nativeQuery = true)
     int countInvoiceByMerchantId(int dataType, String value, long fromDate, long toDate);
+
+    @Query(value = "SELECT a.id AS invoiceId, "
+            + "a.time_paid AS timePaid, "
+            + "COALESCE(JSON_UNQUOTE(JSON_EXTRACT(a.data, '$.vso')), '') AS vso, "
+            + "b.name AS midName, a.data AS data, a.amount AS amountNoVat, a.vat AS vat, "
+            + "a.vat_amount AS vatAmount, a.total_amount AS amount, a.invoice_id AS billNumber, "
+            + "a.name AS invoiceName, c.phone_no AS phoneNo, c.email AS email, a.time_created AS timeCreated, "
+            + "a.status AS status "
+            + "FROM invoice a "
+            + "INNER JOIN account_login c ON c.id = a.user_id "
+            + "LEFT JOIN merchant_sync b ON a.merchant_id = b.id "
+            + "WHERE a.merchant_id = :merchantId AND (a.status = 0 OR a.status = 1) "
+            + "LIMIT :offset, :size", nativeQuery = true)
+    List<IAdminInvoiceDTO> getUnpaidInvoicesByMerchantId(@Param("merchantId") String merchantId, @Param("offset") int offset, @Param("size") int size);
+
+    @Query(value = "SELECT COUNT(a.id) "
+            + "FROM invoice a "
+            + "WHERE a.merchant_id = :merchantId AND (a.status = 0 OR a.status = 1)", nativeQuery = true)
+    int countUnpaidInvoicesByMerchantId(@Param("merchantId") String merchantId);
+
 }
