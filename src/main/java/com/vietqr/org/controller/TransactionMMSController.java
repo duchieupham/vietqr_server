@@ -168,6 +168,9 @@ public class TransactionMMSController {
     GoogleSheetService googleSheetService;
 
     @Autowired
+    TransactionBankService transactionBankService;
+
+    @Autowired
     TransReceiveTempService transReceiveTempService;
 
     @PostMapping("transaction-mms")
@@ -2323,7 +2326,7 @@ public class TransactionMMSController {
                                 if (BankEncryptUtil.isMatchChecksum(dto.getCheckSum(), checkSum)) {
                                     // find terminal ID by bankAccount
                                     boolean checkIdempotency =
-                                            idempotencyService.saveResponseForKey(idempotencyKey, dto.getReferenceNumber());
+                                            idempotencyService.saveResponseForKey(idempotencyKey, dto.getReferenceNumber(), 30);
                                     if (checkIdempotency) {
                                         TerminalBankEntity terminalBankEntity = terminalBankService
                                                 .getTerminalBankByBankAccount(dto.getBankAccount());
@@ -2378,6 +2381,7 @@ public class TransactionMMSController {
                                                             refundLogEntity.setStatus(1);
                                                             refundLogEntity.setMessage(refundResult);
 
+                                                            insertTransactionRefundRedis(refundResult, dto, terminalBankEntity);
                                                             httpStatus = HttpStatus.OK;
                                                             result = new ResponseMessageDTO("SUCCESS", refundResult);
                                                         } else {
@@ -2440,6 +2444,7 @@ public class TransactionMMSController {
                                                         refundLogEntity.setStatus(1);
                                                         refundLogEntity.setMessage(refundResult);
 
+                                                        insertTransactionRefundRedis(refundResult, dto, terminalBankEntity);
                                                         httpStatus = HttpStatus.OK;
                                                         result = new ResponseMessageDTO("SUCCESS", refundResult);
                                                     } else {
@@ -2553,6 +2558,34 @@ public class TransactionMMSController {
             thread.start();
         }
         return new ResponseEntity<>(result, httpStatus);
+    }
+
+    private void insertTransactionRefundRedis(String ftCode, RefundRequestDTO dto, TerminalBankEntity terminalBankEntity) {
+        try {
+            idempotencyService.saveResponseForUUIDRefundKey(ftCode, dto.getReferenceNumber(), 600);
+            TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService.getTransactionReceiveByRefNumber(dto.getReferenceNumber(), "C");
+            if (Objects.nonNull(transactionReceiveEntity)) {
+                transactionReceiveService.updateTransactionRefundStatus(ftCode, transactionReceiveEntity.getSubCode(),
+                        transactionReceiveEntity.getTerminalCode(), 0);
+            }
+        } catch (Exception e) {
+            logger.error("insertTransactionRefundRedis: ERROR: " + e.toString() + " at: " + System.currentTimeMillis());
+        }
+    }
+
+    private boolean checkDuplicateReferenceNumber(String refNumber, String transType) {
+        boolean result = false;
+        try {
+            // if transType = C => check all transaction_bank and transaction_mms
+            // if transType = D => check only transaction bank
+            String check = transactionBankService.checkExistedReferenceNumber(refNumber, transType);
+            if (check == null || check.isEmpty()) {
+                result = true;
+            }
+        } catch (Exception e) {
+            logger.error(e.toString());
+        }
+        return result;
     }
 
     private String refundFromMB(String terminalId, String ftCode, String amount, String content) {

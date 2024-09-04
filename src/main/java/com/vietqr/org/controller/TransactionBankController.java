@@ -36,6 +36,7 @@ import com.vietqr.org.security.JWTAuthorizationFilter;
 import com.vietqr.org.service.*;
 import com.vietqr.org.service.bidv.CustomerVaService;
 import com.vietqr.org.service.mqtt.MqttMessagingService;
+import com.vietqr.org.service.redis.IdempotencyService;
 import com.vietqr.org.service.social.*;
 import com.vietqr.org.util.*;
 import com.vietqr.org.util.bank.bidv.BIDVUtil;
@@ -206,6 +207,9 @@ public class TransactionBankController {
 
     @Autowired
     private MerchantSyncService merchantSyncService;
+
+    @Autowired
+    private IdempotencyService idempotencyService;
 
     @Autowired
     private MerchantConnectionService merchantConnectionService;
@@ -2728,6 +2732,20 @@ public class TransactionBankController {
         return dateTime.format(formatter);
     }
 
+    private TransactionReceiveEntity getRedisTransTypeD(String ftCode) {
+        TransactionReceiveEntity transactionReceiveEntity = null;
+        try {
+            Optional<String> existingResponse = idempotencyService.getResponseForUUIDRefundKey(ftCode);
+            if (existingResponse.isPresent()) {
+                transactionReceiveEntity = transactionReceiveService.getTransactionReceiveByRefNumber(existingResponse.get(), "C");
+                idempotencyService.deleteResponseForUUIDRefundKey(ftCode);
+            }
+        } catch (Exception e) {
+            logger.error("transaction-sync - getRedisTransTypeD - ERROR: " + e.toString());
+        }
+        return transactionReceiveEntity;
+    }
+
     // insert new transaction mean it's not created from business. So DO NOT need to
     // push to users
     public void insertNewTransaction(String transcationUUID, TransactionBankDTO dto,
@@ -3016,33 +3034,6 @@ public class TransactionBankController {
                                 "WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
                     }
                 }
-                /////// DO INSERT TELEGRAM
-//				List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
-//				if (chatIds != null && !chatIds.isEmpty()) {
-//					TelegramUtil telegramUtil = new TelegramUtil();
-//					// String telegramMsg2 = "Thanh toán thành công 🎉."
-//					// + "\nTài khoản: " + bankTypeEntity.getBankShortName() + " - "
-//					// + accountBankEntity.getBankAccount()
-//					// + "\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
-//					// + "\nMã giao dịch: " + dto.getReferencenumber()
-//					// + "\nThời gian: " + convertLongToDate(time)
-//					// + "\nNội dung: " + dto.getContent();
-//					// String telegramMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
-//					// + "| TK: " + bankTypeEntity.getBankShortName() + " - "
-//					// + accountBankEntity.getBankAccount()
-//					// + "| Ma GD: " + dto.getReferencenumber()
-//					// + "| ND: " + dto.getContent()
-//					// + "| " + convertLongToDate(time);
-//					String telegramMsg = prefix + amount + " VND"
-//							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-//							+ accountBankEntity.getBankAccount()
-//							+ " | " + convertLongToDate(time)
-//							+ " | " + dto.getReferencenumber()
-//							+ " | ND: " + dto.getContent();
-//					for (String chatId : chatIds) {
-//						telegramUtil.sendMsg(chatId, telegramMsg);
-//					}
-//				}
 
                 /////// DO INSERT TELEGRAM BY QVAN
                 List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
@@ -3673,7 +3664,22 @@ public class TransactionBankController {
             transactionEntity.setAmount(Long.parseLong(dto.getAmount() + ""));
             transactionEntity.setTime(time);
             transactionEntity.setRefId(uuid.toString());
-            transactionEntity.setType(2);
+            if ("C".equals(dto.getTransType())) {
+                transactionEntity.setType(2);
+                transactionEntity.setTerminalCode("");
+                transactionEntity.setSubCode("");
+            } else {
+                TransactionReceiveEntity transTypeC = getRedisTransTypeD(dto.getReferencenumber());
+                if (Objects.nonNull(transTypeC)) {
+                    transactionEntity.setType(0);
+                    transactionEntity.setTerminalCode(transTypeC.getTerminalCode());
+                    transactionEntity.setSubCode(transTypeC.getSubCode());
+                } else {
+                    transactionEntity.setType(2);
+                    transactionEntity.setTerminalCode("");
+                    transactionEntity.setSubCode("");
+                }
+            }
             transactionEntity.setStatus(1);
             transactionEntity.setTraceId("");
             transactionEntity.setTransType(dto.getTransType());
@@ -3681,7 +3687,6 @@ public class TransactionBankController {
             transactionEntity.setOrderId(orderId);
             transactionEntity.setSign(sign);
             transactionEntity.setTimePaid(time);
-            transactionEntity.setTerminalCode("");
             transactionEntity.setQrCode("");
             transactionEntity.setUserId(accountBankEntity.getUserId());
             transactionEntity.setNote("");

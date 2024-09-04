@@ -2941,5 +2941,11 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "ORDER BY a.time DESC "
             + "LIMIT :limit", nativeQuery = true)
     List<ITransactionLatestDTO> getTransactionLastest(String bankId, int limit, long time);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE transaction_receive SET type = :type, sub_code = :subCode, " +
+            "terminal_code = :terminalCode WHERE reference_number = :ftCode AND trans_type = 'D' LIMIT 1 ", nativeQuery = true)
+    void updateTransactionRefundStatus(String ftCode, String subCode, String terminalCode, int type);
 }
 
