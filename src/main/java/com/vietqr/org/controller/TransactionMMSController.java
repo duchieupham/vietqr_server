@@ -2358,7 +2358,7 @@ public class TransactionMMSController {
                                                             refundLogEntity.setStatus(1);
                                                             refundLogEntity.setMessage(refundResult);
 
-                                                            insertTransactionRefund(refundResult, dto, terminalBankEntity);
+                                                            insertTransactionRefundRedis(refundResult, dto, terminalBankEntity);
                                                             httpStatus = HttpStatus.OK;
                                                             result = new ResponseMessageDTO("SUCCESS", refundResult);
                                                         } else {
@@ -2421,6 +2421,7 @@ public class TransactionMMSController {
                                                         refundLogEntity.setStatus(1);
                                                         refundLogEntity.setMessage(refundResult);
 
+                                                        insertTransactionRefundRedis(refundResult, dto, terminalBankEntity);
                                                         httpStatus = HttpStatus.OK;
                                                         result = new ResponseMessageDTO("SUCCESS", refundResult);
                                                     } else {
@@ -2536,34 +2537,17 @@ public class TransactionMMSController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    private void insertTransactionRefund(String ftCode, RefundRequestDTO dto, TerminalBankEntity terminalBankEntity) {
-        String amount = "";
-        long amountValue = Long.parseLong(dto.getAmount());
-        AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService.getAccountBankReceiveByBankAccountAndBankCode(dto.getBankAccount(), "MB");
-        UUID transcationUUID = UUID.randomUUID();
-        if (Objects.nonNull(accountBankReceiveEntity)) {
-            if (amountValue == 0) {
-                amount = processHiddenAmount(amountValue, accountBankReceiveEntity.getId(),
-                        accountBankReceiveEntity.isValidService(), transcationUUID.toString());
-            } else {
-                amount = processHiddenAmount(0, accountBankReceiveEntity.getId(),
-                        accountBankReceiveEntity.isValidService(), transcationUUID.toString());
+    private void insertTransactionRefundRedis(String ftCode, RefundRequestDTO dto, TerminalBankEntity terminalBankEntity) {
+        try {
+            idempotencyService.saveResponseForUUIDRefundKey(ftCode, dto.getReferenceNumber(), 600);
+            TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService.getTransactionReceiveByRefNumber(dto.getReferenceNumber(), "C");
+            if (Objects.nonNull(transactionReceiveEntity)) {
+                transactionReceiveService.updateTransactionRefundStatus(ftCode, transactionReceiveEntity.getSubCode(),
+                        transactionReceiveEntity.getTerminalCode(), 0);
             }
-            String amountForVoice = dto.getAmount() + "";
-            amount = formatAmountNumber(amount);
-
-            boolean isNotDuplicated = checkDuplicateReferenceNumber(ftCode, "D");
-            if (isNotDuplicated) {
-                transactionBankService.insertTransactionBank(dto.getTransactionid(),
-                        dto.getTransactiontime(),
-                        dto.getReferencenumber(), dto.getAmount(), dto.getContent(),
-                        dto.getBankaccount(),
-                        dto.getTransType(), dto.getReciprocalAccount(), dto.getReciprocalBankCode(),
-                        dto.getVa(),
-                        dto.getValueDate(), uuid.toString());
-            }
+        } catch (Exception e) {
+            logger.error("insertTransactionRefundRedis: ERROR: " + e.toString() + " at: " + System.currentTimeMillis());
         }
-
     }
 
     private boolean checkDuplicateReferenceNumber(String refNumber, String transType) {

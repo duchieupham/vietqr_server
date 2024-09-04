@@ -55,10 +55,20 @@ public class IdempotencyServiceImpl implements IdempotencyService {
         String lockKey = UUID_TRANS_PREFIX + key;
         try {
             result = Boolean.TRUE.equals(redisTemplate
-                    .opsForValue().setIfAbsent(lockKey, "locked", Duration.ofSeconds(duration)));
+                    .opsForValue().setIfAbsent(lockKey, response, Duration.ofSeconds(duration)));
         } catch (Exception e) {
         }
         return result;
+    }
+
+    public Optional<String> getResponseForUUIDRefundKey(String key) {
+        String lockKey = UUID_TRANS_PREFIX + key;
+        try {
+            return Optional.ofNullable(redisTemplate.opsForValue().get(lockKey));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Optional.ofNullable(null);
     }
 
     @Override

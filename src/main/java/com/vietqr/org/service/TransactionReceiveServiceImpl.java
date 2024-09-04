@@ -1600,6 +1600,11 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public void updateTransactionRefundStatus(String ftCode, String subCode, String terminalCode, int type) {
+        repo.updateTransactionRefundStatus(ftCode, subCode, terminalCode, type);
+    }
+
+    @Override
     public TransStatisticDTO getTransactionOverviewBySubTerminalCode(String subTerminalCode, String fromDate, String toDate) {
         return repo.getTransactionOverviewBySubTerminalCode(subTerminalCode,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,

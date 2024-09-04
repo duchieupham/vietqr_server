@@ -3,7 +3,6 @@ package com.vietqr.org.service;
 import com.vietqr.org.dto.IRefundCheckOrderDTO;
 import com.vietqr.org.dto.TransactionCheckMultiTimesDTO;
 import com.vietqr.org.entity.TransactionRefundEntity;
-import com.vietqr.org.entity.TransactionRefundLogEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
