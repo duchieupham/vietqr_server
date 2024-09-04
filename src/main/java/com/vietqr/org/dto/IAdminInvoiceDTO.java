@@ -20,4 +20,6 @@ public interface IAdminInvoiceDTO {
     String getEmail();
     Long getTimeCreated();
     int getStatus();
+    String getMerchantId();
+
 }

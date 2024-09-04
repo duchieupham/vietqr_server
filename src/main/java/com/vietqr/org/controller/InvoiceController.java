@@ -2270,7 +2270,7 @@ public class InvoiceController {
             @RequestParam int filterType,  // Loại lọc chính: 0 = Hóa đơn, 1 = Đại lý, 2 = Thời gian
             @RequestParam(required = false, defaultValue = "0") int subFilterType,  // Loại lọc con (mã hóa đơn, đại lý, tài khoản ngân hàng, ...)
             @RequestParam(required = false) String value,  // Giá trị cần lọc theo
-            @RequestParam(required = false) int invoiceType,  // 0: Hóa đơn thu phis, 1: Hóa giao dich,
+            @RequestParam(required = false) Integer  invoiceType,  // 0: Hóa đơn thu phis, 1: Hóa giao dich,
             // 2: Hóa đơn nạp tiền, 9: tất cả
             @RequestParam int page,
             @RequestParam int size,
@@ -2333,6 +2333,16 @@ public class InvoiceController {
                                         totalElement = invoiceService.countInvoiceByMerchantId(invoiceType, value, time);
                                     }
                                     break;
+                                case 4:
+                                    if ("0".equals(time)) {
+                                        dtos = invoiceService.getAllInvoicesByStatus(value, offset, size);
+                                        totalElement = invoiceService.countAllInvoicesByStatus(value);
+                                    } else {
+                                        dtos = invoiceService.getInvoicesByStatus(value, offset, size, time);
+                                        totalElement = invoiceService.countInvoicesByStatus(value, time);
+                                    }
+
+                                    break;
                                 default:
                                     dtos = new ArrayList<>();
                                     totalElement = 0;
@@ -2358,6 +2368,7 @@ public class InvoiceController {
                                 dto.setEmail(Optional.ofNullable(item.getEmail()).orElse(""));
                                 dto.setTimeCreated(Optional.ofNullable(item.getTimeCreated()).orElse(0L));
                                 dto.setStatus(Optional.ofNullable(item.getStatus()).orElse(0));
+                                dto.setMerchantId(Optional.ofNullable(item.getMerchantId()).orElse(""));
                                 return dto;
                             }).collect(Collectors.toList());
 
@@ -2400,6 +2411,7 @@ public class InvoiceController {
                                 dto.setPendingAmount(Optional.ofNullable(paymentInfo.getPendingFee()).orElse(0L));
                                 dto.setVietQrAccount(Optional.ofNullable(item.getPhoneNo()).orElse(""));
                                 dto.setEmail(Optional.ofNullable(item.getEmail()).orElse(""));
+                                dto.setMerchantId(Optional.ofNullable(item.getMerchantId()).orElse(""));
                                 return dto;
                             }).collect(Collectors.toList());
                             dataDTO.setItems(merchantData);
@@ -2436,6 +2448,7 @@ public class InvoiceController {
                                 dto.setEmail(Optional.ofNullable(item.getEmail()).orElse(""));
                                 dto.setTimeCreated(Optional.ofNullable(item.getTimeCreated()).orElse(0L));
                                 dto.setStatus(Optional.ofNullable(item.getStatus()).orElse(0));
+                                dto.setMerchantId(Optional.ofNullable(item.getMerchantId()).orElse(""));
                                 return dto;
                             }).collect(Collectors.toList());
 
@@ -2491,6 +2504,14 @@ public class InvoiceController {
                                         totalElement = invoiceService.countInvoiceByMerchantId(value, time);
                                     }
                                     break;
+                                case 4:
+                                    if ("0".equals(time)) {
+                                        dtos = invoiceService.getAllInvoicesByStatus(value, offset, size);
+                                        totalElement = invoiceService.countAllInvoicesByStatus(value);
+                                    } else {
+                                        dtos = invoiceService.getInvoicesByStatus(value, offset, size, time);
+                                        totalElement = invoiceService.countInvoicesByStatus(value, time);
+                                    }
                                 default:
                                     throw new IllegalArgumentException("Loại subFilter không hợp lệ");
                             }
@@ -2515,6 +2536,7 @@ public class InvoiceController {
                                 dto.setEmail(Optional.ofNullable(item.getEmail()).orElse(""));
                                 dto.setTimeCreated(Optional.ofNullable(item.getTimeCreated()).orElse(0L));
                                 dto.setStatus(Optional.ofNullable(item.getStatus()).orElse(0));
+                                dto.setMerchantId(Optional.ofNullable(item.getMerchantId()).orElse(""));
                                 return dto;
                             }).collect(Collectors.toList());
 
@@ -2557,6 +2579,7 @@ public class InvoiceController {
                                 dto.setPendingAmount(Optional.ofNullable(paymentInfo.getPendingFee()).orElse(0L));
                                 dto.setVietQrAccount(Optional.ofNullable(item.getPhoneNo()).orElse(""));
                                 dto.setEmail(Optional.ofNullable(item.getEmail()).orElse(""));
+                                dto.setMerchantId(Optional.ofNullable(item.getMerchantId()).orElse(""));
                                 return dto;
                             }).collect(Collectors.toList());
                             dataDTO.setItems(merchantData);
@@ -2593,6 +2616,7 @@ public class InvoiceController {
                                 dto.setEmail(Optional.ofNullable(item.getEmail()).orElse(""));
                                 dto.setTimeCreated(Optional.ofNullable(item.getTimeCreated()).orElse(0L));
                                 dto.setStatus(Optional.ofNullable(item.getStatus()).orElse(0));
+                                dto.setMerchantId(Optional.ofNullable(item.getMerchantId()).orElse(""));
                                 return dto;
                             }).collect(Collectors.toList());
 
@@ -2634,7 +2658,7 @@ public class InvoiceController {
                     + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
-        }
+         }
         return new ResponseEntity<>(result, httpStatus);
     }
 

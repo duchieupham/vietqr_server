@@ -173,4 +173,13 @@ public interface InvoiceService {
     List<AdminMerchantDTO> getUnpaidInvoicesByMerchantId(String merchantId, int offset, int size);
 
     int countUnpaidInvoicesByMerchantId(String merchantId);
+
+
+    List<IAdminInvoiceDTO> getAllInvoicesByStatus(String status, int offset, int size);
+
+    int countAllInvoicesByStatus(String status);
+
+    List<IAdminInvoiceDTO> getInvoicesByStatus(String status, int offset, int size, String time);
+
+    int countInvoicesByStatus(String status, String time);
 }
