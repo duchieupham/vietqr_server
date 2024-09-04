@@ -542,6 +542,9 @@ public class InvoiceServiceImpl implements InvoiceService {
                     dto.setInvoiceId(Optional.ofNullable(item.getInvoiceId()).orElse(""));
                     dto.setVso(Optional.ofNullable(item.getVso()).orElse(""));
                     dto.setMerchantName(Optional.ofNullable(item.getMidName()).orElse(""));
+                    dto.setMerchantId(Optional.ofNullable(item.getMerchantId()).orElse(""));
+                    dto.setBillNumber(Optional.ofNullable(item.getBillNumber()).orElse(""));
+                    dto.setInvoiceName(Optional.ofNullable(item.getInvoiceName()).orElse(""));
 
                     // Lấy thông tin thanh toán
                     IInvoicePaymentDTO paymentInfo = getInvoicePaymentInfo(item.getInvoiceId());
