@@ -2959,33 +2959,6 @@ public class TransactionBankController {
                                 "WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
                     }
                 }
-                /////// DO INSERT TELEGRAM
-//				List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());
-//				if (chatIds != null && !chatIds.isEmpty()) {
-//					TelegramUtil telegramUtil = new TelegramUtil();
-//					// String telegramMsg2 = "Thanh toán thành công 🎉."
-//					// + "\nTài khoản: " + bankTypeEntity.getBankShortName() + " - "
-//					// + accountBankEntity.getBankAccount()
-//					// + "\nGiao dịch: " + prefix + nf.format(dto.getAmount()) + " VND"
-//					// + "\nMã giao dịch: " + dto.getReferencenumber()
-//					// + "\nThời gian: " + convertLongToDate(time)
-//					// + "\nNội dung: " + dto.getContent();
-//					// String telegramMsg = "GD: " + prefix + nf.format(dto.getAmount()) + " VND"
-//					// + "| TK: " + bankTypeEntity.getBankShortName() + " - "
-//					// + accountBankEntity.getBankAccount()
-//					// + "| Ma GD: " + dto.getReferencenumber()
-//					// + "| ND: " + dto.getContent()
-//					// + "| " + convertLongToDate(time);
-//					String telegramMsg = prefix + amount + " VND"
-//							+ " | TK: " + bankTypeEntity.getBankShortName() + " - "
-//							+ accountBankEntity.getBankAccount()
-//							+ " | " + convertLongToDate(time)
-//							+ " | " + dto.getReferencenumber()
-//							+ " | ND: " + dto.getContent();
-//					for (String chatId : chatIds) {
-//						telegramUtil.sendMsg(chatId, telegramMsg);
-//					}
-//				}
 
                 /////// DO INSERT TELEGRAM BY QVAN
                 List<String> chatIds = telegramAccountBankService.getChatIdsByBankId(accountBankEntity.getId());

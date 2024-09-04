@@ -167,6 +167,9 @@ public class TransactionMMSController {
     GoogleSheetService googleSheetService;
 
     @Autowired
+    TransactionBankService transactionBankService;
+
+    @Autowired
     TransReceiveTempService transReceiveTempService;
 
     @PostMapping("transaction-mms")
@@ -2300,7 +2303,7 @@ public class TransactionMMSController {
                                 if (BankEncryptUtil.isMatchChecksum(dto.getCheckSum(), checkSum)) {
                                     // find terminal ID by bankAccount
                                     boolean checkIdempotency =
-                                            idempotencyService.saveResponseForKey(idempotencyKey, dto.getReferenceNumber());
+                                            idempotencyService.saveResponseForKey(idempotencyKey, dto.getReferenceNumber(), 30);
                                     if (checkIdempotency) {
                                         TerminalBankEntity terminalBankEntity = terminalBankService
                                                 .getTerminalBankByBankAccount(dto.getBankAccount());
@@ -2355,6 +2358,7 @@ public class TransactionMMSController {
                                                             refundLogEntity.setStatus(1);
                                                             refundLogEntity.setMessage(refundResult);
 
+                                                            insertTransactionRefund(refundResult, dto, terminalBankEntity);
                                                             httpStatus = HttpStatus.OK;
                                                             result = new ResponseMessageDTO("SUCCESS", refundResult);
                                                         } else {
@@ -2530,6 +2534,51 @@ public class TransactionMMSController {
             thread.start();
         }
         return new ResponseEntity<>(result, httpStatus);
+    }
+
+    private void insertTransactionRefund(String ftCode, RefundRequestDTO dto, TerminalBankEntity terminalBankEntity) {
+        String amount = "";
+        long amountValue = Long.parseLong(dto.getAmount());
+        AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService.getAccountBankReceiveByBankAccountAndBankCode(dto.getBankAccount(), "MB");
+        UUID transcationUUID = UUID.randomUUID();
+        if (Objects.nonNull(accountBankReceiveEntity)) {
+            if (amountValue == 0) {
+                amount = processHiddenAmount(amountValue, accountBankReceiveEntity.getId(),
+                        accountBankReceiveEntity.isValidService(), transcationUUID.toString());
+            } else {
+                amount = processHiddenAmount(0, accountBankReceiveEntity.getId(),
+                        accountBankReceiveEntity.isValidService(), transcationUUID.toString());
+            }
+            String amountForVoice = dto.getAmount() + "";
+            amount = formatAmountNumber(amount);
+
+            boolean isNotDuplicated = checkDuplicateReferenceNumber(ftCode, "D");
+            if (isNotDuplicated) {
+                transactionBankService.insertTransactionBank(dto.getTransactionid(),
+                        dto.getTransactiontime(),
+                        dto.getReferencenumber(), dto.getAmount(), dto.getContent(),
+                        dto.getBankaccount(),
+                        dto.getTransType(), dto.getReciprocalAccount(), dto.getReciprocalBankCode(),
+                        dto.getVa(),
+                        dto.getValueDate(), uuid.toString());
+            }
+        }
+
+    }
+
+    private boolean checkDuplicateReferenceNumber(String refNumber, String transType) {
+        boolean result = false;
+        try {
+            // if transType = C => check all transaction_bank and transaction_mms
+            // if transType = D => check only transaction bank
+            String check = transactionBankService.checkExistedReferenceNumber(refNumber, transType);
+            if (check == null || check.isEmpty()) {
+                result = true;
+            }
+        } catch (Exception e) {
+            logger.error(e.toString());
+        }
+        return result;
     }
 
     private String refundFromMB(String terminalId, String ftCode, String amount, String content) {

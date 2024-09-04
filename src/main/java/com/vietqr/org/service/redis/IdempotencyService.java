@@ -8,8 +8,8 @@ import java.util.Optional;
 public interface IdempotencyService {
 
     public Optional<String> getResponseForKey(String key);
-
     public boolean deleteResponseForKey(String key);
-
-    public boolean saveResponseForKey(String key, String response);
+    public boolean deleteResponseForUUIDRefundKey(String key);
+    public boolean saveResponseForKey(String key, String response, int duration);
+    public boolean saveResponseForUUIDRefundKey(String key, String response, int duration);
 }

@@ -14,6 +14,7 @@ public class IdempotencyServiceImpl implements IdempotencyService {
     private StringRedisTemplate redisTemplate;
 
     private static final String LOCK_PREFIX = "idempotency-lock:";
+    private static final String UUID_TRANS_PREFIX = "idempotency-uuid-lock:";
 
     @Override
     public Optional<String> getResponseForKey(String key) {
@@ -37,13 +38,37 @@ public class IdempotencyServiceImpl implements IdempotencyService {
     }
 
     @Override
-    public boolean saveResponseForKey(String key, String response) {
+    public boolean saveResponseForKey(String key, String response, int duration) {
         boolean result = false;
         String lockKey = LOCK_PREFIX + key;
         try {
             result = Boolean.TRUE.equals(redisTemplate
-                    .opsForValue().setIfAbsent(lockKey, "locked", Duration.ofSeconds(30)));
+                    .opsForValue().setIfAbsent(lockKey, "locked", Duration.ofSeconds(duration)));
         } catch (Exception e) {
+        }
+        return result;
+    }
+
+    @Override
+    public boolean saveResponseForUUIDRefundKey(String key, String response, int duration) {
+        boolean result = false;
+        String lockKey = UUID_TRANS_PREFIX + key;
+        try {
+            result = Boolean.TRUE.equals(redisTemplate
+                    .opsForValue().setIfAbsent(lockKey, "locked", Duration.ofSeconds(duration)));
+        } catch (Exception e) {
+        }
+        return result;
+    }
+
+    @Override
+    public boolean deleteResponseForUUIDRefundKey(String key) {
+        boolean result = false;
+        String lockKey = UUID_TRANS_PREFIX + key;
+        try {
+            redisTemplate.delete(lockKey);
+            result = true;
+        } catch (Exception ignored) {
         }
         return result;
     }
