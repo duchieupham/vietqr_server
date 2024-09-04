@@ -2259,6 +2259,13 @@ public class TransactionController {
             httpStatus = HttpStatus.BAD_REQUEST;
         } finally {
             executorService.shutdown();
+            try {
+                if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                    executorService.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                executorService.shutdownNow();
+            }
         }
         return new ResponseEntity<>(result, httpStatus);
     }

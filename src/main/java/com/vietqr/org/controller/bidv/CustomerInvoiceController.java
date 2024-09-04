@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -1723,55 +1724,65 @@ public class CustomerInvoiceController {
                 if (userIds != null && !userIds.isEmpty()) {
                     int numThread = userIds.size();
                     ExecutorService executorService = Executors.newFixedThreadPool(numThread);
-                    for (String userId : userIds) {
-                        UUID notificationUUID = UUID.randomUUID();
-                        NotificationEntity notiEntity = new NotificationEntity();
-                        String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
-                                + accountBankReceiveEntity.getBankAccount()
-                                + NotificationUtil.getNotiDescUpdateTransSuffix2()
-                                + prefix + amount
-                                + NotificationUtil.getNotiDescUpdateTransSuffix3()
-                                + ""
-                                + NotificationUtil.getNotiDescUpdateTransSuffix4()
-                                + transactionReceiveEntity.getContent();
-                        notiEntity.setId(notificationUUID.toString());
-                        notiEntity.setRead(false);
-                        notiEntity.setMessage(message);
-                        notiEntity.setTime(time);
-                        notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
-                        notiEntity.setUserId(userId);
-                        notiEntity.setData(transactionReceiveEntity.getId());
-                        Map<String, String> data = new HashMap<>();
-                        if (terminalEntity != null) {
-                            data = autoMapUpdateTransPushNotification(
-                                    new NotificationFcmMapDTO(
-                                            notificationUUID.toString(),
-                                            bankTypeEntity,
-                                            StringUtil.getValueNullChecker(terminalEntity.getName()),
-                                            StringUtil.getValueNullChecker(terminalEntity.getCode()),
-                                            StringUtil.getValueNullChecker(terminalEntity.getRawTerminalCode()),
-                                            amount,
-                                            transactionReceiveEntity
-                                    )
-                            );
-                        } else {
-                            data = autoMapUpdateTransPushNotification(
-                                    new NotificationFcmMapDTO(
-                                            notificationUUID.toString(),
-                                            bankTypeEntity,
-                                            "",
-                                            "",
-                                            "",
-                                            amount,
-                                            transactionReceiveEntity
-                                    )
-                            );
+                    try {
+                        for (String userId : userIds) {
+                            UUID notificationUUID = UUID.randomUUID();
+                            NotificationEntity notiEntity = new NotificationEntity();
+                            String message = NotificationUtil.getNotiDescUpdateTransSuffix1()
+                                    + accountBankReceiveEntity.getBankAccount()
+                                    + NotificationUtil.getNotiDescUpdateTransSuffix2()
+                                    + prefix + amount
+                                    + NotificationUtil.getNotiDescUpdateTransSuffix3()
+                                    + ""
+                                    + NotificationUtil.getNotiDescUpdateTransSuffix4()
+                                    + transactionReceiveEntity.getContent();
+                            notiEntity.setId(notificationUUID.toString());
+                            notiEntity.setRead(false);
+                            notiEntity.setMessage(message);
+                            notiEntity.setTime(time);
+                            notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
+                            notiEntity.setUserId(userId);
+                            notiEntity.setData(transactionReceiveEntity.getId());
+                            Map<String, String> data = new HashMap<>();
+                            if (terminalEntity != null) {
+                                data = autoMapUpdateTransPushNotification(
+                                        new NotificationFcmMapDTO(
+                                                notificationUUID.toString(),
+                                                bankTypeEntity,
+                                                StringUtil.getValueNullChecker(terminalEntity.getName()),
+                                                StringUtil.getValueNullChecker(terminalEntity.getCode()),
+                                                StringUtil.getValueNullChecker(terminalEntity.getRawTerminalCode()),
+                                                amount,
+                                                transactionReceiveEntity
+                                        )
+                                );
+                            } else {
+                                data = autoMapUpdateTransPushNotification(
+                                        new NotificationFcmMapDTO(
+                                                notificationUUID.toString(),
+                                                bankTypeEntity,
+                                                "",
+                                                "",
+                                                "",
+                                                amount,
+                                                transactionReceiveEntity
+                                        )
+                                );
+                            }
+                            Map<String, String> finalData = data;
+                            executorService.submit(() -> pushNotification(NotificationUtil
+                                    .getNotiTitleUpdateTransaction(), message, notiEntity, finalData, userId));
                         }
-                        Map<String, String> finalData = data;
-                        executorService.submit(() -> pushNotification(NotificationUtil
-                                .getNotiTitleUpdateTransaction(), message, notiEntity, finalData, userId));
+                    } finally {
+                        executorService.shutdown(); // Yêu cầu các luồng dừng khi hoàn tất công việc
+                        try {
+                            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                                executorService.shutdownNow(); // Nếu vẫn chưa dừng sau 60 giây, cưỡng chế dừng
+                            }
+                        } catch (InterruptedException e) {
+                            executorService.shutdownNow(); // Nếu bị ngắt khi chờ, cưỡng chế dừng
+                        }
                     }
-                    executorService.shutdown();
                 }
                 String message = prefix + amount + " VND"
                         + " | TK: " + bankTypeEntity.getBankShortName() + " - "
