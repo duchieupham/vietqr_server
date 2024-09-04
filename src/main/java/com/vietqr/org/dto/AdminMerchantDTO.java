@@ -8,12 +8,13 @@ public class AdminMerchantDTO {
     private long completeAmount;
     private String vietQrAccount;
     private String email;
+    private String merchantId;
 
 
     public AdminMerchantDTO() {
     }
 
-    public AdminMerchantDTO(String invoiceId, String vso, String merchantName, long pendingAmount, long completeAmount, String vietQrAccount, String email) {
+    public AdminMerchantDTO(String invoiceId, String vso, String merchantName, long pendingAmount, long completeAmount, String vietQrAccount, String email, String merchantId) {
         this.invoiceId = invoiceId;
         this.vso = vso;
         this.merchantName = merchantName;
@@ -21,6 +22,7 @@ public class AdminMerchantDTO {
         this.completeAmount = completeAmount;
         this.vietQrAccount = vietQrAccount;
         this.email = email;
+        this.merchantId = merchantId;
     }
 
     public String getInvoiceId() {
@@ -79,5 +81,13 @@ public class AdminMerchantDTO {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getMerchantId() {
+        return merchantId;
+    }
+
+    public void setMerchantId(String merchantId) {
+        this.merchantId = merchantId;
     }
 }

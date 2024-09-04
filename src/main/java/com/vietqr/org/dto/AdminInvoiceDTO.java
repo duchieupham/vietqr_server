@@ -22,6 +22,7 @@ public class AdminInvoiceDTO {
     private String email;
     private long timeCreated;
     private int status;
+    private String merchantId;
 
     public AdminInvoiceDTO() {
     }
@@ -29,7 +30,7 @@ public class AdminInvoiceDTO {
     public AdminInvoiceDTO(String invoiceId, long timePaid, String vso, String midName, long amount,
                            String bankShortName, String bankAccount, String qrCode, double vat,
                            long vatAmount, long amountNoVat, String billNumber, String invoiceName,
-                           String fullName, String phoneNo, String email, long timeCreated, int status) {
+                           String fullName, String phoneNo, String email, long timeCreated, int status,String merchantId) {
         this.invoiceId = invoiceId;
         this.timePaid = timePaid;
         this.vso = vso;
@@ -48,6 +49,7 @@ public class AdminInvoiceDTO {
         this.email = email;
         this.timeCreated = timeCreated;
         this.status = status;
+        this.merchantId = merchantId;
     }
 
     public String getInvoiceId() {
@@ -192,5 +194,13 @@ public class AdminInvoiceDTO {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public String getMerchantId() {
+        return merchantId;
+    }
+
+    public void setMerchantId(String merchantId) {
+        this.merchantId = merchantId;
     }
 }

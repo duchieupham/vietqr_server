@@ -578,6 +578,33 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         return (int) count;
     }
+
+    @Override
+    public List<IAdminInvoiceDTO> getAllInvoicesByStatus(String status, int offset, int size) {
+        return repo.getAllInvoicesByStatus(status, offset, size);
+    }
+
+    @Override
+    public int countAllInvoicesByStatus(String status) {
+        return repo.countAllInvoicesByStatus(status);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getInvoicesByStatus(String status, int offset, int size, String time) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(time);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.getInvoicesByStatus(status, offset, size, fromDate, toDate);
+    }
+
+    @Override
+    public int countInvoicesByStatus(String status, String time) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(time);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.countInvoicesByStatus(status, fromDate, toDate);
+    }
+
     private AccountBankInfoDTO getBankAccountInfoByData(String data) {
         AccountBankInfoDTO dto = new AccountBankInfoDTO();
         ObjectMapper mapper = new ObjectMapper();
