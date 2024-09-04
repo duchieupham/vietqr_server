@@ -82,11 +82,14 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "FROM transaction_receive a "
             + "WHERE a.bank_id=:bankId AND a.status != 2 "
             + "AND a.time BETWEEN :fromDate AND :toDate "
+            + "AND (a.time_paid BETWEEN :fromTimePaid AND :toTimePaid OR a.time_paid = 0) "
             + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
     List<TransactionRelatedDTO> getTransactions(@Param(value = "offset") int offset,
                                                 @Param(value = "bankId") String bankId,
                                                 @Param(value = "fromDate") long fromDate,
-                                                @Param(value = "toDate") long toDate);
+                                                @Param(value = "toDate") long toDate,
+                                                @Param(value = "fromTimePaid") long fromTimePaid,
+                                                @Param(value = "toTimePaid") long toTimePaid);
 
     @Query(value = "SELECT a.id as transactionId, a.amount, "
             + "a.bank_account as bankAccount, a.content, a.time, a.time_paid as timePaid, "
@@ -96,12 +99,15 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "FROM transaction_receive a "
             + "WHERE a.bank_id = :bankId AND a.status = :status "
             + "AND a.time BETWEEN :fromDate AND :toDate "
+            + "AND (a.time_paid BETWEEN :fromTimePaid AND :toTimePaid OR a.time_paid = 0) "
             + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
     List<TransactionRelatedDTO> getTransactionsByStatus(@Param(value = "status") int status,
                                                         @Param(value = "offset") int offset,
                                                         @Param(value = "bankId") String bankId,
                                                         @Param(value = "fromDate") long fromDate,
-                                                        @Param(value = "toDate") long toDate);
+                                                        @Param(value = "toDate") long toDate,
+                                                        @Param(value = "fromTimePaid") long fromTimePaid,
+                                                        @Param(value = "toTimePaid") long toTimePaid);
 
     @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount, a.content, a.time, "
             + "a.time_paid as timePaid,a.status,a.type,a.trans_type as transType, "
@@ -123,12 +129,15 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "FROM transaction_receive a "
             + "WHERE a.bank_id= :bankId AND a.reference_number = :value "
             + "AND a.time BETWEEN :fromDate AND :toDate "
+            + "AND (a.time_paid BETWEEN :fromTimePaid AND :toTimePaid OR a.time_paid = 0) "
             + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
     List<TransactionRelatedDTO> getTransactionsByFtCode(@Param(value = "value") String value,
                                                         @Param(value = "offset") int offset,
                                                         @Param(value = "bankId") String bankId,
                                                         @Param(value = "fromDate") long fromDate,
-                                                        @Param(value = "toDate") long toDate);
+                                                        @Param(value = "toDate") long toDate,
+                                                        @Param(value = "fromTimePaid") long fromTimePaid,
+                                                        @Param(value = "toTimePaid") long toTimePaid);
 
     @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content,a.time, "
             + "a.time_paid as timePaid,a.status,a.type,a.trans_type as transType, "
@@ -150,13 +159,16 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "FROM transaction_receive a "
             + "WHERE a.bank_id = :bankId AND a.order_id = :value "
             + "AND a.time BETWEEN :fromDate AND :toDate "
+            + "AND (a.time_paid BETWEEN :fromTimePaid AND :toTimePaid OR a.time_paid = 0) "
             + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
     List<TransactionRelatedDTO> getTransactionsByOrderId(
             @Param(value = "value") String value,
             @Param(value = "offset") int offset,
             @Param(value = "bankId") String bankId,
             @Param(value = "fromDate") long fromDate,
-            @Param(value = "toDate") long toDate);
+            @Param(value = "toDate") long toDate,
+            @Param(value = "fromTimePaid") long fromTimePaid,
+            @Param(value = "toTimePaid") long toTimePaid);
 
     @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content, a.time, "
             + "a.time_paid as timePaid,a.status,a.type,a.trans_type as transType, "
@@ -179,13 +191,16 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "FROM transaction_receive a "
             + "WHERE a.bank_id= :bankId AND a.content LIKE %:value% "
             + "AND a.time BETWEEN :fromDate AND :toDate "
+            + "AND (a.time_paid BETWEEN :fromTimePaid AND :toTimePaid OR a.time_paid = 0) "
             + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
     List<TransactionRelatedDTO> getTransactionsByContent(
             @Param(value = "value") String value,
             @Param(value = "offset") int offset,
             @Param(value = "bankId") String bankId,
             @Param(value = "fromDate") long fromDate,
-            @Param(value = "toDate") long toDate);
+            @Param(value = "toDate") long toDate,
+            @Param(value = "fromTimePaid") long fromTimePaid,
+            @Param(value = "toTimePaid") long toTimePaid);
 
     @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount,a.content, a.time, "
             + "a.time_paid as timePaid, a.status, a.type, a.trans_type as transType, "
@@ -208,12 +223,15 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "FROM transaction_receive a "
             + "WHERE a.bank_id = :bankId AND a.terminal_code LIKE %:value% "
             + "AND a.time BETWEEN :fromDate AND :toDate "
+            + "AND (a.time_paid BETWEEN :fromTimePaid AND :toTimePaid OR a.time_paid = 0) "
             + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
     List<TransactionRelatedDTO> getTransactionsByTerminalCode(
             @Param(value = "value") String value,
             @Param(value = "offset") int offset,
             @Param(value = "fromDate") long fromDate,
             @Param(value = "toDate") long toDate,
+            @Param(value = "fromTimePaid") long fromTimePaid,
+            @Param(value = "toTimePaid") long toTimePaid,
             @Param(value = "bankId") String bankId);
 
     @Query(value = "SELECT a.id as transactionId,a.amount, a.bank_account as bankAccount, a.content, a.time, "
@@ -223,12 +241,15 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "FROM transaction_receive a "
             + "WHERE a.bank_id = :bankId AND a.sub_code LIKE %:value% "
             + "AND a.time BETWEEN :fromDate AND :toDate "
+            + "AND (a.time_paid BETWEEN :fromTimePaid AND :toTimePaid OR a.time_paid = 0) "
             + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
     List<TransactionRelatedDTO> getTransactionsBySubCode(
             @Param(value = "value") String value,
             @Param(value = "offset") int offset,
             @Param(value = "fromDate") long fromDate,
             @Param(value = "toDate") long toDate,
+            @Param(value = "fromTimePaid") long fromTimePaid,
+            @Param(value = "toTimePaid") long toTimePaid,
             @Param(value = "bankId") String bankId);
 
     @Query(value = "SELECT a.id as transactionId, a.amount, a.bank_account as bankAccount, a.content, a.time, "
@@ -2154,8 +2175,9 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "FROM transaction_receive a "
             + "WHERE a.bank_id = :bankId AND a.terminal_code IN (:allTerminalCode) "
             + "AND a.time BETWEEN :fromDate AND :toDate "
+            + "AND (a.time_paid BETWEEN :fromTimePaid AND :toTimePaid OR a.time_paid = 0) "
             + "ORDER BY a.time DESC LIMIT :offset, 20", nativeQuery = true)
-    List<TransactionRelatedDTO> getTransactionsByTerminalCodeAndDateListCode(List<String> allTerminalCode, int offset, String bankId, long fromDate, long toDate);
+    List<TransactionRelatedDTO> getTransactionsByTerminalCodeAndDateListCode(List<String> allTerminalCode, int offset, String bankId, long fromDate, long toDate, long fromTimePaid, long toTimePaid);
 
     @Query(value = "SELECT a.id AS transactionId, a.amount, a.bank_account AS bankAccount, a.content, a.time, "
             + "a.time_paid AS timePaid, a.status, a.type,a.trans_type AS transType, "
@@ -2346,8 +2368,9 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "INNER JOIN account_bank_receive c ON a.bank_id = c.id "
             + "INNER JOIN bank_type d ON d.id = c.bank_type_id "
             + "WHERE a.time BETWEEN :fromDate AND :toDate AND a.bank_id = :bankId "
+            + "AND (a.time_paid BETWEEN :fromTimePaid AND :toTimePaid OR a.time_paid = 0) "
             + "ORDER BY a.time DESC ", nativeQuery = true)
-    List<ITransactionRelatedDetailDTO> getTransByBankId(String bankId, long fromDate, long toDate);
+    List<ITransactionRelatedDetailDTO> getTransByBankId(String bankId, long fromDate, long toDate, long fromTimePaid, long toTimePaid);
 
     @Query(value = "SELECT a.id AS transactionId, a.amount AS amount, a.bank_account AS bankAccount "
             + ", a.content AS content, a.time AS time, a.time_paid AS timePaid, a.status AS status, "
@@ -2358,8 +2381,9 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "INNER JOIN account_bank_receive c ON a.bank_id = c.id "
             + "INNER JOIN bank_type d ON d.id = c.bank_type_id "
             + "WHERE a.time BETWEEN :fromDate AND :toDate AND a.terminal_code = :terminalCode "
+            + "AND (a.time_paid BETWEEN :fromTimePaid AND :toTimePaid OR a.time_paid = 0) "
             + "ORDER BY a.time DESC ", nativeQuery = true)
-    List<ITransactionRelatedDetailDTO> getTransByTerminalCode(String terminalCode, long fromDate, long toDate);
+    List<ITransactionRelatedDetailDTO> getTransByTerminalCode(String terminalCode, long fromDate, long toDate, long fromTimePaid, long toTimePaid);
 
     @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, "
             + "a.order_id as orderId, a.reference_number as referenceNumber, "
@@ -2409,8 +2433,9 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "COALESCE(SUM(CASE WHEN a.type = 2 THEN a.amount ELSE 0 END), 0) AS totalCashUnsettled "
             + "FROM transaction_receive a "
             + "WHERE a.time BETWEEN :fromDate AND :toDate AND trans_type = 'C' "
+            + "WHERE a.time_paid BETWEEN :fromTimePaid AND :toTimePaid "
             + "AND a.bank_id = :bankId AND a.status = 1 LIMIT 1", nativeQuery = true)
-    ITransStatisticResponseWebDTO getTransactionWebOverview(String bankId, long fromDate, long toDate);
+    ITransStatisticResponseWebDTO getTransactionWebOverview(String bankId, long fromDate, long toDate, long fromTimePaid, long toTimePaid);
 
     @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, "
             + "a.order_id as orderId, a.reference_number as referenceNumber, "
@@ -2916,5 +2941,11 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "ORDER BY a.time DESC "
             + "LIMIT :limit", nativeQuery = true)
     List<ITransactionLatestDTO> getTransactionLastest(String bankId, int limit, long time);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE transaction_receive SET type = :type, sub_code = :subCode, " +
+            "terminal_code = :terminalCode WHERE reference_number = :ftCode AND trans_type = 'D' LIMIT 1 ", nativeQuery = true)
+    void updateTransactionRefundStatus(String ftCode, String subCode, String terminalCode, int type);
 }
 

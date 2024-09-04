@@ -62,6 +62,8 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     @Override
     public List<TransactionRelatedDTO> getTransactions(int offset, String bankId, String fromDate, String toDate) {
         return repo.getTransactions(offset, bankId,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET - 600,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
@@ -137,6 +139,8 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     public List<TransactionRelatedDTO> getTransactionsByStatus(int status, int offset, String bankId, String fromDate,
                                                                String toDate) {
         return repo.getTransactionsByStatus(status, offset, bankId,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET - 600,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
@@ -671,6 +675,8 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     public List<TransactionRelatedDTO> getTransactionsByFtCode(String value, int offset, String bankId, String fromDate,
                                                                String toDate) {
         return repo.getTransactionsByFtCode(value, offset, bankId,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET - 600,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
@@ -685,6 +691,8 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
                                                                 String fromDate,
                                                                 String toDate) {
         return repo.getTransactionsByOrderId(value, offset, bankId,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET - 600,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
@@ -700,6 +708,8 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
                                                                 String fromDate,
                                                                 String toDate) {
         return repo.getTransactionsByContent(value, offset, bankId,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET - 600,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
@@ -714,6 +724,8 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     public List<TransactionRelatedDTO> getTransactionsByTerminalCodeAndDate(String value, int offset, String fromDate,
                                                                             String toDate, String bankId) {
         return repo.getTransactionsByTerminalCode(value, offset,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET - 600,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET, bankId);
     }
@@ -1069,6 +1081,8 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     @Override
     public List<TransactionRelatedDTO> getTransactionsByTerminalCodeAndDateListCode(List<String> allTerminalCode, int offset, String bankId, String from, String to) {
         return repo.getTransactionsByTerminalCodeAndDateListCode(allTerminalCode, offset, bankId,
+                DateTimeUtil.getDateTimeAsLongInt(from) - DateTimeUtil.GMT_PLUS_7_OFFSET - 600,
+                DateTimeUtil.getDateTimeAsLongInt(to) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(from) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(to) - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
@@ -1195,6 +1209,8 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     @Override
     public List<ITransactionRelatedDetailDTO> getTransByBankId(String bankId, String fromDate, String toDate) {
         return repo.getTransByBankId(bankId,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET - 600,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
@@ -1203,6 +1219,8 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     public List<ITransactionRelatedDetailDTO> getTransByTerminalCode(String terminalCode,
                                                                     String fromDate, String toDate) {
         return repo.getTransByTerminalCode(terminalCode,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET - 600,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
@@ -1232,6 +1250,8 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     @Override
     public ITransStatisticResponseWebDTO getTransactionWebOverview(String bankId, String fromDate, String toDate) {
         return repo.getTransactionWebOverview(bankId,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET - 600,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET);
     }
@@ -1595,8 +1615,15 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     @Override
     public List<TransactionRelatedDTO> getTransactionsBySubCode(String value, int offset, String bankId, String from, String to) {
         return repo.getTransactionsBySubCode(value, offset,
+            DateTimeUtil.getDateTimeAsLongInt(from) - DateTimeUtil.GMT_PLUS_7_OFFSET - 600,
+            DateTimeUtil.getDateTimeAsLongInt(to) - DateTimeUtil.GMT_PLUS_7_OFFSET,
             DateTimeUtil.getDateTimeAsLongInt(from) - DateTimeUtil.GMT_PLUS_7_OFFSET,
             DateTimeUtil.getDateTimeAsLongInt(to) - DateTimeUtil.GMT_PLUS_7_OFFSET, bankId);
+    }
+
+    @Override
+    public void updateTransactionRefundStatus(String ftCode, String subCode, String terminalCode, int type) {
+        repo.updateTransactionRefundStatus(ftCode, subCode, terminalCode, type);
     }
 
     @Override

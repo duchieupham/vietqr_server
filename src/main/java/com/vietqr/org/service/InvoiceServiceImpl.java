@@ -1,5 +1,6 @@
 package com.vietqr.org.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.InvoiceEntity;
 import com.vietqr.org.repository.InvoiceRepository;
@@ -8,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class InvoiceServiceImpl implements InvoiceService {
@@ -528,5 +532,91 @@ public class InvoiceServiceImpl implements InvoiceService {
         return repo.countInvoiceByMerchantId(dataType, value, fromDate, toDate);
     }
 
+    @Override
+    public List<AdminMerchantDTO> getUnpaidInvoicesByMerchantId(String merchantId, int offset, int size) {
+        List<IAdminInvoiceDTO> unpaidInvoices = repo.getUnpaidInvoicesByMerchantId(merchantId, offset, size);
+
+        // Chuyển đổi từ IAdminInvoiceDTO sang AdminMerchantDTO và lọc hóa đơn đã thanh toán đầy đủ
+        return unpaidInvoices.stream().map(item -> {
+                    AdminMerchantDTO dto = new AdminMerchantDTO();
+                    dto.setInvoiceId(Optional.ofNullable(item.getInvoiceId()).orElse(""));
+                    dto.setVso(Optional.ofNullable(item.getVso()).orElse(""));
+                    dto.setMerchantName(Optional.ofNullable(item.getMidName()).orElse(""));
+                    dto.setMerchantId(Optional.ofNullable(item.getMerchantId()).orElse(""));
+                    dto.setBillNumber(Optional.ofNullable(item.getBillNumber()).orElse(""));
+                    dto.setInvoiceName(Optional.ofNullable(item.getInvoiceName()).orElse(""));
+
+                    // Lấy thông tin thanh toán
+                    IInvoicePaymentDTO paymentInfo = getInvoicePaymentInfo(item.getInvoiceId());
+                    long pendingAmount = Optional.ofNullable(paymentInfo.getPendingFee()).orElse(0L);
+                    long completeAmount = Optional.ofNullable(paymentInfo.getCompleteFee()).orElse(0L);
+
+                    dto.setCompleteAmount(completeAmount);
+                    dto.setPendingAmount(pendingAmount);
+
+                    dto.setVietQrAccount(Optional.ofNullable(item.getPhoneNo()).orElse(""));
+                    dto.setEmail(Optional.ofNullable(item.getEmail()).orElse(""));
+
+                    // Chỉ trả về những hóa đơn chưa thanh toán hoặc thanh toán một phần
+                    if (pendingAmount > 0) {
+                        return dto;
+                    } else {
+                        return null; // Bỏ qua các hóa đơn đã thanh toán đầy đủ
+                    }
+                }).filter(Objects::nonNull) // Loại bỏ các giá trị null
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
+    public int countUnpaidInvoicesByMerchantId(String merchantId) {
+        List<IAdminInvoiceDTO> unpaidInvoices = repo.getUnpaidInvoicesByMerchantId(merchantId, 0, Integer.MAX_VALUE);
+
+        // Chỉ đếm những hóa đơn chưa thanh toán hoặc thanh toán một phần
+        long count = unpaidInvoices.stream().filter(item -> {
+            IInvoicePaymentDTO paymentInfo = getInvoicePaymentInfo(item.getInvoiceId());
+            long pendingAmount = Optional.ofNullable(paymentInfo.getPendingFee()).orElse(0L);
+            return pendingAmount > 0;
+        }).count();
+
+        return (int) count;
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getAllInvoicesByStatus(String status, int offset, int size) {
+        return repo.getAllInvoicesByStatus(status, offset, size);
+    }
+
+    @Override
+    public int countAllInvoicesByStatus(String status) {
+        return repo.countAllInvoicesByStatus(status);
+    }
+
+    @Override
+    public List<IAdminInvoiceDTO> getInvoicesByStatus(String status, int offset, int size, String time) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(time);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.getInvoicesByStatus(status, offset, size, fromDate, toDate);
+    }
+
+    @Override
+    public int countInvoicesByStatus(String status, String time) {
+        StartEndTimeDTO startEndTimeDTO = DateTimeUtil.getStartEndMonth(time);
+        long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.countInvoicesByStatus(status, fromDate, toDate);
+    }
+
+    private AccountBankInfoDTO getBankAccountInfoByData(String data) {
+        AccountBankInfoDTO dto = new AccountBankInfoDTO();
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            dto = mapper.readValue(data, AccountBankInfoDTO.class);
+        } catch (Exception e) {
+            dto = new AccountBankInfoDTO();
+        }
+        return dto;
+    }
 
 }

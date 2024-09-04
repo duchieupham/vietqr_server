@@ -47,6 +47,7 @@ import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @RestController
@@ -1270,30 +1271,40 @@ public class TerminalController {
                     if (dto.getUserIds() != null && !dto.getUserIds().isEmpty()) {
                         int numThread = dto.getUserIds().size();
                         ExecutorService executorService = Executors.newFixedThreadPool(numThread);
-                        for (String userId : dto.getUserIds()) {
-                            Map<String, String> data = new HashMap<>();
-                            // insert notification
-                            UUID notificationUUID = UUID.randomUUID();
-                            LocalDateTime currentDateTime = LocalDateTime.now();
-                            long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
-                            String title = NotificationUtil.getNotiTitleAddMember();
-                            String message = String.format(NotificationUtil.getNotiDescAddMember(), dto.getName());
-                            NotificationEntity notiEntity = new NotificationEntity();
-                            notiEntity.setId(notificationUUID.toString());
-                            notiEntity.setRead(false);
-                            notiEntity.setMessage(message);
-                            notiEntity.setTime(time);
-                            notiEntity.setType(NotificationUtil.getNotiTypeAddMember());
-                            notiEntity.setUserId(userId);
-                            notiEntity.setData(dto.getCode());
-                            // data thay đổi
-                            data.put("notificationType", NotificationUtil.getNotiTypeAddMember());
-                            data.put("notificationId", notificationUUID.toString());
-                            data.put("terminalCode", dto.getCode());
-                            data.put("terminalName", dto.getName());
-                            executorService.submit(() -> pushNotification(title, message, notiEntity, data, userId));
+                        try {
+                            for (String userId : dto.getUserIds()) {
+                                Map<String, String> data = new HashMap<>();
+                                // insert notification
+                                UUID notificationUUID = UUID.randomUUID();
+                                LocalDateTime currentDateTime = LocalDateTime.now();
+                                long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+                                String title = NotificationUtil.getNotiTitleAddMember();
+                                String message = String.format(NotificationUtil.getNotiDescAddMember(), dto.getName());
+                                NotificationEntity notiEntity = new NotificationEntity();
+                                notiEntity.setId(notificationUUID.toString());
+                                notiEntity.setRead(false);
+                                notiEntity.setMessage(message);
+                                notiEntity.setTime(time);
+                                notiEntity.setType(NotificationUtil.getNotiTypeAddMember());
+                                notiEntity.setUserId(userId);
+                                notiEntity.setData(dto.getCode());
+                                // data thay đổi
+                                data.put("notificationType", NotificationUtil.getNotiTypeAddMember());
+                                data.put("notificationId", notificationUUID.toString());
+                                data.put("terminalCode", dto.getCode());
+                                data.put("terminalName", dto.getName());
+                                executorService.submit(() -> pushNotification(title, message, notiEntity, data, userId));
+                            }
+                        } finally {
+                            executorService.shutdown(); // Yêu cầu các luồng dừng khi hoàn tất công việc
+                            try {
+                                if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                                    executorService.shutdownNow(); // Nếu vẫn chưa dừng sau 60 giây, cưỡng chế dừng
+                                }
+                            } catch (InterruptedException e) {
+                                executorService.shutdownNow(); // Nếu bị ngắt khi chờ, cưỡng chế dừng
+                            }
                         }
-                        executorService.shutdown();
                     }
                 });
                 thread.start();
@@ -1549,30 +1560,40 @@ public class TerminalController {
                     if (dto.getUserIds() != null && !dto.getUserIds().isEmpty()) {
                         int numThread = dto.getUserIds().size();
                         ExecutorService executorService = Executors.newFixedThreadPool(numThread);
-                        for (String userId : dto.getUserIds()) {
-                            Map<String, String> data = new HashMap<>();
-                            // insert notification
-                            UUID notificationUUID = UUID.randomUUID();
-                            LocalDateTime currentDateTime = LocalDateTime.now();
-                            long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
-                            String title = NotificationUtil.getNotiTitleAddMember();
-                            String message = String.format(NotificationUtil.getNotiDescAddMember(), dto.getName());
-                            NotificationEntity notiEntity = new NotificationEntity();
-                            notiEntity.setId(notificationUUID.toString());
-                            notiEntity.setRead(false);
-                            notiEntity.setMessage(message);
-                            notiEntity.setTime(time);
-                            notiEntity.setType(NotificationUtil.getNotiTypeAddMember());
-                            notiEntity.setUserId(userId);
-                            notiEntity.setData(dto.getCode());
-                            // data thay đổi
-                            data.put("notificationType", NotificationUtil.getNotiTypeAddMember());
-                            data.put("notificationId", notificationUUID.toString());
-                            data.put("terminalCode", dto.getCode());
-                            data.put("terminalName", dto.getName());
-                            executorService.submit(() -> pushNotification(title, message, notiEntity, data, userId));
+                        try {
+                            for (String userId : dto.getUserIds()) {
+                                Map<String, String> data = new HashMap<>();
+                                // insert notification
+                                UUID notificationUUID = UUID.randomUUID();
+                                LocalDateTime currentDateTime = LocalDateTime.now();
+                                long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+                                String title = NotificationUtil.getNotiTitleAddMember();
+                                String message = String.format(NotificationUtil.getNotiDescAddMember(), dto.getName());
+                                NotificationEntity notiEntity = new NotificationEntity();
+                                notiEntity.setId(notificationUUID.toString());
+                                notiEntity.setRead(false);
+                                notiEntity.setMessage(message);
+                                notiEntity.setTime(time);
+                                notiEntity.setType(NotificationUtil.getNotiTypeAddMember());
+                                notiEntity.setUserId(userId);
+                                notiEntity.setData(dto.getCode());
+                                // data thay đổi
+                                data.put("notificationType", NotificationUtil.getNotiTypeAddMember());
+                                data.put("notificationId", notificationUUID.toString());
+                                data.put("terminalCode", dto.getCode());
+                                data.put("terminalName", dto.getName());
+                                executorService.submit(() -> pushNotification(title, message, notiEntity, data, userId));
+                            }
+                        } finally {
+                            executorService.shutdown(); // Yêu cầu các luồng dừng khi hoàn tất công việc
+                            try {
+                                if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                                    executorService.shutdownNow(); // Nếu vẫn chưa dừng sau 60 giây, cưỡng chế dừng
+                                }
+                            } catch (InterruptedException e) {
+                                executorService.shutdownNow(); // Nếu bị ngắt khi chờ, cưỡng chế dừng
+                            }
                         }
-                        executorService.shutdown();
                     }
                 });
                 thread.start();

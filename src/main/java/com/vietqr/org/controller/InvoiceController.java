@@ -17,6 +17,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -2269,7 +2270,7 @@ public class InvoiceController {
             @RequestParam int filterType,  // Loại lọc chính: 0 = Hóa đơn, 1 = Đại lý, 2 = Thời gian
             @RequestParam(required = false, defaultValue = "0") int subFilterType,  // Loại lọc con (mã hóa đơn, đại lý, tài khoản ngân hàng, ...)
             @RequestParam(required = false) String value,  // Giá trị cần lọc theo
-            @RequestParam(required = false) int invoiceType,  // 0: Hóa đơn thu phis, 1: Hóa giao dich,
+            @RequestParam(required = false) Integer  invoiceType,  // 0: Hóa đơn thu phis, 1: Hóa giao dich,
             // 2: Hóa đơn nạp tiền, 9: tất cả
             @RequestParam int page,
             @RequestParam int size,
@@ -2332,6 +2333,16 @@ public class InvoiceController {
                                         totalElement = invoiceService.countInvoiceByMerchantId(invoiceType, value, time);
                                     }
                                     break;
+                                case 4:
+                                    if ("0".equals(time)) {
+                                        dtos = invoiceService.getAllInvoicesByStatus(value, offset, size);
+                                        totalElement = invoiceService.countAllInvoicesByStatus(value);
+                                    } else {
+                                        dtos = invoiceService.getInvoicesByStatus(value, offset, size, time);
+                                        totalElement = invoiceService.countInvoicesByStatus(value, time);
+                                    }
+
+                                    break;
                                 default:
                                     dtos = new ArrayList<>();
                                     totalElement = 0;
@@ -2357,6 +2368,7 @@ public class InvoiceController {
                                 dto.setEmail(Optional.ofNullable(item.getEmail()).orElse(""));
                                 dto.setTimeCreated(Optional.ofNullable(item.getTimeCreated()).orElse(0L));
                                 dto.setStatus(Optional.ofNullable(item.getStatus()).orElse(0));
+                                dto.setMerchantId(Optional.ofNullable(item.getMerchantId()).orElse(""));
                                 return dto;
                             }).collect(Collectors.toList());
 
@@ -2399,6 +2411,7 @@ public class InvoiceController {
                                 dto.setPendingAmount(Optional.ofNullable(paymentInfo.getPendingFee()).orElse(0L));
                                 dto.setVietQrAccount(Optional.ofNullable(item.getPhoneNo()).orElse(""));
                                 dto.setEmail(Optional.ofNullable(item.getEmail()).orElse(""));
+                                dto.setMerchantId(Optional.ofNullable(item.getMerchantId()).orElse(""));
                                 return dto;
                             }).collect(Collectors.toList());
                             dataDTO.setItems(merchantData);
@@ -2435,6 +2448,7 @@ public class InvoiceController {
                                 dto.setEmail(Optional.ofNullable(item.getEmail()).orElse(""));
                                 dto.setTimeCreated(Optional.ofNullable(item.getTimeCreated()).orElse(0L));
                                 dto.setStatus(Optional.ofNullable(item.getStatus()).orElse(0));
+                                dto.setMerchantId(Optional.ofNullable(item.getMerchantId()).orElse(""));
                                 return dto;
                             }).collect(Collectors.toList());
 
@@ -2490,6 +2504,14 @@ public class InvoiceController {
                                         totalElement = invoiceService.countInvoiceByMerchantId(value, time);
                                     }
                                     break;
+                                case 4:
+                                    if ("0".equals(time)) {
+                                        dtos = invoiceService.getAllInvoicesByStatus(value, offset, size);
+                                        totalElement = invoiceService.countAllInvoicesByStatus(value);
+                                    } else {
+                                        dtos = invoiceService.getInvoicesByStatus(value, offset, size, time);
+                                        totalElement = invoiceService.countInvoicesByStatus(value, time);
+                                    }
                                 default:
                                     throw new IllegalArgumentException("Loại subFilter không hợp lệ");
                             }
@@ -2514,6 +2536,7 @@ public class InvoiceController {
                                 dto.setEmail(Optional.ofNullable(item.getEmail()).orElse(""));
                                 dto.setTimeCreated(Optional.ofNullable(item.getTimeCreated()).orElse(0L));
                                 dto.setStatus(Optional.ofNullable(item.getStatus()).orElse(0));
+                                dto.setMerchantId(Optional.ofNullable(item.getMerchantId()).orElse(""));
                                 return dto;
                             }).collect(Collectors.toList());
 
@@ -2556,6 +2579,7 @@ public class InvoiceController {
                                 dto.setPendingAmount(Optional.ofNullable(paymentInfo.getPendingFee()).orElse(0L));
                                 dto.setVietQrAccount(Optional.ofNullable(item.getPhoneNo()).orElse(""));
                                 dto.setEmail(Optional.ofNullable(item.getEmail()).orElse(""));
+                                dto.setMerchantId(Optional.ofNullable(item.getMerchantId()).orElse(""));
                                 return dto;
                             }).collect(Collectors.toList());
                             dataDTO.setItems(merchantData);
@@ -2592,6 +2616,7 @@ public class InvoiceController {
                                 dto.setEmail(Optional.ofNullable(item.getEmail()).orElse(""));
                                 dto.setTimeCreated(Optional.ofNullable(item.getTimeCreated()).orElse(0L));
                                 dto.setStatus(Optional.ofNullable(item.getStatus()).orElse(0));
+                                dto.setMerchantId(Optional.ofNullable(item.getMerchantId()).orElse(""));
                                 return dto;
                             }).collect(Collectors.toList());
 
@@ -2630,6 +2655,240 @@ public class InvoiceController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("InvoiceController: ERROR: getInvoiceListAdmin: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+         }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("/unpaid-invoice-list")
+    public ResponseEntity<Object> getUnpaidInvoices(
+            @RequestParam String merchantId,  // ID của đại lý
+            @RequestParam int page,
+            @RequestParam int size) {
+
+        Object result;
+        HttpStatus httpStatus;
+        try {
+            int offset = (page - 1) * size;
+            List<AdminMerchantDTO> unpaidInvoices = invoiceService.getUnpaidInvoicesByMerchantId(merchantId, offset, size);
+            int totalElement = invoiceService.countUnpaidInvoicesByMerchantId(merchantId);
+
+            // Format dữ liệu trả về
+            DataDTO dataDTO = new DataDTO();
+            dataDTO.setItems(unpaidInvoices);
+            dataDTO.setExtraData(null);
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+            pageDTO.setTotalElement(totalElement);
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+
+            PageResponseDTO pageResponseDTO = new PageResponseDTO();
+            pageResponseDTO.setMetadata(pageDTO);
+            pageResponseDTO.setData(dataDTO);
+
+            result = pageResponseDTO;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("InvoiceController: ERROR: getUnpaidInvoices: " + e.getMessage());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("invoice/request-payment/v2")
+    public ResponseEntity<Object> requestPayment(
+            @Valid @RequestBody PaymentRequestDTOv2 dto
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            PaymentRequestResponseDTO responseDTO = new PaymentRequestResponseDTO();
+            String bankIdRechargeDefault = null;
+
+            // Tính tổng số tiền chưa thanh toán (pendingAmount) của tất cả các hóa đơn
+            long totalAmountAfterVat = 0;
+            long totalAmount = 0;
+            long vatAmount = 0;
+            List<IInvoiceItemDetailDTO> allInvoiceItems = new ArrayList<>();
+
+            IInvoiceDTO firstInvoiceDTO = null; // Định nghĩa biến invoiceDTO đầu tiên
+            MerchantBankMapperDTO merchantBankMapperDTO = null; // Định nghĩa biến merchantBankMapperDTO
+
+            for (String invoiceId : dto.getInvoiceIds()) {
+                String bankId = invoiceService.getBankIdRechargeDefault(invoiceId);
+                if (bankIdRechargeDefault == null) {
+                    bankIdRechargeDefault = bankId;
+                }
+                IInvoiceDTO invoiceDTO = invoiceService.getInvoiceRequestPayment(invoiceId);
+
+                // Lưu hóa đơn đầu tiên để sử dụng sau này
+                if (firstInvoiceDTO == null) {
+                    firstInvoiceDTO = invoiceDTO;
+                    merchantBankMapperDTO = getMerchantBankMapperDTO(invoiceDTO.getData()); // Khởi tạo merchantBankMapperDTO từ hóa đơn đầu tiên
+                }
+
+                // Lấy tất cả các mục hóa đơn thuộc hóa đơn này
+                List<IInvoiceItemDetailDTO> invoiceItems = invoiceItemService
+                        .getInvoiceItemsByInvoiceId(invoiceId);
+
+                for (IInvoiceItemDetailDTO item : invoiceItems) {
+                    totalAmount += item.getTotalAmount();
+                    vatAmount += item.getVatAmount();
+                    totalAmountAfterVat += item.getAmountAfterVat();
+                }
+
+                allInvoiceItems.addAll(invoiceItems);
+            }
+
+
+            String bankId = StringUtil.getValueNullChecker(bankIdRechargeDefault);
+            if (!StringUtil.isNullOrEmpty(dto.getBankIdRecharge())) {
+                bankId = dto.getBankIdRecharge();
+            }
+
+            ObjectMapper mapper = new ObjectMapper();
+            String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
+            String billNumberVQR = "VTS" + RandomCodeUtil.generateRandomId(10);
+            String otpPayment = RandomCodeUtil.generateOTP(6);
+            String content = traceId + " " + billNumberVQR;
+            List<TransactionWalletEntity> transactionWalletEntities = new ArrayList<>();
+
+            // Tạo transaction_wallet_credit cho tổng số tiền
+            TransactionWalletEntity walletEntityCredit = new TransactionWalletEntity();
+            UUID transWalletCreditUUID = UUID.randomUUID();
+            walletEntityCredit.setId(transWalletCreditUUID.toString());
+            walletEntityCredit.setAmount(totalAmountAfterVat + "");
+            walletEntityCredit.setBillNumber(billNumberVQR);
+            walletEntityCredit.setContent(content);
+            walletEntityCredit.setStatus(0);
+            walletEntityCredit.setTimeCreated(DateTimeUtil.getCurrentDateTimeUTC());
+            walletEntityCredit.setTimePaid(0);
+            walletEntityCredit.setTransType("C");
+            walletEntityCredit.setUserId(firstInvoiceDTO.getUserId()); // Sử dụng userId của hóa đơn đầu tiên
+            walletEntityCredit.setOtp("");
+            walletEntityCredit.setPaymentType(0);
+            walletEntityCredit.setPaymentMethod(1);
+            walletEntityCredit.setReferenceNumber(3 + "*" + firstInvoiceDTO.getUserId() + "*" +
+                    otpPayment + "*" + bankId);
+            walletEntityCredit.setPhoneNoRC("");
+            walletEntityCredit.setData(bankId);
+            walletEntityCredit.setRefId("");
+            transactionWalletEntities.add(walletEntityCredit);
+
+            // Tạo transaction_wallet_debit cho tổng số tiền
+            TransactionWalletEntity walletEntityDebit = new TransactionWalletEntity();
+            UUID transWalletUUID = UUID.randomUUID();
+            walletEntityDebit.setId(transWalletUUID.toString());
+            walletEntityDebit.setAmount(totalAmountAfterVat + "");
+            walletEntityDebit.setBillNumber("");
+            walletEntityDebit.setContent(content);
+            walletEntityDebit.setStatus(0);
+            walletEntityDebit.setTimeCreated(DateTimeUtil.getCurrentDateTimeUTC());
+            walletEntityDebit.setTimePaid(0);
+            walletEntityDebit.setTransType("D");
+            walletEntityDebit.setUserId(firstInvoiceDTO.getUserId()); // Sử dụng userId của hóa đơn đầu tiên
+            walletEntityDebit.setOtp(otpPayment);
+            walletEntityDebit.setPaymentType(3);
+            walletEntityDebit.setPaymentMethod(0);
+            walletEntityDebit.setReferenceNumber("");
+            walletEntityDebit.setPhoneNoRC("");
+            walletEntityDebit.setData(bankId);
+            walletEntityDebit.setRefId(transWalletCreditUUID.toString());
+            transactionWalletEntities.add(walletEntityDebit);
+
+            // Tạo QR code
+            IBankAccountInfoDTO bankAccountInfoDTO = accountBankReceiveService
+                    .getAccountBankInfoById(bankId);
+            String userIdHost = EnvironmentUtil.getUserIdHostRecharge();
+            String cai = EnvironmentUtil.getCAIRecharge();
+            VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+            vietQRGenerateDTO.setCaiValue(cai);
+            vietQRGenerateDTO.setBankAccount(bankAccountInfoDTO.getBankAccount());
+            vietQRGenerateDTO.setAmount(totalAmountAfterVat + "");
+            vietQRGenerateDTO.setContent(content);
+            String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+
+            // Tạo transaction_receive
+            UUID transReceiveUUID = UUID.randomUUID();
+            TransactionReceiveEntity transactionReceiveEntity = new TransactionReceiveEntity();
+            transactionReceiveEntity.setId(transReceiveUUID.toString());
+            transactionReceiveEntity.setAmount(totalAmountAfterVat);
+            transactionReceiveEntity.setBankAccount(bankAccountInfoDTO.getBankAccount());
+            transactionReceiveEntity.setBankId(bankId);
+            transactionReceiveEntity.setContent(content);
+            transactionReceiveEntity.setRefId("");
+            transactionReceiveEntity.setStatus(0);
+            transactionReceiveEntity.setTime(DateTimeUtil.getCurrentDateTimeUTC());
+            transactionReceiveEntity.setType(5);
+            transactionReceiveEntity.setTraceId(traceId);
+            transactionReceiveEntity.setTransType("C");
+            transactionReceiveEntity.setReferenceNumber("");
+            transactionReceiveEntity.setOrderId(billNumberVQR);
+            transactionReceiveEntity.setSign("");
+            transactionReceiveEntity.setCustomerBankAccount("");
+            transactionReceiveEntity.setCustomerBankCode("");
+            transactionReceiveEntity.setCustomerName("");
+            transactionReceiveEntity.setTerminalCode("");
+            transactionReceiveEntity.setUserId(userIdHost);
+            transactionReceiveEntity.setNote("");
+            transactionReceiveEntity.setTransStatus(0);
+            transactionReceiveEntity.setQrCode(qr);
+            transactionReceiveEntity.setUrlLink("");
+
+            // Tạo InvoiceTransactionEntity cho mỗi hóa đơn
+            for (String invoiceId : dto.getInvoiceIds()) {
+                InvoiceTransactionEntity entity = new InvoiceTransactionEntity();
+                entity.setId(UUID.randomUUID().toString());
+                entity.setInvoiceId(invoiceId);
+                entity.setInvoiceItemIds(mapper.writeValueAsString(
+                        allInvoiceItems.stream()
+                                .filter(item -> item.getInvoiceItemId().equals(invoiceId))
+                                .map(IInvoiceItemDetailDTO::getInvoiceItemId)
+                                .collect(Collectors.toList())));
+                entity.setBankIdRecharge(dto.getBankIdRecharge() != null ? dto.getBankIdRecharge() : bankIdRechargeDefault);
+                entity.setMid(firstInvoiceDTO.getMerchantId());
+                entity.setBankId(firstInvoiceDTO.getBankId());
+                entity.setUserId(firstInvoiceDTO.getUserId());
+                entity.setStatus(0);
+                entity.setVat(firstInvoiceDTO.getVat());
+                entity.setRefId(transReceiveUUID.toString());
+                entity.setInvoiceNumber(billNumberVQR);
+                entity.setTotalAmount(totalAmountAfterVat);
+                entity.setAmount(totalAmount);
+                entity.setVatAmount(vatAmount);
+                entity.setQrCode(qr);
+
+                Thread thread = new Thread(() -> {
+                    invoiceTransactionService.insert(entity);
+                    transactionWalletService.insertAll(transactionWalletEntities);
+                    transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
+                });
+                thread.start();
+            }
+
+            responseDTO.setQrCode(qr);
+            responseDTO.setTotalAmountAfterVat(totalAmountAfterVat);
+            responseDTO.setInvoiceName("Thanh toán nhiều hóa đơn"); // Đặt tên phù hợp nếu là thanh toán nhiều hóa đơn
+            responseDTO.setMidName(merchantBankMapperDTO.getMerchantName());
+            responseDTO.setVso(merchantBankMapperDTO.getVso());
+            responseDTO.setBankAccount(merchantBankMapperDTO.getBankAccount());
+            responseDTO.setBankShortName(merchantBankMapperDTO.getBankShortName());
+            responseDTO.setUserBankName(merchantBankMapperDTO.getUserBankName());
+            responseDTO.setInvoiceNumber(billNumberVQR);
+            responseDTO.setTotalAmount(totalAmount);
+            responseDTO.setVat(firstInvoiceDTO.getVat());
+            responseDTO.setVatAmount(vatAmount);
+            responseDTO.setInvoiceId(String.join(", ", dto.getInvoiceIds()));
+            responseDTO.setExpiredTime(DateTimeUtil.getEndTimeToDate());
+
+            result = responseDTO;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("InvoiceController: ERROR: requestPayment: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;

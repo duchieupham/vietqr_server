@@ -25,4 +25,5 @@ public interface GoogleChatService {
     int countGoogleChatsByUserId(String userId);
 
     List<GoogleChatInfoDetailDTO> getGoogleChatsByUserIdWithPagination(String userId, int offset, int size);
+    List<GoogleChatEntity> getGoogleChatsByWebhook(String webhook);
 }
