@@ -760,7 +760,7 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, String> 
             + "b.name AS midName, a.data AS data, a.amount AS amountNoVat, a.vat AS vat, "
             + "a.vat_amount AS vatAmount, a.total_amount AS amount, a.invoice_id AS billNumber, "
             + "a.name AS invoiceName, c.phone_no AS phoneNo, c.email AS email, a.time_created AS timeCreated, "
-            + "a.status AS status "
+            + "a.status AS status, a.merchant_id  as merchantId "
             + "FROM invoice a "
             + "INNER JOIN account_login c ON c.id = a.user_id "
             + "LEFT JOIN merchant_sync b ON a.merchant_id = b.id "
