@@ -3082,6 +3082,43 @@ public class TransactionBankController {
                     }
                 }
 
+                // DO INSERT GOOGLE CHAT V2  BY QVAN
+//                List<String> ggChatWebhookss = googleChatAccountBankService.getWebhooksByBankId(accountBankEntity.getId());
+//                if (ggChatWebhookss != null && !ggChatWebhookss.isEmpty()) {
+//                    GoogleChatUtil googleChatUtil = new GoogleChatUtil();
+//                    for (String webhook : ggChatWebhookss) {
+//                        try {
+//                            List<GoogleChatEntity> googleChatEntities = googleChatService.getGoogleChatsByWebhook(webhook);
+//                            if (googleChatEntities != null && !googleChatEntities.isEmpty()) {
+//                                for (GoogleChatEntity googleChatEntity : googleChatEntities) {
+//                                    try {
+//                                        List<String> notificationTypes = new ObjectMapper().readValue(googleChatEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
+//                                        List<String> notificationContents = new ObjectMapper().readValue(googleChatEntity.getNotificationContents(), new TypeReference<List<String>>() {});
+//                                        boolean sendNotification = shouldSendNotification(notificationTypes, dto, transactionEntity);
+//                                        if (sendNotification) {
+//                                            String googleChatMsg = createMessage(notificationContents, dto.getTransType(), amount, bankTypeEntity, accountBankEntity.getBankAccount(), time, dto.getReferencenumber(), dto.getContent());
+//
+//                                            // Định dạng thời gian trước khi gửi thông báo
+//                                            String formattedTime = formatTimeForGoogleChat(time);
+//                                            googleChatMsg = googleChatMsg.replace(convertLongToDate(time), formattedTime);
+//
+//                                            googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
+//                                        }
+//                                    } catch (JsonProcessingException e) {
+//                                        logger.error("Error processing JSON for Google Chat notification: " + e.getMessage());
+//                                    } catch (Exception e) {
+//                                        logger.error("Error sending Google Chat notification: " + e.getMessage());
+//                                    }
+//                                }
+//                            }
+//                        } catch (Exception e) {
+//                            logger.error("Error retrieving Google Chat entities: " + e.getMessage());
+//                        }
+//                    }
+//                }
+
+
+
 
                 // DO INSERT SLACK BY QVAN
                 List<String> slackWebhooks = slackAccountBankService.getWebhooksByBankId(accountBankEntity.getId());

@@ -47,4 +47,6 @@ public interface GoogleChatRepository extends JpaRepository<GoogleChatEntity, Lo
 
     @Query(value = "SELECT COUNT(gc.id) FROM google_chat gc WHERE gc.user_id = :userId", nativeQuery = true)
     int countGoogleChatsByUserId(@Param("userId") String userId);
+    @Query(value="SELECT * FROM google_chat WHERE webhook = :webhook", nativeQuery = true)
+    List<GoogleChatEntity> getGoogleChatsByWebhooks(String webhook);
 }
