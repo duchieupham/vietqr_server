@@ -2433,7 +2433,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "COALESCE(SUM(CASE WHEN a.type = 2 THEN a.amount ELSE 0 END), 0) AS totalCashUnsettled "
             + "FROM transaction_receive a "
             + "WHERE a.time BETWEEN :fromDate AND :toDate AND trans_type = 'C' "
-            + "WHERE a.time_paid BETWEEN :fromTimePaid AND :toTimePaid "
+            + "AND a.time_paid BETWEEN :fromTimePaid AND :toTimePaid "
             + "AND a.bank_id = :bankId AND a.status = 1 LIMIT 1", nativeQuery = true)
     ITransStatisticResponseWebDTO getTransactionWebOverview(String bankId, long fromDate, long toDate, long fromTimePaid, long toTimePaid);
 

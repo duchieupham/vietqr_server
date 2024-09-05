@@ -1547,7 +1547,7 @@ public class TransactionController {
             }
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            logger.error("getTransactionOverviewWeb: ERROR: " + e.getMessage());
+            logger.error("getTransactionOverviewV2: ERROR: " + e.getMessage());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -1585,7 +1585,7 @@ public class TransactionController {
             }
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            logger.error("getTransactionOverviewWeb: ERROR: " + e.getMessage());
+            logger.error("getTransactionLatest: ERROR: " + e.getMessage());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
