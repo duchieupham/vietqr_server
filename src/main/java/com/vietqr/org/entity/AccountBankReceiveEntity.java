@@ -71,6 +71,13 @@ public class AccountBankReceiveEntity implements Serializable {
 	@Column(name = "terminalLength")
 	private int terminalLength;
 
+	/*
+	* 1: enable
+	* 0: disable
+	* */
+	@Column(name = "pushNotification")
+	private int pushNotification;
+
 	@Column(name = "isValidService")
 	private Boolean isValidService;
 
@@ -111,6 +118,7 @@ public class AccountBankReceiveEntity implements Serializable {
 		this.status = status;
 		this.mmsActive = mmsActive;
 		this.ewalletToken = ewalletToken;
+		this.pushNotification = 1;
 	}
 
 	public AccountBankReceiveEntity(String id, String bankTypeId, String bankAccount, String bankAccountName, String nationalId, String phoneAuthenticated, int type, String userId, boolean isAuthenticated, boolean isSync, boolean isWpSync, boolean status, boolean mmsActive, boolean isRpaSync, String username, String password, String ewalletToken, int terminalLength, Boolean isValidService, Long validFeeFrom, Long validFeeTo, String customerId, Long timeCreate, String vso) {
@@ -138,6 +146,7 @@ public class AccountBankReceiveEntity implements Serializable {
 		this.customerId = customerId;
 		this.timeCreate = timeCreate;
 		this.vso = vso;
+		this.pushNotification = 1;
 	}
 
 	public int getTerminalLength() {
@@ -334,6 +343,14 @@ public class AccountBankReceiveEntity implements Serializable {
 
 	public void setTimeCreate(Long timeCreate) {
 		this.timeCreate = timeCreate;
+	}
+
+	public int getPushNotification() {
+		return pushNotification;
+	}
+
+	public void setPushNotification(int pushNotification) {
+		this.pushNotification = pushNotification;
 	}
 
 	@Override

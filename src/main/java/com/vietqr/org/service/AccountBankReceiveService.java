@@ -195,5 +195,5 @@ public interface AccountBankReceiveService {
 	List<BankAccountResponseDTO> getBankAccountsByAccountNameAndSorted(String keyword, int offset, int size);
 	List<BankAccountResponseDTO> getBankAccountsByPhoneAuthenticatedAndSorted(String keyword, int offset, int size);
 	List<BankAccountResponseDTO> getBankAccountsByNationalIdAndSorted(String keyword, int offset, int size);
-
+	void updatePushNotification(String bankId, int value);
 }

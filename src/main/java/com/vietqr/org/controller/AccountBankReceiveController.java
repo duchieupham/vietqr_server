@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PatchMapping;
 
 import com.vietqr.org.dto.AccountBankReceiveDetailDTO.TransactionBankListDTO;
 
@@ -1483,6 +1484,7 @@ public class AccountBankReceiveController {
                     dto.setValidFeeFrom(item.getValidFeeFrom());
                     dto.setValidFeeTo(item.getValidFeeTo());
                     dto.setMmsActive(item.getMmsActive());
+                    dto.setPushNotification(item.getPushNotification());
 
                     /// khi user đã active key để lưu lại
                     List<ICheckKeyActiveDTO> bankReceiveActiveHistoryEntity =
@@ -1552,6 +1554,32 @@ public class AccountBankReceiveController {
             System.out.println(e.getMessage());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PatchMapping("account-bank/{bankId}")
+    public ResponseEntity<ResponseMessageDTO> updatePushNotification(
+            @PathVariable("bankId") String bankId,
+            @RequestBody int value
+    ){
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            AccountBankReceiveEntity entity = accountBankReceiveService.getAccountBankById(bankId);
+            if(entity != null && (value == 1 || value == 0)) {
+                accountBankReceiveService.updatePushNotification(bankId, value);
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            } else {
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("updatePushNotification: ERROR: " + e.toString() + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+
         return new ResponseEntity<>(result, httpStatus);
     }
 
