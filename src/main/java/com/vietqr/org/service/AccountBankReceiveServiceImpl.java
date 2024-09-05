@@ -573,6 +573,11 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
         return convertAndSanitize(accounts);
     }
 
+    @Override
+    public void updatePushNotification(String bankId, int value) {
+        repo.updatePushNotification(bankId, value);
+    }
+
 
     @Override
     public List<BankAccountResponseDTO> getBankAccountsByNationalIds(String keyword, int offset, int size) {

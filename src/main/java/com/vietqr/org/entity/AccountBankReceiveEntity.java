@@ -71,6 +71,13 @@ public class AccountBankReceiveEntity implements Serializable {
 	@Column(name = "terminalLength")
 	private int terminalLength;
 
+	/*
+	* 1: enable
+	* 0: disable
+	* */
+	@Column(name = "pushNotification")
+	private int pushNotification = 1;
+
 	@Column(name = "isValidService")
 	private Boolean isValidService;
 
@@ -334,6 +341,14 @@ public class AccountBankReceiveEntity implements Serializable {
 
 	public void setTimeCreate(Long timeCreate) {
 		this.timeCreate = timeCreate;
+	}
+
+	public int getPushNotification() {
+		return pushNotification;
+	}
+
+	public void setPushNotification(int pushNotification) {
+		this.pushNotification = pushNotification;
 	}
 
 	@Override

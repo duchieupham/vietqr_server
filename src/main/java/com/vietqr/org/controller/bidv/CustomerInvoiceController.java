@@ -310,10 +310,10 @@ public class CustomerInvoiceController {
                                 }
                                 if (customerInvoiceDataDTO != null
                                         && customerInvoiceDataDTO.getQrType() == 1
-                                        && customerInvoiceDataDTO.getStatus() == 0
+//                                        && customerInvoiceDataDTO.getStatus() == 0
                                         && customerInvoiceDataDTO.getAmount().equals(paymentAmount)) {
 
-//                                        if (customerInvoiceDataDTO.getStatus() == 0) {
+                                        if (customerInvoiceDataDTO.getStatus() == 0) {
                                     // check số tiền có khớp hay không
                                     System.out.println("customerInvoiceDataDTO.getAmount(): "
                                             + customerInvoiceDataDTO.getAmount());
@@ -365,15 +365,15 @@ public class CustomerInvoiceController {
 //                                                        "Thành công");
 //                                                httpStatus = HttpStatus.OK;
 //                                            }
-//                                    } else {
-                                        // hoá đơn đã gạch nợ rồi
-//                                            result = new ResponseMessageBidvDTO("023",
-//                                                    "Hóa đơn đã gạch nợ rồi (mỗi hóa đơn chỉ gạch nợ 1 lần)");
-//                                            httpStatus = HttpStatus.OK;
+                                    } else {
+                                         // hoá đơn đã gạch nợ rồi
+                                            result = new ResponseMessageBidvDTO("023",
+                                                    "Hóa đơn đã gạch nợ rồi (mỗi hóa đơn chỉ gạch nợ 1 lần)");
+                                            httpStatus = HttpStatus.OK;
 //                                        result = new ResponseMessageBidvDTO("000",
 //                                                "Thành công");
 //                                        httpStatus = HttpStatus.OK;
-//                                    }
+                                    }
                                     // Hóa đơn BIDV
                                 } else if (customerInvoiceDataDTO != null
                                         && customerInvoiceDataDTO.getQrType() == 0
@@ -534,7 +534,8 @@ public class CustomerInvoiceController {
             Thread thread = new Thread(() -> {
                 //
                 // khi result = 021, 022, 02 insert transaction mới
-                if (tempResult.getResult_code().equals("000")) {
+                if (tempResult.getResult_code().equals("000")
+                || tempResult.getResult_code().equals("023")) {
 
 //                    CustomerInvoiceDataDTO customerInvoiceDataDTO = customerInvoiceService
 //                            .getCustomerInvoiceByBillId(dto.getBill_id());
