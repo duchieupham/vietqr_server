@@ -21,6 +21,10 @@ public class RefundRequestDTO implements Serializable {
     @NotBlank
     private String content;
 
+    private String terminalCode;
+
+    private String subTerminalCode;
+
     private Boolean multiTimes;
 
     @NotBlank
@@ -85,5 +89,21 @@ public class RefundRequestDTO implements Serializable {
 
     public void setMultiTimes(Boolean multiTimes) {
         this.multiTimes = multiTimes;
+    }
+
+    public String getTerminalCode() {
+        return terminalCode;
+    }
+
+    public void setTerminalCode(String terminalCode) {
+        this.terminalCode = terminalCode;
+    }
+
+    public String getSubTerminalCode() {
+        return subTerminalCode;
+    }
+
+    public void setSubTerminalCode(String subTerminalCode) {
+        this.subTerminalCode = subTerminalCode;
     }
 }
