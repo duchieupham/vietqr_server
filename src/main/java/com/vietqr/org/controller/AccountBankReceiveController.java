@@ -1557,7 +1557,7 @@ public class AccountBankReceiveController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @PatchMapping("account-bank/{bankId}")
+    @PostMapping("account-bank/update-noti/{bankId}")
     public ResponseEntity<ResponseMessageDTO> updatePushNotification(
             @PathVariable("bankId") String bankId,
             @RequestBody int value
