@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.vietqr.org.dto.*;
+import com.vietqr.org.dto.mapping.RefundMappingRedisDTO;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.service.*;
 import com.vietqr.org.service.mqtt.MqttMessagingService;
@@ -2464,28 +2465,106 @@ public class TransactionMMSController {
                                     boolean checkIdempotency =
                                             idempotencyService.saveResponseForKey(idempotencyKey, dto.getReferenceNumber(), 30);
                                     if (checkIdempotency) {
-                                        TerminalBankEntity terminalBankEntity = terminalBankService
-                                                .getTerminalBankByBankAccount(dto.getBankAccount());
-                                        if (terminalBankEntity != null) {
-                                            // check multiTimes transaction_refund;
-                                            TransactionCheckMultiTimesDTO checkMultiTimesDTO =
-                                                    transactionRefundService.getTransactionRefundCheck(dto.getBankAccount(),
-                                                            dto.getReferenceNumber());
-                                            time = DateTimeUtil.getCurrentDateTimeUTC();
+                                        TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
+                                                .getTransactionReceiveByRefNumber(dto.getReferenceNumber(), "C");
+                                        if (Objects.nonNull(transactionReceiveEntity)
+                                        && (!StringUtil.isNullOrEmpty(dto.getTerminalCode())
+                                            || !StringUtil.isNullOrEmpty(dto.getSubTerminalCode()))
+                                        && (!StringUtil.getValueNullChecker(transactionReceiveEntity.getTerminalCode())
+                                                .equals(dto.getTerminalCode())
+                                        || !StringUtil.getValueNullChecker(transactionReceiveEntity.getSubCode())
+                                                .equals(dto.getSubTerminalCode()))) {
 
-                                            refundLogEntity = new TransactionRefundLogEntity();
-                                            refundLogEntity.setId(UUID.randomUUID().toString());
-                                            refundLogEntity.setBankAccount(dto.getBankAccount());
-                                            refundLogEntity.setReferenceNumber(dto.getReferenceNumber());
-                                            refundLogEntity.setContent(dto.getContent());
-                                            refundLogEntity.setAmount(Long.parseLong(dto.getAmount()));
-                                            refundLogEntity.setTimeCreated(time);
-                                            refundLogEntity.setTimeResponse(DateTimeUtil.getCurrentDateTimeUTC());
-                                            refundLogEntity.setRefNumber(dto.getReferenceNumber());
-                                            refundLogEntity.setCheckSum(dto.getCheckSum());
-                                            // nếu đã refund trước đó
-                                            if (Objects.nonNull(checkMultiTimesDTO)) {
-                                                if (checkMultiTimesDTO.getMultiTimes()) {
+                                            logger.error(
+                                                    "refundForMerchant: ERROR: " + dto.getReferenceNumber() + " INVALID TERMINAL COD OR SUB CODE");
+                                            httpStatus = HttpStatus.BAD_REQUEST;
+                                            result = new ResponseMessageDTO("FAILED", "E164");
+                                        } else {
+                                            TerminalBankEntity terminalBankEntity = terminalBankService
+                                                    .getTerminalBankByBankAccount(dto.getBankAccount());
+                                            if (terminalBankEntity != null) {
+                                                // check multiTimes transaction_refund;
+                                                TransactionCheckMultiTimesDTO checkMultiTimesDTO =
+                                                        transactionRefundService.getTransactionRefundCheck(dto.getBankAccount(),
+                                                                dto.getReferenceNumber());
+                                                time = DateTimeUtil.getCurrentDateTimeUTC();
+
+                                                refundLogEntity = new TransactionRefundLogEntity();
+                                                refundLogEntity.setId(UUID.randomUUID().toString());
+                                                refundLogEntity.setBankAccount(dto.getBankAccount());
+                                                refundLogEntity.setReferenceNumber(dto.getReferenceNumber());
+                                                refundLogEntity.setContent(dto.getContent());
+                                                refundLogEntity.setAmount(Long.parseLong(dto.getAmount()));
+                                                refundLogEntity.setTimeCreated(time);
+                                                refundLogEntity.setTimeResponse(DateTimeUtil.getCurrentDateTimeUTC());
+                                                refundLogEntity.setRefNumber(dto.getReferenceNumber());
+                                                refundLogEntity.setCheckSum(dto.getCheckSum());
+                                                // nếu đã refund trước đó
+                                                if (Objects.nonNull(checkMultiTimesDTO)) {
+                                                    if (checkMultiTimesDTO.getMultiTimes()) {
+                                                        // lenh refund truoc do cho hoan tien nhieu lan => cho phep hoan tien tiep
+                                                        String refundResult = refundFromMB(terminalBankEntity.getTerminalId(),
+                                                                dto.getReferenceNumber(),
+                                                                dto.getAmount(), dto.getContent());
+
+                                                        if (refundResult != null) {
+                                                            if (refundResult.trim().equals("4863")) {
+                                                                logger.error(
+                                                                        "refundForMerchant: ERROR: " + dto.getBankAccount()
+                                                                                + " FT CODE IS NOT EXISTED");
+                                                                refundLogEntity.setReferenceNumber("");
+                                                                refundLogEntity.setStatus(0);
+                                                                refundLogEntity.setMessage(refundResult);
+
+                                                                httpStatus = HttpStatus.BAD_REQUEST;
+                                                                result = new ResponseMessageDTO("FAILED", "E44");
+                                                            } else if (refundResult.trim().equals("4857")) {
+                                                                logger.error(
+                                                                        "refundForMerchant: ERROR: " + dto.getBankAccount()
+                                                                                + " INVALID AMOUNT");
+                                                                refundLogEntity.setReferenceNumber("");
+                                                                refundLogEntity.setStatus(0);
+                                                                refundLogEntity.setMessage(refundResult);
+
+                                                                httpStatus = HttpStatus.BAD_REQUEST;
+                                                                result = new ResponseMessageDTO("FAILED", "E45");
+                                                            } else if (refundResult.trim().contains("FT")) {
+                                                                refundLogEntity.setReferenceNumber(refundResult);
+                                                                refundLogEntity.setStatus(1);
+                                                                refundLogEntity.setMessage(refundResult);
+
+                                                                insertTransactionRefundRedis(refundResult, dto, terminalBankEntity);
+                                                                httpStatus = HttpStatus.OK;
+                                                                result = new ResponseMessageDTO("SUCCESS", refundResult);
+                                                            } else {
+                                                                logger.error("refundForMerchant: ERROR: UNEXPECTED ERROR");
+                                                                refundLogEntity.setReferenceNumber("");
+                                                                refundLogEntity.setStatus(0);
+                                                                refundLogEntity.setMessage(refundResult);
+                                                                httpStatus = HttpStatus.BAD_REQUEST;
+                                                                result = new ResponseMessageDTO("FAILED", "E05");
+                                                            }
+                                                        } else {
+                                                            logger.error(
+                                                                    "refundForMerchant: ERROR: " + dto.getBankAccount() + " REFUND FAILED");
+                                                            refundLogEntity.setReferenceNumber("");
+                                                            refundLogEntity.setStatus(0);
+                                                            refundLogEntity.setMessage("");
+
+                                                            httpStatus = HttpStatus.BAD_REQUEST;
+                                                            result = new ResponseMessageDTO("FAILED", "E43");
+                                                        }
+                                                    } else {
+                                                        // lenh refund truoc do chi cho hoan tien 1 lan => tra loi
+                                                        logger.error("refundService: ERROR: Only refund one time");
+                                                        // logger
+                                                        refundLogEntity.setReferenceNumber("");
+                                                        refundLogEntity.setStatus(0);
+                                                        refundLogEntity.setMessage("");
+                                                        httpStatus = HttpStatus.BAD_REQUEST;
+                                                        result = new ResponseMessageDTO("FAILED", "E157");
+                                                    }
+                                                } else {
                                                     // lenh refund truoc do cho hoan tien nhieu lan => cho phep hoan tien tiep
                                                     String refundResult = refundFromMB(terminalBankEntity.getTerminalId(),
                                                             dto.getReferenceNumber(),
@@ -2538,75 +2617,13 @@ public class TransactionMMSController {
                                                         httpStatus = HttpStatus.BAD_REQUEST;
                                                         result = new ResponseMessageDTO("FAILED", "E43");
                                                     }
-                                                } else {
-                                                    // lenh refund truoc do chi cho hoan tien 1 lan => tra loi
-                                                    logger.error("refundService: ERROR: Only refund one time");
-                                                    // logger
-                                                    refundLogEntity.setReferenceNumber("");
-                                                    refundLogEntity.setStatus(0);
-                                                    refundLogEntity.setMessage("");
-                                                    httpStatus = HttpStatus.BAD_REQUEST;
-                                                    result = new ResponseMessageDTO("FAILED", "E157");
                                                 }
                                             } else {
-                                                // lenh refund truoc do cho hoan tien nhieu lan => cho phep hoan tien tiep
-                                                String refundResult = refundFromMB(terminalBankEntity.getTerminalId(),
-                                                        dto.getReferenceNumber(),
-                                                        dto.getAmount(), dto.getContent());
-
-                                                if (refundResult != null) {
-                                                    if (refundResult.trim().equals("4863")) {
-                                                        logger.error(
-                                                                "refundForMerchant: ERROR: " + dto.getBankAccount()
-                                                                        + " FT CODE IS NOT EXISTED");
-                                                        refundLogEntity.setReferenceNumber("");
-                                                        refundLogEntity.setStatus(0);
-                                                        refundLogEntity.setMessage(refundResult);
-
-                                                        httpStatus = HttpStatus.BAD_REQUEST;
-                                                        result = new ResponseMessageDTO("FAILED", "E44");
-                                                    } else if (refundResult.trim().equals("4857")) {
-                                                        logger.error(
-                                                                "refundForMerchant: ERROR: " + dto.getBankAccount()
-                                                                        + " INVALID AMOUNT");
-                                                        refundLogEntity.setReferenceNumber("");
-                                                        refundLogEntity.setStatus(0);
-                                                        refundLogEntity.setMessage(refundResult);
-
-                                                        httpStatus = HttpStatus.BAD_REQUEST;
-                                                        result = new ResponseMessageDTO("FAILED", "E45");
-                                                    } else if (refundResult.trim().contains("FT")) {
-                                                        refundLogEntity.setReferenceNumber(refundResult);
-                                                        refundLogEntity.setStatus(1);
-                                                        refundLogEntity.setMessage(refundResult);
-
-                                                        insertTransactionRefundRedis(refundResult, dto, terminalBankEntity);
-                                                        httpStatus = HttpStatus.OK;
-                                                        result = new ResponseMessageDTO("SUCCESS", refundResult);
-                                                    } else {
-                                                        logger.error("refundForMerchant: ERROR: UNEXPECTED ERROR");
-                                                        refundLogEntity.setReferenceNumber("");
-                                                        refundLogEntity.setStatus(0);
-                                                        refundLogEntity.setMessage(refundResult);
-                                                        httpStatus = HttpStatus.BAD_REQUEST;
-                                                        result = new ResponseMessageDTO("FAILED", "E05");
-                                                    }
-                                                } else {
-                                                    logger.error(
-                                                            "refundForMerchant: ERROR: " + dto.getBankAccount() + " REFUND FAILED");
-                                                    refundLogEntity.setReferenceNumber("");
-                                                    refundLogEntity.setStatus(0);
-                                                    refundLogEntity.setMessage("");
-
-                                                    httpStatus = HttpStatus.BAD_REQUEST;
-                                                    result = new ResponseMessageDTO("FAILED", "E43");
-                                                }
+                                                logger.error(
+                                                        "refundForMerchant: ERROR: " + dto.getBankAccount() + " INVALID TERMINAL");
+                                                httpStatus = HttpStatus.BAD_REQUEST;
+                                                result = new ResponseMessageDTO("FAILED", "E42");
                                             }
-                                        } else {
-                                            logger.error(
-                                                    "refundForMerchant: ERROR: " + dto.getBankAccount() + " INVALID TERMINAL");
-                                            httpStatus = HttpStatus.BAD_REQUEST;
-                                            result = new ResponseMessageDTO("FAILED", "E42");
                                         }
                                     } else {
                                         logger.error(
@@ -2698,12 +2715,30 @@ public class TransactionMMSController {
 
     private void insertTransactionRefundRedis(String ftCode, RefundRequestDTO dto, TerminalBankEntity terminalBankEntity) {
         try {
-            idempotencyService.saveResponseForUUIDRefundKey(ftCode, dto.getReferenceNumber(), 600);
             TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService.getTransactionReceiveByRefNumber(dto.getReferenceNumber(), "C");
+            if (StringUtil.isNullOrEmpty(dto.getTerminalCode())) {
+                if (Objects.nonNull(transactionReceiveEntity)) {
+                    dto.setTerminalCode(transactionReceiveEntity.getTerminalCode());
+                }
+            }
+            if (StringUtil.isNullOrEmpty(dto.getSubTerminalCode())) {
+                if (Objects.nonNull(transactionReceiveEntity)) {
+                    dto.setSubTerminalCode(transactionReceiveEntity.getSubCode());
+                }
+            }
             if (Objects.nonNull(transactionReceiveEntity)) {
-                transactionReceiveService.updateTransactionRefundStatus(ftCode, transactionReceiveEntity.getSubCode(),
+                transactionReceiveService.updateTransactionRefundStatus(ftCode,
+                        transactionReceiveEntity.getSubCode(),
                         transactionReceiveEntity.getTerminalCode(), 0);
             }
+            RefundMappingRedisDTO refundMappingRedisDTO = new RefundMappingRedisDTO(
+                    StringUtil.getValueNullChecker(dto.getTerminalCode()),
+                    StringUtil.getValueNullChecker(dto.getSubTerminalCode()),
+                    StringUtil.getValueNullChecker(dto.getReferenceNumber())
+                    );
+            ObjectMapper mapper = new ObjectMapper();
+            idempotencyService.saveResponseForUUIDRefundKey(ftCode, mapper.writeValueAsString(refundMappingRedisDTO), 600);
+
         } catch (Exception e) {
             logger.error("insertTransactionRefundRedis: ERROR: " + e.toString() + " at: " + System.currentTimeMillis());
         }
