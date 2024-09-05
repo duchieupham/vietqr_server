@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -77,6 +78,9 @@ public class TransactionMMSController {
 
     @Autowired
     TerminalAddressService terminalAddressService;
+
+    @Autowired
+    MerchantSyncService merchantSyncService;
 
     @Autowired
     CustomerSyncService customerSyncService;
@@ -1461,6 +1465,24 @@ public class TransactionMMSController {
                 List<BankReceiveConnectionEntity> bankReceiveConnectionEntities = new ArrayList<>();
                 bankReceiveConnectionEntities = bankReceiveConnectionService
                         .getBankReceiveConnectionByBankId(bankId);
+
+                try {
+                    if (bankReceiveConnectionEntities != null && !bankReceiveConnectionEntities.isEmpty()) {
+                        List<String> merchantIds = bankReceiveConnectionEntities.stream()
+                                .map(BankReceiveConnectionEntity::getMid) // Replace with the actual method to get the merchant ID
+                                .distinct() // Ensures the list is unique
+                                .collect(Collectors.toList());
+                        List<MerchantSyncEntity> merchantSyncEntities = merchantSyncService.getMerchantSyncByIds(merchantIds);
+                        if (merchantSyncEntities != null && !merchantSyncEntities.isEmpty()) {
+                            for (MerchantSyncEntity entity: merchantSyncEntities) {
+                                pushTransactionSyncForClientId(entity, transactionBankCustomerDTO);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.error("getCustomerSyncEntitiesV2 WSS: ERROR: " + e.toString());
+                }
+
                 if (bankReceiveConnectionEntities != null && !bankReceiveConnectionEntities.isEmpty()) {
                     int numThread = bankReceiveConnectionEntities.size();
                     ExecutorService executorService = Executors.newFixedThreadPool(numThread);
@@ -1489,6 +1511,38 @@ public class TransactionMMSController {
             }
         } catch (Exception e) {
             logger.error("getCustomerSyncEntities MMS: ERROR: " + e.toString());
+        }
+    }
+
+    private void pushTransactionSyncForClientId(MerchantSyncEntity merchantSyncEntity, TransactionBankCustomerDTO dto) {
+        try {
+            logger.info("transaction-sync: WS: pushTransactionSyncForClientId - orderId: " + dto.getOrderId() + " clientId: " + merchantSyncEntity.getClientId());
+            Thread thread = new Thread(() -> {
+                try {
+                    Map<String, String> data = new HashMap<>();
+                    data.put("transactionid", dto.getTransactionid());
+                    data.put("notificationType", NotificationUtil.getNotiTypeUpdateTransaction());
+                    data.put("transactiontime", dto.getTransactiontime() + "");
+                    data.put("referencenumber", dto.getReferencenumber());
+                    data.put("amount", dto.getAmount() + "");
+                    data.put("content", dto.getContent());
+                    data.put("bankaccount", dto.getBankaccount());
+                    data.put("transType", dto.getTransType());
+                    data.put("orderId", dto.getOrderId());
+                    data.put("terminalCode", dto.getTerminalCode());
+                    data.put("serviceCode", dto.getServiceCode());
+                    data.put("subTerminalCode", dto.getSubTerminalCode());
+                    socketHandler.sendMessageToClientId(merchantSyncEntity.getClientId(),
+                            data);
+                } catch (IOException e) {
+                    logger.error(
+                            "transaction-sync: WS: socketHandler.pushTransactionSyncForClientId - RECHARGE ERROR: "
+                                    + e.toString());
+                }
+            });
+            thread.start();
+        } catch (Exception e) {
+            logger.error("CustomerSync: Error: " + e.toString());
         }
     }
 
