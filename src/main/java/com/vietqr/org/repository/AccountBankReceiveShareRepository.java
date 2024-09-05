@@ -21,6 +21,7 @@ public interface AccountBankReceiveShareRepository
                     + "b.user_id as userId, a.is_owner as isOwner, b.bank_type_id as bankTypeId, "
                     + "b.national_id as nationalId, b.is_valid_service AS isValidService, "
                     + "b.valid_fee_from AS validFeeFrom, b.valid_fee_to AS validFeeTo, "
+                    + "COALESCE(b.push_notification, 1) AS pushNotification, "
                     + "COALESCE(c.va_number, '') AS vaNumber "
                     + "FROM account_bank_receive_share a "
                     + "INNER JOIN account_bank_receive b "

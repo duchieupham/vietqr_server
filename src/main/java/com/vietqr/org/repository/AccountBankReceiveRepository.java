@@ -830,5 +830,11 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "LIMIT :offset, :size", nativeQuery = true)
 	List<IBankAccountResponseDTO> getBankAccountsByNationalIdAndSorted(@Param("keyword") String keyword, @Param("currentTime") long currentTime, @Param("sevenDaysLater") long sevenDaysLater, @Param("offset") int offset, @Param("size") int size);
 
-
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_bank_receive"
+			+ " SET pushNotification = :value"
+			+ " WHERE id = :bankId"
+			, nativeQuery = true)
+	void updatePushNotification(@Param(value = "bankId") String bankId, @Param(value = "value") int value);
 }
