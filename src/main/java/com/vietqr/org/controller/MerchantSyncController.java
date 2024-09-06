@@ -278,14 +278,26 @@ public class MerchantSyncController {
     }
 
     @GetMapping("ecommerce/active")
-    public ResponseEntity<EcommerceActiveDTO> getEcommerceByCode(@RequestParam String ecommerceCode) {
-        EcommerceActiveDTO result = null;
+    public ResponseEntity<Object> getEcommerceByCode(@RequestParam String ecommerceCode) {
+        Object result = null;
         HttpStatus httpStatus = null;
         try {
-            result = new EcommerceActiveDTO();
-            httpStatus = HttpStatus.OK;
+            MerchantSyncEntity merchantSyncEntity = merchantSyncService.getMerchantSyncByCertificate(ecommerceCode);
+            if (Objects.nonNull(merchantSyncEntity)) {
+                CustomerSyncEntity customerSyncEntity = customerSyncService.getCustomerSyncById(merchantSyncEntity.getId());
+                result = new EcommerceActiveDTO(merchantSyncEntity.getFullName(), customerSyncEntity.getInformation(),
+                        merchantSyncEntity.getName(), "", "", merchantSyncEntity.getCertificate(),
+                        merchantSyncEntity.getNationalId(), merchantSyncEntity.getEmail(),
+                        merchantSyncEntity.getPhoneNo(), merchantSyncEntity.getAddress(), merchantSyncEntity.getWebhook(), merchantSyncEntity.getCareer(),
+                        merchantSyncEntity.getBusinessType().equals("Cá nhân") ? 0 : 1);
+                httpStatus = HttpStatus.OK;
+            } else {
+                httpStatus = HttpStatus.BAD_REQUEST;
+                result = new ResponseMessageDTO("FAILED", "E164");
+            }
         } catch (Exception e) {
             httpStatus = HttpStatus.BAD_REQUEST;
+            result = new ResponseMessageDTO("FAILED", "E05");
         }
         return new ResponseEntity<>(result, httpStatus);
     }

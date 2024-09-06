@@ -45,6 +45,22 @@ public class EcommerceActiveDTO {
         this.career = career;
     }
 
+    public EcommerceActiveDTO(String fullName, String website, String name, String bankCode, String bankAccount, String certificate, String nationalId, String email, String phoneNo, String address, String webhook, String career, int businessType) {
+        this.fullName = fullName;
+        this.website = website;
+        this.name = name;
+        this.bankCode = bankCode;
+        this.bankAccount = bankAccount;
+        this.certificate = certificate;
+        this.nationalId = nationalId;
+        this.email = email;
+        this.phoneNo = phoneNo;
+        this.address = address;
+        this.webhook = webhook;
+        this.career = career;
+        this.businessType = businessType;
+    }
+
     public String getFullName() {
         return fullName;
     }
