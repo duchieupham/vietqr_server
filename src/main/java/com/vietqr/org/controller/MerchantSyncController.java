@@ -285,11 +285,11 @@ public class MerchantSyncController {
             MerchantSyncEntity merchantSyncEntity = merchantSyncService.getMerchantSyncByCertificate(ecommerceCode);
             if (Objects.nonNull(merchantSyncEntity)) {
                 CustomerSyncEntity customerSyncEntity = customerSyncService.getCustomerSyncById(merchantSyncEntity.getId());
-                result = new EcommerceActiveDTO(merchantSyncEntity.getFullName(), customerSyncEntity.getInformation(),
+                result = new EcommerceActiveDTO(merchantSyncEntity.getFullName(), customerSyncEntity!= null ? customerSyncEntity.getInformation() : "",
                         merchantSyncEntity.getName(), "", "", merchantSyncEntity.getCertificate(),
                         merchantSyncEntity.getNationalId(), merchantSyncEntity.getEmail(),
                         merchantSyncEntity.getPhoneNo(), merchantSyncEntity.getAddress(), merchantSyncEntity.getWebhook(), merchantSyncEntity.getCareer(),
-                        merchantSyncEntity.getBusinessType().equals("Cá nhân") ? 0 : 1);
+                        "Cá nhân".equals(merchantSyncEntity.getBusinessType()) ? 0 : 1);
                 httpStatus = HttpStatus.OK;
             } else {
                 httpStatus = HttpStatus.BAD_REQUEST;
