@@ -187,95 +187,6 @@ public class MerchantSyncController {
         return result;
     }
 
-//    @PostMapping("ecommerce/bank-account")
-//    public ResponseEntity<Object> syncEcommerce(@RequestBody EcommerceChangeBankAccountDTO dto,
-//                                                @RequestHeader("Authorization") String token) {
-//        Object result = null;
-//        HttpStatus httpStatus = null;
-//        try {
-//            String username = getUsernameFromToken(token);
-//            if (!StringUtil.isNullOrEmpty(username)) {
-//                String accessKey = accountCustomerService.getAccessKeyByUsername(username);
-//                if (!StringUtil.isNullOrEmpty(accessKey)) {
-//                    String checkSum = BankEncryptUtil.generateMD5EcommerceCheckSum(accessKey, dto.getEcommerceSite());
-//                    if (dto.getCheckSum().equals(checkSum)) {
-//                        CustomerSyncEntity entity = customerSyncService.getCustomerSyncByInformation(dto.getEcommerceSite());
-//                        String clientId = "";
-//                        String certificate = "";
-//                        if (entity == null) {
-//                            entity = new CustomerSyncEntity();
-//                            UUID uuid = UUID.randomUUID();
-//                            entity.setId(uuid.toString());
-//                            entity.setUsername("");
-//                            entity.setPassword("");
-//                            entity.setIpAddress("");
-//                            entity.setPort("");
-//                            entity.setSuffixUrl("");
-//                            entity.setInformation(dto.getEcommerceSite());
-//                            entity.setUserId("");
-//                            entity.setActive(false);
-//                            entity.setToken("");
-//                            entity.setMerchant("");
-//                            entity.setAddress("");
-//                            entity.setMaster(false);
-//                            entity.setAccountId("");
-//                            entity.setRefId("");
-//                            String publishId = "MER" + RandomCodeUtil.generateOTP(8);
-//                            certificate = "MER-ECM-" + publishId;
-//                            clientId = BoxTerminalRefIdUtil.encryptQrBoxId(uuid.toString());
-//                            MerchantSyncEntity merchantSyncEntity = new MerchantSyncEntity(uuid.toString(),
-//                                    "", "", "Ecommerce wordpress", publishId, certificate,
-//                                    StringUtil.getValueNullChecker(dto.getWebhook()), clientId);
-//                            customerSyncService.insertCustomerSync(entity);
-//                            merchantSyncService.insert(merchantSyncEntity);
-//                        } else {
-//                            MerchantSyncEntity merchantSyncEntity = merchantSyncService.getMerchantSyncById(entity.getId());
-//                            if (merchantSyncEntity != null) {
-//                                if (StringUtil.isNullOrEmpty(merchantSyncEntity.getPublishId())) {
-//                                    String publishId = "MER" + RandomCodeUtil.generateOTP(8);
-//                                    certificate = "MER-ECM-" + publishId;
-//                                    clientId = BoxTerminalRefIdUtil.encryptQrBoxId(entity.getId());
-//                                    merchantSyncEntity.setPublishId(publishId);
-//                                    merchantSyncEntity.setCertificate(certificate);
-//                                    merchantSyncEntity.setWebhook(StringUtil.getValueNullChecker(dto.getWebhook()));
-//                                    merchantSyncEntity.setClientId(clientId);
-//                                    merchantSyncService.insert(merchantSyncEntity);
-//                                }
-//                                String publishId = merchantSyncEntity.getPublishId();
-//                                certificate = "MER-ECM-" + publishId;
-//                                clientId = BoxTerminalRefIdUtil.encryptQrBoxId(entity.getId());
-//                            } else {
-//                                String publishId = "MER" + RandomCodeUtil.generateOTP(8);
-//                                certificate = "MER-ECM-" + publishId;
-//                                clientId = BoxTerminalRefIdUtil.encryptQrBoxId(entity.getId());
-//                                merchantSyncEntity = new MerchantSyncEntity(entity.getId(),
-//                                        "", "", "Ecommerce wordpress", publishId, certificate,
-//                                        StringUtil.getValueNullChecker(dto.getWebhook()), clientId);
-//                                merchantSyncService.insert(merchantSyncEntity);
-//                            }
-//                        }
-//
-//                        result = new MerchantSyncEcommerceDTO(StringUtil.getValueNullChecker(dto.getWebhook()), clientId, certificate);
-//                        httpStatus = HttpStatus.OK;
-//                    } else {
-//                        result = new ResponseMessageDTO("FAILED", "E74");
-//                        httpStatus = HttpStatus.BAD_REQUEST;
-//                    }
-//                } else {
-//                    result = new ResponseMessageDTO("FAILED", "E05");
-//                    httpStatus = HttpStatus.BAD_REQUEST;
-//                }
-//            } else {
-//                result = new ResponseMessageDTO("FAILED", "E05");
-//                httpStatus = HttpStatus.BAD_REQUEST;
-//            }
-//        } catch (Exception e) {
-//            httpStatus = HttpStatus.BAD_REQUEST;
-//            result = new ResponseMessageDTO("FAILED", "E05");
-//        }
-//        return new ResponseEntity<>(result, httpStatus);
-//    }
-
     @PostMapping("ecommerce/active")
     public ResponseEntity<Object> syncEcommerce(@RequestBody EcommerceActiveDTO dto) {
         Object result = null;
@@ -362,6 +273,19 @@ public class MerchantSyncController {
         } catch (Exception e) {
             httpStatus = HttpStatus.BAD_REQUEST;
             result = new ResponseMessageDTO("FAILED", "E05");
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("ecommerce/active")
+    public ResponseEntity<EcommerceActiveDTO> getEcommerceByCode(@RequestParam String ecommerceCode) {
+        EcommerceActiveDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            result = new EcommerceActiveDTO();
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
     }
