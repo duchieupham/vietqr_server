@@ -13,4 +13,6 @@ public interface AccountBankReceiveShareForNotiDTO {
 
     String getBankShortName();
     Boolean getIsValidService();
+
+    int getPushNotification();
 }

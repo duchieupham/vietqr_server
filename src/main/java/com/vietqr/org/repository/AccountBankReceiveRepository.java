@@ -833,7 +833,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Transactional
 	@Modifying
 	@Query(value = "UPDATE account_bank_receive"
-			+ " SET pushNotification = :value"
+			+ " SET push_notification = :value"
 			+ " WHERE id = :bankId"
 			, nativeQuery = true)
 	void updatePushNotification(@Param(value = "bankId") String bankId, @Param(value = "value") int value);
@@ -845,4 +845,12 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ " WHERE id = :id "
 			, nativeQuery = true)
 	void updateSyncWpById(String id);
+
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_bank_receive"
+			+ " SET push_notification = :value"
+			+ " WHERE user_id = :userId"
+			, nativeQuery = true)
+	void updatePushNotificationUser(@Param(value = "userId") String userId, @Param(value = "value") int value);
 }
