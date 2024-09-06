@@ -31,6 +31,7 @@ import com.google.gson.Gson;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.bidv.ConfirmCustomerVaDTO;
 import com.vietqr.org.dto.bidv.RequestCustomerVaDTO;
+import com.vietqr.org.dto.mapping.RefundMappingRedisDTO;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.security.JWTAuthorizationFilter;
 import com.vietqr.org.service.*;
@@ -2728,18 +2729,19 @@ public class TransactionBankController {
         return dateTime.format(formatter);
     }
 
-    private TransactionReceiveEntity getRedisTransTypeD(String ftCode) {
-        TransactionReceiveEntity transactionReceiveEntity = null;
+    private RefundMappingRedisDTO getRedisTransTypeD(String ftCode) {
+        RefundMappingRedisDTO refundMappingRedisDTO = null;
         try {
             Optional<String> existingResponse = idempotencyService.getResponseForUUIDRefundKey(ftCode);
             if (existingResponse.isPresent()) {
-                transactionReceiveEntity = transactionReceiveService.getTransactionReceiveByRefNumber(existingResponse.get(), "C");
+                ObjectMapper mapper = new ObjectMapper();
+                refundMappingRedisDTO = mapper.readValue(existingResponse.get(), RefundMappingRedisDTO.class);
                 idempotencyService.deleteResponseForUUIDRefundKey(ftCode);
             }
         } catch (Exception e) {
             logger.error("transaction-sync - getRedisTransTypeD - ERROR: " + e.toString());
         }
-        return transactionReceiveEntity;
+        return refundMappingRedisDTO;
     }
 
     // insert new transaction mean it's not created from business. So DO NOT need to
@@ -3702,11 +3704,11 @@ public class TransactionBankController {
                 transactionEntity.setTerminalCode("");
                 transactionEntity.setSubCode("");
             } else {
-                TransactionReceiveEntity transTypeC = getRedisTransTypeD(dto.getReferencenumber());
-                if (Objects.nonNull(transTypeC)) {
+                RefundMappingRedisDTO refundMappingRedisDTO = getRedisTransTypeD(dto.getReferencenumber());
+                if (Objects.nonNull(refundMappingRedisDTO)) {
                     transactionEntity.setType(0);
-                    transactionEntity.setTerminalCode(transTypeC.getTerminalCode());
-                    transactionEntity.setSubCode(transTypeC.getSubCode());
+                    transactionEntity.setTerminalCode(refundMappingRedisDTO.getTerminalCode());
+                    transactionEntity.setSubCode(refundMappingRedisDTO.getSubTerminalCode());
                 } else {
                     transactionEntity.setType(2);
                     transactionEntity.setTerminalCode("");

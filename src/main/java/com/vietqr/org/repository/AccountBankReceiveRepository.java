@@ -841,6 +841,14 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Transactional
 	@Modifying
 	@Query(value = "UPDATE account_bank_receive"
+			+ " SET is_wp_sync = true "
+			+ " WHERE id = :id "
+			, nativeQuery = true)
+	void updateSyncWpById(String id);
+
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_bank_receive"
 			+ " SET push_notification = :value"
 			+ " WHERE user_id = :userId"
 			, nativeQuery = true)
