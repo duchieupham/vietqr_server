@@ -198,4 +198,5 @@ public interface AccountBankReceiveService {
 	void updatePushNotification(String bankId, int value);
 
 	void updateSyncWpById(String id);
+	void updatePushNotificationUser(String userId, int value);
 }

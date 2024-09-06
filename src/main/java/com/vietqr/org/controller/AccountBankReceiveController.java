@@ -1560,14 +1560,14 @@ public class AccountBankReceiveController {
     @PostMapping("account-bank/update-noti/{bankId}")
     public ResponseEntity<ResponseMessageDTO> updatePushNotification(
             @PathVariable("bankId") String bankId,
-            @RequestBody int value
+            @RequestBody AccountBankReceiveValueDTO accountBankReceiveValueDTO
     ){
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
             AccountBankReceiveEntity entity = accountBankReceiveService.getAccountBankById(bankId);
-            if(entity != null && (value == 1 || value == 0)) {
-                accountBankReceiveService.updatePushNotification(bankId, value);
+            if(entity != null && (accountBankReceiveValueDTO.getValue() == 1 || accountBankReceiveValueDTO.getValue() == 0)) {
+                accountBankReceiveService.updatePushNotification(bankId, accountBankReceiveValueDTO.getValue());
                 result = new ResponseMessageDTO("SUCCESS", "");
                 httpStatus = HttpStatus.OK;
             } else {
@@ -1579,6 +1579,31 @@ public class AccountBankReceiveController {
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PostMapping("account-bank/user/{userId}/update-noti")
+    public ResponseEntity<ResponseMessageDTO> updatePushNotificationUser(
+            @PathVariable("userId") String userId,
+            @RequestBody AccountBankReceiveValueDTO accountBankReceiveValueDTO
+    ){
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if(accountBankReceiveValueDTO.getValue() == 1 || accountBankReceiveValueDTO.getValue() == 0) {
+                accountBankReceiveService.updatePushNotificationUser(userId, accountBankReceiveValueDTO.getValue());
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            } else {
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("updatePushNotificationUser: ERROR: " + e.toString() + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+    }
 
         return new ResponseEntity<>(result, httpStatus);
     }

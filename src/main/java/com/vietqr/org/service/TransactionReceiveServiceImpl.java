@@ -1622,8 +1622,8 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
-    public void updateTransactionRefundStatus(String ftCode, String subCode, String terminalCode, int type) {
-        repo.updateTransactionRefundStatus(ftCode, subCode, terminalCode, type);
+    public void updateTransactionRefundStatus(String ftCode, String subCode, String terminalCode, String orderId, int type) {
+        repo.updateTransactionRefundStatus(ftCode, subCode, terminalCode, orderId, type);
     }
 
     @Override

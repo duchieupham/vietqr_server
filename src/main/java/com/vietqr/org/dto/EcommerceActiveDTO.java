@@ -2,6 +2,7 @@ package com.vietqr.org.dto;
 
 public class EcommerceActiveDTO {
     private String fullName;
+    private String website;
     private String name;
     private String bankCode;
     private String bankAccount;
@@ -15,6 +16,19 @@ public class EcommerceActiveDTO {
     private int businessType;
 
     public EcommerceActiveDTO() {
+        this.fullName = "";
+        this.website = "";
+        this.name = "";
+        this.bankCode = "";
+        this.bankAccount = "";
+        this.certificate = "";
+        this.nationalId = "";
+        this.email = "";
+        this.phoneNo = "";
+        this.address = "";
+        this.webhook = "";
+        this.career = "";
+        this.businessType = 1;
     }
 
     public EcommerceActiveDTO(String fullName, String bankCode, String bankAccount, String certificate, String nationalId,
@@ -29,6 +43,22 @@ public class EcommerceActiveDTO {
         this.address = address;
         this.webhook = webhook;
         this.career = career;
+    }
+
+    public EcommerceActiveDTO(String fullName, String website, String name, String bankCode, String bankAccount, String certificate, String nationalId, String email, String phoneNo, String address, String webhook, String career, int businessType) {
+        this.fullName = fullName;
+        this.website = website;
+        this.name = name;
+        this.bankCode = bankCode;
+        this.bankAccount = bankAccount;
+        this.certificate = certificate;
+        this.nationalId = nationalId;
+        this.email = email;
+        this.phoneNo = phoneNo;
+        this.address = address;
+        this.webhook = webhook;
+        this.career = career;
+        this.businessType = businessType;
     }
 
     public String getFullName() {
@@ -125,5 +155,13 @@ public class EcommerceActiveDTO {
 
     public void setBusinessType(int businessType) {
         this.businessType = businessType;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
     }
 }

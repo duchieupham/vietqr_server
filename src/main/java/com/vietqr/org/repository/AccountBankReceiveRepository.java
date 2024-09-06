@@ -292,7 +292,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	String checkIsOwner(String bankId, String userId);
 
 	@Query(value = "SELECT a.id as bankId, b.bank_name as bankName, b.bank_code as bankCode, a.user_id as userId, "
-			+ "b.bank_short_name as bankShortName, a.bank_account as bankAccount, a.is_valid_service AS isValidService "
+			+ "b.bank_short_name as bankShortName, a.bank_account as bankAccount, a.is_valid_service AS isValidService, a.push_notification AS pushNotification "
 			+ "FROM account_bank_receive a "
 			+ "INNER JOIN bank_type b "
 			+ "ON a.bank_type_id = b.id "
@@ -833,7 +833,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Transactional
 	@Modifying
 	@Query(value = "UPDATE account_bank_receive"
-			+ " SET pushNotification = :value"
+			+ " SET push_notification = :value"
 			+ " WHERE id = :bankId"
 			, nativeQuery = true)
 	void updatePushNotification(@Param(value = "bankId") String bankId, @Param(value = "value") int value);
@@ -845,4 +845,12 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ " WHERE id = :id "
 			, nativeQuery = true)
 	void updateSyncWpById(String id);
+
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_bank_receive"
+			+ " SET push_notification = :value"
+			+ " WHERE user_id = :userId"
+			, nativeQuery = true)
+	void updatePushNotificationUser(@Param(value = "userId") String userId, @Param(value = "value") int value);
 }

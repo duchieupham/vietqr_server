@@ -43,8 +43,6 @@ import com.vietqr.org.util.*;
 import com.vietqr.org.util.bank.bidv.BIDVUtil;
 
 import com.vietqr.org.util.bank.bidv.CustomerVaUtil;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -91,7 +89,7 @@ public class TransactionBankController {
     private static final Logger logger = Logger.getLogger(TransactionBankController.class);
 
     @Autowired
-    AccountBankReceiveService accountBankService;
+    AccountBankReceiveService accountBankReceiveService;
 
     @Autowired
     TransactionBankService transactionBankService;
@@ -184,9 +182,6 @@ public class TransactionBankController {
 
     @Autowired
     private TrAnnualFeePackageService trAnnualFeePackageService;
-
-    @Autowired
-    private AccountBankReceiveService accountBankReceiveService;
 
     @Autowired
     private BankReceiveActiveHistoryService bankReceiveActiveHistoryService;
@@ -377,10 +372,10 @@ public class TransactionBankController {
         // String bankTypeId = bankTypeService.getBankTypeIdByBankCode(bankCode);
         // because of bank_type default is MB => aa4e489b-254e-4351-9cd4-f62e09c63ebc
         String bankTypeId = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
-        AccountBankReceiveEntity accountBankEntity = accountBankService
+        AccountBankReceiveEntity accountBankEntity = accountBankReceiveService
                 .getAccountBankByBankAccountAndBankTypeId(dto.getBankaccount(), bankTypeId);
         if (Objects.isNull(accountBankEntity)) {
-            accountBankEntity = accountBankService
+            accountBankEntity = accountBankReceiveService
                     .getAccountBankByBankAccountAndBankTypeId(dto.getBankaccount(), "f44cbe47-cb2b-427e-98b5-10afa0375690");
         }
 
@@ -676,7 +671,7 @@ public class TransactionBankController {
         // String bankTypeId = bankTypeService.getBankTypeIdByBankCode(bankCode);
         // because of bank_type default is MB => aa4e489b-254e-4351-9cd4-f62e09c63ebc
         String bankTypeId = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
-        AccountBankReceiveEntity accountBankEntity = accountBankService
+        AccountBankReceiveEntity accountBankEntity = accountBankReceiveService
                 .getAccountBankByBankAccountAndBankTypeId(dto.getBankaccount(), bankTypeId);
         try {
             // danh sách transaction Id đã được insert
@@ -1287,7 +1282,7 @@ public class TransactionBankController {
                                     data.put("paymentType", "1");
                                     data.put("status", status);
                                     data.put("message", msgErrorCode);
-                                    pushNotification(title, message, notiEntity, data, userId);
+                                    pushNotification(title, message, notiEntity, data, userId, 1);
                                     //
                                 } else {
                                     System.out.println(
@@ -1448,7 +1443,7 @@ public class TransactionBankController {
                                             data.put("paymentType", "2");
                                             data.put("status", 1 + "");
                                             data.put("message", message);
-                                            pushNotification(title, message, notiEntity, data, userId);
+                                            pushNotification(title, message, notiEntity, data, userId, 1);
 
                                         }
                                     }
@@ -1592,7 +1587,7 @@ public class TransactionBankController {
                                         }
 
                                         Thread thread = new Thread(() -> {
-                                            pushNotification(title, message, notiEntity, data, notiEntity.getUserId());
+                                            pushNotification(title, message, notiEntity, data, notiEntity.getUserId(), 1);
                                         });
                                         thread.start();
 
@@ -1678,7 +1673,7 @@ public class TransactionBankController {
     }
 
     private void pushNotification(String title, String message, NotificationEntity notiEntity, Map<String, String> data,
-                                  String userId) {
+                                  String userId, int pushWss) {
         if (notiEntity != null) {
             notificationService.insertNotification(notiEntity);
         }
@@ -1688,8 +1683,9 @@ public class TransactionBankController {
                 fcmTokens,
                 title, message);
         try {
-            socketHandler.sendMessageToUser(userId,
-                    data);
+            if(pushWss == 1) {
+                socketHandler.sendMessageToUser(userId, data);
+            }
         } catch (IOException e) {
             logger.error(
                     "transaction-sync: WS: socketHandler.sendMessageToUser - RECHARGE ERROR: "
@@ -1802,7 +1798,8 @@ public class TransactionBankController {
                             data.put("transType", dto.getTransType());
                             data.put("urlLink", transactionReceiveEntity.getUrlLink() != null ? transactionReceiveEntity.getUrlLink() : "");
                             executorService.submit(() -> pushNotification(NotificationUtil
-                                    .getNotiTitleUpdateTransaction(), message, notiEntity, data, userId));
+                                    .getNotiTitleUpdateTransaction(), message, notiEntity, data, userId,
+                                    StringUtil.getValueNullChecker(accountBankEntity.getPushNotification(), 1)));
                             try {
                                 // send msg to QR Link
                                 String refId = TransactionRefIdUtil.encryptTransactionId(transactionReceiveEntity.getId());
@@ -2083,7 +2080,7 @@ public class TransactionBankController {
                 data.put("transType", dto.getTransType());
                 data.put("urlLink", transactionReceiveEntity.getUrlLink() != null ? transactionReceiveEntity.getUrlLink() : "");
                 pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
-                        message, notiEntity, data, accountBankEntity.getUserId());
+                        message, notiEntity, data, accountBankEntity.getUserId(), StringUtil.getValueNullChecker(accountBankEntity.getPushNotification(), 1));
                 try {
                     String refId = TransactionRefIdUtil.encryptTransactionId(transactionReceiveEntity.getId());
                     socketHandler.sendMessageToTransactionRefId(refId, data);
@@ -2391,7 +2388,7 @@ public class TransactionBankController {
             // .getNotiTitleUpdateTransaction(),
             // message);
             pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
-                    message, notiEntity, data, accountBankEntity.getUserId());
+                    message, notiEntity, data, accountBankEntity.getUserId(), StringUtil.getValueNullChecker(accountBankEntity.getPushNotification(), 1));
             try {
                 // send msg to user
                 // socketHandler.sendMessageToUser(accountBankEntity.getUserId(), data);
@@ -2898,10 +2895,10 @@ public class TransactionBankController {
                                     EnvironmentUtil.getFcmNotificationRoleId());
                             if (roleFCM != null && !roleFCM.isEmpty()) {
                                 executorService.submit(() -> pushNotification(NotificationUtil
-                                        .getNotiTitleUpdateTransaction(), message, notiEntity, data, userId));
+                                        .getNotiTitleUpdateTransaction(), message, notiEntity, data, userId, StringUtil.getValueNullChecker(accountBankEntity.getPushNotification(), 1)));
                             } else {
                                 executorService.submit(() -> pushNotificationWithSocket(NotificationUtil
-                                        .getNotiTitleUpdateTransaction(), message, notiEntity, data, userId));
+                                        .getNotiTitleUpdateTransaction(), message, notiEntity, data, userId, StringUtil.getValueNullChecker(accountBankEntity.getPushNotification(), 1)));
                             }
                         }
                     } finally {
@@ -3025,7 +3022,7 @@ public class TransactionBankController {
                     data.put("traceId", "");
                     data.put("transType", "C");
                     pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
-                            message, notiEntity, data, accountBankEntity.getUserId());
+                            message, notiEntity, data, accountBankEntity.getUserId(), StringUtil.getValueNullChecker(accountBankEntity.getPushNotification(), 1));
                     try {
                         // send msg to QR Link
                         String refId = TransactionRefIdUtil.encryptTransactionId(transactionEntity.getId());
@@ -3394,10 +3391,10 @@ public class TransactionBankController {
                                     EnvironmentUtil.getFcmNotificationRoleId());
                             if (roleFCM != null && !roleFCM.isEmpty()) {
                                 executorService.submit(() -> pushNotification(NotificationUtil
-                                        .getNotiTitleUpdateTransaction(), message, notificationEntity, data, userId));
+                                        .getNotiTitleUpdateTransaction(), message, notificationEntity, data, userId, StringUtil.getValueNullChecker(accountBankEntity.getPushNotification(), 1)));
                             } else {
                                 executorService.submit(() -> pushNotificationWithSocket(NotificationUtil
-                                        .getNotiTitleUpdateTransaction(), message, notificationEntity, data, userId));
+                                        .getNotiTitleUpdateTransaction(), message, notificationEntity, data, userId, StringUtil.getValueNullChecker(accountBankEntity.getPushNotification(), 1)));
                             }
                         }
                     } finally {
@@ -3480,8 +3477,10 @@ public class TransactionBankController {
                                 .getNotiTitleUpdateTransaction(),
                         message);
                 try {
-                    // send msg to user
-                    socketHandler.sendMessageToUser(accountBankEntity.getUserId(), data);
+                    if (StringUtil.getValueNullChecker(accountBankEntity.getPushNotification(), 1) == 1) {
+                        // send msg to user
+                        socketHandler.sendMessageToUser(accountBankEntity.getUserId(), data);
+                    }
                     // send msg to QR Link
                     String refId = TransactionRefIdUtil.encryptTransactionId(transcationUUID.toString());
                     socketHandler.sendMessageToTransactionRefId(refId, data);
@@ -3713,17 +3712,18 @@ public class TransactionBankController {
                     transactionEntity.setType(0);
                     transactionEntity.setTerminalCode(refundMappingRedisDTO.getTerminalCode());
                     transactionEntity.setSubCode(refundMappingRedisDTO.getSubTerminalCode());
+                    transactionEntity.setOrderId(refundMappingRedisDTO.getOrderId());
                 } else {
                     transactionEntity.setType(2);
                     transactionEntity.setTerminalCode("");
                     transactionEntity.setSubCode("");
+                    transactionEntity.setOrderId(orderId);
                 }
             }
             transactionEntity.setStatus(1);
             transactionEntity.setTraceId("");
             transactionEntity.setTransType(dto.getTransType());
             transactionEntity.setReferenceNumber(dto.getReferencenumber());
-            transactionEntity.setOrderId(orderId);
             transactionEntity.setSign(sign);
             transactionEntity.setTimePaid(time);
             transactionEntity.setQrCode("");
@@ -3820,10 +3820,10 @@ public class TransactionBankController {
                                 EnvironmentUtil.getFcmNotificationRoleId());
                         if (roleFCM != null && !roleFCM.isEmpty()) {
                             executorService.submit(() -> pushNotification(NotificationUtil
-                                    .getNotiTitleUpdateTransaction(), message, notificationEntity, data, userId));
+                                    .getNotiTitleUpdateTransaction(), message, notificationEntity, data, userId, StringUtil.getValueNullChecker(accountBankEntity.getPushNotification(), 1)));
                         } else {
                             executorService.submit(() -> pushNotificationWithSocket(NotificationUtil
-                                    .getNotiTitleUpdateTransaction(), message, notificationEntity, data, userId));
+                                    .getNotiTitleUpdateTransaction(), message, notificationEntity, data, userId, StringUtil.getValueNullChecker(accountBankEntity.getPushNotification(), 1)));
                         }
                     }
                 } finally {
@@ -3908,7 +3908,9 @@ public class TransactionBankController {
                     message);
             try {
                 // send msg to user
-                socketHandler.sendMessageToUser(accountBankEntity.getUserId(), data);
+                if (StringUtil.getValueNullChecker(accountBankEntity.getPushNotification(), 1) == 1) {
+                    socketHandler.sendMessageToUser(accountBankEntity.getUserId(), data);
+                }
                 // send msg to QR Link
                 String refId = TransactionRefIdUtil.encryptTransactionId(transcationUUID.toString());
                 socketHandler.sendMessageToTransactionRefId(refId, data);
@@ -4121,10 +4123,12 @@ public class TransactionBankController {
     }
 
     private void pushNotificationWithSocket(String notiTitleUpdateTransaction, String message,
-                                            NotificationEntity notificationEntity, Map<String, String> data, String userId) {
+                                            NotificationEntity notificationEntity, Map<String, String> data, String userId, int pushWss) {
         try {
-            socketHandler.sendMessageToUser(userId,
-                    data);
+            if (pushWss == 1) {
+                socketHandler.sendMessageToUser(userId,
+                        data);
+            }
         } catch (IOException e) {
             logger.error(
                     "transaction-sync: WS: socketHandler.sendMessageToUser - RECHARGE ERROR: "
@@ -4497,7 +4501,7 @@ public class TransactionBankController {
                 String status = rootNode.get("data").get("status").asText();
                 if (status.equals("Success")) {
                     // do update status bank_account from authen => unauthen
-                    accountBankService.unRegisterAuthenticationBank(dto.getBankAccount());
+                    accountBankReceiveService.unRegisterAuthenticationBank(dto.getBankAccount());
                     //
                     result = new ResponseMessageDTO("SUCCESS",
                             "");
