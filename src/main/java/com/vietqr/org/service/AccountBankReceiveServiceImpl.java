@@ -578,6 +578,11 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
         repo.updatePushNotification(bankId, value);
     }
 
+    @Override
+    public void updatePushNotificationUser(String userId, int value) {
+        repo.updatePushNotificationUser(userId, value);
+    }
+
 
     @Override
     public List<BankAccountResponseDTO> getBankAccountsByNationalIds(String keyword, int offset, int size) {

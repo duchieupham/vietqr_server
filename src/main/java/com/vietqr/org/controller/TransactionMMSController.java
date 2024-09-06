@@ -417,7 +417,7 @@ public class TransactionMMSController {
                             notiEntity.setUserId(tempTransReceive.getUserId());
                             notiEntity.setData(tempTransReceive.getId());
                             pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
-                                    message, notiEntity, data, tempTransReceive.getUserId());
+                                    message, notiEntity, data, tempTransReceive.getUserId(), accountBankEntity.getPushNotification());
                             // send msg to QR Link
                             String refId = TransactionRefIdUtil
                                     .encryptTransactionId(tempTransReceive.getId());
@@ -564,7 +564,7 @@ public class TransactionMMSController {
                                     logger.info("transaction-mms-sync: NOT FOUND TerminalBankEntity");
                                 }
                                 pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
-                                        message, notiEntity, data, accountBankReceiveEntity.getUserId());
+                                        message, notiEntity, data, accountBankReceiveEntity.getUserId(), accountBankReceiveEntity.getPushNotification());
 
                                 // Push notifications to Telegram
                                 List<String> webhooks = larkAccountBankService.getWebhooksByBankId(terminalItemEntity.getBankId());
@@ -798,7 +798,7 @@ public class TransactionMMSController {
                                         data.put("traceId", "");
                                         data.put("transType", "C");
                                         pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
-                                                message, notiEntity, data, accountBankReceiveEntity.getUserId());
+                                                message, notiEntity, data, accountBankReceiveEntity.getUserId(), accountBankReceiveEntity.getPushNotification());
                                         TerminalBankEntity terminalBankEntitySync = terminalBankService
                                                 .getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
                                         if (terminalBankEntitySync != null) {
@@ -989,7 +989,7 @@ public class TransactionMMSController {
                                                 data.put("urlLink", transactionEntity.getUrlLink() != null ? transactionEntity.getUrlLink() : "");
                                                 executorService.submit(
                                                         () -> pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
-                                                                message, notiEntity, data, userId));
+                                                                message, notiEntity, data, userId, bankDTO.getPushNotification()));
                                                 try {
                                                     // send msg to QR Link
                                                     String refId = TransactionRefIdUtil
@@ -1199,7 +1199,7 @@ public class TransactionMMSController {
                                         data.put("transType", "C");
                                         data.put("urlLink", "");
                                         pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
-                                                message, notiEntity, data, accountBankReceiveEntity.getUserId());
+                                                message, notiEntity, data, accountBankReceiveEntity.getUserId(), accountBankReceiveEntity.getPushNotification());
                                         TerminalBankEntity terminalBankEntitySync = terminalBankService
                                                 .getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
                                         if (terminalBankEntitySync != null) {
@@ -1401,7 +1401,7 @@ public class TransactionMMSController {
     }
 
     private void pushNotification(String title, String message, NotificationEntity notiEntity, Map<String, String> data,
-                                  String userId) {
+                                  String userId, int pushWss) {
 
         if (notiEntity != null) {
             notificationService.insertNotification(notiEntity);
@@ -1412,8 +1412,9 @@ public class TransactionMMSController {
                 fcmTokens,
                 title, message);
         try {
-            socketHandler.sendMessageToUser(userId,
-                    data);
+            if(pushWss == 1){
+                socketHandler.sendMessageToUser(userId, data);
+            }
         } catch (IOException e) {
             logger.error(
                     "transaction-sync: WS: socketHandler.sendMessageToUser - RECHARGE ERROR: "

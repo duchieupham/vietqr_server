@@ -1583,6 +1583,31 @@ public class AccountBankReceiveController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @PostMapping("account-bank/user/{userId}/update-noti")
+    public ResponseEntity<ResponseMessageDTO> updatePushNotificationUser(
+            @PathVariable("userId") String userId,
+            @RequestBody int value
+    ){
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            if(value == 1 || value == 0) {
+                accountBankReceiveService.updatePushNotificationUser(userId, value);
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            } else {
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("updatePushNotificationUser: ERROR: " + e.toString() + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+    }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
     @PostMapping("account-bank/admin/request-active")
     public ResponseEntity<Object> requestActiveBankAccount(
             @Valid @RequestBody AdminRequestActiveDTO dto,
