@@ -833,7 +833,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Transactional
 	@Modifying
 	@Query(value = "UPDATE account_bank_receive"
-			+ " SET pushNotification = :value"
+			+ " SET push_notification = :value"
 			+ " WHERE id = :bankId"
 			, nativeQuery = true)
 	void updatePushNotification(@Param(value = "bankId") String bankId, @Param(value = "value") int value);
