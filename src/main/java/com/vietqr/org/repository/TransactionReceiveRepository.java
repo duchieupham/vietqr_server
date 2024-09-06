@@ -2945,7 +2945,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
     @Transactional
     @Modifying
     @Query(value = "UPDATE transaction_receive SET type = :type, sub_code = :subCode, " +
-            "terminal_code = :terminalCode WHERE reference_number = :ftCode AND trans_type = 'D' LIMIT 1 ", nativeQuery = true)
-    void updateTransactionRefundStatus(String ftCode, String subCode, String terminalCode, int type);
+            "terminal_code = :terminalCode, order_id = :orderId WHERE reference_number = :ftCode AND trans_type = 'D' LIMIT 1 ", nativeQuery = true)
+    void updateTransactionRefundStatus(String ftCode, String subCode, String terminalCode, String orderId, int type);
 }
 

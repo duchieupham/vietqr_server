@@ -422,7 +422,7 @@ public class TransactionMMSController {
                             notiEntity.setUserId(tempTransReceive.getUserId());
                             notiEntity.setData(tempTransReceive.getId());
                             pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
-                                    message, notiEntity, data, tempTransReceive.getUserId(), accountBankEntity.getPushNotification());
+                                    message, notiEntity, data, tempTransReceive.getUserId(), StringUtil.getValueNullChecker(accountBankEntity.getPushNotification(), 1));
                             // send msg to QR Link
                             String refId = TransactionRefIdUtil
                                     .encryptTransactionId(tempTransReceive.getId());
@@ -569,7 +569,7 @@ public class TransactionMMSController {
                                     logger.info("transaction-mms-sync: NOT FOUND TerminalBankEntity");
                                 }
                                 pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
-                                        message, notiEntity, data, accountBankReceiveEntity.getUserId(), accountBankReceiveEntity.getPushNotification());
+                                        message, notiEntity, data, accountBankReceiveEntity.getUserId(), StringUtil.getValueNullChecker(accountBankReceiveEntity.getPushNotification(), 1));
 
                                 // Push notifications to Telegram
                                 List<String> webhooks = larkAccountBankService.getWebhooksByBankId(terminalItemEntity.getBankId());
@@ -803,7 +803,7 @@ public class TransactionMMSController {
                                         data.put("traceId", "");
                                         data.put("transType", "C");
                                         pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
-                                                message, notiEntity, data, accountBankReceiveEntity.getUserId(), accountBankReceiveEntity.getPushNotification());
+                                                message, notiEntity, data, accountBankReceiveEntity.getUserId(), StringUtil.getValueNullChecker(accountBankReceiveEntity.getPushNotification(), 1));
                                         TerminalBankEntity terminalBankEntitySync = terminalBankService
                                                 .getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
                                         if (terminalBankEntitySync != null) {
@@ -994,7 +994,7 @@ public class TransactionMMSController {
                                                 data.put("urlLink", transactionEntity.getUrlLink() != null ? transactionEntity.getUrlLink() : "");
                                                 executorService.submit(
                                                         () -> pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
-                                                                message, notiEntity, data, userId, bankDTO.getPushNotification()));
+                                                                message, notiEntity, data, userId, StringUtil.getValueNullChecker(bankDTO.getPushNotification(), 1)));
                                                 try {
                                                     // send msg to QR Link
                                                     String refId = TransactionRefIdUtil
@@ -1165,7 +1165,7 @@ public class TransactionMMSController {
                                         data.put("transType", "C");
                                         data.put("urlLink", "");
                                         pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
-                                                message, notiEntity, data, accountBankReceiveEntity.getUserId(), accountBankReceiveEntity.getPushNotification());
+                                                message, notiEntity, data, accountBankReceiveEntity.getUserId(), StringUtil.getValueNullChecker(accountBankReceiveEntity.getPushNotification(), 1));
                                         TerminalBankEntity terminalBankEntitySync = terminalBankService
                                                 .getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
                                         if (terminalBankEntitySync != null) {
@@ -2727,18 +2727,21 @@ public class TransactionMMSController {
                     dto.setSubTerminalCode(transactionReceiveEntity.getSubCode());
                 }
             }
+            String orderId = "";
             if (Objects.nonNull(transactionReceiveEntity)) {
+                orderId = transactionReceiveEntity.getOrderId();
                 transactionReceiveService.updateTransactionRefundStatus(ftCode,
                         transactionReceiveEntity.getSubCode(),
-                        transactionReceiveEntity.getTerminalCode(), 0);
+                        transactionReceiveEntity.getTerminalCode(), orderId, 0);
             }
             RefundMappingRedisDTO refundMappingRedisDTO = new RefundMappingRedisDTO(
                     StringUtil.getValueNullChecker(dto.getTerminalCode()),
                     StringUtil.getValueNullChecker(dto.getSubTerminalCode()),
-                    StringUtil.getValueNullChecker(dto.getReferenceNumber())
+                    StringUtil.getValueNullChecker(dto.getReferenceNumber()),
+                    StringUtil.getValueNullChecker(orderId)
                     );
             ObjectMapper mapper = new ObjectMapper();
-            idempotencyService.saveResponseForUUIDRefundKey(ftCode, mapper.writeValueAsString(refundMappingRedisDTO), 600);
+            idempotencyService.saveResponseForUUIDRefundKey(ftCode, mapper.writeValueAsString(refundMappingRedisDTO), 1200);
 
         } catch (Exception e) {
             logger.error("insertTransactionRefundRedis: ERROR: " + e.toString() + " at: " + System.currentTimeMillis());

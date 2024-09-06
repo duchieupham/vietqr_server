@@ -604,5 +604,5 @@ public interface TransactionReceiveService {
 
     List<TransactionRelatedDTO> getTransactionsBySubCode(String value, int offset, String bankId, String from, String to);
 
-    void updateTransactionRefundStatus(String ftCode, String subCode, String terminalCode, int type);
+    void updateTransactionRefundStatus(String ftCode, String subCode, String terminalCode, String orderId, int type);
 }
