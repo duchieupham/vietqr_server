@@ -19,15 +19,18 @@ public class TelegramEntity implements Serializable {
     @Column(name = "id")
     private String id;
 
+    @Column(name = "name")
+    private String name;
+
     @Column(name = "chatId")
     private String chatId;
 
     @Column(name = "userId")
     private String userId;
 
-
     @Column(name = "notificationTypes")
     private String notificationTypes; // Lưu dưới dạng JSON
+
     @Column(name = "notificationContents")
     private String notificationContents; // Lưu nội dung thông báo dưới dạng JSON
 
@@ -35,8 +38,9 @@ public class TelegramEntity implements Serializable {
         super();
     }
 
-    public TelegramEntity(String id, String chatId, String userId, String notificationTypes, String notificationContents) {
+    public TelegramEntity(String id, String name, String chatId, String userId, String notificationTypes, String notificationContents) {
         this.id = id;
+        this.name = name;
         this.chatId = chatId;
         this.userId = userId;
         this.notificationTypes = notificationTypes;
@@ -49,6 +53,14 @@ public class TelegramEntity implements Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getChatId() {

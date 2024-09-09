@@ -19,6 +19,9 @@ public class LarkEntity implements Serializable {
     @Column(name = "id")
     private String id;
 
+    @Column(name = "name")
+    private String name;
+
     @Column(name = "webhook")
     private String webhook;
 
@@ -35,8 +38,9 @@ public class LarkEntity implements Serializable {
         super();
     }
 
-    public LarkEntity(String id, String webhook, String userId, String notificationTypes, String notificationContents) {
+    public LarkEntity(String id, String name, String webhook, String userId, String notificationTypes, String notificationContents) {
         this.id = id;
+        this.name = name;
         this.webhook = webhook;
         this.userId = userId;
         this.notificationTypes = notificationTypes;
@@ -49,6 +53,14 @@ public class LarkEntity implements Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getWebhook() {
