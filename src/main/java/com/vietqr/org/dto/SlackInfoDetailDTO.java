@@ -5,5 +5,5 @@ public interface SlackInfoDetailDTO {
     String getSlackId();
     String getWebhook();
     int getBankAccountCount();
-
+    String getName();
 }

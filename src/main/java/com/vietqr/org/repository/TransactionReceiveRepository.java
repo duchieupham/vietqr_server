@@ -2947,5 +2947,288 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
     @Query(value = "UPDATE transaction_receive SET type = :type, sub_code = :subCode, " +
             "terminal_code = :terminalCode, order_id = :orderId WHERE reference_number = :ftCode AND trans_type = 'D' LIMIT 1 ", nativeQuery = true)
     void updateTransactionRefundStatus(String ftCode, String subCode, String terminalCode, String orderId, int type);
+
+
+    @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, "
+            + "a.content, a.order_id as orderId, a.reference_number as referenceNumber, a.status, "
+            + "a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+            + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName, "
+            + "a.terminal_code as terminalCode, a.note "
+            + "FROM transaction_receive a "
+            + "LEFT JOIN account_bank_receive b ON a.bank_id = b.id "
+            + "LEFT JOIN bank_type c ON b.bank_type_id = c.id "
+            + "WHERE a.bank_account = :value AND a.time >= :time "
+            + "ORDER BY a.time DESC LIMIT :offset, :size", nativeQuery = true)
+    List<TransactionReceiveAdminListDTO> getTransByBankAccountAllDate(
+            @Param("value") String value,
+            @Param("offset") int offset,
+            @Param("size") int size,
+            @Param("time") long time);
+
+    @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a "
+            + "WHERE a.bank_account = :value AND a.time >= :time", nativeQuery = true)
+    int countTransByBankAccountAllDate(@Param("value") String value, @Param("time") long time);
+
+
+    @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, "
+            + "a.content, a.order_id as orderId, a.reference_number as referenceNumber, a.status, "
+            + "a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+            + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName, "
+            + "a.terminal_code as terminalCode, a.note "
+            + "FROM transaction_receive a "
+            + "LEFT JOIN account_bank_receive b ON a.bank_id = b.id "
+            + "LEFT JOIN bank_type c ON b.bank_type_id = c.id "
+            + "WHERE a.bank_account = :value AND a.time BETWEEN :fromDate AND :toDate "
+            + "ORDER BY a.time DESC LIMIT :offset, :size", nativeQuery = true)
+    List<TransactionReceiveAdminListDTO> getTransByBankAccountFromDate(
+            @Param("value") String value,
+            @Param("fromDate") long fromDate,
+            @Param("toDate") long toDate,
+            @Param("offset") int offset,
+            @Param("size") int size);
+
+
+    @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a "
+            + "WHERE a.bank_account = :value AND a.time BETWEEN :fromDate AND :toDate", nativeQuery = true)
+    int countTransByBankAccountFromDate(@Param("value") String value,
+                                        @Param("fromDate") long fromDate,
+                                        @Param("toDate") long toDate);
+
+    @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, "
+            + "a.content, a.order_id as orderId, a.reference_number as referenceNumber, a.status, "
+            + "a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+            + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName, "
+            + "a.terminal_code as terminalCode, a.note "
+            + "FROM transaction_receive a "
+            + "LEFT JOIN account_bank_receive b ON a.bank_id = b.id "
+            + "LEFT JOIN bank_type c ON b.bank_type_id = c.id "
+            + "WHERE a.reference_number LIKE %:value% AND a.time >= :time "
+            + "ORDER BY a.time DESC LIMIT :offset, :size", nativeQuery = true)
+    List<TransactionReceiveAdminListDTO> getTransByFtCode(
+            @Param("value") String value,
+            @Param("offset") int offset,
+            @Param("size") int size,
+            @Param("time") long time);
+
+
+    @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a "
+            + "WHERE a.reference_number LIKE %:value% AND a.time >= :time", nativeQuery = true)
+    int countTransByFtCode(@Param("value") String value, @Param("time") long time);
+
+
+    @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, "
+            + "a.content, a.order_id as orderId, a.reference_number as referenceNumber, a.status, "
+            + "a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+            + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName, "
+            + "a.terminal_code as terminalCode, a.note "
+            + "FROM transaction_receive a "
+            + "LEFT JOIN account_bank_receive b ON a.bank_id = b.id "
+            + "LEFT JOIN bank_type c ON b.bank_type_id = c.id "
+            + "WHERE a.reference_number LIKE %:value% AND a.time BETWEEN :fromDate AND :toDate "
+            + "ORDER BY a.time DESC LIMIT :offset, :size", nativeQuery = true)
+    List<TransactionReceiveAdminListDTO> getTransByFtCode(
+            @Param("value") String value,
+            @Param("offset") int offset,
+            @Param("fromDate") long fromDate,
+            @Param("toDate") long toDate,
+            @Param("size") int size);
+
+    @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a "
+            + "WHERE a.reference_number LIKE %:value% AND a.time BETWEEN :fromDate AND :toDate", nativeQuery = true)
+    int countTransByFtCode(@Param("value") String value,
+                           @Param("fromDate") long fromDate,
+                           @Param("toDate") long toDate);
+
+    @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, "
+            + "a.content, a.order_id as orderId, a.reference_number as referenceNumber, a.status, "
+            + "a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+            + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName, "
+            + "a.terminal_code as terminalCode, a.note "
+            + "FROM transaction_receive a "
+            + "LEFT JOIN account_bank_receive b ON a.bank_id = b.id "
+            + "LEFT JOIN bank_type c ON b.bank_type_id = c.id "
+            + "WHERE a.order_id LIKE %:value% AND a.time >= :time "
+            + "ORDER BY a.time DESC LIMIT :offset, :size", nativeQuery = true)
+    List<TransactionReceiveAdminListDTO> getTransByOrderId(
+            @Param("value") String value,
+            @Param("offset") int offset,
+            @Param("size") int size,
+            @Param("time") long time);
+
+    @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a "
+            + "WHERE a.order_id LIKE %:value% AND a.time >= :time", nativeQuery = true)
+    int countTransByOrderId(@Param("value") String value, @Param("time") long time);
+
+    @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, "
+            + "a.content, a.order_id as orderId, a.reference_number as referenceNumber, a.status, "
+            + "a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+            + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName, "
+            + "a.terminal_code as terminalCode, a.note "
+            + "FROM transaction_receive a "
+            + "LEFT JOIN account_bank_receive b ON a.bank_id = b.id "
+            + "LEFT JOIN bank_type c ON b.bank_type_id = c.id "
+            + "WHERE a.content LIKE %:value% AND a.time >= :time "
+            + "ORDER BY a.time DESC LIMIT :offset, :size", nativeQuery = true)
+    List<TransactionReceiveAdminListDTO> getTransByContent(
+            @Param("value") String value,
+            @Param("offset") int offset,
+            @Param("size") int size,
+            @Param("time") long time);
+
+    @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a "
+            + "WHERE a.content LIKE %:value% AND a.time >= :time", nativeQuery = true)
+    int countTransByContent(@Param("value") String value, @Param("time") long time);
+
+    @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, "
+            + "a.content, a.order_id as orderId, a.reference_number as referenceNumber, a.status, "
+            + "a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+            + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName, "
+            + "a.terminal_code as terminalCode, a.note "
+            + "FROM transaction_receive a "
+            + "LEFT JOIN account_bank_receive b ON a.bank_id = b.id "
+            + "LEFT JOIN bank_type c ON b.bank_type_id = c.id "
+            + "WHERE a.content LIKE %:value% AND a.time BETWEEN :fromDate AND :toDate "
+            + "ORDER BY a.time DESC LIMIT :offset, :size", nativeQuery = true)
+    List<TransactionReceiveAdminListDTO> getTransByContent(
+            @Param("value") String value,
+            @Param("fromDate") long fromDate,
+            @Param("toDate") long toDate,
+            @Param("offset") int offset,
+            @Param("size") int size);
+
+    @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a "
+            + "WHERE a.content LIKE %:value% AND a.time BETWEEN :fromDate AND :toDate", nativeQuery = true)
+    int countTransByContent(@Param("value") String value,
+                            @Param("fromDate") long fromDate,
+                            @Param("toDate") long toDate);
+
+    @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, "
+            + "a.content, a.order_id as orderId, a.reference_number as referenceNumber, a.status, "
+            + "a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+            + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName, "
+            + "a.terminal_code as terminalCode, a.note "
+            + "FROM transaction_receive a "
+            + "LEFT JOIN account_bank_receive b ON a.bank_id = b.id "
+            + "LEFT JOIN bank_type c ON b.bank_type_id = c.id "
+            + "WHERE a.terminal_code LIKE %:value% AND a.time >= :time "
+            + "ORDER BY a.time DESC LIMIT :offset, :size", nativeQuery = true)
+    List<TransactionReceiveAdminListDTO> getTransByTerminalCode(
+            @Param("value") String value,
+            @Param("offset") int offset,
+            @Param("size") int size,
+            @Param("time") long time);
+
+    @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a "
+            + "WHERE a.terminal_code LIKE %:value% AND a.time >= :time", nativeQuery = true)
+    int countTransByTerminalCode(@Param("value") String value, @Param("time") long time);
+
+
+    @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, "
+            + "a.content, a.order_id as orderId, a.reference_number as referenceNumber, a.status, "
+            + "a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+            + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName, "
+            + "a.terminal_code as terminalCode, a.note "
+            + "FROM transaction_receive a "
+            + "LEFT JOIN account_bank_receive b ON a.bank_id = b.id "
+            + "LEFT JOIN bank_type c ON b.bank_type_id = c.id "
+            + "WHERE a.terminal_code LIKE %:value% AND a.time BETWEEN :fromDate AND :toDate "
+            + "ORDER BY a.time DESC LIMIT :offset, :size", nativeQuery = true)
+    List<TransactionReceiveAdminListDTO> getTransByTerminalCode(
+            @Param("value") String value,
+            @Param("fromDate") long fromDate,
+            @Param("toDate") long toDate,
+            @Param("offset") int offset,
+            @Param("size") int size);
+
+    @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a "
+            + "WHERE a.terminal_code LIKE %:value% AND a.time BETWEEN :fromDate AND :toDate", nativeQuery = true)
+    int countTransByTerminalCode(@Param("value") String value,
+                                 @Param("fromDate") long fromDate,
+                                 @Param("toDate") long toDate);
+
+
+    @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, "
+            + "a.content, a.order_id as orderId, a.reference_number as referenceNumber, a.status, "
+            + "a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+            + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName, "
+            + "a.terminal_code as terminalCode, a.note "
+            + "FROM transaction_receive a "
+            + "LEFT JOIN account_bank_receive b ON a.bank_id = b.id "
+            + "LEFT JOIN bank_type c ON b.bank_type_id = c.id "
+            + "WHERE a.time >= :time "
+            + "ORDER BY a.time DESC LIMIT :offset, :size", nativeQuery = true)
+    List<TransactionReceiveAdminListDTO> getAllTransAllDate(
+            @Param("offset") int offset,
+            @Param("size") int size,
+            @Param("time") long time);
+
+    @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a WHERE a.time >= :time", nativeQuery = true)
+    int countAllTransAllDate(@Param("time") long time);
+
+    @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, "
+            + "a.content, a.order_id as orderId, a.reference_number as referenceNumber, a.status, "
+            + "a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+            + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName, "
+            + "a.terminal_code as terminalCode, a.note "
+            + "FROM transaction_receive a "
+            + "LEFT JOIN account_bank_receive b ON a.bank_id = b.id "
+            + "LEFT JOIN bank_type c ON b.bank_type_id = c.id "
+            + "WHERE a.time BETWEEN :fromDate AND :toDate "
+            + "ORDER BY a.time DESC LIMIT :offset, :size", nativeQuery = true)
+    List<TransactionReceiveAdminListDTO> getAllTransFromDate(
+            @Param("fromDate") long fromDate,
+            @Param("toDate") long toDate,
+            @Param("offset") int offset,
+            @Param("size") int size);
+
+    @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a WHERE a.time BETWEEN :fromDate AND :toDate", nativeQuery = true)
+    int countAllTransFromDate(@Param("fromDate") long fromDate, @Param("toDate") long toDate);
+
+    @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, "
+            + "a.content, a.order_id as orderId, a.reference_number as referenceNumber, a.status, "
+            + "a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+            + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName, "
+            + "a.terminal_code as terminalCode, a.note "
+            + "FROM transaction_receive a "
+            + "LEFT JOIN account_bank_receive b ON a.bank_id = b.id "
+            + "LEFT JOIN bank_type c ON b.bank_type_id = c.id "
+            + "WHERE a.terminal_code = :value AND a.time BETWEEN :fromDate AND :toDate "
+            + "ORDER BY a.time DESC LIMIT :offset, :size", nativeQuery = true)
+    List<TransactionReceiveAdminListDTO> getTransByTerminalCodeFromDate(
+            @Param("value") String value,
+            @Param("fromDate") long fromDate,
+            @Param("toDate") long toDate,
+            @Param("offset") int offset,
+            @Param("size") int size);
+
+    @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a "
+            + "WHERE a.terminal_code = :value AND a.time BETWEEN :fromDate AND :toDate", nativeQuery = true)
+    int countTransByTerminalCodeFromDate(
+            @Param("value") String value,
+            @Param("fromDate") long fromDate,
+            @Param("toDate") long toDate);
+
+    @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, "
+            + "a.content, a.order_id as orderId, a.reference_number as referenceNumber, a.status, "
+            + "a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "
+            + "a.type, b.bank_account_name as userBankName, c.bank_short_name as bankShortName, "
+            + "a.terminal_code as terminalCode, a.note "
+            + "FROM transaction_receive a "
+            + "LEFT JOIN account_bank_receive b ON a.bank_id = b.id "
+            + "LEFT JOIN bank_type c ON b.bank_type_id = c.id "
+            + "WHERE a.terminal_code = :value AND a.time >= :time "
+            + "ORDER BY a.time DESC LIMIT :offset, :size", nativeQuery = true)
+    List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAllDate(
+            @Param("value") String value,
+            @Param("offset") int offset,
+            @Param("size") int size,
+            @Param("time") long time);
+
+    @Query(value = "SELECT COUNT(a.id) FROM transaction_receive a "
+            + "WHERE a.terminal_code = :value AND a.time >= :time", nativeQuery = true)
+    int countTransByTerminalCodeAllDate(
+            @Param("value") String value,
+            @Param("time") long time);
+
 }
 

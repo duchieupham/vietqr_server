@@ -7,6 +7,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EmailVerifyServiceImpl implements EmailVerifyService {
@@ -27,8 +28,17 @@ public class EmailVerifyServiceImpl implements EmailVerifyService {
     }
 
     @Override
-    public void updateEmailVerifiedByUserId(String userId, int otp) {
+    public void updateEmailVerifiedByUserId(String userId, String otp) {
         repository.updateEmailVerifiedByUserId(userId, otp);
     }
 
+    @Override
+    public Optional<EmailVerifyEntity> getEmailVerifyByUserEmail(String userId, String email) {
+        return repository.getEmailVerifyByUserEmail(userId, email);
+    }
+
+    @Override
+    public boolean existsOTP(String userId, String email, String otp) {
+        return repository.existsOTP(userId, email, otp) == 1;
+    }
 }

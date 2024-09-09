@@ -69,10 +69,20 @@ public class AccountSystemServiceImpl implements AccountSystemService {
                 StringUtil.getValueNullChecker(userUpdateRequestDTO.getLastName()),
                 StringUtil.getValueNullChecker(userUpdateRequestDTO.getAddress()),
                 StringUtil.getValueNullChecker(userUpdateRequestDTO.getGender()),
-                StringUtil.getValueNullChecker(userUpdateRequestDTO.getEmail()),
                 StringUtil.getValueNullChecker(userUpdateRequestDTO.getNationalId()),
                 StringUtil.getValueNullChecker(userUpdateRequestDTO.getOldNationalId()),
                 StringUtil.getValueNullChecker(userUpdateRequestDTO.getNationalDate())
         );
+    }
+
+    @Override
+    public void updateAccountEmail(String userId, String email, int type) {
+        accountInformationRepository.updateEmailByUserId(userId, email);
+        accountLoginRepository.updateEmailByUserId(email, userId);
+        if (type == 1) {
+            accountLoginRepository.updateIsVerifiedByUserId(userId, email);
+        } else {
+            accountLoginRepository.updateInvalidateByUserId(userId);
+        }
     }
 }

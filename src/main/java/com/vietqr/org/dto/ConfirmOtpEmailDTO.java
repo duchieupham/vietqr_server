@@ -31,7 +31,7 @@ public class ConfirmOtpEmailDTO {
     }
 
     public String getOtp() {
-        return otp;
+        return otp.trim();
     }
 
     public void setOtp(String otp) {

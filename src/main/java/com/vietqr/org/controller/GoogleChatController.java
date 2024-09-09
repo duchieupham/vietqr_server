@@ -179,6 +179,11 @@ public class GoogleChatController {
                 UUID ggChatUUID = UUID.randomUUID();
                 GoogleChatEntity googleChatEntity = new GoogleChatEntity();
                 googleChatEntity.setId(ggChatUUID.toString());
+                if (dto.getName() != null && !dto.getName().isEmpty()) {
+                    googleChatEntity.setName(dto.getName());
+                } else {
+                    googleChatEntity.setName("Chia sẻ biến động số dư");
+                }
                 googleChatEntity.setUserId(dto.getUserId());
                 googleChatEntity.setWebhook(dto.getWebhook());
                 googleChatEntity.setNotificationTypes(new ObjectMapper().writeValueAsString(dto.getNotificationTypes()));
@@ -325,6 +330,7 @@ public class GoogleChatController {
                 detailDTO.setId(dto.getId());
                 detailDTO.setWebhook(dto.getWebhook());
                 detailDTO.setUserId(dto.getUserId());
+                detailDTO.setName(dto.getName());
                 List<GoogleChatBankDTO> bankDTOs = googleChatAccountBankService.getGoogleAccountBanks(dto.getId());
                 detailDTO.setBanks(bankDTOs);
                 detailDTO.setNotificationTypes(

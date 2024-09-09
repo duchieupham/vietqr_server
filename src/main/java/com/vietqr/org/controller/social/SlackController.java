@@ -137,6 +137,11 @@ public class SlackController {
                 UUID slackUUID = UUID.randomUUID();
                 SlackEntity slackEntity = new SlackEntity();
                 slackEntity.setId(slackUUID.toString());
+                if (dto.getName() != null && !dto.getName().isEmpty()) {
+                    slackEntity.setName(dto.getName());
+                } else {
+                    slackEntity.setName("Chia sẻ biến động số dư");
+                }
                 slackEntity.setUserId(dto.getUserId());
                 slackEntity.setWebhook(dto.getWebhook());
                 slackEntity.setNotificationTypes(new ObjectMapper().writeValueAsString(dto.getNotificationTypes()));
@@ -244,6 +249,7 @@ public class SlackController {
                 detailDTO.setId(dto.getId());
                 detailDTO.setWebhook(dto.getWebhook());
                 detailDTO.setUserId(dto.getUserId());
+                detailDTO.setName(dto.getName());
                 List<SlackBankDTO> bankDTOs = slackAccountBankService.getSlackAccountBanks(dto.getId());
                 detailDTO.setBanks(bankDTOs);
                 detailDTO.setNotificationTypes(

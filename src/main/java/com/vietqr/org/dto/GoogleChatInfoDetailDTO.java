@@ -4,4 +4,5 @@ public interface GoogleChatInfoDetailDTO {
     String getGoogleChatId();
     String getWebhook();
     int getBankAccountCount();
+    String getName();
 }

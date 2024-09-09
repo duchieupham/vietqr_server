@@ -124,6 +124,11 @@ public class GoogleSheetController {
                 UUID googleSheetUUID = UUID.randomUUID();
                 GoogleSheetEntity googleSheetEntity = new GoogleSheetEntity();
                 googleSheetEntity.setId(googleSheetUUID.toString());
+                if (dto.getName() != null && !dto.getName().isEmpty()) {
+                    googleSheetEntity.setName(dto.getName());
+                } else {
+                    googleSheetEntity.setName("Chia sẻ biến động số dư");
+                }
                 googleSheetEntity.setUserId(dto.getUserId());
                 googleSheetEntity.setWebhook(dto.getWebhook());
                 googleSheetEntity.setNotificationTypes(new ObjectMapper().writeValueAsString(dto.getNotificationTypes()));
@@ -230,6 +235,7 @@ public class GoogleSheetController {
                 detailDTO.setId(dto.getId());
                 detailDTO.setWebhook(dto.getWebhook());
                 detailDTO.setUserId(dto.getUserId());
+                detailDTO.setName(dto.getName());
                 List<GoogleSheetBankDTO> bankDTOs = googleSheetAccountBankService.getGoogleSheetAccountBanks(dto.getId());
                 detailDTO.setBanks(bankDTOs);
                 detailDTO.setNotificationTypes(

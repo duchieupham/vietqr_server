@@ -192,6 +192,11 @@ public class LarkController {
                 UUID uuid = UUID.randomUUID();
                 LarkEntity larkEntity = new LarkEntity();
                 larkEntity.setId(uuid.toString());
+                if (dto.getName() != null && !dto.getName().isEmpty()) {
+                    larkEntity.setName(dto.getName());
+                } else {
+                    larkEntity.setName("Chia sẻ biến động số dư");
+                }
                 larkEntity.setUserId(dto.getUserId());
                 larkEntity.setWebhook(dto.getWebhook());
                 larkEntity.setNotificationTypes(new ObjectMapper().writeValueAsString(dto.getNotificationTypes()));
@@ -328,6 +333,7 @@ public class LarkController {
                 larkDetailDTO.setId(larkEntity.getId());
                 larkDetailDTO.setWebhook(larkEntity.getWebhook());
                 larkDetailDTO.setUserId(larkEntity.getUserId());
+                larkDetailDTO.setName(larkEntity.getName());
                 List<LarkBankDTO> telBankDTOs = larkAccountBankService
                         .getLarkAccBanksByLarkId(larkEntity.getId());
                 if (telBankDTOs != null && !telBankDTOs.isEmpty()) {

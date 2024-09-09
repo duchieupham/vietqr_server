@@ -487,6 +487,16 @@ public class VietQRController {
 		HttpStatus httpStatus = null;
 		UUID transactionUUID = UUID.randomUUID();
 		String serviceCode = !StringUtil.isNullOrEmpty(dto.getServiceCode()) ? dto.getServiceCode() : "";
+		String subRawCode = StringUtil.getValueNullChecker(dto.getSubTerminalCode());
+		TerminalBankReceiveEntity terminalBankReceiveEntity = null;
+		if (!StringUtil.isNullOrEmpty(subRawCode)) {
+			terminalBankReceiveEntity =
+					terminalBankReceiveService.getTerminalBankReceiveEntityByTerminalCode(subRawCode);
+			if (terminalBankReceiveEntity != null) {
+				dto.setTerminalCode(terminalBankReceiveEntity.getTerminalCode());
+			}
+		}
+		VietQRDTO vietQRDTO = null;
 		switch (dto.getBankCode().toUpperCase()) {
 			case "MB":
 				// for saving qr mms flow 2
@@ -514,7 +524,7 @@ public class VietQRController {
 					} else {
 						bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getCustomerBankCode());
 					}
-					VietQRDTO vietQRDTO = new VietQRDTO();
+					vietQRDTO = new VietQRDTO();
 					try {
 						if (dto.getContent().length() <= 50) {
 							// check if generate qr with transtype = D or C
@@ -734,7 +744,7 @@ public class VietQRController {
 											qrMMS = qrCode;
 											String bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
 											if (bankTypeId != null && !bankTypeId.trim().isEmpty()) {
-												VietQRDTO vietQRDTO = new VietQRDTO();
+												vietQRDTO = new VietQRDTO();
 												// get cai value
 												BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(bankTypeId);
 												//
@@ -849,7 +859,7 @@ public class VietQRController {
 				} else {
 					bankTypeEntity = bankTypeService.getBankTypeByBankCode(dto.getCustomerBankCode());
 				}
-				VietQRDTO vietQRDTO = new VietQRDTO();
+				vietQRDTO = new VietQRDTO();
 				try {
 					if (dto.getContent().length() <= 50) {
 						// check if generate qr with transtype = D or C
@@ -1097,6 +1107,13 @@ public class VietQRController {
 					logger.error("VietQRController: ERROR: generateQRCustomer: " + e.getMessage() + " at: " + System.currentTimeMillis());
 				}
 				break;
+		}
+		if (Objects.nonNull(terminalBankReceiveEntity)) {
+			sendMessageDynamicQrToQrBox("",
+					terminalBankReceiveEntity.getRawTerminalCode() != null ?
+							terminalBankReceiveEntity.getRawTerminalCode() : "",
+					vietQRDTO, "", vietQRDTO.getQrCode(), dto.getNote()
+			);
 		}
 		return new ResponseEntity<>(result, httpStatus);
 	}

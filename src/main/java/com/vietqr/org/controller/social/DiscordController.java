@@ -137,6 +137,11 @@ public class DiscordController {
                 UUID discordUUID = UUID.randomUUID();
                 DiscordEntity discordEntity = new DiscordEntity();
                 discordEntity.setId(discordUUID.toString());
+                if (dto.getName() != null && !dto.getName().isEmpty()) {
+                    discordEntity.setName(dto.getName());
+                } else {
+                    discordEntity.setName("Chia sẻ biến động số dư");
+                }
                 discordEntity.setUserId(dto.getUserId());
                 discordEntity.setWebhook(dto.getWebhook());
                 discordEntity.setNotificationTypes(new ObjectMapper().writeValueAsString(dto.getNotificationTypes()));
@@ -245,6 +250,7 @@ public class DiscordController {
                 detailDTO.setId(dto.getId());
                 detailDTO.setWebhook(dto.getWebhook());
                 detailDTO.setUserId(dto.getUserId());
+                detailDTO.setName(dto.getName());
                 List<DiscordBankDTO> bankDTOs = discordAccountBankService.getDiscordAccountBanks(dto.getId());
                 detailDTO.setBanks(bankDTOs);
                 detailDTO.setNotificationTypes(

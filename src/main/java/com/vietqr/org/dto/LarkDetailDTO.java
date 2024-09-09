@@ -11,6 +11,7 @@ public class LarkDetailDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String id;
+    private String name;
     private String webhook;
     private String userId;
     private List<LarkBankDTO> banks;
@@ -22,8 +23,9 @@ public class LarkDetailDTO implements Serializable {
         super();
     }
 
-    public LarkDetailDTO(String id, String webhook, String userId, List<LarkBankDTO> banks, List<String> notificationTypes, List<String> notificationContents) {
+    public LarkDetailDTO(String id, String name, String webhook, String userId, List<LarkBankDTO> banks, List<String> notificationTypes, List<String> notificationContents) {
         this.id = id;
+        this.name = name;
         this.webhook = webhook;
         this.userId = userId;
         this.banks = banks;
@@ -37,6 +39,14 @@ public class LarkDetailDTO implements Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getWebhook() {

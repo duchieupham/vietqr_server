@@ -1627,6 +1627,166 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public List<TransactionReceiveAdminListDTO> getTransByBankAccountAllDate(String value, int offset, int size) {
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.getTransByBankAccountAllDate(value, offset, size, time);
+    }
+
+    @Override
+    public int countTransByBankAccountAllDate(String value) {
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.countTransByBankAccountAllDate(value, time);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByBankAccountFromDate(String value, String fromDate, String toDate, int offset, int size) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.getTransByBankAccountFromDate(value, fromTime, toTime, offset, size);
+    }
+
+    @Override
+    public int countTransByBankAccountFromDate(String value, String fromDate, String toDate) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.countTransByBankAccountFromDate(value, fromTime, toTime);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByFtCode(String value, int offset, int size) {
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.getTransByFtCode(value, offset, size, time);
+    }
+
+    @Override
+    public int countTransByFtCode(String value) {
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.countTransByFtCode(value, time);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByFtCode(String value, int offset, String fromDate, String toDate, int size) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.getTransByFtCode(value, offset, fromTime, toTime, size);
+    }
+
+    @Override
+    public int countTransByFtCode(String value, String fromDate, String toDate) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.countTransByFtCode(value, fromTime, toTime);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByOrderId(String value, int offset, int size) {
+        return null;
+    }
+
+    @Override
+    public int countTransByOrderId(String value) {
+        return 0;
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByOrderId(String value, String fromDate, String toDate, int offset, int size) {
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.getTransByOrderId(value, offset, size, time);
+    }
+
+    @Override
+    public int countTransByOrderId(String value, String fromDate, String toDate) {
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.countTransByOrderId(value, time);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByContent(String value, int offset, int size) {
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.getTransByContent(value, offset, size, time);
+    }
+
+    @Override
+    public int countTransByContent(String value) {
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.countTransByContent(value, time);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByContent(String value, String fromDate, String toDate, int offset, int size) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.getTransByContent(value, fromTime, toTime, offset, size);
+    }
+
+    @Override
+    public int countTransByContent(String value, String fromDate, String toDate) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.countTransByContent(value, fromTime, toTime);
+    }
+
+
+    @Override
+    public int countTransByTerminalCode(String value) {
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.countTransByTerminalCode(value, time);
+    }
+
+    @Override
+    public int countTransByTerminalCode(String value, String fromDate, String toDate) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.countTransByTerminalCode(value, fromTime, toTime);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getAllTransAllDate(int offset, int size) {
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.getAllTransAllDate(offset, size, time);
+    }
+
+    @Override
+    public int countAllTransAllDate() {
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.countAllTransAllDate(time);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getAllTransFromDate(String fromDate, String toDate, int offset, int size) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.getAllTransFromDate(fromTime, toTime, offset, size);
+    }
+
+    @Override
+    public int countAllTransFromDate(String fromDate, String toDate) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.countAllTransFromDate(fromTime, toTime);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByTerminalCodeFromDate(String value, String fromDate, String toDate, int offset, int size) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.getTransByTerminalCodeFromDate(value, fromTime, toTime, offset, size);
+    }
+
+    @Override
+    public int countTransByTerminalCodeFromDate(String value, String fromDate, String toDate) {
+        long fromTime = DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long toTime = DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        return repo.countTransByTerminalCodeFromDate(value, fromTime, toTime);
+    }
+
+    @Override
+    public List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAllDate(String value, int offset, int size) {
+        long time = DateTimeUtil.get3MonthsPreviousAsLongInt();
+        return repo.getTransByTerminalCodeAllDate(value, offset, size, time);
+    }
+
+    @Override
     public TransStatisticDTO getTransactionOverviewBySubTerminalCode(String subTerminalCode, String fromDate, String toDate) {
         return repo.getTransactionOverviewBySubTerminalCode(subTerminalCode,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,

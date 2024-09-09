@@ -37,11 +37,11 @@ public interface GoogleChatRepository extends JpaRepository<GoogleChatEntity, Lo
     void updateGoogleChat(String webhook, String id);
 
 
-    @Query(value = "SELECT gc.id AS googleChatId, gc.webhook AS webhook, COUNT(gcab.id) AS bankAccountCount " +
+    @Query(value = "SELECT gc.id AS googleChatId, gc.webhook AS webhook, gc.name AS name, COUNT(gcab.id) AS bankAccountCount " +
             "FROM google_chat gc " +
             "LEFT JOIN google_chat_account_bank gcab ON gc.id = gcab.google_chat_id " +
             "WHERE gc.user_id = :userId " +
-            "GROUP BY gc.id, gc.webhook " +
+            "GROUP BY gc.id, gc.webhook, gc.name " +
             "LIMIT :size OFFSET :offset", nativeQuery = true)
     List<GoogleChatInfoDetailDTO> getGoogleChatsByUserIdWithPagination(@Param("userId") String userId, @Param("offset") int offset, @Param("size") int size);
 

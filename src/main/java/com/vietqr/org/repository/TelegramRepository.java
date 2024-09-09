@@ -60,11 +60,11 @@ public interface TelegramRepository extends JpaRepository<TelegramEntity, Long> 
     @Query(value = "UPDATE telegram SET chat_id = :chatId WHERE id = :id", nativeQuery = true)
     void updateTelegram(String chatId, String id);
 
-    @Query(value = "SELECT t.id AS telegramId, t.chat_id AS chatId, COUNT(tab.id) AS bankAccountCount " +
+    @Query(value = "SELECT t.id AS telegramId, t.chat_id AS chatId, t.name AS name, COUNT(tab.id) AS bankAccountCount " +
             "FROM telegram t " +
             "LEFT JOIN telegram_account_bank tab ON t.id = tab.telegram_id " +
             "WHERE t.user_id = :userId " +
-            "GROUP BY t.id, t.chat_id " +
+            "GROUP BY t.id, t.chat_id, t.name " +
             "LIMIT :size OFFSET :offset", nativeQuery = true)
     List<TelegramInfoDetailDTO> getTelegramsByUserIdWithPagination(@Param("userId") String userId, @Param("offset") int offset, @Param("size") int size);
 
