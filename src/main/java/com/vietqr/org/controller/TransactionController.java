@@ -3916,4 +3916,128 @@ public class TransactionController {
         }
         return result;
     }
+
+    @GetMapping("admin/transactions/v2")
+    public ResponseEntity<Object> getTransactionAdmin(
+            @RequestParam(value = "type") int type,
+            @RequestParam(value = "value") String value,
+            @RequestParam(value = "from") String fromDate,
+            @RequestParam(value = "to") String toDate,
+            @RequestParam(value = "page") int page,
+            @RequestParam(value = "size") int size) {
+
+        Object result = null;
+        HttpStatus httpStatus;
+        PageResponseDTO pageResponseDTO = new PageResponseDTO();
+        DataDTO dataDTO = new DataDTO();
+
+        try {
+            int offset = (page - 1) * size;
+            int totalElement;
+            List<TransactionReceiveAdminListDTO> transactions = new ArrayList<>();
+
+            boolean checkEmptyDate = StringUtil.isEmptyOrEqualsZero(fromDate) || StringUtil.isEmptyOrEqualsZero(toDate);
+
+            // Kiểm tra nếu không lọc theo ngày
+            if (checkEmptyDate) {
+                switch (type) {
+                    case 0:
+                        transactions = transactionReceiveService.getTransByBankAccountAllDate(value, offset, size);
+                        totalElement = transactionReceiveService.countTransByBankAccountAllDate(value);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 1:
+                        transactions = transactionReceiveService.getTransByFtCode(value, offset, size);
+                        totalElement = transactionReceiveService.countTransByFtCode(value);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 2:
+                        transactions = transactionReceiveService.getTransByOrderId(value, offset, size);
+                        totalElement = transactionReceiveService.countTransByOrderId(value);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 3:
+                        value = value.replace("-", " ").trim();
+                        transactions = transactionReceiveService.getTransByContent(value, offset, size);
+                        totalElement = transactionReceiveService.countTransByContent(value);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 4:
+                        transactions = transactionReceiveService.getTransByTerminalCodeAllDate(value, offset, size);
+                        totalElement = transactionReceiveService.countTransByTerminalCode(value);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 9:
+                        transactions = transactionReceiveService.getAllTransAllDate(offset, size);
+                        totalElement = transactionReceiveService.countAllTransAllDate();
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    default:
+                        logger.error("getTransactionAdmin: ERROR: INVALID TYPE");
+                        totalElement = 0;
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        break;
+                }
+            } else {
+                // Lọc theo ngày
+                switch (type) {
+                    case 0:
+                        transactions = transactionReceiveService.getTransByBankAccountFromDate(value, fromDate, toDate, offset, size);
+                        totalElement = transactionReceiveService.countTransByBankAccountFromDate(value, fromDate, toDate);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 1:
+                        transactions = transactionReceiveService.getTransByFtCode(value, offset, fromDate, toDate, size);
+                        totalElement = transactionReceiveService.countTransByFtCode(value, fromDate, toDate);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 2:
+                        transactions = transactionReceiveService.getTransByOrderId(value, fromDate, toDate, offset, size);
+                        totalElement = transactionReceiveService.countTransByOrderId(value, fromDate, toDate);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 3:
+                        value = value.replace("-", " ").trim();
+                        transactions = transactionReceiveService.getTransByContent(value, fromDate, toDate, offset, size);
+                        totalElement = transactionReceiveService.countTransByContent(value, fromDate, toDate);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 4:
+                        transactions = transactionReceiveService.getTransByTerminalCodeFromDate(value, fromDate, toDate, offset, size);
+                        totalElement = transactionReceiveService.countTransByTerminalCodeFromDate(value, fromDate, toDate);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    case 9:
+                        transactions = transactionReceiveService.getAllTransFromDate(fromDate, toDate, offset, size);
+                        totalElement = transactionReceiveService.countAllTransFromDate(fromDate, toDate);
+                        httpStatus = HttpStatus.OK;
+                        break;
+                    default:
+                        logger.error("getTransactionAdmin: ERROR: INVALID TYPE");
+                        totalElement = 0;
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        break;
+                }
+            }
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+            pageDTO.setTotalElement(totalElement);
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageResponseDTO.setMetadata(pageDTO);
+            dataDTO.setItems(transactions);
+            dataDTO.setExtraData(null);
+            pageResponseDTO.setData(dataDTO);
+
+            result = pageResponseDTO;
+        } catch (Exception e) {
+            logger.error("getTransactionAdmin: ERROR: " + e.getMessage());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
 }
