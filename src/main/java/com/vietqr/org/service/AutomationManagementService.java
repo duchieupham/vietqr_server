@@ -37,6 +37,7 @@ public class AutomationManagementService {
 
     @Autowired
     private FcmTokenService fcmTokenService;
+    private boolean isFirstRun = true;
 
     @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 0 9 * * ?")
     public void scheduleExecuteTaskInvoice() {
@@ -86,6 +87,11 @@ public class AutomationManagementService {
 
     @Scheduled(fixedRate = 600000)
     public void scheduleExecuteTaskCheckPerformance() {
+        if (isFirstRun) {
+            logger.info("Skipping the first run of scheduleExecuteTaskCheckPerformance.");
+            isFirstRun = false;
+            return; // Bỏ qua lần đầu tiên
+        }
         long time = 0;
         long timeResponse = 0;
         if (!EnvironmentUtil.isProduction()) {
