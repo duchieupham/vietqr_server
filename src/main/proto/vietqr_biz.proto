@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option java_package = "com.example.vietqr_biz";
+option java_multiple_files = true;
+
+// Định nghĩa service VietQRBizService
+service VietQRBizService {
+  // Định nghĩa phương thức RPC sendMessage
+  rpc SendMessage (MessageRequest) returns (MessageResponse);
+}
+
+// Định nghĩa MessageRequest để gửi message từ client đến server
+message MessageRequest {
+  string message = 1; // Trường message chứa nội dung gửi đi
+}
+
+// Định nghĩa MessageResponse để server phản hồi lại client
+message MessageResponse {
+  string reply = 1; // Trường reply chứa nội dung phản hồi từ server
+}
