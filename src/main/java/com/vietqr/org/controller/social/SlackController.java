@@ -137,6 +137,11 @@ public class SlackController {
                 UUID slackUUID = UUID.randomUUID();
                 SlackEntity slackEntity = new SlackEntity();
                 slackEntity.setId(slackUUID.toString());
+                if (dto.getName() != null && !dto.getName().isEmpty()) {
+                    slackEntity.setName(dto.getName());
+                } else {
+                    slackEntity.setName("Chia sẻ biến động số dư");
+                }
                 slackEntity.setUserId(dto.getUserId());
                 slackEntity.setWebhook(dto.getWebhook());
                 slackEntity.setNotificationTypes(new ObjectMapper().writeValueAsString(dto.getNotificationTypes()));

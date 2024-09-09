@@ -194,6 +194,11 @@ public class TelegramController {
                 TelegramEntity telegramEntity = new TelegramEntity();
                 telegramEntity.setId(uuid.toString());
                 telegramEntity.setUserId(dto.getUserId());
+                if (dto.getName() != null && !dto.getName().isEmpty()) {
+                    telegramEntity.setName(dto.getName());
+                } else {
+                    telegramEntity.setName("Chia sẻ biến động số dư");
+                }
                 telegramEntity.setChatId(dto.getChatId());
                 telegramEntity.setNotificationTypes(new ObjectMapper().writeValueAsString(dto.getNotificationTypes()));
                 telegramEntity.setNotificationContents(new ObjectMapper().writeValueAsString(dto.getNotificationContents()));

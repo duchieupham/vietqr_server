@@ -234,7 +234,7 @@ public class MerchantConnectionController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("MerchantConnection: ERROR: getListMerchantConnection " + e.getMessage() + " at: " + System.currentTimeMillis());
-            result = new ResponseMessageDTO("FAIL", "E05");
+            result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
