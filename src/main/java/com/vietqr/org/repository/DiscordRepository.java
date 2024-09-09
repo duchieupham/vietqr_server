@@ -28,11 +28,11 @@ public interface DiscordRepository extends JpaRepository<DiscordEntity, String> 
     @Query(value = "SELECT * FROM discord WHERE id = :id", nativeQuery = true)
     DiscordEntity getDiscordById(@Param("id") String id);
 
-    @Query(value = "SELECT d.id AS discordId, d.webhook AS webhook, COUNT(dab.id) AS bankAccountCount " +
+    @Query(value = "SELECT d.id AS discordId, d.webhook AS webhook, d.name AS name, COUNT(dab.id) AS bankAccountCount " +
             "FROM discord d " +
             "LEFT JOIN discord_account_bank dab ON d.id = dab.discord_id " +
             "WHERE d.user_id = :userId " +
-            "GROUP BY d.id, d.webhook " +
+            "GROUP BY d.id, d.webhook, d.name " +
             "LIMIT :size OFFSET :offset", nativeQuery = true)
     List<DiscordInfoDetailDTO> getDiscordsByUserIdWithPagination(@Param("userId") String userId, @Param("offset") int offset, @Param("size") int size);
 

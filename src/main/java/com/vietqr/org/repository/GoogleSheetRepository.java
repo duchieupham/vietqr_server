@@ -28,11 +28,11 @@ public interface GoogleSheetRepository extends JpaRepository<GoogleSheetEntity, 
     @Query(value = "SELECT * FROM google_sheet WHERE id = :id", nativeQuery = true)
     GoogleSheetEntity getGoogleSheetById(@Param("id") String id);
 
-    @Query(value = "SELECT gs.id AS googleSheetId, gs.webhook AS webhook, COUNT(gsab.id) AS bankAccountCount " +
+    @Query(value = "SELECT gs.id AS googleSheetId, gs.webhook AS webhook, gs.name AS name, COUNT(gsab.id) AS bankAccountCount " +
             "FROM google_sheet gs " +
             "LEFT JOIN google_sheet_account_bank gsab ON gs.id = gsab.google_sheet_id " +
             "WHERE gs.user_id = :userId " +
-            "GROUP BY gs.id, gs.webhook " +
+            "GROUP BY gs.id, gs.webhook, gs.name " +
             "LIMIT :size OFFSET :offset", nativeQuery = true)
     List<GoogleSheetInfoDetailDTO> getGoogleSheetsByUserIdWithPagination(@Param("userId") String userId, @Param("offset") int offset, @Param("size") int size);
 

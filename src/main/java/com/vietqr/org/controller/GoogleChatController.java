@@ -330,6 +330,7 @@ public class GoogleChatController {
                 detailDTO.setId(dto.getId());
                 detailDTO.setWebhook(dto.getWebhook());
                 detailDTO.setUserId(dto.getUserId());
+                detailDTO.setName(dto.getName());
                 List<GoogleChatBankDTO> bankDTOs = googleChatAccountBankService.getGoogleAccountBanks(dto.getId());
                 detailDTO.setBanks(bankDTOs);
                 detailDTO.setNotificationTypes(

@@ -333,6 +333,7 @@ public class LarkController {
                 larkDetailDTO.setId(larkEntity.getId());
                 larkDetailDTO.setWebhook(larkEntity.getWebhook());
                 larkDetailDTO.setUserId(larkEntity.getUserId());
+                larkDetailDTO.setName(larkEntity.getName());
                 List<LarkBankDTO> telBankDTOs = larkAccountBankService
                         .getLarkAccBanksByLarkId(larkEntity.getId());
                 if (telBankDTOs != null && !telBankDTOs.isEmpty()) {

@@ -27,11 +27,11 @@ public interface SlackRepository  extends JpaRepository<SlackEntity, String> {
     @Query(value = "SELECT COUNT(id) FROM slack WHERE user_id = :userId", nativeQuery = true)
     int countSlacksByUserId(@Param("userId") String userId);
 
-    @Query(value = "SELECT s.id AS slackId, s.webhook AS webhook, COUNT(sab.id) AS bankAccountCount " +
+    @Query(value = "SELECT s.id AS slackId, s.webhook AS webhook, s.name AS name, COUNT(sab.id) AS bankAccountCount " +
             "FROM slack s " +
             "LEFT JOIN slack_account_bank sab ON s.id = sab.slack_id " +
             "WHERE s.user_id = :userId " +
-            "GROUP BY s.id, s.webhook " +
+            "GROUP BY s.id, s.webhook, s.name " +
             "LIMIT :size OFFSET :offset", nativeQuery = true)
     List<SlackInfoDetailDTO> getSlacksByUserIdWithPagination(@Param("userId") String userId, @Param("offset") int offset, @Param("size") int size);
 
