@@ -4,6 +4,7 @@ import com.vietqr.org.entity.EmailVerifyEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public interface EmailVerifyService {
@@ -15,4 +16,7 @@ public interface EmailVerifyService {
 
     void updateEmailVerifiedByUserId(String userId, int otp);
 
+    Optional<EmailVerifyEntity> getEmailVerifyByUserEmail(String userId, String email);
+
+    boolean existsOTP(String userId, String email, int otp);
 }

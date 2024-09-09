@@ -2,8 +2,6 @@ package com.vietqr.org.dto;
 
 public class UserUpdateRequestDTO {
 
-    private String email;
-
     private String firstName;
 
     private String middleName;
@@ -20,14 +18,6 @@ public class UserUpdateRequestDTO {
     private String oldNationalId;
 
     private String nationalDate;
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
 
     public String getFirstName() {
         return firstName;
