@@ -148,8 +148,6 @@ public class KeyBankReceiveController {
                         httpStatus = HttpStatus.OK;
                     }
                 }
-
-
             }
             //3. check key có valid không (đã tồn tại trong db chưa)
             //
@@ -180,7 +178,7 @@ public class KeyBankReceiveController {
                 // check key active có thuộc bankId đó ko
 
                 String bankIdByKey = keyActiveBankReceiveService.getBankIdByKey(dto.getKey());
-                if (!bankIdByKey.equals(dto.getBankId())) {
+                if (!StringUtil.isNullOrEmpty(bankIdByKey) && !bankIdByKey.equals(dto.getBankId())) {
                     result = new ResponseMessageDTO("FAILED", "E176");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 } else {

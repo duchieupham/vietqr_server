@@ -1,14 +1,14 @@
 package com.vietqr.org.dto;
 
-public class EmailDetails {
+public class EmailDetailDTO {
 
     private String recipient;
     private String userId;
 
-    public EmailDetails() {
+    public EmailDetailDTO() {
     }
 
-    public EmailDetails(String recipient, String userId) {
+    public EmailDetailDTO(String recipient, String userId) {
         this.recipient = recipient;
         this.userId = userId;
     }

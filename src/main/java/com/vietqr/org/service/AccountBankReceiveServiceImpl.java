@@ -1,10 +1,12 @@
 package com.vietqr.org.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
+import com.vietqr.org.util.DateTimeUtil;
 import com.vietqr.org.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -217,8 +219,8 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     }
 
     @Override
-    public AccountBankReceiveEntity checkExistedBankAccountAuthenticated(String bankAccount, String bankCode) {
-        return repo.checkExistedBankAccountAuthenticated(bankAccount, bankCode);
+    public AccountBankReceiveEntity getAccountBankReceiveByBankAccountAndBankCode(String bankAccount, String bankCode) {
+        return repo.getAccountBankReceiveByBankAccountAndBankCode(bankAccount, bankCode);
     }
 
     @Override
@@ -343,8 +345,8 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
 
     @Override
     public void updateRegisterAuthenticationBankBIDV(String nationalId, String phoneAuthenticated,
-                                                     String bankAccountName, String bankAccount, String customerId,
-                                                     String ewalletToken, String bankId) {
+            String bankAccountName, String bankAccount, String customerId,
+            String ewalletToken, String bankId) {
         repo.updateRegisterAuthenticationBankBIDV(nationalId, phoneAuthenticated, bankAccountName, bankAccount,
                 customerId, ewalletToken, bankId);
     }
@@ -373,7 +375,6 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     public BankDetailTypeCaiValueDTO getBankAccountTypeDetail(String bankId) {
         return repo.getBankAccountTypeDetail(bankId);
     }
-
 
     @Override
     public int countAllBankAccounts() {
@@ -410,6 +411,7 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     public void unRegisterAuthenBank(String bankAccount, String ewalletToken) {
         repo.unRegisterAuthenBank(bankAccount, ewalletToken);
     }
+
     @Override
     public List<AccountBankReceiveEntity> findBankAccountsByMerchantId(String merchantId) {
         return repo.findBankAccountsByMerchantId(merchantId);
@@ -420,33 +422,221 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
         return repo.getBankAccountNameByBankAccount(bankAccount);
     }
 
+    @Override
+    public List<BankAccountResponseDTO> getBankAccountsByValidFeeToAndIsValidService(int offset, int size) {
+        long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L;
+
+        // Lấy các danh sách tài khoản theo trạng thái: quá hạn, gần hết hạn, còn hạn,
+        // chưa đăng ký dịch vụ
+        List<BankAccountResponseDTO> overdueAccounts = convertAndSanitize(
+                repo.getOverdueBankAccounts(currentTime, offset, size));
+        List<BankAccountResponseDTO> nearlyExpiredAccounts = convertAndSanitize(
+                repo.getNearlyExpiredBankAccounts(currentTime, sevenDaysLater, offset, size));
+        List<BankAccountResponseDTO> validAccounts = convertAndSanitize(
+                repo.getValidBankAccounts(sevenDaysLater, offset, size));
+        List<BankAccountResponseDTO> notRegisteredAccounts = convertAndSanitize(
+                repo.getNotRegisteredBankAccounts(offset, size));
+
+        // Tạo danh sách tổng hợp và thêm các tài khoản theo thứ tự yêu cầu
+        List<BankAccountResponseDTO> allAccounts = new ArrayList<>();
+        allAccounts.addAll(overdueAccounts); // Quá hạn trước
+        allAccounts.addAll(nearlyExpiredAccounts); // Gần hết hạn
+        allAccounts.addAll(validAccounts); // Còn hạn
+        allAccounts.addAll(notRegisteredAccounts); // Chưa đăng ký dịch vụ
+
+        return allAccounts;
+    }
+
+    @Override
+    public int countBankAccountsByValidFeeToAndIsValidService() {
+        long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L;
+
+        int overdueCount = repo.countOverdueBankAccounts(currentTime);
+        int nearlyExpiredCount = repo.countNearlyExpiredBankAccounts(currentTime, sevenDaysLater);
+        int validCount = repo.countValidBankAccounts(sevenDaysLater);
+        int notRegisteredCount = repo.countNotRegisteredBankAccounts();
+
+        // Trả về tổng số lượng tài khoản
+        return overdueCount + nearlyExpiredCount + validCount + notRegisteredCount;
+    }
+
+    @Override
+    public List<BankAccountResponseDTO> getBankAccountsByTimeCreate(int offset, int size) {
+        return convertAndSanitize(repo.getBankAccountsByTimeCreate(offset, size));
+    }
+
+    @Override
+    public int countBankAccountsByTimeCreate() {
+        return repo.countBankAccountsByTimeCreate();
+    }
+
+    @Override
+    public IAdminExtraBankDTO getExtraBankDataForAllTime() {
+        long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET;
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L;
+        return repo.getExtraBankDataForAllTime(currentTime, sevenDaysLater);
+    }
+
+    @Override
+    public List<BankAccountResponseDTO> getBankAccountsByValidFeeToAndIsValidServiceWithSearch(Integer searchType,
+            String value, int offset, int size) {
+        switch (searchType) {
+            case 3:
+                return getBankAccountsByAccounts(value, offset, size);
+            case 4:
+                return getBankAccountsByAccountNames(value, offset, size);
+            case 5:
+                return getBankAccountsByPhoneAuthenticated(value, offset, size);
+            case 6:
+                return getBankAccountsByNationalIds(value, offset, size);
+            default:
+                return getBankAccountsByValidFeeToAndIsValidService(offset, size);
+        }
+    }
+
+    @Override
+    public int countBankAccountsByValidFeeToAndIsValidServiceWithSearch(Integer searchType, String value) {
+        switch (searchType) {
+            case 3:
+                return countBankAccountsByAccount(value);
+            case 4:
+                return countBankAccountsByAccountName(value);
+            case 5:
+                return countBankAccountsByPhoneAuthenticated(value);
+            case 6:
+                return countBankAccountsByNationalId(value);
+            default:
+                return countBankAccountsByValidFeeToAndIsValidService();
+        }
+    }
+
+    @Override
+    public List<BankAccountResponseDTO> getBankAccountsByTimeCreateWithSearch(Integer searchType, String value,
+            int offset, int size) {
+        switch (searchType) {
+            case 3: // Tìm kiếm theo TKNH
+                return getBankAccountsByAccounts(value, offset, size); // Sử dụng service có sẵn
+            case 4: // Tìm kiếm theo Chủ TK
+                return getBankAccountsByAccountNames(value, offset, size); // Sử dụng service có sẵn
+            case 5: // Tìm kiếm theo SĐT
+                return getBankAccountsByPhoneAuthenticated(value, offset, size); // Sử dụng service có sẵn
+            case 6: // Tìm kiếm theo CMND
+                return getBankAccountsByNationalIds(value, offset, size); // Sử dụng service có sẵn
+            default: // Nếu không có searchType hoặc không tìm kiếm theo 3,4,5,6
+                return getBankAccountsByTimeCreate(offset, size); // Lọc theo thời gian tạo gần đây
+        }
+    }
+
+    @Override
+    public int countBankAccountsByTimeCreateWithSearch(Integer searchType, String value) {
+        switch (searchType) {
+            case 3: // Tìm kiếm theo TKNH
+                return countBankAccountsByAccount(value); // Sử dụng service có sẵn
+            case 4: // Tìm kiếm theo Chủ TK
+                return countBankAccountsByAccountName(value); // Sử dụng service có sẵn
+            case 5: // Tìm kiếm theo SĐT
+                return countBankAccountsByPhoneAuthenticated(value); // Sử dụng service có sẵn
+            case 6: // Tìm kiếm theo CMND
+                return countBankAccountsByNationalId(value); // Sử dụng service có sẵn
+            default: // Nếu không có searchType hoặc không tìm kiếm theo 3,4,5,6
+                return countBankAccountsByTimeCreate(); // Lọc theo thời gian tạo gần đây
+        }
+    }
+
+    @Override
+    public List<BankAccountResponseDTO> getBankAccountsByAccountAndSorted(String keyword, int offset, int size) {
+        long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET; // Thời gian hiện tại (UTC+7)
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L; // 7 ngày sau
+        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByAccountAndSorted(keyword, currentTime,
+                sevenDaysLater, offset, size);
+        return convertAndSanitize(accounts);
+    }
+
+    @Override
+    public List<BankAccountResponseDTO> getBankAccountsByAccountNameAndSorted(String keyword, int offset, int size) {
+        long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET; // Thời gian hiện tại (UTC+7)
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L; // 7 ngày sau
+        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByAccountNameAndSorted(keyword, currentTime,
+                sevenDaysLater, offset, size);
+        return convertAndSanitize(accounts);
+    }
+
+    @Override
+    public List<BankAccountResponseDTO> getBankAccountsByPhoneAuthenticatedAndSorted(String keyword, int offset,
+            int size) {
+        long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET; // Thời gian hiện tại (UTC+7)
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L; // 7 ngày sau
+        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByPhoneAuthenticatedAndSorted(keyword, currentTime,
+                sevenDaysLater, offset, size);
+        return convertAndSanitize(accounts);
+    }
+
+    @Override
+    public List<BankAccountResponseDTO> getBankAccountsByNationalIdAndSorted(String keyword, int offset, int size) {
+        long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET; // Thời gian hiện tại (UTC+7)
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L; // 7 ngày sau
+        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByNationalIdAndSorted(keyword, currentTime,
+                sevenDaysLater, offset, size);
+        return convertAndSanitize(accounts);
+    }
+
+    @Override
+    public void updatePushNotification(String bankId, int value) {
+        repo.updatePushNotification(bankId, value);
+    }
+
+    @Override
+    public void updatePushNotificationUser(String userId, int value) {
+        repo.updatePushNotificationUser(userId, value);
+    }
+
+    @Override
+    public void updateSyncWpById(String id) {
+        repo.updateSyncWpById(id);
+    }
 
     @Override
     public List<BankAccountResponseDTO> getBankAccountsByNationalIds(String keyword, int offset, int size) {
-        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByNationalId(keyword, offset, size);
+        long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET; // Thời gian hiện tại (UTC+7)
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L; // 7 ngày sau
+        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByNationalIdAndSorted(keyword, currentTime,
+                sevenDaysLater, offset, size);
         return convertAndSanitize(accounts);
     }
 
     @Override
     public List<BankAccountResponseDTO> getBankAccountsByPhoneAuthenticated(String keyword, int offset, int size) {
-        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByPhoneAuthenticated(keyword, offset, size);
+        long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET; // Thời gian hiện tại (UTC+7)
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L; // 7 ngày sau
+        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByPhoneAuthenticatedAndSorted(keyword, currentTime,
+                sevenDaysLater, offset, size);
         return convertAndSanitize(accounts);
     }
+
     @Override
     public List<BankAccountResponseDTO> getBankAccountsByAccountNames(String keyword, int offset, int size) {
-        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByAccountName(keyword, offset, size);
+        long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET; // Thời gian hiện tại (UTC+7)
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L; // 7 ngày sau
+        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByAccountNameAndSorted(keyword, currentTime,
+                sevenDaysLater, offset, size);
         return convertAndSanitize(accounts);
     }
+
     @Override
     public List<BankAccountResponseDTO> getBankAccountsByAccounts(String keyword, int offset, int size) {
-        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByAccount(keyword, offset, size);
+        long currentTime = System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET; // Thời gian hiện tại (UTC+7)
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60 * 1000L; // 7 ngày sau
+        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByAccountAndSorted(keyword, currentTime,
+                sevenDaysLater, offset, size);
         return convertAndSanitize(accounts);
     }
 
     private List<BankAccountResponseDTO> convertAndSanitize(List<IBankAccountResponseDTO> accounts) {
         return accounts.stream()
                 .map(account -> new BankAccountResponseDTO(
-                        account.getBankId()== null ? "" : account.getBankId(),
+                        account.getBankId() == null ? "" : account.getBankId(),
                         account.getBankAccount() == null ? "" : account.getBankAccount(),
                         account.getBankAccountName() == null ? "" : account.getBankAccountName(),
                         account.getBankShortName() == null ? "" : account.getBankShortName(),
@@ -454,17 +644,17 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
                         account.getMmsActive(),
                         account.getNationalId() == null ? "" : account.getNationalId(),
                         account.getValidFeeTo() == null ? 0 : account.getValidFeeTo(),
+                        account.getValidFrom() == null ? 0 : account.getValidFrom(),
+                        account.getTimeCreate() == null ? 0 : account.getTimeCreate(),
                         account.getPhoneNo() == null ? "" : account.getPhoneNo(),
                         account.getEmail() == null ? "" : account.getEmail(),
                         account.getStatus(),
-                        account.getVso() == null ? "": account.getVso(),
+                        account.getVso() == null ? "" : account.getVso(),
                         StringUtil.getValueNullChecker(account.getIsValidService()),
                         StringUtil.getValueNullChecker(account.getIsAuthenticated()),
                         account.getBankTypeStatus(),
-                        account.getBankCode()
-                ))
+                        account.getBankCode()))
                 .collect(Collectors.toList());
     }
-
 
 }

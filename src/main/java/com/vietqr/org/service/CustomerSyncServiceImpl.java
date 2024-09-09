@@ -201,6 +201,18 @@ public class CustomerSyncServiceImpl implements CustomerSyncService {
         return repo.checkExistedMerchantName(merchantName);
     }
 
+    @Override
+    public void deleteCustomerSync(String id) {
+        repo.deleteRelatedAccountCustomerBankByCustomerSyncId(id);
+        repo.deleteRelatedAccountCustomerByCustomerSyncId(id);
+        repo.deleteCustomerSyncById(id);
+    }
+
+    @Override
+    public CustomerSyncEntity getCustomerSyncByInformation(String information) {
+        return repo.getCustomerSyncByInformation(information);
+    }
+
     // @Override
     // public List<String> checkExistedCustomerSyncByUsername(String username) {
     // return repo.checkExistedCustomerSyncByUsername(username);

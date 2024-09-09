@@ -33,6 +33,7 @@ public class AccountBankShareResponseDTO implements Serializable {
     private Long validFeeTo;
     private int transCount;
     private Boolean mmsActive;
+    private int pushNotification;
 
     public AccountBankShareResponseDTO() {
         super();
@@ -256,5 +257,13 @@ public class AccountBankShareResponseDTO implements Serializable {
 
     public void setMmsActive(Boolean mmsActive) {
         this.mmsActive = mmsActive;
+    }
+
+    public int getPushNotification() {
+        return pushNotification;
+    }
+
+    public void setPushNotification(int pushNotification) {
+        this.pushNotification = pushNotification;
     }
 }

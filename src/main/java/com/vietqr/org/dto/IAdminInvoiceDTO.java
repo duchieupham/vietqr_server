@@ -1,5 +1,8 @@
 package com.vietqr.org.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public interface IAdminInvoiceDTO {
     String getInvoiceId();
     Long getTimePaid();
@@ -17,4 +20,6 @@ public interface IAdminInvoiceDTO {
     String getEmail();
     Long getTimeCreated();
     int getStatus();
+    String getMerchantId();
+
 }

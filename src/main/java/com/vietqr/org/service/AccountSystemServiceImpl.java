@@ -3,19 +3,13 @@ package com.vietqr.org.service;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.repository.*;
-import com.vietqr.org.util.RandomCodeUtil;
 import com.vietqr.org.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.UUID;
-import java.util.logging.Logger;
-
 @Service
 public class AccountSystemServiceImpl implements AccountSystemService {
-    private final static Logger logger = Logger.getLogger(String.valueOf(AccountSystemServiceImpl.class));
+//    private final static Logger logger = Logger.getLogger(String.valueOf(AccountSystemServiceImpl.class));
 
     @Autowired
     AccountSystemRepository repo;

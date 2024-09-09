@@ -1,6 +1,7 @@
 package com.vietqr.org.controller;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.entity.AccountLoginEntity;
 import com.vietqr.org.entity.EmailVerifyEntity;
 import com.vietqr.org.service.*;
 import org.apache.log4j.Logger;
@@ -103,7 +104,6 @@ public class EmailController {
         try {
             emailService.sendMail(dto.getTo(), dto);
 
-
             result = new ResponseMessageDTO("SUCCESS", "Sent mail thành công.");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
@@ -115,64 +115,76 @@ public class EmailController {
 
     // Sending email with attachment
     @PostMapping("/sendMailWithAttachment")
-    public ResponseEntity<Object> sendMailWithAttachment(@RequestBody EmailDetails details) throws MessagingException {
+    public ResponseEntity<Object> sendMailWithAttachment(@RequestBody EmailDetailDTO dto) throws MessagingException {
         Object result = null;
         HttpStatus httpStatus = null;
 
         try {
-            // Creating a mime message
-            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-            MimeMessageHelper mimeMessageHelper;
-//            String status = emailService.sendMailWithAttachment(details);
-            mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            mimeMessageHelper.setFrom(sender);
-            mimeMessageHelper.setTo(details.getRecipient());
-            mimeMessageHelper.setSubject("Xác nhận tài khoản của bạn với mã OTP");
+            AccountLoginEntity accountLoginEntity = accountLoginService.getAccountLoginById(dto.getUserId());
+            if (accountLoginEntity != null) {
+                if (!accountLoginEntity.isVerify()) {
+                    // Creating a mime message
+                    MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+                    MimeMessageHelper mimeMessageHelper;
+//            String status = emailService.sendMailWithAttachment(dto);
+                    mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+                    mimeMessageHelper.setFrom(sender);
+                    mimeMessageHelper.setTo(dto.getRecipient());
+                    mimeMessageHelper.setSubject("Xác nhận tài khoản của bạn với mã OTP");
 
-            int randomOTP = generateSixDigitRandomNumber();
+                    int randomOTP = generateSixDigitRandomNumber();
 
-            String htmlMsg = "<p>Kính gửi khách hàng, </p>"
-                    + "<p>Để hoàn tất quá trình đăng ký và xác minh tài khoản của bạn, vui lòng sử dụng mã OTP dưới đây<br>"
-                    + "Mã OTP của bạn là: <span style=\"font-size: 18px; font-weight: bold;\">" + randomOTP + "</span><br>"
-                    + "Vui lòng nhập mã OTP này vào trang xác minh để kích hoạt tài khoản của bạn. <br>"
-                    + "Nếu bạn không yêu cầu mã OTP này, vui lòng bỏ qua email này hoặc liên hệ với chúng tôi để được hỗ trợ.<br>"
-                    + "Vui lòng nhập mã OTP này vào trang xác minh để kích hoạt tài khoản của bạn. </p>"
-                    + "<p>Trân trọng, <br>"
-                    + "VietQR VN <br>"
-                    + "Email: itsupport@vietqr.vn<br>"
-                    + "Hotline: 1900 6234 - phím số 3<br>"
-                    + "Website: vietqr.com / vietqr.vn / vietqr.ai</p>";
-            mimeMessageHelper.setText(htmlMsg, true);
+                    String htmlMsg = "<p>Kính gửi khách hàng, </p>"
+                            + "<p>Để hoàn tất quá trình đăng ký và xác minh tài khoản của bạn, vui lòng sử dụng mã OTP dưới đây<br>"
+                            + "Mã OTP của bạn là: <span style=\"font-size: 18px; font-weight: bold;\">" + randomOTP + "</span><br>"
+                            + "Vui lòng nhập mã OTP này vào trang xác minh để kích hoạt tài khoản của bạn. <br>"
+                            + "Nếu bạn không yêu cầu mã OTP này, vui lòng bỏ qua email này hoặc liên hệ với chúng tôi để được hỗ trợ.<br>"
+                            + "Vui lòng nhập mã OTP này vào trang xác minh để kích hoạt tài khoản của bạn. </p>"
+                            + "<p>Trân trọng, <br>"
+                            + "VietQR VN <br>"
+                            + "Email: itsupport@vietqr.vn<br>"
+                            + "Hotline: 1900 6234 - phím số 3<br>"
+                            + "Website: vietqr.com / vietqr.vn / vietqr.ai</p>";
+                    mimeMessageHelper.setText(htmlMsg, true);
 
-            byte[] imageBytes = getImageBytes("logo-vietqr-official.png");
-            if (imageBytes != null) {
-                ByteArrayResource dataSource = new ByteArrayResource(imageBytes);
-                mimeMessageHelper.addInline("image", dataSource, "image/png");
+                    byte[] imageBytes = getImageBytes("logo-vietqr-official.png");
+                    if (imageBytes != null) {
+                        ByteArrayResource dataSource = new ByteArrayResource(imageBytes);
+                        mimeMessageHelper.addInline("image", dataSource, "image/png");
+                    }
+                    Thread thread = new Thread(() -> {
+                        javaMailSender.send(mimeMessage);
+                    });
+                    thread.start();
+
+                    // insert data vào bảng EmailVerifyEntity
+                    UUID id = UUID.randomUUID();
+                    EmailVerifyEntity emailVerifyEntity = new EmailVerifyEntity();
+                    emailVerifyEntity.setId(id.toString());
+                    emailVerifyEntity.setEmail(dto.getRecipient());
+                    emailVerifyEntity.setUserId(dto.getUserId());
+                    emailVerifyEntity.setOtp(randomOTP);
+                    LocalDateTime currentDateTime = LocalDateTime.now();
+                    long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+                    emailVerifyEntity.setTimeCreated(time);
+                    // add 10 phút hiệu lực cho OTP
+                    LocalDateTime timeVerifiedDateTime = currentDateTime.plusMinutes(10);
+                    long timeVerified = timeVerifiedDateTime.toEpochSecond(ZoneOffset.UTC);
+                    emailVerifyEntity.setTimeVerified(timeVerified);
+                    emailVerifyEntity.setVerify(false);
+                    emailVerifyService.insertEmailVerify(emailVerifyEntity);
+
+                    result = new ResponseMessageDTO("SUCCESS", "");
+                    httpStatus = HttpStatus.OK;
+                } else {
+                    result = new ResponseMessageDTO("FAILED", "E162");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
             }
-            Thread thread = new Thread(() -> {
-                javaMailSender.send(mimeMessage);
-            });
-            thread.start();
 
-            // insert data vào bảng EmailVerifyEntity
-            UUID id = UUID.randomUUID();
-            EmailVerifyEntity emailVerifyEntity = new EmailVerifyEntity();
-            emailVerifyEntity.setId(id.toString());
-            emailVerifyEntity.setEmail(details.getRecipient());
-            emailVerifyEntity.setUserId(details.getUserId());
-            emailVerifyEntity.setOtp(randomOTP);
-            LocalDateTime currentDateTime = LocalDateTime.now();
-            long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
-            emailVerifyEntity.setTimeCreated(time);
-            // add 10 phút hiệu lực cho OTP
-            LocalDateTime timeVerifiedDateTime = currentDateTime.plusMinutes(10);
-            long timeVerified = timeVerifiedDateTime.toEpochSecond(ZoneOffset.UTC);
-            emailVerifyEntity.setTimeVerified(timeVerified);
-            emailVerifyEntity.setVerify(false);
-            emailVerifyService.insertEmailVerify(emailVerifyEntity);
-
-            result = new ResponseMessageDTO("SUCCESS", "");
-            httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("Send mail error: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());

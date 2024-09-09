@@ -1,5 +1,6 @@
 package com.vietqr.org.controller;
 
+import java.io.ByteArrayOutputStream;
 import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -7,22 +8,25 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import javax.validation.Valid;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.entity.*;
 import com.vietqr.org.service.*;
 import com.vietqr.org.util.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.util.StringUtils;
@@ -41,21 +45,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.vietqr.org.entity.AccountInformationEntity;
-import com.vietqr.org.entity.AccountLoginEntity;
-import com.vietqr.org.entity.AccountSettingEntity;
-import com.vietqr.org.entity.AccountShareEntity;
-import com.vietqr.org.entity.AccountWalletEntity;
-import com.vietqr.org.entity.CustomerSyncEntity;
-import com.vietqr.org.entity.FcmTokenEntity;
-import com.vietqr.org.entity.ImageEntity;
-import com.vietqr.org.entity.LarkWebhookPartnerEntity;
-import com.vietqr.org.entity.NotificationEntity;
-import com.vietqr.org.entity.SystemSettingEntity;
-
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import reactor.core.publisher.Mono;
+import software.amazon.awssdk.core.ResponseInputStream;
 
 @RestController
 @CrossOrigin
@@ -71,6 +64,15 @@ public class AccountController {
 
     @Autowired
     ImageService imageService;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Value("${spring.mail.username}")
+    private String sender;
+
+    @Autowired
+    private JavaMailSender javaMailSender;
 
     @Autowired
     FcmTokenService fcmTokenService;
@@ -98,6 +100,9 @@ public class AccountController {
 
     @Autowired
     MobileCarrierService mobileCarrierService;
+
+    @Autowired
+    AmazonS3Service amazonS3Service;
 
     @Autowired
     SystemSettingService systemSettingService;
@@ -763,6 +768,121 @@ public class AccountController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    // Sending email with attachment
+    @PostMapping("accounts/request-otp")
+    public ResponseEntity<Object> requestOtpResetPassword(@RequestBody RequestResetPassword dto) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+
+        try {
+            // Creating a mime message
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper mimeMessageHelper;
+//            String status = emailService.sendMailWithAttachment(details);
+            mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            mimeMessageHelper.setFrom(sender);
+            mimeMessageHelper.setTo(dto.getEmail());
+            mimeMessageHelper.setSubject("Yêu cầu đặt lại mật khẩu");
+
+            String randomOTP = RandomCodeUtil.generateOTP(6);
+
+            String htmlMsg = "<p>Kính gửi khách hàng, </p>"
+                    + "<p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn. Nếu bạn không thực hiện yêu cầu này, "
+                    + "vui lòng bỏ qua email này và mật khẩu của bạn sẽ không bị thay đổi.</p>"
+                    + "<p>Để đặt lại mật khẩu, vui lòng sử dụng mã OTP dưới đây<br>"
+                    + "Mã OTP của bạn là: <span style=\"font-size: 18px; font-weight: bold;\">" + randomOTP + "</span><br>"
+                    + "Vui lòng nhập mã OTP này vào trang xác minh để đặt lại mật khẩu. <br>"
+                    + "Nếu bạn không yêu cầu mã OTP này, vui lòng bỏ qua email này hoặc liên hệ với chúng tôi để được hỗ trợ.<br>"
+                    + "</p>"
+                    + "<p>Trân trọng, <br>"
+                    + "VietQR VN <br>"
+                    + "Email: itsupport@vietqr.vn<br>"
+                    + "Hotline: 1900 6234 - phím số 3<br>"
+                    + "Website: vietqr.com / vietqr.vn / vietqr.ai</p>";
+            mimeMessageHelper.setText(htmlMsg, true);
+
+            byte[] imageBytes = getImageBytes("logo-vietqr-official.png");
+            if (imageBytes != null) {
+                ByteArrayResource dataSource = new ByteArrayResource(imageBytes);
+                mimeMessageHelper.addInline("image", dataSource, "image/png");
+            }
+            Thread thread = new Thread(() -> {
+                javaMailSender.send(mimeMessage);
+            });
+            thread.start();
+
+            // insert data vào bảng EmailVerifyEntity
+            LocalDateTime currentDateTime = LocalDateTime.now();
+            // add 10 phút hiệu lực cho OTP
+            LocalDateTime timeVerifiedDateTime = currentDateTime.plusMinutes(10);
+            long timeVerified = timeVerifiedDateTime.toEpochSecond(ZoneOffset.UTC);
+            accountLoginService.updateOtpLogin(dto.getEmail(), dto.getPhoneNo(), timeVerified, randomOTP);
+            result = new ResponseMessageDTO("SUCCESS", "");
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("Send mail error: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    // Sending email with attachment
+    @PostMapping("accounts/confirm-otp")
+    public ResponseEntity<Object> confirmOtpResetPassword(@RequestBody ConfirmOTPDTO dto) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            AccountLoginEntity entity = accountLoginService.getAccountLoginByPhoneNo(dto.getPhoneNo());
+            long time = DateTimeUtil.getCurrentDateTimeUTC();
+            if (Objects.nonNull(entity) && entity.getOtp().equals(dto.getOtp()) && time < entity.getTimeExpired()) {
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            } else if (Objects.nonNull(entity) && entity.getOtp().equals(dto.getOtp()) && time > entity.getTimeExpired()) {
+                result = new ResponseMessageDTO("FAILED", "E175");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            } else if (Objects.nonNull(entity) && !entity.getOtp().equals(dto.getOtp())) {
+                result = new ResponseMessageDTO("FAILED", "E177");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            } else {
+                result = new ResponseMessageDTO("FAILED", "E05");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+
+        } catch (Exception e) {
+            logger.error("Send mail error: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    private byte[] getImageBytes(String id) {
+        byte[] result = new byte[0];
+        try {
+            try {
+                ResponseInputStream<?> responseInputStream = amazonS3Service.downloadFile(id);
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = responseInputStream.read(buffer)) != -1) {
+                    outputStream.write(buffer, 0, bytesRead);
+                }
+                result = outputStream.toByteArray();
+            } catch (Exception ignored) {
+            }
+
+            if (!(result.length > 0)) {
+                result = imageService.getImageById(id);
+            }
+        } catch (Exception e) {
+            System.out.println("Error at getImage: " + e.toString());
+        }
+        return result;
+    }
+
     @PostMapping("accounts/cardNumber")
     public ResponseEntity<ResponseMessageDTO> updateCardNumberLogin(
             @RequestBody AccountCardNumberUpdateDTO dto) {
@@ -1342,6 +1462,29 @@ public class AccountController {
                 .compact();
 
         return token;
+    }
+
+    @PutMapping("/change-email")
+    public ResponseEntity<Object> changeEmailUser(@RequestBody ChangeEmailRequestDTO changeEmailRequestDTO) {
+
+        Object result=null;
+        HttpStatus httpStatus=null;
+        try {
+            // Gọi service để thay đổi email
+            boolean isUpdated = accountLoginService.updateEmailByPhoneNo(changeEmailRequestDTO.getPhoneNo(), changeEmailRequestDTO.getNewEmail());
+
+            if (isUpdated) {
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            }
+        } catch (Exception e) {
+            // Log lỗi nếu có ngoại lệ
+            logger.error("AccountController: ERROR: changeEmailForMerchant: " + e.getMessage() + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
     }
 
 

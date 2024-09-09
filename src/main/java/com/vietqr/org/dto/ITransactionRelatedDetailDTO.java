@@ -32,4 +32,6 @@ public interface ITransactionRelatedDetailDTO {
     String getOrderId();
 
     String getTerminalCode();
+
+    String getSubCode();
 }

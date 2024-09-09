@@ -368,4 +368,24 @@ public interface CustomerSyncRepository extends JpaRepository<CustomerSyncEntity
     @Query(value = "SELECT id FROM customer_sync WHERE merchant = :merchantName", nativeQuery = true)
     String checkExistedMerchantName(@Param(value = "merchantName") String merchantName);
 
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE ac FROM account_customer ac " +
+            "JOIN account_customer_bank acb ON ac.id = acb.account_customer_id " +
+            "WHERE acb.customer_sync_id = :id", nativeQuery = true)
+    void deleteRelatedAccountCustomerByCustomerSyncId(@Param("id") String id);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM account_customer_bank WHERE customer_sync_id = :id", nativeQuery = true)
+    void deleteRelatedAccountCustomerBankByCustomerSyncId(@Param("id") String id);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM customer_sync WHERE id = :id", nativeQuery = true)
+    void deleteCustomerSyncById(@Param("id") String id);
+
+    @Query(value = "SELECT * FROM customer_sync WHERE information = :information LIMIT 1", nativeQuery = true)
+    CustomerSyncEntity getCustomerSyncByInformation(String information);
 }

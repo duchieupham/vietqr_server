@@ -601,4 +601,8 @@ public interface TransactionReceiveService {
     TransStatisticV2DTO getTransactionOverviewV2(String bankId, String fromDate, String toDate);
 
     List<ITransactionLatestDTO> getTransactionLastest(String bankId, int limit);
+
+    List<TransactionRelatedDTO> getTransactionsBySubCode(String value, int offset, String bankId, String from, String to);
+
+    void updateTransactionRefundStatus(String ftCode, String subCode, String terminalCode, String orderId, int type);
 }

@@ -28,7 +28,7 @@ public class VietQRDTO implements Serializable {
 	private String qrLink;
 	// terminalCode to show what terminal is
 	private String terminalCode;
-
+	private String subTerminalCode;
 	private String serviceCode;
 	private String orderId;
 
@@ -57,7 +57,6 @@ public class VietQRDTO implements Serializable {
 		this.qrLink = qrLink;
 	}
 
-
 	public VietQRDTO(String bankCode, String bankName,
 					 String bankAccount, String userBankName, String amount, String content, String qrCode, String imgId, int existing, String transactionId, String transactionRefId, String qrLink, String terminalCode, String serviceCode, String orderId, List<AdditionalData> additionalData) {
 		this.bankCode = bankCode;
@@ -76,6 +75,14 @@ public class VietQRDTO implements Serializable {
 		this.serviceCode = serviceCode;
 		this.orderId = orderId;
 		this.additionalData =additionalData;
+	}
+
+	public String getSubTerminalCode() {
+		return subTerminalCode;
+	}
+
+	public void setSubTerminalCode(String subTerminalCode) {
+		this.subTerminalCode = subTerminalCode;
 	}
 
 	public String getBankCode() {

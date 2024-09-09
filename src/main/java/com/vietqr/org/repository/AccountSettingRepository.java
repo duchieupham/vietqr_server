@@ -77,4 +77,9 @@ public interface AccountSettingRepository extends JpaRepository<AccountSettingEn
     @Modifying
     @Query(value = "UPDATE account_setting SET notification_mobile = :value WHERE user_id = :userId", nativeQuery = true)
     void updateNotificationMobile(@Param(value = "value") boolean value, @Param(value = "userId") String userId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE account_setting SET data_config = :value WHERE user_id = :userId", nativeQuery = true)
+    void updateSettingConfig(String value, String userId);
 }

@@ -114,8 +114,10 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
 //		CERT-VVB-VlZCNzQ0NjA0MDhCNjFGQjk2QzhDVmlldFFSQm94QWNjZXNzS2V5
-		String helo = BoxTerminalRefIdUtil.decode("VlZCNzQ0NjA0MDhCNjFGQjk2QzhDVmlldFFSQm94QWNjZXNzS2V5");
+		String helo = BoxTerminalRefIdUtil.decode("VlZCMzQzNTczMDhCNjFGQjk2QzhDVmlldFFSQm94QWNjZXNzS2V5");
 		System.out.println(helo);
+		String checkSum = BankEncryptUtil.generateMD5EcommerceCheckSum("37256497631", "https://www.google.com");
+		System.out.println(checkSum);
 //		MQTTUtil.sub("#");
 		// get bill
 //		 String checksum =
@@ -340,6 +342,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 					.antMatchers(HttpMethod.GET, "/api/transactions/qr-link").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/transactions/qr-link/cancel").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/transaction/voice/**").permitAll()
+					.antMatchers(HttpMethod.POST, "/api/peripheral/ecommerce/token_generate").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/transaction/rpa-sync").permitAll()
 					.antMatchers(HttpMethod.GET, "/api/export-transactions").permitAll()
 					.antMatchers(HttpMethod.GET, "/api/merchant/transactions-export").permitAll()
@@ -354,6 +357,8 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 					.antMatchers(HttpMethod.GET, "/api/van").permitAll()
 					.antMatchers(HttpMethod.GET, "/api/amazon-s3/**").permitAll()
 					.antMatchers(HttpMethod.GET, "/api/amazon-s3/**").permitAll()
+					.antMatchers(HttpMethod.POST, "/api/accounts/request-otp").permitAll()
+					.antMatchers(HttpMethod.POST, "/api/accounts/confirm-otp").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/images-invoice/**").permitAll()
 					.antMatchers(HttpMethod.GET, "/api/images-invoice/**").permitAll()
 					.antMatchers(HttpMethod.GET, "/status").permitAll()

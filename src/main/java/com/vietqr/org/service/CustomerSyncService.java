@@ -91,4 +91,8 @@ public interface CustomerSyncService {
     public Integer getCountingCustomerSync();
 
     public String checkExistedMerchantName(String merchantName);
+
+    void deleteCustomerSync(String id);
+
+    CustomerSyncEntity getCustomerSyncByInformation(String information);
 }

@@ -96,7 +96,7 @@ public interface AccountBankReceiveService {
 
 	String getBankShortNameByBankId(String bankId);
 
-	AccountBankReceiveEntity checkExistedBankAccountAuthenticated(String bankAccount, String bankCode);
+	AccountBankReceiveEntity getAccountBankReceiveByBankAccountAndBankCode(String bankAccount, String bankCode);
 
 	String getBankNameByBankId(String bankTypeId);
 
@@ -178,4 +178,25 @@ public interface AccountBankReceiveService {
 	List<AccountBankReceiveEntity> findBankAccountsByMerchantId(String merchantId);
 
 	String getBankAccountNameByBankAccount(String bankAccount);
+
+	List<BankAccountResponseDTO> getBankAccountsByValidFeeToAndIsValidService(int offset, int size);
+	int countBankAccountsByValidFeeToAndIsValidService();
+
+	List<BankAccountResponseDTO> getBankAccountsByTimeCreate(int offset, int size);
+
+	int countBankAccountsByTimeCreate();
+	IAdminExtraBankDTO getExtraBankDataForAllTime();
+
+	List<BankAccountResponseDTO> getBankAccountsByValidFeeToAndIsValidServiceWithSearch(Integer searchType, String value, int offset, int size);
+	int countBankAccountsByValidFeeToAndIsValidServiceWithSearch(Integer searchType, String value);
+	List<BankAccountResponseDTO> getBankAccountsByTimeCreateWithSearch(Integer searchType, String value, int offset, int size);
+	int countBankAccountsByTimeCreateWithSearch(Integer searchType, String value);
+	List<BankAccountResponseDTO> getBankAccountsByAccountAndSorted(String keyword, int offset, int size);
+	List<BankAccountResponseDTO> getBankAccountsByAccountNameAndSorted(String keyword, int offset, int size);
+	List<BankAccountResponseDTO> getBankAccountsByPhoneAuthenticatedAndSorted(String keyword, int offset, int size);
+	List<BankAccountResponseDTO> getBankAccountsByNationalIdAndSorted(String keyword, int offset, int size);
+	void updatePushNotification(String bankId, int value);
+
+	void updateSyncWpById(String id);
+	void updatePushNotificationUser(String userId, int value);
 }

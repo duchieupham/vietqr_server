@@ -84,6 +84,45 @@ public class AutomationManagementService {
         }
     }
 
+    @Scheduled(fixedRate = 600000)
+    public void scheduleExecuteTaskCheckPerformance() {
+        long time = 0;
+        long timeResponse = 0;
+        if (!EnvironmentUtil.isProduction()) {
+            try {
+                time = System.currentTimeMillis();
+                UriComponents uriComponents = UriComponentsBuilder
+                        .fromHttpUrl("https://api.vietqr.org/vqr/status/performance")
+                        .buildAndExpand(/* add url parameter here */);
+                WebClient webClient = WebClient.builder()
+                        .baseUrl("https://api.vietqr.org/vqr/status/performance")
+                        .build();
+                Mono<ClientResponse> responseMono = webClient.get()
+                        .uri(uriComponents.toUri())
+                        .header("Authorization", "Bearer " + "eyJhbGciOiJIUzUxMiJ9.eyJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXSwidXNlciI6IlkzVnpkRzl0W" +
+                                "lhJdFltd3RkWE5sY2pBMSIsImlhdCI6MTcyNDk0NzQwOX0.Qy_YoRkSDNVdP4yMYeG_EINvE6ApzvmrBS7" +
+                                "xWXkNkQcvagILbLn2xgG9fKXnVgJM94RPzCd64L5aARGIFyP24Q")
+                        .exchange();
+                ClientResponse response = responseMono.block();
+                if (response != null) {
+                    timeResponse = System.currentTimeMillis();
+                }
+            } catch (Exception e) {
+                logger.error("scheduleExecuteTaskCheckPerformance: ERROR: " + e.getMessage() +
+                        " at: " + System.currentTimeMillis());
+            } finally {
+                if ((timeResponse - time) >= 3000) {
+                    String content = "HEATH CHECK WARNING: " +
+                            "\uD83D\uDE4B\u200D♂\uFE0F\uD83D\uDE4B\u200D♂\uFE0F\uD83D\uDE4B\u200D♂\uFE0F." +
+                            "\n\nVUI LÒNG KIỂM TRA HEATH CHECK.\n\n" +
+                            "TIME CALL: " + time + " TIME RESPONSE: " + timeResponse;
+                    GoogleChatUtil googleChatUtil = new GoogleChatUtil();
+                    googleChatUtil.sendMessageToGoogleChat(content, "https://chat.googleapis.com/v1/spaces/AAAAEkpkd2A/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=q9cgRDssTNVRgIQCYkfq06Sfh8nS-h4RD3Nrfby9NJk");
+                }
+            }
+        }
+    }
+
     @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 30 8 * * MON-FRI")
     public void scheduleExecuteTask() {
         if (!EnvironmentUtil.isProduction()) {

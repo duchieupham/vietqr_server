@@ -10,12 +10,12 @@ public class TransactionRelatedResponseDTO {
     private Integer status;
     private Integer type;
     private String transType;
-
     private String terminalCode;
     private String note;
     private String referenceNumber;
     private String orderId;
     private String bankShortName;
+    private String subCode;
 
     public TransactionRelatedResponseDTO() {
     }
@@ -147,5 +147,13 @@ public class TransactionRelatedResponseDTO {
 
     public void setBankShortName(String bankShortName) {
         this.bankShortName = bankShortName;
+    }
+
+    public String getSubCode() {
+        return subCode;
+    }
+
+    public void setSubCode(String subCode) {
+        this.subCode = subCode;
     }
 }

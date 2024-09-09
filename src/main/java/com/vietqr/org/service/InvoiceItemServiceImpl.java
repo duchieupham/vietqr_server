@@ -89,6 +89,12 @@ public class InvoiceItemServiceImpl implements InvoiceItemService {
     }
 
     @Override
+    public IAdminExtraInvoiceDTO getExtraInvoiceForAllTime() {
+        return repo.getExtraInvoiceForAllTime();
+    }
+
+
+    @Override
     public List<InvoiceItemProcessDateDTO> getInvoiceItemByInvoiceId(String invoiceId) {
         return repo.findInvoiceItemEntitiesByInvoiceId(invoiceId);
     }

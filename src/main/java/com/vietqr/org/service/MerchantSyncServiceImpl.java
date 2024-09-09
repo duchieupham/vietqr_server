@@ -229,4 +229,14 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
     public int insert(MerchantSyncEntity entity) {
         return repo.save(entity) == null ? 0 : 1;
     }
+
+    @Override
+    public MerchantSyncEntity getMerchantSyncByCertificate(String certificate) {
+        return repo.getMerchantSyncByCertificate(certificate);
+    }
+
+    @Override
+    public List<MerchantSyncEntity> getMerchantSyncByIds(List<String> merchantIds) {
+        return repo.getMerchantSyncByIds(merchantIds);
+    }
 }

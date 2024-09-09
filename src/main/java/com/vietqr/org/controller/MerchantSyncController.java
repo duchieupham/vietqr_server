@@ -1,29 +1,53 @@
 package com.vietqr.org.controller;
 
 import com.vietqr.org.dto.*;
-import com.vietqr.org.entity.MerchantSyncEntity;
-import com.vietqr.org.entity.TelegramEntity;
-import com.vietqr.org.service.MerchantSyncService;
-import com.vietqr.org.util.StringUtil;
+import com.vietqr.org.entity.*;
+import com.vietqr.org.service.*;
+import com.vietqr.org.util.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.net.URL;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/api/merchant-sync")
+@RequestMapping("/api")
 public class MerchantSyncController {
 
-    @Autowired
-    public MerchantSyncService merchantSyncService;
+    private static final Logger logger = Logger.getLogger(MerchantSyncController.class);
 
-    @GetMapping
+    @Autowired
+    private MerchantSyncService merchantSyncService;
+
+    @Autowired
+    private CustomerSyncService customerSyncService;
+
+    @Autowired
+    private AccountBankReceiveService accountBankReceiveService;
+
+    @Autowired
+    private TerminalBankService terminalBankService;
+
+    @Autowired
+    private AccountCustomerService accountCustomerService;
+
+    @Autowired
+    private BankReceiveConnectionService bankReceiveConnectionService;
+
+    @Autowired
+    private SocketHandler socketHandler;
+
+    @Autowired
+    private BankTypeService bankTypeService;
+
+    @GetMapping("merchant-sync")
     public ResponseEntity<Object> getAllMerchants(
             @RequestParam(value = "value", defaultValue = "") String value,
             @RequestParam(value = "page", defaultValue = "1") int page,
@@ -54,7 +78,231 @@ public class MerchantSyncController {
 
         return new ResponseEntity<>(result, httpStatus);
     }
-    @GetMapping("/{id}")
+
+    @PostMapping("ecommerce")
+    public ResponseEntity<Object> syncEcommerce(@RequestBody EcommerceMerchantSyncDTO dto,
+                                                @RequestHeader("Authorization") String token) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            String username = getUsernameFromToken(token);
+            if (!StringUtil.isNullOrEmpty(username)) {
+                String accessKey = accountCustomerService.getAccessKeyByUsername(username);
+                if (!StringUtil.isNullOrEmpty(accessKey)) {
+                    String checkSum = BankEncryptUtil.generateMD5EcommerceCheckSum(accessKey, dto.getEcommerceSite());
+                    if (dto.getCheckSum().equals(checkSum)) {
+                        CustomerSyncEntity entity = customerSyncService.getCustomerSyncByInformation(dto.getEcommerceSite());
+                        String clientId = "";
+                        String certificate = "";
+                        if (entity == null) {
+                            entity = new CustomerSyncEntity();
+                            UUID uuid = UUID.randomUUID();
+                            entity.setId(uuid.toString());
+                            entity.setUsername("");
+                            entity.setPassword("");
+                            entity.setIpAddress("");
+                            entity.setPort("");
+                            entity.setSuffixUrl("");
+                            entity.setInformation(dto.getEcommerceSite());
+                            entity.setUserId("");
+                            entity.setActive(false);
+                            entity.setToken("");
+                            entity.setMerchant("");
+                            entity.setAddress("");
+                            entity.setMaster(false);
+                            entity.setAccountId("");
+                            entity.setRefId("");
+                            String publishId = "MER" + RandomCodeUtil.generateOTP(8);
+                            certificate = "MER-ECM-" + publishId;
+                            clientId = BoxTerminalRefIdUtil.encryptQrBoxId(uuid.toString());
+                            MerchantSyncEntity merchantSyncEntity = new MerchantSyncEntity(uuid.toString(),
+                                    "", "", "Ecommerce wordpress", publishId, certificate,
+                                    StringUtil.getValueNullChecker(dto.getWebhook()), clientId);
+                            customerSyncService.insertCustomerSync(entity);
+                            merchantSyncService.insert(merchantSyncEntity);
+                        } else {
+                            MerchantSyncEntity merchantSyncEntity = merchantSyncService.getMerchantSyncById(entity.getId());
+                            if (merchantSyncEntity != null) {
+                                if (StringUtil.isNullOrEmpty(merchantSyncEntity.getPublishId())) {
+                                    String publishId = "MER" + RandomCodeUtil.generateOTP(8);
+                                    certificate = "MER-ECM-" + publishId;
+                                    clientId = BoxTerminalRefIdUtil.encryptQrBoxId(entity.getId());
+                                    merchantSyncEntity.setPublishId(publishId);
+                                    merchantSyncEntity.setCertificate(certificate);
+                                    merchantSyncEntity.setWebhook(StringUtil.getValueNullChecker(dto.getWebhook()));
+                                    merchantSyncEntity.setClientId(clientId);
+                                    merchantSyncService.insert(merchantSyncEntity);
+                                }
+                                String publishId = merchantSyncEntity.getPublishId();
+                                certificate = "MER-ECM-" + publishId;
+                                clientId = BoxTerminalRefIdUtil.encryptQrBoxId(entity.getId());
+                            } else {
+                                String publishId = "MER" + RandomCodeUtil.generateOTP(8);
+                                certificate = "MER-ECM-" + publishId;
+                                clientId = BoxTerminalRefIdUtil.encryptQrBoxId(entity.getId());
+                                merchantSyncEntity = new MerchantSyncEntity(entity.getId(),
+                                        "", "", "Ecommerce wordpress", publishId, certificate,
+                                        StringUtil.getValueNullChecker(dto.getWebhook()), clientId);
+                                merchantSyncService.insert(merchantSyncEntity);
+                            }
+                        }
+
+                        result = new MerchantSyncEcommerceDTO(StringUtil.getValueNullChecker(dto.getWebhook()), clientId, certificate);
+                        httpStatus = HttpStatus.OK;
+                    } else {
+                        result = new ResponseMessageDTO("FAILED", "E74");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    }
+                } else {
+                    result = new ResponseMessageDTO("FAILED", "E05");
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                }
+            } else {
+                result = new ResponseMessageDTO("FAILED", "E05");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+            result = new ResponseMessageDTO("FAILED", "E05");
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    private String getUsernameFromToken(String token) {
+        String result = "";
+        try {
+            if (token != null && !token.trim().isEmpty()) {
+                String secretKey = "mySecretKey";
+                String jwtToken = token.substring(7); // remove "Bearer " from the beginning
+                Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(jwtToken).getBody();
+                String userId = (String) claims.get("user");
+                if (userId != null) {
+                    result = new String(Base64.getDecoder().decode(userId));
+                }
+            }
+        } catch (Exception e) {
+            logger.info("TerminalSyncController: ERROR: getUsernameFromToken: "
+                    + e.getMessage() + " at: " + System.currentTimeMillis());
+        }
+        return result;
+    }
+
+    @PostMapping("ecommerce/active")
+    public ResponseEntity<Object> syncEcommerce(@RequestBody EcommerceActiveDTO dto) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            MerchantSyncEntity entity = merchantSyncService.getMerchantSyncByCertificate(dto.getCertificate());
+            if (Objects.nonNull(entity)) {
+                AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService
+                        .getAccountBankReceiveByBankAccountAndBankCode(dto.getBankAccount(), dto.getBankCode());
+                if (Objects.nonNull(accountBankReceiveEntity)) {
+                    entity.setFullName(dto.getFullName());
+                    entity.setName(dto.getName());
+                    entity.setNationalId(dto.getNationalId());
+                    entity.setEmail(dto.getEmail());
+                    entity.setPhoneNo(dto.getPhoneNo());
+                    entity.setAddress(dto.getAddress());
+                    entity.setWebhook(dto.getWebhook());
+                    entity.setIsActive(true);
+                    entity.setCareer(dto.getCareer());
+                    if (dto.getBusinessType() == 0) {
+                        entity.setBusinessType("Cá nhân");
+                    } else {
+                        entity.setBusinessType("Doanh nghiệp");
+                    }
+
+                    CustomerSyncEntity customerSyncEntity = customerSyncService.getCustomerSyncById(entity.getId());
+                    BankReceiveConnectionEntity bankReceiveConnectionEntity = bankReceiveConnectionService.getBankReceiveConnectionByBankIdAndMid(
+                            accountBankReceiveEntity.getId(), entity.getId());
+                    if (Objects.nonNull(bankReceiveConnectionEntity)) {
+                        bankReceiveConnectionEntity.setActive(true);
+                        bankReceiveConnectionService.insert(bankReceiveConnectionEntity);
+                    } else {
+                        bankReceiveConnectionEntity = new BankReceiveConnectionEntity();
+                        bankReceiveConnectionEntity.setId(UUID.randomUUID().toString());
+                        if (accountBankReceiveEntity.isMmsActive()) {
+                            TerminalBankEntity terminalBankEntity = terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
+                            bankReceiveConnectionEntity.setTerminalBankId(Objects.nonNull(terminalBankEntity) ? terminalBankEntity.getId() : "");
+                        } else {
+                            bankReceiveConnectionEntity.setTerminalBankId("");
+                        }
+                        bankReceiveConnectionEntity.setActive(true);
+                        bankReceiveConnectionEntity.setMidConnectId("");
+                        bankReceiveConnectionEntity.setBankId(accountBankReceiveEntity.getId());
+                        bankReceiveConnectionEntity.setData("[]");
+                        bankReceiveConnectionEntity.setMid(entity.getId());
+                        bankReceiveConnectionService.insert(bankReceiveConnectionEntity);
+                    }
+                    accountBankReceiveService.updateSyncWpById(entity.getId());
+                    merchantSyncService.insert(entity);
+                    result = new ResponseMessageDTO("SUCCESS", "");
+                    httpStatus = HttpStatus.OK;
+
+                    try {
+                        Thread thread = new Thread(() -> {
+                            Map<String, String> data = new HashMap<>();
+                            BankTypeEntity bankTypeEntity = bankTypeService.getBankTypeById(accountBankReceiveEntity.getBankTypeId());
+                            data.put("notificationType", NotificationUtil.getNotiSyncEcommerce());
+                            data.put("bankAccount", accountBankReceiveEntity.getBankAccount());
+                            data.put("userBankName", accountBankReceiveEntity.getBankAccountName());
+                            data.put("bankCode", bankTypeEntity.getBankCode());
+                            if (Objects.nonNull(customerSyncEntity)) {
+                                data.put("ecommerceSite", StringUtil.getValueNullChecker(customerSyncEntity.getInformation()));
+                            } else {
+                                data.put("ecommerceSite", "");
+                            }
+                            try {
+                                socketHandler.sendMessageToClientId(entity.getClientId(),
+                                        data);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+                        thread.start();
+                    } catch (Exception ignored) {
+                    }
+                } else {
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    result = new ResponseMessageDTO("FAILED", "E25");
+                }
+            } else {
+                httpStatus = HttpStatus.BAD_REQUEST;
+                result = new ResponseMessageDTO("FAILED", "E163");
+            }
+        } catch (Exception e) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+            result = new ResponseMessageDTO("FAILED", "E05");
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("ecommerce/active")
+    public ResponseEntity<Object> getEcommerceByCode(@RequestParam String ecommerceCode) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        try {
+            MerchantSyncEntity merchantSyncEntity = merchantSyncService.getMerchantSyncByCertificate(ecommerceCode);
+            if (Objects.nonNull(merchantSyncEntity)) {
+                CustomerSyncEntity customerSyncEntity = customerSyncService.getCustomerSyncById(merchantSyncEntity.getId());
+                result = new EcommerceActiveDTO(merchantSyncEntity.getFullName(), customerSyncEntity!= null ? customerSyncEntity.getInformation() : "",
+                        merchantSyncEntity.getName(), "", "", merchantSyncEntity.getCertificate(),
+                        merchantSyncEntity.getNationalId(), merchantSyncEntity.getEmail(),
+                        merchantSyncEntity.getPhoneNo(), merchantSyncEntity.getAddress(), merchantSyncEntity.getWebhook(), merchantSyncEntity.getCareer(),
+                        "Cá nhân".equals(merchantSyncEntity.getBusinessType()) ? 0 : 1);
+                httpStatus = HttpStatus.OK;
+            } else {
+                httpStatus = HttpStatus.BAD_REQUEST;
+                result = new ResponseMessageDTO("FAILED", "E164");
+            }
+        } catch (Exception e) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+            result = new ResponseMessageDTO("FAILED", "E05");
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("merchant-sync/{id}")
     public ResponseEntity<Object> getMerchantById(@PathVariable String id) {
         Object result = null;
         HttpStatus httpStatus = null;
@@ -76,7 +324,7 @@ public class MerchantSyncController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @PostMapping
+    @PostMapping("merchant-sync")
     public ResponseEntity<Object> createMerchant(@RequestBody MerchantSyncRequestDTO dto,
                                                  @RequestParam String platform,
                                                  @RequestParam String details) {
@@ -120,7 +368,7 @@ public class MerchantSyncController {
     private boolean isValidChatId(String chatId) {
         return chatId != null && !chatId.trim().isEmpty();
     }
-    @DeleteMapping("/{id}")
+    @DeleteMapping("merchant-sync/{id}")
     public ResponseEntity<Object> deleteMerchant(@PathVariable String id) {
         Object result = null;
         HttpStatus httpStatus = null;
@@ -136,7 +384,7 @@ public class MerchantSyncController {
 
         return new ResponseEntity<>(result, httpStatus);
     }
-    @PutMapping("/{id}")
+    @PutMapping("merchant-sync/{id}")
     public ResponseEntity<Object> updateMerchant(@PathVariable String id,
                                                  @RequestBody MerchantSyncRequestDTO dto,
                                                  @RequestParam String platform,

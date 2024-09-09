@@ -25,6 +25,7 @@ public class NotificationUtil {
 	private static final String NOTI_SEND_INVOICE_CREATE = "N19";
 	private static final String NOTI_SYNC_MID_V2 = "N20";
 	private static final String NOTI_SYNC_TID_V2 = "N21";
+	private static final String NOTI_SYNC_ECOMMERCE = "N22";
 
 	// Title
 	private static final String NOTI_TITLE_TRANSACTION = "Thông báo biến động số dư";
@@ -145,6 +146,10 @@ public class NotificationUtil {
 
 	public static String getNotiSyncTidV2() {
 		return NOTI_SYNC_TID_V2;
+	}
+
+	public static String getNotiSyncEcommerce() {
+		return NOTI_SYNC_ECOMMERCE;
 	}
 
 	public static String getNotiTitleMobileTopup() {

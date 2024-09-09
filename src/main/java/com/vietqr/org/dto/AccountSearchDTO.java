@@ -14,4 +14,5 @@ public interface AccountSearchDTO {
     String getImgId();
 
     String getCarrierTypeId();
+    String getEmail();
 }

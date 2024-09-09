@@ -24,6 +24,7 @@ public class VietQRCreateCustomerDTO implements Serializable {
     private String orderId;
     private String sign;
     private String terminalCode;
+    private String subTerminalCode;
     private String note;
     private String urlLink;
     private Boolean reconciliation;
@@ -253,13 +254,22 @@ public class VietQRCreateCustomerDTO implements Serializable {
         this.additionalData = additionalData;
     }
 
+    public String getSubTerminalCode() {
+        return subTerminalCode;
+    }
+
+    public void setSubTerminalCode(String subTerminalCode) {
+        this.subTerminalCode = subTerminalCode;
+    }
+
     @Override
     public String toString() {
         return "VietQRCreateCustomerDTO [amount=" + amount + ", content=" + content + ", bankAccount=" + bankAccount
                 + ", bankCode=" + bankCode + ", userBankName=" + userBankName + ", transType=" + transType
                 + ", customerBankAccount=" + customerBankAccount + ", customerBankCode=" + customerBankCode
                 + ", customerName=" + customerName + ", orderId=" + orderId + ", sign=" + sign
-                + ", urlLink=" + urlLink + ", serviceCode=" + serviceCode + ", qrType=" + qrType + "]";
+                + ", urlLink=" + urlLink + ", serviceCode=" + serviceCode +
+                ", subTerminalCode=" + subTerminalCode + ", qrType=" + qrType + "]";
     }
 
 }

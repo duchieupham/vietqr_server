@@ -9,7 +9,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vietqr.org.dto.BoxEnvironmentResDTO;
 import com.vietqr.org.dto.BoxEnvironmentVarDTO;
 import org.apache.log4j.Logger;
 
@@ -47,6 +46,16 @@ public class StringUtil {
         return hashtags;
     }
 
+    public static boolean isLatinAndNumeric(String input) {
+        boolean result = false;
+        try {
+            result = !isNullOrEmpty(input) && input.matches("[a-zA-Z0-9]*");
+        } catch (Exception e) {
+            logger.error("isLatinAlphabet: ERROR: " + e.toString());
+        }
+        return true;
+    }
+
     public static String getValueNullChecker(String value) {
         return value != null ? value : "";
     }
@@ -59,8 +68,16 @@ public class StringUtil {
         return value != null ? value : 0;
     }
 
-    public static String getValueNotNull(String value) {
-        return value != null ? value : "";
+    public static String getValueNullChecker(String value, String expected) {
+        return value != null ? value : expected;
+    }
+
+    public static int getValueNullChecker(Integer value, int expected) {
+        return value != null ? value : expected;
+    }
+
+    public static double getValueNullChecker(Double value, double expected) {
+        return value != null ? value : expected;
     }
 
     public static int getTotalPage(int totalElement, int size) {
@@ -68,6 +85,10 @@ public class StringUtil {
         result = totalElement % size == 0 ?
                 totalElement / size : totalElement / size + 1;
         return result;
+    }
+
+    public static String getValueNotNull(String value) {
+        return value != null ? value : "";
     }
 
     public static boolean containsOnlyDigits(String amount) {

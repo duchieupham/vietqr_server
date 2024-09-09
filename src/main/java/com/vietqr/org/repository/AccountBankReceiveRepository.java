@@ -216,6 +216,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "WHEN b.is_sync = true AND b.mms_active = false THEN 1  "
 			+ "WHEN b.is_sync = true AND b.mms_active = true THEN 2  "
 			+ "WHEN b.is_sync = false AND b.mms_active = true THEN 2  "
+			+ "WHEN b.is_sync = false AND b.mms_active = false THEN 1  "
 			+ "END AS flow, "
 			+ "d.service_fee_id AS serviceFeeId, d.short_name as serviceFeeName, "
 			+ "e.address AS address "
@@ -291,7 +292,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	String checkIsOwner(String bankId, String userId);
 
 	@Query(value = "SELECT a.id as bankId, b.bank_name as bankName, b.bank_code as bankCode, a.user_id as userId, "
-			+ "b.bank_short_name as bankShortName, a.bank_account as bankAccount, a.is_valid_service AS isValidService "
+			+ "b.bank_short_name as bankShortName, a.bank_account as bankAccount, a.is_valid_service AS isValidService, a.push_notification AS pushNotification "
 			+ "FROM account_bank_receive a "
 			+ "INNER JOIN bank_type b "
 			+ "ON a.bank_type_id = b.id "
@@ -321,8 +322,8 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "INNER JOIN bank_type b "
 			+ "ON b.id = a.bank_type_id "
 			+ "WHERE a.bank_account = :bankAccount "
-			+ "AND b.bank_code = :bankCode AND is_authenticated = TRUE ", nativeQuery = true)
-	AccountBankReceiveEntity checkExistedBankAccountAuthenticated(String bankAccount, String bankCode);
+			+ "AND b.bank_code = :bankCode AND is_authenticated = TRUE LIMIT 1", nativeQuery = true)
+	AccountBankReceiveEntity getAccountBankReceiveByBankAccountAndBankCode(String bankAccount, String bankCode);
 
 	@Query(value = "SELECT a.bank_name FROM bank_type a WHERE a.id = :bankTypeId", nativeQuery = true)
 	String getBankNameByBankId(String bankTypeId);
@@ -569,7 +570,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
-			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_from AS validFeeFrom, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId,abr.valid_fee_to AS validFeeTo , abr.valid_fee_from AS validFeeFrom,abr.time_create AS timeCreate,  "
 			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
@@ -584,7 +585,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
-			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom,abr.time_create AS timeCreate,  "
 			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso  "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
@@ -601,7 +602,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
-			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom,abr.time_create AS timeCreate,  "
 			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso  "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
@@ -618,7 +619,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
-			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom,abr.time_create AS timeCreate, "
 			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso  "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
@@ -635,7 +636,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
-			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom,abr.time_create AS timeCreate, "
 			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso  "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
@@ -658,4 +659,198 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 
 	@Query(value = "SELECT bank_account_name FROM account_bank_receive where bank_account = :bankAccount LIMIT 1",nativeQuery = true)
 	String getBankAccountNameByBankAccount(@Param("bankAccount") String bankAccount);
+
+
+	// Lọc theo thời gian kích hoạt dịch vụ (có sắp xếp theo trạng thái valid_fee_to)
+	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
+			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom,abr.time_create AS timeCreate,  "
+			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "FROM account_bank_receive abr "
+			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
+			+ "INNER JOIN account_login al ON abr.user_id = al.id "
+			+ "WHERE abr.valid_fee_to >= :fromDate AND abr.valid_fee_to <= :toDate AND abr.is_valid_service = true "
+			+ "ORDER BY abr.valid_fee_to ASC LIMIT :offset, :size", nativeQuery = true)
+	List<IBankAccountResponseDTO> getBankAccountsByValidFeeToAndIsValidService(@Param("fromDate") long fromDate, @Param("toDate") long toDate, @Param("offset") int offset, @Param("size") int size);
+
+	@Query(value = "SELECT COUNT(*) FROM account_bank_receive WHERE valid_fee_to >= :fromDate AND valid_fee_to <= :toDate AND is_valid_service = true", nativeQuery = true)
+	int countBankAccountsByValidFeeToAndIsValidService(@Param("fromDate") long fromDate, @Param("toDate") long toDate);
+
+	// Lọc theo thời gian tạo (thêm gần đây)
+	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
+			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, abr.time_create AS timeCreate,  "
+			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "FROM account_bank_receive abr "
+			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
+			+ "INNER JOIN account_login al ON abr.user_id = al.id "
+			+ "ORDER BY abr.time_create DESC LIMIT :offset, :size", nativeQuery = true)
+	List<IBankAccountResponseDTO> getBankAccountsByTimeCreate(@Param("offset") int offset, @Param("size") int size);
+
+	@Query(value = "SELECT COUNT(*) FROM account_bank_receive", nativeQuery = true)
+	int countBankAccountsByTimeCreate();
+
+
+	@Query(value = "SELECT "
+			+ "COALESCE(SUM(CASE WHEN  valid_fee_to != 0 and  valid_fee_to < :currentTime THEN 1 ELSE 0 END), 0) AS overdueCount, "  // Tài khoản quá hạn
+			+ "COALESCE(SUM(CASE WHEN valid_fee_to BETWEEN :currentTime AND :sevenDaysLater THEN 1 ELSE 0 END), 0) AS nearlyExpireCount, "  // Tài khoản gần hết hạn (trong vòng 7 ngày tới)
+			+ "COALESCE(SUM(CASE WHEN is_authenticated IS NOT NULL THEN 1 ELSE 0 END), 0) AS validCount, "
+			+ "COALESCE(SUM(CASE WHEN is_authenticated = true THEN 1 ELSE 0 END), 0) AS notRegisteredCount "
+			+ "FROM account_bank_receive", nativeQuery = true)
+	IAdminExtraBankDTO getExtraBankDataForAllTime(@Param("currentTime") long currentTime, @Param("sevenDaysLater") long sevenDaysLater);
+
+
+	// Truy vấn lấy danh sách tài khoản đã quá hạn
+	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
+			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, "
+			+ "abr.time_create AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "FROM account_bank_receive abr "
+			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
+			+ "INNER JOIN account_login al ON abr.user_id = al.id "
+			+ "WHERE abr.is_valid_service = false OR abr.valid_fee_to < :currentTime "
+			+ "ORDER BY abr.valid_fee_to ASC LIMIT :offset, :size", nativeQuery = true)
+	List<IBankAccountResponseDTO> getOverdueBankAccounts(@Param("currentTime") long currentTime, @Param("offset") int offset, @Param("size") int size);
+
+	@Query(value = "SELECT COUNT(*) FROM account_bank_receive WHERE is_valid_service = false OR valid_fee_to < :currentTime", nativeQuery = true)
+	int countOverdueBankAccounts(@Param("currentTime") long currentTime);
+
+	// Truy vấn lấy danh sách tài khoản gần hết hạn (trong khoảng 7 ngày tới)
+	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
+			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, "
+			+ "abr.time_create AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "FROM account_bank_receive abr "
+			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
+			+ "INNER JOIN account_login al ON abr.user_id = al.id "
+			+ "WHERE abr.valid_fee_to >= :currentTime AND abr.valid_fee_to <= :sevenDaysLater "
+			+ "ORDER BY abr.valid_fee_to ASC LIMIT :offset, :size", nativeQuery = true)
+	List<IBankAccountResponseDTO> getNearlyExpiredBankAccounts(@Param("currentTime") long currentTime, @Param("sevenDaysLater") long sevenDaysLater, @Param("offset") int offset, @Param("size") int size);
+
+	@Query(value = "SELECT COUNT(*) FROM account_bank_receive WHERE valid_fee_to >= :currentTime AND valid_fee_to <= :sevenDaysLater", nativeQuery = true)
+	int countNearlyExpiredBankAccounts(@Param("currentTime") long currentTime, @Param("sevenDaysLater") long sevenDaysLater);
+
+	// Truy vấn lấy danh sách tài khoản còn hạn (valid_fee_to > 7 ngày)
+	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
+			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, "
+			+ "abr.time_create AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "FROM account_bank_receive abr "
+			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
+			+ "INNER JOIN account_login al ON abr.user_id = al.id "
+			+ "WHERE abr.valid_fee_to > :sevenDaysLater "
+			+ "ORDER BY abr.valid_fee_to ASC LIMIT :offset, :size", nativeQuery = true)
+	List<IBankAccountResponseDTO> getValidBankAccounts(@Param("sevenDaysLater") long sevenDaysLater, @Param("offset") int offset, @Param("size") int size);
+
+	@Query(value = "SELECT COUNT(*) FROM account_bank_receive WHERE valid_fee_to > :sevenDaysLater", nativeQuery = true)
+	int countValidBankAccounts(@Param("sevenDaysLater") long sevenDaysLater);
+
+	// Truy vấn lấy danh sách tài khoản chưa đăng ký dịch vụ
+	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
+			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, "
+			+ "abr.time_create AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "FROM account_bank_receive abr "
+			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
+			+ "INNER JOIN account_login al ON abr.user_id = al.id "
+			+ "WHERE abr.is_valid_service = false AND abr.valid_fee_to IS NULL "
+			+ "ORDER BY abr.time_create ASC LIMIT :offset, :size", nativeQuery = true)
+	List<IBankAccountResponseDTO> getNotRegisteredBankAccounts(@Param("offset") int offset, @Param("size") int size);
+
+	@Query(value = "SELECT COUNT(*) FROM account_bank_receive WHERE is_valid_service = false AND valid_fee_to IS NULL", nativeQuery = true)
+	int countNotRegisteredBankAccounts();
+	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
+			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, abr.time_create AS timeCreate, "
+			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "FROM account_bank_receive abr "
+			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
+			+ "INNER JOIN account_login al ON abr.user_id = al.id "
+			+ "WHERE abr.bank_account LIKE %:keyword% "
+			+ "ORDER BY CASE WHEN abr.is_valid_service =true and abr.valid_fee_from != 0  and abr.valid_fee_to != 0  and  abr.valid_fee_to < :currentTime THEN 1 "  // Quá hạn
+			+ "WHEN abr.valid_fee_to BETWEEN :currentTime AND :sevenDaysLater THEN 2 "  // Gần hết hạn
+			+ "WHEN abr.valid_fee_to > :sevenDaysLater THEN 3 "  // Còn hạn
+			+ "ELSE 4 END, abr.bank_account_name ASC "
+			+ "LIMIT :offset, :size", nativeQuery = true)
+	List<IBankAccountResponseDTO> getBankAccountsByAccountAndSorted(@Param("keyword") String keyword, @Param("currentTime") long currentTime, @Param("sevenDaysLater") long sevenDaysLater, @Param("offset") int offset, @Param("size") int size);
+
+
+	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
+			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, abr.time_create AS timeCreate, "
+			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "FROM account_bank_receive abr "
+			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
+			+ "INNER JOIN account_login al ON abr.user_id = al.id "
+			+ "WHERE abr.bank_account_name LIKE %:keyword% "
+			+ "ORDER BY CASE WHEN abr.is_valid_service =true and abr.valid_fee_from != 0  and abr.valid_fee_to != 0 and abr.valid_fee_to < :currentTime THEN 1 "  // Quá hạn
+			+ "WHEN abr.valid_fee_to BETWEEN :currentTime AND :sevenDaysLater THEN 2 "  // Gần hết hạn
+			+ "WHEN abr.valid_fee_to > :sevenDaysLater THEN 3 "  // Còn hạn
+			+ "ELSE 4 END, abr.bank_account_name ASC "
+			+ "LIMIT :offset, :size", nativeQuery = true)
+	List<IBankAccountResponseDTO> getBankAccountsByAccountNameAndSorted(@Param("keyword") String keyword, @Param("currentTime") long currentTime, @Param("sevenDaysLater") long sevenDaysLater, @Param("offset") int offset, @Param("size") int size);
+	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
+			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, abr.time_create AS timeCreate, "
+			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "FROM account_bank_receive abr "
+			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
+			+ "INNER JOIN account_login al ON abr.user_id = al.id "
+			+ "WHERE abr.phone_authenticated LIKE %:keyword% "
+			+ "ORDER BY CASE WHEN abr.is_valid_service =true and abr.valid_fee_from != 0  and abr.valid_fee_to != 0 and abr.valid_fee_to < :currentTime THEN 1 "  // Quá hạn
+			+ "WHEN abr.valid_fee_to BETWEEN :currentTime AND :sevenDaysLater THEN 2 "  // Gần hết hạn
+			+ "WHEN abr.valid_fee_to > :sevenDaysLater THEN 3 "  // Còn hạn
+			+ "ELSE 4 END, abr.bank_account_name ASC "
+			+ "LIMIT :offset, :size", nativeQuery = true)
+	List<IBankAccountResponseDTO> getBankAccountsByPhoneAuthenticatedAndSorted(@Param("keyword") String keyword, @Param("currentTime") long currentTime, @Param("sevenDaysLater") long sevenDaysLater, @Param("offset") int offset, @Param("size") int size);
+
+
+	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
+			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
+			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, abr.time_create AS timeCreate, "
+			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "FROM account_bank_receive abr "
+			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
+			+ "INNER JOIN account_login al ON abr.user_id = al.id "
+			+ "WHERE abr.national_id LIKE %:keyword% "
+			+ "ORDER BY CASE WHEN abr.is_valid_service = true and abr.valid_fee_from != 0  and abr.valid_fee_to < :currentTime THEN 1 "  // Quá hạn
+			+ "WHEN abr.valid_fee_to != 0 and abr.valid_fee_to BETWEEN :currentTime AND :sevenDaysLater THEN 2 "  // Gần hết hạn
+			+ "WHEN abr.valid_fee_to > :sevenDaysLater THEN 3 "  // Còn hạn
+			+ "ELSE 4 END, abr.bank_account_name ASC "
+			+ "LIMIT :offset, :size", nativeQuery = true)
+	List<IBankAccountResponseDTO> getBankAccountsByNationalIdAndSorted(@Param("keyword") String keyword, @Param("currentTime") long currentTime, @Param("sevenDaysLater") long sevenDaysLater, @Param("offset") int offset, @Param("size") int size);
+
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_bank_receive"
+			+ " SET push_notification = :value"
+			+ " WHERE id = :bankId"
+			, nativeQuery = true)
+	void updatePushNotification(@Param(value = "bankId") String bankId, @Param(value = "value") int value);
+
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_bank_receive"
+			+ " SET is_wp_sync = true "
+			+ " WHERE id = :id "
+			, nativeQuery = true)
+	void updateSyncWpById(String id);
+
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_bank_receive"
+			+ " SET push_notification = :value"
+			+ " WHERE user_id = :userId"
+			, nativeQuery = true)
+	void updatePushNotificationUser(@Param(value = "userId") String userId, @Param(value = "value") int value);
 }

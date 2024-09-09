@@ -75,4 +75,10 @@ public interface AccountLoginService {
 
     boolean getVerifyEmailStatus(String userId);
     AccountLoginEntity getAccountLoginByPhoneNo(String phoneNo);
+
+    void updateOtpLogin(String email, String phoneNo, long timeVerified, String randomOTP);
+
+    AccountLoginEntity getAccountLoginById(String userId);
+
+    boolean updateEmailByPhoneNo(String phoneNo, String newEmail);
 }
