@@ -124,6 +124,11 @@ public class GoogleSheetController {
                 UUID googleSheetUUID = UUID.randomUUID();
                 GoogleSheetEntity googleSheetEntity = new GoogleSheetEntity();
                 googleSheetEntity.setId(googleSheetUUID.toString());
+                if (dto.getName() != null && !dto.getName().isEmpty()) {
+                    googleSheetEntity.setName(dto.getName());
+                } else {
+                    googleSheetEntity.setName("Chia sẻ biến động số dư");
+                }
                 googleSheetEntity.setUserId(dto.getUserId());
                 googleSheetEntity.setWebhook(dto.getWebhook());
                 googleSheetEntity.setNotificationTypes(new ObjectMapper().writeValueAsString(dto.getNotificationTypes()));
