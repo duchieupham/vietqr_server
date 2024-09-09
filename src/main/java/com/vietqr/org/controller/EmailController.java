@@ -4,6 +4,7 @@ import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.AccountLoginEntity;
 import com.vietqr.org.entity.EmailVerifyEntity;
 import com.vietqr.org.service.*;
+import com.vietqr.org.util.RandomCodeUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -122,17 +123,16 @@ public class EmailController {
         try {
             AccountLoginEntity accountLoginEntity = accountLoginService.getAccountLoginById(dto.getUserId());
             if (accountLoginEntity != null) {
-                if (!accountLoginEntity.isVerify()) {
-                    // Creating a mime message
-                    MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-                    MimeMessageHelper mimeMessageHelper;
+                // Creating a mime message
+                MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+                MimeMessageHelper mimeMessageHelper;
 //            String status = emailService.sendMailWithAttachment(dto);
                     mimeMessageHelper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
                     mimeMessageHelper.setFrom(sender);
                     mimeMessageHelper.setTo(dto.getRecipient());
                     mimeMessageHelper.setSubject("Xác nhận tài khoản của bạn với mã OTP");
 
-                    int randomOTP = generateSixDigitRandomNumber();
+                String randomOTP = RandomCodeUtil.generateOTP(6);
 
                     String htmlMsg = "<p>Kính gửi khách hàng, </p>"
                             + "<p>Để hoàn tất quá trình đăng ký và xác minh tài khoản của bạn, vui lòng sử dụng mã OTP dưới đây<br>"
@@ -174,12 +174,8 @@ public class EmailController {
                     emailVerifyEntity.setVerify(false);
                     emailVerifyService.insertEmailVerify(emailVerifyEntity);
 
-                    result = new ResponseMessageDTO("SUCCESS", "");
-                    httpStatus = HttpStatus.OK;
-                } else {
-                    result = new ResponseMessageDTO("FAILED", "E162");
-                    httpStatus = HttpStatus.BAD_REQUEST;
-                }
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
             } else {
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
@@ -202,7 +198,6 @@ public class EmailController {
             // lấy ra emailverified entity để check
             List<EmailVerifyEntity> emailVerifyByUserId =
                     emailVerifyService.getEmailVerifyByUserId(confirmOtpEmailDTO.getUserId());
-            int otpParse = Integer.parseInt(confirmOtpEmailDTO.getOtp());
             // Lấy thời gian hiện tại
             LocalDateTime currentDateTime = LocalDateTime.now();
             long timeVerified = currentDateTime.toEpochSecond(ZoneOffset.UTC);
@@ -212,12 +207,12 @@ public class EmailController {
 //                return new ResponseEntity<>(result, httpStatus);
 //            } else {
             for (EmailVerifyEntity entity : emailVerifyByUserId) {
-                if (emailVerifyByUserId.get(0).getOtp() != otpParse) {
+                if (emailVerifyByUserId.get(0).getOtp().equals(confirmOtpEmailDTO.getOtp())) {
                     result = new ResponseMessageDTO("FAILED", "E178");
                     httpStatus = HttpStatus.BAD_REQUEST;
                     break;
                 } else {
-                    if (entity.getOtp() != otpParse ) {
+                    if (entity.getOtp().equals(confirmOtpEmailDTO.getOtp())) {
                         result = new ResponseMessageDTO("FAILED", "E177");
                         httpStatus = HttpStatus.BAD_REQUEST;
                         break;
@@ -228,7 +223,7 @@ public class EmailController {
                             break;
                         } else {
                             // update isVerified = true ở bảng
-                            emailVerifyService.updateEmailVerifiedByUserId(confirmOtpEmailDTO.getUserId(), otpParse);
+                            emailVerifyService.updateEmailVerifiedByUserId(confirmOtpEmailDTO.getUserId(), confirmOtpEmailDTO.getOtp());
                             // update isVerified = true ở bảng accountLogin
                             accountLoginService.updateIsVerifiedByUserId(confirmOtpEmailDTO.getUserId(), confirmOtpEmailDTO.getEmail());
                             accountInformationService.updateEmailAccountInformation(confirmOtpEmailDTO.getEmail(), confirmOtpEmailDTO.getUserId());

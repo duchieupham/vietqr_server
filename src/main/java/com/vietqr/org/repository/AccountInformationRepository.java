@@ -207,7 +207,7 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
     @Modifying
     @Transactional
     @Query(value = "UPDATE account_information SET first_name = :firstName, middle_name = :middleName, last_name = :lastName, " +
-            "address = :address, gender = :gender, email = :email, national_id = :nationalId, old_national_id = :oldNationalId, " +
+            "address = :address, gender = :gender, national_id = :nationalId, old_national_id = :oldNationalId, " +
             "national_date = :nationalDate WHERE user_id = :userId", nativeQuery = true)
     int updateUserByUserId(@Param("userId") String userId,
                            @Param("firstName") String firstName,
@@ -215,7 +215,6 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
                            @Param("lastName") String lastName,
                            @Param("address") String address,
                            @Param("gender") Integer gender,
-                           @Param("email") String email,
                            @Param("nationalId") String nationalId,
                            @Param("oldNationalId") String oldNationalId,
                            @Param("nationalDate") String nationalDate);
@@ -242,4 +241,13 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
             + "AND a.status = 1 "
             + "ORDER BY role DESC ", nativeQuery = true)
     List<IAccountTerminalMemberDTO> getMembersByTerminalId(String terminalId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE account_information SET email = :email WHERE user_id = :userId", nativeQuery = true)
+    int updateEmailByUserId(@Param("userId") String userId,
+                           @Param("email") String email);
+
+    @Query(value = "SELECT email FROM account_information WHERE user_id = :userId LIMIT 1", nativeQuery = true)
+    String getEmailByUserId(@Param("userId") String userId);
 }

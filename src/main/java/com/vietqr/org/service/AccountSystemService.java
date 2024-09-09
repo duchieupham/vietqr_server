@@ -21,4 +21,5 @@ public interface AccountSystemService {
 
     void updateUser(String userId, UserUpdateRequestDTO userRequestDTO);
 
+    void updateAccountEmail(String userId, String email, int type);
 }

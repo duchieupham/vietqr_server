@@ -22,7 +22,7 @@ public class EmailVerifyEntity implements Serializable {
     private String userId;
 
     @Column(name = "otp")
-    private int otp;
+    private String otp;
 
     @Column(name = "isVerify")
     private boolean isVerify = false;
@@ -35,7 +35,7 @@ public class EmailVerifyEntity implements Serializable {
     public EmailVerifyEntity() {
     }
 
-    public EmailVerifyEntity(String id, String email, String userId, int otp, boolean isVerify, long timeCreated, long timeVerified) {
+    public EmailVerifyEntity(String id, String email, String userId, String otp, boolean isVerify, long timeCreated, long timeVerified) {
         this.id = id;
         this.email = email;
         this.userId = userId;
@@ -77,11 +77,11 @@ public class EmailVerifyEntity implements Serializable {
         this.userId = userId;
     }
 
-    public int getOtp() {
+    public String getOtp() {
         return otp;
     }
 
-    public void setOtp(int otp) {
+    public void setOtp(String otp) {
         this.otp = otp;
     }
 

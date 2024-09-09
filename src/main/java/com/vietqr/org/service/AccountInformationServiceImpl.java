@@ -131,4 +131,9 @@ public class AccountInformationServiceImpl implements AccountInformationService 
 	public List<IAccountTerminalMemberDTO> getMembersByTerminalId(String terminalId) {
 		return accountInformationRepo.getMembersByTerminalId(terminalId);
 	}
+
+	@Override
+	public String getEmailByUserId(String userId) {
+		return accountInformationRepo.getEmailByUserId(userId);
+	}
 }
