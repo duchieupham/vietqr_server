@@ -14,9 +14,9 @@ public interface EmailVerifyService {
     public List<EmailVerifyEntity> getEmailVerifyByUserId(String userId);
 //    public EmailVerifyEntity getEmailVerifyByUserIdBackUp(String userId);
 
-    void updateEmailVerifiedByUserId(String userId, int otp);
+    void updateEmailVerifiedByUserId(String userId, String otp);
 
     Optional<EmailVerifyEntity> getEmailVerifyByUserEmail(String userId, String email);
 
-    boolean existsOTP(String userId, String email, int otp);
+    boolean existsOTP(String userId, String email, String otp);
 }

@@ -28,7 +28,7 @@ public class EmailVerifyServiceImpl implements EmailVerifyService {
     }
 
     @Override
-    public void updateEmailVerifiedByUserId(String userId, int otp) {
+    public void updateEmailVerifiedByUserId(String userId, String otp) {
         repository.updateEmailVerifiedByUserId(userId, otp);
     }
 
@@ -38,7 +38,7 @@ public class EmailVerifyServiceImpl implements EmailVerifyService {
     }
 
     @Override
-    public boolean existsOTP(String userId, String email, int otp) {
+    public boolean existsOTP(String userId, String email, String otp) {
         return repository.existsOTP(userId, email, otp) == 1;
     }
 }

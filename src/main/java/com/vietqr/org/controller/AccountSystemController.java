@@ -395,19 +395,19 @@ public class AccountSystemController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    private int handleOTP(String userId, String email, int otp) {
+    private int handleOTP(String userId, String email, String otp) {
         int result = 0;
         Optional<EmailVerifyEntity> emailVerifyEntity = emailVerifyService.getEmailVerifyByUserEmail(userId, email);
         if (emailVerifyEntity.isPresent()) {
             EmailVerifyEntity entity = emailVerifyEntity.get();
             if (entity.getTimeVerified() > DateTimeUtil.getCurrentDateTimeUTC()) {
-                if (otp == entity.getOtp()) {
+                if (entity.getOtp().equals(otp)) {
                     result = 1;
                 } else {
                     result = 2;
                 }
             } else {
-                if (otp == entity.getOtp()) {
+                if (entity.getOtp().equals(otp)) {
                     result = 3;
                 } else {
                     if (emailVerifyService.existsOTP(userId, email, otp)) {

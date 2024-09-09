@@ -20,7 +20,7 @@ public class AccountUpdateEmailDTO {
     * type = 1 -> otp
     * */
     @NotNull
-    private int otp;
+    private String otp;
 
     public AccountUpdateEmailDTO() {
     }
@@ -48,11 +48,11 @@ public class AccountUpdateEmailDTO {
     }
 
     @NotNull
-    public int getOtp() {
-        return otp;
+    public String getOtp() {
+        return otp.trim();
     }
 
-    public void setOtp(@NotNull int otp) {
+    public void setOtp(@NotNull String otp) {
         this.otp = otp;
     }
 }

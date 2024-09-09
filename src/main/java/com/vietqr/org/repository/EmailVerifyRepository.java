@@ -21,11 +21,11 @@ public interface EmailVerifyRepository extends JpaRepository<EmailVerifyEntity, 
     @Transactional
     @Modifying
     @Query(value = "UPDATE email_verify SET is_verify = TRUE WHERE (user_id = :userId) AND (otp = :otp) ", nativeQuery = true)
-    void updateEmailVerifiedByUserId(String userId, int otp);
+    void updateEmailVerifiedByUserId(String userId, String otp);
 
-    @Query(value = "SELECT * FROM email_verify WHERE user_id = :userId AND email = :email ORDER BY MAX(time_created) LIMIT 1", nativeQuery = true)
+    @Query(value = "SELECT * FROM email_verify WHERE user_id = :userId AND email = :email ORDER BY time_created DESC LIMIT 1", nativeQuery = true)
     Optional<EmailVerifyEntity> getEmailVerifyByUserEmail(@Param(value = "userId") String userId,@Param(value = "email") String email);
 
     @Query(value = "SELECT EXISTS(SELECT 1 FROM email_verify WHERE user_id = :userId AND email = :email AND otp = :otp)", nativeQuery = true)
-    int existsOTP(@Param(value = "userId") String userId,@Param(value = "email") String email,@Param(value = "otp") int otp);
+    int existsOTP(@Param(value = "userId") String userId,@Param(value = "email") String email,@Param(value = "otp") String otp);
 }
