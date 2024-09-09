@@ -6,15 +6,19 @@ import com.vietqr.org.service.*;
 import com.vietqr.org.util.*;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin
@@ -188,10 +192,11 @@ public class MerchantSyncController {
     }
 
     @PostMapping("ecommerce/active")
-    public ResponseEntity<Object> syncEcommerce(@RequestBody EcommerceActiveDTO dto) {
+    public ResponseEntity<Object> syncEcommerce(@RequestBody EcommerceActiveDTO dto, @RequestHeader("Authorization") String token) {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
+            String username = getUsernameFromToken(token);
             MerchantSyncEntity entity = merchantSyncService.getMerchantSyncByCertificate(dto.getCertificate());
             if (Objects.nonNull(entity)) {
                 AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService
@@ -236,7 +241,11 @@ public class MerchantSyncController {
                     }
                     accountBankReceiveService.updateSyncWpById(entity.getId());
                     merchantSyncService.insert(entity);
-                    result = new ResponseMessageDTO("SUCCESS", "");
+                    TokenDTO tokenDTO = new TokenDTO(getJWTToken(Base64.getEncoder().encodeToString(StringUtil.getValueNullChecker(username).getBytes()),
+                            Base64.getEncoder().encodeToString(entity.getPublishId().getBytes())), "Bearer",
+                            0);
+
+                    result = new ResponseObjectDTO("SUCCESS", tokenDTO);
                     httpStatus = HttpStatus.OK;
 
                     try {
@@ -277,6 +286,27 @@ public class MerchantSyncController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    private String getJWTToken(String publicId, String username) {
+        String secretKey = "mySecretKey";
+        List<GrantedAuthority> grantedAuthorities = AuthorityUtils
+                .commaSeparatedStringToAuthorityList("ROLE_BITRIX");
+
+        String token = Jwts
+                .builder()
+                // .claim("grantType",grantType)
+                .claim("authorities",
+                        grantedAuthorities.stream()
+                                .map(GrantedAuthority::getAuthority)
+                                .collect(Collectors.toList()))
+                .claim("user", username)
+                .claim("bitrixId", publicId)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .signWith(SignatureAlgorithm.HS512,
+                        secretKey.getBytes())
+                .compact();
+        return token;
+    }
+
     @GetMapping("ecommerce/active")
     public ResponseEntity<Object> getEcommerceByCode(@RequestParam String ecommerceCode) {
         Object result = null;
@@ -285,10 +315,16 @@ public class MerchantSyncController {
             MerchantSyncEntity merchantSyncEntity = merchantSyncService.getMerchantSyncByCertificate(ecommerceCode);
             if (Objects.nonNull(merchantSyncEntity)) {
                 CustomerSyncEntity customerSyncEntity = customerSyncService.getCustomerSyncById(merchantSyncEntity.getId());
-                result = new EcommerceActiveDTO(merchantSyncEntity.getFullName(), customerSyncEntity!= null ? customerSyncEntity.getInformation() : "",
-                        merchantSyncEntity.getName(), "", "", merchantSyncEntity.getCertificate(),
-                        merchantSyncEntity.getNationalId(), merchantSyncEntity.getEmail(),
-                        merchantSyncEntity.getPhoneNo(), merchantSyncEntity.getAddress(), merchantSyncEntity.getWebhook(), merchantSyncEntity.getCareer(),
+                result = new EcommerceActiveDTO(StringUtil.getValueNullChecker(merchantSyncEntity.getFullName()),
+                        customerSyncEntity!= null ? StringUtil.getValueNullChecker(customerSyncEntity.getInformation()) : "",
+                        StringUtil.getValueNullChecker(merchantSyncEntity.getName()), "", "",
+                        StringUtil.getValueNullChecker(merchantSyncEntity.getCertificate()),
+                        StringUtil.getValueNullChecker(merchantSyncEntity.getNationalId()),
+                        StringUtil.getValueNullChecker(merchantSyncEntity.getEmail()),
+                        StringUtil.getValueNullChecker(merchantSyncEntity.getPhoneNo()),
+                        StringUtil.getValueNullChecker(merchantSyncEntity.getAddress()),
+                        StringUtil.getValueNullChecker(merchantSyncEntity.getWebhook()),
+                        StringUtil.getValueNullChecker(merchantSyncEntity.getCareer()),
                         "Cá nhân".equals(merchantSyncEntity.getBusinessType()) ? 0 : 1);
                 httpStatus = HttpStatus.OK;
             } else {
