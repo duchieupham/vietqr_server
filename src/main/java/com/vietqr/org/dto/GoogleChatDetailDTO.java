@@ -11,6 +11,7 @@ public class GoogleChatDetailDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String id;
+    private String name;
     private String webhook;
     private String userId;
     private List<GoogleChatBankDTO> banks;
@@ -22,9 +23,9 @@ public class GoogleChatDetailDTO implements Serializable {
         super();
     }
 
-    public GoogleChatDetailDTO(String id, String webhook, String userId, List<GoogleChatBankDTO> banks,
-                               List<String> notificationTypes, List<String> notificationContents) {
+    public GoogleChatDetailDTO(String id, String name, String webhook, String userId, List<GoogleChatBankDTO> banks, List<String> notificationTypes, List<String> notificationContents) {
         this.id = id;
+        this.name = name;
         this.webhook = webhook;
         this.userId = userId;
         this.banks = banks;
@@ -38,6 +39,14 @@ public class GoogleChatDetailDTO implements Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getWebhook() {

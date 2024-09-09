@@ -335,6 +335,7 @@ public class TelegramController {
             telegramDetailDTO.setId(telegramEntity.getId());
             telegramDetailDTO.setChatId(telegramEntity.getChatId());
             telegramDetailDTO.setUserId(telegramEntity.getUserId());
+            telegramDetailDTO.setName(telegramEntity.getName());
             List<TelBankDTO> telBankDTOs = telegramAccountBankService
                     .getTelAccBanksByTelId(telegramEntity.getId());
             if (telBankDTOs != null && !telBankDTOs.isEmpty()) {

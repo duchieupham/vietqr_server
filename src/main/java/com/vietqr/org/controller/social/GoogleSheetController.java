@@ -235,6 +235,7 @@ public class GoogleSheetController {
                 detailDTO.setId(dto.getId());
                 detailDTO.setWebhook(dto.getWebhook());
                 detailDTO.setUserId(dto.getUserId());
+                detailDTO.setName(dto.getName());
                 List<GoogleSheetBankDTO> bankDTOs = googleSheetAccountBankService.getGoogleSheetAccountBanks(dto.getId());
                 detailDTO.setBanks(bankDTOs);
                 detailDTO.setNotificationTypes(

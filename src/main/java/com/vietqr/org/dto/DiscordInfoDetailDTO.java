@@ -4,4 +4,5 @@ public interface DiscordInfoDetailDTO {
     String getDiscordId();
     String getWebhook();
     int getBankAccountCount();
+    String getName();
 }

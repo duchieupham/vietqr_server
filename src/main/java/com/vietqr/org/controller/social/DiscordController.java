@@ -250,6 +250,7 @@ public class DiscordController {
                 detailDTO.setId(dto.getId());
                 detailDTO.setWebhook(dto.getWebhook());
                 detailDTO.setUserId(dto.getUserId());
+                detailDTO.setName(dto.getName());
                 List<DiscordBankDTO> bankDTOs = discordAccountBankService.getDiscordAccountBanks(dto.getId());
                 detailDTO.setBanks(bankDTOs);
                 detailDTO.setNotificationTypes(

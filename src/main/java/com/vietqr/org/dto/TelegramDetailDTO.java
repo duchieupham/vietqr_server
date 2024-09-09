@@ -11,6 +11,7 @@ public class TelegramDetailDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String id;
+    private String name;
     private String chatId;
     private String userId;
     private List<TelBankDTO> banks;
@@ -20,21 +21,30 @@ public class TelegramDetailDTO implements Serializable {
         super();
     }
 
-    public TelegramDetailDTO(String id, String chatId, String userId, List<TelBankDTO> banks,
-                             List<String> notificationTypes, List<String> notificationContents) {
+    public TelegramDetailDTO(String id, String name, String chatId, String userId, List<TelBankDTO> banks, List<String> notificationTypes, List<String> notificationContents) {
         this.id = id;
+        this.name = name;
         this.chatId = chatId;
         this.userId = userId;
         this.banks = banks;
         this.notificationTypes = notificationTypes;
         this.notificationContents = notificationContents;
     }
+
     public String getId() {
         return id;
     }
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getChatId() {

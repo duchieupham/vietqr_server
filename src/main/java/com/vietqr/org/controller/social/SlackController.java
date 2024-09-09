@@ -249,6 +249,7 @@ public class SlackController {
                 detailDTO.setId(dto.getId());
                 detailDTO.setWebhook(dto.getWebhook());
                 detailDTO.setUserId(dto.getUserId());
+                detailDTO.setName(dto.getName());
                 List<SlackBankDTO> bankDTOs = slackAccountBankService.getSlackAccountBanks(dto.getId());
                 detailDTO.setBanks(bankDTOs);
                 detailDTO.setNotificationTypes(

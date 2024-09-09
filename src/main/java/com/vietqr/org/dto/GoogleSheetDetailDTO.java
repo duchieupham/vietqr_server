@@ -4,6 +4,7 @@ import java.util.List;
 
 public class GoogleSheetDetailDTO {
     private String id;
+    private String name;
     private String webhook;
     private String userId;
     private List<GoogleSheetBankDTO> banks;
@@ -14,8 +15,9 @@ public class GoogleSheetDetailDTO {
         super();
     }
 
-    public GoogleSheetDetailDTO(String id, String webhook, String userId, List<GoogleSheetBankDTO> banks, List<String> notificationTypes, List<String> notificationContents) {
+    public GoogleSheetDetailDTO(String id, String name, String webhook, String userId, List<GoogleSheetBankDTO> banks, List<String> notificationTypes, List<String> notificationContents) {
         this.id = id;
+        this.name = name;
         this.webhook = webhook;
         this.userId = userId;
         this.banks = banks;
@@ -29,6 +31,14 @@ public class GoogleSheetDetailDTO {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getWebhook() {
