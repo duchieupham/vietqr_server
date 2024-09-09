@@ -605,4 +605,57 @@ public interface TransactionReceiveService {
     List<TransactionRelatedDTO> getTransactionsBySubCode(String value, int offset, String bankId, String from, String to);
 
     void updateTransactionRefundStatus(String ftCode, String subCode, String terminalCode, String orderId, int type);
+
+    List<TransactionReceiveAdminListDTO> getTransByBankAccountAllDate(String value, int offset, int size);
+
+    int countTransByBankAccountAllDate(String value);
+
+    List<TransactionReceiveAdminListDTO> getTransByBankAccountFromDate(String value, String fromDate, String toDate, int offset, int size);
+
+
+    int countTransByBankAccountFromDate(String value, String fromDate, String toDate);
+
+    List<TransactionReceiveAdminListDTO> getTransByFtCode(String value, int offset, int size);
+
+    int countTransByFtCode(String value);
+
+    List<TransactionReceiveAdminListDTO> getTransByFtCode(String value, int offset, String fromDate, String toDate, int size);
+
+    int countTransByFtCode(String value, String fromDate, String toDate);
+
+    List<TransactionReceiveAdminListDTO> getTransByOrderId(String value, int offset, int size);
+
+    int countTransByOrderId(String value);
+
+    List<TransactionReceiveAdminListDTO> getTransByOrderId(String value, String fromDate, String toDate, int offset, int size);
+
+
+    int countTransByOrderId(String value, String fromDate, String toDate);
+
+    List<TransactionReceiveAdminListDTO> getTransByContent(String value, int offset, int size);
+
+
+    int countTransByContent(String value);
+
+
+    List<TransactionReceiveAdminListDTO> getTransByContent(String value, String fromDate, String toDate, int offset, int size);
+
+    int countTransByContent(String value, String fromDate, String toDate);
+
+    int countTransByTerminalCode(String value);
+
+    int countTransByTerminalCode(String value, String fromDate, String toDate);
+
+    List<TransactionReceiveAdminListDTO> getAllTransAllDate(int offset, int size);
+
+    int countAllTransAllDate();
+
+    List<TransactionReceiveAdminListDTO> getAllTransFromDate(String fromDate, String toDate, int offset, int size);
+
+    int countAllTransFromDate(String fromDate, String toDate);
+    List<TransactionReceiveAdminListDTO> getTransByTerminalCodeFromDate(String value, String fromDate, String toDate, int offset, int size);
+    int countTransByTerminalCodeFromDate(String value, String fromDate, String toDate);
+
+    List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAllDate(String value, int offset, int size);
+
 }
