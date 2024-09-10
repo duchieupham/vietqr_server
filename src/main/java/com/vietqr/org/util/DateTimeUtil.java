@@ -310,4 +310,20 @@ public class DateTimeUtil {
         ZonedDateTime startUtc = startUtcPlus7Zoned.withZoneSameInstant(ZoneOffset.UTC);
         return startUtc.toEpochSecond();
     }
+
+    public static long getDateTimeAsLongMMS(String datetime) {
+        long result = DateTimeUtil.getCurrentDateTimeUTC();
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+            LocalDateTime localDateTime = LocalDateTime.parse(datetime, formatter);
+            ZoneId zoneIdUTC7 = ZoneId.of("Asia/Bangkok");
+            ZonedDateTime utcPlus7DateTime = localDateTime.atZone(zoneIdUTC7);
+            ZonedDateTime utcDateTime = utcPlus7DateTime.withZoneSameInstant(ZoneId.of("UTC"));
+            result = utcDateTime.toEpochSecond();
+        } catch (Exception e) {
+            System.err.println("DateTimeParseException: Error parsing date: " + datetime);
+        }
+
+        return result;
+    }
 }

@@ -90,6 +90,7 @@ public class MerchantSyncController {
         HttpStatus httpStatus = null;
         try {
             String username = getUsernameFromToken(token);
+            String publishId = "";
             if (!StringUtil.isNullOrEmpty(username)) {
                 String accessKey = accountCustomerService.getAccessKeyByUsername(username);
                 if (!StringUtil.isNullOrEmpty(accessKey)) {
@@ -116,7 +117,7 @@ public class MerchantSyncController {
                             entity.setMaster(false);
                             entity.setAccountId("");
                             entity.setRefId("");
-                            String publishId = "MER" + RandomCodeUtil.generateOTP(8);
+                            publishId = "MER" + RandomCodeUtil.generateOTP(8);
                             certificate = "MER-ECM-" + publishId;
                             clientId = BoxTerminalRefIdUtil.encryptQrBoxId(uuid.toString());
                             MerchantSyncEntity merchantSyncEntity = new MerchantSyncEntity(uuid.toString(),
@@ -128,7 +129,7 @@ public class MerchantSyncController {
                             MerchantSyncEntity merchantSyncEntity = merchantSyncService.getMerchantSyncById(entity.getId());
                             if (merchantSyncEntity != null) {
                                 if (StringUtil.isNullOrEmpty(merchantSyncEntity.getPublishId())) {
-                                    String publishId = "MER" + RandomCodeUtil.generateOTP(8);
+                                    publishId = "MER" + RandomCodeUtil.generateOTP(8);
                                     certificate = "MER-ECM-" + publishId;
                                     clientId = BoxTerminalRefIdUtil.encryptQrBoxId(entity.getId());
                                     merchantSyncEntity.setPublishId(publishId);
@@ -137,11 +138,11 @@ public class MerchantSyncController {
                                     merchantSyncEntity.setClientId(clientId);
                                     merchantSyncService.insert(merchantSyncEntity);
                                 }
-                                String publishId = merchantSyncEntity.getPublishId();
+                                publishId = merchantSyncEntity.getPublishId();
                                 certificate = "MER-ECM-" + publishId;
                                 clientId = BoxTerminalRefIdUtil.encryptQrBoxId(entity.getId());
                             } else {
-                                String publishId = "MER" + RandomCodeUtil.generateOTP(8);
+                                publishId = "MER" + RandomCodeUtil.generateOTP(8);
                                 certificate = "MER-ECM-" + publishId;
                                 clientId = BoxTerminalRefIdUtil.encryptQrBoxId(entity.getId());
                                 merchantSyncEntity = new MerchantSyncEntity(entity.getId(),
@@ -150,8 +151,10 @@ public class MerchantSyncController {
                                 merchantSyncService.insert(merchantSyncEntity);
                             }
                         }
-
-                        result = new MerchantSyncEcommerceDTO(StringUtil.getValueNullChecker(dto.getWebhook()), clientId, certificate);
+                        TokenDTO tokenDTO = new TokenDTO(getJWTToken(Base64.getEncoder().encodeToString(StringUtil.getValueNullChecker(username).getBytes()),
+                                Base64.getEncoder().encodeToString(publishId.getBytes())), "Bearer",
+                                0);
+                        result = new MerchantSyncEcommerceDTO(StringUtil.getValueNullChecker(dto.getWebhook()), clientId, certificate, tokenDTO);
                         httpStatus = HttpStatus.OK;
                     } else {
                         result = new ResponseMessageDTO("FAILED", "E74");
@@ -241,11 +244,8 @@ public class MerchantSyncController {
                     }
                     accountBankReceiveService.updateSyncWpById(entity.getId());
                     merchantSyncService.insert(entity);
-                    TokenDTO tokenDTO = new TokenDTO(getJWTToken(Base64.getEncoder().encodeToString(StringUtil.getValueNullChecker(username).getBytes()),
-                            Base64.getEncoder().encodeToString(entity.getPublishId().getBytes())), "Bearer",
-                            0);
 
-                    result = new ResponseObjectDTO("SUCCESS", tokenDTO);
+                    result = new ResponseObjectDTO("SUCCESS", "");
                     httpStatus = HttpStatus.OK;
 
                     try {
