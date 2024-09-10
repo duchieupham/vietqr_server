@@ -34,6 +34,7 @@ public class AccountBankShareResponseDTO implements Serializable {
     private int transCount;
     private Boolean mmsActive;
     private int pushNotification;
+    private Boolean enableVoice;
 
     public AccountBankShareResponseDTO() {
         super();
@@ -265,5 +266,17 @@ public class AccountBankShareResponseDTO implements Serializable {
 
     public void setPushNotification(int pushNotification) {
         this.pushNotification = pushNotification;
+    }
+
+    public Boolean getEnableVoice() {
+        return enableVoice;
+    }
+
+    public void setEnableVoice(Boolean enableVoice) {
+        if (enableVoice == null) {
+            this.enableVoice = true;
+        } else {
+            this.enableVoice = enableVoice;
+        }
     }
 }
