@@ -293,8 +293,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 
 	@Query(value = "SELECT a.id as bankId, b.bank_name as bankName, b.bank_code as bankCode, a.user_id as userId, "
 			+ "b.bank_short_name as bankShortName, a.bank_account as bankAccount, a.is_valid_service AS isValidService, "
-			+ "COALESCE(b.push_notification, 1) AS pushNotification, "
-			+ "COALESCE(b.enable_sound_notification, 1) AS enableSoundNotification, "
+			+ "COALESCE(b.push_notification, 1) AS pushNotification "
 			+ "FROM account_bank_receive a "
 			+ "INNER JOIN bank_type b "
 			+ "ON a.bank_type_id = b.id "
@@ -572,7 +571,8 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
-			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId,abr.valid_fee_to AS validFeeTo , abr.valid_fee_from AS validFeeFrom,abr.time_create AS timeCreate,  "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId,abr.valid_fee_to AS validFeeTo, "
+			+ "abr.valid_fee_from AS validFeeFrom, abr.time_created AS timeCreate, "
 			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
@@ -584,69 +584,17 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Query(value = "SELECT COUNT(abr.id) FROM account_bank_receive abr", nativeQuery = true)
 	int countAllBankAccounts();
 
-	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
-			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
-			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
-			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom,abr.time_create AS timeCreate,  "
-			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso  "
-			+ "FROM account_bank_receive abr "
-			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
-			+ "INNER JOIN account_login al ON abr.user_id = al.id "
-			+ "WHERE abr.bank_account LIKE %:keyword% "
-			+ "ORDER BY abr.bank_account_name ASC "
-			+ "LIMIT :offset, :size", nativeQuery = true)
-	List<IBankAccountResponseDTO> getBankAccountsByAccount(@Param("keyword") String keyword, @Param("offset") int offset, @Param("size") int size);
-
 	@Query(value = "SELECT COUNT(abr.id) FROM account_bank_receive abr "
 			+ "WHERE abr.bank_account LIKE %:keyword%", nativeQuery = true)
 	int countBankAccountsByAccount(@Param("keyword") String keyword);
-
-	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
-			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
-			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
-			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom,abr.time_create AS timeCreate,  "
-			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso  "
-			+ "FROM account_bank_receive abr "
-			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
-			+ "INNER JOIN account_login al ON abr.user_id = al.id "
-			+ "WHERE abr.bank_account_name LIKE %:keyword% "
-			+ "ORDER BY abr.bank_account_name ASC "
-			+ "LIMIT :offset, :size", nativeQuery = true)
-	List<IBankAccountResponseDTO> getBankAccountsByAccountName(@Param("keyword") String keyword, @Param("offset") int offset, @Param("size") int size);
 
 	@Query(value = "SELECT COUNT(abr.id) FROM account_bank_receive abr "
 			+ "WHERE abr.bank_account_name LIKE %:keyword%", nativeQuery = true)
 	int countBankAccountsByAccountName(@Param("keyword") String keyword);
 
-	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
-			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
-			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
-			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom,abr.time_create AS timeCreate, "
-			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso  "
-			+ "FROM account_bank_receive abr "
-			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
-			+ "INNER JOIN account_login al ON abr.user_id = al.id "
-			+ "WHERE abr.phone_authenticated LIKE %:keyword% "
-			+ "ORDER BY abr.bank_account_name ASC "
-			+ "LIMIT :offset, :size", nativeQuery = true)
-	List<IBankAccountResponseDTO> getBankAccountsByPhoneAuthenticated(@Param("keyword") String keyword, @Param("offset") int offset, @Param("size") int size);
-
 	@Query(value = "SELECT COUNT(abr.id) FROM account_bank_receive abr "
 			+ "WHERE abr.phone_authenticated LIKE %:keyword%", nativeQuery = true)
 	int countBankAccountsByPhoneAuthenticated(@Param("keyword") String keyword);
-
-	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
-			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
-			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
-			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom,abr.time_create AS timeCreate, "
-			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso  "
-			+ "FROM account_bank_receive abr "
-			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
-			+ "INNER JOIN account_login al ON abr.user_id = al.id "
-			+ "WHERE abr.national_id LIKE %:keyword% "
-			+ "ORDER BY abr.bank_account_name ASC "
-			+ "LIMIT :offset, :size", nativeQuery = true)
-	List<IBankAccountResponseDTO> getBankAccountsByNationalId(@Param("keyword") String keyword, @Param("offset") int offset, @Param("size") int size);
 
 	@Query(value = "SELECT COUNT(abr.id) FROM account_bank_receive abr "
 			+ "WHERE abr.national_id LIKE %:keyword%", nativeQuery = true)
@@ -662,33 +610,16 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Query(value = "SELECT bank_account_name FROM account_bank_receive where bank_account = :bankAccount LIMIT 1",nativeQuery = true)
 	String getBankAccountNameByBankAccount(@Param("bankAccount") String bankAccount);
 
-
-	// Lọc theo thời gian kích hoạt dịch vụ (có sắp xếp theo trạng thái valid_fee_to)
-	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
-			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
-			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
-			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom,abr.time_create AS timeCreate,  "
-			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
-			+ "FROM account_bank_receive abr "
-			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
-			+ "INNER JOIN account_login al ON abr.user_id = al.id "
-			+ "WHERE abr.valid_fee_to >= :fromDate AND abr.valid_fee_to <= :toDate AND abr.is_valid_service = true "
-			+ "ORDER BY abr.valid_fee_to ASC LIMIT :offset, :size", nativeQuery = true)
-	List<IBankAccountResponseDTO> getBankAccountsByValidFeeToAndIsValidService(@Param("fromDate") long fromDate, @Param("toDate") long toDate, @Param("offset") int offset, @Param("size") int size);
-
-	@Query(value = "SELECT COUNT(*) FROM account_bank_receive WHERE valid_fee_to >= :fromDate AND valid_fee_to <= :toDate AND is_valid_service = true", nativeQuery = true)
-	int countBankAccountsByValidFeeToAndIsValidService(@Param("fromDate") long fromDate, @Param("toDate") long toDate);
-
 	// Lọc theo thời gian tạo (thêm gần đây)
 	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
-			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, abr.time_create AS timeCreate,  "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, abr.time_created AS timeCreate,  "
 			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
 			+ "INNER JOIN account_login al ON abr.user_id = al.id "
-			+ "ORDER BY abr.time_create DESC LIMIT :offset, :size", nativeQuery = true)
+			+ "ORDER BY abr.time_created DESC LIMIT :offset, :size", nativeQuery = true)
 	List<IBankAccountResponseDTO> getBankAccountsByTimeCreate(@Param("offset") int offset, @Param("size") int size);
 
 	@Query(value = "SELECT COUNT(*) FROM account_bank_receive", nativeQuery = true)
@@ -709,7 +640,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
 			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, "
-			+ "abr.time_create AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "abr.time_created AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
 			+ "INNER JOIN account_login al ON abr.user_id = al.id "
@@ -725,7 +656,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
 			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, "
-			+ "abr.time_create AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "abr.time_created AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
 			+ "INNER JOIN account_login al ON abr.user_id = al.id "
@@ -741,7 +672,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
 			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, "
-			+ "abr.time_create AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "abr.time_created AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
 			+ "INNER JOIN account_login al ON abr.user_id = al.id "
@@ -757,20 +688,21 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
 			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, "
-			+ "abr.time_create AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "abr.time_created AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
 			+ "INNER JOIN account_login al ON abr.user_id = al.id "
 			+ "WHERE abr.is_valid_service = false AND abr.valid_fee_to IS NULL "
-			+ "ORDER BY abr.time_create ASC LIMIT :offset, :size", nativeQuery = true)
+			+ "ORDER BY abr.time_created ASC LIMIT :offset, :size", nativeQuery = true)
 	List<IBankAccountResponseDTO> getNotRegisteredBankAccounts(@Param("offset") int offset, @Param("size") int size);
 
 	@Query(value = "SELECT COUNT(*) FROM account_bank_receive WHERE is_valid_service = false AND valid_fee_to IS NULL", nativeQuery = true)
 	int countNotRegisteredBankAccounts();
+
 	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
-			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, abr.time_create AS timeCreate, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, abr.time_created AS timeCreate, "
 			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
@@ -787,7 +719,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
-			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, abr.time_create AS timeCreate, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, abr.time_created AS timeCreate, "
 			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
@@ -799,10 +731,11 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "ELSE 4 END, abr.bank_account_name ASC "
 			+ "LIMIT :offset, :size", nativeQuery = true)
 	List<IBankAccountResponseDTO> getBankAccountsByAccountNameAndSorted(@Param("keyword") String keyword, @Param("currentTime") long currentTime, @Param("sevenDaysLater") long sevenDaysLater, @Param("offset") int offset, @Param("size") int size);
+
 	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
-			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, abr.time_create AS timeCreate, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, abr.time_created AS timeCreate, "
 			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
@@ -815,11 +748,10 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "LIMIT :offset, :size", nativeQuery = true)
 	List<IBankAccountResponseDTO> getBankAccountsByPhoneAuthenticatedAndSorted(@Param("keyword") String keyword, @Param("currentTime") long currentTime, @Param("sevenDaysLater") long sevenDaysLater, @Param("offset") int offset, @Param("size") int size);
 
-
 	@Query(value = "SELECT abr.id as bankId, abr.bank_account AS bankAccount, abr.bank_account_name AS bankAccountName, "
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
-			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, abr.time_create AS timeCreate, "
+			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, abr.time_created AS timeCreate, "
 			+ "al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
@@ -866,4 +798,15 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			@Param(value = "bankId") String bankId,
 			@Param(value = "enableSoundNotification") int enableSoundNotification
 	);
+
+	@Transactional
+	@Modifying
+	@Query(value = "UPDATE account_bank_receive "
+			+ "SET enable_voice = "
+			+ "CASE "
+			+ "WHEN id IN (:bankIds) THEN true "
+			+ "ELSE false "
+			+ "END "
+			+ "WHERE user_id = :userId ", nativeQuery = true)
+	void updateEnableVoiceByBankIds(List<String> bankIds, String userId);
 }

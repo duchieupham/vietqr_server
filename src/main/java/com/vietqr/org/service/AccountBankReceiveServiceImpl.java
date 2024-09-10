@@ -603,6 +603,11 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     }
 
     @Override
+    public void updateEnableVoiceByBankIds(List<String> bankIds, String userId) {
+        repo.updateEnableVoiceByBankIds(bankIds, userId);
+    }
+
+    @Override
     public void updateSyncWpById(String id) {
         repo.updateSyncWpById(id);
     }

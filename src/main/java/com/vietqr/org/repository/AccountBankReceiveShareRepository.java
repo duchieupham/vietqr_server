@@ -1,6 +1,5 @@
 package com.vietqr.org.repository;
 
-import com.vietqr.org.dto.BankAccountActiveKeyResponseDTO;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.AccountBankReceiveShareEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,7 +21,7 @@ public interface AccountBankReceiveShareRepository
                     + "b.national_id as nationalId, b.is_valid_service AS isValidService, "
                     + "b.valid_fee_from AS validFeeFrom, b.valid_fee_to AS validFeeTo, "
                     + "COALESCE(b.push_notification, 1) AS pushNotification, "
-                    + "COALESCE(b.enable_sound_notification, 1) AS enableSoundNotification, "
+                    + "b.enable_voice AS enableVoice, "
                     + "COALESCE(c.va_number, '') AS vaNumber "
                     + "FROM account_bank_receive_share a "
                     + "INNER JOIN account_bank_receive b "

@@ -38,7 +38,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PatchMapping;
 
 import com.vietqr.org.dto.AccountBankReceiveDetailDTO.TransactionBankListDTO;
 
@@ -51,7 +50,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
-import software.amazon.awssdk.thirdparty.jackson.core.type.TypeReference;
 
 @RestController
 @CrossOrigin
@@ -1485,7 +1483,7 @@ public class AccountBankReceiveController {
                     dto.setValidFeeTo(item.getValidFeeTo());
                     dto.setMmsActive(item.getMmsActive());
                     dto.setPushNotification(item.getPushNotification());
-                    dto.setEnableSoundNotification(item.getEnableSoundNotification());
+                    dto.setEnableVoice(item.getEnableVoice());
 
                     /// khi user đã active key để lưu lại
                     List<ICheckKeyActiveDTO> bankReceiveActiveHistoryEntity =
@@ -1611,49 +1609,16 @@ public class AccountBankReceiveController {
 
     @PostMapping("account-bank/sound-noti/enable")
     public ResponseEntity<ResponseMessageDTO> enableSoundNotification(
-            @RequestBody AccountBankReceiveSoundNotiDTO accountBankReceiveSoundNotiDTO
+            @Valid @RequestBody AccountBankReceiveSoundNotiDTO dto
     ){
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            for(String bankId : accountBankReceiveSoundNotiDTO.getBankAccounts()){
-                AccountBankReceiveEntity entity = accountBankReceiveService.getAccountBankById(bankId);
-                if(entity != null) {
-                    accountBankReceiveService.enableSoundNotificationByBankId(bankId);
-                } else {
-                    throw new RuntimeException("BankId is not available or invalid");
-                }
-            }
+            accountBankReceiveService.updateEnableVoiceByBankIds(dto.getBankIds(), dto.getUserId());
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("enableSoundNotification: ERROR: " + e.toString() + " at: " + System.currentTimeMillis());
-            result = new ResponseMessageDTO("FAILED", "E05");
-            httpStatus = HttpStatus.BAD_REQUEST;
-        }
-
-        return new ResponseEntity<>(result, httpStatus);
-    }
-
-    @PostMapping("account-bank/sound-noti/disable")
-    public ResponseEntity<ResponseMessageDTO> disableSoundNotification(
-            @RequestBody AccountBankReceiveSoundNotiDTO accountBankReceiveSoundNotiDTO
-    ){
-        ResponseMessageDTO result = null;
-        HttpStatus httpStatus = null;
-        try {
-            for(String bankId : accountBankReceiveSoundNotiDTO.getBankAccounts()){
-                AccountBankReceiveEntity entity = accountBankReceiveService.getAccountBankById(bankId);
-                if(entity != null) {
-                    accountBankReceiveService.disableSoundNotificationByBankId(bankId);
-                } else {
-                    throw new RuntimeException("BankId is not available or invalid");
-                }
-            }
-            result = new ResponseMessageDTO("SUCCESS", "");
-            httpStatus = HttpStatus.OK;
-        } catch (Exception e) {
-            logger.error("disableSoundNotification: ERROR: " + e.toString() + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
