@@ -188,4 +188,9 @@ public class TerminalBankReceiveServiceImpl implements TerminalBankReceiveServic
     public void updateQrCodeTerminalSync(String data1, String data2, String traceTransfer, String id) {
         repo.updateQrCodeTerminalSync(data1, data2, traceTransfer, id);
     }
+
+    @Override
+    public TerminalBankReceiveEntity getTerminalBankReceiveEntityByRawTerminalCode(String subRawCode) {
+        return repo.getTerminalBankReceiveEntityByRawTerminalCode(subRawCode);
+    }
 }
