@@ -258,4 +258,8 @@ public interface TerminalBankReceiveRepository extends JpaRepository<TerminalBan
     @Query(value = "UPDATE terminal_bank_receive SET data1 = :data1, data2 = :data2, "
             + "trace_transfer = :traceTransfer WHERE id = :id", nativeQuery = true)
     void updateQrCodeTerminalSync(String data1, String data2, String traceTransfer, String id);
+
+    @Query(value = "SELECT * FROM terminal_bank_receive "
+            + "WHERE raw_terminal_code = :subRawCode LIMIT 1", nativeQuery = true)
+    TerminalBankReceiveEntity getTerminalBankReceiveEntityByRawTerminalCode(String subRawCode);
 }

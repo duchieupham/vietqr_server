@@ -491,7 +491,7 @@ public class VietQRController {
 		TerminalBankReceiveEntity terminalBankReceiveEntity = null;
 		if (!StringUtil.isNullOrEmpty(subRawCode)) {
 			terminalBankReceiveEntity =
-					terminalBankReceiveService.getTerminalBankReceiveEntityByTerminalCode(subRawCode);
+					terminalBankReceiveService.getTerminalBankReceiveEntityByRawTerminalCode(subRawCode);
 			if (terminalBankReceiveEntity != null) {
 				dto.setTerminalCode(terminalBankReceiveEntity.getTerminalCode());
 			}
