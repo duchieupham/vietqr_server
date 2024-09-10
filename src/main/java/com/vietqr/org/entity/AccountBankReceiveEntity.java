@@ -78,6 +78,9 @@ public class AccountBankReceiveEntity implements Serializable {
 	@Column(name = "pushNotification")
 	private Integer pushNotification = 1;
 
+	@Column(name = "enableSoundNotification")
+	private Integer enableSoundNotification = 1;
+
 	@Column(name = "isValidService")
 	private Boolean isValidService;
 
@@ -349,6 +352,14 @@ public class AccountBankReceiveEntity implements Serializable {
 
 	public void setPushNotification(Integer pushNotification) {
 		this.pushNotification = pushNotification;
+	}
+
+	public int getEnableSoundNotification() {
+		return enableSoundNotification;
+	}
+
+	public void setEnableSoundNotification(Integer enableSoundNotification) {
+		this.enableSoundNotification = (enableSoundNotification != null) ? enableSoundNotification : 1;
 	}
 
 	@Override

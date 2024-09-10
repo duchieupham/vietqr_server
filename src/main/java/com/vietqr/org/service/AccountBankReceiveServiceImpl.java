@@ -593,6 +593,16 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     }
 
     @Override
+    public void enableSoundNotificationByBankId(String bankId) {
+        repo.updateSoundNotificationByBankId(bankId, 1);
+    }
+
+    @Override
+    public void disableSoundNotificationByBankId(String bankId) {
+        repo.updateSoundNotificationByBankId(bankId, 0);
+    }
+
+    @Override
     public void updateSyncWpById(String id) {
         repo.updateSyncWpById(id);
     }

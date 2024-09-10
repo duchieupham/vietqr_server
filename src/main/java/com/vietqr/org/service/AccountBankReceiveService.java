@@ -199,4 +199,6 @@ public interface AccountBankReceiveService {
 
 	void updateSyncWpById(String id);
 	void updatePushNotificationUser(String userId, int value);
+	void enableSoundNotificationByBankId(String bankId);
+	void disableSoundNotificationByBankId(String bankId);
 }

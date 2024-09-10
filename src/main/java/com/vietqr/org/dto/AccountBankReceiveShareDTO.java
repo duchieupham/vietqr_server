@@ -37,4 +37,6 @@ public interface AccountBankReceiveShareDTO {
     Long getValidFeeTo();
 
     int getPushNotification();
+
+    int getEnableSoundNotification();
 }
