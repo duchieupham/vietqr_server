@@ -1,5 +1,7 @@
 package com.vietqr.org.entity;
 
+import com.vietqr.org.util.DateTimeUtil;
+
 import java.io.Serializable;
 
 import javax.persistence.Column;
@@ -78,6 +80,9 @@ public class AccountBankReceiveEntity implements Serializable {
 	@Column(name = "pushNotification")
 	private Integer pushNotification = 1;
 
+	@Column(name = "enableVoice")
+	private Boolean enableVoice = true;
+
 	@Column(name = "isValidService")
 	private Boolean isValidService;
 
@@ -90,8 +95,8 @@ public class AccountBankReceiveEntity implements Serializable {
 	@Column(name = "customerId")
 	private String customerId = "";
 
-	@Column(name = "timeCreate")
-	private Long timeCreate;
+	@Column(name = "timeCreated")
+	private Long timeCreated = DateTimeUtil.getCurrentDateTimeUTC();
 	@Column(name = "vso")
 	private String vso = "";
 
@@ -120,7 +125,7 @@ public class AccountBankReceiveEntity implements Serializable {
 		this.ewalletToken = ewalletToken;
 	}
 
-	public AccountBankReceiveEntity(String id, String bankTypeId, String bankAccount, String bankAccountName, String nationalId, String phoneAuthenticated, int type, String userId, boolean isAuthenticated, boolean isSync, boolean isWpSync, boolean status, boolean mmsActive, boolean isRpaSync, String username, String password, String ewalletToken, int terminalLength, Boolean isValidService, Long validFeeFrom, Long validFeeTo, String customerId, Long timeCreate, String vso) {
+	public AccountBankReceiveEntity(String id, String bankTypeId, String bankAccount, String bankAccountName, String nationalId, String phoneAuthenticated, int type, String userId, boolean isAuthenticated, boolean isSync, boolean isWpSync, boolean status, boolean mmsActive, boolean isRpaSync, String username, String password, String ewalletToken, int terminalLength, Boolean isValidService, Long validFeeFrom, Long validFeeTo, String customerId, Long timeCreated, String vso) {
 		this.id = id;
 		this.bankTypeId = bankTypeId;
 		this.bankAccount = bankAccount;
@@ -143,7 +148,7 @@ public class AccountBankReceiveEntity implements Serializable {
 		this.validFeeFrom = validFeeFrom;
 		this.validFeeTo = validFeeTo;
 		this.customerId = customerId;
-		this.timeCreate = timeCreate;
+		this.timeCreated = timeCreated;
 		this.vso = vso;
 	}
 
@@ -335,12 +340,12 @@ public class AccountBankReceiveEntity implements Serializable {
 		this.vso = vso;
 	}
 
-	public Long getTimeCreate() {
-		return timeCreate;
+	public Long getTimeCreated() {
+		return timeCreated;
 	}
 
-	public void setTimeCreate(Long timeCreate) {
-		this.timeCreate = timeCreate;
+	public void setTimeCreated(Long timeCreated) {
+		this.timeCreated = timeCreated;
 	}
 
 	public Integer getPushNotification() {
@@ -349,6 +354,14 @@ public class AccountBankReceiveEntity implements Serializable {
 
 	public void setPushNotification(Integer pushNotification) {
 		this.pushNotification = pushNotification;
+	}
+
+	public Boolean getEnableVoice() {
+		return enableVoice;
+	}
+
+	public void setEnableVoice(Boolean enableVoice) {
+		this.enableVoice = enableVoice;
 	}
 
 	@Override

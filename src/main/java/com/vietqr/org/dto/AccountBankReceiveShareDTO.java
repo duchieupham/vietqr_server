@@ -1,7 +1,5 @@
 package com.vietqr.org.dto;
 
-import java.util.Optional;
-
 public interface AccountBankReceiveShareDTO {
 
     String getBankId();
@@ -32,9 +30,11 @@ public interface AccountBankReceiveShareDTO {
 
     Boolean getMmsActive();
 
+    Boolean getEnableVoice();
+
     Long getValidFeeFrom();
 
     Long getValidFeeTo();
 
-    int getPushNotification();
+    Integer getPushNotification();
 }
