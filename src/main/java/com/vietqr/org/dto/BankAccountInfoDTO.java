@@ -1,4 +1,4 @@
-package com.vietqr.org.entity;
+package com.vietqr.org.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
