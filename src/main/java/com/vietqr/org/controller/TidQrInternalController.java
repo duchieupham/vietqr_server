@@ -195,7 +195,7 @@ public class TidQrInternalController {
                                     insertNewCustomerInvoiceTransBIDV(vietQRCreateDTO, accountBankInfoResById, billId);
                             if ("SUCCESS".equals(responseMessageDTO.getStatus())) {
                                 VietQRVaRequestDTO vietQRVaRequestDTO = new VietQRVaRequestDTO();
-                                vietQRVaRequestDTO.setAmount("0");
+                                vietQRVaRequestDTO.setAmount("");
                                 vietQRVaRequestDTO.setBillId(billId);
                                 vietQRVaRequestDTO.setUserBankName(accountBankInfoResById.getUserBankName());
                                 vietQRVaRequestDTO.setDescription(StringUtil.getValueNullChecker(billId));
@@ -663,7 +663,7 @@ public class TidQrInternalController {
                                     insertNewCustomerInvoiceTransBIDV(vietQRCreateDTO, accountBankInfoResById, billId);
                             if ("SUCCESS".equals(responseMessageDTO.getStatus())) {
                                 VietQRVaRequestDTO vietQRVaRequestDTO = new VietQRVaRequestDTO();
-                                vietQRVaRequestDTO.setAmount("0");
+                                vietQRVaRequestDTO.setAmount("");
                                 vietQRVaRequestDTO.setBillId(billId);
                                 vietQRVaRequestDTO.setUserBankName(accountBankInfoResById.getUserBankName());
                                 vietQRVaRequestDTO.setDescription(StringUtil.getValueNullChecker(billId));

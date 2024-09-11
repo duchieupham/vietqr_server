@@ -1493,7 +1493,7 @@ public class TerminalController {
                                                     insertNewCustomerInvoiceTransBIDV(vietQRCreateDTO, accountBankReceiveEntity, billId);
                                             if ("SUCCESS".equals(responseMessageDTO.getStatus())) {
                                                 VietQRVaRequestDTO vietQRVaRequestDTO = new VietQRVaRequestDTO();
-                                                vietQRVaRequestDTO.setAmount("0");
+                                                vietQRVaRequestDTO.setAmount("");
                                                 vietQRVaRequestDTO.setBillId(billId);
                                                 vietQRVaRequestDTO.setUserBankName(accountBankReceiveEntity.getBankAccountName());
                                                 vietQRVaRequestDTO.setDescription(StringUtil.getValueNullChecker(billId));
