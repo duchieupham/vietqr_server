@@ -37,7 +37,7 @@ public class NotificationFcmMapDTO {
         this.bankAccount = transactionReceiveEntity.getBankAccount();
         this.bankName = bankTypeEntity.getBankName();
         this.bankCode = bankTypeEntity.getBankCode();
-        this.bankId = bankTypeEntity.getId();
+        this.bankId = transactionReceiveEntity.getBankId();
         this.terminalName = terminalName;
         this.terminalCode = terminalCode;
         this.rawTerminalCode = rawTerminalCode;

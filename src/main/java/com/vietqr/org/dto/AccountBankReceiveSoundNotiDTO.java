@@ -7,7 +7,6 @@ import java.util.List;
 
 public class AccountBankReceiveSoundNotiDTO {
     @NotNull
-    @NotEmpty
     private List<String> bankIds;
 
     @NotBlank
