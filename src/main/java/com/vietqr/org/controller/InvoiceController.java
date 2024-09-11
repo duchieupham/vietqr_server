@@ -2896,5 +2896,98 @@ public class InvoiceController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("/v2/invoice/{userId}")
+    public ResponseEntity<Object> getInvoicesByUsers(
+            @PathVariable String userId,
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam String bankId,
+            @RequestParam int status,
+            @RequestParam int filterBy,
+            @RequestParam String time
+    ) {
+        Object result = null;
+        PageResDTO response = new PageResDTO();
+        HttpStatus httpStatus = null;
+        if (filterBy == 9) {
+            time = "";
+        }
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            int totalElement = 0;
+            List<InvoiceResponseDTO> data = new ArrayList<>();
+            List<IInvoiceResponseDTO> dtos = new ArrayList<>();
+            int offset = (page - 1) * size;
+            List<Integer> statuses = new ArrayList<>();
+            statuses.add(status);
+
+            if (status == 1) {
+                statuses.add(1);
+            } else {
+                statuses.add(status);
+                if (status == 0) {
+                    statuses.add(3);
+                }
+            }
+            if (bankId == null || bankId.isEmpty()) {
+                if (time == null || time.isEmpty()) {
+                    dtos = invoiceService.getInvoiceByUserId(userId, statuses, offset, size);
+                    totalElement = invoiceService.countInvoiceByUserId(userId, statuses);
+                } else {
+                    dtos = invoiceService.getInvoiceByUserIdAndMonth(userId, statuses, time, offset, size);
+                    totalElement = invoiceService.countInvoiceByUserIdAndMonth(userId, statuses, time);
+                }
+            } else {
+                if (time == null || time.isEmpty()) {
+                    dtos = invoiceService.getInvoiceByUserIdAndBankId(userId, statuses, bankId, offset, size);
+                    totalElement = invoiceService.countInvoiceByUserIdAndBankId(userId, statuses, bankId);
+                } else {
+                    dtos = invoiceService.getInvoiceByUserIdAndBankIdAndMonth(userId, statuses, bankId, time, offset, size);
+                    totalElement = invoiceService.countInvoiceByUserIdAndBankIdAndMonth(userId, statuses, bankId, time);
+                }
+            }
+            data = dtos.stream().map(item -> {
+                InvoiceResponseDTO dto = new InvoiceResponseDTO();
+                dto.setInvoiceId(item.getInvoiceId());
+                dto.setInvoiceName(item.getInvoiceName());
+                dto.setBillNumber(item.getInvoiceNumber());
+                dto.setInvoiceNumber(item.getInvoiceNumber());
+                dto.setTimeCreated(item.getTimeCreated());
+                dto.setTimePaid(item.getTimePaid());
+                dto.setStatus(item.getStatus());
+                dto.setBankId(item.getBankId());
+                MerchantBankMapperDTO merchantBankMapperDTO = getMerchantBankMapperDTO(item.getData());
+                dto.setVso(StringUtil.getValueNullChecker(merchantBankMapperDTO.getVso()));
+                dto.setMidName(StringUtil.getValueNullChecker(merchantBankMapperDTO.getMerchantName()));
+                dto.setBankShortName(StringUtil.getValueNullChecker(merchantBankMapperDTO.getBankShortName()));
+                dto.setBankAccount(StringUtil.getValueNullChecker(merchantBankMapperDTO.getBankAccount()));
+                dto.setUserBankName(StringUtil.getValueNullChecker(merchantBankMapperDTO.getUserBankName()));
+                dto.setBankAccountForPayment("");
+                dto.setUserBankNameForPayment("");
+                dto.setBankNameForPayment("");
+                dto.setBankCodeForPayment("");
+                dto.setQrCode("");
+                dto.setTotalAmount(item.getTotalAmount());
+                String fileAttachmentId = invoiceService.getFileAttachmentId(item.getInvoiceId());
+                dto.setFileAttachmentId(StringUtil.getValueNullChecker(fileAttachmentId));
+                return dto;
+            }).collect(Collectors.toList());
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+            pageDTO.setTotalElement(totalElement);
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            response.setMetadata(pageDTO);
+            response.setData(data);
+            result = response;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("InvoiceController: ERROR: getInvoicesByUser: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 
 }
