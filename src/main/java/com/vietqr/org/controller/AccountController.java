@@ -202,6 +202,7 @@ public class AccountController {
                 dto2.setFromDate(items.getFromDate());
                 dto2.setToDate(items.getToDate());
                 dto2.setActiveService(items.getToDate() - items.getFromDate());
+                dto2.setIsAuthenticated(items.getIsAuthenticated());
                 return dto2;
             }).collect(Collectors.toList());
 
