@@ -11,6 +11,7 @@ public class BankShareDTO {
     private int fromDate;
     private int toDate;
     private int activeService;
+    private boolean isAuthenticated;
 
     public BankShareDTO() {
     }
@@ -26,6 +27,14 @@ public class BankShareDTO {
         this.fromDate = fromDate;
         this.toDate = toDate;
         this.activeService = activeService;
+    }
+
+    public boolean getIsAuthenticated() {
+        return isAuthenticated;
+    }
+
+    public void setIsAuthenticated(boolean authenticated) {
+        isAuthenticated = authenticated;
     }
 
     public String getBankAccount() {

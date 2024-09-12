@@ -178,6 +178,7 @@ public class AccountController {
                 dto.setNationalId(item.getNationalId());
                 dto.setFromDate(item.getFromDate());
                 dto.setToDate(item.getToDate());
+                dto.setIsAuthenticated(item.getIsAuthenticated());
                 // Tính toán số tháng giữa hai LocalDateTime
                 LocalDateTime fromDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(item.getFromDate() * 1000L), ZoneId.systemDefault());
                 LocalDateTime toDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(item.getToDate() * 1000L), ZoneId.systemDefault());
@@ -201,6 +202,7 @@ public class AccountController {
                 dto2.setFromDate(items.getFromDate());
                 dto2.setToDate(items.getToDate());
                 dto2.setActiveService(items.getToDate() - items.getFromDate());
+                dto2.setIsAuthenticated(items.getIsAuthenticated());
                 return dto2;
             }).collect(Collectors.toList());
 

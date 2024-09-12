@@ -60,7 +60,7 @@ public interface TelegramRepository extends JpaRepository<TelegramEntity, Long> 
     @Query(value = "UPDATE telegram SET chat_id = :chatId WHERE id = :id", nativeQuery = true)
     void updateTelegram(String chatId, String id);
 
-    @Query(value = "SELECT t.id AS telegramId, t.chat_id AS chatId, t.name AS name, COUNT(tab.id) AS bankAccountCount " +
+    @Query(value = "SELECT t.id AS telegramId, t.chat_id AS chatId, COALESCE(t.name, 'Chia sẻ biến động số dư') AS name, COUNT(tab.id) AS bankAccountCount " +
             "FROM telegram t " +
             "LEFT JOIN telegram_account_bank tab ON t.id = tab.telegram_id " +
             "WHERE t.user_id = :userId " +

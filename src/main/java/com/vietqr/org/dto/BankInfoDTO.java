@@ -11,6 +11,7 @@ public class BankInfoDTO {
     private int fromDate;
     private int toDate;
     private int activeService;
+    private boolean isAuthenticated;
 
     public BankInfoDTO() {
     }
@@ -106,5 +107,13 @@ public class BankInfoDTO {
 
     public void setActiveService(int activeService) {
         this.activeService = activeService;
+    }
+
+    public boolean getIsAuthenticated() {
+        return isAuthenticated;
+    }
+
+    public void setIsAuthenticated(boolean isAuthenticated) {
+        this.isAuthenticated = isAuthenticated;
     }
 }
