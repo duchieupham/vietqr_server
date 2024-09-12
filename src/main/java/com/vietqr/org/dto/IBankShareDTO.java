@@ -11,4 +11,5 @@ public interface IBankShareDTO {
     int getFromDate();
     int getToDate();
     int getActiveService();
+    boolean getIsAuthenticated();
 }
