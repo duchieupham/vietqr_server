@@ -37,7 +37,7 @@ public interface LarkRepository extends JpaRepository<LarkEntity, Long> {
     @Query(value = "UPDATE lark SET webhook = :webhook WHERE id = :larkId", nativeQuery = true)
     void updateLark(String webhook, String larkId);
 
-    @Query(value = "SELECT l.id AS larkId, l.webhook AS webhook, l.name AS name, COUNT(lab.id) AS bankAccountCount " +
+    @Query(value = "SELECT l.id AS larkId, l.webhook AS webhook, COALESCE(l.name, 'Chia sẻ biến động số dư') AS name, COUNT(lab.id) AS bankAccountCount " +
             "FROM lark l " +
             "LEFT JOIN lark_account_bank lab ON l.id = lab.lark_id " +
             "WHERE l.user_id = :userId " +
