@@ -7,6 +7,8 @@ public class TransStatisticResponseWebDTO {
     private long totalCashSettled;
     private int totalUnsettled;
     private long totalCashUnsettled;
+    private int totalTransRefund;
+    private long totalCashRefund;
 
     public TransStatisticResponseWebDTO(int totalTrans, long totalCashIn,
                                         int totalSettled, long totalCashSettled,
@@ -68,5 +70,21 @@ public class TransStatisticResponseWebDTO {
 
     public void setTotalCashUnsettled(long totalCashUnsettled) {
         this.totalCashUnsettled = totalCashUnsettled;
+    }
+
+    public int getTotalTransRefund() {
+        return totalTransRefund;
+    }
+
+    public void setTotalTransRefund(int totalTransRefund) {
+        this.totalTransRefund = totalTransRefund;
+    }
+
+    public long getTotalCashRefund() {
+        return totalCashRefund;
+    }
+
+    public void setTotalCashRefund(long totalCashRefund) {
+        this.totalCashRefund = totalCashRefund;
     }
 }
