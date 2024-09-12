@@ -1489,6 +1489,8 @@ public class TransactionController {
                 result.setTotalSettled(dto.getTotalSettled());
                 result.setTotalUnsettled(dto.getTotalUnsettled());
                 result.setTotalCashUnsettled(dto.getTotalCashUnsettled());
+                result.setTotalCashRefund(0);
+                result.setTotalTransRefund(0);
             } else {
                 result = new TransStatisticResponseWebDTO();
                 result.setTotalTrans(0);
@@ -1497,6 +1499,8 @@ public class TransactionController {
                 result.setTotalSettled(0);
                 result.setTotalUnsettled(0);
                 result.setTotalCashUnsettled(0L);
+                result.setTotalCashRefund(0L);
+                result.setTotalTransRefund(0);
             }
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
