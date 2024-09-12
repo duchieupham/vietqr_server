@@ -2715,8 +2715,11 @@ public class InvoiceController {
             long vatAmount = 0;
             List<IInvoiceItemDetailDTO> allInvoiceItems = new ArrayList<>();
 
-            IInvoiceDTO firstInvoiceDTO = null; // Định nghĩa biến invoiceDTO đầu tiên
-            MerchantBankMapperDTO merchantBankMapperDTO = null; // Định nghĩa biến merchantBankMapperDTO
+            IInvoiceDTO firstInvoiceDTO = null;
+            MerchantBankMapperDTO merchantBankMapperDTO = null;
+
+            // Danh sách tất cả các InvoiceId
+            List<String> allInvoiceIds = new ArrayList<>();
 
             for (String invoiceId : dto.getInvoiceIds()) {
                 String bankId = invoiceService.getBankIdRechargeDefault(invoiceId);
@@ -2742,8 +2745,8 @@ public class InvoiceController {
                 }
 
                 allInvoiceItems.addAll(invoiceItems);
+                allInvoiceIds.add(invoiceId); // Thêm invoiceId vào danh sách
             }
-
 
             String bankId = StringUtil.getValueNullChecker(bankIdRechargeDefault);
             if (!StringUtil.isNullOrEmpty(dto.getBankIdRecharge())) {
@@ -2755,6 +2758,8 @@ public class InvoiceController {
             String billNumberVQR = "VTS" + RandomCodeUtil.generateRandomId(10);
             String otpPayment = RandomCodeUtil.generateOTP(6);
             String content = traceId + " " + billNumberVQR;
+            logger.info("Generated content for QR code: " + content);
+            System.out.println("Generated content for QR code: " + content);
             List<TransactionWalletEntity> transactionWalletEntities = new ArrayList<>();
 
             // Tạo transaction_wallet_credit cho tổng số tiền
@@ -2839,40 +2844,42 @@ public class InvoiceController {
             transactionReceiveEntity.setQrCode(qr);
             transactionReceiveEntity.setUrlLink("");
 
-            // Tạo InvoiceTransactionEntity cho mỗi hóa đơn
-            for (String invoiceId : dto.getInvoiceIds()) {
-                InvoiceTransactionEntity entity = new InvoiceTransactionEntity();
-                entity.setId(UUID.randomUUID().toString());
-                entity.setInvoiceId(invoiceId);
-                entity.setInvoiceItemIds(mapper.writeValueAsString(
-                        allInvoiceItems.stream()
-                                .filter(item -> item.getInvoiceItemId().equals(invoiceId))
-                                .map(IInvoiceItemDetailDTO::getInvoiceItemId)
-                                .collect(Collectors.toList())));
-                entity.setBankIdRecharge(dto.getBankIdRecharge() != null ? dto.getBankIdRecharge() : bankIdRechargeDefault);
-                entity.setMid(firstInvoiceDTO.getMerchantId());
-                entity.setBankId(firstInvoiceDTO.getBankId());
-                entity.setUserId(firstInvoiceDTO.getUserId());
-                entity.setStatus(0);
-                entity.setVat(firstInvoiceDTO.getVat());
-                entity.setRefId(transReceiveUUID.toString());
-                entity.setInvoiceNumber(billNumberVQR);
-                entity.setTotalAmount(totalAmountAfterVat);
-                entity.setAmount(totalAmount);
-                entity.setVatAmount(vatAmount);
-                entity.setQrCode(qr);
+            // Tạo InvoiceTransactionEntity duy nhất
+            InvoiceTransactionEntity entity = new InvoiceTransactionEntity();
+            entity.setId(UUID.randomUUID().toString());
+            // Lưu tất cả các InvoiceId vào trường invoiceId
+            entity.setInvoiceId(mapper.writeValueAsString(allInvoiceIds));
+            // Lưu tất cả các InvoiceItemId liên quan
+            entity.setInvoiceItemIds(mapper.writeValueAsString(
+                    allInvoiceItems.stream()
+                            .map(IInvoiceItemDetailDTO::getInvoiceItemId)
+                            .collect(Collectors.toList())
+            ));
+            entity.setBankIdRecharge(dto.getBankIdRecharge() != null ? dto.getBankIdRecharge() : bankIdRechargeDefault);
+            entity.setMid(firstInvoiceDTO.getMerchantId());
+            entity.setBankId(firstInvoiceDTO.getBankId());
+            entity.setUserId(firstInvoiceDTO.getUserId());
+            entity.setStatus(0);
+            entity.setVat(firstInvoiceDTO.getVat());
+            entity.setRefId(transReceiveUUID.toString());
+            entity.setInvoiceNumber(billNumberVQR);
+            entity.setTotalAmount(totalAmountAfterVat);
+            entity.setAmount(totalAmount);
+            entity.setVatAmount(vatAmount);
+            entity.setQrCode(qr);
 
-                Thread thread = new Thread(() -> {
-                    invoiceTransactionService.insert(entity);
-                    transactionWalletService.insertAll(transactionWalletEntities);
-                    transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
-                });
-                thread.start();
-            }
+            // Lưu giao dịch
+            Thread thread = new Thread(() -> {
+                invoiceTransactionService.insert(entity);
+                transactionWalletService.insertAll(transactionWalletEntities);
+                transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
+            });
+            thread.start();
 
+            // Thiết lập response
             responseDTO.setQrCode(qr);
             responseDTO.setTotalAmountAfterVat(totalAmountAfterVat);
-            responseDTO.setInvoiceName("Thanh toán nhiều hóa đơn"); // Đặt tên phù hợp nếu là thanh toán nhiều hóa đơn
+            responseDTO.setInvoiceName("Thanh toán nhiều hóa đơn");
             responseDTO.setMidName(merchantBankMapperDTO.getMerchantName());
             responseDTO.setVso(merchantBankMapperDTO.getVso());
             responseDTO.setBankAccount(merchantBankMapperDTO.getBankAccount());
@@ -2895,6 +2902,7 @@ public class InvoiceController {
         }
         return new ResponseEntity<>(result, httpStatus);
     }
+
 
     @GetMapping("/v2/invoice/{userId}")
     public ResponseEntity<Object> getInvoicesByUsers(

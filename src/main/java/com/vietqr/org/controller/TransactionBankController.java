@@ -1488,119 +1488,249 @@ public class TransactionBankController {
                                 TransactionWalletEntity transactionWalletDebit = transactionWalletService
                                         .getTransactionWalletById(checkTransWalletId);
                                 if (transactionWalletDebit != null) {
-
                                     ObjectMapper mapper = new ObjectMapper();
                                     long timePaid = DateTimeUtil.getCurrentDateTimeUTC();
                                     long amount = Long.parseLong(transactionWalletDebit.getAmount());
-                                    InvoiceTransactionEntity invoiceTransactionEntity = invoiceTransactionService.getInvoiceTransactionByRefId(transactionId);
-                                    InvoiceEntity invoiceEntity = invoiceService.getInvoiceEntityById(invoiceTransactionEntity.getInvoiceId());
-                                    if (invoiceTransactionEntity != null && invoiceEntity != null) {
-                                        String invoiceItemIds = invoiceTransactionEntity.getInvoiceItemIds();
-                                        List<String> itemIds = new ArrayList<>();
+
+                                    // Lấy danh sách các InvoiceTransactionEntity liên quan đến giao dịch này
+                                    List<InvoiceTransactionEntity> invoiceTransactionEntities = invoiceTransactionService.getInvoiceTransactionsByRefId(transactionId);
+
+                                    for (InvoiceTransactionEntity invoiceTransactionEntity : invoiceTransactionEntities) {
+                                        String invoiceIdsStr = invoiceTransactionEntity.getInvoiceId();
+                                        List<String> invoiceIds = new ArrayList<>();
+
+                                        // Tách chuỗi invoiceIds từ định dạng JSON thành List
                                         try {
-                                            itemIds = mapper.readValue(invoiceItemIds, new TypeReference<List<String>>() {
-                                            });
+                                            invoiceIds = mapper.readValue(invoiceIdsStr, new TypeReference<List<String>>() {});
                                         } catch (Exception e) {
-                                            logger.error("processTransactionWallet: ERROR: pay Invoice: " + e.getMessage() + " at: "
-                                            + System.currentTimeMillis());
+                                            logger.error("processTransactionWallet: ERROR: parse invoiceIds: " + e.getMessage() + " at: " + System.currentTimeMillis());
                                         }
-                                        List<InvoiceItemEntity> invoiceItemEntities = new ArrayList<>();
-                                        int check = invoiceItemService.updateAllItemIds(itemIds, timePaid);
-                                        int checkNotPaid = 0;
-                                        checkNotPaid = invoiceItemService.checkCountUnPaid(invoiceEntity.getId());
-                                        if (checkNotPaid == 0) {
-                                            isTotal = true;
-                                            invoiceService.updateStatusInvoice(invoiceEntity.getId(), 1, timePaid);
-                                        } else {
-                                            invoiceService.updateStatusInvoice(invoiceEntity.getId(), 3);
-                                        }
-                                        checkSuccess = 1;
-                                        if (checkSuccess > 0) {
-                                            checkSuccessProcess = true;
-                                            // update transaction wallet
-                                            transactionWalletService.updateTransactionWallet(1, time,
-                                                    transactionWalletDebit.getAmount() + "",
-                                                    "",
-                                                    transactionWalletDebit.getUserId(),
-                                                    transactionWalletDebit.getOtp(),
-                                                    paymentType);
-                                        }
-                                    } else {
-                                        InvoiceEntity entityByRefId = invoiceService.getInvoiceEntityByRefId(transactionWalletDebit.getId(), amount);
-                                        if (entityByRefId != null && entityByRefId.getStatus() != 1) {
-                                            checkSuccess = invoiceService.updateStatusInvoice(entityByRefId.getId(), 1);
-                                            invoiceItemService.updateStatusInvoiceItem(entityByRefId.getId());
-                                            if (checkSuccess > 0) {
-                                                checkSuccessProcess = true;
-                                                // update transaction wallet
-                                                transactionWalletService.updateTransactionWallet(1, time,
-                                                        transactionWalletDebit.getAmount() + "",
-                                                        "",
-                                                        transactionWalletDebit.getUserId(),
-                                                        transactionWalletDebit.getOtp(),
-                                                        paymentType);
+
+                                        boolean allInvoicesPaid = true;
+                                        for (String invoiceId : invoiceIds) {
+                                            // Lấy từng InvoiceEntity theo invoiceId
+                                            InvoiceEntity invoiceEntity = invoiceService.getInvoiceEntityById(invoiceId);
+                                            if (invoiceEntity != null) {
+                                                String invoiceItemIds = invoiceTransactionEntity.getInvoiceItemIds();
+                                                List<String> itemIds = new ArrayList<>();
+                                                try {
+                                                    itemIds = mapper.readValue(invoiceItemIds, new TypeReference<List<String>>() {});
+                                                } catch (Exception e) {
+                                                    logger.error("processTransactionWallet: ERROR: pay Invoice: " + e.getMessage() + " at: " + System.currentTimeMillis());
+                                                }
+
+                                                // Cập nhật trạng thái các mục hóa đơn
+                                                List<InvoiceItemEntity> invoiceItemEntities = invoiceItemService.updateAllItemId(itemIds, timePaid);
+                                                int checkNotPaid = invoiceItemService.checkCountUnPaid(invoiceEntity.getId());
+
+                                                // Cập nhật trạng thái hóa đơn nếu tất cả các mục hóa đơn đã được thanh toán
+                                                if (checkNotPaid == 0) {
+                                                    invoiceService.updateStatusInvoice(invoiceEntity.getId(), 1, timePaid); // Đánh dấu hóa đơn đã thanh toán đầy đủ
+                                                } else {
+                                                    invoiceService.updateStatusInvoice(invoiceEntity.getId(), 3); // Đánh dấu hóa đơn thanh toán một phần
+                                                    isTotal = false; // Không thanh toán đầy đủ
+                                                }
+                                                checkSuccess = 1;
+                                                if (checkSuccess > 0) {
+                                                    checkSuccessProcess = true;
+                                                    // Cập nhật transaction wallet
+                                                    transactionWalletService.updateTransactionWallet(1, time, transactionWalletDebit.getAmount() + "",
+                                                            "", transactionWalletDebit.getUserId(), transactionWalletDebit.getOtp(), paymentType);
+                                                }
                                             }
                                         }
+                                        // Cập nhật trạng thái và thời gian cho InvoiceTransactionEntity
+                                        if (allInvoicesPaid) {
+                                            invoiceTransactionEntity.setStatus(1); // Thanh toán đầy đủ
+                                        } else {
+                                            invoiceTransactionEntity.setStatus(3); // Thanh toán một phần
+                                        }
+
+                                        invoiceTransactionService.update(invoiceTransactionEntity);
                                     }
 
                                     if (checkSuccess > 0) {
-                                        // notification
-                                        // push notification
-                                        String notificationUUID = UUID.randomUUID().toString();
-                                        String notiType = NotificationUtil.getNotiInvoice();
-                                        String title = NotificationUtil.getNotiTitleInvoiceSucessFinal();
-                                        String message = NotificationUtil.getNotiDescActiveKey1()
-                                                + invoiceEntity.getInvoiceId()
-                                                + NotificationUtil.getNotiTitleInvoiceTotalAmount()
-                                                + invoiceEntity.getTotalAmount() + " VNĐ"
-                                                //+ NotificationUtil.getNotiDescActiveKey2()
-                                                + NotificationUtil.getNotiDescActiveKey3();
+                                        // Gửi thông báo thanh toán thành công
+                                        for (InvoiceTransactionEntity invoiceTransactionEntity : invoiceTransactionEntities) {
+                                            String invoiceIdsStr = invoiceTransactionEntity.getInvoiceId();
+                                            List<String> invoiceIds = new ArrayList<>();
 
-                                        NotificationEntity notiEntity = new NotificationEntity();
-                                        notiEntity.setId(notificationUUID);
-                                        notiEntity.setRead(false);
-                                        notiEntity.setMessage(message);
-                                        notiEntity.setTime(time);
-                                        notiEntity.setType(
-                                                notiType);
-                                        notiEntity.setUserId(userId);
-                                        notiEntity.setData(checkTransWalletId);
-                                        Map<String, String> data = new HashMap<>();
-                                        data.put("notificationType",
-                                                notiType);
-                                        data.put("notificationId",
-                                                notificationUUID);
-                                        data.put("amount",
-                                                dto.getAmount() + "");
-                                        data.put("time", time + "");
-                                        data.put("status", 1 + "");
-                                        data.put("message", message);
-                                        data.put("status", "1");
-                                        if (!isTotal) {
-                                            data.put("html", "<div><span style=\"font-size: 12;\">Bạn đã thanh toán thành công số tiền <br> <strong> "
-                                                    + StringUtil.formatNumberAsString(dto.getAmount() + "") + " VND " +
-                                                    "</strong><br>cho một phần hóa đơn " + invoiceEntity.getInvoiceId() + " </span></div>");
-                                        } else {
-                                            data.put("html", "<div><span style=\"font-size: 12;\">Bạn đã thanh toán thành công số tiền <br> <strong> "
-                                                    + StringUtil.formatNumberAsString(dto.getAmount() + "") + " VND " +
-                                                    "</strong><br>cho hóa đơn " + invoiceEntity.getInvoiceId() + " </span></div>");
+                                            try {
+                                                invoiceIds = mapper.readValue(invoiceIdsStr, new TypeReference<List<String>>() {});
+                                            } catch (Exception e) {
+                                                logger.error("processTransactionWallet: ERROR: parse invoiceIds for notification: " + e.getMessage() + " at: " + System.currentTimeMillis());
+                                            }
+
+                                            for (String invoiceId : invoiceIds) {
+                                                InvoiceEntity invoiceEntity = invoiceService.getInvoiceEntityById(invoiceId);
+                                                String notificationUUID = UUID.randomUUID().toString();
+                                                String notiType = NotificationUtil.getNotiInvoice();
+                                                String title = NotificationUtil.getNotiTitleInvoiceSucessFinal();
+                                                String message = NotificationUtil.getNotiDescActiveKey1()
+                                                        + invoiceEntity.getInvoiceId()
+                                                        + NotificationUtil.getNotiTitleInvoiceTotalAmount()
+                                                        + invoiceEntity.getTotalAmount() + " VNĐ"
+                                                        + NotificationUtil.getNotiDescActiveKey3();
+
+                                                NotificationEntity notiEntity = new NotificationEntity();
+                                                notiEntity.setId(notificationUUID);
+                                                notiEntity.setRead(false);
+                                                notiEntity.setMessage(message);
+                                                notiEntity.setTime(time);
+                                                notiEntity.setType(notiType);
+                                                notiEntity.setUserId(userId);
+                                                notiEntity.setData(invoiceTransactionEntity.getId());
+
+                                                Map<String, String> data = new HashMap<>();
+                                                data.put("notificationType", notiType);
+                                                data.put("notificationId", notificationUUID);
+                                                data.put("amount", dto.getAmount() + "");
+                                                data.put("time", time + "");
+                                                data.put("status", 1 + "");
+                                                data.put("message", message);
+                                                data.put("status", "1");
+
+                                                if (!isTotal) {
+                                                    data.put("html", "<div><span style=\"font-size: 12;\">Bạn đã thanh toán thành công số tiền <br> <strong> "
+                                                            + StringUtil.formatNumberAsString(dto.getAmount() + "") + " VND </strong><br>cho một phần hóa đơn "
+                                                            + invoiceEntity.getInvoiceId() + " </span></div>");
+                                                } else {
+                                                    data.put("html", "<div><span style=\"font-size: 12;\">Bạn đã thanh toán thành công số tiền <br> <strong> "
+                                                            + StringUtil.formatNumberAsString(dto.getAmount() + "") + " VND </strong><br>cho hóa đơn "
+                                                            + invoiceEntity.getInvoiceId() + " </span></div>");
+                                                }
+
+                                                Thread thread = new Thread(() -> {
+                                                    pushNotification(title, message, notiEntity, data, notiEntity.getUserId(), 1);
+                                                });
+                                                thread.start();
+                                            }
                                         }
-
-                                        Thread thread = new Thread(() -> {
-                                            pushNotification(title, message, notiEntity, data, notiEntity.getUserId(), 1);
-                                        });
-                                        thread.start();
-
                                     } else {
-                                        System.out.println(
-                                                "transaction-sync: TRAN WALLET INVOICE NULL");
+                                        System.out.println("transaction-sync: TRAN WALLET INVOICE NULL");
                                         logger.error("transaction-sync: TRAN WALLET INVOICE IS ALREADY PAID OR CANCELED ");
                                     }
                                 } else {
-                                    System.out.println(
-                                            "transaction-sync: TRAN WALLET INVOICE NULL");
+                                    System.out.println("transaction-sync: TRAN WALLET INVOICE NULL");
                                     logger.error("transaction-sync: TRAN WALLET INVOICE NULL");
                                 }
+
+
+//                                if (transactionWalletDebit != null) {
+//
+//                                    ObjectMapper mapper = new ObjectMapper();
+//                                    long timePaid = DateTimeUtil.getCurrentDateTimeUTC();
+//                                    long amount = Long.parseLong(transactionWalletDebit.getAmount());
+//                                    InvoiceTransactionEntity invoiceTransactionEntity = invoiceTransactionService.getInvoiceTransactionByRefId(transactionId);
+//                                    InvoiceEntity invoiceEntity = invoiceService.getInvoiceEntityById(invoiceTransactionEntity.getInvoiceId());
+//                                    if (invoiceTransactionEntity != null && invoiceEntity != null) {
+//                                        String invoiceItemIds = invoiceTransactionEntity.getInvoiceItemIds();
+//                                        List<String> itemIds = new ArrayList<>();
+//                                        try {
+//                                            itemIds = mapper.readValue(invoiceItemIds, new TypeReference<List<String>>() {
+//                                            });
+//                                        } catch (Exception e) {
+//                                            logger.error("processTransactionWallet: ERROR: pay Invoice: " + e.getMessage() + " at: "
+//                                            + System.currentTimeMillis());
+//                                        }
+//                                        List<InvoiceItemEntity> invoiceItemEntities = new ArrayList<>();
+//                                        int check = invoiceItemService.updateAllItemIds(itemIds, timePaid);
+//                                        int checkNotPaid = 0;
+//                                        checkNotPaid = invoiceItemService.checkCountUnPaid(invoiceEntity.getId());
+//                                        if (checkNotPaid == 0) {
+//                                            isTotal = true;
+//                                            invoiceService.updateStatusInvoice(invoiceEntity.getId(), 1, timePaid);
+//                                        } else {
+//                                            invoiceService.updateStatusInvoice(invoiceEntity.getId(), 3);
+//                                        }
+//                                        checkSuccess = 1;
+//                                        if (checkSuccess > 0) {
+//                                            checkSuccessProcess = true;
+//                                            // update transaction wallet
+//                                            transactionWalletService.updateTransactionWallet(1, time,
+//                                                    transactionWalletDebit.getAmount() + "",
+//                                                    "",
+//                                                    transactionWalletDebit.getUserId(),
+//                                                    transactionWalletDebit.getOtp(),
+//                                                    paymentType);
+//                                        }
+//                                    } else {
+//                                        InvoiceEntity entityByRefId = invoiceService.getInvoiceEntityByRefId(transactionWalletDebit.getId(), amount);
+//                                        if (entityByRefId != null && entityByRefId.getStatus() != 1) {
+//                                            checkSuccess = invoiceService.updateStatusInvoice(entityByRefId.getId(), 1);
+//                                            invoiceItemService.updateStatusInvoiceItem(entityByRefId.getId());
+//                                            if (checkSuccess > 0) {
+//                                                checkSuccessProcess = true;
+//                                                // update transaction wallet
+//                                                transactionWalletService.updateTransactionWallet(1, time,
+//                                                        transactionWalletDebit.getAmount() + "",
+//                                                        "",
+//                                                        transactionWalletDebit.getUserId(),
+//                                                        transactionWalletDebit.getOtp(),
+//                                                        paymentType);
+//                                            }
+//                                        }
+//                                    }
+//
+//                                    if (checkSuccess > 0) {
+//                                        // notification
+//                                        // push notification
+//                                        String notificationUUID = UUID.randomUUID().toString();
+//                                        String notiType = NotificationUtil.getNotiInvoice();
+//                                        String title = NotificationUtil.getNotiTitleInvoiceSucessFinal();
+//                                        String message = NotificationUtil.getNotiDescActiveKey1()
+//                                                + invoiceEntity.getInvoiceId()
+//                                                + NotificationUtil.getNotiTitleInvoiceTotalAmount()
+//                                                + invoiceEntity.getTotalAmount() + " VNĐ"
+//                                                //+ NotificationUtil.getNotiDescActiveKey2()
+//                                                + NotificationUtil.getNotiDescActiveKey3();
+//
+//                                        NotificationEntity notiEntity = new NotificationEntity();
+//                                        notiEntity.setId(notificationUUID);
+//                                        notiEntity.setRead(false);
+//                                        notiEntity.setMessage(message);
+//                                        notiEntity.setTime(time);
+//                                        notiEntity.setType(
+//                                                notiType);
+//                                        notiEntity.setUserId(userId);
+//                                        notiEntity.setData(checkTransWalletId);
+//                                        Map<String, String> data = new HashMap<>();
+//                                        data.put("notificationType",
+//                                                notiType);
+//                                        data.put("notificationId",
+//                                                notificationUUID);
+//                                        data.put("amount",
+//                                                dto.getAmount() + "");
+//                                        data.put("time", time + "");
+//                                        data.put("status", 1 + "");
+//                                        data.put("message", message);
+//                                        data.put("status", "1");
+//                                        if (!isTotal) {
+//                                            data.put("html", "<div><span style=\"font-size: 12;\">Bạn đã thanh toán thành công số tiền <br> <strong> "
+//                                                    + StringUtil.formatNumberAsString(dto.getAmount() + "") + " VND " +
+//                                                    "</strong><br>cho một phần hóa đơn " + invoiceEntity.getInvoiceId() + " </span></div>");
+//                                        } else {
+//                                            data.put("html", "<div><span style=\"font-size: 12;\">Bạn đã thanh toán thành công số tiền <br> <strong> "
+//                                                    + StringUtil.formatNumberAsString(dto.getAmount() + "") + " VND " +
+//                                                    "</strong><br>cho hóa đơn " + invoiceEntity.getInvoiceId() + " </span></div>");
+//                                        }
+//
+//                                        Thread thread = new Thread(() -> {
+//                                            pushNotification(title, message, notiEntity, data, notiEntity.getUserId(), 1);
+//                                        });
+//                                        thread.start();
+//
+//                                    } else {
+//                                        System.out.println(
+//                                                "transaction-sync: TRAN WALLET INVOICE NULL");
+//                                        logger.error("transaction-sync: TRAN WALLET INVOICE IS ALREADY PAID OR CANCELED ");
+//                                    }
+//                                } else {
+//                                    System.out.println(
+//                                            "transaction-sync: TRAN WALLET INVOICE NULL");
+//                                    logger.error("transaction-sync: TRAN WALLET INVOICE NULL");
+//                                }
+
                             } else {
                                 System.out.println("transaction-sync: INVALID OTP");
                                 logger.error("transaction-sync: INVALID OTP");

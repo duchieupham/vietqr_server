@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -31,4 +32,6 @@ public interface InvoiceTransactionRepository extends JpaRepository<InvoiceTrans
     InvoiceRequestPaymentDTO getInvoiceRequestPayment(String invoiceId, String itemIds);
 
     Optional<InvoiceTransactionEntity> findByRefId(String refId);
+
+    List<InvoiceTransactionEntity> findAllByRefId(String refId);
 }
