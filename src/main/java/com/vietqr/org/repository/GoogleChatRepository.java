@@ -37,7 +37,7 @@ public interface GoogleChatRepository extends JpaRepository<GoogleChatEntity, Lo
     void updateGoogleChat(String webhook, String id);
 
 
-    @Query(value = "SELECT gc.id AS googleChatId, gc.webhook AS webhook, gc.name AS name, COUNT(gcab.id) AS bankAccountCount " +
+    @Query(value = "SELECT gc.id AS googleChatId, gc.webhook AS webhook, COALESCE(gc.name, 'Chia sẻ biến động số dư') AS name, COUNT(gcab.id) AS bankAccountCount " +
             "FROM google_chat gc " +
             "LEFT JOIN google_chat_account_bank gcab ON gc.id = gcab.google_chat_id " +
             "WHERE gc.user_id = :userId " +

@@ -28,7 +28,7 @@ public interface DiscordRepository extends JpaRepository<DiscordEntity, String> 
     @Query(value = "SELECT * FROM discord WHERE id = :id", nativeQuery = true)
     DiscordEntity getDiscordById(@Param("id") String id);
 
-    @Query(value = "SELECT d.id AS discordId, d.webhook AS webhook, d.name AS name, COUNT(dab.id) AS bankAccountCount " +
+    @Query(value = "SELECT d.id AS discordId, d.webhook AS webhook, COALESCE(d.name, 'Chia sẻ biến động số dư') AS name, COUNT(dab.id) AS bankAccountCount " +
             "FROM discord d " +
             "LEFT JOIN discord_account_bank dab ON d.id = dab.discord_id " +
             "WHERE d.user_id = :userId " +
