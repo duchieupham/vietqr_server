@@ -20,6 +20,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	@Query(value = "SELECT a.bank_account AS bankAccount, a.bank_account_name AS bankAccountName, " +
 			"a.status AS status, a.mms_active AS mmsActive, " +
             "COALESCE(a.phone_authenticated, '') AS phoneAuthenticated, " +
+            "a.is_authenticated AS isAuthenticated, " +
 			"COALESCE(a.national_id, '') AS nationalId, c.bank_short_name AS bankShortName, " +
             "a.valid_fee_from AS fromDate, a.valid_fee_to AS toDate, " +
 			"COALESCE((a.valid_fee_to - a.valid_fee_from), 0) as activeService " +

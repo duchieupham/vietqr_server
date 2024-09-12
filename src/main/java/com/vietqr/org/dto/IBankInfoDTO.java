@@ -11,4 +11,5 @@ public interface IBankInfoDTO {
      int getFromDate();
      int getToDate();
      int getActiveService();
+     boolean getIsAuthenticated();
 }
