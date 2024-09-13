@@ -55,4 +55,10 @@ public class BankTypeServiceImpl implements BankTypeService {
 		return bankTypeRepository.getBankTypeByBankCode(bankCode);
 	}
 
+	@Override
+	public String getBankCodeByBankShortName(String bankShortName) {
+		BankTypeEntity bankTypeEntity = bankTypeRepository.findByBankShortName(bankShortName);
+		return bankTypeEntity.getBankCode();
+	}
+
 }

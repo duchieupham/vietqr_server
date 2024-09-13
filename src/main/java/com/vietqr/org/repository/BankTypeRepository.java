@@ -34,4 +34,6 @@ public interface BankTypeRepository extends JpaRepository<BankTypeEntity, Long> 
 
 	@Query(value = "SELECT * FROM bank_type WHERE bank_code = :bankCode LIMIT 1", nativeQuery = true)
     BankTypeEntity getBankTypeByBankCode(String bankCode);
+
+	BankTypeEntity findByBankShortName(String bankShortName);
 }

@@ -28,4 +28,6 @@ public interface BankTypeService {
     List<BankTypeShortNameDTO> getBankTypeByListId(List<String> ids);
 
     BankTypeEntity getBankTypeByBankCode(String bankCode);
+
+    String getBankCodeByBankShortName(String bankShortName);
 }

@@ -326,4 +326,10 @@ public class DateTimeUtil {
 
         return result;
     }
+
+    public static long[] getCurrentAndSevenDaysLater() {
+        long currentTime = (System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET) / 1000;
+        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60;
+        return new long[]{currentTime, sevenDaysLater};
+    }
 }

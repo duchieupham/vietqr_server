@@ -642,11 +642,11 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
 			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, "
-			+ "abr.time_created AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "abr.time_create AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
 			+ "INNER JOIN account_login al ON abr.user_id = al.id "
-			+ "WHERE abr.is_valid_service = false OR abr.valid_fee_to < :currentTime "
+			+ "WHERE abr.valid_fee_to != 0 OR abr.valid_fee_to < :currentTime "
 			+ "ORDER BY abr.valid_fee_to ASC LIMIT :offset, :size", nativeQuery = true)
 	List<IBankAccountResponseDTO> getOverdueBankAccounts(@Param("currentTime") long currentTime, @Param("offset") int offset, @Param("size") int size);
 
@@ -658,7 +658,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
 			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, "
-			+ "abr.time_created AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "abr.time_create AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
 			+ "INNER JOIN account_login al ON abr.user_id = al.id "
