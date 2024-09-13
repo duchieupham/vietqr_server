@@ -2891,6 +2891,9 @@ public class InvoiceController {
             responseDTO.setVatAmount(vatAmount);
             responseDTO.setInvoiceId(String.join(", ", dto.getInvoiceIds()));
             responseDTO.setExpiredTime(DateTimeUtil.getEndTimeToDate());
+            String bankCode = bankTypeService.getBankCodeByBankShortName(merchantBankMapperDTO.getBankShortName());
+            responseDTO.setBankCode(bankCode);
+            responseDTO.setUrlLink(EnvironmentUtil.getQRLink() + TransactionRefIdUtil.encryptTransactionId(transReceiveUUID.toString()));
 
             result = responseDTO;
             httpStatus = HttpStatus.OK;
