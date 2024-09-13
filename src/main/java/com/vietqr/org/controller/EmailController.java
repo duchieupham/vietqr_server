@@ -201,18 +201,13 @@ public class EmailController {
             // Lấy thời gian hiện tại
             LocalDateTime currentDateTime = LocalDateTime.now();
             long timeVerified = currentDateTime.toEpochSecond(ZoneOffset.UTC);
-//            if (otpParse != emailVerifyByUserId.get(0).getOtp()) {
-//                result = new ResponseMessageDTO("FAILED", "E178");
-//                httpStatus = HttpStatus.BAD_REQUEST;
-//                return new ResponseEntity<>(result, httpStatus);
-//            } else {
             for (EmailVerifyEntity entity : emailVerifyByUserId) {
-                if (emailVerifyByUserId.get(0).getOtp().equals(confirmOtpEmailDTO.getOtp())) {
+                if (!emailVerifyByUserId.get(0).getOtp().equals(confirmOtpEmailDTO.getOtp())) {
                     result = new ResponseMessageDTO("FAILED", "E178");
                     httpStatus = HttpStatus.BAD_REQUEST;
                     break;
                 } else {
-                    if (entity.getOtp().equals(confirmOtpEmailDTO.getOtp())) {
+                    if (!entity.getOtp().equals(confirmOtpEmailDTO.getOtp())) {
                         result = new ResponseMessageDTO("FAILED", "E177");
                         httpStatus = HttpStatus.BAD_REQUEST;
                         break;
@@ -231,13 +226,9 @@ public class EmailController {
                             result = new ResponseMessageDTO("SUCCESS", "");
                             httpStatus = HttpStatus.OK;
                             break;
-
                         }
-
                     }
                 }
-
-
             }
 
         } catch (Exception e) {
