@@ -198,6 +198,6 @@ public interface AccountLoginRepository extends JpaRepository<AccountLoginEntity
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE account_login SET is_verify = FALSE WHERE id = :userId", nativeQuery = true)
-    void updateInvalidateByUserId(@Param("userId") String userId);
+    @Query(value = "UPDATE account_login SET is_verify = FALSE, email = :email WHERE id = :userId", nativeQuery = true)
+    void updateInvalidateByUserId(@Param("userId") String userId, @Param("email") String email);
 }

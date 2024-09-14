@@ -76,13 +76,8 @@ public class AccountSystemServiceImpl implements AccountSystemService {
     }
 
     @Override
-    public void updateAccountEmail(String userId, String email, int type) {
+    public void updateAccountEmail(String userId, String email) {
         accountInformationRepository.updateEmailByUserId(userId, email);
-        accountLoginRepository.updateEmailByUserId(email, userId);
-        if (type == 1) {
-            accountLoginRepository.updateIsVerifiedByUserId(userId, email);
-        } else {
-            accountLoginRepository.updateInvalidateByUserId(userId);
-        }
+        accountLoginRepository.updateInvalidateByUserId(userId, email);
     }
 }
