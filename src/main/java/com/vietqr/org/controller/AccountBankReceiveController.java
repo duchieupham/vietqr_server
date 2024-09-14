@@ -2555,4 +2555,40 @@ public class AccountBankReceiveController {
         String data = BcryptKeyUtil.hashKeyActive(keyActive, secretKey, duration);
         return data.equals(valueActive);
     }
+
+    @GetMapping("/list-platforms")
+    public ResponseEntity<Object> getPlatformConnections(
+            @RequestParam String bankId,
+            @RequestParam int page,
+            @RequestParam int size) {
+        Object result;
+        HttpStatus httpStatus;
+        PageResDTO pageResDTO = new PageResDTO();
+
+        try {
+            int totalElement;
+            int offset = (page - 1) * size;
+            List<PlatformConnectionDTO> data = accountBankReceiveService.getPlatformConnectionsByBankId(bankId, offset, size);
+            totalElement = accountBankReceiveService.countPlatformConnectionsByBankId(bankId);
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageDTO.setTotalElement(totalElement);
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+
+            pageResDTO.setMetadata(pageDTO);
+            pageResDTO.setData(data);
+
+            httpStatus = HttpStatus.OK;
+            result = pageResDTO;
+        } catch (Exception e) {
+            logger.error("PlatformConnectionController: ERROR: getPlatformConnections: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
 }

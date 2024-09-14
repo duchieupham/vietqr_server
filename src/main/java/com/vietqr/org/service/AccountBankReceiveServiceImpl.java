@@ -661,5 +661,23 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
                         account.getBankCode()))
                 .collect(Collectors.toList());
     }
+    @Override
+    public List<PlatformConnectionDTO> getPlatformConnectionsByBankId(String bankId, int offset, int size) {
+        List<IPlatformConnectionDTO> platformConnections = repo.getPlatformConnectionsByBankId(bankId, offset, size);
+        return convertToDTO(platformConnections);
+    }
+
+    @Override
+    public int countPlatformConnectionsByBankId(String bankId) {
+        return repo.countPlatformConnectionsByBankId(bankId);
+    }
+
+    private List<PlatformConnectionDTO> convertToDTO(List<IPlatformConnectionDTO> platformConnections) {
+        return platformConnections.stream().map(conn -> new PlatformConnectionDTO(
+                conn.getPlatformId(),
+                conn.getPlatformName(),
+                conn.getConnectionDetail()
+        )).collect(Collectors.toList());
+    }
 
 }
