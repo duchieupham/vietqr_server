@@ -203,4 +203,6 @@ public interface AccountBankReceiveService {
 	void disableSoundNotificationByBankId(String bankId);
 
 	void updateEnableVoiceByBankIds(List<String> bankIds, String userId);
+	List<PlatformConnectionDTO> getPlatformConnectionsByBankId(String bankId, int offset, int size);
+	int countPlatformConnectionsByBankId(String bankId);
 }
