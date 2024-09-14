@@ -6,6 +6,8 @@ import javax.transaction.Transactional;
 
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
+import com.vietqr.org.service.grpc.biz.IBankAccountReceiveBankDTO;
+import com.vietqr.org.service.grpc.biz.IBankAccountReceiveUserDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -811,4 +813,30 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "END "
 			+ "WHERE user_id = :userId ", nativeQuery = true)
 	void updateEnableVoiceByBankIds(List<String> bankIds, String userId);
+
+	@Query(value = "SELECT a.bank_account AS bankAccount, "
+			+ "a.bank_account_name AS userBankName, "
+			+ "a.is_sync AS isSync, "
+			+ "a.bank_type_id AS bankTypeId, "
+			+ "a.user_id AS userId, "
+			+ "b.bank_short_name AS bankShortName "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN (SELECT id, bank_short_name FROM bank_type) b "
+			+ "ON a.bank_type_id = b.id "
+			+ "WHERE a.id = :bankId LIMIT 1"
+			, nativeQuery = true)
+	IBankAccountReceiveUserDTO getBankAccountReceiveByBankIdGrpc(@Param(value = "bankId") String bankId);
+
+	@Query(value = "SELECT a.bank_account AS bankAccount, "
+			+ "a.bank_account_name AS userBankName, "
+			+ "a.is_sync AS isSync, "
+			+ "a.bank_type_id AS bankTypeId, "
+			+ "a.id AS bankId, "
+			+ "b.bank_short_name AS bankShortName "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN (SELECT id, bank_short_name FROM bank_type) b "
+			+ "ON a.bank_type_id = b.id "
+			+ "WHERE a.user_id = :userId"
+			, nativeQuery = true)
+	List<IBankAccountReceiveBankDTO> getBankAccountReceiveByUserIdGrpc(@Param(value = "userId") String userId);
 }
