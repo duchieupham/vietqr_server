@@ -676,7 +676,8 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
         return platformConnections.stream().map(conn -> new PlatformConnectionDTO(
                 conn.getPlatformId(),
                 conn.getPlatformName(),
-                conn.getConnectionDetail()
+                conn.getConnectionDetail(),
+                conn.getPlatform()
         )).collect(Collectors.toList());
     }
 

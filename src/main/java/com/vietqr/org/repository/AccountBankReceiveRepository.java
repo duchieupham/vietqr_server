@@ -812,32 +812,32 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "WHERE user_id = :userId ", nativeQuery = true)
 	void updateEnableVoiceByBankIds(List<String> bankIds, String userId);
 
-	@Query(value = "SELECT t.id AS platformId, COALESCE(te.name, '') AS platformName, COALESCE(t.chat_id, '') AS connectionDetail "
+	@Query(value = "SELECT t.id AS platformId, COALESCE(te.name, '') AS platformName, COALESCE(t.chat_id, '') AS connectionDetail, 'Telegram' AS platform "
 			+ "FROM telegram_account_bank t "
 			+ "JOIN telegram te ON t.telegram_id = te.id "
 			+ "WHERE t.bank_id = :bankId "
 			+ "UNION ALL "
-			+ "SELECT l.id AS platformId, COALESCE(le.name, '') AS platformName, COALESCE(l.webhook, '') AS connectionDetail "
+			+ "SELECT l.id AS platformId, COALESCE(le.name, '') AS platformName, COALESCE(l.webhook, '') AS connectionDetail, 'Lark' AS platform "
 			+ "FROM lark_account_bank l "
 			+ "JOIN lark le ON l.lark_id = le.id "
 			+ "WHERE l.bank_id = :bankId "
 			+ "UNION ALL "
-			+ "SELECT g.id AS platformId, COALESCE(gce.name, '') AS platformName, COALESCE(g.webhook, '') AS connectionDetail "
+			+ "SELECT g.id AS platformId, COALESCE(gce.name, '') AS platformName, COALESCE(g.webhook, '') AS connectionDetail, 'Google Chat' AS platform "
 			+ "FROM google_chat_account_bank g "
 			+ "JOIN google_chat gce ON g.google_chat_id = gce.id "
 			+ "WHERE g.bank_id = :bankId "
 			+ "UNION ALL "
-			+ "SELECT gs.id AS platformId, COALESCE(gse.name, '') AS platformName, COALESCE(gs.webhook, '') AS connectionDetail "
+			+ "SELECT gs.id AS platformId, COALESCE(gse.name, '') AS platformName, COALESCE(gs.webhook, '') AS connectionDetail, 'Google Sheet' AS platform "
 			+ "FROM google_sheet_account_bank gs "
 			+ "JOIN google_sheet gse ON gs.google_sheet_id = gse.id "
 			+ "WHERE gs.bank_id = :bankId "
 			+ "UNION ALL "
-			+ "SELECT s.id AS platformId, COALESCE(se.name, '') AS platformName, COALESCE(s.webhook, '') AS connectionDetail "
+			+ "SELECT s.id AS platformId, COALESCE(se.name, '') AS platformName, COALESCE(s.webhook, '') AS connectionDetail, 'Slack' AS platform "
 			+ "FROM slack_account_bank s "
 			+ "JOIN slack se ON s.slack_id = se.id "
 			+ "WHERE s.bank_id = :bankId "
 			+ "UNION ALL "
-			+ "SELECT d.id AS platformId, COALESCE(de.name, '') AS platformName, COALESCE(d.webhook, '') AS connectionDetail "
+			+ "SELECT d.id AS platformId, COALESCE(de.name, '') AS platformName, COALESCE(d.webhook, '') AS connectionDetail, 'Discord' AS platform "
 			+ "FROM discord_account_bank d "
 			+ "JOIN discord de ON d.discord_id = de.id "
 			+ "WHERE d.bank_id = :bankId "
@@ -845,17 +845,19 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "LIMIT :offset, :size", nativeQuery = true)
 	List<IPlatformConnectionDTO> getPlatformConnectionsByBankId(@Param("bankId") String bankId, @Param("offset") int offset, @Param("size") int size);
 
+
 	@Query(value = "SELECT COUNT(*) FROM ("
-			+ "SELECT 1 FROM telegram_account_bank t WHERE t.bank_id = :bankId "
+			+ "SELECT 1 AS platform FROM telegram_account_bank t WHERE t.bank_id = :bankId "
 			+ "UNION ALL "
-			+ "SELECT 1 FROM lark_account_bank l WHERE l.bank_id = :bankId "
+			+ "SELECT 1 AS platform FROM lark_account_bank l WHERE l.bank_id = :bankId "
 			+ "UNION ALL "
-			+ "SELECT 1 FROM google_chat_account_bank g WHERE g.bank_id = :bankId "
+			+ "SELECT 1 AS platform FROM google_chat_account_bank g WHERE g.bank_id = :bankId "
 			+ "UNION ALL "
-			+ "SELECT 1 FROM google_sheet_account_bank gs WHERE gs.bank_id = :bankId "
+			+ "SELECT 1 AS platform FROM google_sheet_account_bank gs WHERE gs.bank_id = :bankId "
 			+ "UNION ALL "
-			+ "SELECT 1 FROM slack_account_bank s WHERE s.bank_id = :bankId "
+			+ "SELECT 1 AS platform FROM slack_account_bank s WHERE s.bank_id = :bankId "
 			+ "UNION ALL "
-			+ "SELECT 1 FROM discord_account_bank d WHERE d.bank_id = :bankId) AS total", nativeQuery = true)
+			+ "SELECT 1 AS platform FROM discord_account_bank d WHERE d.bank_id = :bankId) AS total", nativeQuery = true)
 	int countPlatformConnectionsByBankId(@Param("bankId") String bankId);
+
 }

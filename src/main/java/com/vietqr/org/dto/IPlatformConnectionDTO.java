@@ -4,4 +4,5 @@ public interface IPlatformConnectionDTO {
     String getPlatformId();
     String getPlatformName();
     String getConnectionDetail();
+    String getPlatform();
 }
