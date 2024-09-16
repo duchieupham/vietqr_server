@@ -397,7 +397,7 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
             + " ) t ", nativeQuery = true)
     List<TerminalBankV2DTO> getTerminalByUserIdAndMerchantIds(String userId,
                                                               List<String> merchantIds);
-@Query(value = "SELECT "
+    @Query(value = "SELECT "
         + "terminalName "
         + "FROM ( "
         + "SELECT a.name AS terminalName "
@@ -411,4 +411,10 @@ public interface TerminalRepository extends JpaRepository<TerminalEntity, Long> 
         + "WHERE c.user_id = :userId AND a.merchant_id = :merchantId "
         + " ) t ", nativeQuery = true)
     List<String> getTerminalByUserIdAndMerchantId(String userId, String merchantId);
+
+    @Query(value = "SELECT a.id AS terminalId, a.name AS terminalName, "
+            + "a.merchant_id AS merchantId, a.code AS terminalCode "
+            + "FROM terminal a "
+            + "WHERE a.merchant_id IN (:merchantIds)", nativeQuery = true)
+    List<ITerminalOverviewDTO> getTerminalOverviewByMerchantIds(List<String> merchantIds);
 }
