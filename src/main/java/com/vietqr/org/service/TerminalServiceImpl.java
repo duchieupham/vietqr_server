@@ -257,6 +257,11 @@ public class TerminalServiceImpl implements TerminalService {
     }
 
     @Override
+    public List<ITerminalOverviewDTO> getTerminalOverviewByMerchantIds(List<String> merchantIds) {
+        return repo.getTerminalOverviewByMerchantIds(merchantIds);
+    }
+
+    @Override
     public TerminalEntity getTerminalByTerminalId(String terminalId) {
         return repo.getTerminalByTerminalId(terminalId);
     }
