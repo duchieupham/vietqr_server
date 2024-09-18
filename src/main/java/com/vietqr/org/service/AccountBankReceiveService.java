@@ -2,8 +2,10 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
+import com.vietqr.org.dto.qrfeed.IAccountBankDTO;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.entity.AccountBankReceiveEntity;
@@ -205,4 +207,8 @@ public interface AccountBankReceiveService {
 	void updateEnableVoiceByBankIds(List<String> bankIds, String userId);
 	List<PlatformConnectionDTO> getPlatformConnectionsByBankId(String bankId, int offset, int size);
 	int countPlatformConnectionsByBankId(String bankId);
+
+	List<IAccountBankDTO> getListBankAndNotificationTypesByUserIdAndByPushNotification(String userId);
+
+	void updateNotificationTypes(String userId, String bankId, List<String> notificationTypes) throws JsonProcessingException;
 }

@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
+import com.vietqr.org.dto.qrfeed.IAccountBankDTO;
 import com.vietqr.org.util.DateTimeUtil;
 import com.vietqr.org.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -671,6 +674,18 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     public int countPlatformConnectionsByBankId(String bankId) {
         return repo.countPlatformConnectionsByBankId(bankId);
     }
+
+    @Override
+    public List<IAccountBankDTO> getListBankAndNotificationTypesByUserIdAndByPushNotification(String userId) {
+        return repo.getListBankAndNotificationTypesByUserIdAndByPushNotification(userId);
+    }
+
+    @Override
+    public void updateNotificationTypes(String userId, String bankId, List<String> notificationTypes) throws JsonProcessingException {
+        String notificationTypesJson = new ObjectMapper().writeValueAsString(notificationTypes);
+        repo.updateNotificationTypes(userId, bankId, notificationTypesJson);
+    }
+
 
     private List<PlatformConnectionDTO> convertToDTO(List<IPlatformConnectionDTO> platformConnections) {
         return platformConnections.stream().map(conn -> new PlatformConnectionDTO(

@@ -113,15 +113,30 @@ public class MqttListenerService implements MqttCallback {
     }
 
     // Phương thức tìm kiếm handler phù hợp
+//    private MqttTopicHandlerScanner.MethodHandlerPair findHandlerForTopic(String topic) {
+//        for (Map.Entry<String, MqttTopicHandlerScanner.MethodHandlerPair> entry : topicHandlers.entrySet()) {
+//            String key = entry.getKey();
+//            // Sử dụng phương thức isTopicMatching để tìm chủ đề phù hợp
+//            if (isTopicMatching(key, topic)) {
+//                return entry.getValue();
+//            }
+//        }
+//        return null;
+//    }
+    // Phương thức tìm kiếm handler phù hợp
     private MqttTopicHandlerScanner.MethodHandlerPair findHandlerForTopic(String topic) {
+        MqttTopicHandlerScanner.MethodHandlerPair matchedHandler = null;
+
         for (Map.Entry<String, MqttTopicHandlerScanner.MethodHandlerPair> entry : topicHandlers.entrySet()) {
             String key = entry.getKey();
             // Sử dụng phương thức isTopicMatching để tìm chủ đề phù hợp
             if (isTopicMatching(key, topic)) {
-                return entry.getValue();
+                matchedHandler = entry.getValue();
+                break;
             }
         }
-        return null;
+        return matchedHandler;
     }
+
 
 }
