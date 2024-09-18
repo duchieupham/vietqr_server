@@ -6,6 +6,7 @@ import javax.transaction.Transactional;
 
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
+import com.vietqr.org.dto.qrfeed.IAccountBankDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -859,5 +860,18 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "UNION ALL "
 			+ "SELECT 1 AS platform FROM discord_account_bank d WHERE d.bank_id = :bankId) AS total", nativeQuery = true)
 	int countPlatformConnectionsByBankId(@Param("bankId") String bankId);
+
+	@Modifying
+	@Transactional
+	@Query(value = "UPDATE account_bank_receive SET notification_types = :notificationTypes " +
+			"WHERE user_id = :userId AND id = :bankId", nativeQuery = true)
+	void updateNotificationTypes(@Param("userId") String userId,
+								 @Param("bankId") String bankId,
+								 @Param("notificationTypes") String notificationTypes);
+
+	@Query(value = "SELECT distinct abr.* FROM account_bank_receive abr " +
+			"JOIN account_bank_receive_share abrs ON abr.id = abrs.bank_id " +
+			"WHERE abr.is_authenticated = true AND abrs.is_owner = true AND abr.user_id = :userId", nativeQuery = true)
+	List<AccountBankReceiveEntity> getFullAccountBankReceiveByUserId(@Param("userId") String userId);
 
 }

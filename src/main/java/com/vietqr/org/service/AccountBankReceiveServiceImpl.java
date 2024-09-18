@@ -4,8 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
+import com.vietqr.org.dto.qrfeed.IAccountBankDTO;
 import com.vietqr.org.util.DateTimeUtil;
 import com.vietqr.org.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +18,15 @@ import org.springframework.stereotype.Service;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.repository.AccountBankReceiveRepository;
 
+import javax.transaction.Transactional;
+
 @Service
 public class AccountBankReceiveServiceImpl implements AccountBankReceiveService {
 
     @Autowired
     AccountBankReceiveRepository repo;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public List<IBankShareDTO> getBankShareInfoByUserId(String userId) {
@@ -672,6 +680,53 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
         return repo.countPlatformConnectionsByBankId(bankId);
     }
 
+
+    @Override
+    public List<AccountBankReceiveEntity> getFullAccountBankReceiveByUserId(String userId) {
+        List<AccountBankReceiveEntity> entities = repo.getFullAccountBankReceiveByUserId(userId);
+        return entities.stream().map(this::convertNullsToEmpty).collect(Collectors.toList());
+    }
+
+    private AccountBankReceiveEntity convertNullsToEmpty(AccountBankReceiveEntity entity) {
+        if (entity.getId() == null) entity.setId("");
+        if (entity.getBankTypeId() == null) entity.setBankTypeId("");
+        if (entity.getBankAccount() == null) entity.setBankAccount("");
+        if (entity.getBankAccountName() == null) entity.setBankAccountName("");
+        if (entity.getNationalId() == null) entity.setNationalId("");
+        if (entity.getPhoneAuthenticated() == null) entity.setPhoneAuthenticated("");
+        if (entity.getUserId() == null) entity.setUserId("");
+        if (entity.getUsername() == null) entity.setUsername("");
+        if (entity.getPassword() == null) entity.setPassword("");
+        if (entity.getEwalletToken() == null) entity.setEwalletToken("");
+        if (entity.getCustomerId() == null) entity.setCustomerId("");
+        if (entity.getVso() == null) entity.setVso("");
+        if (entity.getNotificationTypes() != null && !entity.getNotificationTypes().isEmpty()) {
+            try {
+                List<String> notificationTypes = objectMapper.readValue(entity.getNotificationTypes(), new TypeReference<List<String>>() {});
+                entity.setNotificationTypes(notificationTypes.toString()); // Convert to proper format ["CREDIT","DEBIT","RECON"]
+            } catch (Exception e) {
+                entity.setNotificationTypes("");
+            }
+        } else {
+            entity.setNotificationTypes("");
+        }
+        if (entity.getTerminalLength() == 0) entity.setTerminalLength(0);
+        if (entity.getValidFeeFrom() == 0) entity.setValidFeeFrom(0L);
+        if (entity.getValidFeeTo() == null) entity.setValidFeeTo(0L);
+        if (entity.getTimeCreated() == null) entity.setTimeCreated(0L);
+        if (entity.getPushNotification() == null) entity.setPushNotification(1);
+        if (entity.getEnableVoice() == null) entity.setEnableVoice(true);
+        if (!entity.isAuthenticated()) entity.setAuthenticated(false);
+        if (!entity.isSync()) entity.setSync(false);
+        if (!entity.isWpSync()) entity.setWpSync(false);
+        if (!entity.isStatus()) entity.setStatus(false);
+        if (!entity.isMmsActive()) entity.setMmsActive(false);
+        if (!entity.isRpaSync()) entity.setRpaSync(false);
+
+        return entity;
+    }
+
+
     private List<PlatformConnectionDTO> convertToDTO(List<IPlatformConnectionDTO> platformConnections) {
         return platformConnections.stream().map(conn -> new PlatformConnectionDTO(
                 conn.getPlatformId(),
@@ -679,6 +734,33 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
                 conn.getConnectionDetail(),
                 conn.getPlatform()
         )).collect(Collectors.toList());
+    }
+
+    @Transactional
+    @Override
+    public void updateNotificationTypes(String userId, String bankId, List<String> notificationTypes) throws JsonProcessingException {
+
+        List<String> cleanedNotificationTypes = notificationTypes.stream()
+                .filter(type -> type != null && !type.trim().isEmpty())  // Loại bỏ giá trị null hoặc chuỗi rỗng
+                .distinct()  // Đảm bảo các giá trị là duy nhất
+                .collect(Collectors.toList());
+        String notificationTypesJson;
+        if (isJsonArray(notificationTypes)) {
+            notificationTypesJson = objectMapper.writeValueAsString(cleanedNotificationTypes);
+        } else {
+            // Nếu không phải JSON, chuyển đổi thành JSON
+            notificationTypesJson = objectMapper.writeValueAsString(cleanedNotificationTypes);
+        }
+        repo.updateNotificationTypes(userId, bankId, notificationTypesJson);
+    }
+
+    private boolean isJsonArray(List<String> notificationTypes) {
+        try {
+            objectMapper.readValue(notificationTypes.toString(), new TypeReference<List<String>>() {});
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 }

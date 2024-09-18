@@ -28,7 +28,7 @@ public interface TransactionRefundRepository extends JpaRepository<TransactionRe
             + "ORDER BY time ASC LIMIT 1", nativeQuery = true)
     TransactionCheckMultiTimesDTO getTransactionRefundCheck(String bankAccount, String referenceNumber);
 
-    @Query(value = "SELECT id "
+    @Query(value = "SELECT ref_number "
             + "FROM transaction_refund "
             + "WHERE bank_account = :bankAccount "
             + "AND status = 1 AND reference_number = :referenceNumber "

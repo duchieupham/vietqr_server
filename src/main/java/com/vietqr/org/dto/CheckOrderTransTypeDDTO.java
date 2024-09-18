@@ -12,6 +12,7 @@ public class CheckOrderTransTypeDDTO {
     private Long timePaid;
     private String terminalCode;
     private String note;
+    private String refundFrom;
 
     public CheckOrderTransTypeDDTO() {
     }
@@ -30,6 +31,14 @@ public class CheckOrderTransTypeDDTO {
         this.timePaid = timePaid;
         this.terminalCode = terminalCode;
         this.note = note;
+    }
+
+    public String getRefundFrom() {
+        return refundFrom;
+    }
+
+    public void setRefundFrom(String refundFrom) {
+        this.refundFrom = refundFrom;
     }
 
     public String getReferenceNumber() {
