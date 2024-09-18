@@ -358,8 +358,8 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 					.antMatchers(HttpMethod.POST, "/api/accounts/confirm-otp").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/images-invoice/**").permitAll()
 					.antMatchers(HttpMethod.GET, "/api/images-invoice/**").permitAll()
+					.antMatchers(HttpMethod.GET, "/api/customer-error-log/example").permitAll()
 					.antMatchers(HttpMethod.GET, "/status").permitAll()
-
 					.anyRequest().authenticated();
 		}
 

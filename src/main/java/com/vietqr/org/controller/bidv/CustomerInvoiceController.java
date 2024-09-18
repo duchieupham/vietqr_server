@@ -12,9 +12,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
+import com.vietqr.org.dto.mapper.ErrorCodeMapper;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.service.*;
 import com.vietqr.org.service.mqtt.MqttMessagingService;
@@ -120,6 +122,9 @@ public class CustomerInvoiceController {
 
     @Autowired
     BankTypeService bankTypeService;
+
+    @Autowired
+    CustomerErrorLogService customerErrorLogService;
 
     @Autowired
     LarkAccountBankService larkAccountBankService;
@@ -747,15 +752,19 @@ public class CustomerInvoiceController {
                         for (BankReceiveConnectionEntity bankReceiveConnectionEntity : bankReceiveConnectionEntities) {
                             MerchantConnectionEntity merchantConnectionEntity = merchantConnectionService
                                     .getMerchanConnectionById(bankReceiveConnectionEntity.getMidConnectId());
+                            String errorCode = customerErrorLogService.getRetryErrorsByCustomerId(merchantConnectionEntity.getMid());
+                            List<String> errorCodes = new ArrayList<>();
+                            errorCodes = mapperErrors(errorCode);
                             if (merchantConnectionEntity != null) {
+                                List<String> finalErrorCodes = errorCodes;
                                 executorService.submit(() -> pushNewTransactionToCustomerSyncV2(transReceiveId, merchantConnectionEntity,
-                                        transactionBankCustomerDTO));
+                                        transactionBankCustomerDTO, 1, finalErrorCodes));
                             }
                         }
                     } finally {
                         executorService.shutdown(); // Yêu cầu các luồng dừng khi hoàn tất công việc
                         try {
-                            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                            if (!executorService.awaitTermination(700, TimeUnit.SECONDS)) {
                                 executorService.shutdownNow(); // Nếu vẫn chưa dừng sau 60 giây, cưỡng chế dừng
                             }
                         } catch (InterruptedException e) {
@@ -771,20 +780,24 @@ public class CustomerInvoiceController {
     }
 
     private void pushNewTransactionToCustomerSyncV2(String transReceiveId, MerchantConnectionEntity entity,
-                                                    TransactionBankCustomerDTO dto) {
+                                                    TransactionBankCustomerDTO dto, int retryCount, List<String> errorCodes) {
         ResponseMessageDTO result = null;
         TransactionLogResponseDTO transactionLogResponseDTO = new TransactionLogResponseDTO();
-        // final ResponseMessageDTO[] results = new ResponseMessageDTO[1];
-        // final List<ResponseMessageDTO> results = new ArrayList<>();
-        // final String[] msg = new String[1];
-//        if (retry > 1 && retry <= 5) {
-//            try {
-//                Thread.sleep(12000); // Sleep for 12000 milliseconds (12 seconds)
-//            } catch (InterruptedException e) {
-//                // Handle the exception if the thread is interrupted during sleep
-//                e.printStackTrace();
-//            }
-//        }
+        if (retryCount > 1 && retryCount <= 5) {
+            try {
+                Thread.sleep(1000 * (retryCount - 1) + retryCount); // Sleep for 12000 milliseconds (12 seconds)
+            } catch (InterruptedException e) {
+                // Handle the exception if the thread is interrupted during sleep
+                e.printStackTrace();
+            }
+        } else if (retryCount > 5 && retryCount <= 10) {
+            try {
+                Thread.sleep(60000);
+            } catch (InterruptedException e) {
+                // Handle the exception if the thread is interrupted during sleep
+                e.printStackTrace();
+            }
+        }
         long time = DateTimeUtil.getCurrentDateTimeUTC();
         try {
             transactionLogResponseDTO.setTimeRequest(DateTimeUtil.getCurrentDateTimeUTC());
@@ -866,6 +879,16 @@ public class CustomerInvoiceController {
                 String json = response.bodyToMono(String.class).block();
                 System.out.println("Response pushNewTransactionToCustomerSync: " + json);
                 logger.info("Response pushNewTransactionToCustomerSync: " + json + " status: " + response.statusCode());
+                String errorCode = validateFormatCallbackResponse(json);
+                if (!StringUtil.isNullOrEmpty(errorCode)) {
+                    // retry callback
+                    if (Objects.nonNull(errorCodes) && errorCodes.contains(errorCode)) {
+                        if (retryCount < 10) {
+                            pushNewTransactionToCustomerSyncV2(transReceiveId, entity,
+                                    dto, ++retryCount, errorCodes);
+                        }
+                    }
+                }
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode rootNode = objectMapper.readTree(json);
                 if (rootNode.get("object") != null) {
@@ -881,13 +904,16 @@ public class CustomerInvoiceController {
             } else {
                 String json = response.bodyToMono(String.class).block();
                 // nếu trả sai format retry callback
-//                if (!validateFormatCallbackResponse(json)) {
-//                    // retry callback
-//                    if (retry < 5) {
-//                        pushNewTransactionToCustomerSyncV2(transReceiveId, entity,
-//                                dto, ++retry);
-//                    }
-//                }
+                String errorCode = validateFormatCallbackResponse(json);
+                if (!StringUtil.isNullOrEmpty(errorCode)) {
+                    // retry callback
+                    if (Objects.nonNull(errorCodes) && errorCodes.contains(errorCode)) {
+                        if (retryCount < 10) {
+                            pushNewTransactionToCustomerSyncV2(transReceiveId, entity,
+                                    dto, ++retryCount, errorCodes);
+                        }
+                    }
+                }
                 System.out.println("Response pushNewTransactionToCustomerSync: " + json);
                 logger.info("Response pushNewTransactionToCustomerSync: " + json + " status: " + response.statusCode());
                 result = new ResponseMessageDTO("FAILED", "E05 - " + json);
@@ -903,10 +929,10 @@ public class CustomerInvoiceController {
                             + " at: " + responseTime);
 
 //            // retry callback
-//            if (retry < 5) {
-//                pushNewTransactionToCustomerSyncV2(transReceiveId, entity,
-//                        dto, ++retry);
-//            }
+            if (retryCount < 10) {
+                pushNewTransactionToCustomerSyncV2(transReceiveId, entity,
+                        dto, ++retryCount, errorCodes);
+            }
         } finally {
             if (result != null) {
                 UUID logUUID = UUID.randomUUID();
@@ -1225,15 +1251,32 @@ public class CustomerInvoiceController {
                 accountCustomerBankEntities = accountCustomerBankService
                         .getAccountCustomerBankByBankId(accountBankEntity.getId());
                 if (accountCustomerBankEntities != null && !accountCustomerBankEntities.isEmpty()) {
-                    for (AccountCustomerBankEntity accountCustomerBankEntity : accountCustomerBankEntities) {
-                        CustomerSyncEntity customerSyncEntity = customerSyncService
-                                .getCustomerSyncById(accountCustomerBankEntity.getCustomerSyncId());
-                        if (customerSyncEntity != null) {
-                            System.out.println("customerSyncEntity: " + customerSyncEntity.getId() + " - "
-                                    + customerSyncEntity.getInformation());
-                            result = pushNewTransactionToCustomerSync(transactionUUID, customerSyncEntity,
-                                    transactionBankCustomerDTO,
-                                    time);
+                    int numThread = accountCustomerBankEntities.size();
+                    ExecutorService executorService = Executors.newFixedThreadPool(numThread);
+                    try {
+                        for (AccountCustomerBankEntity accountCustomerBankEntity : accountCustomerBankEntities) {
+                            CustomerSyncEntity customerSyncEntity = customerSyncService
+                                    .getCustomerSyncById(accountCustomerBankEntity.getCustomerSyncId());
+                            if (customerSyncEntity != null) {
+                                String retryErrors = customerErrorLogService.getRetryErrorsByCustomerId(customerSyncEntity.getId());
+                                List<String> errors = new ArrayList<>();
+                                errors = mapperErrors(retryErrors);
+                                System.out.println("customerSyncEntity: " + customerSyncEntity.getId() + " - "
+                                        + customerSyncEntity.getInformation());
+                                List<String> finalErrors = errors;
+                                executorService.submit(() -> pushNewTransactionToCustomerSync(transactionUUID, customerSyncEntity,
+                                        transactionBankCustomerDTO,
+                                        time, 1, finalErrors));
+                            }
+                        }
+                    } finally {
+                        executorService.shutdown(); // Yêu cầu các luồng dừng khi hoàn tất công việc
+                        try {
+                            if (!executorService.awaitTermination(700, TimeUnit.SECONDS)) {
+                                executorService.shutdownNow(); // Nếu vẫn chưa dừng sau 60 giây, cưỡng chế dừng
+                            }
+                        } catch (InterruptedException e) {
+                            executorService.shutdownNow(); // Nếu bị ngắt khi chờ, cưỡng chế dừng
                         }
                     }
                 }
@@ -1365,6 +1408,24 @@ public class CustomerInvoiceController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    private List<String> mapperErrors(String errors) {
+        List<String> result = new ArrayList<>();
+        try {
+            if (StringUtil.isNullOrEmpty(errors)) {
+                ObjectMapper mapper = new ObjectMapper();
+                List<ErrorCodeMapper> list = mapper.readValue(errors, new TypeReference<List<ErrorCodeMapper>>() {
+                });
+                for (ErrorCodeMapper dto : list) {
+                    result.add(dto.getErrorCode());
+                }
+            }
+
+        } catch (Exception e) {
+            logger.error("mapperErrors: Error: " + e.toString());
+        }
+        return result;
+    }
+
     // API remove invoice
     @DeleteMapping("customer-va/invoice/remove")
     public ResponseEntity<ResponseMessageDTO> removeInvoice(
@@ -1392,6 +1453,11 @@ public class CustomerInvoiceController {
         HttpStatus httpStatus = null;
         try {
             String customerId = customerInvoiceService.getCustomerIdByBillId(dto.getBillId());
+            if ("0".equals(dto.getAmount())) {
+                dto.setAmount("");
+            } else {
+                dto.setAmount(dto.getAmount() + "");
+            }
             result = CustomerVaUtil.generateVaInvoiceVietQR(dto, customerId);
             if (result.getStatus().equals("SUCCESS")) {
                 httpStatus = HttpStatus.OK;
@@ -1704,15 +1770,32 @@ public class CustomerInvoiceController {
                 accountCustomerBankEntities = accountCustomerBankService
                         .getAccountCustomerBankByBankId(accountBankEntity.getId());
                 if (accountCustomerBankEntities != null && !accountCustomerBankEntities.isEmpty()) {
-                    for (AccountCustomerBankEntity accountCustomerBankEntity : accountCustomerBankEntities) {
-                        CustomerSyncEntity customerSyncEntity = customerSyncService
-                                .getCustomerSyncById(accountCustomerBankEntity.getCustomerSyncId());
-                        if (customerSyncEntity != null) {
-                            System.out.println("customerSyncEntity: " + customerSyncEntity.getId() + " - "
-                                    + customerSyncEntity.getInformation());
-                            result = pushNewTransactionToCustomerSync(transReceiveId, customerSyncEntity,
-                                    transactionBankCustomerDTO,
-                                    time);
+                    int numThread = accountCustomerBankEntities.size();
+                    ExecutorService executorService = Executors.newFixedThreadPool(numThread);
+                    try {
+                        for (AccountCustomerBankEntity accountCustomerBankEntity : accountCustomerBankEntities) {
+                            CustomerSyncEntity customerSyncEntity = customerSyncService
+                                    .getCustomerSyncById(accountCustomerBankEntity.getCustomerSyncId());
+                            if (customerSyncEntity != null) {
+                                String retryErrors = customerErrorLogService.getRetryErrorsByCustomerId(customerSyncEntity.getId());
+                                List<String> errors = new ArrayList<>();
+                                errors = mapperErrors(retryErrors);
+                                System.out.println("customerSyncEntity: " + customerSyncEntity.getId() + " - "
+                                        + customerSyncEntity.getInformation());
+                                List<String> finalErrors = errors;
+                                executorService.submit(() -> pushNewTransactionToCustomerSync(transReceiveId, customerSyncEntity,
+                                        transactionBankCustomerDTO,
+                                        time, 1, finalErrors));
+                            }
+                        }
+                    } finally {
+                        executorService.shutdown(); // Yêu cầu các luồng dừng khi hoàn tất công việc
+                        try {
+                            if (!executorService.awaitTermination(700, TimeUnit.SECONDS)) {
+                                executorService.shutdownNow(); // Nếu vẫn chưa dừng sau 60 giây, cưỡng chế dừng
+                            }
+                        } catch (InterruptedException e) {
+                            executorService.shutdownNow(); // Nếu bị ngắt khi chờ, cưỡng chế dừng
                         }
                     }
                 }
@@ -1727,9 +1810,24 @@ public class CustomerInvoiceController {
 
     private ResponseMessageDTO pushNewTransactionToCustomerSync(String transReceiveId, CustomerSyncEntity entity,
                                                                 TransactionBankCustomerDTO dto,
-                                                                long time) {
+                                                                long time, int retryCount, List<String> errorCodes) {
         ResponseMessageDTO result = null;
         TransactionLogResponseDTO transactionLogResponseDTO = new TransactionLogResponseDTO();
+        if (retryCount > 1 && retryCount <= 5) {
+            try {
+                Thread.sleep(1000 * (retryCount - 1) + retryCount); // Sleep for 12000 milliseconds (12 seconds)
+            } catch (InterruptedException e) {
+                // Handle the exception if the thread is interrupted during sleep
+                e.printStackTrace();
+            }
+        } else if (retryCount > 5 && retryCount <= 10) {
+            try {
+                Thread.sleep(60000);
+            } catch (InterruptedException e) {
+                // Handle the exception if the thread is interrupted during sleep
+                e.printStackTrace();
+            }
+        }
         try {
             transactionLogResponseDTO.setTimeRequest(DateTimeUtil.getCurrentDateTimeUTC());
             logger.info("pushNewTransactionToCustomerSync: orderId: " +
@@ -1818,6 +1916,16 @@ public class CustomerInvoiceController {
                 String json = response.bodyToMono(String.class).block();
                 System.out.println("Response pushNewTransactionToCustomerSync: " + json);
                 logger.info("Response pushNewTransactionToCustomerSync: " + json + " status: " + response.statusCode());
+                String errorCode = validateFormatCallbackResponse(json);
+                if (!StringUtil.isNullOrEmpty(errorCode)) {
+                    // retry callback
+                    if (Objects.nonNull(errorCodes) && errorCodes.contains(errorCode)) {
+                        if (retryCount < 10) {
+                            pushNewTransactionToCustomerSync(transReceiveId, entity,
+                                    dto, time, ++retryCount, errorCodes);
+                        }
+                    }
+                }
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode rootNode = objectMapper.readTree(json);
                 if (rootNode.get("object") != null) {
@@ -1834,6 +1942,16 @@ public class CustomerInvoiceController {
                 String json = response.bodyToMono(String.class).block();
                 System.out.println("Response pushNewTransactionToCustomerSync: " + json);
                 logger.info("Response pushNewTransactionToCustomerSync: " + json + " status: " + response.statusCode());
+                String errorCode = validateFormatCallbackResponse(json);
+                if (!StringUtil.isNullOrEmpty(errorCode)) {
+                    // retry callback
+                    if (Objects.nonNull(errorCodes) && errorCodes.contains(errorCode)) {
+                        if (retryCount < 10) {
+                            pushNewTransactionToCustomerSync(transReceiveId, entity,
+                                    dto, time, ++retryCount, errorCodes);
+                        }
+                    }
+                }
                 result = new ResponseMessageDTO("FAILED", "E05 - " + json);
             }
         } catch (Exception e) {
@@ -1852,6 +1970,10 @@ public class CustomerInvoiceController {
                                 entity.getInformation() + " - "
                                 + e.toString()
                                 + " at: " + responseTime);
+            }
+            if (retryCount < 10) {
+                pushNewTransactionToCustomerSync(transReceiveId, entity,
+                        dto, time, ++retryCount, errorCodes);
             }
         } finally {
             if (result != null) {
@@ -2000,6 +2122,24 @@ public class CustomerInvoiceController {
                 logEntity.setUrlCallback(address);
                 transactionReceiveLogService.insert(logEntity);
             }
+        }
+        return result;
+    }
+
+    private String validateFormatCallbackResponse(String json) {
+        String result = "";
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode rootNode = objectMapper.readTree(json);
+            if (rootNode.has("error") &&
+                    rootNode.has("errorReason") &&
+                    rootNode.has("toastMessage") &&
+                    rootNode.has("object")) {
+                result = rootNode.get("errorReason").asText();
+            }
+        } catch (Exception e) {
+            logger.error("validateFormatCallbackResponse: ERROR: " +
+                    e.getMessage() + " at: " + System.currentTimeMillis());
         }
         return result;
     }
