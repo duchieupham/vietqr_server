@@ -873,4 +873,5 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			"JOIN account_bank_receive_share abrs ON abr.id = abrs.bank_id " +
 			"WHERE abr.is_authenticated = true AND abrs.is_owner = true AND abr.user_id = :userId", nativeQuery = true)
 	List<AccountBankReceiveEntity> getFullAccountBankReceiveByUserId(@Param("userId") String userId);
+
 }
