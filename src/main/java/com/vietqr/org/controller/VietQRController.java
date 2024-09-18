@@ -1693,7 +1693,7 @@ public class VietQRController {
 					if (rootNode.get("data").get("qrcode") != null) {
 						String qrCode = rootNode.get("data").get("qrcode").asText();
 						logger.info("requestVietQRMMS: RESPONSE qrcode: " + qrCode);
-						ResponseMessageDTO responseMessageDTO = new ResponseMessageDTO("SUCCESS", qrCode);
+						result = new ResponseMessageDTO("SUCCESS", qrCode);
 					} else {
 						logger.info("requestVietQRMMS: RESPONSE qrcode is null");
 					}
@@ -1707,7 +1707,7 @@ public class VietQRController {
 				JsonNode rootNode = objectMapper.readTree(json);
 				if (rootNode.get("errorCode") != null) {
 					String getMessageBankCode = getMessageBankCode(rootNode.get("errorCode").asText());
-						ResponseMessageDTO responseMessageDTO = new ResponseMessageDTO("FAILED", getMessageBankCode);
+					result = new ResponseMessageDTO("FAILED", getMessageBankCode);
 				} else {
 					logger.info("requestVietQRMMS: RESPONSE data is null");
 				}
