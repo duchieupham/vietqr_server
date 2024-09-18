@@ -3282,8 +3282,10 @@ public class TransactionController {
                                                                 item.getReferenceNumber());
                                                 if (StringUtil.isNullOrEmpty(checkExistRefundReferenceNumber)) {
                                                     checkOrderDTO.setType(item.getType());
+                                                    checkOrderDTO.setRefundFrom("");
                                                 } else {
                                                     checkOrderDTO.setType(6);
+                                                    checkOrderDTO.setRefundFrom(checkExistRefundReferenceNumber);
                                                 }
                                                 checkOrderDTO.setTransType(item.getTransType());
                                                 return checkOrderDTO;
@@ -3353,8 +3355,10 @@ public class TransactionController {
                                                                 item.getReferenceNumber());
                                                 if (StringUtil.isNullOrEmpty(checkExistRefundReferenceNumber)) {
                                                     checkOrderDTO.setType(item.getType());
+                                                    checkOrderDTO.setRefundFrom("");
                                                 } else {
                                                     checkOrderDTO.setType(6);
+                                                    checkOrderDTO.setRefundFrom(checkExistRefundReferenceNumber);
                                                 }
                                                 checkOrderDTO.setTransType(item.getTransType());
                                                 return checkOrderDTO;
@@ -3491,8 +3495,10 @@ public class TransactionController {
                                                                 item.getReferenceNumber());
                                                 if (StringUtil.isNullOrEmpty(checkExistRefundReferenceNumber)) {
                                                     checkOrderDTO.setType(item.getType());
+                                                    checkOrderDTO.setRefundFrom("");
                                                 } else {
                                                     checkOrderDTO.setType(6);
+                                                    checkOrderDTO.setRefundFrom(checkExistRefundReferenceNumber);
                                                 }
                                                 checkOrderDTO.setTransType(item.getTransType());
                                                 return checkOrderDTO;

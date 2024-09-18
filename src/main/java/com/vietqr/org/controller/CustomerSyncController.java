@@ -1,22 +1,27 @@
 package com.vietqr.org.controller;
 
+import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import com.vietqr.org.dto.*;
+import com.vietqr.org.dto.mapper.ErrorCodeMapper;
+import com.vietqr.org.entity.*;
+import com.vietqr.org.service.*;
+import com.vietqr.org.util.DateTimeUtil;
 import com.vietqr.org.util.StringUtil;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -25,22 +30,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vietqr.org.entity.AccountBankReceiveEntity;
-import com.vietqr.org.entity.AccountCustomerBankEntity;
-import com.vietqr.org.entity.AccountCustomerEntity;
-import com.vietqr.org.entity.BankReceivePersonalEntity;
-import com.vietqr.org.entity.CustomerSyncEntity;
-import com.vietqr.org.entity.CustomerSyncMappingEntity;
-import com.vietqr.org.service.AccountBankReceivePersonalService;
-import com.vietqr.org.service.AccountBankReceiveService;
-import com.vietqr.org.service.AccountCustomerBankService;
-import com.vietqr.org.service.AccountCustomerService;
-import com.vietqr.org.service.CustomerSyncMappingService;
-import com.vietqr.org.service.CustomerSyncService;
-import com.vietqr.org.service.TerminalBankService;
 import com.vietqr.org.util.EnvironmentUtil;
 
 import reactor.core.publisher.Mono;
+
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @CrossOrigin
@@ -68,6 +62,93 @@ public class CustomerSyncController {
 
     @Autowired
     AccountCustomerService accountCustomerService;
+
+    @Autowired
+    CustomerErrorLogService customerErrorLogService;
+
+    private static final List<String> VALID_ERROR_CODES = Arrays.asList("R", "S", "F", "W");
+
+    @GetMapping("/customer-error-log/example")
+    public ResponseEntity<InputStreamResource> getCustomerErrorLogExample(HttpServletResponse response) throws IOException {
+        ClassPathResource file = new ClassPathResource("templates/CustomerErrorLog.xlsx");
+        if (!file.exists()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        // Đọc file Excel và tạo InputStreamResource
+        InputStreamResource resource = new InputStreamResource(file.getInputStream());
+
+        // Thiết lập headers để trả về file
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=CustomerErrorLog.xlsx");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentLength(file.contentLength())
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
+    }
+
+    @PostMapping("/customer-error-log/update")
+    public ResponseEntity<ResponseObjectDTO> updateCustomerErrorLog(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("customerId") String customerId) {
+        ResponseObjectDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            List<CustomerErrorLogInsertDTO> errorDescriptions = new ArrayList<>();
+            try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+                // Lấy sheet có tên ErrorDescription
+                Sheet sheet = workbook.getSheet("ErrorDescription");
+
+                if (sheet == null) {
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
+
+                // Bỏ qua hàng tiêu đề (header)
+                for (int i = sheet.getFirstRowNum() + 1; i <= sheet.getLastRowNum(); i++) {
+                    Row row = sheet.getRow(i);
+                    if (row != null) {
+                        // Lấy dữ liệu từ từng cột
+                        String groupCode = row.getCell(1).getStringCellValue();
+                        String errorCode = row.getCell(2).getStringCellValue();
+                        String errorDescription = row.getCell(3).getStringCellValue();
+                        if (!VALID_ERROR_CODES.contains(groupCode)) {
+                            // Trả về thông báo chi tiết về dòng nào có ErrorCode không hợp lệ
+                            result = new ResponseObjectDTO("FAILED", "E167");
+                            httpStatus = HttpStatus.BAD_REQUEST;
+                            return new ResponseEntity<>(result, httpStatus);
+                        }
+                        // Tạo đối tượng ErrorDescription và thêm vào danh sách
+                        CustomerErrorLogInsertDTO error = new CustomerErrorLogInsertDTO(groupCode, errorCode, errorDescription);
+                        errorDescriptions.add(error);
+                    }
+                }
+            }
+            Map<String, List<CustomerErrorLogInsertDTO>> groupedByErrorCode = errorDescriptions.stream()
+                    .collect(Collectors.groupingBy(CustomerErrorLogInsertDTO::getGroupCode));
+            List<CustomerErrorLogEntity> entities = new ArrayList<>();
+            for (Map.Entry<String, List<CustomerErrorLogInsertDTO>> entry : groupedByErrorCode.entrySet()) {
+                CustomerErrorLogEntity entity = new CustomerErrorLogEntity();
+                entity.setId(UUID.randomUUID().toString());
+                entity.setGroupCode(entry.getKey());
+                List<ErrorCodeMapper> errorCodeMappers = new ArrayList<>();
+                errorCodeMappers = entry.getValue().stream().map(e ->
+                        new ErrorCodeMapper(e.getErrorCode(), e.getErrorDescription())).collect(Collectors.toList());
+                entity.setErrorCodes(new ObjectMapper().writeValueAsString(errorCodeMappers));
+                entity.setCustomerSyncId(customerId);
+                entity.setTimeCreated(DateTimeUtil.getCurrentDateTimeUTC());
+                entities.add(entity);
+            }
+            customerErrorLogService.insertAll(entities);
+            result = new ResponseObjectDTO("SUCCESS", errorDescriptions);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("updateCustomerErrorLog: ERROR: " + e.toString());
+            result = new ResponseObjectDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
 
     @GetMapping("admin/customer-sync")
     public ResponseEntity<List<CustomerSyncListDTO>> getCustomerSyncList() {
