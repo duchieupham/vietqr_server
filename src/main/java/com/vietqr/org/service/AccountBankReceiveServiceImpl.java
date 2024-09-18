@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import com.vietqr.org.entity.AccountBankReceiveEntity;
 import com.vietqr.org.repository.AccountBankReceiveRepository;
 
+import javax.transaction.Transactional;
+
 @Service
 public class AccountBankReceiveServiceImpl implements AccountBankReceiveService {
 
@@ -679,13 +681,6 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     }
 
 
-
-    @Override
-    public void updateNotificationTypes(String userId, String bankId, List<String> notificationTypes) throws JsonProcessingException {
-        String notificationTypesJson = new ObjectMapper().writeValueAsString(notificationTypes);
-        repo.updateNotificationTypes(userId, bankId, notificationTypesJson);
-    }
-
     @Override
     public List<AccountBankReceiveEntity> getFullAccountBankReceiveByUserId(String userId) {
         List<AccountBankReceiveEntity> entities = repo.getFullAccountBankReceiveByUserId(userId);
@@ -739,6 +734,33 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
                 conn.getConnectionDetail(),
                 conn.getPlatform()
         )).collect(Collectors.toList());
+    }
+
+    @Transactional
+    @Override
+    public void updateNotificationTypes(String userId, String bankId, List<String> notificationTypes) throws JsonProcessingException {
+
+        List<String> cleanedNotificationTypes = notificationTypes.stream()
+                .filter(type -> type != null && !type.trim().isEmpty())  // Loại bỏ giá trị null hoặc chuỗi rỗng
+                .distinct()  // Đảm bảo các giá trị là duy nhất
+                .collect(Collectors.toList());
+        String notificationTypesJson;
+        if (isJsonArray(notificationTypes)) {
+            notificationTypesJson = objectMapper.writeValueAsString(cleanedNotificationTypes);
+        } else {
+            // Nếu không phải JSON, chuyển đổi thành JSON
+            notificationTypesJson = objectMapper.writeValueAsString(cleanedNotificationTypes);
+        }
+        repo.updateNotificationTypes(userId, bankId, notificationTypesJson);
+    }
+
+    private boolean isJsonArray(List<String> notificationTypes) {
+        try {
+            objectMapper.readValue(notificationTypes.toString(), new TypeReference<List<String>>() {});
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 }
