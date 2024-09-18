@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.bidv.RequestCustomerVaDTO;
+import com.vietqr.org.dto.qrfeed.IAccountBankDTO;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.entity.bidv.CustomerVaEntity;
 import com.vietqr.org.service.*;
@@ -28,16 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.vietqr.org.dto.AccountBankReceiveDetailDTO.TransactionBankListDTO;
 
@@ -2591,4 +2583,55 @@ public class AccountBankReceiveController {
 
         return new ResponseEntity<>(result, httpStatus);
     }
+
+    @GetMapping("/bank-notification/{userId}")
+    public ResponseEntity<List<AccountBankDTO>> getListBankAndNotificationTypesByUserIdAndByPushNotification(@PathVariable("userId") String userId) {
+        HttpStatus httpStatus;
+        List<AccountBankDTO> result = new ArrayList<>();
+
+        try {
+            List<IAccountBankDTO> accountBankDTOs = accountBankReceiveService.getListBankAndNotificationTypesByUserIdAndByPushNotification(userId);
+            result = accountBankDTOs.stream().map(bank -> {
+                AccountBankDTO dto = new AccountBankDTO();
+                dto.setBankId(bank.getId() != null ? bank.getId() : "");
+                dto.setNotificationTypes(bank.getNotificationTypes() != null ? bank.getNotificationTypes() : "");  // If null, set to empty string
+                return dto;
+            }).collect(Collectors.toList());
+
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("PlatformConnectionController: ERROR: fetching account banks: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @PutMapping("/bank-notification/update")
+    public ResponseEntity<ResponseMessageDTO> updateBankNotification(@RequestBody BankNotificationUpdateDTO dto) {
+        ResponseMessageDTO result;
+        HttpStatus httpStatus;
+
+        try {
+            if (dto != null && dto.getUserId() != null && !dto.getUserId().isEmpty() &&
+                    dto.getBankId() != null && !dto.getBankId().isEmpty() &&
+                    dto.getNotificationTypes() != null && !dto.getNotificationTypes().isEmpty()) {
+                accountBankReceiveService.updateNotificationTypes(dto.getUserId(), dto.getBankId(), dto.getNotificationTypes());
+
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            } else {
+                result = new ResponseMessageDTO("FAILED", "E05");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("Error updating bank notification: " + e.getMessage());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
 }

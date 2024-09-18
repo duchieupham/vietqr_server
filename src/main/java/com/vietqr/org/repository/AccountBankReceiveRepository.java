@@ -6,6 +6,7 @@ import javax.transaction.Transactional;
 
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
+import com.vietqr.org.dto.qrfeed.IAccountBankDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -860,4 +861,15 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "SELECT 1 AS platform FROM discord_account_bank d WHERE d.bank_id = :bankId) AS total", nativeQuery = true)
 	int countPlatformConnectionsByBankId(@Param("bankId") String bankId);
 
+	@Query(value = "SELECT COALESCE(id, '') AS id, COALESCE(notification_types, '') AS notification_types " +
+			"FROM account_bank_receive WHERE user_id = :userId and push_notification = '1' ", nativeQuery = true)
+	List<IAccountBankDTO> getListBankAndNotificationTypesByUserIdAndByPushNotification(@Param("userId") String userId);
+
+	@Modifying
+	@Transactional
+	@Query(value = "UPDATE account_bank_receive SET notification_types = :notificationTypes " +
+			"WHERE user_id = :userId AND id = :bankId", nativeQuery = true)
+	void updateNotificationTypes(@Param("userId") String userId,
+								 @Param("bankId") String bankId,
+								 @Param("notificationTypes") String notificationTypes);
 }

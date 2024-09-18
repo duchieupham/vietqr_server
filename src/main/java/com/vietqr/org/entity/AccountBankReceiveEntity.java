@@ -100,6 +100,9 @@ public class AccountBankReceiveEntity implements Serializable {
 	@Column(name = "vso")
 	private String vso = "";
 
+	@Column(name = "notificationTypes")
+	private String notificationTypes;
+
 	public AccountBankReceiveEntity() {
 		super();
 	}
@@ -362,6 +365,14 @@ public class AccountBankReceiveEntity implements Serializable {
 
 	public void setEnableVoice(Boolean enableVoice) {
 		this.enableVoice = enableVoice;
+	}
+
+	public String getNotificationTypes() {
+		return notificationTypes;
+	}
+
+	public void setNotificationTypes(String notificationTypes) {
+		this.notificationTypes = notificationTypes;
 	}
 
 	@Override
