@@ -861,10 +861,6 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "SELECT 1 AS platform FROM discord_account_bank d WHERE d.bank_id = :bankId) AS total", nativeQuery = true)
 	int countPlatformConnectionsByBankId(@Param("bankId") String bankId);
 
-	@Query(value = "SELECT COALESCE(id, '') AS id, COALESCE(notification_types, '') AS notification_types " +
-			"FROM account_bank_receive WHERE user_id = :userId and push_notification = '1' ", nativeQuery = true)
-	List<IAccountBankDTO> getListBankAndNotificationTypesByUserIdAndByPushNotification(@Param("userId") String userId);
-
 	@Modifying
 	@Transactional
 	@Query(value = "UPDATE account_bank_receive SET notification_types = :notificationTypes " +
@@ -872,4 +868,9 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	void updateNotificationTypes(@Param("userId") String userId,
 								 @Param("bankId") String bankId,
 								 @Param("notificationTypes") String notificationTypes);
+
+	@Query(value = "SELECT distinct abr.* FROM account_bank_receive abr " +
+			"JOIN account_bank_receive_share abrs ON abr.id = abrs.bank_id " +
+			"WHERE abr.is_authenticated = true AND abrs.is_owner = true AND abr.user_id = :userId", nativeQuery = true)
+	List<AccountBankReceiveEntity> getFullAccountBankReceiveByUserId(@Param("userId") String userId);
 }

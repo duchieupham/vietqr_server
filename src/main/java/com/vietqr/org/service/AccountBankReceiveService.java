@@ -208,7 +208,8 @@ public interface AccountBankReceiveService {
 	List<PlatformConnectionDTO> getPlatformConnectionsByBankId(String bankId, int offset, int size);
 	int countPlatformConnectionsByBankId(String bankId);
 
-	List<IAccountBankDTO> getListBankAndNotificationTypesByUserIdAndByPushNotification(String userId);
 
 	void updateNotificationTypes(String userId, String bankId, List<String> notificationTypes) throws JsonProcessingException;
+
+	List<AccountBankReceiveEntity> getFullAccountBankReceiveByUserId(String userId);
 }

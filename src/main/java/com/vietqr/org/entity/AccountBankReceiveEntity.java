@@ -155,6 +155,36 @@ public class AccountBankReceiveEntity implements Serializable {
 		this.vso = vso;
 	}
 
+	public AccountBankReceiveEntity(String id, String bankTypeId, String bankAccount, String bankAccountName, String nationalId, String phoneAuthenticated, int type, String userId, boolean isAuthenticated, boolean isSync, boolean isWpSync, boolean status, boolean mmsActive, boolean isRpaSync, String username, String password, String ewalletToken, int terminalLength, Integer pushNotification, Boolean enableVoice, Boolean isValidService, Long validFeeFrom, Long validFeeTo, String customerId, Long timeCreated, String vso, String notificationTypes) {
+		this.id = id;
+		this.bankTypeId = bankTypeId;
+		this.bankAccount = bankAccount;
+		this.bankAccountName = bankAccountName;
+		this.nationalId = nationalId;
+		this.phoneAuthenticated = phoneAuthenticated;
+		this.type = type;
+		this.userId = userId;
+		this.isAuthenticated = isAuthenticated;
+		this.isSync = isSync;
+		this.isWpSync = isWpSync;
+		this.status = status;
+		this.mmsActive = mmsActive;
+		this.isRpaSync = isRpaSync;
+		this.username = username;
+		this.password = password;
+		this.ewalletToken = ewalletToken;
+		this.terminalLength = terminalLength;
+		this.pushNotification = pushNotification;
+		this.enableVoice = enableVoice;
+		this.isValidService = isValidService;
+		this.validFeeFrom = validFeeFrom;
+		this.validFeeTo = validFeeTo;
+		this.customerId = customerId;
+		this.timeCreated = timeCreated;
+		this.vso = vso;
+		this.notificationTypes = notificationTypes;
+	}
+
 	public int getTerminalLength() {
 		return terminalLength;
 	}

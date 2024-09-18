@@ -2584,29 +2584,6 @@ public class AccountBankReceiveController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    @GetMapping("/bank-notification/{userId}")
-    public ResponseEntity<List<AccountBankDTO>> getListBankAndNotificationTypesByUserIdAndByPushNotification(@PathVariable("userId") String userId) {
-        HttpStatus httpStatus;
-        List<AccountBankDTO> result = new ArrayList<>();
-
-        try {
-            List<IAccountBankDTO> accountBankDTOs = accountBankReceiveService.getListBankAndNotificationTypesByUserIdAndByPushNotification(userId);
-            result = accountBankDTOs.stream().map(bank -> {
-                AccountBankDTO dto = new AccountBankDTO();
-                dto.setBankId(bank.getId() != null ? bank.getId() : "");
-                dto.setNotificationTypes(bank.getNotificationTypes() != null ? bank.getNotificationTypes() : "");  // If null, set to empty string
-                return dto;
-            }).collect(Collectors.toList());
-
-            httpStatus = HttpStatus.OK;
-        } catch (Exception e) {
-            logger.error("PlatformConnectionController: ERROR: fetching account banks: " + e.getMessage()
-                    + " at: " + System.currentTimeMillis());
-            httpStatus = HttpStatus.BAD_REQUEST;
-        }
-
-        return new ResponseEntity<>(result, httpStatus);
-    }
 
     @PutMapping("/bank-notification/update")
     public ResponseEntity<ResponseMessageDTO> updateBankNotification(@RequestBody BankNotificationUpdateDTO dto) {
@@ -2629,6 +2606,22 @@ public class AccountBankReceiveController {
             logger.error("Error updating bank notification: " + e.getMessage());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("/bank-notification/{userId}")
+    public ResponseEntity<List<AccountBankReceiveEntity>> getFullAccountBankByUserId(@PathVariable("userId") String userId) {
+        HttpStatus httpStatus;
+        List<AccountBankReceiveEntity> result;
+        try {
+            result = accountBankReceiveService.getFullAccountBankReceiveByUserId(userId);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("Error fetching account banks: " + e.getMessage());
+            httpStatus = HttpStatus.BAD_REQUEST;
+            result = new ArrayList<>();
         }
 
         return new ResponseEntity<>(result, httpStatus);
