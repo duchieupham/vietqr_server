@@ -708,6 +708,7 @@ public class TransactionBankController {
                             // nêếu mms_active = true và transType = C => không insert transaction_bank do
                             // đã insert ở luồng ưu tiên
                             if (accountBankEntity.isMmsActive() == true
+                                    && !checkDuplicate
                                     && dto.getTransType().trim().toUpperCase().equals("C")) {
                                 // System.out.println("isMmsActive");
                                 logger.info("Transaction-sync: mms_active = true => do not insert transaction_bank");
