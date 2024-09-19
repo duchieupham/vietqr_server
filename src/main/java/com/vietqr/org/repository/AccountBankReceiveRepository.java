@@ -869,9 +869,43 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 								 @Param("bankId") String bankId,
 								 @Param("notificationTypes") String notificationTypes);
 
-	@Query(value = "SELECT distinct abr.* FROM account_bank_receive abr " +
+	@Query(value = "SELECT distinct " +
+			"abr.id AS id, " +
+			"COALESCE(abr.bank_account, '') AS bankAccount, " +
+			"COALESCE(abr.bank_account_name, '') AS bankAccountName, " +
+			"COALESCE(abr.bank_type_id, '') AS bankTypeId, " +
+			"COALESCE(abr.is_authenticated, false) AS isAuthenticated, " +
+			"COALESCE(abr.is_sync, false) AS isSync, " +
+			"COALESCE(abr.is_wp_sync, false) AS isWpSync, " +
+			"COALESCE(abr.status, false) AS status, " +
+			"COALESCE(abr.national_id, '') AS nationalId, " +
+			"COALESCE(abr.phone_authenticated, '') AS phoneAuthenticated, " +
+			"COALESCE(abr.mms_active, false) AS mmsActive, " +
+			"COALESCE(abr.type, 0) AS type, " +
+			"COALESCE(abr.user_id, '') AS userId, " +
+			"COALESCE(abr.is_rpa_sync, false) AS isRpaSync, " +
+			"COALESCE(abr.username, '') AS username, " +
+			"COALESCE(abr.password, '') AS password, " +
+			"COALESCE(abr.ewallet_token, '') AS ewalletToken, " +
+			"COALESCE(abr.terminal_length, 0) AS terminalLength, " +
+			"COALESCE(abr.enable_voice, true) AS enableVoice, " +
+			"COALESCE(abr.valid_fee_from, 0) AS validFeeFrom, " +
+			"COALESCE(abr.valid_fee_to, 0) AS validFeeTo, " +
+			"COALESCE(abr.customer_id, '') AS customerId, " +
+			"COALESCE(abr.time_created, 0) AS timeCreated, " +
+			"COALESCE(abr.vso, '') AS vso, " +
+			"COALESCE(abr.push_notification, 1) AS pushNotification, " +
+			"COALESCE(abr.is_valid_service, false) AS validService, " +
+			"COALESCE(abr.notification_types, '') AS notificationTypes, " +
+			"COALESCE(bt.bank_short_name, '') AS bankShortName, " +
+			"COALESCE(bt.img_id, '') AS imgId " +
+			"FROM account_bank_receive abr " +
 			"JOIN account_bank_receive_share abrs ON abr.id = abrs.bank_id " +
-			"WHERE abr.is_authenticated = true AND abrs.is_owner = true AND abr.user_id = :userId", nativeQuery = true)
-	List<AccountBankReceiveEntity> getFullAccountBankReceiveByUserId(@Param("userId") String userId);
+			"JOIN bank_type bt ON abr.bank_type_id = bt.id " +
+			"WHERE abr.is_authenticated = true " +
+			"AND abrs.is_owner = true " +
+			"AND abr.user_id = :userId",
+			nativeQuery = true)
+	List<IBankNotificationProjection> getFullAccountBankReceiveByUserId(@Param("userId") String userId);
 
 }
