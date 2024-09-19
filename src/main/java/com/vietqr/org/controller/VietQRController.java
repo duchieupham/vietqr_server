@@ -493,7 +493,7 @@ public class VietQRController {
 		String serviceCode = !StringUtil.isNullOrEmpty(dto.getServiceCode()) ? dto.getServiceCode() : "";
 		String subRawCode = StringUtil.getValueNullChecker(dto.getSubTerminalCode());
 		TerminalBankReceiveEntity terminalBankReceiveEntity = null;
-		if (!StringUtil.isNullOrEmpty(subRawCode)) {
+		if (!StringUtil.isNullOrEmpty(subRawCode) && !"3991031291095".equals(dto.getBankAccount())) {
 			terminalBankReceiveEntity =
 					terminalBankReceiveService.getTerminalBankReceiveEntityByRawTerminalCode(subRawCode);
 			if (terminalBankReceiveEntity != null) {
@@ -1724,6 +1724,8 @@ public class VietQRController {
 
 	String getMessageBankCode(String errBankCode) {
 		switch (errBankCode) {
+			case "404":
+				return "E165";
 			case "203":
 				return "E165";
 			case "205":
