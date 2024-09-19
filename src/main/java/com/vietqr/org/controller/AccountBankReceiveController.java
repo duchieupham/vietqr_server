@@ -2591,17 +2591,10 @@ public class AccountBankReceiveController {
         HttpStatus httpStatus;
 
         try {
-            if (dto != null && dto.getUserId() != null && !dto.getUserId().isEmpty() &&
-                    dto.getBankId() != null && !dto.getBankId().isEmpty() &&
-                    dto.getNotificationTypes() != null && !dto.getNotificationTypes().isEmpty()) {
                 accountBankReceiveService.updateNotificationTypes(dto.getUserId(), dto.getBankId(), dto.getNotificationTypes());
-
                 result = new ResponseMessageDTO("SUCCESS", "");
                 httpStatus = HttpStatus.OK;
-            } else {
-                result = new ResponseMessageDTO("FAILED", "E05");
-                httpStatus = HttpStatus.BAD_REQUEST;
-            }
+
         } catch (Exception e) {
             logger.error("Error updating bank notification: " + e.getMessage());
             result = new ResponseMessageDTO("FAILED", "E05");
@@ -2612,9 +2605,9 @@ public class AccountBankReceiveController {
     }
 
     @GetMapping("/bank-notification/{userId}")
-    public ResponseEntity<List<AccountBankReceiveEntity>> getFullAccountBankByUserId(@PathVariable("userId") String userId) {
+    public ResponseEntity<List<BankNotificationDTO>> getFullAccountBankByUserId(@PathVariable("userId") String userId) {
         HttpStatus httpStatus;
-        List<AccountBankReceiveEntity> result;
+        List<BankNotificationDTO> result;
         try {
             result = accountBankReceiveService.getFullAccountBankReceiveByUserId(userId);
             httpStatus = HttpStatus.OK;
@@ -2623,8 +2616,6 @@ public class AccountBankReceiveController {
             httpStatus = HttpStatus.BAD_REQUEST;
             result = new ArrayList<>();
         }
-
         return new ResponseEntity<>(result, httpStatus);
     }
-
 }

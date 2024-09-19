@@ -211,5 +211,5 @@ public interface AccountBankReceiveService {
 
 	void updateNotificationTypes(String userId, String bankId, List<String> notificationTypes) throws JsonProcessingException;
 
-	List<AccountBankReceiveEntity> getFullAccountBankReceiveByUserId(String userId);
+	List<BankNotificationDTO> getFullAccountBankReceiveByUserId(String userId);
 }
