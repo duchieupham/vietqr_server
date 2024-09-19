@@ -680,50 +680,54 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
         return repo.countPlatformConnectionsByBankId(bankId);
     }
 
-
     @Override
-    public List<AccountBankReceiveEntity> getFullAccountBankReceiveByUserId(String userId) {
-        List<AccountBankReceiveEntity> entities = repo.getFullAccountBankReceiveByUserId(userId);
-        return entities.stream().map(this::convertNullsToEmpty).collect(Collectors.toList());
+    public List<BankNotificationDTO> getFullAccountBankReceiveByUserId(String userId) {
+        List<IBankNotificationProjection> projections = repo.getFullAccountBankReceiveByUserId(userId);
+        return projections.stream().map(this::mapToBankNotificationDTO).collect(Collectors.toList());
     }
 
-    private AccountBankReceiveEntity convertNullsToEmpty(AccountBankReceiveEntity entity) {
-        if (entity.getId() == null) entity.setId("");
-        if (entity.getBankTypeId() == null) entity.setBankTypeId("");
-        if (entity.getBankAccount() == null) entity.setBankAccount("");
-        if (entity.getBankAccountName() == null) entity.setBankAccountName("");
-        if (entity.getNationalId() == null) entity.setNationalId("");
-        if (entity.getPhoneAuthenticated() == null) entity.setPhoneAuthenticated("");
-        if (entity.getUserId() == null) entity.setUserId("");
-        if (entity.getUsername() == null) entity.setUsername("");
-        if (entity.getPassword() == null) entity.setPassword("");
-        if (entity.getEwalletToken() == null) entity.setEwalletToken("");
-        if (entity.getCustomerId() == null) entity.setCustomerId("");
-        if (entity.getVso() == null) entity.setVso("");
-        if (entity.getNotificationTypes() != null && !entity.getNotificationTypes().isEmpty()) {
+    private BankNotificationDTO mapToBankNotificationDTO(IBankNotificationProjection projection) {
+        BankNotificationDTO dto = new BankNotificationDTO();
+        dto.setId(projection.getId());
+        dto.setBankAccount(projection.getBankAccount());
+        dto.setBankAccountName(projection.getBankAccountName());
+        dto.setBankTypeId(projection.getBankTypeId());
+        dto.setAuthenticated(projection.getIsAuthenticated());
+        dto.setSync(projection.getIsSync());
+        dto.setWpSync(projection.getIsWpSync());
+        dto.setStatus(projection.getStatus());
+        dto.setNationalId(projection.getNationalId());
+        dto.setPhoneAuthenticated(projection.getPhoneAuthenticated());
+        dto.setMmsActive(projection.getMmsActive());
+        dto.setType(projection.getType());
+        dto.setUserId(projection.getUserId());
+        dto.setRpaSync(projection.getIsRpaSync());
+        dto.setUsername(projection.getUsername());
+        dto.setPassword(projection.getPassword());
+        dto.setEwalletToken(projection.getEwalletToken());
+        dto.setTerminalLength(projection.getTerminalLength());
+        dto.setEnableVoice(projection.getEnableVoice());
+        dto.setValidFeeFrom(projection.getValidFeeFrom());
+        dto.setValidFeeTo(projection.getValidFeeTo());
+        dto.setCustomerId(projection.getCustomerId());
+        dto.setTimeCreated(projection.getTimeCreated());
+        dto.setVso(projection.getVso());
+        dto.setPushNotification(projection.getPushNotification());
+        dto.setValidService(projection.getValidService());
+        String notificationTypes = projection.getNotificationTypes();
+        if (notificationTypes != null && !notificationTypes.isEmpty()) {
             try {
-                List<String> notificationTypes = objectMapper.readValue(entity.getNotificationTypes(), new TypeReference<List<String>>() {});
-                entity.setNotificationTypes(notificationTypes.toString()); // Convert to proper format ["CREDIT","DEBIT","RECON"]
+                List<String> notificationList = objectMapper.readValue(notificationTypes, new TypeReference<List<String>>() {});
+                dto.setNotificationTypes(notificationList.toString().replaceAll("\\s+", ""));
             } catch (Exception e) {
-                entity.setNotificationTypes("");
+                dto.setNotificationTypes("");
             }
         } else {
-            entity.setNotificationTypes("");
+            dto.setNotificationTypes("");
         }
-        if (entity.getTerminalLength() == 0) entity.setTerminalLength(0);
-        if (entity.getValidFeeFrom() == 0) entity.setValidFeeFrom(0L);
-        if (entity.getValidFeeTo() == null) entity.setValidFeeTo(0L);
-        if (entity.getTimeCreated() == null) entity.setTimeCreated(0L);
-        if (entity.getPushNotification() == null) entity.setPushNotification(1);
-        if (entity.getEnableVoice() == null) entity.setEnableVoice(true);
-        if (!entity.isAuthenticated()) entity.setAuthenticated(false);
-        if (!entity.isSync()) entity.setSync(false);
-        if (!entity.isWpSync()) entity.setWpSync(false);
-        if (!entity.isStatus()) entity.setStatus(false);
-        if (!entity.isMmsActive()) entity.setMmsActive(false);
-        if (!entity.isRpaSync()) entity.setRpaSync(false);
-
-        return entity;
+        dto.setBankShortName(projection.getBankShortName());
+        dto.setImgId(projection.getImgId());
+        return dto;
     }
 
 
