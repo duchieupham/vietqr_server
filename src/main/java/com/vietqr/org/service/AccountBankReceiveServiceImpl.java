@@ -758,6 +758,21 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
         repo.updateNotificationTypes(userId, bankId, notificationTypesJson);
     }
 
+    @Override
+    public IAccountBankQR getAccountBankQR(String bankAccount, String bankTypeId) {
+        return repo.getAccountBankQR(bankAccount, bankTypeId);
+    }
+
+    @Override
+    public IAccountBankInfoQR getAccountBankQRByAccountAndId(String bankAccount, String bankTypeId) {
+        return repo.getAccountBankQRByAccountAndId(bankAccount, bankTypeId);
+    }
+
+    @Override
+    public IAccountBankUserQR getAccountBankUserQRById(String bankId) {
+        return repo.getAccountBankUserQRById(bankId);
+    }
+
     private boolean isJsonArray(List<String> notificationTypes) {
         try {
             objectMapper.readValue(notificationTypes.toString(), new TypeReference<List<String>>() {});

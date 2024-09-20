@@ -123,9 +123,6 @@ public class VietQRController {
 	@Autowired
 	private ImageService imageService;
 
-	@Autowired
-	private VietQRService vietQRService;
-
 	public VietQRController(FirebaseMessagingService firebaseMessagingService) {
 		this.firebaseMessagingService = firebaseMessagingService;
 	}
@@ -498,7 +495,7 @@ public class VietQRController {
         ITerminalBankReceiveQR terminalBankReceiveEntity = null;
 		if (!StringUtil.isNullOrEmpty(subRawCode) && !"3991031291095".equals(dto.getBankAccount())) {
 			terminalBankReceiveEntity =
-					vietQRService.getTerminalBankReceiveQR(subRawCode);
+					terminalBankReceiveService.getTerminalBankReceiveQR(subRawCode);
 			if (terminalBankReceiveEntity != null) {
 				dto.setTerminalCode(terminalBankReceiveEntity.getTerminalCode());
 			}
@@ -537,14 +534,14 @@ public class VietQRController {
 							// find bankTypeId by bankcode
 							if (bankTypeId != null && !bankTypeId.isEmpty()) {
 								// get cai value
-								ICaiBankTypeQR caiBankTypeQR = vietQRService.getCaiBankTypeById(bankTypeId);
+								ICaiBankTypeQR caiBankTypeQR = bankTypeService.getCaiBankTypeById(bankTypeId);
 								// find bank by bankAccount and banktypeId
 								IAccountBankInfoQR accountBankEntity = null;
 								if (dto.getTransType() == null || dto.getTransType().trim().toUpperCase().equals("C")) {
-									accountBankEntity = vietQRService
+									accountBankEntity = accountBankReceiveService
 											.getAccountBankQRByAccountAndId(dto.getBankAccount(), bankTypeId);
 								} else {
-									accountBankEntity = vietQRService
+									accountBankEntity = accountBankReceiveService
                                             .getAccountBankQRByAccountAndId(dto.getCustomerBankAccount(), bankTypeId);
 								}
 								if (accountBankEntity != null) {
@@ -634,7 +631,7 @@ public class VietQRController {
 						if (dto.getTransType() != null && dto.getTransType().trim().equalsIgnoreCase("D")) {
 							bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
 						}
-                        IAccountBankQR accountBankQR = vietQRService.getAccountBankQR(dto.getBankAccount(), bankTypeId);
+                        IAccountBankQR accountBankQR = accountBankReceiveService.getAccountBankQR(dto.getBankAccount(), bankTypeId);
 						if (accountBankQR != null) {
 							VietQRCreateDTO vietQRCreateDTO = new VietQRCreateDTO();
 							vietQRCreateDTO.setBankId(accountBankQR.getId());
@@ -1806,7 +1803,7 @@ public class VietQRController {
 			NumberFormat nf = NumberFormat.getInstance(Locale.US);
 			// 2. Insert transaction_receive if branch_id and business_id != null
 			// 3. Insert transaction_receive_branch if branch_id and business_id != null
-			IAccountBankUserQR accountBankEntity = vietQRService.getAccountBankUserQRById(dto.getBankId());
+			IAccountBankUserQR accountBankEntity = accountBankReceiveService.getAccountBankUserQRById(dto.getBankId());
 			if (accountBankEntity != null) {
 				LocalDateTime currentDateTime = LocalDateTime.now();
 				TransactionReceiveEntity transactionEntity = new TransactionReceiveEntity();

@@ -212,4 +212,10 @@ public interface AccountBankReceiveService {
 	void updateNotificationTypes(String userId, String bankId, List<String> notificationTypes) throws JsonProcessingException;
 
 	List<BankNotificationDTO> getFullAccountBankReceiveByUserId(String userId);
+
+	IAccountBankQR getAccountBankQR(String bankAccount, String bankTypeId);
+
+	IAccountBankInfoQR getAccountBankQRByAccountAndId(String bankAccount, String bankTypeId);
+
+	IAccountBankUserQR getAccountBankUserQRById(String bankId);
 }
