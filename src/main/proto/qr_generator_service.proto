@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.example.grpc.qrgenerator";
+option java_outer_classname = "QRGeneratorServiceProto";
+
+service QRGeneratorService {
+  rpc GenerateStaticQR (RequestStaticQR) returns (VietQR);
+  rpc GenerateDynamicQR (RequestDynamicQR) returns (VietQR);
+  rpc GenerateSemiDynamicQR (RequestSemiDynamicQR) returns (VietQR);
+}
+
+message RequestStaticQR {
+  sint64 amount = 1;
+  string content = 2; /* length <= 20 */
+  string bankAccount = 3;
+  string bankCode = 4;
+  string transType = 5;
+  string customerBankCode = 6;
+  string terminalCode = 7;
+  string token = 8;
+}
+
+message RequestDynamicQR {
+  sint64 amount = 1;
+  string content = 2; /* length <= 50 */
+  string bankAccount = 3;
+  string bankCode = 4;
+  string userBankName = 5;
+  string transType = 6;
+  string customerBankAccount = 7;
+  string customerBankCode = 8;
+  string customerName = 9;
+  string orderId = 10;
+  string sign = 11;
+  string terminalCode = 12;
+  string subTerminalCode = 13;
+  string note = 14;
+  string urlLink = 15;
+  bool reconciliation = 16;
+  string serviceCode = 17;
+  string token = 18;
+}
+
+message RequestSemiDynamicQR {
+  sint64 amount = 1;
+  string content = 2;
+  string bankAccount = 3;
+  string bankCode = 4;
+  string transType = 5;
+  string customerBankCode = 6;
+  string terminalCode = 7;
+  string serviceCode = 8;
+  string token = 9;
+}
+
+message VietQR {
+  string bankCode = 1;
+  string bankName = 2;
+  string bankAccount = 3;
+  string userBankName = 4;
+  sint64 amount = 5;
+  string content = 6;
+  string qrCode = 7;
+  string imgId = 8;
+  int32 existing = 9;
+  string transactionId = 10;
+  string transactionRefId = 11;
+  string qrLink = 12;
+  string terminalCode = 13;
+  string subTerminalCode = 14;
+  string serviceCode = 15;
+  string orderId = 16;
+}
