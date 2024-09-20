@@ -137,6 +137,20 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 	AccountBankReceiveEntity getAccountBankByBankAccountAndBankTypeId(@Param(value = "bankAccount") String bankAccount,
 			@Param(value = "bankTypeId") String bankTypeId);
 
+	@Query(value = "SELECT bank_account as bankAccount, bank_name as bankName, bank_account_name as bankAccountName FROM account_bank_receive WHERE bank_account = :bankAccount AND " +
+			"bank_type_id = :bankTypeId AND is_authenticated = true AND status = 1", nativeQuery = true)
+	IAccountBankInfoQR getAccountBankQRByAccountAndId(
+			@Param(value = "bankAccount") String bankAccount,
+			@Param(value = "bankTypeId") String bankTypeId
+	);
+
+	@Query(value = "SELECT id AS id, user_id AS userId FROM account_bank_receive WHERE bank_account = :bankAccount AND " +
+			"bank_type_id = :bankTypeId AND is_authenticated = true AND status = 1", nativeQuery = true)
+	IAccountBankQR getAccountBankQR(
+			@Param(value = "bankAccount") String bankAccount,
+			@Param(value = "bankTypeId") String bankTypeId
+	);
+
 	@Query(value = "SELECT b.id as id, b.bank_account as bankAccount, c.bank_name as bankName, b.bank_account_name as userBankName, c.img_id as imgId, b.is_authenticated as authenticated  "
 			+ "FROM bank_receive_branch a "
 			+ "INNER JOIN account_bank_receive b "
@@ -908,4 +922,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			nativeQuery = true)
 	List<IBankNotificationProjection> getFullAccountBankReceiveByUserId(@Param("userId") String userId);
 
+
+	@Query(value = "SELECT bank_account AS bankAccount, user_id AS userId FROM account_bank_receive WHERE id = :bankId LIMIT 1", nativeQuery = true)
+	IAccountBankUserQR getAccountBankUserQRById(@Param(value = "bankId") String bankId);
 }
