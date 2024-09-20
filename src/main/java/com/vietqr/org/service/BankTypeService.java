@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 // import org.springframework.scheduling.annotation.Async;
+import com.vietqr.org.dto.BankCaiTypeDTO;
 import com.vietqr.org.dto.BankTypeShortNameDTO;
 import org.springframework.stereotype.Service;
 
@@ -30,4 +31,6 @@ public interface BankTypeService {
     BankTypeEntity getBankTypeByBankCode(String bankCode);
 
     String getBankCodeByBankShortName(String bankShortName);
+
+    BankCaiTypeDTO getBankCaiByBankCode(String bankCode);
 }
