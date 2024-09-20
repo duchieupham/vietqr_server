@@ -1195,9 +1195,9 @@ public class VietQRController {
 									terminalBankReceiveEntity.setTerminalId(terminalBankSyncDTO.getTerminalId());
 									terminalBankReceiveEntity.setTypeOfQR(1);
 									if (accountBankReceiveEntity.isMmsActive()) {
-										TerminalBankEntity terminalBankEntity =
-												terminalBankService.getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
-										if (terminalBankEntity != null) {
+										String terminalId =
+												terminalBankService.getTerminalBankQRByBankAccount(accountBankReceiveEntity.getBankAccount());
+										if (terminalId != null) {
 											// luồng uu tien
 											if (StringUtil.isNullOrEmpty(dto.getContent())) {
 												content = terminalBankSyncDTO.getRawTerminalCode();
@@ -1206,7 +1206,7 @@ public class VietQRController {
 											}
 											qr = MBVietQRUtil.generateStaticVietQRMMS(
 													new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
-															terminalBankEntity.getTerminalId(), content));
+															terminalId, content));
 											String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
 
 											terminalBankReceiveEntity.setData2(qr);
