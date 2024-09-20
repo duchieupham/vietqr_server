@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.example.grpc";
+option java_outer_classname = "TrSysServiceProto";
+
+service TrSysService {
+  rpc GetTrSys (GetTrSysRequest) returns (TSys);
+}
+
+message GetTrSysRequest {
+  int64 startDate = 1;
+  int64 endDate = 2;
+}
+
+message TSys {
+  int32 totalNumberCredits = 1;
+  int64 totalAmountCredits = 2;
+  int32 totalNumberRecon = 3;
+  int64 totalAmountRecon = 4;
+  int32 totalNumberWithoutRecon = 5;
+  int64 totalAmountWithoutRecon = 6;
+  int32 totalNumberPushError = 7;
+  int64 totalAmountPushErrorSum = 8;
+}
