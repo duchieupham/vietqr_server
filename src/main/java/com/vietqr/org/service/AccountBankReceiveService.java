@@ -218,4 +218,8 @@ public interface AccountBankReceiveService {
 	IAccountBankInfoQR getAccountBankQRByAccountAndId(String bankAccount, String bankTypeId);
 
 	IAccountBankUserQR getAccountBankUserQRById(String bankId);
+
+	IAccountBankReceiveQR getAccountBankReceiveQRByAccountAndId(String bankAccount, String bankTypeId);
+
+	IAccountBankReceiveMMS getAccountBankReceiveQRByBankAccountAndBankCode(String bankAccount, String bankCode);
 }

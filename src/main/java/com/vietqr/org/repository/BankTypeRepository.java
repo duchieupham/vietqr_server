@@ -3,6 +3,7 @@ package com.vietqr.org.repository;
 import java.util.List;
 
 import com.vietqr.org.dto.BankTypeShortNameDTO;
+import com.vietqr.org.dto.IBankTypeQR;
 import com.vietqr.org.dto.ICaiBankTypeQR;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -42,4 +43,12 @@ public interface BankTypeRepository extends JpaRepository<BankTypeEntity, Long> 
 			+ "INNER JOIN (SELECT cai_value FROM cai_bank WHERE bank_type_id = :id) b "
 			+ "WHERE id = :id", nativeQuery = true)
 	ICaiBankTypeQR getCaiBankTypeById(@Param(value = "id") String id);
+
+	@Query(value = "SELECT bank_code AS bankCode, bank_name AS bankName, img_id AS imgId FROM bank_type "
+			+ "WHERE id = :id", nativeQuery = true)
+	IBankTypeQR getBankTypeQRById(@Param(value = "id") String id);
+
+	@Query(value = "SELECT bank_code AS bankCode, bank_name AS bankName, img_id AS imgId FROM bank_type "
+			+ "WHERE bank_code = :code", nativeQuery = true)
+	IBankTypeQR getBankTypeQRByCode(@Param(value = "code") String code);
 }

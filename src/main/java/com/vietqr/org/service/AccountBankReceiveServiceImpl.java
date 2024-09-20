@@ -773,6 +773,16 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
         return repo.getAccountBankUserQRById(bankId);
     }
 
+    @Override
+    public IAccountBankReceiveQR getAccountBankReceiveQRByAccountAndId(String bankAccount, String bankTypeId) {
+        return repo.getAccountBankReceiveQRByAccountAndId(bankAccount, bankTypeId);
+    }
+
+    @Override
+    public IAccountBankReceiveMMS getAccountBankReceiveQRByBankAccountAndBankCode(String bankAccount, String bankCode) {
+        return repo.getAccountBankReceiveQRByBankAccountAndBankCode(bankAccount, bankCode);
+    }
+
     private boolean isJsonArray(List<String> notificationTypes) {
         try {
             objectMapper.readValue(notificationTypes.toString(), new TypeReference<List<String>>() {});
