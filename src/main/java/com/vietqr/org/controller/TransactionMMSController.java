@@ -2,10 +2,7 @@ package com.vietqr.org.controller;
 
 import java.io.IOException;
 import java.text.NumberFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -1997,6 +1994,15 @@ public class TransactionMMSController {
                 } else {
                     result = new ResponseMessageDTO("FAILED", "E05 - " + json);
                 }
+            } else if (response.statusCode().value() != 400 && (response.statusCode().is4xxClientError() || response.statusCode().is5xxServerError())) {
+                String json = response.bodyToMono(String.class).block();
+                logger.info("Response pushNewTransactionToCustomerSync: " + json + " status Code: " + response.statusCode());
+                // retry callback
+                if (retryCount < 10) {
+                    pushNewTransactionToCustomerSync(transReceiveId, entity,
+                            dto, time, ++retryCount, errorCodes);
+                }
+                result = new ResponseMessageDTO("FAILED", "E05 - " + json);
             } else {
                 String json = response.bodyToMono(String.class).block();
                 logger.info("Response pushNewTransactionToCustomerSync: " + json + " status Code: " + response.statusCode());
