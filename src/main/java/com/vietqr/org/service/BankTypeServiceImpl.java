@@ -2,6 +2,7 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+import com.vietqr.org.dto.BankCaiTypeDTO;
 import com.vietqr.org.dto.BankTypeShortNameDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -59,6 +60,11 @@ public class BankTypeServiceImpl implements BankTypeService {
 	public String getBankCodeByBankShortName(String bankShortName) {
 		BankTypeEntity bankTypeEntity = bankTypeRepository.findByBankShortName(bankShortName);
 		return bankTypeEntity.getBankCode();
+	}
+
+	@Override
+	public BankCaiTypeDTO getBankCaiByBankCode(String bankCode) {
+		return bankTypeRepository.getBankCaiByBankCode(bankCode);
 	}
 
 }

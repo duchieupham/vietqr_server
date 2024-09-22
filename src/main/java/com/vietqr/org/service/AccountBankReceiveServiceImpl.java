@@ -686,6 +686,11 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
         return projections.stream().map(this::mapToBankNotificationDTO).collect(Collectors.toList());
     }
 
+    @Override
+    public AccountBankGenerateBIDVDTO getAccountBankBIDVByBankAccountAndBankTypeId(String bankAccount, String bankTypeId) {
+        return repo.getAccountBankBIDVByBankAccountAndBankTypeId(bankAccount, bankTypeId);
+    }
+
     private BankNotificationDTO mapToBankNotificationDTO(IBankNotificationProjection projection) {
         BankNotificationDTO dto = new BankNotificationDTO();
         dto.setId(projection.getId());

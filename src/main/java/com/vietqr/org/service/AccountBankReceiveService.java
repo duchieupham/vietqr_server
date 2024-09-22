@@ -5,7 +5,6 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
-import com.vietqr.org.dto.qrfeed.IAccountBankDTO;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.entity.AccountBankReceiveEntity;
@@ -212,4 +211,6 @@ public interface AccountBankReceiveService {
 	void updateNotificationTypes(String userId, String bankId, List<String> notificationTypes) throws JsonProcessingException;
 
 	List<BankNotificationDTO> getFullAccountBankReceiveByUserId(String userId);
+
+	AccountBankGenerateBIDVDTO getAccountBankBIDVByBankAccountAndBankTypeId(String bankAccount, String bankTypeId);
 }

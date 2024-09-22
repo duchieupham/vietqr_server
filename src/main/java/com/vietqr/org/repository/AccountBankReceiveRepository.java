@@ -908,4 +908,10 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			nativeQuery = true)
 	List<IBankNotificationProjection> getFullAccountBankReceiveByUserId(@Param("userId") String userId);
 
+	@Query(value = "SELECT a.id AS id, a.user_id AS userId, a.bank_account AS bankAccount, "
+			+ "a.bank_account_name AS bankAccountName, a.customer_id AS customerId "
+			+ "FROM account_bank_receive a "
+			+ "WHERE a.bank_type_id = :bankTypeId AND a.bank_account = :bankAccount "
+			+ "AND is_authenticated = true AND status = 1 LIMIT 1 ", nativeQuery = true)
+    AccountBankGenerateBIDVDTO getAccountBankBIDVByBankAccountAndBankTypeId(String bankAccount, String bankTypeId);
 }
