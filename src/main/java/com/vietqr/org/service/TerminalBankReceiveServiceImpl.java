@@ -193,4 +193,9 @@ public class TerminalBankReceiveServiceImpl implements TerminalBankReceiveServic
     public TerminalBankReceiveEntity getTerminalBankReceiveEntityByRawTerminalCode(String subRawCode) {
         return repo.getTerminalBankReceiveEntityByRawTerminalCode(subRawCode);
     }
+
+    @Override
+    public ITerminalBankReceiveQR getTerminalBankReceiveQR(String subRawCode) {
+        return repo.getTerminalBankReceiveQR(subRawCode);
+    }
 }

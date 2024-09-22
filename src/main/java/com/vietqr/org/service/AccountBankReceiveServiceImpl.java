@@ -686,6 +686,11 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
         return projections.stream().map(this::mapToBankNotificationDTO).collect(Collectors.toList());
     }
 
+    @Override
+    public AccountBankGenerateBIDVDTO getAccountBankBIDVByBankAccountAndBankTypeId(String bankAccount, String bankTypeId) {
+        return repo.getAccountBankBIDVByBankAccountAndBankTypeId(bankAccount, bankTypeId);
+    }
+
     private BankNotificationDTO mapToBankNotificationDTO(IBankNotificationProjection projection) {
         BankNotificationDTO dto = new BankNotificationDTO();
         dto.setId(projection.getId());
@@ -756,6 +761,31 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
             notificationTypesJson = objectMapper.writeValueAsString(cleanedNotificationTypes);
         }
         repo.updateNotificationTypes(userId, bankId, notificationTypesJson);
+    }
+
+    @Override
+    public IAccountBankQR getAccountBankQR(String bankAccount, String bankTypeId) {
+        return repo.getAccountBankQR(bankAccount, bankTypeId);
+    }
+
+    @Override
+    public IAccountBankInfoQR getAccountBankQRByAccountAndId(String bankAccount, String bankTypeId) {
+        return repo.getAccountBankQRByAccountAndId(bankAccount, bankTypeId);
+    }
+
+    @Override
+    public IAccountBankUserQR getAccountBankUserQRById(String bankId) {
+        return repo.getAccountBankUserQRById(bankId);
+    }
+
+    @Override
+    public IAccountBankReceiveQR getAccountBankReceiveQRByAccountAndId(String bankAccount, String bankTypeId) {
+        return repo.getAccountBankReceiveQRByAccountAndId(bankAccount, bankTypeId);
+    }
+
+    @Override
+    public IAccountBankReceiveMMS getAccountBankReceiveQRByBankAccountAndBankCode(String bankAccount, String bankCode) {
+        return repo.getAccountBankReceiveQRByBankAccountAndBankCode(bankAccount, bankCode);
     }
 
     private boolean isJsonArray(List<String> notificationTypes) {

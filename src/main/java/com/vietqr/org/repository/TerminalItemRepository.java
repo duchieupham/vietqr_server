@@ -23,4 +23,8 @@ public interface TerminalItemRepository extends JpaRepository<TerminalItemEntity
     @Modifying
     @Query(value = "DELETE FROM terminal_item WHERE id = :id LIMIT 1 ", nativeQuery = true)
     void removeById(String id);
+
+    @Query(value = "SELECT id FROM terminal_item WHERE bank_id = :bankId "
+            + "AND terminal_code = :terminalCode AND raw_service_code = :serviceCode", nativeQuery = true)
+    String existsByIdServiceCodeTerminalCode(String bankId, String serviceCode, String terminalCode);
 }

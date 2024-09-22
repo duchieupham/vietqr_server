@@ -79,4 +79,6 @@ public interface TerminalBankReceiveService {
     void updateQrCodeTerminalSync(String data1, String data2, String traceTransfer, String id);
 
     TerminalBankReceiveEntity getTerminalBankReceiveEntityByRawTerminalCode(String subRawCode);
+
+    ITerminalBankReceiveQR getTerminalBankReceiveQR(String subRawCode);
 }
