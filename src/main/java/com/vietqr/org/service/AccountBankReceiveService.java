@@ -213,4 +213,14 @@ public interface AccountBankReceiveService {
 	List<BankNotificationDTO> getFullAccountBankReceiveByUserId(String userId);
 
 	AccountBankGenerateBIDVDTO getAccountBankBIDVByBankAccountAndBankTypeId(String bankAccount, String bankTypeId);
+
+	IAccountBankQR getAccountBankQR(String bankAccount, String bankTypeId);
+
+	IAccountBankInfoQR getAccountBankQRByAccountAndId(String bankAccount, String bankTypeId);
+
+	IAccountBankUserQR getAccountBankUserQRById(String bankId);
+
+	IAccountBankReceiveQR getAccountBankReceiveQRByAccountAndId(String bankAccount, String bankTypeId);
+
+	IAccountBankReceiveMMS getAccountBankReceiveQRByBankAccountAndBankCode(String bankAccount, String bankCode);
 }
