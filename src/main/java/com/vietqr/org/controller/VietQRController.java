@@ -519,12 +519,12 @@ public class VietQRController {
 				if (!checkMMS) {
 					// Luồng 1
 					String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
-					String bankTypeId = "";
-					if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
-						bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
-					} else {
-						bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getCustomerBankCode());
-					}
+					String bankTypeId = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
+//					if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
+//						bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
+//					} else {
+//						bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getCustomerBankCode());
+//					}
 					vietQRDTO = new VietQRDTO();
 					try {
 						if (dto.getContent().length() <= 50) {
@@ -603,7 +603,7 @@ public class VietQRController {
 									vietQRDTO.setContent(content);
 									vietQRDTO.setQrCode(VietQRUtil.generateTransactionQR(vietQRGenerateDTO));
 									vietQRDTO.setImgId(caiBankTypeQR.getImgId());
-									vietQRDTO.setExisting(0);
+									vietQRDTO.setExisting(1);
 									vietQRDTO.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
 									vietQRDTO.setAdditionalData(new ArrayList<>());
 									vietQRDTO.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
@@ -712,7 +712,8 @@ public class VietQRController {
 												&& "SUCCESS".equals(responseMessageDTO.getStatus())) {
 											qrCode = responseMessageDTO.getMessage();
 											qrMMS = qrCode;
-											String bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
+											// "MB Bank"
+											String bankTypeId = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
 											if (bankTypeId != null && !bankTypeId.trim().isEmpty()) {
 												vietQRDTO = new VietQRDTO();
 												// get cai value
@@ -730,7 +731,7 @@ public class VietQRController {
 												vietQRDTO.setContent(content);
 												vietQRDTO.setQrCode(qrCode);
 												vietQRDTO.setImgId(bankTypeEntity.getImgId());
-												vietQRDTO.setExisting(0);
+												vietQRDTO.setExisting(1);
 												vietQRDTO.setTransactionId("");
 												vietQRDTO.setTerminalCode(dto.getTerminalCode());
 												String refId = TransactionRefIdUtil
@@ -1132,7 +1133,7 @@ public class VietQRController {
 							if (Objects.nonNull(terminalBankSyncDTO)) {
 								if (StringUtil.isNullOrEmpty(terminalBankSyncDTO.getData1())
 										&& StringUtil.isNullOrEmpty(terminalBankSyncDTO.getData2())) {
-									if (accountBankReceiveEntity.isMmsActive()) {
+									if (accountBankReceiveEntity.getMmsActive()) {
 										String terminalId = terminalBankService.getTerminalBankQRByBankAccount(accountBankReceiveEntity.getBankAccount());
 										if (terminalId != null) {
 											// luồng uu tien
@@ -1176,7 +1177,7 @@ public class VietQRController {
 									vietQRDTO.setContent(content);
 									vietQRDTO.setQrCode(qr);
 									vietQRDTO.setImgId(bankTypeEntity.getImgId());
-									vietQRDTO.setExisting(0);
+									vietQRDTO.setExisting(1);
 									vietQRDTO.setTransactionId("");
 									vietQRDTO.setTerminalCode(dto.getTerminalCode());
 									vietQRDTO.setTransactionRefId("");
@@ -1194,7 +1195,7 @@ public class VietQRController {
 									terminalBankReceiveEntity.setBankId(terminalBankSyncDTO.getBankId());
 									terminalBankReceiveEntity.setTerminalId(terminalBankSyncDTO.getTerminalId());
 									terminalBankReceiveEntity.setTypeOfQR(1);
-									if (accountBankReceiveEntity.isMmsActive()) {
+									if (accountBankReceiveEntity.getMmsActive()) {
 										String terminalId =
 												terminalBankService.getTerminalBankQRByBankAccount(accountBankReceiveEntity.getBankAccount());
 										if (terminalId != null) {
@@ -1208,7 +1209,6 @@ public class VietQRController {
 													new VietQRStaticMMSRequestDTO(MBTokenUtil.getMBBankToken().getAccess_token(),
 															terminalId, content));
 											String traceTransfer = MBVietQRUtil.getTraceTransfer(qr);
-
 											terminalBankReceiveEntity.setData2(qr);
 											terminalBankReceiveEntity.setData1("");
 											terminalBankReceiveEntity.setTraceTransfer(traceTransfer);
@@ -1242,9 +1242,13 @@ public class VietQRController {
 									vietQRDTO.setContent(content);
 									vietQRDTO.setQrCode(qr);
 									vietQRDTO.setImgId(bankTypeEntity.getImgId());
-									vietQRDTO.setExisting(0);
+									vietQRDTO.setExisting(1);
 									vietQRDTO.setTransactionId("");
 									vietQRDTO.setTerminalCode(dto.getTerminalCode());
+									vietQRDTO.setSubTerminalCode("");
+									vietQRDTO.setServiceCode("");
+									vietQRDTO.setOrderId("");
+									vietQRDTO.setAdditionalData(new ArrayList<>());
 									String qrLink = "";
 									vietQRDTO.setTransactionRefId("");
 									vietQRDTO.setQrLink(qrLink);
@@ -1308,11 +1312,7 @@ public class VietQRController {
 						if (checkExistedMMSBank != null && !checkExistedMMSBank.trim().isEmpty() && transType.equals("C")) {
 							checkMMS = true;
 						}
-						if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
-							bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
-						} else {
-							bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getCustomerBankCode());
-						}
+						bankTypeId = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
 						bankTypeEntity = bankTypeService.getBankTypeQRById(bankTypeId);
 						if (checkMMS) {
 							accountBankReceiveEntity = accountBankReceiveService
@@ -1344,7 +1344,7 @@ public class VietQRController {
 										vietQRDTO.setContent(content);
 										vietQRDTO.setQrCode(qrMMS);
 										vietQRDTO.setImgId(bankTypeEntity.getImgId());
-										vietQRDTO.setExisting(0);
+										vietQRDTO.setExisting(1);
 										vietQRDTO.setTransactionId("");
 										vietQRDTO.setTerminalCode(dto.getTerminalCode());
 										vietQRDTO.setTransactionRefId("");

@@ -1,7 +1,7 @@
 package com.vietqr.org.dto;
 
 public interface IAccountBankReceiveMMS {
-    boolean isMmsActive();
+    boolean getMmsActive();
     String getBankAccount();
     String getId();
     String getBankAccountName();
