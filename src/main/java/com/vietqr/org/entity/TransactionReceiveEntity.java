@@ -145,6 +145,11 @@ public class TransactionReceiveEntity implements Serializable {
 	@Column(name = "note")
 	private String note;
 
+	// 0: init
+	// 1: success - Thanh cong
+	// 2: pending - Cho xử lý
+	// 3: failed - That bai
+	// 4: error - Loi
 	@Column(name = "transStatus")
 	private Integer transStatus;
 

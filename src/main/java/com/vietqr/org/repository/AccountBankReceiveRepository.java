@@ -330,6 +330,13 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "AND b.bank_code = :bankCode AND is_authenticated = TRUE LIMIT 1", nativeQuery = true)
 	AccountBankReceiveEntity getAccountBankReceiveByBankAccountAndBankCode(String bankAccount, String bankCode);
 
+	@Query(value = "SELECT mms_active AS mmsActive, bank_account AS bankAccount, a.id AS id, bank_account_name AS bankAccountName FROM account_bank_receive a "
+			+ "INNER JOIN bank_type b "
+			+ "ON b.id = a.bank_type_id "
+			+ "WHERE a.bank_account = :bankAccount "
+			+ "AND b.bank_code = :bankCode AND is_authenticated = TRUE LIMIT 1", nativeQuery = true)
+	IAccountBankReceiveMMS getAccountBankReceiveQRByBankAccountAndBankCode(String bankAccount, String bankCode);
+
 	@Query(value = "SELECT a.bank_name FROM bank_type a WHERE a.id = :bankTypeId", nativeQuery = true)
 	String getBankNameByBankId(String bankTypeId);
 
@@ -644,11 +651,11 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
 			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, "
-			+ "abr.time_created AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "abr.time_create AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
 			+ "INNER JOIN account_login al ON abr.user_id = al.id "
-			+ "WHERE abr.is_valid_service = false OR abr.valid_fee_to < :currentTime "
+			+ "WHERE abr.valid_fee_to != 0 OR abr.valid_fee_to < :currentTime "
 			+ "ORDER BY abr.valid_fee_to ASC LIMIT :offset, :size", nativeQuery = true)
 	List<IBankAccountResponseDTO> getOverdueBankAccounts(@Param("currentTime") long currentTime, @Param("offset") int offset, @Param("size") int size);
 
@@ -660,7 +667,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
 			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, "
-			+ "abr.time_created AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "abr.time_create AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
 			+ "INNER JOIN account_login al ON abr.user_id = al.id "
@@ -827,16 +834,52 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			, nativeQuery = true)
 	IBankAccountReceiveUserDTO getBankAccountReceiveByBankIdGrpc(@Param(value = "bankId") String bankId);
 
-	@Query(value = "SELECT a.bank_account AS bankAccount, "
-			+ "a.bank_account_name AS userBankName, "
-			+ "a.is_sync AS isSync, "
-			+ "a.bank_type_id AS bankTypeId, "
-			+ "a.id AS bankId, "
-			+ "b.bank_short_name AS bankShortName "
+	@Query(value = "SELECT distinct " +
+			"abr.id AS id, " +
+			"COALESCE(abr.bank_account, '') AS bankAccount, " +
+			"COALESCE(abr.bank_account_name, '') AS bankAccountName, " +
+			"COALESCE(abr.bank_type_id, '') AS bankTypeId, " +
+			"COALESCE(abr.is_authenticated, false) AS isAuthenticated, " +
+			"COALESCE(abr.is_sync, false) AS isSync, " +
+			"COALESCE(abr.is_wp_sync, false) AS isWpSync, " +
+			"COALESCE(abr.status, false) AS status, " +
+			"COALESCE(abr.national_id, '') AS nationalId, " +
+			"COALESCE(abr.phone_authenticated, '') AS phoneAuthenticated, " +
+			"COALESCE(abr.mms_active, false) AS mmsActive, " +
+			"COALESCE(abr.type, 0) AS type, " +
+			"COALESCE(abr.user_id, '') AS userId, " +
+			"COALESCE(abr.is_rpa_sync, false) AS isRpaSync, " +
+			"COALESCE(abr.username, '') AS username, " +
+			"COALESCE(abr.password, '') AS password, " +
+			"COALESCE(abr.ewallet_token, '') AS ewalletToken, " +
+			"COALESCE(abr.terminal_length, 0) AS terminalLength, " +
+			"COALESCE(abr.enable_voice, true) AS enableVoice, " +
+			"COALESCE(abr.valid_fee_from, 0) AS validFeeFrom, " +
+			"COALESCE(abr.valid_fee_to, 0) AS validFeeTo, " +
+			"COALESCE(abr.customer_id, '') AS customerId, " +
+			"COALESCE(abr.time_created, 0) AS timeCreated, " +
+			"COALESCE(abr.vso, '') AS vso, " +
+			"COALESCE(abr.push_notification, 1) AS pushNotification, " +
+			"COALESCE(abr.is_valid_service, false) AS validService, " +
+			"COALESCE(abr.notification_types, '') AS notificationTypes, " +
+			"COALESCE(bt.bank_short_name, '') AS bankShortName, " +
+			"COALESCE(bt.img_id, '') AS imgId " +
+			"FROM account_bank_receive abr " +
+			"JOIN account_bank_receive_share abrs ON abr.id = abrs.bank_id " +
+			"JOIN bank_type bt ON abr.bank_type_id = bt.id " +
+			"WHERE abr.is_authenticated = true " +
+			"AND abrs.is_owner = true " +
+			"AND abr.user_id = :userId",
+			nativeQuery = true)
+	List<IBankNotificationProjection> getFullAccountBankReceiveByUserId(@Param("userId") String userId);
+
+	@Query(value = "SELECT a.id AS id, a.user_id AS userId, a.bank_account AS bankAccount, "
+			+ "a.bank_account_name AS bankAccountName, a.customer_id AS customerId "
 			+ "FROM account_bank_receive a "
-			+ "INNER JOIN (SELECT id, bank_short_name FROM bank_type) b "
-			+ "ON a.bank_type_id = b.id "
-			+ "WHERE a.user_id = :userId"
-			, nativeQuery = true)
-	List<IBankAccountReceiveBankDTO> getBankAccountReceiveByUserIdGrpc(@Param(value = "userId") String userId);
+			+ "WHERE a.bank_type_id = :bankTypeId AND a.bank_account = :bankAccount "
+			+ "AND is_authenticated = true AND status = 1 LIMIT 1 ", nativeQuery = true)
+    AccountBankGenerateBIDVDTO getAccountBankBIDVByBankAccountAndBankTypeId(String bankAccount, String bankTypeId);
+
+	@Query(value = "SELECT bank_account AS bankAccount, user_id AS userId FROM account_bank_receive WHERE id = :bankId LIMIT 1", nativeQuery = true)
+	IAccountBankUserQR getAccountBankUserQRById(@Param(value = "bankId") String bankId);
 }

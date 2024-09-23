@@ -41,6 +41,7 @@ import javax.validation.Valid;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.sql.Array;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -147,6 +148,45 @@ public class TerminalController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             result = new ResponseDataDTO("");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("terminal/overview/v2")
+    public ResponseEntity<Object> getTerminalOverview(
+            @RequestParam String userId,
+            @RequestParam String bankId
+    ) {
+        List<TerminalOverviewDTO> result = null;
+        HttpStatus httpStatus = null;
+        try {
+            result = new ArrayList<>();
+            List<IMerchantOverviewDTO> iMerchantOverviewDTOS = merchantService
+                    .getMerchantByUserIdAndBankId(userId, bankId);
+            List<String> merchantIds = iMerchantOverviewDTOS.stream()
+                    .map(IMerchantOverviewDTO::getMerchantId)
+                    .collect(Collectors.toList());
+            List<ITerminalOverviewDTO> iTerminalOverviewDTOS = terminalService
+                    .getTerminalOverviewByMerchantIds(merchantIds);
+            result = iMerchantOverviewDTOS.stream().map(item -> {
+                TerminalOverviewDTO dto = new TerminalOverviewDTO();
+                dto.setMerchantId(item.getMerchantId());
+                dto.setMerchantName(item.getMerchantName());
+                List<TerminalOverviewV2DTO> terminalOverviewV2DTOS = iTerminalOverviewDTOS.stream()
+                        .filter(terminal -> terminal.getMerchantId().equals(item.getMerchantId()))
+                        .map(terminal -> {
+                            TerminalOverviewV2DTO terminalOverviewV2DTO = new TerminalOverviewV2DTO();
+                            terminalOverviewV2DTO.setTerminalId(terminal.getTerminalId());
+                            terminalOverviewV2DTO.setTerminalName(terminal.getTerminalName());
+                            terminalOverviewV2DTO.setTerminalCode(terminal.getTerminalCode());
+                            return terminalOverviewV2DTO;
+                        }).collect(Collectors.toList());
+                dto.setTerminals(terminalOverviewV2DTOS);
+                return dto;
+            }).collect(Collectors.toList());
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);

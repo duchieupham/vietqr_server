@@ -502,7 +502,11 @@ public class TidInternalSubscriber {
                                 // insert success transaction_receive
                                 if ("SUCCESS".equals(responseMessageDTO.getStatus())) {
                                     VietQRVaRequestDTO vietQRVaRequestDTO = new VietQRVaRequestDTO();
-                                    vietQRVaRequestDTO.setAmount(dto.getAmount() + "");
+                                    if ("0".equals(dto.getAmount())) {
+                                        vietQRVaRequestDTO.setAmount("");
+                                    } else {
+                                        vietQRVaRequestDTO.setAmount(dto.getAmount() + "");
+                                    }
                                     vietQRVaRequestDTO.setBillId(billId);
                                     vietQRVaRequestDTO.setUserBankName(accountBankEntity.getBankAccountName());
                                     vietQRVaRequestDTO.setDescription(StringUtil.getValueNullChecker(billId));
