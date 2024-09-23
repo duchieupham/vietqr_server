@@ -1515,39 +1515,31 @@ public class TransactionController {
             @RequestParam(value = "bankId") String bankId,
             @RequestParam(value = "userId") String userId,
             @RequestParam(value = "fromDate") String fromDate,
+            @RequestParam(value = "terminalCode", required = false) String terminalCode,
             @RequestParam(value = "toDate") String toDate) {
         TransStatisticResponseV2DTO result = null;
         HttpStatus httpStatus = null;
         try {
             TransStatisticV2DTO dto = null;
-            dto = transactionReceiveService
-                    .getTransactionOverviewV2(bankId, fromDate, toDate);
-            MerchantBankV2DTO merchantBankV2DTO = merchantBankReceiveService
-                    .getMerchantBankV2OverviewByBankId(bankId, userId);
+            if (StringUtil.isNullOrEmpty(terminalCode)) {
+                dto = transactionReceiveService
+                        .getTransactionOverviewV2(bankId, fromDate, toDate);
+            } else {
+                dto = transactionReceiveService
+                        .getTransactionOverviewV2ByTerminalCode(bankId, terminalCode, fromDate, toDate);
+            }
             if (Objects.nonNull(dto)) {
                 result = new TransStatisticResponseV2DTO();
                 result.setCountCredit(dto.getCountCredit());
                 result.setTotalCredit(dto.getTotalCredit());
                 result.setCountDebit(dto.getCountDebit());
                 result.setTotalDebit(dto.getTotalDebit());
-                if (Objects.nonNull(merchantBankV2DTO)) {
-                    result.setMerchantName(StringUtil
-                            .getValueNullChecker(merchantBankV2DTO.getMerchantName()));
-                    List<String> terminalDTOs = terminalService
-                            .getTerminalByUserIdAndMerchantId(userId, merchantBankV2DTO.getMerchantId());
-                    result.setTerminals(terminalDTOs != null ? terminalDTOs : new ArrayList<>());
-                } else {
-                    result.setMerchantName("");
-                    result.setTerminals(new ArrayList<>());
-                }
             } else {
                 result = new TransStatisticResponseV2DTO();
                 result.setCountCredit(0);
                 result.setTotalCredit(0);
                 result.setCountDebit(0);
                 result.setTotalDebit(0);
-                result.setMerchantName("");
-                result.setTerminals(new ArrayList<>());
             }
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
@@ -3290,8 +3282,10 @@ public class TransactionController {
                                                                 item.getReferenceNumber());
                                                 if (StringUtil.isNullOrEmpty(checkExistRefundReferenceNumber)) {
                                                     checkOrderDTO.setType(item.getType());
+                                                    checkOrderDTO.setRefundFrom("");
                                                 } else {
                                                     checkOrderDTO.setType(6);
+                                                    checkOrderDTO.setRefundFrom(checkExistRefundReferenceNumber);
                                                 }
                                                 checkOrderDTO.setTransType(item.getTransType());
                                                 return checkOrderDTO;
@@ -3361,8 +3355,10 @@ public class TransactionController {
                                                                 item.getReferenceNumber());
                                                 if (StringUtil.isNullOrEmpty(checkExistRefundReferenceNumber)) {
                                                     checkOrderDTO.setType(item.getType());
+                                                    checkOrderDTO.setRefundFrom("");
                                                 } else {
                                                     checkOrderDTO.setType(6);
+                                                    checkOrderDTO.setRefundFrom(checkExistRefundReferenceNumber);
                                                 }
                                                 checkOrderDTO.setTransType(item.getTransType());
                                                 return checkOrderDTO;
@@ -3499,8 +3495,10 @@ public class TransactionController {
                                                                 item.getReferenceNumber());
                                                 if (StringUtil.isNullOrEmpty(checkExistRefundReferenceNumber)) {
                                                     checkOrderDTO.setType(item.getType());
+                                                    checkOrderDTO.setRefundFrom("");
                                                 } else {
                                                     checkOrderDTO.setType(6);
+                                                    checkOrderDTO.setRefundFrom(checkExistRefundReferenceNumber);
                                                 }
                                                 checkOrderDTO.setTransType(item.getTransType());
                                                 return checkOrderDTO;

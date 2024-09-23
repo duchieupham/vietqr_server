@@ -7,6 +7,7 @@ import com.vietqr.org.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -91,6 +92,20 @@ public class InvoiceItemServiceImpl implements InvoiceItemService {
     @Override
     public IAdminExtraInvoiceDTO getExtraInvoiceForAllTime() {
         return repo.getExtraInvoiceForAllTime();
+    }
+
+    @Override
+    public List<InvoiceItemEntity> updateAllItemId(List<String> itemIds, long timePaid) {
+        List<InvoiceItemEntity> updatedInvoiceItems = new ArrayList<>();
+        for (String itemId : itemIds) {
+            InvoiceItemEntity invoiceItemEntity = repo.findById(itemId).orElse(null);
+            if (invoiceItemEntity != null) {
+                invoiceItemEntity.setTimePaid(timePaid);
+                invoiceItemEntity.setStatus(1);
+                updatedInvoiceItems.add(repo.save(invoiceItemEntity));
+            }
+        }
+        return updatedInvoiceItems;
     }
 
 

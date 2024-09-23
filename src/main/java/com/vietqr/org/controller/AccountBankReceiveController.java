@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.bidv.RequestCustomerVaDTO;
+import com.vietqr.org.dto.qrfeed.IAccountBankDTO;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.entity.bidv.CustomerVaEntity;
 import com.vietqr.org.service.*;
@@ -28,16 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.vietqr.org.dto.AccountBankReceiveDetailDTO.TransactionBankListDTO;
 
@@ -2554,5 +2546,76 @@ public class AccountBankReceiveController {
     private boolean isKeyActive(String keyActive, String secretKey, int duration, String valueActive) {
         String data = BcryptKeyUtil.hashKeyActive(keyActive, secretKey, duration);
         return data.equals(valueActive);
+    }
+
+    @GetMapping("/list-platforms")
+    public ResponseEntity<Object> getPlatformConnections(
+            @RequestParam String bankId,
+            @RequestParam int page,
+            @RequestParam int size) {
+        Object result;
+        HttpStatus httpStatus;
+        PageResDTO pageResDTO = new PageResDTO();
+
+        try {
+            int totalElement;
+            int offset = (page - 1) * size;
+            List<PlatformConnectionDTO> data = accountBankReceiveService.getPlatformConnectionsByBankId(bankId, offset, size);
+            totalElement = accountBankReceiveService.countPlatformConnectionsByBankId(bankId);
+
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            pageDTO.setTotalElement(totalElement);
+            pageDTO.setTotalPage(StringUtil.getTotalPage(totalElement, size));
+
+            pageResDTO.setMetadata(pageDTO);
+            pageResDTO.setData(data);
+
+            httpStatus = HttpStatus.OK;
+            result = pageResDTO;
+        } catch (Exception e) {
+            logger.error("PlatformConnectionController: ERROR: getPlatformConnections: " + e.getMessage()
+                    + " at: " + System.currentTimeMillis());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+
+    @PutMapping("/bank-notification/update")
+    public ResponseEntity<ResponseMessageDTO> updateBankNotification(@RequestBody BankNotificationUpdateDTO dto) {
+        ResponseMessageDTO result;
+        HttpStatus httpStatus;
+
+        try {
+                accountBankReceiveService.updateNotificationTypes(dto.getUserId(), dto.getBankId(), dto.getNotificationTypes());
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+
+        } catch (Exception e) {
+            logger.error("Error updating bank notification: " + e.getMessage());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
+
+    @GetMapping("/bank-notification/{userId}")
+    public ResponseEntity<List<BankNotificationDTO>> getFullAccountBankByUserId(@PathVariable("userId") String userId) {
+        HttpStatus httpStatus;
+        List<BankNotificationDTO> result;
+        try {
+            result = accountBankReceiveService.getFullAccountBankReceiveByUserId(userId);
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("Error fetching account banks: " + e.getMessage());
+            httpStatus = HttpStatus.BAD_REQUEST;
+            result = new ArrayList<>();
+        }
+        return new ResponseEntity<>(result, httpStatus);
     }
 }

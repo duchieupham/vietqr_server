@@ -15,13 +15,15 @@ public class PaymentRequestResponseDTO {
     private long vatAmount;
     private String invoiceId;
     private long expiredTime;
+    private String bankCode;
+    private String urlLink;
 
     public PaymentRequestResponseDTO() {
     }
 
     public PaymentRequestResponseDTO(String qrCode, long totalAmountAfterVat, String invoiceName, String midName,
                                      String vso, String bankAccount, String bankShortName, String invoiceNumber,
-                                     String userBankName, long totalAmount, double vat, long vatAmount, String invoiceId) {
+                                     String userBankName, long totalAmount, double vat, long vatAmount, String invoiceId, String bankCode, String urlLink) {
         this.qrCode = qrCode;
         this.totalAmountAfterVat = totalAmountAfterVat;
         this.invoiceName = invoiceName;
@@ -35,6 +37,8 @@ public class PaymentRequestResponseDTO {
         this.vat = vat;
         this.vatAmount = vatAmount;
         this.invoiceId = invoiceId;
+        this.bankCode = bankCode;
+        this.urlLink = urlLink;
     }
 
     public String getQrCode() {
@@ -147,5 +151,22 @@ public class PaymentRequestResponseDTO {
 
     public void setExpiredTime(long expiredTime) {
         this.expiredTime = expiredTime;
+    }
+
+
+    public String getBankCode() {
+        return bankCode;
+    }
+
+    public void setBankCode(String bankCode) {
+        this.bankCode = bankCode;
+    }
+
+    public String getUrlLink() {
+        return urlLink;
+    }
+
+    public void setUrlLink(String urlLink) {
+        this.urlLink = urlLink;
     }
 }

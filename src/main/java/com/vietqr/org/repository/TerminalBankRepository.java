@@ -20,6 +20,9 @@ public interface TerminalBankRepository extends JpaRepository<TerminalBankEntity
     @Query(value = "SELECT * FROM terminal_bank WHERE bank_account_raw_number = :bankAccount LIMIT 1", nativeQuery = true)
     TerminalBankEntity getTerminalBankByBankAccount(@Param(value = "bankAccount") String bankAccount);
 
+    @Query(value = "SELECT terminal_id FROM terminal_bank WHERE bank_account_raw_number = :bankAccount LIMIT 1", nativeQuery = true)
+    String getTerminalBankQRByBankAccount(@Param(value = "bankAccount") String bankAccount);
+
     @Query(value = "SELECT terminal_id FROM terminal_bank WHERE bank_account_raw_number = :bankAccount", nativeQuery = true)
     String getTerminalIdByBankAccount(@Param(value = "bankAccount") String bankAccount);
 

@@ -30,4 +30,9 @@ public class TerminalItemServiceImpl implements TerminalItemService {
     public void removeById(String id) {
         repo.removeById(id);
     }
+
+    @Override
+    public String existsByIdServiceCodeTerminalCode(String id, String serviceCode, String terminalCode) {
+        return repo.existsByIdServiceCodeTerminalCode(id, serviceCode, terminalCode);
+    }
 }

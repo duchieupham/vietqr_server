@@ -6,8 +6,7 @@ import javax.transaction.Transactional;
 
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
-import com.vietqr.org.service.grpc.biz.IBankAccountReceiveBankDTO;
-import com.vietqr.org.service.grpc.biz.IBankAccountReceiveUserDTO;
+import com.vietqr.org.dto.qrfeed.IAccountBankDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -137,6 +136,28 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			"bank_type_id = :bankTypeId AND is_authenticated = true AND status = 1", nativeQuery = true)
 	AccountBankReceiveEntity getAccountBankByBankAccountAndBankTypeId(@Param(value = "bankAccount") String bankAccount,
 			@Param(value = "bankTypeId") String bankTypeId);
+
+	@Query(value = "SELECT bank_account as bankAccount, bank_account_name as bankAccountName " +
+			"FROM account_bank_receive WHERE bank_account = :bankAccount AND " +
+			"bank_type_id = :bankTypeId AND is_authenticated = true AND status = 1", nativeQuery = true)
+	IAccountBankInfoQR getAccountBankQRByAccountAndId(
+			@Param(value = "bankAccount") String bankAccount,
+			@Param(value = "bankTypeId") String bankTypeId
+	);
+
+	@Query(value = "SELECT id AS id, bank_account as bankAccount, bank_account_name as bankAccountName FROM account_bank_receive WHERE bank_account = :bankAccount AND " +
+			"bank_type_id = :bankTypeId AND is_authenticated = true AND status = 1 LIMIT 1", nativeQuery = true)
+	IAccountBankReceiveQR getAccountBankReceiveQRByAccountAndId(
+			@Param(value = "bankAccount") String bankAccount,
+			@Param(value = "bankTypeId") String bankTypeId
+	);
+
+	@Query(value = "SELECT id AS id, user_id AS userId FROM account_bank_receive WHERE bank_account = :bankAccount AND " +
+			"bank_type_id = :bankTypeId AND is_authenticated = true AND status = 1", nativeQuery = true)
+	IAccountBankQR getAccountBankQR(
+			@Param(value = "bankAccount") String bankAccount,
+			@Param(value = "bankTypeId") String bankTypeId
+	);
 
 	@Query(value = "SELECT b.id as id, b.bank_account as bankAccount, c.bank_name as bankName, b.bank_account_name as userBankName, c.img_id as imgId, b.is_authenticated as authenticated  "
 			+ "FROM bank_receive_branch a "
@@ -329,6 +350,13 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "WHERE a.bank_account = :bankAccount "
 			+ "AND b.bank_code = :bankCode AND is_authenticated = TRUE LIMIT 1", nativeQuery = true)
 	AccountBankReceiveEntity getAccountBankReceiveByBankAccountAndBankCode(String bankAccount, String bankCode);
+
+	@Query(value = "SELECT mms_active AS mmsActive, bank_account AS bankAccount, a.id AS id, bank_account_name AS bankAccountName FROM account_bank_receive a "
+			+ "INNER JOIN bank_type b "
+			+ "ON b.id = a.bank_type_id "
+			+ "WHERE a.bank_account = :bankAccount "
+			+ "AND b.bank_code = :bankCode AND is_authenticated = TRUE LIMIT 1", nativeQuery = true)
+	IAccountBankReceiveMMS getAccountBankReceiveQRByBankAccountAndBankCode(String bankAccount, String bankCode);
 
 	@Query(value = "SELECT a.bank_name FROM bank_type a WHERE a.id = :bankTypeId", nativeQuery = true)
 	String getBankNameByBankId(String bankTypeId);
@@ -644,11 +672,11 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
 			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, "
-			+ "abr.time_created AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "abr.time_create AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
 			+ "INNER JOIN account_login al ON abr.user_id = al.id "
-			+ "WHERE abr.is_valid_service = false OR abr.valid_fee_to < :currentTime "
+			+ "WHERE abr.valid_fee_to != 0 OR abr.valid_fee_to < :currentTime "
 			+ "ORDER BY abr.valid_fee_to ASC LIMIT :offset, :size", nativeQuery = true)
 	List<IBankAccountResponseDTO> getOverdueBankAccounts(@Param("currentTime") long currentTime, @Param("offset") int offset, @Param("size") int size);
 
@@ -660,7 +688,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
 			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, "
-			+ "abr.time_created AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "abr.time_create AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
 			+ "INNER JOIN account_login al ON abr.user_id = al.id "
@@ -814,29 +842,108 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "WHERE user_id = :userId ", nativeQuery = true)
 	void updateEnableVoiceByBankIds(List<String> bankIds, String userId);
 
-	@Query(value = "SELECT a.bank_account AS bankAccount, "
-			+ "a.bank_account_name AS userBankName, "
-			+ "a.is_sync AS isSync, "
-			+ "a.bank_type_id AS bankTypeId, "
-			+ "a.user_id AS userId, "
-			+ "b.bank_short_name AS bankShortName "
-			+ "FROM account_bank_receive a "
-			+ "INNER JOIN (SELECT id, bank_short_name FROM bank_type) b "
-			+ "ON a.bank_type_id = b.id "
-			+ "WHERE a.id = :bankId LIMIT 1"
-			, nativeQuery = true)
-	IBankAccountReceiveUserDTO getBankAccountReceiveByBankIdGrpc(@Param(value = "bankId") String bankId);
+	@Query(value = "SELECT te.id AS platformId, COALESCE(te.name, '') AS platformName, COALESCE(t.chat_id, '') AS connectionDetail, 'Telegram' AS platform "
+			+ "FROM telegram_account_bank t "
+			+ "JOIN telegram te ON t.telegram_id = te.id "
+			+ "WHERE t.bank_id = :bankId "
+			+ "UNION ALL "
+			+ "SELECT le.id AS platformId, COALESCE(le.name, '') AS platformName, COALESCE(l.webhook, '') AS connectionDetail, 'Lark' AS platform "
+			+ "FROM lark_account_bank l "
+			+ "JOIN lark le ON l.lark_id = le.id "
+			+ "WHERE l.bank_id = :bankId "
+			+ "UNION ALL "
+			+ "SELECT gce.id AS platformId, COALESCE(gce.name, '') AS platformName, COALESCE(g.webhook, '') AS connectionDetail, 'Google Chat' AS platform "
+			+ "FROM google_chat_account_bank g "
+			+ "JOIN google_chat gce ON g.google_chat_id = gce.id "
+			+ "WHERE g.bank_id = :bankId "
+			+ "UNION ALL "
+			+ "SELECT gse.id AS platformId, COALESCE(gse.name, '') AS platformName, COALESCE(gs.webhook, '') AS connectionDetail, 'Google Sheet' AS platform "
+			+ "FROM google_sheet_account_bank gs "
+			+ "JOIN google_sheet gse ON gs.google_sheet_id = gse.id "
+			+ "WHERE gs.bank_id = :bankId "
+			+ "UNION ALL "
+			+ "SELECT se.id AS platformId, COALESCE(se.name, '') AS platformName, COALESCE(s.webhook, '') AS connectionDetail, 'Slack' AS platform "
+			+ "FROM slack_account_bank s "
+			+ "JOIN slack se ON s.slack_id = se.id "
+			+ "WHERE s.bank_id = :bankId "
+			+ "UNION ALL "
+			+ "SELECT de.id AS platformId, COALESCE(de.name, '') AS platformName, COALESCE(d.webhook, '') AS connectionDetail, 'Discord' AS platform "
+			+ "FROM discord_account_bank d "
+			+ "JOIN discord de ON d.discord_id = de.id "
+			+ "WHERE d.bank_id = :bankId "
+			+ "ORDER BY platformName ASC "
+			+ "LIMIT :offset, :size", nativeQuery = true)
+	List<IPlatformConnectionDTO> getPlatformConnectionsByBankId(@Param("bankId") String bankId, @Param("offset") int offset, @Param("size") int size);
 
-	@Query(value = "SELECT a.bank_account AS bankAccount, "
-			+ "a.bank_account_name AS userBankName, "
-			+ "a.is_sync AS isSync, "
-			+ "a.bank_type_id AS bankTypeId, "
-			+ "a.id AS bankId, "
-			+ "b.bank_short_name AS bankShortName "
+
+	@Query(value = "SELECT COUNT(*) FROM ("
+			+ "SELECT 1 AS platform FROM telegram_account_bank t WHERE t.bank_id = :bankId "
+			+ "UNION ALL "
+			+ "SELECT 1 AS platform FROM lark_account_bank l WHERE l.bank_id = :bankId "
+			+ "UNION ALL "
+			+ "SELECT 1 AS platform FROM google_chat_account_bank g WHERE g.bank_id = :bankId "
+			+ "UNION ALL "
+			+ "SELECT 1 AS platform FROM google_sheet_account_bank gs WHERE gs.bank_id = :bankId "
+			+ "UNION ALL "
+			+ "SELECT 1 AS platform FROM slack_account_bank s WHERE s.bank_id = :bankId "
+			+ "UNION ALL "
+			+ "SELECT 1 AS platform FROM discord_account_bank d WHERE d.bank_id = :bankId) AS total", nativeQuery = true)
+	int countPlatformConnectionsByBankId(@Param("bankId") String bankId);
+
+	@Modifying
+	@Transactional
+	@Query(value = "UPDATE account_bank_receive SET notification_types = :notificationTypes " +
+			"WHERE user_id = :userId AND id = :bankId", nativeQuery = true)
+	void updateNotificationTypes(@Param("userId") String userId,
+								 @Param("bankId") String bankId,
+								 @Param("notificationTypes") String notificationTypes);
+
+	@Query(value = "SELECT distinct " +
+			"abr.id AS id, " +
+			"COALESCE(abr.bank_account, '') AS bankAccount, " +
+			"COALESCE(abr.bank_account_name, '') AS bankAccountName, " +
+			"COALESCE(abr.bank_type_id, '') AS bankTypeId, " +
+			"COALESCE(abr.is_authenticated, false) AS isAuthenticated, " +
+			"COALESCE(abr.is_sync, false) AS isSync, " +
+			"COALESCE(abr.is_wp_sync, false) AS isWpSync, " +
+			"COALESCE(abr.status, false) AS status, " +
+			"COALESCE(abr.national_id, '') AS nationalId, " +
+			"COALESCE(abr.phone_authenticated, '') AS phoneAuthenticated, " +
+			"COALESCE(abr.mms_active, false) AS mmsActive, " +
+			"COALESCE(abr.type, 0) AS type, " +
+			"COALESCE(abr.user_id, '') AS userId, " +
+			"COALESCE(abr.is_rpa_sync, false) AS isRpaSync, " +
+			"COALESCE(abr.username, '') AS username, " +
+			"COALESCE(abr.password, '') AS password, " +
+			"COALESCE(abr.ewallet_token, '') AS ewalletToken, " +
+			"COALESCE(abr.terminal_length, 0) AS terminalLength, " +
+			"COALESCE(abr.enable_voice, true) AS enableVoice, " +
+			"COALESCE(abr.valid_fee_from, 0) AS validFeeFrom, " +
+			"COALESCE(abr.valid_fee_to, 0) AS validFeeTo, " +
+			"COALESCE(abr.customer_id, '') AS customerId, " +
+			"COALESCE(abr.time_created, 0) AS timeCreated, " +
+			"COALESCE(abr.vso, '') AS vso, " +
+			"COALESCE(abr.push_notification, 1) AS pushNotification, " +
+			"COALESCE(abr.is_valid_service, false) AS validService, " +
+			"COALESCE(abr.notification_types, '') AS notificationTypes, " +
+			"COALESCE(bt.bank_short_name, '') AS bankShortName, " +
+			"COALESCE(bt.img_id, '') AS imgId " +
+			"FROM account_bank_receive abr " +
+			"JOIN account_bank_receive_share abrs ON abr.id = abrs.bank_id " +
+			"JOIN bank_type bt ON abr.bank_type_id = bt.id " +
+			"WHERE abr.is_authenticated = true " +
+			"AND abrs.is_owner = true " +
+			"AND abr.user_id = :userId",
+			nativeQuery = true)
+	List<IBankNotificationProjection> getFullAccountBankReceiveByUserId(@Param("userId") String userId);
+
+	@Query(value = "SELECT a.id AS id, a.user_id AS userId, a.bank_account AS bankAccount, "
+			+ "a.bank_account_name AS bankAccountName, a.customer_id AS customerId "
 			+ "FROM account_bank_receive a "
-			+ "INNER JOIN (SELECT id, bank_short_name FROM bank_type) b "
-			+ "ON a.bank_type_id = b.id "
-			+ "WHERE a.user_id = :userId"
-			, nativeQuery = true)
-	List<IBankAccountReceiveBankDTO> getBankAccountReceiveByUserIdGrpc(@Param(value = "userId") String userId);
+			+ "WHERE a.bank_type_id = :bankTypeId AND a.bank_account = :bankAccount "
+			+ "AND is_authenticated = true AND status = 1 LIMIT 1 ", nativeQuery = true)
+    AccountBankGenerateBIDVDTO getAccountBankBIDVByBankAccountAndBankTypeId(String bankAccount, String bankTypeId);
+
+	@Query(value = "SELECT bank_account AS bankAccount, user_id AS userId FROM account_bank_receive WHERE id = :bankId LIMIT 1", nativeQuery = true)
+	IAccountBankUserQR getAccountBankUserQRById(@Param(value = "bankId") String bankId);
 }

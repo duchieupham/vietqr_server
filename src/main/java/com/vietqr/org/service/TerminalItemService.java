@@ -12,4 +12,6 @@ public interface TerminalItemService {
     TerminalItemEntity getItemByBankAndServiceCode(String id, String serviceCode, String terminalCode);
 
     void removeById(String id);
+
+    String existsByIdServiceCodeTerminalCode(String id, String serviceCode, String terminalCode);
 }

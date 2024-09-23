@@ -31,4 +31,6 @@ public interface TerminalBankService {
     List<QrBoxListDTO> getQrBoxListByBankId(String bankId);
 
     List<QrBoxDynamicDTO> getQrBoxDynamicQrByBankId(String bankId);
+
+    String getTerminalBankQRByBankAccount(String bankAccount);
 }
