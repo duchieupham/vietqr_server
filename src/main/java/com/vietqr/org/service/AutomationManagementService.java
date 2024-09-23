@@ -17,6 +17,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -96,13 +100,13 @@ public class AutomationManagementService {
         long timeResponse = 0;
         if (!EnvironmentUtil.isProduction()) {
             try {
-                time = System.currentTimeMillis();
                 UriComponents uriComponents = UriComponentsBuilder
                         .fromHttpUrl("https://api.vietqr.org/vqr/status/performance")
                         .buildAndExpand(/* add url parameter here */);
                 WebClient webClient = WebClient.builder()
                         .baseUrl("https://api.vietqr.org/vqr/status/performance")
                         .build();
+                time = System.currentTimeMillis();
                 Mono<ClientResponse> responseMono = webClient.get()
                         .uri(uriComponents.toUri())
                         .header("Authorization", "Bearer " + "eyJhbGciOiJIUzUxMiJ9.eyJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXSwidXNlciI6IlkzVnpkRzl0W" +
@@ -117,11 +121,16 @@ public class AutomationManagementService {
                 logger.error("scheduleExecuteTaskCheckPerformance: ERROR: " + e.getMessage() +
                         " at: " + System.currentTimeMillis());
             } finally {
-                if ((timeResponse - time) >= 3000) {
+                if ((timeResponse - time) >= 5000) {
+                    LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(time + 25200), ZoneId.systemDefault());
+                    LocalDateTime responseTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timeResponse + 25200), ZoneId.systemDefault());
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                     String content = "HEATH CHECK WARNING: " +
                             "\uD83D\uDE4B\u200D♂\uFE0F\uD83D\uDE4B\u200D♂\uFE0F\uD83D\uDE4B\u200D♂\uFE0F." +
                             "\n\nVUI LÒNG KIỂM TRA HEATH CHECK.\n\n" +
-                            "TIME CALL: " + time + " TIME RESPONSE: " + timeResponse;
+                            "TIME CALL: " + dateTime.format(formatter)
+                            + "\n\nTIME RESPONSE: " + responseTime.format(formatter)
+                            + "\n\nTIME DELAY: " + (timeResponse - time) + " ms";
                     GoogleChatUtil googleChatUtil = new GoogleChatUtil();
                     googleChatUtil.sendMessageToGoogleChat(content, "https://chat.googleapis.com/v1/spaces/AAAAEkpkd2A/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=q9cgRDssTNVRgIQCYkfq06Sfh8nS-h4RD3Nrfby9NJk");
                 }
