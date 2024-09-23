@@ -1,4 +1,4 @@
-package com.vietqr.org.service.grpc.statistical;
+package com.vietqr.org.service.grpc.statistical.trsys;
 
 import com.example.grpc.GetTrSysRequest;
 import com.example.grpc.TSys;
@@ -24,18 +24,7 @@ public class TrSysServer extends TrSysServiceGrpc.TrSysServiceImplBase {
         try {
             com.example.grpc.TSys result = trSysService.getTrSysData(request.getStartDate(), request.getEndDate());
 
-            TSys response = TSys.newBuilder()
-                    .setTotalNumberCredits(result.getTotalNumberCredits())
-                    .setTotalAmountCredits(result.getTotalAmountCredits())
-                    .setTotalNumberRecon(result.getTotalNumberRecon())
-                    .setTotalAmountRecon(result.getTotalAmountRecon())
-                    .setTotalNumberWithoutRecon(result.getTotalNumberWithoutRecon())
-                    .setTotalAmountWithoutRecon(result.getTotalAmountWithoutRecon())
-                    .setTotalNumberPushError(result.getTotalNumberPushError())
-                    .setTotalAmountPushErrorSum(result.getTotalAmountPushErrorSum())
-                    .build();
-
-            responseObserver.onNext(response);
+            responseObserver.onNext(result);
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("ERROR getTrSys: " + e.getMessage() + " at " + System.currentTimeMillis());

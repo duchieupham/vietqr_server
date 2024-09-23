@@ -1,4 +1,4 @@
-package com.vietqr.org.service.grpc.statistical;
+package com.vietqr.org.service.grpc.statistical.trsys;
 
 import com.vietqr.org.entity.TransactionReceiveEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

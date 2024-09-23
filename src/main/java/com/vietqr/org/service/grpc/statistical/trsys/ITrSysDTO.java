@@ -1,4 +1,4 @@
-package com.vietqr.org.service.grpc.statistical;
+package com.vietqr.org.service.grpc.statistical.trsys;
 
 public interface ITrSysDTO {
     int getTotalNumberCredits();

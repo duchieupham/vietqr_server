@@ -1,4 +1,4 @@
-package com.vietqr.org.service.grpc.statistical;
+package com.vietqr.org.service.grpc.statistical.trsys;
 
 import com.example.grpc.TSys;
 import org.springframework.stereotype.Service;
