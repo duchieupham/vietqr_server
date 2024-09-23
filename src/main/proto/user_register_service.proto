@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.example.grpc";
+option java_outer_classname = "UserRegisterServiceProto";
+
+service UserRegisterService {
+  rpc GetUserRegister(GetUserRegisterRequest) returns (UserRegister);
+}
+
+message GetUserRegisterRequest {
+  int64 startDate = 1;
+  int64 endDate = 2;
+}
+
+message UserRegister {
+  string userCount = 1;
+  int64 iosPlatform = 2;
+  int64 androidPlatform = 3;
+  int64 webPlatform = 4;
+}
