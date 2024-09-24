@@ -71,4 +71,9 @@ public class TerminalBankServiceImpl implements TerminalBankService {
         return repo.getQrBoxDynamicQrByBankId(bankId);
     }
 
+    @Override
+    public String getTerminalBankQRByBankAccount(String bankAccount) {
+        return repo.getTerminalBankQRByBankAccount(bankAccount);
+    }
+
 }

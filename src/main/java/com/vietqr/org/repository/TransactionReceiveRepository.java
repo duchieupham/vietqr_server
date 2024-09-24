@@ -3230,5 +3230,13 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             @Param("value") String value,
             @Param("time") long time);
 
+    @Query(value = "SELECT "
+            + "COALESCE(SUM(CASE WHEN status = 1 AND trans_type = 'C' then amount END), 0) AS totalCredit, "
+            + "COALESCE(COUNT(CASE WHEN status = 1 AND trans_type = 'C' then 1 END), 0) AS countCredit, "
+            + "COALESCE(SUM(CASE WHEN status = 1 AND trans_type = 'D' then amount END), 0) AS totalDebit, "
+            + "COALESCE(COUNT(CASE WHEN status = 1 AND trans_type = 'D' then 1 END), 0) AS countDebit "
+            + "FROM transaction_receive "
+            + "WHERE bank_id = :bankId AND time BETWEEN :fromDate AND :toDate AND terminal_code = :terminalCode LIMIT 1", nativeQuery = true)
+    TransStatisticV2DTO getTransactionOverviewV2ByTerminalCode(String bankId, String terminalCode, long fromDate, long toDate);
 }
 

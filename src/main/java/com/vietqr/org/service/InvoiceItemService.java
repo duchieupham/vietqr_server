@@ -38,4 +38,6 @@ public interface InvoiceItemService {
 
     List<BankIdProcessDateResponseDTO> getProcessDatesByType(int type, List<String> bankIds, String processDate);
     IAdminExtraInvoiceDTO getExtraInvoiceForAllTime();
+
+    List<InvoiceItemEntity> updateAllItemId(List<String> itemIds, long timePaid);
 }

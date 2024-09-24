@@ -80,4 +80,11 @@ public interface MerchantRepository extends JpaRepository<MerchantEntity, Long> 
     @Modifying
     @Query(value = "DELETE FROM merchant WHERE id = :id", nativeQuery = true)
     void deleteMerchantById(@Param(value = "id") String id);
+
+    @Query(value = "SELECT a.id AS merchantId, a.name AS merchantName "
+            + "FROM merchant a "
+            + "INNER JOIN merchant_member b ON a.id = b.merchant_id "
+            + "INNER JOIN merchant_bank_receive c ON c.merchant_id = a.id "
+            + "WHERE b.user_id = :userId AND c.bank_id = :bankId ", nativeQuery = true)
+    List<IMerchantOverviewDTO> getMerchantByUserIdAndBankId(String userId, String bankId);
 }

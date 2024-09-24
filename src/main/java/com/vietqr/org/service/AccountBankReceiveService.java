@@ -2,6 +2,7 @@ package com.vietqr.org.service;
 
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
 import org.springframework.stereotype.Service;
@@ -203,4 +204,23 @@ public interface AccountBankReceiveService {
 	void disableSoundNotificationByBankId(String bankId);
 
 	void updateEnableVoiceByBankIds(List<String> bankIds, String userId);
+	List<PlatformConnectionDTO> getPlatformConnectionsByBankId(String bankId, int offset, int size);
+	int countPlatformConnectionsByBankId(String bankId);
+
+
+	void updateNotificationTypes(String userId, String bankId, List<String> notificationTypes) throws JsonProcessingException;
+
+	List<BankNotificationDTO> getFullAccountBankReceiveByUserId(String userId);
+
+	AccountBankGenerateBIDVDTO getAccountBankBIDVByBankAccountAndBankTypeId(String bankAccount, String bankTypeId);
+
+	IAccountBankQR getAccountBankQR(String bankAccount, String bankTypeId);
+
+	IAccountBankInfoQR getAccountBankQRByAccountAndId(String bankAccount, String bankTypeId);
+
+	IAccountBankUserQR getAccountBankUserQRById(String bankId);
+
+	IAccountBankReceiveQR getAccountBankReceiveQRByAccountAndId(String bankAccount, String bankTypeId);
+
+	IAccountBankReceiveMMS getAccountBankReceiveQRByBankAccountAndBankCode(String bankAccount, String bankCode);
 }

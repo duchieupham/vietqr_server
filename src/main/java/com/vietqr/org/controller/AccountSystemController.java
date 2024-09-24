@@ -315,76 +315,17 @@ public class AccountSystemController {
     }
 
     @PutMapping("admin/account-email/{userId}")
-    public ResponseEntity<ResponseMessageDTO> updateAccountEmail(@PathVariable(value = "userId") String userId, @Valid @RequestBody AccountUpdateEmailDTO accountUpdateEmailDTO) {
+    public ResponseEntity<ResponseMessageDTO> saveAccountEmail(@PathVariable(value = "userId") String userId, @Valid @RequestBody AccountUpdateEmailDTO accountUpdateEmailDTO) {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            boolean isVerified = accountLoginService.getVerifyEmailStatus(userId);
-            if (!isVerified) {
-                result = new ResponseMessageDTO("FAILED", "E207");
-                httpStatus = HttpStatus.BAD_REQUEST;
+            if (EmailUtil.isVerified(accountUpdateEmailDTO.getEmail())) {
+                accountSystemService.updateAccountEmail(userId, accountUpdateEmailDTO.getEmail());
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
             } else {
-                switch (accountUpdateEmailDTO.getType()) {
-                    // Without OTP sending
-                    case 0:
-                        if (EmailUtil.isVerified(accountUpdateEmailDTO.getEmail())) {
-                            accountSystemService.updateAccountEmail(userId, accountUpdateEmailDTO.getEmail(), accountUpdateEmailDTO.getType());
-                            result = new ResponseMessageDTO("SUCCESS", "");
-                            httpStatus = HttpStatus.OK;
-                        } else {
-                            result = new ResponseMessageDTO("FAILED", "E206");
-                            httpStatus = HttpStatus.BAD_REQUEST;
-                        }
-                        break;
-                    // With OTP sending
-                    case 1:
-                        String email = "";
-                        if (accountUpdateEmailDTO.getEmail().isEmpty()) {
-                            email = accountInformationService.getEmailByUserId(userId);
-                        } else if (EmailUtil.isVerified(accountUpdateEmailDTO.getEmail())) {
-                            email = accountUpdateEmailDTO.getEmail();
-                        } else {
-                            result = new ResponseMessageDTO("FAILED", "E206");
-                            httpStatus = HttpStatus.BAD_REQUEST;
-                            break;
-                        }
-
-                        // Check OTP
-                        switch (handleOTP(userId, email, accountUpdateEmailDTO.getOtp())) {
-                            case 0:
-                                // Có vấn đề xảy ra khi gửi OTP
-                                result = new ResponseMessageDTO("FAILED", "E21");
-                                httpStatus = HttpStatus.BAD_REQUEST;
-                                break;
-                            case 1:
-                                // Success
-                                accountSystemService.updateAccountEmail(userId, accountUpdateEmailDTO.getEmail(), accountUpdateEmailDTO.getType());
-                                emailVerifyService.updateEmailVerifiedByUserId(userId, accountUpdateEmailDTO.getOtp());
-                                result = new ResponseMessageDTO("SUCCESS", "");
-                                httpStatus = HttpStatus.OK;
-                                break;
-                            case 2:
-                                // OTP không chính xác
-                                result = new ResponseMessageDTO("FAILED", "E177");
-                                httpStatus = HttpStatus.BAD_REQUEST;
-                                break;
-                            case 3:
-                                // OTP hết hiệu lực
-                                result = new ResponseMessageDTO("FAILED", "E175");
-                                httpStatus = HttpStatus.BAD_REQUEST;
-                                break;
-                            default:
-                                // OTP đã bị vô hiệu hóa
-                                result = new ResponseMessageDTO("FAILED", "E178");
-                                httpStatus = HttpStatus.BAD_REQUEST;
-                                break;
-                        }
-                        break;
-                    default:
-                        result = new ResponseMessageDTO("FAILED", "E46");
-                        httpStatus = HttpStatus.BAD_REQUEST;
-                        break;
-                }
+                result = new ResponseMessageDTO("FAILED", "E206");
+                httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("Failed at AccountSystemController:  Error at updateAccountEmail: " + e.getMessage() + "at" + System.currentTimeMillis());

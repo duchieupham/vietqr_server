@@ -105,4 +105,6 @@ public interface TerminalService {
     List<TerminalBankV2DTO> getTerminalByUserIdAndMerchantIds(String userId, List<String> merchantIds);
 
     List<String> getTerminalByUserIdAndMerchantId(String userId, String merchantId);
+
+    List<ITerminalOverviewDTO> getTerminalOverviewByMerchantIds(List<String> merchantIds);
 }

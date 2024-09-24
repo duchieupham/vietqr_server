@@ -115,6 +115,10 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 		SpringApplication.run(VietqrApplication.class, args);
 		String helo = BoxTerminalRefIdUtil.encryptQrBoxId("VVB189427");
 		System.out.println(helo);
+		System.out.println( BankEncryptUtil.generateRefundMD5Checksum("MjEwY2Q0MzEtOTVkYS00NDI0LWFkMGEtMzA4M2I2ZjA5YTQ3", "FT24260909017602"
+				, "15000", "3991031291095"));
+		String checkOrder = BankEncryptUtil.generateMD5CheckOrderChecksum("3991031291095", "customer-vso19552happyday-user24117");
+		System.out.println(checkOrder);
 //		MQTTUtil.sub("#");
 		// get bill
 //		 String checksum =
@@ -358,8 +362,8 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 					.antMatchers(HttpMethod.POST, "/api/accounts/confirm-otp").permitAll()
 					.antMatchers(HttpMethod.POST, "/api/images-invoice/**").permitAll()
 					.antMatchers(HttpMethod.GET, "/api/images-invoice/**").permitAll()
+					.antMatchers(HttpMethod.GET, "/api/customer-error-log/example").permitAll()
 					.antMatchers(HttpMethod.GET, "/status").permitAll()
-
 					.anyRequest().authenticated();
 		}
 

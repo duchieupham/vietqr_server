@@ -25,4 +25,6 @@ public interface MerchantService {
     List<MerchantResponseListDTO> getMerchantsByUserId(String userId);
 
     void deleteMerchant(String id);
+
+    List<IMerchantOverviewDTO> getMerchantByUserIdAndBankId(String userId, String bankId);
 }

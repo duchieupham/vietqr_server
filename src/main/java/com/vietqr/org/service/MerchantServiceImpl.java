@@ -59,5 +59,8 @@ public class MerchantServiceImpl implements MerchantService {
         repo.deleteMerchantById(id);
     }
 
-
+    @Override
+    public List<IMerchantOverviewDTO> getMerchantByUserIdAndBankId(String userId, String bankId) {
+        return repo.getMerchantByUserIdAndBankId(userId, bankId);
+    }
 }
