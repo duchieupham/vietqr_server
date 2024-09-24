@@ -8,6 +8,8 @@ import net.devh.boot.grpc.server.service.GrpcService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
+
 @GrpcService
 public class TrBankServer extends TrBankServiceGrpc.TrBankServiceImplBase{
     private static final Logger logger = Logger.getLogger(TrBankServer.class);
@@ -21,8 +23,12 @@ public class TrBankServer extends TrBankServiceGrpc.TrBankServiceImplBase{
     @Override
     public void getTrBank(GetTrBankRequest request, StreamObserver<TBank> responseObserver) {
         try {
-            com.example.grpc.TBank result = trBankService.getTrBankData(request.getStartDate(), request.getEndDate());
-            responseObserver.onNext(result);
+            List<TBank> resultList = trBankService.getTrBankData(request.getStartDate(), request.getEndDate());
+
+            for (TBank result : resultList) {
+                responseObserver.onNext(result);
+            }
+
             responseObserver.onCompleted();
         } catch (Exception e) {
             logger.error("ERROR getTrBank: " + e.getMessage() + " at " + System.currentTimeMillis());

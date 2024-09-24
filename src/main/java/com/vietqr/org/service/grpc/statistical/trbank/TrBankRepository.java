@@ -6,9 +6,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface TrBankRepository extends JpaRepository<TransactionReceiveEntity, String> {
-
     @Query(value = "SELECT " +
             "    bt.bank_short_name AS bankShortName, " +
             "    COALESCE(SUM(CASE WHEN tr.trans_type = 'C' AND tr.status = '1' THEN tr.amount ELSE 0 END), 0) AS totalAmountCredits, " +
@@ -20,8 +21,7 @@ public interface TrBankRepository extends JpaRepository<TransactionReceiveEntity
             "JOIN bank_type bt ON abr.bank_type_id = bt.id " +
             "WHERE bt.bank_short_name IN ('MBBank', 'BIDV') " +
             "    AND tr.time BETWEEN :startDate AND :endDate " +
-            "GROUP BY bt.bank_short_name;",
-            nativeQuery = true)
-    ITrBankDTO getTrBankData(@Param("startDate") long startDate, @Param("endDate") long endDate);
+            "GROUP BY bt.bank_short_name;", nativeQuery = true)
+    List<ITrBankDTO> getTrBankData(@Param("startDate") long startDate, @Param("endDate") long endDate);
 }
 

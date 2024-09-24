@@ -23,6 +23,4 @@ public interface TrMcRepository extends JpaRepository<TransactionReceiveEntity, 
             "WHERE tr.time BETWEEN :startDate AND :endDate " +
             "GROUP BY cs.merchant", nativeQuery = true)
     List<ITrMcDTO> getTrMcData(@Param("startDate") long startDate, @Param("endDate") long endDate);
-
-
 }

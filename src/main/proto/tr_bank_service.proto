@@ -5,7 +5,7 @@ option java_package = "com.example.grpc";
 option java_outer_classname = "TrBankServiceProto";
 
 service TrBankService {
-  rpc GetTrBank (GetTrBankRequest) returns (TBank);
+  rpc GetTrBank (GetTrBankRequest) returns (stream TBank);
 }
 
 message GetTrBankRequest {
