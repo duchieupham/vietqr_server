@@ -3238,5 +3238,23 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "FROM transaction_receive "
             + "WHERE bank_id = :bankId AND time BETWEEN :fromDate AND :toDate AND terminal_code = :terminalCode LIMIT 1", nativeQuery = true)
     TransStatisticV2DTO getTransactionOverviewV2ByTerminalCode(String bankId, String terminalCode, long fromDate, long toDate);
+
+    @Query(value = "SELECT "
+            + "id AS transactionId, "
+            + "amount AS amount, "
+            + "time_paid AS timePaid, "
+            + "reference_number AS referenceNumber, "
+            + "content AS content, "
+            + "order_id AS orderId "
+            + "FROM transaction_receive "
+            + "WHERE bank_account = :bankAccount "
+            + "AND (time BETWEEN :fromDate AND :toDate) "
+            + "AND status = 1"
+            , nativeQuery = true)
+    List<ITransactionReceiveAdminInfoDTO> getTransactionReceiveToMapInvoice(
+            @Param("bankAccount") String bankAccount,
+            @Param("fromDate") long fromDate,
+            @Param("toDate") long toDate
+    );
 }
 

@@ -1794,6 +1794,11 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public List<ITransactionReceiveAdminInfoDTO> getTransactionReceiveToMapInvoice(TransactionReceiveAdminResDTO dto) {
+        return repo.getTransactionReceiveToMapInvoice(dto.getBankAccount(), dto.getFromDate(), dto.getToDate());
+    }
+
+    @Override
     public TransStatisticDTO getTransactionOverviewBySubTerminalCode(String subTerminalCode, String fromDate, String toDate) {
         return repo.getTransactionOverviewBySubTerminalCode(subTerminalCode,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,

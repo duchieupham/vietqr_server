@@ -4042,4 +4042,31 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("admin/transaction/map-invoice")
+    public ResponseEntity<Object> getTransactionReceiveToMapInvoice(
+            @Valid @RequestBody TransactionReceiveAdminResDTO dto
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        final String bankBluecom = "699699699996";
+        final String bankPDTuan = "29058474275";
+
+        try {
+            List<ITransactionReceiveAdminInfoDTO> data = transactionReceiveService.getTransactionReceiveToMapInvoice(dto);
+            if (bankBluecom.equals(dto.getBankAccount()) || bankPDTuan.equals(dto.getBankAccount())) {
+                result = new ResponseObjectDTO("SUCCESS", data);
+                httpStatus = HttpStatus.OK;
+            } else {
+                logger.error("getTransactionReceiveAdminToMap: ERROR: Invalid request body");
+                result = new ResponseMessageDTO("FAILED", "E46");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("getTransactionReceiveAdminToMap: ERROR: " + e.getMessage());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
 }

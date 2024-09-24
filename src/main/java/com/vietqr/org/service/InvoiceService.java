@@ -182,4 +182,6 @@ public interface InvoiceService {
     List<IAdminInvoiceDTO> getInvoicesByStatus(String status, int offset, int size, String time);
 
     int countInvoicesByStatus(String status, String time);
+
+    void updateStatusToMapTransaction(String invoiceId, List<ITransactionInvoiceItemDTO> invoiceItemList, int status);
 }

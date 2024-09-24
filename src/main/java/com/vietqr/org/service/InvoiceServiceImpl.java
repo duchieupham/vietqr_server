@@ -3,6 +3,7 @@ package com.vietqr.org.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.InvoiceEntity;
+import com.vietqr.org.repository.InvoiceItemRepository;
 import com.vietqr.org.repository.InvoiceRepository;
 import com.vietqr.org.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,9 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Autowired
     private InvoiceRepository repo;
+
+    @Autowired
+    private InvoiceItemRepository invoiceItemRepository;
 
     @Override
     public void insert(InvoiceEntity entity) {
@@ -606,6 +610,14 @@ public class InvoiceServiceImpl implements InvoiceService {
         long fromDate = startEndTimeDTO.getStartTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
         long toDate = startEndTimeDTO.getEndTime() - DateTimeUtil.GMT_PLUS_7_OFFSET;
         return repo.countInvoicesByStatus(status, fromDate, toDate);
+    }
+
+    @Override
+    public void updateStatusToMapTransaction(String invoiceId, List<ITransactionInvoiceItemDTO> invoiceItemList, int status) {
+        invoiceItemList.forEach((item)->
+            invoiceItemRepository.updateStatusInvoiceItem(item.getId(), DateTimeUtil.getCurrentDateTimeUTC())
+        );
+        repo.updateStatusInvoice(invoiceId, status);
     }
 
     private AccountBankInfoDTO getBankAccountInfoByData(String data) {

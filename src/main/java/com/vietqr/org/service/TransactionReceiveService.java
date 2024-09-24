@@ -659,4 +659,6 @@ public interface TransactionReceiveService {
     List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAllDate(String value, int offset, int size);
 
     TransStatisticV2DTO getTransactionOverviewV2ByTerminalCode(String bankId, String terminalCode, String fromDate, String toDate);
+
+    List<ITransactionReceiveAdminInfoDTO> getTransactionReceiveToMapInvoice(TransactionReceiveAdminResDTO dto);
 }
