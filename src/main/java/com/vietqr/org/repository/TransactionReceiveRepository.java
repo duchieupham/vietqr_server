@@ -2948,7 +2948,6 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             "terminal_code = :terminalCode, order_id = :orderId WHERE reference_number = :ftCode AND trans_type = 'D' LIMIT 1 ", nativeQuery = true)
     void updateTransactionRefundStatus(String ftCode, String subCode, String terminalCode, String orderId, int type);
 
-
     @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, "
             + "a.content, a.order_id as orderId, a.reference_number as referenceNumber, a.status, "
             + "a.time as timeCreated, a.time_paid as timePaid, a.trans_type as transType, "

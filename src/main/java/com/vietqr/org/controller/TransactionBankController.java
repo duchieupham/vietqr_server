@@ -3783,7 +3783,7 @@ public class TransactionBankController {
                     transactionEntity.setType(2);
                     transactionEntity.setTerminalCode("");
                     transactionEntity.setSubCode("");
-                    transactionEntity.setOrderId(orderId);
+                    transactionEntity.setOrderId("");
                 }
             }
             transactionEntity.setStatus(1);
