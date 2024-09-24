@@ -2220,7 +2220,14 @@ public class TransactionMMSController {
 //                        if (true) {
                             result = new TransactionMMSResponseDTO("00", "Success");
                         } else {
-                            result = new TransactionMMSResponseDTO("12", "False checksum");
+                            String checkOrder = checkOrderFromMB(entity.getReferenceLabelCode());
+                            if (StringUtil.isNullOrEmpty(checkOrder) && "000".equals(checkOrder)) {
+                                result = new TransactionMMSResponseDTO("00", "Success");
+                            } else {
+                                // checksum is not match
+                                // System.out.println("checksum is not match"
+                                result = new TransactionMMSResponseDTO("12", "False checksum");
+                            }
                         }
                     } else {
                         result = new TransactionMMSResponseDTO("07", "Merchant is not exist");
@@ -2868,6 +2875,124 @@ public class TransactionMMSController {
         return result;
     }
 
+    private String checkOrderFromMB(String orderId) {
+        String result = null;
+        try {
+            TokenProductBankDTO token = getBankToken();
+            if (token != null) {
+                UUID clientMessageId = UUID.randomUUID();
+                Map<String, Object> data = new HashMap<>();
+                String checkSum = BankEncryptUtil.generateCheckOrderMD5Checksum("", "", orderId);
+                data.put("referenceLabel", orderId);
+                data.put("checkSum", checkSum);
+                UriComponents uriComponents = UriComponentsBuilder
+                        .fromHttpUrl(EnvironmentUtil.getBankUrl()
+                                + "ms/offus/public/payment-service/payment/v1.0/checkOrder")
+                        .buildAndExpand(/* add url parameter here */);
+                WebClient webClient = WebClient.builder()
+                        .baseUrl(
+                                EnvironmentUtil.getBankUrl()
+                                        + "ms/offus/public/payment-service/payment/v1.0/checkOrder")
+                        .build();
+                Mono<ClientResponse> responseMono = webClient.post()
+                        .uri(uriComponents.toUri())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("clientMessageId", clientMessageId.toString())
+                        .header("userName", EnvironmentUtil.getUsernameAPI())
+                        .header("secretKey", EnvironmentUtil.getSecretKeyAPI())
+                        .header("Authorization", "Bearer " + getBankToken().getAccess_token())
+                        .body(BodyInserters.fromValue(data))
+                        .exchange();
+                ClientResponse response = responseMono.block();
+
+                String json = response.bodyToMono(String.class).block();
+                logger.info("checkOrderFromMB: RESPONSE: " + json + " orderId: " + orderId);
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode rootNode = objectMapper.readTree(json);
+                if (rootNode.get("errorCode") != null) {
+                    // 000
+                    if ((rootNode.get("errorCode").asText()).trim().equals("000")) {
+                        if (rootNode.get("data").get("ft") != null) {
+                            result = rootNode.get("data").get("ft").asText();
+                            logger.info("checkOrderFromMB: RESPONSE FT: " + result);
+                        } else {
+                            logger.error("checkOrderFromMB: RESPONSE: FT NULL");
+                        }
+                    }
+                    // "4863" FT code not existed
+                    else if ((rootNode.get("errorCode").asText()).trim().equals("4863")) {
+                        result = "4863";
+                    }
+                    // "4857" Invalid amount
+                    else if ((rootNode.get("errorCode").asText()).trim().equals("4857")) {
+                        result = "4857";
+                    }
+                } else {
+                    logger.error("checkOrderFromMB: RESPONSE: ERROR CODE NULL");
+                }
+
+            } else {
+                logger.error("ERROR at checkOrderFromMB: " + orderId + " - " + " TOKEN BANK IS INVALID");
+            }
+        } catch (Exception e) {
+            logger.error("ERROR at checkOrderFromMB: " + orderId + " - " + e.toString());
+        }
+        return result;
+    }
+
+    // get token bank product
+    private TokenProductBankDTO getBankToken() {
+        TokenProductBankDTO result = null;
+        try {
+            String key = EnvironmentUtil.getUserBankAccess() + ":" + EnvironmentUtil.getPasswordBankAccess();
+            String encodedKey = Base64.getEncoder().encodeToString(key.getBytes());
+            UriComponents uriComponents = UriComponentsBuilder
+                    .fromHttpUrl(EnvironmentUtil.getBankUrl() + "oauth2/v1/token")
+                    .buildAndExpand(/* add url parameter here */);
+            WebClient webClient = WebClient.builder()
+                    .baseUrl(EnvironmentUtil.getBankUrl()
+                            + "oauth2/v1/token")
+                    .build();
+            // Call POST API
+            TokenProductBankDTO response = webClient.method(HttpMethod.POST)
+                    .uri(uriComponents.toUri())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .header("Authorization", "Basic " + encodedKey)
+                    .body(BodyInserters.fromFormData("grant_type", "client_credentials"))
+                    .exchange()
+                    .flatMap(clientResponse -> {
+                        if (clientResponse.statusCode().is2xxSuccessful()) {
+                            return clientResponse.bodyToMono(TokenProductBankDTO.class);
+                        } else {
+                            clientResponse.body((clientHttpResponse, context) -> {
+                                logger.info(clientHttpResponse.getBody().collectList().block().toString());
+                                return clientHttpResponse.getBody();
+                            });
+                            return null;
+                        }
+                    })
+                    .block();
+            result = response;
+        } catch (Exception e) {
+            logger.error(e.toString());
+        }
+        return result;
+    }
+
+    private String getUsernameFromToken(String token) {
+        String result = "";
+        if (token != null && !token.trim().isEmpty()) {
+            String secretKey = "mySecretKey";
+            String jwtToken = token.substring(7); // remove "Bearer " from the beginning
+            Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(jwtToken).getBody();
+            String userId = (String) claims.get("user");
+            if (userId != null) {
+                result = new String(Base64.getDecoder().decode(userId));
+            }
+        }
+        return result;
+    }
+
     private String refundFromMB(String terminalId, String ftCode, String amount, String content) {
         String result = null;
         try {
@@ -2941,59 +3066,6 @@ public class TransactionMMSController {
             logger.error("ERROR at refundFromMB: " + ftCode + " - " + e.toString());
         }
         System.out.println("RESULT REFUND: " + result);
-        return result;
-    }
-
-    // get token bank product
-    private TokenProductBankDTO getBankToken() {
-        TokenProductBankDTO result = null;
-        try {
-            String key = EnvironmentUtil.getUserBankAccess() + ":" + EnvironmentUtil.getPasswordBankAccess();
-            String encodedKey = Base64.getEncoder().encodeToString(key.getBytes());
-            UriComponents uriComponents = UriComponentsBuilder
-                    .fromHttpUrl(EnvironmentUtil.getBankUrl() + "oauth2/v1/token")
-                    .buildAndExpand(/* add url parameter here */);
-            WebClient webClient = WebClient.builder()
-                    .baseUrl(EnvironmentUtil.getBankUrl()
-                            + "oauth2/v1/token")
-                    .build();
-            // Call POST API
-            TokenProductBankDTO response = webClient.method(HttpMethod.POST)
-                    .uri(uriComponents.toUri())
-                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                    .header("Authorization", "Basic " + encodedKey)
-                    .body(BodyInserters.fromFormData("grant_type", "client_credentials"))
-                    .exchange()
-                    .flatMap(clientResponse -> {
-                        if (clientResponse.statusCode().is2xxSuccessful()) {
-                            return clientResponse.bodyToMono(TokenProductBankDTO.class);
-                        } else {
-                            clientResponse.body((clientHttpResponse, context) -> {
-                                logger.info(clientHttpResponse.getBody().collectList().block().toString());
-                                return clientHttpResponse.getBody();
-                            });
-                            return null;
-                        }
-                    })
-                    .block();
-            result = response;
-        } catch (Exception e) {
-            logger.error(e.toString());
-        }
-        return result;
-    }
-
-    private String getUsernameFromToken(String token) {
-        String result = "";
-        if (token != null && !token.trim().isEmpty()) {
-            String secretKey = "mySecretKey";
-            String jwtToken = token.substring(7); // remove "Bearer " from the beginning
-            Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(jwtToken).getBody();
-            String userId = (String) claims.get("user");
-            if (userId != null) {
-                result = new String(Base64.getDecoder().decode(userId));
-            }
-        }
         return result;
     }
 
