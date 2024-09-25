@@ -3247,12 +3247,13 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "content AS content, "
             + "order_id AS orderId "
             + "FROM transaction_receive "
-            + "WHERE bank_account = :bankAccount "
+            + "WHERE bank_id = :bankId "
             + "AND (time BETWEEN :fromDate AND :toDate) "
-            + "AND status = 1"
+            + "AND status = 1 "
+            + "AND type != 5 "
             , nativeQuery = true)
     List<ITransactionReceiveAdminInfoDTO> getTransactionReceiveToMapInvoice(
-            @Param("bankAccount") String bankAccount,
+            @Param("bankId") String bankId,
             @Param("fromDate") long fromDate,
             @Param("toDate") long toDate
     );

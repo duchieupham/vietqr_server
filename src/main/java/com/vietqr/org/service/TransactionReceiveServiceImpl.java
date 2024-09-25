@@ -1794,8 +1794,12 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
-    public List<ITransactionReceiveAdminInfoDTO> getTransactionReceiveToMapInvoice(TransactionReceiveAdminResDTO dto) {
-        return repo.getTransactionReceiveToMapInvoice(dto.getBankAccount(), dto.getFromDate(), dto.getToDate());
+    public List<ITransactionReceiveAdminInfoDTO> getTransactionReceiveToMapInvoice(String bankId, String fromDate, String toDate) {
+        return repo.getTransactionReceiveToMapInvoice(
+                bankId,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate),
+                DateTimeUtil.getDateTimeAsLongInt(toDate)
+        );
     }
 
     @Override
