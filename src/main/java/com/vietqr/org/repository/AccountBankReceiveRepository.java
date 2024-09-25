@@ -6,7 +6,8 @@ import javax.transaction.Transactional;
 
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
-import com.vietqr.org.dto.qrfeed.IAccountBankDTO;
+import com.vietqr.org.service.grpc.biz.IBankAccountReceiveBankDTO;
+import com.vietqr.org.service.grpc.biz.IBankAccountReceiveUserDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -136,28 +137,6 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			"bank_type_id = :bankTypeId AND is_authenticated = true AND status = 1", nativeQuery = true)
 	AccountBankReceiveEntity getAccountBankByBankAccountAndBankTypeId(@Param(value = "bankAccount") String bankAccount,
 			@Param(value = "bankTypeId") String bankTypeId);
-
-	@Query(value = "SELECT bank_account as bankAccount, bank_account_name as bankAccountName " +
-			"FROM account_bank_receive WHERE bank_account = :bankAccount AND " +
-			"bank_type_id = :bankTypeId AND is_authenticated = true AND status = 1", nativeQuery = true)
-	IAccountBankInfoQR getAccountBankQRByAccountAndId(
-			@Param(value = "bankAccount") String bankAccount,
-			@Param(value = "bankTypeId") String bankTypeId
-	);
-
-	@Query(value = "SELECT id AS id, bank_account as bankAccount, bank_account_name as bankAccountName FROM account_bank_receive WHERE bank_account = :bankAccount AND " +
-			"bank_type_id = :bankTypeId AND is_authenticated = true AND status = 1 LIMIT 1", nativeQuery = true)
-	IAccountBankReceiveQR getAccountBankReceiveQRByAccountAndId(
-			@Param(value = "bankAccount") String bankAccount,
-			@Param(value = "bankTypeId") String bankTypeId
-	);
-
-	@Query(value = "SELECT id AS id, user_id AS userId FROM account_bank_receive WHERE bank_account = :bankAccount AND " +
-			"bank_type_id = :bankTypeId AND is_authenticated = true AND status = 1", nativeQuery = true)
-	IAccountBankQR getAccountBankQR(
-			@Param(value = "bankAccount") String bankAccount,
-			@Param(value = "bankTypeId") String bankTypeId
-	);
 
 	@Query(value = "SELECT b.id as id, b.bank_account as bankAccount, c.bank_name as bankName, b.bank_account_name as userBankName, c.img_id as imgId, b.is_authenticated as authenticated  "
 			+ "FROM bank_receive_branch a "
@@ -842,61 +821,18 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "WHERE user_id = :userId ", nativeQuery = true)
 	void updateEnableVoiceByBankIds(List<String> bankIds, String userId);
 
-	@Query(value = "SELECT te.id AS platformId, COALESCE(te.name, '') AS platformName, COALESCE(t.chat_id, '') AS connectionDetail, 'Telegram' AS platform "
-			+ "FROM telegram_account_bank t "
-			+ "JOIN telegram te ON t.telegram_id = te.id "
-			+ "WHERE t.bank_id = :bankId "
-			+ "UNION ALL "
-			+ "SELECT le.id AS platformId, COALESCE(le.name, '') AS platformName, COALESCE(l.webhook, '') AS connectionDetail, 'Lark' AS platform "
-			+ "FROM lark_account_bank l "
-			+ "JOIN lark le ON l.lark_id = le.id "
-			+ "WHERE l.bank_id = :bankId "
-			+ "UNION ALL "
-			+ "SELECT gce.id AS platformId, COALESCE(gce.name, '') AS platformName, COALESCE(g.webhook, '') AS connectionDetail, 'Google Chat' AS platform "
-			+ "FROM google_chat_account_bank g "
-			+ "JOIN google_chat gce ON g.google_chat_id = gce.id "
-			+ "WHERE g.bank_id = :bankId "
-			+ "UNION ALL "
-			+ "SELECT gse.id AS platformId, COALESCE(gse.name, '') AS platformName, COALESCE(gs.webhook, '') AS connectionDetail, 'Google Sheet' AS platform "
-			+ "FROM google_sheet_account_bank gs "
-			+ "JOIN google_sheet gse ON gs.google_sheet_id = gse.id "
-			+ "WHERE gs.bank_id = :bankId "
-			+ "UNION ALL "
-			+ "SELECT se.id AS platformId, COALESCE(se.name, '') AS platformName, COALESCE(s.webhook, '') AS connectionDetail, 'Slack' AS platform "
-			+ "FROM slack_account_bank s "
-			+ "JOIN slack se ON s.slack_id = se.id "
-			+ "WHERE s.bank_id = :bankId "
-			+ "UNION ALL "
-			+ "SELECT de.id AS platformId, COALESCE(de.name, '') AS platformName, COALESCE(d.webhook, '') AS connectionDetail, 'Discord' AS platform "
-			+ "FROM discord_account_bank d "
-			+ "JOIN discord de ON d.discord_id = de.id "
-			+ "WHERE d.bank_id = :bankId "
-			+ "ORDER BY platformName ASC "
-			+ "LIMIT :offset, :size", nativeQuery = true)
-	List<IPlatformConnectionDTO> getPlatformConnectionsByBankId(@Param("bankId") String bankId, @Param("offset") int offset, @Param("size") int size);
-
-
-	@Query(value = "SELECT COUNT(*) FROM ("
-			+ "SELECT 1 AS platform FROM telegram_account_bank t WHERE t.bank_id = :bankId "
-			+ "UNION ALL "
-			+ "SELECT 1 AS platform FROM lark_account_bank l WHERE l.bank_id = :bankId "
-			+ "UNION ALL "
-			+ "SELECT 1 AS platform FROM google_chat_account_bank g WHERE g.bank_id = :bankId "
-			+ "UNION ALL "
-			+ "SELECT 1 AS platform FROM google_sheet_account_bank gs WHERE gs.bank_id = :bankId "
-			+ "UNION ALL "
-			+ "SELECT 1 AS platform FROM slack_account_bank s WHERE s.bank_id = :bankId "
-			+ "UNION ALL "
-			+ "SELECT 1 AS platform FROM discord_account_bank d WHERE d.bank_id = :bankId) AS total", nativeQuery = true)
-	int countPlatformConnectionsByBankId(@Param("bankId") String bankId);
-
-	@Modifying
-	@Transactional
-	@Query(value = "UPDATE account_bank_receive SET notification_types = :notificationTypes " +
-			"WHERE user_id = :userId AND id = :bankId", nativeQuery = true)
-	void updateNotificationTypes(@Param("userId") String userId,
-								 @Param("bankId") String bankId,
-								 @Param("notificationTypes") String notificationTypes);
+	@Query(value = "SELECT a.bank_account AS bankAccount, "
+			+ "a.bank_account_name AS userBankName, "
+			+ "a.is_sync AS isSync, "
+			+ "a.bank_type_id AS bankTypeId, "
+			+ "a.user_id AS userId, "
+			+ "b.bank_short_name AS bankShortName "
+			+ "FROM account_bank_receive a "
+			+ "INNER JOIN (SELECT id, bank_short_name FROM bank_type) b "
+			+ "ON a.bank_type_id = b.id "
+			+ "WHERE a.id = :bankId LIMIT 1"
+			, nativeQuery = true)
+	IBankAccountReceiveUserDTO getBankAccountReceiveByBankIdGrpc(@Param(value = "bankId") String bankId);
 
 	@Query(value = "SELECT distinct " +
 			"abr.id AS id, " +
