@@ -612,14 +612,6 @@ public class InvoiceServiceImpl implements InvoiceService {
         return repo.countInvoicesByStatus(status, fromDate, toDate);
     }
 
-    @Override
-    public void updateStatusToMapTransaction(String invoiceId, List<ITransactionInvoiceItemDTO> invoiceItemList, int status) {
-        invoiceItemList.forEach((item)->
-            invoiceItemRepository.updateStatusInvoiceItem(item.getId(), DateTimeUtil.getCurrentDateTimeUTC())
-        );
-        repo.updateStatusInvoice(invoiceId, status);
-    }
-
     private AccountBankInfoDTO getBankAccountInfoByData(String data) {
         AccountBankInfoDTO dto = new AccountBankInfoDTO();
         ObjectMapper mapper = new ObjectMapper();

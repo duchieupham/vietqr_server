@@ -3010,28 +3010,42 @@ public class InvoiceController {
         HttpStatus httpStatus = null;
         try {
             AtomicLong amountTransaction = new AtomicLong(0);
-            dto.getTransactionList().forEach((item) -> {
-                amountTransaction.addAndGet(item.getAmount());
-            });
-            long finalAmountTransaction = amountTransaction.get();
-
             AtomicLong amountInvoiceItem = new AtomicLong(0);
-            dto.getInvoiceItemList().forEach((item) -> {
-                amountInvoiceItem.addAndGet(item.getTotalAfterVat());
-            });
+
+            amountTransaction.set(
+                    dto.getTransactionList()
+                            .stream()
+                            .mapToLong(ITransactionInvoiceDTO::getAmount)
+                            .sum()
+            );
+            amountInvoiceItem.set(
+                    dto.getInvoiceItemList()
+                            .stream()
+                            .mapToLong(ITransactionInvoiceItemDTO::getTotalAfterVat)
+                            .sum()
+            );
+
+            long finalAmountTransaction = amountTransaction.get();
             long finalAmountInvoiceItem = amountInvoiceItem.get();
 
             if (finalAmountTransaction >= finalAmountInvoiceItem) {
+                dto.getInvoiceItemList().parallelStream().forEach((item) ->
+                        invoiceItemService.updateStatusInvoiceItem(item.getId())
+                );
+                dto.getTransactionList().parallelStream().forEach((item) ->
+                        transactionReceiveService.updateTransactionReceiveType(item.getId())
+                );
                 int check = invoiceItemService.checkCountUnPaid(dto.getInvoiceId());
                 if (check == dto.getInvoiceItemList().size()) {
-                    invoiceService.updateStatusToMapTransaction(dto.getInvoiceId(), dto.getInvoiceItemList(), 1);
+                    invoiceService.updateStatusInvoice(dto.getInvoiceId(), 1, DateTimeUtil.getCurrentDateTimeUTC());
                 } else {
-                    invoiceService.updateStatusToMapTransaction(dto.getInvoiceId(), dto.getInvoiceItemList(), 3);
+                    invoiceService.updateStatusInvoice(dto.getInvoiceId(), 3);
                 }
+
                 result = new ResponseMessageDTO("SUCCESS", "");
                 httpStatus = HttpStatus.OK;
             } else {
-                logger.error("mapTransactionWithInvoice: ERROR: Amount of transactionList is less than Amount of invoiceItemList");
+                logger.error("mapTransactionWithInvoice: ERROR: Total amount of transactionList is less than total amount of invoiceItemList");
                 result = new ResponseMessageDTO("FAILED", "E219");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
