@@ -3237,5 +3237,9 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "FROM transaction_receive "
             + "WHERE bank_id = :bankId AND time BETWEEN :fromDate AND :toDate AND terminal_code = :terminalCode LIMIT 1", nativeQuery = true)
     TransStatisticV2DTO getTransactionOverviewV2ByTerminalCode(String bankId, String terminalCode, long fromDate, long toDate);
+
+    @Query("SELECT t FROM TransactionReceiveEntity t WHERE t.bankAccount = :bankAccount AND t.content = :content AND t.amount = :amount AND t.status = 0")
+    TransactionReceiveEntity findPendingTransactionByBankAccountContentAmount(@Param("bankAccount") String bankAccount, @Param("content") String content, @Param("amount") long amount);
+
 }
 
