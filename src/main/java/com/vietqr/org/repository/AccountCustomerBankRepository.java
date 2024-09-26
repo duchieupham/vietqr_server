@@ -1,6 +1,7 @@
 package com.vietqr.org.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.transaction.Transactional;
 
@@ -49,6 +50,14 @@ public interface AccountCustomerBankRepository extends JpaRepository<AccountCust
             + "ON a.customer_sync_id = c.id "
             + "WHERE b.username = :username AND c.active = TRUE ", nativeQuery = true)
     List<String> checkExistedCustomerSyncByUsername(@Param(value = "username") String username);
+
+    @Query(value = "SELECT b.username "
+            + "FROM account_customer_bank a "
+            + "INNER JOIN account_customer b "
+            + "ON a.account_customer_id = b.id "
+            + "WHERE a.bank_account = :bankAccount", nativeQuery = true)
+    Optional<String> getUsernameByBankAccount(@Param(value = "bankAccount") String bankAccount);
+
 
     @Query(value = "SELECT id FROM account_customer_bank WHERE bank_account = :bankAccount AND customer_sync_id = :customerSyncId ", nativeQuery = true)
     String checkExistedBankAccountIntoMerchant(

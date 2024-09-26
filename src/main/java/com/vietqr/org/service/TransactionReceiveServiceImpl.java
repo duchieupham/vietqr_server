@@ -1794,6 +1794,16 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public TransactionReceiveEntity findPendingTransactionByBankAccountContentAmount(String bankAccount, String content, long amount) {
+        return repo.findPendingTransactionByBankAccountContentAmount(bankAccount, content, amount);
+    }
+
+    @Override
+    public void updateTransaction(TransactionReceiveEntity transactionEntity) {
+        repo.save(transactionEntity);
+    }
+
+    @Override
     public TransStatisticDTO getTransactionOverviewBySubTerminalCode(String subTerminalCode, String fromDate, String toDate) {
         return repo.getTransactionOverviewBySubTerminalCode(subTerminalCode,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
