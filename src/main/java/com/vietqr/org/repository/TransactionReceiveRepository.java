@@ -3251,8 +3251,25 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "AND (time BETWEEN :fromDate AND :toDate) "
             + "AND status = 1 "
             + "AND type != 5 "
+            + "ORDER BY time DESC "
+            + "LIMIT :offset, :size "
             , nativeQuery = true)
     List<ITransactionReceiveAdminInfoDTO> getTransactionReceiveToMapInvoice(
+            @Param("bankId") String bankId,
+            @Param("fromDate") long fromDate,
+            @Param("toDate") long toDate,
+            @Param("offset") int offset,
+            @Param("size") int size
+    );
+
+    @Query(value = "SELECT COUNT(id) "
+            + "FROM transaction_receive "
+            + "WHERE bank_id = :bankId "
+            + "AND (time BETWEEN :fromDate AND :toDate) "
+            + "AND status = 1 "
+            + "AND type != 5 "
+            , nativeQuery = true)
+    int countTransactionByBankIdAndTime(
             @Param("bankId") String bankId,
             @Param("fromDate") long fromDate,
             @Param("toDate") long toDate

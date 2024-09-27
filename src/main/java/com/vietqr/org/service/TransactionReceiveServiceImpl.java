@@ -1794,17 +1794,28 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
-    public List<ITransactionReceiveAdminInfoDTO> getTransactionReceiveToMapInvoice(String bankId, String fromDate, String toDate) {
+    public List<ITransactionReceiveAdminInfoDTO> getTransactionReceiveToMapInvoice(String bankId, String fromDate, String toDate, int offset, int size) {
         return repo.getTransactionReceiveToMapInvoice(
                 bankId,
-                DateTimeUtil.getDateTimeAsLongInt(fromDate),
-                DateTimeUtil.getDateTimeAsLongInt(toDate)
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset,
+                size
         );
     }
 
     @Override
     public void updateTransactionReceiveType(String id) {
         repo.updateTransactionReceiveType(id);
+    }
+
+    @Override
+    public int countTransactionByBankIdAndTime(String bankId, String fromDate, String toDate) {
+        return repo.countTransactionByBankIdAndTime(
+                bankId,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET
+        );
     }
 
     @Override

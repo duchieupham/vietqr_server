@@ -4045,15 +4045,26 @@ public class TransactionController {
     @GetMapping("admin/transaction/map-invoice")
     public ResponseEntity<Object> getTransactionReceiveToMapInvoice(
             @Valid @RequestParam String bankId,
+            @Valid @RequestParam int page,
+            @Valid @RequestParam int size,
             @Valid @RequestParam String fromDate,
             @Valid @RequestParam String toDate
     ) {
         Object result = null;
         HttpStatus httpStatus = null;
-
+        PageResDTO response = new PageResDTO();
         try {
-            List<ITransactionReceiveAdminInfoDTO> data = transactionReceiveService.getTransactionReceiveToMapInvoice(bankId, fromDate, toDate);
-            result = new ResponseObjectDTO("SUCCESS", data);
+            int offset = (page - 1) * size;
+            List<ITransactionReceiveAdminInfoDTO> data = transactionReceiveService.getTransactionReceiveToMapInvoice(bankId, fromDate, toDate, offset, size);
+            int countItem = transactionReceiveService.countTransactionByBankIdAndTime(bankId, fromDate, toDate);
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setTotalPage(StringUtil.getTotalPage(countItem, size));
+            pageDTO.setTotalElement(countItem);
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            response.setMetadata(pageDTO);
+            response.setData(data);
+            result = response;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("getTransactionReceiveAdminToMap: ERROR: " + e.getMessage());

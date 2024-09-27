@@ -660,7 +660,9 @@ public interface TransactionReceiveService {
 
     TransStatisticV2DTO getTransactionOverviewV2ByTerminalCode(String bankId, String terminalCode, String fromDate, String toDate);
 
-    List<ITransactionReceiveAdminInfoDTO> getTransactionReceiveToMapInvoice(String bankId, String fromDate, String toDate);
+    List<ITransactionReceiveAdminInfoDTO> getTransactionReceiveToMapInvoice(String bankId, String fromDate, String toDate, int offset, int size);
 
     void updateTransactionReceiveType(String id);
+
+    int countTransactionByBankIdAndTime(String bankId, String fromDate, String toDate);
 }

@@ -2659,7 +2659,7 @@ public class InvoiceController {
                     + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
-         }
+        }
         return new ResponseEntity<>(result, httpStatus);
     }
 
@@ -3029,18 +3029,30 @@ public class InvoiceController {
             long finalAmountInvoiceItem = amountInvoiceItem.get();
 
             if (finalAmountTransaction >= finalAmountInvoiceItem) {
-                dto.getInvoiceItemList().parallelStream().forEach((item) ->
-                        invoiceItemService.updateStatusInvoiceItem(item.getId())
-                );
-                dto.getTransactionList().parallelStream().forEach((item) ->
-                        transactionReceiveService.updateTransactionReceiveType(item.getId())
-                );
+                List<String> invoiceItemIds = new ArrayList<>();
+                List<String> transactionIds = new ArrayList<>();
+                dto.getInvoiceItemList().parallelStream().forEach((item) -> {
+                    invoiceItemService.updateStatusInvoiceItem(item.getId());
+                    invoiceItemIds.add(item.getId());
+                });
+                dto.getTransactionList().parallelStream().forEach((item) -> {
+                    transactionReceiveService.updateTransactionReceiveType(item.getId());
+                    transactionIds.add(item.getId());
+                });
                 int check = invoiceItemService.checkCountUnPaid(dto.getInvoiceId());
                 if (check == dto.getInvoiceItemList().size()) {
                     invoiceService.updateStatusInvoice(dto.getInvoiceId(), 1, DateTimeUtil.getCurrentDateTimeUTC());
                 } else {
                     invoiceService.updateStatusInvoice(dto.getInvoiceId(), 3);
                 }
+                ObjectMapper mapper = new ObjectMapper();
+
+                invoiceTransactionService.insert(new InvoiceTransactionEntity(
+                        UUID.randomUUID().toString(),
+                        dto.getInvoiceId(),
+                        mapper.writeValueAsString(invoiceItemIds),
+                        mapper.writeValueAsString(transactionIds)
+                ));
 
                 result = new ResponseMessageDTO("SUCCESS", "");
                 httpStatus = HttpStatus.OK;

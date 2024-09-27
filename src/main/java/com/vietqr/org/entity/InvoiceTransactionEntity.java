@@ -62,7 +62,18 @@ public class InvoiceTransactionEntity implements Serializable {
     @Column(name = "status")
     private int status;
 
+    // list id transaction map with invoice
+    @Column(name = "transactionIds", columnDefinition = "JSON")
+    private String transactionIds;
+
     public InvoiceTransactionEntity() {
+    }
+
+    public InvoiceTransactionEntity(String id, String invoiceId, String invoiceItemIds, String transactionIds) {
+        this.id = id;
+        this.invoiceId = invoiceId;
+        this.invoiceItemIds = invoiceItemIds;
+        this.transactionIds = transactionIds;
     }
 
     public InvoiceTransactionEntity(String id, String invoiceId, String invoiceItemIds, String bankIdRecharge,
@@ -199,5 +210,13 @@ public class InvoiceTransactionEntity implements Serializable {
 
     public void setMid(String mid) {
         this.mid = mid;
+    }
+
+    public String getTransactionIds() {
+        return transactionIds;
+    }
+
+    public void setTransactionIds(String transactionIds) {
+        this.transactionIds = transactionIds;
     }
 }
