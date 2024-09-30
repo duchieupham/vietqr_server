@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.example.grpc";
+option java_outer_classname = "TrBankServiceProto";
+
+service TrBankService {
+  rpc GetTrBank (GetTrBankRequest) returns (stream TBank);
+}
+
+message GetTrBankRequest {
+  int64 startDate = 1;
+  int64 endDate = 2;
+}
+
+message TBank {
+  string bankShortName = 1;
+  int64 totalAmountCredits = 2;
+  int64 totalAmountRecon = 3;
+  int32 totalNumberCredits = 4;
+  int32 totalNumberRecon = 5;
+}

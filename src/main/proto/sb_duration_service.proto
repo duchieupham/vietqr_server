@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.example.grpc";
+option java_outer_classname = "SbDurationServiceProto";
+
+service SbDurationService {
+  rpc GetSbDuration (GetSbDurationRequest) returns (SbDuration);
+}
+
+message GetSbDurationRequest {
+  int64 expired = 1;
+  int64 nearingExpiration = 2;
+}
+
+message SbDuration {
+  int32 nearingExpirationCount = 1;
+  int32 expiredCount = 2;
+}
