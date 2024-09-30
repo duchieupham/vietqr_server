@@ -663,4 +663,10 @@ public interface TransactionReceiveService {
     TransactionReceiveEntity findPendingTransactionByBankAccountContentAmount(String bankAccount, String content, long amount);
 
     void updateTransaction(TransactionReceiveEntity transactionEntity);
+
+    List<ITransactionReceiveAdminInfoDTO> getTransactionReceiveToMapInvoice(String bankId, String fromDate, String toDate, int offset, int size);
+
+    void updateTransactionReceiveType(List<String> id);
+
+    int countTransactionByBankIdAndTime(String bankId, String fromDate, String toDate);
 }
