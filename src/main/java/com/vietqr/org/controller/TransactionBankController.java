@@ -1900,7 +1900,7 @@ public class TransactionBankController {
 
                         // Tạo dữ liệu JSON thông báo
                         Map<String, Object> notificationData = new HashMap<>();
-                        notificationData.put("referenceNumber", transactionReceiveEntity.getReferenceNumber());
+                        notificationData.put("referenceNumber",  dto.getReferencenumber());
                         notificationData.put("bankAccount", transactionReceiveEntity.getBankAccount());
                         notificationData.put("amount", Double.parseDouble(amount.replace(",", "")));
                         notificationData.put("transType", transactionReceiveEntity.getTransType());
@@ -2182,7 +2182,7 @@ public class TransactionBankController {
 
                         // Tạo dữ liệu JSON thông báo
                         Map<String, Object> notificationData = new HashMap<>();
-                        notificationData.put("referenceNumber", transactionReceiveEntity.getReferenceNumber());
+                        notificationData.put("referenceNumber",  dto.getReferencenumber());
                         notificationData.put("bankAccount", transactionReceiveEntity.getBankAccount());
                         notificationData.put("amount", Double.parseDouble(amount.replace(",", "")));
                         notificationData.put("transType", transactionReceiveEntity.getTransType());
@@ -2507,7 +2507,7 @@ public class TransactionBankController {
 
                     // Tạo dữ liệu JSON thông báo
                     Map<String, Object> notificationData = new HashMap<>();
-                    notificationData.put("referenceNumber", transactionReceiveEntity.getReferenceNumber());
+                    notificationData.put("referenceNumber", dto.getReferencenumber());
                     notificationData.put("bankAccount", transactionReceiveEntity.getBankAccount());
                     notificationData.put("amount", Double.parseDouble(amount.replace(",", "")));
                     notificationData.put("transType", transactionReceiveEntity.getTransType());

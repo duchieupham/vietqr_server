@@ -1,6 +1,9 @@
 package com.vietqr.org.dto;
 
+import com.vietqr.org.service.mqtt.AdditionalData;
+
 import java.io.Serializable;
+import java.util.List;
 
 public class VietQRMMSCreateDTO implements Serializable {
 
@@ -20,6 +23,7 @@ public class VietQRMMSCreateDTO implements Serializable {
     private String urlLink;
     private String serviceCode = "";
     private String subTerminalCode = "";
+    private List<AdditionalData> additionalData;
 
     public VietQRMMSCreateDTO() {
         super();
@@ -45,6 +49,21 @@ public class VietQRMMSCreateDTO implements Serializable {
         this.sign = sign;
         this.terminalCode = terminalCode;
         this.note = note;
+    }
+
+    public VietQRMMSCreateDTO(String bankAccount, String bankCode, String amount, String content, String orderId, String sign, String terminalCode, String note, String urlLink, String serviceCode, String subTerminalCode, List<AdditionalData> additionalData) {
+        this.bankAccount = bankAccount;
+        this.bankCode = bankCode;
+        this.amount = amount;
+        this.content = content;
+        this.orderId = orderId;
+        this.sign = sign;
+        this.terminalCode = terminalCode;
+        this.note = note;
+        this.urlLink = urlLink;
+        this.serviceCode = serviceCode;
+        this.subTerminalCode = subTerminalCode;
+        this.additionalData = additionalData;
     }
 
     public String getBankAccount() {
@@ -133,5 +152,13 @@ public class VietQRMMSCreateDTO implements Serializable {
 
     public void setSubTerminalCode(String subTerminalCode) {
         this.subTerminalCode = subTerminalCode;
+    }
+
+    public List<AdditionalData> getAdditionalData() {
+        return additionalData;
+    }
+
+    public void setAdditionalData(List<AdditionalData> additionalData) {
+        this.additionalData = additionalData;
     }
 }
