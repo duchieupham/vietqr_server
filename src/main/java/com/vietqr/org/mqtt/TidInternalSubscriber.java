@@ -111,7 +111,11 @@ public class TidInternalSubscriber {
                 String boxId = BoxTerminalRefIdUtil.encryptQrBoxId(qrBoxCode);
                 QrBoxSyncEntity entity = qrBoxSyncService.getByMacAddress(macAddr);
                 if (entity != null) {
-                    boxId = BoxTerminalRefIdUtil.encryptQrBoxId(entity.getQrBoxCode());
+                    if (StringUtil.isNullOrEmpty(entity.getBoxId())) {
+                        boxId = BoxTerminalRefIdUtil.encryptQrBoxId(entity.getQrBoxCode());
+                    } else {
+                        boxId = entity.getBoxId();
+                    }
                 } else {
                     entity = new QrBoxSyncEntity();
                     entity.setId(UUID.randomUUID().toString());
