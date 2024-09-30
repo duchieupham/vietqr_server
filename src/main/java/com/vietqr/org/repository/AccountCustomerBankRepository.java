@@ -55,7 +55,7 @@ public interface AccountCustomerBankRepository extends JpaRepository<AccountCust
             + "FROM account_customer_bank a "
             + "INNER JOIN account_customer b "
             + "ON a.account_customer_id = b.id "
-            + "WHERE a.bank_account = :bankAccount", nativeQuery = true)
+            + "WHERE a.bank_account = :bankAccount LIMIT 1", nativeQuery = true)
     Optional<String> getUsernameByBankAccount(@Param(value = "bankAccount") String bankAccount);
 
 
