@@ -106,7 +106,7 @@ public class AutomationManagementService {
                 WebClient webClient = WebClient.builder()
                         .baseUrl("https://api.vietqr.org/vqr/status/performance")
                         .build();
-                time = System.currentTimeMillis() + 25200;
+                time = System.currentTimeMillis() + 25200000;
                 Mono<ClientResponse> responseMono = webClient.get()
                         .uri(uriComponents.toUri())
                         .header("Authorization", "Bearer " + "eyJhbGciOiJIUzUxMiJ9.eyJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXSwidXNlciI6IlkzVnpkRzl0W" +
@@ -115,7 +115,7 @@ public class AutomationManagementService {
                         .exchange();
                 ClientResponse response = responseMono.block();
                 if (response != null) {
-                    timeResponse = System.currentTimeMillis() + 25200;
+                    timeResponse = System.currentTimeMillis() + 25200000;
                 }
             } catch (Exception e) {
                 logger.error("scheduleExecuteTaskCheckPerformance: ERROR: " + e.getMessage() +

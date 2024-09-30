@@ -1,8 +1,8 @@
 package com.vietqr.org.util;
 
 import com.vietqr.org.mqtt.TidInternalSubscriber;
-import com.vietqr.org.service.QrBoxSyncService;
 
+import com.vietqr.org.service.redis.IdempotencyService;
 import org.apache.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,22 +12,20 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class MqttListenerService implements MqttCallback {
 
     private static final Logger logger = Logger.getLogger(MqttListenerService.class);
-    private static final int CODE_LENGTH = 6;
-    private static final String NUMBERS = "0123456789";
     private final IMqttClient mqttClient;
     private final MqttTopicHandlerScanner mqttTopicHandlerScanner;
-    @Autowired
-    private QrBoxSyncService qrBoxSyncService;
 
     private Map<String, MqttTopicHandlerScanner.MethodHandlerPair> topicHandlers = new HashMap<>();
 
-
-    public MqttListenerService(IMqttClient mqttClient, MqttTopicHandlerScanner mqttTopicHandlerScanner) {
+    @Autowired
+    private IdempotencyService idempotencyService;
+    public MqttListenerService(IMqttClient mqttClient, MqttTopicHandlerScanner mqttTopicHandlerScanner, ) {
         this.mqttClient = mqttClient;
         this.mqttTopicHandlerScanner = mqttTopicHandlerScanner;
         this.topicHandlers = initTopicHandlers();
@@ -59,7 +57,6 @@ public class MqttListenerService implements MqttCallback {
         return patternLevels.length == topicLevels.length;
     }
 
-
     @PostConstruct
     public void startListening() throws MqttException {
         mqttClient.setCallback(this);
@@ -68,31 +65,44 @@ public class MqttListenerService implements MqttCallback {
 
     @PreDestroy
     public void stopListening() throws MqttException {
+        logger.error("MQTT Listener: ERROR: STOP LISTENING");
         mqttClient.disconnect();
     }
 
     @Override
     public void connectionLost(Throwable cause) {
         // Handle connection lost
+        logger.error("MQTT Listener: ERROR: connectionLost: " + cause.getMessage());
+        boolean reconnected = false;
+        int attempt = 0;
+        while (!reconnected) {
+            attempt++;
+            try {
+                TimeUnit.SECONDS.sleep(Math.min(attempt * 5, 60)); // Increase wait time between retries, max 60 seconds
+                mqttClient.reconnect();
+                reconnected = true; // If reconnect succeeds, set reconnected to true
+                logger.info("MQTT Listener: Successfully reconnected after " + attempt + " attempt(s).");
+
+            } catch (MqttException | InterruptedException e) {
+                logger.error("MQTT Listener: ERROR: Reconnection attempt " + attempt + " failed: " + e.getMessage());
+            }
+        }
     }
 
     @Override
-    public void messageArrived(String topic, MqttMessage message) throws Exception {
-        System.out.println("Message received from topic: " + topic);
-        System.out.println("Message: " + new String(message.getPayload()));
-
-        //MqttTopicHandlerScanner.MethodHandlerPair handlerPair = topicHandlers.get(topic);
-        // Tìm kiếm chủ đề trong danh sách các handler
+    public void messageArrived(String topic, MqttMessage message) {
         MqttTopicHandlerScanner.MethodHandlerPair handlerPair = findHandlerForTopic(topic);
         try {
-            if (handlerPair != null) {
-                System.out.println(topic);
+            String existKey = idempotencyService.getResponseForKey("MQTT-KEY:" + message.getId()).orElse("");
+            if (handlerPair != null && StringUtil.isNullOrEmpty(existKey) &&
+                    idempotencyService.saveResponseForKey("MQTT-KEY:" + message.getId(), "", 30)) {
+                logger.info("MQTT Listener: messageArrived HANDLER: " + topic + " message: " + new String(message.getPayload()));
                 handlerPair.getMethod().invoke(handlerPair.getBean(), topic, message);
             } else {
-                System.out.println("No handler for topic: " + topic);
+                logger.warn("MQTT Listener: messageArrived NOT HANDLER OR ALREADY HANDLE: " + topic + " message: " + new String(message.getPayload()));
             }
         } catch (Exception e) {
-            System.out.println(e.toString());
+            logger.error("MQTT Listener: messageArrived: " + topic + " cause: " + e.getMessage());
         }
     }
 
