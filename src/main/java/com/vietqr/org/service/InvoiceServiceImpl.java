@@ -3,6 +3,7 @@ package com.vietqr.org.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.InvoiceEntity;
+import com.vietqr.org.repository.InvoiceItemRepository;
 import com.vietqr.org.repository.InvoiceRepository;
 import com.vietqr.org.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,9 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Autowired
     private InvoiceRepository repo;
+
+    @Autowired
+    private InvoiceItemRepository invoiceItemRepository;
 
     @Override
     public void insert(InvoiceEntity entity) {

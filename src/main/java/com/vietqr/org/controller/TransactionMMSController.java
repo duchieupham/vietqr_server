@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.gson.Gson;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.mapper.ErrorCodeMapper;
 import com.vietqr.org.dto.mapping.RefundMappingRedisDTO;
@@ -143,6 +144,7 @@ public class TransactionMMSController {
 
     @Autowired
     TransactionRefundLogService transactionRefundLogService;
+
     @Autowired
     TelegramService telegramService;
 
@@ -424,6 +426,43 @@ public class TransactionMMSController {
                             notiEntity.setData(tempTransReceive.getId());
                             pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
                                     message, notiEntity, data, tempTransReceive.getUserId(), StringUtil.getValueNullChecker(accountBankEntity.getPushNotification(), 1));
+
+                            // DO INSERT MQTT BY QVAN
+                            try {
+                                if(finalTransactionReceiveEntity.getAdditionalData() != null) {
+                                    ObjectMapper objectMapper = new ObjectMapper();
+                                    JsonNode additionalDataArray = objectMapper.readTree(finalTransactionReceiveEntity.getAdditionalData());
+                                    String terminalCode = additionalDataArray.get(0).get("terminalCode").asText();
+
+                                    // Tạo mqttTopic với giá trị terminalCode
+                                    String mqttTopic = "vietqr/bdsd/" + terminalCode;
+
+                                    // Tạo dữ liệu JSON thông báo
+                                    Map<String, Object> notificationData = new HashMap<>();
+                                    notificationData.put("referenceNumber", entity.getFtCode());
+                                    notificationData.put("bankAccount", finalTransactionReceiveEntity.getBankAccount());
+                                    notificationData.put("amount", finalTransactionReceiveEntity.getAmount());
+                                    notificationData.put("transType", finalTransactionReceiveEntity.getTransType());
+                                    notificationData.put("content", finalTransactionReceiveEntity.getContent());
+                                    notificationData.put("status", 1);
+                                    String formattedTime = formatTimeUtcPlus(finalTransactionReceiveEntity.getTimePaid());
+                                    notificationData.put("timePaid", formattedTime);
+                                    notificationData.put("orderId", finalTransactionReceiveEntity.getOrderId());
+
+                                    // Chuyển đổi dữ liệu thành chuỗi JSON
+                                    Gson gson = new Gson();
+                                    String payload = gson.toJson(notificationData);
+
+                                    // Xuất bản thông điệp MQTT
+                                    MQTTUtil.sendMessage(mqttTopic, payload);
+                                    System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
+                                }
+                            }
+                            catch (Exception e) {
+                                // Xử lý các ngoại lệ khác nếu có
+                                System.err.println("Error while sending balance change notification: " + e.toString());
+                            }
+
                             // send msg to QR Link
                             String refId = TransactionRefIdUtil
                                     .encryptTransactionId(tempTransReceive.getId());
@@ -651,6 +690,42 @@ public class TransactionMMSController {
                                             logger.error("Error sending Google Sheets notification: " + e.getMessage());
                                         }
                                     }
+                                }
+
+                                // DO INSERT MQTT BY QVAN
+                                try {
+                                    if(finalTransactionReceiveEntity.getAdditionalData() != null) {
+                                        ObjectMapper objectMapper = new ObjectMapper();
+                                        JsonNode additionalDataArray = objectMapper.readTree(finalTransactionReceiveEntity.getAdditionalData());
+                                        String terminalCode = additionalDataArray.get(0).get("terminalCode").asText();
+
+                                        // Tạo mqttTopic với giá trị terminalCode
+                                        String mqttTopic = "vietqr/bdsd/" + terminalCode;
+
+                                        // Tạo dữ liệu JSON thông báo
+                                        Map<String, Object> notificationData = new HashMap<>();
+                                        notificationData.put("referenceNumber", entity.getFtCode());
+                                        notificationData.put("bankAccount", finalTransactionReceiveEntity.getBankAccount());
+                                        notificationData.put("amount", finalTransactionReceiveEntity.getAmount());
+                                        notificationData.put("transType", finalTransactionReceiveEntity.getTransType());
+                                        notificationData.put("content", finalTransactionReceiveEntity.getContent());
+                                        notificationData.put("status", 1);
+                                        String formattedTime = formatTimeUtcPlus(finalTransactionReceiveEntity.getTimePaid());
+                                        notificationData.put("timePaid", formattedTime);
+                                        notificationData.put("orderId", finalTransactionReceiveEntity.getOrderId());
+
+                                        // Chuyển đổi dữ liệu thành chuỗi JSON
+                                        Gson gson = new Gson();
+                                        String payload = gson.toJson(notificationData);
+
+                                        // Xuất bản thông điệp MQTT
+                                        MQTTUtil.sendMessage(mqttTopic, payload);
+                                        System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
+                                    }
+                                }
+                                catch (Exception e) {
+                                    // Xử lý các ngoại lệ khác nếu có
+                                    System.err.println("Error while sending balance change notification: " + e.toString());
                                 }
 
                             } else {
@@ -1067,6 +1142,42 @@ public class TransactionMMSController {
                                             }
                                         }
 
+                                        // DO INSERT MQTT BY QVAN
+                                        try {
+                                            if(finalTransactionReceiveEntity.getAdditionalData() != null) {
+                                                ObjectMapper objectMapper = new ObjectMapper();
+                                                JsonNode additionalDataArray = objectMapper.readTree(finalTransactionReceiveEntity.getAdditionalData());
+                                                String terminalCode = additionalDataArray.get(0).get("terminalCode").asText();
+
+                                                // Tạo mqttTopic với giá trị terminalCode
+                                                String mqttTopic = "vietqr/bdsd/" + terminalCode;
+
+                                                // Tạo dữ liệu JSON thông báo
+                                                Map<String, Object> notificationData = new HashMap<>();
+                                                notificationData.put("referenceNumber", entity.getFtCode());
+                                                notificationData.put("bankAccount", finalTransactionReceiveEntity.getBankAccount());
+                                                notificationData.put("amount", finalTransactionReceiveEntity.getAmount());
+                                                notificationData.put("transType", finalTransactionReceiveEntity.getTransType());
+                                                notificationData.put("content", finalTransactionReceiveEntity.getContent());
+                                                notificationData.put("status", 1);
+                                                String formattedTime = formatTimeUtcPlus(finalTransactionReceiveEntity.getTimePaid());
+                                                notificationData.put("timePaid", formattedTime);
+                                                notificationData.put("orderId", finalTransactionReceiveEntity.getOrderId());
+
+                                                // Chuyển đổi dữ liệu thành chuỗi JSON
+                                                Gson gson = new Gson();
+                                                String payload = gson.toJson(notificationData);
+
+                                                // Xuất bản thông điệp MQTT
+                                                MQTTUtil.sendMessage(mqttTopic, payload);
+                                                System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
+                                            }
+                                        }
+                                        catch (Exception e) {
+                                            // Xử lý các ngoại lệ khác nếu có
+                                            System.err.println("Error while sending balance change notification: " + e.toString());
+                                        }
+
                                     }
 
                                 } else if (terminalSubRawCodeDTO != null) {
@@ -1253,6 +1364,42 @@ public class TransactionMMSController {
                                             for (String webhook : ggChatWebhooks) {
                                                 googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
                                             }
+                                        }
+
+                                        // DO INSERT MQTT BY QVAN
+                                        try {
+                                            if(finalTransactionReceiveEntity.getAdditionalData() != null) {
+                                                ObjectMapper objectMapper = new ObjectMapper();
+                                                JsonNode additionalDataArray = objectMapper.readTree(finalTransactionReceiveEntity.getAdditionalData());
+                                                String terminalCode = additionalDataArray.get(0).get("terminalCode").asText();
+
+                                                // Tạo mqttTopic với giá trị terminalCode
+                                                String mqttTopic = "vietqr/bdsd/" + terminalCode;
+
+                                                // Tạo dữ liệu JSON thông báo
+                                                Map<String, Object> notificationData = new HashMap<>();
+                                                notificationData.put("referenceNumber", finalTransactionReceiveEntity.getReferenceNumber());
+                                                notificationData.put("bankAccount", finalTransactionReceiveEntity.getBankAccount());
+                                                notificationData.put("amount", finalTransactionReceiveEntity.getAmount());
+                                                notificationData.put("transType", finalTransactionReceiveEntity.getTransType());
+                                                notificationData.put("content", finalTransactionReceiveEntity.getContent());
+                                                notificationData.put("status", 1);
+                                                String formattedTime = formatTimeUtcPlus(finalTransactionReceiveEntity.getTimePaid());
+                                                notificationData.put("timePaid", formattedTime);
+                                                notificationData.put("orderId", finalTransactionReceiveEntity.getOrderId());
+
+                                                // Chuyển đổi dữ liệu thành chuỗi JSON
+                                                Gson gson = new Gson();
+                                                String payload = gson.toJson(notificationData);
+
+                                                // Xuất bản thông điệp MQTT
+                                                MQTTUtil.sendMessage(mqttTopic, payload);
+                                                System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
+                                            }
+                                        }
+                                        catch (Exception e) {
+                                            // Xử lý các ngoại lệ khác nếu có
+                                            System.err.println("Error while sending balance change notification: " + e.toString());
                                         }
 
                                     } catch (Exception e) {
@@ -2213,14 +2360,24 @@ public class TransactionMMSController {
                                 entity.getBillNumber(), entity.getPayDate(), entity.getDebitAmount());
                         // System.out.println("data getTraceTransfer: " + entity.getTraceTransfer());
                         // System.out.println("data getBillNumber: " + entity.getBillNumber());
-                        System.out.println("data getPayDate: " + entity.getPayDate());
+//                        System.out.println("data getPayDate: " + entity.getPayDate());
                         // System.out.println("data getDebitAmount: " + entity.getDebitAmount());
                         // System.out.println("data checksum: " + dataCheckSum);
-                        if (BankEncryptUtil.isMatchChecksum(dataCheckSum, entity.getCheckSum())) {
+                        if (BankEncryptUtil.isMatchChecksum(dataCheckSum, entity.getCheckSum()) && !"BLC60".equals(entity.getTerminalLabel())) {
 //                        if (true) {
                             result = new TransactionMMSResponseDTO("00", "Success");
                         } else {
-                            result = new TransactionMMSResponseDTO("12", "False checksum");
+                            logger.info("FAILED CHECKSUM: CHECKORDER: " + entity.getReferenceLabelCode());
+                            ResponseObjectDTO responseObjectDTO = checkOrderFromMB(entity.getFtCode(), entity.getReferenceLabelCode());
+                            if (responseObjectDTO != null && "SUCCESS".equals(responseObjectDTO.getStatus())) {
+                                logger.info("SUCCESS CHECKSUM: CHECKORDER: INFO: " + entity.getReferenceLabelCode());
+                                result = new TransactionMMSResponseDTO("00", "Success");
+                            } else {
+                                // checksum is not match
+                                // System.out.println("checksum is not match"
+                                logger.error("FAILED CHECKSUM: CHECKORDER: ERROR: " + entity.getReferenceLabelCode());
+                                result = new TransactionMMSResponseDTO("12", "False checksum");
+                            }
                         }
                     } else {
                         result = new TransactionMMSResponseDTO("07", "Merchant is not exist");
@@ -2930,6 +3087,129 @@ public class TransactionMMSController {
         return result;
     }
 
+    private ResponseObjectDTO checkOrderFromMB(String ftCode, String orderId) {
+        ResponseObjectDTO result = null;
+        try {
+            TokenProductBankDTO token = getBankToken();
+            if (token != null) {
+                UUID clientMessageId = UUID.randomUUID();
+                Map<String, Object> data = new HashMap<>();
+                String checkSum = BankEncryptUtil.generateCheckOrderMD5Checksum(ftCode, "", orderId);
+                data.put("traceTransfer", ftCode);
+                data.put("referenceLabel", orderId);
+                data.put("billNumber", "");
+                data.put("checkSum", checkSum);
+                UriComponents uriComponents = UriComponentsBuilder
+                        .fromHttpUrl(EnvironmentUtil.getBankUrl()
+                                + "ms/offus/public/payment-service/payment/v1.0/checkOrder")
+                        .buildAndExpand(/* add url parameter here */);
+                WebClient webClient = WebClient.builder()
+                        .baseUrl(
+                                EnvironmentUtil.getBankUrl()
+                                        + "ms/offus/public/payment-service/payment/v1.0/checkOrder")
+                        .build();
+                Mono<ClientResponse> responseMono = webClient.post()
+                        .uri(uriComponents.toUri())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("clientMessageId", clientMessageId.toString())
+                        .header("userName", EnvironmentUtil.getUsernameAPI())
+                        .header("secretKey", EnvironmentUtil.getSecretKeyAPI())
+                        .header("Authorization", "Bearer " + getBankToken().getAccess_token())
+                        .body(BodyInserters.fromValue(data))
+                        .exchange();
+                ClientResponse response = responseMono.block();
+
+                String json = response.bodyToMono(String.class).block();
+                logger.info("checkOrderFromMB: RESPONSE: " + json + " orderId: " + orderId);
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode rootNode = objectMapper.readTree(json);
+                if (rootNode.get("errorCode") != null) {
+                    // 000
+                    if ((rootNode.get("errorCode").asText()).trim().equals("000")) {
+                        if (rootNode.get("data").get("traceTransfer") != null) {
+                            result = new ResponseObjectDTO("SUCCESS", rootNode.get("data").get("traceTransfer"));
+                            logger.info("checkOrderFromMB: RESPONSE FT: " + result);
+                        } else {
+                            result = new ResponseObjectDTO("FAILED", "E05");
+                            logger.error("checkOrderFromMB: RESPONSE: FT NULL");
+                        }
+                    }
+                    // "4863" FT code not existed
+                    else if ((rootNode.get("errorCode").asText()).trim().equals("4863")) {
+                        result = new ResponseObjectDTO("FAILED", "4863");
+                    }
+                    // "4857" Invalid amount
+                    else if ((rootNode.get("errorCode").asText()).trim().equals("4857")) {
+                        result = new ResponseObjectDTO("FAILED", "4857");
+                    }
+                } else {
+                    result = new ResponseObjectDTO("FAILED", "E05");
+                    logger.error("checkOrderFromMB: RESPONSE: ERROR CODE NULL");
+                }
+            } else {
+                result = new ResponseObjectDTO("FAILED", "E05");
+                logger.error("ERROR at checkOrderFromMB: " + orderId + " - " + " TOKEN BANK IS INVALID");
+            }
+        } catch (Exception e) {
+            result = new ResponseObjectDTO("FAILED", "E05");
+            logger.error("ERROR at checkOrderFromMB: " + orderId + " - " + e.toString());
+        }
+        return result;
+    }
+
+    // get token bank product
+    private TokenProductBankDTO getBankToken() {
+        TokenProductBankDTO result = null;
+        try {
+            String key = EnvironmentUtil.getUserBankAccess() + ":" + EnvironmentUtil.getPasswordBankAccess();
+            String encodedKey = Base64.getEncoder().encodeToString(key.getBytes());
+            UriComponents uriComponents = UriComponentsBuilder
+                    .fromHttpUrl(EnvironmentUtil.getBankUrl() + "oauth2/v1/token")
+                    .buildAndExpand(/* add url parameter here */);
+            WebClient webClient = WebClient.builder()
+                    .baseUrl(EnvironmentUtil.getBankUrl()
+                            + "oauth2/v1/token")
+                    .build();
+            // Call POST API
+            TokenProductBankDTO response = webClient.method(HttpMethod.POST)
+                    .uri(uriComponents.toUri())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .header("Authorization", "Basic " + encodedKey)
+                    .body(BodyInserters.fromFormData("grant_type", "client_credentials"))
+                    .exchange()
+                    .flatMap(clientResponse -> {
+                        if (clientResponse.statusCode().is2xxSuccessful()) {
+                            return clientResponse.bodyToMono(TokenProductBankDTO.class);
+                        } else {
+                            clientResponse.body((clientHttpResponse, context) -> {
+                                logger.info(clientHttpResponse.getBody().collectList().block().toString());
+                                return clientHttpResponse.getBody();
+                            });
+                            return null;
+                        }
+                    })
+                    .block();
+            result = response;
+        } catch (Exception e) {
+            logger.error(e.toString());
+        }
+        return result;
+    }
+
+    private String getUsernameFromToken(String token) {
+        String result = "";
+        if (token != null && !token.trim().isEmpty()) {
+            String secretKey = "mySecretKey";
+            String jwtToken = token.substring(7); // remove "Bearer " from the beginning
+            Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(jwtToken).getBody();
+            String userId = (String) claims.get("user");
+            if (userId != null) {
+                result = new String(Base64.getDecoder().decode(userId));
+            }
+        }
+        return result;
+    }
+
     private String refundFromMB(String terminalId, String ftCode, String amount, String content) {
         String result = null;
         try {
@@ -3003,59 +3283,6 @@ public class TransactionMMSController {
             logger.error("ERROR at refundFromMB: " + ftCode + " - " + e.toString());
         }
         System.out.println("RESULT REFUND: " + result);
-        return result;
-    }
-
-    // get token bank product
-    private TokenProductBankDTO getBankToken() {
-        TokenProductBankDTO result = null;
-        try {
-            String key = EnvironmentUtil.getUserBankAccess() + ":" + EnvironmentUtil.getPasswordBankAccess();
-            String encodedKey = Base64.getEncoder().encodeToString(key.getBytes());
-            UriComponents uriComponents = UriComponentsBuilder
-                    .fromHttpUrl(EnvironmentUtil.getBankUrl() + "oauth2/v1/token")
-                    .buildAndExpand(/* add url parameter here */);
-            WebClient webClient = WebClient.builder()
-                    .baseUrl(EnvironmentUtil.getBankUrl()
-                            + "oauth2/v1/token")
-                    .build();
-            // Call POST API
-            TokenProductBankDTO response = webClient.method(HttpMethod.POST)
-                    .uri(uriComponents.toUri())
-                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                    .header("Authorization", "Basic " + encodedKey)
-                    .body(BodyInserters.fromFormData("grant_type", "client_credentials"))
-                    .exchange()
-                    .flatMap(clientResponse -> {
-                        if (clientResponse.statusCode().is2xxSuccessful()) {
-                            return clientResponse.bodyToMono(TokenProductBankDTO.class);
-                        } else {
-                            clientResponse.body((clientHttpResponse, context) -> {
-                                logger.info(clientHttpResponse.getBody().collectList().block().toString());
-                                return clientHttpResponse.getBody();
-                            });
-                            return null;
-                        }
-                    })
-                    .block();
-            result = response;
-        } catch (Exception e) {
-            logger.error(e.toString());
-        }
-        return result;
-    }
-
-    private String getUsernameFromToken(String token) {
-        String result = "";
-        if (token != null && !token.trim().isEmpty()) {
-            String secretKey = "mySecretKey";
-            String jwtToken = token.substring(7); // remove "Bearer " from the beginning
-            Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(jwtToken).getBody();
-            String userId = (String) claims.get("user");
-            if (userId != null) {
-                result = new String(Base64.getDecoder().decode(userId));
-            }
-        }
         return result;
     }
 
@@ -3214,5 +3441,12 @@ public class TransactionMMSController {
             result = false;
         }
         return result;
+    }
+
+    private  String formatTimeUtcPlus(long time) {
+        long utcPlusSevenTime = time + 25200;
+        LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(utcPlusSevenTime), ZoneId.of("GMT"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss", Locale.ENGLISH);
+        return dateTime.format(formatter);
     }
 }

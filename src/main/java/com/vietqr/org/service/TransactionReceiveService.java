@@ -659,4 +659,14 @@ public interface TransactionReceiveService {
     List<TransactionReceiveAdminListDTO> getTransByTerminalCodeAllDate(String value, int offset, int size);
 
     TransStatisticV2DTO getTransactionOverviewV2ByTerminalCode(String bankId, String terminalCode, String fromDate, String toDate);
+
+    TransactionReceiveEntity findPendingTransactionByBankAccountContentAmount(String bankAccount, String content, long amount);
+
+    void updateTransaction(TransactionReceiveEntity transactionEntity);
+
+    List<ITransactionReceiveAdminInfoDTO> getTransactionReceiveToMapInvoice(String bankId, String fromDate, String toDate, int offset, int size);
+
+    void updateTransactionReceiveType(List<String> id);
+
+    int countTransactionByBankIdAndTime(String bankId, String fromDate, String toDate);
 }

@@ -3237,5 +3237,50 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "FROM transaction_receive "
             + "WHERE bank_id = :bankId AND time BETWEEN :fromDate AND :toDate AND terminal_code = :terminalCode LIMIT 1", nativeQuery = true)
     TransStatisticV2DTO getTransactionOverviewV2ByTerminalCode(String bankId, String terminalCode, long fromDate, long toDate);
+
+    @Query(value = "SELECT "
+            + "id AS transactionId, "
+            + "amount AS amount, "
+            + "time_paid AS timePaid, "
+            + "reference_number AS referenceNumber, "
+            + "content AS content, "
+            + "order_id AS orderId "
+            + "FROM transaction_receive "
+            + "WHERE bank_id = :bankId "
+            + "AND (time BETWEEN :fromDate AND :toDate) "
+            + "AND status = 1 "
+            + "AND type != 5 "
+            + "ORDER BY time DESC "
+            + "LIMIT :offset, :size "
+            , nativeQuery = true)
+    List<ITransactionReceiveAdminInfoDTO> getTransactionReceiveToMapInvoice(
+            @Param("bankId") String bankId,
+            @Param("fromDate") long fromDate,
+            @Param("toDate") long toDate,
+            @Param("offset") int offset,
+            @Param("size") int size
+    );
+
+    @Query(value = "SELECT COUNT(id) "
+            + "FROM transaction_receive "
+            + "WHERE bank_id = :bankId "
+            + "AND (time BETWEEN :fromDate AND :toDate) "
+            + "AND status = 1 "
+            + "AND type != 5 "
+            , nativeQuery = true)
+    int countTransactionByBankIdAndTime(
+            @Param("bankId") String bankId,
+            @Param("fromDate") long fromDate,
+            @Param("toDate") long toDate
+    );
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE transaction_receive SET type = 5 WHERE id IN (:ids)", nativeQuery = true)
+    void updateTransactionReceiveType(@Param(value = "ids") List<String> ids);
+
+    @Query("SELECT t FROM TransactionReceiveEntity t WHERE t.bankAccount = :bankAccount AND t.content = :content AND t.amount = :amount AND t.status = 0")
+    TransactionReceiveEntity findPendingTransactionByBankAccountContentAmount(@Param("bankAccount") String bankAccount, @Param("content") String content, @Param("amount") long amount);
+
 }
 

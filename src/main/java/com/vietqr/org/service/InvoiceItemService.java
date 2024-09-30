@@ -40,4 +40,6 @@ public interface InvoiceItemService {
     IAdminExtraInvoiceDTO getExtraInvoiceForAllTime();
 
     List<InvoiceItemEntity> updateAllItemId(List<String> itemIds, long timePaid);
+
+    void updateStatusInvoiceItemByIds(List<String> invoiceItemIds);
 }

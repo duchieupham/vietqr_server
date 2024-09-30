@@ -6,7 +6,6 @@ import javax.transaction.Transactional;
 
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
-import com.vietqr.org.dto.qrfeed.IAccountBankDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -672,7 +671,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
 			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, "
-			+ "abr.time_create AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "abr.time_created AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
 			+ "INNER JOIN account_login al ON abr.user_id = al.id "
@@ -688,7 +687,7 @@ public interface AccountBankReceiveRepository extends JpaRepository<AccountBankR
 			+ "bt.bank_short_name AS bankShortName, abr.phone_authenticated AS phoneAuthenticated, "
 			+ "abr.is_valid_service AS isValidService, abr.is_authenticated AS isAuthenticated, bt.status AS bankTypeStatus, bt.bank_code AS bankCode, "
 			+ "abr.mms_active AS mmsActive, abr.national_id AS nationalId, abr.valid_fee_to AS validFeeTo, abr.valid_fee_from AS validFeeFrom, "
-			+ "abr.time_create AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
+			+ "abr.time_created AS timeCreate, al.phone_no AS phoneNo, al.email AS email, abr.status AS status, abr.vso AS vso "
 			+ "FROM account_bank_receive abr "
 			+ "INNER JOIN bank_type bt ON abr.bank_type_id = bt.id "
 			+ "INNER JOIN account_login al ON abr.user_id = al.id "

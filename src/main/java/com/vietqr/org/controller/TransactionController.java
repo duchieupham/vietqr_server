@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.entity.*;
@@ -23,7 +24,9 @@ import com.vietqr.org.util.*;
 import org.apache.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +36,12 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
 import org.apache.poi.ss.usermodel.*;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Mono;
 
 @RestController
 @CrossOrigin
@@ -3218,6 +3227,113 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    private TokenProductBankDTO getBankToken() {
+        TokenProductBankDTO result = null;
+        try {
+            String key = EnvironmentUtil.getUserBankAccess() + ":" + EnvironmentUtil.getPasswordBankAccess();
+            String encodedKey = Base64.getEncoder().encodeToString(key.getBytes());
+            UriComponents uriComponents = UriComponentsBuilder
+                    .fromHttpUrl(EnvironmentUtil.getBankUrl() + "oauth2/v1/token")
+                    .buildAndExpand(/* add url parameter here */);
+            WebClient webClient = WebClient.builder()
+                    .baseUrl(EnvironmentUtil.getBankUrl()
+                            + "oauth2/v1/token")
+                    .build();
+            // Call POST API
+            TokenProductBankDTO response = webClient.method(HttpMethod.POST)
+                    .uri(uriComponents.toUri())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .header("Authorization", "Basic " + encodedKey)
+                    .body(BodyInserters.fromFormData("grant_type", "client_credentials"))
+                    .exchange()
+                    .flatMap(clientResponse -> {
+                        if (clientResponse.statusCode().is2xxSuccessful()) {
+                            return clientResponse.bodyToMono(TokenProductBankDTO.class);
+                        } else {
+                            clientResponse.body((clientHttpResponse, context) -> {
+                                logger.info(clientHttpResponse.getBody().collectList().block().toString());
+                                return clientHttpResponse.getBody();
+                            });
+                            return null;
+                        }
+                    })
+                    .block();
+            result = response;
+        } catch (Exception e) {
+            logger.error(e.toString());
+        }
+        return result;
+    }
+
+    private ResponseObjectDTO checkOrderFromMB(String ftCode, String orderId) {
+        ResponseObjectDTO result = null;
+        try {
+            TokenProductBankDTO token = getBankToken();
+            if (token != null) {
+                UUID clientMessageId = UUID.randomUUID();
+                Map<String, Object> data = new HashMap<>();
+                String checkSum = BankEncryptUtil.generateCheckOrderMD5Checksum(ftCode, "", orderId);
+                data.put("traceTransfer", ftCode);
+                data.put("referenceLabel", orderId);
+                data.put("billNumber", "");
+                data.put("checkSum", checkSum);
+                UriComponents uriComponents = UriComponentsBuilder
+                        .fromHttpUrl(EnvironmentUtil.getBankUrl()
+                                + "ms/offus/public/payment-service/payment/v1.0/checkOrder")
+                        .buildAndExpand(/* add url parameter here */);
+                WebClient webClient = WebClient.builder()
+                        .baseUrl(
+                                EnvironmentUtil.getBankUrl()
+                                        + "ms/offus/public/payment-service/payment/v1.0/checkOrder")
+                        .build();
+                Mono<ClientResponse> responseMono = webClient.post()
+                        .uri(uriComponents.toUri())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("clientMessageId", clientMessageId.toString())
+                        .header("userName", EnvironmentUtil.getUsernameAPI())
+                        .header("secretKey", EnvironmentUtil.getSecretKeyAPI())
+                        .header("Authorization", "Bearer " + getBankToken().getAccess_token())
+                        .body(BodyInserters.fromValue(data))
+                        .exchange();
+                ClientResponse response = responseMono.block();
+
+                String json = response.bodyToMono(String.class).block();
+                logger.info("checkOrderFromMB: RESPONSE: " + json + " orderId: " + orderId);
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode rootNode = objectMapper.readTree(json);
+                if (rootNode.get("errorCode") != null) {
+                    // 000
+                    if ((rootNode.get("errorCode").asText()).trim().equals("000")) {
+                        if (rootNode.get("data").get("traceTransfer") != null) {
+                            result = new ResponseObjectDTO("SUCCESS", rootNode.get("data").get("traceTransfer"));
+                            logger.info("checkOrderFromMB: RESPONSE FT: " + result);
+                        } else {
+                            result = new ResponseObjectDTO("FAILED", "E05");
+                            logger.error("checkOrderFromMB: RESPONSE: FT NULL");
+                        }
+                    }
+                    // "4863" FT code not existed
+                    else if ((rootNode.get("errorCode").asText()).trim().equals("4863")) {
+                        result = new ResponseObjectDTO("FAILED", "4863");
+                    }
+                    // "4857" Invalid amount
+                    else if ((rootNode.get("errorCode").asText()).trim().equals("4857")) {
+                        result = new ResponseObjectDTO("FAILED", "4857");
+                    }
+                } else {
+                    result = new ResponseObjectDTO("FAILED", "E05");
+                    logger.error("checkOrderFromMB: RESPONSE: ERROR CODE NULL");
+                }
+            } else {
+                result = new ResponseObjectDTO("FAILED", "E05");
+                logger.error("ERROR at checkOrderFromMB: " + orderId + " - " + " TOKEN BANK IS INVALID");
+            }
+        } catch (Exception e) {
+            result = new ResponseObjectDTO("FAILED", "E05");
+            logger.error("ERROR at checkOrderFromMB: " + orderId + " - " + e.toString());
+        }
+        return result;
+    }
     ///
     // API check transaction by merchant token
     @PostMapping("transactions/check-order")
@@ -3315,9 +3431,14 @@ public class TransactionController {
                                         }
                                         httpStatus = HttpStatus.OK;
                                     } else {
-                                        logger.error("checkTransactionStatus: NOT FOUND TRANSACTION");
-                                        httpStatus = HttpStatus.BAD_REQUEST;
-                                        result = new ResponseMessageDTO("FAILED", "E96");
+//                                        ResponseObjectDTO responseObjectDTO = checkOrderFromMB("", dto.getValue());
+//                                        if ("SUCCESS".equals(responseObjectDTO.getStatus())) {
+//
+//                                        } else {
+                                            logger.error("checkTransactionStatus: NOT FOUND TRANSACTION");
+                                            httpStatus = HttpStatus.BAD_REQUEST;
+                                            result = new ResponseMessageDTO("FAILED", "E96");
+//                                        }
                                     }
                                 } else if (dto.getType() != null && dto.getType() == 1) {
                                     responseDTOs = transactionReceiveService.getTransByReferenceNumber(dto.getValue(),
@@ -4042,4 +4163,36 @@ public class TransactionController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @GetMapping("admin/transaction/map-invoice")
+    public ResponseEntity<Object> getTransactionReceiveToMapInvoice(
+            @Valid @RequestParam String bankId,
+            @Valid @RequestParam int page,
+            @Valid @RequestParam int size,
+            @Valid @RequestParam String fromDate,
+            @Valid @RequestParam String toDate
+    ) {
+        Object result = null;
+        HttpStatus httpStatus = null;
+        PageResDTO response = new PageResDTO();
+        try {
+            int offset = (page - 1) * size;
+            List<ITransactionReceiveAdminInfoDTO> data = transactionReceiveService.getTransactionReceiveToMapInvoice(bankId, fromDate, toDate, offset, size);
+            int countItem = transactionReceiveService.countTransactionByBankIdAndTime(bankId, fromDate, toDate);
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setTotalPage(StringUtil.getTotalPage(countItem, size));
+            pageDTO.setTotalElement(countItem);
+            pageDTO.setSize(size);
+            pageDTO.setPage(page);
+            response.setMetadata(pageDTO);
+            response.setData(data);
+            result = response;
+            httpStatus = HttpStatus.OK;
+        } catch (Exception e) {
+            logger.error("getTransactionReceiveAdminToMap: ERROR: " + e.getMessage());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
 }

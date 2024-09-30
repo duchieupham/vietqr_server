@@ -17,6 +17,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -26,6 +27,7 @@ import java.io.IOException;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @RestController
@@ -42,7 +44,7 @@ public class InvoiceController {
     InvoiceItemService invoiceItemService;
 
     @Autowired
-    FileAttachService imageInvoiceService;
+    FileAttachService fileAttachService;
 
     @Autowired
     SystemSettingService systemSettingService;
@@ -2657,7 +2659,7 @@ public class InvoiceController {
                     + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
-         }
+        }
         return new ResponseEntity<>(result, httpStatus);
     }
 
@@ -3000,4 +3002,71 @@ public class InvoiceController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
+    @PutMapping("/invoice/admin-map")
+    public ResponseEntity<ResponseMessageDTO> mapTransactionWithInvoice(
+            @Validated @RequestBody InvoiceMapTransactionDTO dto
+    ) {
+        ResponseMessageDTO result = null;
+        HttpStatus httpStatus = null;
+        try {
+            AtomicLong amountTransaction = new AtomicLong(0);
+            AtomicLong amountInvoiceItem = new AtomicLong(0);
+
+            amountTransaction.set(
+                    dto.getTransactionList()
+                            .stream()
+                            .mapToLong(TransactionInvoiceDTO::getAmount)
+                            .sum()
+            );
+            amountInvoiceItem.set(
+                    dto.getInvoiceItemList()
+                            .stream()
+                            .mapToLong(TransactionInvoiceItemDTO::getTotalAfterVat)
+                            .sum()
+            );
+
+            long finalAmountTransaction = amountTransaction.get();
+            long finalAmountInvoiceItem = amountInvoiceItem.get();
+
+            if (finalAmountTransaction >= finalAmountInvoiceItem) {
+                int check = invoiceItemService.checkCountUnPaid(dto.getInvoiceId());
+                List<String> invoiceItemIds = new ArrayList<>();
+                List<String> transactionIds = new ArrayList<>();
+                dto.getInvoiceItemList().parallelStream().forEach((item) -> {
+                    invoiceItemIds.add(item.getId());
+                });
+                invoiceItemService.updateStatusInvoiceItemByIds(invoiceItemIds);
+                dto.getTransactionList().parallelStream().forEach((item) -> {
+                    transactionIds.add(item.getId());
+                });
+                transactionReceiveService.updateTransactionReceiveType(transactionIds);
+                if (check == dto.getInvoiceItemList().size()) {
+                    invoiceService.updateStatusInvoice(dto.getInvoiceId(), 1, DateTimeUtil.getCurrentDateTimeUTC());
+                } else {
+                    invoiceService.updateStatusInvoice(dto.getInvoiceId(), 3);
+                }
+                ObjectMapper mapper = new ObjectMapper();
+
+                invoiceTransactionService.insert(new InvoiceTransactionEntity(
+                        UUID.randomUUID().toString(),
+                        dto.getInvoiceId(),
+                        mapper.writeValueAsString(invoiceItemIds),
+                        mapper.writeValueAsString(transactionIds)
+                ));
+
+                result = new ResponseMessageDTO("SUCCESS", "");
+                httpStatus = HttpStatus.OK;
+            } else {
+                logger.error("mapTransactionWithInvoice: ERROR: Total amount of transactionList is less than total amount of invoiceItemList");
+                result = new ResponseMessageDTO("FAILED", "E219");
+                httpStatus = HttpStatus.BAD_REQUEST;
+            }
+        } catch (Exception e) {
+            logger.error("mapTransactionWithInvoice: ERROR: " + e.getMessage());
+            result = new ResponseMessageDTO("FAILED", "E05");
+            httpStatus = HttpStatus.BAD_REQUEST;
+        }
+
+        return new ResponseEntity<>(result, httpStatus);
+    }
 }

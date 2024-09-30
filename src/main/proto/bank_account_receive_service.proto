@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.example.grpc.bankaccountreceive";
+option java_outer_classname = "BankAccountReceiveServiceProto";
+
+service BankAccountReceiveService {
+  rpc GetBankAccountReceiveByBankId (RequestByBankId) returns (BankAccountReceive);
+  rpc GetBankAccountReceiveByUserId (RequestByUserId) returns (BankAccountReceiveList);
+}
+
+message RequestByBankId {
+  string bankId = 1;
+}
+
+message RequestByUserId {
+  string userId = 1;
+}
+
+message BankAccountReceive {
+  string id = 1;
+  string bankAccount = 2;
+  string userBankName = 3;
+  bool isSync = 4;
+  string bankTypeId = 5;
+  string userId = 6;
+  string bankShortName = 7;
+}
+
+message BankAccountReceiveList {
+  repeated BankAccountReceive bankAccountReceives = 1;
+}

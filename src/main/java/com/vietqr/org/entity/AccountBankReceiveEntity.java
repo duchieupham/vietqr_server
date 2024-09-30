@@ -101,7 +101,7 @@ public class AccountBankReceiveEntity implements Serializable {
 	private String vso = "";
 
 	@Column(name = "notificationTypes")
-	private String notificationTypes;
+	private String notificationTypes = "[\"DEBIT\",\"CREDIT\",\"RECON\"]";
 
 	public AccountBankReceiveEntity() {
 		super();

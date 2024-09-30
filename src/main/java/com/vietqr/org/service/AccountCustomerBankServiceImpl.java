@@ -1,6 +1,7 @@
 package com.vietqr.org.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,12 @@ public class AccountCustomerBankServiceImpl implements AccountCustomerBankServic
     @Override
     public List<String> checkExistedCustomerSyncByUsername(String username) {
         return repo.checkExistedCustomerSyncByUsername(username);
+    }
+
+    @Override
+    public String findUsernameByBankAccount(String bankAccount) {
+        Optional<String> usernameOpt = repo.getUsernameByBankAccount(bankAccount);
+        return usernameOpt.orElse(null);
     }
 
     @Override
