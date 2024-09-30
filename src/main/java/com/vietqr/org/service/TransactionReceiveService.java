@@ -662,7 +662,7 @@ public interface TransactionReceiveService {
 
     List<ITransactionReceiveAdminInfoDTO> getTransactionReceiveToMapInvoice(String bankId, String fromDate, String toDate, int offset, int size);
 
-    void updateTransactionReceiveType(String id);
+    void updateTransactionReceiveType(List<String> id);
 
     int countTransactionByBankIdAndTime(String bankId, String fromDate, String toDate);
 }

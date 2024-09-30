@@ -1805,8 +1805,8 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
-    public void updateTransactionReceiveType(String id) {
-        repo.updateTransactionReceiveType(id);
+    public void updateTransactionReceiveType(List<String> ids) {
+        repo.updateTransactionReceiveType(ids);
     }
 
     @Override

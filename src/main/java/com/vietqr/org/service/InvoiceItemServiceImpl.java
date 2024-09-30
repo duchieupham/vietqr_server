@@ -108,6 +108,11 @@ public class InvoiceItemServiceImpl implements InvoiceItemService {
         return updatedInvoiceItems;
     }
 
+    @Override
+    public void updateStatusInvoiceItemByIds(List<String> invoiceItemIds) {
+        repo.updateStatusInvoiceItemByIds(invoiceItemIds, DateTimeUtil.getCurrentDateTimeUTC());
+    }
+
 
     @Override
     public List<InvoiceItemProcessDateDTO> getInvoiceItemByInvoiceId(String invoiceId) {

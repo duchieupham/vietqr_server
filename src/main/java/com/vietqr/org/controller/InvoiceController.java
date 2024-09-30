@@ -3032,13 +3032,13 @@ public class InvoiceController {
                 List<String> invoiceItemIds = new ArrayList<>();
                 List<String> transactionIds = new ArrayList<>();
                 dto.getInvoiceItemList().parallelStream().forEach((item) -> {
-                    invoiceItemService.updateStatusInvoiceItem(item.getId());
                     invoiceItemIds.add(item.getId());
                 });
+                invoiceItemService.updateStatusInvoiceItemByIds(invoiceItemIds);
                 dto.getTransactionList().parallelStream().forEach((item) -> {
-                    transactionReceiveService.updateTransactionReceiveType(item.getId());
                     transactionIds.add(item.getId());
                 });
+                transactionReceiveService.updateTransactionReceiveType(transactionIds);
                 int check = invoiceItemService.checkCountUnPaid(dto.getInvoiceId());
                 if (check == dto.getInvoiceItemList().size()) {
                     invoiceService.updateStatusInvoice(dto.getInvoiceId(), 1, DateTimeUtil.getCurrentDateTimeUTC());

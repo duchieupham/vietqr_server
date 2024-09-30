@@ -3277,7 +3277,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE transaction_receive SET type = 5 WHERE id = :id", nativeQuery = true)
-    void updateTransactionReceiveType(@Param(value = "id") String id);
+    @Query(value = "UPDATE transaction_receive SET type = 5 WHERE id IN (:ids)", nativeQuery = true)
+    void updateTransactionReceiveType(@Param(value = "ids") List<String> ids);
 }
 
