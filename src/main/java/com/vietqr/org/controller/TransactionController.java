@@ -3265,15 +3265,17 @@ public class TransactionController {
         return result;
     }
 
-    private String checkOrderFromMB(String orderId) {
-        String result = null;
+    private ResponseObjectDTO checkOrderFromMB(String ftCode, String orderId) {
+        ResponseObjectDTO result = null;
         try {
             TokenProductBankDTO token = getBankToken();
             if (token != null) {
                 UUID clientMessageId = UUID.randomUUID();
                 Map<String, Object> data = new HashMap<>();
-                String checkSum = BankEncryptUtil.generateCheckOrderMD5Checksum("", "", orderId);
+                String checkSum = BankEncryptUtil.generateCheckOrderMD5Checksum(ftCode, "", orderId);
+                data.put("traceTransfer", ftCode);
                 data.put("referenceLabel", orderId);
+                data.put("billNumber", "");
                 data.put("checkSum", checkSum);
                 UriComponents uriComponents = UriComponentsBuilder
                         .fromHttpUrl(EnvironmentUtil.getBankUrl()
@@ -3302,29 +3304,32 @@ public class TransactionController {
                 if (rootNode.get("errorCode") != null) {
                     // 000
                     if ((rootNode.get("errorCode").asText()).trim().equals("000")) {
-                        if (rootNode.get("data").get("ft") != null) {
-                            result = rootNode.get("data").get("ft").asText();
+                        if (rootNode.get("data").get("traceTransfer") != null) {
+                            result = new ResponseObjectDTO("SUCCESS", rootNode.get("data").get("traceTransfer"));
                             logger.info("checkOrderFromMB: RESPONSE FT: " + result);
                         } else {
+                            result = new ResponseObjectDTO("FAILED", "E05");
                             logger.error("checkOrderFromMB: RESPONSE: FT NULL");
                         }
                     }
                     // "4863" FT code not existed
                     else if ((rootNode.get("errorCode").asText()).trim().equals("4863")) {
-                        result = "4863";
+                        result = new ResponseObjectDTO("FAILED", "4863");
                     }
                     // "4857" Invalid amount
                     else if ((rootNode.get("errorCode").asText()).trim().equals("4857")) {
-                        result = "4857";
+                        result = new ResponseObjectDTO("FAILED", "4857");
                     }
                 } else {
+                    result = new ResponseObjectDTO("FAILED", "E05");
                     logger.error("checkOrderFromMB: RESPONSE: ERROR CODE NULL");
                 }
-
             } else {
+                result = new ResponseObjectDTO("FAILED", "E05");
                 logger.error("ERROR at checkOrderFromMB: " + orderId + " - " + " TOKEN BANK IS INVALID");
             }
         } catch (Exception e) {
+            result = new ResponseObjectDTO("FAILED", "E05");
             logger.error("ERROR at checkOrderFromMB: " + orderId + " - " + e.toString());
         }
         return result;
@@ -3426,9 +3431,14 @@ public class TransactionController {
                                         }
                                         httpStatus = HttpStatus.OK;
                                     } else {
-                                        logger.error("checkTransactionStatus: NOT FOUND TRANSACTION");
-                                        httpStatus = HttpStatus.BAD_REQUEST;
-                                        result = new ResponseMessageDTO("FAILED", "E96");
+//                                        ResponseObjectDTO responseObjectDTO = checkOrderFromMB("", dto.getValue());
+//                                        if ("SUCCESS".equals(responseObjectDTO.getStatus())) {
+//
+//                                        } else {
+                                            logger.error("checkTransactionStatus: NOT FOUND TRANSACTION");
+                                            httpStatus = HttpStatus.BAD_REQUEST;
+                                            result = new ResponseMessageDTO("FAILED", "E96");
+//                                        }
                                     }
                                 } else if (dto.getType() != null && dto.getType() == 1) {
                                     responseDTOs = transactionReceiveService.getTransByReferenceNumber(dto.getValue(),
