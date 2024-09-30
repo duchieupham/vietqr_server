@@ -1006,6 +1006,23 @@ public class TidInternalSubscriber {
                     transactionEntity.setCustomerBankCode(dto.getCustomerBankCode());
                     transactionEntity.setCustomerName(dto.getCustomerName());
                 }
+                // Lưu trữ additionalData vào transactionEntity
+                if (dto.getAdditionalData() != null && !dto.getAdditionalData().isEmpty()) {
+
+                    List<Object> additionalDataList = new ArrayList<>();
+                    for (AdditionalData additionalData : dto.getAdditionalData()) {
+                        additionalDataList.add(new AdditionalDataInTransaction(
+                                dto.getAmount(),
+                                DateTimeUtil.getCurrentDateTimeUTC(),
+                                dto.getServiceCode(),
+                                dto.getTerminalCode(),
+                                additionalData.getAdditionalData1()
+                        ));
+                    }
+                    ObjectMapper mapper = new ObjectMapper();
+                    String additionalDataJson = mapper.writeValueAsString(additionalDataList);
+                    transactionEntity.setAdditionalData(additionalDataJson);
+                }
                 transactionReceiveService.insertTransactionReceive(transactionEntity);
                 logger.info("After insertNewTransactionBIDV at: " + DateTimeUtil.getCurrentDateTimeUTC());
             }
