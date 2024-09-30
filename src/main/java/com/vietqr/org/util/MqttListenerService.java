@@ -25,7 +25,7 @@ public class MqttListenerService implements MqttCallback {
 
     @Autowired
     private IdempotencyService idempotencyService;
-    public MqttListenerService(IMqttClient mqttClient, MqttTopicHandlerScanner mqttTopicHandlerScanner, ) {
+    public MqttListenerService(IMqttClient mqttClient, MqttTopicHandlerScanner mqttTopicHandlerScanner) {
         this.mqttClient = mqttClient;
         this.mqttTopicHandlerScanner = mqttTopicHandlerScanner;
         this.topicHandlers = initTopicHandlers();
