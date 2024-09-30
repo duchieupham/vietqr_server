@@ -227,6 +227,9 @@ public class TransactionBankController {
 	private MqttMessagingService mqttMessagingService;
 
     @Autowired
+    private TransactionRefundLogService transactionRefundLogService;
+
+    @Autowired
     SlackAccountBankService slackAccountBankService;
 
     @Autowired
@@ -3780,10 +3783,32 @@ public class TransactionBankController {
                     transactionEntity.setSubCode(refundMappingRedisDTO.getSubTerminalCode());
                     transactionEntity.setOrderId(refundMappingRedisDTO.getOrderId());
                 } else {
-                    transactionEntity.setType(2);
-                    transactionEntity.setTerminalCode("");
-                    transactionEntity.setSubCode("");
-                    transactionEntity.setOrderId("");
+                    TransactionRefundLogEntity transactionRefundLogEntity =
+                            transactionRefundLogService.getByTransactionRefundByReferenceNumber(dto.getReferencenumber());
+
+                    if (Objects.nonNull(transactionRefundLogEntity)) {
+                        TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
+                                .getTransactionReceiveByRefNumber(transactionRefundLogEntity.getRefNumber(), "C");
+                        if (Objects.nonNull(transactionReceiveEntity)) {
+                            refundMappingRedisDTO =
+                                    new RefundMappingRedisDTO(transactionReceiveEntity.getTerminalCode(), transactionReceiveEntity.getSubCode(),
+                                            transactionReceiveEntity.getReferenceNumber(), transactionReceiveEntity.getOrderId());
+                            transactionEntity.setType(0);
+                            transactionEntity.setTerminalCode(refundMappingRedisDTO.getTerminalCode());
+                            transactionEntity.setSubCode(refundMappingRedisDTO.getSubTerminalCode());
+                            transactionEntity.setOrderId(refundMappingRedisDTO.getOrderId());
+                        } else {
+                            transactionEntity.setType(2);
+                            transactionEntity.setTerminalCode("");
+                            transactionEntity.setSubCode("");
+                            transactionEntity.setOrderId("");
+                        }
+                    } else {
+                        transactionEntity.setType(2);
+                        transactionEntity.setTerminalCode("");
+                        transactionEntity.setSubCode("");
+                        transactionEntity.setOrderId("");
+                    }
                 }
             }
             transactionEntity.setStatus(1);

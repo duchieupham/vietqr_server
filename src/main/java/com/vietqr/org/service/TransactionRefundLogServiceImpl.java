@@ -15,4 +15,9 @@ public class TransactionRefundLogServiceImpl implements TransactionRefundLogServ
     public void insert(TransactionRefundLogEntity entity) {
         repo.save(entity);
     }
+
+    @Override
+    public TransactionRefundLogEntity getByTransactionRefundByReferenceNumber(String referencenumber) {
+        return repo.getByTransactionRefundByReferenceNumber(referencenumber);
+    }
 }
