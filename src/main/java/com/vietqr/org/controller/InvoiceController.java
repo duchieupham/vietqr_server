@@ -3029,6 +3029,7 @@ public class InvoiceController {
             long finalAmountInvoiceItem = amountInvoiceItem.get();
 
             if (finalAmountTransaction >= finalAmountInvoiceItem) {
+                int check = invoiceItemService.checkCountUnPaid(dto.getInvoiceId());
                 List<String> invoiceItemIds = new ArrayList<>();
                 List<String> transactionIds = new ArrayList<>();
                 dto.getInvoiceItemList().parallelStream().forEach((item) -> {
@@ -3039,7 +3040,6 @@ public class InvoiceController {
                     transactionIds.add(item.getId());
                 });
                 transactionReceiveService.updateTransactionReceiveType(transactionIds);
-                int check = invoiceItemService.checkCountUnPaid(dto.getInvoiceId());
                 if (check == dto.getInvoiceItemList().size()) {
                     invoiceService.updateStatusInvoice(dto.getInvoiceId(), 1, DateTimeUtil.getCurrentDateTimeUTC());
                 } else {
