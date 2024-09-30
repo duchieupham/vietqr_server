@@ -4,9 +4,9 @@ import java.util.List;
 
 public class InvoiceMapTransactionDTO {
     private String invoiceId;
-    private List<ITransactionInvoiceItemDTO> invoiceItemList;
+    private List<TransactionInvoiceItemDTO> invoiceItemList;
 
-    private List<ITransactionInvoiceDTO> transactionList;
+    private List<TransactionInvoiceDTO> transactionList;
 
     public String getInvoiceId() {
         return invoiceId;
@@ -16,19 +16,19 @@ public class InvoiceMapTransactionDTO {
         this.invoiceId = invoiceId;
     }
 
-    public List<ITransactionInvoiceItemDTO> getInvoiceItemList() {
+    public List<TransactionInvoiceItemDTO> getInvoiceItemList() {
         return invoiceItemList;
     }
 
-    public void setInvoiceItemList(List<ITransactionInvoiceItemDTO> invoiceItemList) {
+    public void setInvoiceItemList(List<TransactionInvoiceItemDTO> invoiceItemList) {
         this.invoiceItemList = invoiceItemList;
     }
 
-    public List<ITransactionInvoiceDTO> getTransactionList() {
+    public List<TransactionInvoiceDTO> getTransactionList() {
         return transactionList;
     }
 
-    public void setTransactionList(List<ITransactionInvoiceDTO> transactionList) {
+    public void setTransactionList(List<TransactionInvoiceDTO> transactionList) {
         this.transactionList = transactionList;
     }
 }

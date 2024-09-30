@@ -1,7 +1,23 @@
 package com.vietqr.org.dto;
 
-public interface ITransactionInvoiceItemDTO {
-    String getId();
+public class TransactionInvoiceItemDTO {
+    private String id;
 
-    long getTotalAfterVat();
+    private long totalAfterVat;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public long getTotalAfterVat() {
+        return totalAfterVat;
+    }
+
+    public void setTotalAfterVat(long totalAfterVat) {
+        this.totalAfterVat = totalAfterVat;
+    }
 }

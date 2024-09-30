@@ -3015,13 +3015,13 @@ public class InvoiceController {
             amountTransaction.set(
                     dto.getTransactionList()
                             .stream()
-                            .mapToLong(ITransactionInvoiceDTO::getAmount)
+                            .mapToLong(TransactionInvoiceDTO::getAmount)
                             .sum()
             );
             amountInvoiceItem.set(
                     dto.getInvoiceItemList()
                             .stream()
-                            .mapToLong(ITransactionInvoiceItemDTO::getTotalAfterVat)
+                            .mapToLong(TransactionInvoiceItemDTO::getTotalAfterVat)
                             .sum()
             );
 
