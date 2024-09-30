@@ -60,7 +60,7 @@ public class MqttListenerService implements MqttCallback {
     @PostConstruct
     public void startListening() throws MqttException {
         mqttClient.setCallback(this);
-        mqttClient.subscribe("#", 1);
+        mqttClient.subscribe("#", 2);
     }
 
     @PreDestroy
@@ -93,11 +93,16 @@ public class MqttListenerService implements MqttCallback {
     public void messageArrived(String topic, MqttMessage message) {
         MqttTopicHandlerScanner.MethodHandlerPair handlerPair = findHandlerForTopic(topic);
         try {
-            String existKey = idempotencyService.getResponseForKey("MQTT-KEY:" + message.getId()).orElse("");
-            if (handlerPair != null && StringUtil.isNullOrEmpty(existKey) &&
-                    idempotencyService.saveResponseForKey("MQTT-KEY:" + message.getId(), "", 30)) {
-                logger.info("MQTT Listener: messageArrived HANDLER: " + topic + " message: " + new String(message.getPayload()));
-                handlerPair.getMethod().invoke(handlerPair.getBean(), topic, message);
+            String existKey = idempotencyService.getResponseForKey("idempotency-lock:MQTT-KEY:" + message.getId()).orElse("");
+            if (handlerPair != null && StringUtil.isNullOrEmpty(existKey)
+                    ) {
+                if (idempotencyService.saveResponseForKey("MQTT-KEY:" + message.getId(), "", 30)) {
+                    logger.info("MQTT Listener: messageArrived HANDLER: " + topic + " message: " + new String(message.getPayload()));
+                    handlerPair.getMethod().invoke(handlerPair.getBean(), topic, message);
+//                    idempotencyService.deleteResponseForKey("MQTT-KEY:" + message.getId());
+                } else {
+                    logger.warn("MQTT Listener: messageArrived NOT HANDLER OR ALREADY HANDLE: " + topic + " message: " + new String(message.getPayload()));
+                }
             } else {
                 logger.warn("MQTT Listener: messageArrived NOT HANDLER OR ALREADY HANDLE: " + topic + " message: " + new String(message.getPayload()));
             }

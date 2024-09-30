@@ -222,10 +222,8 @@ public class TransactionMMSController {
                         if (entity.getReferenceLabelCode() != null
                                 && !entity.getReferenceLabelCode().trim().isEmpty()) {
                             // TRANSACTION QR
-                            System.out.println(System.currentTimeMillis());
                             transactionReceiveEntity = transactionReceiveService
                                     .getTransactionByOrderId(entity.getReferenceLabelCode(), entity.getDebitAmount());
-                            System.out.println(System.currentTimeMillis());
                             if (transactionReceiveEntity != null) {
                                 // transactionReceiveEntity != null:
                                 // update status transaction receive
@@ -3125,6 +3123,7 @@ public class TransactionMMSController {
                 JsonNode rootNode = objectMapper.readTree(json);
                 if (rootNode.get("errorCode") != null) {
                     // 000
+                    logger.info("checkOrderFromMB: RESPONSE: " + rootNode.asText() + " orderId: " + orderId);
                     if ((rootNode.get("errorCode").asText()).trim().equals("000")) {
                         if (rootNode.get("data").get("traceTransfer") != null) {
                             result = new ResponseObjectDTO("SUCCESS", rootNode.get("data").get("traceTransfer"));
