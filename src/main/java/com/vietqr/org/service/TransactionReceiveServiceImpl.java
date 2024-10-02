@@ -1931,7 +1931,7 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
         String year = DateTimeUtil.getYearAsString(toDate);
         int differenceMonthFromTime = DateTimeUtil.getDifferenceMonthFromTime(toDate, currentTime);
         List<String> suffix = new ArrayList<>();
-        if (differenceMonthFromTime < 3) {
+        if (differenceMonthFromTime < 4) {
             suffix.add("");
             List<String> strings = StringUtil.getStartQuarter(DateTimeUtil.getMonth(toDate), year);
             for (String item : strings) {

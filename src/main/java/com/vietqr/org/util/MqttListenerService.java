@@ -75,6 +75,7 @@ public class MqttListenerService implements MqttCallback {
         logger.error("MQTT Listener: ERROR: connectionLost: " + cause.getMessage());
         boolean reconnected = false;
         int attempt = 0;
+        GoogleChatUtil googleChatUtil = new GoogleChatUtil();
         while (!reconnected) {
             attempt++;
             try {
@@ -85,8 +86,16 @@ public class MqttListenerService implements MqttCallback {
 
             } catch (MqttException | InterruptedException e) {
                 logger.error("MQTT Listener: ERROR: Reconnection attempt " + attempt + " failed: " + e.getMessage());
+            } finally {
+                String content = "MQTT CONNECTION LOST: " +
+                        "\uD83D\uDE4B\u200D♂\uFE0F\uD83D\uDE4B\u200D♂\uFE0F\uD83D\uDE4B\u200D♂\uFE0F." +
+                        "\n\nMQTT Listener: ERROR: connectionLost: " + cause.getMessage() + "\n\n" +
+                        "\n\nTRYING RECONNECTION...\n\n";
+                googleChatUtil.sendMessageToGoogleChatInternal(content);
             }
         }
+        String content = "MQTT Listener: Successfully reconnected after " + attempt + " attempt(s).";
+        googleChatUtil.sendMessageToGoogleChatInternal(content);
     }
 
     @Override

@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vietqr.org.dto.*;
-import com.vietqr.org.dto.bidv.CustomerVaInfoDataDTO;
 import org.springframework.stereotype.Service;
 
 import com.vietqr.org.entity.AccountBankReceiveEntity;
@@ -36,22 +35,11 @@ public interface AccountBankReceiveService {
 	public void updateRegisterAuthenticationBank(String nationalId, String phoneAuthenticated, String bankAccountName,
 			String bankAccount, String ewalletToken, String bankId);
 
-	// public AccountBankReceiveEntity getAccountBankByBankAccount(String
-	// bankAccount);
-
 	public AccountBankReceiveEntity getAccountBankByBankAccountAndBankTypeId(String bankAccount, String bankTypeId);
-
-	public List<BusinessBankDTO> getBankByBranchId(String branchId);
 
 	public void unRegisterAuthenticationBank(String bankAccount);
 
-	public void unRegisterAuthenBank(String bankAccount, String ewalletToken);
-
 	public void updateStatusAccountBankByUserId(int status, String userId);
-
-	public List<AccountBankConnectBranchDTO> getAccountBankConnect(String userId);
-
-	public void updateBankType(String id, int type);
 
 	public List<AccountBankWpDTO> getAccountBankReceiveWps(String userId);
 
@@ -64,9 +52,6 @@ public interface AccountBankReceiveService {
 	public String getUserIdByBankId(String bankId);
 
 	public List<AccountBankReceiveRPAItemDTO> getBankAccountsRPA(String userId);
-
-	// public AccountBankReceiveEntity getBankAccountAuthenticatedByAccount(String
-	// bankAccount);
 
 	public List<AccountBankReceiveByCusSyncDTO> getBankAccountsByCusSyncId(String customerSyncId, int offset);
 
@@ -87,13 +72,9 @@ public interface AccountBankReceiveService {
 
 	public Boolean getMMSActiveByBankId(String bankId);
 
-	public AccountBankReceiveForNotiDTO findAccountBankIden(String bankAccount, String bankTypeId);
-
 	String checkIsOwner(String bankId, String userId);
 
 	AccountBankReceiveShareForNotiDTO findAccountBankByTraceTransfer(String traceTransfer, String bankTypeId);
-
-	public String checkExistedBankAccountByBankAccountAndBankCode(String bankAccount, String bankCode);
 
 	String getBankShortNameByBankId(String bankId);
 
@@ -127,15 +108,11 @@ public interface AccountBankReceiveService {
 
 	IAccountBankReceiveDTO getAccountBankInfoResById(String bankId);
 
-    BankAccountRechargeDTO getBankAccountRecharge(String bankId);
-
     IBankReceiveFeePackageDTO getCustomerBankDetailByBankId(String bankId);
 
     List<IAccountBankReceiveDTO> getBankIdsByBankId(String bankId);
 
     AccountBankReceiveEntity getAccountBankByCustomerIdAndByServiceId(String customerId);
-
-    CustomerVaInfoDataDTO getAccountCustomerInfo(String customerId);
 
 	void updateRegisterAuthentication(String userId, String merchantId);
 
@@ -192,16 +169,10 @@ public interface AccountBankReceiveService {
 	int countBankAccountsByValidFeeToAndIsValidServiceWithSearch(Integer searchType, String value);
 	List<BankAccountResponseDTO> getBankAccountsByTimeCreateWithSearch(Integer searchType, String value, int offset, int size);
 	int countBankAccountsByTimeCreateWithSearch(Integer searchType, String value);
-	List<BankAccountResponseDTO> getBankAccountsByAccountAndSorted(String keyword, int offset, int size);
-	List<BankAccountResponseDTO> getBankAccountsByAccountNameAndSorted(String keyword, int offset, int size);
-	List<BankAccountResponseDTO> getBankAccountsByPhoneAuthenticatedAndSorted(String keyword, int offset, int size);
-	List<BankAccountResponseDTO> getBankAccountsByNationalIdAndSorted(String keyword, int offset, int size);
 	void updatePushNotification(String bankId, int value);
 
 	void updateSyncWpById(String id);
 	void updatePushNotificationUser(String userId, int value);
-	void enableSoundNotificationByBankId(String bankId);
-	void disableSoundNotificationByBankId(String bankId);
 
 	void updateEnableVoiceByBankIds(List<String> bankIds, String userId);
 	List<PlatformConnectionDTO> getPlatformConnectionsByBankId(String bankId, int offset, int size);
