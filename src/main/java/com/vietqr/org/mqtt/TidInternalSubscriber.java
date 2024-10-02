@@ -629,7 +629,8 @@ public class TidInternalSubscriber {
                                     vietQRVaRequestDTO.setUserBankName(accountBankEntity.getBankAccountName());
                                     vietQRVaRequestDTO.setDescription(StringUtil.getValueNullChecker(billId));
 
-                                    ResponseMessageDTO generateVaInvoiceVietQR = CustomerVaUtil.generateVaInvoiceVietQR(vietQRVaRequestDTO, accountBankEntity.getCustomerId());
+                                    ResponseMessageDTO generateVaInvoiceVietQR
+                                            = CustomerVaUtil.generateVaInvoiceVietQR(vietQRVaRequestDTO, accountBankEntity.getCustomerId());
 
                                     if ("SUCCESS".equals(generateVaInvoiceVietQR.getStatus())) {
                                         qr = generateVaInvoiceVietQR.getMessage();

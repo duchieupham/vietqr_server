@@ -1567,8 +1567,9 @@ public class TransactionMMSController {
                             String retryErrors = customerErrorLogService.getRetryErrorsByCustomerId(customerSyncEntity.getId());
                             List<String> errors = new ArrayList<>();
                             errors = mapperErrors(retryErrors);
-                            pushNewTransactionToCustomerSync(transReceiveId, customerSyncEntity, transactionBankCustomerDTO,
-                                    time * 1000, 1, errors);
+                            List<String> finalErrors = errors;
+                            executorService.submit(() -> pushNewTransactionToCustomerSync(transReceiveId, customerSyncEntity, transactionBankCustomerDTO,
+                                    time * 1000, 1, finalErrors));
                         } else {
                             logger.info("customerSyncEntity = null");
                         }
@@ -2361,7 +2362,7 @@ public class TransactionMMSController {
 //                        System.out.println("data getPayDate: " + entity.getPayDate());
                         // System.out.println("data getDebitAmount: " + entity.getDebitAmount());
                         // System.out.println("data checksum: " + dataCheckSum);
-                        if (BankEncryptUtil.isMatchChecksum(dataCheckSum, entity.getCheckSum()) && !"BLC60".equals(entity.getTerminalLabel())) {
+                        if (BankEncryptUtil.isMatchChecksum(dataCheckSum, entity.getCheckSum())) {
 //                        if (true) {
                             result = new TransactionMMSResponseDTO("00", "Success");
                         } else {

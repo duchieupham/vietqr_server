@@ -66,9 +66,6 @@ public class SocketHandler extends TextWebSocketHandler {
                 session.getAttributes().put("boxId", boxId);
                 notificationBoxSessions.add(session);
                 Map<String, String> data = new HashMap<>();
-                data.put("status", "SUCCESS");
-                data.put("notificationType", NotificationUtil.getNotiTypeConnectSuccess());
-                updateStatusVietQrBox(boxId, 1);
                 sendMessageToBoxId(boxId, data);
             }else if (clientId != null && !clientId.trim().isEmpty()) {
                 // save clientId for this session
@@ -83,18 +80,6 @@ public class SocketHandler extends TextWebSocketHandler {
         }
     }
 
-    private void updateStatusVietQrBox(String boxId, int status) {
-        try {
-            Thread thread = new Thread(() -> {
-                String boxCode = BoxTerminalRefIdUtil.decryptBoxId(boxId);
-                qrBoxSyncRepository.updateStatusBox(boxCode, status, DateTimeUtil.getCurrentDateTimeUTC());
-            });
-            thread.start();
-        } catch (Exception e) {
-            logger.error("updateStatusVietQrBox: ERROR: " + e.getMessage());
-        }
-    }
-
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) {
         logger.info("WS: handleTextMessage: " + session.getId() + " - " + message.toString());
@@ -106,10 +91,7 @@ public class SocketHandler extends TextWebSocketHandler {
         loginSessions.remove(session);
         transactionSessions.remove(session);
         notificationClientSessions.remove(session);
-        boolean checkOfflineBox = notificationBoxSessions.remove(session);
-        if (checkOfflineBox) {
-            updateStatusVietQrBox(session.getAttributes().get("boxId").toString(), 0);
-        }
+        notificationBoxSessions.remove(session);
         //
         logger.info("WS: remove session: " + session.toString());
         logger.info("WS: notificationSessions size: " + notificationSessions.size());
@@ -124,8 +106,8 @@ public class SocketHandler extends TextWebSocketHandler {
         logger.info("WS: sendMessageEcLoginToWeb");
         logger.info("WS: ecLoginSessions: " + ecLoginSessions.size());
         for (WebSocketSession session : ecLoginSessions) {
-            logger.info("WS: ec-login session ID: " + session.getId());
-            logger.info("WS: ec-login session Attributes: " + session.getAttributes());
+//            logger.info("WS: ec-login session ID: " + session.getId());
+//            logger.info("WS: ec-login session Attributes: " + session.getAttributes());
             Object sessionEcLoginId = session.getAttributes().get("ecLoginId");
             if (sessionEcLoginId != null && sessionEcLoginId.equals(ecLoginId)) {
                 ObjectMapper mapper = new ObjectMapper();
@@ -139,8 +121,8 @@ public class SocketHandler extends TextWebSocketHandler {
         logger.info("WS: sendMessageToClient");
         logger.info("WS: notificationSessions: " + notificationClientSessions.size());
         for (WebSocketSession session : notificationClientSessions) {
-            logger.info("WS: session ID: " + session.getId());
-            logger.info("WS: session Attributes: " + session.getAttributes());
+//            logger.info("WS: session ID: " + session.getId());
+//            logger.info("WS: session Attributes: " + session.getAttributes());
             Object sessionClientId = session.getAttributes().get("clientId");
             if (sessionClientId != null && sessionClientId.equals(clientId)) {
                 ObjectMapper mapper = new ObjectMapper();
@@ -154,8 +136,8 @@ public class SocketHandler extends TextWebSocketHandler {
         logger.info("WS: sendMessageLoginToWeb");
         logger.info("WS: loginSessions: " + loginSessions.size());
         for (WebSocketSession session : loginSessions) {
-            logger.info("WS: login session ID: " + session.getId());
-            logger.info("WS: login session Attributes: " + session.getAttributes());
+//            logger.info("WS: login session ID: " + session.getId());
+//            logger.info("WS: login session Attributes: " + session.getAttributes());
             Object sessionLoginId = session.getAttributes().get("loginId");
             if (sessionLoginId != null && sessionLoginId.equals(loginId)) {
                 ObjectMapper mapper = new ObjectMapper();
@@ -169,8 +151,8 @@ public class SocketHandler extends TextWebSocketHandler {
         logger.info("WS: sendMessageToUser");
         logger.info("WS: notificationSessions: " + notificationSessions.size());
         for (WebSocketSession session : notificationSessions) {
-            logger.info("WS: session ID: " + session.getId());
-            logger.info("WS: session Attributes: " + session.getAttributes());
+//            logger.info("WS: session ID: " + session.getId());
+//            logger.info("WS: session Attributes: " + session.getAttributes());
             Object sessionUserId = session.getAttributes().get("userId");
             if (sessionUserId != null && sessionUserId.equals(userId)) {
                 ObjectMapper mapper = new ObjectMapper();
@@ -196,8 +178,8 @@ public class SocketHandler extends TextWebSocketHandler {
         logger.info("WS: sendMessageToUser");
         logger.info("WS: notificationSessions: " + notificationBoxSessions.size());
         for (WebSocketSession session : notificationBoxSessions) {
-            logger.info("WS: session ID: " + session.getId());
-            logger.info("WS: session Attributes: " + session.getAttributes());
+//            logger.info("WS: session ID: " + session.getId());
+//            logger.info("WS: session Attributes: " + session.getAttributes());
             Object sessionUserId = session.getAttributes().get("boxId");
             if (sessionUserId != null && sessionUserId.equals(boxId)) {
                 ObjectMapper mapper = new ObjectMapper();
@@ -211,8 +193,8 @@ public class SocketHandler extends TextWebSocketHandler {
         logger.info("WS: sendMessageToTransactionRefId");
         logger.info("WS: transactionSessions: " + transactionSessions.size());
         for (WebSocketSession session : transactionSessions) {
-            logger.info("WS: session ID: " + session.getId());
-            logger.info("WS: session Attributes: " + session.getAttributes());
+//            logger.info("WS: session ID: " + session.getId());
+//            logger.info("WS: session Attributes: " + session.getAttributes());
             Object sessionUserId = session.getAttributes().get("refId");
             if (sessionUserId != null && sessionUserId.equals(refId)) {
                 ObjectMapper mapper = new ObjectMapper();

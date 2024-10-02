@@ -44,4 +44,34 @@ public class GoogleChatUtil {
         }
         return check;
     }
+
+    public boolean sendMessageToGoogleChatInternal(String message) {
+        boolean check = false;
+        String webhook = "https://chat.googleapis.com/v1/spaces/AAAAEkpkd2A/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=q9cgRDssTNVRgIQCYkfq06Sfh8nS-h4RD3Nrfby9NJk";
+        try {
+            if (webhook != null) {
+                Map<String, Object> data = new HashMap<>();
+                data.put("text", message);
+                // Build URL with PathVariable
+                UriComponents uriComponents = UriComponentsBuilder
+                        .fromHttpUrl(webhook).buildAndExpand();
+                // Create WebClient with authorization header
+                WebClient webClient = WebClient.builder()
+                        .baseUrl(uriComponents.toUriString())
+                        .build();
+                Mono<ClientResponse> responseMono = webClient.post()
+                        // .uri("/bank/api/transaction-sync")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(BodyInserters.fromValue(data))
+                        .exchange();
+                ClientResponse response = responseMono.block();
+                if (response.statusCode().is2xxSuccessful()) {
+                    check = true;
+                }
+            }
+        } catch (Exception e) {
+            logger.error("GoogleChatUtil: sendMessageToGoogleChat: ERROR: " + e.toString());
+        }
+        return check;
+    }
 }

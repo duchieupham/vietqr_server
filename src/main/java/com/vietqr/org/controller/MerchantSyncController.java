@@ -242,7 +242,7 @@ public class MerchantSyncController {
                         bankReceiveConnectionEntity.setMid(entity.getId());
                         bankReceiveConnectionService.insert(bankReceiveConnectionEntity);
                     }
-                    accountBankReceiveService.updateSyncWpById(entity.getId());
+                    accountBankReceiveService.updateSyncWpById(accountBankReceiveEntity.getId());
                     merchantSyncService.insert(entity);
 
                     result = new ResponseObjectDTO("SUCCESS", "");

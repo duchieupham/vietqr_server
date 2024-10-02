@@ -90,20 +90,9 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
                 ewalletToken, bankId);
     }
 
-    // @Override
-    // public AccountBankReceiveEntity getAccountBankByBankAccount(String
-    // bankAccount) {
-    // return repo.getAccountBankByBankAccount(bankAccount);
-    // }
-
     @Override
     public AccountBankReceiveEntity getAccountBankByBankAccountAndBankTypeId(String bankAccount, String bankTypeId) {
         return repo.getAccountBankByBankAccountAndBankTypeId(bankAccount, bankTypeId);
-    }
-
-    @Override
-    public List<BusinessBankDTO> getBankByBranchId(String branchId) {
-        return repo.getBankByBranchId(branchId);
     }
 
     @Override
@@ -114,16 +103,6 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     @Override
     public void updateStatusAccountBankByUserId(int status, String userId) {
         repo.updateStatusAccountBankByUserId(status, userId);
-    }
-
-    @Override
-    public List<AccountBankConnectBranchDTO> getAccountBankConnect(String userId) {
-        return repo.getAccountBankConnect(userId);
-    }
-
-    @Override
-    public void updateBankType(String id, int type) {
-        repo.updateBankType(id, type);
     }
 
     @Override
@@ -202,11 +181,6 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     }
 
     @Override
-    public AccountBankReceiveForNotiDTO findAccountBankIden(String bankAccount, String bankTypeId) {
-        return repo.findAccountBankIden(bankAccount, bankTypeId);
-    }
-
-    @Override
     public String checkIsOwner(String bankId, String userId) {
         return repo.checkIsOwner(bankId, userId);
     }
@@ -214,11 +188,6 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     @Override
     public AccountBankReceiveShareForNotiDTO findAccountBankByTraceTransfer(String traceTransfer, String bankTypeId) {
         return repo.findAccountBankByTraceTransfer(traceTransfer, bankTypeId);
-    }
-
-    @Override
-    public String checkExistedBankAccountByBankAccountAndBankCode(String bankAccount, String bankCode) {
-        return repo.checkExistedBankAccountByBankAccountAndBankCode(bankAccount, bankCode);
     }
 
     @Override
@@ -302,11 +271,6 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     }
 
     @Override
-    public BankAccountRechargeDTO getBankAccountRecharge(String bankId) {
-        return repo.getBankAccountRecharge(bankId);
-    }
-
-    @Override
     public IBankReceiveFeePackageDTO getCustomerBankDetailByBankId(String bankId) {
         return repo.getCustomerBankDetailByBankId(bankId);
     }
@@ -319,11 +283,6 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     @Override
     public AccountBankReceiveEntity getAccountBankByCustomerIdAndByServiceId(String customerId) {
         return repo.getAccountBankByCustomerIdAndByServiceId(customerId);
-    }
-
-    @Override
-    public CustomerVaInfoDataDTO getAccountCustomerInfo(String customerId) {
-        return repo.getAccountCustomerInfo(customerId);
     }
 
     @Override
@@ -413,11 +372,6 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     public List<BankAccountResponseDTO> getAllBankAccount(int offset, int size) {
         List<IBankAccountResponseDTO> accounts = repo.getAllBankAccounts(offset, size);
         return convertAndSanitize(accounts);
-    }
-
-    @Override
-    public void unRegisterAuthenBank(String bankAccount, String ewalletToken) {
-        repo.unRegisterAuthenBank(bankAccount, ewalletToken);
     }
 
     @Override
@@ -551,40 +505,6 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     }
 
     @Override
-    public List<BankAccountResponseDTO> getBankAccountsByAccountAndSorted(String keyword, int offset, int size) {
-        long[] times = DateTimeUtil.getCurrentAndSevenDaysLater();
-        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByAccountAndSorted(keyword, times[0],
-                times[1], offset, size);
-        return convertAndSanitize(accounts);
-    }
-
-    @Override
-    public List<BankAccountResponseDTO> getBankAccountsByAccountNameAndSorted(String keyword, int offset, int size) {
-        long[] times = DateTimeUtil.getCurrentAndSevenDaysLater();
-        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByAccountNameAndSorted(keyword,  times[0],
-                times[1], offset, size);
-        return convertAndSanitize(accounts);
-    }
-
-    @Override
-    public List<BankAccountResponseDTO> getBankAccountsByPhoneAuthenticatedAndSorted(String keyword, int offset,
-            int size) {
-        long[] times = DateTimeUtil.getCurrentAndSevenDaysLater();
-        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByPhoneAuthenticatedAndSorted(keyword, times[0],
-                times[1], offset, size);
-        return convertAndSanitize(accounts);
-    }
-
-    @Override
-    public List<BankAccountResponseDTO> getBankAccountsByNationalIdAndSorted(String keyword, int offset, int size) {
-        long currentTime = (System.currentTimeMillis() - DateTimeUtil.GMT_PLUS_7_OFFSET) / 1000;
-        long sevenDaysLater = currentTime + 7 * 24 * 60 * 60;
-        List<IBankAccountResponseDTO> accounts = repo.getBankAccountsByNationalIdAndSorted(keyword, currentTime,
-                sevenDaysLater, offset, size);
-        return convertAndSanitize(accounts);
-    }
-
-    @Override
     public void updatePushNotification(String bankId, int value) {
         repo.updatePushNotification(bankId, value);
     }
@@ -592,16 +512,6 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     @Override
     public void updatePushNotificationUser(String userId, int value) {
         repo.updatePushNotificationUser(userId, value);
-    }
-
-    @Override
-    public void enableSoundNotificationByBankId(String bankId) {
-        repo.updateSoundNotificationByBankId(bankId, 1);
-    }
-
-    @Override
-    public void disableSoundNotificationByBankId(String bankId) {
-        repo.updateSoundNotificationByBankId(bankId, 0);
     }
 
     @Override
