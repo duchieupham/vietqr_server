@@ -381,12 +381,12 @@ public class CustomerInvoiceController {
 //                                            }
                                     } else {
                                          // hoá đơn đã gạch nợ rồi
-                                            result = new ResponseMessageBidvDTO("023",
-                                                    "Hóa đơn đã gạch nợ rồi (mỗi hóa đơn chỉ gạch nợ 1 lần)");
-                                            httpStatus = HttpStatus.OK;
-//                                        result = new ResponseMessageBidvDTO("000",
-//                                                "Thành công");
-//                                        httpStatus = HttpStatus.OK;
+//                                            result = new ResponseMessageBidvDTO("023",
+//                                                    "Hóa đơn đã gạch nợ rồi (mỗi hóa đơn chỉ gạch nợ 1 lần)");
+//                                            httpStatus = HttpStatus.OK;
+                                        result = new ResponseMessageBidvDTO("000",
+                                                "Thành công");
+                                        httpStatus = HttpStatus.OK;
                                     }
                                     // Hóa đơn BIDV
                                 } else if (customerInvoiceDataDTO != null
@@ -549,7 +549,8 @@ public class CustomerInvoiceController {
                 //
                 // khi result = 021, 022, 02 insert transaction mới
                 if (tempResult.getResult_code().equals("000")
-                || tempResult.getResult_code().equals("023")) {
+//                || tempResult.getResult_code().equals("023")
+                ) {
 
 //                    CustomerInvoiceDataDTO customerInvoiceDataDTO = customerInvoiceService
 //                            .getCustomerInvoiceByBillId(dto.getBill_id());
@@ -604,7 +605,7 @@ public class CustomerInvoiceController {
                             }
                         }
 
-                        //
+                        // static qr
                     } else if (Objects.nonNull(finalCustomerInvoiceDataDTO)
                             && finalCustomerInvoiceDataDTO.getQrType() == 2) {
                         // static qr

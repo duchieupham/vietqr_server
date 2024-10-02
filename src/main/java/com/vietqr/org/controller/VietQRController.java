@@ -501,30 +501,350 @@ public class VietQRController {
 			}
 		}
 		VietQRDTO vietQRDTO = null;
-		switch (dto.getBankCode().toUpperCase()) {
-			case "MB":
-				// for saving qr mms flow 2
-				String qrMMS = "";
-				// find bankAccount đã liên kết và mms = true và check transType = "C -> gọi
-				// luồng 2
-				String checkExistedMMSBank = accountBankReceiveService.checkMMSBankAccount(dto.getBankAccount());
-				boolean checkMMS = false;
-				String transType = "C";
-				if (dto.getTransType() != null) {
-					transType = dto.getTransType().trim();
-				}
-				if (checkExistedMMSBank != null && !checkExistedMMSBank.trim().isEmpty() && transType.equals("C")) {
-					checkMMS = true;
-				}
-				if (!checkMMS) {
-					// Luồng 1
-					String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
-					String bankTypeId = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
+		if (dto.getReconciliation() == null || dto.getReconciliation() == true) {
+			switch (dto.getBankCode().toUpperCase()) {
+				case "MB":
+					// for saving qr mms flow 2
+					String qrMMS = "";
+					// find bankAccount đã liên kết và mms = true và check transType = "C -> gọi
+					// luồng 2
+					String checkExistedMMSBank = accountBankReceiveService.checkMMSBankAccount(dto.getBankAccount());
+					boolean checkMMS = false;
+					String transType = "C";
+					if (dto.getTransType() != null) {
+						transType = dto.getTransType().trim();
+					}
+					if (checkExistedMMSBank != null && !checkExistedMMSBank.trim().isEmpty() && transType.equals("C")) {
+						checkMMS = true;
+					}
+					if (!checkMMS) {
+						// Luồng 1
+						String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
+						String bankTypeId = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
 //					if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
 //						bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
 //					} else {
 //						bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getCustomerBankCode());
 //					}
+						vietQRDTO = new VietQRDTO();
+						try {
+							if (dto.getContent().length() <= 50) {
+								// check if generate qr with transtype = D or C
+								// if D => generate with customer information
+								// if C => do normal
+								// find bankTypeId by bankcode
+								if (bankTypeId != null && !bankTypeId.isEmpty()) {
+									// get cai value
+									ICaiBankTypeQR caiBankTypeQR = bankTypeService.getCaiBankTypeById(bankTypeId);
+									// find bank by bankAccount and banktypeId
+									IAccountBankInfoQR accountBankEntity = null;
+									if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
+										accountBankEntity = accountBankReceiveService
+												.getAccountBankQRByAccountAndId(dto.getBankAccount(), bankTypeId);
+									} else {
+										accountBankEntity = accountBankReceiveService
+												.getAccountBankQRByAccountAndId(dto.getCustomerBankAccount(), bankTypeId);
+									}
+									if (accountBankEntity != null) {
+										String content = dto.getContent();
+										if (dto.getReconciliation() == null || dto.getReconciliation()) {
+											content = traceId + " " + dto.getContent();
+										}
+										// generate VietQRGenerateDTO
+										VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+										vietQRGenerateDTO.setCaiValue(caiBankTypeQR.getCaiValue());
+										vietQRGenerateDTO.setAmount(dto.getAmount() + "");
+										vietQRGenerateDTO.setContent(content);
+										vietQRGenerateDTO.setBankAccount(accountBankEntity.getBankAccount());
+										// generate VietQRDTO
+										String refId = TransactionRefIdUtil.encryptTransactionId(transactionUUID.toString());
+										vietQRDTO.setBankCode(caiBankTypeQR.getBankCode());
+										vietQRDTO.setBankName(caiBankTypeQR.getBankName());
+										vietQRDTO.setBankAccount(accountBankEntity.getBankAccount());
+										vietQRDTO.setUserBankName(accountBankEntity.getBankAccountName().toUpperCase());
+										vietQRDTO.setAmount(dto.getAmount() + "");
+										vietQRDTO.setContent(content);
+										vietQRDTO.setQrCode(VietQRUtil.generateTransactionQR(vietQRGenerateDTO));
+										vietQRDTO.setImgId(caiBankTypeQR.getImgId());
+										vietQRDTO.setExisting(1);
+										vietQRDTO.setTransactionId("");
+										vietQRDTO.setTerminalCode(dto.getTerminalCode());
+										vietQRDTO.setTransactionRefId(refId);
+										vietQRDTO.setQrLink(EnvironmentUtil.getQRLink() + refId);
+										vietQRDTO.setOrderId(dto.getOrderId());
+										vietQRDTO.setAdditionalData(new ArrayList<>());
+										if (dto.getAdditionalData() != null && !dto.getAdditionalData().isEmpty()) {
+											vietQRDTO.setAdditionalData(dto.getAdditionalData());
+										}
+										vietQRDTO.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
+										vietQRDTO.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
+
+										result = vietQRDTO;
+										httpStatus = HttpStatus.OK;
+									} else {
+										String bankAccount = dto.getCustomerBankAccount();
+										String userBankName = dto.getCustomerName().trim().toUpperCase();
+										String content = dto.getContent();
+										if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
+											bankAccount = dto.getBankAccount();
+											userBankName = dto.getUserBankName().trim().toUpperCase();
+										}
+										// generate VietQRGenerateDTO
+										VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+										vietQRGenerateDTO.setCaiValue(caiBankTypeQR.getCaiValue());
+										vietQRGenerateDTO.setAmount(dto.getAmount() + "");
+										if (dto.getReconciliation() == null || dto.getReconciliation()) {
+											content = traceId + " " + dto.getContent();
+										}
+										vietQRGenerateDTO.setContent(content);
+										vietQRGenerateDTO.setBankAccount(bankAccount);
+										// generate VietQRDTO
+										vietQRDTO.setBankCode(caiBankTypeQR.getBankCode());
+										vietQRDTO.setBankName(caiBankTypeQR.getBankName());
+										vietQRDTO.setBankAccount(bankAccount);
+										vietQRDTO.setUserBankName(userBankName);
+										vietQRDTO.setAmount(dto.getAmount() + "");
+										vietQRDTO.setContent(content);
+										vietQRDTO.setQrCode(VietQRUtil.generateTransactionQR(vietQRGenerateDTO));
+										vietQRDTO.setImgId(caiBankTypeQR.getImgId());
+										vietQRDTO.setExisting(1);
+										vietQRDTO.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
+										vietQRDTO.setAdditionalData(new ArrayList<>());
+										if (dto.getAdditionalData() != null && !dto.getAdditionalData().isEmpty()) {
+											vietQRDTO.setAdditionalData(dto.getAdditionalData());
+										}
+										vietQRDTO.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
+										vietQRDTO.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
+										result = vietQRDTO;
+										httpStatus = HttpStatus.OK;
+									}
+								} else {
+									result = new ResponseMessageDTO("FAILED", "E24");
+									httpStatus = HttpStatus.BAD_REQUEST;
+								}
+							} else {
+								result = new ResponseMessageDTO("FAILED", "E26");
+								httpStatus = HttpStatus.BAD_REQUEST;
+							}
+							return new ResponseEntity<>(result, httpStatus);
+							//
+						} catch (Exception e) {
+							logger.error(e.toString());
+							result = new ResponseMessageDTO("FAILED", "Unexpected Error");
+							httpStatus = HttpStatus.BAD_REQUEST;
+							return new ResponseEntity<>(result, httpStatus);
+						} finally {
+							// insert new transaction with orderId and sign
+							if (dto.getTransType() != null && dto.getTransType().trim().equalsIgnoreCase("D")) {
+								bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
+							}
+							IAccountBankQR accountBankQR = accountBankReceiveService.getAccountBankQR(dto.getBankAccount(), bankTypeId);
+							if (accountBankQR != null) {
+								VietQRCreateDTO vietQRCreateDTO = new VietQRCreateDTO();
+								vietQRCreateDTO.setBankId(accountBankQR.getId());
+								vietQRCreateDTO.setAmount(dto.getAmount() + "");
+								vietQRCreateDTO.setContent(dto.getContent());
+								vietQRCreateDTO.setUserId(accountBankQR.getUserId());
+								vietQRCreateDTO.setTerminalCode(dto.getTerminalCode());
+								vietQRCreateDTO.setServiceCode(serviceCode);
+
+								if (dto.getTransType() != null && dto.getTransType().trim().equalsIgnoreCase("D")) {
+									vietQRCreateDTO.setTransType("D");
+									vietQRCreateDTO.setCustomerBankAccount(dto.getCustomerBankAccount());
+									vietQRCreateDTO.setCustomerBankCode(dto.getCustomerBankCode());
+									vietQRCreateDTO.setCustomerName(dto.getCustomerName());
+								} else {
+									vietQRCreateDTO.setTransType("C");
+								}
+								if (dto.getUrlLink() != null && !dto.getUrlLink().trim().isEmpty()) {
+									vietQRCreateDTO.setUrlLink(dto.getUrlLink());
+								} else {
+									vietQRCreateDTO.setUrlLink("");
+								}
+								VietQRDTO finalVietQRDTO = vietQRDTO;
+
+								Thread thread1 = new Thread(()->
+										insertNewTransaction(transactionUUID, traceId, vietQRCreateDTO, finalVietQRDTO, dto.getOrderId(),
+												dto.getSign(), true)
+								);
+								thread1.start();
+							}
+							Thread thread2 = new Thread(()-> logUserInfo(token));
+							thread2.start();
+						}
+					} else {
+						// Luồng 2
+						LocalDateTime requestLDT = LocalDateTime.now();
+						logger.info("generateVietQRMMS: start generate at: " + requestLDT.toEpochSecond(ZoneOffset.UTC));
+						String bankTypeMB = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
+						AccountBankReceiveEntity accountBankEntity = null;
+						String qrCode = "";
+						try {
+							// 1. Validate input (amount, content, bankCode) => E34 if Invalid input data
+							if (checkRequestBodyFlow2(dto)) {
+								// 2. Find terminal bank by bank_account_raw_number
+								accountBankEntity = accountBankReceiveService
+										.getAccountBankByBankAccountAndBankTypeId(dto.getBankAccount(), bankTypeMB);
+								if (accountBankEntity != null) {
+									String terminalId = terminalBankService
+											.getTerminalBankQRByBankAccount(dto.getBankAccount());
+									if (terminalId == null) {
+										// 3.A. If not found => E35 (terminal is not existed)
+										logger.error("generateVietQRMMS: ERROR: Bank account is not existed.");
+										result = new ResponseMessageDTO("FAILED", "E35");
+										httpStatus = HttpStatus.BAD_REQUEST;
+									} else {
+										// 3.B. If found => get bank token => create qr code
+										TokenProductBankDTO tokenBankDTO = MBTokenUtil.getMBBankToken();
+										if (tokenBankDTO != null) {
+											String content = "";
+											if (dto.getContent() != null && !dto.getContent().trim().isEmpty()) {
+												content = dto.getContent();
+											} else {
+												content = "VQR" + RandomCodeUtil.generateRandomUUID();
+											}
+											if (accountBankEntity.getBankAccount().equals("4144898989")) {
+												content = !StringUtil.isNullOrEmpty(dto.getContent()) ?
+														(dto.getContent() + " " + "Ghe Massage AeonBT")
+														: "Ghe Massage AeonBT" ;
+											}
+											VietQRMMSRequestDTO requestDTO = new VietQRMMSRequestDTO();
+											requestDTO.setToken(tokenBankDTO.getAccess_token());
+											requestDTO.setTerminalId(terminalId);
+											requestDTO.setAmount(dto.getAmount() + "");
+											requestDTO.setContent(content);
+											requestDTO.setOrderId(dto.getOrderId());
+											ResponseMessageDTO responseMessageDTO = requestVietQRMMS(requestDTO);
+											if (Objects.nonNull(responseMessageDTO)
+													&& "SUCCESS".equals(responseMessageDTO.getStatus())) {
+												qrCode = responseMessageDTO.getMessage();
+												qrMMS = qrCode;
+												// "MB Bank"
+												String bankTypeId = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
+												if (bankTypeId != null && !bankTypeId.trim().isEmpty()) {
+													vietQRDTO = new VietQRDTO();
+													// get cai value
+													IBankTypeQR bankTypeEntity = bankTypeService.getBankTypeQRById(bankTypeId);
+													String bankAccount = "";
+													String userBankName = "";
+													bankAccount = dto.getBankAccount();
+													userBankName = dto.getUserBankName().trim().toUpperCase();
+													// generate VietQRDTO
+													vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
+													vietQRDTO.setBankName(bankTypeEntity.getBankName());
+													vietQRDTO.setBankAccount(bankAccount);
+													vietQRDTO.setUserBankName(userBankName);
+													vietQRDTO.setAmount(dto.getAmount() + "");
+													vietQRDTO.setContent(content);
+													vietQRDTO.setQrCode(qrCode);
+													vietQRDTO.setImgId(bankTypeEntity.getImgId());
+													vietQRDTO.setExisting(1);
+													vietQRDTO.setTransactionId("");
+													vietQRDTO.setTerminalCode(dto.getTerminalCode());
+													String refId = TransactionRefIdUtil
+															.encryptTransactionId(transactionUUID.toString());
+													vietQRDTO.setTransactionRefId(refId);
+													vietQRDTO.setQrLink(EnvironmentUtil.getQRLink() + refId);
+													vietQRDTO.setOrderId(dto.getOrderId());
+													vietQRDTO.setAdditionalData(new ArrayList<>());
+													if (dto.getAdditionalData() != null && !dto.getAdditionalData().isEmpty()) {
+														vietQRDTO.setAdditionalData(dto.getAdditionalData());
+													}
+													vietQRDTO.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
+													vietQRDTO.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
+													result = vietQRDTO;
+													httpStatus = HttpStatus.OK;
+												} else {
+													result = new ResponseMessageDTO("FAILED", "E24");
+													httpStatus = HttpStatus.BAD_REQUEST;
+												}
+											} else {
+												logger.error("generateVietQRMMS: ERROR: Invalid get QR Code");
+												if (responseMessageDTO != null) {
+													result = new ResponseMessageDTO("FAILED", responseMessageDTO.getMessage());
+												} else {
+													result = new ResponseMessageDTO("FAILED", "E05");
+												}
+												httpStatus = HttpStatus.BAD_REQUEST;
+											}
+										} else {
+											logger.error("generateVietQRMMS: ERROR: Invalid get bank token");
+											result = new ResponseMessageDTO("FAILED", "E05");
+											httpStatus = HttpStatus.BAD_REQUEST;
+										}
+									}
+								} else {
+									logger.error("generateVietQRMMS: ERROR: bankAccount is not existed in system");
+									result = new ResponseMessageDTO("FAILED", "E36");
+									httpStatus = HttpStatus.BAD_REQUEST;
+
+								}
+							} else {
+								logger.error("generateVietQRMMS: ERROR: Invalid request body");
+								result = new ResponseMessageDTO("FAILED", "E34");
+								httpStatus = HttpStatus.BAD_REQUEST;
+							}
+						} catch (Exception e) {
+							logger.error("generateVietQRMMS: ERROR: " + e.toString());
+							result = new ResponseMessageDTO("FAILED", "E05");
+							httpStatus = HttpStatus.BAD_REQUEST;
+						} finally {
+							// 4. Insert transaction_receive
+							// (5. Insert notification)
+							if (accountBankEntity != null && qrCode != null && !qrCode.isEmpty()) {
+								String content = "";
+								if (dto.getContent() != null && !dto.getContent().trim().isEmpty()) {
+									content = dto.getContent();
+								} else {
+									content = "VQR" + RandomCodeUtil.generateRandomUUID();
+								}
+
+								if (accountBankEntity.getBankAccount().equals("4144898989")) {
+									content = !StringUtil.isNullOrEmpty(dto.getContent()) ?
+											(dto.getContent() + " " + "Ghe Massage AeonBT")
+											: "Ghe Massage AeonBT" ;
+								}
+
+								LocalDateTime currentDateTime = LocalDateTime.now();
+								long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+								VietQRMMSCreateDTO vietQRMMSCreateDTO = new VietQRMMSCreateDTO();
+								vietQRMMSCreateDTO.setBankAccount(dto.getBankAccount());
+								vietQRMMSCreateDTO.setBankCode(dto.getBankCode());
+								vietQRMMSCreateDTO.setAmount(dto.getAmount() + "");
+								vietQRMMSCreateDTO.setContent(content);
+								vietQRMMSCreateDTO.setOrderId(dto.getOrderId());
+								vietQRMMSCreateDTO.setSign(dto.getSign());
+								vietQRMMSCreateDTO.setTerminalCode(dto.getTerminalCode());
+								vietQRMMSCreateDTO.setNote(dto.getNote());
+								vietQRMMSCreateDTO.setServiceCode(serviceCode);
+								vietQRMMSCreateDTO.setSubTerminalCode(dto.getSubTerminalCode());
+								if (dto.getUrlLink() != null && !dto.getUrlLink().trim().isEmpty()) {
+									vietQRMMSCreateDTO.setUrlLink(dto.getUrlLink());
+								} else {
+									vietQRMMSCreateDTO.setUrlLink("");
+								}
+								String finalQrMMS = qrMMS;
+								AccountBankReceiveEntity finalAccountBankEntity = accountBankEntity;
+								Thread thread3 = new Thread(()->
+										insertNewTransactionFlow2(finalQrMMS, transactionUUID.toString(), finalAccountBankEntity, vietQRMMSCreateDTO, time)
+								);
+								thread3.start();
+							}
+						}
+					}
+					break;
+				case "BIDV":
+//					String traceBIDVId = "VQR" + RandomCodeUtil.generateRandomUUID();
+					String qr = "";
+					String billId = "";
+					String content = dto.getContent();
+					BankCaiTypeDTO bankCaiTypeDTOBIDV = null;
+					AccountBankGenerateBIDVDTO accountBankBIDV = null;
+					if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
+						bankCaiTypeDTOBIDV = bankTypeService.getBankCaiByBankCode(dto.getBankCode());
+					} else {
+						bankCaiTypeDTOBIDV = bankTypeService.getBankCaiByBankCode(dto.getCustomerBankCode());
+					}
 					vietQRDTO = new VietQRDTO();
 					try {
 						if (dto.getContent().length() <= 50) {
@@ -532,80 +852,153 @@ public class VietQRController {
 							// if D => generate with customer information
 							// if C => do normal
 							// find bankTypeId by bankcode
-							if (bankTypeId != null && !bankTypeId.isEmpty()) {
-								// get cai value
-								ICaiBankTypeQR caiBankTypeQR = bankTypeService.getCaiBankTypeById(bankTypeId);
+							if (Objects.nonNull(bankCaiTypeDTOBIDV)) {
 								// find bank by bankAccount and banktypeId
-								IAccountBankInfoQR accountBankEntity = null;
-								if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
-									accountBankEntity = accountBankReceiveService
-											.getAccountBankQRByAccountAndId(dto.getBankAccount(), bankTypeId);
-								} else {
-									accountBankEntity = accountBankReceiveService
-                                            .getAccountBankQRByAccountAndId(dto.getCustomerBankAccount(), bankTypeId);
-								}
-								if (accountBankEntity != null) {
-									String content = dto.getContent();
-									if (dto.getReconciliation() == null || dto.getReconciliation()) {
-										content = traceId + " " + dto.getContent();
-									}
-									// generate VietQRGenerateDTO
-									VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
-									vietQRGenerateDTO.setCaiValue(caiBankTypeQR.getCaiValue());
-									vietQRGenerateDTO.setAmount(dto.getAmount() + "");
-									vietQRGenerateDTO.setContent(content);
-									vietQRGenerateDTO.setBankAccount(accountBankEntity.getBankAccount());
-									// generate VietQRDTO
-									String refId = TransactionRefIdUtil.encryptTransactionId(transactionUUID.toString());
-									vietQRDTO.setBankCode(caiBankTypeQR.getBankCode());
-									vietQRDTO.setBankName(caiBankTypeQR.getBankName());
-									vietQRDTO.setBankAccount(accountBankEntity.getBankAccount());
-									vietQRDTO.setUserBankName(accountBankEntity.getBankAccountName().toUpperCase());
-									vietQRDTO.setAmount(dto.getAmount() + "");
-									vietQRDTO.setContent(content);
-									vietQRDTO.setQrCode(VietQRUtil.generateTransactionQR(vietQRGenerateDTO));
-									vietQRDTO.setImgId(caiBankTypeQR.getImgId());
-									vietQRDTO.setExisting(1);
-									vietQRDTO.setTransactionId("");
-									vietQRDTO.setTerminalCode(dto.getTerminalCode());
-									vietQRDTO.setTransactionRefId(refId);
-									vietQRDTO.setQrLink(EnvironmentUtil.getQRLink() + refId);
-									vietQRDTO.setOrderId(dto.getOrderId());
-									vietQRDTO.setAdditionalData(new ArrayList<>());
-									vietQRDTO.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
-									vietQRDTO.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
 
-									result = vietQRDTO;
-									httpStatus = HttpStatus.OK;
+								if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
+									accountBankBIDV = accountBankReceiveService
+											.getAccountBankBIDVByBankAccountAndBankTypeId(dto.getBankAccount(),
+													bankCaiTypeDTOBIDV.getId());
 								} else {
-									String bankAccount = dto.getCustomerBankAccount();
-									String userBankName = dto.getCustomerName().trim().toUpperCase();
-									String content = dto.getContent();
+									accountBankBIDV = accountBankReceiveService
+											.getAccountBankBIDVByBankAccountAndBankTypeId(dto.getCustomerBankAccount(),
+													bankCaiTypeDTOBIDV.getId());
+								}
+								if (Objects.nonNull(accountBankBIDV)) {
+									// get cai value
+									billId = getRandomBillId();
+									content = billId + " " + StringUtil.getValueNullChecker(dto.getContent());
+									// generate qr BIDV
+									VietQRCreateDTO vietQRCreateDTO = new VietQRCreateDTO();
+									vietQRCreateDTO.setBankId(accountBankBIDV.getId());
+									vietQRCreateDTO.setAmount(dto.getAmount() + "");
+									vietQRCreateDTO.setContent(content);
+									vietQRCreateDTO.setUserId(accountBankBIDV.getUserId());
+									vietQRCreateDTO.setTerminalCode(dto.getTerminalCode());
+									//
+									if (dto.getTransType() != null && dto.getTransType().trim().equalsIgnoreCase("D")) {
+										vietQRCreateDTO.setTransType("D");
+										vietQRCreateDTO.setCustomerBankAccount(dto.getCustomerBankAccount());
+										vietQRCreateDTO.setCustomerBankCode(dto.getCustomerBankCode());
+										vietQRCreateDTO.setCustomerName(dto.getCustomerName());
+									} else {
+										vietQRCreateDTO.setTransType("C");
+									}
+									if (dto.getUrlLink() != null && !dto.getUrlLink().trim().isEmpty()) {
+										vietQRCreateDTO.setUrlLink(dto.getUrlLink());
+									} else {
+										vietQRCreateDTO.setUrlLink("");
+									}
+									ResponseMessageDTO responseMessageDTO =
+											insertNewCustomerInvoiceTransBIDV(vietQRCreateDTO, accountBankBIDV, billId);
+
+									// insert success transaction_receive
+									if ("SUCCESS".equals(responseMessageDTO.getStatus())) {
+										VietQRVaRequestDTO vietQRVaRequestDTO = new VietQRVaRequestDTO();
+										if ("0".equals(dto.getAmount())) {
+											vietQRVaRequestDTO.setAmount("");
+										} else {
+											vietQRVaRequestDTO.setAmount(dto.getAmount() + "");
+										}
+										vietQRVaRequestDTO.setAmount(dto.getAmount() + "");
+										vietQRVaRequestDTO.setBillId(billId);
+										vietQRVaRequestDTO.setUserBankName(accountBankBIDV.getBankAccountName());
+										vietQRVaRequestDTO.setDescription(StringUtil.getValueNullChecker(content));
+
+										ResponseMessageDTO generateVaInvoiceVietQR = new ResponseMessageDTO("SUCCESS", "");
+										if (!EnvironmentUtil.isProduction()) {
+											String bankAccountRequest= "";
+											if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
+												bankAccountRequest = dto.getBankAccount();
+											} else {
+												bankAccountRequest = dto.getCustomerBankAccount();
+											}
+											VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+											vietQRGenerateDTO.setCaiValue(bankCaiTypeDTOBIDV.getCaiValue());
+											vietQRGenerateDTO.setAmount(dto.getAmount() + "");
+											vietQRGenerateDTO.setContent(content);
+											vietQRGenerateDTO.setBankAccount(bankAccountRequest);
+											qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+											generateVaInvoiceVietQR = new ResponseMessageDTO("SUCCESS", qr);
+										} else {
+											if ("0".equals(dto.getAmount())) {
+												vietQRVaRequestDTO.setAmount("");
+											} else {
+												vietQRVaRequestDTO.setAmount(dto.getAmount() + "");
+											}
+											generateVaInvoiceVietQR = CustomerVaUtil.generateVaInvoiceVietQR(vietQRVaRequestDTO, accountBankBIDV.getCustomerId());
+										}
+										if ("SUCCESS".equals(generateVaInvoiceVietQR.getStatus())) {
+											qr = generateVaInvoiceVietQR.getMessage();
+
+											// generate VietQRDTO
+											vietQRDTO.setBankCode(bankCaiTypeDTOBIDV.getBankCode());
+											vietQRDTO.setBankName(bankCaiTypeDTOBIDV.getBankName());
+											vietQRDTO.setBankAccount(accountBankBIDV.getBankAccount());
+											vietQRDTO.setUserBankName(accountBankBIDV.getBankAccountName().toUpperCase());
+											vietQRDTO.setAmount(dto.getAmount() + "");
+											vietQRDTO.setContent(content);
+											vietQRDTO.setQrCode(qr);
+											vietQRDTO.setImgId(bankCaiTypeDTOBIDV.getImgId());
+											vietQRDTO.setExisting(1);
+											vietQRDTO.setTransactionId("");
+											vietQRDTO.setTerminalCode(dto.getTerminalCode());
+											String refId = TransactionRefIdUtil.encryptTransactionId(transactionUUID.toString());
+											String qrLink = EnvironmentUtil.getQRLink() + refId;
+											vietQRDTO.setTransactionRefId(refId);
+											vietQRDTO.setQrLink(qrLink);
+											vietQRDTO.setOrderId(dto.getOrderId());
+											vietQRDTO.setAdditionalData(new ArrayList<>());
+											if (dto.getAdditionalData() != null && !dto.getAdditionalData().isEmpty()) {
+												vietQRDTO.setAdditionalData(dto.getAdditionalData());
+											}
+											vietQRDTO.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
+											vietQRDTO.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
+											//
+											result = vietQRDTO;
+											httpStatus = HttpStatus.OK;
+										} else {
+											result = new ResponseMessageDTO("FAILED", "E05");
+											httpStatus = HttpStatus.BAD_REQUEST;
+										}
+									} else {
+										httpStatus = HttpStatus.BAD_REQUEST;
+									}
+								} else {
+									String bankAccount = "";
+									String userBankName = "";
+									content = "";
 									if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
 										bankAccount = dto.getBankAccount();
 										userBankName = dto.getUserBankName().trim().toUpperCase();
+									} else {
+										bankAccount = dto.getCustomerBankAccount();
+										userBankName = dto.getCustomerName().trim().toUpperCase();
 									}
 									// generate VietQRGenerateDTO
 									VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
-									vietQRGenerateDTO.setCaiValue(caiBankTypeQR.getCaiValue());
+									vietQRGenerateDTO.setCaiValue(bankCaiTypeDTOBIDV.getCaiValue());
 									vietQRGenerateDTO.setAmount(dto.getAmount() + "");
-									if (dto.getReconciliation() == null || dto.getReconciliation()) {
-										content = traceId + " " + dto.getContent();
-									}
+									content = billId + " " + dto.getContent();
 									vietQRGenerateDTO.setContent(content);
 									vietQRGenerateDTO.setBankAccount(bankAccount);
+									qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+									//
 									// generate VietQRDTO
-									vietQRDTO.setBankCode(caiBankTypeQR.getBankCode());
-									vietQRDTO.setBankName(caiBankTypeQR.getBankName());
+									vietQRDTO.setBankCode(bankCaiTypeDTOBIDV.getBankCode());
+									vietQRDTO.setBankName(bankCaiTypeDTOBIDV.getBankName());
 									vietQRDTO.setBankAccount(bankAccount);
 									vietQRDTO.setUserBankName(userBankName);
 									vietQRDTO.setAmount(dto.getAmount() + "");
 									vietQRDTO.setContent(content);
-									vietQRDTO.setQrCode(VietQRUtil.generateTransactionQR(vietQRGenerateDTO));
-									vietQRDTO.setImgId(caiBankTypeQR.getImgId());
-									vietQRDTO.setExisting(1);
-									vietQRDTO.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
+									vietQRDTO.setQrCode(qr);
+									vietQRDTO.setImgId(bankCaiTypeDTOBIDV.getImgId());
+									vietQRDTO.setExisting(0);
+									vietQRDTO.setOrderId(dto.getOrderId());
 									vietQRDTO.setAdditionalData(new ArrayList<>());
+									if (dto.getAdditionalData() != null && !dto.getAdditionalData().isEmpty()) {
+										vietQRDTO.setAdditionalData(dto.getAdditionalData());
+									}
 									vietQRDTO.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
 									vietQRDTO.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
 									result = vietQRDTO;
@@ -620,474 +1013,163 @@ public class VietQRController {
 							httpStatus = HttpStatus.BAD_REQUEST;
 						}
 						return new ResponseEntity<>(result, httpStatus);
-						//
 					} catch (Exception e) {
 						logger.error(e.toString());
+						System.out.println(e.toString());
 						result = new ResponseMessageDTO("FAILED", "Unexpected Error");
 						httpStatus = HttpStatus.BAD_REQUEST;
-						return new ResponseEntity<>(result, httpStatus);
 					} finally {
-						// insert new transaction with orderId and sign
-						if (dto.getTransType() != null && dto.getTransType().trim().equalsIgnoreCase("D")) {
-							bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
+						if (Objects.nonNull(accountBankBIDV) && !StringUtil.isNullOrEmpty(qr)) {
+							VietQRBIDVCreateDTO dto1 = new VietQRBIDVCreateDTO();
+							dto1.setContent(content);
+							dto1.setAmount(dto.getAmount() + "");
+							dto1.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
+							dto1.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
+							dto1.setNote(StringUtil.getValueNullChecker(dto.getNote()));
+							dto1.setUrlLink(StringUtil.getValueNullChecker(dto.getUrlLink()));
+							dto1.setTransType(StringUtil.getValueNullChecker(dto.getTransType()));
+							dto1.setSign(StringUtil.getValueNullChecker(dto.getSign()));
+							dto1.setBillId(billId);
+							dto1.setCustomerBankAccount(StringUtil.getValueNullChecker(dto.getCustomerBankAccount()));
+							dto1.setCustomerBankCode(StringUtil.getValueNullChecker(dto.getCustomerBankCode()));
+							dto1.setCustomerName(StringUtil.getValueNullChecker(dto.getCustomerName()));
+							dto1.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
+							dto1.setQr(qr);
+							AccountBankGenerateBIDVDTO finalAccountBankBIDV = accountBankBIDV;
+							Thread thread = new Thread(() -> {
+								insertNewTransactionBIDV(transactionUUID, dto1, false, "",
+										finalAccountBankBIDV);
+							});
+							thread.start();
 						}
-                        IAccountBankQR accountBankQR = accountBankReceiveService.getAccountBankQR(dto.getBankAccount(), bankTypeId);
-						if (accountBankQR != null) {
-							VietQRCreateDTO vietQRCreateDTO = new VietQRCreateDTO();
-							vietQRCreateDTO.setBankId(accountBankQR.getId());
-							vietQRCreateDTO.setAmount(dto.getAmount() + "");
-							vietQRCreateDTO.setContent(dto.getContent());
-							vietQRCreateDTO.setUserId(accountBankQR.getUserId());
-							vietQRCreateDTO.setTerminalCode(dto.getTerminalCode());
-							vietQRCreateDTO.setServiceCode(serviceCode);
-
-							if (dto.getTransType() != null && dto.getTransType().trim().equalsIgnoreCase("D")) {
-								vietQRCreateDTO.setTransType("D");
-								vietQRCreateDTO.setCustomerBankAccount(dto.getCustomerBankAccount());
-								vietQRCreateDTO.setCustomerBankCode(dto.getCustomerBankCode());
-								vietQRCreateDTO.setCustomerName(dto.getCustomerName());
-							} else {
-								vietQRCreateDTO.setTransType("C");
-							}
-							if (dto.getUrlLink() != null && !dto.getUrlLink().trim().isEmpty()) {
-								vietQRCreateDTO.setUrlLink(dto.getUrlLink());
-							} else {
-								vietQRCreateDTO.setUrlLink("");
-							}
-							VietQRDTO finalVietQRDTO = vietQRDTO;
-
-							Thread thread1 = new Thread(()->
-								insertNewTransaction(transactionUUID, traceId, vietQRCreateDTO, finalVietQRDTO, dto.getOrderId(),
-									dto.getSign(), true)
-							);
-							thread1.start();
-						}
-                        Thread thread2 = new Thread(()-> logUserInfo(token));
-						thread2.start();
 					}
-				} else {
-					// Luồng 2
-					LocalDateTime requestLDT = LocalDateTime.now();
-					logger.info("generateVietQRMMS: start generate at: " + requestLDT.toEpochSecond(ZoneOffset.UTC));
-					String bankTypeMB = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
-					AccountBankReceiveEntity accountBankEntity = null;
-					String qrCode = "";
+					break;
+				default:
+					String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
+					BankCaiTypeDTO bankCaiTypeDTO = null;
+					if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
+						bankCaiTypeDTO = bankTypeService.getBankCaiByBankCode(dto.getBankCode());
+					} else {
+						bankCaiTypeDTO = bankTypeService.getBankCaiByBankCode(dto.getCustomerBankCode());
+					}
 					try {
-						// 1. Validate input (amount, content, bankCode) => E34 if Invalid input data
-						if (checkRequestBodyFlow2(dto)) {
-							// 2. Find terminal bank by bank_account_raw_number
-							accountBankEntity = accountBankReceiveService
-									.getAccountBankByBankAccountAndBankTypeId(dto.getBankAccount(), bankTypeMB);
-							if (accountBankEntity != null) {
-								String terminalId = terminalBankService
-										.getTerminalBankQRByBankAccount(dto.getBankAccount());
-								if (terminalId == null) {
-									// 3.A. If not found => E35 (terminal is not existed)
-									logger.error("generateVietQRMMS: ERROR: Bank account is not existed.");
-									result = new ResponseMessageDTO("FAILED", "E35");
-									httpStatus = HttpStatus.BAD_REQUEST;
-								} else {
-									// 3.B. If found => get bank token => create qr code
-									TokenProductBankDTO tokenBankDTO = MBTokenUtil.getMBBankToken();
-									if (tokenBankDTO != null) {
-										String content = "";
-										if (dto.getContent() != null && !dto.getContent().trim().isEmpty()) {
-											content = dto.getContent();
-										} else {
-                                            content = "VQR" + RandomCodeUtil.generateRandomUUID();
-										}
-										if (accountBankEntity.getBankAccount().equals("4144898989")) {
-											content = !StringUtil.isNullOrEmpty(dto.getContent()) ?
-													(dto.getContent() + " " + "Ghe Massage AeonBT")
-													: "Ghe Massage AeonBT" ;
-										}
-										VietQRMMSRequestDTO requestDTO = new VietQRMMSRequestDTO();
-										requestDTO.setToken(tokenBankDTO.getAccess_token());
-										requestDTO.setTerminalId(terminalId);
-										requestDTO.setAmount(dto.getAmount() + "");
-										requestDTO.setContent(content);
-										requestDTO.setOrderId(dto.getOrderId());
-										ResponseMessageDTO responseMessageDTO = requestVietQRMMS(requestDTO);
-										if (Objects.nonNull(responseMessageDTO)
-												&& "SUCCESS".equals(responseMessageDTO.getStatus())) {
-											qrCode = responseMessageDTO.getMessage();
-											qrMMS = qrCode;
-											// "MB Bank"
-											String bankTypeId = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
-											if (bankTypeId != null && !bankTypeId.trim().isEmpty()) {
-												vietQRDTO = new VietQRDTO();
-												// get cai value
-												IBankTypeQR bankTypeEntity = bankTypeService.getBankTypeQRById(bankTypeId);
-												String bankAccount = "";
-												String userBankName = "";
-												bankAccount = dto.getBankAccount();
-												userBankName = dto.getUserBankName().trim().toUpperCase();
-												// generate VietQRDTO
-												vietQRDTO.setBankCode(bankTypeEntity.getBankCode());
-												vietQRDTO.setBankName(bankTypeEntity.getBankName());
-												vietQRDTO.setBankAccount(bankAccount);
-												vietQRDTO.setUserBankName(userBankName);
-												vietQRDTO.setAmount(dto.getAmount() + "");
-												vietQRDTO.setContent(content);
-												vietQRDTO.setQrCode(qrCode);
-												vietQRDTO.setImgId(bankTypeEntity.getImgId());
-												vietQRDTO.setExisting(1);
-												vietQRDTO.setTransactionId("");
-												vietQRDTO.setTerminalCode(dto.getTerminalCode());
-												String refId = TransactionRefIdUtil
-														.encryptTransactionId(transactionUUID.toString());
-												vietQRDTO.setTransactionRefId(refId);
-												vietQRDTO.setQrLink(EnvironmentUtil.getQRLink() + refId);
-												vietQRDTO.setOrderId(dto.getOrderId());
-												vietQRDTO.setAdditionalData(new ArrayList<>());
-												vietQRDTO.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
-												vietQRDTO.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
-												result = vietQRDTO;
-												httpStatus = HttpStatus.OK;
-											} else {
-												result = new ResponseMessageDTO("FAILED", "E24");
-												httpStatus = HttpStatus.BAD_REQUEST;
-											}
-										} else {
-											logger.error("generateVietQRMMS: ERROR: Invalid get QR Code");
-											if (responseMessageDTO != null) {
-												result = new ResponseMessageDTO("FAILED", responseMessageDTO.getMessage());
-											} else {
-												result = new ResponseMessageDTO("FAILED", "E05");
-											}
-                                            httpStatus = HttpStatus.BAD_REQUEST;
-										}
-									} else {
-										logger.error("generateVietQRMMS: ERROR: Invalid get bank token");
-										result = new ResponseMessageDTO("FAILED", "E05");
-										httpStatus = HttpStatus.BAD_REQUEST;
-									}
-								}
-							} else {
-								logger.error("generateVietQRMMS: ERROR: bankAccount is not existed in system");
-								result = new ResponseMessageDTO("FAILED", "E36");
-								httpStatus = HttpStatus.BAD_REQUEST;
-
-							}
+						String bankAccount = "";
+						String userBankName = "";
+						content = "";
+						if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
+							bankAccount = dto.getBankAccount();
+							userBankName = dto.getUserBankName().trim().toUpperCase();
 						} else {
-							logger.error("generateVietQRMMS: ERROR: Invalid request body");
-							result = new ResponseMessageDTO("FAILED", "E34");
+							bankAccount = dto.getCustomerBankAccount();
+							userBankName = dto.getCustomerName().trim().toUpperCase();
+						}
+						if (dto.getContent().length() <= 50) {
+							// generate VietQRGenerateDTO
+							VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+							vietQRGenerateDTO.setCaiValue(bankCaiTypeDTO.getCaiValue());
+							vietQRGenerateDTO.setAmount(dto.getAmount() + "");
+							if (dto.getReconciliation() == null || dto.getReconciliation()) {
+								content = traceId + " " + dto.getContent();
+							} else {
+								content = dto.getContent();
+							}
+							vietQRGenerateDTO.setContent(content);
+							vietQRGenerateDTO.setBankAccount(bankAccount);
+							qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+							//
+							vietQRDTO = new VietQRDTO();
+							// generate VietQRDTO
+							vietQRDTO.setBankCode(bankCaiTypeDTO.getBankCode());
+							vietQRDTO.setBankName(bankCaiTypeDTO.getBankName());
+							vietQRDTO.setBankAccount(bankAccount);
+							vietQRDTO.setUserBankName(userBankName);
+							vietQRDTO.setAmount(dto.getAmount() + "");
+							vietQRDTO.setContent(content);
+							vietQRDTO.setQrCode(qr);
+							vietQRDTO.setImgId(bankCaiTypeDTO.getImgId());
+							vietQRDTO.setExisting(0);
+							vietQRDTO.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
+							vietQRDTO.setAdditionalData(new ArrayList<>());
+							if (dto.getAdditionalData() != null && !dto.getAdditionalData().isEmpty()) {
+								vietQRDTO.setAdditionalData(dto.getAdditionalData());
+							}
+							vietQRDTO.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
+							vietQRDTO.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
+							result = vietQRDTO;
+							httpStatus = HttpStatus.OK;
+						} else {
+							result = new ResponseMessageDTO("FAILED", "E26");
 							httpStatus = HttpStatus.BAD_REQUEST;
 						}
 					} catch (Exception e) {
-						logger.error("generateVietQRMMS: ERROR: " + e.toString());
-						result = new ResponseMessageDTO("FAILED", "E05");
 						httpStatus = HttpStatus.BAD_REQUEST;
-					} finally {
-						// 4. Insert transaction_receive
-						// (5. Insert notification)
-						if (accountBankEntity != null && qrCode != null && !qrCode.isEmpty()) {
-							String content = "";
-							if (dto.getContent() != null && !dto.getContent().trim().isEmpty()) {
-								content = dto.getContent();
-							} else {
-                                content = "VQR" + RandomCodeUtil.generateRandomUUID();
-							}
-
-							if (accountBankEntity.getBankAccount().equals("4144898989")) {
-								content = !StringUtil.isNullOrEmpty(dto.getContent()) ?
-										(dto.getContent() + " " + "Ghe Massage AeonBT")
-										: "Ghe Massage AeonBT" ;
-							}
-
-							LocalDateTime currentDateTime = LocalDateTime.now();
-							long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
-							VietQRMMSCreateDTO vietQRMMSCreateDTO = new VietQRMMSCreateDTO();
-							vietQRMMSCreateDTO.setBankAccount(dto.getBankAccount());
-							vietQRMMSCreateDTO.setBankCode(dto.getBankCode());
-							vietQRMMSCreateDTO.setAmount(dto.getAmount() + "");
-							vietQRMMSCreateDTO.setContent(content);
-							vietQRMMSCreateDTO.setOrderId(dto.getOrderId());
-							vietQRMMSCreateDTO.setSign(dto.getSign());
-							vietQRMMSCreateDTO.setTerminalCode(dto.getTerminalCode());
-							vietQRMMSCreateDTO.setNote(dto.getNote());
-							vietQRMMSCreateDTO.setServiceCode(serviceCode);
-							vietQRMMSCreateDTO.setSubTerminalCode(dto.getSubTerminalCode());
-							if (dto.getUrlLink() != null && !dto.getUrlLink().trim().isEmpty()) {
-								vietQRMMSCreateDTO.setUrlLink(dto.getUrlLink());
-							} else {
-								vietQRMMSCreateDTO.setUrlLink("");
-							}
-                            String finalQrMMS = qrMMS;
-                            AccountBankReceiveEntity finalAccountBankEntity = accountBankEntity;
-                            Thread thread3 = new Thread(()->
-								insertNewTransactionFlow2(finalQrMMS, transactionUUID.toString(), finalAccountBankEntity, vietQRMMSCreateDTO, time)
-                            );
-                            thread3.start();
-						}
+						logger.error("VietQRController: ERROR: generateQRCustomer: " + e.getMessage() + " at: " + System.currentTimeMillis());
 					}
-				}
-				break;
-			case "BIDV":
-				String traceBIDVId = "VQR" + RandomCodeUtil.generateRandomUUID();
-				String qr = "";
-				String billId = "";
-				BankCaiTypeDTO bankCaiTypeDTOBIDV = null;
-				AccountBankGenerateBIDVDTO accountBankBIDV = null;
+					break;
+			}
+		} else {
+			String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
+			BankCaiTypeDTO bankCaiTypeDTO = null;
+			if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
+				bankCaiTypeDTO = bankTypeService.getBankCaiByBankCode(dto.getBankCode());
+			} else {
+				bankCaiTypeDTO = bankTypeService.getBankCaiByBankCode(dto.getCustomerBankCode());
+			}
+			try {
+				String bankAccount = "";
+				String userBankName = "";
+				String content = "";
 				if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
-					bankCaiTypeDTOBIDV = bankTypeService.getBankCaiByBankCode(dto.getBankCode());
+					bankAccount = dto.getBankAccount();
+					userBankName = dto.getUserBankName().trim().toUpperCase();
 				} else {
-					bankCaiTypeDTOBIDV = bankTypeService.getBankCaiByBankCode(dto.getCustomerBankCode());
+					bankAccount = dto.getCustomerBankAccount();
+					userBankName = dto.getCustomerName().trim().toUpperCase();
 				}
-				vietQRDTO = new VietQRDTO();
-				try {
-					if (dto.getContent().length() <= 50) {
-						// check if generate qr with transtype = D or C
-						// if D => generate with customer information
-						// if C => do normal
-						// find bankTypeId by bankcode
-						if (Objects.nonNull(bankCaiTypeDTOBIDV)) {
-							// find bank by bankAccount and banktypeId
-
-							if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
-								accountBankBIDV = accountBankReceiveService
-										.getAccountBankBIDVByBankAccountAndBankTypeId(dto.getBankAccount(),
-												bankCaiTypeDTOBIDV.getId());
-							} else {
-								accountBankBIDV = accountBankReceiveService
-										.getAccountBankBIDVByBankAccountAndBankTypeId(dto.getCustomerBankAccount(),
-												bankCaiTypeDTOBIDV.getId());
-							}
-							if (Objects.nonNull(accountBankBIDV)) {
-								// get cai value
-								billId = getRandomBillId();
-								String content = billId;
-								// generate qr BIDV
-								VietQRCreateDTO vietQRCreateDTO = new VietQRCreateDTO();
-								vietQRCreateDTO.setBankId(accountBankBIDV.getId());
-								vietQRCreateDTO.setAmount(dto.getAmount() + "");
-								vietQRCreateDTO.setContent(billId);
-								vietQRCreateDTO.setUserId(accountBankBIDV.getUserId());
-								vietQRCreateDTO.setTerminalCode(dto.getTerminalCode());
-								//
-								if (dto.getTransType() != null && dto.getTransType().trim().equalsIgnoreCase("D")) {
-									vietQRCreateDTO.setTransType("D");
-									vietQRCreateDTO.setCustomerBankAccount(dto.getCustomerBankAccount());
-									vietQRCreateDTO.setCustomerBankCode(dto.getCustomerBankCode());
-									vietQRCreateDTO.setCustomerName(dto.getCustomerName());
-								} else {
-									vietQRCreateDTO.setTransType("C");
-								}
-								if (dto.getUrlLink() != null && !dto.getUrlLink().trim().isEmpty()) {
-									vietQRCreateDTO.setUrlLink(dto.getUrlLink());
-								} else {
-									vietQRCreateDTO.setUrlLink("");
-								}
-								ResponseMessageDTO responseMessageDTO =
-										insertNewCustomerInvoiceTransBIDV(vietQRCreateDTO, accountBankBIDV, billId);
-
-								// insert success transaction_receive
-								if ("SUCCESS".equals(responseMessageDTO.getStatus())) {
-									VietQRVaRequestDTO vietQRVaRequestDTO = new VietQRVaRequestDTO();
-									if ("0".equals(dto.getAmount())) {
-										vietQRVaRequestDTO.setAmount("");
-									} else {
-										vietQRVaRequestDTO.setAmount(dto.getAmount() + "");
-									}
-									vietQRVaRequestDTO.setAmount(dto.getAmount() + "");
-									vietQRVaRequestDTO.setBillId(billId);
-									vietQRVaRequestDTO.setUserBankName(accountBankBIDV.getBankAccountName());
-									vietQRVaRequestDTO.setDescription(StringUtil.getValueNullChecker(billId));
-
-									ResponseMessageDTO generateVaInvoiceVietQR = new ResponseMessageDTO("SUCCESS", "");
-									if (!EnvironmentUtil.isProduction()) {
-										String bankAccountRequest= "";
-										if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
-											bankAccountRequest = dto.getBankAccount();
-										} else {
-											bankAccountRequest = dto.getCustomerBankAccount();
-										}
-										VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
-										vietQRGenerateDTO.setCaiValue(bankCaiTypeDTOBIDV.getCaiValue());
-										vietQRGenerateDTO.setAmount(dto.getAmount() + "");
-										content = traceBIDVId + " " + billId;
-										vietQRGenerateDTO.setContent(content);
-										vietQRGenerateDTO.setBankAccount(bankAccountRequest);
-										qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
-										generateVaInvoiceVietQR = new ResponseMessageDTO("SUCCESS", qr);
-									} else {
-										if ("0".equals(dto.getAmount())) {
-											vietQRVaRequestDTO.setAmount("");
-										} else {
-											vietQRVaRequestDTO.setAmount(dto.getAmount() + "");
-										}
-										generateVaInvoiceVietQR = CustomerVaUtil.generateVaInvoiceVietQR(vietQRVaRequestDTO, accountBankBIDV.getCustomerId());
-									}
-									if ("SUCCESS".equals(generateVaInvoiceVietQR.getStatus())) {
-										qr = generateVaInvoiceVietQR.getMessage();
-
-										// generate VietQRDTO
-										vietQRDTO.setBankCode(bankCaiTypeDTOBIDV.getBankCode());
-										vietQRDTO.setBankName(bankCaiTypeDTOBIDV.getBankName());
-										vietQRDTO.setBankAccount(accountBankBIDV.getBankAccount());
-										vietQRDTO.setUserBankName(accountBankBIDV.getBankAccountName().toUpperCase());
-										vietQRDTO.setAmount(dto.getAmount() + "");
-										vietQRDTO.setContent(content);
-										vietQRDTO.setQrCode(qr);
-										vietQRDTO.setImgId(bankCaiTypeDTOBIDV.getImgId());
-										vietQRDTO.setExisting(1);
-										vietQRDTO.setTransactionId("");
-										vietQRDTO.setTerminalCode(dto.getTerminalCode());
-										String refId = TransactionRefIdUtil.encryptTransactionId(transactionUUID.toString());
-										String qrLink = EnvironmentUtil.getQRLink() + refId;
-										vietQRDTO.setTransactionRefId(refId);
-										vietQRDTO.setQrLink(qrLink);
-										vietQRDTO.setOrderId(dto.getOrderId());
-										vietQRDTO.setAdditionalData(new ArrayList<>());
-										vietQRDTO.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
-										vietQRDTO.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
-										//
-										result = vietQRDTO;
-										httpStatus = HttpStatus.OK;
-									} else {
-										result = new ResponseMessageDTO("FAILED", "E05");
-										httpStatus = HttpStatus.BAD_REQUEST;
-									}
-								} else {
-									httpStatus = HttpStatus.BAD_REQUEST;
-								}
-							} else {
-								String bankAccount = "";
-								String userBankName = "";
-								String content = "";
-								if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
-									bankAccount = dto.getBankAccount();
-									userBankName = dto.getUserBankName().trim().toUpperCase();
-								} else {
-									bankAccount = dto.getCustomerBankAccount();
-									userBankName = dto.getCustomerName().trim().toUpperCase();
-								}
-								// generate VietQRGenerateDTO
-								VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
-								vietQRGenerateDTO.setCaiValue(bankCaiTypeDTOBIDV.getCaiValue());
-								vietQRGenerateDTO.setAmount(dto.getAmount() + "");
-								content = billId;
-								vietQRGenerateDTO.setContent(content);
-								vietQRGenerateDTO.setBankAccount(bankAccount);
-								qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
-								//
-								// generate VietQRDTO
-								vietQRDTO.setBankCode(bankCaiTypeDTOBIDV.getBankCode());
-								vietQRDTO.setBankName(bankCaiTypeDTOBIDV.getBankName());
-								vietQRDTO.setBankAccount(bankAccount);
-								vietQRDTO.setUserBankName(userBankName);
-								vietQRDTO.setAmount(dto.getAmount() + "");
-								vietQRDTO.setContent(content);
-								vietQRDTO.setQrCode(qr);
-								vietQRDTO.setImgId(bankCaiTypeDTOBIDV.getImgId());
-								vietQRDTO.setExisting(0);
-								vietQRDTO.setOrderId(dto.getOrderId());
-								vietQRDTO.setAdditionalData(new ArrayList<>());
-								vietQRDTO.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
-								vietQRDTO.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
-								result = vietQRDTO;
-								httpStatus = HttpStatus.OK;
-							}
-						} else {
-							result = new ResponseMessageDTO("FAILED", "E24");
-							httpStatus = HttpStatus.BAD_REQUEST;
-						}
+				if (dto.getContent().length() <= 50) {
+					// generate VietQRGenerateDTO
+					VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
+					vietQRGenerateDTO.setCaiValue(bankCaiTypeDTO.getCaiValue());
+					vietQRGenerateDTO.setAmount(dto.getAmount() + "");
+					if (dto.getReconciliation() == null || dto.getReconciliation()) {
+						content = traceId + " " + dto.getContent();
 					} else {
-						result = new ResponseMessageDTO("FAILED", "E26");
-						httpStatus = HttpStatus.BAD_REQUEST;
+						content = dto.getContent();
 					}
-					return new ResponseEntity<>(result, httpStatus);
-				} catch (Exception e) {
-					logger.error(e.toString());
-					System.out.println(e.toString());
-					result = new ResponseMessageDTO("FAILED", "Unexpected Error");
-					httpStatus = HttpStatus.BAD_REQUEST;
-				} finally {
-					if (Objects.nonNull(accountBankBIDV) && !StringUtil.isNullOrEmpty(qr)) {
-						VietQRBIDVCreateDTO dto1 = new VietQRBIDVCreateDTO();
-						dto1.setContent(dto.getContent());
-						dto1.setAmount(dto.getAmount() + "");
-						dto1.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
-						dto1.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
-						dto1.setNote(StringUtil.getValueNullChecker(dto.getNote()));
-						dto1.setUrlLink(StringUtil.getValueNullChecker(dto.getUrlLink()));
-						dto1.setTransType(StringUtil.getValueNullChecker(dto.getTransType()));
-						dto1.setSign(StringUtil.getValueNullChecker(dto.getSign()));
-						dto1.setBillId(billId);
-						dto1.setCustomerBankAccount(StringUtil.getValueNullChecker(dto.getCustomerBankAccount()));
-						dto1.setCustomerBankCode(StringUtil.getValueNullChecker(dto.getCustomerBankCode()));
-						dto1.setCustomerName(StringUtil.getValueNullChecker(dto.getCustomerName()));
-						dto1.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
-						dto1.setQr(qr);
-						AccountBankGenerateBIDVDTO finalAccountBankBIDV = accountBankBIDV;
-						Thread thread = new Thread(() -> {
-							insertNewTransactionBIDV(transactionUUID, dto1, false, traceBIDVId,
-									finalAccountBankBIDV);
-						});
-						thread.start();
+					vietQRGenerateDTO.setContent(content);
+					vietQRGenerateDTO.setBankAccount(bankAccount);
+					String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
+					//
+					vietQRDTO = new VietQRDTO();
+					// generate VietQRDTO
+					vietQRDTO.setBankCode(bankCaiTypeDTO.getBankCode());
+					vietQRDTO.setBankName(bankCaiTypeDTO.getBankName());
+					vietQRDTO.setBankAccount(bankAccount);
+					vietQRDTO.setUserBankName(userBankName);
+					vietQRDTO.setAmount(dto.getAmount() + "");
+					vietQRDTO.setContent(content);
+					vietQRDTO.setQrCode(qr);
+					vietQRDTO.setImgId(bankCaiTypeDTO.getImgId());
+					vietQRDTO.setExisting(0);
+					vietQRDTO.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
+					vietQRDTO.setAdditionalData(new ArrayList<>());
+					if (dto.getAdditionalData() != null && !dto.getAdditionalData().isEmpty()) {
+						vietQRDTO.setAdditionalData(dto.getAdditionalData());
 					}
-				}
-				break;
-			default:
-				String traceId = "VQR" + RandomCodeUtil.generateRandomUUID();
-				BankCaiTypeDTO bankCaiTypeDTO = null;
-				if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
-					bankCaiTypeDTO = bankTypeService.getBankCaiByBankCode(dto.getBankCode());
+					vietQRDTO.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
+					vietQRDTO.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
+					result = vietQRDTO;
+					httpStatus = HttpStatus.OK;
 				} else {
-					bankCaiTypeDTO = bankTypeService.getBankCaiByBankCode(dto.getCustomerBankCode());
-				}
-				try {
-					String bankAccount = "";
-					String userBankName = "";
-					String content = "";
-					if (dto.getTransType() == null || dto.getTransType().trim().equalsIgnoreCase("C")) {
-						bankAccount = dto.getBankAccount();
-						userBankName = dto.getUserBankName().trim().toUpperCase();
-					} else {
-						bankAccount = dto.getCustomerBankAccount();
-						userBankName = dto.getCustomerName().trim().toUpperCase();
-					}
-					if (dto.getContent().length() <= 50) {
-						// generate VietQRGenerateDTO
-						VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
-						vietQRGenerateDTO.setCaiValue(bankCaiTypeDTO.getCaiValue());
-						vietQRGenerateDTO.setAmount(dto.getAmount() + "");
-						if (dto.getReconciliation() == null || dto.getReconciliation()) {
-							content = traceId + " " + dto.getContent();
-						} else {
-							content = dto.getContent();
-						}
-						vietQRGenerateDTO.setContent(content);
-						vietQRGenerateDTO.setBankAccount(bankAccount);
-						qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
-						//
-						vietQRDTO = new VietQRDTO();
-						// generate VietQRDTO
-						vietQRDTO.setBankCode(bankCaiTypeDTO.getBankCode());
-						vietQRDTO.setBankName(bankCaiTypeDTO.getBankName());
-						vietQRDTO.setBankAccount(bankAccount);
-						vietQRDTO.setUserBankName(userBankName);
-						vietQRDTO.setAmount(dto.getAmount() + "");
-						vietQRDTO.setContent(content);
-						vietQRDTO.setQrCode(qr);
-						vietQRDTO.setImgId(bankCaiTypeDTO.getImgId());
-						vietQRDTO.setExisting(0);
-						vietQRDTO.setOrderId(StringUtil.getValueNullChecker(dto.getOrderId()));
-						vietQRDTO.setAdditionalData(new ArrayList<>());
-						vietQRDTO.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
-						vietQRDTO.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
-						result = vietQRDTO;
-						httpStatus = HttpStatus.OK;
-					} else {
-						result = new ResponseMessageDTO("FAILED", "E26");
-						httpStatus = HttpStatus.BAD_REQUEST;
-					}
-				} catch (Exception e) {
+					result = new ResponseMessageDTO("FAILED", "E26");
 					httpStatus = HttpStatus.BAD_REQUEST;
-					logger.error("VietQRController: ERROR: generateQRCustomer: " + e.getMessage() + " at: " + System.currentTimeMillis());
 				}
-				break;
+			} catch (Exception e) {
+				httpStatus = HttpStatus.BAD_REQUEST;
+				logger.error("VietQRController: ERROR: generateQRCustomer: " + e.getMessage() + " at: " + System.currentTimeMillis());
+			}
 		}
+
 		if (Objects.nonNull(terminalBankReceiveEntity)) {
 			sendMessageDynamicQrToQrBox("",
 					terminalBankReceiveEntity.getRawTerminalCode() != null ?
@@ -1244,6 +1326,9 @@ public class VietQRController {
 									vietQRDTO.setServiceCode("");
 									vietQRDTO.setOrderId("");
 									vietQRDTO.setAdditionalData(new ArrayList<>());
+									if (dto.getAdditionalData() != null && !dto.getAdditionalData().isEmpty()) {
+										vietQRDTO.setAdditionalData(dto.getAdditionalData());
+									}
 									String qrLink = "";
 									vietQRDTO.setTransactionRefId("");
 									vietQRDTO.setQrLink(qrLink);
@@ -1530,7 +1615,7 @@ public class VietQRController {
 				if (!StringUtil.isNullOrEmpty(accountBankReceiveEntity.getCustomerId())) {
 					CustomerInvoiceEntity entity = new CustomerInvoiceEntity();
 					entity.setId(UUID.randomUUID().toString());
-					entity.setCustomerId(entity.getCustomerId());
+					entity.setCustomerId(accountBankReceiveEntity.getCustomerId());
 					try {
 						amount = Long.parseLong(dto.getAmount());
 					} catch (Exception e) {
@@ -2164,7 +2249,7 @@ public class VietQRController {
 											vietQRDTO.setContent(content);
 											vietQRDTO.setQrCode(qrCode);
 											vietQRDTO.setImgId(bankTypeEntity.getImgId());
-											vietQRDTO.setExisting(0);
+											vietQRDTO.setExisting(1);
 											vietQRDTO.setTransactionId("");
 											vietQRDTO.setTerminalCode(subRawCode);
 											String refId = TransactionRefIdUtil
@@ -2233,12 +2318,12 @@ public class VietQRController {
 					if ("BIDV".equals(bankTypeEntity.getBankCode()) && accountBankEntity.isAuthenticated()) {
 						String billId = "";
 						billId = getRandomBillId();
-						String content = billId;
+						String content = billId + " " + dto.getContent();
 						// generate qr BIDV
 						VietQRCreateDTO vietQRCreateDTO = new VietQRCreateDTO();
 						vietQRCreateDTO.setBankId(accountBankEntity.getId());
 						vietQRCreateDTO.setAmount(dto.getAmount() + "");
-						vietQRCreateDTO.setContent(billId);
+						vietQRCreateDTO.setContent(content);
 						vietQRCreateDTO.setUserId(accountBankEntity.getUserId());
 						vietQRCreateDTO.setTerminalCode(dto.getTerminalCode());
 						vietQRCreateDTO.setTransType("C");
@@ -2256,7 +2341,7 @@ public class VietQRController {
 							}
 							vietQRVaRequestDTO.setBillId(billId);
 							vietQRVaRequestDTO.setUserBankName(accountBankEntity.getBankAccountName());
-							vietQRVaRequestDTO.setDescription(StringUtil.getValueNullChecker(billId));
+							vietQRVaRequestDTO.setDescription(StringUtil.getValueNullChecker(content));
 
 							ResponseMessageDTO generateVaInvoiceVietQR = CustomerVaUtil.generateVaInvoiceVietQR(vietQRVaRequestDTO, accountBankEntity.getCustomerId());
 							if ("SUCCESS".equals(generateVaInvoiceVietQR.getStatus())) {
@@ -2264,7 +2349,7 @@ public class VietQRController {
 							}
 						}
 						VietQRBIDVCreateDTO dto1 = new VietQRBIDVCreateDTO();
-						dto1.setContent(dto.getContent());
+						dto1.setContent(content);
 						dto1.setAmount(dto.getAmount() + "");
 						dto1.setTerminalCode(StringUtil.getValueNullChecker(dto.getTerminalCode()));
 						if (StringUtil.isNullOrEmpty(dto.getTerminalCode()) &&
@@ -2292,7 +2377,7 @@ public class VietQRController {
 							vietQRDTO.setBankAccount(accountBankEntity.getBankAccount());
 							vietQRDTO.setUserBankName(accountBankEntity.getBankAccountName().toUpperCase());
 							vietQRDTO.setAmount(StringUtil.formatNumberAsString(dto.getAmount()));
-							vietQRDTO.setContent(billId);
+							vietQRDTO.setContent(content);
 							vietQRDTO.setQrCode(qr);
 							vietQRDTO.setImgId(bankTypeEntity.getImgId());
 							// return transactionId to upload bill image

@@ -3778,6 +3778,7 @@ public class TransactionController {
 
     ///
     // Get detail transaction QR LINK
+    // cần xử lí lại
     @GetMapping("transactions/qr-link")
     public ResponseEntity<Object> getTransactionQR(@RequestParam(value = "refId") String refId) {
         Object result = null;
@@ -3807,10 +3808,17 @@ public class TransactionController {
                     String qr = VietQRUtil.generateTransactionQR(vietQRGenerateDTO);
                     // check bankAccount if mms_active = true
                     //
-                    if (dto.getMmsActive() != null && dto.getMmsActive() == true) {
-                        if (dto.getQrCode() != null && !dto.getQrCode().trim().isEmpty()) {
+                    switch (dto.getBankCode()) {
+                        case "BIDV":
                             qr = dto.getQrCode();
-                        }
+                            break;
+                        default:
+                            if (dto.getMmsActive() != null && dto.getMmsActive()) {
+                                if (dto.getQrCode() != null && !dto.getQrCode().trim().isEmpty()) {
+                                    qr = dto.getQrCode();
+                                }
+                            }
+                            break;
                     }
                     // process response
                     TransactionQRResponseDTO responseDTO = new TransactionQRResponseDTO();
@@ -3871,7 +3879,7 @@ public class TransactionController {
                     String id = TransactionRefIdUtil.decryptTransactionId(dto.getRefId());
                     if (id != null && !id.trim().isEmpty()) {
                         // update status
-                        transactionReceiveService.updateTransactionStatusById(2, id);
+//                        transactionReceiveService.updateTransactionStatusById(2, id);
                         // push to QR Link Websocket
                         Map<String, String> data = new HashMap<>();
                         data.put("notificationType", NotificationUtil.getNotiTypeCancelTransaction());
