@@ -4220,6 +4220,18 @@ public class TransactionController {
 
         try {
             List<String> transType = getTransactionTypes(type);
+            // CẦN LẤY DANH SÁCH BANK ID CỦA CHỦ SỞ HỮU VÀ ĐƯỢC CHIA SẺ (thông qua account_bank_receive_share)
+            // CHỦ SỞ HỮU:is_owner = true ngươ lại bằng false
+            // Danh sách giao dịch của chủ sở hữu sẽ là 1 câu query riêng, được chia sẻ 1 caau query riêng
+
+            // Logic sẽ là lấy các bank_id chủ sở hữu để get danh sách giao dịch ra trước
+            // Nếu danh sách giao dịch của chủ sở hữu trả về < 20 record mới filter sang danh sách giao dịch được chia sẻ
+            // danh sách giao dịch được chia sẻ chỉ filter theo tminalCode lúc này mới check để lấy ra dnah sách terminalCode
+            // của userId này và của bankId nàydduocwjc phép xem
+            // Môĩ lần chỉ lấy ra đúng max 20 record ko lấy hơn.
+            // filter danh sách giao dịch thì dùng bank_id IN (:bankIds) giống như terminalCode tránh dùng for do phải tạo
+            // nhiều connection ko cần thiết xuoongs database
+            // Làm theo cách add bên dưới sẽ có trường hợp lớn hơn 20 record trả về 1 lần
             List<String> bankIds = accountBankReceiveService.getListBankIdByUserId(userId);
             for (String bankId : bankIds) {
                 TypeValueFilterDTO typeCase = processFilterSearch(value, bankId);
