@@ -1,6 +1,7 @@
 package com.vietqr.org.util;
 
 import javax.crypto.Cipher;
+import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
@@ -9,6 +10,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.log4j.Logger;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.security.spec.KeySpec;
@@ -133,6 +135,23 @@ public class BankEncryptUtil {
             result = sb.toString();
         } catch (Exception e) {
             logger.error("generateMD5GetBillForBankChecksum: ERROR: " + e.toString());
+        }
+        return result;
+    }
+
+    public static String generateHMACSHA256PayBillForBankChecksum(String secretCode, String transId, String billId, String amount) {
+        String result = "";
+        try {
+            String algorithm = "HmacSHA256";
+            String plainText = secretCode + transId + billId + amount;
+            SecretKeySpec secretKeySpec = new SecretKeySpec(secretCode.getBytes(StandardCharsets.UTF_8), algorithm);
+            Mac mac = Mac.getInstance(algorithm);
+            mac.init(secretKeySpec);
+
+            byte[] hmacBytes = mac.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
+            result = Base64.getEncoder().encodeToString(hmacBytes);
+        } catch (Exception e) {
+            logger.error("generateHMACSHA256PayBillForBankChecksum: ERROR: " + e.toString());
         }
         return result;
     }
