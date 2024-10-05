@@ -2,10 +2,8 @@ package com.vietqr.org.util;
 
 import com.vietqr.org.mqtt.TidInternalSubscriber;
 
-import com.vietqr.org.service.redis.IdempotencyService;
 import org.apache.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -22,9 +20,6 @@ public class MqttListenerService implements MqttCallback {
     private final MqttTopicHandlerScanner mqttTopicHandlerScanner;
 
     private Map<String, MqttTopicHandlerScanner.MethodHandlerPair> topicHandlers = new HashMap<>();
-
-    @Autowired
-    private IdempotencyService idempotencyService;
     public MqttListenerService(IMqttClient mqttClient, MqttTopicHandlerScanner mqttTopicHandlerScanner) {
         this.mqttClient = mqttClient;
         this.mqttTopicHandlerScanner = mqttTopicHandlerScanner;
@@ -79,25 +74,40 @@ public class MqttListenerService implements MqttCallback {
         while (!reconnected) {
             attempt++;
             try {
-                TimeUnit.SECONDS.sleep(Math.min(attempt * 5, 60)); // Increase wait time between retries, max 60 seconds
+                TimeUnit.SECONDS.sleep(Math.min(attempt * 2, 60)); // Increase wait time between retries, max 60 seconds
                 mqttClient.reconnect();
-                reconnected = true; // If reconnect succeeds, set reconnected to true
+                if (mqttClient.isConnected()) {
+                    reconnected = true; // If reconnect succeeds, set reconnected to true
+                }
                 logger.info("MQTT Listener: Successfully reconnected after " + attempt + " attempt(s).");
 
             } catch (MqttException | InterruptedException e) {
                 logger.error("MQTT Listener: ERROR: Reconnection attempt " + attempt + " failed: " + e.getMessage());
+                if (mqttClient.isConnected()) {
+                    reconnected = true; // If reconnect succeeds, set reconnected to true
+                }
             } finally {
-                String content = "MQTT CONNECTION LOST: " +
-                        "\uD83D\uDE4B\u200D♂\uFE0F\uD83D\uDE4B\u200D♂\uFE0F\uD83D\uDE4B\u200D♂\uFE0F." +
-                        "\n\nMQTT Listener: ERROR: connectionLost: " + cause.getMessage() + "\n\n" +
-                        "\n\nTRYING RECONNECTION...\n\n";
-                googleChatUtil.sendMessageToGoogleChatInternal(content);
+                if (mqttClient.isConnected()) {
+                    reconnected = true;
+                }
+                if (EnvironmentUtil.isProduction()) {
+                    String content = "MQTT CONNECTION LOST: " +
+                            "\uD83D\uDE4B\u200D♂\uFE0F\uD83D\uDE4B\u200D♂\uFE0F\uD83D\uDE4B\u200D♂\uFE0F." +
+                            "\n\nMQTT Listener: ERROR: connectionLost: " + cause.getMessage() +
+                            "\nTRYING RECONNECTION...\n";
+                    googleChatUtil.sendMessageToGoogleChatInternal(content);
+                }
             }
         }
-        String content = "MQTT Listener: Successfully reconnected after " + attempt + " attempt(s).";
-        googleChatUtil.sendMessageToGoogleChatInternal(content);
+        if (EnvironmentUtil.isProduction()) {
+            String content = "MQTT Listener: Successfully reconnected after " + attempt + " attempt(s).";
+            googleChatUtil.sendMessageToGoogleChatInternal(content);
+        }
+
         try {
-            startListening();
+            if (mqttClient.isConnected()) {
+                startListening();
+            }
         } catch (MqttException e) {
             logger.error("startListening ERROR: " + e.getMessage());
         }
@@ -107,16 +117,17 @@ public class MqttListenerService implements MqttCallback {
     public void messageArrived(String topic, MqttMessage message) {
         MqttTopicHandlerScanner.MethodHandlerPair handlerPair = findHandlerForTopic(topic);
         try {
-            String existKey = idempotencyService.getResponseForKey("idempotency-lock:MQTT-KEY:" + message.getId()).orElse("");
-            if (handlerPair != null && StringUtil.isNullOrEmpty(existKey)
-                    ) {
-                if (idempotencyService.saveResponseForKey("MQTT-KEY:" + message.getId(), "", 30)) {
-                    logger.info("MQTT Listener: messageArrived HANDLER: " + topic + " message: " + new String(message.getPayload()));
-                    handlerPair.getMethod().invoke(handlerPair.getBean(), topic, message);
+//            String existKey = idempotencyService.getResponseForKey("idempotency-lock:MQTT-KEY:" + message.getId()).orElse("");
+            if (handlerPair != null
+            ) {
+//                if (idempotencyService.saveResponseForKey("MQTT-KEY:" + message.getId(), "", 30)) {
+                logger.info("MQTT Listener: messageArrived HANDLER: " + topic + " message: " + new String(message.getPayload()) + "clientId: "
+                + message.getId() + " at: " + System.currentTimeMillis());
+                handlerPair.getMethod().invoke(handlerPair.getBean(), topic, message);
 //                    idempotencyService.deleteResponseForKey("MQTT-KEY:" + message.getId());
-                } else {
-                    logger.warn("MQTT Listener: messageArrived NOT HANDLER OR ALREADY HANDLE: " + topic + " message: " + new String(message.getPayload()));
-                }
+//                } else {
+//                    logger.warn("MQTT Listener: messageArrived NOT HANDLER OR ALREADY HANDLE: " + topic + " message: " + new String(message.getPayload()));
+//                }
             } else {
                 logger.warn("MQTT Listener: messageArrived NOT HANDLER OR ALREADY HANDLE: " + topic + " message: " + new String(message.getPayload()));
             }
@@ -127,7 +138,11 @@ public class MqttListenerService implements MqttCallback {
 
     @Override
     public void deliveryComplete(IMqttDeliveryToken token) {
-        // Handle delivery completion
+        try {
+            logger.info("deliveryComplete: message: " + token.getMessage() + " client ID: " + token.getClient());
+        } catch (MqttException e) {
+            logger.info("deliveryComplete: ERROR: " + e.getMessage());
+        }
     }
 
     private Map<String, MqttTopicHandlerScanner.MethodHandlerPair> initTopicHandlers() {
@@ -139,6 +154,8 @@ public class MqttListenerService implements MqttCallback {
         message.setPayload(payload.getBytes());
         message.setQos(1);
         mqttClient.publish(topic, message);
+        logger.info("MQTT SendMessage: publishMessageToCommonTopic HANDLER: " + topic + " message: " + new String(message.getPayload()) + "clientId: "
+                + message.getId() + " at: " + System.currentTimeMillis());
     }
 
     // Phương thức tìm kiếm handler phù hợp
