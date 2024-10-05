@@ -96,6 +96,11 @@ public class MqttListenerService implements MqttCallback {
         }
         String content = "MQTT Listener: Successfully reconnected after " + attempt + " attempt(s).";
         googleChatUtil.sendMessageToGoogleChatInternal(content);
+        try {
+            startListening();
+        } catch (MqttException e) {
+            logger.error("startListening ERROR: " + e.getMessage());
+        }
     }
 
     @Override
