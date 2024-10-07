@@ -700,7 +700,7 @@ public class TransactionBankController {
                     checkDuplicateReferenceNumber(dto.getReferencenumber(), dto.getTransType());
 
             responseObjectDTO =checkOrderFromMB(dto.getReferencenumber(), "");
-            if (responseObjectDTO.getStatus().equals("SUCCESS")) {
+            if (Objects.nonNull(responseObjectDTO) && responseObjectDTO.getStatus().equals("SUCCESS")) {
                 transactionBankMMSDTO = (TransactionBankMMSDTO) responseObjectDTO.getData();
             }
         }
