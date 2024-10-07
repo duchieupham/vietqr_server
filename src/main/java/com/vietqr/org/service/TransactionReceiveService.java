@@ -669,4 +669,6 @@ public interface TransactionReceiveService {
     void updateTransactionReceiveType(List<String> id);
 
     int countTransactionByBankIdAndTime(String bankId, String fromDate, String toDate);
+
+    TransactionReceiveEntity getTransactionReceiveByQrCodeId(String qrCodeId, String amount);
 }
