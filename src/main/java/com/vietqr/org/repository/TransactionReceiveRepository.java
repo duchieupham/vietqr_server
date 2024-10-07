@@ -3282,5 +3282,12 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
     @Query("SELECT t FROM TransactionReceiveEntity t WHERE t.bankAccount = :bankAccount AND t.content = :content AND t.amount = :amount AND t.status = 0")
     TransactionReceiveEntity findPendingTransactionByBankAccountContentAmount(@Param("bankAccount") String bankAccount, @Param("content") String content, @Param("amount") long amount);
 
+    @Query(value = "SELECT * "
+            + "FROM transaction_receive "
+            + "WHERE "
+            + "AND time >= :time "
+            + "AND status = 0 AND amount = :amount AND qr_code LIKE (%:qrCodeId%) "
+            + "AND trans_type = :transType LIMIT 1", nativeQuery = true)
+    TransactionReceiveEntity getTransactionReceiveByQrCodeId(String qrCodeId, String amount, String transType, long time);
 }
 
