@@ -171,29 +171,29 @@ public class TidInternalSubscriber {
     }
 
 
+//    @MqttTopicHandler(topic = "vietqr/request/#") // Xử lý các yêu cầu khởi tạo QR
+//    public void handleQRRequest(String topic, MqttMessage message) {
+//        try {
+//            String payload = new String(message.getPayload());
+//            ObjectMapper mapper = new ObjectMapper();
+//            VietQRCreateCustomerDTO dto = mapper.readValue(payload, VietQRCreateCustomerDTO.class);
+//
+//            // Xử lý logic QR và phản hồi
+//            VietQRDTO response = (VietQRDTO) generateQRCustomer(dto);
+//            String responsePayload = mapper.writeValueAsString(response);
+//
+//            String tramId = dto.getTerminalCode();
+//            String responseTopic = "vietqr/response/" + tramId;
+//
+//            mqttListenerService.publishMessageToCommonTopic(responseTopic, responsePayload);
+//            logger.info("Response sent to topic: " + responseTopic + " Payload: " + responsePayload);
+//
+//        } catch (Exception e) {
+//            logger.error("Error handling QR request: " + e.getMessage());
+//        }
+//    }
+
     @MqttTopicHandler(topic = "vietqr/request/#") // Xử lý các yêu cầu khởi tạo QR
-    public void handleQRRequest(String topic, MqttMessage message) {
-        try {
-            String payload = new String(message.getPayload());
-            ObjectMapper mapper = new ObjectMapper();
-            VietQRCreateCustomerDTO dto = mapper.readValue(payload, VietQRCreateCustomerDTO.class);
-
-            // Xử lý logic QR và phản hồi
-            VietQRDTO response = (VietQRDTO) generateQRCustomer(dto);
-            String responsePayload = mapper.writeValueAsString(response);
-
-            String tramId = dto.getTerminalCode();
-            String responseTopic = "vietqr/response/" + tramId;
-
-            mqttListenerService.publishMessageToCommonTopic(responseTopic, responsePayload);
-            logger.info("Response sent to topic: " + responseTopic + " Payload: " + responsePayload);
-
-        } catch (Exception e) {
-            logger.error("Error handling QR request: " + e.getMessage());
-        }
-    }
-
-    @MqttTopicHandler(topic = "vietqr/requestQR/#") // Xử lý các yêu cầu khởi tạo QR
     public void handleQR(String topic, MqttMessage message) {
         try {
             String payload = new String(message.getPayload());
@@ -205,7 +205,7 @@ public class TidInternalSubscriber {
             String responsePayload = mapper.writeValueAsString(response);
 
             String tramId = dto.getTerminalCode();
-            String responseTopic = "vietqr/responseQR/" + tramId;
+            String responseTopic = "vietqr/response/" + tramId;
 
             mqttListenerService.publishMessageToCommonTopic(responseTopic, responsePayload);
             logger.info("Response sent to topic: " + responseTopic + " Payload: " + responsePayload);
