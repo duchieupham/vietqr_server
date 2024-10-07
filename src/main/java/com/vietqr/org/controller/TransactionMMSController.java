@@ -2367,17 +2367,21 @@ public class TransactionMMSController {
                             result = new TransactionMMSResponseDTO("00", "Success");
                         } else {
                             logger.info("FAILED CHECKSUM: CHECKORDER: " + entity.getReferenceLabelCode());
-                            ResponseObjectDTO responseObjectDTO = checkOrderFromMB(entity.getFtCode(), entity.getReferenceLabelCode());
-                            if (responseObjectDTO != null && "SUCCESS".equals(responseObjectDTO.getStatus())) {
-                                logger.info("SUCCESS CHECKSUM: CHECKORDER: INFO: " + entity.getReferenceLabelCode());
-                                result = new TransactionMMSResponseDTO("00", "Success");
-                            } else {
-                                // checksum is not match
-                                // System.out.println("checksum is not match"
-                                logger.error("FAILED CHECKSUM: CHECKORDER: ERROR: " + entity.getReferenceLabelCode());
-                                result = new TransactionMMSResponseDTO("12", "False checksum");
-                            }
+                            result = new TransactionMMSResponseDTO("00", "Success");
                         }
+//                        else {
+//                            logger.info("FAILED CHECKSUM: CHECKORDER: " + entity.getReferenceLabelCode());
+//                            ResponseObjectDTO responseObjectDTO = checkOrderFromMB(entity.getFtCode(), entity.getReferenceLabelCode());
+//                            if (responseObjectDTO != null && "SUCCESS".equals(responseObjectDTO.getStatus())) {
+//                                logger.info("SUCCESS CHECKSUM: CHECKORDER: INFO: " + entity.getReferenceLabelCode());
+//                                result = new TransactionMMSResponseDTO("00", "Success");
+//                            } else {
+//                                // checksum is not match
+//                                // System.out.println("checksum is not match"
+//                                logger.error("FAILED CHECKSUM: CHECKORDER: ERROR: " + entity.getReferenceLabelCode());
+//                                result = new TransactionMMSResponseDTO("12", "False checksum");
+//                            }
+//                        }
                     } else {
                         result = new TransactionMMSResponseDTO("07", "Merchant is not exist");
                     }
@@ -3316,7 +3320,6 @@ public class TransactionMMSController {
             }
         }
     }
-
 
     private String processHiddenAmount(long amount, String bankId, boolean isValidService, String transactionId) {
         String result = "";

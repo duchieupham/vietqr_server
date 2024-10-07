@@ -194,4 +194,6 @@ public interface AccountBankReceiveService {
 	IAccountBankReceiveQR getAccountBankReceiveQRByAccountAndId(String bankAccount, String bankTypeId);
 
 	IAccountBankReceiveMMS getAccountBankReceiveQRByBankAccountAndBankCode(String bankAccount, String bankCode);
+
+	List<String> getListBankIdByUserId(String userId);
 }

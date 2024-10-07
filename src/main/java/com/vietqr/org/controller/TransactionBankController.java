@@ -666,6 +666,7 @@ public class TransactionBankController {
         NumberFormat nf = NumberFormat.getInstance(Locale.US);
         long currentTime = DateTimeUtil.getCurrentDateTimeUTC();
         long timePaid = dto.getTransactiontime() / 1000;
+        TransactionReceiveEntity transactionMMS = null;
         logger.info("receive transaction sync from MB: " + dto.toString() + " at: " + currentTime);
         // System.out.println("receive transaction sync from MB: " + dto.toString() + "
         // at: " + time);
@@ -680,6 +681,8 @@ public class TransactionBankController {
         String bankTypeId = "aa4e489b-254e-4351-9cd4-f62e09c63ebc";
         AccountBankReceiveEntity accountBankEntity = accountBankReceiveService
                 .getAccountBankByBankAccountAndBankTypeId(dto.getBankaccount(), bankTypeId);
+        ResponseObjectDTO responseObjectDTO = null;
+        TransactionBankMMSDTO transactionBankMMSDTO = null;
         // nếu mms = true, ko bị duplicated, transType = C => delay 10s
         if (Objects.nonNull(accountBankEntity)
                 && checkDuplicate == true
@@ -690,11 +693,16 @@ public class TransactionBankController {
                 Thread.sleep(10000); // Sleep for 10000 milliseconds (10 seconds)
             } catch (InterruptedException e) {
                 // Handle the exception if the thread is interrupted during sleep
-                e.printStackTrace();
+                logger.error("insertTransactionBank: ERROR: " + e.getMessage());
             }
             // kiem tra lai sau 10s
             checkDuplicate =
                     checkDuplicateReferenceNumber(dto.getReferencenumber(), dto.getTransType());
+
+            responseObjectDTO =checkOrderFromMB(dto.getReferencenumber(), "");
+            if (responseObjectDTO.getStatus().equals("SUCCESS")) {
+                transactionBankMMSDTO = (TransactionBankMMSDTO) responseObjectDTO.getData();
+            }
         }
         try {
             // danh sách transaction Id đã được insert
@@ -712,9 +720,31 @@ public class TransactionBankController {
                             // đã insert ở luồng ưu tiên
                             if (accountBankEntity.isMmsActive() == true
                                     && !checkDuplicate
+                                    && Objects.nonNull(responseObjectDTO) && responseObjectDTO.getStatus().equals("SUCCESS")
                                     && dto.getTransType().trim().toUpperCase().equals("C")) {
                                 // System.out.println("isMmsActive");
-                                logger.info("Transaction-sync: mms_active = true => do not insert transaction_bank");
+                                logger.info("Transaction-sync: mms_active = true => do not insert transaction_bank => check and insert transaction_mms");
+                                transactionMMS = transactionReceiveService
+                                        .getTransactionReceiveByQrCodeId(transactionBankMMSDTO.getQrCodeId(), transactionBankMMSDTO.getDebitAmount());
+                                if (Objects.nonNull(transactionMMS)) {
+                                    TransactionMMSEntity transactionMMSEntity = new TransactionMMSEntity(
+                                            UUID.randomUUID().toString(), transactionBankMMSDTO.getQrCodeId(), transactionBankMMSDTO.getStoreLabel(),
+                                            transactionBankMMSDTO.getTerminalLabel(), transactionBankMMSDTO.getDebitAmount(), transactionBankMMSDTO.getRealAmount(),
+                                            transactionBankMMSDTO.getPayDate(), transactionBankMMSDTO.getRespCode(),
+                                            transactionBankMMSDTO.getRespDesc(), transactionBankMMSDTO.getCheckSum(), transactionBankMMSDTO.getRate(),
+                                            "", "", transactionMMS.getOrderId(), "", transactionBankMMSDTO.getFtCode(),
+                                            "/integration-bluecom/vqr/api/transaction-mms"
+                                    );
+                                } else {
+                                    transactionBankService.insertTransactionBank(dto.getTransactionid(),
+                                            dto.getTransactiontime(),
+                                            dto.getReferencenumber(), dto.getAmount(), dto.getContent(),
+                                            dto.getBankaccount(),
+                                            dto.getTransType(), dto.getReciprocalAccount(), dto.getReciprocalBankCode(),
+                                            dto.getVa(),
+                                            dto.getValueDate(), uuid.toString());
+                                }
+
                             } else {
                                 // System.out.println("isMmsActive = false");
                                 transactionBankService.insertTransactionBank(dto.getTransactionid(),
@@ -765,6 +795,7 @@ public class TransactionBankController {
         } finally {
             TransactionResponseDTO finalResult = result;
             boolean finalCheckDuplicate = checkDuplicate;
+            TransactionReceiveEntity finalTransactionMMS = transactionMMS;
             Thread thread = new Thread(() -> {
                 // AccountBankReceiveEntity accountBankEntity = accountBankService
                 // .getAccountBankById(transactionReceiveEntity.getBankId());
@@ -786,6 +817,9 @@ public class TransactionBankController {
                                         TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
                                                 .getTransactionByTraceIdAndAmount(traceId, dto.getAmount() + "",
                                                         dto.getTransType().trim().toUpperCase());
+                                        if (Objects.nonNull(finalTransactionMMS)) {
+                                            transactionReceiveEntity = finalTransactionMMS;
+                                        }
                                         if (transactionReceiveEntity != null) {
                                             orderId = transactionReceiveEntity.getOrderId();
                                             sign = transactionReceiveEntity.getSign();
@@ -6584,5 +6618,115 @@ public class TransactionBankController {
         LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(utcPlusSevenTime), ZoneId.of("GMT"));
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss", Locale.ENGLISH);
         return dateTime.format(formatter);
+    }
+
+    private ResponseObjectDTO checkOrderFromMB(String ftCode, String orderId) {
+        ResponseObjectDTO result = null;
+        try {
+            TokenProductBankDTO token = getBankToken();
+            if (token != null) {
+                UUID clientMessageId = UUID.randomUUID();
+                Map<String, Object> data = new HashMap<>();
+                String checkSum = BankEncryptUtil.generateCheckOrderMD5Checksum(ftCode, "", orderId);
+                data.put("traceTransfer", ftCode);
+                data.put("referenceLabel", orderId);
+                data.put("billNumber", "");
+                data.put("checkSum", checkSum);
+                UriComponents uriComponents = UriComponentsBuilder
+                        .fromHttpUrl(EnvironmentUtil.getBankUrl()
+                                + "ms/offus/public/payment-service/payment/v1.0/checkOrder")
+                        .buildAndExpand(/* add url parameter here */);
+                WebClient webClient = WebClient.builder()
+                        .baseUrl(
+                                EnvironmentUtil.getBankUrl()
+                                        + "ms/offus/public/payment-service/payment/v1.0/checkOrder")
+                        .build();
+                Mono<ClientResponse> responseMono = webClient.post()
+                        .uri(uriComponents.toUri())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("clientMessageId", clientMessageId.toString())
+                        .header("userName", EnvironmentUtil.getUsernameAPI())
+                        .header("secretKey", EnvironmentUtil.getSecretKeyAPI())
+                        .header("Authorization", "Bearer " + getBankToken().getAccess_token())
+                        .body(BodyInserters.fromValue(data))
+                        .exchange();
+                ClientResponse response = responseMono.block();
+
+                String json = response.bodyToMono(String.class).block();
+                logger.info("checkOrderFromMB: RESPONSE: " + json + " orderId: " + orderId);
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode rootNode = objectMapper.readTree(json);
+                if (rootNode.get("errorCode") != null) {
+                    // 000
+                    logger.info("checkOrderFromMB: RESPONSE: " + rootNode.asText() + " orderId: " + orderId);
+                    if ((rootNode.get("errorCode").asText()).trim().equals("000")) {
+                        if (rootNode.get("data").get("traceTransfer") != null) {
+                            result = new ResponseObjectDTO("SUCCESS", rootNode.get("data").get("traceTransfer"));
+                            logger.info("checkOrderFromMB: RESPONSE FT: " + result);
+                        } else {
+                            result = new ResponseObjectDTO("FAILED", "E05");
+                            logger.error("checkOrderFromMB: RESPONSE: FT NULL");
+                        }
+                    }
+                    // "4863" FT code not existed
+                    else if ((rootNode.get("errorCode").asText()).trim().equals("4863")) {
+                        result = new ResponseObjectDTO("FAILED", "4863");
+                    }
+                    // "4857" Invalid amount
+                    else if ((rootNode.get("errorCode").asText()).trim().equals("4857")) {
+                        result = new ResponseObjectDTO("FAILED", "4857");
+                    }
+                } else {
+                    result = new ResponseObjectDTO("FAILED", "E05");
+                    logger.error("checkOrderFromMB: RESPONSE: ERROR CODE NULL");
+                }
+            } else {
+                result = new ResponseObjectDTO("FAILED", "E05");
+                logger.error("ERROR at checkOrderFromMB: " + orderId + " - " + " TOKEN BANK IS INVALID");
+            }
+        } catch (Exception e) {
+            result = new ResponseObjectDTO("FAILED", "E05");
+            logger.error("ERROR at checkOrderFromMB: " + orderId + " - " + e.toString());
+        }
+        return result;
+    }
+
+    // get token bank product
+    private TokenProductBankDTO getBankToken() {
+        TokenProductBankDTO result = null;
+        try {
+            String key = EnvironmentUtil.getUserBankAccess() + ":" + EnvironmentUtil.getPasswordBankAccess();
+            String encodedKey = Base64.getEncoder().encodeToString(key.getBytes());
+            UriComponents uriComponents = UriComponentsBuilder
+                    .fromHttpUrl(EnvironmentUtil.getBankUrl() + "oauth2/v1/token")
+                    .buildAndExpand(/* add url parameter here */);
+            WebClient webClient = WebClient.builder()
+                    .baseUrl(EnvironmentUtil.getBankUrl()
+                            + "oauth2/v1/token")
+                    .build();
+            // Call POST API
+            TokenProductBankDTO response = webClient.method(HttpMethod.POST)
+                    .uri(uriComponents.toUri())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .header("Authorization", "Basic " + encodedKey)
+                    .body(BodyInserters.fromFormData("grant_type", "client_credentials"))
+                    .exchange()
+                    .flatMap(clientResponse -> {
+                        if (clientResponse.statusCode().is2xxSuccessful()) {
+                            return clientResponse.bodyToMono(TokenProductBankDTO.class);
+                        } else {
+                            clientResponse.body((clientHttpResponse, context) -> {
+                                logger.info(clientHttpResponse.getBody().collectList().block().toString());
+                                return clientHttpResponse.getBody();
+                            });
+                            return null;
+                        }
+                    })
+                    .block();
+            result = response;
+        } catch (Exception e) {
+            logger.error(e.toString());
+        }
+        return result;
     }
 }

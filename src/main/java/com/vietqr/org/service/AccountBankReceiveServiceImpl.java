@@ -698,6 +698,11 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
         return repo.getAccountBankReceiveQRByBankAccountAndBankCode(bankAccount, bankCode);
     }
 
+    @Override
+    public List<String> getListBankIdByUserId(String userId) {
+        return repo.getListBankIdByUserId(userId);
+    }
+
     private boolean isJsonArray(List<String> notificationTypes) {
         try {
             objectMapper.readValue(notificationTypes.toString(), new TypeReference<List<String>>() {});
