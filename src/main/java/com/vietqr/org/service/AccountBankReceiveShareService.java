@@ -73,4 +73,6 @@ public interface AccountBankReceiveShareService {
     AccountBankReceiveShareEntity getAccountAlreadyShare(String terminalId, String userId);
 
     int updateAccountBankArrangement(String bankId, int index, String userId);
+
+    List<String> getListBankIdSharedByUserId(String userId);
 }
