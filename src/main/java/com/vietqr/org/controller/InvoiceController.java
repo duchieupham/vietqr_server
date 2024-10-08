@@ -1375,6 +1375,7 @@ public class InvoiceController {
                 thread.start();
 
                 responseDTO.setQrCode(qr);
+                responseDTO.setUrlLink(EnvironmentUtil.getQRLink() + TransactionRefIdUtil.encryptTransactionId(transReceiveUUID.toString()));
                 responseDTO.setTotalAmountAfterVat(totalAmountAfterVat);
                 responseDTO.setInvoiceName(invoiceDTO.getInvoiceName());
                 responseDTO.setMidName(merchantBankMapperDTO.getMerchantName());
