@@ -69,4 +69,15 @@ public interface MerchantMemberRoleRepository extends JpaRepository<MerchantMemb
             + "WHERE b.trans_receive_role_ids LIKE CONCAT('%', a.id, '%') "
             + "AND c.user_id = :userId AND d.bank_id = :bankId ) ", nativeQuery = true)
     List<String> getRoleByUserIdAndBankId(String userId, String bankId);
+
+    @Query(value = "SELECT a.id "
+            + "FROM transaction_receive_role a "
+            + "WHERE EXISTS ( "
+            + "SELECT 1 "
+            + "FROM merchant_member_role b "
+            + "INNER JOIN merchant_member c ON c.id = b.merchant_member_id "
+            + "INNER JOIN merchant_bank_receive d ON d.merchant_id = c.merchant_id "
+            + "WHERE b.trans_receive_role_ids LIKE CONCAT('%', a.id, '%') "
+            + "AND c.user_id = :userId AND d.bank_id IN (:bankIds) ) ", nativeQuery = true)
+    List<String> getRoleByUserIdAndBankId(String userId, List<String> bankIds);
 }

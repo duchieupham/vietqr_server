@@ -136,6 +136,8 @@ public interface AccountBankReceiveService {
 	List<IAccountBankMonthDTO> getBankAccountStatistics();
 
 	BankDetailTypeCaiValueDTO getBankAccountTypeDetail(String bankId);
+
+	List<BankDetailTypeCaiValueDTO> getBankAccountTypeDetail(List<String> bankIds);
 	int countAllBankAccounts();
 	int countBankAccountsByAccount(String keyword);
 	int countBankAccountsByAccountName(String keyword);

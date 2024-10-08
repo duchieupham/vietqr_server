@@ -10,6 +10,8 @@ import java.util.List;
 public interface TransReceiveTempService {
     TransReceiveTempEntity getLastTimeByBankId(String bankId);
 
+    List<TransReceiveTempEntity> getLastTimeByBankId(List<String> bankIds);
+
     String getTransIdsByBankId(String bankId);
 
     void insert(TransReceiveTempEntity entity);

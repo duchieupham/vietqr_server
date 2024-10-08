@@ -18,6 +18,11 @@ public class TransReceiveTempServiceImpl implements TransReceiveTempService {
     }
 
     @Override
+    public List<TransReceiveTempEntity> getLastTimeByBankId(List<String> bankIds) {
+        return repo.getLastTimeByBankId(bankIds);
+    }
+
+    @Override
     public String getTransIdsByBankId(String bankId) {
         return repo.getTransIdsByBankId(bankId);
     }

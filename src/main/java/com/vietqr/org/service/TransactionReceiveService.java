@@ -541,6 +541,9 @@ public interface TransactionReceiveService {
     List<TransactionRelatedV2DTO> getTransactionsV2(String bankId, List<String> transType, String fromDate,
                                                     String toDate, int offset);
 
+    List<TransactionRelatedV2DTO> getTransactionsV2(List<String> bankIds, String fromDate,
+                                                    String toDate, int offset);
+
     ITransStatisticListExtra getExtraTransactionsV2(String bankId, String fromDate, String toDate);
 
     TransactionDetailV2DTO getTransactionV2ById(String id);
@@ -550,47 +553,93 @@ public interface TransactionReceiveService {
     List<TransactionRelatedV2DTO> getTransactionsListCodeV2(String bankId, List<String> terminalCodes,
                                                             List<String> transType, String fromDate, String toDate, int offset);
 
+    List<TransactionRelatedV2DTO> getTransactionsListCodeV2(List<String> bankIds, List<String> terminalCodes,
+                                                            String fromDate, String toDate, int offset);
+
     List<TransactionRelatedV2DTO> getTransactionsV2ByAmount(String bankId, List<String> transType, String value,
                                                             String fromDate, String toDate, int offset);
 
+    List<TransactionRelatedV2DTO> getTransactionsV2ByAmount(List<String> bankIds, String value,
+                                                            String fromDate, String toDate, int offset);
+
     List<TransactionRelatedV2DTO> getTransactionsV2ByStatus(String bankId, List<String> transType, String value,
+                                                            String fromDate, String toDate, int offset);
+
+    List<TransactionRelatedV2DTO> getTransactionsV2ByStatus(List<String> bankIds, String value,
                                                             String fromDate, String toDate, int offset);
 
     List<TransactionRelatedV2DTO> getTransactionsV2ByTerminalCode(String bankId, List<String> transType,
                                                                   List<String> terminalCodes, String fromDate,
                                                                   String toDate, int offset);
 
+    List<TransactionRelatedV2DTO> getTransactionsV2ByTerminalCode(List<String> bankIds,
+                                                                  List<String> terminalCodes, String fromDate,
+                                                                  String toDate, int offset);
+
     List<TransactionRelatedV2DTO> getTransactionsV2ByContent(String bankId, List<String> transType, String value,
+                                                             String fromDate, String toDate, int offset);
+
+    List<TransactionRelatedV2DTO> getTransactionsV2ByContent(List<String> bankIds, String value,
                                                              String fromDate, String toDate, int offset);
 
     List<TransactionRelatedV2DTO> getTransactionsV2ByFtCode(String bankId, List<String> transType, String value,
                                                             String fromDate, String toDate, int offset);
 
+    List<TransactionRelatedV2DTO> getTransactionsV2ByFtCode(List<String> bankIds, String value,
+                                                            String fromDate, String toDate, int offset);
+
     List<TransactionRelatedV2DTO> getTransactionsV2ByOrderId(String bankId, List<String> transType, String value,
+                                                             String fromDate, String toDate, int offset);
+
+    List<TransactionRelatedV2DTO> getTransactionsV2ByOrderId(List<String> bankIds, String value,
                                                              String fromDate, String toDate, int offset);
 
     List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByAmount(String bankId, List<String> listCode,
                                                                     List<String> transType, String value,
                                                                     String fromDate, String toDate, int offset);
 
+    List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByAmount(List<String> bankIds, List<String> listCode,
+                                                                    String value,
+                                                                    String fromDate, String toDate, int offset);
+
     List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByStatus(String bankId, List<String> terminalCodes,
                                                                     List<String> transType, String value,
+                                                                    String fromDate, String toDate, int offset);
+
+    List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByStatus(List<String> bankIds, List<String> terminalCodes,
+                                                                    String value,
                                                                     String fromDate, String toDate, int offset);
 
     List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByTerminalCode(String bankId, List<String> terminalCodes,
                                                                           List<String> transType, List<String> value,
                                                                           String fromDate, String toDate, int offset);
 
+    List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByTerminalCode(List<String> bankIds, List<String> terminalCodes,
+                                                                          List<String> value,
+                                                                          String fromDate, String toDate, int offset);
+
     List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByContent(String bankId, List<String> terminalCodes,
                                                                      List<String> transType, String value,
+                                                                     String fromDate, String toDate, int offset);
+
+    List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByContent(List<String> bankIds, List<String> terminalCodes,
+                                                                     String value,
                                                                      String fromDate, String toDate, int offset);
 
     List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByOrderId(String bankId, List<String> terminalCodes,
                                                                      List<String> transType, String value,
                                                                      String fromDate, String toDate, int offset);
 
+    List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByOrderId(List<String> bankIds, List<String> terminalCodes,
+                                                                     String value,
+                                                                     String fromDate, String toDate, int offset);
+
     List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByReferenceNumber(String bankId, List<String> listCode,
                                                                              List<String> transType, String value,
+                                                                             String fromDate, String toDate, int offset);
+
+    List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByReferenceNumber(List<String> bankIds, List<String> listCode,
+                                                                             String value,
                                                                              String fromDate, String toDate, int offset);
 
     ITransStatisticListExtra getExtraTransactionsByListCodeV2(String bankId, List<String> listCode,

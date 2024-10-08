@@ -344,6 +344,11 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     }
 
     @Override
+    public List<BankDetailTypeCaiValueDTO> getBankAccountTypeDetail(List<String> bankIds) {
+        return repo.getBankAccountTypeDetail(bankIds);
+    }
+
+    @Override
     public int countAllBankAccounts() {
         return repo.countAllBankAccounts();
     }
