@@ -251,4 +251,9 @@ public interface AccountBankReceiveShareRepository
     @Query(value = "UPDATE account_bank_receive_share SET arrangement = :index WHERE "
             + "bank_id = :bankId AND user_id = :userId ", nativeQuery = true)
     int updateAccountBankArrangement(String bankId, int index, String userId);
+
+    @Query(value = "SELECT DISTINCT bank_id FROM account_bank_receive_share "
+            + "WHERE is_owner = FALSE AND user_id = :userId"
+            , nativeQuery = true)
+    List<String> getListBankIdSharedByUserId(@Param("userId") String userId);
 }

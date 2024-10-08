@@ -102,6 +102,8 @@ public interface TerminalService {
 
     List<String> getAllCodeByNameAndBankId(String name, String bankId);
 
+    List<String> getAllCodeByNameAndBankId(String name, List<String> bankIds);
+
     List<TerminalBankV2DTO> getTerminalByUserIdAndMerchantIds(String userId, List<String> merchantIds);
 
     List<String> getTerminalByUserIdAndMerchantId(String userId, String merchantId);

@@ -18,6 +18,10 @@ public interface TransReceiveTempRepository extends JpaRepository<TransReceiveTe
             + "WHERE bank_id = :bankId LIMIT 1", nativeQuery = true)
     TransReceiveTempEntity getLastTimeByBankId(String bankId);
 
+    @Query(value = "SELECT * FROM trans_receive_temp "
+            + "WHERE bank_id IN (:bankIds)", nativeQuery = true)
+    List<TransReceiveTempEntity> getLastTimeByBankId(List<String> bankIds);
+
     @Query(value = "SELECT bank_id AS bankId, "
             + "MAX(last_times) AS lastTimes, MAX(nums) AS nums "
             + "FROM trans_receive_temp "

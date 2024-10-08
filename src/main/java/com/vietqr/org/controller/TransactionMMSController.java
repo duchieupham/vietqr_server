@@ -422,8 +422,6 @@ public class TransactionMMSController {
                             notiEntity.setType(NotificationUtil.getNotiTypeUpdateTransaction());
                             notiEntity.setUserId(tempTransReceive.getUserId());
                             notiEntity.setData(tempTransReceive.getId());
-                            pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
-                                    message, notiEntity, data, tempTransReceive.getUserId(), StringUtil.getValueNullChecker(accountBankEntity.getPushNotification(), 1));
 
                             // DO INSERT MQTT BY QVAN
                             try {
@@ -460,6 +458,9 @@ public class TransactionMMSController {
                                 // Xử lý các ngoại lệ khác nếu có
                                 System.err.println("Error while sending balance change notification: " + e.toString());
                             }
+
+                            pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
+                                    message, notiEntity, data, tempTransReceive.getUserId(), StringUtil.getValueNullChecker(accountBankEntity.getPushNotification(), 1));
 
                             // send msg to QR Link
                             String refId = TransactionRefIdUtil
@@ -606,6 +607,43 @@ public class TransactionMMSController {
                                 } else {
                                     logger.info("transaction-mms-sync: NOT FOUND TerminalBankEntity");
                                 }
+
+                                // DO INSERT MQTT BY QVAN
+                                try {
+                                    if(finalTransactionReceiveEntity.getAdditionalData() != null) {
+                                        ObjectMapper objectMapper = new ObjectMapper();
+                                        JsonNode additionalDataArray = objectMapper.readTree(finalTransactionReceiveEntity.getAdditionalData());
+                                        String terminalCode = additionalDataArray.get(0).get("terminalCode").asText();
+
+                                        // Tạo mqttTopic với giá trị terminalCode
+                                        String mqttTopic = "vietqr/bdsd/" + terminalCode;
+
+                                        // Tạo dữ liệu JSON thông báo
+                                        Map<String, Object> notificationData = new HashMap<>();
+                                        notificationData.put("referenceNumber", entity.getFtCode());
+                                        notificationData.put("bankAccount", finalTransactionReceiveEntity.getBankAccount());
+                                        notificationData.put("amount", finalTransactionReceiveEntity.getAmount());
+                                        notificationData.put("transType", finalTransactionReceiveEntity.getTransType());
+                                        notificationData.put("content", finalTransactionReceiveEntity.getContent());
+                                        notificationData.put("status", 1);
+                                        String formattedTime = formatTimeUtcPlus(finalTransactionReceiveEntity.getTimePaid());
+                                        notificationData.put("timePaid", formattedTime);
+                                        notificationData.put("orderId", finalTransactionReceiveEntity.getOrderId());
+
+                                        // Chuyển đổi dữ liệu thành chuỗi JSON
+                                        Gson gson = new Gson();
+                                        String payload = gson.toJson(notificationData);
+
+                                        // Xuất bản thông điệp MQTT
+                                        MQTTUtil.sendMessage(mqttTopic, payload);
+                                        System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
+                                    }
+                                }
+                                catch (Exception e) {
+                                    // Xử lý các ngoại lệ khác nếu có
+                                    System.err.println("Error while sending balance change notification: " + e.toString());
+                                }
+
                                 pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
                                         message, notiEntity, data, accountBankReceiveEntity.getUserId(), StringUtil.getValueNullChecker(accountBankReceiveEntity.getPushNotification(), 1));
 
@@ -690,41 +728,7 @@ public class TransactionMMSController {
                                     }
                                 }
 
-                                // DO INSERT MQTT BY QVAN
-                                try {
-                                    if(finalTransactionReceiveEntity.getAdditionalData() != null) {
-                                        ObjectMapper objectMapper = new ObjectMapper();
-                                        JsonNode additionalDataArray = objectMapper.readTree(finalTransactionReceiveEntity.getAdditionalData());
-                                        String terminalCode = additionalDataArray.get(0).get("terminalCode").asText();
 
-                                        // Tạo mqttTopic với giá trị terminalCode
-                                        String mqttTopic = "vietqr/bdsd/" + terminalCode;
-
-                                        // Tạo dữ liệu JSON thông báo
-                                        Map<String, Object> notificationData = new HashMap<>();
-                                        notificationData.put("referenceNumber", entity.getFtCode());
-                                        notificationData.put("bankAccount", finalTransactionReceiveEntity.getBankAccount());
-                                        notificationData.put("amount", finalTransactionReceiveEntity.getAmount());
-                                        notificationData.put("transType", finalTransactionReceiveEntity.getTransType());
-                                        notificationData.put("content", finalTransactionReceiveEntity.getContent());
-                                        notificationData.put("status", 1);
-                                        String formattedTime = formatTimeUtcPlus(finalTransactionReceiveEntity.getTimePaid());
-                                        notificationData.put("timePaid", formattedTime);
-                                        notificationData.put("orderId", finalTransactionReceiveEntity.getOrderId());
-
-                                        // Chuyển đổi dữ liệu thành chuỗi JSON
-                                        Gson gson = new Gson();
-                                        String payload = gson.toJson(notificationData);
-
-                                        // Xuất bản thông điệp MQTT
-                                        MQTTUtil.sendMessage(mqttTopic, payload);
-                                        System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
-                                    }
-                                }
-                                catch (Exception e) {
-                                    // Xử lý các ngoại lệ khác nếu có
-                                    System.err.println("Error while sending balance change notification: " + e.toString());
-                                }
 
                             } else {
                                 // qr tĩnh
@@ -1090,6 +1094,41 @@ public class TransactionMMSController {
                                                 executorService.shutdownNow(); // Nếu bị ngắt khi chờ, cưỡng chế dừng
                                             }
                                         }
+                                        // DO INSERT MQTT BY QVAN
+                                        try {
+                                            if(finalTransactionReceiveEntity.getAdditionalData() != null) {
+                                                ObjectMapper objectMapper = new ObjectMapper();
+                                                JsonNode additionalDataArray = objectMapper.readTree(finalTransactionReceiveEntity.getAdditionalData());
+                                                String terminalCode = additionalDataArray.get(0).get("terminalCode").asText();
+
+                                                // Tạo mqttTopic với giá trị terminalCode
+                                                String mqttTopic = "vietqr/bdsd/" + terminalCode;
+
+                                                // Tạo dữ liệu JSON thông báo
+                                                Map<String, Object> notificationData = new HashMap<>();
+                                                notificationData.put("referenceNumber", entity.getFtCode());
+                                                notificationData.put("bankAccount", finalTransactionReceiveEntity.getBankAccount());
+                                                notificationData.put("amount", finalTransactionReceiveEntity.getAmount());
+                                                notificationData.put("transType", finalTransactionReceiveEntity.getTransType());
+                                                notificationData.put("content", finalTransactionReceiveEntity.getContent());
+                                                notificationData.put("status", 1);
+                                                String formattedTime = formatTimeUtcPlus(finalTransactionReceiveEntity.getTimePaid());
+                                                notificationData.put("timePaid", formattedTime);
+                                                notificationData.put("orderId", finalTransactionReceiveEntity.getOrderId());
+
+                                                // Chuyển đổi dữ liệu thành chuỗi JSON
+                                                Gson gson = new Gson();
+                                                String payload = gson.toJson(notificationData);
+
+                                                // Xuất bản thông điệp MQTT
+                                                MQTTUtil.sendMessage(mqttTopic, payload);
+                                                System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
+                                            }
+                                        }
+                                        catch (Exception e) {
+                                            // Xử lý các ngoại lệ khác nếu có
+                                            System.err.println("Error while sending balance change notification: " + e.toString());
+                                        }
 
                                         // /////// DO INSERT TELEGRAM
                                         List<String> chatIds = telegramAccountBankService
@@ -1139,43 +1178,6 @@ public class TransactionMMSController {
                                                 googleChatUtil.sendMessageToGoogleChat(googleChatMsg, webhook);
                                             }
                                         }
-
-                                        // DO INSERT MQTT BY QVAN
-                                        try {
-                                            if(finalTransactionReceiveEntity.getAdditionalData() != null) {
-                                                ObjectMapper objectMapper = new ObjectMapper();
-                                                JsonNode additionalDataArray = objectMapper.readTree(finalTransactionReceiveEntity.getAdditionalData());
-                                                String terminalCode = additionalDataArray.get(0).get("terminalCode").asText();
-
-                                                // Tạo mqttTopic với giá trị terminalCode
-                                                String mqttTopic = "vietqr/bdsd/" + terminalCode;
-
-                                                // Tạo dữ liệu JSON thông báo
-                                                Map<String, Object> notificationData = new HashMap<>();
-                                                notificationData.put("referenceNumber", entity.getFtCode());
-                                                notificationData.put("bankAccount", finalTransactionReceiveEntity.getBankAccount());
-                                                notificationData.put("amount", finalTransactionReceiveEntity.getAmount());
-                                                notificationData.put("transType", finalTransactionReceiveEntity.getTransType());
-                                                notificationData.put("content", finalTransactionReceiveEntity.getContent());
-                                                notificationData.put("status", 1);
-                                                String formattedTime = formatTimeUtcPlus(finalTransactionReceiveEntity.getTimePaid());
-                                                notificationData.put("timePaid", formattedTime);
-                                                notificationData.put("orderId", finalTransactionReceiveEntity.getOrderId());
-
-                                                // Chuyển đổi dữ liệu thành chuỗi JSON
-                                                Gson gson = new Gson();
-                                                String payload = gson.toJson(notificationData);
-
-                                                // Xuất bản thông điệp MQTT
-                                                MQTTUtil.sendMessage(mqttTopic, payload);
-                                                System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
-                                            }
-                                        }
-                                        catch (Exception e) {
-                                            // Xử lý các ngoại lệ khác nếu có
-                                            System.err.println("Error while sending balance change notification: " + e.toString());
-                                        }
-
                                     }
 
                                 } else if (terminalSubRawCodeDTO != null) {
@@ -1315,6 +1317,42 @@ public class TransactionMMSController {
                                                         bankTypeId);
 
                                         Long amount = Long.parseLong(entity.getDebitAmount() + "");
+
+                                        // DO INSERT MQTT BY QVAN
+                                        try {
+                                            if(finalTransactionReceiveEntity.getAdditionalData() != null) {
+                                                ObjectMapper objectMapper = new ObjectMapper();
+                                                JsonNode additionalDataArray = objectMapper.readTree(finalTransactionReceiveEntity.getAdditionalData());
+                                                String terminalCode = additionalDataArray.get(0).get("terminalCode").asText();
+
+                                                // Tạo mqttTopic với giá trị terminalCode
+                                                String mqttTopic = "vietqr/bdsd/" + terminalCode;
+
+                                                // Tạo dữ liệu JSON thông báo
+                                                Map<String, Object> notificationData = new HashMap<>();
+                                                notificationData.put("referenceNumber", finalTransactionReceiveEntity.getReferenceNumber());
+                                                notificationData.put("bankAccount", finalTransactionReceiveEntity.getBankAccount());
+                                                notificationData.put("amount", finalTransactionReceiveEntity.getAmount());
+                                                notificationData.put("transType", finalTransactionReceiveEntity.getTransType());
+                                                notificationData.put("content", finalTransactionReceiveEntity.getContent());
+                                                notificationData.put("status", 1);
+                                                String formattedTime = formatTimeUtcPlus(finalTransactionReceiveEntity.getTimePaid());
+                                                notificationData.put("timePaid", formattedTime);
+                                                notificationData.put("orderId", finalTransactionReceiveEntity.getOrderId());
+
+                                                // Chuyển đổi dữ liệu thành chuỗi JSON
+                                                Gson gson = new Gson();
+                                                String payload = gson.toJson(notificationData);
+
+                                                // Xuất bản thông điệp MQTT
+                                                MQTTUtil.sendMessage(mqttTopic, payload);
+                                                System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
+                                            }
+                                        }
+                                        catch (Exception e) {
+                                            // Xử lý các ngoại lệ khác nếu có
+                                            System.err.println("Error while sending balance change notification: " + e.toString());
+                                        }
                                         // /////// DO INSERT TELEGRAM
                                         List<String> chatIds = telegramAccountBankService
                                                 .getChatIdsByBankId(bankDTO.getBankId());
@@ -1364,41 +1402,7 @@ public class TransactionMMSController {
                                             }
                                         }
 
-                                        // DO INSERT MQTT BY QVAN
-                                        try {
-                                            if(finalTransactionReceiveEntity.getAdditionalData() != null) {
-                                                ObjectMapper objectMapper = new ObjectMapper();
-                                                JsonNode additionalDataArray = objectMapper.readTree(finalTransactionReceiveEntity.getAdditionalData());
-                                                String terminalCode = additionalDataArray.get(0).get("terminalCode").asText();
 
-                                                // Tạo mqttTopic với giá trị terminalCode
-                                                String mqttTopic = "vietqr/bdsd/" + terminalCode;
-
-                                                // Tạo dữ liệu JSON thông báo
-                                                Map<String, Object> notificationData = new HashMap<>();
-                                                notificationData.put("referenceNumber", finalTransactionReceiveEntity.getReferenceNumber());
-                                                notificationData.put("bankAccount", finalTransactionReceiveEntity.getBankAccount());
-                                                notificationData.put("amount", finalTransactionReceiveEntity.getAmount());
-                                                notificationData.put("transType", finalTransactionReceiveEntity.getTransType());
-                                                notificationData.put("content", finalTransactionReceiveEntity.getContent());
-                                                notificationData.put("status", 1);
-                                                String formattedTime = formatTimeUtcPlus(finalTransactionReceiveEntity.getTimePaid());
-                                                notificationData.put("timePaid", formattedTime);
-                                                notificationData.put("orderId", finalTransactionReceiveEntity.getOrderId());
-
-                                                // Chuyển đổi dữ liệu thành chuỗi JSON
-                                                Gson gson = new Gson();
-                                                String payload = gson.toJson(notificationData);
-
-                                                // Xuất bản thông điệp MQTT
-                                                MQTTUtil.sendMessage(mqttTopic, payload);
-                                                System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
-                                            }
-                                        }
-                                        catch (Exception e) {
-                                            // Xử lý các ngoại lệ khác nếu có
-                                            System.err.println("Error while sending balance change notification: " + e.toString());
-                                        }
 
                                     } catch (Exception e) {
                                         logger.error("transaction-mms: push to QR-Box: " + e.getMessage() + "at: " + System.currentTimeMillis());

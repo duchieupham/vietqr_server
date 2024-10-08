@@ -198,12 +198,26 @@ public interface TerminalBankReceiveRepository extends JpaRepository<TerminalBan
             + "GROUP BY b.code ", nativeQuery = true)
     List<String> getTerminalCodeByUserIdAndBankId(String userId, String bankId);
 
+@Query(value = "SELECT b.code FROM terminal_bank_receive a "
+            + "INNER JOIN terminal b on b.id = a.terminal_id "
+            + "INNER JOIN merchant_member c ON (c.merchant_id = b.merchant_id AND c.terminal_id = b.id) "
+            + "WHERE c.user_id = :userId AND a.bank_id IN (:bankIds) AND c.terminal_id != '' "
+            + "GROUP BY b.code ", nativeQuery = true)
+    List<String> getTerminalCodeByUserIdAndBankId(String userId, List<String> bankIds);
+
     @Query(value = "SELECT b.code FROM terminal_bank_receive a "
             + "INNER JOIN terminal b on b.id = a.terminal_id "
             + "INNER JOIN merchant_member c ON c.merchant_id = b.merchant_id "
             + "WHERE c.user_id = :userId AND a.bank_id = :bankId AND c.terminal_id = '' "
             + "GROUP BY b.code ", nativeQuery = true)
     List<String> getTerminalCodeByUserIdAndBankIdNoTerminal(String userId, String bankId);
+
+    @Query(value = "SELECT b.code FROM terminal_bank_receive a "
+            + "INNER JOIN terminal b on b.id = a.terminal_id "
+            + "INNER JOIN merchant_member c ON c.merchant_id = b.merchant_id "
+            + "WHERE c.user_id = :userId AND a.bank_id IN (:bankIds) AND c.terminal_id = '' "
+            + "GROUP BY b.code ", nativeQuery = true)
+    List<String> getTerminalCodeByUserIdAndBankIdNoTerminal(String userId, List<String> bankIds);
 
     @Query(value = "SELECT a.bank_id FROM terminal_bank_receive a "
             + "INNER JOIN terminal b ON a.terminal_id = b.id "

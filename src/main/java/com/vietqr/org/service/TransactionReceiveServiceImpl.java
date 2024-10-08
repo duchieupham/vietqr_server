@@ -1450,6 +1450,14 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public List<TransactionRelatedV2DTO> getTransactionsV2(List<String> bankIds, String fromDate, String toDate, int offset) {
+        return repo.getTransactionsWebV2(bankIds,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
     public ITransStatisticListExtra getExtraTransactionsV2(String bankId, String fromDate, String toDate) {
         return repo.getExtraTransactionsV2(bankId,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
@@ -1477,6 +1485,14 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public List<TransactionRelatedV2DTO> getTransactionsListCodeV2(List<String> bankIds, List<String> terminalCodes, String fromDate, String toDate, int offset) {
+        return repo.getTransactionsListCodeWebV2(bankIds, terminalCodes,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
     public List<TransactionRelatedV2DTO> getTransactionsV2ByAmount(String bankId, List<String> transType, String value, String fromDate, String toDate, int offset) {
         return repo.getTransactionsV2ByAmount(bankId, transType, value,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
@@ -1485,8 +1501,24 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public List<TransactionRelatedV2DTO> getTransactionsV2ByAmount(List<String> bankIds, String value, String fromDate, String toDate, int offset) {
+        return repo.getTransactionsWebV2ByAmount(bankIds, value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
     public List<TransactionRelatedV2DTO> getTransactionsV2ByStatus(String bankId, List<String> transType, String value, String fromDate, String toDate, int offset) {
         return repo.getTransactionsV2ByStatus(bankId, transType, value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
+    public List<TransactionRelatedV2DTO> getTransactionsV2ByStatus(List<String> bankIds, String value, String fromDate, String toDate, int offset) {
+        return repo.getTransactionsV2ByStatus(bankIds, value,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 offset);
@@ -1502,9 +1534,25 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public List<TransactionRelatedV2DTO> getTransactionsV2ByTerminalCode(List<String> bankIds, List<String> terminalCodes, String fromDate, String toDate, int offset) {
+        return repo.getTransactionsWebV2ByTerminalCode(bankIds, terminalCodes,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
     public List<TransactionRelatedV2DTO> getTransactionsV2ByContent(String bankId, List<String> transType, String value,
                                                                     String fromDate, String toDate, int offset) {
         return repo.getTransactionsV2ByContent(bankId, transType, value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
+    public List<TransactionRelatedV2DTO> getTransactionsV2ByContent(List<String> bankIds, String value, String fromDate, String toDate, int offset) {
+        return repo.getTransactionsWebV2ByContent(bankIds, value,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 offset);
@@ -1520,8 +1568,24 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public List<TransactionRelatedV2DTO> getTransactionsV2ByFtCode(List<String> bankIds, String value, String fromDate, String toDate, int offset) {
+        return repo.getTransactionsWebV2ByFtCode(bankIds, value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
     public List<TransactionRelatedV2DTO> getTransactionsV2ByOrderId(String bankId, List<String> transType, String value, String fromDate, String toDate, int offset) {
         return repo.getTransactionsV2ByOrderId(bankId, transType, value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
+    public List<TransactionRelatedV2DTO> getTransactionsV2ByOrderId(List<String> bankIds, String value, String fromDate, String toDate, int offset) {
+        return repo.getTransactionsWebV2ByOrderId(bankIds, value,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 offset);
@@ -1538,10 +1602,26 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByAmount(List<String> bankIds, List<String> listCode, String value, String fromDate, String toDate, int offset) {
+        return repo.getTransactionsListCodeWebV2ByAmount(bankIds, listCode, value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
     public List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByStatus(String bankId, List<String> terminalCodes,
                                                                            List<String> transType, String value,
                                                                            String fromDate, String toDate, int offset) {
         return repo.getTransactionsListCodeV2ByStatus(bankId, terminalCodes, transType, value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
+    public List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByStatus(List<String> bankIds, List<String> terminalCodes, String value, String fromDate, String toDate, int offset) {
+        return repo.getTransactionsListCodeWebV2ByStatus(bankIds, terminalCodes, value,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 offset);
@@ -1558,10 +1638,26 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByTerminalCode(List<String> bankIds, List<String> terminalCodes, List<String> value, String fromDate, String toDate, int offset) {
+        return repo.getTransactionsListCodeWebV2ByTerminalCode(bankIds, terminalCodes, value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
     public List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByContent(String bankId, List<String> terminalCodes,
                                                                             List<String> transType, String value,
                                                                             String fromDate, String toDate, int offset) {
         return repo.getTransactionsListCodeV2ByContent(bankId, terminalCodes, transType, value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
+    public List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByContent(List<String> bankIds, List<String> terminalCodes, String value, String fromDate, String toDate, int offset) {
+        return repo.getTransactionsListCodeWebV2ByContent(bankIds, terminalCodes, value,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 offset);
@@ -1578,10 +1674,26 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
     }
 
     @Override
+    public List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByOrderId(List<String> bankIds, List<String> terminalCodes, String value, String fromDate, String toDate, int offset) {
+        return repo.getTransactionsListCodeWebV2ByOrderId(bankIds, terminalCodes, value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
     public List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByReferenceNumber(String bankId, List<String> terminalCodes,
                                                                                     List<String> transType, String value,
                                                                                     String fromDate, String toDate, int offset) {
         return repo.getTransactionsListCodeV2ByReferenceNumber(bankId, terminalCodes, transType, value,
+                DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
+                offset);
+    }
+
+    @Override
+    public List<TransactionRelatedV2DTO> getTransactionsListCodeV2ByReferenceNumber(List<String> bankIds, List<String> listCode, String value, String fromDate, String toDate, int offset) {
+        return repo.getTransactionsListCodeWebV2ByReferenceNumber(bankIds, listCode, value,
                 DateTimeUtil.getDateTimeAsLongInt(fromDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 DateTimeUtil.getDateTimeAsLongInt(toDate) - DateTimeUtil.GMT_PLUS_7_OFFSET,
                 offset);

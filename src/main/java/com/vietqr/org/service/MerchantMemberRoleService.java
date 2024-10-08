@@ -25,4 +25,6 @@ public interface MerchantMemberRoleService {
     List<String> getListUserIdRoles(String bankId, String roles);
 
     List<String> getRoleByUserIdAndBankId(String userId, String bankId);
+
+    List<String> getRoleByUserIdAndBankId(String userId, List<String> bankIds);
 }
