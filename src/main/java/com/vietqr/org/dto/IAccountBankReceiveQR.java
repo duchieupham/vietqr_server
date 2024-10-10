@@ -4,4 +4,6 @@ public interface IAccountBankReceiveQR {
     String getId();
     String getBankAccount();
     String getBankAccountName();
+    String getCustomerId();
+    String getUserId();
 }

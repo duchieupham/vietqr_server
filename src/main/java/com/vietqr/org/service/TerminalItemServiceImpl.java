@@ -35,4 +35,9 @@ public class TerminalItemServiceImpl implements TerminalItemService {
     public String existsByIdServiceCodeTerminalCode(String id, String serviceCode, String terminalCode) {
         return repo.existsByIdServiceCodeTerminalCode(id, serviceCode, terminalCode);
     }
+
+    @Override
+    public TerminalItemEntity getTerminalItemByServiceCode(String serviceCode, long amount) {
+        return repo.getTerminalItemByServiceCode(serviceCode, amount);
+    }
 }
