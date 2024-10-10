@@ -406,6 +406,12 @@ public class VietQRController {
 			qrType = dto.getQrType();
 		}
 		try {
+			if (StringUtil.containsOnlyDigits(dto.getBankCode())) {
+				String bankCode = bankTypeService.getBankCodeByCaiValue(dto.getBankCode());
+				if (!StringUtil.isNullOrEmpty(bankCode)) {
+					dto.setBankCode(bankCode);
+				}
+			}
 			switch (qrType) {
 				case 0:
 					response = generateDynamicQrCustomer(dto, token);

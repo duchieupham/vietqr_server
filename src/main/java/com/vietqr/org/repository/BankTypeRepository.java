@@ -59,4 +59,9 @@ public interface BankTypeRepository extends JpaRepository<BankTypeEntity, Long> 
 	@Query(value = "SELECT bank_code AS bankCode, bank_name AS bankName, img_id AS imgId FROM bank_type "
 			+ "WHERE bank_code = :code", nativeQuery = true)
 	IBankTypeQR getBankTypeQRByCode(@Param(value = "code") String code);
+
+	@Query(value = "SELECT a.bank_code FROM bank_type a "
+			+ "INNER JOIN cai_bank b ON a.id = b.bank_type_id "
+			+ "WHERE b.cai_value = :caiValue LIMIT 1", nativeQuery = true)
+    String getBankCodeByCaiValue(String caiValue);
 }
