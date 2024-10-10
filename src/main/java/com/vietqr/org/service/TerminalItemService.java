@@ -14,4 +14,6 @@ public interface TerminalItemService {
     void removeById(String id);
 
     String existsByIdServiceCodeTerminalCode(String id, String serviceCode, String terminalCode);
+
+    TerminalItemEntity getTerminalItemByServiceCode(String serviceCode);
 }

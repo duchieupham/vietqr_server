@@ -139,6 +139,9 @@ public class CustomerInvoiceController {
     SystemSettingService systemSettingService;
 
     @Autowired
+    TerminalItemService terminalItemService;
+
+    @Autowired
     MqttMessagingService mqttMessagingService;
 
     @Autowired
@@ -464,6 +467,30 @@ public class CustomerInvoiceController {
                                     result = new ResponseMessageBidvDTO("000",
                                             "Thành công");
                                     httpStatus = HttpStatus.OK;
+                                } else if (Objects.nonNull(customerInvoiceDataDTO)
+                                && customerInvoiceDataDTO.getQrType() == 3) {
+                                    // semi qr
+                                    accountBankReceiveEntity = accountBankReceiveService
+                                            .getAccountBankByCustomerIdAndByServiceId(dto.getCustomer_id());
+                                    TransactionBidvEntity transactionBidvEntity = new TransactionBidvEntity();
+                                    transactionBidvEntity.setId(UUID.randomUUID().toString());
+                                    transactionBidvEntity.setCustomerId(dto.getCustomer_id());
+                                    transactionBidvEntity.setServiceId(dto.getService_id());
+                                    transactionBidvEntity.setAmount(dto.getAmount());
+                                    transactionBidvEntity.setBillId(dto.getBill_id());
+                                    transactionBidvEntity.setTransDate(dto.getTrans_date());
+                                    transactionBidvEntity.setCheckSum(dto.getChecksum());
+                                    Thread thread = new Thread(() -> {
+                                        transactionBidvService.insert(transactionBidvEntity);
+                                    });
+                                    thread.start();
+                                    // hoá đơn đã gạch nợ rồi
+//                                        result = new ResponseMessageBidvDTO("023",
+//                                                "Hóa đơn đã gạch nợ rồi (mỗi hóa đơn chỉ gạch nợ 1 lần)");
+//                                        httpStatus = HttpStatus.OK;
+                                    result = new ResponseMessageBidvDTO("000",
+                                            "Thành công");
+                                    httpStatus = HttpStatus.OK;
                                 } else if (Objects.nonNull(customerInvoiceDataDTO)) {
                                     // transaction_receive type = 2
                                     accountBankReceiveEntity = accountBankReceiveService
@@ -632,9 +659,24 @@ public class CustomerInvoiceController {
                         }
 
                         if (Objects.nonNull(finalAccountBankReceiveEntity)) {
-                            getCustomerSyncEntities(transactionUUID.toString(), dto, rawCode,
+                            getCustomerSyncEntities(transactionUUID.toString(), dto, rawCode, null,
                                     finalAccountBankReceiveEntity, DateTimeUtil.getCurrentDateTimeUTC());
-                            insertNewTransaction(dto, transactionUUID.toString(), finalAccountBankReceiveEntity, boxIdRef, terminalEntity, rawDTO);
+                            insertNewTransaction(dto, transactionUUID.toString(), finalAccountBankReceiveEntity, boxIdRef, terminalEntity, rawDTO, null);
+                        }
+                        // semi qr
+                    }else if (Objects.nonNull(finalCustomerInvoiceDataDTO)
+                            && finalCustomerInvoiceDataDTO.getQrType() == 3) {
+                        // semi qr
+                        TerminalItemEntity terminalItemEntity = null;
+                        UUID transactionUUID = UUID.randomUUID();
+                        terminalItemEntity = terminalItemService
+                                .getTerminalItemByServiceCode(finalCustomerInvoiceDataDTO.getName());
+
+                        if (Objects.nonNull(finalAccountBankReceiveEntity)) {
+                            getCustomerSyncEntities(transactionUUID.toString(), dto, "", terminalItemEntity,
+                                    finalAccountBankReceiveEntity, DateTimeUtil.getCurrentDateTimeUTC());
+                            insertNewTransaction(dto, transactionUUID.toString(), finalAccountBankReceiveEntity,
+                                    "", null, null, terminalItemEntity);
                         }
                         // hoa đơn BIDV
                     } else if (Objects.nonNull(finalCustomerInvoiceDataDTO)
@@ -682,9 +724,10 @@ public class CustomerInvoiceController {
                         if (Objects.nonNull(rawAccount)) {
                             UUID transactionUUID = UUID.randomUUID();
                             logger.info("bidv/paybill - bill_id detect: " + dto.getBill_id());
-                            getCustomerSyncEntities(transactionUUID.toString(), dto, "",
+                            getCustomerSyncEntities(transactionUUID.toString(), dto, "", null,
                                     rawAccount, DateTimeUtil.getCurrentDateTimeUTC());
-                            insertNewTransaction(dto, transactionUUID.toString(), rawAccount, "", null, null);
+                            insertNewTransaction(dto, transactionUUID.toString(), rawAccount, "",
+                                    null, null, null);
                         }
                     }
                 }
@@ -1067,7 +1110,7 @@ public class CustomerInvoiceController {
 
     private void insertNewTransaction(CustomerInvoicePaymentRequestDTO dto, String transactionUUID,
                                       AccountBankReceiveEntity accountBankReceiveEntity, String boxIdRef,
-                                      TerminalEntity terminalEntity, ISubTerminalCodeDTO subTerminalCodeDTO) {
+                                      TerminalEntity terminalEntity, ISubTerminalCodeDTO subTerminalCodeDTO, TerminalItemEntity terminalItemEntity) {
         String amountForVoice = dto.getAmount();
         String amount = processHiddenAmount(Long.parseLong(dto.getAmount()), accountBankReceiveEntity.getId(),
                 accountBankReceiveEntity.isValidService(), transactionUUID);
@@ -1087,10 +1130,16 @@ public class CustomerInvoiceController {
         transactionReceiveEntity.setRefId(UUID.randomUUID().toString());
         if (Objects.nonNull(terminalEntity)) {
             transactionReceiveEntity.setType(1);
+            transactionReceiveEntity.setServiceCode("");
             transactionReceiveEntity.setTerminalCode(terminalEntity.getCode());
         } else if (Objects.nonNull(subTerminalCodeDTO)) {
             transactionReceiveEntity.setType(1);
+            transactionReceiveEntity.setServiceCode("");
             transactionReceiveEntity.setTerminalCode(subTerminalCodeDTO.getCode());
+        } else if (Objects.nonNull(terminalItemEntity)) {
+            transactionReceiveEntity.setType(3);
+            transactionReceiveEntity.setTerminalCode(terminalItemEntity.getTerminalCode());
+            transactionReceiveEntity.setServiceCode(terminalItemEntity.getServiceCode());
         } else {
             transactionReceiveEntity.setType(2);
             transactionReceiveEntity.setTerminalCode("");
@@ -1104,7 +1153,6 @@ public class CustomerInvoiceController {
         transactionReceiveEntity.setCustomerBankAccount("");
         transactionReceiveEntity.setCustomerBankCode("");
         transactionReceiveEntity.setCustomerName("");
-        transactionReceiveEntity.setServiceCode("");
         transactionReceiveEntity.setQrCode("");
         transactionReceiveEntity.setUserId(accountBankReceiveEntity.getUserId());
         transactionReceiveEntity.setNote("");
@@ -1228,6 +1276,7 @@ public class CustomerInvoiceController {
     }
 
     private ResponseMessageDTO getCustomerSyncEntities(String transactionUUID, CustomerInvoicePaymentRequestDTO dto, String rawCode,
+                                                       TerminalItemEntity terminalItemEntity,
                                          AccountBankReceiveEntity accountBankEntity, long time) {
         ResponseMessageDTO result = new ResponseMessageDTO("SUCCESS", "");
         try {
@@ -1250,7 +1299,12 @@ public class CustomerInvoiceController {
                 transactionBankCustomerDTO.setSign("");
                 transactionBankCustomerDTO.setOrderId("");
                 transactionBankCustomerDTO.setTerminalCode(rawCode);
-                transactionBankCustomerDTO.setServiceCode("");
+                if (Objects.nonNull(terminalItemEntity)) {
+                    transactionBankCustomerDTO.setServiceCode(terminalItemEntity.getRawServiceCode());
+                    transactionBankCustomerDTO.setTerminalCode(terminalItemEntity.getTerminalCode());
+                } else {
+                    transactionBankCustomerDTO.setServiceCode("");
+                }
                 transactionBankCustomerDTO.setUrlLink("");
                 List<AccountCustomerBankEntity> accountCustomerBankEntities = new ArrayList<>();
                 accountCustomerBankEntities = accountCustomerBankService
