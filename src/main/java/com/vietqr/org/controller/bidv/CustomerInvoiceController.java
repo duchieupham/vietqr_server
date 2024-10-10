@@ -669,8 +669,9 @@ public class CustomerInvoiceController {
                         // semi qr
                         TerminalItemEntity terminalItemEntity = null;
                         UUID transactionUUID = UUID.randomUUID();
+                        long amount = Long.parseLong(dto.getAmount());
                         terminalItemEntity = terminalItemService
-                                .getTerminalItemByServiceCode(finalCustomerInvoiceDataDTO.getName());
+                                .getTerminalItemByServiceCode(finalCustomerInvoiceDataDTO.getName(), amount);
 
                         if (Objects.nonNull(finalAccountBankReceiveEntity)) {
                             getCustomerSyncEntities(transactionUUID.toString(), dto, "", terminalItemEntity,

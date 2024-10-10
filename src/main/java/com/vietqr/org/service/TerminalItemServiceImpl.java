@@ -37,7 +37,7 @@ public class TerminalItemServiceImpl implements TerminalItemService {
     }
 
     @Override
-    public TerminalItemEntity getTerminalItemByServiceCode(String serviceCode) {
-        return repo.getTerminalItemByServiceCode(serviceCode);
+    public TerminalItemEntity getTerminalItemByServiceCode(String serviceCode, long amount) {
+        return repo.getTerminalItemByServiceCode(serviceCode, amount);
     }
 }

@@ -30,5 +30,5 @@ public interface TerminalItemRepository extends JpaRepository<TerminalItemEntity
 
     @Query(value = "SELECT * FROM terminal_item "
             + "WHERE service_code = :serviceCode AND amount = :amount LIMIT 1", nativeQuery = true)
-    TerminalItemEntity getTerminalItemByServiceCode(String serviceCode);
+    TerminalItemEntity getTerminalItemByServiceCode(String serviceCode, long amount);
 }

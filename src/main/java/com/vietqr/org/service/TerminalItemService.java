@@ -15,5 +15,5 @@ public interface TerminalItemService {
 
     String existsByIdServiceCodeTerminalCode(String id, String serviceCode, String terminalCode);
 
-    TerminalItemEntity getTerminalItemByServiceCode(String serviceCode);
+    TerminalItemEntity getTerminalItemByServiceCode(String serviceCode, long amount);
 }
