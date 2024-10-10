@@ -340,12 +340,13 @@ public class TransactionMMSController {
 
                                             // Xuất bản thông điệp MQTT
                                             MQTTUtil.sendMessage(mqttTopic, payload);
-                                            System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
+                                            logger.info("Balance change notification sent to topic: " + mqttTopic + " Payload: "
+                                                    + payload + " at: " + System.currentTimeMillis());
                                         }
                                     }
                                     catch (Exception e) {
                                         // Xử lý các ngoại lệ khác nếu có
-                                        System.err.println("Error while sending balance change notification: " + e.toString());
+                                        logger.error("Error while sending balance change notification: " + e.toString());
                                     }
                                 });
                                 thread2.start();
@@ -353,9 +354,18 @@ public class TransactionMMSController {
                                 logger.error("getCustomerSyncEntitiesV2: ERROR: " + e.getMessage() +
                                         " at: " + System.currentTimeMillis());
                             }
-                            getCustomerSyncEntities(tempTransReceive.getId(), tempTerminalBank.getId(),
-                                    entity.getFtCode(),
-                                    tempTransReceive, timePaid, rawCode, urlLink, "", tempTransReceive.getSubCode());
+                            try {
+                                final String finalRawCode = rawCode;
+                                Thread thread2 = new Thread(() -> {
+                                    getCustomerSyncEntities(tempTransReceive.getId(), tempTerminalBank.getId(),
+                                            entity.getFtCode(),
+                                            tempTransReceive, timePaid, finalRawCode, urlLink, "", tempTransReceive.getSubCode());
+                                });
+                                thread2.start();
+                            } catch (Exception e) {
+                                logger.error("getCustomerSyncEntitiesV2: ERROR: " + e.getMessage() +
+                                        " at: " + System.currentTimeMillis());
+                            }
                             try {
                                 final String finalRawCode = rawCode;
                                 Thread thread2 = new Thread(() -> {
@@ -605,10 +615,10 @@ public class TransactionMMSController {
                                 data.put("transType", "C");
                                 TerminalBankEntity terminalBankEntitySync = terminalBankService
                                         .getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
-                                try {
-                                    Thread thread4 = new Thread(() -> {
-                                        try {
-                                            if (terminalBankEntitySync != null) {
+                                if (terminalBankEntitySync != null) {
+                                    try {
+                                        Thread thread4 = new Thread(() -> {
+                                            try {
                                                 // push data to customerSync
                                                 ////////////////////////
                                                 getCustomerSyncEntities(transactionReceive.getId(),
@@ -616,23 +626,22 @@ public class TransactionMMSController {
                                                         entity.getFtCode(),
                                                         transactionReceive, timePaid, "", "",
                                                         terminalItemEntity.getRawServiceCode(), "");
-                                            } else {
-                                                logger.info("transaction-mms-sync: NOT FOUND TerminalBankEntity");
+                                            } catch (Exception e) {
+                                                // Xử lý các ngoại lệ khác nếu có
+                                                logger.error("Error while getCustomerSyncEntities: " + e.toString());
                                             }
-                                        }
-                                        catch (Exception e) {
-                                            // Xử lý các ngoại lệ khác nếu có
-                                            System.err.println("Error while getCustomerSyncEntities: " + e.toString());
-                                        }
-                                    });
-                                    thread4.start();
-                                } catch (Exception e) {
-                                    logger.error("getCustomerSyncEntities: ERROR: " + e.getMessage() +
-                                            " at: " + System.currentTimeMillis());
+                                        });
+                                        thread4.start();
+                                    } catch (Exception e) {
+                                        logger.error("getCustomerSyncEntities: ERROR: " + e.getMessage() +
+                                                " at: " + System.currentTimeMillis());
+                                    }
+                                } else {
+                                    logger.info("transaction-mms-sync: NOT FOUND TerminalBankEntity");
                                 }
-
                                 pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
-                                        message, notiEntity, data, accountBankReceiveEntity.getUserId(), StringUtil.getValueNullChecker(accountBankReceiveEntity.getPushNotification(), 1));
+                                        message, notiEntity, data, accountBankReceiveEntity.getUserId(),
+                                        StringUtil.getValueNullChecker(accountBankReceiveEntity.getPushNotification(), 1));
 
                                 // Push notifications to Telegram
                                 List<String> webhooks = larkAccountBankService.getWebhooksByBankId(terminalItemEntity.getBankId());
@@ -1269,8 +1278,6 @@ public class TransactionMMSController {
                                                         bankTypeId);
 
                                         Long amount = Long.parseLong(entity.getDebitAmount() + "");
-
-
                                         // /////// DO INSERT TELEGRAM
                                         List<String> chatIds = telegramAccountBankService
                                                 .getChatIdsByBankId(bankDTO.getBankId());
