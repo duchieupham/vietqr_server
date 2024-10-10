@@ -27,4 +27,8 @@ public interface TerminalItemRepository extends JpaRepository<TerminalItemEntity
     @Query(value = "SELECT id FROM terminal_item WHERE bank_id = :bankId "
             + "AND terminal_code = :terminalCode AND raw_service_code = :serviceCode", nativeQuery = true)
     String existsByIdServiceCodeTerminalCode(String bankId, String serviceCode, String terminalCode);
+
+    @Query(value = "SELECT * FROM terminal_item "
+            + "WHERE service_code = :serviceCode AND amount = :amount LIMIT 1", nativeQuery = true)
+    TerminalItemEntity getTerminalItemByServiceCode(String serviceCode, long amount);
 }

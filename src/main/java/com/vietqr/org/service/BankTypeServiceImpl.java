@@ -83,4 +83,9 @@ public class BankTypeServiceImpl implements BankTypeService {
 	public IBankTypeQR getBankTypeQRByCode(String code) {
 		return bankTypeRepository.getBankTypeQRByCode(code);
 	}
+
+	@Override
+	public String getBankCodeByCaiValue(String caiValue) {
+		return bankTypeRepository.getBankCodeByCaiValue(caiValue);
+	}
 }
