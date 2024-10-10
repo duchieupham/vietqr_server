@@ -605,53 +605,31 @@ public class TransactionMMSController {
                                 data.put("transType", "C");
                                 TerminalBankEntity terminalBankEntitySync = terminalBankService
                                         .getTerminalBankByBankAccount(accountBankReceiveEntity.getBankAccount());
-                                if (terminalBankEntitySync != null) {
-                                    // push data to customerSync
-                                    ////////////////////////
-                                    getCustomerSyncEntities(transactionReceive.getId(),
-                                            terminalBankEntitySync.getId(),
-                                            entity.getFtCode(),
-                                            transactionReceive, timePaid, "", "",
-                                            terminalItemEntity.getRawServiceCode(), "");
-                                } else {
-                                    logger.info("transaction-mms-sync: NOT FOUND TerminalBankEntity");
+                                try {
+                                    Thread thread4 = new Thread(() -> {
+                                        try {
+                                            if (terminalBankEntitySync != null) {
+                                                // push data to customerSync
+                                                ////////////////////////
+                                                getCustomerSyncEntities(transactionReceive.getId(),
+                                                        terminalBankEntitySync.getId(),
+                                                        entity.getFtCode(),
+                                                        transactionReceive, timePaid, "", "",
+                                                        terminalItemEntity.getRawServiceCode(), "");
+                                            } else {
+                                                logger.info("transaction-mms-sync: NOT FOUND TerminalBankEntity");
+                                            }
+                                        }
+                                        catch (Exception e) {
+                                            // Xử lý các ngoại lệ khác nếu có
+                                            System.err.println("Error while getCustomerSyncEntities: " + e.toString());
+                                        }
+                                    });
+                                    thread4.start();
+                                } catch (Exception e) {
+                                    logger.error("getCustomerSyncEntities: ERROR: " + e.getMessage() +
+                                            " at: " + System.currentTimeMillis());
                                 }
-
-                                // DO INSERT MQTT BY QVAN
-//                                try {
-//                                    if(finalTransactionReceiveEntity.getAdditionalData() != null) {
-//                                        ObjectMapper objectMapper = new ObjectMapper();
-//                                        JsonNode additionalDataArray = objectMapper.readTree(finalTransactionReceiveEntity.getAdditionalData());
-//                                        String terminalCode = additionalDataArray.get(0).get("terminalCode").asText();
-//
-//                                        // Tạo mqttTopic với giá trị terminalCode
-//                                        String mqttTopic = "vietqr/bdsd/" + terminalCode;
-//
-//                                        // Tạo dữ liệu JSON thông báo
-//                                        Map<String, Object> notificationData = new HashMap<>();
-//                                        notificationData.put("referenceNumber", entity.getFtCode());
-//                                        notificationData.put("bankAccount", finalTransactionReceiveEntity.getBankAccount());
-//                                        notificationData.put("amount", finalTransactionReceiveEntity.getAmount());
-//                                        notificationData.put("transType", finalTransactionReceiveEntity.getTransType());
-//                                        notificationData.put("content", finalTransactionReceiveEntity.getContent());
-//                                        notificationData.put("status", 1);
-//                                        String formattedTime = formatTimeUtcPlus(finalTransactionReceiveEntity.getTimePaid());
-//                                        notificationData.put("timePaid", formattedTime);
-//                                        notificationData.put("orderId", finalTransactionReceiveEntity.getOrderId());
-//
-//                                        // Chuyển đổi dữ liệu thành chuỗi JSON
-//                                        Gson gson = new Gson();
-//                                        String payload = gson.toJson(notificationData);
-//
-//                                        // Xuất bản thông điệp MQTT
-//                                        MQTTUtil.sendMessage(mqttTopic, payload);
-//                                        System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
-//                                    }
-//                                }
-//                                catch (Exception e) {
-//                                    // Xử lý các ngoại lệ khác nếu có
-//                                    System.err.println("Error while sending balance change notification: " + e.toString());
-//                                }
 
                                 pushNotification(NotificationUtil.getNotiTitleUpdateTransaction(),
                                         message, notiEntity, data, accountBankReceiveEntity.getUserId(), StringUtil.getValueNullChecker(accountBankReceiveEntity.getPushNotification(), 1));
@@ -1103,41 +1081,6 @@ public class TransactionMMSController {
                                                 executorService.shutdownNow(); // Nếu bị ngắt khi chờ, cưỡng chế dừng
                                             }
                                         }
-                                        // DO INSERT MQTT BY QVAN
-//                                        try {
-//                                            if(finalTransactionReceiveEntity.getAdditionalData() != null) {
-//                                                ObjectMapper objectMapper = new ObjectMapper();
-//                                                JsonNode additionalDataArray = objectMapper.readTree(finalTransactionReceiveEntity.getAdditionalData());
-//                                                String terminalCode = additionalDataArray.get(0).get("terminalCode").asText();
-//
-//                                                // Tạo mqttTopic với giá trị terminalCode
-//                                                String mqttTopic = "vietqr/bdsd/" + terminalCode;
-//
-//                                                // Tạo dữ liệu JSON thông báo
-//                                                Map<String, Object> notificationData = new HashMap<>();
-//                                                notificationData.put("referenceNumber", entity.getFtCode());
-//                                                notificationData.put("bankAccount", finalTransactionReceiveEntity.getBankAccount());
-//                                                notificationData.put("amount", finalTransactionReceiveEntity.getAmount());
-//                                                notificationData.put("transType", finalTransactionReceiveEntity.getTransType());
-//                                                notificationData.put("content", finalTransactionReceiveEntity.getContent());
-//                                                notificationData.put("status", 1);
-//                                                String formattedTime = formatTimeUtcPlus(finalTransactionReceiveEntity.getTimePaid());
-//                                                notificationData.put("timePaid", formattedTime);
-//                                                notificationData.put("orderId", finalTransactionReceiveEntity.getOrderId());
-//
-//                                                // Chuyển đổi dữ liệu thành chuỗi JSON
-//                                                Gson gson = new Gson();
-//                                                String payload = gson.toJson(notificationData);
-//
-//                                                // Xuất bản thông điệp MQTT
-//                                                MQTTUtil.sendMessage(mqttTopic, payload);
-//                                                System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
-//                                            }
-//                                        }
-//                                        catch (Exception e) {
-//                                            // Xử lý các ngoại lệ khác nếu có
-//                                            System.err.println("Error while sending balance change notification: " + e.toString());
-//                                        }
 
                                         // /////// DO INSERT TELEGRAM
                                         List<String> chatIds = telegramAccountBankService
@@ -1327,41 +1270,7 @@ public class TransactionMMSController {
 
                                         Long amount = Long.parseLong(entity.getDebitAmount() + "");
 
-                                        // DO INSERT MQTT BY QVAN
-//                                        try {
-//                                            if(finalTransactionReceiveEntity.getAdditionalData() != null) {
-//                                                ObjectMapper objectMapper = new ObjectMapper();
-//                                                JsonNode additionalDataArray = objectMapper.readTree(finalTransactionReceiveEntity.getAdditionalData());
-//                                                String terminalCode = additionalDataArray.get(0).get("terminalCode").asText();
-//
-//                                                // Tạo mqttTopic với giá trị terminalCode
-//                                                String mqttTopic = "vietqr/bdsd/" + terminalCode;
-//
-//                                                // Tạo dữ liệu JSON thông báo
-//                                                Map<String, Object> notificationData = new HashMap<>();
-//                                                notificationData.put("referenceNumber", finalTransactionReceiveEntity.getReferenceNumber());
-//                                                notificationData.put("bankAccount", finalTransactionReceiveEntity.getBankAccount());
-//                                                notificationData.put("amount", finalTransactionReceiveEntity.getAmount());
-//                                                notificationData.put("transType", finalTransactionReceiveEntity.getTransType());
-//                                                notificationData.put("content", finalTransactionReceiveEntity.getContent());
-//                                                notificationData.put("status", 1);
-//                                                String formattedTime = formatTimeUtcPlus(finalTransactionReceiveEntity.getTimePaid());
-//                                                notificationData.put("timePaid", formattedTime);
-//                                                notificationData.put("orderId", finalTransactionReceiveEntity.getOrderId());
-//
-//                                                // Chuyển đổi dữ liệu thành chuỗi JSON
-//                                                Gson gson = new Gson();
-//                                                String payload = gson.toJson(notificationData);
-//
-//                                                // Xuất bản thông điệp MQTT
-//                                                MQTTUtil.sendMessage(mqttTopic, payload);
-//                                                System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
-//                                            }
-//                                        }
-//                                        catch (Exception e) {
-//                                            // Xử lý các ngoại lệ khác nếu có
-//                                            System.err.println("Error while sending balance change notification: " + e.toString());
-//                                        }
+
                                         // /////// DO INSERT TELEGRAM
                                         List<String> chatIds = telegramAccountBankService
                                                 .getChatIdsByBankId(bankDTO.getBankId());
