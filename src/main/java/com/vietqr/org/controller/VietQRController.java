@@ -1390,7 +1390,7 @@ public class VietQRController {
 						if (StringUtil.isNullOrEmpty(dto.getContent())) {
 							content = dto.getServiceCode();
 						}
-						serviceCode = getRandomBillId();
+						serviceCode = getTerminalCode();
 						String transType = "C";
 						if (dto.getTransType() != null) {
 							transType = dto.getTransType().trim();
@@ -1501,11 +1501,11 @@ public class VietQRController {
 						break;
 					case "BIDV":
 						qr = "";
-						serviceCode = getRandomBillId();
+						serviceCode = getTerminalCode();
 						String billId = RandomCodeUtil.getRandomBillId();
 						VietQRCreateDTO vietQRCreateDTO = new VietQRCreateDTO();
 						vietQRCreateDTO.setBankId(accountBankReceiveEntity.getId());
-						vietQRCreateDTO.setAmount("0");
+						vietQRCreateDTO.setAmount(dto.getAmount() + "");
 						vietQRCreateDTO.setContent(billId);
 						vietQRCreateDTO.setUserId(accountBankReceiveEntity.getUserId());
 						vietQRCreateDTO.setServiceCode(serviceCode);
