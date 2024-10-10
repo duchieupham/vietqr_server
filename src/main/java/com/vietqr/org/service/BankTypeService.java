@@ -41,4 +41,6 @@ public interface BankTypeService {
     IBankTypeQR getBankTypeQRById(String id);
 
     IBankTypeQR getBankTypeQRByCode(String code);
+
+    String getBankCodeByCaiValue(String caiValue);
 }
