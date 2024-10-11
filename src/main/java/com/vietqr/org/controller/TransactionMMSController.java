@@ -3205,6 +3205,9 @@ public class TransactionMMSController {
                     else if ((rootNode.get("errorCode").asText()).trim().equals("4857")) {
                         result = "4857";
                     }
+                    else if ((rootNode.get("errorCode").asText()).trim() != null) {
+                        result = rootNode.get("errorCode").asText();
+                    }
                 } else {
                     logger.error("refundFromMB: RESPONSE: ERROR CODE NULL");
                 }
