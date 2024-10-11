@@ -116,10 +116,10 @@ public class TransactionReceiveEntity implements Serializable {
 
 	// for customers
 	@Column(name = "orderId")
-	private String orderId;
+	private String orderId = "";
 
 	@Column(name = "sign")
-	private String sign;
+	private String sign = "";
 
 	@Column(name = "customerBankAccount")
 	private String customerBankAccount;

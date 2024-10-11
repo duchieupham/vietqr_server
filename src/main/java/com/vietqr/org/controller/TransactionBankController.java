@@ -3847,7 +3847,8 @@ public class TransactionBankController {
                     transactionEntity.setSubCode("");
                     transactionEntity.setServiceCode(terminalItemEntity.getServiceCode());
                 }
-            } else {
+            } else if (accountBankEntity.isMmsActive() && "D".equals(dto.getTransType())) {
+                // Trong trường hợp đã lưu xuống redis thì chỉ cần lấy từ redis lên để xử lí
                 RefundMappingRedisDTO refundMappingRedisDTO = getRedisTransTypeD(dto.getReferencenumber());
                 if (Objects.nonNull(refundMappingRedisDTO)) {
                     transactionEntity.setType(0);
@@ -3855,12 +3856,15 @@ public class TransactionBankController {
                     transactionEntity.setSubCode(refundMappingRedisDTO.getSubTerminalCode());
                     transactionEntity.setOrderId(refundMappingRedisDTO.getOrderId());
                 } else {
+                    // Trong trường hợp redis không lưu, nhưng đẫ lưu thành công vào database (redis bị disconnect),
+                    // MB gửi BĐSD chậm khiến giao dịch trong redis bị clear
                     TransactionRefundLogEntity transactionRefundLogEntity =
                             transactionRefundLogService.getByTransactionRefundByReferenceNumber(dto.getReferencenumber());
 
                     if (Objects.nonNull(transactionRefundLogEntity)) {
                         TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
                                 .getTransactionReceiveByRefNumber(transactionRefundLogEntity.getRefNumber(), "C");
+                        // Trong trường hợp tìm thấy giao dịch được hoàn tiền lưu trong hệ thống VietQR
                         if (Objects.nonNull(transactionReceiveEntity)) {
                             refundMappingRedisDTO =
                                     new RefundMappingRedisDTO(transactionReceiveEntity.getTerminalCode(), transactionReceiveEntity.getSubCode(),
@@ -3869,6 +3873,7 @@ public class TransactionBankController {
                             transactionEntity.setTerminalCode(refundMappingRedisDTO.getTerminalCode());
                             transactionEntity.setSubCode(refundMappingRedisDTO.getSubTerminalCode());
                             transactionEntity.setOrderId(refundMappingRedisDTO.getOrderId());
+                        // Trong trường hợp không tìm thấy giao dịch trong hệ thống VietQR
                         } else {
                             transactionEntity.setType(2);
                             transactionEntity.setTerminalCode("");
@@ -3882,6 +3887,11 @@ public class TransactionBankController {
                         transactionEntity.setOrderId("");
                     }
                 }
+            } else {
+                transactionEntity.setType(2);
+                transactionEntity.setTerminalCode("");
+                transactionEntity.setSubCode("");
+                transactionEntity.setOrderId("");
             }
             transactionEntity.setStatus(1);
             transactionEntity.setTraceId("");
