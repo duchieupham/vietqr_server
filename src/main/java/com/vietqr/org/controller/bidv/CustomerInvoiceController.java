@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.mapper.ErrorCodeMapper;
 import com.vietqr.org.entity.*;
@@ -626,6 +628,50 @@ public class CustomerInvoiceController {
                                 String urlLink = transactionReceiveEntity.getUrlLink() != null
                                         ? transactionReceiveEntity.getUrlLink()
                                         : "";
+                                try {
+                                    Thread thread2 = new Thread(() -> {
+                                        // DO INSERT MQTT BY QVAN
+                                        try {
+                                            if(transactionReceiveEntity.getAdditionalData() != null) {
+                                                ObjectMapper objectMapper = new ObjectMapper();
+                                                JsonNode additionalDataArray = objectMapper.readTree(transactionReceiveEntity.getAdditionalData());
+                                                String terminalCode = additionalDataArray.get(0).get("terminalCode").asText();
+
+                                                // Tạo mqttTopic với giá trị terminalCode
+                                                String mqttTopic = "vietqr/bdsd/" + terminalCode;
+
+                                                // Tạo dữ liệu JSON thông báo
+                                                Map<String, Object> notificationData = new HashMap<>();
+                                                notificationData.put("referenceNumber", transactionReceiveEntity.getReferenceNumber());
+                                                notificationData.put("bankAccount", transactionReceiveEntity.getBankAccount());
+                                                notificationData.put("amount", transactionReceiveEntity.getAmount());
+                                                notificationData.put("transType", transactionReceiveEntity.getTransType());
+                                                notificationData.put("content", transactionReceiveEntity.getContent());
+                                                notificationData.put("status", 1);
+                                                String formattedTime = formatTimeUtcPlus(transactionReceiveEntity.getTimePaid());
+                                                notificationData.put("timePaid", formattedTime);
+                                                notificationData.put("orderId", transactionReceiveEntity.getOrderId());
+
+                                                // Chuyển đổi dữ liệu thành chuỗi JSON
+                                                Gson gson = new Gson();
+                                                String payload = gson.toJson(notificationData);
+
+                                                // Xuất bản thông điệp MQTT
+                                                MQTTUtil.sendMessage(mqttTopic, payload);
+                                                logger.info("Balance change notification sent to topic: " + mqttTopic + " Payload: "
+                                                        + payload + " at: " + System.currentTimeMillis());
+                                            }
+                                        }
+                                        catch (Exception e) {
+                                            // Xử lý các ngoại lệ khác nếu có
+                                            logger.error("Error while sending balance change notification: " + e.toString());
+                                        }
+                                    });
+                                    thread2.start();
+                                } catch (Exception e) {
+                                    logger.error("getCustomerSyncEntitiesV2: ERROR: " + e.getMessage() +
+                                            " at: " + System.currentTimeMillis());
+                                }
                                 getCustomerSyncEntities(transactionReceiveEntity.getId(), dto, transactionReceiveEntity,
                                         finalAccountBankReceiveEntity, DateTimeUtil.getCurrentDateTimeUTC(),
                                         orderId, sign, rawCode, urlLink, transactionReceiveEntity.getTerminalCode());
@@ -2528,5 +2574,12 @@ public class CustomerInvoiceController {
             logger.error("getRandomBillId: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
         }
         return result;
+    }
+
+    private  String formatTimeUtcPlus(long time) {
+        long utcPlusSevenTime = time + 25200;
+        LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochSecond(utcPlusSevenTime), ZoneId.of("GMT"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss", Locale.ENGLISH);
+        return dateTime.format(formatter);
     }
 }

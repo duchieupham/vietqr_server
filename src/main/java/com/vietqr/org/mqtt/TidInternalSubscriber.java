@@ -1589,7 +1589,7 @@ public class TidInternalSubscriber {
             }
             if (dto != null
                     && content.length() <= 19
-                    && orderId.length() <= 13
+                    && orderId.length() <= 22
                     && dto.getAmount() != null && !dto.getBankAccount().trim().isEmpty()
                     && dto.getBankAccount() != null && !dto.getBankAccount().trim().isEmpty()
                     && dto.getBankCode() != null && dto.getBankCode().equals("MB")
