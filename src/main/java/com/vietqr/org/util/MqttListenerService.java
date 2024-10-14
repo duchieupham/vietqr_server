@@ -55,7 +55,7 @@ public class MqttListenerService implements MqttCallback {
     @PostConstruct
     public void startListening() throws MqttException {
         mqttClient.setCallback(this);
-        mqttClient.subscribe("#", 2);
+        mqttClient.subscribe("#", 1);
     }
 
     @PreDestroy
@@ -89,7 +89,7 @@ public class MqttListenerService implements MqttCallback {
                 }
                 logger.info("MQTT Listener: Successfully reconnected after " + attempt + " attempt(s).");
 
-            } catch (MqttException | InterruptedException e) {
+            } catch (Exception e) {
                 logger.error("MQTT Listener: ERROR: Reconnection attempt " + attempt + " failed: " + e.getMessage());
                 if (mqttClient.isConnected()) {
                     reconnected = true; // If reconnect succeeds, set reconnected to true
