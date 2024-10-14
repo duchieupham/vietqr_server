@@ -1,17 +1,33 @@
 package com.vietqr.org.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TransactionBankMMSDTO {
+    @JsonProperty(value = "traceTransfer")
     private String traceTransfer;
+    @JsonProperty(value = "ftCode")
     private String ftCode;
+    @JsonProperty(value = "storeLabel")
     private String storeLabel;
+    @JsonProperty(value = "terminalLabel")
     private String terminalLabel;
+    @JsonProperty(value = "debitAmount")
     private String debitAmount;
+    @JsonProperty(value = "realAmount")
     private String realAmount;
+    @JsonProperty(value = "payDate")
     private String payDate;
+    @JsonProperty(value = "respCode")
     private String respCode;
+    @JsonProperty(value = "respDesc")
     private String respDesc;
+    @JsonProperty(value = "checkSum")
     private String checkSum;
+    @JsonProperty(value = "qrCodeId")
     private String qrCodeId;
+    @JsonProperty(value = "rate")
     private String rate;
 
     public TransactionBankMMSDTO() {
