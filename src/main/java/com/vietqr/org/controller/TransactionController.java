@@ -4307,7 +4307,7 @@ public class TransactionController {
         ExecutorService executorService = Executors.newFixedThreadPool(3);
 
         try {
-            List<String> bankIds = accountBankReceiveService.getListBankIdByUserId(userId);
+            List<String> bankIds = accountBankReceiveService.getListBankIdsByUserId(userId);
             TypeValueFilterDTO typeCase = processFilterSearch(value, bankIds);
             List<BankDetailTypeCaiValueDTO> bankDetailDTOs = getBankDetails(executorService, bankIds);
             List<TransactionRelatedV2DTO> transactions = getTransactions(
@@ -4321,7 +4321,7 @@ public class TransactionController {
                     offset
             );
             result.addAll(processTransactions(transactions, bankIds, bankDetailDTOs));
-            if(transactions.size() < 20){
+            if(transactions.size() < 20) {
                 ResponseObjectDTO terminalAccessResponse = getTerminalCodeAccess(executorService, bankIds, userId);
                 List<String> bankIdsShared = accountBankReceiveShareService.getListBankIdSharedByUserId(userId);
                 List<TransactionRelatedV2DTO> transactionsShared = getTransactions(

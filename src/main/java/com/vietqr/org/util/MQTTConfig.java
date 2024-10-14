@@ -30,7 +30,7 @@ public class MQTTConfig {
         MemoryPersistence persistence = new MemoryPersistence();
         IMqttClient client = new MqttClient(brokerUrl, clientId, persistence);
         MqttConnectOptions connOpts = new MqttConnectOptions();
-        connOpts.setCleanSession(true);
+        connOpts.setCleanSession(false);
         connOpts.setUserName(username);
         connOpts.setPassword(password.toCharArray());
         connOpts.setAutomaticReconnect(true);

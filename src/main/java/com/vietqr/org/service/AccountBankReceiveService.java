@@ -197,5 +197,5 @@ public interface AccountBankReceiveService {
 
 	IAccountBankReceiveMMS getAccountBankReceiveQRByBankAccountAndBankCode(String bankAccount, String bankCode);
 
-	List<String> getListBankIdByUserId(String userId);
+	List<String> getListBankIdsByUserId(String userId);
 }
