@@ -45,6 +45,7 @@ import com.vietqr.org.util.bank.bidv.BIDVUtil;
 
 import com.vietqr.org.util.bank.bidv.CustomerVaUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -249,6 +250,9 @@ public class TransactionBankController {
 
     @Autowired
     GoogleSheetService googleSheetService;
+
+    @Autowired
+    private TransactionMMSService transactionMMSService;
 
     private String getUsernameFromToken(String token) {
         String result = "";
@@ -717,9 +721,12 @@ public class TransactionBankController {
             checkDuplicate =
                     checkDuplicateReferenceNumber(dto.getReferencenumber(), dto.getTransType());
 
-            responseObjectDTO =checkOrderFromMB(dto.getReferencenumber(), "");
-            if (Objects.nonNull(responseObjectDTO) && responseObjectDTO.getStatus().equals("SUCCESS")) {
-                transactionBankMMSDTO = (TransactionBankMMSDTO) responseObjectDTO.getData();
+            // nếu chưa có thì checkOrder
+            if (checkDuplicate) {
+                responseObjectDTO =checkOrderFromMB(dto.getReferencenumber(), "");
+                if (Objects.nonNull(responseObjectDTO) && responseObjectDTO.getStatus().equals("SUCCESS")) {
+                    transactionBankMMSDTO = (TransactionBankMMSDTO) responseObjectDTO.getData();
+                }
             }
         }
         try {
@@ -753,6 +760,7 @@ public class TransactionBankController {
                                             "", "", transactionMMS.getOrderId(), "", transactionBankMMSDTO.getFtCode(),
                                             "/integration-bluecom/vqr/api/transaction-mms"
                                     );
+                                    transactionMMSService.insertTransactionMMS(transactionMMSEntity);
                                 } else {
                                     transactionBankService.insertTransactionBank(dto.getTransactionid(),
                                             dto.getTransactiontime(),
@@ -6711,7 +6719,8 @@ public class TransactionBankController {
                     logger.info("checkOrderFromMB: RESPONSE: " + rootNode.asText() + " orderId: " + orderId);
                     if ((rootNode.get("errorCode").asText()).trim().equals("000")) {
                         if (rootNode.get("data").get("traceTransfer") != null) {
-                            result = new ResponseObjectDTO("SUCCESS", rootNode.get("data").get("traceTransfer"));
+                            TransactionBankMMSDTO transactionBankMMSDTO = objectMapper.treeToValue(rootNode.get("data"), TransactionBankMMSDTO.class);
+                            result = new ResponseObjectDTO("SUCCESS", transactionBankMMSDTO);
                             logger.info("checkOrderFromMB: RESPONSE FT: " + result);
                         } else {
                             result = new ResponseObjectDTO("FAILED", "E05");

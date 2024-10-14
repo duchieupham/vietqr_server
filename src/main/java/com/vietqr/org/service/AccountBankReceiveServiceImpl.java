@@ -704,7 +704,7 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
     }
 
     @Override
-    public List<String> getListBankIdByUserId(String userId) {
+    public List<String> getListBankIdsByUserId(String userId) {
         return repo.getListBankIdByUserId(userId);
     }
 

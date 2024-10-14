@@ -71,13 +71,21 @@ public class MqttListenerService implements MqttCallback {
         boolean reconnected = false;
         int attempt = 0;
         GoogleChatUtil googleChatUtil = new GoogleChatUtil();
+        if (EnvironmentUtil.isProduction()) {
+            String content = "MQTT CONNECTION LOST: " +
+                    "\uD83D\uDE4B\u200D♂\uFE0F\uD83D\uDE4B\u200D♂\uFE0F\uD83D\uDE4B\u200D♂\uFE0F." +
+                    "\n\nMQTT Listener: ERROR: connectionLost: " + cause.getMessage() +
+                    "\nTRYING RECONNECTION...\n";
+            googleChatUtil.sendMessageToGoogleChatInternal(content);
+        }
         while (!reconnected) {
             attempt++;
             try {
                 TimeUnit.SECONDS.sleep(Math.min(attempt * 2, 60)); // Increase wait time between retries, max 60 seconds
-                mqttClient.reconnect();
                 if (mqttClient.isConnected()) {
                     reconnected = true; // If reconnect succeeds, set reconnected to true
+                } else {
+                    mqttClient.reconnect();
                 }
                 logger.info("MQTT Listener: Successfully reconnected after " + attempt + " attempt(s).");
 
@@ -90,13 +98,6 @@ public class MqttListenerService implements MqttCallback {
                 if (mqttClient.isConnected()) {
                     reconnected = true;
                 }
-                if (EnvironmentUtil.isProduction()) {
-                    String content = "MQTT CONNECTION LOST: " +
-                            "\uD83D\uDE4B\u200D♂\uFE0F\uD83D\uDE4B\u200D♂\uFE0F\uD83D\uDE4B\u200D♂\uFE0F." +
-                            "\n\nMQTT Listener: ERROR: connectionLost: " + cause.getMessage() +
-                            "\nTRYING RECONNECTION...\n";
-                    googleChatUtil.sendMessageToGoogleChatInternal(content);
-                }
             }
         }
         if (EnvironmentUtil.isProduction()) {
@@ -106,6 +107,7 @@ public class MqttListenerService implements MqttCallback {
 
         try {
             if (mqttClient.isConnected()) {
+                logger.error("startListening INFO: " + System.currentTimeMillis());
                 startListening();
             }
         } catch (MqttException e) {
