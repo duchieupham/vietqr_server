@@ -239,4 +239,9 @@ public class MerchantSyncServiceImpl implements MerchantSyncService {
     public List<MerchantSyncEntity> getMerchantSyncByIds(List<String> merchantIds) {
         return repo.getMerchantSyncByIds(merchantIds);
     }
+
+    @Override
+    public MerchantSyncEntity getMerchantSyncByEcommerceSiteAndCode(String ecommerceSite, String code) {
+        return repo.getMerchantSyncByEcommerceSiteAndCode(ecommerceSite, code);
+    }
 }

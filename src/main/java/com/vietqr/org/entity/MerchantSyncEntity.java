@@ -59,10 +59,16 @@ public class MerchantSyncEntity implements Serializable {
     @Column(name = "clientId")
     private String clientId = "";
 
+    @Column(name = "code")
+    private String code;
+
+    @Column(name = "information")
+    private String information = "";
+
     public MerchantSyncEntity() {
     }
 
-    public MerchantSyncEntity(String id, String name, String fullName, String businessType, String publishId, String certificate, String webhook, String clientId) {
+    public MerchantSyncEntity(String id, String name, String fullName, String businessType, String publishId, String certificate, String webhook, String clientId, String code) {
         this.id = id;
         this.name = name;
         this.fullName = fullName;
@@ -82,6 +88,7 @@ public class MerchantSyncEntity implements Serializable {
         this.certificate = certificate;
         this.webhook = webhook;
         this.clientId = clientId;
+        this.code = code;
     }
 
     public MerchantSyncEntity(String id, String name, String fullName, String vso, String businessType, String career, String address, String nationalId, boolean isActive, String userId, String accountCustomerId, String email, String phoneNo, String publishId, String refId, boolean isMaster, String certificate, String webhook, String clientId) {
@@ -271,5 +278,21 @@ public class MerchantSyncEntity implements Serializable {
 
     public void setIsMaster(boolean master) {
         isMaster = master;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getInformation() {
+        return information;
+    }
+
+    public void setInformation(String information) {
+        this.information = information;
     }
 }

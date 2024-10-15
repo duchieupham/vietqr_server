@@ -2,6 +2,7 @@ package com.vietqr.org.dto;
 
 public class EcommerceMerchantSyncDTO {
     private String ecommerceSite;
+    private String code;
     private String checkSum;
     private String webhook;
 
@@ -35,5 +36,13 @@ public class EcommerceMerchantSyncDTO {
 
     public void setWebhook(String webhook) {
         this.webhook = webhook;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 }

@@ -163,4 +163,7 @@ public interface MerchantSyncRepository extends JpaRepository<MerchantSyncEntity
 
     @Query(value = "SELECT * from merchant_sync WHERE id IN (:merchantIds) AND is_active = TRUE",nativeQuery = true)
     List<MerchantSyncEntity> getMerchantSyncByIds(List<String> merchantIds);
+
+    @Query(value = "SELECT * from merchant_sync WHERE information = :ecommerceSite AND code = :code LIMIT 1",nativeQuery = true)
+    MerchantSyncEntity getMerchantSyncByEcommerceSiteAndCode(String ecommerceSite, String code);
 }

@@ -250,4 +250,11 @@ public interface AccountInformationRepository extends JpaRepository<AccountInfor
 
     @Query(value = "SELECT email FROM account_information WHERE user_id = :userId LIMIT 1", nativeQuery = true)
     String getEmailByUserId(@Param("userId") String userId);
+
+    @Query(value = "SELECT b.phone_no AS phoneNo, a.middle_name AS middleName, "
+            + "a.first_name AS firstName, a.last_name AS lastName "
+            + "FROM account_information a "
+            + "INNER JOIN account_login b ON a.user_id = b.id "
+            + "WHERE user_id = :userId LIMIT 1", nativeQuery = true)
+    IAccountInformationDTO getAccountInformationByUserId(String userId);
 }
