@@ -136,4 +136,9 @@ public class AccountInformationServiceImpl implements AccountInformationService 
 	public String getEmailByUserId(String userId) {
 		return accountInformationRepo.getEmailByUserId(userId);
 	}
+
+	@Override
+	public IAccountInformationDTO getAccountInformationByUserId(String userId) {
+		return accountInformationRepo.getAccountInformationByUserId(userId);
+	}
 }

@@ -1499,18 +1499,14 @@ public class AccountBankReceiveController {
                         dto.setEmailVerified(true);
                         break;
                     }
-                    Thread thread = new Thread(() -> {
-                        List<String> IdBankReceiveActiveHistory = bankReceiveActiveHistoryService.getIdBankReceiveActiveByUserIdAndBankId(dto.getUserId(), item.getBankId());
-                        for (String id : IdBankReceiveActiveHistory) {
-                            if (id != null) {
+                    List<String> IdBankReceiveActiveHistory = bankReceiveActiveHistoryService.getIdBankReceiveActiveByUserIdAndBankId(dto.getUserId(), item.getBankId());
+                    for (String id : IdBankReceiveActiveHistory) {
+                        if (id != null) {
                                 dto.setActiveKey(true);
-                            } else {
+                        } else {
                                 dto.setActiveKey(false);
-                            }
                         }
-                    });
-                    thread.start();
-
+                    }
                     dto.setCaiValue(valueDTO.getCaiValue());
                     VietQRGenerateDTO vietQRGenerateDTO = new VietQRGenerateDTO();
                     String qr = "";

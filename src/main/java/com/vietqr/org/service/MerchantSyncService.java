@@ -70,4 +70,6 @@ public interface MerchantSyncService {
     MerchantSyncEntity getMerchantSyncByCertificate(String certificate);
 
     List<MerchantSyncEntity> getMerchantSyncByIds(List<String> merchantIds);
+
+    MerchantSyncEntity getMerchantSyncByEcommerceSiteAndCode(String ecommerceSite, String code);
 }

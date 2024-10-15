@@ -186,7 +186,6 @@ public class TransactionMMSController {
         TransactionMMSResponseDTO result = null;
         HttpStatus httpStatus = null;
         TerminalBankEntity terminalBankEntity = null;
-        TransactionReceiveEntity transactionReceiveEntity = null;
         UUID uuid = UUID.randomUUID();
         int checkInsert = 0;
         logger.info("receive transaction-mms-sync from MB: " + entity.toString() + " at: " + DateTimeUtil.getCurrentDateTimeUTC());
@@ -211,36 +210,6 @@ public class TransactionMMSController {
                     logger.info(
                             "transaction-mms-sync: INSERT (insertTransactionMMS) SUCCESS at: " + DateTimeUtil.getCurrentDateTimeUTC());
                     ///
-                    // find transaction_receive to update
-                    // amount
-                    // order_id -> reference_label_code
-                    // status = 0
-                    // (traceId => bill_number)
-                    if (result != null && result.getResCode().equals("00")) {
-                        // referenceLabelCode is empty => static QR
-                        // referenceLabelCode is not empty => transaction QR
-                        if (entity.getReferenceLabelCode() != null
-                                && !entity.getReferenceLabelCode().trim().isEmpty()) {
-                            // TRANSACTION QR
-                            transactionReceiveEntity = transactionReceiveService
-                                    .getTransactionByOrderId(entity.getReferenceLabelCode(), entity.getDebitAmount());
-                            if (transactionReceiveEntity != null) {
-                                // transactionReceiveEntity != null:
-                                // update status transaction receive
-                                transactionReceiveService.updateTransactionReceiveStatus(1, uuid.toString(),
-                                        entity.getFtCode(), timePaid,
-                                        transactionReceiveEntity.getId());
-                                logger.info(
-                                        "transaction-mms-sync: updateTransactionReceiveStatus SUCCESS at: "
-                                                + DateTimeUtil.getCurrentDateTimeUTC());
-                            } else {
-                                //////////////////////////////////////////
-                                logger.info("transaction-mms-sync: NOT FOUND transactionReceiveEntity");
-                            }
-                            ///
-                        }
-
-                    }
                 } else {
                     httpStatus = HttpStatus.BAD_REQUEST;
                     logger.error(
@@ -265,14 +234,39 @@ public class TransactionMMSController {
             // "transaction-mms-sync: RESPONSE ERRPR at: " + responseTime);
             return new ResponseEntity<>(result, httpStatus);
         } finally {
+            // Sử dụng thread mới để xử lý transactionReceiveEntity trong finally
             final TransactionMMSResponseDTO tempResult = result;
-            final TransactionReceiveEntity tempTransReceive = transactionReceiveEntity;
             final TerminalBankEntity tempTerminalBank = terminalBankEntity;
-            TransactionReceiveEntity finalTransactionReceiveEntity = transactionReceiveEntity;
+//            TransactionReceiveEntity finalTransactionReceiveEntity = transactionReceiveEntity;
             TerminalBankEntity finalTerminalBankEntity = terminalBankEntity;
-            TransactionReceiveEntity finalTransactionReceiveEntity1 = transactionReceiveEntity;
+//            TransactionReceiveEntity finalTransactionReceiveEntity1 = transactionReceiveEntity;
             Thread thread = new Thread(() -> {
+                TransactionReceiveEntity tempTransReceive;
                 if (tempResult != null && tempResult.getResCode().equals("00")) {
+                     // referenceLabelCode is empty => static QR
+                        // referenceLabelCode is not empty => transaction QR
+                        if (entity.getReferenceLabelCode() != null
+                                && !entity.getReferenceLabelCode().trim().isEmpty()) {
+                            // TRANSACTION QR
+                            tempTransReceive = transactionReceiveService
+                                    .getTransactionByOrderId(entity.getReferenceLabelCode(), entity.getDebitAmount());
+                            if (tempTransReceive != null) {
+                                // transactionReceiveEntity != null:
+                                // update status transaction receive
+                                transactionReceiveService.updateTransactionReceiveStatus(1, uuid.toString(),
+                                        entity.getFtCode(), timePaid,
+                                        tempTransReceive.getId());
+                                logger.info(
+                                        "transaction-mms-sync: updateTransactionReceiveStatus SUCCESS at: "
+                                                + DateTimeUtil.getCurrentDateTimeUTC());
+                            } else {
+                                //////////////////////////////////////////
+                                logger.info("transaction-mms-sync: NOT FOUND transactionReceiveEntity");
+                            }
+                            ///
+                        } else {
+                            tempTransReceive = null;
+                        }
                     // tempTransReceive is null => static QR
                     // tempTransReceive is not empty => transaction QR
                     ///
@@ -311,12 +305,13 @@ public class TransactionMMSController {
                                     ? tempTransReceive.getUrlLink()
                                     : "";
                             try {
+                                TransactionReceiveEntity finalTempTransReceive = tempTransReceive;
                                 Thread thread2 = new Thread(() -> {
                                     // DO INSERT MQTT BY QVAN
                                     try {
-                                        if(finalTransactionReceiveEntity.getAdditionalData() != null) {
+                                        if(finalTempTransReceive.getAdditionalData() != null) {
                                             ObjectMapper objectMapper = new ObjectMapper();
-                                            JsonNode additionalDataArray = objectMapper.readTree(finalTransactionReceiveEntity.getAdditionalData());
+                                            JsonNode additionalDataArray = objectMapper.readTree(finalTempTransReceive.getAdditionalData());
                                             String terminalCode = additionalDataArray.get(0).get("terminalCode").asText();
 
                                             // Tạo mqttTopic với giá trị terminalCode
@@ -325,14 +320,14 @@ public class TransactionMMSController {
                                             // Tạo dữ liệu JSON thông báo
                                             Map<String, Object> notificationData = new HashMap<>();
                                             notificationData.put("referenceNumber", entity.getFtCode());
-                                            notificationData.put("bankAccount", finalTransactionReceiveEntity.getBankAccount());
-                                            notificationData.put("amount", finalTransactionReceiveEntity.getAmount());
-                                            notificationData.put("transType", finalTransactionReceiveEntity.getTransType());
-                                            notificationData.put("content", finalTransactionReceiveEntity.getContent());
+                                            notificationData.put("bankAccount", finalTempTransReceive.getBankAccount());
+                                            notificationData.put("amount", finalTempTransReceive.getAmount());
+                                            notificationData.put("transType", finalTempTransReceive.getTransType());
+                                            notificationData.put("content", finalTempTransReceive.getContent());
                                             notificationData.put("status", 1);
-                                            String formattedTime = formatTimeUtcPlus(finalTransactionReceiveEntity.getTimePaid());
+                                            String formattedTime = formatTimeUtcPlus(finalTempTransReceive.getTimePaid());
                                             notificationData.put("timePaid", formattedTime);
-                                            notificationData.put("orderId", finalTransactionReceiveEntity.getOrderId());
+                                            notificationData.put("orderId", finalTempTransReceive.getOrderId());
 
                                             // Chuyển đổi dữ liệu thành chuỗi JSON
                                             Gson gson = new Gson();
@@ -655,7 +650,7 @@ public class TransactionMMSController {
                                                 });
                                                 List<String> notificationContents = new ObjectMapper().readValue(larkEntity.getNotificationContents(), new TypeReference<List<String>>() {
                                                 });
-                                                boolean sendNotification = shouldSendNotification(notificationTypes, entity, finalTransactionReceiveEntity);
+                                                boolean sendNotification = shouldSendNotification(notificationTypes, entity, tempTransReceive);
                                                 if (sendNotification) {
                                                     String larkMsg = createMessage(notificationContents, "C", amountForShow, bankTypeEntity, terminalItemEntity.getBankAccount(), timePaid, entity.getFtCode(), entity.getTraceTransfer());
                                                     String formattedTime = formatTimeForGoogleChat(timePaid);
@@ -695,7 +690,7 @@ public class TransactionMMSController {
                                             if (googleSheetEntity != null) {
                                                 List<String> notificationTypes = new ObjectMapper().readValue(googleSheetEntity.getNotificationTypes(), new TypeReference<List<String>>() {});
                                                 List<String> notificationContents = new ObjectMapper().readValue(googleSheetEntity.getNotificationContents(), new TypeReference<List<String>>() {});
-                                                boolean sendNotification = shouldSendNotification(notificationTypes, entity, finalTransactionReceiveEntity);
+                                                boolean sendNotification = shouldSendNotification(notificationTypes, entity, tempTransReceive);
                                                 if (sendNotification) {
                                                     if (!googleSheetUtil.headerInsertedProperties.containsKey(webhook) || !Boolean.parseBoolean(googleSheetUtil.headerInsertedProperties.getProperty(webhook))) {
                                                         googleSheetUtil.insertHeader(webhook);
@@ -707,13 +702,13 @@ public class TransactionMMSController {
                                                     datas.put("bankShortName", bankTypeEntity.getBankShortName());
                                                     datas.put("content", terminalItemEntity.getContent());
                                                     datas.put("amount", String.valueOf(entity.getDebitAmount()));
-                                                    datas.put("timePaid", String.valueOf(finalTransactionReceiveEntity.getTimePaid()));
+                                                    datas.put("timePaid", String.valueOf(tempTransReceive.getTimePaid()));
                                                     datas.put("time", String.valueOf(currentTime));
-                                                    datas.put("type", String.valueOf(finalTransactionReceiveEntity.getType()));
+                                                    datas.put("type", String.valueOf(tempTransReceive.getType()));
                                                     datas.put("terminalName", finalTerminalBankEntity != null ? finalTerminalBankEntity.getTerminalName() : "");
-                                                    datas.put("orderId", finalTransactionReceiveEntity.getOrderId() != null ? finalTransactionReceiveEntity.getOrderId() : "");
-                                                    datas.put("referenceNumber", finalTransactionReceiveEntity.getReferenceNumber() != null ? finalTransactionReceiveEntity.getReferenceNumber() : "");
-                                                    datas.put("transType", finalTransactionReceiveEntity.getTransType()); // Assuming this is what you meant by transaction type
+                                                    datas.put("orderId", tempTransReceive.getOrderId() != null ? tempTransReceive.getOrderId() : "");
+                                                    datas.put("referenceNumber", tempTransReceive.getReferenceNumber() != null ? tempTransReceive.getReferenceNumber() : "");
+                                                    datas.put("transType", tempTransReceive.getTransType()); // Assuming this is what you meant by transaction type
                                                     datas.put("status", "1");
                                                     googleSheetUtil.insertTransactionToGoogleSheet(datas, notificationContents, webhook);
                                                 }
@@ -1336,6 +1331,8 @@ public class TransactionMMSController {
                             }
                         }
                     }
+                } else {
+                    tempTransReceive = null;
                 }
             });
             thread.start();
@@ -2935,20 +2932,23 @@ public class TransactionMMSController {
                     transactionRefundLogService.insert(finalRefundLogEntity);
                 }
                 if (finalResult.getStatus().equals("SUCCESS")) {
-                    TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
-                            .getTransactionReceiveByRefNumber(dto.getReferenceNumber(), "C");
+//                    TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
+//                            .getTransactionReceiveByRefNumber(dto.getReferenceNumber(), "C");
                     TransactionRefundEntity entity = new TransactionRefundEntity();
                     entity.setId(UUID.randomUUID().toString());
                     entity.setBankAccount(dto.getBankAccount());
-                    if (transactionReceiveEntity != null) {
-                        entity.setBankId(StringUtil.getValueNullChecker(transactionReceiveEntity.getBankId()));
-                        entity.setTransactionId(transactionReceiveEntity.getId());
-                        entity.setUserId(transactionReceiveEntity.getUserId());
-                    } else {
-                        entity.setBankId("");
-                        entity.setTransactionId("");
-                        entity.setUserId("");
-                    }
+//                    if (transactionReceiveEntity != null) {
+//                        entity.setBankId(StringUtil.getValueNullChecker(transactionReceiveEntity.getBankId()));
+//                        entity.setTransactionId(transactionReceiveEntity.getId());
+//                        entity.setUserId(transactionReceiveEntity.getUserId());
+//                    } else {
+//                        entity.setBankId("");
+//                        entity.setTransactionId("");
+//                        entity.setUserId("");
+//                    }
+                    entity.setBankId("");
+                    entity.setTransactionId("");
+                    entity.setUserId("");
                     entity.setContent(dto.getContent());
                     entity.setAmount(Long.parseLong(dto.getAmount()));
                     entity.setTime(finalTime);

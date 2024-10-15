@@ -75,6 +75,14 @@ public class EnvironmentUtil {
     private static final String IP_VIETQRVN_UAT = "112.78.1.220";
     private static final String IP_VIETQRVN_PROD = "112.78.1.209";
 
+    //WP
+    private static final String WP_ACCESS_KEY_UAT = "customer-ecommerce-wordpress-user241328";
+    private static final String WP_ACCESS_KEY_PROD = "customer-ecommerce-wordpress-user241328";
+
+    //BITRIX
+    private static final String BITRIX_ACCESS_KEY_UAT = "customer-hehe-user24114";
+    private static final String BITRIX_ACCESS_KEY_PROD = "customer-adigitranshtc-user2473";
+
     // URL VIETQR VN
     private static final String URL_VIETQR_VN_UAT = "https://dev.vietqr.org/vqr/api";
     private static final String URL_VIETQR_VN_PROD = "https://api.vietqr.org/vqr/api";
@@ -83,6 +91,10 @@ public class EnvironmentUtil {
     // LINK NEWS IMAGE
     private static final String IMAGE_POST_UAT_LINK = "";
     private static final String IMGAGE_POST_PROD_LINK = "";
+
+    //WEBHOOK BITRIX
+    private static final String BITRIX_WEBHOOK_UAT = "https://drm.bluecom.vn/rest/1/2ty828rdcfg2sqf8/crm.contact.add.json";
+    private static final String BITRIX_WEBHOOK_PROD = "https://crm.bluecom.vn/rest/1/2ty828rdcfg2sqf8/crm.contact.add.json";
 
     // PARTNERS CONNECT
     private static final String SERVICE_VHITEK_ACTIVE = "VHITEK_ACTIVE";
@@ -355,6 +367,10 @@ public class EnvironmentUtil {
         return (IS_PRODUCTION == false) ? IP_VIETQRVN_UAT : IP_VIETQRVN_PROD;
     }
 
+    public static String getWpAccessKey() {
+        return (IS_PRODUCTION == false) ? WP_ACCESS_KEY_UAT : WP_ACCESS_KEY_PROD;
+    }
+
     // BIDV BIDV_UNLINKED_URL_UAT
     public static String getBidvUrlUnlinked() {
         return (IS_PRODUCTION == false) ? BIDV_UNLINKED_URL_UAT : BIDV_UNLINKED_URL_PROD;
@@ -419,6 +435,10 @@ public class EnvironmentUtil {
 
     public static String getServiceVhitekActive() {
         return SERVICE_VHITEK_ACTIVE;
+    }
+
+    public static String getBitrixWebhook() {
+        return (IS_PRODUCTION == false) ? BITRIX_WEBHOOK_UAT : BITRIX_WEBHOOK_PROD;
     }
 
     public static String getUserIdHostRecharge() {
@@ -765,5 +785,9 @@ public class EnvironmentUtil {
 
     public static String getBidvUrlGenVietQrGetToken() {
         return (isProduction() == false) ? BIDV_URL_GET_TOKEN_GEN_QR_UAT : BIDV_URL_GET_TOKEN_GEN_QR_PROD;
+    }
+
+    public static String getBitrixAccessKey() {
+        return (isProduction() == false) ? BITRIX_ACCESS_KEY_UAT : BITRIX_ACCESS_KEY_PROD;
     }
 }

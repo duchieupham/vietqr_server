@@ -1240,7 +1240,7 @@ public class TidInternalSubscriber {
                                             vietQRDTO.setTransactionRefId(TransactionRefIdUtil.encryptTransactionId(transactionUUID.toString()));
                                             vietQRDTO.setQrLink(EnvironmentUtil.getQRLink() + vietQRDTO.getTransactionRefId());
                                             vietQRDTO.setOrderId(dto.getOrderId());
-                                            vietQRDTO.setAdditionalData(new ArrayList<>());
+                                            vietQRDTO.setAdditionalData(dto.getAdditionalData());
                                             vietQRDTO.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
                                             vietQRDTO.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
                                             result = vietQRDTO;
@@ -1431,12 +1431,9 @@ public class TidInternalSubscriber {
                                         vietQRDTO.setExisting(1);
                                         vietQRDTO.setTransactionId("");
                                         vietQRDTO.setTerminalCode(dto.getTerminalCode());
-                                        String refId = TransactionRefIdUtil.encryptTransactionId(transactionUUID.toString());
-                                        String qrLink = EnvironmentUtil.getQRLink() + refId;
-                                        vietQRDTO.setTransactionRefId(refId);
-                                        vietQRDTO.setQrLink(qrLink);
+                                        vietQRDTO.setTransactionRefId(TransactionRefIdUtil.encryptTransactionId(transactionUUID.toString()));
+                                        vietQRDTO.setQrLink(EnvironmentUtil.getQRLink() + vietQRDTO.getTransactionRefId());
                                         vietQRDTO.setOrderId(dto.getOrderId());
-                                        vietQRDTO.setAdditionalData(new ArrayList<>());
                                         vietQRDTO.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
                                         vietQRDTO.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
                                         vietQRDTO.setAdditionalData(dto.getAdditionalData());
@@ -1475,13 +1472,16 @@ public class TidInternalSubscriber {
                                 vietQRDTO.setUserBankName(userBankName);
                                 vietQRDTO.setAmount(dto.getAmount() + "");
                                 vietQRDTO.setContent(content);
+                                vietQRDTO.setTerminalCode(dto.getTerminalCode());
                                 vietQRDTO.setQrCode(qr);
                                 vietQRDTO.setImgId(bankCaiTypeDTOBIDV.getImgId());
                                 vietQRDTO.setExisting(0);
+                                vietQRDTO.setTransactionId("");
                                 vietQRDTO.setOrderId(dto.getOrderId());
-                                vietQRDTO.setAdditionalData(new ArrayList<>());
                                 vietQRDTO.setServiceCode(StringUtil.getValueNullChecker(dto.getServiceCode()));
                                 vietQRDTO.setSubTerminalCode(StringUtil.getValueNullChecker(dto.getSubTerminalCode()));
+                                vietQRDTO.setTransactionRefId(TransactionRefIdUtil.encryptTransactionId(transactionUUID.toString()));
+                                vietQRDTO.setQrLink(EnvironmentUtil.getQRLink() + vietQRDTO.getTransactionRefId());
                                 vietQRDTO.setAdditionalData(dto.getAdditionalData());
                                 result = vietQRDTO;
                             }

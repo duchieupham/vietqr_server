@@ -4,6 +4,7 @@ public class MerchantSyncEcommerceDTO {
     private String webhook;
     private String clientId;
     private String certificate;
+    private String code = "";
     private TokenDTO token;
 
     public MerchantSyncEcommerceDTO(String webhook, String clientId, String certificate) {
@@ -17,6 +18,14 @@ public class MerchantSyncEcommerceDTO {
         this.clientId = clientId;
         this.certificate = certificate;
         this.token = token;
+    }
+
+    public MerchantSyncEcommerceDTO(String webhook, String clientId, String certificate, TokenDTO token, String code) {
+        this.webhook = webhook;
+        this.clientId = clientId;
+        this.certificate = certificate;
+        this.token = token;
+        this.code = code;
     }
 
     public MerchantSyncEcommerceDTO() {
@@ -52,5 +61,13 @@ public class MerchantSyncEcommerceDTO {
 
     public void setToken(TokenDTO token) {
         this.token = token;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 }

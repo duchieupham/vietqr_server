@@ -57,4 +57,6 @@ public interface AccountInformationService {
 	List<IAccountTerminalMemberDTO> getMembersByTerminalId(String terminalId);
 
 	public String getEmailByUserId(String userId);
+
+    IAccountInformationDTO getAccountInformationByUserId(String userId);
 }
