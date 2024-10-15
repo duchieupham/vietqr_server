@@ -70,7 +70,7 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
 
     @Override
     public TransactionReceiveEntity getTransactionByOrderId(String orderId, String amount) {
-        return repo.getTransactionByOrderId(orderId, amount, DateTimeUtil.get2LastPartition());
+        return repo.getTransactionByOrderId(orderId, amount, DateTimeUtil.get2DaysAgo());
     }
 
     @Override
@@ -91,7 +91,7 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
 
     @Override
     public TransactionReceiveEntity getTransactionReceiveByRefNumber(String referenceNumber, String transType) {
-        return repo.getTransactionReceiveByRefNumber(referenceNumber, transType, DateTimeUtil.get2LastPartition());
+        return repo.getTransactionReceiveByRefNumber(referenceNumber, transType, DateTimeUtil.getDaysAgo(7));
     }
 
     @Override
@@ -1735,7 +1735,7 @@ public class TransactionReceiveServiceImpl implements TransactionReceiveService 
 
     @Override
     public void updateTransactionRefundStatus(String ftCode, String subCode, String terminalCode, String orderId, int type) {
-        repo.updateTransactionRefundStatus(ftCode, subCode, terminalCode, orderId, type);
+        repo.updateTransactionRefundStatus(ftCode, subCode, terminalCode, orderId, type, DateTimeUtil.getDaysAgo(1));
     }
 
     @Override

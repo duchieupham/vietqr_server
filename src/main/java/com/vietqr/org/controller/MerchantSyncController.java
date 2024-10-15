@@ -9,6 +9,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
@@ -50,6 +51,9 @@ public class MerchantSyncController {
 
     @Autowired
     private BankTypeService bankTypeService;
+
+    @Autowired
+    private AccountInformationService accountInformationService;
 
     @GetMapping("merchant-sync")
     public ResponseEntity<Object> getAllMerchants(
@@ -93,71 +97,156 @@ public class MerchantSyncController {
             String publishId = "";
             if (!StringUtil.isNullOrEmpty(username)) {
                 String accessKey = accountCustomerService.getAccessKeyByUsername(username);
-                if (!StringUtil.isNullOrEmpty(accessKey)) {
-                    String checkSum = BankEncryptUtil.generateMD5EcommerceCheckSum(accessKey, dto.getEcommerceSite());
-                    if (dto.getCheckSum().equals(checkSum)) {
-                        CustomerSyncEntity entity = customerSyncService.getCustomerSyncByInformation(dto.getEcommerceSite());
-                        String clientId = "";
-                        String certificate = "";
-                        if (entity == null) {
-                            entity = new CustomerSyncEntity();
-                            UUID uuid = UUID.randomUUID();
-                            entity.setId(uuid.toString());
-                            entity.setUsername("");
-                            entity.setPassword("");
-                            entity.setIpAddress("");
-                            entity.setPort("");
-                            entity.setSuffixUrl("");
-                            entity.setInformation(dto.getEcommerceSite());
-                            entity.setUserId("");
-                            entity.setActive(false);
-                            entity.setToken("");
-                            entity.setMerchant("");
-                            entity.setAddress("");
-                            entity.setMaster(false);
-                            entity.setAccountId("");
-                            entity.setRefId("");
-                            publishId = "MER" + RandomCodeUtil.generateOTP(8);
-                            certificate = "MER-ECM-" + publishId;
-                            clientId = BoxTerminalRefIdUtil.encryptQrBoxId(uuid.toString());
-                            MerchantSyncEntity merchantSyncEntity = new MerchantSyncEntity(uuid.toString(),
-                                    "", "", "Ecommerce wordpress", publishId, certificate,
-                                    StringUtil.getValueNullChecker(dto.getWebhook()), clientId);
-                            customerSyncService.insertCustomerSync(entity);
-                            merchantSyncService.insert(merchantSyncEntity);
-                        } else {
-                            MerchantSyncEntity merchantSyncEntity = merchantSyncService.getMerchantSyncById(entity.getId());
-                            if (merchantSyncEntity != null) {
-                                if (StringUtil.isNullOrEmpty(merchantSyncEntity.getPublishId())) {
+                if (username.equals(EnvironmentUtil.getWpAccessKey())) {
+                    if (!StringUtil.isNullOrEmpty(accessKey)) {
+                        String checkSum = BankEncryptUtil.generateMD5EcommerceCheckSum(accessKey, dto.getEcommerceSite());
+                        if (dto.getCheckSum().equals(checkSum)) {
+                            CustomerSyncEntity entity = customerSyncService.getCustomerSyncByInformation(dto.getEcommerceSite());
+                            String clientId = "";
+                            String certificate = "";
+                            if (entity == null) {
+                                entity = new CustomerSyncEntity();
+                                UUID uuid = UUID.randomUUID();
+                                entity.setId(uuid.toString());
+                                entity.setUsername("");
+                                entity.setPassword("");
+                                entity.setIpAddress("");
+                                entity.setPort("");
+                                entity.setSuffixUrl("");
+                                entity.setInformation(dto.getEcommerceSite());
+                                entity.setUserId("");
+                                entity.setActive(false);
+                                entity.setToken("");
+                                entity.setMerchant("");
+                                entity.setAddress("");
+                                entity.setMaster(false);
+                                entity.setAccountId("");
+                                entity.setRefId("");
+                                publishId = "MER" + RandomCodeUtil.generateOTP(8);
+                                certificate = "MER-ECM-" + publishId;
+                                clientId = BoxTerminalRefIdUtil.encryptQrBoxId(uuid.toString());
+                                MerchantSyncEntity merchantSyncEntity = new MerchantSyncEntity(uuid.toString(),
+                                        "", "", "Ecommerce wordpress", publishId, certificate,
+                                        StringUtil.getValueNullChecker(dto.getWebhook()), clientId, "");
+                                merchantSyncEntity.setInformation(dto.getEcommerceSite());
+                                customerSyncService.insertCustomerSync(entity);
+                                merchantSyncService.insert(merchantSyncEntity);
+                            } else {
+                                MerchantSyncEntity merchantSyncEntity = merchantSyncService.getMerchantSyncById(entity.getId());
+                                if (merchantSyncEntity != null) {
+                                    if (StringUtil.isNullOrEmpty(merchantSyncEntity.getPublishId())) {
+                                        publishId = "MER" + RandomCodeUtil.generateOTP(8);
+                                        certificate = "MER-ECM-" + publishId;
+                                        clientId = BoxTerminalRefIdUtil.encryptQrBoxId(entity.getId());
+                                        merchantSyncEntity.setPublishId(publishId);
+                                        merchantSyncEntity.setCertificate(certificate);
+                                        merchantSyncEntity.setWebhook(StringUtil.getValueNullChecker(dto.getWebhook()));
+                                        merchantSyncEntity.setClientId(clientId);
+                                        merchantSyncService.insert(merchantSyncEntity);
+                                    }
+                                    publishId = merchantSyncEntity.getPublishId();
+                                    certificate = "MER-ECM-" + publishId;
+                                    clientId = BoxTerminalRefIdUtil.encryptQrBoxId(entity.getId());
+                                } else {
                                     publishId = "MER" + RandomCodeUtil.generateOTP(8);
                                     certificate = "MER-ECM-" + publishId;
                                     clientId = BoxTerminalRefIdUtil.encryptQrBoxId(entity.getId());
-                                    merchantSyncEntity.setPublishId(publishId);
-                                    merchantSyncEntity.setCertificate(certificate);
-                                    merchantSyncEntity.setWebhook(StringUtil.getValueNullChecker(dto.getWebhook()));
-                                    merchantSyncEntity.setClientId(clientId);
+                                    merchantSyncEntity = new MerchantSyncEntity(entity.getId(),
+                                            "", "", "Ecommerce wordpress", publishId, certificate,
+                                            StringUtil.getValueNullChecker(dto.getWebhook()), clientId, "");
+                                    merchantSyncEntity.setInformation(dto.getEcommerceSite());
                                     merchantSyncService.insert(merchantSyncEntity);
                                 }
-                                publishId = merchantSyncEntity.getPublishId();
-                                certificate = "MER-ECM-" + publishId;
-                                clientId = BoxTerminalRefIdUtil.encryptQrBoxId(entity.getId());
-                            } else {
-                                publishId = "MER" + RandomCodeUtil.generateOTP(8);
-                                certificate = "MER-ECM-" + publishId;
-                                clientId = BoxTerminalRefIdUtil.encryptQrBoxId(entity.getId());
-                                merchantSyncEntity = new MerchantSyncEntity(entity.getId(),
-                                        "", "", "Ecommerce wordpress", publishId, certificate,
-                                        StringUtil.getValueNullChecker(dto.getWebhook()), clientId);
-                                merchantSyncService.insert(merchantSyncEntity);
                             }
+                            TokenDTO tokenDTO = new TokenDTO(getJWTToken(Base64.getEncoder().encodeToString(StringUtil.getValueNullChecker(username).getBytes()),
+                                    Base64.getEncoder().encodeToString(publishId.getBytes())), "Bearer",
+                                    0);
+                            result = new MerchantSyncEcommerceDTO(StringUtil.getValueNullChecker(dto.getWebhook()), clientId, certificate, tokenDTO);
+                            httpStatus = HttpStatus.OK;
+                        } else {
+                            result = new ResponseMessageDTO("FAILED", "E74");
+                            httpStatus = HttpStatus.BAD_REQUEST;
                         }
-                        TokenDTO tokenDTO = new TokenDTO(getJWTToken(Base64.getEncoder().encodeToString(StringUtil.getValueNullChecker(username).getBytes()),
-                                Base64.getEncoder().encodeToString(publishId.getBytes())), "Bearer",
-                                0);
-                        result = new MerchantSyncEcommerceDTO(StringUtil.getValueNullChecker(dto.getWebhook()), clientId, certificate, tokenDTO);
-                        httpStatus = HttpStatus.OK;
                     } else {
-                        result = new ResponseMessageDTO("FAILED", "E74");
+                        result = new ResponseMessageDTO("FAILED", "E05");
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                    }
+
+                } else if (username.equals(EnvironmentUtil.getBitrixAccessKey())) {
+                    if (!StringUtil.isNullOrEmpty(accessKey)) {
+                        String checkSum = BankEncryptUtil.generateMD5EcommerceCheckSum(accessKey, dto.getEcommerceSite());
+                        if (dto.getCheckSum().equals(checkSum)) {
+                            CustomerSyncEntity entity = customerSyncService.getCustomerSyncByInformation(dto.getEcommerceSite());
+                            String clientId = "";
+                            String certificate = "";
+                            if (entity == null) {
+                                entity = new CustomerSyncEntity();
+                                UUID uuid = UUID.randomUUID();
+                                entity.setId(uuid.toString());
+                                entity.setUsername("");
+                                entity.setPassword("");
+                                entity.setIpAddress("");
+                                entity.setPort("");
+                                entity.setSuffixUrl("");
+                                entity.setInformation(dto.getEcommerceSite());
+                                entity.setUserId("");
+                                entity.setActive(false);
+                                entity.setToken("");
+                                entity.setMerchant("");
+                                entity.setAddress("");
+                                entity.setMaster(false);
+                                entity.setAccountId("");
+                                entity.setRefId("");
+                                publishId = "MER" + RandomCodeUtil.generateOTP(8);
+                                certificate = "MER-ECM-BITRIX-" + publishId;
+                                clientId = BoxTerminalRefIdUtil.encryptQrBoxId(uuid.toString());
+                                MerchantSyncEntity merchantSyncEntity = new MerchantSyncEntity(uuid.toString(),
+                                        "", "", "Bitrix", publishId, certificate,
+                                        StringUtil.getValueNullChecker(dto.getWebhook()), clientId, dto.getCode());
+                                customerSyncService.insertCustomerSync(entity);
+                                merchantSyncService.insert(merchantSyncEntity);
+                            } else {
+                                MerchantSyncEntity merchantSyncEntity = merchantSyncService
+                                        .getMerchantSyncByEcommerceSiteAndCode(dto.getEcommerceSite(), dto.getCode());
+                                if (merchantSyncEntity != null) {
+                                    if (StringUtil.isNullOrEmpty(merchantSyncEntity.getPublishId())) {
+                                        publishId = "MER" + RandomCodeUtil.generateOTP(8);
+                                        certificate = "MER-ECM-BITRIX-" + publishId;
+                                        clientId = BoxTerminalRefIdUtil.encryptQrBoxId(entity.getId());
+                                        merchantSyncEntity.setPublishId(publishId);
+                                        merchantSyncEntity.setCertificate(certificate);
+                                        merchantSyncEntity.setWebhook(StringUtil.getValueNullChecker(dto.getWebhook()));
+                                        merchantSyncEntity.setClientId(clientId);
+                                        merchantSyncService.insert(merchantSyncEntity);
+                                    }
+                                    publishId = merchantSyncEntity.getPublishId();
+                                    certificate = "MER-ECM-BITRIX-" + publishId;
+                                    clientId = BoxTerminalRefIdUtil.encryptQrBoxId(entity.getId());
+                                } else {
+                                    publishId = "MER" + RandomCodeUtil.generateOTP(8);
+                                    certificate = "MER-ECM-BITRIX-" + publishId;
+                                    clientId = BoxTerminalRefIdUtil.encryptQrBoxId(entity.getId());
+                                    merchantSyncEntity = new MerchantSyncEntity(UUID.randomUUID().toString(),
+                                            "", "", "Bitrix", publishId, certificate,
+                                            StringUtil.getValueNullChecker(dto.getWebhook()), clientId, dto.getCode());
+                                    merchantSyncEntity.setInformation(dto.getEcommerceSite());
+                                    merchantSyncService.insert(merchantSyncEntity);
+                                }
+                            }
+                            TokenDTO tokenDTO = new TokenDTO(getJWTToken(Base64.getEncoder()
+                                            .encodeToString(StringUtil.getValueNullChecker(username).getBytes()),
+                                    Base64.getEncoder().encodeToString(publishId.getBytes())), "Bearer",
+                                    0);
+                            result = new MerchantSyncEcommerceDTO(StringUtil
+                                    .getValueNullChecker(dto.getWebhook()), clientId, certificate,
+                                    tokenDTO, dto.getCode());
+                            httpStatus = HttpStatus.OK;
+                        } else {
+                            result = new ResponseMessageDTO("FAILED", "E74");
+                            httpStatus = HttpStatus.BAD_REQUEST;
+                        }
+                    } else {
+                        result = new ResponseMessageDTO("FAILED", "E05");
                         httpStatus = HttpStatus.BAD_REQUEST;
                     }
                 } else {
@@ -199,7 +288,8 @@ public class MerchantSyncController {
         Object result = null;
         HttpStatus httpStatus = null;
         try {
-            String username = getUsernameFromToken(token);
+            String userId = getUserIdFromToken(token);
+
             MerchantSyncEntity entity = merchantSyncService.getMerchantSyncByCertificate(dto.getCertificate());
             if (Objects.nonNull(entity)) {
                 AccountBankReceiveEntity accountBankReceiveEntity = accountBankReceiveService
@@ -275,6 +365,20 @@ public class MerchantSyncController {
                     httpStatus = HttpStatus.BAD_REQUEST;
                     result = new ResponseMessageDTO("FAILED", "E25");
                 }
+
+                if (dto.getCertificate().startsWith("MER-ECM-BITRIX") && !StringUtil.isNullOrEmpty(entity.getCode())) {
+                    Thread thread = new Thread(() -> {
+                        if (dto.getCertificate().startsWith("MER-ECM-BITRIX") && !StringUtil.isNullOrEmpty(userId)) {
+                            IAccountInformationDTO iAccountInformationDTO = accountInformationService.getAccountInformationByUserId(userId);
+                            if (Objects.nonNull(iAccountInformationDTO)) {
+                                WebhookUtil webhookUtil = new WebhookUtil();
+                                webhookUtil.sendMessageToWebhookBitrix(iAccountInformationDTO.getFirstName(), iAccountInformationDTO.getLastName(),
+                                        iAccountInformationDTO.getPhoneNo(), "MOBILE");
+                            }
+                        }
+                    });
+                    thread.start();
+                }
             } else {
                 httpStatus = HttpStatus.BAD_REQUEST;
                 result = new ResponseMessageDTO("FAILED", "E163");
@@ -284,6 +388,25 @@ public class MerchantSyncController {
             result = new ResponseMessageDTO("FAILED", "E05");
         }
         return new ResponseEntity<>(result, httpStatus);
+    }
+
+    private String getUserIdFromToken(String token) {
+        String result = "";
+        try {
+            if (token != null && !token.trim().isEmpty()) {
+                String secretKey = "mySecretKey";
+                String jwtToken = token.substring(7); // remove "Bearer " from the beginning
+                Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(jwtToken).getBody();
+                String userId = (String) claims.get("userId");
+                if (userId != null) {
+                    result = userId;
+                }
+            }
+        } catch (Exception e) {
+            logger.info("TerminalSyncController: ERROR: getUsernameFromToken: "
+                    + e.getMessage() + " at: " + System.currentTimeMillis());
+        }
+        return result;
     }
 
     private String getJWTToken(String publicId, String username) {

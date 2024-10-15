@@ -27,6 +27,8 @@ public class RefundRequestDTO implements Serializable {
 
     private Boolean multiTimes;
 
+    private String orderId;
+
     @NotBlank
     private String checkSum;
 
@@ -105,5 +107,13 @@ public class RefundRequestDTO implements Serializable {
 
     public void setSubTerminalCode(String subTerminalCode) {
         this.subTerminalCode = subTerminalCode;
+    }
+
+    public String getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
     }
 }
