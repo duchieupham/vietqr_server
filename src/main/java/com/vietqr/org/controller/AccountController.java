@@ -721,6 +721,13 @@ public class AccountController {
             logger.error("Error at registerAccount: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E04");
             httpStatus = HttpStatus.BAD_REQUEST;
+        } finally {
+            Thread thread = new Thread(() -> {
+                WebhookUtil webhookUtil = new WebhookUtil();
+                webhookUtil.sendMessageToWebhookBitrix("Undefined", "",
+                        dto.getPhoneNo(), dto.getPlatform());
+            });
+            thread.start();
         }
         return new ResponseEntity<>(result, httpStatus);
     }

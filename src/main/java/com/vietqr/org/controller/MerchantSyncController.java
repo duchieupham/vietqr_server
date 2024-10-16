@@ -365,20 +365,6 @@ public class MerchantSyncController {
                     httpStatus = HttpStatus.BAD_REQUEST;
                     result = new ResponseMessageDTO("FAILED", "E25");
                 }
-
-                if (dto.getCertificate().startsWith("MER-ECM-BITRIX") && !StringUtil.isNullOrEmpty(entity.getCode())) {
-                    Thread thread = new Thread(() -> {
-                        if (dto.getCertificate().startsWith("MER-ECM-BITRIX") && !StringUtil.isNullOrEmpty(userId)) {
-                            IAccountInformationDTO iAccountInformationDTO = accountInformationService.getAccountInformationByUserId(userId);
-                            if (Objects.nonNull(iAccountInformationDTO)) {
-                                WebhookUtil webhookUtil = new WebhookUtil();
-                                webhookUtil.sendMessageToWebhookBitrix(iAccountInformationDTO.getFirstName(), iAccountInformationDTO.getLastName(),
-                                        iAccountInformationDTO.getPhoneNo(), "MOBILE");
-                            }
-                        }
-                    });
-                    thread.start();
-                }
             } else {
                 httpStatus = HttpStatus.BAD_REQUEST;
                 result = new ResponseMessageDTO("FAILED", "E163");
