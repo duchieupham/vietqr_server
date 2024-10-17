@@ -17,7 +17,7 @@ public class MerchantRefUtil {
             result = encryptedId;
         } catch (Exception e) {
             logger.error("encryptTransactionId: ERROR:" + e.toString());
-            System.out.println("encryptTransactionId: ERROR:" + e.toString());
+            //System.out.println("encryptTransactionId: ERROR:" + e.toString());
         }
         return result;
     }

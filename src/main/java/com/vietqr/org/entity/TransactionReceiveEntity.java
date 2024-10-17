@@ -150,8 +150,8 @@ public class TransactionReceiveEntity implements Serializable {
 	// 2: pending - Cho xử lý
 	// 3: failed - That bai
 	// 4: error - Loi
-	@Column(name = "transStatus")
-	private Integer transStatus;
+	@Column(name = "statusResponse")
+	private Integer statusResponse;
 
 	@Column(name = "urlLink")
 	private String urlLink = "";
@@ -252,7 +252,7 @@ public class TransactionReceiveEntity implements Serializable {
 		this.note = note;
 	}
 
-	public TransactionReceiveEntity(String id, String bankAccount, String bankId, String content, long amount, long time, long timePaid, String refId, int type, int status, String traceId, String transType, String referenceNumber, String orderId, String sign, String customerBankAccount, String customerBankCode, String customerName, String terminalCode, String serviceCode, String qrCode, String userId, String note, Integer transStatus, String urlLink, String billId, String hashTag, String additionalData) {
+	public TransactionReceiveEntity(String id, String bankAccount, String bankId, String content, long amount, long time, long timePaid, String refId, int type, int status, String traceId, String transType, String referenceNumber, String orderId, String sign, String customerBankAccount, String customerBankCode, String customerName, String terminalCode, String serviceCode, String qrCode, String userId, String note, Integer statusResponse, String urlLink, String billId, String hashTag, String additionalData) {
 		this.id = id;
 		this.bankAccount = bankAccount;
 		this.bankId = bankId;
@@ -276,7 +276,7 @@ public class TransactionReceiveEntity implements Serializable {
 		this.qrCode = qrCode;
 		this.userId = userId;
 		this.note = note;
-		this.transStatus = transStatus;
+		this.statusResponse = statusResponse;
 		this.urlLink = urlLink;
 		this.billId = billId;
 		this.hashTag = hashTag;
@@ -459,12 +459,12 @@ public class TransactionReceiveEntity implements Serializable {
 		this.note = note;
 	}
 
-	public Integer getTransStatus() {
-		return transStatus;
+	public Integer getStatusResponse() {
+		return statusResponse;
 	}
 
-	public void setTransStatus(Integer transStatus) {
-		this.transStatus = transStatus;
+	public void setStatusResponse(Integer transStatus) {
+		this.statusResponse = transStatus;
 	}
 
 	public String getUrlLink() {

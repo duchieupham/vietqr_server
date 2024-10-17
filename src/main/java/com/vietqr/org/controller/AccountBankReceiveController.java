@@ -595,7 +595,6 @@ public class AccountBankReceiveController {
             // check existed same user
             List<String> checkExistedSameUser = accountBankReceiveService
                     .checkExistedBankAccountSameUser(bankAccount, bankTypeId, userId);
-            System.out.println("type" + type);
             if (checkExistedSameUser == null || checkExistedSameUser.isEmpty()) {
                 if (type.equals("ADD")) {
                     result = new ResponseMessageDTO("SUCCESS", "");
@@ -617,7 +616,6 @@ public class AccountBankReceiveController {
             }
 
         } catch (Exception e) {
-            System.out.println(e.toString());
             logger.error(e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -730,7 +728,6 @@ public class AccountBankReceiveController {
             result = new ResponseMessageDTO("SUCCESS", uuid.toString() + "*" + qr);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            System.out.println(e.toString());
             logger.error(e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -1103,7 +1100,6 @@ public class AccountBankReceiveController {
             result = new ResponseMessageDTO("SUCCESS", uuid.toString() + "*" + qr);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            System.out.println("Error at insertAccountBank: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "Unexpected Error.");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -1272,7 +1268,6 @@ public class AccountBankReceiveController {
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
-            System.out.println(e.toString());
             logger.error(e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -1538,7 +1533,6 @@ public class AccountBankReceiveController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.info("getAccountBankBackups: ERROR: " + e.getMessage() + " " + userId);
-            System.out.println(e.getMessage());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -1846,7 +1840,6 @@ public class AccountBankReceiveController {
                 httpStatus = HttpStatus.OK;
             }
         } catch (Exception e) {
-            System.out.println("Error at deleteAccountBank: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "Unexpected Error.");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -1907,7 +1900,6 @@ public class AccountBankReceiveController {
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
-            System.out.println("Error at insertAccountBankReceiveRPA: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -1923,7 +1915,6 @@ public class AccountBankReceiveController {
             result = accountBankReceiveService.getBankAccountsRPA(userId);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            System.out.println("Error at getBankAccountRPAs: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -1940,7 +1931,6 @@ public class AccountBankReceiveController {
             result = accountBankReceiveService.getBankAccountsByCusSyncId(customerSyncId, offset);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            System.out.println("Error at getBankAccountsByCusSyncId: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -1981,19 +1971,16 @@ public class AccountBankReceiveController {
                     // flow 1
                 } else {
                     // err
-                    System.out.println("transferBankAccountFlow: INVALID MMS ACTIVE/NOT FOUND BANK ACCOUNT");
                     logger.error("transferBankAccountFlow: INVALID MMS ACTIVE/NOT FOUND BANK ACCOUNT");
                     result = new ResponseMessageDTO("FAILED", "E108");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {
-                System.out.println("transferBankAccountFlow: INVALID REQUEST BODY");
                 logger.error("transferBankAccountFlow: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
-            System.out.println("transferBankAccountFlow: ERROR: " + e.toString());
             logger.error("transferBankAccountFlow: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -2118,7 +2105,6 @@ public class AccountBankReceiveController {
                 logger.error("Error parsing JSON to TerminalResponseFlow2", e);
             }
 
-            System.out.println(terminalResponse);
         } else {
             logger.info("getTerminals: RESPONSE: " + response.statusCode().value() + " - " + json);
         }
@@ -2276,13 +2262,11 @@ public class AccountBankReceiveController {
                     }
                 } else {
                     logger.error("requestLinkedBankOTP: INVALID BANK CODE");
-                    System.out.println("requestLinkedBankOTP: INVALID BANK CODE");
                     result = new ResponseMessageDTO("FAILED", "E109");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {
                 logger.error("requestLinkedBankOTP: INVALID REQUEST BODY");
-                System.out.println("requestLinkedBankOTP: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }

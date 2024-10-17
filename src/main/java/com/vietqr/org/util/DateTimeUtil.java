@@ -214,7 +214,7 @@ public class DateTimeUtil {
 
     public static long getMinusCurrentDate() {
         LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC+7"));
-        System.out.println(now.toEpochSecond(ZoneOffset.UTC));
+        //System.out.println(now.toEpochSecond(ZoneOffset.UTC));
         LocalDate currentDate = now.toLocalDate();
         WeekFields weekFields = WeekFields.ISO;
         DayOfWeek firstDayOfWeek = weekFields.getFirstDayOfWeek();

@@ -748,7 +748,6 @@ public class TransactionController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             logger.error("exportTransactions: ERROR: " + e.toString());
-            System.out.println("exportTransactions: ERROR: " + e.toString());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
@@ -1309,7 +1308,6 @@ public class TransactionController {
                 httpStatus = HttpStatus.OK;
             }
         } catch (Exception e) {
-            System.out.println("Error at getTransactionSubTerminalCodeOverview: " + e.toString());
             logger.error("Error at getTransactionSubTerminalCodeOverview: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -1361,7 +1359,6 @@ public class TransactionController {
                     break;
             }
         } catch (Exception e) {
-            System.out.println("Error at getTransactionSubTerminalCodeOverview: " + e.toString());
             logger.error("Error at getTransactionSubTerminalCodeOverview: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -2034,7 +2031,6 @@ public class TransactionController {
             // type = 4: terminal code
             // type = 5: status
             // type = 6: amount
-            System.out.println("Pre get Transaction: " + System.currentTimeMillis());
             List<String> transType = new ArrayList<>();
             switch (type) {
                 case 0:
@@ -2059,7 +2055,6 @@ public class TransactionController {
             Future<List<TransactionRelatedV2DTO>> future1 = null;
             Future<BankDetailTypeCaiValueDTO> future2 = null;
             ResponseObjectDTO responseObjectDTO = future3.get();
-            System.out.println("After get Transaction: " + System.currentTimeMillis());
             switch (responseObjectDTO.getStatus()) {
                 case "SUCCESS":
                     callableTask1 = () -> {
@@ -2184,7 +2179,6 @@ public class TransactionController {
 
             BankDetailTypeCaiValueDTO bankDetailDTO = future2.get();
             dtos = future1.get();
-            System.out.println("END get Transaction: " + System.currentTimeMillis());
             String caiValue = "";
             boolean isActiveService = true;
             if (Objects.nonNull(bankDetailDTO)) {
@@ -2346,7 +2340,6 @@ public class TransactionController {
                     }
                 }
             }
-            System.out.println("Response Time: " + System.currentTimeMillis());
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("getTransactionsFilter: ERROR: " + e.toString());
@@ -2819,7 +2812,6 @@ public class TransactionController {
             }
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            System.out.println("getTransactionImages: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -2835,7 +2827,6 @@ public class TransactionController {
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            System.out.println("deleteTransactionImages: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -2982,10 +2973,8 @@ public class TransactionController {
                                 }
 
                             }
-                            System.out.println("transactions size: " + transactions.size());
                             if (transactions != null && !transactions.isEmpty()) {
                                 int check = transactionRPAService.insertAllTransactionRPA(transactions);
-                                System.out.println("check " + check);
                                 if (check == 1) {
                                     result = new ResponseMessageDTO("SUCCESS", "");
                                     httpStatus = HttpStatus.OK;
@@ -3079,7 +3068,6 @@ public class TransactionController {
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
-            System.out.println("Error at getBankOverview: " + e.toString());
             logger.error("Error at getBankOverview: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -3142,7 +3130,6 @@ public class TransactionController {
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
-            System.out.println("Error at getBankOverview: " + e.toString());
             logger.error("Error at getBankOverview: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -3194,7 +3181,6 @@ public class TransactionController {
             }
 
         } catch (Exception e) {
-            System.out.println("Error at getTransactionStatistic: " + e.toString());
             logger.error("Error at getTransactionStatistic: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -3245,7 +3231,6 @@ public class TransactionController {
             }
 
         } catch (Exception e) {
-            System.out.println("Error at getTransactionStatistic: " + e.toString());
             logger.error("Error at getTransactionStatistic: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -3260,7 +3245,6 @@ public class TransactionController {
             long timestamp = date.getTime() / 1000; // Chia cho 1000 để chuyển đổi sang giây
             result = (long) timestamp;
         } catch (Exception e) {
-            System.out.println("convertTimeStringToInteger: ERORR: " + e.toString());
             logger.error("convertTimeStringToInteger: ERORR: " + e.toString());
         }
         return result;
@@ -3608,7 +3592,6 @@ public class TransactionController {
                                     result = new ResponseMessageDTO("FAILED", "E95");
                                 }
                             } else {
-                                System.out.println("checkTransactionStatus: INVALID REQUEST BODY");
                                 logger.error("checkTransactionStatus: INVALID REQUEST BODY");
                                 result = new ResponseMessageDTO("FAILED", "E46");
                                 httpStatus = HttpStatus.BAD_REQUEST;
@@ -3619,25 +3602,21 @@ public class TransactionController {
                             result = new ResponseMessageDTO("FAILED", "E39");
                         }
                     } else {
-                        System.out.println("checkTransactionStatus: BANK ACCOUNT IS NOT MATCH WITH MERCHANT INFO");
                         logger.error("checkTransactionStatus: BANK ACCOUNT IS NOT MATCH WITH MERCHANT INFO");
                         result = new ResponseMessageDTO("FAILED", "E77");
                         httpStatus = HttpStatus.BAD_REQUEST;
                     }
                 } else {
-                    System.out.println("checkTransactionStatus: INVALID REQUEST BODY");
                     logger.error("checkTransactionStatus: INVALID REQUEST BODY");
                     result = new ResponseMessageDTO("FAILED", "E46");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {
-                System.out.println("checkTransactionStatus: INVALID TOKEN");
                 logger.error("checkTransactionStatus: INVALID TOKEN");
                 result = new ResponseMessageDTO("FAILED", "E74");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
-            System.out.println("checkTransactionStatus: ERROR: " + e.toString());
             logger.error("checkTransactionStatus: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -3819,7 +3798,6 @@ public class TransactionController {
                                     result = new ResponseMessageDTO("FAILED", "E95");
                                 }
                             } else {
-                                System.out.println("checkTransactionStatus: INVALID REQUEST BODY");
                                 logger.error("checkTransactionStatus: INVALID REQUEST BODY");
                                 result = new ResponseMessageDTO("FAILED", "E46");
                                 httpStatus = HttpStatus.BAD_REQUEST;
@@ -3831,19 +3809,16 @@ public class TransactionController {
                         }
 
                 } else {
-                    System.out.println("checkTransactionStatus: INVALID REQUEST BODY");
                     logger.error("checkTransactionStatus: INVALID REQUEST BODY");
                     result = new ResponseMessageDTO("FAILED", "E46");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {
-                System.out.println("checkTransactionStatus: INVALID TOKEN");
                 logger.error("checkTransactionStatus: INVALID TOKEN");
                 result = new ResponseMessageDTO("FAILED", "E74");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
-            System.out.println("checkTransactionStatus: ERROR: " + e.toString());
             logger.error("checkTransactionStatus: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;

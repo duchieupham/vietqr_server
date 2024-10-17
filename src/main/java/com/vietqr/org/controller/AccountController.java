@@ -461,7 +461,6 @@ public class AccountController {
             long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
             accountSettingService.updateAccessLogin(time, accessCount, userId);
         } catch (Exception e) {
-            System.out.println("updateAccessLogin: ERROR: " + e.toString());
             logger.error("updateAccessLogin: ERROR: " + e.toString());
         }
     }
@@ -471,12 +470,10 @@ public class AccountController {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            System.out.println("FCM TOKEN: " + dto.getFcmToken());
             fcmTokenService.deleteFcmToken(dto.getFcmToken());
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            System.out.println("Error at logout: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "Unexpected Error");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -501,7 +498,6 @@ public class AccountController {
             }
 
         } catch (Exception e) {
-            System.out.println("Error at searchAccount: " + e.toString());
             logger.error("Error at searchAccount: " + e.getMessage() + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -517,7 +513,6 @@ public class AccountController {
             result = accountInformationService.getAccountsSearch(phoneNo);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            System.out.println("Error at searchAccounts: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -887,7 +882,6 @@ public class AccountController {
                 result = imageService.getImageById(id);
             }
         } catch (Exception e) {
-            System.out.println("Error at getImage: " + e.toString());
         }
         return result;
     }
@@ -980,7 +974,6 @@ public class AccountController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("getCardNumberByUserId: ERROR: " + e.toString());
-            System.out.println("getCardNumberByUserId: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -1113,7 +1106,6 @@ public class AccountController {
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
-            System.out.println("Error at updatePassword: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "Cannot update password");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -1218,7 +1210,6 @@ public class AccountController {
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
-            System.out.println("Error at updateInformation: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "Cannot update information");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -1246,7 +1237,6 @@ public class AccountController {
                 httpStatus = HttpStatus.OK;
             }
         } catch (Exception e) {
-            System.out.println("Error at updateImage: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "Cannot update information");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -1398,25 +1388,17 @@ public class AccountController {
                                 .exchange();
                         ClientResponse response = responseMono.block();
                         if (response.statusCode().is2xxSuccessful()) {
-                            System.out.println(
-                                    "SYNC BITRIX SUCCESS ITEM " + counter + ": " + entity.getId() + " - "
-                                            + name.trim() + " - "
-                                            + entity.getPhoneNo());
                         } else {
                             logger.error(
                                     "SYNC BITRIX FAILED ITEM: " + entity.getId() + " - " + entity.getPhoneNo());
-                            System.out.println(
-                                    "SYNC BITRIX FAILED ITEM: " + entity.getId() + " - " + entity.getPhoneNo());
                         }
                     } catch (Exception e) {
-                        System.out.println("ERROR: " + e.toString());
                     }
                 }
             }
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            System.out.println(e.toString());
             logger.error("syncVcardsToBitrix: ERROR: " + e.toString());
             result = new ResponseMessageDTO("syncVcardsToBitrix", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;

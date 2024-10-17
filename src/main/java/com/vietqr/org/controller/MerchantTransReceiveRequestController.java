@@ -84,7 +84,7 @@ public class MerchantTransReceiveRequestController {
                     entity.setTimeApproved(0);
                     entity.setStatus(0);
 
-                    transactionReceiveEntity.setTransStatus(1);
+                    transactionReceiveEntity.setStatusResponse(1);
 
                     transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
                     transReceiveRequestMappingService.insert(entity);
@@ -417,7 +417,7 @@ public class MerchantTransReceiveRequestController {
                             data1.setTransactionId(dto.getTransactionId());
                             data1.setTerminalCode(transactionReceiveEntity.getTerminalCode());
                             data1.setType(transactionReceiveEntity.getType());
-                            data1.setTransStatus(transactionReceiveEntity.getTransStatus());
+                            data1.setTransStatus(transactionReceiveEntity.getStatusResponse());
                             data2.setTransactionId(dto.getTransactionId());
                             data2.setTerminalCode(transReceiveRequestMappingEntity.getRequestValue());
                             data2.setType(transactionReceiveEntity.getType());
@@ -431,7 +431,7 @@ public class MerchantTransReceiveRequestController {
                             data1.setTransactionId(dto.getTransactionId());
                             data1.setTerminalCode(transReceiveRequestMappingEntity.getRequestValue());
                             data1.setType(transactionReceiveEntity.getType());
-                            data1.setTransStatus(transactionReceiveEntity.getTransStatus());
+                            data1.setTransStatus(transactionReceiveEntity.getStatusResponse());
                             data2.setTransactionId(dto.getTransactionId());
                             data2.setTerminalCode(transReceiveRequestMappingEntity.getRequestValue());
                             data2.setType(1);
@@ -472,7 +472,7 @@ public class MerchantTransReceiveRequestController {
                         // update request already approve:
                         transReceiveRequestMappingEntity.setTimeApproved(currentTime);
                         // update transaction
-                        transactionReceiveEntity.setTransStatus(2);
+                        transactionReceiveEntity.setStatusResponse(2);
                         transactionReceiveEntity.setTerminalCode(transReceiveRequestMappingEntity.getRequestValue());
 
                         transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
@@ -487,7 +487,7 @@ public class MerchantTransReceiveRequestController {
                     List<TransRequestDTO> listRequests = transReceiveRequestMappingService
                             .getTransactionReceiveRequest(strings);
                     if (transactionReceiveEntity != null && listRequests.size() <= 1) {
-                        transactionReceiveEntity.setTransStatus(0);
+                        transactionReceiveEntity.setStatusResponse(0);
                         transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
                     }
                     transReceiveRequestMappingService.insert(transReceiveRequestMappingEntity);

@@ -661,7 +661,6 @@ public class ContactController {
 //            }
 //        } catch (Exception e) {
 //            logger.error("getContactListApproved: ERROR: " + e.toString());
-//            System.out.println("getContactListApproved: ERROR: " + e.toString());
 //            httpStatus = HttpStatus.BAD_REQUEST;
 //        }
         return new ResponseEntity<>(result, httpStatus);
@@ -736,7 +735,6 @@ public class ContactController {
 //            }
         } catch (Exception e) {
             logger.error("getContactListApproved: ERROR: " + e.toString());
-            System.out.println("getContactListApproved: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -995,7 +993,6 @@ public class ContactController {
 //                if (dto.getImage() != null) {
 //                    if (dto.getImgId() != null && !dto.getImgId().trim().isEmpty()) {
 //                        String fileName = StringUtils.cleanPath(dto.getImage().getOriginalFilename());
-//                        // System.out.println(fileName);
 //                        imageService.updateImage(dto.getImage().getBytes(), fileName, dto.getImgId());
 //                    } else {
 //                        UUID uuidImage = UUID.randomUUID();
@@ -1015,7 +1012,6 @@ public class ContactController {
 //                httpStatus = HttpStatus.BAD_REQUEST;
 //            }
 //        } catch (Exception e) {
-//            System.out.println(e.toString());
 //            logger.error("updateContact: ERROR: " + e.toString());
 //            result = new ResponseMessageDTO("FAILED", "E05");
 //            httpStatus = HttpStatus.BAD_REQUEST;
@@ -1072,7 +1068,6 @@ public class ContactController {
         HttpStatus httpStatus = HttpStatus.OK;
 //        try {
 //            String qr = VCardUtil.getVcardQR(dto);
-//            System.out.println("QR Vcard: \n" + qr);
 //            result = new ResponseMessageDTO("SUCCESS", qr);
 //            httpStatus = HttpStatus.OK;
 //        } catch (Exception e) {
@@ -1175,7 +1170,6 @@ public class ContactController {
 //                if (dto.getImage() != null) {
 //                    if (dto.getImgId() != null && !dto.getImgId().trim().isEmpty()) {
 //                        String fileName = StringUtils.cleanPath(dto.getImage().getOriginalFilename());
-//                        // System.out.println(fileName);
 //                        imageService.updateImage(dto.getImage().getBytes(), fileName, dto.getImgId());
 //                    } else {
 //                        UUID uuidImage = UUID.randomUUID();
@@ -1195,7 +1189,6 @@ public class ContactController {
 //                httpStatus = HttpStatus.BAD_REQUEST;
 //            }
 //        } catch (Exception e) {
-//            System.out.println(e.toString());
 //            logger.error("updateContact: ERROR: " + e.toString());
 //            result = new ResponseMessageDTO("FAILED", "E05");
 //            httpStatus = HttpStatus.BAD_REQUEST;
@@ -1260,18 +1253,11 @@ public class ContactController {
 //                                    .exchange();
 //                            ClientResponse response = responseMono.block();
 //                            if (response.statusCode().is2xxSuccessful()) {
-//                                System.out.println(
-//                                        "SYNC BITRIX SUCCESS ITEM " + counter + ": " + entity.getId() + " - "
-//                                                + entity.getNickname() + " - "
-//                                                + entity.getPhoneNo());
 //                            } else {
 //                                logger.error(
 //                                        "SYNC BITRIX FAILED ITEM: " + entity.getId() + " - " + entity.getPhoneNo());
-//                                System.out.println(
-//                                        "SYNC BITRIX FAILED ITEM: " + entity.getId() + " - " + entity.getPhoneNo());
 //                            }
 //                        } catch (Exception e) {
-//                            System.out.println("ERROR: " + e.toString());
 //                        }
 //                    }
 //                }
@@ -1280,7 +1266,6 @@ public class ContactController {
 //            result = new ResponseMessageDTO("SUCCESS", "");
 //            httpStatus = HttpStatus.OK;
 //        } catch (Exception e) {
-//            System.out.println(e.toString());
 //            logger.error("syncVcardsToBitrix: ERROR: " + e.toString());
 //            result = new ResponseMessageDTO("FAILED", "E05");
 //            httpStatus = HttpStatus.BAD_REQUEST;

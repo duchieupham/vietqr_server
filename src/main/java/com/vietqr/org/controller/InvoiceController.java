@@ -1342,7 +1342,7 @@ public class InvoiceController {
                 transactionReceiveEntity.setTerminalCode("");
                 transactionReceiveEntity.setUserId(userIdHost);
                 transactionReceiveEntity.setNote("");
-                transactionReceiveEntity.setTransStatus(0);
+                transactionReceiveEntity.setStatusResponse(0);
                 transactionReceiveEntity.setQrCode(qr);
                 transactionReceiveEntity.setUrlLink("");
 
@@ -1785,7 +1785,7 @@ public class InvoiceController {
                 transactionReceiveEntity.setTerminalCode("");
                 transactionReceiveEntity.setUserId(userIdHost);
                 transactionReceiveEntity.setNote("");
-                transactionReceiveEntity.setTransStatus(0);
+                transactionReceiveEntity.setStatusResponse(0);
                 transactionReceiveEntity.setQrCode(qr);
                 transactionReceiveEntity.setUrlLink("");
 
@@ -2761,7 +2761,7 @@ public class InvoiceController {
             String otpPayment = RandomCodeUtil.generateOTP(6);
             String content = traceId + " " + billNumberVQR;
             logger.info("Generated content for QR code: " + content);
-            System.out.println("Generated content for QR code: " + content);
+            //System.out.println("Generated content for QR code: " + content);
             List<TransactionWalletEntity> transactionWalletEntities = new ArrayList<>();
 
             // Tạo transaction_wallet_credit cho tổng số tiền
@@ -2842,7 +2842,7 @@ public class InvoiceController {
             transactionReceiveEntity.setTerminalCode("");
             transactionReceiveEntity.setUserId(userIdHost);
             transactionReceiveEntity.setNote("");
-            transactionReceiveEntity.setTransStatus(0);
+            transactionReceiveEntity.setStatusResponse(0);
             transactionReceiveEntity.setQrCode(qr);
             transactionReceiveEntity.setUrlLink("");
 

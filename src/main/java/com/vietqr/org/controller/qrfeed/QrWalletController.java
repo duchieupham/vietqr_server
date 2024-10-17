@@ -2,7 +2,6 @@ package com.vietqr.org.controller.qrfeed;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.zxing.WriterException;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.qrfeed.*;
@@ -15,7 +14,6 @@ import com.vietqr.org.service.qrfeed.QRCodeService;
 import com.vietqr.org.service.qrfeed.QrCommentService;
 import com.vietqr.org.service.qrfeed.QrUserService;
 import com.vietqr.org.service.qrfeed.QrWalletService;
-import com.vietqr.org.service.vnpt.services.Interfaces;
 import com.vietqr.org.util.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +31,6 @@ import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.ResponseInputStream;
 
 import javax.imageio.ImageIO;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -56,7 +52,7 @@ public class QrWalletController {
     AccountLoginService accountLoginService;
 
     @Autowired
-    FileAttachService imageInvoiceService;
+    FileAttachService fileAttachService;
 
     @Autowired
     private QRCodeService qrCodeService;
@@ -923,7 +919,7 @@ public class QrWalletController {
 
                             // save image
                             UUID ids = UUID.randomUUID();
-                            imageInvoiceService.saveFile(file, ids.toString());
+                            fileAttachService.saveFile(file, ids.toString());
                             entity.setFileAttachmentId(ids.toString());
                             qrWalletService.insertQrWallet(entity);
 
@@ -1217,7 +1213,7 @@ public class QrWalletController {
             result = new ResponseMessageDTO("SUCCESS", uuid.toString());
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            System.out.println("Error at insertImage: " + e.toString());
+            //System.out.println("Error at insertImage: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -1232,7 +1228,7 @@ public class QrWalletController {
         HttpStatus httpStatus = null;
         try {
             UUID id = UUID.randomUUID();
-            imageInvoiceService.saveFile(file, id.toString());
+            fileAttachService.saveFile(file, id.toString());
 
             // update file log to qr
             qrWalletService.updateFileQrById(id.toString(), qrId);

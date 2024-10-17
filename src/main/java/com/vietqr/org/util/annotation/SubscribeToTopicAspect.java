@@ -26,7 +26,7 @@
 //    @Before("@annotation(subscribeToTopic)")
 //    public void subscribeToTopic(JoinPoint joinPoint, SubscribeTopic subscribeToTopic) throws Exception {
 //        String topic = subscribeToTopic.value();
-//        System.out.println("Subscribing to topic: " + topic); // Debug logging
+//        //System.out.println("Subscribing to topic: " + topic); // Debug logging
 //        Object target = joinPoint.getTarget();
 //        Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
 //        topicMethodMap.put(topic, method);

@@ -168,7 +168,7 @@ public class SocketHandler extends TextWebSocketHandler {
                         logger.warn("WS: WebSocket session is not open: " + session.getId());
                     }
                 }
-//                System.out.println(System.currentTimeMillis());
+//                //System.out.println(System.currentTimeMillis());
 //                session.sendMessage(new TextMessage(jsonMessage));
             }
         }

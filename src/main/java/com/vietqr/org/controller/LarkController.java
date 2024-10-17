@@ -55,7 +55,6 @@ public class LarkController {
             }
         } catch (Exception e) {
             logger.error("Error at sendFirstMessage: " + e.toString());
-            System.out.println("Error at sendFirstMessage: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -91,19 +90,16 @@ public class LarkController {
                     httpStatus = HttpStatus.OK;
                 } else {
                     logger.error("NOT FOUND LARK INFORMATION");
-                    System.out.println("NOT FOUND LARK INFORMATION");
                     result = new ResponseMessageDTO("FAILED", "E05");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {
                 logger.error("INVALID REQUEST BODY");
-                System.out.println("INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("Error at insertBankIntoLark: " + e.toString());
-            System.out.println("Error at insertBankIntoLark: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -124,19 +120,16 @@ public class LarkController {
                     httpStatus = HttpStatus.OK;
                 } else {
                     logger.error("NOT FOUND LARK INFORMATION");
-                    System.out.println("NOT FOUND LARK INFORMATION");
                     result = new ResponseMessageDTO("FAILED", "E05");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {
                 logger.error("INVALID REQUEST BODY");
-                System.out.println("INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("Error at removeBankFromLark: " + e.toString());
-            System.out.println("Error at removeBankFromLark: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -170,13 +163,11 @@ public class LarkController {
                 httpStatus = HttpStatus.OK;
             } else {
                 logger.error("insertLarkChatId: INVALID REQUEST BODY");
-                System.out.println("insertLarkChatId: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("Error at insertLarkChatId: " + e.toString());
-            System.out.println("Error at insertLarkChatId: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -216,13 +207,11 @@ public class LarkController {
                 httpStatus = HttpStatus.OK;
             } else {
                 logger.error("insertLarkChatId: INVALID REQUEST BODY");
-                System.out.println("insertLarkChatId: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("Error at insertLarkChatId: " + e.toString());
-            System.out.println("Error at insertLarkChatId: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -250,19 +239,16 @@ public class LarkController {
                     httpStatus = HttpStatus.OK;
                 } else {
                     logger.error("updateLarkChatIds: LARK ID NOT FOUND");
-                    System.out.println("updateLarkChatIds: LARK ID NOT FOUND");
                     result = new ResponseMessageDTO("FAILED", "E47");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {
                 logger.error("updateLarkConfigure: INVALID REQUEST BODY");
-                System.out.println("updateLarkConfigure: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("Error at updateLarkConfigure: " + e.toString());
-            System.out.println("Error at updateLarkConfigure: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -296,7 +282,6 @@ public class LarkController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("getLarkInformation: ERROR: " + e.toString());
-            System.out.println("getLarkInformation: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -315,7 +300,6 @@ public class LarkController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("Error at removeLark: " + e.toString());
-            System.out.println("Error at removeLark: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -354,7 +338,6 @@ public class LarkController {
             }
         } catch (Exception e) {
             logger.error("getLarkInformationDetail: ERROR: " + e.getMessage() + System.currentTimeMillis());
-            System.out.println("getLarkInformationDetail: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -370,7 +353,6 @@ public class LarkController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("LarkController: updateLarkWebhook: ERROR: "  + e.getMessage() + System.currentTimeMillis());
-            System.out.println("LarkController: updateLarkWebhook: ERROR: "  + e.getMessage() + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }

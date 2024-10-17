@@ -152,7 +152,6 @@ public class KeyBankReceiveController {
             //3. check key có valid không (đã tồn tại trong db chưa)
             //
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             logger.error("requestActiveBankReceive: ERROR: " + e.getMessage() + " at " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -268,7 +267,6 @@ public class KeyBankReceiveController {
             //3. check key có valid không (đã tồn tại trong db chưa)
             //
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             logger.error("requestActiveBankReceive: ERROR: " + e.getMessage() + " at " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -386,7 +384,6 @@ public class KeyBankReceiveController {
             }
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             logger.error("confirmActiveBankReceive: ERROR: " + e.getMessage() + " at " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -473,7 +470,6 @@ public class KeyBankReceiveController {
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             logger.error("checkActiveKeyForAdmin: ERROR: " + e.getMessage() + " at " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -520,7 +516,6 @@ public class KeyBankReceiveController {
             }
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             logger.error("generateKeyForAdmin: ERROR: " + e.getMessage() + " at " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -576,7 +571,6 @@ public class KeyBankReceiveController {
             httpStatus = HttpStatus.OK;
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             logger.error("generateKeyForAdmin: ERROR: " + e.getMessage() + " at " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -772,7 +766,6 @@ public class KeyBankReceiveController {
                 }
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             logger.error("keyActiveWithPaymentMethod: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -882,7 +875,7 @@ public class KeyBankReceiveController {
                                     transactionReceiveEntity.setTerminalCode(EnvironmentUtil.getVietQrActiveKey());
                                     transactionReceiveEntity.setUserId(userIdHost);
                                     transactionReceiveEntity.setNote("");
-                                    transactionReceiveEntity.setTransStatus(0);
+                                    transactionReceiveEntity.setStatusResponse(0);
                                     transactionReceiveEntity.setQrCode(qr);
                                     transactionReceiveEntity.setUrlLink("");
                                     transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
@@ -940,7 +933,6 @@ public class KeyBankReceiveController {
             }
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             logger.error("confirmActiveBankReceive: ERROR: " + e.getMessage() + " at " + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;

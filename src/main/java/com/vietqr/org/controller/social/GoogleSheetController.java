@@ -42,7 +42,7 @@ public class GoogleSheetController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("GoogleSheetController: sendFirstMessage: ERROR: " + e.toString());
-            System.out.println("GoogleSheetController: sendFirstMessage: ERROR: " + e.toString());
+            //System.out.println("GoogleSheetController: sendFirstMessage: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -84,7 +84,7 @@ public class GoogleSheetController {
             }
         } catch (Exception e) {
             logger.error("GoogleSheetController: insertBankIntoGoogleSheet: ERROR: " + e.toString());
-            System.out.println("GoogleSheetController: insertBankIntoGoogleSheet: ERROR: " + e.toString());
+            //System.out.println("GoogleSheetController: insertBankIntoGoogleSheet: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -107,7 +107,7 @@ public class GoogleSheetController {
             }
         } catch (Exception e) {
             logger.error("GoogleSheetController: removeBankFromGoogleSheet: ERROR: " + e.toString());
-            System.out.println("GoogleSheetController: removeBankFromGoogleSheet: ERROR: " + e.toString());
+            //System.out.println("GoogleSheetController: removeBankFromGoogleSheet: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -150,13 +150,13 @@ public class GoogleSheetController {
                 httpStatus = HttpStatus.OK;
             } else {
                 logger.error("insertGoogleSheet: INVALID REQUEST BODY");
-                System.out.println("insertGoogleSheet: INVALID REQUEST BODY");
+                //System.out.println("insertGoogleSheet: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("GoogleSheetController: insertGoogleSheet: ERROR: " + e.toString());
-            System.out.println("GoogleSheetController: insertGoogleSheet: ERROR: " + e.toString());
+            //System.out.println("GoogleSheetController: insertGoogleSheet: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -185,19 +185,19 @@ public class GoogleSheetController {
                     httpStatus = HttpStatus.OK;
                 } else {
                     logger.error("updateGoogleSheetConfigure: GOOGLE SHEET ID NOT FOUND");
-                    System.out.println("updateGoogleSheetConfigure: GOOGLE SHEET ID NOT FOUND");
+                    //System.out.println("updateGoogleSheetConfigure: GOOGLE SHEET ID NOT FOUND");
                     result = new ResponseMessageDTO("FAILED", "E47");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {
                 logger.error("updateGoogleSheetConfigure: INVALID REQUEST BODY");
-                System.out.println("updateGoogleSheetConfigure: INVALID REQUEST BODY");
+                //System.out.println("updateGoogleSheetConfigure: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("Error at updateGoogleSheetConfigure: " + e.toString());
-            System.out.println("Error at updateGoogleSheetConfigure: " + e.toString());
+            //System.out.println("Error at updateGoogleSheetConfigure: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -216,7 +216,7 @@ public class GoogleSheetController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("GoogleSheetController: removeGoogleSheet: ERROR: " + e.toString());
-            System.out.println("GoogleSheetController: removeGoogleSheet: ERROR:  " + e.toString());
+            //System.out.println("GoogleSheetController: removeGoogleSheet: ERROR:  " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -252,7 +252,7 @@ public class GoogleSheetController {
 
         } catch (Exception e) {
             logger.error("GoogleSheetController: getGoogleSheetInformationDetail: ERROR: " + e.getMessage() + System.currentTimeMillis());
-            System.out.println("GoogleSheetController: getGoogleSheetInformationDetail: ERROR: " + e.getMessage() + System.currentTimeMillis());
+            //System.out.println("GoogleSheetController: getGoogleSheetInformationDetail: ERROR: " + e.getMessage() + System.currentTimeMillis());
             ResponseMessageDTO responseMessageDTO = new ResponseMessageDTO("FAILED", "E05");
             result = responseMessageDTO;
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -271,7 +271,7 @@ public class GoogleSheetController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("GoogleSheetController: updateGoogleSheetWebhook: ERROR: "  + e.getMessage() + System.currentTimeMillis());
-            System.out.println("GoogleSheetController: updateGoogleSheetWebhook: ERROR: "  + e.getMessage() + System.currentTimeMillis());
+            //System.out.println("GoogleSheetController: updateGoogleSheetWebhook: ERROR: "  + e.getMessage() + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }

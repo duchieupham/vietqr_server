@@ -219,25 +219,15 @@ public class MobileCarrierController {
                             String prefix = phoneNo.substring(0, 3);
                             String carrierTypeId = mobileCarrierService.getTypeIdByPrefix(prefix);
                             if (carrierTypeId != null) {
-                                // 2.1.
-                                System.out.println("index: " + index + " - phone: " + phoneNo + " - prefix: " + prefix
-                                        + " - carrier: " + carrierTypeId);
                                 accountInformationService.updateCarrierTypeIdByUserId(carrierTypeId, account.getId());
                             } else {
-                                // 2.2.
-                                System.out.println("index: " + index + " - phone: " + phoneNo + " - prefix: " + prefix
-                                        + " - carrier: " + carrierTypeId);
                                 accountInformationService.updateCarrierTypeIdByUserId("", account.getId());
                             }
                         } else {
-                            // 2.2.
-                            System.out.println("index: " + index + " - phone: " + phoneNo
-                                    + " - carrier: " + "");
                             accountInformationService.updateCarrierTypeIdByUserId("", account.getId());
                         }
                     } else {
                         logger.error("updateCarrierTypeForUsers: account null or userId null");
-                        System.out.println("updateCarrierTypeForUsers: account null or userId null");
                     }
                 }
             }
@@ -245,7 +235,6 @@ public class MobileCarrierController {
             result = new ResponseMessageDTO("SUCCESS", "");
         } catch (Exception e) {
             logger.error("ERROR at updateCarrierTypeForUsers: " + e.toString());
-            System.out.println("ERROR at updateCarrierTypeForUsers: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
             result = new ResponseMessageDTO("FAILED", "E05");
         }
@@ -262,7 +251,6 @@ public class MobileCarrierController {
             httpStatus = HttpStatus.OK;
             result = new ResponseMessageDTO("SUCCESS", "");
         } catch (Exception e) {
-            System.out.println("Error at registerAccount: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }

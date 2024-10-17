@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.gson.Gson;
+import com.vietqr.org.constant.GroupCodeConstant;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.mapper.ErrorCodeMapper;
 import com.vietqr.org.dto.mapping.RefundMappingRedisDTO;
@@ -230,8 +231,6 @@ public class TransactionMMSController {
             result = new TransactionMMSResponseDTO("99", "Internal error");
             logger.info(
                     "transaction-mms-sync: RESPONSE ERRPR at: " + DateTimeUtil.getCurrentDateTimeUTC());
-            // System.out.println(
-            // "transaction-mms-sync: RESPONSE ERRPR at: " + responseTime);
             return new ResponseEntity<>(result, httpStatus);
         } finally {
             // Sử dụng thread mới để xử lý transactionReceiveEntity trong finally
@@ -277,7 +276,6 @@ public class TransactionMMSController {
                         boolean isSubTerminal = false;
                         // push data to customerSync
                         if (tempTerminalBank != null) {
-                            System.out.println("terminal bank != null");
                             String terminalId = "";
                             String traceTransfer = entity.getTraceTransfer();
                             if (!StringUtil.isNullOrEmpty(traceTransfer)) {
@@ -374,7 +372,6 @@ public class TransactionMMSController {
                                         " at: " + System.currentTimeMillis());
                             }
                         } else {
-                            // System.out.println("terminal bank = null");
                             logger.info(
                                     "transaction-mms-sync: terminalBankEntity = NULL; CANNOT push data to customerSync");
                         }
@@ -554,7 +551,7 @@ public class TransactionMMSController {
                                 transactionReceive.setTime(currentTime);
                                 transactionReceive.setTimePaid(timePaid);
                                 transactionReceive.setBankId(accountBankReceiveEntity.getId());
-                                transactionReceive.setTransStatus(0);
+                                transactionReceive.setStatusResponse(0);
                                 transactionReceive.setTerminalCode(terminalItemEntity.getTerminalCode());
                                 transactionReceive.setContent(entity.getTraceTransfer());
                                 transactionReceive.setBankAccount(accountBankReceiveEntity.getBankAccount());
@@ -782,7 +779,7 @@ public class TransactionMMSController {
                                         transactionReceiveEntity1.setTime(currentTime);
                                         transactionReceiveEntity1.setTimePaid(timePaid);
                                         transactionReceiveEntity1.setBankId(accountBankReceiveEntity.getId());
-                                        transactionReceiveEntity1.setTransStatus(0);
+                                        transactionReceiveEntity1.setStatusResponse(0);
                                         if (terminalBankReceiveEntity.getTerminalCode() != null
                                                 && !terminalBankReceiveEntity.getTerminalCode().trim().isEmpty()) {
                                             transactionReceiveEntity1
@@ -989,7 +986,7 @@ public class TransactionMMSController {
                                         transactionEntity.setQrCode("");
                                         transactionEntity.setUserId(bankDTO.getUserId());
                                         transactionEntity.setNote("");
-                                        transactionEntity.setTransStatus(0);
+                                        transactionEntity.setStatusResponse(0);
                                         transactionEntity.setUrlLink("");
                                         if (!insertTransaction) {
                                             transactionReceiveService.insertTransactionReceive(transactionEntity);
@@ -1163,7 +1160,7 @@ public class TransactionMMSController {
                                         transactionReceiveEntity1.setTime(currentTime);
                                         transactionReceiveEntity1.setTimePaid(timePaid);
                                         transactionReceiveEntity1.setBankId(accountBankReceiveEntity.getId());
-                                        transactionReceiveEntity1.setTransStatus(0);
+                                        transactionReceiveEntity1.setStatusResponse(0);
                                         transactionReceiveEntity1.setTerminalCode(terminalSubRawCodeDTO.getTerminalCode());
                                         transactionReceiveEntity1.setContent(entity.getTraceTransfer());
                                         transactionReceiveEntity1.setBankAccount(accountBankReceiveEntity.getBankAccount());
@@ -1453,11 +1450,9 @@ public class TransactionMMSController {
         try {
             // find customerSyncEntities by terminal_bank_id
             List<TerminalAddressEntity> terminalAddressEntities = new ArrayList<>();
-            // System.out.println("terminal Bank ID: " + terminalBankId);
             terminalAddressEntities = terminalAddressService
                     .getTerminalAddressByTerminalBankId(terminalBankId);
             if (terminalAddressEntities != null && !terminalAddressEntities.isEmpty()) {
-                // System.out.println("terminalAddressEntites != empty");
                 TransactionBankCustomerDTO transactionBankCustomerDTO = new TransactionBankCustomerDTO();
                 transactionBankCustomerDTO.setTransactionid(transactionReceiveEntity.getId());
                 transactionBankCustomerDTO.setTransactiontime(time * 1000);
@@ -1489,12 +1484,13 @@ public class TransactionMMSController {
                         CustomerSyncEntity customerSyncEntity = customerSyncService
                                 .getCustomerSyncById(terminalAddressEntity.getCustomerSyncId());
                         if (customerSyncEntity != null) {
-                            // System.out.println("customerSyncEntity != null");
-                            String retryErrors = customerErrorLogService.getRetryErrorsByCustomerId(customerSyncEntity.getId());
-                            List<String> errors = new ArrayList<>();
-                            errors = mapperErrors(retryErrors);
-                            List<String> finalErrors = errors;
-                            executorService.submit(() -> pushNewTransactionToCustomerSync(transReceiveId, customerSyncEntity, transactionBankCustomerDTO,
+                            List<CustomerErrorLogDTO> errorLogDTOS = customerErrorLogService
+                                    .getRetryErrorsByCustomerId(customerSyncEntity.getId());
+                            Map<String, String> errors = new HashMap<>();
+                            errors = mapperErrors(errorLogDTOS);
+                            Map<String, String> finalErrors = errors;
+                            executorService.submit(() -> pushNewTransactionToCustomerSync(transReceiveId, customerSyncEntity,
+                                    transactionBankCustomerDTO,
                                     time * 1000, 1, finalErrors));
                         } else {
                             logger.info("customerSyncEntity = null");
@@ -1518,15 +1514,18 @@ public class TransactionMMSController {
         }
     }
 
-    private List<String> mapperErrors(String errors) {
-        List<String> result = new ArrayList<>();
+    private Map<String, String> mapperErrors(List<CustomerErrorLogDTO> errors) {
+        Map<String, String> result = new HashMap<>();
+        ObjectMapper mapper = new ObjectMapper();
         try {
-            if (StringUtil.isNullOrEmpty(errors)) {
-                ObjectMapper mapper = new ObjectMapper();
-                List<ErrorCodeMapper> list = mapper.readValue(errors, new TypeReference<List<ErrorCodeMapper>>() {
-                });
-                for (ErrorCodeMapper dto : list) {
-                    result.add(dto.getErrorCode());
+            if (Objects.nonNull(errors) && !errors.isEmpty()) {
+                for (CustomerErrorLogDTO logDTO: errors) {
+                    List<ErrorCodeMapper> list = mapper.readValue(logDTO.getErrorCodes(),
+                            new TypeReference<List<ErrorCodeMapper>>() {
+                            });
+                    for (ErrorCodeMapper dto : list) {
+                        result.put(dto.getErrorCode(), logDTO.getGroupCode());
+                    }
                 }
             }
 
@@ -1542,11 +1541,9 @@ public class TransactionMMSController {
         try {
             // find customerSyncEntities by terminal_bank_id
             List<TerminalAddressEntity> terminalAddressEntities = new ArrayList<>();
-            // System.out.println("terminal Bank ID: " + terminalBankId);
             terminalAddressEntities = terminalAddressService
                     .getTerminalAddressByTerminalBankId(terminalBankId);
             if (!terminalAddressEntities.isEmpty()) {
-                // System.out.println("terminalAddressEntites != empty");
                 TransactionBankCustomerDTO transactionBankCustomerDTO = new TransactionBankCustomerDTO();
                 transactionBankCustomerDTO.setTransactionid(transactionReceiveEntity.getId());
                 transactionBankCustomerDTO.setTransactiontime(time * 1000);
@@ -1599,11 +1596,11 @@ public class TransactionMMSController {
                         for (BankReceiveConnectionEntity bankReceiveConnectionEntity : bankReceiveConnectionEntities) {
                             MerchantConnectionEntity merchantConnectionEntity = merchantConnectionService
                                     .getMerchanConnectionById(bankReceiveConnectionEntity.getMidConnectId());
-                            String retryErrors = customerErrorLogService.getRetryErrorsByCustomerId(merchantConnectionEntity.getMid());
-                            List<String> errorCodes = new ArrayList<>();
+                            List<CustomerErrorLogDTO> retryErrors = customerErrorLogService.getRetryErrorsByCustomerId(merchantConnectionEntity.getMid());
+                            Map<String, String> errorCodes = new HashMap<>();
                             errorCodes = mapperErrors(retryErrors);
                             if (merchantConnectionEntity != null) {
-                                List<String> finalErrorCodes = errorCodes;
+                                Map<String, String> finalErrorCodes = errorCodes;
                                 executorService.submit(() -> pushNewTransactionToCustomerSyncV2(transReceiveId, merchantConnectionEntity,
                                         transactionBankCustomerDTO, 1, finalErrorCodes));
                             }
@@ -1643,7 +1640,7 @@ public class TransactionMMSController {
                     data.put("transType", dto.getTransType());
                     data.put("orderId", dto.getOrderId());
                     data.put("terminalCode", dto.getTerminalCode());
-                    data.put("serviceCode", dto.getServiceCode());
+                    data.put("serviceCode",StringUtil.getValueNullChecker(dto.getServiceCode()));
                     data.put("subTerminalCode", dto.getSubTerminalCode());
                     socketHandler.sendMessageToClientId(merchantSyncEntity.getClientId(),
                             data);
@@ -1660,7 +1657,8 @@ public class TransactionMMSController {
     }
 
     private void pushNewTransactionToCustomerSyncV2(String transReceiveId, MerchantConnectionEntity entity,
-                                                    TransactionBankCustomerDTO dto, int retryCount, List<String> errorCodes) {
+                                                    TransactionBankCustomerDTO dto,
+                                                    int retryCount, Map<String, String> errorCodes) {
         ResponseMessageDTO result = null;
         // final ResponseMessageDTO[] results = new ResponseMessageDTO[1];
         // final List<ResponseMessageDTO> results = new ArrayList<>();
@@ -1687,9 +1685,6 @@ public class TransactionMMSController {
             logger.info("pushNewTransactionToCustomerSync: orderId: " +
                     dto.getOrderId());
             logger.info("pushNewTransactionToCustomerSync: sign: " + dto.getSign());
-            System.out.println("pushNewTransactionToCustomerSync: orderId: " +
-                    dto.getOrderId());
-            System.out.println("pushNewTransactionToCustomerSync: sign: " + dto.getSign());
             TokenDTO tokenDTO = null;
             if (entity.getUsername() != null && !entity.getUsername().trim().isEmpty() &&
                     entity.getPassword() != null
@@ -1711,7 +1706,7 @@ public class TransactionMMSController {
             data.put("sign", dto.getSign());
             data.put("terminalCode", dto.getTerminalCode());
             data.put("urlLink", dto.getUrlLink());
-            data.put("serviceCode", dto.getServiceCode());
+            data.put("serviceCode", StringUtil.getValueNullChecker(dto.getServiceCode()));
             data.put("subTerminalCode", dto.getSubTerminalCode());
             WebClient.Builder webClientBuilder = WebClient.builder()
                     .baseUrl(entity.getUrlCallback());
@@ -1750,24 +1745,49 @@ public class TransactionMMSController {
             }
 
             ClientResponse response = responseMono.block();
-            System.out.println("response status code: " + response.statusCode());
             try {
                 transactionLogResponseDTO.setTimeResponse(DateTimeUtil.getCurrentDateTimeUTC());
                 transactionLogResponseDTO.setStatusCode(response.statusCode().value());
-            } catch (Exception e) {}
+            } catch (Exception ignored) {}
+            // 1. nếu status = 200 thì default là mã lỗi success
             if (response.statusCode().is2xxSuccessful()) {
                 String json = response.bodyToMono(String.class).block();
-                System.out.println("Response pushNewTransactionToCustomerSync: " + json);
                 logger.info("Response pushNewTransactionToCustomerSync: " + json + " status: " + response.statusCode());
                 String errorCode = validateFormatCallbackResponse(json);
+                // 1.1 nếu response map đc theo format thì kiểm tra các bước dưới
                 if (!StringUtil.isNullOrEmpty(errorCode)) {
                     // retry callback
-                    if (Objects.nonNull(errorCodes) && errorCodes.contains(errorCode)) {
+                    // 1.1.1 nếu status = 200 và khách có map mã lỗi trong database thì kiểm tra mã lỗi có phải mã
+                    // lỗi retry không, nếu phải thì thực hiện if
+                    if (Objects.nonNull(errorCodes)
+                            && GroupCodeConstant.RETRY_GROUP.getValue()
+                            .equals(errorCodes.get(errorCode))) {
+                        // 1.1.1.1
                         if (retryCount < 10) {
                             pushNewTransactionToCustomerSyncV2(transReceiveId, entity,
                                     dto, ++retryCount, errorCodes);
                         }
+                        // 1.1.1.2
+                        else {
+                            updateTransactionStatusResponse(errorCodes.getOrDefault(errorCode,"R"),
+                                    transReceiveId);
+                        }
                     }
+                    // 1.1.2 nếu không phải là mã lỗi retry và khách có map mã lỗi trong database
+                    else if (Objects.nonNull(errorCodes)) {
+                        String groupCode = errorCodes.getOrDefault(errorCode, "R");
+                        updateTransactionStatusResponse(groupCode, transReceiveId);
+                    }
+                    // 1.1.3 nếu khách không có mã lỗi đồng bộ với hệ thống luôn thì trả về success
+                    else {
+                        updateTransactionStatusResponse("S",
+                                transReceiveId);
+                    }
+                }
+                // 1.2 nếu response không map được theo format trả thành công luôn
+                else {
+                    updateTransactionStatusResponse("S",
+                            transReceiveId);
                 }
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode rootNode = objectMapper.readTree(json);
@@ -1781,20 +1801,66 @@ public class TransactionMMSController {
                 } else {
                     result = new ResponseMessageDTO("FAILED", "E05 - " + json);
                 }
-            } else {
+            }
+            // 2. nếu status != 400 và status thuộc loại 4xx hoặc 5xx 401, 403... 500 508...
+            else if (response.statusCode().value() != 400
+                    && (response.statusCode().is4xxClientError()
+                    || response.statusCode().is5xxServerError())) {
+                String json = response.bodyToMono(String.class).block();
+                logger.info("Response pushNewTransactionToCustomerSync: " + json + " status Code: " + response.statusCode());
+                // retry callback
+                // 2.1 retry chưa tới lần thứ 10
+                if (retryCount < 10) {
+                    pushNewTransactionToCustomerSyncV2(transReceiveId, entity,
+                            dto, ++retryCount, errorCodes);
+                }
+                // 2.2 retry sau 10 lần nhưng vẫn failed
+                else {
+                    updateTransactionStatusResponse("R", transReceiveId);
+                }
+                result = new ResponseMessageDTO("FAILED", "E05 - " + json);
+            }
+            // 3. status = 400
+            else {
                 String json = response.bodyToMono(String.class).block();
                 // nếu trả sai format retry callback
                 String errorCode = validateFormatCallbackResponse(json);
+                // 3.1 nếu map được mã lỗi từ response trả về
                 if (!StringUtil.isNullOrEmpty(errorCode)) {
                     // retry callback
-                    if (Objects.nonNull(errorCodes) && errorCodes.contains(errorCode)) {
+                    // 3.1.1 nếu status = 200 và khách có map mã lỗi trong database thì kiểm tra mã lỗi có phải mã
+                    // lỗi retry không, nếu phải thì thực hiện if
+                    if (Objects.nonNull(errorCodes)
+                            && GroupCodeConstant.RETRY_GROUP.getValue().
+                            equals(errorCodes.get(errorCode))) {
+                        // 3.1.1.1
                         if (retryCount < 10) {
                             pushNewTransactionToCustomerSyncV2(transReceiveId, entity,
                                     dto, ++retryCount, errorCodes);
                         }
+                        // 3.1.1.2
+                        else {
+                            updateTransactionStatusResponse(errorCodes.getOrDefault(errorCode, "R"),
+                                    transReceiveId);
+                        }
+                    }
+                    // 3.1.2 nếu không phải là mã lỗi retry và khách có map mã lỗi trong database
+                    else if (Objects.nonNull(errorCodes)) {
+                        String groupCode = errorCodes.getOrDefault(errorCode, "R");
+                        updateTransactionStatusResponse(groupCode, transReceiveId);
+                    }
+                    // 3.1.3 nếu khách không có mã lỗi đồng bộ với hệ thống luôn thì trả về thất bại
+                    else {
+                        updateTransactionStatusResponse("R",
+                                transReceiveId);
                     }
                 }
-                System.out.println("Response pushNewTransactionToCustomerSync: " + json);
+                // 3.2 nếu không map được mã lỗi từ response trả về thì trả thất bại luôn
+                else {
+                    updateTransactionStatusResponse("R",
+                            transReceiveId);
+                }
+                //System.out.println("Response pushNewTransactionToCustomerSync: " + json);
                 logger.info("Response pushNewTransactionToCustomerSync: " + json + " status: " + response.statusCode());
                 result = new ResponseMessageDTO("FAILED", "E05 - " + json);
             }
@@ -1812,6 +1878,8 @@ public class TransactionMMSController {
             if (retryCount < 10) {
                 pushNewTransactionToCustomerSyncV2(transReceiveId, entity,
                         dto, ++retryCount, errorCodes);
+            } else {
+                updateTransactionStatusResponse("R", transReceiveId);
             }
         } finally {
             if (result != null) {
@@ -1869,7 +1937,6 @@ public class TransactionMMSController {
             webClient = WebClient.builder()
                     .baseUrl(entity.getUrlGetToken())
                     .build();
-            System.out.println("uriComponents: " + uriComponents.getPath());
             Mono<TokenDTO> responseMono = webClient.method(HttpMethod.POST)
                     .uri(uriComponents.toUri())
                     .contentType(MediaType.APPLICATION_JSON)
@@ -1877,7 +1944,6 @@ public class TransactionMMSController {
                     .body(BodyInserters.fromValue(data))
                     .exchange()
                     .flatMap(clientResponse -> {
-                        System.out.println("status code: " + clientResponse.statusCode());
                         try {
                             transactionLogResponseDTO.setTimeResponse(DateTimeUtil.getCurrentDateTimeUTC());
                             transactionLogResponseDTO.setStatusCode(clientResponse.statusCode().value());
@@ -1927,7 +1993,7 @@ public class TransactionMMSController {
 
     private ResponseMessageDTO pushNewTransactionToCustomerSync(String transReceiveId, CustomerSyncEntity entity,
                                                                 TransactionBankCustomerDTO dto,
-                                                                long time, int retryCount, List<String> errorCodes) {
+                                                                long time, int retryCount, Map<String, String> errorCodes) {
         ResponseMessageDTO result = null;
         TransactionLogResponseDTO transactionLogResponseDTO = new TransactionLogResponseDTO();
         if (retryCount > 1 && retryCount <= 5) {
@@ -1950,13 +2016,7 @@ public class TransactionMMSController {
             transactionLogResponseDTO.setTimeRequest(DateTimeUtil.getCurrentDateTimeUTC());
             logger.info("pushNewTransactionToCustomerSync: orderId: " +
                     dto.getOrderId() + " at: " + System.currentTimeMillis());
-            // System.out.println("pushNewTransactionToCustomerSync: orderId: " +
-            // dto.getOrderId());
             logger.info("pushNewTransactionToCustomerSync: sign: " + dto.getSign());
-            // System.out.println("pushNewTransactionToCustomerSync: orderId: " +
-            // dto.getOrderId());
-            // System.out.println("pushNewTransactionToCustomerSync: sign: " +
-            // dto.getSign());
             TokenDTO tokenDTO = null;
             if (entity.getUsername() != null && !entity.getUsername().trim().isEmpty() &&
                     entity.getPassword() != null
@@ -1978,7 +2038,7 @@ public class TransactionMMSController {
             data.put("sign", dto.getSign());
             data.put("terminalCode", dto.getTerminalCode());
             data.put("urlLink", dto.getUrlLink());
-            data.put("serviceCode", dto.getServiceCode());
+            data.put("serviceCode", StringUtil.getValueNullChecker(dto.getServiceCode()));
             data.put("subTerminalCode", dto.getSubTerminalCode());
             String suffixUrl = "";
             if (entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty()) {
@@ -2009,8 +2069,6 @@ public class TransactionMMSController {
             // Mono<TransactionResponseDTO> responseMono = null;
             logger.info("pushNewTransactionToCustomerSync request orderId: " + dto.getOrderId()
                     + " at: " + System.currentTimeMillis());
-            // System.out.println("pushNewTransactionToCustomerSync request at:" +
-            // startRequestTime);
             Mono<ClientResponse> responseMono = null;
             if (tokenDTO != null) {
                 responseMono = webClient.post()
@@ -2034,25 +2092,44 @@ public class TransactionMMSController {
             try {
                 transactionLogResponseDTO.setTimeResponse(DateTimeUtil.getCurrentDateTimeUTC());
                 transactionLogResponseDTO.setStatusCode(response.statusCode().value());
-            } catch (Exception e) {}
+            } catch (Exception ignored) {}
             logger.info("Response pushNewTransactionToCustomerSync response orderId: " + dto.getOrderId()
                     + " at: " + System.currentTimeMillis());
-            // System.out.println("Response pushNewTransactionToCustomerSync at:" +
-            // responseTime);
-            // System.out.println("response: " + response.toString());
-            // System.out.println("response status code: " + response.statusCode());
+            // 1. nếu status = 200 thì default là mã lỗi success
             if (response.statusCode().is2xxSuccessful()) {
                 String json = response.bodyToMono(String.class).block();
                 logger.info("Response pushNewTransactionToCustomerSync: " + json + " status Code: " + response.statusCode());
                 String errorCode = validateFormatCallbackResponse(json);
+                // 1.1 nếu response map đc theo format thì kiểm tra các bước dưới
                 if (!StringUtil.isNullOrEmpty(errorCode)) {
                     // retry callback
-                    if (Objects.nonNull(errorCodes) && errorCodes.contains(errorCode)) {
+                    // 1.1.1 nếu status = 200 và khách có map mã lỗi trong database thì kiểm tra mã lỗi có phải mã
+                    // lỗi retry không, nếu phải thì thực hiện if
+                    if (Objects.nonNull(errorCodes)
+                            && GroupCodeConstant.RETRY_GROUP.getValue()
+                            .equals(errorCodes.get(errorCode))) {
+                        // 1.1.1.1
                         if (retryCount < 10) {
                             pushNewTransactionToCustomerSync(transReceiveId, entity,
                                     dto, time, ++retryCount, errorCodes);
+                        // 1.1.1.2
+                        } else {
+                            updateTransactionStatusResponse(errorCodes.getOrDefault(errorCode, "R"),
+                                    transReceiveId);
                         }
                     }
+                    // 1.1.2 nếu không phải là mã lỗi retry và khách có map mã lỗi trong database
+                    else if (Objects.nonNull(errorCodes)) {
+                        String groupCode = errorCodes.getOrDefault(errorCode, "R");
+                        updateTransactionStatusResponse(groupCode, transReceiveId);
+                    }
+                    // 1.1.3 nếu khách không có mã lỗi đồng bộ với hệ thống luôn thì trả về success
+                    else {
+                        updateTransactionStatusResponse("S", transReceiveId);
+                    }
+                // 1.2 nếu response không map được theo format trả thành công luôn
+                } else {
+                    updateTransactionStatusResponse("S", transReceiveId);
                 }
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode rootNode = objectMapper.readTree(json);
@@ -2066,38 +2143,75 @@ public class TransactionMMSController {
                 } else {
                     result = new ResponseMessageDTO("FAILED", "E05 - " + json);
                 }
-            } else if (response.statusCode().value() != 400 && (response.statusCode().is4xxClientError() || response.statusCode().is5xxServerError())) {
+
+            }
+            // 2. nếu status != 400 và status thuộc loại 4xx hoặc 5xx 401, 403... 500 508...
+            else if (response.statusCode().value() != 400
+                    && (response.statusCode().is4xxClientError()
+                    || response.statusCode().is5xxServerError())) {
                 String json = response.bodyToMono(String.class).block();
                 logger.info("Response pushNewTransactionToCustomerSync: " + json + " status Code: " + response.statusCode());
                 // retry callback
+                // 2.1 retry chưa tới lần thứ 10
                 if (retryCount < 10) {
                     pushNewTransactionToCustomerSync(transReceiveId, entity,
                             dto, time, ++retryCount, errorCodes);
                 }
+                // 2.2 retry sau 10 lần nhưng vẫn failed
+                else {
+                    updateTransactionStatusResponse("R", transReceiveId);
+                }
                 result = new ResponseMessageDTO("FAILED", "E05 - " + json);
-            } else {
+            }
+            // 3. status = 400
+            else {
                 String json = response.bodyToMono(String.class).block();
                 logger.info("Response pushNewTransactionToCustomerSync: " + json + " status Code: " + response.statusCode());
                 String errorCode = validateFormatCallbackResponse(json);
+                // 3.1 nếu map được mã lỗi từ response trả về
                 if (!StringUtil.isNullOrEmpty(errorCode)) {
                     // retry callback
-                    if (Objects.nonNull(errorCodes) && errorCodes.contains(errorCode)) {
+                    // 3.1.1 nếu status = 400 và khách có map mã lỗi trong database thì kiểm tra mã lỗi có phải mã
+                    // lỗi retry không, nếu phải thì thực hiện if
+                    if (Objects.nonNull(errorCodes)
+                            && GroupCodeConstant.RETRY_GROUP.getValue()
+                            .equals(errorCodes.get(errorCode))) {
+                        //3.1.1.1
                         if (retryCount < 10) {
                             pushNewTransactionToCustomerSync(transReceiveId, entity,
                                     dto, time, ++retryCount, errorCodes);
                         }
+                        //3.1.1.2
+                        else {
+                            updateTransactionStatusResponse(errorCodes
+                                    .getOrDefault(errorCode, "R"), transReceiveId);
+                        }
                     }
+                    // 3.1.2 nếu không phải là mã lỗi retry và khách có map mã lỗi trong database
+                    else if (Objects.nonNull(errorCodes)) {
+                        String groupCode = errorCodes.getOrDefault(errorCode, "R");
+                        updateTransactionStatusResponse(groupCode, transReceiveId);
+                    }
+                    // 3.1.3 nếu khách không có mã lỗi đồng bộ với hệ thống luôn thì trả về thất bại
+                    else {
+                        updateTransactionStatusResponse("R", transReceiveId);
+                    }
+                }
+                // 3.2 nếu không map được mã lỗi từ response trả về thì trả thất bại
+                else {
+                    updateTransactionStatusResponse("R", transReceiveId);
                 }
                 result = new ResponseMessageDTO("FAILED", "E05 - " + json);
             }
         } catch (Exception e) {
-            LocalDateTime currentDateTime = LocalDateTime.now();
-            long responseTime = currentDateTime.toEpochSecond(ZoneOffset.UTC);
+            long responseTime = DateTimeUtil.getCurrentDateTimeUTC();
             if (retryCount < 10) {
                 pushNewTransactionToCustomerSync(transReceiveId, entity,
                         dto, time, ++retryCount, errorCodes);
+            } else {
+                updateTransactionStatusResponse("R", transReceiveId);
             }
-            result = new ResponseMessageDTO("FAILED", "E05 - " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05 - " + e.getMessage());
             if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
                 logger.error(
                         "Error Unexpected at pushNewTransactionToCustomerSync: " +
@@ -2141,6 +2255,32 @@ public class TransactionMMSController {
         return result;
     }
 
+    private void updateTransactionStatusResponse(String groupError, String transactionId) {
+        // 0: init
+        // 1: success - Thanh cong
+        // 2: pending - Cho xử lý
+        // 3: failed - That bai
+        // 4: error - Loi
+        int statusResponse = 0;
+        switch (groupError) {
+            case "R":
+                statusResponse = 3;
+                break;
+            case "S":
+                statusResponse = 1;
+                break;
+            case "F":
+                statusResponse = 4;
+                break;
+            case "W":
+                statusResponse = 2;
+                break;
+            default:
+                break;
+        }
+        transactionReceiveService.updateStatusResponse(transactionId, statusResponse);
+    }
+
     private TokenDTO getCustomerSyncToken(String transReceiveId, CustomerSyncEntity entity) {
         TokenDTO result = null;
         ResponseMessageDTO msgDTO = null;
@@ -2151,9 +2291,6 @@ public class TransactionMMSController {
             String encodedKey = Base64.getEncoder().encodeToString(key.getBytes());
             logger.info("key: " + encodedKey + " - username: " + entity.getUsername() + " - password: "
                     + entity.getPassword());
-            // System.out.println("key: " + encodedKey + " - username: " +
-            // entity.getUsername() + " - password: "
-            // + entity.getPassword());
             String suffixUrl = entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty() ? entity.getSuffixUrl()
                     : "";
             UriComponents uriComponents = null;
@@ -2180,7 +2317,6 @@ public class TransactionMMSController {
                                 + "/api/token_generate")
                         .build();
             }
-            // System.out.println("uriComponents: " + uriComponents.toString());
             Mono<TokenDTO> responseMono = webClient.method(HttpMethod.POST)
                     .uri(uriComponents.toUri())
                     .contentType(MediaType.APPLICATION_JSON)
@@ -2188,7 +2324,6 @@ public class TransactionMMSController {
                     .body(BodyInserters.fromValue(data))
                     .exchange()
                     .flatMap(clientResponse -> {
-                        System.out.println("status code: " + clientResponse.statusCode());
                         try {
                             transactionLogResponseDTO.setTimeResponse(DateTimeUtil.getCurrentDateTimeUTC());
                             transactionLogResponseDTO.setStatusCode(clientResponse.statusCode().value());
@@ -2214,8 +2349,6 @@ public class TransactionMMSController {
                     logger.info("Token got: " + result.getAccess_token() + " - from: " + entity.getInformation());
                 }
 
-                // System.out.println("Token got: " + result.getAccess_token() + " - from: " +
-                // entity.getIpAddress());
             } else {
                 msgDTO = new ResponseMessageDTO("FAILED", "E05");
                 if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
@@ -2229,8 +2362,6 @@ public class TransactionMMSController {
             msgDTO = new ResponseMessageDTO("FAILED", "E05 - " + e.toString());
             if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
                 logger.error("Error at getCustomerSyncToken: " + entity.getIpAddress() + " - " + e.toString());
-                // System.out.println("Error at getCustomerSyncToken: " + entity.getIpAddress()
-                // + " - " + e.toString());
             } else {
                 logger.error("Error at getCustomerSyncToken: " + entity.getInformation() + " - " + e.toString());
             }
@@ -2264,7 +2395,7 @@ public class TransactionMMSController {
         LocalDateTime responseDateTime = LocalDateTime.now();
         long responseTime = responseDateTime.toEpochSecond(ZoneOffset.UTC);
         logger.info("getCustomerSyncToken response at:" + responseTime);
-        // System.out.println("getCustomerSyncToken response at:" + responseTime);
+        // //System.out.println("getCustomerSyncToken response at:" + responseTime);
         return result;
     }
 
@@ -2283,11 +2414,6 @@ public class TransactionMMSController {
                         // billNumber + payDate + debitAmount + acccessKey)
                         String dataCheckSum = BankEncryptUtil.generateMD5Checksum(entity.getTraceTransfer(),
                                 entity.getBillNumber(), entity.getPayDate(), entity.getDebitAmount());
-                        // System.out.println("data getTraceTransfer: " + entity.getTraceTransfer());
-                        // System.out.println("data getBillNumber: " + entity.getBillNumber());
-//                        System.out.println("data getPayDate: " + entity.getPayDate());
-                        // System.out.println("data getDebitAmount: " + entity.getDebitAmount());
-                        // System.out.println("data checksum: " + dataCheckSum);
                         if (BankEncryptUtil.isMatchChecksum(dataCheckSum, entity.getCheckSum())) {
 //                        if (true) {
                             result = new TransactionMMSResponseDTO("00", "Success");
@@ -2303,7 +2429,6 @@ public class TransactionMMSController {
 //                                result = new TransactionMMSResponseDTO("00", "Success");
 //                            } else {
 //                                // checksum is not match
-//                                // System.out.println("checksum is not match"
 //                                logger.error("FAILED CHECKSUM: CHECKORDER: ERROR: " + entity.getReferenceLabelCode());
 //                                result = new TransactionMMSResponseDTO("12", "False checksum");
 //                            }
@@ -2580,26 +2705,22 @@ public class TransactionMMSController {
                             }
                         } else {
                             // bank account is not matched
-                            System.out.println("refundForMerchant: BANK ACCOUNT IS NOT MATCH WITH MERCHANT INFO");
                             logger.error("refundForMerchant: BANK ACCOUNT IS NOT MATCH WITH MERCHANT INFO");
                             result = new ResponseMessageDTO("FAILED", "E77");
                             httpStatus = HttpStatus.BAD_REQUEST;
                         }
                     } else {
                         // merchant is not existed
-                        System.out.println("refundForMerchant: MERCHANT IS NOT EXISTED");
                         logger.error("refundForMerchant: MERCHANT IS NOT EXISTED");
                         result = new ResponseMessageDTO("FAILED", "E104");
                         httpStatus = HttpStatus.BAD_REQUEST;
                     }
                 } else {
-                    System.out.println("refundForMerchant: INVALID TOKEN");
                     logger.error("refundForMerchant: INVALID TOKEN");
                     result = new ResponseMessageDTO("FAILED", "E74");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {
-                System.out.println("refundForMerchant: INVALID REQUEST BODY");
                 logger.error("refundForMerchant: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
@@ -2620,6 +2741,7 @@ public class TransactionMMSController {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         TransactionRefundLogEntity refundLogEntity = null;
+        TransactionReceiveEntity transactionReceiveEntity = null;
         String idempotencyKey = "";
         long time = 0;
         try {
@@ -2657,7 +2779,7 @@ public class TransactionMMSController {
                                     boolean checkIdempotency =
                                             idempotencyService.saveResponseForKey(idempotencyKey, dto.getReferenceNumber(), 30);
                                     if (checkIdempotency) {
-                                        TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
+                                        transactionReceiveEntity = transactionReceiveService
                                                 .getTransactionReceiveByRefNumber(dto.getReferenceNumber(), "C");
                                         if (Objects.nonNull(transactionReceiveEntity)
                                         && (!StringUtil.isNullOrEmpty(dto.getTerminalCode())
@@ -2893,27 +3015,27 @@ public class TransactionMMSController {
                                 }
                             } else {
                                 // bank account is not matched
-                                System.out.println("refundForMerchant: BANK ACCOUNT IS NOT MATCH WITH MERCHANT INFO");
+                                //System.out.println("refundForMerchant: BANK ACCOUNT IS NOT MATCH WITH MERCHANT INFO");
                                 logger.error("refundForMerchant: BANK ACCOUNT IS NOT MATCH WITH MERCHANT INFO");
                                 result = new ResponseMessageDTO("FAILED", "E77");
                                 httpStatus = HttpStatus.BAD_REQUEST;
                             }
                         } else {
                             // merchant is not existed
-                            System.out.println("refundForMerchant: MERCHANT IS NOT EXISTED");
+                            //System.out.println("refundForMerchant: MERCHANT IS NOT EXISTED");
                             logger.error("refundForMerchant: MERCHANT IS NOT EXISTED");
                             result = new ResponseMessageDTO("FAILED", "E104");
                             httpStatus = HttpStatus.BAD_REQUEST;
                         }
                     } else {
-                        System.out.println("refundForMerchant: INVALID TOKEN");
+                        //System.out.println("refundForMerchant: INVALID TOKEN");
                         logger.error("refundForMerchant: INVALID TOKEN");
                         result = new ResponseMessageDTO("FAILED", "E74");
                         httpStatus = HttpStatus.BAD_REQUEST;
                     }
                 }
             } else {
-                System.out.println("refundForMerchant: INVALID REQUEST BODY");
+                //System.out.println("refundForMerchant: INVALID REQUEST BODY");
                 logger.error("refundForMerchant: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
@@ -2927,28 +3049,24 @@ public class TransactionMMSController {
             TransactionRefundLogEntity finalRefundLogEntity = refundLogEntity;
             long finalTime = time;
             String finalIdempotencyKey = idempotencyKey;
+            TransactionReceiveEntity finalTransactionReceiveEntity = transactionReceiveEntity;
             Thread thread = new Thread(() -> {
                 if (finalRefundLogEntity != null) {
                     transactionRefundLogService.insert(finalRefundLogEntity);
                 }
                 if (finalResult.getStatus().equals("SUCCESS")) {
-//                    TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
-//                            .getTransactionReceiveByRefNumber(dto.getReferenceNumber(), "C");
                     TransactionRefundEntity entity = new TransactionRefundEntity();
                     entity.setId(UUID.randomUUID().toString());
                     entity.setBankAccount(dto.getBankAccount());
-//                    if (transactionReceiveEntity != null) {
-//                        entity.setBankId(StringUtil.getValueNullChecker(transactionReceiveEntity.getBankId()));
-//                        entity.setTransactionId(transactionReceiveEntity.getId());
-//                        entity.setUserId(transactionReceiveEntity.getUserId());
-//                    } else {
-//                        entity.setBankId("");
-//                        entity.setTransactionId("");
-//                        entity.setUserId("");
-//                    }
-                    entity.setBankId("");
-                    entity.setTransactionId("");
-                    entity.setUserId("");
+                    if (finalTransactionReceiveEntity != null) {
+                        entity.setBankId(StringUtil.getValueNullChecker(finalTransactionReceiveEntity.getBankId()));
+                        entity.setTransactionId(finalTransactionReceiveEntity.getId());
+                        entity.setUserId(finalTransactionReceiveEntity.getUserId());
+                    } else {
+                        entity.setBankId("");
+                        entity.setTransactionId("");
+                        entity.setUserId("");
+                    }
                     entity.setContent(dto.getContent());
                     entity.setAmount(Long.parseLong(dto.getAmount()));
                     entity.setTime(finalTime);
@@ -3183,7 +3301,7 @@ public class TransactionMMSController {
                 ClientResponse response = responseMono.block();
 
                 String json = response.bodyToMono(String.class).block();
-                System.out.println("refundFromMB: RESPONSE: " + json + " FT Code: " + ftCode);
+                //System.out.println("refundFromMB: RESPONSE: " + json + " FT Code: " + ftCode);
                 logger.info("refundFromMB: RESPONSE: " + json + " FT Code: " + ftCode);
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode rootNode = objectMapper.readTree(json);
@@ -3218,7 +3336,7 @@ public class TransactionMMSController {
         } catch (Exception e) {
             logger.error("ERROR at refundFromMB: " + ftCode + " - " + e.toString());
         }
-        System.out.println("RESULT REFUND: " + result);
+        //System.out.println("RESULT REFUND: " + result);
         return result;
     }
 
