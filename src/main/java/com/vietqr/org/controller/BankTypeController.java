@@ -297,9 +297,11 @@ public class BankTypeController {
 					dto.setId(bankTypeEntity.getId());
 					dto.setBankCode(bankTypeEntity.getBankCode());
 					dto.setBankName(bankTypeEntity.getBankName());
+					dto.setBankShortName(bankTypeEntity.getBankShortName());
 					dto.setImageId(bankTypeEntity.getImgId());
 					dto.setStatus(bankTypeEntity.getStatus());
 					dto.setCaiValue(caiValue);
+					dto.setUnlinkedType(bankTypeEntity.getUnlinkedType());
 					result = dto;
 					httpStatus = HttpStatus.OK;
 				} else {
