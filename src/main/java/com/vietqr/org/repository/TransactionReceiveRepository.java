@@ -3497,7 +3497,8 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE transaction_receive SET status_response = :statusResponse WHERE id = :transactionId LIMIT 1", nativeQuery = true)
+    @Query(value = "UPDATE transaction_receive SET status_response = :statusResponse " +
+            "WHERE id = :transactionId AND status_response != 3 LIMIT 1", nativeQuery = true)
     void updateStatusResponse(String transactionId, int statusResponse);
 }
 
