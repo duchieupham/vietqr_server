@@ -86,7 +86,6 @@ public class VhitekActiveController {
             String key = entity.getUsernameBasic() + ":" + entity.getPasswordBasic();
             String encodedKey = Base64.getEncoder().encodeToString(key.getBytes());
             logger.info("VhitekActiveController: getCustomerSyncToken: encodedKey: " + encodedKey);
-            System.out.println("VhitekActiveController: getCustomerSyncToken: encodedKey: " + encodedKey);
             Mono<TokenDTO> responseMono = webClient.method(HttpMethod.POST)
                     .uri(uriComponents.toUri())
                     .contentType(MediaType.APPLICATION_JSON)
@@ -94,8 +93,6 @@ public class VhitekActiveController {
                     .body(BodyInserters.fromValue(data))
                     .exchange()
                     .flatMap(clientResponse -> {
-                        System.out.println(
-                                "VhitekActiveController: get token: status code: " + clientResponse.statusCode());
                         if (clientResponse.statusCode().is2xxSuccessful()) {
                             return clientResponse.bodyToMono(TokenDTO.class);
                         } else {
@@ -111,15 +108,11 @@ public class VhitekActiveController {
             if (resultOptional.isPresent()) {
                 result = resultOptional.get();
                 logger.info("VhitekActiveController: getCustomerSyncToken: token got: " + result.getAccess_token());
-                System.out.println(
-                        "VhitekActiveController: getCustomerSyncToken: token got: " + result.getAccess_token());
             } else {
                 logger.info("VhitekActiveController: getCustomerSyncToken: Token could not be retrieved");
-                System.out.println("VhitekActiveController: getCustomerSyncToken: Token could not be retrieved");
             }
         } catch (Exception e) {
             logger.info("VhitekActiveController: getCustomerSyncToken: ERROR: " + e.toString());
-            System.out.println("VhitekActiveController: getCustomerSyncToken:  ERROR: " + e.toString());
         }
         return result;
     }
@@ -149,7 +142,7 @@ public class VhitekActiveController {
                         ClientResponse response = responseMono.block();
                         if (response.statusCode().is2xxSuccessful()) {
                             String json = response.bodyToMono(String.class).block();
-                            System.out.println("checkValidUser: Response: " + json);
+                            //System.out.println("checkValidUser: Response: " + json);
                             logger.error("checkValidUser: Response: " + json);
                             ObjectMapper objectMapper = new ObjectMapper();
                             JsonNode rootNode = objectMapper.readTree(json);
@@ -159,32 +152,30 @@ public class VhitekActiveController {
                                 if (status != null && status == true) {
                                     String userId = rootNode.get("detail").get("details").asText();
                                     if (userId != null && !userId.trim().isEmpty()) {
-                                        System.out.println(
-                                                "checkValidUser: EMAIL IS EXISTED IN VHITEK SYSTEM: " + userId);
                                         logger.info("checkValidUser: EMAIL IS EXISTED IN VHITEK SYSTEM: " + userId);
                                         result = new ResponseMessageDTO("SUCCESS", userId);
                                         httpStatus = HttpStatus.OK;
                                     } else {
-                                        System.out.println("checkValidUser: EMAIL IS NOT EXISTED IN VHITEK SYSTEM");
+                                        //System.out.println("checkValidUser: EMAIL IS NOT EXISTED IN VHITEK SYSTEM");
                                         logger.error("checkValidUser: EMAIL IS NOT EXISTED IN VHITEK SYSTEM");
                                         result = new ResponseMessageDTO("CHECK", "C08");
                                         httpStatus = HttpStatus.BAD_REQUEST;
                                     }
                                 } else {
-                                    System.out.println("checkValidUser: EMAIL IS NOT EXISTED IN VHITEK SYSTEM");
+                                    //System.out.println("checkValidUser: EMAIL IS NOT EXISTED IN VHITEK SYSTEM");
                                     logger.error("checkValidUser: EMAIL IS NOT EXISTED IN VHITEK SYSTEM");
                                     result = new ResponseMessageDTO("CHECK", "C08");
                                     httpStatus = HttpStatus.BAD_REQUEST;
                                 }
                             } else {
-                                System.out.println("checkValidUser: Response ERROR: " + json);
+                                //System.out.println("checkValidUser: Response ERROR: " + json);
                                 logger.error("checkValidUser: Response ERROR: " + json);
                                 result = new ResponseMessageDTO("FAILED", "E100");
                                 httpStatus = HttpStatus.BAD_REQUEST;
                             }
                         } else {
                             String json = response.bodyToMono(String.class).block();
-                            System.out.println("checkValidUser: Response ERROR: " + json);
+                            //System.out.println("checkValidUser: Response ERROR: " + json);
                             logger.error("checkValidUser: Response ERROR: " + json);
                             result = new ResponseMessageDTO("FAILED", "E100");
                             httpStatus = HttpStatus.BAD_REQUEST;
@@ -202,7 +193,7 @@ public class VhitekActiveController {
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
-            System.out.println("checkValidUser: ERROR: " + e.toString());
+            //System.out.println("checkValidUser: ERROR: " + e.toString());
             logger.error("checkValidUser: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -243,7 +234,7 @@ public class VhitekActiveController {
                         ClientResponse response = responseMono.block();
                         if (response.statusCode().is2xxSuccessful()) {
                             String json = response.bodyToMono(String.class).block();
-                            System.out.println("createUserVhitek: Response: " + json);
+                            //System.out.println("createUserVhitek: Response: " + json);
                             logger.info("createUserVhitek: Response: " + json);
                             ObjectMapper objectMapper = new ObjectMapper();
                             JsonNode rootNode = objectMapper.readTree(json);
@@ -255,7 +246,7 @@ public class VhitekActiveController {
                                     String userId = rootNode.get("detail").get("idUser").asText();
                                     if (userId != null && !userId.trim().isEmpty()) {
                                         logger.info("createUserVhitek: SUCCESS: " + userId);
-                                        System.out.println("createUserVhitek: SUCCESS: " + userId);
+                                        //System.out.println("createUserVhitek: SUCCESS: " + userId);
                                         ServicePartnerCheckerEntity partnerCheckerEntity = new ServicePartnerCheckerEntity();
                                         UUID uuid = UUID.randomUUID();
                                         partnerCheckerEntity.setId(uuid.toString());
@@ -272,26 +263,26 @@ public class VhitekActiveController {
                                         result = new ResponseMessageDTO("SUCCESS", userId);
                                         httpStatus = HttpStatus.OK;
                                     } else {
-                                        System.out.println("createUserVhitek: Response: " + json);
+                                        //System.out.println("createUserVhitek: Response: " + json);
                                         logger.error("createUserVhitek: Response: " + json);
                                         result = new ResponseMessageDTO("FAILED", "E05");
                                         httpStatus = HttpStatus.BAD_REQUEST;
                                     }
                                 } else {
-                                    System.out.println("createUserVhitek: Response: " + json);
+                                    //System.out.println("createUserVhitek: Response: " + json);
                                     logger.error("createUserVhitek: Response: " + json);
                                     result = new ResponseMessageDTO("FAILED", "E05");
                                     httpStatus = HttpStatus.BAD_REQUEST;
                                 }
                             } else {
-                                System.out.println("createUserVhitek: Response: " + json);
+                                //System.out.println("createUserVhitek: Response: " + json);
                                 logger.error("createUserVhitek: Response: " + json);
                                 result = new ResponseMessageDTO("FAILED", "E05");
                                 httpStatus = HttpStatus.BAD_REQUEST;
                             }
                         } else {
                             String json = response.bodyToMono(String.class).block();
-                            System.out.println("createUserVhitek: Response: " + json);
+                            //System.out.println("createUserVhitek: Response: " + json);
                             logger.error("createUserVhitek: Response: " + json);
                             result = new ResponseMessageDTO("FAILED", "E05");
                             httpStatus = HttpStatus.BAD_REQUEST;
@@ -309,7 +300,7 @@ public class VhitekActiveController {
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
-            System.out.println("createUserVhitek: ERROR: " + e.toString());
+            //System.out.println("createUserVhitek: ERROR: " + e.toString());
             logger.error("createUserVhitek: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -350,8 +341,6 @@ public class VhitekActiveController {
                                     .build();
                             LocalDateTime current = LocalDateTime.now();
                             long timeRequest = current.toEpochSecond(ZoneOffset.UTC);
-                            System.out.println("VhitekActiveController: activeTerminalVhitek2: Response: " + data
-                                    + " at: " + timeRequest);
                             logger.info("VhitekActiveController: activeTerminalVhitek2: Response: " + data
                                     + " at: " + timeRequest);
                             Mono<ClientResponse> responseMono = webClient.post()
@@ -364,8 +353,6 @@ public class VhitekActiveController {
                                 String json = response.bodyToMono(String.class).block();
                                 current = LocalDateTime.now();
                                 long timeResponse = current.toEpochSecond(ZoneOffset.UTC);
-                                System.out.println("VhitekActiveController: activeTerminalVhitek2: Response: " + json
-                                + " at: " + timeResponse);
                                 logger.info("VhitekActiveController: activeTerminalVhitek2: Response: " + json
                                 + " at: " + timeResponse);
                                 ObjectMapper objectMapper = new ObjectMapper();
@@ -374,7 +361,6 @@ public class VhitekActiveController {
                                     Boolean status = rootNode.get("detail").get("status").asBoolean();
                                     if (status != null && status == true) {
                                         logger.info("createUserVhitek: SUCCESS: ");
-                                        System.out.println("createUserVhitek: SUCCESS: ");
                                         ServicePartnerCheckerEntity partnerCheckerEntity = new ServicePartnerCheckerEntity();
                                         UUID uuid = UUID.randomUUID();
                                         partnerCheckerEntity.setId(uuid.toString());
@@ -390,7 +376,7 @@ public class VhitekActiveController {
                                         result = new ResponseMessageDTO("SUCCESS", "");
                                         httpStatus = HttpStatus.OK;
                                     } else {
-                                        System.out.println("activeTerminalVhitek: Response: " + json);
+                                        //System.out.println("activeTerminalVhitek: Response: " + json);
                                         logger.error("activeTerminalVhitek: Response: " + json);
                                         Integer errCode = rootNode.get("detail").get("code").asInt();
                                         if (errCode != null && errCode == -2) {
@@ -403,7 +389,7 @@ public class VhitekActiveController {
 
                                     }
                                 } else {
-                                    System.out.println("activeTerminalVhitek: Response: " + json);
+                                    //System.out.println("activeTerminalVhitek: Response: " + json);
                                     logger.error("activeTerminalVhitek: Response: " + json);
                                     result = new ResponseMessageDTO("FAILED", "E05");
                                     httpStatus = HttpStatus.BAD_REQUEST;
@@ -412,8 +398,6 @@ public class VhitekActiveController {
                                 current = LocalDateTime.now();
                                 long timeResponse = current.toEpochSecond(ZoneOffset.UTC);
                                 String json = response.bodyToMono(String.class).block();
-                                System.out.println("VhitekActiveController: activeTerminalVhitek2: Response: " + json
-                                + " at: " + timeResponse);
                                 logger.error("VhitekActiveController: activeTerminalVhitek2: Response: " + json
                                         + " at: " + timeResponse);
                                 result = new ResponseMessageDTO("FAILED", "E05");
@@ -424,7 +408,7 @@ public class VhitekActiveController {
                             httpStatus = HttpStatus.BAD_REQUEST;
                         }
                     } else {
-                        System.out.println("activeTerminalVhitek: ERROR: " + result.getMessage());
+                        //System.out.println("activeTerminalVhitek: ERROR: " + result.getMessage());
                         logger.error("activeTerminalVhitek: ERROR: " + result.getMessage());
                         httpStatus = HttpStatus.BAD_REQUEST;
                     }
@@ -437,7 +421,7 @@ public class VhitekActiveController {
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
-            System.out.println("activeTerminalVhitek: ERROR: " + e.toString());
+            //System.out.println("activeTerminalVhitek: ERROR: " + e.toString());
             logger.error("activeTerminalVhitek: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -479,7 +463,7 @@ public class VhitekActiveController {
                         ClientResponse response = responseMono.block();
                         if (response.statusCode().is2xxSuccessful()) {
                             String json = response.bodyToMono(String.class).block();
-                            System.out.println("activeTerminalVhitek: Response: " + json);
+                            //System.out.println("activeTerminalVhitek: Response: " + json);
                             logger.info("activeTerminalVhitek: Response: " + json);
                             ObjectMapper objectMapper = new ObjectMapper();
                             JsonNode rootNode = objectMapper.readTree(json);
@@ -487,7 +471,7 @@ public class VhitekActiveController {
                                 Boolean status = rootNode.get("detail").get("status").asBoolean();
                                 if (status != null && status == true) {
                                     logger.info("createUserVhitek: SUCCESS: ");
-                                    System.out.println("createUserVhitek: SUCCESS: ");
+                                    //System.out.println("createUserVhitek: SUCCESS: ");
                                     ServicePartnerCheckerEntity partnerCheckerEntity = new ServicePartnerCheckerEntity();
                                     UUID uuid = UUID.randomUUID();
                                     partnerCheckerEntity.setId(uuid.toString());
@@ -503,7 +487,7 @@ public class VhitekActiveController {
                                     result = new ResponseMessageDTO("SUCCESS", "");
                                     httpStatus = HttpStatus.OK;
                                 } else {
-                                    System.out.println("activeTerminalVhitek: Response: " + json);
+                                    //System.out.println("activeTerminalVhitek: Response: " + json);
                                     logger.error("activeTerminalVhitek: Response: " + json);
                                     Integer errCode = rootNode.get("detail").get("code").asInt();
                                     if (errCode != null && errCode == -2) {
@@ -516,14 +500,14 @@ public class VhitekActiveController {
 
                                 }
                             } else {
-                                System.out.println("activeTerminalVhitek: Response: " + json);
+                                //System.out.println("activeTerminalVhitek: Response: " + json);
                                 logger.error("activeTerminalVhitek: Response: " + json);
                                 result = new ResponseMessageDTO("FAILED", "E05");
                                 httpStatus = HttpStatus.BAD_REQUEST;
                             }
                         } else {
                             String json = response.bodyToMono(String.class).block();
-                            System.out.println("activeTerminalVhitek: Response: " + json);
+                            //System.out.println("activeTerminalVhitek: Response: " + json);
                             logger.error("activeTerminalVhitek: Response: " + json);
                             result = new ResponseMessageDTO("FAILED", "E05");
                             httpStatus = HttpStatus.BAD_REQUEST;
@@ -541,7 +525,7 @@ public class VhitekActiveController {
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
-            System.out.println("activeTerminalVhitek: ERROR: " + e.toString());
+            //System.out.println("activeTerminalVhitek: ERROR: " + e.toString());
             logger.error("activeTerminalVhitek: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -583,7 +567,7 @@ public class VhitekActiveController {
                         ClientResponse response = responseMono.block();
                         if (response.statusCode().is2xxSuccessful()) {
                             String json = response.bodyToMono(String.class).block();
-                            System.out.println("activeTerminalVhitek: Response: " + json);
+                            //System.out.println("activeTerminalVhitek: Response: " + json);
                             logger.info("activeTerminalVhitek: Response: " + json);
                             ObjectMapper objectMapper = new ObjectMapper();
                             JsonNode rootNode = objectMapper.readTree(json);
@@ -591,7 +575,7 @@ public class VhitekActiveController {
                                 Boolean status = rootNode.get("detail").get("status").asBoolean();
                                 if (status != null && status == true) {
                                     logger.info("createUserVhitek: SUCCESS: ");
-                                    System.out.println("createUserVhitek: SUCCESS: ");
+                                    //System.out.println("createUserVhitek: SUCCESS: ");
                                     ServicePartnerCheckerEntity partnerCheckerEntity = new ServicePartnerCheckerEntity();
                                     UUID uuid = UUID.randomUUID();
                                     partnerCheckerEntity.setId(uuid.toString());
@@ -607,7 +591,7 @@ public class VhitekActiveController {
                                     result = new ResponseMessageDTO("SUCCESS", "");
                                     httpStatus = HttpStatus.OK;
                                 } else {
-                                    System.out.println("activeTerminalVhitek: Response: " + json);
+                                    //System.out.println("activeTerminalVhitek: Response: " + json);
                                     logger.error("activeTerminalVhitek: Response: " + json);
                                     Integer errCode = rootNode.get("detail").get("code").asInt();
                                     if (errCode != null && errCode == -2) {
@@ -620,14 +604,14 @@ public class VhitekActiveController {
 
                                 }
                             } else {
-                                System.out.println("activeTerminalVhitek: Response: " + json);
+                                //System.out.println("activeTerminalVhitek: Response: " + json);
                                 logger.error("activeTerminalVhitek: Response: " + json);
                                 result = new ResponseMessageDTO("FAILED", "E05");
                                 httpStatus = HttpStatus.BAD_REQUEST;
                             }
                         } else {
                             String json = response.bodyToMono(String.class).block();
-                            System.out.println("activeTerminalVhitek: Response: " + json);
+                            //System.out.println("activeTerminalVhitek: Response: " + json);
                             logger.error("activeTerminalVhitek: Response: " + json);
                             result = new ResponseMessageDTO("FAILED", "E05");
                             httpStatus = HttpStatus.BAD_REQUEST;
@@ -645,7 +629,7 @@ public class VhitekActiveController {
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
-            System.out.println("activeTerminalVhitek: ERROR: " + e.toString());
+            //System.out.println("activeTerminalVhitek: ERROR: " + e.toString());
             logger.error("activeTerminalVhitek: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -691,13 +675,13 @@ public class VhitekActiveController {
             } else {
                 //
                 // 2.2.2.1. if not authenticated, response err
-                System.out.println("insertBankIntoMerchant: BANK ACCOUNT IS NOT AUTHENTICATED");
+                //System.out.println("insertBankIntoMerchant: BANK ACCOUNT IS NOT AUTHENTICATED");
                 logger.info("insertBankIntoMerchant: BANK ACCOUNT IS NOT AUTHENTICATED");
                 result = new ResponseMessageDTO("FAILED", "E101");
             }
 
         } catch (Exception e) {
-            System.out.println("insertBankIntoMerchant: ERROR: " + e.toString());
+            //System.out.println("insertBankIntoMerchant: ERROR: " + e.toString());
             logger.error("insertBankIntoMerchant: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
         }
@@ -768,16 +752,16 @@ public class VhitekActiveController {
             if (response.statusCode().is2xxSuccessful()) {
                 result = true;
                 String json = response.bodyToMono(String.class).block();
-                System.out.println("syncTID: Response: " + json);
+                //System.out.println("syncTID: Response: " + json);
                 logger.info("syncTID: Response: " + json);
             } else {
                 result = false;
                 String json = response.bodyToMono(String.class).block();
-                System.out.println("syncTID: Response: " + json);
+                //System.out.println("syncTID: Response: " + json);
                 logger.info("syncTID: Response: " + json);
             }
         } catch (Exception e) {
-            System.out.println("syncTID: ERROR: " + e.toString());
+            //System.out.println("syncTID: ERROR: " + e.toString());
             logger.error("syncTID: ERROR: " + e.toString());
         }
         return result;

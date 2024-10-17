@@ -51,7 +51,7 @@ public class VCardUtil {
             }
         } catch (Exception e) {
             logger.error("VcardQR: ERROR: " + e.toString());
-            System.out.println("VcardQR: ERROR: " + e.toString());
+            //System.out.println("VcardQR: ERROR: " + e.toString());
         }
         return result;
     }

@@ -83,7 +83,6 @@ public class BankTypeController {
 			result = new ResponseMessageDTO("SUCESS", "");
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
-			System.out.println("Error at insertBankType: " + e.toString());
 			result = new ResponseMessageDTO("FAILED", "Unexpected Error");
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
@@ -113,7 +112,6 @@ public class BankTypeController {
 			}
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
-			System.out.println("Error at getBankTypes: " + e.toString());
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(result, httpStatus);
@@ -219,7 +217,6 @@ public class BankTypeController {
 			}
 
 		} catch (Exception e) {
-			System.out.println("searchUserBankName: ERROR:: " + e.toString());
 			result = new ResponseMessageDTO("FAILED", "E05");
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
@@ -249,7 +246,6 @@ public class BankTypeController {
 			}
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
-			System.out.println("Error at getBankTypes: " + e.toString());
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(result, httpStatus);
@@ -278,7 +274,6 @@ public class BankTypeController {
 			}
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
-			System.out.println("Error at getBankTypes: " + e.toString());
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(result, httpStatus);

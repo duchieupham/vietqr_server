@@ -28,16 +28,16 @@
 //
 //    @Override
 //    public void connectionLost(Throwable throwable) {
-//        System.out.println("Connection lost: " + throwable.getMessage());
+//        //System.out.println("Connection lost: " + throwable.getMessage());
 //    }
 //
 //    @Override
 //    public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
-//        System.out.println("Message arrived. Topic: " + mqttMessage+ " Message: " + new String(mqttMessage.getPayload()));
+//        //System.out.println("Message arrived. Topic: " + mqttMessage+ " Message: " + new String(mqttMessage.getPayload()));
 //    }
 //
 //    @Override
 //    public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
-//        System.out.println("Delivery complete");
+//        //System.out.println("Delivery complete");
 //    }
 //}

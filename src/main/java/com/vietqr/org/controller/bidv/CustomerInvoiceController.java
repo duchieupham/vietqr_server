@@ -17,6 +17,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.vietqr.org.constant.GroupCodeConstant;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.mapper.ErrorCodeMapper;
 import com.vietqr.org.entity.*;
@@ -199,8 +200,8 @@ public class CustomerInvoiceController {
                     logger.info("BIDV: getbill: customer_id: " + dto.getCustomer_id());
                     logger.info("BIDV: getbill: service_id: " + dto.getService_id());
                     logger.info("BIDV: getbill: getChecksum: " + dto.getChecksum());
-                    System.out.println("dto.getService_id(): " + dto.getService_id());
-                    System.out.println("serviceId: " + serviceId);
+//                    //System.out.println("dto.getService_id(): " + dto.getService_id());
+//                    //System.out.println("serviceId: " + serviceId);
                     if (dto.getService_id().equals(serviceId)) {
                         // check valid checksum
                         String checksum = BankEncryptUtil.generateMD5GetBillForBankChecksum(secretKey, serviceId,
@@ -338,9 +339,6 @@ public class CustomerInvoiceController {
 
                                         if (customerInvoiceDataDTO.getStatus() == 0) {
                                     // check số tiền có khớp hay không
-                                    System.out.println("customerInvoiceDataDTO.getAmount(): "
-                                            + customerInvoiceDataDTO.getAmount());
-                                    System.out.println("paymentAmount: " + paymentAmount);
 //                                    if (customerInvoiceDataDTO.getAmount().equals(paymentAmount)) {
                                         // transaction_receive type = 0
                                         // insert invoice payment
@@ -404,9 +402,9 @@ public class CustomerInvoiceController {
                                         && customerInvoiceDataDTO.getAmount().equals(paymentAmount)) {
 //                                        if (customerInvoiceDataDTO.getStatus() == 0) {
                                     // check số tiền có khớp hay không
-                                    System.out.println("customerInvoiceDataDTO.getAmount(): "
-                                            + customerInvoiceDataDTO.getAmount());
-                                    System.out.println("paymentAmount: " + paymentAmount);
+//                                    //System.out.println("customerInvoiceDataDTO.getAmount(): "
+//                                            + customerInvoiceDataDTO.getAmount());
+//                                    //System.out.println("paymentAmount: " + paymentAmount);
 //                                    if (customerInvoiceDataDTO.getAmount().equals(paymentAmount)) {
                                         // nếu có: insert invoice payment + update trạng thái hoá đơn
                                         // insert invoice payment
@@ -847,11 +845,11 @@ public class CustomerInvoiceController {
                         for (BankReceiveConnectionEntity bankReceiveConnectionEntity : bankReceiveConnectionEntities) {
                             MerchantConnectionEntity merchantConnectionEntity = merchantConnectionService
                                     .getMerchanConnectionById(bankReceiveConnectionEntity.getMidConnectId());
-                            String errorCode = customerErrorLogService.getRetryErrorsByCustomerId(merchantConnectionEntity.getMid());
-                            List<String> errorCodes = new ArrayList<>();
+                            List<CustomerErrorLogDTO> errorCode = customerErrorLogService.getRetryErrorsByCustomerId(merchantConnectionEntity.getMid());
+                            Map<String, String> errorCodes = new HashMap<>();
                             errorCodes = mapperErrors(errorCode);
                             if (merchantConnectionEntity != null) {
-                                List<String> finalErrorCodes = errorCodes;
+                                Map<String, String> finalErrorCodes = errorCodes;
                                 executorService.submit(() -> pushNewTransactionToCustomerSyncV2(transReceiveId, merchantConnectionEntity,
                                         transactionBankCustomerDTO, 1, finalErrorCodes));
                             }
@@ -870,12 +868,11 @@ public class CustomerInvoiceController {
             }
         } catch (Exception e) {
             logger.error("CustomerSync: Error: " + e.toString());
-            System.out.println("CustomerSync: Error: " + e.toString());
         }
     }
 
     private void pushNewTransactionToCustomerSyncV2(String transReceiveId, MerchantConnectionEntity entity,
-                                                    TransactionBankCustomerDTO dto, int retryCount, List<String> errorCodes) {
+                                                    TransactionBankCustomerDTO dto, int retryCount, Map<String, String> errorCodes) {
         ResponseMessageDTO result = null;
         TransactionLogResponseDTO transactionLogResponseDTO = new TransactionLogResponseDTO();
         if (retryCount > 1 && retryCount <= 5) {
@@ -899,9 +896,6 @@ public class CustomerInvoiceController {
             logger.info("pushNewTransactionToCustomerSync: orderId: " +
                     dto.getOrderId());
             logger.info("pushNewTransactionToCustomerSync: sign: " + dto.getSign());
-            System.out.println("pushNewTransactionToCustomerSync: orderId: " +
-                    dto.getOrderId());
-            System.out.println("pushNewTransactionToCustomerSync: sign: " + dto.getSign());
             TokenDTO tokenDTO = null;
             if (entity.getUsername() != null && !entity.getUsername().trim().isEmpty() &&
                     entity.getPassword() != null
@@ -925,7 +919,6 @@ public class CustomerInvoiceController {
             data.put("urlLink", dto.getUrlLink());
             data.put("serviceCode", "");
             data.put("subTerminalCode", dto.getSubTerminalCode());
-            System.out.println("Push data V2: Request: " + data);
             String suffixUrl = "";
             WebClient.Builder webClientBuilder = WebClient.builder()
                     .baseUrl(entity.getUrlCallback());
@@ -964,25 +957,50 @@ public class CustomerInvoiceController {
             }
 
             ClientResponse response = responseMono.block();
-            System.out.println("response status code: " + response.statusCode());
             try {
                 transactionLogResponseDTO.setStatusCode(response.statusCode().value());
                 transactionLogResponseDTO.setTimeResponse(DateTimeUtil.getCurrentDateTimeUTC());
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
+            // 1. nếu status = 200 thì default là mã lỗi success
             if (response.statusCode().is2xxSuccessful()) {
                 String json = response.bodyToMono(String.class).block();
-                System.out.println("Response pushNewTransactionToCustomerSync: " + json);
                 logger.info("Response pushNewTransactionToCustomerSync: " + json + " status: " + response.statusCode());
                 String errorCode = validateFormatCallbackResponse(json);
+                // 1.1 nếu response map đc theo format thì kiểm tra các bước dưới
                 if (!StringUtil.isNullOrEmpty(errorCode)) {
                     // retry callback
-                    if (Objects.nonNull(errorCodes) && errorCodes.contains(errorCode)) {
+                    // 1.1.1 nếu status = 200 và khách có map mã lỗi trong database thì kiểm tra mã lỗi có phải mã
+                    // lỗi retry không, nếu phải thì thực hiện if
+                    if (Objects.nonNull(errorCodes)
+                            && GroupCodeConstant.RETRY_GROUP.getValue()
+                            .equals(errorCodes.get(errorCode))) {
+                        // 1.1.1.1
                         if (retryCount < 10) {
                             pushNewTransactionToCustomerSyncV2(transReceiveId, entity,
                                     dto, ++retryCount, errorCodes);
                         }
+                        // 1.1.1.2
+                        else {
+                            updateTransactionStatusResponse(errorCodes.getOrDefault(errorCode,"R"),
+                                    transReceiveId, false);
+                        }
                     }
+                    // 1.1.2 nếu không phải là mã lỗi retry và khách có map mã lỗi trong database
+                    else if (Objects.nonNull(errorCodes)) {
+                        String groupCode = errorCodes.getOrDefault(errorCode, "R");
+                        updateTransactionStatusResponse(groupCode, transReceiveId, false);
+                    }
+                    // 1.1.3 nếu khách không có mã lỗi đồng bộ với hệ thống luôn thì trả về success
+                    else {
+                        updateTransactionStatusResponse("S",
+                                transReceiveId, false);
+                    }
+                }
+                // 1.2 nếu response không map được theo format trả thành công luôn
+                else {
+                    updateTransactionStatusResponse("S",
+                            transReceiveId, false);
                 }
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode rootNode = objectMapper.readTree(json);
@@ -996,20 +1014,65 @@ public class CustomerInvoiceController {
                 } else {
                     result = new ResponseMessageDTO("FAILED", "E05 - " + json);
                 }
-            } else {
+            }
+            // 2. nếu status != 400 và status thuộc loại 4xx hoặc 5xx 401, 403... 500 508...
+            else if (response.statusCode().value() != 400
+                    && (response.statusCode().is4xxClientError()
+                    || response.statusCode().is5xxServerError())) {
+                String json = response.bodyToMono(String.class).block();
+                logger.info("Response pushNewTransactionToCustomerSync: " + json + " status Code: " + response.statusCode());
+                // retry callback
+                // 2.1 retry chưa tới lần thứ 10
+                if (retryCount < 10) {
+                    pushNewTransactionToCustomerSyncV2(transReceiveId, entity,
+                            dto, ++retryCount, errorCodes);
+                }
+                // 2.2 retry sau 10 lần nhưng vẫn failed
+                else {
+                    updateTransactionStatusResponse("R", transReceiveId, false);
+                }
+                result = new ResponseMessageDTO("FAILED", "E05 - " + json);
+            }
+            else {
                 String json = response.bodyToMono(String.class).block();
                 // nếu trả sai format retry callback
                 String errorCode = validateFormatCallbackResponse(json);
+                // 3.1 nếu map được mã lỗi từ response trả về
                 if (!StringUtil.isNullOrEmpty(errorCode)) {
                     // retry callback
-                    if (Objects.nonNull(errorCodes) && errorCodes.contains(errorCode)) {
+                    // 3.1.1 nếu status = 200 và khách có map mã lỗi trong database thì kiểm tra mã lỗi có phải mã
+                    // lỗi retry không, nếu phải thì thực hiện if
+                    if (Objects.nonNull(errorCodes)
+                            && GroupCodeConstant.RETRY_GROUP.getValue().
+                            equals(errorCodes.get(errorCode))) {
+                        // 3.1.1.1
                         if (retryCount < 10) {
                             pushNewTransactionToCustomerSyncV2(transReceiveId, entity,
                                     dto, ++retryCount, errorCodes);
                         }
+                        // 3.1.1.2
+                        else {
+                            updateTransactionStatusResponse(errorCodes.getOrDefault(errorCode, "R"),
+                                    transReceiveId, false);
+                        }
+                    }
+                    // 3.1.2 nếu không phải là mã lỗi retry và khách có map mã lỗi trong database
+                    else if (Objects.nonNull(errorCodes)) {
+                        String groupCode = errorCodes.getOrDefault(errorCode, "R");
+                        updateTransactionStatusResponse(groupCode, transReceiveId, false);
+                    }
+                    // 3.1.3 nếu khách không có mã lỗi đồng bộ với hệ thống luôn thì trả về thất bại
+                    else {
+                        updateTransactionStatusResponse("R",
+                                transReceiveId, false);
                     }
                 }
-                System.out.println("Response pushNewTransactionToCustomerSync: " + json);
+                // 3.2 nếu không map được mã lỗi từ response trả về thì trả thất bại luôn
+                else {
+                    updateTransactionStatusResponse("R",
+                            transReceiveId, false);
+                }
+//                //System.out.println("Response pushNewTransactionToCustomerSync: " + json);
                 logger.info("Response pushNewTransactionToCustomerSync: " + json + " status: " + response.statusCode());
                 result = new ResponseMessageDTO("FAILED", "E05 - " + json);
             }
@@ -1027,6 +1090,8 @@ public class CustomerInvoiceController {
             if (retryCount < 10) {
                 pushNewTransactionToCustomerSyncV2(transReceiveId, entity,
                         dto, ++retryCount, errorCodes);
+            } else {
+                updateTransactionStatusResponse("R", transReceiveId, false);
             }
         } finally {
             if (result != null) {
@@ -1066,7 +1131,6 @@ public class CustomerInvoiceController {
             webClient = WebClient.builder()
                     .baseUrl(entity.getUrlGetToken())
                     .build();
-            System.out.println("uriComponents: " + uriComponents.getPath());
             Mono<TokenDTO> responseMono = webClient.method(HttpMethod.POST)
                     .uri(uriComponents.toUri())
                     .contentType(MediaType.APPLICATION_JSON)
@@ -1074,7 +1138,6 @@ public class CustomerInvoiceController {
                     .body(BodyInserters.fromValue(data))
                     .exchange()
                     .flatMap(clientResponse -> {
-                        System.out.println("status code: " + clientResponse.statusCode());
                         try {
                             transactionLogResponseDTO.setTimeResponse(DateTimeUtil.getCurrentDateTimeUTC());
                             transactionLogResponseDTO.setStatusCode(clientResponse.statusCode().value());
@@ -1139,7 +1202,7 @@ public class CustomerInvoiceController {
                     data.put("transType", dto.getTransType());
                     data.put("orderId", dto.getOrderId());
                     data.put("terminalCode", dto.getTerminalCode());
-                    data.put("serviceCode", dto.getServiceCode());
+                    data.put("serviceCode", StringUtil.getValueNullChecker(dto.getServiceCode()));
                     data.put("subTerminalCode", dto.getSubTerminalCode());
                     socketHandler.sendMessageToClientId(merchantSyncEntity.getClientId(),
                             data);
@@ -1203,7 +1266,7 @@ public class CustomerInvoiceController {
         transactionReceiveEntity.setQrCode("");
         transactionReceiveEntity.setUserId(accountBankReceiveEntity.getUserId());
         transactionReceiveEntity.setNote("");
-        transactionReceiveEntity.setTransStatus(0);
+        transactionReceiveEntity.setStatusResponse(0);
         transactionReceiveEntity.setUrlLink("");
         transactionReceiveEntity.setBillId(dto.getBill_id());
         transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
@@ -1364,12 +1427,10 @@ public class CustomerInvoiceController {
                             CustomerSyncEntity customerSyncEntity = customerSyncService
                                     .getCustomerSyncById(accountCustomerBankEntity.getCustomerSyncId());
                             if (customerSyncEntity != null) {
-                                String retryErrors = customerErrorLogService.getRetryErrorsByCustomerId(customerSyncEntity.getId());
-                                List<String> errors = new ArrayList<>();
+                                List<CustomerErrorLogDTO> retryErrors = customerErrorLogService.getRetryErrorsByCustomerId(customerSyncEntity.getId());
+                                Map<String, String> errors = new HashMap<>();
                                 errors = mapperErrors(retryErrors);
-                                System.out.println("customerSyncEntity: " + customerSyncEntity.getId() + " - "
-                                        + customerSyncEntity.getInformation());
-                                List<String> finalErrors = errors;
+                                Map<String, String> finalErrors = errors;
                                 executorService.submit(() -> pushNewTransactionToCustomerSync(transactionUUID, customerSyncEntity,
                                         transactionBankCustomerDTO,
                                         time, 1, finalErrors));
@@ -1389,7 +1450,6 @@ public class CustomerInvoiceController {
             }
         } catch (Exception e) {
             logger.error("CustomerSync: Error: " + e.toString());
-            System.out.println("CustomerSync: Error: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05 - " + e.toString());
         }
         return result;
@@ -1514,15 +1574,18 @@ public class CustomerInvoiceController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    private List<String> mapperErrors(String errors) {
-        List<String> result = new ArrayList<>();
+    private Map<String, String> mapperErrors(List<CustomerErrorLogDTO> errors) {
+        Map<String, String> result = new HashMap<>();
+        ObjectMapper mapper = new ObjectMapper();
         try {
-            if (StringUtil.isNullOrEmpty(errors)) {
-                ObjectMapper mapper = new ObjectMapper();
-                List<ErrorCodeMapper> list = mapper.readValue(errors, new TypeReference<List<ErrorCodeMapper>>() {
-                });
-                for (ErrorCodeMapper dto : list) {
-                    result.add(dto.getErrorCode());
+            if (Objects.nonNull(errors) && !errors.isEmpty()) {
+                for (CustomerErrorLogDTO logDTO: errors) {
+                    List<ErrorCodeMapper> list = mapper.readValue(logDTO.getErrorCodes(),
+                            new TypeReference<List<ErrorCodeMapper>>() {
+                            });
+                    for (ErrorCodeMapper dto : list) {
+                        result.put(dto.getErrorCode(), logDTO.getGroupCode());
+                    }
                 }
             }
 
@@ -1883,12 +1946,10 @@ public class CustomerInvoiceController {
                             CustomerSyncEntity customerSyncEntity = customerSyncService
                                     .getCustomerSyncById(accountCustomerBankEntity.getCustomerSyncId());
                             if (customerSyncEntity != null) {
-                                String retryErrors = customerErrorLogService.getRetryErrorsByCustomerId(customerSyncEntity.getId());
-                                List<String> errors = new ArrayList<>();
+                                List<CustomerErrorLogDTO> retryErrors = customerErrorLogService.getRetryErrorsByCustomerId(customerSyncEntity.getId());
+                                Map<String, String> errors = new HashMap<>();
                                 errors = mapperErrors(retryErrors);
-                                System.out.println("customerSyncEntity: " + customerSyncEntity.getId() + " - "
-                                        + customerSyncEntity.getInformation());
-                                List<String> finalErrors = errors;
+                                Map<String, String>  finalErrors = errors;
                                 executorService.submit(() -> pushNewTransactionToCustomerSync(transReceiveId, customerSyncEntity,
                                         transactionBankCustomerDTO,
                                         time, 1, finalErrors));
@@ -1908,7 +1969,6 @@ public class CustomerInvoiceController {
             }
         } catch (Exception e) {
             logger.error("CustomerSync: Error: " + e.toString());
-            System.out.println("CustomerSync: Error: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05 - " + e.toString());
         }
         return result;
@@ -1916,7 +1976,7 @@ public class CustomerInvoiceController {
 
     private ResponseMessageDTO pushNewTransactionToCustomerSync(String transReceiveId, CustomerSyncEntity entity,
                                                                 TransactionBankCustomerDTO dto,
-                                                                long time, int retryCount, List<String> errorCodes) {
+                                                                long time, int retryCount, Map<String, String> errorCodes) {
         ResponseMessageDTO result = null;
         TransactionLogResponseDTO transactionLogResponseDTO = new TransactionLogResponseDTO();
         if (retryCount > 1 && retryCount <= 5) {
@@ -1939,9 +1999,6 @@ public class CustomerInvoiceController {
             logger.info("pushNewTransactionToCustomerSync: orderId: " +
                     dto.getOrderId());
             logger.info("pushNewTransactionToCustomerSync: sign: " + dto.getSign());
-            System.out.println("pushNewTransactionToCustomerSync: orderId: " +
-                    dto.getOrderId());
-            System.out.println("pushNewTransactionToCustomerSync: sign: " + dto.getSign());
             TokenDTO tokenDTO = null;
             if (entity.getUsername() != null && !entity.getUsername().trim().isEmpty() &&
                     entity.getPassword() != null
@@ -2013,24 +2070,49 @@ public class CustomerInvoiceController {
             }
 
             ClientResponse response = responseMono.block();
-            System.out.println("response status code: " + response.statusCode());
             try {
                 transactionLogResponseDTO.setTimeResponse(DateTimeUtil.getCurrentDateTimeUTC());
                 transactionLogResponseDTO.setStatusCode(response.statusCode().value());
-            } catch (Exception e) {}
+            } catch (Exception ignored) {}
+            // 1. nếu status = 200 thì default là mã lỗi success
             if (response.statusCode().is2xxSuccessful()) {
                 String json = response.bodyToMono(String.class).block();
-                System.out.println("Response pushNewTransactionToCustomerSync: " + json);
                 logger.info("Response pushNewTransactionToCustomerSync: " + json + " status: " + response.statusCode());
                 String errorCode = validateFormatCallbackResponse(json);
+                // 1.1 nếu response map đc theo format thì kiểm tra các bước dưới
                 if (!StringUtil.isNullOrEmpty(errorCode)) {
                     // retry callback
-                    if (Objects.nonNull(errorCodes) && errorCodes.contains(errorCode)) {
+                    // 1.1.1 nếu status = 200 và khách có map mã lỗi trong database thì kiểm tra mã lỗi có phải mã
+                    // lỗi retry không, nếu phải thì thực hiện if
+                    if (Objects.nonNull(errorCodes)
+                            && GroupCodeConstant.RETRY_GROUP.getValue()
+                            .equals(errorCodes.get(errorCode))) {
+                        // 1.1.1.1
                         if (retryCount < 10) {
                             pushNewTransactionToCustomerSync(transReceiveId, entity,
                                     dto, time, ++retryCount, errorCodes);
                         }
+                        // 1.1.1.2
+                        else {
+                            updateTransactionStatusResponse(errorCodes.getOrDefault(errorCode,"R"),
+                                    transReceiveId, false);
+                        }
                     }
+                    // 1.1.2 nếu không phải là mã lỗi retry và khách có map mã lỗi trong database
+                    else if (Objects.nonNull(errorCodes)) {
+                        String groupCode = errorCodes.getOrDefault(errorCode, "R");
+                        updateTransactionStatusResponse(groupCode, transReceiveId, false);
+                    }
+                    // 1.1.3 nếu khách không có mã lỗi đồng bộ với hệ thống luôn thì trả về success
+                    else {
+                        updateTransactionStatusResponse("S",
+                                transReceiveId, false);
+                    }
+                }
+                // 1.2 nếu response không map được theo format trả thành công luôn
+                else {
+                    updateTransactionStatusResponse("S",
+                            transReceiveId, false);
                 }
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode rootNode = objectMapper.readTree(json);
@@ -2044,20 +2126,67 @@ public class CustomerInvoiceController {
                 } else {
                     result = new ResponseMessageDTO("FAILED", "E05 - " + json);
                 }
-            } else {
+            }
+            // 2. nếu status != 400 và status thuộc loại 4xx hoặc 5xx 401, 403... 500 508...
+            else if (response.statusCode().value() != 400
+                    && (response.statusCode().is4xxClientError()
+                    || response.statusCode().is5xxServerError())) {
                 String json = response.bodyToMono(String.class).block();
-                System.out.println("Response pushNewTransactionToCustomerSync: " + json);
-                logger.info("Response pushNewTransactionToCustomerSync: " + json + " status: " + response.statusCode());
+                logger.info("Response pushNewTransactionToCustomerSync: " + json + " status Code: " + response.statusCode());
+                // retry callback
+                // 2.1 retry chưa tới lần thứ 10
+                if (retryCount < 10) {
+                    pushNewTransactionToCustomerSync(transReceiveId, entity,
+                            dto, time, ++retryCount, errorCodes);
+                }
+                // 2.2 retry sau 10 lần nhưng vẫn failed
+                else {
+                    updateTransactionStatusResponse("R", transReceiveId, false);
+                }
+                result = new ResponseMessageDTO("FAILED", "E05 - " + json);
+            }
+
+            // 3. status = 400
+            else {
+                String json = response.bodyToMono(String.class).block();
+                // nếu trả sai format retry callback
                 String errorCode = validateFormatCallbackResponse(json);
+                // 3.1 nếu map được mã lỗi từ response trả về
                 if (!StringUtil.isNullOrEmpty(errorCode)) {
                     // retry callback
-                    if (Objects.nonNull(errorCodes) && errorCodes.contains(errorCode)) {
+                    // 3.1.1 nếu status = 200 và khách có map mã lỗi trong database thì kiểm tra mã lỗi có phải mã
+                    // lỗi retry không, nếu phải thì thực hiện if
+                    if (Objects.nonNull(errorCodes)
+                            && GroupCodeConstant.RETRY_GROUP.getValue().
+                            equals(errorCodes.get(errorCode))) {
+                        // 3.1.1.1
                         if (retryCount < 10) {
                             pushNewTransactionToCustomerSync(transReceiveId, entity,
                                     dto, time, ++retryCount, errorCodes);
                         }
+                        // 3.1.1.2
+                        else {
+                            updateTransactionStatusResponse(errorCodes.getOrDefault(errorCode, "R"),
+                                    transReceiveId, false);
+                        }
+                    }
+                    // 3.1.2 nếu không phải là mã lỗi retry và khách có map mã lỗi trong database
+                    else if (Objects.nonNull(errorCodes)) {
+                        String groupCode = errorCodes.getOrDefault(errorCode, "R");
+                        updateTransactionStatusResponse(groupCode, transReceiveId, false);
+                    }
+                    // 3.1.3 nếu khách không có mã lỗi đồng bộ với hệ thống luôn thì trả về thất bại
+                    else {
+                        updateTransactionStatusResponse("R",
+                                transReceiveId, false);
                     }
                 }
+                // 3.2 nếu không map được mã lỗi từ response trả về thì trả thất bại luôn
+                else {
+                    updateTransactionStatusResponse("R",
+                            transReceiveId, false);
+                }
+                logger.info("Response pushNewTransactionToCustomerSync: " + json + " status: " + response.statusCode());
                 result = new ResponseMessageDTO("FAILED", "E05 - " + json);
             }
         } catch (Exception e) {
@@ -2080,6 +2209,8 @@ public class CustomerInvoiceController {
             if (retryCount < 10) {
                 pushNewTransactionToCustomerSync(transReceiveId, entity,
                         dto, time, ++retryCount, errorCodes);
+            } else {
+                updateTransactionStatusResponse("R", transReceiveId, false);
             }
         } finally {
             if (result != null) {
@@ -2111,6 +2242,34 @@ public class CustomerInvoiceController {
         return result;
     }
 
+    private void updateTransactionStatusResponse(String groupError, String transactionId, boolean isRetry) {
+        // 0: init
+        // 1: success - Thanh cong
+        // 2: pending - Cho xử lý
+        // 3: failed - That bai
+        // 4: error - Loi
+        int statusResponse = 0;
+        switch (groupError) {
+            case "R":
+                statusResponse = 3;
+                break;
+            case "S":
+                statusResponse = 1;
+                break;
+            case "F":
+                statusResponse = 4;
+                break;
+            case "W":
+                statusResponse = 2;
+                break;
+            default:
+                break;
+        }
+        if (!isRetry) {
+            transactionReceiveService.updateStatusResponse(transactionId, statusResponse);
+        }
+    }
+
     private TokenDTO getCustomerSyncToken(String transReceiveId, CustomerSyncEntity entity, long time) {
         TokenDTO result = null;
         ResponseMessageDTO msgDTO = null;
@@ -2122,9 +2281,6 @@ public class CustomerInvoiceController {
             logger.info("key: " + encodedKey + " - username: " + entity.getUsername() + " - password: "
                     + entity.getPassword());
 
-            System.out.println("key: " + encodedKey + " - username: " +
-                    entity.getUsername() + " - password: "
-                    + entity.getPassword());
             String suffixUrl = entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty()
                     ? entity.getSuffixUrl()
                     : "";
@@ -2152,7 +2308,6 @@ public class CustomerInvoiceController {
                                 + "/api/token_generate")
                         .build();
             }
-            System.out.println("uriComponents: " + uriComponents.getPath());
             Mono<TokenDTO> responseMono = webClient.method(HttpMethod.POST)
                     .uri(uriComponents.toUri())
                     .contentType(MediaType.APPLICATION_JSON)
@@ -2160,7 +2315,6 @@ public class CustomerInvoiceController {
                     .body(BodyInserters.fromValue(data))
                     .exchange()
                     .flatMap(clientResponse -> {
-                        System.out.println("status code: " + clientResponse.statusCode());
                         try {
                             transactionLogResponseDTO.setTimeResponse(DateTimeUtil.getCurrentDateTimeUTC());
                             transactionLogResponseDTO.setStatusCode(clientResponse.statusCode().value());
@@ -2197,8 +2351,6 @@ public class CustomerInvoiceController {
             msgDTO = new ResponseMessageDTO("FAILED", "E05 - " + e.toString());
             if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
                 logger.error("Error at getCustomerSyncToken: " + entity.getIpAddress() + " - " + e.toString());
-                // System.out.println("Error at getCustomerSyncToken: " + entity.getIpAddress()
-                // + " - " + e.toString());
             } else {
                 logger.error("Error at getCustomerSyncToken: " + entity.getInformation() + " - " + e.toString());
             }

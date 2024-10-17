@@ -70,7 +70,6 @@ public class AccountSettingController {
                 List<MerchantRoleSettingDTO> roles = new ArrayList<>();
                 try {
                     List<IMerchantBankMemberDTO> iMerchantBankMemberDTOs = merchantMemberService.getIMerchantBankMemberByUserId(userId);
-                    System.out.println(iMerchantBankMemberDTOs.get(0).getMerchantMemberId());
                     List<IMerchantRoleRawDTO> merchantRoleRawDTOS = merchantMemberRoleService
                             .getMerchantIdsByMerchantMemberIds(iMerchantBankMemberDTOs.stream()
                                     .map(IMerchantBankMemberDTO::getMerchantMemberId)
@@ -233,7 +232,6 @@ public class AccountSettingController {
                 httpStatus = HttpStatus.OK;
             }
         } catch (Exception e) {
-            System.out.println("Error at updateImageKiot: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -327,7 +325,6 @@ public class AccountSettingController {
             }
         } catch (Exception e) {
             logger.error("updateThemeType: ERROR: " + e.toString());
-            System.out.println("updateThemeType: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }

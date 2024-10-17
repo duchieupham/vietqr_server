@@ -182,7 +182,7 @@ public class VietQRController {
 			socketHandler.sendMessageToUser("36a242cd-5c83-4fb8-830a-cf30a193a99d", data);
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
-			System.out.println("Error at insertCaiBank: " + e.toString());
+			//System.out.println("Error at insertCaiBank: " + e.toString());
 			result = new ResponseMessageDTO("FAILED", "Unexpected Error.");
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
@@ -209,7 +209,7 @@ public class VietQRController {
 				httpStatus = HttpStatus.BAD_REQUEST;
 			}
 		} catch (Exception e) {
-			System.out.println("Error at insertCaiBank: " + e.toString());
+			//System.out.println("Error at insertCaiBank: " + e.toString());
 			result = new ResponseMessageDTO("FAILED", "Unexpected Error.");
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
@@ -264,7 +264,7 @@ public class VietQRController {
 				httpStatus = HttpStatus.BAD_REQUEST;
 			}
 		} catch (Exception e) {
-			System.out.println("generateQRBankImage: ERROR: " + e.toString());
+			//System.out.println("generateQRBankImage: ERROR: " + e.toString());
 			logger.error(e.toString());
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
@@ -1021,7 +1021,7 @@ public class VietQRController {
 						return new ResponseEntity<>(result, httpStatus);
 					} catch (Exception e) {
 						logger.error(e.toString());
-						System.out.println(e.toString());
+						//System.out.println(e.toString());
 						result = new ResponseMessageDTO("FAILED", "Unexpected Error");
 						httpStatus = HttpStatus.BAD_REQUEST;
 					} finally {
@@ -1235,7 +1235,7 @@ public class VietQRController {
 											terminalBankReceiveService.updateQrCodeTerminalSync("", qr, traceTransfer,
 													terminalBankSyncDTO.getTerminalBankReceiveId());
 										} else {
-											System.out.println("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
+											//System.out.println("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
 										}
 									} else {
 										// luồng thuong
@@ -1296,7 +1296,7 @@ public class VietQRController {
 											terminalBankReceiveEntity.setData1("");
 											terminalBankReceiveEntity.setTraceTransfer(traceTransfer);
 										} else {
-											System.out.println("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
+											//System.out.println("TerminalController: insertTerminal: terminalBankEntity is null or bankCode is not MB");
 										}
 									} else {
 										// luồng thuong
@@ -2056,7 +2056,7 @@ public class VietQRController {
 			transactionEntity.setQrCode(qrCode);
 			transactionEntity.setUserId(accountBankReceiveEntity.getUserId());
 			transactionEntity.setNote(dto.getNote() != null ? dto.getNote() : "");
-			transactionEntity.setTransStatus(0);
+			transactionEntity.setStatusResponse(0);
 			transactionEntity.setUrlLink(dto.getUrlLink() != null ? dto.getUrlLink() : "");
 			transactionEntity.setServiceCode(dto.getServiceCode());
 			transactionReceiveService.insertTransactionReceive(transactionEntity);
@@ -2101,7 +2101,7 @@ public class VietQRController {
 				transactionEntity.setUserId(accountBankEntity.getUserId());
 				transactionEntity.setOrderId(orderId);
 				transactionEntity.setNote(dto.getNote() != null ? dto.getNote() : "");
-				transactionEntity.setTransStatus(0);
+				transactionEntity.setStatusResponse(0);
 				transactionEntity.setUrlLink(dto.getUrlLink() != null ? dto.getUrlLink() : "");
 				if (dto.getTransType() != null) {
 					transactionEntity.setTransType(dto.getTransType());
@@ -2203,7 +2203,7 @@ public class VietQRController {
 				transactionEntity.setQrCode("");
 				transactionEntity.setUserId(accountBankEntity.getUserId());
 				transactionEntity.setNote("");
-				transactionEntity.setTransStatus(0);
+				transactionEntity.setStatusResponse(0);
 				transactionEntity.setUrlLink("");
 				transactionReceiveService.insertTransactionReceive(transactionEntity);
 				// insert transaction branch if existing branchId and businessId. Else just do
@@ -2607,7 +2607,7 @@ public class VietQRController {
 			}
 			return new ResponseEntity<>(result, httpStatus);
 		} catch (Exception e) {
-			System.out.println("Error at generateQR: " + e.toString());
+			//System.out.println("Error at generateQR: " + e.toString());
 			httpStatus = HttpStatus.BAD_REQUEST;
 			return new ResponseEntity<>(result, httpStatus);
 		} finally {
@@ -2671,12 +2671,12 @@ public class VietQRController {
 					}
 				}
 			}
-			// System.out.println("bankIds list: " + bankIds.size() + " - " +
+			// //System.out.println("bankIds list: " + bankIds.size() + " - " +
 			// bankIds.toString());
 			if (bankIds != null && !bankIds.isEmpty()) {
 				for (String bankId : bankIds) {
 					AccountBankReceiveEntity accountBankEntity = accountBankReceiveService.getAccountBankById(bankId);
-					// System.out.println("bankId: " + bankId + " - bank account: " +
+					// //System.out.println("bankId: " + bankId + " - bank account: " +
 					// accountBankEntity.getBankAccount());
 					if (accountBankEntity != null) {
 						// get bank type information
@@ -2762,7 +2762,7 @@ public class VietQRController {
 			}
 
 		} catch (Exception e) {
-			// System.out.println("Error at generateQRList: " + e.toString());
+			// //System.out.println("Error at generateQRList: " + e.toString());
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(result, httpStatus);
@@ -2832,7 +2832,7 @@ public class VietQRController {
 			}
 			return new ResponseEntity<>(result, httpStatus);
 		} catch (Exception e) {
-			// System.out.println("Error at reGenerateQR: " + e.toString());
+			// //System.out.println("Error at reGenerateQR: " + e.toString());
 			logger.error("Re-generateQR: " + e.toString());
 			httpStatus = HttpStatus.BAD_REQUEST;
 			return new ResponseEntity<>(result, httpStatus);
@@ -2867,7 +2867,7 @@ public class VietQRController {
 				transactionEntity.setUserId(entity.getUserId());
 				transactionEntity.setOrderId(dto.getOrderId());
 				transactionEntity.setNote(dto.getNote());
-				transactionEntity.setTransStatus(0);
+				transactionEntity.setStatusResponse(0);
 				transactionEntity.setUrlLink(dto.getUrlLink());
 				transactionEntity.setTransType("C");
 				transactionEntity.setReferenceNumber("");
@@ -2913,7 +2913,7 @@ public class VietQRController {
 				transactionEntity.setUserId(accountBank.getUserId());
 				transactionEntity.setOrderId(dto.getOrderId());
 				transactionEntity.setNote(dto.getNote());
-				transactionEntity.setTransStatus(0);
+				transactionEntity.setStatusResponse(0);
 				transactionEntity.setUrlLink(dto.getUrlLink());
 				transactionEntity.setTransType("C");
 				transactionEntity.setReferenceNumber("");

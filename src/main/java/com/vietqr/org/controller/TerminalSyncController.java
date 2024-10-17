@@ -957,7 +957,6 @@ public class TerminalSyncController {
             for (MidSynchronizeDTO item : dtos) {
                 String checkSum = BankEncryptUtil.generateMD5SyncMidChecksum(accessKey, item.getMerchantName(),
                         item.getMerchantIdentity());
-                System.out.println(checkSum);
                 if (BankEncryptUtil.isMatchChecksum(checkSum, item.getCheckSum())) {
                     if (ObjectUtils.allNotNull(item.getMerchantFullName(), item.getMerchantName(), item.getMerchantAddress(),
                             item.getMerchantIdentity(), item.getContactEmail(), item.getContactPhone())) {
@@ -1034,7 +1033,6 @@ public class TerminalSyncController {
             for (TidSynchronizeV2DTO item : dto.getTerminals()) {
                 String checkSum = BankEncryptUtil.generateMD5SyncTidChecksum(accessKey, item.getBankCode(),
                         item.getBankAccount());
-                System.out.println(checkSum);
                 if (BankEncryptUtil.isMatchChecksum(checkSum, item.getCheckSum())) {
                     if (ObjectUtils.allNotNull(item.getBankAccount(), item.getBankCode(), item.getTerminalCode(),
                             item.getTerminalAddress(), item.getTerminalName())) {

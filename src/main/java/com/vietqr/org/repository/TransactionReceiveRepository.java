@@ -2093,7 +2093,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "a.content AS content, a.time AS timeCreated, a.time_paid AS timePaid, a.status AS status, "
             + "a.type AS type, a.trans_type as transType, a.bank_id AS bankId, a.order_id AS orderId, "
             + "a.reference_number AS referenceNumber, a.note AS note, a.terminal_code AS terminalCode, "
-            + "b.bank_account_name AS userBankName, c.bank_short_name AS bankShortName, a.trans_status AS statusResponse "
+            + "b.bank_account_name AS userBankName, c.bank_short_name AS bankShortName, a.status_response AS statusResponse "
             + "FROM transaction_receive a INNER JOIN account_bank_receive b ON a.bank_id = b.id "
             + "INNER JOIN bank_type c ON c.id = b.bank_type_id "
             + "WHERE a.bank_id = :bankId AND a.status = 1 AND a.trans_type = 'C' AND a.type = 2 "
@@ -2105,7 +2105,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "a.content AS content, a.time AS timeCreated, a.time_paid AS timePaid, a.status AS status, "
             + "a.type AS type, a.trans_type as transType, a.bank_id AS bankId, a.order_id AS orderId, "
             + "a.reference_number AS referenceNumber, a.note AS note, a.terminal_code AS terminalCode, "
-            + "b.bank_account_name AS userBankName, c.bank_short_name AS bankShortName, a.trans_status AS statusResponse "
+            + "b.bank_account_name AS userBankName, c.bank_short_name AS bankShortName, a.status_response AS statusResponse "
             + "FROM transaction_receive a INNER JOIN account_bank_receive b ON a.bank_id = b.id "
             + "INNER JOIN bank_type c ON c.id = b.bank_type_id "
             + "WHERE a.bank_id = :bankId AND a.status = 1 AND a.trans_type = 'C' AND a.type = 2 "
@@ -2117,7 +2117,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "a.content AS content, a.time AS timeCreated, a.time_paid AS timePaid, a.status AS status, "
             + "a.type AS type, a.trans_type as transType, a.bank_id AS bankId, a.order_id AS orderId, "
             + "a.reference_number AS referenceNumber, a.note AS note, a.terminal_code AS terminalCode, "
-            + "b.bank_account_name AS userBankName, c.bank_short_name AS bankShortName, a.trans_status AS statusResponse "
+            + "b.bank_account_name AS userBankName, c.bank_short_name AS bankShortName, a.status_response AS statusResponse "
             + "FROM transaction_receive a INNER JOIN account_bank_receive b ON a.bank_id = b.id "
             + "INNER JOIN bank_type c ON c.id = b.bank_type_id "
             + "WHERE a.bank_id = :bankId AND a.status = 1 AND a.trans_type = 'C' AND a.type = 2 "
@@ -2129,7 +2129,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "a.content AS content, a.time AS timeCreated, a.time_paid AS timePaid, a.status AS status, "
             + "a.type AS type, a.trans_type as transType, a.bank_id AS bankId, a.order_id AS orderId, "
             + "a.reference_number AS referenceNumber, a.note AS note, a.terminal_code AS terminalCode, "
-            + "b.bank_account_name AS userBankName, c.bank_short_name AS bankShortName, a.trans_status AS statusResponse "
+            + "b.bank_account_name AS userBankName, c.bank_short_name AS bankShortName, a.status_response AS statusResponse "
             + "FROM transaction_receive a INNER JOIN account_bank_receive b ON a.bank_id = b.id "
             + "INNER JOIN bank_type c ON c.id = b.bank_type_id "
             + "WHERE a.bank_id = :bankId AND a.status = 1 AND a.trans_type = 'C' AND a.type = 2 "
@@ -2141,7 +2141,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "a.content AS content, a.time AS timeCreated, a.time_paid AS timePaid, a.status AS status, "
             + "a.type AS type, a.trans_type as transType, a.bank_id AS bankId, a.order_id AS orderId, "
             + "a.reference_number AS referenceNumber, a.note AS note, a.terminal_code AS terminalCode, "
-            + "b.bank_account_name AS userBankName, c.bank_short_name AS bankShortName, a.trans_status AS statusResponse "
+            + "b.bank_account_name AS userBankName, c.bank_short_name AS bankShortName, a.status_response AS statusResponse "
             + "FROM transaction_receive a INNER JOIN account_bank_receive b ON a.bank_id = b.id "
             + "INNER JOIN bank_type c ON c.id = b.bank_type_id "
             + "WHERE a.bank_id = :bankId AND a.status = 1 AND a.trans_type = 'C' AND a.type = 2 "
@@ -2151,7 +2151,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
 
     @Transactional
     @Modifying
-    @Query(value = "UPDATE transaction_receive SET terminal_code = :terminalCode, type = :type, trans_status = 2 WHERE id = :transactionId ", nativeQuery = true)
+    @Query(value = "UPDATE transaction_receive SET terminal_code = :terminalCode, type = :type, status_response = 2 WHERE id = :transactionId ", nativeQuery = true)
     void updateTransactionReceiveTerminalCode(String transactionId, String terminalCode, int type);
 
     @Query(value = "SELECT a.* FROM transaction_receive a WHERE a.id = :transactionId "
@@ -2396,7 +2396,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "INNER JOIN bank_type c "
             + "ON b.bank_type_id = c.id "
             + "WHERE a.time BETWEEN :fromDate AND :toDate "
-            + "AND a.bank_id = :bankId AND a.type = 2 AND trans_status = 1 "
+            + "AND a.bank_id = :bankId AND a.type = 2 AND status_response = 1 "
             + "ORDER BY a.time DESC "
             + "LIMIT :offset, :size ", nativeQuery = true)
     List<TransactionReceiveAdminListDTO> getTransactionReceiveWithRequest(String bankId,
@@ -2405,7 +2405,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
     @Query(value = "SELECT COUNT(a.id) "
             + "FROM transaction_receive a "
             + "WHERE a.time BETWEEN :fromDate AND :toDate "
-            + "AND a.bank_id = :bankId AND a.type = 2 AND trans_status = 1 ", nativeQuery = true)
+            + "AND a.bank_id = :bankId AND a.type = 2 AND status_response = 1 ", nativeQuery = true)
     int countTransactionReceiveWithRequest(String bankId, long fromDate, long toDate);
 
     @Query(value = "SELECT a.id, a.bank_account as bankAccount, a.amount, a.bank_id as bankId, a.content, "
@@ -2419,7 +2419,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "INNER JOIN bank_type c "
             + "ON b.bank_type_id = c.id "
             + "WHERE a.time BETWEEN :fromDate AND :toDate "
-            + "AND a.bank_id = :bankId AND a.type = 2 AND trans_status = 1 "
+            + "AND a.bank_id = :bankId AND a.type = 2 AND status_response = 1 "
             + "AND a.id = :value "
             + "ORDER BY a.time DESC "
             + "LIMIT :offset, :size ", nativeQuery = true)
@@ -2448,7 +2448,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "INNER JOIN bank_type c "
             + "ON b.bank_type_id = c.id "
             + "WHERE a.time BETWEEN :fromDate AND :toDate "
-            + "AND a.bank_id = :bankId AND a.type = 2 AND trans_status = 1 "
+            + "AND a.bank_id = :bankId AND a.type = 2 AND status_response = 1 "
             + "AND a.reference_number = :value "
             + "ORDER BY a.time DESC "
             + "LIMIT :offset, :size ", nativeQuery = true)
@@ -2465,7 +2465,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "INNER JOIN bank_type c "
             + "ON b.bank_type_id = c.id "
             + "WHERE a.time BETWEEN :fromDate AND :toDate "
-            + "AND a.bank_id = :bankId AND a.type = 2 AND trans_status = 1 "
+            + "AND a.bank_id = :bankId AND a.type = 2 AND status_response = 1 "
             + "AND a.order_id = :value "
             + "ORDER BY a.time DESC "
             + "LIMIT :offset, :size ", nativeQuery = true)
@@ -2482,7 +2482,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "INNER JOIN bank_type c "
             + "ON b.bank_type_id = c.id "
             + "WHERE a.time BETWEEN :fromDate AND :toDate "
-            + "AND a.bank_id = :bankId AND a.type = 2 AND trans_status = 1 "
+            + "AND a.bank_id = :bankId AND a.type = 2 AND status_response = 1 "
             + "AND a.terminal_code = :value "
             + "ORDER BY a.time DESC "
             + "LIMIT :offset, :size ", nativeQuery = true)
@@ -2499,7 +2499,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "INNER JOIN bank_type c "
             + "ON b.bank_type_id = c.id "
             + "WHERE a.time BETWEEN :fromDate AND :toDate "
-            + "AND a.bank_id = :bankId AND a.type = 2 AND trans_status = 1 "
+            + "AND a.bank_id = :bankId AND a.type = 2 AND status_response = 1 "
             + "AND a.status = :value "
             + "ORDER BY a.time DESC "
             + "LIMIT :offset, :size ", nativeQuery = true)
@@ -2516,7 +2516,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "INNER JOIN bank_type c "
             + "ON b.bank_type_id = c.id "
             + "WHERE a.time BETWEEN :fromDate AND :toDate "
-            + "AND a.bank_id = :bankId AND a.type = 2 AND trans_status = 1 "
+            + "AND a.bank_id = :bankId AND a.type = 2 AND status_response = 1 "
             + "AND a.content LIKE %:value% "
             + "ORDER BY a.time DESC "
             + "LIMIT :offset, :size ", nativeQuery = true)
@@ -2526,42 +2526,42 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "FROM transaction_receive a "
             + "WHERE a.time BETWEEN :fromDate AND :toDate "
             + "AND a.status = :value "
-            + "AND a.bank_id = :bankId AND a.type = 2 AND trans_status = 1 ", nativeQuery = true)
+            + "AND a.bank_id = :bankId AND a.type = 2 AND status_response = 1 ", nativeQuery = true)
     int countTransactionReceiveWithRequestByStatus(String bankId, long fromDate, long toDate, int value);
 
     @Query(value = "SELECT COUNT(a.id) "
             + "FROM transaction_receive a "
             + "WHERE a.time BETWEEN :fromDate AND :toDate "
             + "AND a.terminal_code = :value "
-            + "AND a.bank_id = :bankId AND a.type = 2 AND trans_status = 1 ", nativeQuery = true)
+            + "AND a.bank_id = :bankId AND a.type = 2 AND status_response = 1 ", nativeQuery = true)
     int countTransactionReceiveWithRequestByTerminalCode(String bankId, long fromDate, long toDate, String value);
 
     @Query(value = "SELECT COUNT(a.id) "
             + "FROM transaction_receive a "
             + "WHERE a.time BETWEEN :fromDate AND :toDate "
             + "AND a.content LIKE %:value% "
-            + "AND a.bank_id = :bankId AND a.type = 2 AND trans_status = 1 ", nativeQuery = true)
+            + "AND a.bank_id = :bankId AND a.type = 2 AND status_response = 1 ", nativeQuery = true)
     int countTransactionReceiveWithRequestByContent(String bankId, long fromDate, long toDate, String value);
 
     @Query(value = "SELECT COUNT(a.id) "
             + "FROM transaction_receive a "
             + "WHERE a.time BETWEEN :fromDate AND :toDate "
             + "AND a.order_id = :value "
-            + "AND a.bank_id = :bankId AND a.type = 2 AND trans_status = 1 ", nativeQuery = true)
+            + "AND a.bank_id = :bankId AND a.type = 2 AND status_response = 1 ", nativeQuery = true)
     int countTransactionReceiveWithRequestByOrderId(String bankId, long fromDate, long toDate, String value);
 
     @Query(value = "SELECT COUNT(a.id) "
             + "FROM transaction_receive a "
             + "WHERE a.time BETWEEN :fromDate AND :toDate "
             + "AND a.reference_number = :value "
-            + "AND a.bank_id = :bankId AND a.type = 2 AND trans_status = 1 ", nativeQuery = true)
+            + "AND a.bank_id = :bankId AND a.type = 2 AND status_response = 1 ", nativeQuery = true)
     int countTransactionReceiveWithRequestByFtCode(String bankId, long fromDate, long toDate, String value);
 
     @Query(value = "SELECT a.id as id, a.amount AS amount, a.bank_account AS bankAccount, "
             + "a.content AS content, a.time AS timeCreated, a.time_paid AS timePaid, a.status AS status, "
             + "a.type AS type, a.trans_type as transType, a.bank_id AS bankId, a.order_id AS orderId, "
             + "a.reference_number AS referenceNumber, a.note AS note, a.terminal_code AS terminalCode, "
-            + "b.bank_account_name AS userBankName, c.bank_short_name AS bankShortName, a.trans_status AS statusResponse "
+            + "b.bank_account_name AS userBankName, c.bank_short_name AS bankShortName, a.status_response AS statusResponse "
             + "FROM transaction_receive a INNER JOIN account_bank_receive b ON a.bank_id = b.id "
             + "INNER JOIN bank_type c ON c.id = b.bank_type_id "
             + "WHERE a.bank_id = :bankId AND a.status = 1 AND a.trans_type = 'C' AND a.type = 2 "
@@ -3494,5 +3494,10 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
             + "AND status = 0 AND amount = :amount AND qr_code LIKE (%:qrCodeId%) "
             + "AND trans_type = :transType LIMIT 1", nativeQuery = true)
     TransactionReceiveEntity getTransactionReceiveByQrCodeId(String qrCodeId, String amount, String transType, long time);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE transaction_receive SET status_response = :statusResponse WHERE id = :transactionId LIMIT 1", nativeQuery = true)
+    void updateStatusResponse(String transactionId, int statusResponse);
 }
 

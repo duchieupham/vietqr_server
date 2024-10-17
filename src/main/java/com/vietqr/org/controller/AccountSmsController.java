@@ -102,7 +102,6 @@ public class AccountSmsController {
             long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
             accountSmsService.updateAccessLoginSms(time, accessCount, id);
         } catch (Exception e) {
-            System.out.println("updateAccessSmsLogin: ERROR: " + e.toString());
             logger.error("updateAccessSmsLogin: ERROR: " + e.toString());
         }
     }
@@ -160,7 +159,6 @@ public class AccountSmsController {
                 httpStatus = HttpStatus.OK;
             }
         } catch (Exception e) {
-            System.out.println("Error at registerAccount: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -182,7 +180,6 @@ public class AccountSmsController {
             }
 
         } catch (Exception e) {
-            System.out.println("Error at searchAccount: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -194,12 +191,10 @@ public class AccountSmsController {
         ResponseMessageDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            System.out.println("FCM TOKEN: " + dto.getFcmToken());
             fcmTokenSmsService.deleteFcmTokenSms(dto.getFcmToken());
             result = new ResponseMessageDTO("SUCCESS", "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            System.out.println("Error at logout: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }

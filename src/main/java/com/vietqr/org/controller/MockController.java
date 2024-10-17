@@ -198,7 +198,6 @@ public class MockController {
 
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IOException e) {
-            System.out.println(e.getMessage());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
@@ -306,7 +305,6 @@ public class MockController {
 
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (IOException e) {
-            System.out.println(e.getMessage());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }

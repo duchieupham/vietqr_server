@@ -78,7 +78,6 @@ public class BearerTokenController {
 		try {
 
 			String userId = getUserIdFromToken(token);
-			System.out.println("userId: " + userId);
 			if (userId != null && !userId.trim().isEmpty()) {
 				updateAccessLogin(userId);
 			}
@@ -99,7 +98,6 @@ public class BearerTokenController {
 		HttpStatus httpStatus = null;
 		try {
 			String smsId = getSmsIdFromToken(token);
-			System.out.println("smsId: " + smsId);
 			if (smsId != null && !smsId.trim().isEmpty()) {
 				updateAccessSmsLogin(smsId);
 			}
@@ -147,7 +145,6 @@ public class BearerTokenController {
 			long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
 			accountSettingService.updateAccessLogin(time, accessCount, userId);
 		} catch (Exception e) {
-			System.out.println("updateAccessLogin: ERROR: " + e.toString());
 			logger.error("updateAccessLogin: ERROR: " + e.toString());
 		}
 	}
@@ -163,7 +160,6 @@ public class BearerTokenController {
 			long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
 			accountSmsService.updateAccessLoginSms(time, accessCount, id);
 		} catch (Exception e) {
-			System.out.println("updateAccessSmsLogin: ERROR: " + e.toString());
 			logger.error("updateAccessSmsLogin: ERROR: " + e.toString());
 		}
 	}

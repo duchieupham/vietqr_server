@@ -18,8 +18,8 @@ public class CorsConfig {
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         source.registerCorsConfiguration("/**", config);
-        System.out.println("go into cors Filter");
-        System.out.println(source.getCorsConfigurations());
+        //System.out.println("go into cors Filter");
+        //System.out.println(source.getCorsConfigurations());
         return new CorsFilter(source);
     }
 }

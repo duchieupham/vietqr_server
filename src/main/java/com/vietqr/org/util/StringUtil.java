@@ -133,7 +133,7 @@ public class StringUtil {
             }
         } catch (Exception e) {
             logger.error("formatBankAccount: ERROR: " + e.toString());
-            System.out.println("formatBankAccount: ERROR: " + e.toString());
+            //System.out.println("formatBankAccount: ERROR: " + e.toString());
         }
 
         return result;
@@ -153,7 +153,7 @@ public class StringUtil {
             result = formattedNumber;
         } catch (Exception e) {
             logger.error("formatPhoneNumber: ERROR: " + e.toString());
-            System.out.println("formatPhoneNumber: ERROR: " + e.toString());
+            //System.out.println("formatPhoneNumber: ERROR: " + e.toString());
         }
 
         return result;

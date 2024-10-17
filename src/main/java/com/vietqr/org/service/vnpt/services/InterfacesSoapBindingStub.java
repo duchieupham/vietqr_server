@@ -501,7 +501,7 @@ public class InterfacesSoapBindingStub extends org.apache.axis.client.Stub imple
 			} else {
 				extractAttachments(_call);
 				try {
-					System.out.println("_resp: " + _resp.toString());
+					//System.out.println("_resp: " + _resp.toString());
 					logger.info("_resp: " + _resp.toString());
 					return (QueryBalanceResult) _resp;
 				} catch (java.lang.Exception _exception) {

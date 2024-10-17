@@ -61,7 +61,6 @@ public class CustomerVaController {
             // .checkExistedBankAccountByBankAccountAndBankCode(dto.getBankAccount(),
             // dto.getBankCode());
             Long customerVaLength = customerVaService.getCustomerVaLength() + 1;
-            System.out.println("customerVaLength: " + customerVaLength);
             String merchantId = CustomerVaUtil.generateMerchantId(dto.getMerchantName(), customerVaLength);
             String checkExistedMerchantId = customerVaService.checkExistedMerchantId(merchantId);
             result = CustomerVaUtil.requestCustomerVa(dto, merchantId, "1", customerVaLength, checkExistedMerchantId);

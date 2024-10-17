@@ -178,7 +178,7 @@ public class AutomationManagementService {
     // @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 19 09 * * MON-FRI")
     // public void myScheduledTask() {
     // // Your task logic goes here
-    // System.out.println("System time is: " + LocalDateTime.now());
+    // //System.out.println("System time is: " + LocalDateTime.now());
     // }
 
     @Scheduled(zone = "Asia/Ho_Chi_Minh", cron = "0 30 17 * * MON-FRI")

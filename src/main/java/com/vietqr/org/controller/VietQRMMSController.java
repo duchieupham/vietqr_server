@@ -180,7 +180,7 @@ public class VietQRMMSController {
                         //
                     } catch (Exception e) {
                         logger.error(e.toString());
-                        System.out.println(e.toString());
+                        //System.out.println(e.toString());
                         result = new ResponseMessageDTO("FAILED", "Unexpected Error");
                         httpStatus = HttpStatus.BAD_REQUEST;
                         return new ResponseEntity<>(result, httpStatus);
@@ -188,7 +188,7 @@ public class VietQRMMSController {
                         // insert new transaction with orderId and sign
                             bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
                         if (accountBankEntity != null) {
-                            System.out.println("FINALLY accountBankEntity FOUND: " + accountBankEntity.toString());
+                            //System.out.println("FINALLY accountBankEntity FOUND: " + accountBankEntity.toString());
                             VietQRCreateDTO vietQRCreateDTO = new VietQRCreateDTO();
                             vietQRCreateDTO.setBankId(accountBankEntity.getId());
                             vietQRCreateDTO.setAmount(dto.getAmount() + "");
@@ -216,7 +216,7 @@ public class VietQRMMSController {
                         if (user != null) {
                             String decodedUser = new String(Base64.getDecoder().decode(user));
                             logger.info("qr/generate-customer - user " + decodedUser + " call at " + time);
-                            System.out.println("qr/generate-customer - user " + decodedUser + " call at " + time);
+                            //System.out.println("qr/generate-customer - user " + decodedUser + " call at " + time);
                         } else {
                             logger.info("qr/generate-customer - Sytem User call at " + time);
                         }
@@ -280,7 +280,7 @@ public class VietQRMMSController {
                 transactionEntity.setUserId(accountBankEntity.getUserId());
                 transactionEntity.setOrderId(orderId);
                 transactionEntity.setNote(dto.getNote() != null ? dto.getNote() : "");
-                transactionEntity.setTransStatus(0);
+                transactionEntity.setStatusResponse(0);
                 transactionEntity.setUrlLink(dto.getUrlLink() != null ? dto.getUrlLink() : "");
                 if (dto.getTransType() != null) {
                     transactionEntity.setTransType(dto.getTransType());
@@ -347,7 +347,7 @@ public class VietQRMMSController {
             transactionEntity.setQrCode(qrCode);
             transactionEntity.setUserId(accountBankReceiveEntity.getUserId());
             transactionEntity.setNote(dto.getNote() != null ? dto.getNote() : "");
-            transactionEntity.setTransStatus(0);
+            transactionEntity.setStatusResponse(0);
             if (dto.getUrlLink() == null || dto.getUrlLink().isEmpty()) {
                 dto.setUrlLink("");
             } else {

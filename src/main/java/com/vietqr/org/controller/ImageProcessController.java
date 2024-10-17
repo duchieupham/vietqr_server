@@ -36,7 +36,6 @@ public class ImageProcessController {
             httpStatus = HttpStatus.OK;
             return new ResponseEntity<>(result, headers, httpStatus);
         } catch (Exception e) {
-            System.out.println("Error at getImage: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
             return new ResponseEntity<>(result, httpStatus);
         }

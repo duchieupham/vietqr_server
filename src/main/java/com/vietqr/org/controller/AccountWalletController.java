@@ -45,7 +45,6 @@ public class AccountWalletController {
         AccountWalletDTO result = null;
         HttpStatus httpStatus = null;
         try {
-            System.out.println("userId: " + userId);
             logger.info("getAccountWalletByUserId: " + userId);
 
             AccountWalletEntity entity = accountWalletService.getAccountWalletByUserId(userId);
@@ -53,7 +52,6 @@ public class AccountWalletController {
                     entity.getWalletId(), entity.isEnableService());
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            System.out.println(e.toString());
             logger.error("getAccountWalletByUserId: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -100,10 +98,7 @@ public class AccountWalletController {
             userIds = accountLoginService.getAllUserIds();
             if (userIds != null && !userIds.isEmpty()) {
                 accountWalletService.deleteAllAccountWallet();
-                System.out.println("delete account wallet success");
-                System.out.println("userIds size: " + userIds.size());
                 for (int i = 0; i < userIds.size(); i++) {
-                    System.out.println("userId: index: " + i + " - id: " + userIds.get(i));
                     //
                     // insert account wallet
                     UUID accountWalletUUID = UUID.randomUUID();

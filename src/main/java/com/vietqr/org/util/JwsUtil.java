@@ -85,14 +85,14 @@ public class JwsUtil {
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
                 key = data;
-                System.out.println(data);
+                //System.out.println(data);
                 break;
             }
             myReader.close();
         } catch (Exception e) {
-            System.out.println("getSymmatricKey: ERROR: " + e.toString());
+            //System.out.println("getSymmatricKey: ERROR: " + e.toString());
         }
-        System.out.println("SymmatricKey = " + key);
+        //System.out.println("SymmatricKey = " + key);
         return key;
     }
 
@@ -120,7 +120,7 @@ public class JwsUtil {
             // TODO: handle exception
         }
         payload = sb.toString();
-        System.out.println("Body: " + payload);
+        //System.out.println("Body: " + payload);
 
         return payload;
     }

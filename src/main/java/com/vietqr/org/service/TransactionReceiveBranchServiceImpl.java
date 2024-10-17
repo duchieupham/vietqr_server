@@ -17,7 +17,7 @@ public class TransactionReceiveBranchServiceImpl implements TransactionReceiveBr
 
     @Override
     public int insertTransactionReceiveBranch(TransactionReceiveBranchEntity entity) {
-        System.out.println("branchId services: " + entity.getBranchId());
+        //System.out.println("branchId services: " + entity.getBranchId());
         return repo.save(entity) == null ? 0 : 1;
     }
 

@@ -55,7 +55,7 @@ public class SlackController {
             }
         } catch (Exception e) {
             logger.error("SlackController: sendFirstMessage: ERROR: " + e.toString());
-            System.out.println("SlackController: sendFirstMessage: ERROR: " + e.toString());
+            //System.out.println("SlackController: sendFirstMessage: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -97,7 +97,7 @@ public class SlackController {
             }
         } catch (Exception e) {
             logger.error("SlackController: insertBankIntoSlack: ERROR: " + e.toString());
-            System.out.println("SlackController: insertBankIntoSlack: ERROR: " + e.toString());
+            //System.out.println("SlackController: insertBankIntoSlack: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -120,7 +120,7 @@ public class SlackController {
             }
         } catch (Exception e) {
             logger.error("SlackController: removeBankFromSlack: ERROR: " + e.toString());
-            System.out.println("SlackController: removeBankFromSlack: ERROR: " + e.toString());
+            //System.out.println("SlackController: removeBankFromSlack: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -163,13 +163,13 @@ public class SlackController {
                 httpStatus = HttpStatus.OK;
             } else {
                 logger.error("insertSlack: INVALID REQUEST BODY");
-                System.out.println("insertSlack: INVALID REQUEST BODY");
+                //System.out.println("insertSlack: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("SlackController: insertSlack: ERROR: " + e.toString());
-            System.out.println("SlackController: insertSlack: ERROR: " + e.toString());
+            //System.out.println("SlackController: insertSlack: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -199,19 +199,19 @@ public class SlackController {
                     httpStatus = HttpStatus.OK;
                 } else {
                     logger.error("updateSlackConfigure: SLACK ID NOT FOUND");
-                    System.out.println("updateSlackConfigure: SLACK ID NOT FOUND");
+                    //System.out.println("updateSlackConfigure: SLACK ID NOT FOUND");
                     result = new ResponseMessageDTO("FAILED", "E47");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {
                 logger.error("updateSlackConfigure: INVALID REQUEST BODY");
-                System.out.println("updateSlackConfigure: INVALID REQUEST BODY");
+                //System.out.println("updateSlackConfigure: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("Error at updateSlackConfigure: " + e.toString());
-            System.out.println("Error at updateSlackConfigure: " + e.toString());
+            //System.out.println("Error at updateSlackConfigure: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -230,7 +230,7 @@ public class SlackController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("SlackController: removeSlack: ERROR: " + e.toString());
-            System.out.println("SlackController: removeSlack: ERROR:  " + e.toString());
+            //System.out.println("SlackController: removeSlack: ERROR:  " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -266,7 +266,7 @@ public class SlackController {
 
         } catch (Exception e) {
             logger.error("SlackController: getSlackInformationDetail: ERROR: " + e.getMessage() + System.currentTimeMillis());
-            System.out.println("SlackController: getSlackInformationDetail: ERROR: " + e.getMessage() + System.currentTimeMillis());
+            //System.out.println("SlackController: getSlackInformationDetail: ERROR: " + e.getMessage() + System.currentTimeMillis());
             ResponseMessageDTO responseMessageDTO = new ResponseMessageDTO("FAILED", "E05");
             result = responseMessageDTO;
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -285,7 +285,7 @@ public class SlackController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("SlackController: updateSlackWebhook: ERROR: "  + e.getMessage() + System.currentTimeMillis());
-            System.out.println("SlackController: updateSlackWebhook: ERROR: "  + e.getMessage() + System.currentTimeMillis());
+            //System.out.println("SlackController: updateSlackWebhook: ERROR: "  + e.getMessage() + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }

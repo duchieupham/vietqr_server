@@ -60,7 +60,6 @@ public class ImageController {
 //			result = imageService.getImageById(id);
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
-			System.out.println("Error at getImage: " + e.toString());
 			logger.error("getImage: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}

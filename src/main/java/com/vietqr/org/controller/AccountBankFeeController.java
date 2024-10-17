@@ -1291,7 +1291,6 @@ public class AccountBankFeeController {
         try {
             //
         } catch (Exception e) {
-            System.out.println(e.toString());
             logger.error("markPaid: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;

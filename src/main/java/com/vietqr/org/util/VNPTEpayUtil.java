@@ -114,14 +114,14 @@ public class VNPTEpayUtil {
             logger.info("So du tam giu: " + result.getBalance_debit());
             logger.info("So du kha dung: " + result.getBalance_avaiable());
             //
-            System.out.println(result.getErrorCode());
-            System.out.println(result.getMessage());
-            System.out.println("So du tien mat: " + result.getBalance_money());
-            System.out.println("So du thuong: " + result.getBalance_bonus());
-            System.out.println("So du tam giu: " + result.getBalance_debit());
-            System.out.println("So du kha dung: " + result.getBalance_avaiable());
+            //System.out.println(result.getErrorCode());
+            //System.out.println(result.getMessage());
+            //System.out.println("So du tien mat: " + result.getBalance_money());
+            //System.out.println("So du thuong: " + result.getBalance_bonus());
+            //System.out.println("So du tam giu: " + result.getBalance_debit());
+            //System.out.println("So du kha dung: " + result.getBalance_avaiable());
         } catch (Exception e) {
-            System.out.println("ERROR AT queryBalance: " + e.toString());
+            //System.out.println("ERROR AT queryBalance: " + e.toString());
             logger.error("ERROR AT queryBalance: " + e.toString());
             e.printStackTrace();
         }
@@ -153,16 +153,16 @@ public class VNPTEpayUtil {
                 keyPrivateRsa = private_key;
             }
             String dataSign = requestId + partnerName + provider + target + amount;
-            System.out.println("topup: data sign: " + dataSign);
+            //System.out.println("topup: data sign: " + dataSign);
             logger.info("topup: data sign: " + dataSign);
             //
             String sign = sign(dataSign, keyPrivateRsa);
-            System.out.println("topup: sign after process: " + sign);
+            //System.out.println("topup: sign after process: " + sign);
             logger.info("topup: sign after process: " + sign);
             //
             TopupResult topupResult = getService().topup(requestId, partnerName, provider, target, amount, sign);
-            System.out.println("topup: ERROR CODE: " + topupResult.getErrorCode());
-            System.out.println("topup: MESSAGE: " + topupResult.getMessage());
+            //System.out.println("topup: ERROR CODE: " + topupResult.getErrorCode());
+            //System.out.println("topup: MESSAGE: " + topupResult.getMessage());
             logger.info("topup: ERROR CODE: " + topupResult.getErrorCode());
             logger.info("topup: MESSAGE: " + topupResult.getMessage());
             //

@@ -36,7 +36,7 @@ public class TelegramUtil extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             if (!e.toString().contains("Unable to deserialize response")) {
                 logger.error("ERROR at sendMsg: " + e.toString());
-                System.out.println("ERROR at sendMsg: " + e.toString());
+                //System.out.println("ERROR at sendMsg: " + e.toString());
                 e.printStackTrace();
             } else {
                 result = false;

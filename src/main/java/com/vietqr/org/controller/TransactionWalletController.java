@@ -3,8 +3,6 @@ package com.vietqr.org.controller;
 import com.vietqr.org.dto.*;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -203,7 +201,7 @@ public class TransactionWalletController {
                     transactionReceiveEntity.setTerminalCode("");
                     transactionReceiveEntity.setUserId(userIdHost);
                     transactionReceiveEntity.setNote("");
-                    transactionReceiveEntity.setTransStatus(0);
+                    transactionReceiveEntity.setStatusResponse(0);
                     transactionReceiveEntity.setUrlLink("");
                     transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
                     // insert transaction branch
@@ -498,8 +496,6 @@ public class TransactionWalletController {
             result.setData(data);
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            System.out.println("getTransactionsVNPTFilter: ERROR: " + e.getMessage()
-                    + " at: " + System.currentTimeMillis());
             logger.error("getTransactionsVNPTFilter: ERROR: " + e.getMessage()
                     + " at: " + System.currentTimeMillis());
             httpStatus = HttpStatus.BAD_REQUEST;

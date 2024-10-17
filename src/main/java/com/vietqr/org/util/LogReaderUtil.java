@@ -40,7 +40,7 @@ public class LogReaderUtil {
                     // int count = 0;
                     while ((line = reader.readLine()) != null) {
                         // count++;
-                        // System.out.println("\nLine " + count + ": " + line);
+                        // //System.out.println("\nLine " + count + ": " + line);
                         result.add(line);
                     }
                     // if (contentBuilder != null) {
@@ -53,7 +53,7 @@ public class LogReaderUtil {
             session.disconnect();
 
         } catch (Exception e) {
-            System.out.println(e.toString());
+            //System.out.println(e.toString());
         }
         return result;
     }

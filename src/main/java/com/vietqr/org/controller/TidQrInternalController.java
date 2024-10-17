@@ -778,7 +778,6 @@ public class TidQrInternalController {
                     //
                 } catch (Exception e) {
                     logger.error(e.toString());
-                    System.out.println(e.toString());
                     result = new ResponseMessageDTO("FAILED", "Unexpected Error");
                     httpStatus = HttpStatus.BAD_REQUEST;
                     return new ResponseEntity<>(result, httpStatus);
@@ -976,7 +975,7 @@ public class TidQrInternalController {
             transactionEntity.setQrCode(qrCode);
             transactionEntity.setUserId(accountBankReceiveEntity.getUserId());
             transactionEntity.setNote(dto.getNote() != null ? dto.getNote() : "");
-            transactionEntity.setTransStatus(0);
+            transactionEntity.setStatusResponse(0);
             transactionEntity.setUrlLink(dto.getUrlLink() != null ? dto.getUrlLink() : "");
             transactionReceiveService.insertTransactionReceive(transactionEntity);
             LocalDateTime endTime = LocalDateTime.now();
@@ -1188,7 +1187,7 @@ public class TidQrInternalController {
                 transactionEntity.setUserId(accountBankEntity.getUserId());
                 transactionEntity.setOrderId(orderId);
                 transactionEntity.setNote(dto.getNote() != null ? dto.getNote() : "");
-                transactionEntity.setTransStatus(0);
+                transactionEntity.setStatusResponse(0);
                 transactionEntity.setUrlLink(dto.getUrlLink() != null ? dto.getUrlLink() : "");
                 if (dto.getTransType() != null) {
                     transactionEntity.setTransType(dto.getTransType());

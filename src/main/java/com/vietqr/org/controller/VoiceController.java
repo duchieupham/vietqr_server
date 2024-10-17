@@ -99,7 +99,7 @@ public class VoiceController {
             //
         } catch (Exception e) {
             logger.error("Error at getTransactionVoice: " + e.toString());
-            System.out.println("Error at getTransactionVoice: " + e.toString());
+            //System.out.println("Error at getTransactionVoice: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
