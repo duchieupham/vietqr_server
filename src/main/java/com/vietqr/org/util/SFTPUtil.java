@@ -66,10 +66,10 @@ public class SFTPUtil {
                 int count = 0;
                 while ((line = reader.readLine()) != null) {
                     count++;
-                    System.out.println("\nLine " + count + ": ");
+                    //System.out.println("\nLine " + count + ": ");
                     String[] data = line.split("\\|");
                     for (String part : data) {
-                        System.out.println(part);
+                        //System.out.println(part);
                     }
                 }
             }
@@ -112,7 +112,7 @@ public class SFTPUtil {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(textToWrite.getBytes());
             channel.put(inputStream, remoteFilePath);
 
-            System.out.println("Text written to " + remoteFilePath);
+            //System.out.println("Text written to " + remoteFilePath);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -172,7 +172,7 @@ public class SFTPUtil {
                 int count = 0;
                 while ((line = reader.readLine()) != null) {
                     count++;
-                    System.out.println("\nLine " + count + ": ");
+                    //System.out.println("\nLine " + count + ": ");
                     String[] data = line.split("\\|");
                     //
                     if (count != 1) {
@@ -200,11 +200,11 @@ public class SFTPUtil {
                         transTCSftpDTO.setCheckSum(data[20]);
                         transTCs.add(transTCSftpDTO);
                         // for (String part : data) {
-                        // System.out.println(part);
+                        // //System.out.println(part);
                         // }
 
                         //
-                        System.out.println("FT Get from TC file: " + transTCSftpDTO.getFt());
+                        //System.out.println("FT Get from TC file: " + transTCSftpDTO.getFt());
                         if (transTCSftpDTO.getFt() != null) {
                             TransactionMMSEntity transactionMMSEntity = transactionMMSService
                                     .getTransactionMMSByFtCode(transTCSftpDTO.getFt(), date);
@@ -213,7 +213,7 @@ public class SFTPUtil {
                                 if (transTCSftpDTO.getAmount().trim()
                                         .equals(transactionMMSEntity.getDebitAmount().trim())) {
                                     // MATCHED
-                                    System.out.println("Transaction " + transTCSftpDTO.getNo() + " matched amount.");
+                                    //System.out.println("Transaction " + transTCSftpDTO.getNo() + " matched amount.");
                                     totalCorrectTransaction++;
                                     totalCorrectAmount += Long.parseLong(transactionMMSEntity.getDebitAmount());
                                 } else {
@@ -246,7 +246,7 @@ public class SFTPUtil {
                                 TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
                                         .findTransactionReceiveByFtCode(transTCSftpDTO.getFt());
                                 if (transactionReceiveEntity == null) {
-                                    System.out.println("Transaction " + transTCSftpDTO.getNo() + " NOT FOUND");
+                                    //System.out.println("Transaction " + transTCSftpDTO.getNo() + " NOT FOUND");
                                     totalWrongTransaction++;
                                     totalWrongAmount += Long.parseLong(transTCSftpDTO.getAmount());
                                     // add Wrong record into list
@@ -267,7 +267,7 @@ public class SFTPUtil {
                                     transCLs.add(transCLSftpDTO);
                                 } else {
                                     // MATCHED
-                                    System.out.println("Transaction " + transTCSftpDTO.getNo() + " matched amount.");
+                                    //System.out.println("Transaction " + transTCSftpDTO.getNo() + " matched amount.");
                                     totalCorrectTransaction++;
                                     totalCorrectAmount += transactionReceiveEntity.getAmount();
                                 }
@@ -277,11 +277,11 @@ public class SFTPUtil {
                     }
                 }
             }
-            System.out.println("\n\nCONCLUSION ROUND 1: ");
-            System.out.println("totalCorrectTransaction: " + totalCorrectTransaction);
-            System.out.println("totalCorrectAmount: " + totalCorrectAmount);
-            System.out.println("totalWrongTransaction: " + totalWrongTransaction);
-            System.out.println("totalWrongAmount: " + totalWrongAmount);
+            //System.out.println("\n\nCONCLUSION ROUND 1: ");
+            //System.out.println("totalCorrectTransaction: " + totalCorrectTransaction);
+            //System.out.println("totalCorrectAmount: " + totalCorrectAmount);
+            //System.out.println("totalWrongTransaction: " + totalWrongTransaction);
+            //System.out.println("totalWrongAmount: " + totalWrongAmount);
 
             // VÒNG 2:
             // 1. Quét transactionmms theo ngày
@@ -297,7 +297,7 @@ public class SFTPUtil {
                 }
                 for (TransactionMMSEntity transactionMMSEntity : transactionMMSEntities) {
                     if (ftCodes.contains(transactionMMSEntity.getFtCode())) {
-                        System.out.println("Transaction matched: " + transactionMMSEntity.getFtCode());
+                        //System.out.println("Transaction matched: " + transactionMMSEntity.getFtCode());
                     } else {
                         totalWrongTransaction++;
                         totalWrongAmount += Long.parseLong(transactionMMSEntity.getDebitAmount());
@@ -323,25 +323,25 @@ public class SFTPUtil {
                     }
                 }
             } else {
-                System.out.println("transactionMMSEntities is NULL or EMPTY");
+                //System.out.println("transactionMMSEntities is NULL or EMPTY");
             }
 
-            System.out.println("\n\nCONCLUSION ROUND 2: ");
-            System.out.println("totalCorrectTransaction: " + totalCorrectTransaction);
-            System.out.println("totalCorrectAmount: " + totalCorrectAmount);
-            System.out.println("totalWrongTransaction: " + totalWrongTransaction);
-            System.out.println("totalWrongAmount: " + totalWrongAmount);
-            System.out.println("\n\n");
+            //System.out.println("\n\nCONCLUSION ROUND 2: ");
+            //System.out.println("totalCorrectTransaction: " + totalCorrectTransaction);
+            //System.out.println("totalCorrectAmount: " + totalCorrectAmount);
+            //System.out.println("totalWrongTransaction: " + totalWrongTransaction);
+            //System.out.println("totalWrongAmount: " + totalWrongAmount);
+            //System.out.println("\n\n");
             TransTHSftpDTO transTHTitle = new TransTHSftpDTO("STT", "Ngay giao dich", "Dich vu",
                     "So luong can khop",
                     "Gia tri can khop", "So luong chenh lech", "Gia tri chenh lech", "Ket qua", "Add_Info",
                     "Check sum");
             TransTHSftpDTO transTHSftpDTO = new TransTHSftpDTO("1", date, "1011", totalCorrectTransaction + "",
                     totalCorrectAmount + "", totalWrongTransaction + "", totalWrongAmount + "", "", "", "");
-            System.out.println(transTHTitle.toString());
-            System.out.println(transTHSftpDTO.toString());
+            //System.out.println(transTHTitle.toString());
+            //System.out.println(transTHSftpDTO.toString());
             //
-            System.out.println("\n\n");
+            //System.out.println("\n\n");
             TransCLSftpDTO transCLSftpTitle = new TransCLSftpDTO("STT", "Channel", "Channel name", "Loai giao dich",
                     "Request id",
                     "Bank trans id", "FT", "Ngay giao dich",
@@ -350,9 +350,9 @@ public class SFTPUtil {
                     "Ten chu tai khoan ghi co", "So tai khoan don vi thu huong",
                     "Ten ngan hang nhan", "Key doi soat napas", "Trang thai giao dich", "Add_Info",
                     "Check sum");
-            System.out.println(transCLSftpTitle.toString());
+            //System.out.println(transCLSftpTitle.toString());
             for (TransCLSftpDTO transCL : transCLs) {
-                System.out.println(transCL.toString());
+                //System.out.println(transCL.toString());
             }
             // disconnect SFTP reader
             channelSftp.disconnect();

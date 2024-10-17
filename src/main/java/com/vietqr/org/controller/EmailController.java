@@ -262,7 +262,6 @@ public class EmailController {
                 result = imageService.getImageById(id);
             }
         } catch (Exception e) {
-            System.out.println("Error at getImage: " + e.toString());
         }
         return result;
     }

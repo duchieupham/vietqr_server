@@ -126,13 +126,11 @@ public class PostController {
                 httpStatus = HttpStatus.OK;
             } else {
                 logger.error("insertNewsfeed: ERROR:  INVALID REQUEST BODY");
-                System.out.println("insertNewsfeed: ERROR: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("insertNewsfeed: ERROR: " + e.toString());
-            System.out.println("insertNewsfeed: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -147,7 +145,6 @@ public class PostController {
         try {
         } catch (Exception e) {
             logger.error("insertNews: ERROR: " + e.toString());
-            System.out.println("insertNews: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -200,30 +197,24 @@ public class PostController {
         HttpStatus httpStatus = null;
         int a = 112;
         try {
-            // System.out.println("content: " + dto.getContent());
             // List<String> images = ImageUtil.parseImages(dto.getContent());
             // int index = 0;
             // if (images != null && !images.isEmpty()) {
             // for (String image : images) {
-            // System.out.println("index: " + index);
-            // System.out.println(image);
             // index++;
             // }
             // }
             LocalDateTime currentDateTime = LocalDateTime.now();
             long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
             result = new ResponseMessageDTO("SUCCESS", "end try at: " + time);
-            System.out.println("end try at: " + time);
             httpStatus = HttpStatus.OK;
             return new ResponseEntity<>(result, httpStatus);
         } catch (Exception e) {
             // logger.error("insertNews: ERROR: " + e.toString());
-            System.out.println("insertTestNews: ERROR: " + e.toString());
             LocalDateTime currentDateTime = LocalDateTime.now();
             long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
             result = new ResponseMessageDTO("FAILED", "E05" + " at: " + time);
             httpStatus = HttpStatus.BAD_REQUEST;
-            System.out.println("end catch at: " + time);
             return new ResponseEntity<>(result, httpStatus);
         } finally {
             // Thực hiện công việc trong một luồng riêng
@@ -235,7 +226,6 @@ public class PostController {
                     Thread.sleep(5000); // Tạm dừng luồng trong 1 giây
                     LocalDateTime currentDateTime = LocalDateTime.now();
                     long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
-                    System.out.println(a + "end finally at: " + time);
                 } catch (InterruptedException e) {
                     // Xử lý ngoại lệ nếu có
                 }

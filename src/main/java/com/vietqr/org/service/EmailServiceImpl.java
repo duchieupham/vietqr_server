@@ -131,7 +131,7 @@ public class EmailServiceImpl implements EmailService {
                 result = imageService.getImageById(id);
             }
         } catch (Exception e) {
-            System.out.println("Error at getImage: " + e.toString());
+            //System.out.println("Error at getImage: " + e.toString());
         }
         return result;
     }

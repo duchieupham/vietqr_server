@@ -50,7 +50,6 @@ public class BankTextFormController {
 				httpStatus = HttpStatus.BAD_REQUEST;
 			}
 		} catch (Exception e) {
-			System.out.println("Error at insertBankTextForm: " + e.toString());
 			result = new ResponseMessageDTO("FAILED", "Unexpected Error");
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
@@ -65,7 +64,6 @@ public class BankTextFormController {
 			result = bankTextFormService.getBankTextFormsByBankId(bankId);
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
-			System.out.println("Error at getBankTextForms: " + e.toString());
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}
 		return new ResponseEntity<>(result, httpStatus);
@@ -80,7 +78,6 @@ public class BankTextFormController {
 			result = new ResponseMessageDTO("SUCCESS", "");
 			httpStatus = HttpStatus.OK;
 		} catch (Exception e) {
-			System.out.println("Error at deleteBankTextForm: " + e.toString());
 			result = new ResponseMessageDTO("FAILED", "Unexpected Error");
 			httpStatus = HttpStatus.BAD_REQUEST;
 		}

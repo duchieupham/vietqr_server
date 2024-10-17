@@ -44,9 +44,9 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
 //            File filePut = convertMultiPartToFile(file);
 //            s3Client.putObject(request, RequestBody.fromFile(filePut));
 //            result = endpointUrl + "/" + key;
-//            System.out.println("File uploaded successfully at: " + System.currentTimeMillis());
+//            //System.out.println("File uploaded successfully at: " + System.currentTimeMillis());
 //        } catch (Exception ignored) {
-//            System.out.println("Error at uploadFile: " + ignored.toString());
+//            //System.out.println("Error at uploadFile: " + ignored.toString());
 //            logger.info("Error at uploadFile: " + ignored.toString());
 //        }
 //        return result;
@@ -66,9 +66,9 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
             filePut = convertMultiPartToFile(file);
             s3Client.putObject(request, RequestBody.fromFile(filePut));
             result = endpointUrl + "/" + key;
-            System.out.println("File uploaded successfully at: " + System.currentTimeMillis());
+            //System.out.println("File uploaded successfully at: " + System.currentTimeMillis());
         } catch (Exception e) {
-            System.out.println("Error at uploadFile: " + e.toString());
+            //System.out.println("Error at uploadFile: " + e.toString());
             logger.info("Error at uploadFile: " + e.toString());
         } finally {
             if (filePut != null && filePut.exists()) {
@@ -84,9 +84,9 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
         String result = "";
         try {
             result = endpointUrl + "/" + key;
-            System.out.println("File uploaded successfully at: " + System.currentTimeMillis());
+            //System.out.println("File uploaded successfully at: " + System.currentTimeMillis());
         } catch (Exception ignored) {
-            System.out.println("Error at uploadFile: " + ignored.toString());
+            //System.out.println("Error at uploadFile: " + ignored.toString());
             logger.info("Error at uploadFile: " + ignored.toString());
         }
         return result;

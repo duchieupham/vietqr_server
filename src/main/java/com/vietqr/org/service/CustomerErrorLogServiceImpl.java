@@ -1,5 +1,6 @@
 package com.vietqr.org.service;
 
+import com.vietqr.org.dto.CustomerErrorLogDTO;
 import com.vietqr.org.entity.CustomerErrorLogEntity;
 import com.vietqr.org.repository.CustomerErrorLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,7 @@ public class CustomerErrorLogServiceImpl implements CustomerErrorLogService {
     private CustomerErrorLogRepository repo;
 
     @Override
-    public String getRetryErrorsByCustomerId(String customerId) {
+    public List<CustomerErrorLogDTO> getRetryErrorsByCustomerId(String customerId) {
         return repo.getRetryErrorsByCustomerId(customerId);
     }
 

@@ -35,7 +35,7 @@ public class FirebaseMessagingService {
 	// String response = FirebaseMessaging.getInstance().send(message);
 	// //deploy
 	//// String response = firebaseMessaging.send(message);
-	// System.out.println("Successfully sent message: " + response);
+	// //System.out.println("Successfully sent message: " + response);
 	// }
 
 	private Logger logger = Logger.getLogger(FirebaseMessagingService.class);
@@ -85,7 +85,7 @@ public class FirebaseMessagingService {
 		try {
 			fcmUtil.sendMessage(data, request);
 		} catch (InterruptedException | ExecutionException e) {
-			System.out.println("Error at sendPushNotificationWithData" + e.toString());
+			//System.out.println("Error at sendPushNotificationWithData" + e.toString());
 			logger.error(e.getMessage());
 			if (e.toString()
 					.contains(
@@ -114,7 +114,7 @@ public class FirebaseMessagingService {
 
 					}
 				} catch (Exception e) {
-					System.out.println("Error at sendUsersNotificationWithData" + e.toString());
+					//System.out.println("Error at sendUsersNotificationWithData" + e.toString());
 					logger.error(
 							"Error when Send Notification using FCM " + e.toString());
 					if (e.toString()

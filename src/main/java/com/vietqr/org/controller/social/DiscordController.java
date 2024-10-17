@@ -55,7 +55,7 @@ public class DiscordController {
             }
         } catch (Exception e) {
             logger.error("DiscordController: sendFirstMessage: ERROR: " + e.toString());
-            System.out.println("DiscordController: sendFirstMessage: ERROR: " + e.toString());
+            //System.out.println("DiscordController: sendFirstMessage: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -97,7 +97,7 @@ public class DiscordController {
             }
         } catch (Exception e) {
             logger.error("DiscordController: insertBankIntoDiscord: ERROR: " + e.toString());
-            System.out.println("DiscordController: insertBankIntoDiscord: ERROR: " + e.toString());
+            //System.out.println("DiscordController: insertBankIntoDiscord: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -120,7 +120,7 @@ public class DiscordController {
             }
         } catch (Exception e) {
             logger.error("DiscordController: removeBankFromDiscord: ERROR: " + e.toString());
-            System.out.println("DiscordController: removeBankFromDiscord: ERROR: " + e.toString());
+            //System.out.println("DiscordController: removeBankFromDiscord: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -163,13 +163,13 @@ public class DiscordController {
                 httpStatus = HttpStatus.OK;
             } else {
                 logger.error("insertDiscord: INVALID REQUEST BODY");
-                System.out.println("insertDiscord: INVALID REQUEST BODY");
+                //System.out.println("insertDiscord: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("DiscordController: insertDiscord: ERROR: " + e.toString());
-            System.out.println("DiscordController: insertDiscord: ERROR: " + e.toString());
+            //System.out.println("DiscordController: insertDiscord: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -199,19 +199,19 @@ public class DiscordController {
                     httpStatus = HttpStatus.OK;
                 } else {
                     logger.error("updateDiscordConfigure: DISCORD ID NOT FOUND");
-                    System.out.println("updateDiscordConfigure: DISCORD ID NOT FOUND");
+                    //System.out.println("updateDiscordConfigure: DISCORD ID NOT FOUND");
                     result = new ResponseMessageDTO("FAILED", "E47");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {
                 logger.error("updateDiscordConfigure: INVALID REQUEST BODY");
-                System.out.println("updateDiscordConfigure: INVALID REQUEST BODY");
+                //System.out.println("updateDiscordConfigure: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("Error at updateDiscordConfigure: " + e.toString());
-            System.out.println("Error at updateDiscordConfigure: " + e.toString());
+            //System.out.println("Error at updateDiscordConfigure: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -231,7 +231,7 @@ public class DiscordController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("DiscordController: removeDiscord: ERROR: " + e.toString());
-            System.out.println("DiscordController: removeDiscord: ERROR:  " + e.toString());
+            //System.out.println("DiscordController: removeDiscord: ERROR:  " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -267,7 +267,7 @@ public class DiscordController {
 
         } catch (Exception e) {
             logger.error("DiscordController: getDiscordInformationDetail: ERROR: " + e.getMessage() + System.currentTimeMillis());
-            System.out.println("DiscordController: getDiscordInformationDetail: ERROR: " + e.getMessage() + System.currentTimeMillis());
+            //System.out.println("DiscordController: getDiscordInformationDetail: ERROR: " + e.getMessage() + System.currentTimeMillis());
             ResponseMessageDTO responseMessageDTO = new ResponseMessageDTO("FAILED", "E05");
             result = responseMessageDTO;
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -286,7 +286,7 @@ public class DiscordController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("DiscordController: updateDiscordWebhook: ERROR: "  + e.getMessage() + System.currentTimeMillis());
-            System.out.println("DiscordController: updateDiscordWebhook: ERROR: "  + e.getMessage() + System.currentTimeMillis());
+            //System.out.println("DiscordController: updateDiscordWebhook: ERROR: "  + e.getMessage() + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }

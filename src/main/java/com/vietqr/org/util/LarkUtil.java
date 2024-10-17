@@ -25,10 +25,10 @@ public class LarkUtil {
                     requestEntity,
                     String.class);
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
-                System.out.println("Tin nhắn đã được gửi đến Lark");
+                //System.out.println("Tin nhắn đã được gửi đến Lark");
                 check = true;
             } else {
-                System.out.println("Lỗi khi gửi tin nhắn đến Lark: " + responseEntity.getStatusCode());
+                //System.out.println("Lỗi khi gửi tin nhắn đến Lark: " + responseEntity.getStatusCode());
             }
         }
         return check;

@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
+import com.vietqr.org.constant.GroupCodeConstant;
 import com.vietqr.org.dto.*;
 import com.vietqr.org.dto.bidv.ConfirmCustomerVaDTO;
 import com.vietqr.org.dto.bidv.RequestCustomerVaDTO;
@@ -45,7 +46,6 @@ import com.vietqr.org.util.bank.bidv.BIDVUtil;
 
 import com.vietqr.org.util.bank.bidv.CustomerVaUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -231,9 +231,6 @@ public class TransactionBankController {
 	private MqttMessagingService mqttMessagingService;
 
     @Autowired
-    private TransactionRefundLogService transactionRefundLogService;
-
-    @Autowired
     SlackAccountBankService slackAccountBankService;
 
     @Autowired
@@ -293,7 +290,6 @@ public class TransactionBankController {
                 String username = getUsernameFromToken(token);
                 if (username != null && !username.trim().isEmpty()) {
                     if (callbackDTO != null) {
-                        System.out.println("username: " + username);
                         List<String> checkExistedCustomerSync = accountCustomerBankService
                                 .checkExistedCustomerSyncByUsername(username);
                         if (checkExistedCustomerSync != null && !checkExistedCustomerSync.isEmpty()) {
@@ -330,7 +326,6 @@ public class TransactionBankController {
                                         httpStatus = HttpStatus.BAD_REQUEST;
                                     }
                                 } else {
-                                    System.out.println("BANK ACCOUNT IS NOT MATCH WITH MERCHANT INFO");
                                     logger.error("BANK ACCOUNT IS NOT MATCH WITH MERCHANT INFO");
                                     result = new ResponseMessageDTO("FAILED", "E77");
                                     httpStatus = HttpStatus.BAD_REQUEST;
@@ -338,31 +333,26 @@ public class TransactionBankController {
                             }
 
                         } else {
-                            System.out.println("MERCHANT IS NOT EXISTED");
                             logger.error("MERCHANT IS NOT EXISTED");
                             result = new ResponseMessageDTO("FAILED", "E76");
                             httpStatus = HttpStatus.BAD_REQUEST;
                         }
                     } else {
-                        System.out.println("INVALID REQUEST BODY");
                         logger.error("INVALID REQUEST BODY");
                         result = new ResponseMessageDTO("FAILED", "E46");
                         httpStatus = HttpStatus.BAD_REQUEST;
                     }
                 } else {
-                    System.out.println("INVALID TOKEN");
                     logger.error("INVALID TOKEN");
                     result = new ResponseMessageDTO("FAILED", "E74");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {
-                System.out.println("SERVICE IS NOT AVAILABLE");
                 logger.error("SERVICE IS NOT AVAILABLE");
                 result = new ResponseMessageDTO("FAILED", "E75");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
-            System.out.println("testCallbackForCusto: ERROR: " + e.toString());
             logger.error("testCallbackForCusto: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05 - " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -378,7 +368,6 @@ public class TransactionBankController {
         LocalDateTime currentDateTime = LocalDateTime.now();
         long time = currentDateTime.toEpochSecond(ZoneOffset.UTC);
         logger.info("receive transaction sync from MB: " + dto.toString() + " at: " + time);
-        // System.out.println("receive transaction sync from MB: " + dto.toString() + "
         // at: " + time);
         boolean checkDuplicate = checkDuplicateReferenceNumber(dto.getReferencenumber(), dto.getTransType());
         TransactionResponseDTO resultCheck = validateTransactionBank(dto, uuid.toString());
@@ -396,18 +385,14 @@ public class TransactionBankController {
         try {
             List<Object> list = transactionBankService.checkTransactionIdInserted(dto.getTransactionid(),
                     dto.getTransType());
-            // System.out.println("list size: " + list.size());
             if (list != null && list.isEmpty()) {
                 if (!resultCheck.isError()) {
-                    // System.out.println("checkDuplicate: " + checkDuplicate);
                     if (checkDuplicate) {
                         if (accountBankEntity != null) {
                             if (accountBankEntity.isMmsActive() == true
                                     && dto.getTransType().trim().toUpperCase().equals("C")) {
-                                // System.out.println("isMmsActive");
                                 logger.info("Transaction-sync: mms_active = true => do not insert transaction_bank");
                             } else {
-                                // System.out.println("isMmsActive = false");
                                 transactionBankService.insertTransactionBank(dto.getTransactionid(),
                                         dto.getTransactiontime(),
                                         dto.getReferencenumber(), dto.getAmount(), dto.getContent(),
@@ -452,7 +437,7 @@ public class TransactionBankController {
                                 result = new ResponseMessageDTO("SUCCESS", "");
                             }
                         } else {
-                            // System.out.println("accountBankEntity = null");
+                            // //System.out.println("accountBankEntity = null");
                             logger.info("accountBankEntity = null");
                             transactionBankService.insertTransactionBank(dto.getTransactionid(),
                                     dto.getTransactiontime(),
@@ -477,7 +462,7 @@ public class TransactionBankController {
 
         } catch (Exception e) {
             logger.error("Error at transaction-sync: " + e.toString());
-            // System.out.println("Error at transaction-sync: " + e.toString());
+            // //System.out.println("Error at transaction-sync: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05" + " - " + e.toString());
         } finally {
             // AccountBankReceiveEntity accountBankEntity = accountBankService
@@ -690,7 +675,7 @@ public class TransactionBankController {
         long timePaid = dto.getTransactiontime() / 1000;
         TransactionReceiveEntity transactionMMS = null;
         logger.info("receive transaction sync from MB: " + dto.toString() + " at: " + currentTime);
-        // System.out.println("receive transaction sync from MB: " + dto.toString() + "
+        // //System.out.println("receive transaction sync from MB: " + dto.toString() + "
         // at: " + time);
         // kiểm tra xem đã có push ở lg 2 chưa
         boolean checkDuplicate = checkDuplicateReferenceNumber(dto.getReferencenumber(), dto.getTransType());
@@ -733,30 +718,31 @@ public class TransactionBankController {
             // danh sách transaction Id đã được insert
             List<Object> list = transactionBankService.checkTransactionIdInserted(dto.getTransactionid(),
                     dto.getTransType());
-            // System.out.println("list size: " + list.size());
+            // //System.out.println("list size: " + list.size());
             if (list != null && list.isEmpty()) {
                 if (!result.isError()) {
-                    // System.out.println("checkDuplicate: " + checkDuplicate);
+                    // //System.out.println("checkDuplicate: " + checkDuplicate);
                     // Nếu chưa insert transaction_bank
                     if (checkDuplicate) {
                         // có taài khoản bank trong he thong VietQR
                         if (accountBankEntity != null) {
                             // nêếu mms_active = true và transType = C => không insert transaction_bank do
                             // đã insert ở luồng ưu tiên
-                            if (accountBankEntity.isMmsActive() == true
-                                    && !checkDuplicate
+                            if (accountBankEntity.isMmsActive()
                                     && Objects.nonNull(responseObjectDTO) && responseObjectDTO.getStatus().equals("SUCCESS")
-                                    && dto.getTransType().trim().toUpperCase().equals("C")) {
+                                    && dto.getTransType().trim().equalsIgnoreCase("C")
+                                    && Objects.nonNull(transactionBankMMSDTO)
+                            ) {
                                 // System.out.println("isMmsActive");
                                 logger.info("Transaction-sync: mms_active = true => do not insert transaction_bank => check and insert transaction_mms");
                                 transactionMMS = transactionReceiveService
                                         .getTransactionReceiveByQrCodeId(transactionBankMMSDTO.getQrCodeId(), transactionBankMMSDTO.getDebitAmount());
                                 if (Objects.nonNull(transactionMMS)) {
                                     TransactionMMSEntity transactionMMSEntity = new TransactionMMSEntity(
-                                            UUID.randomUUID().toString(), transactionBankMMSDTO.getQrCodeId(), transactionBankMMSDTO.getStoreLabel(),
+                                            UUID.randomUUID().toString(), transactionBankMMSDTO.getQrCodeId(), "",
                                             transactionBankMMSDTO.getTerminalLabel(), transactionBankMMSDTO.getDebitAmount(), transactionBankMMSDTO.getRealAmount(),
                                             transactionBankMMSDTO.getPayDate(), transactionBankMMSDTO.getRespCode(),
-                                            transactionBankMMSDTO.getRespDesc(), transactionBankMMSDTO.getCheckSum(), transactionBankMMSDTO.getRate(),
+                                            transactionBankMMSDTO.getRespDesc(), transactionBankMMSDTO.getCheckSum(), StringUtil.getValueNullChecker(transactionBankMMSDTO.getRate()),
                                             "", "", transactionMMS.getOrderId(), "", transactionBankMMSDTO.getFtCode(),
                                             "/integration-bluecom/vqr/api/transaction-mms"
                                     );
@@ -772,7 +758,7 @@ public class TransactionBankController {
                                 }
 
                             } else {
-                                // System.out.println("isMmsActive = false");
+                                // //System.out.println("isMmsActive = false");
                                 transactionBankService.insertTransactionBank(dto.getTransactionid(),
                                         dto.getTransactiontime(),
                                         dto.getReferencenumber(), dto.getAmount(), dto.getContent(),
@@ -780,11 +766,11 @@ public class TransactionBankController {
                                         dto.getTransType(), dto.getReciprocalAccount(), dto.getReciprocalBankCode(),
                                         dto.getVa(),
                                         dto.getValueDate(), uuid.toString());
-                                // System.out.println("After insert");
+                                // //System.out.println("After insert");
                             }
                         } else {
                             // MB push gì về collect hết
-                            // System.out.println("accountBankEntity = null");
+                            // //System.out.println("accountBankEntity = null");
                             logger.info("accountBankEntity = null");
                             transactionBankService.insertTransactionBank(dto.getTransactionid(),
                                     dto.getTransactiontime(),
@@ -812,7 +798,7 @@ public class TransactionBankController {
             return new ResponseEntity<>(result, httpStatus);
         } catch (Exception e) {
             logger.error("Error at transaction-sync: " + e.toString());
-            // System.out.println("Error at transaction-sync: " + e.toString());
+            // //System.out.println("Error at transaction-sync: " + e.toString());
             result = new TransactionResponseDTO(true, "005", "Unexpected error");
             httpStatus = HttpStatus.BAD_REQUEST;
             // nếu có lỗi thì trả về lỗi cho MB
@@ -828,156 +814,40 @@ public class TransactionBankController {
                 if (accountBankEntity != null) {
                         if (!finalResult.isError()) {
                             if (finalCheckDuplicate) {
-                                if (accountBankEntity != null) {
-                                    // find transaction by id
-                                    String traceId = getTraceId(dto.getContent(), "VQR");
-                                    String orderId = "";
-                                    String sign = "";
-                                    String rawCode = "";
-                                    String rawCodeResult = "";
-                                    String boxIdRef = "";
-                                    TerminalEntity terminalEntity = null;
-                                    TerminalItemEntity terminalItemEntity = null;
-                                    ISubTerminalCodeDTO rawDTO = null;
+                                // find transaction by id
+                                String traceId = getTraceId(dto.getContent(), "VQR");
+                                String orderId = "";
+                                String sign = "";
+                                String rawCode = "";
+                                String rawCodeResult = "";
+                                String boxIdRef = "";
+                                TerminalEntity terminalEntity = null;
+                                TerminalItemEntity terminalItemEntity = null;
+                                ISubTerminalCodeDTO rawDTO = null;
+                                if ((traceId != null && !traceId.isEmpty())
+                                        || Objects.nonNull(finalTransactionMMS)) {
+                                    logger.info("transaction-sync - trace ID detect: " + traceId);
+                                    TransactionReceiveEntity transactionReceiveEntity = null;
                                     if (traceId != null && !traceId.isEmpty()) {
-                                        logger.info("transaction-sync - trace ID detect: " + traceId);
-                                        TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
+                                        transactionReceiveEntity = transactionReceiveService
                                                 .getTransactionByTraceIdAndAmount(traceId, dto.getAmount() + "",
                                                         dto.getTransType().trim().toUpperCase());
-                                        if (Objects.nonNull(finalTransactionMMS)) {
-                                            transactionReceiveEntity = finalTransactionMMS;
-                                        }
-                                        if (transactionReceiveEntity != null) {
-                                            orderId = transactionReceiveEntity.getOrderId();
-                                            sign = transactionReceiveEntity.getSign();
-                                            if (transactionReceiveEntity.getTerminalCode() != null
-                                                    && !transactionReceiveEntity.getTerminalCode().trim().isEmpty()) {
-                                                terminalEntity = terminalService
-                                                        .getTerminalByTerminalCode(
-                                                                transactionReceiveEntity.getTerminalCode());
-                                                if (terminalEntity != null) {
-                                                    rawCode = terminalEntity.getRawTerminalCode();
-                                                } else {
-                                                    rawDTO = terminalBankReceiveService.getSubTerminalCodeBySubTerminalCode(
-                                                            transactionReceiveEntity.getTerminalCode());
-                                                    if (rawDTO != null) {
-                                                        rawCode = rawDTO.getRawCode();
-                                                        if (!StringUtil.isNullOrEmpty(rawDTO.getTerminalId())) {
-                                                            terminalEntity = terminalService.getTerminalByTerminalId(rawDTO.getTerminalId());
-                                                        }
-                                                        if (rawDTO.getQrType() == 2) {
-                                                            boxIdRef = rawDTO.getRawCode();
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            if (rawCode == null || rawCode.trim().isEmpty()) {
-                                                rawCodeResult = "";
-                                            } else {
-                                                rawCodeResult = rawCode;
-                                            }
-                                            String urlLink = transactionReceiveEntity.getUrlLink() != null
-                                                    ? transactionReceiveEntity.getUrlLink()
-                                                    : "";
-                                            getCustomerSyncEntities(transactionReceiveEntity.getId(), dto,
-                                                    accountBankEntity, timePaid, orderId, sign, rawCodeResult, urlLink,
-                                                    transactionReceiveEntity.getTerminalCode(), transactionReceiveEntity.getSubCode(), "");
-                                            getCustomerSyncEntitiesV2(transactionReceiveEntity.getId(), dto,
-                                                    accountBankEntity, timePaid, orderId, sign, rawCode, urlLink,
-                                                    transactionReceiveEntity.getTerminalCode(), transactionReceiveEntity.getSubCode(), "");
-                                            updateTransaction(dto, transactionReceiveEntity, accountBankEntity, timePaid,
-                                                    nf, boxIdRef, rawDTO, terminalEntity);
-
-                                            // check if recharge => do update status and push data to customer
-                                            ////////// USER RECHAGE VQR || USER RECHARGE MOBILE
-                                            if (transactionReceiveEntity.getType() == 5) {
-                                                // find transactionWallet by billNumber and status = 0
-                                                TransactionWalletEntity transactionWalletEntity = transactionWalletService
-                                                        .getTransactionWalletByBillNumber(orderId);
-                                                    processTransactionWallet(nf, timePaid, dto, orderId,
-                                                            transactionWalletEntity, transactionReceiveEntity.getId());
-                                            }
-                                        } else {
-                                            logger.info(
-                                                    "transaction-sync - cannot find transaction receive. Receive new transaction outside system");
-                                            // process here
-                                            UUID transcationUUID = UUID.randomUUID();
-                                            // push websocket
-                                            String terminalCodeContent = "";
-                                            String serviceCodeContent = "";
-                                            if (accountBankEntity.getTerminalLength() > 0) {
-                                                terminalCodeContent = getTraceId(dto.getContent(), "SQR",
-                                                        accountBankEntity.getTerminalLength());
-                                                serviceCodeContent = getTraceId(dto.getContent(), "SMQR",
-                                                        accountBankEntity.getTerminalLength());
-                                            }
-                                            String terminalCode = "";
-                                            String serviceCode = "";
-                                            if (terminalCodeContent.length() > 3) {
-                                                // find terminal by terminalCode
-                                                terminalCode = terminalCodeContent.substring(3);
-                                            } else if (serviceCodeContent.length() > 4) {
-                                                serviceCode = serviceCodeContent.substring(4);
-                                            }
-
-                                            if (!terminalCode.trim().isEmpty()) {
-                                                terminalEntity = terminalService
-                                                        .getTerminalByTerminalCode(terminalCode);
-                                                if (terminalEntity != null) {
-                                                    rawCode = terminalEntity.getRawTerminalCode();
-                                                } else {
-                                                    rawDTO = terminalBankReceiveService.getSubTerminalCodeBySubTerminalCode(terminalCode);
-                                                    if (rawDTO != null) {
-                                                        rawCode = rawDTO.getRawCode();
-                                                        if (!StringUtil.isNullOrEmpty(rawDTO.getTerminalId())) {
-                                                            terminalEntity = terminalService.getTerminalByTerminalId(rawDTO.getTerminalId());
-                                                        }
-                                                        if (rawDTO.getQrType() == 2) {
-                                                            boxIdRef = rawDTO.getRawCode();
-                                                        }
-                                                    }
-                                                }
-                                            } else if (!StringUtil.isNullOrEmpty(serviceCode)) {
-                                                terminalItemEntity = terminalItemService.getTerminalItemByServiceCode(serviceCode, dto.getAmount());
-                                            }
-                                            if (Objects.nonNull(terminalItemEntity)) {
-                                                terminalCode = terminalItemEntity.getTerminalCode();
-                                                serviceCode = terminalItemEntity.getRawServiceCode();
-                                            }
-                                            getCustomerSyncEntities(transcationUUID.toString(), dto, accountBankEntity,
-                                                    timePaid, orderId, sign, rawCode, "", terminalCode, "", serviceCode);
-                                            getCustomerSyncEntitiesV2(transcationUUID.toString(), dto, accountBankEntity,
-                                                    timePaid, orderId, sign, rawCode, "", terminalCode, "", serviceCode);
-                                            // push notification
-                                            insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity,
-                                                    timePaid,
-                                                    traceId, uuid, nf, "", "", boxIdRef, rawDTO,
-                                                    terminalEntity, terminalItemEntity);
-                                        }
-                                        // }
                                     } else {
-                                        logger.info(
-                                                "transaction-sync - traceId is empty. Receive new transaction outside system");
-                                        UUID transcationUUID = UUID.randomUUID();
-                                        String terminalCodeContent = "";
-                                        if (accountBankEntity.getTerminalLength() > 0) {
-                                            terminalCodeContent = getTraceId(dto.getContent(), "SQR",
-                                                    accountBankEntity.getTerminalLength());
-                                        }
-                                        String terminalCode = "";
-                                        if (terminalCodeContent.length() > 3) {
-                                            // find terminal by terminalCode
-                                            terminalCode = terminalCodeContent.substring(3);
-                                        }
-
-                                        if (!terminalCode.trim().isEmpty()) {
+                                        transactionReceiveEntity = finalTransactionMMS;
+                                    }
+                                    if (transactionReceiveEntity != null) {
+                                        orderId = transactionReceiveEntity.getOrderId();
+                                        sign = transactionReceiveEntity.getSign();
+                                        if (transactionReceiveEntity.getTerminalCode() != null
+                                                && !transactionReceiveEntity.getTerminalCode().trim().isEmpty()) {
                                             terminalEntity = terminalService
-                                                    .getTerminalByTerminalCode(terminalCode);
+                                                    .getTerminalByTerminalCode(
+                                                            transactionReceiveEntity.getTerminalCode());
                                             if (terminalEntity != null) {
                                                 rawCode = terminalEntity.getRawTerminalCode();
                                             } else {
                                                 rawDTO = terminalBankReceiveService.getSubTerminalCodeBySubTerminalCode(
-                                                        terminalCode);
+                                                        transactionReceiveEntity.getTerminalCode());
                                                 if (rawDTO != null) {
                                                     rawCode = rawDTO.getRawCode();
                                                     if (!StringUtil.isNullOrEmpty(rawDTO.getTerminalId())) {
@@ -989,14 +859,131 @@ public class TransactionBankController {
                                                 }
                                             }
                                         }
+                                        if (rawCode == null || rawCode.trim().isEmpty()) {
+                                            rawCodeResult = "";
+                                        } else {
+                                            rawCodeResult = rawCode;
+                                        }
+                                        String urlLink = transactionReceiveEntity.getUrlLink() != null
+                                                ? transactionReceiveEntity.getUrlLink()
+                                                : "";
+                                        getCustomerSyncEntities(transactionReceiveEntity.getId(), dto,
+                                                accountBankEntity, timePaid, orderId, sign, rawCodeResult, urlLink,
+                                                transactionReceiveEntity.getTerminalCode(), transactionReceiveEntity.getSubCode(), "");
+                                        getCustomerSyncEntitiesV2(transactionReceiveEntity.getId(), dto,
+                                                accountBankEntity, timePaid, orderId, sign, rawCode, urlLink,
+                                                transactionReceiveEntity.getTerminalCode(), transactionReceiveEntity.getSubCode(), "");
+                                        updateTransaction(dto, transactionReceiveEntity, accountBankEntity, timePaid,
+                                                nf, boxIdRef, rawDTO, terminalEntity);
+
+                                        // check if recharge => do update status and push data to customer
+                                        ////////// USER RECHAGE VQR || USER RECHARGE MOBILE
+                                        if (transactionReceiveEntity.getType() == 5) {
+                                            // find transactionWallet by billNumber and status = 0
+                                            TransactionWalletEntity transactionWalletEntity = transactionWalletService
+                                                    .getTransactionWalletByBillNumber(orderId);
+                                                processTransactionWallet(nf, timePaid, dto, orderId,
+                                                        transactionWalletEntity, transactionReceiveEntity.getId());
+                                        }
+                                    } else {
+                                        logger.info(
+                                                "transaction-sync - cannot find transaction receive. Receive new transaction outside system");
+                                        // process here
+                                        UUID transcationUUID = UUID.randomUUID();
+                                        // push websocket
+                                        String terminalCodeContent = "";
+                                        String serviceCodeContent = "";
+                                        if (accountBankEntity.getTerminalLength() > 0) {
+                                            terminalCodeContent = getTraceId(dto.getContent(), "SQR",
+                                                    accountBankEntity.getTerminalLength());
+                                            serviceCodeContent = getTraceId(dto.getContent(), "SMQR",
+                                                    accountBankEntity.getTerminalLength());
+                                        }
+                                        String terminalCode = "";
+                                        String serviceCode = "";
+                                        if (terminalCodeContent.length() > 3) {
+                                            // find terminal by terminalCode
+                                            terminalCode = terminalCodeContent.substring(3);
+                                        } else if (serviceCodeContent.length() > 4) {
+                                            serviceCode = serviceCodeContent.substring(4);
+                                        }
+
+                                        if (!terminalCode.trim().isEmpty()) {
+                                            terminalEntity = terminalService
+                                                    .getTerminalByTerminalCode(terminalCode);
+                                            if (terminalEntity != null) {
+                                                rawCode = terminalEntity.getRawTerminalCode();
+                                            } else {
+                                                rawDTO = terminalBankReceiveService.getSubTerminalCodeBySubTerminalCode(terminalCode);
+                                                if (rawDTO != null) {
+                                                    rawCode = rawDTO.getRawCode();
+                                                    if (!StringUtil.isNullOrEmpty(rawDTO.getTerminalId())) {
+                                                        terminalEntity = terminalService.getTerminalByTerminalId(rawDTO.getTerminalId());
+                                                    }
+                                                    if (rawDTO.getQrType() == 2) {
+                                                        boxIdRef = rawDTO.getRawCode();
+                                                    }
+                                                }
+                                            }
+                                        } else if (!StringUtil.isNullOrEmpty(serviceCode)) {
+                                            terminalItemEntity = terminalItemService.getTerminalItemByServiceCode(serviceCode, dto.getAmount());
+                                        }
+                                        if (Objects.nonNull(terminalItemEntity)) {
+                                            terminalCode = terminalItemEntity.getTerminalCode();
+                                            serviceCode = terminalItemEntity.getRawServiceCode();
+                                        }
                                         getCustomerSyncEntities(transcationUUID.toString(), dto, accountBankEntity,
-                                                timePaid,
-                                                orderId, sign, rawCode, "", terminalCode, "", "");
+                                                timePaid, orderId, sign, rawCode, "", terminalCode, "", serviceCode);
                                         getCustomerSyncEntitiesV2(transcationUUID.toString(), dto, accountBankEntity,
-                                                timePaid, orderId, sign, rawCode, "", terminalCode, "", "");
-                                        insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity, timePaid,
-                                                traceId, uuid, nf, "", "", boxIdRef, rawDTO, terminalEntity, null);
+                                                timePaid, orderId, sign, rawCode, "", terminalCode, "", serviceCode);
+                                        // push notification
+                                        insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity,
+                                                timePaid,
+                                                traceId, uuid, nf, "", "", boxIdRef, rawDTO,
+                                                terminalEntity, terminalItemEntity);
                                     }
+                                    // }
+                                } else {
+                                    logger.info(
+                                            "transaction-sync - traceId is empty. Receive new transaction outside system");
+                                    UUID transcationUUID = UUID.randomUUID();
+                                    String terminalCodeContent = "";
+                                    if (accountBankEntity.getTerminalLength() > 0) {
+                                        terminalCodeContent = getTraceId(dto.getContent(), "SQR",
+                                                accountBankEntity.getTerminalLength());
+                                    }
+                                    String terminalCode = "";
+                                    if (terminalCodeContent.length() > 3) {
+                                        // find terminal by terminalCode
+                                        terminalCode = terminalCodeContent.substring(3);
+                                    }
+
+                                    if (!terminalCode.trim().isEmpty()) {
+                                        terminalEntity = terminalService
+                                                .getTerminalByTerminalCode(terminalCode);
+                                        if (terminalEntity != null) {
+                                            rawCode = terminalEntity.getRawTerminalCode();
+                                        } else {
+                                            rawDTO = terminalBankReceiveService.getSubTerminalCodeBySubTerminalCode(
+                                                    terminalCode);
+                                            if (rawDTO != null) {
+                                                rawCode = rawDTO.getRawCode();
+                                                if (!StringUtil.isNullOrEmpty(rawDTO.getTerminalId())) {
+                                                    terminalEntity = terminalService.getTerminalByTerminalId(rawDTO.getTerminalId());
+                                                }
+                                                if (rawDTO.getQrType() == 2) {
+                                                    boxIdRef = rawDTO.getRawCode();
+                                                }
+                                            }
+                                        }
+                                    }
+                                    getCustomerSyncEntities(transcationUUID.toString(), dto, accountBankEntity,
+                                            timePaid,
+                                            orderId, sign, rawCode, "", terminalCode, "", "");
+                                    getCustomerSyncEntitiesV2(transcationUUID.toString(), dto, accountBankEntity,
+                                            timePaid, orderId, sign, rawCode, "", terminalCode, "", "");
+                                    insertNewTransaction(transcationUUID.toString(), dto, accountBankEntity, timePaid,
+                                            traceId, uuid, nf, "", "", boxIdRef, rawDTO, terminalEntity, null);
                                 }
                             } else {
                                 logger.error("Transaction-sync: Duplicate Reference number");
@@ -1064,7 +1051,7 @@ public class TransactionBankController {
 
             result = traceId;
         } catch (Exception e) {
-            System.out.println("ERROR: " + e.toString());
+            //System.out.println("ERROR: " + e.toString());
         }
 
         return result;
@@ -1112,7 +1099,7 @@ public class TransactionBankController {
 
             result = traceId;
         } catch (Exception e) {
-            System.out.println("ERROR: " + e.toString());
+            //System.out.println("ERROR: " + e.toString());
         }
 
         return result;
@@ -1213,8 +1200,6 @@ public class TransactionBankController {
                                                         phoneNo,
                                                         userId, otp,
                                                         1);
-                                        System.out.println(
-                                                "transaction-sync: : TRANSACTION FAILED: " + topupResponseCode);
                                         logger.error(
                                                 "transaction-sync: : TRANSACTION FAILED: " + topupResponseCode);
                                     } else if (topupResponseCode == 35) {
@@ -1226,9 +1211,6 @@ public class TransactionBankController {
                                                         phoneNo,
                                                         userId, otp,
                                                         1);
-                                        System.out.println(
-                                                "transaction-sync:  VNPT EPAY BUSY TRAFFIC: "
-                                                        + topupResponseCode);
                                         logger.error("transaction-sync:  VNPT EPAY BUSY TRAFFIC: "
                                                 + topupResponseCode);
                                     } else if (topupResponseCode == 109) {
@@ -1240,8 +1222,6 @@ public class TransactionBankController {
                                                         phoneNo,
                                                         userId, otp,
                                                         1);
-                                        System.out.println(
-                                                "transaction-sync: VNPT EPAY MAINTAN: " + topupResponseCode);
                                         logger.error("transaction-sync: VNPT EPAY MAINTAN: " + topupResponseCode);
                                     } else {
                                         msgErrorCode = "E62";
@@ -1252,8 +1232,6 @@ public class TransactionBankController {
                                                         phoneNo,
                                                         userId, otp,
                                                         1);
-                                        System.out.println(
-                                                "transaction-sync: TRANSACTION FAILED: " + topupResponseCode);
                                         logger.error("transaction-sync: TRANSACTION FAILED: " + topupResponseCode);
                                     }
                                     // update account wallet amount if vnpt epay failed
@@ -1299,20 +1277,14 @@ public class TransactionBankController {
                                     pushNotification(title, message, notiEntity, data, userId, 1);
                                     //
                                 } else {
-                                    System.out.println(
-                                            "transaction-sync: TRAN MOBILE NULL");
                                     logger.error("transaction-sync: TRAN MOBILE NULL");
                                 }
 
                             } else {
-                                System.out.println("transaction-sync: INVALID OTP");
+                                //System.out.println("transaction-sync: INVALID OTP");
                                 logger.error("transaction-sync: INVALID OTP");
                             }
                         } else {
-                            System.out.println(
-                                    "transaction-sync: REFERENCE NUMBER INVALID: "
-                                            + entity
-                                            .getReferenceNumber());
                             logger.error("transaction-sync: REFERENCE NUMBER INVALID: "
                                     + entity.getReferenceNumber());
                         }
@@ -1347,14 +1319,14 @@ public class TransactionBankController {
                                             long amount = Long.parseLong(accountWalletEntity.getAmount()) + dto.getAmount();
                                             accountWalletService.updateAmount(amount + "", accountWalletEntity.getId());
                                         } else {
-                                            System.out.println("transaction-sync: accountWalletEntity IS NULL");
+                                            //System.out.println("transaction-sync: accountWalletEntity IS NULL");
                                             logger.error("transaction-sync: accountWalletEntity IS NULL");
                                         }
                                     } else {
                                         ITrAnnualFeeDTO ITrAnnualFeeDTO = trAnnualFeePackageService
                                                 .getFeeById(feeId);
                                         if (ITrAnnualFeeDTO == null) {
-                                            System.out.println("transaction-sync: transactionWalletEntity IS NULL");
+                                            //System.out.println("transaction-sync: transactionWalletEntity IS NULL");
                                             logger.error("transaction-sync: transactionWalletEntity IS NULL");
                                         } else {
                                             long validFeeFrom;
@@ -1469,19 +1441,15 @@ public class TransactionBankController {
                                             transactionWalletEntity.getOtp(),
                                             2);
                                 } else {
-                                    System.out.println("transaction-sync: transactionWalletEntity IS NULL");
+                                    //System.out.println("transaction-sync: transactionWalletEntity IS NULL");
                                     logger.error("transaction-sync: transactionWalletEntity IS NULL");
                                 }
 
                             } else {
-                                System.out.println("transaction-sync: INVALID OTP");
+                                //System.out.println("transaction-sync: INVALID OTP");
                                 logger.error("transaction-sync: INVALID OTP");
                             }
                         } else {
-                            System.out.println(
-                                    "transaction-sync: REFERENCE NUMBER INVALID: "
-                                            + entity
-                                            .getReferenceNumber());
                             logger.error("transaction-sync: REFERENCE NUMBER INVALID: "
                                     + entity.getReferenceNumber());
                         }
@@ -1621,11 +1589,11 @@ public class TransactionBankController {
                                             }
                                         }
                                     } else {
-                                        System.out.println("transaction-sync: TRAN WALLET INVOICE NULL");
+                                        //System.out.println("transaction-sync: TRAN WALLET INVOICE NULL");
                                         logger.error("transaction-sync: TRAN WALLET INVOICE IS ALREADY PAID OR CANCELED ");
                                     }
                                 } else {
-                                    System.out.println("transaction-sync: TRAN WALLET INVOICE NULL");
+                                    //System.out.println("transaction-sync: TRAN WALLET INVOICE NULL");
                                     logger.error("transaction-sync: TRAN WALLET INVOICE NULL");
                                 }
 
@@ -1735,18 +1703,18 @@ public class TransactionBankController {
 //                                        thread.start();
 //
 //                                    } else {
-//                                        System.out.println(
+//                                        //System.out.println(
 //                                                "transaction-sync: TRAN WALLET INVOICE NULL");
 //                                        logger.error("transaction-sync: TRAN WALLET INVOICE IS ALREADY PAID OR CANCELED ");
 //                                    }
 //                                } else {
-//                                    System.out.println(
+//                                    //System.out.println(
 //                                            "transaction-sync: TRAN WALLET INVOICE NULL");
 //                                    logger.error("transaction-sync: TRAN WALLET INVOICE NULL");
 //                                }
 
                             } else {
-                                System.out.println("transaction-sync: INVALID OTP");
+                                //System.out.println("transaction-sync: INVALID OTP");
                                 logger.error("transaction-sync: INVALID OTP");
                             }
                             if (!checkSuccessProcess) {
@@ -1764,10 +1732,6 @@ public class TransactionBankController {
                                 }
                             }
                         } else {
-                            System.out.println(
-                                    "transaction-sync: REFERENCE NUMBER INVALID: "
-                                            + entity
-                                            .getReferenceNumber());
                             logger.error("transaction-sync: REFERENCE NUMBER INVALID: "
                                     + entity.getReferenceNumber());
                         }
@@ -1993,7 +1957,7 @@ public class TransactionBankController {
 
                         // Xuất bản thông điệp MQTT
                         MQTTUtil.sendMessage(mqttTopic, payload);
-                        System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
+                        //System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
                     }
                 }
                 catch (Exception e) {
@@ -2275,7 +2239,7 @@ public class TransactionBankController {
 
                         // Xuất bản thông điệp MQTT
                         MQTTUtil.sendMessage(mqttTopic, payload);
-                        System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
+                        //System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
                     }
                 } catch (Exception e) {
                     // Xử lý các ngoại lệ khác nếu có
@@ -2600,7 +2564,7 @@ public class TransactionBankController {
 
                     // Xuất bản thông điệp MQTT
                     MQTTUtil.sendMessage(mqttTopic, payload);
-                    System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
+                    //System.out.println("Balance change notification sent to topic: " + mqttTopic + " Payload: " + payload);
                 }
             } catch (Exception e) {
                 // Xử lý các ngoại lệ khác nếu có
@@ -2947,7 +2911,7 @@ public class TransactionBankController {
                 transactionEntity.setQrCode("");
                 transactionEntity.setUserId(accountBankEntity.getUserId());
                 transactionEntity.setNote("");
-                transactionEntity.setTransStatus(0);
+                transactionEntity.setStatusResponse(0);
                 transactionEntity.setUrlLink("");
                 // int check =
                 // transactionReceiveService.insertTransactionReceiveWithCheckDuplicated(transactionEntity);
@@ -3447,7 +3411,7 @@ public class TransactionBankController {
                 transactionEntity.setQrCode("");
                 transactionEntity.setUserId(accountBankEntity.getUserId());
                 transactionEntity.setNote("");
-                transactionEntity.setTransStatus(0);
+                transactionEntity.setStatusResponse(0);
                 transactionEntity.setUrlLink("");
                 // int check =
                 // transactionReceiveService.insertTransactionReceiveWithCheckDuplicated(transactionEntity);
@@ -3884,7 +3848,7 @@ public class TransactionBankController {
             transactionEntity.setQrCode("");
             transactionEntity.setUserId(accountBankEntity.getUserId());
             transactionEntity.setNote("");
-            transactionEntity.setTransStatus(0);
+            transactionEntity.setStatusResponse(0);
             transactionEntity.setUrlLink("");
             // int check =
             // transactionReceiveService.insertTransactionReceiveWithCheckDuplicated(transactionEntity);
@@ -4355,7 +4319,7 @@ public class TransactionBankController {
 
                 Exception e) {
             logger.error("getBIDVToken: ERROR: " + e.toString());
-            System.out.println("getBIDVToken: ERROR: " + e.toString());
+            //System.out.println("getBIDVToken: ERROR: " + e.toString());
         }
         return result;
     }
@@ -4751,19 +4715,19 @@ public class TransactionBankController {
                     }
                 } else {
                     logger.error("requestLinkedBankOTP: INVALID BANK CODE");
-                    System.out.println("requestLinkedBankOTP: INVALID BANK CODE");
+                    //System.out.println("requestLinkedBankOTP: INVALID BANK CODE");
                     result = new ResponseMessageDTO("FAILED", "E109");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {
                 logger.error("requestLinkedBankOTP: INVALID REQUEST BODY");
-                System.out.println("requestLinkedBankOTP: INVALID REQUEST BODY");
+                //System.out.println("requestLinkedBankOTP: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("Error at requestLinkedBankOTP: " + e.toString());
-            System.out.println("Error at requestLinkedBankOTP: " + e.toString());
+            //System.out.println("Error at requestLinkedBankOTP: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -4803,19 +4767,19 @@ public class TransactionBankController {
                     }
                 } else {
                     logger.error("confirmLinkedBankOTP: INVALID BANK CODE");
-                    System.out.println("confirmLinkedBankOTP: INVALID BANK CODE");
+                    //System.out.println("confirmLinkedBankOTP: INVALID BANK CODE");
                     result = new ResponseMessageDTO("FAILED", "E109");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {
                 logger.error("confirmLinkedBankOTP: INVALID REQUEST BODY");
-                System.out.println("confirmLinkedBankOTP: INVALID REQUEST BODY");
+                //System.out.println("confirmLinkedBankOTP: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("Error at confirmLinkedBankOTP: " + e.toString());
-            System.out.println("Error at confirmLinkedBankOTP: " + e.toString());
+            //System.out.println("Error at confirmLinkedBankOTP: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -4856,7 +4820,7 @@ public class TransactionBankController {
 //				JsonWebEncryption jwe = new JsonWebEncryption();
 //				String payload = BIDVUtil.generateUnlinkedBody(serviceId, merchantId, merchantName, channelId,
 //						transDate, dto.getEwalletToken(), dto.getBankAccount(), "Y");
-//				System.out.println("Payload: " + payload);
+//				//System.out.println("Payload: " + payload);
 //				//
 //				jwe.setPayload(payload);
 //				jwe.setAlgorithmHeaderValue(KeyManagementAlgorithmIdentifiers.A256KW);
@@ -4881,7 +4845,7 @@ public class TransactionBankController {
 //				// JWE
 //				JweObj j = new JweObj(recipients, protected_, ciphertext, iv, tag);
 //				String jweString = gson.toJson(j);
-//				System.out.println("\n\nJWE: " + jweString);
+//				//System.out.println("\n\nJWE: " + jweString);
 //				Map<String, Object> body = gson.fromJson(jweString, Map.class);
 //
 //				// JWS
@@ -4891,7 +4855,7 @@ public class TransactionBankController {
 //				PrivateKey privateKey = JwsUtil.getPrivateKey();
 //				jws.setKey(privateKey);
 //				String jwsString = jws.getCompactSerialization();
-//				System.out.println("\n\nJWS: " + jwsString);
+//				//System.out.println("\n\nJWS: " + jwsString);
 //				///
 //				// call API
 //				UriComponents uriComponents = UriComponentsBuilder
@@ -4902,9 +4866,9 @@ public class TransactionBankController {
 //						.build();
 //				String token = getBIDVToken("ewallet").getAccess_token();
 //				String clientXCertification = JwsUtil.getClientXCertificate();
-//				System.out.println("\n\nToken BIDV: " + token);
-//				System.out.println("\n\nclientXCertification BIDV: " + clientXCertification);
-//				// System.out.println("\n\nTime: " + "2020-01-31T09:59:34.000+10:12");
+//				//System.out.println("\n\nToken BIDV: " + token);
+//				//System.out.println("\n\nclientXCertification BIDV: " + clientXCertification);
+//				// //System.out.println("\n\nTime: " + "2020-01-31T09:59:34.000+10:12");
 //				Mono<ClientResponse> responseMono = webClient.post()
 //						.uri(uriComponents.toUri())
 //						.contentType(MediaType.APPLICATION_JSON)
@@ -4919,12 +4883,12 @@ public class TransactionBankController {
 //						.header("X-JWS-Signature", jwsString)
 //						.body(BodyInserters.fromValue(body))
 //						.exchange();
-//				System.out.println("\n\n");
+//				//System.out.println("\n\n");
 //				ClientResponse response = responseMono.block();
 //				if (response.statusCode().is2xxSuccessful()) {
 //					String json = response.bodyToMono(String.class).block();
 //					logger.info("Response unlinkedBankOTP: " + json);
-//					System.out.println("Response unlinkedBankOTP: " + json);
+//					//System.out.println("Response unlinkedBankOTP: " + json);
 //					ObjectMapper objectMapper = new ObjectMapper();
 //					JsonNode rootNode = objectMapper.readTree(json);
 //					// if (rootNode.get("errorCode") != null) {
@@ -4991,19 +4955,19 @@ public class TransactionBankController {
 //				} else {
 //					String json = response.bodyToMono(String.class).block();
 //					logger.info("Response unlinkedBankOTP: " + json);
-//					System.out.println("Response unlinkedBankOTP: " + json);
+//					//System.out.println("Response unlinkedBankOTP: " + json);
 //					result = new ResponseMessageDTO("FAILED", "E05");
 //					httpStatus = HttpStatus.BAD_REQUEST;
 //				}
 //			} else {
 //				logger.error("unlinkedBankOTP: INVALID REQUEST BODY");
-//				System.out.println("unlinkedBankOTP: INVALID REQUEST BODY");
+//				//System.out.println("unlinkedBankOTP: INVALID REQUEST BODY");
 //				result = new ResponseMessageDTO("FAILED", "E46");
 //				httpStatus = HttpStatus.BAD_REQUEST;
 //			}
         } catch (Exception e) {
             logger.error("Error at unlinkedBankOTP: " + e.toString());
-            System.out.println("Error at unlinkedBankOTP: " + e.toString());
+            //System.out.println("Error at unlinkedBankOTP: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -5017,7 +4981,7 @@ public class TransactionBankController {
         try {
         } catch (Exception e) {
             logger.error("Error at confirmUnlinkedBankOTP: " + e.toString());
-            System.out.println("Error at confirmUnlinkedBankOTP: " + e.toString());
+            //System.out.println("Error at confirmUnlinkedBankOTP: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -5109,7 +5073,7 @@ public class TransactionBankController {
             JsonWebEncryption jwe = new JsonWebEncryption();
             String payload = BIDVUtil.generateRequestLinkedBody(serviceId, merchantId, merchantName, channelId,
                     transDate, payerDebitType, registerSmartBanking, dto);
-            System.out.println("Payload: " + payload);
+            //System.out.println("Payload: " + payload);
             logger.info("requestLinkedBIDVOTP: Payload: " + payload);
             //
             jwe.setPayload(payload);
@@ -5135,7 +5099,7 @@ public class TransactionBankController {
             // JWE
             JweObj j = new JweObj(recipients, protected_, ciphertext, iv, tag);
             String jweString = gson.toJson(j);
-            System.out.println("\n\nJWE: " + jweString);
+            //System.out.println("\n\nJWE: " + jweString);
             logger.info("requestLinkedBIDVOTP: JWE: " + jweString);
             Map<String, Object> body = gson.fromJson(jweString, Map.class);
 
@@ -5146,7 +5110,7 @@ public class TransactionBankController {
             PrivateKey privateKey = JwsUtil.getPrivateKey();
             jws.setKey(privateKey);
             String jwsString = jws.getCompactSerialization();
-            System.out.println("\n\nJWS: " + jwsString);
+            //System.out.println("\n\nJWS: " + jwsString);
             logger.info("requestLinkedBIDVOTP: JWS: " + jwsString);
             ///
             // call API
@@ -5158,9 +5122,9 @@ public class TransactionBankController {
                     .build();
             String token = getBIDVToken("ewallet").getAccess_token();
             String clientXCertification = JwsUtil.getClientXCertificate();
-            System.out.println("\n\nToken BIDV: " + token);
+            //System.out.println("\n\nToken BIDV: " + token);
             logger.info("requestLinkedBIDVOTP: Token BIDV: " + token);
-            System.out.println("\n\nclientXCertification BIDV: " + clientXCertification);
+            //System.out.println("\n\nclientXCertification BIDV: " + clientXCertification);
             logger.info("requestLinkedBIDVOTP: clientXCertification BIDV: " + clientXCertification);
             Mono<ClientResponse> responseMono = webClient.post()
                     .uri(uriComponents.toUri())
@@ -5176,12 +5140,12 @@ public class TransactionBankController {
                     .header("X-JWS-Signature", jwsString)
                     .body(BodyInserters.fromValue(body))
                     .exchange();
-            System.out.println("\n\n");
+            //System.out.println("\n\n");
             ClientResponse response = responseMono.block();
             if (response.statusCode().is2xxSuccessful()) {
                 String json = response.bodyToMono(String.class).block();
                 logger.info("Response requestLinkedBIDVOTP: " + json);
-                System.out.println("Response requestLinkedBIDVOTP: " + json);
+                //System.out.println("Response requestLinkedBIDVOTP: " + json);
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode rootNode = objectMapper.readTree(json);
                 if (rootNode.get("errorCode") != null) {
@@ -5214,7 +5178,7 @@ public class TransactionBankController {
             } else {
                 String json = response.bodyToMono(String.class).block();
                 logger.info("Response requestLinkedBIDVOTP: " + json);
-                System.out.println("Response requestLinkedBIDVOTP: " + json);
+                //System.out.println("Response requestLinkedBIDVOTP: " + json);
                 result = new ResponseMessageDTO("FAILED", "E05");
             }
         } catch (Exception e) {
@@ -5302,7 +5266,7 @@ public class TransactionBankController {
             JsonWebEncryption jwe = new JsonWebEncryption();
             String payload = BIDVUtil.generateConfirmLinkedBody(serviceId, merchantId, merchantName, channelId,
                     transDate, dto);
-            System.out.println("Payload: " + payload);
+            //System.out.println("Payload: " + payload);
             logger.info("confirmLinkedBIDVOTP: Payload: " + payload);
             //
             jwe.setPayload(payload);
@@ -5328,7 +5292,7 @@ public class TransactionBankController {
             // JWE
             JweObj j = new JweObj(recipients, protected_, ciphertext, iv, tag);
             String jweString = gson.toJson(j);
-            System.out.println("\n\nJWE: " + jweString);
+            //System.out.println("\n\nJWE: " + jweString);
             logger.info("confirmLinkedBIDVOTP: JWE: " + jweString);
             Map<String, Object> body = gson.fromJson(jweString, Map.class);
 
@@ -5339,7 +5303,7 @@ public class TransactionBankController {
             PrivateKey privateKey = JwsUtil.getPrivateKey();
             jws.setKey(privateKey);
             String jwsString = jws.getCompactSerialization();
-            System.out.println("\n\nJWS: " + jwsString);
+            //System.out.println("\n\nJWS: " + jwsString);
             logger.info("confirmLinkedBIDVOTP: JWS: " + jwsString);
             ///
             // call API
@@ -5351,9 +5315,9 @@ public class TransactionBankController {
                     .build();
             String token = getBIDVToken("ewallet").getAccess_token();
             String clientXCertification = JwsUtil.getClientXCertificate();
-            System.out.println("\n\nToken BIDV: " + token);
+            //System.out.println("\n\nToken BIDV: " + token);
             logger.info("confirmLinkedBIDVOTP: Token BIDV: " + token);
-            System.out.println("\n\nclientXCertification BIDV: " + clientXCertification);
+            //System.out.println("\n\nclientXCertification BIDV: " + clientXCertification);
             logger.info("confirmLinkedBIDVOTP: clientXCertification BIDV: " + clientXCertification);
             Mono<ClientResponse> responseMono = webClient.post()
                     .uri(uriComponents.toUri())
@@ -5369,12 +5333,12 @@ public class TransactionBankController {
                     .header("X-JWS-Signature", jwsString)
                     .body(BodyInserters.fromValue(body))
                     .exchange();
-            System.out.println("\n\n");
+            //System.out.println("\n\n");
             ClientResponse response = responseMono.block();
             if (response.statusCode().is2xxSuccessful()) {
                 String json = response.bodyToMono(String.class).block();
                 logger.info("Response confirmLinkedBIDVOTP: " + json);
-                System.out.println("Response confirmLinkedBIDVOTP: " + json);
+                //System.out.println("Response confirmLinkedBIDVOTP: " + json);
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode rootNode = objectMapper.readTree(json);
                 if (rootNode.get("errorCode") != null) {
@@ -5398,7 +5362,7 @@ public class TransactionBankController {
             } else {
                 String json = response.bodyToMono(String.class).block();
                 logger.info("Response confirmLinkedBIDVOTP: " + json);
-                System.out.println("Response confirmLinkedBIDVOTP: " + json);
+                //System.out.println("Response confirmLinkedBIDVOTP: " + json);
                 result = new ResponseMessageDTO("FAILED", "E05");
             }
         } catch (Exception e) {
@@ -5441,7 +5405,7 @@ public class TransactionBankController {
         // Định dạng thời gian theo yêu cầu (2020-01-31T09:59:34.000+07:00)
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         String formattedTime = offsetDateTime.format(formatter);
-        System.out.println("getSystemTimeWithOffset: formattedTime: " + formattedTime);
+        //System.out.println("getSystemTimeWithOffset: formattedTime: " + formattedTime);
         return formattedTime;
     }
 
@@ -5520,7 +5484,7 @@ public class TransactionBankController {
             result = response;
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            System.out.println("Error at callBackLogin: " + e.toString());
+            //System.out.println("Error at callBackLogin: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -5583,9 +5547,6 @@ public class TransactionBankController {
             logger.info("key: " + encodedKey + " - username: " + entity.getUsername() + " - password: "
                     + entity.getPassword());
 
-            System.out.println("key: " + encodedKey + " - username: " +
-                    entity.getUsername() + " - password: "
-                    + entity.getPassword());
             String suffixUrl = entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty()
                     ? entity.getSuffixUrl()
                     : "";
@@ -5613,7 +5574,7 @@ public class TransactionBankController {
                                 + "/api/token_generate")
                         .build();
             }
-            System.out.println("uriComponents: " + uriComponents.getPath());
+            //System.out.println("uriComponents: " + uriComponents.getPath());
             Mono<TokenDTO> responseMono = webClient.method(HttpMethod.POST)
                     .uri(uriComponents.toUri())
                     .contentType(MediaType.APPLICATION_JSON)
@@ -5621,7 +5582,7 @@ public class TransactionBankController {
                     .body(BodyInserters.fromValue(data))
                     .exchange()
                     .flatMap(clientResponse -> {
-                        System.out.println("status code: " + clientResponse.statusCode());
+                        //System.out.println("status code: " + clientResponse.statusCode());
                         try {
                             transactionLogResponseDTO.setTimeResponse(DateTimeUtil.getCurrentDateTimeUTC());
                             transactionLogResponseDTO.setStatusCode(clientResponse.statusCode().value());
@@ -5659,7 +5620,7 @@ public class TransactionBankController {
             msgDTO = new ResponseMessageDTO("FAILED", "E05 - " + e.toString());
             if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
                 logger.error("Error at getCustomerSyncToken: " + entity.getIpAddress() + " - " + e.toString());
-                // System.out.println("Error at getCustomerSyncToken: " + entity.getIpAddress()
+                // //System.out.println("Error at getCustomerSyncToken: " + entity.getIpAddress()
                 // + " - " + e.toString());
             } else {
                 logger.error("Error at getCustomerSyncToken: " + entity.getInformation() + " - " + e.toString());
@@ -5696,7 +5657,7 @@ public class TransactionBankController {
 
     private ResponseMessageDTO pushNewTransactionToCustomerSync(String transReceiveId, CustomerSyncEntity entity,
                                                                 TransactionBankCustomerDTO dto,
-                                                                long time, int retryCount, List<String> errorCodes) {
+                                                                long time, int retryCount, Map<String, String> errorCodes) {
         ResponseMessageDTO result = null;
         TransactionLogResponseDTO transactionLogResponseDTO = new TransactionLogResponseDTO();
         // final ResponseMessageDTO[] results = new ResponseMessageDTO[1];
@@ -5722,9 +5683,6 @@ public class TransactionBankController {
             logger.info("pushNewTransactionToCustomerSync: orderId: " +
                     dto.getOrderId());
             logger.info("pushNewTransactionToCustomerSync: sign: " + dto.getSign());
-            System.out.println("pushNewTransactionToCustomerSync: orderId: " +
-                    dto.getOrderId());
-            System.out.println("pushNewTransactionToCustomerSync: sign: " + dto.getSign());
             TokenDTO tokenDTO = null;
             if (entity.getUsername() != null && !entity.getUsername().trim().isEmpty() &&
                     entity.getPassword() != null
@@ -5747,7 +5705,7 @@ public class TransactionBankController {
             data.put("terminalCode", dto.getTerminalCode());
             data.put("urlLink", dto.getUrlLink());
             data.put("subTerminalCode", dto.getSubTerminalCode());
-            data.put("serviceCode", dto.getServiceCode());
+            data.put("serviceCode", StringUtil.getValueNullChecker(dto.getServiceCode()));
             String suffixUrl = "";
             if (entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty()) {
                 suffixUrl = entity.getSuffixUrl();
@@ -5800,25 +5758,49 @@ public class TransactionBankController {
             ClientResponse response = responseMono.block();
             logger.info("Response pushNewTransactionToCustomerSync response orderId: " + dto.getOrderId()
                     + " at: " + System.currentTimeMillis());
-            System.out.println("response status code: " + response.statusCode());
+//            //System.out.println("response status code: " + response.statusCode());
             try {
                 transactionLogResponseDTO.setStatusCode(response.statusCode().value());
                 transactionLogResponseDTO.setTimeResponse(DateTimeUtil.getCurrentDateTimeUTC());
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
+            // 1. nếu status = 200 thì default là mã lỗi success
             if (response.statusCode().is2xxSuccessful()) {
                 String json = response.bodyToMono(String.class).block();
-                System.out.println("Response pushNewTransactionToCustomerSync: " + json);
+//                //System.out.println("Response pushNewTransactionToCustomerSync: " + json);
                 logger.info("Response pushNewTransactionToCustomerSync: " + json + " status: " + response.statusCode());
                 String errorCode = validateFormatCallbackResponse(json);
+                // 1.1 nếu response map đc theo format thì kiểm tra các bước dưới
                 if (!StringUtil.isNullOrEmpty(errorCode)) {
                     // retry callback
-                    if (Objects.nonNull(errorCodes) && errorCodes.contains(errorCode)) {
+                    // 1.1.1 nếu status = 200 và khách có map mã lỗi trong database thì kiểm tra mã lỗi có phải mã
+                    // lỗi retry không, nếu phải thì thực hiện if
+                    if (Objects.nonNull(errorCodes)
+                            && GroupCodeConstant.RETRY_GROUP.getValue()
+                            .equals(errorCodes.get(errorCode))) {
+                        // 1.1.1.1
                         if (retryCount < 10) {
                             pushNewTransactionToCustomerSync(transReceiveId, entity,
                                     dto, time, ++retryCount, errorCodes);
                         }
+                        // 1.1.1.2
+                        else {
+                            updateTransactionStatusResponse(errorCodes.getOrDefault(errorCode, "R"), transReceiveId, false);
+                        }
                     }
+                    // 1.1.2 nếu không phải là mã lỗi retry và khách có map mã lỗi trong database
+                    else if (Objects.nonNull(errorCodes)) {
+                        String groupCode = errorCodes.getOrDefault(errorCode, "R");
+                        updateTransactionStatusResponse(groupCode, transReceiveId, false);
+                    }
+                    // 1.1.3 nếu khách không có mã lỗi đồng bộ với hệ thống luôn thì trả về success
+                    else {
+                        updateTransactionStatusResponse("S", transReceiveId, false);
+                    }
+                }
+                // 1.2 nếu response không map được theo format trả thành công luôn
+                else {
+                    updateTransactionStatusResponse("S", transReceiveId, false);
                 }
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode rootNode = objectMapper.readTree(json);
@@ -5832,19 +5814,61 @@ public class TransactionBankController {
                 } else {
                     result = new ResponseMessageDTO("FAILED", "E05 - " + json);
                 }
-            } else {
+            }
+            // 2. nếu status != 400 và status thuộc loại 4xx hoặc 5xx 401, 403... 500 508...
+            else if (response.statusCode().value() != 400
+                    && (response.statusCode().is4xxClientError()
+                    || response.statusCode().is5xxServerError())) {
                 String json = response.bodyToMono(String.class).block();
-                System.out.println("Response pushNewTransactionToCustomerSync: " + json);
+                logger.info("Response pushNewTransactionToCustomerSync: " + json + " status Code: " + response.statusCode());
+                // retry callback
+                // 2.1 retry chưa tới lần thứ 10
+                if (retryCount < 10) {
+                    pushNewTransactionToCustomerSync(transReceiveId, entity,
+                            dto, time, ++retryCount, errorCodes);
+                }
+                // 2.2 retry sau 10 lần nhưng vẫn failed
+                else {
+                    updateTransactionStatusResponse("R", transReceiveId, false);
+                }
+                result = new ResponseMessageDTO("FAILED", "E05 - " + json);
+            }
+            // 3. status = 400
+            else {
+                String json = response.bodyToMono(String.class).block();
+//                //System.out.println("Response pushNewTransactionToCustomerSync: " + json);
                 logger.info("Response pushNewTransactionToCustomerSync: " + json + " status: " + response.statusCode());
                 String errorCode = validateFormatCallbackResponse(json);
+                // 3.1 nếu map được mã lỗi từ response trả về
                 if (!StringUtil.isNullOrEmpty(errorCode)) {
                     // retry callback
-                    if (Objects.nonNull(errorCodes) && errorCodes.contains(errorCode)) {
+                    // 3.1.1 nếu status = 200 và khách có map mã lỗi trong database thì kiểm tra mã lỗi có phải mã
+                    // lỗi retry không, nếu phải thì thực hiện if
+                    if (Objects.nonNull(errorCodes) && GroupCodeConstant.RETRY_GROUP.getValue()
+                            .equals(errorCodes.get(errorCode))) {
+                        //3.1.1.1
                         if (retryCount < 10) {
                             pushNewTransactionToCustomerSync(transReceiveId, entity,
                                     dto, time, ++retryCount, errorCodes);
                         }
+                        //3.1.1.2
+                        else {
+                            updateTransactionStatusResponse(errorCodes.getOrDefault(errorCode, "R"), transReceiveId, false);
+                        }
                     }
+                    // 3.1.2 nếu không phải là mã lỗi retry và khách có map mã lỗi trong database
+                    else if (Objects.nonNull(errorCodes)) {
+                        String groupCode = errorCodes.getOrDefault(errorCode, "R");
+                        updateTransactionStatusResponse(groupCode, transReceiveId, false);
+                    }
+                    // 3.1.3 nếu khách không có mã lỗi đồng bộ với hệ thống luôn thì trả về thất bại
+                    else {
+                        updateTransactionStatusResponse("R", transReceiveId, false);
+                    }
+                }
+                // 3.2 nếu không map được mã lỗi từ response trả về thì trả thất bại luôn
+                else {
+                    updateTransactionStatusResponse("R", transReceiveId, false);
                 }
                 result = new ResponseMessageDTO("FAILED", "E05 - " + json);
             }
@@ -5852,7 +5876,7 @@ public class TransactionBankController {
         } catch (Exception e) {
             LocalDateTime currentDateTime = LocalDateTime.now();
             long responseTime = currentDateTime.toEpochSecond(ZoneOffset.UTC);
-            result = new ResponseMessageDTO("FAILED", "E05 - " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05 - " + e.getMessage());
             if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
                 logger.error(
                         "Error Unexpected at pushNewTransactionToCustomerSync: " +
@@ -5869,40 +5893,40 @@ public class TransactionBankController {
             if (retryCount < 10) {
                 pushNewTransactionToCustomerSync(transReceiveId, entity,
                         dto, time, ++retryCount, errorCodes);
+            } else {
+                updateTransactionStatusResponse("R", transReceiveId, false);
             }
         } finally {
-            if (result != null) {
-                UUID logUUID = UUID.randomUUID();
-                String suffixUrl = "";
-                if (entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty()) {
-                    suffixUrl = "/" + entity.getSuffixUrl();
-                }
-                String address = "";
-                if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
-                    address = "http://" + entity.getIpAddress() + ":" + entity.getPort() + suffixUrl
-                            + "/bank/api/transaction-sync";
-                } else {
-                    address = entity.getInformation() + suffixUrl + "/bank/api/transaction-sync";
-                }
-                TransactionReceiveLogEntity logEntity = new TransactionReceiveLogEntity();
-                logEntity.setId(logUUID.toString());
-                logEntity.setTransactionId(transReceiveId);
-                logEntity.setStatus(result.getStatus());
-                logEntity.setMessage(result.getMessage());
-                logEntity.setStatusCode(StringUtil.getValueNullChecker(transactionLogResponseDTO.getStatusCode()));
-                logEntity.setType(1);
-                logEntity.setTimeResponse(transactionLogResponseDTO.getTimeResponse());
-                logEntity.setTime(transactionLogResponseDTO.getTimeRequest());
-                logEntity.setUrlCallback(address);
-                transactionReceiveLogService.insert(logEntity);
+            UUID logUUID = UUID.randomUUID();
+            String suffixUrl = "";
+            if (entity.getSuffixUrl() != null && !entity.getSuffixUrl().isEmpty()) {
+                suffixUrl = "/" + entity.getSuffixUrl();
             }
+            String address = "";
+            if (entity.getIpAddress() != null && !entity.getIpAddress().isEmpty()) {
+                address = "http://" + entity.getIpAddress() + ":" + entity.getPort() + suffixUrl
+                        + "/bank/api/transaction-sync";
+            } else {
+                address = entity.getInformation() + suffixUrl + "/bank/api/transaction-sync";
+            }
+            TransactionReceiveLogEntity logEntity = new TransactionReceiveLogEntity();
+            logEntity.setId(logUUID.toString());
+            logEntity.setTransactionId(transReceiveId);
+            logEntity.setStatus(result.getStatus());
+            logEntity.setMessage(result.getMessage());
+            logEntity.setStatusCode(StringUtil.getValueNullChecker(transactionLogResponseDTO.getStatusCode()));
+            logEntity.setType(1);
+            logEntity.setTimeResponse(transactionLogResponseDTO.getTimeResponse());
+            logEntity.setTime(transactionLogResponseDTO.getTimeRequest());
+            logEntity.setUrlCallback(address);
+            transactionReceiveLogService.insert(logEntity);
         }
         return result;
     }
 
     private void pushNewTransactionToCustomerSyncV2(String transReceiveId, MerchantConnectionEntity entity,
                                                     TransactionBankCustomerDTO dto,
-                                                    int retryCount, List<String> errorCodes) {
+                                                    int retryCount, Map<String, String> errorCodes) {
         ResponseMessageDTO result = null;
         TransactionLogResponseDTO transactionLogResponseDTO = new TransactionLogResponseDTO();
         // final ResponseMessageDTO[] results = new ResponseMessageDTO[1];
@@ -5929,9 +5953,6 @@ public class TransactionBankController {
             logger.info("pushNewTransactionToCustomerSync: orderId: " +
                     dto.getOrderId());
             logger.info("pushNewTransactionToCustomerSync: sign: " + dto.getSign());
-            System.out.println("pushNewTransactionToCustomerSync: orderId: " +
-                    dto.getOrderId());
-            System.out.println("pushNewTransactionToCustomerSync: sign: " + dto.getSign());
             TokenDTO tokenDTO = null;
             if (entity.getUsername() != null && !entity.getUsername().trim().isEmpty() &&
                     entity.getPassword() != null
@@ -5953,9 +5974,9 @@ public class TransactionBankController {
             data.put("sign", dto.getSign());
             data.put("terminalCode", dto.getTerminalCode());
             data.put("urlLink", dto.getUrlLink());
-            data.put("serviceCode", dto.getServiceCode());
+            data.put("serviceCode", StringUtil.getValueNullChecker(dto.getServiceCode()));
             data.put("subTerminalCode", dto.getSubTerminalCode());
-            System.out.println("Push data V2: Request: " + data);
+//            //System.out.println("Push data V2: Request: " + data);
             String suffixUrl = "";
             WebClient.Builder webClientBuilder = WebClient.builder()
                     .baseUrl(entity.getUrlCallback());
@@ -5970,8 +5991,6 @@ public class TransactionBankController {
                     .build();
 
             logger.info("uriComponents: " + entity.getUrlCallback() + " " + webClient.get().uri(builder -> builder.path("/").build()).toString());
-            System.out
-                    .println("uriComponents: " + entity.getUrlCallback() + " " + webClient.get().uri(builder -> builder.path("/").build()).toString());
             // Mono<TransactionResponseDTO> responseMono = null;
             Mono<ClientResponse> responseMono = null;
             if (tokenDTO != null) {
@@ -5994,25 +6013,47 @@ public class TransactionBankController {
             }
 
             ClientResponse response = responseMono.block();
-            System.out.println("response status code: " + response.statusCode());
             try {
                 transactionLogResponseDTO.setStatusCode(response.statusCode().value());
                 transactionLogResponseDTO.setTimeResponse(DateTimeUtil.getCurrentDateTimeUTC());
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
+            // 1. nếu status = 200 thì default là mã lỗi success
             if (response.statusCode().is2xxSuccessful()) {
                 String json = response.bodyToMono(String.class).block();
-                System.out.println("Response pushNewTransactionToCustomerSync: " + json);
+//                //System.out.println("Response pushNewTransactionToCustomerSync: " + json);
                 logger.info("Response pushNewTransactionToCustomerSync: " + json + " status: " + response.statusCode());
                 String errorCode = validateFormatCallbackResponse(json);
+                // 1.1 nếu response map đc theo format thì kiểm tra các bước dưới
                 if (!StringUtil.isNullOrEmpty(errorCode)) {
                     // retry callback
-                    if (Objects.nonNull(errorCodes) && errorCodes.contains(errorCode)) {
+                    // 1.1.1 nếu status = 200 và khách có map mã lỗi trong database thì kiểm tra mã lỗi có phải mã
+                    // lỗi retry không, nếu phải thì thực hiện if
+                    if (Objects.nonNull(errorCodes) && GroupCodeConstant.RETRY_GROUP.getValue()
+                            .equals(errorCodes.get(errorCode))) {
+                        // 1.1.1.1
                         if (retryCount < 10) {
                             pushNewTransactionToCustomerSyncV2(transReceiveId, entity,
                                     dto, ++retryCount, errorCodes);
                         }
+                        // 1.1.1.2
+                        else {
+                            updateTransactionStatusResponse(errorCodes.getOrDefault(errorCode, "R"), transReceiveId, false);
+                        }
                     }
+                    // 1.1.2 nếu không phải là mã lỗi retry và khách có map mã lỗi trong database
+                    else if (Objects.nonNull(errorCodes)) {
+                        String groupCode = errorCodes.getOrDefault(errorCode, "R");
+                        updateTransactionStatusResponse(groupCode, transReceiveId, false);
+                    }
+                    // 1.1.3 nếu khách không có mã lỗi đồng bộ với hệ thống luôn thì trả về success
+                    else {
+                        updateTransactionStatusResponse("S", transReceiveId, false);
+                    }
+                }
+                // 1.2 nếu response không map được theo format trả thành công luôn
+                else {
+                    updateTransactionStatusResponse("S", transReceiveId, false);
                 }
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode rootNode = objectMapper.readTree(json);
@@ -6026,27 +6067,69 @@ public class TransactionBankController {
                 } else {
                     result = new ResponseMessageDTO("FAILED", "E05 - " + json);
                 }
-            } else {
+            }
+            // 2. nếu status != 400 và status thuộc loại 4xx hoặc 5xx 401, 403... 500 508...
+            else if (response.statusCode().value() != 400
+                    && (response.statusCode().is4xxClientError()
+                    || response.statusCode().is5xxServerError())) {
+                String json = response.bodyToMono(String.class).block();
+                logger.info("Response pushNewTransactionToCustomerSync: " + json + " status Code: " + response.statusCode());
+                // retry callback
+                // 2.1 retry chưa tới lần thứ 10
+                if (retryCount < 10) {
+                    pushNewTransactionToCustomerSyncV2(transReceiveId, entity,
+                            dto, ++retryCount, errorCodes);
+                }
+                // 2.2 retry sau 10 lần nhưng vẫn failed
+                else {
+                    updateTransactionStatusResponse("R", transReceiveId, false);
+                }
+                result = new ResponseMessageDTO("FAILED", "E05 - " + json);
+            }
+            // 3. status = 400
+            else {
                 String json = response.bodyToMono(String.class).block();
                 // nếu trả sai format retry callback
                 String errorCode = validateFormatCallbackResponse(json);
+                // 3.1 nếu map được mã lỗi từ response trả về
                 if (!StringUtil.isNullOrEmpty(errorCode)) {
                     // retry callback
-                    if (Objects.nonNull(errorCodes) && errorCodes.contains(errorCode)) {
+                    // 3.1.1 nếu status = 200 và khách có map mã lỗi trong database thì kiểm tra mã lỗi có phải mã
+                    // lỗi retry không, nếu phải thì thực hiện if
+                    if (Objects.nonNull(errorCodes) && GroupCodeConstant.RETRY_GROUP.getValue()
+                            .equals(errorCodes.get(errorCode))) {
+                        // 3.1.1.1
                         if (retryCount < 10) {
                             pushNewTransactionToCustomerSyncV2(transReceiveId, entity,
                                     dto, ++retryCount, errorCodes);
                         }
+                        // 3.1.1.2
+                        else {
+                            updateTransactionStatusResponse(errorCodes.getOrDefault(errorCode, "R"), transReceiveId, false);
+                        }
+                    }
+                    // 3.1.2 nếu không phải là mã lỗi retry và khách có map mã lỗi trong database
+                    else if (Objects.nonNull(errorCodes)) {
+                        String groupCode = errorCodes.getOrDefault(errorCode, "R");
+                        updateTransactionStatusResponse(groupCode, transReceiveId, false);
+                    }
+                    // 3.1.3 nếu khách không có mã lỗi đồng bộ với hệ thống luôn thì trả về thất bại
+                    else {
+                        updateTransactionStatusResponse("R", transReceiveId, false);
                     }
                 }
-                System.out.println("Response pushNewTransactionToCustomerSync: " + json);
+                // 3.2 nếu không map được mã lỗi từ response trả về thì trả thất bại luôn
+                else {
+                    updateTransactionStatusResponse("R", transReceiveId, false);
+                }
+//                //System.out.println("Response pushNewTransactionToCustomerSync: " + json);
                 logger.info("Response pushNewTransactionToCustomerSync: " + json + " status: " + response.statusCode());
                 result = new ResponseMessageDTO("FAILED", "E05 - " + json);
             }
         } catch (Exception e) {
             LocalDateTime currentDateTime = LocalDateTime.now();
             long responseTime = currentDateTime.toEpochSecond(ZoneOffset.UTC);
-            result = new ResponseMessageDTO("FAILED", "E05 - " + e.toString());
+            result = new ResponseMessageDTO("FAILED", "E05 - " + e.getMessage());
             logger.error(
                     "Error Unexpected at pushNewTransactionToCustomerSync: " +
                             entity.getUrlCallback() + " - "
@@ -6057,6 +6140,8 @@ public class TransactionBankController {
             if (retryCount < 10) {
                 pushNewTransactionToCustomerSyncV2(transReceiveId, entity,
                         dto, ++retryCount, errorCodes);
+            } else {
+                updateTransactionStatusResponse("R", transReceiveId, false);
             }
         } finally {
             if (result != null) {
@@ -6096,7 +6181,7 @@ public class TransactionBankController {
             webClient = WebClient.builder()
                     .baseUrl(entity.getUrlGetToken())
                     .build();
-            System.out.println("uriComponents: " + uriComponents.getPath());
+            //System.out.println("uriComponents: " + uriComponents.getPath());
             Mono<TokenDTO> responseMono = webClient.method(HttpMethod.POST)
                     .uri(uriComponents.toUri())
                     .contentType(MediaType.APPLICATION_JSON)
@@ -6104,7 +6189,7 @@ public class TransactionBankController {
                     .body(BodyInserters.fromValue(data))
                     .exchange()
                     .flatMap(clientResponse -> {
-                        System.out.println("status code: " + clientResponse.statusCode());
+                        //System.out.println("status code: " + clientResponse.statusCode());
                         try {
                             transactionLogResponseDTO.setTimeResponse(DateTimeUtil.getCurrentDateTimeUTC());
                             transactionLogResponseDTO.setStatusCode(clientResponse.statusCode().value());
@@ -6201,15 +6286,13 @@ public class TransactionBankController {
                                 CustomerSyncEntity customerSyncEntity = customerSyncService
                                         .getCustomerSyncById(accountCustomerBankEntity.getCustomerSyncId());
                                 if (customerSyncEntity != null) {
-                                    String retryErrors = customerErrorLogService.getRetryErrorsByCustomerId(customerSyncEntity.getId());
-                                    List<String> errors = new ArrayList<>();
-                                    errors = mapperErrors(retryErrors);
-                                    System.out.println("customerSyncEntity: " + customerSyncEntity.getId() + " - "
-                                            + customerSyncEntity.getInformation());
-                                    List<String> finalErrors = errors;
+                                    List<CustomerErrorLogDTO> customerErrorLogDTOS = customerErrorLogService.getRetryErrorsByCustomerId(customerSyncEntity.getId());
+                                    Map<String, String> errorCodes = new HashMap<>();
+                                    errorCodes = mapperErrors(customerErrorLogDTOS);
+                                    Map<String, String> finalErrorCodes = errorCodes;
                                     executorService.submit(() -> pushNewTransactionToCustomerSync(transReceiveId, customerSyncEntity,
                                             transactionBankCustomerDTO,
-                                            time, 1, finalErrors));
+                                            time, 1, finalErrorCodes));
                                 }
                             }
                         } finally {
@@ -6227,15 +6310,12 @@ public class TransactionBankController {
                             CustomerSyncEntity customerSyncEntity = customerSyncService
                                     .getCustomerSyncById(accountCustomerBankEntity.getCustomerSyncId());
                             if (customerSyncEntity != null) {
-                                String retryErrors = customerErrorLogService.getRetryErrorsByCustomerId(customerSyncEntity.getId());
-                                List<String> errors = new ArrayList<>();
-                                errors = mapperErrors(retryErrors);
-                                System.out.println("customerSyncEntity: " + customerSyncEntity.getId() + " - "
-                                        + customerSyncEntity.getInformation());
-                                List<String> finalErrors = errors;
+                                List<CustomerErrorLogDTO> customerErrorLogDTOS = customerErrorLogService.getRetryErrorsByCustomerId(customerSyncEntity.getId());
+                                Map<String, String> errorCodes = new HashMap<>();
+                                errorCodes = mapperErrors(customerErrorLogDTOS);
                                 result = pushNewTransactionToCustomerSync(transReceiveId, customerSyncEntity,
                                         transactionBankCustomerDTO,
-                                        time, 11, errors);
+                                        time, 11, errorCodes);
                             }
                         }
                     }
@@ -6243,21 +6323,23 @@ public class TransactionBankController {
             }
         } catch (Exception e) {
             logger.error("CustomerSync: Error: " + e.toString());
-            System.out.println("CustomerSync: Error: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05 - " + e.toString());
         }
         return result;
     }
 
-    private List<String> mapperErrors(String errors) {
-        List<String> result = new ArrayList<>();
+    private Map<String, String> mapperErrors(List<CustomerErrorLogDTO> errors) {
+        Map<String, String> result = new HashMap<>();
+        ObjectMapper mapper = new ObjectMapper();
         try {
-            if (StringUtil.isNullOrEmpty(errors)) {
-                ObjectMapper mapper = new ObjectMapper();
-                List<ErrorCodeMapper> list = mapper.readValue(errors, new TypeReference<List<ErrorCodeMapper>>() {
-                });
-                for (ErrorCodeMapper dto : list) {
-                    result.add(dto.getErrorCode());
+            if (Objects.nonNull(errors) && !errors.isEmpty()) {
+                for (CustomerErrorLogDTO logDTO: errors) {
+                    List<ErrorCodeMapper> list = mapper.readValue(logDTO.getErrorCodes(),
+                            new TypeReference<List<ErrorCodeMapper>>() {
+                    });
+                    for (ErrorCodeMapper dto : list) {
+                        result.put(dto.getErrorCode(), logDTO.getGroupCode());
+                    }
                 }
             }
 
@@ -6265,6 +6347,34 @@ public class TransactionBankController {
             logger.error("mapperErrors: Error: " + e.toString());
         }
         return result;
+    }
+
+    private void updateTransactionStatusResponse(String groupError, String transactionId, boolean isRetry) {
+        // 0: init
+        // 1: success - Thanh cong
+        // 2: pending - Cho xử lý
+        // 3: failed - That bai
+        // 4: error - Loi
+        int statusResponse = 0;
+        switch (groupError) {
+            case "R":
+                statusResponse = 3;
+                break;
+            case "S":
+                statusResponse = 1;
+                break;
+            case "F":
+                statusResponse = 4;
+                break;
+            case "W":
+                statusResponse = 2;
+                break;
+            default:
+                break;
+        }
+        if (!isRetry) {
+            transactionReceiveService.updateStatusResponse(transactionId, statusResponse);
+        }
     }
 
     private void getCustomerSyncEntitiesV2(String transReceiveId, TransactionBankDTO dto,
@@ -6329,13 +6439,14 @@ public class TransactionBankController {
                         for (BankReceiveConnectionEntity bankReceiveConnectionEntity : bankReceiveConnectionEntities) {
                             MerchantConnectionEntity merchantConnectionEntity = merchantConnectionService
                                     .getMerchanConnectionById(bankReceiveConnectionEntity.getMidConnectId());
-                            String retryErrors = customerErrorLogService.getRetryErrorsByCustomerId(merchantConnectionEntity.getMid());
-                            List<String> errors = new ArrayList<>();
-                            errors = mapperErrors(retryErrors);
+
+                            List<CustomerErrorLogDTO> customerErrorLogDTOS = customerErrorLogService.getRetryErrorsByCustomerId(merchantConnectionEntity.getMid());
+                            Map<String, String> errorCodes = new HashMap<>();
+                            errorCodes = mapperErrors(customerErrorLogDTOS);
                             if (merchantConnectionEntity != null) {
-                                List<String> finalErrors = errors;
+                                Map<String, String> finalErrorCodes = errorCodes;
                                 executorService.submit(() -> pushNewTransactionToCustomerSyncV2(transReceiveId, merchantConnectionEntity,
-                                        transactionBankCustomerDTO, 1, finalErrors));
+                                        transactionBankCustomerDTO, 1, finalErrorCodes));
                             }
                         }
                     } finally {
@@ -6352,7 +6463,6 @@ public class TransactionBankController {
             }
         } catch (Exception e) {
             logger.error("CustomerSync: Error: " + e.toString());
-            System.out.println("CustomerSync: Error: " + e.toString());
         }
     }
 
@@ -6372,7 +6482,7 @@ public class TransactionBankController {
                     data.put("transType", dto.getTransType());
                     data.put("orderId", dto.getOrderId());
                     data.put("terminalCode", dto.getTerminalCode());
-                    data.put("serviceCode", dto.getServiceCode());
+                    data.put("serviceCode", StringUtil.getValueNullChecker(dto.getServiceCode()));
                     data.put("subTerminalCode", dto.getSubTerminalCode());
                     socketHandler.sendMessageToClientId(merchantSyncEntity.getClientId(),
                             data);

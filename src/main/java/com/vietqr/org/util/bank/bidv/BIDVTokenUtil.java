@@ -21,7 +21,7 @@ public class BIDVTokenUtil {
         try {
             String url = EnvironmentUtil.getBidvUrlGetToken();
             //
-            System.out.println("URL GET TOKEN BIDV: " + url);
+            //System.out.println("URL GET TOKEN BIDV: " + url);
             UriComponents uriComponents = UriComponentsBuilder
                     .fromHttpUrl(url)
                     .buildAndExpand(/* add url parameter here */);
@@ -56,7 +56,7 @@ public class BIDVTokenUtil {
             result = response;
         } catch (Exception e) {
             logger.error("BIDVTokenUtil: getBIDVToken: ERROR: " + e.toString());
-            System.out.println("BIDVTokenUtil: getBIDVToken: ERROR: " + e.toString());
+            //System.out.println("BIDVTokenUtil: getBIDVToken: ERROR: " + e.toString());
         }
         return result;
     }
@@ -66,7 +66,7 @@ public class BIDVTokenUtil {
         try {
             String url = EnvironmentUtil.getBidvUrlGenVietQrGetToken();
             //
-            System.out.println("URL GET TOKEN BIDV: " + url);
+            //System.out.println("URL GET TOKEN BIDV: " + url);
             UriComponents uriComponents = UriComponentsBuilder
                     .fromHttpUrl(url)
                     .buildAndExpand(/* add url parameter here */);
@@ -101,7 +101,7 @@ public class BIDVTokenUtil {
             result = response;
         } catch (Exception e) {
             logger.error("BIDVTokenUtil: getBIDVToken: ERROR: " + e.toString());
-            System.out.println("BIDVTokenUtil: getBIDVToken: ERROR: " + e.toString());
+            //System.out.println("BIDVTokenUtil: getBIDVToken: ERROR: " + e.toString());
         }
         return result;
     }

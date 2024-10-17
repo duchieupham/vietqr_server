@@ -73,7 +73,6 @@ public class ReportController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("Error at insertReport: " + e.toString());
-            System.out.println("Error at insertReport: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -89,7 +88,6 @@ public class ReportController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("Error at getReports: " + e.toString());
-            System.out.println("Error at getReports: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -104,7 +102,6 @@ public class ReportController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("Error at getReportImages: " + e.toString());
-            System.out.println("Error at getReportImages: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);

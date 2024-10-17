@@ -2547,20 +2547,17 @@ public class TerminalController {
 
 
                     } else {
-                        System.out.println("syncTerminal: Request Body is null or empty");
                         logger.error("syncTerminal: Request Body is null or empty");
                         result = new ResponseMessageDTO("FAILED", "E46");
                         httpStatus = HttpStatus.BAD_REQUEST;
                     }
                 } else {
                     // merchant is not existed
-                    System.out.println("refundForMerchant: MERCHANT IS NOT EXISTED");
                     logger.error("refundForMerchant: MERCHANT IS NOT EXISTED");
                     result = new ResponseMessageDTO("FAILED", "E104");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {
-                System.out.println("syncTerminal: INVALID TOKEN");
                 logger.error("syncTerminal: INVALID TOKEN");
                 result = new ResponseMessageDTO("FAILED", "E74");
                 httpStatus = HttpStatus.BAD_REQUEST;
@@ -2617,13 +2614,11 @@ public class TerminalController {
 //
 //                    } else {
 //                        // merchant is not existed
-//                        System.out.println("refundForMerchant: MERCHANT IS NOT EXISTED");
 //                        logger.error("refundForMerchant: MERCHANT IS NOT EXISTED");
 //                        result = new ResponseMessageDTO("FAILED", "E104");
 //                        httpStatus = HttpStatus.BAD_REQUEST;
 //                    }
 //                } else {
-//                    System.out.println("syncTerminal: INVALID TOKEN");
 //                    logger.error("syncTerminal: INVALID TOKEN");
 //                    result = new ResponseMessageDTO("FAILED", "E74");
 //                    httpStatus = HttpStatus.BAD_REQUEST;
@@ -2879,8 +2874,6 @@ public class TerminalController {
                     // call api
                     LocalDateTime now = LocalDateTime.now();
                     long time = now.toEpochSecond(ZoneOffset.UTC);
-                    System.out.println("TerminalController: createQRSyncToTerminal: Request: "
-                            + data + " token: " + tokenDTO.getAccess_token() + " at: " + time);
                     logger.info("TerminalController: createQRSyncToTerminal: Request: "
                             + data + " token: " + tokenDTO.getAccess_token() + " at: " + time);
                     WebClient webClient = WebClient.builder()
@@ -2896,8 +2889,6 @@ public class TerminalController {
                     time = responseTime.toEpochSecond(ZoneOffset.UTC);
                     if (response.statusCode().is2xxSuccessful()) {
                         String json = response.bodyToMono(String.class).block();
-                        System.out.println("TerminalController: createQRSyncToTerminal: Response: " + json
-                        + " at: " + time);
                         logger.info("TerminalController: createQRSyncToTerminal: Response: " + json + " success status: " + response.statusCode()
                         + " at: " + time);
 
@@ -2906,7 +2897,6 @@ public class TerminalController {
                         httpStatus = HttpStatus.OK;
                     } else {
                         String json = response.bodyToMono(String.class).block();
-                        System.out.println("createQRSyncToTerminal: Response: " + json);
                         logger.error("TerminalController: createQRSyncToTerminal: Response: " + json + " error status: " + response.statusCode()
                         + " at: " + time);
                         result = new ResponseMessageDTO("FAILED", "E05");
@@ -2942,7 +2932,6 @@ public class TerminalController {
             String key = entity.getUsernameBasic() + ":" + entity.getPasswordBasic();
             String encodedKey = Base64.getEncoder().encodeToString(key.getBytes());
             logger.info("VhitekActiveController: getCustomerSyncToken: encodedKey: " + encodedKey);
-            System.out.println("VhitekActiveController: getCustomerSyncToken: encodedKey: " + encodedKey);
             Mono<TokenDTO> responseMono = webClient.method(HttpMethod.POST)
                     .uri(uriComponents.toUri())
                     .contentType(MediaType.APPLICATION_JSON)
@@ -2950,8 +2939,6 @@ public class TerminalController {
                     .body(BodyInserters.fromValue(data))
                     .exchange()
                     .flatMap(clientResponse -> {
-                        System.out.println(
-                                "VhitekActiveController: get token: status code: " + clientResponse.statusCode());
                         if (clientResponse.statusCode().is2xxSuccessful()) {
                             return clientResponse.bodyToMono(TokenDTO.class);
                         } else {
@@ -2967,15 +2954,11 @@ public class TerminalController {
             if (resultOptional.isPresent()) {
                 result = resultOptional.get();
                 logger.info("VhitekActiveController: getCustomerSyncToken: token got: " + result.getAccess_token());
-                System.out.println(
-                        "VhitekActiveController: getCustomerSyncToken: token got: " + result.getAccess_token());
             } else {
                 logger.info("VhitekActiveController: getCustomerSyncToken: Token could not be retrieved");
-                System.out.println("VhitekActiveController: getCustomerSyncToken: Token could not be retrieved");
             }
         } catch (Exception e) {
             logger.info("VhitekActiveController: getCustomerSyncToken: ERROR: " + e.toString());
-            System.out.println("VhitekActiveController: getCustomerSyncToken:  ERROR: " + e.toString());
         }
         return result;
     }

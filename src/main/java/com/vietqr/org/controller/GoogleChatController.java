@@ -59,7 +59,6 @@ public class GoogleChatController {
             }
         } catch (Exception e) {
             logger.error("GoogleChatController: sendFirstMessage: ERROR: " + e.toString());
-            System.out.println("GoogleChatController: sendFirstMessage: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -101,7 +100,6 @@ public class GoogleChatController {
             }
         } catch (Exception e) {
             logger.error("GoogleChatController: insertBankIntoGoogleChat: ERROR: " + e.toString());
-            System.out.println("GoogleChatController: insertBankIntoGoogleChat: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -124,7 +122,6 @@ public class GoogleChatController {
             }
         } catch (Exception e) {
             logger.error("GoogleChatController: removeBankFromGoogleChat: ERROR: " + e.toString());
-            System.out.println("GoogleChatController: removeBankFromGoogleChat: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -164,7 +161,6 @@ public class GoogleChatController {
             }
         } catch (Exception e) {
             logger.error("GoogleChatController: insertGoogleChat: ERROR: " + e.toString());
-            System.out.println("GoogleChatController: insertGoogleChat: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -205,13 +201,11 @@ public class GoogleChatController {
                 httpStatus = HttpStatus.OK;
             } else {
                 logger.error("insertGoogleChat: INVALID REQUEST BODY");
-                System.out.println("insertGoogleChat: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("GoogleChatController: insertGoogleChat: ERROR: " + e.toString());
-            System.out.println("GoogleChatController: insertGoogleChat: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -240,19 +234,16 @@ public class GoogleChatController {
                     httpStatus = HttpStatus.OK;
                 } else {
                     logger.error("updateGoogleChatConfigure: GOOGLE CHAT ID NOT FOUND");
-                    System.out.println("updateGoogleChatConfigure: GOOGLE CHAT ID NOT FOUND");
                     result = new ResponseMessageDTO("FAILED", "E47");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {
                 logger.error("updateGoogleChatConfigure: INVALID REQUEST BODY");
-                System.out.println("updateGoogleChatConfigure: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("Error at updateGoogleChatConfigure: " + e.toString());
-            System.out.println("Error at updateGoogleChatConfigure: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -289,7 +280,6 @@ public class GoogleChatController {
 
         } catch (Exception e) {
             logger.error("GoogleChatController: getLarkInformation: ERROR: " + e.toString());
-            System.out.println("GoogleChatController: getLarkInformation: ERROR: " + e.toString());
             ResponseMessageDTO responseMessageDTO = new ResponseMessageDTO("FAILED", "E05");
             result = responseMessageDTO;
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -310,7 +300,6 @@ public class GoogleChatController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("GoogleChatController: removeGoogleChat: ERROR: " + e.toString());
-            System.out.println("GoogleChatController: removeGoogleChat: ERROR:  " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -347,7 +336,6 @@ public class GoogleChatController {
 
         } catch (Exception e) {
             logger.error("GoogleChatController: getGoogleChatInformationDetail: ERROR: " + e.getMessage() + System.currentTimeMillis());
-            System.out.println("GoogleChatController: getGoogleChatInformationDetail: ERROR: " + e.getMessage() + System.currentTimeMillis());
             ResponseMessageDTO responseMessageDTO = new ResponseMessageDTO("FAILED", "E05");
             result = responseMessageDTO;
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -365,7 +353,6 @@ public class GoogleChatController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("GoogleChatController: updateGoogleChatWebhook: ERROR: "  + e.getMessage() + System.currentTimeMillis());
-            System.out.println("GoogleChatController: updateGoogleChatWebhook: ERROR: "  + e.getMessage() + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }

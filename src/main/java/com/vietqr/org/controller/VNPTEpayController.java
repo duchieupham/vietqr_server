@@ -352,7 +352,7 @@ public class VNPTEpayController {
                                     transactionReceiveEntity.setTerminalCode("");
                                     transactionReceiveEntity.setUserId(userIdHost);
                                     transactionReceiveEntity.setNote("");
-                                    transactionReceiveEntity.setTransStatus(0);
+                                    transactionReceiveEntity.setStatusResponse(0);
                                     transactionReceiveEntity.setUrlLink("");
                                     transactionReceiveService.insertTransactionReceive(transactionReceiveEntity);
                                     // insert transaction branch
@@ -428,7 +428,7 @@ public class VNPTEpayController {
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
-            System.out.println("Error at rechargeMobile: " + e.toString());
+            //System.out.println("Error at rechargeMobile: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -467,14 +467,14 @@ public class VNPTEpayController {
         HttpStatus httpStatus = null;
         try {
             logger.info("START getPayBalance");
-            System.out.println("EnvironmentUtil.getVnptEpayPartnerName(): " + EnvironmentUtil.getVnptEpayPartnerName());
+            //System.out.println("EnvironmentUtil.getVnptEpayPartnerName(): " + EnvironmentUtil.getVnptEpayPartnerName());
             QueryBalanceResult queryBalanceResult = VNPTEpayUtil.queryBalance(EnvironmentUtil.getVnptEpayPartnerName());
             result = new EpayBalanceDTO(queryBalanceResult.getBalance_money() + "",
                     queryBalanceResult.getBalance_money() + "", queryBalanceResult.getBalance_debit() + "",
                     queryBalanceResult.getBalance_avaiable() + "");
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
-            System.out.println("Error at registerAccount: " + e.toString());
+            //System.out.println("Error at registerAccount: " + e.toString());
             logger.error("Error at registerAccount: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }

@@ -27,7 +27,7 @@ public class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
         long startTime = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC);
         long endTime = date.plusDays(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC);
 
-        System.out.println("Received request for date: " + date);
+        //System.out.println("Received request for date: " + date);
 
         List<IAccountLogin> users = accountLoginService.findUsersRegisteredInDay(startTime, endTime);
         long userRegister = users.size();
@@ -66,7 +66,7 @@ public class UserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
         long startTime = yearMonth.atDay(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC);
         long endTime = yearMonth.plusMonths(1).atDay(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC);
 
-        System.out.println("Received request for month: " + yearMonth);
+        //System.out.println("Received request for month: " + yearMonth);
 
         List<IAccountLogin> users = accountLoginService.findUsersRegisteredInMonth(startTime, endTime);
         long userRegister = users.size();

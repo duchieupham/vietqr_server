@@ -40,7 +40,7 @@ public class BIDVDateUtil {
         // Định dạng thời gian theo yêu cầu (2020-01-31T09:59:34.000+07:00)
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         String formattedTime = offsetDateTime.format(formatter);
-        System.out.println("getSystemTimeWithOffset: formattedTime: " + formattedTime);
+        //System.out.println("getSystemTimeWithOffset: formattedTime: " + formattedTime);
         return formattedTime;
     }
 }

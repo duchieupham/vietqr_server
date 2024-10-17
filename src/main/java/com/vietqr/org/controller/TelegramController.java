@@ -55,7 +55,6 @@ public class TelegramController {
             }
         } catch (Exception e) {
             logger.error("Error at sendFirstMessage: " + e.toString());
-            System.out.println("Error at sendFirstMessage: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -92,19 +91,16 @@ public class TelegramController {
                     httpStatus = HttpStatus.OK;
                 } else {
                     logger.error("NOT FOUND LARK INFORMATION");
-                    System.out.println("NOT FOUND LARK INFORMATION");
                     result = new ResponseMessageDTO("FAILED", "E05");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {
                 logger.error("INVALID REQUEST BODY");
-                System.out.println("INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("Error at insertBankIntoLark: " + e.toString());
-            System.out.println("Error at insertBankIntoLark: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -125,19 +121,16 @@ public class TelegramController {
                     httpStatus = HttpStatus.OK;
                 } else {
                     logger.error("NOT FOUND LARK INFORMATION");
-                    System.out.println("NOT FOUND LARK INFORMATION");
                     result = new ResponseMessageDTO("FAILED", "E05");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {
                 logger.error("INVALID REQUEST BODY");
-                System.out.println("INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("Error at removeBankFromLark: " + e.toString());
-            System.out.println("Error at removeBankFromLark: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -171,13 +164,11 @@ public class TelegramController {
                 httpStatus = HttpStatus.OK;
             } else {
                 logger.error("insertTelegramChatId: INVALID REQUEST BODY");
-                System.out.println("insertTelegramChatId: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("Error at insertTelegramChatId: " + e.toString());
-            System.out.println("Error at insertTelegramChatId: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -217,13 +208,11 @@ public class TelegramController {
                 httpStatus = HttpStatus.OK;
             } else {
                 logger.error("insertTelegramChatId: INVALID REQUEST BODY");
-                System.out.println("insertTelegramChatId: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("Error at insertTelegramChatId: " + e.toString());
-            System.out.println("Error at insertTelegramChatId: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -253,19 +242,16 @@ public class TelegramController {
                     httpStatus = HttpStatus.OK;
                 } else {
                     logger.error("updateTelegramConfigure: TELEGRAM ID NOT FOUND");
-                    System.out.println("updateTelegramConfigure: TELEGRAM ID NOT FOUND");
                     result = new ResponseMessageDTO("FAILED", "E47");
                     httpStatus = HttpStatus.BAD_REQUEST;
                 }
             } else {
                 logger.error("updateTelegramConfigure: INVALID REQUEST BODY");
-                System.out.println("updateTelegramConfigure: INVALID REQUEST BODY");
                 result = new ResponseMessageDTO("FAILED", "E46");
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
             logger.error("Error at updateTelegramConfigure: " + e.toString());
-            System.out.println("Error at updateTelegramConfigure: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -298,7 +284,6 @@ public class TelegramController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("getTelegramInformation: ERROR: " + e.toString());
-            System.out.println("getTelegramInformation: ERROR: " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -317,7 +302,6 @@ public class TelegramController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("Error at removeTelegram: " + e.toString());
-            System.out.println("Error at removeTelegram: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -355,7 +339,6 @@ public class TelegramController {
 
         } catch (Exception e) {
             logger.error("getTelegramInformationDetail: ERROR: " + e.getMessage() + System.currentTimeMillis());
-            System.out.println("getTelegramInformationDetail: ERROR: " + e.getMessage() + System.currentTimeMillis());
             httpStatus = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(result, httpStatus);
@@ -372,7 +355,6 @@ public class TelegramController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("TelegramController: updateChatId: ERROR: " + e.getMessage() + System.currentTimeMillis());
-            System.out.println("TelegramController: updateChatId: ERROR: " + e.getMessage() + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }
@@ -406,7 +388,6 @@ public class TelegramController {
             httpStatus = HttpStatus.OK;
         } catch (Exception e) {
             logger.error("TelegramController: getListTelegramInformation : ERROR " + e.getMessage() + System.currentTimeMillis());
-            System.out.println("getTelegramInformationDetails: ERROR: " + e.getMessage() + System.currentTimeMillis());
             result = new ResponseMessageDTO("FAILED", "E05");
             httpStatus = HttpStatus.BAD_REQUEST;
         }

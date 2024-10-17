@@ -95,7 +95,6 @@ public class MerchantConnectionController {
                 httpStatus = HttpStatus.BAD_REQUEST;
             }
         } catch (Exception e) {
-            System.out.println("checkTokenMerchantConnection: ERROR: " + e.toString());
             //logger.error("checkTokenMerchantConnection: ERROR: " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05 - " + e.toString());
             httpStatus = HttpStatus.BAD_REQUEST;
@@ -110,10 +109,6 @@ public class MerchantConnectionController {
             String encodedKey = Base64.getEncoder().encodeToString(key.getBytes());
             logger.info("key: " + encodedKey + " - username: " + username.trim() + " - password: "
                     + password.trim());
-
-            System.out.println("key: " + encodedKey + " - username: " +
-                    username.trim() + " - password: "
-                    + password.trim());
             Map<String, Object> data = new HashMap<>();
             UriComponents uriComponents = null;
             WebClient webClient = null;
@@ -124,7 +119,6 @@ public class MerchantConnectionController {
             webClient = WebClient.builder()
                     .baseUrl(url.trim())
                     .build();
-            System.out.println("uriComponents: " + uriComponents.toString());
             Mono<ClientResponse> responseMono = webClient.method(HttpMethod.POST)
                     .uri(uriComponents.toUri())
                     .contentType(MediaType.APPLICATION_JSON)
@@ -136,7 +130,6 @@ public class MerchantConnectionController {
 
             if (response.statusCode().is2xxSuccessful()) {
                 String json = response.bodyToMono(String.class).block();
-                System.out.println("json: " + json);
                 logger.info("Response pushNewTransactionToMerchantConnection: " + json);
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode rootNode = objectMapper.readTree(json);
@@ -149,12 +142,10 @@ public class MerchantConnectionController {
             } else {
                 String json = response.bodyToMono(String.class).block();
                 logger.info("Token could not be retrieved from: " + url + " - error: " + json);
-                System.out.println("Token could not be retrieved from: " + url + " - error: " + json);
                 result = new ResponseMessageDTO("FAILED", "E05 - " + json);
             }
         } catch (Exception e) {
             //logger.error("Error at getMerchantConnectionToken: " + url + " - " + e.toString());
-            System.out.println("Error at getMerchantConnectionToken: " + url + " - " + e.toString());
             result = new ResponseMessageDTO("FAILED", "E05 - " + e.toString());
         }
         return result;
@@ -170,7 +161,6 @@ public class MerchantConnectionController {
             if (dto != null && dto.getMerchantName() != null && !dto.getMerchantName().trim().isEmpty()) {
                 // get count account customer
                 Integer customerCounting = merchantConnectionService.getCountingMerchantConnection();
-                // System.out.println("customerCounting: " + customerCounting);
                 // generate username - password
                 String prefix = "customer";
                 String merchantName = dto.getMerchantName().trim().toLowerCase();
@@ -181,10 +171,8 @@ public class MerchantConnectionController {
                 int lastTwoDigitsOfYear = currentDate.getYear() % 100;
                 String username = prefix + "-" + merchantName + "-" + suffix + lastTwoDigitsOfYear
                         + (customerCounting + 1);
-                // System.out.println("username: " + username);
                 //
                 String password = encodeBase64(username.trim());
-                // System.out.println("password: " + password);
                 result = new AccountCustomerGenerateDTO(username, password);
                 httpStatus = HttpStatus.OK;
             } else {

@@ -720,4 +720,6 @@ public interface TransactionReceiveService {
     int countTransactionByBankIdAndTime(String bankId, String fromDate, String toDate);
 
     TransactionReceiveEntity getTransactionReceiveByQrCodeId(String qrCodeId, String amount);
+
+    void updateStatusResponse(String transactionId, int statusResponse);
 }

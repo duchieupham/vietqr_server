@@ -27,7 +27,7 @@ public class TransactionRefIdUtil {
     // result = encryptedId;
     // } catch (Exception e) {
     // logger.error("encryptTransactionId: ERROR:" + e.toString());
-    // System.out.println("encryptTransactionId: ERROR:" + e.toString());
+    // //System.out.println("encryptTransactionId: ERROR:" + e.toString());
     // }
     // return result;
     // }
@@ -50,7 +50,7 @@ public class TransactionRefIdUtil {
     // result = decryptedId;
     // } catch (Exception e) {
     // logger.error("decryptTransactionId: ERROR:" + e.toString());
-    // System.out.println("decryptTransactionId: ERROR:" + e.toString());
+    // //System.out.println("decryptTransactionId: ERROR:" + e.toString());
     // }
     // return result;
     // }
@@ -71,7 +71,7 @@ public class TransactionRefIdUtil {
             result = encryptedId;
         } catch (Exception e) {
             logger.error("encryptTransactionId: ERROR:" + e.toString());
-            System.out.println("encryptTransactionId: ERROR:" + e.toString());
+            //System.out.println("encryptTransactionId: ERROR:" + e.toString());
         }
         return result;
     }
@@ -82,7 +82,7 @@ public class TransactionRefIdUtil {
             result = decode(refId);
         } catch (Exception e) {
             logger.error("decryptTransactionId: ERROR:" + e.toString());
-            System.out.println("decryptTransactionId: ERROR:" + e.toString());
+            //System.out.println("decryptTransactionId: ERROR:" + e.toString());
         }
         return result;
     }

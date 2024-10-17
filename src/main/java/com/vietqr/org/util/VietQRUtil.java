@@ -254,7 +254,7 @@ public class VietQRUtil {
 			result = byteArrayOutputStream.toByteArray();
 		} catch (Exception e) {
 			result = new byte[0];
-			System.out.println("generateVietQRImg: ERROR: " + e.toString());
+			//System.out.println("generateVietQRImg: ERROR: " + e.toString());
 			logger.error("generateVietQRImg: ERROR: " + e.toString());
 		}
 
