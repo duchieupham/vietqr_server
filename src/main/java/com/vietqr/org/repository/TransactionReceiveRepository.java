@@ -3490,7 +3490,7 @@ public interface TransactionReceiveRepository extends JpaRepository<TransactionR
     @Query(value = "SELECT * "
             + "FROM transaction_receive "
             + "WHERE "
-            + "AND time >= :time "
+            + "time >= :time "
             + "AND status = 0 AND amount = :amount AND qr_code LIKE (%:qrCodeId%) "
             + "AND trans_type = :transType LIMIT 1", nativeQuery = true)
     TransactionReceiveEntity getTransactionReceiveByQrCodeId(String qrCodeId, String amount, String transType, long time);
