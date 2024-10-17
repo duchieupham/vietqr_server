@@ -151,7 +151,7 @@ public class TransactionReceiveEntity implements Serializable {
 	// 3: failed - That bai
 	// 4: error - Loi
 	@Column(name = "statusResponse")
-	private Integer statusResponse;
+	private Integer statusResponse = 0;
 
 	@Column(name = "urlLink")
 	private String urlLink = "";
