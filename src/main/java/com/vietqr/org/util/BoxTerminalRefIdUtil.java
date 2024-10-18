@@ -17,8 +17,16 @@ public class BoxTerminalRefIdUtil {
     }
 
     public static String decode(String encodedString) {
-        byte[] decodedBytes = Base64.getUrlDecoder().decode(encodedString.getBytes(StandardCharsets.UTF_8));
-        return new String(decodedBytes, StandardCharsets.UTF_8);
+        String result = "";
+        try {
+            byte[] decodedBytes = Base64.getUrlDecoder().decode(encodedString.getBytes(StandardCharsets.UTF_8));
+            String value = new String(decodedBytes, StandardCharsets.UTF_8);
+            result = value.replaceAll(VIET_QR_BOX_ACCESS_KEY, "");
+        } catch (Exception e) {
+            logger.error("decode: ERROR:" + e.getMessage());
+        }
+        return result;
+
     }
 
     public static String encryptQrBoxId(String id) {

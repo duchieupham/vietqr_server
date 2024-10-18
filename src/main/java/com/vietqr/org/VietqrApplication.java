@@ -113,6 +113,7 @@ public class VietqrApplication extends SpringBootServletInitializer implements W
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException, Exception {
 		SpringApplication.run(VietqrApplication.class, args);
+//		System.out.println(BoxTerminalRefIdUtil.decode(""));
 //		String checkOrder = BankEncryptUtil.generateMD5CheckOrderChecksum("3991031291095", "customer-vso19552happyday-user24117");
 //		System.out.println(checkOrder);
 //		System.out.println(BankEncryptUtil.generateCheckOrderMD5Checksum("FT24281716290033", "", ""));
