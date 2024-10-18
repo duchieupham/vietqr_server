@@ -508,6 +508,7 @@ public class TransactionMMSController {
                                         data1.put("transType", "C");
                                         data1.put("message", String.format(EnvironmentUtil.getVietQrPaymentSuccessQrVoice(), amountForVoice));
                                         pushNotificationBoxIdRef(amountForVoice, amountForShow, rawCode);
+                                        pushNotificationBdsdTerminalCode(amountForVoice, rawCode, tempTransReceive, timePaid, entity.getFtCode());
                                     } catch (Exception ignored) {
                                     }
                                 }
@@ -897,6 +898,8 @@ public class TransactionMMSController {
                                         try {
                                             if (isSubTerminal) {
                                                 pushNotificationBoxIdRef(amountForVoice, amountForShow, subRawCode);
+                                                pushNotificationBdsdTerminalCode(amountForVoice, subRawCode, transactionReceiveEntity1,
+                                                        timePaid, entity.getFtCode());
                                             }
                                         } catch (Exception e) {
                                             logger.error("transaction-mms-sync: ERROR: " + e.toString());
@@ -1261,6 +1264,8 @@ public class TransactionMMSController {
                                             pushNotificationBoxIdRef(amountForVoice,
                                                     StringUtil.formatNumberAsString(entity.getDebitAmount()),
                                                     subRawCode);
+                                            pushNotificationBdsdTerminalCode(amountForVoice, subRawCode,
+                                                    transactionReceiveEntity1, timePaid, entity.getFtCode());
                                         } catch (Exception e) {
                                             logger.error("transaction-mms-sync: ERROR: " + e.toString());
                                         }
@@ -1759,7 +1764,7 @@ public class TransactionMMSController {
                     // retry callback
                     // 1.1.1 nếu status = 200 và khách có map mã lỗi trong database thì kiểm tra mã lỗi có phải mã
                     // lỗi retry không, nếu phải thì thực hiện if
-                    if (Objects.nonNull(errorCodes)
+                    if (Objects.nonNull(errorCodes) && !errorCodes.isEmpty()
                             && GroupCodeConstant.RETRY_GROUP.getValue()
                             .equals(errorCodes.get(errorCode))) {
                         // 1.1.1.1
@@ -1774,7 +1779,7 @@ public class TransactionMMSController {
                         }
                     }
                     // 1.1.2 nếu không phải là mã lỗi retry và khách có map mã lỗi trong database
-                    else if (Objects.nonNull(errorCodes)) {
+                    else if (Objects.nonNull(errorCodes) && !errorCodes.isEmpty()) {
                         String groupCode = errorCodes.getOrDefault(errorCode, "R");
                         updateTransactionStatusResponse(groupCode, transReceiveId);
                     }
@@ -1830,7 +1835,7 @@ public class TransactionMMSController {
                     // retry callback
                     // 3.1.1 nếu status = 200 và khách có map mã lỗi trong database thì kiểm tra mã lỗi có phải mã
                     // lỗi retry không, nếu phải thì thực hiện if
-                    if (Objects.nonNull(errorCodes)
+                    if (Objects.nonNull(errorCodes) && !errorCodes.isEmpty()
                             && GroupCodeConstant.RETRY_GROUP.getValue().
                             equals(errorCodes.get(errorCode))) {
                         // 3.1.1.1
@@ -1845,7 +1850,7 @@ public class TransactionMMSController {
                         }
                     }
                     // 3.1.2 nếu không phải là mã lỗi retry và khách có map mã lỗi trong database
-                    else if (Objects.nonNull(errorCodes)) {
+                    else if (Objects.nonNull(errorCodes) && !errorCodes.isEmpty()) {
                         String groupCode = errorCodes.getOrDefault(errorCode, "R");
                         updateTransactionStatusResponse(groupCode, transReceiveId);
                     }
@@ -2105,7 +2110,7 @@ public class TransactionMMSController {
                     // retry callback
                     // 1.1.1 nếu status = 200 và khách có map mã lỗi trong database thì kiểm tra mã lỗi có phải mã
                     // lỗi retry không, nếu phải thì thực hiện if
-                    if (Objects.nonNull(errorCodes)
+                    if (Objects.nonNull(errorCodes) && !errorCodes.isEmpty()
                             && GroupCodeConstant.RETRY_GROUP.getValue()
                             .equals(errorCodes.get(errorCode))) {
                         // 1.1.1.1
@@ -2119,7 +2124,7 @@ public class TransactionMMSController {
                         }
                     }
                     // 1.1.2 nếu không phải là mã lỗi retry và khách có map mã lỗi trong database
-                    else if (Objects.nonNull(errorCodes)) {
+                    else if (Objects.nonNull(errorCodes) && !errorCodes.isEmpty()) {
                         String groupCode = errorCodes.getOrDefault(errorCode, "R");
                         updateTransactionStatusResponse(groupCode, transReceiveId);
                     }
@@ -2173,7 +2178,7 @@ public class TransactionMMSController {
                     // retry callback
                     // 3.1.1 nếu status = 400 và khách có map mã lỗi trong database thì kiểm tra mã lỗi có phải mã
                     // lỗi retry không, nếu phải thì thực hiện if
-                    if (Objects.nonNull(errorCodes)
+                    if (Objects.nonNull(errorCodes) && !errorCodes.isEmpty()
                             && GroupCodeConstant.RETRY_GROUP.getValue()
                             .equals(errorCodes.get(errorCode))) {
                         //3.1.1.1
@@ -2188,7 +2193,7 @@ public class TransactionMMSController {
                         }
                     }
                     // 3.1.2 nếu không phải là mã lỗi retry và khách có map mã lỗi trong database
-                    else if (Objects.nonNull(errorCodes)) {
+                    else if (Objects.nonNull(errorCodes) && !errorCodes.isEmpty()) {
                         String groupCode = errorCodes.getOrDefault(errorCode, "R");
                         updateTransactionStatusResponse(groupCode, transReceiveId);
                     }
@@ -3338,6 +3343,39 @@ public class TransactionMMSController {
         }
         //System.out.println("RESULT REFUND: " + result);
         return result;
+    }
+
+    private void pushNotificationBdsdTerminalCode(String amount, String terminalCode, TransactionReceiveEntity transactionReceiveEntity,
+                                                  long time, String referenceNumber) {
+        try {
+            if (transactionReceiveEntity.getAdditionalData() == null || "[]".equals(transactionReceiveEntity.getAdditionalData())) {
+                // Tạo mqttTopic với giá trị terminalCode
+                if (!StringUtil.isNullOrEmpty(terminalCode)) {
+                    String mqttTopic = "vietqr/bdsd/" + terminalCode;
+
+                    // Tạo dữ liệu JSON thông báo
+                    Map<String, Object> notificationData = new HashMap<>();
+                    notificationData.put("referenceNumber",  referenceNumber);
+                    notificationData.put("bankAccount", transactionReceiveEntity.getBankAccount());
+                    notificationData.put("amount", Double.parseDouble(amount.replace(",", "")));
+                    notificationData.put("transType", transactionReceiveEntity.getTransType());
+                    notificationData.put("content", transactionReceiveEntity.getContent());
+                    notificationData.put("status", 1);
+                    String formattedTime = formatTimeUtcPlus(time);
+                    notificationData.put("timePaid", formattedTime);
+                    notificationData.put("orderId", transactionReceiveEntity.getOrderId());
+
+                    // Chuyển đổi dữ liệu thành chuỗi JSON
+                    Gson gson = new Gson();
+                    String payload = gson.toJson(notificationData);
+
+                    // Xuất bản thông điệp MQTT
+                    MQTTUtil.sendMessage(mqttTopic, payload);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("pushNotificationBdsdTerminalCode: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
+        }
     }
 
     private void pushNotificationBoxIdRef(String amountForVoice, String amount, String boxIdRef) {

@@ -972,7 +972,7 @@ public class CustomerInvoiceController {
                     // retry callback
                     // 1.1.1 nếu status = 200 và khách có map mã lỗi trong database thì kiểm tra mã lỗi có phải mã
                     // lỗi retry không, nếu phải thì thực hiện if
-                    if (Objects.nonNull(errorCodes)
+                    if (Objects.nonNull(errorCodes) && !errorCodes.isEmpty()
                             && GroupCodeConstant.RETRY_GROUP.getValue()
                             .equals(errorCodes.get(errorCode))) {
                         // 1.1.1.1
@@ -987,7 +987,7 @@ public class CustomerInvoiceController {
                         }
                     }
                     // 1.1.2 nếu không phải là mã lỗi retry và khách có map mã lỗi trong database
-                    else if (Objects.nonNull(errorCodes)) {
+                    else if (Objects.nonNull(errorCodes) && !errorCodes.isEmpty()) {
                         String groupCode = errorCodes.getOrDefault(errorCode, "R");
                         updateTransactionStatusResponse(groupCode, transReceiveId, false);
                     }
@@ -1042,7 +1042,7 @@ public class CustomerInvoiceController {
                     // retry callback
                     // 3.1.1 nếu status = 200 và khách có map mã lỗi trong database thì kiểm tra mã lỗi có phải mã
                     // lỗi retry không, nếu phải thì thực hiện if
-                    if (Objects.nonNull(errorCodes)
+                    if (Objects.nonNull(errorCodes) && !errorCodes.isEmpty()
                             && GroupCodeConstant.RETRY_GROUP.getValue().
                             equals(errorCodes.get(errorCode))) {
                         // 3.1.1.1
@@ -1057,7 +1057,7 @@ public class CustomerInvoiceController {
                         }
                     }
                     // 3.1.2 nếu không phải là mã lỗi retry và khách có map mã lỗi trong database
-                    else if (Objects.nonNull(errorCodes)) {
+                    else if (Objects.nonNull(errorCodes) && !errorCodes.isEmpty()) {
                         String groupCode = errorCodes.getOrDefault(errorCode, "R");
                         updateTransactionStatusResponse(groupCode, transReceiveId, false);
                     }
@@ -2084,7 +2084,7 @@ public class CustomerInvoiceController {
                     // retry callback
                     // 1.1.1 nếu status = 200 và khách có map mã lỗi trong database thì kiểm tra mã lỗi có phải mã
                     // lỗi retry không, nếu phải thì thực hiện if
-                    if (Objects.nonNull(errorCodes)
+                    if (Objects.nonNull(errorCodes) && !errorCodes.isEmpty()
                             && GroupCodeConstant.RETRY_GROUP.getValue()
                             .equals(errorCodes.get(errorCode))) {
                         // 1.1.1.1
@@ -2099,7 +2099,7 @@ public class CustomerInvoiceController {
                         }
                     }
                     // 1.1.2 nếu không phải là mã lỗi retry và khách có map mã lỗi trong database
-                    else if (Objects.nonNull(errorCodes)) {
+                    else if (Objects.nonNull(errorCodes) && !errorCodes.isEmpty()) {
                         String groupCode = errorCodes.getOrDefault(errorCode, "R");
                         updateTransactionStatusResponse(groupCode, transReceiveId, false);
                     }
@@ -2156,7 +2156,7 @@ public class CustomerInvoiceController {
                     // retry callback
                     // 3.1.1 nếu status = 200 và khách có map mã lỗi trong database thì kiểm tra mã lỗi có phải mã
                     // lỗi retry không, nếu phải thì thực hiện if
-                    if (Objects.nonNull(errorCodes)
+                    if (Objects.nonNull(errorCodes) && !errorCodes.isEmpty()
                             && GroupCodeConstant.RETRY_GROUP.getValue().
                             equals(errorCodes.get(errorCode))) {
                         // 3.1.1.1
@@ -2171,7 +2171,7 @@ public class CustomerInvoiceController {
                         }
                     }
                     // 3.1.2 nếu không phải là mã lỗi retry và khách có map mã lỗi trong database
-                    else if (Objects.nonNull(errorCodes)) {
+                    else if (Objects.nonNull(errorCodes) && !errorCodes.isEmpty()) {
                         String groupCode = errorCodes.getOrDefault(errorCode, "R");
                         updateTransactionStatusResponse(groupCode, transReceiveId, false);
                     }
@@ -2580,6 +2580,7 @@ public class CustomerInvoiceController {
                 pushNotification(NotificationUtil
                         .getNotiTitleUpdateTransaction(), msg, notiEntity, data, accountBankReceiveEntity.getUserId());
                 pushNotificationQrBox(boxIdRef, amountForVoice, data);
+                pushNotificationBdsdTerminalCode(amountForVoice, boxIdRef, transactionReceiveEntity, time, referenceNumber);
                 // INSERT TELEGRAM, GG CHAT, LARK
                 doInsertSocialMedia(accountBankReceiveEntity.getId(), message);
             } else {
@@ -2622,6 +2623,7 @@ public class CustomerInvoiceController {
                     String refId = TransactionRefIdUtil.encryptTransactionId(transactionReceiveEntity.getId());
                     socketHandler.sendMessageToTransactionRefId(refId, data);
                     pushNotificationQrBox(boxIdRef, amountForVoice, data);
+                    pushNotificationBdsdTerminalCode(amountForVoice, boxIdRef, transactionReceiveEntity, time, referenceNumber);
                 } catch (IOException e) {
                     logger.error("WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
                 }
@@ -2671,6 +2673,7 @@ public class CustomerInvoiceController {
                 String refId = TransactionRefIdUtil.encryptTransactionId(transactionReceiveEntity.getId());
                 socketHandler.sendMessageToTransactionRefId(refId, data);
                 pushNotificationQrBox(boxIdRef, amountForVoice, data);
+                pushNotificationBdsdTerminalCode(amountForVoice, boxIdRef, transactionReceiveEntity, time, referenceNumber);
             } catch (IOException e) {
                 logger.error("WS: socketHandler.sendMessageToUser - updateTransaction ERROR: " + e.toString());
             }
@@ -2682,6 +2685,39 @@ public class CustomerInvoiceController {
                     + " | ND: " + transactionReceiveEntity.getContent();
             /////// DO INSERT TELEGRAM, GG CHAT, LARK
             doInsertSocialMedia(accountBankReceiveEntity.getId(), messageSocial);
+        }
+    }
+
+    private void pushNotificationBdsdTerminalCode(String amount, String terminalCode, TransactionReceiveEntity transactionReceiveEntity,
+                                                  long time, String referenceNumber) {
+        try {
+            if (transactionReceiveEntity.getAdditionalData() == null || "[]".equals(transactionReceiveEntity.getAdditionalData())) {
+                // Tạo mqttTopic với giá trị terminalCode
+                if (!StringUtil.isNullOrEmpty(terminalCode)) {
+                    String mqttTopic = "vietqr/bdsd/" + terminalCode;
+
+                    // Tạo dữ liệu JSON thông báo
+                    Map<String, Object> notificationData = new HashMap<>();
+                    notificationData.put("referenceNumber",  referenceNumber);
+                    notificationData.put("bankAccount", transactionReceiveEntity.getBankAccount());
+                    notificationData.put("amount", Double.parseDouble(amount.replace(",", "")));
+                    notificationData.put("transType", transactionReceiveEntity.getTransType());
+                    notificationData.put("content", transactionReceiveEntity.getContent());
+                    notificationData.put("status", 1);
+                    String formattedTime = formatTimeUtcPlus(time);
+                    notificationData.put("timePaid", formattedTime);
+                    notificationData.put("orderId", transactionReceiveEntity.getOrderId());
+
+                    // Chuyển đổi dữ liệu thành chuỗi JSON
+                    Gson gson = new Gson();
+                    String payload = gson.toJson(notificationData);
+
+                    // Xuất bản thông điệp MQTT
+                    MQTTUtil.sendMessage(mqttTopic, payload);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("pushNotificationBdsdTerminalCode: ERROR: " + e.getMessage() + " at: " + System.currentTimeMillis());
         }
     }
 
