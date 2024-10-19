@@ -880,7 +880,6 @@ public class TidInternalSubscriber {
                     } else {
                         result = new ResponseMessageDTO("FAILED", "E26");
                     }
-                    return new ResponseEntity<>(result, httpStatus);
                 } catch (Exception e) {
                     logger.error(e.toString());
                     //System.out.println(e.toString());
