@@ -828,7 +828,7 @@ public class TransactionBankController {
                                         || Objects.nonNull(finalTransactionMMS)) {
                                     logger.info("transaction-sync - trace ID detect: " + traceId);
                                     TransactionReceiveEntity transactionReceiveEntity = null;
-                                    if (traceId != null && !traceId.isEmpty()) {
+                                    if (traceId != null && !traceId.isEmpty() && !Objects.nonNull(finalTransactionMMS)) {
                                         transactionReceiveEntity = transactionReceiveService
                                                 .getTransactionByTraceIdAndAmount(traceId, dto.getAmount() + "",
                                                         dto.getTransType().trim().toUpperCase());
