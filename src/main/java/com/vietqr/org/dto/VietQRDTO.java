@@ -34,6 +34,8 @@ public class VietQRDTO implements Serializable {
 
 	private List<AdditionalData> additionalData;
 
+	private String qrCodeBase64;
+
 	public VietQRDTO() {
 		super();
 	}
@@ -212,6 +214,14 @@ public class VietQRDTO implements Serializable {
 
 	public void setOrderId(String orderId) {
 		this.orderId = orderId;
+	}
+
+	public String getQrCodeBase64() {
+		return qrCodeBase64;
+	}
+
+	public void setQrCodeBase64(String qrCodeBase64) {
+		this.qrCodeBase64 = qrCodeBase64;
 	}
 
 	@Override
