@@ -13,15 +13,23 @@ import com.vietqr.org.dto.qrfeed.QrLinkDTO;
 import org.apache.log4j.Logger;
 
 import java.awt.*;
+import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+
 
 public class VietQRUtil {
 	private static final Logger logger = Logger.getLogger(VietQRUtil.class);
 
-	private static final int QR_CODE_WIDTH = 400;
-	private static final int QR_CODE_HEIGHT = 600;
+		private static final int QR_CODE_WIDTH = 400;
+		private static final int QR_CODE_HEIGHT = 600;
 	private static final int CENTER_ICON_WIDTH = 30;
 	private static final int CENTER_ICON_HEIGHT = 30;
 	private static final int HEADER_WIDTH = 140;
@@ -260,5 +268,178 @@ public class VietQRUtil {
 
 		return result;
 	}
+
+
+
+//	public static String generateTransactionQRWithLogoBase64(VietQRGenerateDTO dto, byte[] logoBytes) throws Exception {
+//		// Generate QR Code string
+//		String qrCodeString = generateTransactionQR(dto);
+//
+//		// Create QR Code with specific size
+//		QRCodeWriter qrCodeWriter = new QRCodeWriter();
+//		Map<EncodeHintType, Object> hints = new HashMap<>();
+//		hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H); // High level of error correction for logo support
+//
+//		// Encode the QR code with the given data
+//		BitMatrix bitMatrix = qrCodeWriter.encode(qrCodeString, BarcodeFormat.QR_CODE, QR_CODE_WIDTH, QR_CODE_HEIGHT, hints);
+//
+//		// Create a buffered image to draw the QR code on
+//		BufferedImage qrImage = new BufferedImage(QR_CODE_WIDTH, QR_CODE_HEIGHT, BufferedImage.TYPE_INT_RGB);
+//		Graphics2D graphics = qrImage.createGraphics();
+//		graphics.setColor(Color.WHITE);
+//		graphics.fillRect(0, 0, QR_CODE_WIDTH, QR_CODE_HEIGHT);
+//		graphics.setColor(Color.BLACK);
+//
+//		// Draw the QR code pixels
+//		for (int i = 0; i < QR_CODE_WIDTH; i++) {
+//			for (int j = 0; j < QR_CODE_HEIGHT; j++) {
+//				if (bitMatrix.get(i, j)) {
+//					graphics.fillRect(i, j, 1, 1);
+//				}
+//			}
+//		}
+//
+//		// Insert the logo with white circular background in the center of the QR code
+//		if (logoBytes != null && logoBytes.length > 0) {
+//			BufferedImage logoImage = ImageIO.read(new ByteArrayInputStream(logoBytes));
+//
+//			// Rescale the logo to make it smaller
+//			int logoScaledWidth = QR_CODE_WIDTH / 8; // Adjust the size ratio
+//			int logoScaledHeight = QR_CODE_HEIGHT / 8;
+//
+//			// Create a circular clipping path
+//			int circleDiameter = logoScaledWidth + 40; // Slightly larger than the logo
+//			int centerX = (QR_CODE_WIDTH - circleDiameter) / 2;
+//			int centerY = (QR_CODE_HEIGHT - circleDiameter) / 2;
+//
+//			// Draw the white circle behind the logo
+//			graphics.setColor(Color.WHITE);
+//			graphics.fillOval(centerX, centerY, circleDiameter, circleDiameter); // Draw a circle, not a square
+//
+//			// Scale the logo
+//			Image scaledLogo = logoImage.getScaledInstance(logoScaledWidth, logoScaledHeight, Image.SCALE_SMOOTH);
+//
+//			// Draw the logo inside the circle
+//			int logoX = (QR_CODE_WIDTH - logoScaledWidth) / 2;
+//			int logoY = (QR_CODE_HEIGHT - logoScaledHeight) / 2;
+//			graphics.drawImage(scaledLogo, logoX, logoY, null);
+//		}
+//
+//		// Dispose of the graphics context and flush
+//		graphics.dispose();
+//
+//		// Convert the QR code with logo to a Base64 string
+//		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//		ImageIO.write(qrImage, "png", outputStream);
+//		byte[] qrImageBytes = outputStream.toByteArray();
+//
+//		return Base64.getEncoder().encodeToString(qrImageBytes);
+//	}
+
+
+	public static String generateTransactionQRWithLogoBase64(VietQRGenerateDTO dto, byte[] logoBytes) throws Exception {
+		// Generate QR Code string
+		String qrCodeString = generateTransactionQR(dto);
+
+		// Create QR Code with specific size
+		QRCodeWriter qrCodeWriter = new QRCodeWriter();
+		Map<EncodeHintType, Object> hints = new HashMap<>();
+		hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H); // High level of error correction for logo support
+
+		// Encode the QR code with the given data
+		BitMatrix bitMatrix = qrCodeWriter.encode(qrCodeString, BarcodeFormat.QR_CODE, QR_CODE_WIDTH, QR_CODE_HEIGHT, hints);
+
+		// Trim the QR code size to remove unnecessary white border
+		bitMatrix = trimWhiteBorder(bitMatrix);
+
+		int trimmedWidth = bitMatrix.getWidth();
+		int trimmedHeight = bitMatrix.getHeight();
+
+		// Add padding (white border) around the QR code
+		int padding = 20; // Adjust padding size as needed
+		int newWidth = trimmedWidth + 2 * padding;
+		int newHeight = trimmedHeight + 2 * padding;
+
+		// Create a buffered image to draw the QR code on with padding
+		BufferedImage qrImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+		Graphics2D graphics = qrImage.createGraphics();
+		graphics.setColor(Color.WHITE);
+		graphics.fillRect(0, 0, newWidth, newHeight);
+		graphics.setColor(Color.BLACK);
+
+		// Draw the QR code pixels in the center with padding
+		for (int i = 0; i < trimmedWidth; i++) {
+			for (int j = 0; j < trimmedHeight; j++) {
+				if (bitMatrix.get(i, j)) {
+					graphics.fillRect(i + padding, j + padding, 1, 1);
+				}
+			}
+		}
+
+		// Insert the logo with white circular background in the center of the QR code
+		if (logoBytes != null && logoBytes.length > 0) {
+			BufferedImage logoImage = ImageIO.read(new ByteArrayInputStream(logoBytes));
+
+			// Rescale the logo to make it smaller
+			int logoScaledWidth = trimmedWidth / 8; // Adjust the size ratio
+			int logoScaledHeight = trimmedHeight / 8;
+
+			// Create a circular clipping path
+			int circleDiameter = logoScaledWidth + 40; // Slightly larger than the logo
+			int centerX = (newWidth - circleDiameter) / 2;
+			int centerY = (newHeight - circleDiameter) / 2;
+
+			// Draw the white circle behind the logo
+			graphics.setColor(Color.WHITE);
+			graphics.fillOval(centerX, centerY, circleDiameter, circleDiameter); // Draw a circle, not a square
+
+			// Scale the logo
+			Image scaledLogo = logoImage.getScaledInstance(logoScaledWidth, logoScaledHeight, Image.SCALE_SMOOTH);
+
+			// Draw the logo inside the circle
+			int logoX = (newWidth - logoScaledWidth) / 2;
+			int logoY = (newHeight - logoScaledHeight) / 2;
+			graphics.drawImage(scaledLogo, logoX, logoY, null);
+		}
+
+		// Dispose of the graphics context and flush
+		graphics.dispose();
+
+		// Convert the QR code with logo to a Base64 string
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		ImageIO.write(qrImage, "png", outputStream);
+		byte[] qrImageBytes = outputStream.toByteArray();
+
+		return Base64.getEncoder().encodeToString(qrImageBytes);
+	}
+
+	private static BitMatrix trimWhiteBorder(BitMatrix matrix) {
+		int left = matrix.getWidth(), top = matrix.getHeight(), right = 0, bottom = 0;
+		for (int x = 0; x < matrix.getWidth(); x++) {
+			for (int y = 0; y < matrix.getHeight(); y++) {
+				if (matrix.get(x, y)) {
+					if (x < left) left = x;
+					if (x > right) right = x;
+					if (y < top) top = y;
+					if (y > bottom) bottom = y;
+				}
+			}
+		}
+
+		int newWidth = right - left + 1;
+		int newHeight = bottom - top + 1;
+		BitMatrix trimmedMatrix = new BitMatrix(newWidth, newHeight);
+		for (int x = 0; x < newWidth; x++) {
+			for (int y = 0; y < newHeight; y++) {
+				if (matrix.get(x + left, y + top)) {
+					trimmedMatrix.set(x, y);
+				}
+			}
+		}
+		return trimmedMatrix;
+	}
+
+
+
 
 }

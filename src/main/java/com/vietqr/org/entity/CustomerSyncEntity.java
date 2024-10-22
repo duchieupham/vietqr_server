@@ -64,6 +64,9 @@ public class CustomerSyncEntity implements Serializable {
     @Column(name = "refId")
     private String refId;
 
+    @Column(name="imageId")
+    private String imageId;
+
     public CustomerSyncEntity() {
         super();
     }
@@ -207,4 +210,11 @@ public class CustomerSyncEntity implements Serializable {
         this.refId = refId;
     }
 
+    public String getImageId() {
+        return imageId;
+    }
+
+    public void setImageId(String imageId) {
+        this.imageId = imageId;
+    }
 }
