@@ -16,4 +16,6 @@ public interface TerminalAddressService {
     TerminalAddressEntity getTerminalAddressByBankIdAndCustomerSyncId(String bankId, String customerSyncId);
 
     TerminalAddressEntity getTerminalAddressByBankIdAndTerminalBankId(String bankId);
+
+    void removeBankAccountFromCustomerSync(String bankId, String customerSyncId);
 }

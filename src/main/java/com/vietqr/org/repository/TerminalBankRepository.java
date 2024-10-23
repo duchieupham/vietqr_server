@@ -64,5 +64,8 @@ public interface TerminalBankRepository extends JpaRepository<TerminalBankEntity
             + "LEFT JOIN terminal b ON a.terminal_id = b.id "
             + "WHERE a.bank_id = :bankId AND type_of_qr = 2 ", nativeQuery = true)
     List<QrBoxDynamicDTO> getQrBoxDynamicQrByBankId(String bankId);
+
+    @Query(value = "SELECT id FROM terminal_bank WHERE bank_account_raw_number = :bankAccount LIMIT 1 ", nativeQuery = true)
+    String getIdByBankAccount(String bankAccount);
 }
 

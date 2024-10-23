@@ -10,6 +10,7 @@ import com.vietqr.org.dto.mapper.ErrorCodeMapper;
 import com.vietqr.org.entity.*;
 import com.vietqr.org.service.*;
 import com.vietqr.org.util.DateTimeUtil;
+import com.vietqr.org.util.RandomCodeUtil;
 import com.vietqr.org.util.StringUtil;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Row;
@@ -49,6 +50,9 @@ public class CustomerSyncController {
     TerminalBankService terminalBankService;
 
     @Autowired
+    MerchantConnectionService merchantConnectionService;
+
+    @Autowired
     AccountBankReceiveService accountBankReceiveService;
 
     @Autowired
@@ -59,6 +63,18 @@ public class CustomerSyncController {
 
     @Autowired
     CustomerSyncMappingService customerSyncMappingService;
+
+    @Autowired
+    BankTypeService bankTypeService;
+
+    @Autowired
+    MerchantSyncService merchantSyncService;
+
+    @Autowired
+    MerchantBankReceiveService merchantBankReceiveService;
+
+    @Autowired
+    BankReceiveConnectionService bankReceiveConnectionService;
 
     @Autowired
     AccountCustomerService accountCustomerService;
@@ -650,6 +666,7 @@ public class CustomerSyncController {
             int environment) {
         ResponseMessageDTO result = null;
         try {
+            // PROD ENVIRONMENT
             if (environment == 0) {
                 // core
                 // 1. check existed merchant name
@@ -690,7 +707,12 @@ public class CustomerSyncController {
                                         accountBankReceiveEntity.setId(uuidAccountBank.toString());
                                         accountBankReceiveEntity.setBankAccount(dto.getBankAccount());
                                         accountBankReceiveEntity.setBankAccountName(dto.getUserBankName());
-                                        accountBankReceiveEntity.setBankTypeId(EnvironmentUtil.getBankTypeIdRecharge());
+                                        if (!StringUtil.isNullOrEmpty(dto.getBankCode())) {
+                                            String bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
+                                            accountBankReceiveEntity.setBankTypeId(bankTypeId);
+                                        } else {
+                                            accountBankReceiveEntity.setBankTypeId(EnvironmentUtil.getBankTypeIdRecharge());
+                                        }
                                         accountBankReceiveEntity.setAuthenticated(true);
                                         accountBankReceiveEntity.setSync(true);
                                         accountBankReceiveEntity.setWpSync(false);
@@ -782,6 +804,50 @@ public class CustomerSyncController {
                                         accountCustomerEntity.setRole("ROLE_USER");
                                         accountCustomerEntity.setUsername(dto.getSystemUsername());
                                         accountCustomerService.insert(accountCustomerEntity);
+
+                                        String midConnectionId = UUID.randomUUID().toString();
+                                        try {
+                                            MerchantSyncEntity merchantSyncEntity = new MerchantSyncEntity();
+                                            merchantSyncEntity.setId(customerSyncId);
+                                            merchantSyncEntity.setName(dto.getMerchantName());
+                                            merchantSyncEntity.setFullName(dto.getMerchantName());
+                                            merchantSyncEntity.setVso("");
+                                            merchantSyncEntity.setBusinessType("");
+                                            merchantSyncEntity.setCareer("");
+                                            merchantSyncEntity.setAddress(dto.getAddress());
+                                            merchantSyncEntity.setNationalId("");
+                                            merchantSyncEntity.setIsActive(false);
+                                            merchantSyncEntity.setUserId("");
+                                            merchantSyncEntity.setAccountCustomerId(uuidAccountCustomer.toString());
+                                            merchantSyncEntity.setEmail("");
+                                            merchantSyncEntity.setPhoneNo("");
+                                            merchantSyncEntity.setPublishId("MER" + RandomCodeUtil.generateOTP(8));
+                                            merchantSyncEntity.setRefId("");
+                                            merchantSyncEntity.setIsMaster(false);
+                                            merchantSyncEntity.setCertificate("");
+                                            merchantSyncEntity.setWebhook("");
+                                            merchantSyncEntity.setClientId("");
+                                            merchantSyncEntity.setCode("");
+                                            merchantSyncEntity.setInformation(!StringUtil.isNullOrEmpty(url) ?
+                                                    StringUtil.getValueNullChecker(url): (ip + "/" + port));
+
+                                            MerchantConnectionEntity merchantConnectionEntity = new MerchantConnectionEntity();
+                                            merchantConnectionEntity.setId(midConnectionId);
+                                            merchantConnectionEntity.setMid(customerSyncId);
+                                            String finalUrl = StringUtil.isNullOrEmpty(url)
+                                                    ? url + "/" + suffix : ip + "/" + port;
+                                            merchantConnectionEntity.setUrlGetToken(finalUrl + "/api/token_generate");
+                                            merchantConnectionEntity.setUrlCallback(finalUrl + "/bank/api/transaction-sync");
+                                            merchantConnectionEntity.setUsername(dto.getCustomerUsername());
+                                            merchantConnectionEntity.setPassword(dto.getCustomerPassword());
+                                            merchantConnectionEntity.setToken("");
+                                            merchantConnectionEntity.setType(1);
+                                            merchantSyncService.insert(merchantSyncEntity);
+                                            merchantConnectionService.insert(merchantConnectionEntity);
+                                        } catch (Exception e) {
+                                            logger.info("Merchant Sync insert ERROR: " + e.getMessage());
+                                        }
+
                                         // 8. add account_customer_bank
                                         UUID accountCustomerBankUUID = UUID.randomUUID();
                                         AccountCustomerBankEntity accountCustomerBankEntity = new AccountCustomerBankEntity();
@@ -798,6 +864,28 @@ public class CustomerSyncController {
                                         accountCustomerBankEntity.setBankId(bankId);
                                         accountCustomerBankEntity.setCustomerSyncId(customerSyncId);
                                         accountCustomerBankService.insert(accountCustomerBankEntity);
+
+                                        try {
+                                            BankReceiveConnectionEntity bankReceiveConnectionEntity = new BankReceiveConnectionEntity();
+                                            bankReceiveConnectionEntity.setId(accountCustomerBankUUID.toString());
+                                            bankReceiveConnectionEntity.setBankId(bankId);
+                                            bankReceiveConnectionEntity.setMidConnectId(midConnectionId);
+                                            bankReceiveConnectionEntity.setData("{}");
+                                            bankReceiveConnectionEntity.setTerminalBankId("");
+                                            bankReceiveConnectionEntity.setMid(customerSyncId);
+                                            bankReceiveConnectionEntity.setActive(false);
+
+                                            MerchantBankReceiveEntity merchantBankReceiveEntity = new MerchantBankReceiveEntity();
+                                            merchantBankReceiveEntity.setId(UUID.randomUUID().toString());
+                                            merchantBankReceiveEntity.setBankId(bankId);
+                                            merchantBankReceiveEntity.setMerchantId(customerSyncId);
+
+                                            bankReceiveConnectionService.insert(bankReceiveConnectionEntity);
+                                            merchantBankReceiveService.insert(merchantBankReceiveEntity);
+                                        } catch (Exception e) {
+                                            logger.info("Merchant Sync insert ERROR: " + e.getMessage());
+                                        }
+
                                         result = new ResponseMessageDTO("SUCCESS", "");
 
                                     } else {
@@ -816,8 +904,15 @@ public class CustomerSyncController {
                                 //////////
                                 // prod:
                                 // 5. check bankAccount existed and linked
-                                String checkExistedBankAccount = accountBankReceiveService
-                                        .checkExistedBankAccountByBankAccount(dto.getBankAccount());
+                                String checkExistedBankAccount = "";
+                                if (!StringUtil.isNullOrEmpty(dto.getBankCode())) {
+                                    checkExistedBankAccount = accountBankReceiveService
+                                            .checkExistedBankAccountByBankAccountAndBankCode(dto.getBankAccount(), dto.getBankCode());
+                                } else {
+                                    checkExistedBankAccount = accountBankReceiveService
+                                            .checkExistedBankAccountByBankAccount(dto.getBankAccount());
+                                }
+
                                 if (checkExistedBankAccount != null && !checkExistedBankAccount.trim().isEmpty()) {
                                     // if existed and linked -> pass
                                     //
@@ -885,6 +980,51 @@ public class CustomerSyncController {
                                         accountCustomerEntity.setRole("ROLE_USER");
                                         accountCustomerEntity.setUsername(dto.getSystemUsername());
                                         accountCustomerService.insert(accountCustomerEntity);
+
+                                        //insert v2:
+                                        String midConnectionId = UUID.randomUUID().toString();
+                                        try {
+                                            MerchantSyncEntity merchantSyncEntity = new MerchantSyncEntity();
+                                            merchantSyncEntity.setId(customerSyncId);
+                                            merchantSyncEntity.setName(dto.getMerchantName());
+                                            merchantSyncEntity.setFullName(dto.getMerchantName());
+                                            merchantSyncEntity.setVso("");
+                                            merchantSyncEntity.setBusinessType("");
+                                            merchantSyncEntity.setCareer("");
+                                            merchantSyncEntity.setAddress(dto.getAddress());
+                                            merchantSyncEntity.setNationalId("");
+                                            merchantSyncEntity.setIsActive(false);
+                                            merchantSyncEntity.setUserId("");
+                                            merchantSyncEntity.setAccountCustomerId(uuidAccountCustomer.toString());
+                                            merchantSyncEntity.setEmail("");
+                                            merchantSyncEntity.setPhoneNo("");
+                                            merchantSyncEntity.setPublishId("MER" + RandomCodeUtil.generateOTP(8));
+                                            merchantSyncEntity.setRefId("");
+                                            merchantSyncEntity.setIsMaster(false);
+                                            merchantSyncEntity.setCertificate("");
+                                            merchantSyncEntity.setWebhook("");
+                                            merchantSyncEntity.setClientId("");
+                                            merchantSyncEntity.setCode("");
+                                            merchantSyncEntity.setInformation(!StringUtil.isNullOrEmpty(url) ?
+                                                    StringUtil.getValueNullChecker(url): (ip + "/" + port));
+
+                                            MerchantConnectionEntity merchantConnectionEntity = new MerchantConnectionEntity();
+                                            merchantConnectionEntity.setId(midConnectionId);
+                                            merchantConnectionEntity.setMid(customerSyncId);
+                                            String finalUrl = StringUtil.isNullOrEmpty(url)
+                                                    ? url + "/" + suffix : ip + "/" + port;
+                                            merchantConnectionEntity.setUrlGetToken(finalUrl + "/api/token_generate");
+                                            merchantConnectionEntity.setUrlCallback(finalUrl + "/bank/api/transaction-sync");
+                                            merchantConnectionEntity.setUsername(dto.getCustomerUsername());
+                                            merchantConnectionEntity.setPassword(dto.getCustomerPassword());
+                                            merchantConnectionEntity.setToken("");
+                                            merchantConnectionEntity.setType(1);
+                                            merchantSyncService.insert(merchantSyncEntity);
+                                            merchantConnectionService.insert(merchantConnectionEntity);
+                                        } catch (Exception e) {
+                                            logger.info("Merchant Sync insert ERROR: " + e.getMessage());
+                                        }
+
                                         // 8. add account_customer
                                         UUID accountCustomerBankUUID = UUID.randomUUID();
                                         AccountCustomerBankEntity accountCustomerBankEntity = new AccountCustomerBankEntity();
@@ -895,6 +1035,29 @@ public class CustomerSyncController {
                                         accountCustomerBankEntity.setBankId(checkExistedBankAccount);
                                         accountCustomerBankEntity.setCustomerSyncId(customerSyncId);
                                         accountCustomerBankService.insert(accountCustomerBankEntity);
+
+
+                                        try {
+                                            BankReceiveConnectionEntity bankReceiveConnectionEntity = new BankReceiveConnectionEntity();
+                                            bankReceiveConnectionEntity.setId(accountCustomerBankUUID.toString());
+                                            bankReceiveConnectionEntity.setBankId(checkExistedBankAccount);
+                                            bankReceiveConnectionEntity.setMidConnectId(midConnectionId);
+                                            bankReceiveConnectionEntity.setData("{}");
+                                            bankReceiveConnectionEntity.setTerminalBankId("");
+                                            bankReceiveConnectionEntity.setMid(customerSyncId);
+                                            bankReceiveConnectionEntity.setActive(false);
+
+                                            MerchantBankReceiveEntity merchantBankReceiveEntity = new MerchantBankReceiveEntity();
+                                            merchantBankReceiveEntity.setId(UUID.randomUUID().toString());
+                                            merchantBankReceiveEntity.setBankId(checkExistedBankAccount);
+                                            merchantBankReceiveEntity.setMerchantId(customerSyncId);
+
+                                            bankReceiveConnectionService.insert(bankReceiveConnectionEntity);
+                                            merchantBankReceiveService.insert(merchantBankReceiveEntity);
+                                        } catch (Exception e) {
+                                            logger.info("Merchant Sync insert ERROR: " + e.getMessage());
+                                        }
+
                                         result = new ResponseMessageDTO("SUCCESS", "");
                                     } else {
                                         // if not -> show msg
@@ -916,6 +1079,7 @@ public class CustomerSyncController {
                     result = new ResponseMessageDTO("FAILED", "E46");
 
                 }
+                // UAT ENVIRONMENT
             } else if (environment == 1) {
                 // insert test environment
                 token = removeBearer(token);
@@ -928,6 +1092,7 @@ public class CustomerSyncController {
                 data.put("suffixUrl", dto.getSuffixUrl());
                 data.put("address", dto.getAddress());
                 data.put("bankAccount", dto.getBankAccount());
+                data.put("bankCode", dto.getBankCode());
                 data.put("userBankName", dto.getUserBankName());
                 data.put("customerUsername", dto.getCustomerUsername());
                 data.put("customerPassword", dto.getCustomerPassword());

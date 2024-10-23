@@ -30,6 +30,11 @@ public class TerminalAddressServiceImpl implements TerminalAddressService {
     }
 
     @Override
+    public void removeBankAccountFromCustomerSync(String bankId, String customerSyncId) {
+        repository.removeBankAccountFromCustomerSync(bankId, customerSyncId);
+    }
+
+    @Override
     public int insert(TerminalAddressEntity entity) {
         return repository.save(entity) == null ? 0 : 1;
     }

@@ -29,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -118,6 +117,8 @@ public class TidInternalSubscriber {
     @MqttTopicHandler(topic = "/vqr/handle-box")
     public void handleIncomingMessage(String topic, MqttMessage message) {
         try {
+
+            // String secretKeyVVB = "VmlldFFSVm9pY2VCb3g=";
             ObjectMapper mapper = new ObjectMapper();
             HandleSyncBoxQrDTO dto = mapper.readValue(message.getPayload(), HandleSyncBoxQrDTO.class);
             String checkSum = BoxTerminalRefIdUtil.encryptMacAddr(dto.getMacAddr());
@@ -147,6 +148,7 @@ public class TidInternalSubscriber {
                     entity.setQrName("");
                     entity.setLastChecked(0);
                     entity.setStatus(0);
+                    entity.setSerialNumber(StringUtil.getValueNullChecker(dto.getSerialNumber()));
                 }
                 qrBoxSyncService.insert(entity);
 
@@ -208,6 +210,17 @@ public class TidInternalSubscriber {
 
         } catch (Exception e) {
             logger.error("Error handling QR request: " + e.getMessage());
+        }
+    }
+
+    @MqttTopicHandler(topic = "vietqr/cash/#")
+    public void handleCash(String topic, MqttMessage message) {
+        try {
+            String payload = new String(message.getPayload());
+            logger.info("Response handleCash to topic: " + topic + " Payload: " + payload);
+
+        } catch (Exception e) {
+            logger.error("Error handleCash: " + e.getMessage());
         }
     }
 

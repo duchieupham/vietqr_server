@@ -45,6 +45,10 @@ public class QrBoxSyncEntity implements Serializable {
 
     @Column(name = "status")
     private int status = 0;
+
+    @Column(name = "serialNumber")
+    private String serialNumber = "";
+
     private String boxId = "";
 
     public QrBoxSyncEntity(String id, String certificate, long timeCreated, long timeSync) {
@@ -143,5 +147,13 @@ public class QrBoxSyncEntity implements Serializable {
 
     public void setBoxId(String boxId) {
         this.boxId = boxId;
+    }
+
+    public String getSerialNumber() {
+        return serialNumber;
+    }
+
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber;
     }
 }

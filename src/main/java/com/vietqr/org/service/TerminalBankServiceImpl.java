@@ -76,4 +76,9 @@ public class TerminalBankServiceImpl implements TerminalBankService {
         return repo.getTerminalBankQRByBankAccount(bankAccount);
     }
 
+    @Override
+    public String getIdByBankAccount(String bankAccount) {
+        return repo.getIdByBankAccount(bankAccount);
+    }
+
 }
