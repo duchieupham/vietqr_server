@@ -1185,7 +1185,7 @@ public class TidInternalSubscriber {
                 refundLogEntity.setReferenceNumber(refundResult);
                 refundLogEntity.setMessage(refundResult);
                 insertTransactionRefundRedis(refundResult, dto, terminalBankEntity);
-                return new ResponseMessageDTO("SUCCESS", dto.getReferenceNumber());
+                return new ResponseMessageDTO("SUCCESS", refundResult);
         } else {
                 return handleRefundError(refundResult, dto);
         }
