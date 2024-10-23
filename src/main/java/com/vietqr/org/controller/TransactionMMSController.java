@@ -2829,6 +2829,7 @@ public class TransactionMMSController {
                                                         refundLogEntity.setStatus(0);
 
                                                         if (refundResult != null) {
+                                                            refundLogEntity.setTimeResponse(DateTimeUtil.getCurrentDateTimeUTC());
                                                             refundLogEntity.setMessage(refundResult);
                                                             switch (refundResult) {
                                                                 case "4863":
@@ -2884,7 +2885,7 @@ public class TransactionMMSController {
                                                                         refundLogEntity.setStatus(1);
                                                                         refundLogEntity.setReferenceNumber(refundResult);
                                                                         refundLogEntity.setMessage(refundResult);
-                                                                        insertTransactionRefundRedis(refundResult, dto, terminalBankEntity);
+                                                                        insertTransactionRefundRedis(refundResult, dto);
                                                                         httpStatus = HttpStatus.OK;
                                                                         result = new ResponseMessageDTO("SUCCESS", refundResult);
                                                                     } else {
@@ -2923,6 +2924,7 @@ public class TransactionMMSController {
                                                     refundLogEntity.setStatus(0);
 
                                                     if (refundResult != null) {
+                                                        refundLogEntity.setTimeResponse(DateTimeUtil.getCurrentDateTimeUTC());
                                                         refundLogEntity.setMessage(refundResult);
                                                         switch (refundResult) {
                                                             case "4863":
@@ -2978,7 +2980,7 @@ public class TransactionMMSController {
                                                                     refundLogEntity.setStatus(1);
                                                                     refundLogEntity.setReferenceNumber(refundResult);
                                                                     refundLogEntity.setMessage(refundResult);
-                                                                    insertTransactionRefundRedis(refundResult, dto, terminalBankEntity);
+                                                                    insertTransactionRefundRedis(refundResult, dto);
                                                                     httpStatus = HttpStatus.OK;
                                                                     result = new ResponseMessageDTO("SUCCESS", refundResult);
                                                                 } else {
@@ -3093,9 +3095,11 @@ public class TransactionMMSController {
         return new ResponseEntity<>(result, httpStatus);
     }
 
-    private void insertTransactionRefundRedis(String ftCode, RefundRequestDTO dto, TerminalBankEntity terminalBankEntity) {
+    // ftCode: transType D
+    private void insertTransactionRefundRedis(String ftCode, RefundRequestDTO dto) {
         try {
-            TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService.getTransactionReceiveByRefNumber(dto.getReferenceNumber(), "C");
+            TransactionReceiveEntity transactionReceiveEntity = transactionReceiveService
+                    .getTransactionReceiveByRefNumber(dto.getReferenceNumber(), "C");
             if (StringUtil.isNullOrEmpty(dto.getTerminalCode())) {
                 if (Objects.nonNull(transactionReceiveEntity)) {
                     dto.setTerminalCode(transactionReceiveEntity.getTerminalCode());
@@ -3110,13 +3114,13 @@ public class TransactionMMSController {
             if (Objects.nonNull(transactionReceiveEntity)) {
                 orderId = transactionReceiveEntity.getOrderId();
                 transactionReceiveService.updateTransactionRefundStatus(ftCode,
-                        transactionReceiveEntity.getSubCode(),
-                        transactionReceiveEntity.getTerminalCode(), orderId, 0);
+                        dto.getSubTerminalCode(),
+                        dto.getTerminalCode(), orderId, 0);
             }
             RefundMappingRedisDTO refundMappingRedisDTO = new RefundMappingRedisDTO(
                     StringUtil.getValueNullChecker(dto.getTerminalCode()),
                     StringUtil.getValueNullChecker(dto.getSubTerminalCode()),
-                    StringUtil.getValueNullChecker(dto.getReferenceNumber()),
+                    StringUtil.getValueNullChecker(ftCode),
                     StringUtil.getValueNullChecker(orderId)
                     );
             ObjectMapper mapper = new ObjectMapper();

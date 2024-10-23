@@ -55,4 +55,9 @@ public class MerchantConnectionServiceImpl implements MerchantConnectionService 
     public int countAllMerchantConnection() {
         return repo.countAllMerchantConnection();
     }
+
+    @Override
+    public void insert(MerchantConnectionEntity merchantConnectionEntity) {
+        repo.save(merchantConnectionEntity);
+    }
 }

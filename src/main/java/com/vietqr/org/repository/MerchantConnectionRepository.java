@@ -26,7 +26,7 @@ public interface MerchantConnectionRepository extends JpaRepository<MerchantConn
     @Query(value="SELECT COUNT(id) FROM merchant_connection", nativeQuery = true)
     Integer getCountingMerchantConnection();
 
-    @Query(value = "SELECT id FROM merchant_connection WHERE mid = :mid ", nativeQuery = true)
+    @Query(value = "SELECT id FROM merchant_connection WHERE mid = :mid AND type = 1 ", nativeQuery = true)
     List<String> getIdMerchantConnectionByMid(String mid);
 
     @Query(value = "SELECT * FROM merchant_connection WHERE id = :id ", nativeQuery = true)

@@ -3,6 +3,7 @@ package com.vietqr.org.entity;
 import com.vietqr.org.dto.DataTransactionDTO;
 import com.vietqr.org.dto.FeeTransactionInfoDTO;
 import com.vietqr.org.dto.TransReceiveInvoicesDTO;
+import com.vietqr.org.util.StringUtil;
 
 import java.io.Serializable;
 
@@ -392,7 +393,7 @@ public class TransactionReceiveEntity implements Serializable {
 	}
 
 	public void setSign(String sign) {
-		this.sign = sign;
+		this.sign = StringUtil.getValueNullChecker(sign);
 	}
 
 	public String getCustomerBankAccount() {
@@ -488,7 +489,7 @@ public class TransactionReceiveEntity implements Serializable {
 	}
 
 	public void setServiceCode(String serviceCode) {
-		this.serviceCode = serviceCode;
+		this.serviceCode = StringUtil.getValueNullChecker(serviceCode);
 	}
 
 	public String getHashTag() {

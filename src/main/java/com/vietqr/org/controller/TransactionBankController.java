@@ -3807,6 +3807,7 @@ public class TransactionBankController {
             transactionEntity.setId(transcationUUID);
             transactionEntity.setBankAccount(accountBankEntity.getBankAccount());
             transactionEntity.setBankId(accountBankEntity.getId());
+
             if (traceId == null || traceId.isEmpty()) {
                 transactionEntity.setContent(dto.getContent().trim());
             } else {

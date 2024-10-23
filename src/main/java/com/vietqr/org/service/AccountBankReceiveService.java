@@ -198,4 +198,6 @@ public interface AccountBankReceiveService {
 	IAccountBankReceiveMMS getAccountBankReceiveQRByBankAccountAndBankCode(String bankAccount, String bankCode);
 
 	List<String> getListBankIdsByUserId(String userId);
+
+    String checkExistedBankAccountByBankAccountAndBankCode(String bankAccount, String bankCode);
 }

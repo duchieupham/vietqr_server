@@ -24,4 +24,6 @@ public interface MerchantConnectionService {
     List<MerchantConnectionEntity> getAllMerchantConnectionEntity(int offset, int size);
 
     int countAllMerchantConnection();
+
+    void insert(MerchantConnectionEntity merchantConnectionEntity);
 }

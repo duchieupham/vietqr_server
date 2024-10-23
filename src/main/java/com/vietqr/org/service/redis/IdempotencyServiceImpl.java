@@ -1,5 +1,7 @@
 package com.vietqr.org.service.redis;
 
+import com.vietqr.org.controller.TransactionBankController;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,8 @@ public class IdempotencyServiceImpl implements IdempotencyService {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
+    private static final Logger logger = Logger.getLogger(IdempotencyServiceImpl.class);
+
     private static final String LOCK_PREFIX = "idempotency-lock:";
     private static final String UUID_TRANS_PREFIX = "idempotency-uuid-lock:";
 
@@ -21,6 +25,7 @@ public class IdempotencyServiceImpl implements IdempotencyService {
         try {
             return Optional.ofNullable(redisTemplate.opsForValue().get(key));
         } catch (Exception e) {
+            logger.error("getResponseForKey: ERROR " + e.getMessage());
         }
         return Optional.ofNullable(null);
     }
@@ -32,7 +37,8 @@ public class IdempotencyServiceImpl implements IdempotencyService {
         try {
             redisTemplate.delete(lockKey);
             result = true;
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            logger.error("deleteResponseForKey: ERROR " + e.getMessage());
         }
         return result;
     }
@@ -45,6 +51,7 @@ public class IdempotencyServiceImpl implements IdempotencyService {
             result = Boolean.TRUE.equals(redisTemplate
                     .opsForValue().setIfAbsent(lockKey, "locked", Duration.ofSeconds(duration)));
         } catch (Exception e) {
+            logger.error("saveResponseForKey: ERROR " + e.getMessage());
         }
         return result;
     }
@@ -57,6 +64,7 @@ public class IdempotencyServiceImpl implements IdempotencyService {
             result = Boolean.TRUE.equals(redisTemplate
                     .opsForValue().setIfAbsent(lockKey, response, Duration.ofSeconds(duration)));
         } catch (Exception e) {
+            logger.error("saveResponseForUUIDRefundKey: ERROR " + e.getMessage());
         }
         return result;
     }
@@ -66,7 +74,7 @@ public class IdempotencyServiceImpl implements IdempotencyService {
         try {
             return Optional.ofNullable(redisTemplate.opsForValue().get(lockKey));
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("getResponseForUUIDRefundKey ERROR: " + e.getMessage());
         }
         return Optional.ofNullable(null);
     }
@@ -78,7 +86,8 @@ public class IdempotencyServiceImpl implements IdempotencyService {
         try {
             redisTemplate.delete(lockKey);
             result = true;
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            logger.error("deleteResponseForUUIDRefundKey ERROR: " + e.getMessage());
         }
         return result;
     }

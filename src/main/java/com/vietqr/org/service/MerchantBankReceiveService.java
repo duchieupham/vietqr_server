@@ -13,9 +13,8 @@ public interface MerchantBankReceiveService {
     MerchantBankReceiveEntity getMerchantBankReceiveByMerchantAndBankId(String merchantId, String id);
 
     void insertAllMerchantBankReceive(List<MerchantBankReceiveEntity> merchantBankReceiveEntities);
-    void save(MerchantBankReceiveEntity entity);
 
-    String getBankIdReceiveByMerchant(String key);
+    void save(MerchantBankReceiveEntity entity);
 
     MerchantBankReceiveEntity getMerchantBankByMerchantId(String merchantId, String bankId);
 
@@ -24,5 +23,5 @@ public interface MerchantBankReceiveService {
 
     int countMerchantBankV2ByBankId(String bankId, String userId);
 
-    MerchantBankV2DTO getMerchantBankV2OverviewByBankId(String bankId, String userId);
+    void insert(MerchantBankReceiveEntity merchantBankReceiveEntity);
 }

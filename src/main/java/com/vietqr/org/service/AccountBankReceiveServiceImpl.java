@@ -708,6 +708,11 @@ public class AccountBankReceiveServiceImpl implements AccountBankReceiveService 
         return repo.getListBankIdByUserId(userId);
     }
 
+    @Override
+    public String checkExistedBankAccountByBankAccountAndBankCode(String bankAccount, String bankCode) {
+        return repo.checkExistedBankAccountByBankAccountAndBankCode(bankAccount, bankCode);
+    }
+
     private boolean isJsonArray(List<String> notificationTypes) {
         try {
             objectMapper.readValue(notificationTypes.toString(), new TypeReference<List<String>>() {});

@@ -11,6 +11,7 @@ public class AccountCusBankInsertDTO implements Serializable {
 
     private String bankAccount;
     private String userBankName;
+    private String bankCode;
     private String customerSyncId;
     private String accountCustomerId;
 
@@ -58,4 +59,11 @@ public class AccountCusBankInsertDTO implements Serializable {
         this.accountCustomerId = accountCustomerId;
     }
 
+    public String getBankCode() {
+        return bankCode;
+    }
+
+    public void setBankCode(String bankCode) {
+        this.bankCode = bankCode;
+    }
 }

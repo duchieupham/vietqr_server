@@ -37,4 +37,9 @@ public class BankReceiveConnectionServiceImpl implements BankReceiveConnectionSe
     public void insert(BankReceiveConnectionEntity bankReceiveConnectionEntity) {
         repo.save(bankReceiveConnectionEntity);
     }
+
+    @Override
+    public void removeBankAccountFromCustomerSync(String bankId, String customerSyncId) {
+        repo.removeBankAccountFromCustomerSync(bankId, customerSyncId);
+    }
 }

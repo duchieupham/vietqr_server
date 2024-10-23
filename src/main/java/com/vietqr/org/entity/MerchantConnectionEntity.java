@@ -29,6 +29,10 @@ public class MerchantConnectionEntity implements Serializable {
     private String password;
     @Column(name = "token")
     private String token;
+
+    // 0: Using token
+    // 1: Using username:password
+    // 9: unified
     @Column(name = "type")
     private int type;
 
