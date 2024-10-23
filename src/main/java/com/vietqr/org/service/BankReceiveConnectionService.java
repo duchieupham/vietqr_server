@@ -16,4 +16,6 @@ public interface BankReceiveConnectionService {
     String checkBankAccountByBankIdAndMid(String bankId, String mid);
 
     void insert(BankReceiveConnectionEntity bankReceiveConnectionEntity);
+
+    void removeBankAccountFromCustomerSync(String bankId, String customerSyncId);
 }

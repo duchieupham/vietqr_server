@@ -3,6 +3,9 @@ package com.vietqr.org.controller;
 import java.util.List;
 import java.util.UUID;
 
+import com.vietqr.org.entity.*;
+import com.vietqr.org.service.*;
+import com.vietqr.org.util.StringUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,12 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.vietqr.org.dto.AccountCusBankInsertDTO;
 import com.vietqr.org.dto.AccountCusBankRemoveDTO;
 import com.vietqr.org.dto.ResponseMessageDTO;
-import com.vietqr.org.entity.AccountBankReceiveEntity;
-import com.vietqr.org.entity.AccountCustomerBankEntity;
-import com.vietqr.org.entity.BankReceivePersonalEntity;
-import com.vietqr.org.service.AccountBankReceivePersonalService;
-import com.vietqr.org.service.AccountBankReceiveService;
-import com.vietqr.org.service.AccountCustomerBankService;
 import com.vietqr.org.util.EnvironmentUtil;
 
 @RestController
@@ -38,6 +35,21 @@ public class AccountCustomerBankController {
     AccountCustomerBankService accountCustomerBankService;
 
     @Autowired
+    MerchantConnectionService merchantConnectionService;
+
+    @Autowired
+    TerminalAddressService terminalAddressService;
+
+    @Autowired
+    BankTypeService bankTypeService;
+
+    @Autowired
+    TerminalBankService terminalBankService;
+
+    @Autowired
+    BankReceiveConnectionService bankReceiveConnectionService;
+
+    @Autowired
     AccountBankReceivePersonalService accountBankReceivePersonalService;
 
     // api add bank into customer sync
@@ -51,10 +63,16 @@ public class AccountCustomerBankController {
             if (dto != null) {
                 // 1. check env
                 if (EnvironmentUtil.isProduction() == false) {
+                    String checkExistedBankAccount = "";
                     /// 1.1. test
                     // 2. check existed bank account
-                    String checkExistedBankAccount = accountBankReceiveService
-                            .checkExistedBankAccountByBankAccount(dto.getBankAccount());
+                    if (!StringUtil.isNullOrEmpty(dto.getBankCode())) {
+                        checkExistedBankAccount = accountBankReceiveService
+                                .checkExistedBankAccountByBankAccountAndBankCode(dto.getBankAccount(), dto.getBankCode());
+                    } else {
+                        checkExistedBankAccount = accountBankReceiveService
+                                .checkExistedBankAccountByBankAccount(dto.getBankAccount());
+                    }
                     if (checkExistedBankAccount != null && !checkExistedBankAccount.trim().isEmpty()) {
                         // 2.1. if existed:
                         // 2.1.1. if existed, check whether added into acc_cus_sync
@@ -80,6 +98,22 @@ public class AccountCustomerBankController {
                             accountCustomerBankEntity.setAccountCustomerId(dto.getAccountCustomerId());
                             accountCustomerBankEntity.setCustomerSyncId(dto.getCustomerSyncId());
                             accountCustomerBankService.insert(accountCustomerBankEntity);
+
+                            try {
+                                List<String> merchantConnectionByMids = merchantConnectionService.getIdMerchantConnectionByMid(dto.getCustomerSyncId());
+                                if (merchantConnectionByMids != null && !merchantConnectionByMids.isEmpty()) {
+                                    BankReceiveConnectionEntity bankReceiveConnectionEntity = new BankReceiveConnectionEntity();
+                                    bankReceiveConnectionEntity.setId(uuid.toString());
+                                    bankReceiveConnectionEntity.setBankId(checkExistedBankAccount);
+                                    bankReceiveConnectionEntity.setMid(dto.getCustomerSyncId());
+                                    bankReceiveConnectionEntity.setMidConnectId(merchantConnectionByMids.get(0));
+                                    bankReceiveConnectionEntity.setTerminalBankId("");
+                                    bankReceiveConnectionEntity.setData("{}");
+                                    bankReceiveConnectionEntity.setActive(false);
+                                    bankReceiveConnectionService.insert(bankReceiveConnectionEntity);
+                                }
+                            } catch (Exception ignored) {
+                            }
                             result = new ResponseMessageDTO("SUCCESS", "");
                             httpStatus = HttpStatus.OK;
                         }
@@ -90,7 +124,11 @@ public class AccountCustomerBankController {
                         accountBankReceiveEntity.setId(uuid.toString());
                         accountBankReceiveEntity.setBankAccount(dto.getBankAccount());
                         accountBankReceiveEntity.setBankAccountName(dto.getUserBankName());
-                        accountBankReceiveEntity.setBankTypeId(EnvironmentUtil.getBankTypeIdRecharge());
+                        String bankTypeId = EnvironmentUtil.getBankTypeIdRecharge();
+                        if (!StringUtil.isNullOrEmpty(dto.getBankCode())) {
+                            bankTypeId = bankTypeService.getBankTypeIdByBankCode(dto.getBankCode());
+                        }
+                        accountBankReceiveEntity.setBankTypeId(bankTypeId);
                         accountBankReceiveEntity.setAuthenticated(true);
                         accountBankReceiveEntity.setSync(true);
                         accountBankReceiveEntity.setWpSync(false);
@@ -124,6 +162,23 @@ public class AccountCustomerBankController {
                         accountCustomerBankEntity.setBankId(uuid.toString());
                         accountCustomerBankEntity.setCustomerSyncId(dto.getCustomerSyncId());
                         accountCustomerBankService.insert(accountCustomerBankEntity);
+                        // merchant v2
+                        try {
+                            List<String> merchantConnectionByMids = merchantConnectionService.getIdMerchantConnectionByMid(dto.getCustomerSyncId());
+                            if (merchantConnectionByMids != null && !merchantConnectionByMids.isEmpty()) {
+                                BankReceiveConnectionEntity bankReceiveConnectionEntity = new BankReceiveConnectionEntity();
+                                bankReceiveConnectionEntity.setId(uuid3.toString());
+                                bankReceiveConnectionEntity.setBankId(checkExistedBankAccount);
+                                bankReceiveConnectionEntity.setMid(dto.getCustomerSyncId());
+                                bankReceiveConnectionEntity.setMidConnectId(merchantConnectionByMids.get(0));
+                                bankReceiveConnectionEntity.setTerminalBankId("");
+                                bankReceiveConnectionEntity.setData("{}");
+                                bankReceiveConnectionEntity.setActive(false);
+                                bankReceiveConnectionService.insert(bankReceiveConnectionEntity);
+                            }
+                        } catch (Exception ignored) {
+                        }
+
                         //
                         result = new ResponseMessageDTO("SUCCESS", "");
                         httpStatus = HttpStatus.OK;
@@ -157,6 +212,37 @@ public class AccountCustomerBankController {
                             accountCustomerBankEntity.setAccountCustomerId(dto.getAccountCustomerId());
                             accountCustomerBankEntity.setCustomerSyncId(dto.getCustomerSyncId());
                             accountCustomerBankService.insert(accountCustomerBankEntity);
+
+                            String terminalBankIdExisted = "";
+                            if (StringUtil.getValueNullChecker(dto.getBankCode()).equals("MB")) {
+                                terminalBankIdExisted = terminalBankService.getIdByBankAccount(dto.getBankAccount());
+                                if (!StringUtil.isNullOrEmpty(terminalBankIdExisted)) {
+                                    TerminalAddressEntity terminalAddressEntity = new TerminalAddressEntity();
+                                    terminalAddressEntity.setId(UUID.randomUUID().toString());
+                                    terminalAddressEntity.setBankAccount(dto.getBankAccount());
+                                    terminalAddressEntity.setTerminalBankId(terminalBankIdExisted);
+                                    terminalAddressEntity.setBankId(checkExistedBankAccount);
+                                    terminalAddressEntity.setCustomerSyncId(dto.getCustomerSyncId());
+
+                                    terminalAddressService.insert(terminalAddressEntity);
+                                }
+                            }
+
+                            try {
+                                List<String> merchantConnectionByMids = merchantConnectionService.getIdMerchantConnectionByMid(dto.getCustomerSyncId());
+                                if (merchantConnectionByMids != null && !merchantConnectionByMids.isEmpty()) {
+                                    BankReceiveConnectionEntity bankReceiveConnectionEntity = new BankReceiveConnectionEntity();
+                                    bankReceiveConnectionEntity.setId(uuid.toString());
+                                    bankReceiveConnectionEntity.setBankId(checkExistedBankAccount);
+                                    bankReceiveConnectionEntity.setMid(dto.getCustomerSyncId());
+                                    bankReceiveConnectionEntity.setMidConnectId(merchantConnectionByMids.get(0));
+                                    bankReceiveConnectionEntity.setTerminalBankId(terminalBankIdExisted);
+                                    bankReceiveConnectionEntity.setData("{}");
+                                    bankReceiveConnectionEntity.setActive(false);
+                                    bankReceiveConnectionService.insert(bankReceiveConnectionEntity);
+                                }
+                            } catch (Exception ignored) {
+                            }
                             result = new ResponseMessageDTO("SUCCESS", "");
                             httpStatus = HttpStatus.OK;
                         }
@@ -190,6 +276,8 @@ public class AccountCustomerBankController {
         try {
             if (dto != null) {
                 accountCustomerBankService.removeBankAccountFromCustomerSync(dto.getBankId(), dto.getCustomerSyncId());
+                terminalAddressService.removeBankAccountFromCustomerSync(dto.getBankId(), dto.getCustomerSyncId());
+                bankReceiveConnectionService.removeBankAccountFromCustomerSync(dto.getBankId(), dto.getCustomerSyncId());
                 List<AccountCustomerBankEntity> checkExistedBankAccountFromMerchant = accountCustomerBankService
                         .getAccountCustomerBankByBankId(dto.getBankId());
                 if (checkExistedBankAccountFromMerchant == null || checkExistedBankAccountFromMerchant.isEmpty()) {

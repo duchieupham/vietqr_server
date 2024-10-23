@@ -35,11 +35,6 @@ public class MerchantBankReceiveServiceImpl implements MerchantBankReceiveServic
     }
 
     @Override
-    public String getBankIdReceiveByMerchant(String key) {
-        return repo.getBankIdReceiveByMerchant(key);
-    }
-
-    @Override
     public MerchantBankReceiveEntity getMerchantBankByMerchantId(String merchantId, String bankId) {
         return repo.getMerchantBankByMerchantId(merchantId, bankId);
     }
@@ -55,7 +50,7 @@ public class MerchantBankReceiveServiceImpl implements MerchantBankReceiveServic
     }
 
     @Override
-    public MerchantBankV2DTO getMerchantBankV2OverviewByBankId(String bankId, String userId) {
-        return repo.getMerchantBankV2OverviewByBankId(bankId, userId);
+    public void insert(MerchantBankReceiveEntity merchantBankReceiveEntity) {
+        repo.save(merchantBankReceiveEntity);
     }
 }

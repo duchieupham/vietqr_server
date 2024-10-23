@@ -21,6 +21,7 @@ public class CustomerSyncInsertDTO implements Serializable {
     private String customerPassword;
     private String systemUsername;
     private int customerSyncActive;
+    private String bankCode;
 
     public CustomerSyncInsertDTO() {
         super();
@@ -139,4 +140,11 @@ public class CustomerSyncInsertDTO implements Serializable {
         this.customerSyncActive = customerSyncActive;
     }
 
+    public String getBankCode() {
+        return bankCode;
+    }
+
+    public void setBankCode(String bankCode) {
+        this.bankCode = bankCode;
+    }
 }

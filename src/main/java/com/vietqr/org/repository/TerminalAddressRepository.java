@@ -3,11 +3,14 @@ package com.vietqr.org.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.vietqr.org.entity.TerminalAddressEntity;
+
+import javax.transaction.Transactional;
 
 @Repository
 public interface TerminalAddressRepository extends JpaRepository<TerminalAddressEntity, Long> {
@@ -27,4 +30,9 @@ public interface TerminalAddressRepository extends JpaRepository<TerminalAddress
             + "LEFT JOIN account_bank_receive c ON a.bank_id = c.id "
             + "WHERE a.bank_id = :bankId ", nativeQuery = true)
     TerminalAddressEntity getTerminalAddressByBankIdAndTerminalBankId(String bankId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "DELETE FROM terminal_address WHERE bank_id = :bankId AND cusomer_sync_id = :customerSyncId", nativeQuery = true)
+    void removeBankAccountFromCustomerSync(String bankId, String customerSyncId);
 }
