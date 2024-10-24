@@ -52,9 +52,6 @@ public class MerchantSyncController {
     @Autowired
     private BankTypeService bankTypeService;
 
-    @Autowired
-    private AccountInformationService accountInformationService;
-
     @GetMapping("merchant-sync")
     public ResponseEntity<Object> getAllMerchants(
             @RequestParam(value = "value", defaultValue = "") String value,
