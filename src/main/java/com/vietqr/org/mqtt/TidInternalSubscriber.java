@@ -1097,7 +1097,7 @@ public class TidInternalSubscriber {
             if ("SUCCESS".equals(result.getStatus())) {
                 result = processRefund(dto);
             }
-            String responseTopic = "vietqr/refund-response/" + dto.getBankAccount();
+            String responseTopic = "vietqr/refund-response/" + dto.getCheckSum();
             publishResponse(responseTopic, result);
 
         } catch (Exception e) {
@@ -1172,7 +1172,7 @@ public class TidInternalSubscriber {
                 refundLogEntity.setReferenceNumber(refundResult);
                 refundLogEntity.setMessage(refundResult);
                 insertTransactionRefundRedis(refundResult, dto, terminalBankEntity);
-                return new ResponseMessageDTO("SUCCESS", dto.getReferenceNumber());
+                return new ResponseMessageDTO("SUCCESS", refundResult);
         } else {
                 return handleRefundError(refundResult, dto);
         }
