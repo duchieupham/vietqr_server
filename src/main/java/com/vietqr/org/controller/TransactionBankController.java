@@ -4400,6 +4400,25 @@ public class TransactionBankController {
         return new ResponseEntity<TokenProductBankDTO>(result, httpStatus);
     }
 
+    private String getUserIdFromToken(String token) {
+        String result = "otherUser";
+        try {
+            if (token != null && !token.trim().isEmpty()) {
+                String secretKey = "mySecretKey";
+                String jwtToken = token.substring(7); // remove "Bearer " from the beginning
+                Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(jwtToken).getBody();
+                String userId = (String) claims.get("userId");
+                if (userId != null) {
+                    result = userId;
+                }
+            }
+        } catch (Exception e) {
+            logger.info("TerminalSyncController: ERROR: getUsernameFromToken: "
+                    + e.getMessage() + " at: " + System.currentTimeMillis());
+        }
+        return result;
+    }
+
     @PostMapping("account/info")
     private ResponseEntity<AccountBankNameDTO> getBankNameInformation(
             @RequestHeader("Authorization") String userToken,
@@ -4408,7 +4427,16 @@ public class TransactionBankController {
         AccountBankNameDTO result = null;
         HttpStatus httpStatus = null;
         try {
+            String userId = getUserIdFromToken(userToken);
+            Optional<String> listBlock = idempotencyService.getResponseForUUIDRefundKey("ACCOUNT-INFO_BLOCK");
+            if (listBlock.isPresent()) {
+                if (listBlock.get().contains(userId)) {
+                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                    return new ResponseEntity<>(result, httpStatus);
+                }
+            }
             logger.info("Token getBankNameInformation: " + userToken + " at: " + System.currentTimeMillis());
+            logger.info("getBankNameInformation INFO: " + dto.toString());
             String checkSum = BankEncryptUtil.generateMD5GetAccountInfoCheckSum(dto.getAccountNumber(),
                     dto.getBankCode(), dto.getAccountType());
             // check sum
