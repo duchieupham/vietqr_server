@@ -65,4 +65,15 @@ public class AccountInfoRequestDTO {
     public void setCheckSum(String checkSum) {
         this.checkSum = checkSum;
     }
+
+    @Override
+    public String toString() {
+        return "AccountInfoRequestDTO {" +
+                "bankCode='" + bankCode + '\'' +
+                ", accountNumber='" + accountNumber + '\'' +
+                ", accountType='" + accountType + '\'' +
+                ", transferType='" + transferType + '\'' +
+                ", checkSum='" + checkSum + '\'' +
+                '}';
+    }
 }

@@ -100,7 +100,7 @@ public class NewQRController {
     CustomerInvoiceService customerInvoiceService;
 
 
-    @PostMapping("qr/new-generate-customer")
+    @PostMapping("/qr-image/generate-customer")
     public ResponseEntity<Object> generateQRCustomer(@RequestBody VietQRCreateCustomerDTO dto,
                                                      @RequestHeader("Authorization") String token) {
         Object result = null;
